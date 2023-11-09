@@ -630,30 +630,18 @@ export const updateUserDetails = (username: string, data: object) => {
 export const createShift = (params: object) => {
   return fireRequest("createShift", [], params);
 };
-export const updateShift = (id: string, params: object) => {
-  return fireRequest("updateShift", [id], params);
-};
-export const deleteShiftRecord = (id: string) => {
-  return fireRequest("deleteShiftRecord", [id], {});
-};
+
 export const listShiftRequests = (params: object, key: string) => {
   return fireRequest("listShiftRequests", [], params, null, key);
 };
-export const getShiftDetails = (pathParam: object) => {
-  return fireRequest("getShiftDetails", [], {}, pathParam);
-};
+
 export const completeTransfer = (pathParams: object) => {
   return fireRequest("completeTransfer", [], {}, pathParams);
 };
 export const downloadShiftRequests = (params: object) => {
   return fireRequest("downloadShiftRequests", [], params);
 };
-export const getShiftComments = (id: string) => {
-  return fireRequest("getShiftComments", [], {}, { id });
-};
-export const addShiftComments = (id: string, params: object) => {
-  return fireRequest("addShiftComments", [], params, { id });
-};
+
 // External Results
 export const externalResultList = (params: object, altKey: string) => {
   return fireRequest("externalResultList", [], params, null, altKey);
@@ -787,8 +775,8 @@ export const editInvestigation = (
 };
 
 // ICD11
-export const listICD11Diagnosis = (params: object, key: string) => {
-  return fireRequest("listICD11Diagnosis", [], params, null, key);
+export const listICD11Diagnosis = (params: object) => {
+  return fireRequest("listICD11Diagnosis", [], params, null);
 };
 // Medibase
 export const listMedibaseMedicines = (

@@ -87,7 +87,10 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       {kasp_string}
                     </div>
                   )}
-                  <div className="flex flex-wrap items-center justify-between">
+                  <div
+                    className="flex flex-wrap items-center justify-between"
+                    id="facility-name-card"
+                  >
                     <Link
                       href={`/facility/${facility.id}`}
                       className="float-left text-xl font-bold capitalize text-inherit hover:text-inherit"

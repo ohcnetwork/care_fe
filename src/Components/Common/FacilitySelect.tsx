@@ -6,7 +6,7 @@ import { FacilityModel } from "../Facility/models";
 
 interface FacilitySelectProps {
   name: string;
-  exclude_user: string;
+  exclude_user?: string;
   errors?: string | undefined;
   className?: string;
   searchAll?: boolean;

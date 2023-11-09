@@ -507,7 +507,7 @@ export const FacilityHome = (props: any) => {
             </div>
             <div className="mt-10 flex items-center gap-3">
               <div>
-                {facilityData.features?.some((feature) =>
+                {facilityData.features?.some((feature: any) =>
                   FACILITY_FEATURE_TYPES.some((f) => f.id === feature)
                 ) && (
                   <h1 className="text-lg font-semibold">Available features</h1>
@@ -634,6 +634,16 @@ export const FacilityHome = (props: any) => {
                 ghost
                 border
                 className="mt-2 flex w-full flex-row justify-center md:w-auto"
+                onClick={() => navigate(`/facility/${facilityId}/livefeed`)}
+              >
+                <CareIcon className="care-l-video text-lg" />
+                <span>Live Monitoring</span>
+              </ButtonV2>
+              <ButtonV2
+                variant="primary"
+                ghost
+                border
+                className="mt-2 flex w-full flex-row justify-center md:w-auto"
                 onClick={() => navigate(`/facility/${facilityId}/patient`)}
                 authorizeFor={NonReadOnlyUsers}
               >
@@ -641,6 +651,7 @@ export const FacilityHome = (props: any) => {
                 <span className="text-sm">Add Details of a Patient</span>
               </ButtonV2>
               <ButtonV2
+                id="view-patient-facility-list"
                 variant="primary"
                 ghost
                 border
