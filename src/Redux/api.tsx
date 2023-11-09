@@ -315,7 +315,6 @@ const routes = {
   getAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",
     method: "GET",
-    TRes: Type<PaginatedResponse<AssetBedModel>>(),
   },
   updateAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",

@@ -26,7 +26,7 @@ import useFullscreen from "../../../Common/hooks/useFullscreen.js";
 import { triggerGoal } from "../../../Integrations/Plausible.js";
 import useAuthUser from "../../../Common/hooks/useAuthUser.js";
 import Spinner from "../../Common/Spinner.js";
-import useQuery from "../../../Utils/request/useQuery";
+import useQuery from "../../../Utils/request/useQuery.js";
 
 interface IFeedProps {
   facilityId: string;
@@ -46,6 +46,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     middleware_address: "",
     location_middleware: "",
   });
+
   const [cameraConfig, setCameraConfig] = useState<any>({});
   const [bedPresets, setBedPresets] = useState<any>([]);
   const [bed, setBed] = useState<any>();
@@ -56,15 +57,13 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const [statusReported, setStatusReported] = useState(false);
   const authUser = useAuthUser();
 
-  let cameraMiddlewareHostname = "";
-
+  let facilityMiddlewareHostname = "";
 
   useQuery(routes.getPermittedFacility, {
     pathParams: { id: facilityId || "" },
     onResponse: ({ res, data }) => {
       if (res && res.status === 200 && data && data.middleware_address) {
-        cameraMiddlewareHostname = data.middleware_address;
-
+        facilityMiddlewareHostname = data.middleware_address;
       }
     },
   });
@@ -82,7 +81,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
         precision: precision,
       });
     }
-  }, [precision, cameraState]);
+  }, [precision]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -93,7 +92,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
       setCamTimeout(0);
     }, 5000);
     return () => clearTimeout(timeout);
-  }, [cameraState, cameraConfig]);
+  }, [cameraState]);
 
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
@@ -107,8 +106,10 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
         if (consultationBedId) {
           (async () => {
             const { res: listAssetBedsRes, data: listAssetBedsData } =
-              await request(routes.getAssetBed, {
-                pathParams: { external_id: consultationBedId },
+              await request(routes.listAssetBeds, {
+                query: {
+                  bed: consultationBedId,
+                },
               });
             setBed(consultationBedId);
             const bedAssets: any = {
@@ -128,6 +129,12 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
               setCameraAsset({
                 id: bedAssets.data.results[0].asset_object.id,
                 accessKey: config[2] || "",
+                middleware_address:
+                  bedAssets.data.results[0].asset_object?.meta
+                    ?.middleware_hostname,
+                location_middleware:
+                  bedAssets.data.results[0].asset_object.location_object
+                    ?.middleware_address,
               });
               setCameraConfig(bedAssets.data.results[0].meta);
               setCameraState({
@@ -208,8 +215,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
 
   const getBedPresets = async (asset: any) => {
     if (asset.id && bed) {
-      const { data: bedAssets } = await request(routes.getAssetBed, {
-        pathParams: { external_id: asset.id, bed },
+      const { data: bedAssets } = await request(routes.listAssetBeds, {
+        query: { asset: asset.id, bed },
       });
       setBedPresets(bedAssets?.results);
     }
