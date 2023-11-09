@@ -135,7 +135,7 @@ export default function ListView() {
             <div className="mt-2 flex">
               <button
                 data-testid="resource-details"
-                onClick={(_) => navigate(`/resource/${resource.external_id}`)}
+                onClick={(_) => navigate(`/resource/${resource.id}`)}
                 className="btn btn-default mr-2 w-full bg-white"
               >
                 <i className="fas fa-eye mr-2" /> All Details
