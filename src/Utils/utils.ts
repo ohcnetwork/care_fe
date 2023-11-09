@@ -92,6 +92,10 @@ export const relativeDate = (date: DateLike) => {
   return `${obj.fromNow()} at ${obj.format(TIME_FORMAT)}`;
 };
 
+export const formatName = (user: { first_name: string; last_name: string }) => {
+  return `${user.first_name} ${user.last_name}`;
+};
+
 export const relativeTime = (time?: DateLike) => {
   return `${dayjs(time).fromNow()}`;
 };
@@ -110,8 +114,12 @@ export const handleSignOut = (forceReload: boolean) => {
   const redirectURL = new URLSearchParams(window.location.search).get(
     "redirect"
   );
-  redirectURL ? navigate(`/?redirect=${redirectURL}`) : navigate("/");
-  if (forceReload) window.location.href = "/";
+  const url = redirectURL ? `/?redirect=${redirectURL}` : "/";
+  if (forceReload) {
+    window.location.href = url;
+  } else {
+    navigate(url);
+  }
 };
 
 export const handleRedirection = () => {

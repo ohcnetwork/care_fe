@@ -104,6 +104,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
       if (res && res.status === 200 && data) {
         const consultationBedId = data.current_bed?.bed_object?.id;
         if (consultationBedId) {
+
           (async () => {
             const { res: listAssetBedsRes, data: listAssetBedsData } =
               await request(routes.listAssetBeds, {

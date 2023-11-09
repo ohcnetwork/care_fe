@@ -49,6 +49,8 @@ import Page from "../Common/components/Page.js";
 import dayjs from "dayjs";
 import { triggerGoal } from "../../Integrations/Plausible.js";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
+import useQuery from "../../Utils/request/useQuery.js";
+import routes from "../../Redux/api.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -477,6 +479,11 @@ export const PatientManager = () => {
     [fetchFacilityBadgeName, fetchLocationBadgeName]
   );
 
+  const { data: permittedFacilities } = useQuery(
+    routes.getPermittedFacilities,
+    {}
+  );
+
   const LastAdmittedToTypeBadges = () => {
     const badge = (key: string, value: any, id: string) => {
       return (
@@ -781,9 +788,13 @@ export const PatientManager = () => {
             <ButtonV2
               id="add-patient-details"
               onClick={() => {
-                qParams.facility
-                  ? navigate(`/facility/${qParams.facility}/patient`)
-                  : setShowDialog(true);
+                if (qParams.facility)
+                  navigate(`/facility/${qParams.facility}/patient`);
+                else if (permittedFacilities?.results.length === 1)
+                  navigate(
+                    `/facility/${permittedFacilities?.results[0].id}/patient`
+                  );
+                else setShowDialog(true);
               }}
               className="w-full lg:w-fit"
             >
@@ -803,6 +814,7 @@ export const PatientManager = () => {
             />
             {showDoctorConnect && (
               <ButtonV2
+                id="doctor-connect-patient-button"
                 onClick={() => {
                   triggerGoal("Doctor Connect Clicked", {
                     facilityId: qParams.facility,

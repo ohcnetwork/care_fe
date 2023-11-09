@@ -14,10 +14,6 @@ const minutesAgo = (timestamp: string) => {
   return `${dayjs().diff(dayjs(timestamp), "minute")}m ago`;
 };
 
-const isWithinMinutes = (timestamp: string, minutes: number) => {
-  return dayjs().diff(dayjs(timestamp), "minute") < minutes;
-};
-
 export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
   const { connect, waveformCanvas, data, isOnline } = useHL7VitalsMonitor(
     props.config
@@ -39,8 +35,8 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
     connect(props.socketUrl);
   }, [props.socketUrl]);
 
-  const bpWithinMaxPersistence = !!(
-    (data.bp?.["date-time"] && isWithinMinutes(data.bp?.["date-time"], 30)) // Max blood pressure persistence is 30 minutes
+  const bpWithinMaxPersistence = dayjs(data.bp?.["date-time"]).isAfter(
+    props.patientCurrentBedAssignmentDate
   );
 
   return (
