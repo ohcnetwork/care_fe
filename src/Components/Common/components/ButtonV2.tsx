@@ -200,3 +200,23 @@ export const Cancel = ({ label = "Cancel", ...props }: CommonButtonProps) => {
     />
   );
 };
+
+export const Back = ({ label = "Go back", ...props }: CommonButtonProps) => {
+  const { t } = useTranslation();
+  return (
+    <ButtonV2
+      id="back"
+      type="button"
+      variant="secondary"
+      border
+      children={
+        <>
+          <CareIcon className="care-l-angle-left text-lg" />
+          <span className="whitespace-pre-wrap">{t(label)}</span>
+        </>
+      }
+      {...props}
+      className={classNames("w-full md:w-auto", props.className)}
+    />
+  );
+};
