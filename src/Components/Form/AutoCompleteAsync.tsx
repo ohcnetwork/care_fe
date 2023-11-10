@@ -10,6 +10,7 @@ import {
 import { useTranslation } from "react-i18next";
 
 interface Props {
+  id?: string;
   name?: string;
   selected: any | any[];
   fetchData: (search: string) => Promise<any> | undefined;
@@ -31,6 +32,7 @@ interface Props {
 
 const AutoCompleteAsync = (props: Props) => {
   const {
+    id,
     name,
     selected,
     fetchData,
@@ -82,6 +84,7 @@ const AutoCompleteAsync = (props: Props) => {
         <div className="relative mt-1">
           <div className="flex">
             <Combobox.Input
+              id={id}
               name={name}
               className="cui-input-base truncate pr-16"
               placeholder={

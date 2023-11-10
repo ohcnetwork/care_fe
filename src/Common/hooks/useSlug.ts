@@ -8,9 +8,9 @@ import { usePath } from "raviger";
  * // Current path: /consultation/94b9a
  * const consultation = useSlug("consultation"); // consultation = "94b9a"
  */
-export default function useSlug(prefix: string) {
+export default function useSlug(prefix: string, fallback?: string) {
   const path = usePath() ?? "";
-  return findSlug(path.split("/"), prefix);
+  return findSlug(path.split("/"), prefix, fallback);
 }
 
 /**
@@ -28,7 +28,7 @@ export const useSlugs = (...prefix: string[]) => {
   return prefix.map((p) => findSlug(path.split("/"), p));
 };
 
-const findSlug = (segments: string[], prefix: string) => {
+const findSlug = (segments: string[], prefix: string, fallback?: string) => {
   const index = segments.findIndex((segment) => segment === prefix);
   if (index === -1) {
     throw new Error(
@@ -36,8 +36,8 @@ const findSlug = (segments: string[], prefix: string) => {
     );
   }
 
-  const slug = segments[index + 1];
-  if (!slug) {
+  const slug = segments[index + 1] ?? fallback;
+  if (slug === undefined) {
     throw new Error(`Slug not found in path "${segments.join("/")}"`);
   }
 
