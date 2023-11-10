@@ -231,10 +231,6 @@ export type IFacilityNotificationResponse = {
   [key: string]: string;
 };
 
-export type DeleteModel = {
-  detail?: string;
-};
-
 export type IUserFacilityRequest = {
   facility: string;
 };

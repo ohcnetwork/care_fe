@@ -156,19 +156,17 @@ export const FacilityHome = (props: any) => {
   };
 
   const handleDeleteSubmit = async () => {
-    const { res, data } = await request(routes.deleteFacility, {
+    await request(routes.deleteFacility, {
       pathParams: { id: facilityId },
+      onResponse: ({ res }) => {
+        if (res?.ok) {
+          Notification.Success({
+            msg: "Facility deleted successfully",
+          });
+        }
+        navigate("/facility");
+      },
     });
-    if (res?.ok) {
-      Notification.Success({
-        msg: "Facility deleted successfully",
-      });
-    } else {
-      Notification.Error({
-        msg: "Error while deleting Facility: " + (data?.detail || ""),
-      });
-    }
-    navigate("/facility");
   };
 
   if (isLoading) {

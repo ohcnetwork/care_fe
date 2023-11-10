@@ -148,6 +148,13 @@ export default function FacilityUsers(props: any) {
       pathParams: {
         username: unlinkFacilityData.userName,
       },
+      onResponse: ({ res }) => {
+        if (res?.status === 204) {
+          Notification.Success({
+            msg: "User Facility deleted successfully",
+          });
+        }
+      },
     });
     setIsFacilityLoading(false);
     loadFacilities(unlinkFacilityData.userName);
@@ -160,19 +167,16 @@ export default function FacilityUsers(props: any) {
 
   const handleSubmit = async () => {
     const username = userData.username;
-    const { res, data } = await request(routes.deleteUser, {
+    await request(routes.deleteUser, {
       pathParams: { username: username },
+      onResponse: ({ res }) => {
+        if (res?.status === 204) {
+          Notification.Success({
+            msg: "User deleted successfully",
+          });
+        }
+      },
     });
-    if (res?.status === 204) {
-      Notification.Success({
-        msg: "User deleted successfully",
-      });
-    } else {
-      Notification.Error({
-        msg: "Error while deleting User: " + (data?.detail || ""),
-      });
-    }
-
     setUserData({ show: false, username: "", name: "" });
     refetch();
   };

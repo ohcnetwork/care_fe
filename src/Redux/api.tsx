@@ -32,7 +32,6 @@ import {
   CapacityModal,
   ConsultationModel,
   CurrentBed,
-  DeleteModel,
   DoctorModal,
   FacilityModel,
   IFacilityNotificationRequest,
@@ -172,7 +171,7 @@ const routes = {
     path: "/api/v1/users/{username}/delete_facility/",
     method: "DELETE",
     TBody: Type<IUserFacilityRequest>(),
-    TRes: Type<DeleteModel>(),
+    TRes: Type<Record<string, never>>(),
   },
 
   clearHomeFacility: {
@@ -204,7 +203,7 @@ const routes = {
   deleteUser: {
     path: "/api/v1/users/{username}",
     method: "DELETE",
-    TRes: Type<DeleteModel>(),
+    TRes: Type<Record<string, never>>(),
   },
 
   addUser: {
@@ -398,7 +397,7 @@ const routes = {
   deleteFacility: {
     path: "/api/v1/facility/{id}",
     method: "DELETE",
-    TRes: Type<DeleteModel>(),
+    TRes: Type<Record<string, never>>(),
   },
 
   downloadFacility: {
