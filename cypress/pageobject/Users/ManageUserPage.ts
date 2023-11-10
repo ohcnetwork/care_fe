@@ -73,7 +73,9 @@ export class ManageUserPage {
   }
 
   navigateToProfile() {
+    cy.intercept("GET", "**/api/v1/users/**").as("getUsers");
     cy.get("#profilenamelink").click();
+    cy.wait("@getUsers").its("response.statusCode").should("eq", 200);
   }
 
   verifyWorkingHours(expectedHours: string) {
