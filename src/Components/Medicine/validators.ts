@@ -61,27 +61,28 @@ export const comparePrescriptions = (a: Prescription, b: Prescription) => {
 };
 
 export const AdministrationDosageValidator = (
-  value: Prescription["base_dosage"],
   base_dosage: Prescription["base_dosage"],
   target_dosage: Prescription["target_dosage"]
 ) => {
-  const getDosageValue = (dosage: string | undefined) => {
-    return dosage ? Number(dosage.split(" ")[0]) : undefined;
+  return (value: Prescription["base_dosage"]) => {
+    const getDosageValue = (dosage: string | undefined) => {
+      return dosage ? Number(dosage.split(" ")[0]) : undefined;
+    };
+
+    const valueDosage = getDosageValue(value);
+    const baseDosage = getDosageValue(base_dosage);
+    const targetDosage = getDosageValue(target_dosage);
+
+    if (!valueDosage) return "This field is required";
+
+    if (value?.split(" ")[1] !== base_dosage?.split(" ")[1])
+      return "Unit must be the same as start and target dosage's unit";
+
+    if (
+      baseDosage &&
+      targetDosage &&
+      (valueDosage < baseDosage || valueDosage > targetDosage)
+    )
+      return "Dosage should be between start and target dosage";
   };
-
-  const valueDosage = getDosageValue(value);
-  const baseDosage = getDosageValue(base_dosage);
-  const targetDosage = getDosageValue(target_dosage);
-
-  if (!valueDosage) return "This field is required";
-
-  if (value?.split(" ")[1] !== base_dosage?.split(" ")[1])
-    return "Unit must be the same as start and target dosage's unit";
-
-  if (
-    baseDosage &&
-    targetDosage &&
-    (valueDosage < baseDosage || valueDosage > targetDosage)
-  )
-    return "Dosage should be between start and target dosage";
 };

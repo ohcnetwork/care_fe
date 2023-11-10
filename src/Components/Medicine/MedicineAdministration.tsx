@@ -61,19 +61,16 @@ export default function MedicineAdministration(props: Props) {
     for (let i = 0; i < prescriptions.length; i++) {
       if (shouldAdminister[i]) {
         if (prescriptions[i].dosage_type === "TITRATED") {
-          const errorText = AdministrationDosageValidator(
-            dosages[i].dosage,
+          const error = AdministrationDosageValidator(
             prescriptions[i].base_dosage,
             prescriptions[i].target_dosage
-          );
-          if (errorText) {
-            setDosages((dosages) => {
-              const newDosages = [...dosages];
-              newDosages[i].error = errorText;
-              return newDosages;
-            });
-            return;
-          }
+          )(dosages[i].dosage);
+          setDosages((dosages) => {
+            const newDosages = [...dosages];
+            newDosages[i].error = error;
+            return newDosages;
+          });
+          if (error) return;
         }
         const administration = {
           prescription: prescriptions[i],

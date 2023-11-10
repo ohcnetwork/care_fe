@@ -3,10 +3,7 @@ import { FormFieldBaseProps } from "./Utils";
 
 type Props = FormFieldBaseProps<string> & {
   placeholder?: string;
-  value?: string;
   autoComplete?: string;
-  className?: string | undefined;
-  disabled?: boolean;
   min?: string | number;
   max?: string | number;
 };

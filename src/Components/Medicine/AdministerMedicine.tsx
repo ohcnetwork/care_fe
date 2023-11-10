@@ -70,14 +70,12 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
       onClose={() => props.onClose(false)}
       onConfirm={async () => {
         if (prescription.dosage_type === "TITRATED") {
-          setError(
-            AdministrationDosageValidator(
-              dosage,
-              prescription.base_dosage,
-              prescription.target_dosage
-            )
-          );
-          return;
+          const error = AdministrationDosageValidator(
+            prescription.base_dosage,
+            prescription.target_dosage
+          )(dosage);
+          setError(error);
+          if (error) return;
         }
 
         setIsLoading(true);
