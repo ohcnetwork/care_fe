@@ -137,11 +137,15 @@ export default function LiveFeedScreen({ facilityId }: Props) {
                       <FieldLabel className="text-sm">
                         Filter by Location
                       </FieldLabel>
-                      <div className="flex w-full items-center gap-2">
+                      <div>
                         <LocationSelect
                           key={qParams.location}
                           name="Facilities"
-                          setSelected={(location) => updateQuery({ location })}
+                          setSelected={(location) => {
+                            location
+                              ? updateQuery({ location })
+                              : removeFilter("location");
+                          }}
                           selected={qParams.location}
                           showAll={false}
                           multiple={false}
@@ -149,16 +153,6 @@ export default function LiveFeedScreen({ facilityId }: Props) {
                           errors=""
                           errorClassName="hidden"
                         />
-                        {qParams.location && (
-                          <ButtonV2
-                            variant="secondary"
-                            circle
-                            border
-                            onClick={() => removeFilter("location")}
-                          >
-                            Clear
-                          </ButtonV2>
-                        )}
                       </div>
                     </div>
                     <CheckBoxFormField
