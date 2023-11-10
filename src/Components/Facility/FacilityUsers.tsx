@@ -1,4 +1,4 @@
-import { lazy, useEffect, useState } from "react";
+import { lazy, useState } from "react";
 import Pagination from "../Common/Pagination";
 import { USER_TYPES, RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import { FacilityModel } from "../Facility/models";
@@ -21,18 +21,11 @@ const Loading = lazy(() => import("../Common/Loading"));
 
 export default function FacilityUsers(props: any) {
   const { facilityId } = props;
-  const initialData: any[] = [];
   let manageUsers: any = null;
-  const [users, setUsers] = useState(initialData);
   const [isFacilityLoading, setIsFacilityLoading] = useState(false);
-  const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [offset, setOffset] = useState(0);
-  const [facilityData, setFacilityData] = useState({
-    name: "",
-    district_object_id: 0,
-  });
   const authUser = useAuthUser();
 
   const [linkFacility, setLinkFacility] = useState<{
@@ -54,40 +47,21 @@ export default function FacilityUsers(props: any) {
 
   const limit = RESULTS_PER_PAGE_LIMIT;
 
-  useEffect(() => {
-    async function fetchFacilityName() {
-      if (facilityId) {
-        const { res, data } = await request(routes.getAnyFacility, {
-          pathParams: {
-            id: facilityId,
-          },
-        });
-        if (res && data) {
-          setFacilityData({
-            name: data.name || "",
-            district_object_id: data?.district_object?.id || 0,
-          });
-        }
-      } else {
-        setFacilityData({
-          name: "",
-          district_object_id: 0,
-        });
-      }
-    }
-    fetchFacilityName();
-  }, [facilityId]);
+  const { data: facilityData } = useQuery(routes.getAnyFacility, {
+    pathParams: {
+      id: facilityId,
+    },
+    prefetch: facilityId !== undefined,
+  });
 
-  const { refetch } = useQuery(routes.getFacilityUsers, {
+  const {
+    data: facilityUserData,
+    refetch: facilityUserFetch,
+    loading: isLoading,
+  } = useQuery(routes.getFacilityUsers, {
     query: { offset: offset, limit: limit },
     pathParams: { facility_id: facilityId },
     prefetch: facilityId !== undefined,
-    onResponse: ({ res, data }) => {
-      if (res?.ok && data) {
-        setUsers(data.results);
-        setTotalCount(data.count);
-      }
-    },
   });
 
   const handlePagination = (page: number, limit: number) => {
@@ -104,8 +78,8 @@ export default function FacilityUsers(props: any) {
     const { res, data } = await request(routes.userListFacility, {
       pathParams: { username: username },
     });
-    if (res?.ok && data) {
-      const updated = users.map((user) => {
+    if (res?.ok && data && facilityUserData) {
+      facilityUserData.results = facilityUserData.results.map((user) => {
         return user.username === username
           ? {
               ...user,
@@ -113,7 +87,6 @@ export default function FacilityUsers(props: any) {
             }
           : user;
       });
-      setUsers(updated);
     }
     setIsFacilityLoading(false);
   };
@@ -178,7 +151,7 @@ export default function FacilityUsers(props: any) {
       },
     });
     setUserData({ show: false, username: "", name: "" });
-    refetch();
+    facilityUserFetch();
   };
 
   const handleDelete = (user: any) => {
@@ -290,15 +263,16 @@ export default function FacilityUsers(props: any) {
       currentUserLevel >= DISTRICT_ADMIN_LEVEL &&
       currentUserLevel > level
     )
-      return facilityData?.district_object_id === authUser.district;
+      return facilityData?.district_object?.id === authUser.district;
     return false;
   };
 
   let userList: any[] = [];
 
-  users &&
-    users.length &&
-    (userList = users.map((user: any) => {
+  facilityUserData &&
+    facilityUserData.results &&
+    facilityUserData.results.length &&
+    (userList = facilityUserData.results.map((user: any) => {
       return (
         <div
           key={`usr_${user.id}`}
@@ -420,25 +394,28 @@ export default function FacilityUsers(props: any) {
       );
     }));
 
-  if (!users) {
+  if (!facilityUserData) {
     manageUsers = <Loading />;
-  } else if (users && users.length) {
+  } else if (facilityUserData.results && facilityUserData.results.length) {
     manageUsers = (
       <div>
         <div className="flex flex-wrap md:-mx-4">{userList}</div>
-        {totalCount > limit && (
+        {facilityUserData && facilityUserData.count > limit && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination
               cPage={currentPage}
               defaultPerPage={limit}
-              data={{ totalCount }}
+              data={{ totalCount: facilityUserData.count }}
               onChange={handlePagination}
             />
           </div>
         )}
       </div>
     );
-  } else if (users && users.length === 0) {
+  } else if (
+    facilityUserData.results &&
+    facilityUserData.results.length === 0
+  ) {
     manageUsers = (
       <div>
         <div>
@@ -464,15 +441,16 @@ export default function FacilityUsers(props: any) {
       )}
 
       <div className="m-4 mt-5 grid grid-cols-1 sm:grid-cols-3 md:gap-5 md:px-4">
-        <CountBlock
-          text="Total Users"
-          count={totalCount}
-          // loading={isLoading}
-          icon="l-user-injured"
-          className="flex-1"
-        />
+        {facilityUserData && (
+          <CountBlock
+            text="Total Users"
+            count={facilityUserData.count}
+            loading={isLoading}
+            icon="l-user-injured"
+            className="flex-1"
+          />
+        )}
       </div>
-
       <div className="px-3 md:px-8">
         <div>{manageUsers}</div>
       </div>
