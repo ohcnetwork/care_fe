@@ -167,7 +167,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                             : "button-primary-border bg-primary-100"
                         }`}
                       >
-                        <span className="tooltip-text tooltip-bottom md:tooltip-right -translate-y-2">
+                        <span className="tooltip-text tooltip-top">
                           Live Patients / Total beds
                         </span>{" "}
                         <CareIcon
