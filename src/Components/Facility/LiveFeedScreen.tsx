@@ -14,9 +14,6 @@ import { AssetData } from "../Assets/AssetTypes";
 import { Popover, Transition } from "@headlessui/react";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import { useTranslation } from "react-i18next";
-import { SortOption } from "../Common/SortDropdown";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import LiveFeedTile from "./LiveFeedTile";
 import { getCameraConfig } from "../../Utils/transformUtils";
 import { getPermittedFacility, listAssets } from "../../Redux/actions";
@@ -24,45 +21,11 @@ import { useDispatch } from "react-redux";
 
 const PER_PAGE_LIMIT = 6;
 
-const SORT_OPTIONS: SortOption[] = [
-  { isAscending: true, value: "bed__name" },
-  { isAscending: false, value: "-bed__name" },
-  { isAscending: false, value: "-created_date" },
-  { isAscending: true, value: "created_date" },
-];
-
 interface Props {
   facilityId: string;
 }
 
-const getOrderingList = async (
-  facilityId: string,
-  setOrdering: (order: string) => void
-) => {
-  const orderData = localStorage.getItem("live-feed-order");
-  if (orderData) {
-    const order = JSON.parse(orderData);
-    const orderValue = order.find((item: any) => item.facility === facilityId);
-    setOrdering(orderValue.order);
-  }
-};
-
-const setOrderingList = async (facilityId: string, order: string) => {
-  const orderData = localStorage.getItem("live-feed-order") || "[]";
-  const orderList = JSON.parse(orderData);
-  const index = orderList.findIndex(
-    (item: any) => item.facility === facilityId
-  );
-  if (index !== -1) {
-    orderList[index].order = order;
-  } else {
-    orderList.push({ facility: facilityId, order });
-  }
-  localStorage.setItem("live-feed-order", JSON.stringify(orderList));
-};
-
 export default function LiveFeedScreen({ facilityId }: Props) {
-  const { t } = useTranslation();
   const dispatch = useDispatch<any>();
   const [isFullscreen, setFullscreen] = useFullscreen();
   const sidebar = useContext(SidebarShrinkContext);
@@ -73,7 +36,6 @@ export default function LiveFeedScreen({ facilityId }: Props) {
   const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
     limit: PER_PAGE_LIMIT,
   });
-  const [ordering, setOrdering] = useState<string>("bed__name");
 
   const [refresh_presets_hash, setRefreshPresetsHash] = useState<number>(
     Number(new Date())
@@ -87,10 +49,6 @@ export default function LiveFeedScreen({ facilityId }: Props) {
       sidebar.setShrinked(sidebar.shrinked);
     };
   }, []);
-
-  useEffect(() => {
-    getOrderingList(facilityId, setOrdering);
-  }, [facilityId]);
 
   useEffect(() => {
     async function fetchFacilityOrObject() {
@@ -112,7 +70,6 @@ export default function LiveFeedScreen({ facilityId }: Props) {
         asset_class: "ONVIF",
         facility: facilityId || "",
         location: qParams.location,
-        ordering: qParams.ordering || ordering,
         bed_is_occupied: qParams.bed_is_occupied,
       };
 
@@ -204,30 +161,6 @@ export default function LiveFeedScreen({ facilityId }: Props) {
                         )}
                       </div>
                     </div>
-                    <SelectFormField
-                      name="ordering"
-                      label={t("sort_by")}
-                      required
-                      value={qParams.ordering || ordering}
-                      onChange={({ value }) => {
-                        updateQuery({ ordering: value });
-                        setOrderingList(facilityId, value);
-                      }}
-                      options={SORT_OPTIONS}
-                      optionLabel={({ value }) => t("SortOptions." + value)}
-                      optionIcon={({ isAscending }) => (
-                        <CareIcon
-                          className={
-                            isAscending
-                              ? "care-l-sort-amount-up"
-                              : "care-l-sort-amount-down"
-                          }
-                        />
-                      )}
-                      optionValue={({ value }) => value}
-                      labelClassName="text-sm"
-                      errorClassName="hidden"
-                    />
                     <CheckBoxFormField
                       name="bed_is_occupied"
                       label="Hide Cameras without Patient"
