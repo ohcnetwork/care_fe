@@ -38,7 +38,11 @@ export default function PrescriptionsTable({
 
   const { data } = useQuery(MedicineRoutes.listPrescriptions, {
     pathParams: { consultation },
-    query: { is_prn, prescription_type, limit: 100 },
+    query: {
+      dosage_type: is_prn ? "PRN" : "REGULAR,TITRATED",
+      prescription_type,
+      limit: 100,
+    },
   });
 
   const lastModified = data?.results[0]?.modified_date;

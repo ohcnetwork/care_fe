@@ -9,6 +9,15 @@ export const PrescriptionFormValidator = () => {
     if (form.dosage_type === "TITRATED") {
       errors.base_dosage = RequiredFieldValidator()(form.base_dosage);
       errors.target_dosage = RequiredFieldValidator()(form.target_dosage);
+      if (
+        form.base_dosage &&
+        form.target_dosage &&
+        form.base_dosage.split(" ")[1] &&
+        form.target_dosage.split(" ")[1]
+      ) {
+        errors.base_dosage = "Unit must be same as target dosage's unit";
+        errors.target_dosage = "Unit must be same as base dosage's unit";
+      }
     } else errors.base_dosage = RequiredFieldValidator()(form.base_dosage);
     if (form.dosage_type === "PRN")
       errors.indicator = RequiredFieldValidator()(form.indicator);
@@ -49,4 +58,30 @@ export const comparePrescriptions = (a: Prescription, b: Prescription) => {
     PRESCRIPTION_COMPARE_FIELDS.every((field) => a[field] === b[field]) &&
     a.medicine_object?.id === b.medicine_object?.id
   );
+};
+
+export const AdministrationDosageValidator = (
+  value: Prescription["base_dosage"],
+  base_dosage: Prescription["base_dosage"],
+  target_dosage: Prescription["target_dosage"]
+) => {
+  const getDosageValue = (dosage: string | undefined) => {
+    return dosage ? Number(dosage.split(" ")[0]) : undefined;
+  };
+
+  const valueDosage = getDosageValue(value);
+  const baseDosage = getDosageValue(base_dosage);
+  const targetDosage = getDosageValue(target_dosage);
+
+  if (!valueDosage) return "This field is required";
+
+  if (value?.split(" ")[1] !== base_dosage?.split(" ")[1])
+    return "Unit must be the same as start and target dosage's unit";
+
+  if (
+    baseDosage &&
+    targetDosage &&
+    (valueDosage < baseDosage || valueDosage > targetDosage)
+  )
+    return "Dosage should be between start and target dosage";
 };

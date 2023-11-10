@@ -10,10 +10,11 @@ import { useTranslation } from "react-i18next";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import dayjs from "../../Utils/dayjs";
-import NumericWithUnitsFormField from "../Form/FormFields/NumericWithUnitsFormField";
 import useSlug from "../../Common/hooks/useSlug";
 import request from "../../Utils/request/request";
 import MedicineRoutes from "./routes";
+import DosageFormField from "../Form/FormFields/DosageFormField";
+import { AdministrationDosageValidator } from "./validators";
 
 interface Props {
   prescription: Prescription;
@@ -68,18 +69,14 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
       show
       onClose={() => props.onClose(false)}
       onConfirm={async () => {
-        if (!dosage && prescription.dosage_type === "TITRATED") {
-          setError("This field is required");
-          return;
-        }
-        if (
-          (prescription.dosage_type === "TITRATED" &&
-            Number(dosage?.split(" ")[0]) <
-              Number(prescription.base_dosage?.split(" ")[0])) ||
-          Number(dosage?.split(" ")[0]) >
-            Number(prescription.target_dosage?.split(" ")[0])
-        ) {
-          setError("Dosage should be between start and target dosage");
+        if (prescription.dosage_type === "TITRATED") {
+          setError(
+            AdministrationDosageValidator(
+              dosage,
+              prescription.base_dosage,
+              prescription.target_dosage
+            )
+          );
           return;
         }
 
@@ -104,7 +101,7 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
         <PrescriptionDetailCard prescription={prescription} readonly />
 
         {prescription.dosage_type === "TITRATED" && (
-          <NumericWithUnitsFormField
+          <DosageFormField
             name="dosage"
             label={
               t("dosage") +
@@ -113,11 +110,11 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
             value={dosage}
             onChange={({ value }) => setDosage(value)}
             required
-            units={["mg", "g", "ml", "drop(s)", "ampule(s)", "tsp"]}
             min={prescription.base_dosage}
             max={prescription.target_dosage}
             disabled={isLoading}
             error={error}
+            errorClassName={error ? "block" : "hidden"}
           />
         )}
 

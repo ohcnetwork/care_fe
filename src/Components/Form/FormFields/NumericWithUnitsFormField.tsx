@@ -36,6 +36,7 @@ export default function NumericWithUnitsFormField(props: Props) {
           required={field.required}
           value={numValue}
           onChange={(e) => field.handleChange(e.target.value + " " + unitValue)}
+          disabled={props.disabled}
         />
         <div className="absolute inset-y-0 right-0 flex items-center">
           <select
@@ -46,6 +47,7 @@ export default function NumericWithUnitsFormField(props: Props) {
             onChange={(e) =>
               field.handleChange(numValue + " " + e.target.value)
             }
+            disabled={props.disabled}
           >
             {props.units.map((unit) => (
               <option key={unit}>{unit}</option>

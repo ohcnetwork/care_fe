@@ -5,7 +5,6 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { MedicineAdministrationRecord, Prescription } from "./models";
 import { useState } from "react";
-import NumericWithUnitsFormField from "../Form/FormFields/NumericWithUnitsFormField";
 import { useTranslation } from "react-i18next";
 import MedibaseAutocompleteFormField from "./MedibaseAutocompleteFormField";
 import dayjs from "../../Utils/dayjs";
@@ -15,6 +14,7 @@ import MedicineRoutes from "./routes";
 import request from "../../Utils/request/request";
 import useSlug from "../../Common/hooks/useSlug";
 import { Success } from "../../Utils/Notifications";
+import DosageFormField from "../Form/FormFields/DosageFormField";
 
 export default function CreatePrescriptionForm(props: {
   prescription: Prescription;
@@ -63,7 +63,7 @@ export default function CreatePrescriptionForm(props: {
           />
           {props.prescription.dosage_type !== "PRN" && (
             <CheckBoxFormField
-              label="Titrate Dosage"
+              label={t("titrate_dosage")}
               name="Titrate Dosage"
               value={field("dosage_type").value === "TITRATED"}
               onChange={(e) => {
@@ -92,30 +92,27 @@ export default function CreatePrescriptionForm(props: {
             />
             {field("dosage_type").value === "TITRATED" ? (
               <div className="flex w-full gap-4">
-                <NumericWithUnitsFormField
+                <DosageFormField
                   className="flex-1"
-                  label="Start Dosage"
+                  label={t("start_dosage")}
                   {...field("base_dosage", RequiredFieldValidator())}
                   required
-                  units={["mg", "g", "ml", "drop(s)", "ampule(s)", "tsp"]}
                   min={0}
                 />
-                <NumericWithUnitsFormField
+                <DosageFormField
                   className="flex-1"
-                  label="Target Dosage"
+                  label={t("target_dosage")}
                   {...field("target_dosage", RequiredFieldValidator())}
                   required
-                  units={["mg", "g", "ml", "drop(s)", "ampule(s)", "tsp"]}
                   min={0}
                 />
               </div>
             ) : (
-              <NumericWithUnitsFormField
+              <DosageFormField
                 className="flex-1"
                 label={t("dosage")}
                 {...field("base_dosage", RequiredFieldValidator())}
                 required={field("dosage_type").value !== "TITRATED"}
-                units={["mg", "g", "ml", "drop(s)", "ampule(s)", "tsp"]}
                 min={0}
               />
             )}
@@ -169,7 +166,7 @@ export default function CreatePrescriptionForm(props: {
 
           {field("dosage_type").value === "TITRATED" && (
             <TextAreaFormField
-              label="Instructions on titration"
+              label={t("instruction_on_titration")}
               {...field("instruction_on_titration")}
             />
           )}

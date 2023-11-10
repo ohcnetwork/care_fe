@@ -192,7 +192,14 @@ export default function MedicineAdministrationTableRow({
           </div>
 
           <div className="flex gap-1 text-xs font-semibold text-gray-900 lg:flex-col lg:px-2 lg:text-center">
-            <p>{prescription.base_dosage}</p>
+            {prescription.dosage_type !== "TITRATED" ? (
+              <p>{prescription.base_dosage}</p>
+            ) : (
+              <p>
+                {prescription.base_dosage} - {prescription.target_dosage}
+              </p>
+            )}
+
             <p>
               {prescription.dosage_type !== "PRN"
                 ? t("PRESCRIPTION_FREQUENCY_" + prescription.frequency)

@@ -163,7 +163,10 @@ export default function PrescriptionDetailCard({
           )}
 
           {prescription.instruction_on_titration && (
-            <Detail className="col-span-10" label="Instruction on titration">
+            <Detail
+              className="col-span-10"
+              label={t("instruction_on_titration")}
+            >
               <ReadMore
                 text={prescription.instruction_on_titration}
                 minChars={120}
