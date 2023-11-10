@@ -9,7 +9,7 @@ type OptionCallback<T, R> = (option: T) => R;
 
 type SelectMenuProps<T, V = T> = {
   id?: string;
-  options: T[];
+  options: readonly T[];
   disabled?: boolean | undefined;
   value: V | undefined;
   placeholder?: ReactNode;

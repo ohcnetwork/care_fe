@@ -117,6 +117,7 @@ export default ({ show, setShow, username }: IProps) => {
             {!isLoading && (
               <div className="tooltip flex items-center gap-2">
                 <SkillSelect
+                  id="select-skill"
                   multiple={false}
                   name="skill"
                   disabled={!authorizeForAddSkill}
@@ -128,6 +129,7 @@ export default ({ show, setShow, username }: IProps) => {
                   username={username}
                 />
                 <ButtonV2
+                  id="add-skill-button"
                   disabled={!authorizeForAddSkill}
                   onClick={() => addSkill(username, selectedSkill)}
                   className="w-6rem"
@@ -146,7 +148,7 @@ export default ({ show, setShow, username }: IProps) => {
                 <CircularProgress />
               </div>
             ) : (
-              <div className="mb-2 mt-4">
+              <div className="mb-2 mt-4" id="added-user-skills">
                 {hasSkills ? (
                   <SkillsArray
                     isLoading={isLoading}

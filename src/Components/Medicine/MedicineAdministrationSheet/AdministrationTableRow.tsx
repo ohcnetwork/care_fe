@@ -33,22 +33,25 @@ export default function MedicineAdministrationTableRow({
   const [showAdminister, setShowAdminister] = useState(false);
   const [showDiscontinue, setShowDiscontinue] = useState(false);
 
-  const { data, loading } = useQuery(MedicineRoutes.listAdministrations, {
-    pathParams: { consultation },
-    query: {
-      prescription: prescription.id,
-      administered_date_after: formatDateTime(
-        props.intervals[0].start,
-        "YYYY-MM-DD"
-      ),
-      administered_date_before: formatDateTime(
-        props.intervals[props.intervals.length - 1].end,
-        "YYYY-MM-DD"
-      ),
-      archived: false,
-    },
-    key: `${prescription.last_administration?.administered_date}`,
-  });
+  const { data, loading, refetch } = useQuery(
+    MedicineRoutes.listAdministrations,
+    {
+      pathParams: { consultation },
+      query: {
+        prescription: prescription.id,
+        administered_date_after: formatDateTime(
+          props.intervals[0].start,
+          "YYYY-MM-DD"
+        ),
+        administered_date_before: formatDateTime(
+          props.intervals[props.intervals.length - 1].end,
+          "YYYY-MM-DD"
+        ),
+        archived: false,
+      },
+      key: `${prescription.last_administration?.administered_date}`,
+    }
+  );
 
   return (
     <tr
@@ -229,6 +232,7 @@ export default function MedicineAdministrationTableRow({
                 administrations={data.results}
                 interval={{ start, end }}
                 prescription={prescription}
+                refetch={refetch}
               />
             )}
           </td>
