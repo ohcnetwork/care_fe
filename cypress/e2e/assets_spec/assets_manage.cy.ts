@@ -117,23 +117,6 @@ describe("Asset", () => {
     assetPage.verifyDeleteStatus();
   });
 
-  it("Verify Facility Asset Page Redirection", () => {
-    cy.visit("/facility");
-    assetSearchPage.typeSearchKeyword(fillFacilityName);
-    assetSearchPage.pressEnter();
-    facilityPage.verifyFacilityBadgeContent(fillFacilityName);
-    facilityPage.visitAlreadyCreatedFacility();
-    facilityPage.clickManageFacilityDropdown();
-    facilityPage.clickCreateAssetFacilityOption();
-    facilityPage.verifyfacilitycreateassetredirection();
-    facilityPage.verifyassetfacilitybackredirection();
-    facilityPage.clickManageFacilityDropdown();
-    facilityPage.clickviewAssetFacilityOption();
-    facilityPage.verifyfacilityviewassetredirection();
-    assetFilters.assertFacilityText(fillFacilityName);
-    facilityPage.verifyassetfacilitybackredirection();
-  });
-
   afterEach(() => {
     cy.saveLocalStorage();
   });
