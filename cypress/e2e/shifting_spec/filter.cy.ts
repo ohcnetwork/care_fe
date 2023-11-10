@@ -19,7 +19,7 @@ describe("Shifting section filter", () => {
     shiftingPage.filterByFacility(
       "Dummy Shifting",
       "Dummy Shifting",
-      "District Admin"
+      "District"
     );
 
     shiftingPage.facilityAssignedBadge().should("exist");
