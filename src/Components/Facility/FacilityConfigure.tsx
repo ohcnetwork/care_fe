@@ -1,7 +1,7 @@
 import { lazy, useReducer, useState } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
-import { Submit, Back } from "../Common/components/ButtonV2";
+import { Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import Page from "../Common/components/Page";
 import { ConfigureHealthFacility } from "../ABDM/ConfigureHealthFacility";
@@ -161,9 +161,6 @@ export const FacilityConfigure = (props: IProps) => {
         </div>
 
         <ConfigureHealthFacility facilityId={facilityId} />
-        <div className="mt-8 flex w-full justify-end">
-          <Back onClick={() => navigate(`/facility/${facilityId}`)} />
-        </div>
       </div>
     </Page>
   );
