@@ -43,8 +43,8 @@ describe("Manage User", () => {
     manageUserPage.clicklinkedskillbutton();
     manageUserPage.assertSkillInAddedUserSkills(linkedskill);
     manageUserPage.clickCloseSlideOver();
-    manageUserPage.navigateToProfile();
     cy.wait(5000);
+    manageUserPage.navigateToProfile();
     userCreationPage.verifyElementContainsText(
       "username-profile-details",
       usernameforworkinghour
