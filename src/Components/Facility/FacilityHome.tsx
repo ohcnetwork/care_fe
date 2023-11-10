@@ -1,12 +1,7 @@
 import * as Notification from "../../Utils/Notifications.js";
 
 import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import {
-  CapacityModal,
-  DoctorModal,
-  FacilityModel,
-  PatientStatsModel,
-} from "./models";
+import { DoctorModal, FacilityModel } from "./models";
 import {
   DOCTOR_SPECIALIZATION,
   FACILITY_FEATURE_TYPES,
@@ -14,7 +9,7 @@ import {
   getBedTypes,
 } from "../../Common/constants";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
-import { lazy, useEffect, useState } from "react";
+import { lazy, useState } from "react";
 import { BedCapacity } from "./BedCapacity";
 import BedTypeCard from "./BedTypeCard";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -55,17 +50,10 @@ export const getFacilityFeatureIcon = (featureId: number) => {
 export const FacilityHome = (props: any) => {
   const { t } = useTranslation();
   const { facilityId } = props;
-  const [facilityData, setFacilityData] = useState<FacilityModel>({});
-  const [capacityData, setCapacityData] = useState<Array<CapacityModal>>([]);
-  const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [editCoverImage, setEditCoverImage] = useState(false);
   const [imageKey, setImageKey] = useState(Date.now());
   const [totalDoctors, setTotalDoctors] = useState(0);
-  const [patientStatsData, setPatientStatsData] = useState<
-    Array<PatientStatsModel>
-  >([]);
   const [bedCapacityModalOpen, setBedCapacityModalOpen] = useState(false);
   const [doctorCapacityModalOpen, setDoctorCapacityModalOpen] = useState(false);
   const authUser = useAuthUser();
@@ -73,83 +61,46 @@ export const FacilityHome = (props: any) => {
 
   useMessageListener((data) => console.log(data));
 
-  const { res: permittedFacilityRes, data: permittedFacilityData } = useQuery(
+  const { data: facilityData, loading: isLoading } = useQuery(
     routes.getPermittedFacility,
     {
       pathParams: {
         id: facilityId,
       },
+      onResponse: ({ res }) => {
+        if (res?.ok) {
+          capacityQuery.refetch();
+          doctorQuery.refetch();
+          triageQuery.refetch();
+        } else {
+          navigate("/not-found");
+        }
+      },
     }
   );
 
-  const {
-    res: capacityRes,
-    data: capacityFetchData,
-    refetch: capacityFetch,
-  } = useQuery(routes.getCapacity, {
+  const capacityQuery = useQuery(routes.getCapacity, {
     pathParams: { facilityId },
   });
 
-  const {
-    res: doctorRes,
-    data: doctorFetchData,
-    refetch: doctorFetch,
-  } = useQuery(routes.listDoctor, {
+  const doctorQuery = useQuery(routes.listDoctor, {
     pathParams: { facilityId: facilityId },
+    onResponse: ({ res, data }) => {
+      if (res?.ok && data) {
+        let totalCount = 0;
+        [data].map((doctor: DoctorModal) => {
+          if (doctor.count) {
+            totalCount += doctor.count;
+          }
+        });
+        setTotalDoctors(totalCount);
+      }
+    },
   });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      if (permittedFacilityRes?.ok) {
-        capacityFetch();
-        doctorFetch();
-        const { res: triageRes, data: triageData } = await request(
-          routes.getTriage,
-          {
-            pathParams: { facilityId },
-          }
-        );
-
-        if (permittedFacilityRes) {
-          setIsLoading(false);
-          if (!permittedFacilityData) {
-            Notification.Error({
-              msg: "Something went wrong..!",
-            });
-          } else {
-            setFacilityData(permittedFacilityData);
-            if (capacityRes?.ok && capacityFetchData) {
-              setCapacityData(capacityFetchData.results);
-            }
-            if (doctorRes?.ok && doctorFetchData) {
-              setDoctorData(doctorFetchData.results);
-              // calculating total doctors count
-              let totalCount = 0;
-              [doctorFetchData].map((doctor: DoctorModal) => {
-                if (doctor.count) {
-                  totalCount += doctor.count;
-                }
-              });
-              setTotalDoctors(totalCount);
-            }
-            if (
-              triageRes?.ok &&
-              triageData &&
-              triageData.results &&
-              triageData.results.length
-            ) {
-              setPatientStatsData(triageData.results);
-            }
-          }
-        }
-      } else {
-        navigate("/not-found");
-        setIsLoading(false);
-      }
-    };
-    if (permittedFacilityRes?.ok) fetchData();
-  }, [facilityId, permittedFacilityRes, permittedFacilityData]);
+  const triageQuery = useQuery(routes.getTriage, {
+    pathParams: { facilityId },
+  });
 
   const handleDeleteClose = () => {
     setOpenDeleteDialog(false);
@@ -175,14 +126,14 @@ export const FacilityHome = (props: any) => {
   let capacityList: any = null;
   let totalBedCount = 0;
   let totalOccupiedBedCount = 0;
-  if (!capacityData || !capacityData.length) {
+  if (!capacityQuery.data || !capacityQuery.data.results.length) {
     capacityList = (
       <h5 className="mt-4 flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-gray-500 shadow">
         No Bed Types Found
       </h5>
     );
   } else {
-    capacityData.forEach((x) => {
+    capacityQuery.data.results.forEach((x) => {
       totalBedCount += x.total_capacity ? x.total_capacity : 0;
       totalOccupiedBedCount += x.current_capacity ? x.current_capacity : 0;
     });
@@ -198,7 +149,7 @@ export const FacilityHome = (props: any) => {
           }}
         />
         {getBedTypes(config).map((x) => {
-          const res = capacityData.find((data) => {
+          const res = capacityQuery.data?.results.find((data) => {
             return data.room_type === x.id;
           });
           if (
@@ -207,9 +158,11 @@ export const FacilityHome = (props: any) => {
             res.total_capacity !== undefined
           ) {
             const removeCurrentBedType = (bedTypeId: number | undefined) => {
-              setCapacityData((state) =>
-                state.filter((i) => i.id !== bedTypeId)
-              );
+              if (capacityQuery.data !== undefined) {
+                capacityQuery.data.results = capacityQuery.data.results.filter(
+                  (i) => i.id !== bedTypeId
+                );
+              }
             };
             return (
               <BedTypeCard
@@ -223,10 +176,7 @@ export const FacilityHome = (props: any) => {
                 lastUpdated={res.modified_date}
                 removeBedType={removeCurrentBedType}
                 handleUpdate={() => {
-                  capacityFetch();
-                  if (capacityRes?.ok && capacityFetchData) {
-                    setCapacityData(capacityFetchData.results);
-                  }
+                  capacityQuery.refetch();
                 }}
               />
             );
@@ -237,7 +187,7 @@ export const FacilityHome = (props: any) => {
   }
 
   let doctorList: any = null;
-  if (!doctorData || !doctorData.length) {
+  if (!doctorQuery.data || !doctorQuery.data.results.length) {
     doctorList = (
       <h5 className="flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-gray-500 shadow">
         No Doctors Found
@@ -263,11 +213,13 @@ export const FacilityHome = (props: any) => {
           </div>
         </div>
 
-        {doctorData.map((data: DoctorModal) => {
+        {doctorQuery.data.results.map((data: DoctorModal) => {
           const removeCurrentDoctorData = (doctorId: number | undefined) => {
-            setDoctorData((state) =>
-              state.filter((i: DoctorModal) => i.id !== doctorId)
-            );
+            if (doctorQuery.data !== undefined) {
+              doctorQuery.data.results = doctorQuery.data?.results.filter(
+                (i: DoctorModal) => i.id !== doctorId
+              );
+            }
           };
 
           return (
@@ -275,12 +227,11 @@ export const FacilityHome = (props: any) => {
               facilityId={facilityId}
               key={`bed_${data.id}`}
               handleUpdate={async () => {
-                doctorFetch();
-                if (doctorRes?.ok && doctorFetchData) {
-                  setDoctorData(doctorFetchData.results);
+                doctorQuery.refetch();
+                if (doctorQuery.res?.ok && doctorQuery.data) {
                   // update total doctors count
                   let totalCount = 0;
-                  doctorFetchData.results.map((doctor: DoctorModal) => {
+                  doctorQuery.data.results.map((doctor: DoctorModal) => {
                     if (doctor.count) {
                       totalCount += doctor.count;
                     }
@@ -298,15 +249,23 @@ export const FacilityHome = (props: any) => {
   }
 
   const stats: (string | JSX.Element)[][] = [];
-  for (let i = 0; i < patientStatsData.length; i++) {
+  for (
+    let i = 0;
+    triageQuery.data?.results && i < triageQuery.data.results.length;
+    i++
+  ) {
     const temp: (string | JSX.Element)[] = [];
-    temp.push(String(patientStatsData[i].entry_date) || "0");
-    temp.push(String(patientStatsData[i].num_patients_visited) || "0");
-    temp.push(String(patientStatsData[i].num_patients_home_quarantine) || "0");
-    temp.push(String(patientStatsData[i].num_patients_isolation) || "0");
-    temp.push(String(patientStatsData[i].num_patient_referred) || "0");
+    temp.push(String(triageQuery.data.results[i].entry_date) || "0");
+    temp.push(String(triageQuery.data.results[i].num_patients_visited) || "0");
     temp.push(
-      String(patientStatsData[i].num_patient_confirmed_positive) || "0"
+      String(triageQuery.data.results[i].num_patients_home_quarantine) || "0"
+    );
+    temp.push(
+      String(triageQuery.data.results[i].num_patients_isolation) || "0"
+    );
+    temp.push(String(triageQuery.data.results[i].num_patient_referred) || "0");
+    temp.push(
+      String(triageQuery.data.results[i].num_patient_confirmed_positive) || "0"
     );
     temp.push(
       <ButtonV2
@@ -314,7 +273,9 @@ export const FacilityHome = (props: any) => {
         ghost
         border
         onClick={() =>
-          navigate(`/facility/${facilityId}/triage/${patientStatsData[i].id}`)
+          navigate(
+            `/facility/${facilityId}/triage/${triageQuery.data?.results[i].id}`
+          )
         }
         authorizeFor={NonReadOnlyUsers}
       >
@@ -324,7 +285,7 @@ export const FacilityHome = (props: any) => {
     stats.push(temp);
   }
 
-  const hasCoverImage = !!facilityData.read_cover_image_url;
+  const hasCoverImage = !!facilityData?.read_cover_image_url;
 
   const StaffUserTypeIndex = USER_TYPES.findIndex((type) => type === "Staff");
   const hasPermissionToEditCoverImage =
@@ -341,24 +302,25 @@ export const FacilityHome = (props: any) => {
 
   const CoverImage = () => (
     <img
-      src={`${facilityData.read_cover_image_url}?imgKey=${imageKey}`}
-      alt={facilityData.name}
+      src={`${facilityData?.read_cover_image_url}?imgKey=${imageKey}`}
+      alt={facilityData?.name}
       className="h-full w-full object-cover"
     />
   );
 
   return (
     <Page
-      title={facilityData.name || "Facility"}
-      crumbsReplacements={{ [facilityId]: { name: facilityData.name } }}
+      title={facilityData?.name || "Facility"}
+      crumbsReplacements={{ [facilityId]: { name: facilityData?.name } }}
       focusOnLoad={true}
       backUrl="/facility"
     >
       <ConfirmDialog
-        title={`Delete ${facilityData.name}`}
+        title={`Delete ${facilityData?.name}`}
         description={
           <span>
-            Are you sure you want to delete <strong>{facilityData.name}</strong>
+            Are you sure you want to delete{" "}
+            <strong>{facilityData?.name}</strong>
           </span>
         }
         action="Delete"
@@ -370,13 +332,13 @@ export const FacilityHome = (props: any) => {
       <CoverImageEditModal
         open={editCoverImage}
         onSave={() =>
-          facilityData.read_cover_image_url
+          facilityData?.read_cover_image_url
             ? setImageKey(Date.now())
             : window.location.reload()
         }
         onClose={() => setEditCoverImage(false)}
         onDelete={() => window.location.reload()}
-        facility={facilityData}
+        facility={facilityData ?? ({} as FacilityModel)}
       />
       {hasCoverImage ? (
         <div
@@ -439,7 +401,7 @@ export const FacilityHome = (props: any) => {
                   {editCoverImageTooltip}
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold">{facilityData.name}</h1>
+                  <h1 className="text-3xl font-bold">{facilityData?.name}</h1>
                   {facilityData?.modified_date && (
                     <RecordMeta
                       className="mt-1 text-sm text-gray-700"
@@ -457,7 +419,7 @@ export const FacilityHome = (props: any) => {
                         Address
                       </h1>
                       <p className="text-base font-medium">
-                        {facilityData.address}
+                        {facilityData?.address}
                       </p>
                     </div>
 
@@ -466,7 +428,7 @@ export const FacilityHome = (props: any) => {
                         <h1 className="text-base font-semibold text-[#B9B9B9]">
                           Phone Number
                         </h1>
-                        <ContactLink tel={String(facilityData.phone_number)} />
+                        <ContactLink tel={String(facilityData?.phone_number)} />
                       </div>
                     </div>
                   </div>
@@ -505,13 +467,13 @@ export const FacilityHome = (props: any) => {
             </div>
             <div className="mt-10 flex items-center gap-3">
               <div>
-                {facilityData.features?.some((feature: any) =>
+                {facilityData?.features?.some((feature: any) =>
                   FACILITY_FEATURE_TYPES.some((f) => f.id === feature)
                 ) && (
                   <h1 className="text-lg font-semibold">Available features</h1>
                 )}
                 <div className="mt-5 flex flex-wrap gap-2">
-                  {facilityData.features?.map(
+                  {facilityData?.features?.map(
                     (feature: number, i: number) =>
                       FACILITY_FEATURE_TYPES.some((f) => f.id === feature) && (
                         <Chip
@@ -678,17 +640,17 @@ export const FacilityHome = (props: any) => {
             rows={[
               [
                 "Capacity",
-                String(facilityData.oxygen_capacity),
-                String(facilityData.type_b_cylinders),
-                String(facilityData.type_c_cylinders),
-                String(facilityData.type_d_cylinders),
+                String(facilityData?.oxygen_capacity),
+                String(facilityData?.type_b_cylinders),
+                String(facilityData?.type_c_cylinders),
+                String(facilityData?.type_d_cylinders),
               ],
               [
                 "Daily Expected Consumption",
-                String(facilityData.expected_oxygen_requirement),
-                String(facilityData.expected_type_b_cylinders),
-                String(facilityData.expected_type_c_cylinders),
-                String(facilityData.expected_type_d_cylinders),
+                String(facilityData?.expected_oxygen_requirement),
+                String(facilityData?.expected_type_b_cylinders),
+                String(facilityData?.expected_type_c_cylinders),
+                String(facilityData?.expected_type_d_cylinders),
               ],
             ]}
           />
@@ -771,10 +733,7 @@ export const FacilityHome = (props: any) => {
             facilityId={facilityId}
             handleClose={() => setBedCapacityModalOpen(false)}
             handleUpdate={async () => {
-              capacityFetch();
-              if (capacityRes?.ok && capacityFetchData) {
-                setCapacityData(capacityFetchData.results);
-              }
+              capacityQuery.refetch();
             }}
           />
         </DialogModal>
@@ -790,12 +749,11 @@ export const FacilityHome = (props: any) => {
             facilityId={facilityId}
             handleClose={() => setDoctorCapacityModalOpen(false)}
             handleUpdate={async () => {
-              doctorFetch;
-              if (doctorRes?.ok && doctorFetchData) {
-                setDoctorData(doctorFetchData.results);
+              doctorQuery.refetch();
+              if (doctorQuery.res?.ok && doctorQuery.data) {
                 // update total doctors count
                 setTotalDoctors(
-                  doctorFetchData.results.reduce(
+                  doctorQuery.data.results.reduce(
                     (acc: number, doctor: DoctorModal) =>
                       acc + (doctor.count || 0),
                     0
