@@ -11,12 +11,14 @@ interface Props {
   administrations: MedicineAdministrationRecord[];
   interval: { start: Date; end: Date };
   prescription: Prescription;
+  refetch: () => void;
 }
 
 export default function AdministrationEventCell({
   administrations,
   interval: { start, end },
   prescription,
+  refetch,
 }: Props) {
   const [showTimeline, setShowTimeline] = useState(false);
   // Check if cell belongs to an administered prescription
@@ -55,6 +57,7 @@ export default function AdministrationEventCell({
             interval={{ start, end }}
             prescription={prescription}
             showPrescriptionDetails
+            onRefetch={refetch}
           />
         </DialogModal>
         <button
