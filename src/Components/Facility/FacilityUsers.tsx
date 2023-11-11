@@ -22,7 +22,9 @@ const Loading = lazy(() => import("../Common/Loading"));
 export default function FacilityUsers(props: any) {
   const { facilityId } = props;
   let manageUsers: any = null;
-  const [isFacilityLoading, setIsFacilityLoading] = useState(false);
+  const [isUnlinkFacilityLoading, setIsUnlinkFacilityLoading] = useState(false);
+  const [isAddFacilityLoading, setIsAddFacilityLoading] = useState(false);
+  const [isLoadFacilityLoading, setIsLoadFacilityLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [offset, setOffset] = useState(0);
@@ -71,10 +73,10 @@ export default function FacilityUsers(props: any) {
   };
 
   const loadFacilities = async (username: string) => {
-    if (isFacilityLoading) {
+    if (isUnlinkFacilityLoading || isAddFacilityLoading) {
       return;
     }
-    setIsFacilityLoading(true);
+    setIsLoadFacilityLoading(true);
     const { res, data } = await request(routes.userListFacility, {
       pathParams: { username: username },
     });
@@ -88,7 +90,7 @@ export default function FacilityUsers(props: any) {
           : user;
       });
     }
-    setIsFacilityLoading(false);
+    setIsLoadFacilityLoading(false);
   };
 
   const showLinkFacilityModal = (username: string) => {
@@ -114,7 +116,7 @@ export default function FacilityUsers(props: any) {
   };
 
   const handleUnlinkFacilitySubmit = async () => {
-    setIsFacilityLoading(true);
+    setIsUnlinkFacilityLoading(true);
     await request(routes.deleteUserFacility, {
       // body given in the dispatch call but there is no body in API documentation
       body: { facility: String(unlinkFacilityData?.facility?.id) },
@@ -129,7 +131,7 @@ export default function FacilityUsers(props: any) {
         }
       },
     });
-    setIsFacilityLoading(false);
+    setIsUnlinkFacilityLoading(false);
     loadFacilities(unlinkFacilityData.userName);
     hideUnlinkFacilityModal();
   };
@@ -164,7 +166,9 @@ export default function FacilityUsers(props: any) {
 
   const facilityClassname = classNames(
     "align-baseline text-sm font-bold",
-    isFacilityLoading ? "text-gray-500" : "text-blue-500 hover:text-blue-800"
+    isAddFacilityLoading || isUnlinkFacilityLoading || isLoadFacilityLoading
+      ? "text-gray-500"
+      : "text-blue-500 hover:text-blue-800"
   );
 
   const showLinkFacility = (username: string) => {
@@ -202,7 +206,7 @@ export default function FacilityUsers(props: any) {
                   size="small"
                   circle
                   variant="secondary"
-                  disabled={isFacilityLoading}
+                  disabled={isUnlinkFacilityLoading}
                   onClick={() =>
                     setUnlinkFacilityData({
                       show: true,
@@ -233,7 +237,7 @@ export default function FacilityUsers(props: any) {
 
   const addFacility = async (username: string, facility: any) => {
     hideLinkFacilityModal();
-    setIsFacilityLoading(true);
+    setIsAddFacilityLoading(true);
     // Remaining props of request are not specified in dispatch request
     await request(routes.addUserFacility, {
       body: {
@@ -243,7 +247,7 @@ export default function FacilityUsers(props: any) {
         username: username,
       },
     });
-    setIsFacilityLoading(false);
+    setIsAddFacilityLoading(false);
     loadFacilities(username);
   };
 
