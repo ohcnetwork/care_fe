@@ -157,6 +157,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                 </div>
               </div>
               <div className="flex flex-wrap border-t bg-gray-50 px-2 py-1 md:px-3">
+                {/* <div className="flex justify-between py-2"> */}
                 <div className="flex w-full flex-wrap justify-between gap-2">
                   <div className="flex flex-wrap gap-2">
                     <div
@@ -166,7 +167,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                           : "button-primary-border bg-primary-100"
                       }`}
                     >
-                      <span className="tooltip-text tooltip-bottom md:tooltip-right -translate-y-2">
+                      <span className="tooltip-text tooltip-top">
                         Live Patients / Total beds
                       </span>{" "}
                       <CareIcon
@@ -184,37 +185,25 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                             : "text-gray-700"
                         }`}
                       >
-                        <span className="tooltip-text tooltip-top">
-                          Live Patients / Total beds
-                        </span>{" "}
-                        <CareIcon
-                          className={classNames(
-                            "care-l-bed mr-2",
-                            facility.patient_count / facility.bed_count > 0.85
-                              ? "text-white"
-                              : "text-primary-600"
-                          )}
-                        />{" "}
-                        <dt
-                          className={`my-1 text-sm font-semibold ${
-                            facility.patient_count / facility.bed_count > 0.85
-                              ? "text-white"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          Occupancy: {facility.patient_count} /{" "}
-                          {facility.bed_count}{" "}
-                        </dt>{" "}
-                      </div>
-                      <DialogModal
-                        show={notifyModalFor === facility.id}
-                        title={
-                          <span className="flex justify-center text-2xl">
-                            Notify: {facility.name}
-                          </span>
-                        }
-                        onClose={() => setNotifyModalFor(undefined)}
- 
+                        Occupancy: {facility.patient_count} /{" "}
+                        {facility.bed_count}{" "}
+                      </dt>{" "}
+                    </div>
+                    <DialogModal
+                      show={notifyModalFor === facility.id}
+                      title={
+                        <span className="flex justify-center text-2xl">
+                          Notify: {facility.name}
+                        </span>
+                      }
+                      onClose={() => setNotifyModalFor(undefined)}
+                    >
+                      <form
+                        onSubmit={(event) => {
+                          event.preventDefault();
+                          handleNotifySubmit(notifyModalFor);
+                        }}
+                        className="flex w-full flex-col bg-white text-center"
                       >
                         <TextAreaFormField
                           id="NotifyModalMessageInput"
@@ -270,6 +259,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       <CareIcon className="care-l-user-injured text-lg" />
                       {t("view_patients")}
                     </ButtonV2>
+                    {/* </div> */}
                   </div>
                 </div>
               </div>
