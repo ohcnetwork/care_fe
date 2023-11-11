@@ -47,39 +47,41 @@ export const FacilityHomeTriage = (props: any) => {
   }
 
   return (
-    <div className="-my-2 py-2 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-      <div className="justify-between md:flex md:pb-2">
-        <div className="mb-2 text-xl font-bold">Corona Triage</div>
-        <ButtonV2
-          className="w-full md:w-auto"
-          onClick={() => navigate(`/facility/${props.facilityId}/triage`)}
-          authorizeFor={props.NonReadOnlyUsers}
-        >
-          <i className="fas fa-notes-medical mr-2 text-white" />
-          Add Triage
-        </ButtonV2>
-      </div>
-      <div className="mt-4 overflow-x-auto overflow-y-hidden">
-        <Table
-          rows={stats}
-          headings={[
-            "Date",
-            "Total Triaged",
-            "Advised Home Quarantine",
-            "Suspects Isolated",
-            "Referred",
-            "Confirmed positives",
-            "Actions",
-          ]}
-        />
-        {stats.length === 0 && (
-          <>
-            <hr />
-            <div className="mt-3 flex min-w-[1000px] items-center justify-center rounded-sm border border-[#D2D6DC] p-4 text-xl font-bold text-gray-600">
-              No Data Found
-            </div>
-          </>
-        )}
+    <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
+      <div className="-my-2 py-2 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+        <div className="justify-between md:flex md:pb-2">
+          <div className="mb-2 text-xl font-bold">Corona Triage</div>
+          <ButtonV2
+            className="w-full md:w-auto"
+            onClick={() => navigate(`/facility/${props.facilityId}/triage`)}
+            authorizeFor={props.NonReadOnlyUsers}
+          >
+            <i className="fas fa-notes-medical mr-2 text-white" />
+            Add Triage
+          </ButtonV2>
+        </div>
+        <div className="mt-4 overflow-x-auto overflow-y-hidden">
+          <Table
+            rows={stats}
+            headings={[
+              "Date",
+              "Total Triaged",
+              "Advised Home Quarantine",
+              "Suspects Isolated",
+              "Referred",
+              "Confirmed positives",
+              "Actions",
+            ]}
+          />
+          {stats.length === 0 && (
+            <>
+              <hr />
+              <div className="mt-3 flex min-w-[1000px] items-center justify-center rounded-sm border border-[#D2D6DC] p-4 text-xl font-bold text-gray-600">
+                No Data Found
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

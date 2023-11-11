@@ -2,29 +2,22 @@ import * as Notification from "../../Utils/Notifications.js";
 
 import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import { FacilityModel } from "./models";
-import {
-  FACILITY_FEATURE_TYPES,
-  USER_TYPES,
-  getBedTypes,
-} from "../../Common/constants";
+import { FACILITY_FEATURE_TYPES, USER_TYPES } from "../../Common/constants";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
 import { lazy, useState } from "react";
-import { BedCapacity } from "./BedCapacity";
-import BedTypeCard from "./BedTypeCard";
+
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import Chip from "../../CAREUI/display/Chip";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import ContactLink from "../Common/components/ContactLink";
 import CoverImageEditModal from "./CoverImageEditModal";
-import DialogModal from "../Common/Dialog";
 
 import Page from "../Common/components/Page";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import Table from "../Common/components/Table";
 
 import { navigate } from "raviger";
-import useConfig from "../../Common/hooks/useConfig";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import { useTranslation } from "react-i18next";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
@@ -33,6 +26,7 @@ import routes from "../../Redux/api.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import { FacilityHomeTriage } from "./FacilityHomeTriage.js";
 import { FacilityDoctorList } from "./FacilityDoctorList.js";
+import { FacilityBedCapacity } from "./FacilityBedCapacity.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -52,9 +46,7 @@ export const FacilityHome = (props: any) => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [editCoverImage, setEditCoverImage] = useState(false);
   const [imageKey, setImageKey] = useState(Date.now());
-  const [bedCapacityModalOpen, setBedCapacityModalOpen] = useState(false);
   const authUser = useAuthUser();
-  const config = useConfig();
 
   useMessageListener((data) => console.log(data));
 
@@ -65,18 +57,12 @@ export const FacilityHome = (props: any) => {
         id: facilityId,
       },
       onResponse: ({ res }) => {
-        if (res?.ok) {
-          capacityQuery.refetch();
-        } else {
+        if (!res?.ok) {
           navigate("/not-found");
         }
       },
     }
   );
-
-  const capacityQuery = useQuery(routes.getCapacity, {
-    pathParams: { facilityId },
-  });
 
   const handleDeleteClose = () => {
     setOpenDeleteDialog(false);
@@ -98,68 +84,6 @@ export const FacilityHome = (props: any) => {
 
   if (isLoading) {
     return <Loading />;
-  }
-  let capacityList: any = null;
-  let totalBedCount = 0;
-  let totalOccupiedBedCount = 0;
-  if (!capacityQuery.data || !capacityQuery.data.results.length) {
-    capacityList = (
-      <h5 className="mt-4 flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-gray-500 shadow">
-        No Bed Types Found
-      </h5>
-    );
-  } else {
-    capacityQuery.data.results.forEach((x) => {
-      totalBedCount += x.total_capacity ? x.total_capacity : 0;
-      totalOccupiedBedCount += x.current_capacity ? x.current_capacity : 0;
-    });
-
-    capacityList = (
-      <div className="mt-4 grid w-full gap-7 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-        <BedTypeCard
-          label="Total Beds"
-          used={totalOccupiedBedCount}
-          total={totalBedCount}
-          handleUpdate={() => {
-            return;
-          }}
-        />
-        {getBedTypes(config).map((x) => {
-          const res = capacityQuery.data?.results.find((data) => {
-            return data.room_type === x.id;
-          });
-          if (
-            res &&
-            res.current_capacity !== undefined &&
-            res.total_capacity !== undefined
-          ) {
-            const removeCurrentBedType = (bedTypeId: number | undefined) => {
-              if (capacityQuery.data !== undefined) {
-                capacityQuery.data.results = capacityQuery.data.results.filter(
-                  (i) => i.id !== bedTypeId
-                );
-              }
-            };
-            return (
-              <BedTypeCard
-                facilityId={facilityId}
-                bedCapacityId={res.id}
-                key={`bed_${res.id}`}
-                room_type={res.room_type}
-                label={x.text}
-                used={res.current_capacity}
-                total={res.total_capacity}
-                lastUpdated={res.modified_date}
-                removeBedType={removeCurrentBedType}
-                handleUpdate={() => {
-                  capacityQuery.refetch();
-                }}
-              />
-            );
-          }
-        })}
-      </div>
-    );
   }
 
   const hasCoverImage = !!facilityData?.read_cover_image_url;
@@ -533,46 +457,13 @@ export const FacilityHome = (props: any) => {
           />
         </div>
       </div>
-      <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
-        <div className="justify-between md:flex  md:border-b md:pb-2">
-          <div className="mb-2 text-xl font-semibold">Bed Capacity</div>
-          <ButtonV2
-            className="w-full md:w-auto"
-            onClick={() => setBedCapacityModalOpen(true)}
-            authorizeFor={NonReadOnlyUsers}
-          >
-            <i className="fas fa-bed mr-2 text-white" />
-            Add More Bed Types
-          </ButtonV2>
-        </div>
-        <div>{capacityList}</div>
-      </div>
 
+      <FacilityBedCapacity facilityId={facilityId} />
       <FacilityDoctorList facilityId={facilityId} />
-
-      <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
-        <FacilityHomeTriage
-          facilityId={facilityId}
-          NonReadOnlyUsers={NonReadOnlyUsers}
-        />
-      </div>
-
-      {bedCapacityModalOpen && (
-        <DialogModal
-          show={bedCapacityModalOpen}
-          onClose={() => setBedCapacityModalOpen(false)}
-          title="Add Bed Capacity"
-          className="max-w-md md:min-w-[600px]"
-        >
-          <BedCapacity
-            facilityId={facilityId}
-            handleClose={() => setBedCapacityModalOpen(false)}
-            handleUpdate={async () => {
-              capacityQuery.refetch();
-            }}
-          />
-        </DialogModal>
-      )}
+      <FacilityHomeTriage
+        facilityId={facilityId}
+        NonReadOnlyUsers={NonReadOnlyUsers}
+      />
     </Page>
   );
 };
