@@ -184,25 +184,37 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                             : "text-gray-700"
                         }`}
                       >
-                        Occupancy: {facility.patient_count} /{" "}
-                        {facility.bed_count}{" "}
-                      </dt>{" "}
-                    </div>
-                    <DialogModal
-                      show={notifyModalFor === facility.id}
-                      title={
-                        <span className="flex justify-center text-2xl">
-                          Notify: {facility.name}
-                        </span>
-                      }
-                      onClose={() => setNotifyModalFor(undefined)}
-                    >
-                      <form
-                        onSubmit={(event) => {
-                          event.preventDefault();
-                          handleNotifySubmit(notifyModalFor);
-                        }}
-                        className="flex w-full flex-col bg-white text-center"
+                        <span className="tooltip-text tooltip-top">
+                          Live Patients / Total beds
+                        </span>{" "}
+                        <CareIcon
+                          className={classNames(
+                            "care-l-bed mr-2",
+                            facility.patient_count / facility.bed_count > 0.85
+                              ? "text-white"
+                              : "text-primary-600"
+                          )}
+                        />{" "}
+                        <dt
+                          className={`my-1 text-sm font-semibold ${
+                            facility.patient_count / facility.bed_count > 0.85
+                              ? "text-white"
+                              : "text-gray-700"
+                          }`}
+                        >
+                          Occupancy: {facility.patient_count} /{" "}
+                          {facility.bed_count}{" "}
+                        </dt>{" "}
+                      </div>
+                      <DialogModal
+                        show={notifyModalFor === facility.id}
+                        title={
+                          <span className="flex justify-center text-2xl">
+                            Notify: {facility.name}
+                          </span>
+                        }
+                        onClose={() => setNotifyModalFor(undefined)}
+ 
                       >
                         <TextAreaFormField
                           id="NotifyModalMessageInput"
