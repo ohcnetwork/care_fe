@@ -34,6 +34,7 @@ import useAuthUser from "../../Common/hooks/useAuthUser.js";
 import request from "../../Utils/request/request.js";
 import routes from "../../Redux/api.js";
 import useQuery from "../../Utils/request/useQuery.js";
+import { FacilityHomeTriage } from "./FacilityHomeTriage.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -71,7 +72,6 @@ export const FacilityHome = (props: any) => {
         if (res?.ok) {
           capacityQuery.refetch();
           doctorQuery.refetch();
-          triageQuery.refetch();
         } else {
           navigate("/not-found");
         }
@@ -96,10 +96,6 @@ export const FacilityHome = (props: any) => {
         setTotalDoctors(totalCount);
       }
     },
-  });
-
-  const triageQuery = useQuery(routes.getTriage, {
-    pathParams: { facilityId },
   });
 
   const handleDeleteClose = () => {
@@ -246,43 +242,6 @@ export const FacilityHome = (props: any) => {
         })}
       </div>
     );
-  }
-
-  const stats: (string | JSX.Element)[][] = [];
-  for (
-    let i = 0;
-    triageQuery.data?.results && i < triageQuery.data.results.length;
-    i++
-  ) {
-    const temp: (string | JSX.Element)[] = [];
-    temp.push(String(triageQuery.data.results[i].entry_date) || "0");
-    temp.push(String(triageQuery.data.results[i].num_patients_visited) || "0");
-    temp.push(
-      String(triageQuery.data.results[i].num_patients_home_quarantine) || "0"
-    );
-    temp.push(
-      String(triageQuery.data.results[i].num_patients_isolation) || "0"
-    );
-    temp.push(String(triageQuery.data.results[i].num_patient_referred) || "0");
-    temp.push(
-      String(triageQuery.data.results[i].num_patient_confirmed_positive) || "0"
-    );
-    temp.push(
-      <ButtonV2
-        variant="secondary"
-        ghost
-        border
-        onClick={() =>
-          navigate(
-            `/facility/${facilityId}/triage/${triageQuery.data?.results[i].id}`
-          )
-        }
-        authorizeFor={NonReadOnlyUsers}
-      >
-        Edit
-      </ButtonV2>
-    );
-    stats.push(temp);
   }
 
   const hasCoverImage = !!facilityData?.read_cover_image_url;
@@ -685,43 +644,14 @@ export const FacilityHome = (props: any) => {
         </div>
         <div className="mt-4">{doctorList}</div>
       </div>
+
       <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
-        <div className="-my-2 py-2 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-          <div className="justify-between md:flex md:pb-2">
-            <div className="mb-2 text-xl font-bold">Corona Triage</div>
-            <ButtonV2
-              className="w-full md:w-auto"
-              onClick={() => navigate(`/facility/${facilityId}/triage`)}
-              authorizeFor={NonReadOnlyUsers}
-            >
-              <i className="fas fa-notes-medical mr-2 text-white" />
-              Add Triage
-            </ButtonV2>
-          </div>
-          <div className="mt-4 overflow-x-auto overflow-y-hidden">
-            <Table
-              rows={stats}
-              headings={[
-                "Date",
-                "Total Triaged",
-                "Advised Home Quarantine",
-                "Suspects Isolated",
-                "Referred",
-                "Confirmed positives",
-                "Actions",
-              ]}
-            />
-            {stats.length === 0 && (
-              <>
-                <hr />
-                <div className="mt-3 flex min-w-[1000px] items-center justify-center rounded-sm border border-[#D2D6DC] p-4 text-xl font-bold text-gray-600">
-                  No Data Found
-                </div>
-              </>
-            )}
-          </div>
-        </div>
+        <FacilityHomeTriage
+          facilityId={facilityId}
+          NonReadOnlyUsers={NonReadOnlyUsers}
+        />
       </div>
+
       {bedCapacityModalOpen && (
         <DialogModal
           show={bedCapacityModalOpen}
