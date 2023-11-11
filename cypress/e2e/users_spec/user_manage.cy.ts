@@ -2,6 +2,7 @@ import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { UserPage } from "../../pageobject/Users/UserSearch";
 import ManageUserPage from "../../pageobject/Users/ManageUserPage";
+import { UserCreationPage } from "../../pageobject/Users/UserCreation";
 
 describe("Manage User", () => {
   const loginPage = new LoginPage();
@@ -11,6 +12,7 @@ describe("Manage User", () => {
   const usernametolinkfacilitydoc2 = "dummydoctor5";
   const usernametolinkfacilitydoc3 = "dummydoctor6";
   const usernametolinkskill = "devdoctor";
+  const userCreationPage = new UserCreationPage();
   const usernameforworkinghour = "devdistrictadmin";
   const usernamerealname = "Dummy Doctor";
   const facilitytolinkusername = "Dummy Shifting Center";
@@ -37,7 +39,16 @@ describe("Manage User", () => {
     manageUserPage.selectFacilityFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
     manageUserPage.clickCloseSlideOver();
+    cy.wait(5000);
+    manageUserPage.clicklinkedskillbutton();
+    manageUserPage.assertSkillInAddedUserSkills(linkedskill);
+    manageUserPage.clickCloseSlideOver();
+    cy.wait(5000);
     manageUserPage.navigateToProfile();
+    userCreationPage.verifyElementContainsText(
+      "username-profile-details",
+      usernameforworkinghour
+    );
     manageUserPage.assertSkillInAlreadyLinkedSkills(linkedskill);
   });
 
