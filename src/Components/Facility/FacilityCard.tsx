@@ -88,7 +88,10 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       {kasp_string}
                     </div>
                   )}
-                  <div className="flex flex-wrap items-center justify-between">
+                  <div
+                    className="flex flex-wrap items-center justify-between"
+                    id="facility-name-card"
+                  >
                     <Link
                       href={`/facility/${facility.id}`}
                       className="float-left text-xl font-bold capitalize text-inherit hover:text-inherit"
@@ -164,7 +167,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                             : "button-primary-border bg-primary-100"
                         }`}
                       >
-                        <span className="tooltip-text tooltip-bottom md:tooltip-right -translate-y-2">
+                        <span className="tooltip-text tooltip-top">
                           Live Patients / Total beds
                         </span>{" "}
                         <CareIcon

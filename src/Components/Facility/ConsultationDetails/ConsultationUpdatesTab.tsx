@@ -113,6 +113,10 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             <div className="mx-auto flex w-full flex-col justify-between gap-1 rounded bg-[#020617] lg:w-auto lg:min-w-[1280px] lg:flex-row">
               <div className="min-h-[400px] flex-1">
                 <HL7PatientVitalsMonitor
+                  patientCurrentBedAssignmentDate={
+                    props.patientData?.last_consultation?.current_bed
+                      ?.start_date
+                  }
                   patientAssetBed={{
                     asset: monitorBedData?.asset_object as AssetData,
                     bed: monitorBedData?.bed_object as BedModel,
@@ -150,6 +154,10 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         <div className="min-h-[400px] flex-1">
                           <HL7PatientVitalsMonitor
                             key={`hl7-${hl7SocketUrl}-${vitals.hash}`}
+                            patientCurrentBedAssignmentDate={
+                              props.patientData?.last_consultation?.current_bed
+                                ?.start_date
+                            }
                             patientAssetBed={{
                               asset: monitorBedData?.asset_object as AssetData,
                               bed: monitorBedData?.bed_object as BedModel,
@@ -232,7 +240,6 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         </div>
                         <div className="overflow-x-auto overflow-y-hidden">
                           <PrescriptionsTable
-                            consultation_id={props.consultationData.id ?? ""}
                             is_prn={false}
                             readonly
                             prescription_type="DISCHARGE"
@@ -241,7 +248,6 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         <hr className="my-2 border border-gray-300"></hr>
                         <div className="overflow-x-auto overflow-y-hidden">
                           <PrescriptionsTable
-                            consultation_id={props.consultationData.id ?? ""}
                             is_prn
                             readonly
                             prescription_type="DISCHARGE"

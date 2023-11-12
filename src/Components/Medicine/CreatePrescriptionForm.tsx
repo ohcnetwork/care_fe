@@ -4,41 +4,50 @@ import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { MedicineAdministrationRecord, Prescription } from "./models";
-import { PrescriptionActions } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
 import { useState } from "react";
 import NumericWithUnitsFormField from "../Form/FormFields/NumericWithUnitsFormField";
 import { useTranslation } from "react-i18next";
 import MedibaseAutocompleteFormField from "./MedibaseAutocompleteFormField";
 import dayjs from "../../Utils/dayjs";
 import { PrescriptionFormValidator } from "./validators";
+import MedicineRoutes from "./routes";
+import request from "../../Utils/request/request";
+import useSlug from "../../Common/hooks/useSlug";
+import { Success } from "../../Utils/Notifications";
 
 export default function CreatePrescriptionForm(props: {
   prescription: Prescription;
-  create: ReturnType<typeof PrescriptionActions>["create"];
   onDone: () => void;
 }) {
-  const dispatch = useDispatch<any>();
-  const [isCreating, setIsCreating] = useState(false);
   const { t } = useTranslation();
+  const consultation = useSlug("consultation");
+  const [isCreating, setIsCreating] = useState(false);
 
   return (
     <Form<Prescription>
       disabled={isCreating}
       defaults={props.prescription}
       onCancel={props.onDone}
-      onSubmit={async (obj) => {
-        obj["medicine"] = obj.medicine_object?.id;
-        delete obj.medicine_object;
+      onSubmit={async (body) => {
+        body["medicine"] = body.medicine_object?.id;
+        delete body.medicine_object;
 
         setIsCreating(true);
-        const res = await dispatch(props.create(obj));
+        const { res, error } = await request(
+          MedicineRoutes.createPrescription,
+          {
+            pathParams: { consultation },
+            body,
+          }
+        );
         setIsCreating(false);
-        if (res.status !== 201) {
-          return res.data;
-        } else {
-          props.onDone();
+
+        if (!res?.ok) {
+          return error;
         }
+
+        Success({ msg: t("Medicine prescribed") });
+        props.onDone();
       }}
       noPadding
       validate={PrescriptionFormValidator()}

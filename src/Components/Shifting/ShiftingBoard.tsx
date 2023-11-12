@@ -1,23 +1,22 @@
 import { useEffect, useState } from "react";
 import { classNames, formatAge, formatDateTime } from "../../Utils/utils";
-import {
-  completeTransfer,
-  downloadShiftRequests,
-  listShiftRequests,
-} from "../../Redux/actions";
+import { downloadShiftRequests } from "../../Redux/actions";
 import { useDrag, useDrop } from "react-dnd";
 
 import ButtonV2 from "../Common/components/ButtonV2";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import { navigate } from "raviger";
 import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
+
 import { useTranslation } from "react-i18next";
 import { ExportButton } from "../Common/Export";
 import dayjs from "../../Utils/dayjs";
 import useAuthUser from "../../Common/hooks/useAuthUser";
-
-const limit = 14;
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
+import { PaginatedResponse } from "../../Utils/request/types";
+import { IShift } from "./models";
 
 interface boardProps {
   board: string;
@@ -38,7 +37,6 @@ const reduceLoading = (action: string, current: any) => {
 };
 
 const ShiftCard = ({ shift, filter }: any) => {
-  const dispatch: any = useDispatch();
   const { wartime_shifting } = useConfig();
   const [modalFor, setModalFor] = useState({
     externalId: undefined,
@@ -52,13 +50,14 @@ const ShiftCard = ({ shift, filter }: any) => {
   const authUser = useAuthUser();
   const { t } = useTranslation();
 
-  const handleTransferComplete = (shift: any) => {
+  const handleTransferComplete = async (shift: any) => {
     setModalFor({ ...modalFor, loading: true });
-    dispatch(completeTransfer({ externalId: modalFor })).then(() => {
-      navigate(
-        `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`
-      );
+    await request(routes.completeTransfer, {
+      pathParams: { externalId: shift.external_id },
     });
+    navigate(
+      `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`
+    );
   };
   return (
     <div ref={drag} className="mt-2 w-full">
@@ -259,11 +258,8 @@ export default function ShiftingBoard({
   filterProp,
   formatFilter,
 }: boardProps) {
-  const dispatch: any = useDispatch();
-  const [data, setData] = useState<any[]>([]);
-  const [totalCount, setTotalCount] = useState();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState({ board: false, more: false });
+  const [offset, setOffSet] = useState(0);
+  const [isLoading, setIsLoading] = useState({ board: "BOARD", more: false });
   const [{ isOver }, drop] = useDrop(() => ({
     accept: "shift-card",
     drop: (item: any) => {
@@ -273,26 +269,24 @@ export default function ShiftingBoard({
     },
     collect: (monitor) => ({ isOver: !!monitor.isOver() }),
   }));
+  const [data, setData] = useState<PaginatedResponse<IShift>>();
 
-  const fetchData = () => {
-    setIsLoading((loading) => reduceLoading("BOARD", loading));
-    dispatch(
-      listShiftRequests(formatFilter({ ...filterProp, status: board }), board)
-    ).then((res: any) => {
-      if (res && res.data) {
-        setData(res.data.results);
-        setTotalCount(res.data.count);
-        setCurrentPage(1);
+  useQuery(routes.listShiftRequests, {
+    query: formatFilter({
+      ...filterProp,
+      status: board,
+    }),
+    onResponse: ({ res, data: listShiftData }) => {
+      if (res?.ok && listShiftData) {
+        setData(listShiftData);
       }
       setIsLoading((loading) => reduceLoading("COMPLETE", loading));
-    });
-  };
+    },
+  });
 
   useEffect(() => {
-    fetchData();
+    setIsLoading((loading) => reduceLoading("BOARD", loading));
   }, [
-    board,
-    dispatch,
     filterProp.facility,
     filterProp.origin_facility,
     filterProp.shifting_approving_facility,
@@ -313,27 +307,29 @@ export default function ShiftingBoard({
     filterProp.breathlessness_level,
   ]);
 
-  const handlePagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentPage(page);
+  const handlePagination = async () => {
     setIsLoading((loading) => reduceLoading("MORE", loading));
-    dispatch(
-      listShiftRequests(
-        formatFilter({ ...filterProp, status: board, offset: offset }),
-        board
-      )
-    ).then((res: any) => {
-      if (res && res.data) {
-        setData((data) => [...data, ...res.data.results]);
-        setTotalCount(res.data.count);
-      }
-      setIsLoading((loading) => reduceLoading("COMPLETE", loading));
+    setOffSet(offset + 14);
+    const { res, data: newPageData } = await request(routes.listShiftRequests, {
+      query: formatFilter({
+        ...filterProp,
+        status: board,
+        offset: offset,
+      }),
     });
+    if (res?.ok && newPageData) {
+      setData((prev) =>
+        prev
+          ? { ...prev, results: [...prev.results, ...newPageData.results] }
+          : newPageData
+      );
+    }
+    setIsLoading((loading) => reduceLoading("COMPLETE", loading));
   };
   const { t } = useTranslation();
 
   const patientFilter = (filter: string) => {
-    return data
+    return data?.results
       .filter(({ status }) => status === filter)
       .map((shift: any) => (
         <ShiftCard key={`shift_${shift.id}`} shift={shift} filter={filter} />
@@ -363,7 +359,7 @@ export default function ShiftingBoard({
             />
           </h3>
           <span className="ml-2 rounded-lg bg-primary-500 px-2 text-white">
-            {totalCount || "0"}
+            {data?.count || "0"}
           </span>
         </div>
       </div>
@@ -382,20 +378,20 @@ export default function ShiftingBoard({
               </div>
             </div>
           </div>
-        ) : data?.length > 0 ? (
+        ) : data?.count ?? 0 > 0 ? (
           patientFilter(board)
         ) : (
           <p className="mx-auto p-4">{t("no_patients_to_show")}</p>
         )}
         {!isLoading.board &&
-          data?.length < (totalCount || 0) &&
+          (data?.count ?? 0) < (data?.results.length || 0) &&
           (isLoading.more ? (
             <div className="mx-auto my-4 rounded-md bg-gray-100 p-2 px-4 hover:bg-white">
               {t("loading")}
             </div>
           ) : (
             <button
-              onClick={(_) => handlePagination(currentPage + 1, limit)}
+              onClick={(_) => handlePagination()}
               className="mx-auto my-4 rounded-md bg-gray-100 p-2 px-4 hover:bg-white"
             >
               More...

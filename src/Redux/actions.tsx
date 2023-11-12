@@ -1,9 +1,5 @@
 import { HCXClaimModel, HCXPolicyModel } from "../Components/HCX/models";
-import {
-  MedibaseMedicine,
-  MedicineAdministrationRecord,
-  Prescription,
-} from "../Components/Medicine/models";
+import { MedibaseMedicine } from "../Components/Medicine/models";
 import { fireRequest, fireRequestForFiles } from "./fireRequest";
 
 export const getConfig = () => {
@@ -634,30 +630,18 @@ export const updateUserDetails = (username: string, data: object) => {
 export const createShift = (params: object) => {
   return fireRequest("createShift", [], params);
 };
-export const updateShift = (id: string, params: object) => {
-  return fireRequest("updateShift", [id], params);
-};
-export const deleteShiftRecord = (id: string) => {
-  return fireRequest("deleteShiftRecord", [id], {});
-};
+
 export const listShiftRequests = (params: object, key: string) => {
   return fireRequest("listShiftRequests", [], params, null, key);
 };
-export const getShiftDetails = (pathParam: object) => {
-  return fireRequest("getShiftDetails", [], {}, pathParam);
-};
+
 export const completeTransfer = (pathParams: object) => {
   return fireRequest("completeTransfer", [], {}, pathParams);
 };
 export const downloadShiftRequests = (params: object) => {
   return fireRequest("downloadShiftRequests", [], params);
 };
-export const getShiftComments = (id: string) => {
-  return fireRequest("getShiftComments", [], {}, { id });
-};
-export const addShiftComments = (id: string, params: object) => {
-  return fireRequest("addShiftComments", [], params, { id });
-};
+
 // External Results
 export const externalResultList = (params: object, altKey: string) => {
   return fireRequest("externalResultList", [], params, null, altKey);
@@ -791,8 +775,8 @@ export const editInvestigation = (
 };
 
 // ICD11
-export const listICD11Diagnosis = (params: object, key: string) => {
-  return fireRequest("listICD11Diagnosis", [], params, null, key);
+export const listICD11Diagnosis = (params: object) => {
+  return fireRequest("listICD11Diagnosis", [], params, null);
 };
 // Medibase
 export const listMedibaseMedicines = (
@@ -857,74 +841,6 @@ export const getAssetAvailability = (id: string) =>
 
 export const listPMJYPackages = (query?: string) =>
   fireRequest("listPMJYPackages", [], { query });
-
-/** Prescription related actions */
-export const PrescriptionActions = (consultation_external_id: string) => {
-  const pathParams = { consultation_external_id };
-
-  return {
-    list: (query?: Record<string, any>) => {
-      let altKey;
-      if (query?.is_prn !== undefined) {
-        altKey = query?.is_prn
-          ? "listPRNPrescriptions"
-          : "listNormalPrescriptions";
-      }
-      return fireRequest("listPrescriptions", [], query, pathParams, altKey);
-    },
-
-    create: (obj: Prescription) =>
-      fireRequest("createPrescription", [], obj, pathParams),
-
-    listAdministrations: (query?: object) =>
-      fireRequest("listAdministrations", [], query, pathParams),
-
-    getAdministration: (external_id: string) =>
-      fireRequest("getAdministration", [], {}, { ...pathParams, external_id }),
-
-    /** Returns actions specific to a prescription */
-    prescription(external_id: string) {
-      const pathParams = { consultation_external_id, external_id };
-
-      return {
-        /** Read a specific prescription of a consultation */
-        get: () => fireRequest("getPrescription", [], {}, pathParams),
-
-        /** Administer a prescription */
-        administer: (obj: MedicineAdministrationRecord) =>
-          fireRequest(
-            "administerPrescription",
-            [],
-            obj,
-            pathParams,
-            `administer-medicine-${external_id}`
-          ),
-
-        listAdministrations: (query?: {
-          administered_date_after?: string;
-          administered_date_before?: string;
-        }) =>
-          fireRequest(
-            "listAdministrations",
-            [],
-            { prescription: external_id, ...query },
-            pathParams,
-            `list-administrations-${external_id}`
-          ),
-
-        /** Discontinue a prescription */
-        discontinue: (discontinued_reason: string | undefined) =>
-          fireRequest(
-            "discontinuePrescription",
-            [],
-            { discontinued_reason },
-            pathParams,
-            `discontinue-medicine-${external_id}`
-          ),
-      };
-    },
-  };
-};
 
 // HCX Actions
 export const HCXActions = {
