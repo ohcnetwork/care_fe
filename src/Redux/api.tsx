@@ -43,7 +43,7 @@ import {
   ILocalBodyByDistrict,
   IPartialUpdateExternalResult,
 } from "../Components/ExternalResult/models";
-import { UserModel } from "../Components/Users/models";
+import { SkillModel, UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
 import {
   NotificationData,
@@ -142,6 +142,8 @@ const routes = {
 
   userListSkill: {
     path: "/api/v1/users/{username}/skill/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<SkillModel>>(),
   },
 
   userListFacility: {
@@ -736,6 +738,7 @@ const routes = {
   getUserDetails: {
     path: "/api/v1/users/{username}/",
     method: "GET",
+    TRes: Type<UserModel>(),
   },
   updateUserDetails: {
     path: "/api/v1/users",

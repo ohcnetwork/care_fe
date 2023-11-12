@@ -1,13 +1,7 @@
-import { useState, useCallback, useReducer, lazy, FormEvent } from "react";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+import { useState, useReducer, lazy, FormEvent, useEffect } from "react";
 import { GENDER_TYPES } from "../../Common/constants";
 import { useDispatch } from "react-redux";
-import {
-  getUserDetails,
-  getUserListSkills,
-  partialUpdateUser,
-  updateUserPassword,
-} from "../../Redux/actions";
+import { partialUpdateUser, updateUserPassword } from "../../Redux/actions";
 import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
@@ -23,6 +17,8 @@ import UpdatableApp, { checkForUpdate } from "../Common/UpdatableApp";
 import dayjs from "../../Utils/dayjs";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { PhoneNumberValidator } from "../Form/FieldValidators";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -125,52 +121,54 @@ export default function UserProfile() {
   const initialDetails: any = [{}];
   const [details, setDetails] = useState(initialDetails);
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatchAction(getUserDetails(authUser.username));
-      const resSkills = await dispatchAction(
-        getUserListSkills({ username: authUser.username })
-      );
-      if (!status.aborted) {
-        if (res && res.data && resSkills) {
-          res.data.skills = resSkills.data.results.map(
+  const { data: res, loading: isUserLoading } = useQuery(
+    routes.getUserDetails,
+    {
+      pathParams: { username: authUser.username },
+    }
+  );
+
+  const { data: resSkills, loading: isSkillsLoading } = useQuery(
+    routes.userListSkill,
+    {
+      pathParams: { username: authUser.username },
+    }
+  );
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!isUserLoading && !isSkillsLoading && res && resSkills) {
+        setDetails({
+          ...res,
+          skills: resSkills.results.map(
             (skill: SkillModel) => skill.skill_object
-          );
-          setDetails(res.data);
-          const formData: EditForm = {
-            firstName: res.data.first_name,
-            lastName: res.data.last_name,
-            age: res.data.age,
-            gender: res.data.gender,
-            email: res.data.email,
-            phoneNumber: res.data.phone_number,
-            altPhoneNumber: res.data.alt_phone_number,
-            doctor_qualification: res.data.doctor_qualification,
-            doctor_experience_commenced_on: dayjs().diff(
-              dayjs(res.data.doctor_experience_commenced_on),
-              "years"
-            ),
-            doctor_medical_council_registration:
-              res.data.doctor_medical_council_registration,
-            weekly_working_hours: res.data.weekly_working_hours,
-          };
-          dispatch({
-            type: "set_form",
-            form: formData,
-          });
-        }
-        setIsLoading(false);
+          ),
+        });
+        const formData: EditForm = {
+          firstName: res.first_name,
+          lastName: res.last_name,
+          age: res.age?.toString() || "",
+          gender: res.gender || "",
+          email: res.email,
+          phoneNumber: res.phone_number?.toString() || "",
+          altPhoneNumber: res.alt_phone_number?.toString() || "",
+          doctor_qualification: res.doctor_qualification,
+          doctor_experience_commenced_on: dayjs().diff(
+            dayjs(res.doctor_experience_commenced_on),
+            "years"
+          ),
+          doctor_medical_council_registration:
+            res.doctor_medical_council_registration,
+          weekly_working_hours: res.weekly_working_hours,
+        };
+        dispatch({
+          type: "set_form",
+          form: formData,
+        });
       }
-    },
-    [dispatchAction, authUser.username]
-  );
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
-  );
+    };
+    fetchData();
+  }, [isUserLoading, isSkillsLoading, res, resSkills]);
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -324,7 +322,7 @@ export default function UserProfile() {
       const res = await dispatchAction(
         partialUpdateUser(authUser.username, data)
       );
-      if (res && res.data) {
+      if (res) {
         Notification.Success({
           msg: "Details updated successfully",
         });
@@ -344,7 +342,7 @@ export default function UserProfile() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || isUserLoading || isSkillsLoading) {
     return <Loading />;
   }
 
