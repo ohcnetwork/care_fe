@@ -20,6 +20,9 @@ export const DailyRoundsList = (props: any) => {
   return (
     <PaginatedList
       route={routes.getDailyReports}
+      pathParams={{
+        consultationId,
+      }}
       query={{
         rounds_type: showAutomatedRounds ? "" : "NORMAL,VENTILATOR,ICU",
       }}
@@ -39,48 +42,44 @@ export const DailyRoundsList = (props: any) => {
                 ))}
               </>
             </PaginatedList.WhenLoading>
-            <PaginatedList.Items<
-              DailyRoundsModel[]
-            > className="my-8 flex grow flex-col gap-3 lg:mx-8">
-              {(items) => {
-                return items.map((itemData, idx) => {
-                  if (itemData.rounds_type === "AUTOMATED") {
-                    return (
-                      <VirtualNursingAssistantLogUpdateCard
-                        round={itemData}
-                        previousRound={items[idx + 1]}
-                      />
-                    );
-                  }
+            <PaginatedList.Items<DailyRoundsModel> className="my-8 flex grow flex-col gap-3 lg:mx-8">
+              {(item) => {
+                if (item.rounds_type === "AUTOMATED") {
                   return (
-                    <DefaultLogUpdateCard
-                      round={itemData}
-                      consultationData={consultationData}
-                      onViewDetails={() => {
-                        if (itemData.rounds_type === "NORMAL") {
-                          navigate(
-                            `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${itemData.id}`
-                          );
-                        } else {
-                          navigate(
-                            `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${itemData.id}`
-                          );
-                        }
-                      }}
-                      onUpdateLog={() => {
-                        if (itemData.rounds_type === "NORMAL") {
-                          navigate(
-                            `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${itemData.id}/update`
-                          );
-                        } else {
-                          navigate(
-                            `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${itemData.id}/update`
-                          );
-                        }
-                      }}
+                    <VirtualNursingAssistantLogUpdateCard
+                      round={item}
+                      previousRound={item}
                     />
                   );
-                });
+                }
+                return (
+                  <DefaultLogUpdateCard
+                    round={item}
+                    consultationData={consultationData}
+                    onViewDetails={() => {
+                      if (item.rounds_type === "NORMAL") {
+                        navigate(
+                          `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${item.id}`
+                        );
+                      } else {
+                        navigate(
+                          `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${item.id}`
+                        );
+                      }
+                    }}
+                    onUpdateLog={() => {
+                      if (item.rounds_type === "NORMAL") {
+                        navigate(
+                          `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${item.id}/update`
+                        );
+                      } else {
+                        navigate(
+                          `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${item.id}/update`
+                        );
+                      }
+                    }}
+                  />
+                );
               }}
             </PaginatedList.Items>
             <div className="flex w-full items-center justify-center">
