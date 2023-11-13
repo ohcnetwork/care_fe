@@ -32,6 +32,8 @@ import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
 import dayjs from "../../Utils/dayjs";
 import { triggerGoal } from "../../Integrations/Plausible";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -90,6 +92,15 @@ export const PatientHome = (props: any) => {
       );
     });
   };
+
+  const { data: insuranceDetials, loading: insuranceDetailsLoading } = useQuery(
+    routes.listHCXPolicies,
+    {
+      query: {
+        patient: id,
+      },
+    }
+  );
 
   const handleAssignedVolunteer = () => {
     dispatch(
@@ -975,7 +986,7 @@ export const PatientHome = (props: any) => {
         </section>
 
         <section
-          className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-2"
+          className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-3"
           data-testid="patient-details"
         >
           <div className="w-full">
@@ -1108,6 +1119,71 @@ export const PatientHome = (props: any) => {
                 )}
                 {patientMedHis}
               </div>
+            </div>
+          </div>
+          <div className="w-full">
+            <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
+              <div className="border-b border-dashed pb-2 text-xl font-bold text-gray-900">
+                Insurance Details
+              </div>
+
+              {insuranceDetials?.count == 0 || insuranceDetailsLoading ? (
+                <div className="flex w-full items-center justify-center text-xl font-bold text-gray-500">
+                  No Insurance Data Available
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-2">
+                  <div className=" ">
+                    <div className="text-sm font-semibold leading-5 text-zinc-400">
+                      Member ID
+                    </div>
+                    <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
+                      {insuranceDetials?.results[0]?.subscriber_id || ""}
+                    </div>
+                  </div>
+                  <div className=" ">
+                    <div className="text-sm font-semibold leading-5 text-zinc-400">
+                      Policy ID / Policy Name
+                    </div>
+                    <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
+                      {insuranceDetials?.results[0]?.policy_id || ""}
+                    </div>
+                  </div>
+                  <div className="sm:col-span-1">
+                    <div className="text-sm font-semibold leading-5 text-zinc-400">
+                      Insurer ID
+                    </div>
+                    <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
+                      {insuranceDetials?.results[0]?.insurer_id || ""}
+                    </div>
+                  </div>
+                  <div className="sm:col-span-1">
+                    <div className="text-sm font-semibold leading-5 text-zinc-400">
+                      Insurer Name
+                    </div>
+                    <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
+                      {insuranceDetials?.results[0]?.insurer_name || ""}
+                    </div>
+                  </div>
+
+                  {insuranceDetials?.count && insuranceDetials?.count > 1 && (
+                    <div className=" first-letter: sm:col-span-2  md:ml-auto md:mt-10 ">
+                      <div className=" mt-1 whitespace-normal break-words text-sm font-medium leading-5">
+                        <ButtonV2
+                          onClick={() => {
+                            navigate(
+                              `/facility/${patientData?.facility}/patient/${id}/insurance`
+                            );
+                          }}
+                          className="h-auto whitespace-pre-wrap border border-gray-500 bg-white text-black hover:bg-gray-300"
+                        >
+                          View All Details
+                        </ButtonV2>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </section>
