@@ -189,6 +189,7 @@ const routes = {
   partialUpdateUser: {
     path: "/api/v1/users/{username}/",
     method: "PATCH",
+    TRes: undefined,
   },
 
   deleteUser: {

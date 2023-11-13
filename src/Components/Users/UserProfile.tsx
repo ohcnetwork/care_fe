@@ -1,7 +1,7 @@
 import { useState, useReducer, lazy, FormEvent, useEffect } from "react";
 import { GENDER_TYPES } from "../../Common/constants";
 import { useDispatch } from "react-redux";
-import { partialUpdateUser, updateUserPassword } from "../../Redux/actions";
+import { updateUserPassword } from "../../Redux/actions";
 import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
@@ -19,6 +19,7 @@ import useAuthUser from "../../Common/hooks/useAuthUser";
 import { PhoneNumberValidator } from "../Form/FieldValidators";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -116,7 +117,6 @@ export default function UserProfile() {
   const [showEdit, setShowEdit] = useState<boolean | false>(false);
 
   const [isLoading, setIsLoading] = useState(false);
-  const dispatchAction: any = useDispatch();
 
   const initialDetails: any = [{}];
   const [details, setDetails] = useState(initialDetails);
@@ -319,10 +319,11 @@ export default function UserProfile() {
             : undefined,
         weekly_working_hours: states.form.weekly_working_hours,
       };
-      const res = await dispatchAction(
-        partialUpdateUser(authUser.username, data)
-      );
-      if (res) {
+      const { res } = await request(routes.partialUpdateUser, {
+        pathParams: { username: authUser.username },
+        body: data,
+      });
+      if (res?.status === 200) {
         Notification.Success({
           msg: "Details updated successfully",
         });
