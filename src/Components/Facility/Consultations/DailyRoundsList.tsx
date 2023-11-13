@@ -43,12 +43,12 @@ export const DailyRoundsList = (props: any) => {
               </>
             </PaginatedList.WhenLoading>
             <PaginatedList.Items<DailyRoundsModel> className="my-8 flex grow flex-col gap-3 lg:mx-8">
-              {(item) => {
+              {(item, items) => {
                 if (item.rounds_type === "AUTOMATED") {
                   return (
                     <VirtualNursingAssistantLogUpdateCard
                       round={item}
-                      previousRound={item}
+                      previousRound={items[items.indexOf(item) + 1]}
                     />
                   );
                 }
