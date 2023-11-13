@@ -127,6 +127,7 @@ const routes = {
   updatePassword: {
     path: "/api/v1/password_change/",
     method: "PUT",
+    TRes: Type<{ [key: string]: string | string[] }>(),
   },
   // User Endpoints
   currentUser: {
@@ -189,7 +190,7 @@ const routes = {
   partialUpdateUser: {
     path: "/api/v1/users/{username}/",
     method: "PATCH",
-    TRes: undefined,
+    TRes: Type<{ [key: string]: object }>(),
   },
 
   deleteUser: {

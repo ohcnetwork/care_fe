@@ -1,7 +1,5 @@
 import { useState, useReducer, lazy, FormEvent, useEffect } from "react";
 import { GENDER_TYPES } from "../../Common/constants";
-import { useDispatch } from "react-redux";
-import { updateUserPassword } from "../../Redux/actions";
 import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
@@ -86,7 +84,6 @@ const editFormReducer = (state: State, action: Action) => {
 };
 export default function UserProfile() {
   const [states, dispatch] = useReducer(editFormReducer, initialState);
-  const reduxDispatch: any = useDispatch();
   const [updateStatus, setUpdateStatus] = useState({
     isChecking: false,
     isUpdateAvailable: false,
@@ -366,7 +363,7 @@ export default function UserProfile() {
     }
   };
 
-  const changePassword = (e: any) => {
+  const changePassword = async (e: any) => {
     e.preventDefault();
     //validating form
     if (
@@ -382,24 +379,27 @@ export default function UserProfile() {
         username: authUser.username,
         new_password: changePasswordForm.new_password_1,
       };
-      reduxDispatch(updateUserPassword(form)).then((resp: any) => {
-        setIsLoading(false);
-        const res = resp && resp.data;
-        if (res.message === "Password updated successfully") {
-          Notification.Success({
-            msg: "Password changed!",
-          });
-        } else {
-          Notification.Error({
-            msg: "There was some error. Please try again in some time.",
-          });
-        }
-        setChangePasswordForm({
-          ...changePasswordForm,
-          new_password_1: "",
-          new_password_2: "",
-          old_password: "",
+      const { res, data } = await request(routes.updatePassword, {
+        body: form,
+      });
+      setIsLoading(false);
+      if (
+        res?.status == 200 &&
+        data?.message === "Password updated successfully"
+      ) {
+        Notification.Success({
+          msg: "Password changed!",
         });
+      } else {
+        Notification.Error({
+          msg: "There was some error. Please try again in some time.",
+        });
+      }
+      setChangePasswordForm({
+        ...changePasswordForm,
+        new_password_1: "",
+        new_password_2: "",
+        old_password: "",
       });
     }
   };
