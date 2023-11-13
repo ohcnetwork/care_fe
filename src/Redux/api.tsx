@@ -28,9 +28,15 @@ import {
   AssetUpdate,
 } from "../Components/Assets/AssetTypes";
 import {
+  CapacityModal,
   ConsultationModel,
+  DistrictModel,
+  DoctorModal,
   FacilityModel,
+  IStateListResponse,
+  LocalBodyModel,
   LocationModel,
+  StateModel,
   WardModel,
 } from "../Components/Facility/models";
 import {
@@ -229,6 +235,7 @@ const routes = {
   createFacility: {
     path: "/api/v1/facility/",
     method: "POST",
+    TRes: Type<FacilityModel>(),
   },
 
   getPermittedFacility: {
@@ -246,6 +253,7 @@ const routes = {
   updateFacility: {
     path: "/api/v1/facility",
     method: "PUT",
+    TRes: Type<FacilityModel>(),
   },
 
   partialUpdateFacility: {
@@ -458,6 +466,7 @@ const routes = {
 
   getCapacity: {
     path: "/api/v1/facility/{facilityId}/capacity/",
+    TRes: Type<PaginatedResponse<CapacityModal>>(),
   },
 
   getCapacityBed: {
@@ -471,6 +480,7 @@ const routes = {
 
   listDoctor: {
     path: "/api/v1/facility/{facilityId}/hospital_doctor/",
+    TRes: Type<PaginatedResponse<DoctorModal>>(),
   },
   getDoctor: {
     path: "/api/v1/facility/{facilityId}/hospital_doctor/{id}/",
@@ -596,19 +606,23 @@ const routes = {
   // States
   statesList: {
     path: "/api/v1/state/",
+    TRes: Type<IStateListResponse>(),
   },
 
   getState: {
     path: "/api/v1/state/{id}/",
+    TRes: Type<StateModel>(),
   },
 
   // Districts
 
   getDistrict: {
     path: "/api/v1/district/{id}/",
+    TRes: Type<DistrictModel>(),
   },
   getDistrictByState: {
     path: "/api/v1/state/{id}/districts/",
+    TRes: Type<StateModel>(),
   },
   getDistrictByName: {
     path: "/api/v1/district/",
@@ -627,6 +641,7 @@ const routes = {
   // Local Body
   getLocalBody: {
     path: "/api/v1/local_body/{id}/",
+    TRes: Type<LocalBodyModel>(),
   },
   getAllLocalBody: {
     path: "/api/v1/local_body/",
