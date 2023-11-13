@@ -139,7 +139,7 @@ export default function ManageUsers() {
       className="w-full"
       onClick={() => navigate("/users/add")}
     >
-      <CareIcon className="care-l-plus w-full text-lg" />
+      <CareIcon icon="l-plus" className="text-lg" />
       <p>Add New User</p>
     </ButtonV2>
   );
