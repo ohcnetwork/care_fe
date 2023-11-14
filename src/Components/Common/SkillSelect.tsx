@@ -5,6 +5,7 @@ import AutoCompleteAsync from "../Form/AutoCompleteAsync";
 import { SkillObjectModel } from "../Users/models";
 
 interface SkillSelectProps {
+  id?: string;
   name: string;
   errors?: string | undefined;
   className?: string;
@@ -20,6 +21,7 @@ interface SkillSelectProps {
 
 export const SkillSelect = (props: SkillSelectProps) => {
   const {
+    id,
     name,
     multiple,
     selected,
@@ -64,6 +66,7 @@ export const SkillSelect = (props: SkillSelectProps) => {
 
   return (
     <AutoCompleteAsync
+      id={id}
       name={name}
       multiple={multiple}
       selected={selected}
