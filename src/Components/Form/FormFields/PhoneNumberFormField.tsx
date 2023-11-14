@@ -138,7 +138,7 @@ const phoneNumberTypeIcons: Record<PhoneNumberType, string> = {
 const PhoneNumberTypesHelp = ({ types }: { types: PhoneNumberType[] }) => (
   <div className="flex gap-1">
     {types.map((type) => (
-      <span className="tooltip mt-1">
+      <span key={type} className="tooltip mt-1">
         <CareIcon
           className={classNames(
             `care-l-${phoneNumberTypeIcons[type]}`,

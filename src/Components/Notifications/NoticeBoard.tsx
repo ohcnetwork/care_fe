@@ -1,43 +1,23 @@
-import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { getNotifications } from "../../Redux/actions";
 import Page from "../Common/components/Page";
 import Loading from "../Common/Loading";
 import { formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 
 export const NoticeBoard = () => {
-  const dispatch: any = useDispatch();
-  const [isLoading, setIsLoading] = useState(true);
-  const [data, setData] = useState<any[]>([]);
   const { t } = useTranslation();
-
-  useEffect(() => {
-    setIsLoading(true);
-    dispatch(
-      getNotifications(
-        { offset: 0, event: "MESSAGE", medium_sent: "SYSTEM" },
-        new Date().getTime().toString()
-      )
-    )
-      .then((res: any) => {
-        if (res && res.data) {
-          setData(res.data.results);
-        }
-        setIsLoading(false);
-      })
-      .catch(() => {
-        setIsLoading(false);
-      });
-  }, [dispatch]);
+  const { data, loading } = useQuery(routes.getNotifications, {
+    query: { offset: 0, event: "MESSAGE", medium_sent: "SYSTEM" },
+  });
 
   let notices;
 
-  if (data?.length) {
+  if (data?.results.length) {
     notices = (
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-        {data.map((item) => (
+        {data.results.map((item) => (
           <div
             key={`usr_${item.id}`}
             className="overflow-hidden rounded shadow-md"
@@ -71,7 +51,7 @@ export const NoticeBoard = () => {
     );
   }
 
-  if (isLoading) return <Loading />;
+  if (loading) return <Loading />;
   return (
     <Page title={t("Notice Board")} hideBack={true} breadcrumbs={false}>
       <div>{notices}</div>

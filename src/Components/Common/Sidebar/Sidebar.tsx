@@ -116,7 +116,7 @@ const StatelessSidebar = ({
 
   return (
     <nav
-      className={`group flex h-screen flex-col bg-primary-800 py-3 md:py-5 ${
+      className={`group flex h-full flex-col bg-primary-800 py-3 md:py-5 ${
         shrinked ? "w-14" : "w-60"
       } transition-all duration-300 ease-in-out ${
         isOverflowVisible && shrinked
@@ -134,7 +134,7 @@ const StatelessSidebar = ({
         />
       </Link>
       <div className="h-3" /> {/* flexible spacing */}
-      <div className="relative mb-4 flex h-full flex-col md:mb-0">
+      <div className="relative flex h-full flex-col">
         <div className="relative flex flex-1 flex-col md:flex-none">
           <div
             ref={indicatorRef}
