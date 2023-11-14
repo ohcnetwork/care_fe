@@ -49,6 +49,7 @@ const LiveFeed = (props: any) => {
   const [toDelete, setToDelete] = useState<any>(null);
   const [toUpdate, setToUpdate] = useState<any>(null);
   const [_isFullscreen, setFullscreen] = useFullscreen();
+  const [lockStatus, setLockStatus] = useState(false);
 
   const { width } = useWindowDimensions();
   const extremeSmallScreenBreakpoint = 320;
@@ -461,6 +462,11 @@ const LiveFeed = (props: any) => {
           </div>
 
           <div className="mx-4 flex max-w-sm flex-col">
+            <div>
+              <button onClick={() => setLockStatus(!lockStatus)}>
+                : Lock Status: <b>{lockStatus ? "Locked" : "Unlocked"}</b>
+              </button>
+            </div>
             <nav className="flex flex-wrap">
               <button
                 className={`flex-1 p-4  text-center font-bold  text-gray-700 hover:text-gray-800  ${
