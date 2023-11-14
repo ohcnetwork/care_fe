@@ -31,6 +31,7 @@ import {
 import {
   ConsultationModel,
   CurrentBed,
+  DistrictModel,
   FacilityModel,
   LocationModel,
   WardModel,
@@ -621,6 +622,8 @@ const routes = {
 
   getDistrict: {
     path: "/api/v1/district/{id}/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<DistrictModel>>(),
   },
   getDistrictByState: {
     path: "/api/v1/state/{id}/districts/",
