@@ -1,6 +1,6 @@
 import * as Notification from "../../Utils/Notifications.js";
 
-import { BedModel, FacilityModel, ICD11DiagnosisModel } from "./models";
+import { BedModel, FacilityModel } from "./models";
 import {
   CONSULTATION_SUGGESTION,
   PATIENT_CATEGORIES,
@@ -37,7 +37,6 @@ import Beds from "./Consultations/Beds";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import DateFormField from "../Form/FormFields/DateFormField";
-import { DiagnosisSelectFormField } from "../Common/DiagnosisSelectFormField";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
   FieldChangeEvent,
@@ -59,12 +58,20 @@ import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import useVisibility from "../../Utils/useVisibility";
 import dayjs from "../../Utils/dayjs";
-import AutocompleteFormField from "../Form/FormFields/Autocomplete.js";
 import RouteToFacilitySelect, {
   RouteToFacility,
 } from "../Common/RouteToFacilitySelect.js";
 import { LocationSelect } from "../Common/LocationSelect.js";
 import { classNames } from "../../Utils/utils.js";
+import {
+  ConditionVerificationStatuses,
+  ConsultationDiagnosis,
+  CreateDiagnosis,
+} from "../Diagnosis/types.js";
+import {
+  CreateDiagnosesBuilder,
+  EditDiagnosesBuilder,
+} from "../Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -91,11 +98,10 @@ type FormDetails = {
   referred_from_facility_external?: string;
   referred_by_external?: string;
   transferred_from_location?: string;
-  icd11_diagnoses_object: ICD11DiagnosisModel[];
-  icd11_provisional_diagnoses_object: ICD11DiagnosisModel[];
-  icd11_principal_diagnosis?: ICD11DiagnosisModel["id"];
   treating_physician: string;
   treating_physician_object: UserModel | null;
+  create_diagnoses: CreateDiagnosis[];
+  diagnoses: ConsultationDiagnosis[];
   is_kasp: BooleanStrings;
   kasp_enabled_date: null;
   examination_details: string;
@@ -142,11 +148,10 @@ const initForm: FormDetails = {
   referred_from_facility_external: "",
   referred_by_external: "",
   transferred_from_location: "",
-  icd11_diagnoses_object: [],
-  icd11_provisional_diagnoses_object: [],
-  icd11_principal_diagnosis: undefined,
   treating_physician: "",
   treating_physician_object: null,
+  create_diagnoses: [],
+  diagnoses: [],
   is_kasp: "false",
   kasp_enabled_date: null,
   examination_details: "",
@@ -327,18 +332,6 @@ export const ConsultationForm = (props: any) => {
           consultation_notes: "Patient declared dead",
         },
       });
-    } else if (
-      event.name === "icd11_diagnoses_object" ||
-      event.name === "icd11_provisional_diagnoses_object"
-    ) {
-      dispatch({
-        type: "set_form",
-        form: {
-          ...state.form,
-          [event.name]: event.value,
-          icd11_principal_diagnosis: undefined,
-        },
-      });
     } else {
       dispatch({
         type: "set_form",
@@ -408,6 +401,11 @@ export const ConsultationForm = (props: any) => {
             death_datetime: res.data?.death_datetime || "",
             death_confirmed_doctor: res.data?.death_confirmed_doctor || "",
             InvestigationAdvice: res.data.investigation,
+            diagnoses: res.data.diagnoses.sort(
+              (a: ConsultationDiagnosis, b: ConsultationDiagnosis) =>
+                ConditionVerificationStatuses.indexOf(a.verification_status) -
+                ConditionVerificationStatuses.indexOf(b.verification_status)
+            ),
           };
           dispatch({ type: "set_form", form: { ...state.form, ...formData } });
           setBed(formData.bed);
@@ -618,58 +616,6 @@ export const ConsultationForm = (props: any) => {
           return;
         }
 
-        case "icd11_provisional_diagnoses_object": {
-          if (
-            state.form[field].length === 0 &&
-            state.form["icd11_diagnoses_object"].length === 0
-          ) {
-            for (const err_field of [field, "icd11_diagnoses_object"])
-              errors[err_field] =
-                "Please select either Provisional Diagnosis or Final Diagnosis";
-            invalidForm = true;
-            break;
-          }
-          return;
-        }
-
-        case "icd11_principal_diagnosis": {
-          if (!state.form[field]) {
-            errors[field] = "Please select Principal Diagnosis";
-            invalidForm = true;
-            break;
-          }
-
-          if (
-            state.form[field] &&
-            state.form["icd11_diagnoses_object"].length &&
-            !state.form["icd11_provisional_diagnoses_object"] &&
-            !state.form["icd11_diagnoses_object"]
-              .map((d) => d.id)
-              .includes(state.form[field]!)
-          ) {
-            errors[field] =
-              "Please select Principal Diagnosis from Final Diagnosis";
-            invalidForm = true;
-            break;
-          }
-
-          if (
-            state.form[field] &&
-            state.form["icd11_provisional_diagnoses_object"].length &&
-            !state.form["icd11_diagnoses_object"] &&
-            !state.form["icd11_provisional_diagnoses_object"]
-              .map((d) => d.id)
-              .includes(state.form[field]!)
-          ) {
-            errors[field] =
-              "Please select Principal Diagnosis from Provisional Diagnosis";
-            invalidForm = true;
-            break;
-          }
-
-          return;
-        }
-
         default:
           return;
       }
@@ -744,14 +690,7 @@ export const ConsultationForm = (props: any) => {
         treatment_plan: state.form.treatment_plan,
         discharge_date: state.form.discharge_date,
         patient_no: state.form.patient_no,
-        icd11_diagnoses: state.form.icd11_diagnoses_object.map(
-          (o: ICD11DiagnosisModel) => o.id
-        ),
-        icd11_provisional_diagnoses:
-          state.form.icd11_provisional_diagnoses_object.map(
-            (o: ICD11DiagnosisModel) => o.id
-          ),
-        icd11_principal_diagnosis: state.form.icd11_principal_diagnosis,
+        create_diagnoses: isUpdate ? undefined : state.form.create_diagnoses,
         treating_physician: state.form.treating_physician,
         investigation: state.form.InvestigationAdvice,
         procedure: state.form.procedures,
@@ -1333,44 +1272,25 @@ export const ConsultationForm = (props: any) => {
                 <div className="flex flex-col gap-4 pb-4">
                   <div className="flex flex-col">
                     {sectionTitle("Diagnosis", true)}
-                    <p className="-mt-4 mb-4 space-x-1 text-sm text-gray-700">
-                      <span className="font-medium">
-                        Either Provisional or Final Diagnosis is mandatory
-                      </span>
-                      <span>| Diagnoses as per ICD-11 recommended by WHO</span>
+                    <p className="-mt-4 space-x-1 text-sm text-gray-700">
+                      <span>Diagnoses as per ICD-11 recommended by WHO</span>
                     </p>
                   </div>
 
-                  <div ref={fieldRef["icd11_provisional_diagnoses_object"]}>
-                    <DiagnosisSelectFormField
-                      {...field("icd11_provisional_diagnoses_object")}
-                      multiple
-                      label="Provisional Diagnosis"
-                    />
-                  </div>
-
-                  <div ref={fieldRef["icd11_diagnoses_object"]}>
-                    <DiagnosisSelectFormField
-                      {...field("icd11_diagnoses_object")}
-                      multiple
-                      label="Final Diagnosis"
-                    />
-                  </div>
-
-                  <div ref={fieldRef["icd11_principal_diagnosis"]}>
-                    <AutocompleteFormField
-                      {...field("icd11_principal_diagnosis")}
-                      label="Principal Diagnosis"
-                      placeholder="Search for diagnosis"
-                      options={
-                        state.form.icd11_diagnoses_object.length
-                          ? state.form.icd11_diagnoses_object
-                          : state.form.icd11_provisional_diagnoses_object
-                      }
-                      optionLabel={(option) => option.label}
-                      optionValue={(option) => option.id}
-                      required
-                    />
+                  <div ref={fieldRef["diagnoses"]}>
+                    {isUpdate ? (
+                      <EditDiagnosesBuilder value={state.form.diagnoses} />
+                    ) : (
+                      <CreateDiagnosesBuilder
+                        value={state.form.create_diagnoses}
+                        onChange={(diagnoses) => {
+                          handleFormFieldChange({
+                            name: "create_diagnoses",
+                            value: diagnoses,
+                          });
+                        }}
+                      />
+                    )}
                   </div>
                 </div>
 

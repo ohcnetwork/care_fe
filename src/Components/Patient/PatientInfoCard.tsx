@@ -8,7 +8,7 @@ import {
   TELEMEDICINE_ACTIONS,
 } from "../../Common/constants";
 import { ConsultationModel, PatientCategory } from "../Facility/models";
-import { Switch } from "@headlessui/react";
+import { Switch, Menu } from "@headlessui/react";
 
 import { Link } from "raviger";
 import { useState } from "react";
@@ -26,8 +26,9 @@ import Beds from "../Facility/Consultations/Beds";
 import { PatientModel } from "./models";
 import request from "../../Utils/request/request.js";
 import routes from "../../Redux/api.js";
-import { Menu } from "@headlessui/react";
 import DropdownMenu from "../Common/components/Menu.js";
+import { triggerGoal } from "../../Integrations/Plausible.js";
+import useAuthUser from "../../Common/hooks/useAuthUser.js";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
@@ -36,6 +37,8 @@ export default function PatientInfoCard(props: {
   consultationId: string;
   showAbhaProfile?: boolean;
 }) {
+  const authUser = useAuthUser();
+
   const [open, setOpen] = useState(false);
   const [showLinkABHANumber, setShowLinkABHANumber] = useState(false);
   const [showABHAProfile, setShowABHAProfile] = useState(
@@ -459,6 +462,11 @@ export default function PatientInfoCard(props: {
                               });
                               setOpen(true);
                             }
+                            triggerGoal("Patient Card Button Clicked", {
+                              buttonName: action[1],
+                              consultationId: consultation?.id,
+                              userId: authUser?.id,
+                            });
                           }}
                         >
                           <CareIcon
@@ -489,6 +497,11 @@ export default function PatientInfoCard(props: {
                             onClick={() => {
                               close();
                               setShowABHAProfile(true);
+                              triggerGoal("Patient Card Button Clicked", {
+                                buttonName: "Show ABHA Profile",
+                                consultationId: consultation?.id,
+                                userId: authUser?.id,
+                              });
                             }}
                           >
                             <CareIcon className="care-l-user-square text-lg text-primary-500" />
@@ -497,6 +510,11 @@ export default function PatientInfoCard(props: {
                           <div
                             className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
                             onClick={() => {
+                              triggerGoal("Patient Card Button Clicked", {
+                                buttonName: "Link Care Context",
+                                consultationId: consultation?.id,
+                                userId: authUser?.id,
+                              });
                               close();
                               setShowLinkCareContext(true);
                             }}
@@ -532,6 +550,11 @@ export default function PatientInfoCard(props: {
                 <Switch
                   checked={medicoLegalCase}
                   onChange={(checked) => {
+                    triggerGoal("Patient Card Button Clicked", {
+                      buttonName: "Medico Legal Case",
+                      consultationId: consultation?.id,
+                      userId: authUser?.id,
+                    });
                     setMedicoLegalCase(checked);
                     switchMedicoLegalCase(checked);
                   }}

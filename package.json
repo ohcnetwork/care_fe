@@ -69,6 +69,7 @@
     "dayjs": "^1.11.9",
     "echarts": "^5.4.2",
     "echarts-for-react": "^3.0.2",
+    "eslint-mdx": "^2.2.0",
     "events": "^3.3.0",
     "i18next": "^23.2.7",
     "i18next-browser-languagedetector": "^7.1.0",
@@ -129,7 +130,7 @@
     "@typescript-eslint/parser": "^5.61.0",
     "@vitejs/plugin-react-swc": "^3.3.2",
     "autoprefixer": "^10.4.14",
-    "cypress": "^13.1.0",
+    "cypress": "^13.5.0",
     "cypress-localstorage-commands": "^2.2.3",
     "eslint": "^8.44.0",
     "eslint-config-prettier": "^8.8.0",
@@ -137,6 +138,7 @@
     "eslint-plugin-i18next": "^6.0.3",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-jsx-a11y": "^6.7.1",
+    "eslint-plugin-mdx": "^2.2.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-only-warn": "^1.1.0",
     "eslint-plugin-prettier": "^4.2.1",
@@ -180,21 +182,6 @@
       "prettier --write --ignore-unknown",
       "eslint --fix",
       "git update-index --again"
-    ]
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app"
-    ],
-    "overrides": [
-      {
-        "files": [
-          "**/*.stories.*"
-        ],
-        "rules": {
-          "import/no-anonymous-default-export": "off"
-        }
-      }
     ]
   },
   "engines": {

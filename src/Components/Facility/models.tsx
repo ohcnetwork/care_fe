@@ -4,6 +4,7 @@ import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 import { AssetData } from "../Assets/AssetTypes";
 import { UserBareMinimum } from "../Users/models";
 import { RouteToFacility } from "../Common/RouteToFacilitySelect";
+import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 
 export interface LocalBodyModel {
   name: string;
@@ -53,10 +54,10 @@ export interface FacilityModel {
   ward_object?: WardModel;
   modified_date?: string;
   created_date?: string;
-  state: number;
-  district: number;
-  local_body: number;
-  ward: number;
+  state?: number;
+  district?: number;
+  local_body?: number;
+  ward?: number;
 }
 
 export interface CapacityModal {
@@ -121,10 +122,8 @@ export interface ConsultationModel {
   route_to_facility?: RouteToFacility;
   is_kasp?: boolean;
   kasp_enabled_date?: string;
-  diagnosis?: string;
-  icd11_diagnoses_object?: ICD11DiagnosisModel[];
-  icd11_provisional_diagnoses_object?: ICD11DiagnosisModel[];
-  icd11_principal_diagnosis?: ICD11DiagnosisModel["id"];
+  readonly diagnoses?: ConsultationDiagnosis[];
+  create_diagnoses?: CreateDiagnosis[]; // Used for bulk creating diagnoses upon consultation creation
   deprecated_verified_by?: string;
   treating_physician?: UserBareMinimum["id"];
   treating_physician_object?: UserBareMinimum;
@@ -230,10 +229,3 @@ export interface CurrentBed {
   end_date: string;
   meta: Record<string, any>;
 }
-
-// Voluntarily made as `type` for it to achieve type-safety when used with
-// `useAsyncOptions<ICD11DiagnosisModel>`
-export type ICD11DiagnosisModel = {
-  id: string;
-  label: string;
-};

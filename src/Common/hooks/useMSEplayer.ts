@@ -20,6 +20,8 @@ interface UseMSEMediaPlayerOption {
 export interface ICameraAssetState {
   id: string;
   accessKey: string;
+  middleware_address: string;
+  location_middleware: string;
 }
 
 export enum StreamStatus {

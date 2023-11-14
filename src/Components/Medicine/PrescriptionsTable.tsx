@@ -1,8 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
+import { useState } from "react";
+import ResponsiveMedicineTable from "./ResponsiveMedicineTables";
 import { formatDateTime } from "../../Utils/utils";
-import { PrescriptionActions } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
 import { Prescription } from "./models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
@@ -14,11 +12,13 @@ import AdministerMedicine from "./AdministerMedicine";
 import DialogModal from "../Common/Dialog";
 import PrescriptionDetailCard from "./PrescriptionDetailCard";
 import { useTranslation } from "react-i18next";
+import useSlug from "../../Common/hooks/useSlug";
+import useQuery from "../../Utils/request/useQuery";
+import MedicineRoutes from "./routes";
 
 interface Props {
   is_prn?: boolean;
   prescription_type?: Prescription["prescription_type"];
-  consultation_id: string;
   onChange?: () => void;
   readonly?: boolean;
 }
@@ -26,35 +26,22 @@ interface Props {
 export default function PrescriptionsTable({
   is_prn = false,
   prescription_type = "REGULAR",
-  consultation_id,
   onChange,
   readonly,
 }: Props) {
-  const dispatch = useDispatch<any>();
+  const consultation = useSlug("consultation");
   const { t } = useTranslation();
-
-  const [prescriptions, setPrescriptions] = useState<Prescription[]>();
   const [showBulkAdminister, setShowBulkAdminister] = useState(false);
   const [showDiscontinueFor, setShowDiscontinueFor] = useState<Prescription>();
   const [showAdministerFor, setShowAdministerFor] = useState<Prescription>();
   const [detailedViewFor, setDetailedViewFor] = useState<Prescription>();
 
-  const { list, prescription } = useMemo(
-    () => PrescriptionActions(consultation_id),
-    [consultation_id]
-  );
+  const { data } = useQuery(MedicineRoutes.listPrescriptions, {
+    pathParams: { consultation },
+    query: { is_prn, prescription_type, limit: 100 },
+  });
 
-  const fetchPrescriptions = useCallback(() => {
-    dispatch(list({ is_prn, prescription_type })).then((res: any) =>
-      setPrescriptions(res.data.results)
-    );
-  }, [consultation_id]);
-
-  useEffect(() => {
-    fetchPrescriptions();
-  }, [consultation_id]);
-
-  const lastModified = prescriptions?.[0]?.modified_date;
+  const lastModified = data?.results[0]?.modified_date;
   const tkeys =
     prescription_type === "REGULAR"
       ? is_prn
@@ -66,7 +53,7 @@ export default function PrescriptionsTable({
 
   return (
     <div>
-      {prescriptions && (
+      {data?.results && (
         <SlideOver
           title={t("administer_medicines")}
           dialogClass="w-full max-w-sm sm:max-w-md md:max-w-[1200px]"
@@ -74,8 +61,7 @@ export default function PrescriptionsTable({
           setOpen={setShowBulkAdminister}
         >
           <MedicineAdministration
-            prescriptions={prescriptions}
-            action={prescription}
+            prescriptions={data?.results}
             onDone={() => {
               setShowBulkAdminister(false);
               onChange?.();
@@ -86,7 +72,6 @@ export default function PrescriptionsTable({
       {showDiscontinueFor && (
         <DiscontinuePrescription
           prescription={showDiscontinueFor}
-          actions={prescription(showDiscontinueFor.id ?? "")}
           onClose={(success) => {
             setShowDiscontinueFor(undefined);
             if (success) onChange?.();
@@ -97,7 +82,6 @@ export default function PrescriptionsTable({
       {showAdministerFor && (
         <AdministerMedicine
           prescription={showAdministerFor}
-          actions={prescription(showAdministerFor.id ?? "")}
           onClose={(success) => {
             setShowAdministerFor(undefined);
             if (success) onChange?.();
@@ -115,7 +99,6 @@ export default function PrescriptionsTable({
           <div className="mt-4 flex flex-col gap-4">
             <PrescriptionDetailCard
               prescription={detailedViewFor}
-              actions={prescription(detailedViewFor.id ?? "")}
               key={detailedViewFor.id}
               readonly
             />
@@ -198,7 +181,7 @@ export default function PrescriptionsTable({
               maxWidthColumn={0}
               theads={Object.keys(tkeys).map((_) => t(_))}
               list={
-                prescriptions?.map((obj) => ({
+                data?.results.map((obj) => ({
                   ...obj,
                   medicine: obj.medicine_object?.name ?? obj.medicine_old,
                   route__pretty:
@@ -277,7 +260,7 @@ export default function PrescriptionsTable({
                   : undefined
               }
             />
-            {prescriptions?.length === 0 && (
+            {data?.results.length === 0 && (
               <div className="text-semibold flex items-center justify-center py-2 text-gray-600">
                 {t("no_data_found")}
               </div>
