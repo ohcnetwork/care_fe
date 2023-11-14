@@ -237,13 +237,6 @@ const TreatmentSummary = (props: any) => {
                   </div>
 
                   <div>
-                    <b>Diagnosis :</b>
-                    {consultationData.diagnosis
-                      ? consultationData.diagnosis
-                      : "    ---"}
-                  </div>
-
-                  <div>
                     <b>Physical Examination info :</b>
                     {dailyRounds.physical_examination_info
                       ? dailyRounds.physical_examination_info

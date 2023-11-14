@@ -1,4 +1,5 @@
 import { IConfig } from "../Common/hooks/useConfig";
+
 import {
   IAadhaarOtp,
   IAadhaarOtpTBody,
@@ -29,6 +30,7 @@ import {
 } from "../Components/Assets/AssetTypes";
 import {
   ConsultationModel,
+  CurrentBed,
   FacilityModel,
   LocationModel,
   WardModel,
@@ -41,19 +43,21 @@ import {
   ILocalBodyByDistrict,
   IPartialUpdateExternalResult,
 } from "../Components/ExternalResult/models";
-
-import { Prescription } from "../Components/Medicine/models";
-
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
+import {
+  NotificationData,
+  PNconfigData,
+} from "../Components/Notifications/models";
 import { PatientModel } from "../Components/Patient/models";
 import { IComment, IResource } from "../Components/Resource/models";
+import { IShift } from "../Components/Shifting/models";
 
 /**
  * A fake function that returns an empty object casted to type T
  * @returns Empty object as type T
  */
-function Type<T>(): T {
+export function Type<T>(): T {
   return {} as T;
 }
 
@@ -205,11 +209,14 @@ const routes = {
 
   getUserPnconfig: {
     path: "/api/v1/users/{username}/pnconfig/",
+    method: "GET",
+    TRes: Type<PNconfigData>(),
   },
 
   updateUserPnconfig: {
     path: "/api/v1/users/{username}/pnconfig/",
     method: "PATCH",
+    TRes: Type<PNconfigData>(),
   },
 
   // Skill Endpoints
@@ -222,6 +229,7 @@ const routes = {
 
   getPermittedFacilities: {
     path: "/api/v1/facility/",
+    TRes: Type<PaginatedResponse<FacilityModel>>(),
   },
 
   getAllFacilities: {
@@ -357,6 +365,7 @@ const routes = {
   listConsultationBeds: {
     path: "/api/v1/consultationbed/",
     method: "GET",
+    TRes: Type<PaginatedResponse<CurrentBed>>(),
   },
   createConsultationBed: {
     path: "/api/v1/consultationbed/",
@@ -739,23 +748,31 @@ const routes = {
     method: "POST",
   },
   updateShift: {
-    path: "/api/v1/shift",
+    path: "/api/v1/shift/{id}",
     method: "PUT",
+    TBody: Type<IShift>(),
+    TRes: Type<IShift>(),
   },
   deleteShiftRecord: {
-    path: "/api/v1/shift",
+    path: "/api/v1/shift/{id}",
     method: "DELETE",
+    TRes: Type<{ detail: string }>(),
   },
   listShiftRequests: {
     path: "/api/v1/shift/",
     method: "GET",
+    TRes: Type<PaginatedResponse<IShift>>(),
   },
   getShiftDetails: {
     path: "/api/v1/shift/{id}/",
+    method: "GET",
+    TRes: Type<IShift>(),
   },
   completeTransfer: {
     path: "/api/v1/shift/{externalId}/transfer/",
     method: "POST",
+    TBody: Type<IShift>(),
+    TRes: Type<Partial<PatientModel>>(),
   },
   downloadShiftRequests: {
     path: "/api/v1/shift/",
@@ -764,24 +781,35 @@ const routes = {
   getShiftComments: {
     path: "/api/v1/shift/{id}/comment/",
     method: "GET",
+    TRes: Type<PaginatedResponse<IComment>>(),
   },
   addShiftComments: {
     path: "/api/v1/shift/{id}/comment/",
     method: "POST",
+    TBody: Type<Partial<IComment>>(),
+    TRes: Type<IComment>(),
   },
+
   // Notifications
   getNotifications: {
     path: "/api/v1/notification/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<NotificationData>>(),
   },
   getNotificationData: {
     path: "/api/v1/notification/{id}/",
+    method: "GET",
+    TRes: Type<NotificationData>(),
   },
   markNotificationAsRead: {
     path: "/api/v1/notification/{id}/",
     method: "PATCH",
+    TRes: Type<NotificationData>(),
   },
   getPublicKey: {
     path: "/api/v1/notification/public_key/",
+    method: "GET",
+    TRes: Type<NotificationData>(),
   },
   sendNotificationMessages: {
     path: "/api/v1/notification/notify/",
@@ -1113,47 +1141,6 @@ const routes = {
   getAssetAvailability: {
     path: "/api/v1/asset_availability/{id}",
     method: "GET",
-  },
-
-  // Prescription endpoints
-
-  listPrescriptions: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/",
-    method: "GET",
-  },
-
-  createPrescription: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/",
-    method: "POST",
-    TBody: Type<Prescription>(),
-    TRes: Type<Prescription>(),
-  },
-
-  listAdministrations: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescription_administration/",
-    method: "GET",
-  },
-
-  getAdministration: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescription_administration/{external_id}/",
-    method: "GET",
-  },
-
-  getPrescription: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/",
-    method: "GET",
-  },
-
-  administerPrescription: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/administer/",
-    method: "POST",
-  },
-
-  discontinuePrescription: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/discontinue/",
-    method: "POST",
-    TBody: Type<{ discontinued_reason: string }>(),
-    TRes: Type<Record<string, never>>(),
   },
 
   // HCX Endpoints

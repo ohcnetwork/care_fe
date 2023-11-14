@@ -193,18 +193,6 @@ describe("User Creation", () => {
     userPage.verifyMultipleBadgesWithSameId(alreadylinkedusersviews);
   });
 
-  // the below commented out codes, will be used in the upcoming refactoring of this module, since it is a inter-dependent of partially converted code, currently taking it down
-
-  //   it("link facility for user", () => {
-  //     cy.contains("Linked Facilities").click();
-  //     cy.intercept(/\/api\/v1\/facility/).as("getFacilities");
-  //     cy.get("[name='facility']")
-  //       .click()
-  //       .type("Dummy Facility 1")
-  //       .wait("@getFacilities");
-  //     cy.get("li[role='option']").should("not.exist");
-  //   });
-
   afterEach(() => {
     cy.saveLocalStorage();
   });

@@ -65,7 +65,7 @@ const AssetsList = () => {
     status: qParams.status || "",
   };
 
-  useQuery(routes.listAssets, {
+  const { loading } = useQuery(routes.listAssets, {
     query: params,
     onResponse: ({ res, data }) => {
       if (res?.status === 200 && data) {
@@ -176,7 +176,13 @@ const AssetsList = () => {
     );
 
   let manageAssets = null;
-  if (assetsExist) {
+  if (loading) {
+    manageAssets = (
+      <div className="col-span-3 w-full py-8 text-center">
+        <Loading />
+      </div>
+    );
+  } else if (assetsExist) {
     manageAssets = (
       <div className="grid grid-cols-1 gap-2 md:-mx-8 md:grid-cols-2 lg:grid-cols-3">
         {assets.map((asset: AssetData) => (
@@ -309,7 +315,7 @@ const AssetsList = () => {
         <CountBlock
           text="Total Assets"
           count={totalCount}
-          loading={isLoading}
+          loading={loading}
           icon="l-monitor-heart-rate"
           className="flex-1"
         />

@@ -168,11 +168,15 @@ export default function CentralNursingStation({ facilityId }: Props) {
                       <FieldLabel className="text-sm">
                         Filter by Location
                       </FieldLabel>
-                      <div className="flex w-full items-center gap-2">
+                      <div>
                         <LocationSelect
                           key={qParams.location}
                           name="Facilities"
-                          setSelected={(location) => updateQuery({ location })}
+                          setSelected={(location) => {
+                            location
+                              ? updateQuery({ location })
+                              : removeFilter("location");
+                          }}
                           selected={qParams.location}
                           showAll={false}
                           multiple={false}
@@ -180,16 +184,6 @@ export default function CentralNursingStation({ facilityId }: Props) {
                           errors=""
                           errorClassName="hidden"
                         />
-                        {qParams.location && (
-                          <ButtonV2
-                            variant="secondary"
-                            circle
-                            border
-                            onClick={() => removeFilter("location")}
-                          >
-                            Clear
-                          </ButtonV2>
-                        )}
                       </div>
                     </div>
                     <SelectFormField
@@ -273,6 +267,10 @@ export default function CentralNursingStation({ facilityId }: Props) {
           {data.map((props) => (
             <div className="overflow-hidden text-clip">
               <HL7PatientVitalsMonitor
+                patientCurrentBedAssignmentDate={
+                  props.patientAssetBed?.patient?.last_consultation?.current_bed
+                    ?.start_date
+                }
                 key={`${props.patientAssetBed?.bed.id}-${hash}`}
                 {...props}
                 config={config}
