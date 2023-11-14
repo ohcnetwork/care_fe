@@ -814,6 +814,7 @@ export const PatientManager = () => {
             />
             {showDoctorConnect && (
               <ButtonV2
+                id="doctor-connect-patient-button"
                 onClick={() => {
                   triggerGoal("Doctor Connect Clicked", {
                     facilityId: qParams.facility,

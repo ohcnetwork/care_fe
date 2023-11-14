@@ -253,7 +253,7 @@ export default function ResourceDetails(props: { id: string }) {
               <ButtonV2
                 data-testid="update-status"
                 className="mt-4 w-full sm:mt-2"
-                href={`/resource/${data.external_id}/update`}
+                href={`/resource/${data.id}/update`}
               >
                 Update Status/Details
               </ButtonV2>

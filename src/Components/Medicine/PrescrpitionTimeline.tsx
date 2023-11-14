@@ -28,11 +28,13 @@ interface Props {
   interval: { start: Date; end: Date };
   prescription: Prescription;
   showPrescriptionDetails?: boolean;
+  onRefetch?: () => void;
 }
 
 export default function PrescrpitionTimeline({
   prescription,
   interval,
+  onRefetch,
 }: Props) {
   const consultation = useSlug("consultation");
   const { data, refetch, loading } = useQuery(
@@ -82,7 +84,10 @@ export default function PrescrpitionTimeline({
               <MedicineAdministeredNode
                 key={`activity-${event.type}-${prescription.id}`}
                 event={event}
-                onArchived={refetch}
+                onArchived={() => {
+                  onRefetch?.();
+                  refetch();
+                }}
                 isLastNode={index === events.length - 1}
                 hideArchive={prescription.discontinued}
               />

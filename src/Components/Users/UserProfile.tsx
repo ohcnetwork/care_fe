@@ -559,7 +559,10 @@ export default function UserProfile() {
                       Skills
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      <div className="flex flex-wrap gap-2">
+                      <div
+                        className="flex flex-wrap gap-2"
+                        id="already-linked-skills"
+                      >
                         {details.skills && details.skills.length
                           ? details.skills?.map((skill: SkillObjectModel) => {
                               return (
