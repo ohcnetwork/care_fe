@@ -4,7 +4,7 @@ import {
   OptionsType,
   SYMPTOM_CHOICES,
 } from "../../../Common/constants";
-import { ConsultationModel, ICD11DiagnosisModel } from "../models";
+import { ConsultationModel } from "../models";
 import {
   getConsultation,
   getPatient,
@@ -13,7 +13,6 @@ import {
 } from "../../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { lazy, useCallback, useState } from "react";
-import ToolTip from "../../Common/utils/Tooltip";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import DischargeModal from "../DischargeModal";
@@ -43,6 +42,7 @@ import { ConsultationPressureSoreTab } from "./ConsultationPressureSoreTab";
 import { ConsultationDialysisTab } from "./ConsultationDialysisTab";
 import { ConsultationNeurologicalMonitoringTab } from "./ConsultationNeurologicalMonitoringTab";
 import { ConsultationNutritionTab } from "./ConsultationNutritionTab";
+import LegacyDiagnosesList from "../../Diagnosis/LegacyDiagnosesList";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
@@ -218,56 +218,56 @@ export const ConsultationDetails = (props: any) => {
       selected === true ? "border-primary-500 text-primary-600 border-b-2" : ""
     }`;
 
-  const ShowDiagnosis = ({
-    diagnoses = [],
-    label = "Diagnosis",
-    nshow = 2,
-  }: {
-    diagnoses: ICD11DiagnosisModel[] | undefined;
-    label: string;
-    nshow?: number;
-  }) => {
-    const [showMore, setShowMore] = useState(false);
+  // const ShowDiagnosis = ({
+  //   diagnoses = [],
+  //   label = "Diagnosis",
+  //   nshow = 2,
+  // }: {
+  //   diagnoses: ICD11DiagnosisModel[] | undefined;
+  //   label: string;
+  //   nshow?: number;
+  // }) => {
+  //   const [showMore, setShowMore] = useState(false);
 
-    return diagnoses.length ? (
-      <div className="w-full text-sm">
-        <p className="font-semibold leading-relaxed">{label}</p>
-        {diagnoses.slice(0, !showMore ? nshow : undefined).map((diagnosis) =>
-          diagnosis.id === consultationData.icd11_principal_diagnosis ? (
-            <div className="relative flex items-center gap-2">
-              <p>{diagnosis.label}</p>
-              <div>
-                <ToolTip text="Principal Diagnosis" position="BOTTOM">
-                  <CareIcon className="care-l-stethoscope rounded-lg bg-primary-500  p-1 text-2xl text-white" />
-                </ToolTip>
-              </div>
-            </div>
-          ) : (
-            <p>{diagnosis.label}</p>
-          )
-        )}
-        {diagnoses.length > nshow && (
-          <>
-            {!showMore ? (
-              <a
-                onClick={() => setShowMore(true)}
-                className="cursor-pointer text-sm text-blue-600 hover:text-blue-300"
-              >
-                show more
-              </a>
-            ) : (
-              <a
-                onClick={() => setShowMore(false)}
-                className="cursor-pointer text-sm text-blue-600 hover:text-blue-300"
-              >
-                show less
-              </a>
-            )}
-          </>
-        )}
-      </div>
-    ) : null;
-  };
+  //   return diagnoses.length ? (
+  //     <div className="w-full text-sm">
+  //       <p className="font-semibold leading-relaxed">{label}</p>
+  //       {diagnoses.slice(0, !showMore ? nshow : undefined).map((diagnosis) =>
+  //         diagnosis.id === consultationData.icd11_principal_diagnosis ? (
+  //           <div className="relative flex items-center gap-2">
+  //             <p>{diagnosis.label}</p>
+  //             <div>
+  //               <ToolTip text="Principal Diagnosis" position="BOTTOM">
+  //                 <CareIcon className="care-l-stethoscope rounded-lg bg-primary-500  p-1 text-2xl text-white" />
+  //               </ToolTip>
+  //             </div>
+  //           </div>
+  //         ) : (
+  //           <p>{diagnosis.label}</p>
+  //         )
+  //       )}
+  //       {diagnoses.length > nshow && (
+  //         <>
+  //           {!showMore ? (
+  //             <a
+  //               onClick={() => setShowMore(true)}
+  //               className="cursor-pointer text-sm text-blue-600 hover:text-blue-300"
+  //             >
+  //               show more
+  //             </a>
+  //           ) : (
+  //             <a
+  //               onClick={() => setShowMore(false)}
+  //               className="cursor-pointer text-sm text-blue-600 hover:text-blue-300"
+  //             >
+  //               show less
+  //             </a>
+  //           )}
+  //         </>
+  //       )}
+  //     </div>
+  //   ) : null;
+  // };
 
   return (
     <div>
@@ -430,21 +430,8 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )*/}
 
-                <ShowDiagnosis
-                  diagnoses={
-                    consultationData?.icd11_provisional_diagnoses_object
-                  }
-                  label="Provisional Diagnosis (as per ICD-11 recommended by WHO)"
-                />
-
-                <ShowDiagnosis
-                  diagnoses={[
-                    ...(consultationData?.diagnosis
-                      ? [{ id: "0", label: consultationData?.diagnosis }]
-                      : []),
-                    ...(consultationData?.icd11_diagnoses_object ?? []),
-                  ]}
-                  label="Diagnosis (as per ICD-11 recommended by WHO)"
+                <LegacyDiagnosesList
+                  diagnoses={consultationData.diagnoses || []}
                 />
 
                 {(consultationData.verified_by_object ||

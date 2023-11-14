@@ -139,7 +139,7 @@ export default function ManageUsers() {
       className="w-full"
       onClick={() => navigate("/users/add")}
     >
-      <CareIcon className="care-l-plus w-full text-lg" />
+      <CareIcon icon="l-plus" className="text-lg" />
       <p>Add New User</p>
     </ButtonV2>
   );
@@ -442,7 +442,7 @@ export default function ManageUsers() {
                   ) && (
                     <div className="flex-col md:flex-row">
                       <ButtonV2
-                        id="skills"
+                        id="avg-workinghour"
                         className="flex w-full items-center md:w-full"
                         onClick={() => {
                           setExpandWorkingHours(true);

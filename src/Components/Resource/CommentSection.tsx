@@ -4,7 +4,6 @@ import { formatDateTime } from "../../Utils/utils";
 import CircularProgress from "../Common/components/CircularProgress";
 import ButtonV2 from "../Common/components/ButtonV2";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import PaginatedList from "../../CAREUI/misc/PaginatedList";
 import { IComment } from "./models";
@@ -12,12 +11,6 @@ import request from "../../Utils/request/request";
 
 const CommentSection = (props: { id: string }) => {
   const [commentBox, setCommentBox] = useState("");
-  const { loading, refetch: resourceRefetch } = useQuery(
-    routes.getResourceComments,
-    {
-      pathParams: { id: props.id },
-    }
-  );
 
   const onSubmitComment = async () => {
     const payload = {
@@ -35,49 +28,52 @@ const CommentSection = (props: { id: string }) => {
     });
     if (res?.ok) {
       Notification.Success({ msg: "Comment added successfully" });
-      resourceRefetch();
     }
     setCommentBox("");
   };
   return (
-    <div className="flex w-full flex-col">
-      <TextAreaFormField
-        name="comment"
-        placeholder="Type your comment"
-        value={commentBox}
-        onChange={(e) => setCommentBox(e.value)}
-      />
-      <div className="flex w-full justify-end">
-        <ButtonV2 onClick={onSubmitComment}>Post Your Comment</ButtonV2>
-      </div>
-      <div className="w-full">
-        {loading ? (
-          <CircularProgress className="h-12 w-12" />
-        ) : (
-          <PaginatedList
-            route={routes.getResourceComments}
-            pathParams={{ id: props.id }}
-          >
-            {() => (
-              <div>
-                <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-gray-200 bg-white p-5 text-center text-2xl font-bold text-gray-500">
-                  <span>No comments available</span>
-                </PaginatedList.WhenEmpty>
-                <PaginatedList.WhenLoading>
-                  <CircularProgress className="h-12 w-12" />
-                </PaginatedList.WhenLoading>
-                <PaginatedList.Items<IComment>>
-                  {(item) => <Comment {...item} />}
-                </PaginatedList.Items>
-                <div className="flex w-full items-center justify-center">
-                  <PaginatedList.Paginator hideIfSinglePage />
-                </div>
+    <PaginatedList
+      route={routes.getResourceComments}
+      pathParams={{ id: props.id }}
+    >
+      {(_, query) => (
+        <div className="flex w-full flex-col">
+          <TextAreaFormField
+            name="comment"
+            placeholder="Type your comment"
+            value={commentBox}
+            onChange={(e) => setCommentBox(e.value)}
+          />
+
+          <div className="flex w-full justify-end">
+            <ButtonV2
+              onClick={async () => {
+                await onSubmitComment();
+                query.refetch();
+              }}
+            >
+              Post Your Comment
+            </ButtonV2>
+          </div>
+          <div className="w-full">
+            <div>
+              <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-gray-200 bg-white p-5 text-center text-2xl font-bold text-gray-500">
+                <span>No comments available</span>
+              </PaginatedList.WhenEmpty>
+              <PaginatedList.WhenLoading>
+                <CircularProgress className="h-12 w-12" />
+              </PaginatedList.WhenLoading>
+              <PaginatedList.Items<IComment>>
+                {(item) => <Comment {...item} />}
+              </PaginatedList.Items>
+              <div className="flex w-full items-center justify-center">
+                <PaginatedList.Paginator hideIfSinglePage />
               </div>
-            )}
-          </PaginatedList>
-        )}
-      </div>
-    </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </PaginatedList>
   );
 };
 
