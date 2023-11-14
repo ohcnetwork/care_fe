@@ -75,8 +75,10 @@ export default function UserFilter(props: any) {
 
   useEffect(() => {
     const fetchData = async () => {
-      await refetch();
-      setFilterState({ district_ref: districtData });
+      if (filter.district_id) {
+        await refetch();
+        setFilterState({ district_ref: districtData });
+      }
     };
     fetchData();
   }, [filter.district_id]);
