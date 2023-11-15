@@ -39,7 +39,11 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
 
   const discontinuedPrescriptions = useQuery(MedicineRoutes.listPrescriptions, {
     pathParams: { consultation },
-    query: { ...filters, discontinued: true },
+    query: {
+      ...filters,
+      limit: showDiscontinued ? 100 : 1,
+      discontinued: true,
+    },
     prefetch: !showDiscontinued,
   });
 
@@ -112,33 +116,48 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
             loading || !prescriptions?.length || !(prescriptions?.length > 1)
           }
         >
-          {loading && <Loading />}
-          {prescriptions?.length === 0 && <NoPrescriptions prn={is_prn} />}
-
-          {!!prescriptions?.length && (
-            <MedicineAdministrationTable
-              prescriptions={prescriptions}
-              pagination={pagination}
-              onRefetch={() => {
-                refetch();
-                discontinuedPrescriptions.refetch();
-              }}
-            />
+          {loading ? (
+            <Loading />
+          ) : (
+            <>
+              {prescriptions?.length === 0 && <NoPrescriptions prn={is_prn} />}
+              {!!prescriptions?.length && (
+                <MedicineAdministrationTable
+                  prescriptions={prescriptions}
+                  pagination={pagination}
+                  onRefetch={() => {
+                    refetch();
+                    discontinuedPrescriptions.refetch();
+                  }}
+                />
+              )}
+            </>
           )}
         </ScrollOverlay>
-        {!showDiscontinued && !!discontinuedCount && (
+        {!!discontinuedCount && (
           <ButtonV2
             variant="secondary"
             className="group sticky left-0 w-full rounded-b-lg rounded-t-none bg-gray-100"
-            onClick={() => setShowDiscontinued(true)}
+            onClick={() => !loading && setShowDiscontinued(!showDiscontinued)}
           >
-            <span className="flex w-full items-center justify-start gap-1 text-xs transition-all duration-200 ease-in-out group-hover:gap-3 md:text-sm">
-              <CareIcon icon="l-eye" className="text-lg" />
-              <span>
-                Show <strong>{discontinuedCount}</strong> discontinued
-                prescription(s)
+            {loading ? (
+              <span className="flex w-full items-center justify-start gap-1 text-xs transition-all duration-200 ease-in-out group-hover:gap-3 md:text-sm">
+                <CareIcon icon="l-spinner-alt" className="text-lg" />
+                <span>Loading...</span>
               </span>
-            </span>
+            ) : (
+              <span className="flex w-full items-center justify-start gap-1 text-xs transition-all duration-200 ease-in-out group-hover:gap-3 md:text-sm">
+                <CareIcon
+                  icon={showDiscontinued ? "l-eye-slash" : "l-eye"}
+                  className="text-lg"
+                />
+                <span>
+                  {showDiscontinued ? "Hide" : "Show"}{" "}
+                  <strong>{discontinuedCount}</strong> discontinued
+                  prescription(s)
+                </span>
+              </span>
+            )}
           </ButtonV2>
         )}
       </div>
