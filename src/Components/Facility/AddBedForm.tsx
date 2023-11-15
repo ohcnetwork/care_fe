@@ -229,6 +229,11 @@ export const AddBedForm = (props: BedFormProps) => {
                   min={1}
                   max={100}
                   onChange={(e) => setNumberOfBeds(Number(e.value))}
+                  error={
+                    numberOfBeds > 100
+                      ? "Number of beds cannot be greater than 100"
+                      : undefined
+                  }
                 />
               </>
             )}
