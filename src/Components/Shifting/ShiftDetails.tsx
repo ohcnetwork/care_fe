@@ -801,7 +801,7 @@ export default function ShiftDetails(props: { id: string }) {
               <h4 className="mt-8">{t("audit_log")}</h4>
 
               <div className="mt-2 grid rounded-lg bg-white p-2 px-4 text-center shadow lg:grid-cols-2">
-                <div className="border-b-2 pb-2 lg:border-b-0 lg:border-r-2 lg:pb-0">
+                <div className="flex flex-col items-center border-b-2 pb-2 lg:border-b-0 lg:border-r-2 lg:pb-0">
                   <div className="text-sm font-medium leading-5 text-gray-500">
                     {t("created")}
                   </div>
@@ -811,11 +811,16 @@ export default function ShiftDetails(props: { id: string }) {
                       {data?.created_by_object?.last_name}
                     </div>
                     <div className="text-xs">
-                      {data?.created_date && formatDateTime(data?.created_date)}
+                      {data?.created_date && (
+                        <RecordMeta
+                          prefix={t("created")}
+                          time={data?.created_date}
+                        />
+                      )}
                     </div>
                   </div>
                 </div>
-                <div className="mt-2 lg:mt-0">
+                <div className=" mt-2 flex flex-col items-center lg:mt-0">
                   <div className="text-sm font-medium leading-5 text-gray-500">
                     {t("last_edited")}
                   </div>
@@ -825,8 +830,12 @@ export default function ShiftDetails(props: { id: string }) {
                       {data?.last_edited_by_object?.last_name}
                     </div>
                     <div className="text-xs">
-                      {data?.modified_date &&
-                        formatDateTime(data?.modified_date)}
+                      {data?.modified_date && (
+                        <RecordMeta
+                          prefix={t("updated")}
+                          time={data?.modified_date}
+                        />
+                      )}
                     </div>
                   </div>
                 </div>
