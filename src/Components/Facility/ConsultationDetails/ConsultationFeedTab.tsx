@@ -1,22 +1,29 @@
 import { lazy } from "react";
 import { Feed } from "../Consultations/Feed";
 import { ConsultationTabProps } from "./index";
-
-const PageTitle = lazy(() => import("../../Common/PageTitle"));
+import PatientPrivacyToggle from "../../Patient/PatientPrivacyToggle";
+const Page = lazy(() => import("../../Common/components/Page"));
 
 export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   return (
-    <div>
-      <PageTitle
-        title="Camera Feed"
-        breadcrumbs={false}
-        hideBack={true}
-        focusOnLoad={true}
-      />
+    <Page
+      title="Camera Feed"
+      breadcrumbs={false}
+      hideBack={true}
+      focusOnLoad={true}
+      className="px-0"
+      options={
+        <PatientPrivacyToggle
+          consultationId={props.consultationId}
+          consultation={props.consultationData}
+          // fetchPatientData={props.patientData}
+        />
+      }
+    >
       <Feed
         facilityId={props.facilityId}
         consultationId={props.consultationId}
       />
-    </div>
+    </Page>
   );
 };
