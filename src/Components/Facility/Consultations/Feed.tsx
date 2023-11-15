@@ -205,7 +205,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     const fetchFacility = async () => {
       const res = await dispatch(getPermittedFacility(facilityId));
 
-      if (res.status === 200 && res.data) {
+      if (res?.status === 200 && res?.data) {
         setFacilityMiddlewareHostname(res.data.middleware_address);
       }
     };
@@ -446,7 +446,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
         }
       });
     };
-  }, [cameraAsset]);
+  }, [cameraAsset.id]);
 
   //count down from CAMERA_ACCESS_TIMEOUT when mouse is idle to unlock asset after timeout
   useEffect(() => {
@@ -516,7 +516,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   });
 
   useEffect(() => {
-    let tId: any;
+    let tId: NodeJS.Timeout;
     if (streamStatus !== StreamStatus.Playing) {
       if (streamStatus !== StreamStatus.Offline) {
         setStreamStatus(StreamStatus.Loading);
@@ -536,7 +536,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
             }
           },
         });
-      }, 100);
+      }, 1000);
     } else if (!statusReported) {
       triggerGoal("Camera Feed Viewed", {
         consultationId,
@@ -549,7 +549,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     return () => {
       clearTimeout(tId);
     };
-  }, [startStream, streamStatus]);
+  }, [startStream, streamStatus, authUser.id, consultationId, statusReported]);
 
   useAbortableEffect((status: statusType) => {
     fetchData(status);
@@ -932,6 +932,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
               playing={true}
               muted={true}
               onPlay={() => {
+                setStreamStatus(StreamStatus.Playing);
                 setVideoStartTime(() => new Date());
               }}
               width="100%"
@@ -960,6 +961,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
               playsInline
               className="max-h-full max-w-full"
               onPlay={() => {
+                setStreamStatus(StreamStatus.Playing);
                 setVideoStartTime(() => new Date());
               }}
               onWaiting={() => {
