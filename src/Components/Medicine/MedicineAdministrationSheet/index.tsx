@@ -138,26 +138,20 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
           <ButtonV2
             variant="secondary"
             className="group sticky left-0 w-full rounded-b-lg rounded-t-none bg-gray-100"
-            onClick={() => !loading && setShowDiscontinued(!showDiscontinued)}
+            disabled={loading || discontinuedPrescriptions.loading}
+            onClick={() => setShowDiscontinued(!showDiscontinued)}
           >
-            {loading ? (
-              <span className="flex w-full items-center justify-start gap-1 text-xs transition-all duration-200 ease-in-out group-hover:gap-3 md:text-sm">
-                <CareIcon icon="l-spinner-alt" className="text-lg" />
-                <span>Loading...</span>
+            <span className="flex w-full items-center justify-start gap-1 text-xs transition-all duration-200 ease-in-out group-hover:gap-3 md:text-sm">
+              <CareIcon
+                icon={showDiscontinued ? "l-eye-slash" : "l-eye"}
+                className="text-lg"
+              />
+              <span>
+                {showDiscontinued ? "Hide" : "Show"}{" "}
+                <strong>{discontinuedCount}</strong> discontinued
+                prescription(s)
               </span>
-            ) : (
-              <span className="flex w-full items-center justify-start gap-1 text-xs transition-all duration-200 ease-in-out group-hover:gap-3 md:text-sm">
-                <CareIcon
-                  icon={showDiscontinued ? "l-eye-slash" : "l-eye"}
-                  className="text-lg"
-                />
-                <span>
-                  {showDiscontinued ? "Hide" : "Show"}{" "}
-                  <strong>{discontinuedCount}</strong> discontinued
-                  prescription(s)
-                </span>
-              </span>
-            )}
+            </span>
           </ButtonV2>
         )}
       </div>
