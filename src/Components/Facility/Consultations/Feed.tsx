@@ -446,7 +446,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
         }
       });
     };
-  }, [cameraAsset, cameraMiddlewareHostname]);
+  }, [cameraAsset]);
 
   //count down from CAMERA_ACCESS_TIMEOUT when mouse is idle to unlock asset after timeout
   useEffect(() => {
