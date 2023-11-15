@@ -61,6 +61,11 @@ const triageFormReducer = (state = initialState, action: any) => {
   }
 };
 
+const scrollTo = (id: string | boolean) => {
+  const element = document.querySelector(`#${id}`);
+  element?.scrollIntoView({ behavior: "smooth", block: "center" });
+};
+
 export const TriageForm = (props: triageFormProps) => {
   const { goBack } = useAppHistory();
   const dispatchTriageData: any = useDispatch();
@@ -172,6 +177,10 @@ export const TriageForm = (props: triageFormProps) => {
     });
     if (invalidForm) {
       dispatch({ type: "set_error", errors });
+      const firstError = Object.keys(errors).find((e) => errors[e]);
+      if (firstError) {
+        scrollTo(firstError);
+      }
       return false;
     }
     dispatch({ type: "set_error", errors });
