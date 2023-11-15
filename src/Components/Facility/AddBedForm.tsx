@@ -239,7 +239,11 @@ export const AddBedForm = (props: BedFormProps) => {
             )}
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-end">
               <Cancel onClick={handleCancel} />
-              <Submit onClick={handleSubmit} label={buttonText} />
+              <Submit
+                onClick={handleSubmit}
+                label={buttonText}
+                disabled={numberOfBeds > 100}
+              />
             </div>
           </form>
         </Card>
