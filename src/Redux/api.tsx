@@ -201,7 +201,7 @@ const routes = {
   },
 
   deleteUser: {
-    path: "/api/v1/users/{username}",
+    path: "/api/v1/users/{username}/",
     method: "DELETE",
     TRes: Type<Record<string, never>>(),
   },
@@ -395,7 +395,7 @@ const routes = {
 
   // Download Api
   deleteFacility: {
-    path: "/api/v1/facility/{id}",
+    path: "/api/v1/facility/{id}/",
     method: "DELETE",
     TRes: Type<Record<string, never>>(),
   },
