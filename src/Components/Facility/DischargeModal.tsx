@@ -12,7 +12,7 @@ import DateFormField from "../Form/FormFields/DateFormField";
 import DialogModal from "../Common/Dialog";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
-import { HCXActions, PrescriptionActions } from "../../Redux/actions";
+import { HCXActions } from "../../Redux/actions";
 import { HCXClaimModel } from "../HCX/models";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
@@ -75,7 +75,7 @@ const DischargeModal = ({
   const [latestClaim, setLatestClaim] = useState<HCXClaimModel>();
   const [isCreateClaimLoading, setIsCreateClaimLoading] = useState(false);
   const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
-  const [facility, setFacility] = useState<FacilityModel>({ id: 0, name: "" }); // for referred to external
+  const [facility, setFacility] = useState<FacilityModel>();
   const [errors, setErrors] = useState<any>({});
 
   const fetchLatestClaim = useCallback(async () => {
@@ -87,7 +87,7 @@ const DischargeModal = ({
       })
     );
 
-    if (res.data?.results?.length) {
+    if (res?.data?.results?.length > 0) {
       setLatestClaim(res.data.results[0]);
       if (isCreateClaimLoading)
         Notification.Success({ msg: "Fetched Claim Approval Results" });
@@ -183,15 +183,14 @@ const DischargeModal = ({
     });
   };
 
-  const prescriptionActions = PrescriptionActions(consultationData.id ?? "");
-
   const handleFacilitySelect = (selected: FacilityModel) => {
-    setFacility(selected ? selected : facility);
-    const { id, name } = selected;
+    setFacility(selected);
+    const { id, name } = selected || {};
     const isExternal = id === -1;
     setPreDischargeForm((prev) => ({
       ...prev,
-      ...(isExternal ? { referred_to_external: name } : { referred_to: id }),
+      referred_to: isExternal ? null : id,
+      referred_to_external: isExternal ? name : null,
     }));
   };
 
@@ -237,9 +236,9 @@ const DischargeModal = ({
               setSelected={(selected) =>
                 handleFacilitySelect(selected as FacilityModel)
               }
-              selected={facility}
-              showAll={true}
-              freeText={true}
+              selected={facility ?? null}
+              showAll
+              freeText
               multiple={false}
               errors={errors?.referred_to}
               className="mb-4"
@@ -283,18 +282,11 @@ const DischargeModal = ({
 
             <div className="mb-4">
               <FieldLabel>Discharge Prescription Medications</FieldLabel>
-              <PrescriptionBuilder
-                actions={prescriptionActions}
-                prescription_type="DISCHARGE"
-              />
+              <PrescriptionBuilder prescription_type="DISCHARGE" />
             </div>
             <div className="mb-4">
               <FieldLabel>Discharge PRN Prescriptions</FieldLabel>
-              <PrescriptionBuilder
-                actions={prescriptionActions}
-                prescription_type="DISCHARGE"
-                is_prn
-              />
+              <PrescriptionBuilder prescription_type="DISCHARGE" is_prn />
             </div>
           </div>
         )}

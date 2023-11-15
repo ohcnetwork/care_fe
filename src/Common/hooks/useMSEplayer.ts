@@ -20,6 +20,8 @@ interface UseMSEMediaPlayerOption {
 export interface ICameraAssetState {
   id: string;
   accessKey: string;
+  middleware_address: string;
+  location_middleware: string;
 }
 
 export enum StreamStatus {
@@ -207,6 +209,9 @@ export const useMSEMediaPlayer = ({
               } else {
                 readPacket(event.data);
               }
+            };
+            ws.onerror = function (event) {
+              onError && onError(event);
             };
           },
           false

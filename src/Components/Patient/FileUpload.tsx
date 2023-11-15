@@ -100,7 +100,7 @@ interface FileUploadProps {
   hideBack: boolean;
   audio?: boolean;
   unspecified: boolean;
-  sampleId?: number;
+  sampleId?: string;
   claimId?: string;
 }
 
@@ -481,15 +481,20 @@ export const FileUpload = (props: FileUploadProps) => {
     };
     const responseData = await dispatch(retrieveUpload(data, id));
     const file_extension = getExtension(responseData.data.read_signed_url);
-    setFileState({
-      ...file_state,
-      open: true,
-      name: responseData.data.name,
-      extension: file_extension,
-      isImage: ExtImage.includes(file_extension),
-    });
-    downloadFileUrl(responseData.data.read_signed_url);
-    setFileUrl(responseData.data.read_signed_url);
+    if (file_extension === "pdf") {
+      window.open(responseData.data.read_signed_url, "_blank");
+      setFileState({ ...file_state, open: false });
+    } else {
+      setFileState({
+        ...file_state,
+        open: true,
+        name: responseData.data.name,
+        extension: file_extension,
+        isImage: ExtImage.includes(file_extension),
+      });
+      downloadFileUrl(responseData.data.read_signed_url);
+      setFileUrl(responseData.data.read_signed_url);
+    }
   };
 
   const validateEditFileName = (name: any) => {
@@ -1518,6 +1523,7 @@ export const FileUpload = (props: FileUploadProps) => {
                             <CareIcon className="care-l-file-upload-alt text-lg" />
                             {t("choose_file")}
                             <input
+                              id="file_upload_patient"
                               title="changeFile"
                               onChange={onFileChange}
                               type="file"
@@ -1537,6 +1543,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       Open Camera
                     </ButtonV2>
                     <ButtonV2
+                      id="upload_file_button"
                       authorizeFor={NonReadOnlyUsers}
                       disabled={!file || !uploadFileName || !isActive}
                       onClick={() => handleUpload({ status })}

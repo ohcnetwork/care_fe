@@ -1,6 +1,6 @@
 import * as Notification from "../Utils/Notifications.js";
 
-import { isEmpty, omitBy } from "lodash";
+import { isEmpty, omitBy } from "lodash-es";
 
 import { LocalStorageKeys } from "../Common/constants";
 import api from "./api";
@@ -93,11 +93,15 @@ export const fireRequest = (
     const config: any = {
       headers: {},
     };
-    if (!request.noAuth && localStorage.getItem(LocalStorageKeys.accessToken)) {
-      config.headers["Authorization"] =
-        "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken);
-    } else {
-      // TODO: get access token
+    if (!request.noAuth) {
+      const access_token = localStorage.getItem(LocalStorageKeys.accessToken);
+      if (access_token) {
+        config.headers["Authorization"] = "Bearer " + access_token;
+      } else {
+        // The access token is missing from the local storage. Redirect to login page.
+        window.location.href = "/";
+        return;
+      }
     }
     const axiosApiCall: any = axios.create(config);
 
@@ -153,7 +157,7 @@ export const fireRequest = (
           if (error.response.status > 400 && error.response.status < 500) {
             if (error.response.data && error.response.data.detail) {
               if (error.response.data.code === "token_not_valid") {
-                window.location.href = "/session-expired";
+                window.location.href = `/session-expired?redirect=${window.location.href}`;
               }
               Notification.Error({
                 msg: error.response.data.detail,

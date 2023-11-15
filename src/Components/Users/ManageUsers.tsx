@@ -73,6 +73,8 @@ export default function ManageUsers() {
     name: string;
   }>({ show: false, username: "", name: "" });
 
+  const [weeklyHoursError, setWeeklyHoursError] = useState<string>("");
+
   const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen =
     width <= extremeSmallScreenBreakpoint ? true : false;
@@ -132,8 +134,12 @@ export default function ManageUsers() {
   );
 
   const addUser = (
-    <ButtonV2 className="w-full" onClick={() => navigate("/users/add")}>
-      <CareIcon className="care-l-plus w-full text-lg" />
+    <ButtonV2
+      id="addUserButton"
+      className="w-full"
+      onClick={() => navigate("/users/add")}
+    >
+      <CareIcon icon="l-plus" className="text-lg" />
       <p>Add New User</p>
     </ButtonV2>
   );
@@ -144,7 +150,10 @@ export default function ManageUsers() {
 
   const handleWorkingHourSubmit = async () => {
     const username = selectedUser;
-    if (!username || weeklyHours < 0 || weeklyHours > 168) return;
+    if (!username || !weeklyHours || weeklyHours < 0 || weeklyHours > 168) {
+      setWeeklyHoursError("Value should be between 0 and 168");
+      return;
+    }
     const res = await dispatch(
       partialUpdateUser(username, {
         weekly_working_hours: weeklyHours,
@@ -163,6 +172,7 @@ export default function ManageUsers() {
       });
     }
     setWeeklyHours(0);
+    setWeeklyHoursError("");
     fetchData({ aborted: false });
   };
 
@@ -387,7 +397,10 @@ export default function ManageUsers() {
                   )}
                 </div>
                 <div>
-                  <UserDetails id="working-hours" title="Weekly working hours">
+                  <UserDetails
+                    id="working-hours"
+                    title="Average weekly working hours"
+                  >
                     {user.weekly_working_hours ? (
                       <span className="font-semibold">
                         {user.weekly_working_hours} hours
@@ -429,7 +442,7 @@ export default function ManageUsers() {
                   ) && (
                     <div className="flex-col md:flex-row">
                       <ButtonV2
-                        id="skills"
+                        id="avg-workinghour"
                         className="flex w-full items-center md:w-full"
                         onClick={() => {
                           setExpandWorkingHours(true);
@@ -438,7 +451,7 @@ export default function ManageUsers() {
                         }}
                       >
                         <CareIcon className="care-l-clock text-xl" />
-                        <p>Set weekly working hours</p>
+                        <p>Set Average weekly working hours</p>
                       </ButtonV2>
                     </div>
                   )}
@@ -490,17 +503,18 @@ export default function ManageUsers() {
       </SlideOverCustom>
       <SlideOverCustom
         open={expandWorkingHours}
-        setOpen={setExpandWorkingHours}
-        slideFrom="right"
-        title="Weekly working hours"
-        dialogClass="md:w-[400px]"
-        onCloseClick={() => {
+        setOpen={(state) => {
+          setExpandWorkingHours(state);
           setWeeklyHours(0);
+          setWeeklyHoursError("");
         }}
+        slideFrom="right"
+        title="Average weekly working hours"
+        dialogClass="md:w-[400px]"
       >
         <div className="px-2">
           <dt className="mb-3 text-sm font-medium leading-5 text-black">
-            Set weekly working hours for {selectedUser}
+            Set Average weekly working hours for {selectedUser}
           </dt>
           <TextFormField
             name="weekly_working_hours"
@@ -509,11 +523,7 @@ export default function ManageUsers() {
             onChange={(e) => {
               setWeeklyHours(e.value);
             }}
-            error={
-              weeklyHours < 0 || weeklyHours > 168
-                ? "Weekly working hours should be between 0 and 168"
-                : ""
-            }
+            error={weeklyHoursError}
             required
             label=""
             type="number"
@@ -537,6 +547,7 @@ export default function ManageUsers() {
         <div className="col-span-2 my-2 flex flex-col justify-between space-y-3 lg:flex-row lg:space-x-4 lg:space-y-0 lg:px-3">
           <div className="w-full">
             <SearchInput
+              id="search-by-username"
               name="username"
               onChange={(e) => updateQuery({ [e.name]: e.value })}
               value={qParams.username}
@@ -695,6 +706,7 @@ function UserFacilities(props: { user: any }) {
         <FacilitySelect
           multiple={false}
           name="facility"
+          exclude_user={username}
           showAll={false} // Show only facilities that user has access to link (not all facilities)
           showNOptions={8}
           selected={facility}
@@ -719,7 +731,7 @@ function UserFacilities(props: { user: any }) {
         <div className="flex flex-col">
           {/* Home Facility section */}
           {user?.home_facility_object && (
-            <div className="mt-2">
+            <div className="mt-2" id="home-facility">
               <div className="mb-2 ml-2 text-lg font-bold">Home Facility</div>
               <div className="relative rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg">
                 <div className="flex items-center justify-between">
@@ -750,7 +762,7 @@ function UserFacilities(props: { user: any }) {
 
           {/* Linked Facilities section */}
           {facilities.length > 0 && (
-            <div className="mt-2">
+            <div className="mt-2" id="linked-facility-list">
               <div className="mb-2 ml-2 text-lg font-bold">
                 Linked Facilities
               </div>
@@ -773,6 +785,7 @@ function UserFacilities(props: { user: any }) {
                         <div className="flex items-center gap-2">
                           <button
                             className="tooltip text-lg hover:text-primary-500"
+                            id="home-facility-icon"
                             onClick={() => {
                               if (user?.home_facility_object) {
                                 // has previous home facility
@@ -794,6 +807,7 @@ function UserFacilities(props: { user: any }) {
                             </span>
                           </button>
                           <button
+                            id="unlink-facility-button"
                             className="tooltip text-lg text-red-600"
                             onClick={() =>
                               setUnlinkFacilityData({

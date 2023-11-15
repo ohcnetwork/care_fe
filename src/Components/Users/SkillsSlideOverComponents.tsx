@@ -45,6 +45,7 @@ export const SkillsArray = ({
             <div className="text-lg font-bold">{skill.skill_object.name}</div>
             <div>
               <ButtonV2
+                id="unlink-skill"
                 size="small"
                 variant="danger"
                 ghost={true}

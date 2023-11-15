@@ -61,7 +61,7 @@ export default function SlideOver({
     <Transition.Root show={open} as={Fragment}>
       <Dialog
         as="div"
-        className="relative z-10"
+        className="relative z-30"
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         onClose={closeOnBackdropClick ? setOpen : () => {}}
       >
@@ -109,6 +109,7 @@ export default function SlideOver({
               >
                 <div className="flex items-center gap-2 p-2 pt-4">
                   <button
+                    id="close-slide-over"
                     className="flex h-8 w-8 items-center justify-center rounded-lg text-2xl hover:bg-black/20"
                     onClick={() => {
                       setOpen(false);

@@ -1,10 +1,10 @@
 import { classNames } from "../../../Utils/utils";
 export default function SwitchTabs(props: {
-  activeTab: boolean;
+  isTab2Active: boolean;
   onClickTab1: () => void;
   onClickTab2: () => void;
-  Tab1: string;
-  Tab2: string;
+  tab1: string;
+  tab2: string;
   className?: string;
 }) {
   const className = classNames(
@@ -15,28 +15,28 @@ export default function SwitchTabs(props: {
     <div className={className}>
       <div
         className={`absolute z-0 w-[50%] origin-left rounded bg-primary-500 py-4 transition-all duration-200 ease-out lg:left-1.5 ${
-          props.activeTab ? "right-1.5 lg:translate-x-[89%]" : "left-1.5"
+          props.isTab2Active ? "right-1.5 lg:translate-x-[89%]" : "left-1.5"
         }`}
       ></div>
       <div
         className={`z-10 flex cursor-pointer items-center justify-center text-sm transition-all duration-200 ease-out ${
-          props.activeTab
+          props.isTab2Active
             ? "text-primary-500 hover:font-medium hover:text-green-600"
             : "text-white"
         } `}
         onClick={props.onClickTab1}
       >
-        {props.Tab1}
+        {props.tab1}
       </div>
       <div
         className={`z-10 flex cursor-pointer items-center justify-center text-sm transition-all duration-200 ease-out ${
-          !props.activeTab
+          !props.isTab2Active
             ? "ml-2 text-primary-500 hover:font-medium hover:text-green-600"
             : "text-white"
         }`}
         onClick={props.onClickTab2}
       >
-        {props.Tab2}
+        {props.tab2}
       </div>
     </div>
   );

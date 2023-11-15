@@ -1,6 +1,6 @@
 import * as Notification from "../../Utils/Notifications.js";
 
-import { BedModel, FacilityModel, ICD11DiagnosisModel } from "./models";
+import { BedModel, FacilityModel } from "./models";
 import {
   CONSULTATION_STATUS,
   CONSULTATION_SUGGESTION,
@@ -38,9 +38,11 @@ import Beds from "./Consultations/Beds";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import DateFormField from "../Form/FormFields/DateFormField";
-import { DiagnosisSelectFormField } from "../Common/DiagnosisSelectFormField";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
+import {
+  FieldChangeEvent,
+  FieldChangeEventHandler,
+} from "../Form/FormFields/Utils";
 import { FormAction } from "../Form/Utils";
 import PatientCategorySelect from "../Patient/PatientCategorySelect";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
@@ -57,6 +59,15 @@ import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import useVisibility from "../../Utils/useVisibility";
 import dayjs from "../../Utils/dayjs";
+import {
+  ConditionVerificationStatuses,
+  ConsultationDiagnosis,
+  CreateDiagnosis,
+} from "../Diagnosis/types.js";
+import {
+  CreateDiagnosesBuilder,
+  EditDiagnosesBuilder,
+} from "../Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -78,9 +89,10 @@ type FormDetails = {
   discharge_date: null;
   referred_to?: string;
   referred_to_external?: string;
-  icd11_diagnoses_object: ICD11DiagnosisModel[];
-  icd11_provisional_diagnoses_object: ICD11DiagnosisModel[];
+  create_diagnoses: CreateDiagnosis[];
+  diagnoses: ConsultationDiagnosis[];
   verified_by: string;
+  verified_by_object: UserModel | null;
   is_kasp: BooleanStrings;
   kasp_enabled_date: null;
   examination_details: string;
@@ -91,7 +103,7 @@ type FormDetails = {
   procedure: ProcedureType[];
   investigation: InvestigationType[];
   is_telemedicine: BooleanStrings;
-  action?: string;
+  action?: number;
   assigned_to: string;
   assigned_to_object: UserModel | null;
   special_instruction: string;
@@ -117,14 +129,15 @@ const initForm: FormDetails = {
   facility: "",
   admitted: "false",
   admitted_to: "",
-  category: "Comfort",
+  category: "",
   admission_date: new Date(),
   discharge_date: null,
   referred_to: "",
   referred_to_external: "",
-  icd11_diagnoses_object: [],
-  icd11_provisional_diagnoses_object: [],
+  create_diagnoses: [],
+  diagnoses: [],
   verified_by: "",
+  verified_by_object: null,
   is_kasp: "false",
   kasp_enabled_date: null,
   examination_details: "",
@@ -135,7 +148,7 @@ const initForm: FormDetails = {
   procedure: [],
   investigation: [],
   is_telemedicine: "false",
-  action: "NO_ACTION",
+  action: 10,
   assigned_to: "",
   assigned_to_object: null,
   special_instruction: "",
@@ -271,15 +284,14 @@ export const ConsultationForm = (props: any) => {
         setIsLoading(true);
         const res = await dispatchAction(getPatient({ id: patientId }));
         if (res.data) {
+          if (isUpdate) {
+            dispatch({
+              type: "set_form",
+              form: { ...state.form, action: res.data.action },
+            });
+          }
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
-          if (isUpdate) {
-            const form = { ...state.form };
-            form.action = TELEMEDICINE_ACTIONS.find(
-              (a) => a.id === res.data.action
-            )?.text;
-            dispatch({ type: "set_form", form });
-          }
         }
       } else {
         setPatientName("");
@@ -293,6 +305,37 @@ export const ConsultationForm = (props: any) => {
   const hasSymptoms =
     !!state.form.symptoms.length && !state.form.symptoms.includes(1);
   const isOtherSymptomsSelected = state.form.symptoms.includes(9);
+
+  const handleFormFieldChange: FieldChangeEventHandler<unknown> = (event) => {
+    if (event.name === "consultation_status" && event.value === "1") {
+      dispatch({
+        type: "set_form",
+        form: {
+          ...state.form,
+          consultation_status: 1,
+          symptoms: [1],
+          symptoms_onset_date: new Date(),
+          category: "Critical",
+          suggestion: "DD",
+        },
+      });
+    } else if (event.name === "suggestion" && event.value === "DD") {
+      dispatch({
+        type: "set_form",
+        form: {
+          ...state.form,
+          suggestion: "DD",
+          consultation_notes: "Patient declared dead",
+          verified_by: "Declared Dead",
+        },
+      });
+    } else {
+      dispatch({
+        type: "set_form",
+        form: { ...state.form, [event.name]: event.value },
+      });
+    }
+  };
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -323,15 +366,16 @@ export const ConsultationForm = (props: any) => {
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
             category: res.data.category
               ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)
-                  ?.id ?? "Comfort"
-              : "Comfort",
+                  ?.id ?? ""
+              : "",
             patient_no: res.data.patient_no ?? "",
-            verified_by: res.data.verified_by ? res.data.verified_by : "",
             OPconsultation: res.data.consultation_notes,
             is_telemedicine: `${res.data.is_telemedicine}`,
             is_kasp: `${res.data.is_kasp}`,
             assigned_to: res.data.assigned_to || "",
             assigned_to_object: res.data.assigned_to_object,
+            verified_by: res.data.verified_by || "",
+            verified_by_object: res.data.verified_by_object,
             ett_tt: res.data.ett_tt ? Number(res.data.ett_tt) : 3,
             special_instruction: res.data.special_instruction || "",
             weight: res.data.weight ? res.data.weight : "",
@@ -342,8 +386,13 @@ export const ConsultationForm = (props: any) => {
             death_datetime: res.data?.death_datetime || "",
             death_confirmed_doctor: res.data?.death_confirmed_doctor || "",
             InvestigationAdvice: res.data.investigation,
+            diagnoses: res.data.diagnoses.sort(
+              (a: ConsultationDiagnosis, b: ConsultationDiagnosis) =>
+                ConditionVerificationStatuses.indexOf(a.verification_status) -
+                ConditionVerificationStatuses.indexOf(b.verification_status)
+            ),
           };
-          dispatch({ type: "set_form", form: formData });
+          dispatch({ type: "set_form", form: { ...state.form, ...formData } });
           setBed(formData.bed);
 
           if (res.data.last_daily_round) {
@@ -355,7 +404,7 @@ export const ConsultationForm = (props: any) => {
         setIsLoading(false);
       }
     },
-    [dispatchAction, id]
+    [dispatchAction, id, patientName, patientId]
   );
 
   useAbortableEffect(
@@ -529,27 +578,65 @@ export const ConsultationForm = (props: any) => {
         }
 
         case "verified_by": {
-          if (!state.form[field].replace(/\s/g, "").length) {
-            errors[field] = "Please fill verified by";
+          if (state.form.suggestion !== "DD" && !state.form[field]) {
+            errors[field] = "Please fill treating physician";
             invalidForm = true;
             break;
           }
           return;
         }
 
-        case "icd11_provisional_diagnoses_object": {
-          if (
-            state.form[field].length === 0 &&
-            state.form["icd11_diagnoses_object"].length === 0
-          ) {
-            for (const err_field of [field, "icd11_diagnoses_object"])
-              errors[err_field] =
-                "Please select either Provisional Diagnosis or Final Diagnosis";
-            invalidForm = true;
-            break;
-          }
-          return;
-        }
+        // case "icd11_provisional_diagnoses_object": {
+        //   if (
+        //     state.form[field].length === 0 &&
+        //     state.form["icd11_diagnoses_object"].length === 0
+        //   ) {
+        //     for (const err_field of [field, "icd11_diagnoses_object"])
+        //       errors[err_field] =
+        //         "Please select either Provisional Diagnosis or Final Diagnosis";
+        //     invalidForm = true;
+        //     break;
+        //   }
+        //   return;
+        // }
+
+        // case "icd11_principal_diagnosis": {
+        //   if (!state.form[field]) {
+        //     errors[field] = "Please select Principal Diagnosis";
+        //     invalidForm = true;
+        //     break;
+        //   }
+
+        //   if (
+        //     state.form[field] &&
+        //     state.form["icd11_diagnoses_object"].length &&
+        //     !state.form["icd11_provisional_diagnoses_object"] &&
+        //     !state.form["icd11_diagnoses_object"]
+        //       .map((d) => d.id)
+        //       .includes(state.form[field]!)
+        //   ) {
+        //     errors[field] =
+        //       "Please select Principal Diagnosis from Final Diagnosis";
+        //     invalidForm = true;
+        //     break;
+        //   }
+
+        //   if (
+        //     state.form[field] &&
+        //     state.form["icd11_provisional_diagnoses_object"].length &&
+        //     !state.form["icd11_diagnoses_object"] &&
+        //     !state.form["icd11_provisional_diagnoses_object"]
+        //       .map((d) => d.id)
+        //       .includes(state.form[field]!)
+        //   ) {
+        //     errors[field] =
+        //       "Please select Principal Diagnosis from Provisional Diagnosis";
+        //     invalidForm = true;
+        //     break;
+        //   }
+
+        //   return;
+        // }
 
         default:
           return;
@@ -571,6 +658,7 @@ export const ConsultationForm = (props: any) => {
   };
 
   const declareThePatientDead = async (
+    id: string,
     cause_of_death: string,
     death_datetime: string,
     death_confirmed_doctor: string
@@ -582,6 +670,7 @@ export const ConsultationForm = (props: any) => {
           discharge_notes: cause_of_death,
           death_datetime: death_datetime,
           death_confirmed_doctor: death_confirmed_doctor,
+          discharge_date: dayjs().toISOString(),
         },
         { id }
       )
@@ -623,13 +712,7 @@ export const ConsultationForm = (props: any) => {
         treatment_plan: state.form.treatment_plan,
         discharge_date: state.form.discharge_date,
         patient_no: state.form.patient_no,
-        icd11_diagnoses: state.form.icd11_diagnoses_object.map(
-          (o: ICD11DiagnosisModel) => o.id
-        ),
-        icd11_provisional_diagnoses:
-          state.form.icd11_provisional_diagnoses_object.map(
-            (o: ICD11DiagnosisModel) => o.id
-          ),
+        create_diagnoses: isUpdate ? undefined : state.form.create_diagnoses,
         verified_by: state.form.verified_by,
         investigation: state.form.InvestigationAdvice,
         procedure: state.form.procedures,
@@ -666,6 +749,7 @@ export const ConsultationForm = (props: any) => {
 
         if (data.suggestion === "DD") {
           await declareThePatientDead(
+            res.data.id,
             state.form.cause_of_death,
             state.form.death_datetime,
             state.form.death_confirmed_doctor
@@ -694,46 +778,14 @@ export const ConsultationForm = (props: any) => {
     }
   };
 
-  const handleFormFieldChange: FieldChangeEventHandler<unknown> = (event) => {
-    if (event.name === "consultation_status" && event.value === "1") {
+  const handleDoctorSelect = (event: FieldChangeEvent<UserModel | null>) => {
+    if (event.value?.id) {
       dispatch({
         type: "set_form",
         form: {
           ...state.form,
-          consultation_status: 1,
-          symptoms: [1],
-          symptoms_onset_date: new Date(),
-          category: "Critical",
-          suggestion: "DD",
-          verified_by: "Brought Dead",
-        },
-      });
-    } else if (event.name === "suggestion" && event.value === "DD") {
-      dispatch({
-        type: "set_form",
-        form: {
-          ...state.form,
-          suggestion: "DD",
-          consultation_notes: "Patient declared dead",
-          verified_by: "Declared Dead",
-        },
-      });
-    } else {
-      dispatch({
-        type: "set_form",
-        form: { ...state.form, [event.name]: event.value },
-      });
-    }
-  };
-
-  const handleDoctorSelect = (doctor: UserModel | null) => {
-    if (doctor?.id) {
-      dispatch({
-        type: "set_form",
-        form: {
-          ...state.form,
-          assigned_to: doctor.id.toString(),
-          assigned_to_object: doctor,
+          [event.name]: event.value.id.toString(),
+          [`${event.name}_object`]: event.value,
         },
       });
     } else {
@@ -741,8 +793,8 @@ export const ConsultationForm = (props: any) => {
         type: "set_form",
         form: {
           ...state.form,
-          assigned_to: "",
-          assigned_to_object: null,
+          [event.name]: "",
+          [`${event.name}_object`]: null,
         },
       });
     }
@@ -1129,28 +1181,25 @@ export const ConsultationForm = (props: any) => {
                 <div className="flex flex-col gap-4 pb-4">
                   <div className="flex flex-col">
                     {sectionTitle("Diagnosis", true)}
-                    <p className="-mt-4 mb-4 space-x-1 text-sm text-gray-700">
-                      <span className="font-medium">
-                        Either Provisional or Final Diagnosis is mandatory
-                      </span>
-                      <span>| Diagnoses as per ICD-11 recommended by WHO</span>
+                    <p className="-mt-4 space-x-1 text-sm text-gray-700">
+                      <span>Diagnoses as per ICD-11 recommended by WHO</span>
                     </p>
                   </div>
 
-                  <div ref={fieldRef["icd11_provisional_diagnoses_object"]}>
-                    <DiagnosisSelectFormField
-                      {...field("icd11_provisional_diagnoses_object")}
-                      multiple
-                      label="Provisional Diagnosis"
-                    />
-                  </div>
-
-                  <div ref={fieldRef["icd11_diagnoses_object"]}>
-                    <DiagnosisSelectFormField
-                      {...field("icd11_diagnoses_object")}
-                      multiple
-                      label="Final Diagnosis"
-                    />
+                  <div ref={fieldRef["diagnoses"]}>
+                    {isUpdate ? (
+                      <EditDiagnosesBuilder value={state.form.diagnoses} />
+                    ) : (
+                      <CreateDiagnosesBuilder
+                        value={state.form.create_diagnoses}
+                        onChange={(diagnoses) => {
+                          handleFormFieldChange({
+                            name: "create_diagnoses",
+                            value: diagnoses,
+                          });
+                        }}
+                      />
+                    )}
                   </div>
                 </div>
 
@@ -1241,11 +1290,17 @@ export const ConsultationForm = (props: any) => {
                             className="col-span-6"
                             ref={fieldRef["verified_by"]}
                           >
-                            <TextAreaFormField
-                              {...field("verified_by")}
-                              label="Verified by"
-                              required
+                            <UserAutocompleteFormField
+                              name={"verified_by"}
+                              label="Treating Physician"
                               placeholder="Attending Doctors Name and Designation"
+                              required
+                              value={state.form.verified_by_object ?? undefined}
+                              onChange={handleDoctorSelect}
+                              showActiveStatus
+                              userType={"Doctor"}
+                              homeFacility={facilityId}
+                              error={state.errors.verified_by}
                             />
                           </div>
 
@@ -1263,12 +1318,12 @@ export const ConsultationForm = (props: any) => {
                             </div>
                             <div className="flex-1" ref={fieldRef["action"]}>
                               <SelectFormField
-                                {...field("action")}
+                                {...selectField("action")}
                                 label="Action"
                                 position="above"
                                 options={TELEMEDICINE_ACTIONS}
                                 optionLabel={(option) => option.desc}
-                                optionValue={(option) => option.text}
+                                optionDescription={() => ""}
                               />
                             </div>
                           </div>
@@ -1290,11 +1345,10 @@ export const ConsultationForm = (props: any) => {
                                 value={
                                   state.form.assigned_to_object ?? undefined
                                 }
-                                onChange={(option) =>
-                                  handleDoctorSelect(option.value)
-                                }
+                                onChange={handleDoctorSelect}
                                 userType={"Doctor"}
                                 name={"assigned_to"}
+                                label="Assigned to"
                               />
                             </div>
                           )}

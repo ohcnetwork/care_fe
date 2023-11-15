@@ -1,7 +1,5 @@
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { getNotifications, markNotificationAsRead } from "../../Redux/actions";
 import Spinner from "../Common/Spinner";
 import { NOTIFICATION_EVENTS } from "../../Common/constants";
 import { classNames, formatDateTime } from "../../Utils/utils";
@@ -17,6 +15,8 @@ import SelectMenuV2 from "../Form/SelectMenuV2";
 import { useTranslation } from "react-i18next";
 import CircularProgress from "../Common/components/CircularProgress";
 import useNotificationSubscribe from "../../Common/hooks/useNotificationSubscribe";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 const RESULT_LIMIT = 14;
 
@@ -31,14 +31,16 @@ const NotificationTile = ({
   onClickCB,
   setShowNotifications,
 }: NotificationTileProps) => {
-  const dispatch: any = useDispatch();
   const [result, setResult] = useState(notification);
   const [isMarkingAsRead, setIsMarkingAsRead] = useState(false);
   const { t } = useTranslation();
 
   const handleMarkAsRead = async () => {
     setIsMarkingAsRead(true);
-    await dispatch(markNotificationAsRead(result.id));
+    await request(routes.markNotificationAsRead, {
+      pathParams: { id: result.id },
+      body: { read_at: new Date() },
+    });
     setResult({ ...result, read_at: new Date() });
     setIsMarkingAsRead(false);
   };
@@ -145,7 +147,6 @@ export default function NotificationsList({
   onClickCB,
   handleOverflow,
 }: NotificationsListProps) {
-  const dispatch: any = useDispatch();
   const [data, setData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [offset, setOffset] = useState(0);
@@ -155,6 +156,7 @@ export default function NotificationsList({
   const [eventFilter, setEventFilter] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
   const [isMarkingAllAsRead, setIsMarkingAllAsRead] = useState(false);
+  const [showUnread, setShowUnread] = useState(false);
   const { t } = useTranslation();
   const {
     isSubscribed,
@@ -203,8 +205,11 @@ export default function NotificationsList({
   const handleMarkAllAsRead = async () => {
     setIsMarkingAllAsRead(true);
     await Promise.all(
-      data.map(async (notification) => {
-        return await dispatch(markNotificationAsRead(notification.id));
+      data.map((notification) => {
+        return request(routes.markNotificationAsRead, {
+          pathParams: { id: notification.id },
+          body: { read_at: new Date() },
+        });
       })
     );
     setReload(!reload);
@@ -213,10 +218,10 @@ export default function NotificationsList({
 
   useEffect(() => {
     setIsLoading(true);
-    dispatch(
-      getNotifications({ offset, event: eventFilter, medium_sent: "SYSTEM" })
-    )
-      .then((res: any) => {
+    request(routes.getNotifications, {
+      query: { offset, event: eventFilter, medium_set: "SYSTEM" },
+    })
+      .then((res) => {
         if (res && res.data) {
           setData(res.data.results);
           setUnreadCount(
@@ -234,7 +239,7 @@ export default function NotificationsList({
         setOffset((prev) => prev - RESULT_LIMIT);
       });
     intialSubscriptionState();
-  }, [dispatch, reload, open, offset, eventFilter, isSubscribed]);
+  }, [reload, open, offset, eventFilter, isSubscribed]);
 
   if (!offset && isLoading) {
     manageResults = (
@@ -245,33 +250,39 @@ export default function NotificationsList({
   } else if (data?.length) {
     manageResults = (
       <>
-        {data.map((result: any) => (
-          <NotificationTile
-            key={result.id}
-            notification={result}
-            onClickCB={onClickCB}
-            setShowNotifications={setOpen}
-          />
-        ))}
+        {data
+          .filter((notification: any) =>
+            showUnread ? notification.read_at === null : true
+          )
+          .map((result: any) => (
+            <NotificationTile
+              key={result.id}
+              notification={result}
+              onClickCB={onClickCB}
+              setShowNotifications={setOpen}
+            />
+          ))}
         {isLoading && (
           <div className="flex items-center justify-center">
             <CircularProgress />
           </div>
         )}
-        {totalCount > RESULT_LIMIT && offset < totalCount - RESULT_LIMIT && (
-          <div className="mt-4 flex w-full justify-center px-4 py-5 lg:px-8">
-            <ButtonV2
-              className="w-full"
-              disabled={isLoading}
-              variant="secondary"
-              shadow
-              border
-              onClick={() => setOffset((prev) => prev + RESULT_LIMIT)}
-            >
-              {isLoading ? t("loading") : t("load_more")}
-            </ButtonV2>
-          </div>
-        )}
+        {!showUnread &&
+          totalCount > RESULT_LIMIT &&
+          offset < totalCount - RESULT_LIMIT && (
+            <div className="mt-4 flex w-full justify-center px-4 py-5 lg:px-8">
+              <ButtonV2
+                className="w-full"
+                disabled={isLoading}
+                variant="secondary"
+                shadow
+                border
+                onClick={() => setOffset((prev) => prev + RESULT_LIMIT)}
+              >
+                {isLoading ? t("loading") : t("load_more")}
+              </ButtonV2>
+            </div>
+          )}
       </>
     );
   } else if (data && data.length === 0) {
@@ -341,6 +352,21 @@ export default function NotificationsList({
                 }
               />
               <span className="text-xs">{t("mark_all_as_read")}</span>
+            </ButtonV2>
+            <ButtonV2
+              ghost
+              variant="secondary"
+              onClick={() => setShowUnread(!showUnread)}
+            >
+              <CareIcon
+                className={showUnread ? "care-l-filter-slash" : "care-l-filter"}
+              />
+
+              <span className="text-xs">
+                {showUnread
+                  ? t("show_all_notifications")
+                  : t("show_unread_notifications")}
+              </span>
             </ButtonV2>
           </div>
 

@@ -5,6 +5,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
 import useConfig from "../../Common/hooks/useConfig";
+import Chip from "../../CAREUI/display/Chip";
 
 interface ConsultationProps {
   itemData: ConsultationModel;
@@ -70,6 +71,15 @@ export const ConsultationCard = (props: ConsultationProps) => {
               </div>
               <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
                 {formatDateTime(itemData.admission_date)}
+                {itemData.is_readmission && (
+                  <Chip
+                    size="small"
+                    variant="custom"
+                    className="ml-4 border-blue-600 bg-blue-100 text-blue-600"
+                    startIcon="l-repeat"
+                    text="Readmission"
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -121,6 +131,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
       </div>
       <div className="mt-4 flex w-full flex-col justify-between gap-1 md:flex-row">
         <ButtonV2
+          id="view_consulation_updates"
           className="h-auto whitespace-pre-wrap border border-gray-500 bg-white text-black hover:bg-gray-300"
           onClick={() =>
             navigate(

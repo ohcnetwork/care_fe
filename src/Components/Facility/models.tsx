@@ -2,6 +2,8 @@ import { AssignedToObjectModel } from "../Patient/models";
 import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 import { AssetData } from "../Assets/AssetTypes";
+import { UserBareMinimum } from "../Users/models";
+import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 
 export interface LocalBodyModel {
   name: string;
@@ -27,7 +29,6 @@ export interface WardModel {
 export interface FacilityModel {
   id?: number;
   name?: string;
-  district?: number;
   read_cover_image_url?: string;
   facility_type?: string;
   address?: string;
@@ -52,6 +53,10 @@ export interface FacilityModel {
   ward_object?: WardModel;
   modified_date?: string;
   created_date?: string;
+  state?: number;
+  district?: number;
+  local_body?: number;
+  ward?: number;
 }
 
 export interface CapacityModal {
@@ -109,10 +114,11 @@ export interface ConsultationModel {
   consultation_status?: number;
   is_kasp?: boolean;
   kasp_enabled_date?: string;
-  diagnosis?: string;
-  icd11_diagnoses_object?: ICD11DiagnosisModel[];
-  icd11_provisional_diagnoses_object?: ICD11DiagnosisModel[];
+  readonly diagnoses?: ConsultationDiagnosis[];
+  create_diagnoses?: CreateDiagnosis[]; // Used for bulk creating diagnoses upon consultation creation
+  deprecated_verified_by?: string;
   verified_by?: string;
+  verified_by_object?: UserBareMinimum;
   suggestion_text?: string;
   symptoms?: Array<number>;
   symptoms_text?: string;
@@ -138,6 +144,8 @@ export interface ConsultationModel {
   cause_of_death?: string;
   death_datetime?: string;
   death_confirmed_doctor?: string;
+  is_readmission?: boolean;
+  medico_legal_case?: boolean;
 }
 export interface PatientStatsModel {
   id?: number;
@@ -181,6 +189,7 @@ export interface LocationModel {
   id?: string;
   name?: string;
   description?: string;
+  middleware_address?: string;
   facility?: {
     name: string;
   };
@@ -214,11 +223,3 @@ export interface CurrentBed {
   privacy?: boolean;
   meta: Record<string, any>;
 }
-
-// Voluntarily made as `type` for it to achieve type-safety when used with
-// `useAsyncOptions<ICD11DiagnosisModel>`
-export type ICD11DiagnosisModel = {
-  id: string;
-  label: string;
-  parentId: string | null;
-};

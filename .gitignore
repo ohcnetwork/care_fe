@@ -54,6 +54,7 @@ public/build-meta.json
 # Using NPM
 yarn.lock
 pnpm-lock.yaml
+bun.lockb
 
 # Cypress
 cypress/downloads

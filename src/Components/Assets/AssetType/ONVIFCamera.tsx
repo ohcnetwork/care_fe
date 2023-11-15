@@ -2,10 +2,8 @@ import { useEffect, useState } from "react";
 import { AssetData } from "../AssetTypes";
 import { useDispatch } from "react-redux";
 import {
-  partialUpdateAsset,
   partialUpdateAssetBed,
   createAssetBed,
-  getPermittedFacility,
   listAssetBeds,
   deleteAssetBed,
 } from "../../../Redux/actions";
@@ -21,15 +19,22 @@ import { SyntheticEvent } from "react";
 import LiveFeed from "../../Facility/Consultations/LiveFeed";
 import Card from "../../../CAREUI/display/Card";
 import { BoundaryRange } from "../../../Common/constants";
+import useAuthUser from "../../../Common/hooks/useAuthUser";
 
-interface ONVIFCameraProps {
+import request from "../../../Utils/request/request";
+import routes from "../../../Redux/api";
+import useQuery from "../../../Utils/request/useQuery";
+
+import CareIcon from "../../../CAREUI/icons/CareIcon";
+
+interface Props {
   assetId: string;
   facilityId: string;
   asset: any;
+  onUpdated?: () => void;
 }
 
-const ONVIFCamera = (props: ONVIFCameraProps) => {
-  const { assetId, facilityId, asset } = props;
+const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
   const [isLoading, setIsLoading] = useState(true);
   const [assetType, setAssetType] = useState("");
   const [middlewareHostname, setMiddlewareHostname] = useState("");
@@ -133,17 +138,20 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     }
     return boundary;
   };
+  const { data: facility, loading } = useQuery(routes.getPermittedFacility, {
+    pathParams: { id: facilityId },
+  });
+  const authUser = useAuthUser();
   useEffect(() => {
-    const fetchFacility = async () => {
-      const res = await dispatch(getPermittedFacility(facilityId));
+    if (facility?.middleware_address) {
+      setFacilityMiddlewareHostname(facility.middleware_address);
+    }
+  }, [facility, facilityId]);
 
-      if (res.status === 200 && res.data) {
-        setFacilityMiddlewareHostname(res.data.middleware_address);
-      }
-    };
+  const fallbackMiddleware =
+    asset?.location_object?.middleware_address || facilityMiddlewareHostname;
 
-    if (facilityId) fetchFacility();
-  }, [dispatch, facilityId]);
+  const currentMiddleware = middlewareHostname || fallbackMiddleware;
 
   useEffect(() => {
     if (asset) {
@@ -202,22 +210,19 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
           camera_access_key: `${username}:${password}:${streamUuid}`,
         },
       };
-      const res: any = await Promise.resolve(
-        dispatch(partialUpdateAsset(assetId, data))
-      );
+      const { res } = await request(routes.partialUpdateAsset, {
+        pathParams: { external_id: assetId },
+        body: data,
+      });
       if (res?.status === 200) {
-        Notification.Success({
-          msg: "Asset Configured Successfully",
-        });
-        window.location.reload();
+        Notification.Success({ msg: "Asset Configured Successfully" });
+        onUpdated?.();
       } else {
-        Notification.Error({
-          msg: "Something went wrong..!",
-        });
+        Notification.Error({ msg: "Something went wrong!" });
       }
       setLoadingSetConfiguration(false);
     } else {
-      setIpAddress_error("Please Enter a Valid Camera address !!");
+      setIpAddress_error("IP address is invalid");
     }
   };
 
@@ -335,17 +340,16 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     try {
       setLoadingAddPreset(true);
       const presetData = await axios.get(
-        `https://${facilityMiddlewareHostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
+        `https://${currentMiddleware}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
       );
-      const res: any = await Promise.resolve(
-        dispatch(
-          createAssetBed(
-            { meta: { ...data, ...presetData.data } },
-            assetId,
-            bed?.id as string
-          )
-        )
-      );
+
+      const { res } = await request(routes.createAssetBed, {
+        body: {
+          meta: { ...data, ...presetData.data },
+          asset: assetId,
+          bed: bed?.id as string,
+        },
+      });
       if (res?.status === 201) {
         Notification.Success({
           msg: "Preset Added Successfully",
@@ -364,60 +368,81 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     }
     setLoadingAddPreset(false);
   };
-  if (isLoading) return <Loading />;
+  if (isLoading || loading || !facility) return <Loading />;
+
   return (
     <div className="space-y-6">
-      <form className="rounded bg-white p-8 shadow" onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 gap-x-4 lg:grid-cols-2">
-          <TextFormField
-            name="middleware_hostname"
-            label="Hospital Middleware Hostname"
-            autoComplete="off"
-            value={middlewareHostname}
-            onChange={({ value }) => setMiddlewareHostname(value)}
-          />
-          <TextFormField
-            name="camera_address"
-            label="Local IP Address"
-            autoComplete="off"
-            value={cameraAddress}
-            onChange={({ value }) => setCameraAddress(value)}
-            error={ipadrdress_error}
-          />
-          <TextFormField
-            name="username"
-            label="Username"
-            autoComplete="off"
-            value={username}
-            onChange={({ value }) => setUsername(value)}
-          />
-          <TextFormField
-            name="password"
-            label="Password"
-            autoComplete="off"
-            type="password"
-            value={password}
-            onChange={({ value }) => setPassword(value)}
-          />
-          <TextFormField
-            name="stream_uuid"
-            label="Stream UUID"
-            autoComplete="off"
-            value={streamUuid}
-            type="password"
-            className="tracking-widest"
-            labelClassName="tracking-normal"
-            onChange={({ value }) => setStreamUuid(value)}
-          />
-        </div>
-        <div className="flex justify-end">
-          <Submit
-            disabled={loadingSetConfiguration}
-            className="w-full md:w-auto"
-            label="Set Configuration"
-          />
-        </div>
-      </form>
+      {["DistrictAdmin", "StateAdmin"].includes(authUser.user_type) && (
+        <form className="rounded bg-white p-8 shadow" onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 gap-x-4 lg:grid-cols-2">
+            <TextFormField
+              name="middleware_hostname"
+              label={
+                <div className="flex flex-row gap-1">
+                  <p>Middleware Hostname</p>
+                  {!middlewareHostname && (
+                    <div className="tooltip">
+                      <CareIcon
+                        icon="l-info-circle"
+                        className="tooltip text-indigo-500 hover:text-indigo-600"
+                      />
+                      <span className="tooltip-text w-56 whitespace-normal">
+                        Middleware hostname sourced from{" "}
+                        {asset?.location_object?.middleware_address
+                          ? "asset location"
+                          : "asset facility"}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              }
+              placeholder={fallbackMiddleware}
+              value={middlewareHostname}
+              onChange={({ value }) => setMiddlewareHostname(value)}
+            />
+            <TextFormField
+              name="camera_address"
+              label="Local IP Address"
+              autoComplete="off"
+              value={cameraAddress}
+              onChange={({ value }) => setCameraAddress(value)}
+              error={ipadrdress_error}
+            />
+            <TextFormField
+              name="username"
+              label="Username"
+              autoComplete="off"
+              value={username}
+              onChange={({ value }) => setUsername(value)}
+            />
+            <TextFormField
+              name="password"
+              label="Password"
+              autoComplete="off"
+              type="password"
+              value={password}
+              onChange={({ value }) => setPassword(value)}
+            />
+            <TextFormField
+              name="stream_uuid"
+              label="Stream UUID"
+              autoComplete="off"
+              value={streamUuid}
+              type="password"
+              className="tracking-widest"
+              labelClassName="tracking-normal"
+              onChange={({ value }) => setStreamUuid(value)}
+            />
+          </div>
+          <div className="flex justify-end">
+            <Submit
+              disabled={loadingSetConfiguration}
+              className="w-full md:w-auto"
+              label="Set Configuration"
+            />
+          </div>
+        </form>
+      )}
 
       {assetType === "ONVIF" ? (
         <>

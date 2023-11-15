@@ -62,7 +62,7 @@ export const FacilityHome = (props: any) => {
   const { t } = useTranslation();
   const { facilityId } = props;
   const dispatch: any = useDispatch();
-  const [facilityData, setFacilityData] = useState<FacilityModel>({});
+  const [facilityData, setFacilityData] = useState<FacilityModel | any>({});
   const [capacityData, setCapacityData] = useState<Array<CapacityModal>>([]);
   const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -323,7 +323,7 @@ export const FacilityHome = (props: any) => {
       StaffUserTypeIndex;
 
   const editCoverImageTooltip = hasPermissionToEditCoverImage && (
-    <div className="absolute right-0 top-0 z-10 flex h-48 w-full flex-col items-center justify-center bg-black text-sm text-gray-300 opacity-0 transition-[opacity] hover:opacity-60 md:h-[88px]">
+    <div className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center bg-black text-sm text-gray-300 opacity-0 transition-[opacity] hover:opacity-60 md:h-[88px]">
       <i className="fa-solid fa-pen" />
       <span className="mt-2">{`${hasCoverImage ? "Edit" : "Upload"}`}</span>
     </div>
@@ -495,7 +495,7 @@ export const FacilityHome = (props: any) => {
             </div>
             <div className="mt-10 flex items-center gap-3">
               <div>
-                {facilityData.features?.some((feature) =>
+                {facilityData.features?.some((feature: any) =>
                   FACILITY_FEATURE_TYPES.some((f) => f.id === feature)
                 ) && (
                   <h1 className="text-lg font-semibold">Available features</h1>
@@ -541,9 +541,7 @@ export const FacilityHome = (props: any) => {
                 </DropdownItem>
                 <DropdownItem
                   id="configure-facility"
-                  onClick={() =>
-                    navigate(`/facility/${facilityId}/middleware/update`)
-                  }
+                  onClick={() => navigate(`/facility/${facilityId}/configure`)}
                   authorizeFor={NonReadOnlyUsers}
                   icon={<CareIcon className="care-l-setting text-lg" />}
                 >
@@ -565,6 +563,7 @@ export const FacilityHome = (props: any) => {
                   Location Management
                 </DropdownItem>
                 <DropdownItem
+                  id="resource-request"
                   onClick={() =>
                     navigate(`/facility/${facilityId}/resource/new`)
                   }
@@ -574,6 +573,7 @@ export const FacilityHome = (props: any) => {
                   Resource Request
                 </DropdownItem>
                 <DropdownItem
+                  id="create-assets"
                   onClick={() => navigate(`/facility/${facilityId}/assets/new`)}
                   authorizeFor={NonReadOnlyUsers}
                   icon={<CareIcon className="care-l-plus-circle text-lg" />}
@@ -581,18 +581,21 @@ export const FacilityHome = (props: any) => {
                   Create Asset
                 </DropdownItem>
                 <DropdownItem
+                  id="view-assets"
                   onClick={() => navigate(`/assets?facility=${facilityId}`)}
                   icon={<CareIcon className="care-l-medkit text-lg" />}
                 >
                   View Assets
                 </DropdownItem>
                 <DropdownItem
+                  id="view-users"
                   onClick={() => navigate(`/facility/${facilityId}/users`)}
                   icon={<CareIcon className="care-l-users-alt text-lg" />}
                 >
                   View Users
                 </DropdownItem>
                 <DropdownItem
+                  id="delete-facility"
                   variant="danger"
                   onClick={() => setOpenDeleteDialog(true)}
                   className="flex items-center gap-3"
@@ -619,6 +622,16 @@ export const FacilityHome = (props: any) => {
                 ghost
                 border
                 className="mt-2 flex w-full flex-row justify-center md:w-auto"
+                onClick={() => navigate(`/facility/${facilityId}/livefeed`)}
+              >
+                <CareIcon className="care-l-video text-lg" />
+                <span>Live Monitoring</span>
+              </ButtonV2>
+              <ButtonV2
+                variant="primary"
+                ghost
+                border
+                className="mt-2 flex w-full flex-row justify-center md:w-auto"
                 onClick={() => navigate(`/facility/${facilityId}/patient`)}
                 authorizeFor={NonReadOnlyUsers}
               >
@@ -626,6 +639,7 @@ export const FacilityHome = (props: any) => {
                 <span className="text-sm">Add Details of a Patient</span>
               </ButtonV2>
               <ButtonV2
+                id="view-patient-facility-list"
                 variant="primary"
                 ghost
                 border

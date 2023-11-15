@@ -1,7 +1,7 @@
 import { PerformedByModel } from "../HCX/misc";
 
 interface BasePrescription {
-  readonly id?: string;
+  readonly id: string;
   medicine?: string;
   medicine_object?: MedibaseMedicine;
   medicine_old?: string;
@@ -10,7 +10,7 @@ interface BasePrescription {
   notes?: string;
   meta?: object;
   readonly prescription_type?: "DISCHARGE" | "REGULAR";
-  readonly discontinued?: boolean;
+  readonly discontinued: boolean;
   discontinued_reason?: string;
   readonly prescribed_by: PerformedByModel;
   readonly discontinued_date: string;
@@ -50,13 +50,15 @@ export interface PRNPrescription extends BasePrescription {
 export type Prescription = NormalPrescription | PRNPrescription;
 
 export type MedicineAdministrationRecord = {
-  readonly id?: string;
-  readonly prescription?: Prescription;
+  readonly id: string;
+  readonly prescription: Prescription;
   notes: string;
   administered_date?: string;
-  readonly administered_by?: PerformedByModel;
-  readonly created_date?: string;
-  readonly modified_date?: string;
+  readonly administered_by: PerformedByModel;
+  readonly archived_by: PerformedByModel | undefined;
+  readonly archived_on: string | undefined;
+  readonly created_date: string;
+  readonly modified_date: string;
 };
 
 export type MedibaseMedicine = {

@@ -5,12 +5,12 @@
     "site_url": "care.coronasafe.in",
     "analytics_server_url": "https://plausible.10bedicu.in",
     "header_logo": {
-        "light":"https://cdn.coronasafe.network/header_logo.png",
-        "dark":"https://cdn.coronasafe.network/header_logo.png"
+        "light": "https://cdn.coronasafe.network/header_logo.png",
+        "dark": "https://cdn.coronasafe.network/header_logo.png"
     },
     "main_logo": {
-        "light":"https://cdn.coronasafe.network/light-logo.svg",
-        "dark":"https://cdn.coronasafe.network/black-logo.svg"
+        "light": "https://cdn.coronasafe.network/light-logo.svg",
+        "dark": "https://cdn.coronasafe.network/black-logo.svg"
     },
     "gmaps_api_key": "AIzaSyDsBAc3y7deI5ZO3NtK5GuzKwtUzQNJNUk",
     "gov_data_api_key": "579b464db66ec23bdd000001cdd3946e44ce4aad7209ff7b23ac571b",

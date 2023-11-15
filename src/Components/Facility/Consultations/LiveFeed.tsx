@@ -43,6 +43,7 @@ const LiveFeed = (props: any) => {
   );
   const [bedTransfer, setBedTransfer] = useState<BedModel>({});
   const [newPresetName, setNewPresetName] = useState<string>("");
+  const [videoStartTime, setVideoStartTime] = useState<Date | null>(null);
   const [loading, setLoading] = useState<string | undefined>();
   const dispatch: any = useDispatch();
   const [page, setPage] = useState({
@@ -137,6 +138,16 @@ const LiveFeed = (props: any) => {
           });
       },
     });
+
+  const calculateVideoLiveDelay = () => {
+    const video = liveFeedPlayerRef.current as HTMLVideoElement;
+    if (!video || !videoStartTime) return 0;
+
+    const timeDifference =
+      (new Date().getTime() - videoStartTime.getTime()) / 1000;
+
+    return timeDifference - video.currentTime;
+  };
 
   const getBedPresets = async (id: any) => {
     const bedAssets = bed.id
@@ -313,6 +324,7 @@ const LiveFeed = (props: any) => {
     },
     reset: () => {
       setStreamStatus(StreamStatus.Loading);
+      setVideoStartTime(null);
       startStream({
         onSuccess: () => setStreamStatus(StreamStatus.Playing),
         onError: () => setStreamStatus(StreamStatus.Offline),
@@ -541,7 +553,25 @@ const LiveFeed = (props: any) => {
                 playsInline
                 className="z-10 h-full w-full"
                 ref={liveFeedPlayerRef}
+                onPlay={() => {
+                  setVideoStartTime(() => new Date());
+                }}
+                onWaiting={() => {
+                  const delay = calculateVideoLiveDelay();
+                  if (delay > 5) {
+                    setStreamStatus(StreamStatus.Loading);
+                  }
+                }}
               ></video>
+
+              {streamStatus === StreamStatus.Playing &&
+                calculateVideoLiveDelay() > 3 && (
+                  <div className="absolute left-8 top-12 z-10 flex items-center gap-2 rounded-3xl bg-red-400 px-3 py-1.5 text-xs font-semibold text-gray-100">
+                    <CareIcon className="care-l-wifi-slash h-4 w-4" />
+                    <span>Slow Network Detected</span>
+                  </div>
+                )}
+
               {loading && (
                 <div className="absolute bottom-0 right-0 rounded-tl bg-white/75 p-4">
                   <div className="flex items-center gap-2">
