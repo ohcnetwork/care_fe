@@ -329,7 +329,7 @@ export const AddInventoryForm = (props: any) => {
                 />
               </div>
             </div>
-            <div className="mt-4 flex flex-col justify-end gap-2 md:flex-row">
+            <div className="cui-form-button-group">
               <Cancel onClick={() => goBack()} />
               <Submit onClick={handleSubmit} label="Add/Update Inventory" />
             </div>
