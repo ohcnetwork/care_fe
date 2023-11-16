@@ -5,12 +5,6 @@ export interface IAsset {
   middlewareHostname: string;
 }
 
-interface PTZPayload {
-  x: number;
-  y: number;
-  zoom: number;
-}
-
 interface UseMSEMediaPlayerOption {
   config: IAsset;
   url?: string;
@@ -40,16 +34,6 @@ export interface IOptions {
   onSuccess?: (resp: any) => void;
   onError?: (err: any) => void;
 }
-
-enum PTZ {
-  Up = "up",
-  Down = "down",
-  Left = "left",
-  Right = "right",
-  ZoomIn = "zoomIn",
-  ZoomOut = "zoomOut",
-}
-
 const stopStream =
   ({
     middlewareHostname,
@@ -69,38 +53,9 @@ const stopStream =
       .catch((err) => options.onError && options.onError(err));
   };
 
-export const getPTZPayload = (action: PTZ): PTZPayload => {
-  let x = 0;
-  let y = 0;
-  let zoom = 0;
-  switch (action) {
-    case PTZ.Up:
-      y = 0.1;
-      break;
-    case PTZ.Down:
-      y = -0.1;
-      break;
-    case PTZ.Left:
-      x = -0.1;
-      break;
-    case PTZ.Right:
-      x = 0.1;
-      break;
-    case PTZ.ZoomIn:
-      zoom = 0.1;
-      break;
-    case PTZ.ZoomOut:
-      zoom = -0.1;
-      break;
-  }
-
-  return { x, y, zoom };
-};
-
 /**
  * MSE player utility
  */
-
 const Utf8ArrayToStr = (array: string | any[] | Uint8Array) => {
   let out, i, c;
   let char2, char3;

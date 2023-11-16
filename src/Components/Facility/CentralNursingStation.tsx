@@ -254,8 +254,8 @@ export default function CentralNursingStation({ facilityId }: Props) {
         </div>
       ) : (
         <div className="mt-1 grid grid-cols-1 gap-1 lg:grid-cols-2 3xl:grid-cols-3">
-          {data.map((props) => (
-            <div className="overflow-hidden text-clip">
+          {data.map((props, i) => (
+            <div className="overflow-hidden text-clip" key={i}>
               <HL7PatientVitalsMonitor
                 patientCurrentBedAssignmentDate={
                   props.patientAssetBed?.patient?.last_consultation?.current_bed
