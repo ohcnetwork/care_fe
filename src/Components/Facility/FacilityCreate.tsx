@@ -175,10 +175,10 @@ export const FacilityCreate = (props: FacilityProps) => {
         },
       });
       if (res?.ok && data) {
-        setDistricts([data]);
+        setDistricts(data);
       }
       setIsDistrictLoading(false);
-      return res ? [data] : [];
+      return res ? data : [];
     }
   };
 

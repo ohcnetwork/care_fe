@@ -261,7 +261,7 @@ const routes = {
   },
 
   updateFacility: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/{id}/",
     method: "PUT",
     TRes: Type<FacilityModel>(),
   },
@@ -633,7 +633,7 @@ const routes = {
   },
   getDistrictByState: {
     path: "/api/v1/state/{id}/districts/",
-    TRes: Type<StateModel>(),
+    TRes: Type<StateModel[]>(),
   },
   getDistrictByName: {
     path: "/api/v1/district/",
