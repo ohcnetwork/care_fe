@@ -5,6 +5,7 @@ import Page from "../Common/components/Page";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import { HCXPolicyModel } from "../HCX/models";
+import { InsuranceDetialsCard } from "./InsuranceDetailsCard";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -52,48 +53,7 @@ export const InsuranceDetails = (props: IProps) => {
           data-testid="patient-details"
         >
           {insuranceDetials?.results.map((data: HCXPolicyModel) => (
-            <div className="w-full" key={data.id}>
-              <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
-                <div className="border-b border-dashed pb-2 text-xl font-bold text-gray-900">
-                  Policy Details
-                </div>
-
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-2">
-                  <div className=" ">
-                    <div className="text-sm font-semibold leading-5 text-zinc-400">
-                      Member ID
-                    </div>
-                    <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
-                      {data.subscriber_id || ""}
-                    </div>
-                  </div>
-                  <div className=" ">
-                    <div className="text-sm font-semibold leading-5 text-zinc-400">
-                      Policy ID / Policy Name
-                    </div>
-                    <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
-                      {data.policy_id || ""}
-                    </div>
-                  </div>
-                  <div className="sm:col-span-1">
-                    <div className="text-sm font-semibold leading-5 text-zinc-400">
-                      Insurer ID
-                    </div>
-                    <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
-                      {data.insurer_id || ""}
-                    </div>
-                  </div>
-                  <div className="sm:col-span-1">
-                    <div className="text-sm font-semibold leading-5 text-zinc-400">
-                      Insurer Name
-                    </div>
-                    <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
-                      {data.insurer_name || ""}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <InsuranceDetialsCard data={data} />
           ))}
         </section>
       )}
