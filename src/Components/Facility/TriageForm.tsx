@@ -21,7 +21,7 @@ import { FieldChangeEvent } from "../Form/FormFields/Utils";
 const Loading = lazy(() => import("../Common/Loading"));
 import Page from "../Common/components/Page";
 import dayjs from "dayjs";
-import { dateQueryString } from "../../Utils/utils";
+import { dateQueryString, scrollTo } from "../../Utils/utils";
 
 interface triageFormProps extends PatientStatsModel {
   facilityId: number;
@@ -59,11 +59,6 @@ const triageFormReducer = (state = initialState, action: any) => {
     default:
       return state;
   }
-};
-
-const scrollTo = (id: string | boolean) => {
-  const element = document.querySelector(`#${id}`);
-  element?.scrollIntoView({ behavior: "smooth", block: "center" });
 };
 
 export const TriageForm = (props: triageFormProps) => {
