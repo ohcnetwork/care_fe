@@ -211,7 +211,7 @@ const LiveFeed = (props: any) => {
           onSuccess: () => setStreamStatus(StreamStatus.Playing),
           onError: () => setStreamStatus(StreamStatus.Offline),
         });
-      }, 1000);
+      }, 5000);
     }
 
     return () => {

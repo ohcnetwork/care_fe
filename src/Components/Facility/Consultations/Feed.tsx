@@ -265,7 +265,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
             }
           },
         });
-      }, 1000);
+      }, 5000);
     } else if (!statusReported) {
       triggerGoal("Camera Feed Viewed", {
         consultationId,
