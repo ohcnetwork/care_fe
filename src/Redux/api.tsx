@@ -989,6 +989,29 @@ const routes = {
     TBody: Type<AssetServiceUpdate>(),
   },
 
+  // Asset lock endpoints
+
+  lockAsset: {
+    path: "/api/v1/asset/{asset_external_id}/lock_asset/",
+    method: "POST",
+    TRes: Type<unknown>(),
+    TBody: Type<unknown>(),
+  },
+  unlockAsset: {
+    path: "/api/v1/asset/{asset_external_id}/unlock_asset/",
+    method: "POST",
+    TRes: Type<unknown>(),
+    TBody: Type<unknown>(),
+  },
+  addWaitingUserToAsset: {
+    path: "/api/v1/asset/{asset_external_id}/add_waiting_user/",
+    method: "POST",
+  },
+  removeWaitingUserFromAsset: {
+    path: "/api/v1/asset/{asset_external_id}/remove_waiting_user/",
+    method: "POST",
+  },
+
   abha: {
     // ABDM HealthID endpoints
     generateAadhaarOtp: {

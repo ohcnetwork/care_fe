@@ -23,6 +23,9 @@ import Page from "../../Common/components/Page";
 import ConfirmDialog from "../../Common/ConfirmDialog";
 import { FieldLabel } from "../../Form/FormFields/FormField";
 import useFullscreen from "../../../Common/hooks/useFullscreen";
+// import useQuery from "../../../Utils/request/useQuery";
+import routes from "../../../Redux/api";
+import request from "../../../Utils/request/request";
 
 const LiveFeed = (props: any) => {
   const middlewareHostname =
@@ -291,6 +294,33 @@ const LiveFeed = (props: any) => {
     return { ...option, callback: () => cb(option) };
   });
 
+  // lock and unlock asset methods
+  const lockAsset = async () => {
+    const { data } = await request(routes.lockAsset, {
+      pathParams: {
+        asset_external_id: props.asset?.id ?? "",
+      },
+    });
+    console.log(data);
+
+    // useQuery(routes.lockAsset, {
+    //   pathParams: { asset_external_id: "assetId" },
+    // });
+  };
+
+  const unlockAsset = async () => {
+    const { data } = await request(routes.unlockAsset, {
+      pathParams: {
+        asset_external_id: props.asset?.id ?? "",
+      },
+    });
+    console.log(data);
+
+    // useQuery(routes.unlockAsset, {
+    //   pathParams: { asset_external_id: "assetId" },
+    // });
+  };
+
   // Voluntarily disabling eslint, since length of `cameraPTZ` is constant and
   // hence shall not cause issues. (https://news.ycombinator.com/item?id=24363703)
   for (const option of cameraPTZ) {
@@ -463,7 +493,16 @@ const LiveFeed = (props: any) => {
 
           <div className="mx-4 flex max-w-sm flex-col">
             <div>
-              <button onClick={() => setLockStatus(!lockStatus)}>
+              <button
+                onClick={() => {
+                  if (lockStatus) {
+                    unlockAsset();
+                  } else {
+                    lockAsset();
+                  }
+                  setLockStatus(!lockStatus);
+                }}
+              >
                 : Lock Status: <b>{lockStatus ? "Locked" : "Unlocked"}</b>
               </button>
             </div>
