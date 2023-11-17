@@ -35,6 +35,7 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import PatientCategorySelect from "./PatientCategorySelect";
+import { DailyRoundsModel } from "./models";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm: any = {
@@ -107,7 +108,7 @@ export const DailyRounds = (props: any) => {
   const [patientName, setPatientName] = useState("");
   const [prevReviewInterval, setPreviousReviewInterval] = useState(-1);
   const [prevAction, setPreviousAction] = useState("NO_ACTION");
-  const [previousLog, setPreviousLog] = useState<any>({});
+  const [previousLog, setPreviousLog] = useState<DailyRoundsModel>();
 
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id ? "Save" : "Continue";
