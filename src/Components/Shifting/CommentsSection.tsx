@@ -52,7 +52,7 @@ const CommentSection = (props: CommentSectionProps) => {
             className="mt-4 rounded-lg border border-gray-500 p-4 focus:ring-primary-500"
             onChange={(e) => setCommentBox(e.target.value)}
           />
-          <div className="flex w-full justify-end">
+          <div className="mt-2 flex w-full justify-end">
             <ButtonV2
               className="mt-4"
               onClick={async () => {
@@ -63,13 +63,15 @@ const CommentSection = (props: CommentSectionProps) => {
               {t("post_your_comment")}
             </ButtonV2>
           </div>
-          <div className="w-full">
-            <PaginatedList.WhenLoading>
-              <CircularProgress />
-            </PaginatedList.WhenLoading>
-            <PaginatedList.Items<IComment>>
-              {(item) => <Comment {...item} />}
-            </PaginatedList.Items>
+          <div className="mt-2 w-full">
+            <div className="max-h-[400px] overflow-y-auto">
+              <PaginatedList.WhenLoading>
+                <CircularProgress />
+              </PaginatedList.WhenLoading>
+              <PaginatedList.Items<IComment>>
+                {(item) => <Comment {...item} />}
+              </PaginatedList.Items>
+            </div>
             <div className="flex w-full items-center justify-center">
               <PaginatedList.Paginator hideIfSinglePage />
             </div>
