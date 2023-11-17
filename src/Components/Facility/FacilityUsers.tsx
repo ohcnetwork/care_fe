@@ -286,7 +286,7 @@ export default function FacilityUsers(props: any) {
       return user.state_object?.id === authUser.state;
     if (
       currentUserLevel < STATE_READ_ONLY_ADMIN_LEVEL &&
-      currentUserLevel >= DISTRICT_ADMIN_LEVEL &&
+      currentUserLevel >= STATE_ADMIN_LEVEL &&
       currentUserLevel > level
     )
       return facilityData?.district_object_id === authUser.district;
