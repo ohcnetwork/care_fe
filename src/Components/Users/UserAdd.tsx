@@ -14,12 +14,10 @@ import {
   validateUsername,
 } from "../../Common/validation";
 import {
-  addUser,
   getDistrictByState,
   getLocalbodyByDistrict,
   getStates,
   getUserListFacility,
-  checkUsername,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -45,6 +43,8 @@ import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 import dayjs from "../../Utils/dayjs";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { PhoneNumberValidator } from "../Form/FieldValidators";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -198,9 +198,9 @@ export const UserAdd = (props: UserProps) => {
 
   const check_username = async (username: string) => {
     setUsernameExists(userExistsEnums.checking);
-    const usernameCheck = await dispatchAction(
-      checkUsername({ username: username })
-    );
+    const { res: usernameCheck } = await request(routes.checkUsername, {
+      pathParams: { username },
+    });
     if (usernameCheck === undefined || usernameCheck.status === 409)
       setUsernameExists(userExistsEnums.exists);
     else if (usernameCheck.status === 200)
@@ -605,13 +605,10 @@ export const UserAdd = (props: UserProps) => {
             : undefined,
       };
 
-      const res = await dispatchAction(addUser(data));
-      if (
-        res &&
-        (res.data || res.data === "") &&
-        res.status >= 200 &&
-        res.status < 300
-      ) {
+      const { res } = await request(routes.addUser, {
+        body: data,
+      });
+      if (res && res.status >= 200 && res.status < 300) {
         dispatch({ type: "set_form", form: initForm });
         if (!userId) {
           Notification.Success({

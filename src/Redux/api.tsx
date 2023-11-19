@@ -202,6 +202,7 @@ const routes = {
   addUser: {
     path: "/api/v1/users/add_user/",
     method: "POST",
+    TRes: Type<UserModel>(),
   },
 
   searchUser: {
@@ -738,6 +739,7 @@ const routes = {
   checkUsername: {
     path: "/api/v1/users/{username}/check_availability/",
     method: "GET",
+    TRes: undefined,
   },
 
   getUserDetails: {
