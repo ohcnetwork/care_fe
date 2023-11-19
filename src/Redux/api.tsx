@@ -34,6 +34,7 @@ import {
   DistrictModel,
   FacilityModel,
   LocationModel,
+  StateModel,
   WardModel,
 } from "../Components/Facility/models";
 import {
@@ -150,6 +151,8 @@ const routes = {
 
   userListFacility: {
     path: "/api/v1/users/{username}/get_facilities/",
+    method: "GET",
+    TRes: Type<FacilityModel[]>(),
   },
 
   addUserFacility: {
@@ -613,6 +616,8 @@ const routes = {
   // States
   statesList: {
     path: "/api/v1/state/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<StateModel>>(),
   },
 
   getState: {
@@ -628,6 +633,8 @@ const routes = {
   },
   getDistrictByState: {
     path: "/api/v1/state/{id}/districts/",
+    method: "GET",
+    TRes: Type<DistrictModel[]>(),
   },
   getDistrictByName: {
     path: "/api/v1/district/",

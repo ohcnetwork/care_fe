@@ -1,6 +1,5 @@
 import { Link, navigate } from "raviger";
 import { lazy, useCallback, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
 import {
   GENDER_TYPES,
   USER_TYPES,
@@ -13,12 +12,6 @@ import {
   validatePassword,
   validateUsername,
 } from "../../Common/validation";
-import {
-  getDistrictByState,
-  getLocalbodyByDistrict,
-  getStates,
-  getUserListFacility,
-} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
@@ -163,7 +156,6 @@ export const validateRule = (
 
 export const UserAdd = (props: UserProps) => {
   const { goBack } = useAppHistory();
-  const dispatchAction: any = useDispatch();
   const { userId } = props;
 
   const [state, dispatch] = useAutoSaveReducer<UserForm>(
@@ -258,8 +250,10 @@ export const UserAdd = (props: UserProps) => {
     async (id: number) => {
       if (id > 0) {
         setIsDistrictLoading(true);
-        const districtList = await dispatchAction(getDistrictByState({ id }));
-        if (districtList) {
+        const districtList = await request(routes.getDistrictByState, {
+          pathParams: { id: id.toString() },
+        });
+        if (districtList && districtList.data) {
           if (userIndex <= USER_TYPES.indexOf("DistrictAdmin")) {
             setDistricts([
               {
@@ -274,18 +268,18 @@ export const UserAdd = (props: UserProps) => {
         setIsDistrictLoading(false);
       }
     },
-    [dispatchAction]
+    [authUser.district, authUser.district_object?.name, userIndex]
   );
 
   const fetchLocalBody = useCallback(
     async (id: number) => {
       if (id > 0) {
         setIsLocalbodyLoading(true);
-        const localBodyList = await dispatchAction(
-          getLocalbodyByDistrict({ id })
-        );
+        const localBodyList = await request(routes.getLocalbodyByDistrict, {
+          pathParams: { id: id.toString() },
+        });
         setIsLocalbodyLoading(false);
-        if (localBodyList) {
+        if (localBodyList && localBodyList.data) {
           if (userIndex <= USER_TYPES.indexOf("LocalBodyAdmin")) {
             setLocalBodies([
               {
@@ -299,14 +293,14 @@ export const UserAdd = (props: UserProps) => {
         }
       }
     },
-    [dispatchAction]
+    [authUser.local_body, authUser.local_body_object?.name, userIndex]
   );
 
   const fetchStates = useCallback(
     async (status: statusType) => {
       setIsStateLoading(true);
-      const statesRes = await dispatchAction(getStates());
-      if (!status.aborted && statesRes.data.results) {
+      const { data: statesData } = await request(routes.statesList, {});
+      if (!status.aborted && statesData && statesData.results) {
         if (userIndex <= USER_TYPES.indexOf("StateAdmin")) {
           setStates([
             {
@@ -315,26 +309,26 @@ export const UserAdd = (props: UserProps) => {
             },
           ]);
         } else {
-          setStates(statesRes.data.results);
+          setStates(statesData.results);
         }
       }
       setIsStateLoading(false);
     },
-    [dispatchAction]
+    [authUser.state, authUser.state_object?.name, userIndex]
   );
 
   const fetchFacilities = useCallback(
-    async (status: any) => {
+    async (status: statusType) => {
       setIsStateLoading(true);
-      const res = await dispatchAction(
-        getUserListFacility({ username: authUser.username })
-      );
+      const res = await request(routes.userListFacility, {
+        pathParams: { username: authUser.username },
+      });
       if (!status.aborted && res && res.data) {
         setFacilities(res.data);
       }
       setIsStateLoading(false);
     },
-    [dispatchAction, authUser.username]
+    [authUser.username]
   );
 
   useAbortableEffect(
