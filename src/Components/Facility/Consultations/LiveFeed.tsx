@@ -474,7 +474,7 @@ const LiveFeed = (props: any) => {
           onSuccess: () => setStreamStatus(StreamStatus.Playing),
           onError: () => setStreamStatus(StreamStatus.Offline),
         });
-      }, 500);
+      }, 1000);
     }
     return () => {
       clearTimeout(tId);

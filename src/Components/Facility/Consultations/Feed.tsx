@@ -390,8 +390,28 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     }
   };
 
+  const startStreamFeed = () => {
+    startStream({
+      onSuccess: () => setStreamStatus(StreamStatus.Playing),
+      onError: () => {
+        setStreamStatus(StreamStatus.Offline);
+        if (!statusReported) {
+          triggerGoal("Camera Feed Viewed", {
+            consultationId,
+            userId: authUser.id,
+            result: "error",
+          });
+          setStatusReported(true);
+        }
+      },
+    });
+  };
+
   useEffect(() => {
     if (cameraAsset.id) {
+      setTimeout(() => {
+        startStreamFeed();
+      }, 1000);
       getPresets({
         onSuccess: (resp) => {
           setPresets(resp);
@@ -522,21 +542,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
         setStreamStatus(StreamStatus.Loading);
       }
       tId = setTimeout(() => {
-        startStream({
-          onSuccess: () => setStreamStatus(StreamStatus.Playing),
-          onError: () => {
-            setStreamStatus(StreamStatus.Offline);
-            if (!statusReported) {
-              triggerGoal("Camera Feed Viewed", {
-                consultationId,
-                userId: authUser.id,
-                result: "error",
-              });
-              setStatusReported(true);
-            }
-          },
-        });
-      }, 1000);
+        startStreamFeed();
+      }, 5000);
     } else if (!statusReported) {
       triggerGoal("Camera Feed Viewed", {
         consultationId,
