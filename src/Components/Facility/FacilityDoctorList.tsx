@@ -59,9 +59,10 @@ export const FacilityDoctorList = (props: any) => {
         {doctorQuery.data.results.map((data: DoctorModal) => {
           const removeCurrentDoctorData = (doctorId: number | undefined) => {
             if (doctorQuery.data !== undefined) {
-              doctorQuery.data.results = doctorQuery.data?.results.filter(
+              doctorQuery.data?.results.filter(
                 (i: DoctorModal) => i.id !== doctorId
               );
+              doctorQuery.refetch();
             }
           };
 
@@ -71,16 +72,6 @@ export const FacilityDoctorList = (props: any) => {
               key={`bed_${data.id}`}
               handleUpdate={async () => {
                 doctorQuery.refetch();
-                if (doctorQuery.res?.ok && doctorQuery.data) {
-                  // update total doctors count
-                  let totalCount = 0;
-                  doctorQuery.data.results.map((doctor: DoctorModal) => {
-                    if (doctor.count) {
-                      totalCount += doctor.count;
-                    }
-                  });
-                  setTotalDoctors(totalCount);
-                }
               }}
               {...data}
               removeDoctor={removeCurrentDoctorData}
@@ -121,16 +112,6 @@ export const FacilityDoctorList = (props: any) => {
             handleClose={() => setDoctorCapacityModalOpen(false)}
             handleUpdate={async () => {
               doctorQuery.refetch();
-              if (doctorQuery.res?.ok && doctorQuery.data) {
-                // update total doctors count
-                setTotalDoctors(
-                  doctorQuery.data.results.reduce(
-                    (acc: number, doctor: DoctorModal) =>
-                      acc + (doctor.count || 0),
-                    0
-                  )
-                );
-              }
             }}
           />
         </DialogModal>

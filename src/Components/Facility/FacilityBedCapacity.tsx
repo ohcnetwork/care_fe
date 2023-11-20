@@ -18,8 +18,6 @@ export const FacilityBedCapacity = (props: any) => {
   });
 
   let capacityList: any = null;
-  let totalBedCount = 0;
-  let totalOccupiedBedCount = 0;
   if (!capacityQuery.data || !capacityQuery.data.results.length) {
     capacityList = (
       <h5 className="mt-4 flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-gray-500 shadow">
@@ -27,10 +25,14 @@ export const FacilityBedCapacity = (props: any) => {
       </h5>
     );
   } else {
-    capacityQuery.data.results.forEach((x) => {
-      totalBedCount += x.total_capacity ? x.total_capacity : 0;
-      totalOccupiedBedCount += x.current_capacity ? x.current_capacity : 0;
-    });
+    const totalBedCount = capacityQuery.data.results.reduce(
+      (acc, x) => acc + (x.total_capacity ? x.total_capacity : 0),
+      0
+    );
+    const totalOccupiedBedCount = capacityQuery.data.results.reduce(
+      (acc, x) => acc + (x.current_capacity ? x.current_capacity : 0),
+      0
+    );
 
     capacityList = (
       <div className="mt-4 grid w-full gap-7 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
@@ -53,9 +55,8 @@ export const FacilityBedCapacity = (props: any) => {
           ) {
             const removeCurrentBedType = (bedTypeId: number | undefined) => {
               if (capacityQuery.data !== undefined) {
-                capacityQuery.data.results = capacityQuery.data.results.filter(
-                  (i) => i.id !== bedTypeId
-                );
+                capacityQuery.data.results.filter((i) => i.id !== bedTypeId);
+                capacityQuery.refetch();
               }
             };
             return (
