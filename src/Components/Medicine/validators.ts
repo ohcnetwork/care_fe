@@ -12,8 +12,7 @@ export const PrescriptionFormValidator = () => {
       if (
         form.base_dosage &&
         form.target_dosage &&
-        form.base_dosage.split(" ")[1] &&
-        form.target_dosage.split(" ")[1]
+        form.base_dosage.split(" ")[1] !== form.target_dosage.split(" ")[1]
       ) {
         errors.base_dosage = "Unit must be same as target dosage's unit";
         errors.target_dosage = "Unit must be same as base dosage's unit";
