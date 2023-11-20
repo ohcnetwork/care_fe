@@ -141,7 +141,6 @@ export default function UserFilter(props: any) {
         placeholder="Phone Number"
         value={filterState.phone_number}
         onChange={handleChange}
-        errorClassName="hidden"
         types={["mobile", "landline"]}
       />
 
@@ -151,7 +150,6 @@ export default function UserFilter(props: any) {
         placeholder="WhatsApp Phone Number"
         value={filterState.alt_phone_number}
         onChange={handleChange}
-        errorClassName="hidden"
         types={["mobile"]}
       />
     </FiltersSlideover>
