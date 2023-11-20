@@ -163,6 +163,8 @@ const routes = {
   addUserSkill: {
     path: "/api/v1/users/{username}/skill/",
     method: "POST",
+    TBody: Type<{ skill: string }>(),
+    TRes: Type<SkillModel>(),
   },
 
   deleteUserFacility: {
@@ -178,6 +180,7 @@ const routes = {
   deleteUserSkill: {
     path: "/api/v1/users/{username}/skill/{id}/",
     method: "DELETE",
+    TRes: undefined,
   },
 
   createUser: {

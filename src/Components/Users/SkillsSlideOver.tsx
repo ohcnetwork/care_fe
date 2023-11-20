@@ -2,20 +2,17 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
 import { SkillModel, SkillObjectModel } from "../Users/models";
 import { SkillSelect } from "../Common/SkillSelect";
-import {
-  addUserSkill,
-  getUserListSkills,
-  deleteUserSkill,
-} from "../../Redux/actions";
 import UnlinkSkillDialog from "./UnlinkSkillDialog";
 import * as Notification from "../../Utils/Notifications.js";
-import { useDispatch } from "react-redux";
 import ButtonV2 from "../Common/components/ButtonV2";
 import AuthorizeFor from "../../Utils/AuthorizeFor";
 import { useIsAuthorized } from "../../Common/hooks/useIsAuthorized";
 import { AddSkillsPlaceholder, SkillsArray } from "./SkillsSlideOverComponents";
 import { useTranslation } from "react-i18next";
 import CircularProgress from "../Common/components/CircularProgress";
+import useQuery from "../../Utils/request/useQuery";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 interface IProps {
   username: string;
@@ -32,25 +29,23 @@ export default ({ show, setShow, username }: IProps) => {
   );
   const [isLoading, setIsLoading] = useState(false);
   const [deleteSkill, setDeleteSkill] = useState<SkillModel | null>(null);
-  const dispatch: any = useDispatch();
 
-  const fetchSkills = useCallback(
-    async (username: string) => {
-      setIsLoading(true);
-      const res = await dispatch(getUserListSkills({ username }));
-      if (res && res.data) {
-        setSkills(res.data.results);
-      }
-      setIsLoading(false);
-    },
-    [dispatch]
-  );
+  const {
+    data: userSkills,
+    loading: userSkillsLoading,
+    refetch: refetchUserSkills,
+  } = useQuery(routes.userListSkill, {
+    pathParams: { username },
+  });
 
   const addSkill = useCallback(
     async (username: string, skill: SkillObjectModel | null) => {
       if (!skill) return;
       setIsLoading(true);
-      const res = await dispatch(addUserSkill(username, skill.id));
+      const { res } = await request(routes.addUserSkill, {
+        pathParams: { username },
+        body: { skill: skill.id },
+      });
       if (res?.status !== 201) {
         Notification.Error({
           msg: "Error while adding skill",
@@ -62,30 +57,34 @@ export default ({ show, setShow, username }: IProps) => {
       }
       setSelectedSkill(null);
       setIsLoading(false);
-      fetchSkills(username);
+      await refetchUserSkills();
     },
-    [dispatch, fetchSkills]
+    [refetchUserSkills]
   );
 
   const removeSkill = useCallback(
     async (username: string, skillId: string) => {
-      const res = await dispatch(deleteUserSkill(username, skillId));
+      const { res } = await request(routes.deleteUserSkill, {
+        pathParams: { username, id: skillId },
+      });
       if (res?.status !== 204) {
         Notification.Error({
           msg: "Error while unlinking skill",
         });
       }
       setDeleteSkill(null);
-      fetchSkills(username);
+      await refetchUserSkills();
     },
-    [dispatch, fetchSkills]
+    [refetchUserSkills]
   );
 
   useEffect(() => {
     setIsLoading(true);
-    if (username) fetchSkills(username);
+    if (userSkills && !userSkillsLoading) {
+      setSkills(userSkills.results);
+    }
     setIsLoading(false);
-  }, [username, fetchSkills]);
+  }, [userSkills, userSkillsLoading]);
 
   const authorizeForAddSkill = useIsAuthorized(
     AuthorizeFor(["DistrictAdmin", "StateAdmin"])
