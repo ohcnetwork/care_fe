@@ -14,7 +14,6 @@ const clearFilterState = {
   district: "",
   local_body: "",
   facility_type: "",
-  kasp_empanelled: "",
 };
 
 function FacilityFilter(props: any) {
@@ -26,7 +25,6 @@ function FacilityFilter(props: any) {
     district: filter.district || "",
     local_body: filter.local_body || "",
     facility_type: filter.facility_type || "",
-    kasp_empanelled: filter.kasp_empanelled || "",
   });
 
   const applyFilter = () => {
@@ -35,7 +33,6 @@ function FacilityFilter(props: any) {
       district: Number(filterState.district) || "",
       local_body: Number(filterState.local_body) || "",
       facility_type: filterState.facility_type || "",
-      kasp_empanelled: filterState.kasp_empanelled || "",
     };
     onChange(data);
   };
