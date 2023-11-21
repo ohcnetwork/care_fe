@@ -594,16 +594,21 @@ export const FacilityHome = (props: any) => {
                 >
                   View Users
                 </DropdownItem>
-                <DropdownItem
-                  id="delete-facility"
-                  variant="danger"
-                  onClick={() => setOpenDeleteDialog(true)}
-                  className="flex items-center gap-3"
-                  icon={<CareIcon className="care-l-trash-alt text-lg" />}
-                  authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
-                >
-                  Delete Facility
-                </DropdownItem>
+                {authUser.user_type == "DistrictAdmin" ||
+                authUser.user_type == "StateAdmin" ? (
+                  <DropdownItem
+                    id="delete-facility"
+                    variant="danger"
+                    onClick={() => setOpenDeleteDialog(true)}
+                    className="flex items-center gap-3"
+                    icon={<CareIcon className="care-l-trash-alt text-lg" />}
+                    authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
+                  >
+                    Delete Facility
+                  </DropdownItem>
+                ) : (
+                  <></>
+                )}
               </DropdownMenu>
             </div>
             <div className="flex flex-col justify-end">
