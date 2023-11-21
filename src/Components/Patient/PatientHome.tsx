@@ -467,7 +467,7 @@ export const PatientHome = (props: any) => {
             </div>
             <div className="mt-4 flex items-center">
               <ButtonV2
-                className="w-full"
+                className="mb-2 w-full"
                 disabled={!patientData.is_active}
                 onClick={() =>
                   navigate(
@@ -727,7 +727,7 @@ export const PatientHome = (props: any) => {
                   </div>
                 </div>
                 <div className="mt-2 flex justify-between rounded-sm bg-white p-2 px-4 text-center shadow">
-                  <div className="w-1/2 border-r-2 pb-1">
+                  <div className="w-1/2 border-r-2 pb-1 pr-2">
                     <div className="text-sm font-normal leading-5 text-gray-500">
                       Created
                     </div>
@@ -740,7 +740,7 @@ export const PatientHome = (props: any) => {
                       </div>
                     </div>
                   </div>
-                  <div className="w-1/2 pb-1">
+                  <div className="w-1/2 pb-1 pl-2">
                     <div className="text-sm font-normal leading-5 text-gray-500">
                       Last Edited
                     </div>

@@ -370,11 +370,8 @@ export const FacilityHome = (props: any) => {
       />
       {hasCoverImage ? (
         <div
-          className={`group relative h-48 w-full text-clip rounded-t bg-gray-200 opacity-100 transition-all duration-200 ease-in-out md:h-0 md:opacity-0 ${
-            hasPermissionToEditCoverImage && "cursor-pointer"
-          }`}
-          onClick={() =>
-            hasPermissionToEditCoverImage && setEditCoverImage(true)
+          className={
+            "group relative h-48 w-full text-clip rounded-t bg-gray-200 opacity-100 transition-all duration-200 ease-in-out md:h-0 md:opacity-0"
           }
         >
           <CoverImage />
