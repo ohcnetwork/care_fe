@@ -126,6 +126,7 @@ export default ({ show, setShow, username }: IProps) => {
                   setSelected={setSelectedSkill}
                   errors=""
                   username={username}
+                  userSkills={skills}
                 />
                 <ButtonV2
                   id="add-skill-button"

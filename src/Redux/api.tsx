@@ -45,7 +45,11 @@ import {
   ILocalBodyByDistrict,
   IPartialUpdateExternalResult,
 } from "../Components/ExternalResult/models";
-import { SkillModel, UserModel } from "../Components/Users/models";
+import {
+  SkillModel,
+  SkillObjectModel,
+  UserModel,
+} from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
 import {
   NotificationData,
@@ -243,6 +247,8 @@ const routes = {
 
   getAllSkills: {
     path: "/api/v1/skill/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<SkillObjectModel>>(),
   },
 
   // Facility Endpoints
