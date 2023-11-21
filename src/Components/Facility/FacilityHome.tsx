@@ -622,7 +622,11 @@ export const FacilityHome = (props: any) => {
                 ghost
                 border
                 className="mt-2 flex w-full flex-row justify-center md:w-auto"
-                onClick={() => navigate(`/facility/${facilityId}/livefeed`)}
+                onClick={() =>
+                  navigate(
+                    `/facility/${facilityId}/location/09ab6e88-9132-434a-b8ab-b342b10e7bef/feed`
+                  )
+                }
               >
                 <CareIcon icon="l-video" className="text-lg" />
                 <span>Live Monitoring</span>

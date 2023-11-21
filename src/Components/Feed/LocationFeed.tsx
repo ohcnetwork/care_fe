@@ -1,7 +1,5 @@
-import { Fragment, useContext, useEffect, useState } from "react";
+import { Fragment, useState } from "react";
 import useFilters from "../../Common/hooks/useFilters";
-import useFullscreen from "../../Common/hooks/useFullscreen";
-import { FacilityModel } from "./models";
 import Loading from "../Common/Loading";
 import Page from "../Common/components/Page";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -9,99 +7,48 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import { LocationSelect } from "../Common/LocationSelect";
 import Pagination from "../Common/Pagination";
-import { SidebarShrinkContext } from "../Common/Sidebar/Sidebar";
-import { AssetData } from "../Assets/AssetTypes";
 import { Popover, Transition } from "@headlessui/react";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import LiveFeedTile from "./LiveFeedTile";
-import { getCameraConfig } from "../../Utils/transformUtils";
-import { getPermittedFacility, listAssets } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import { RouteParams } from "../../Routers/types";
+import LocationFeedTile from "./LocationFeedTile";
+import Fullscreen from "../../CAREUI/misc/Fullscreen";
 
-const PER_PAGE_LIMIT = 6;
+const PER_PAGE_LIMIT = 4;
 
-interface Props {
-  facilityId: string;
-}
+type Props = RouteParams<"facilityId" | "locationId">;
 
-export default function LiveFeedScreen({ facilityId }: Props) {
-  const dispatch = useDispatch<any>();
-  const [isFullscreen, setFullscreen] = useFullscreen();
-  const sidebar = useContext(SidebarShrinkContext);
-
-  const [facility, setFacility] = useState<FacilityModel>();
-  const [assets, setAssets] = useState<AssetData[]>();
-  const [totalCount, setTotalCount] = useState(0);
+export default function LocationFeed(props: Props) {
+  const [isFullscreen, setFullscreen] = useState(false);
   const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
     limit: PER_PAGE_LIMIT,
   });
 
-  const [refresh_presets_hash, setRefreshPresetsHash] = useState<number>(
-    Number(new Date())
-  );
+  const facilityQuery = useQuery(routes.getPermittedFacility, {
+    pathParams: { id: props.facilityId },
+  });
 
-  // To automatically collapse sidebar.
-  useEffect(() => {
-    sidebar.setShrinked(true);
+  const { data, loading } = useQuery(routes.listAssets, {
+    query: {
+      ...qParams,
+      limit: PER_PAGE_LIMIT,
+      offset: (qParams.page ? qParams.page - 1 : 0) * PER_PAGE_LIMIT,
+      facility: props.facilityId,
+      location: props.locationId,
+      asset_class: "ONVIF",
+      in_use_by_consultation: qParams.in_use_by_consultation ?? true,
+    },
+  });
 
-    return () => {
-      sidebar.setShrinked(sidebar.shrinked);
-    };
-  }, []);
-
-  useEffect(() => {
-    async function fetchFacilityOrObject() {
-      if (facility) return facility;
-      const res = await dispatch(getPermittedFacility(facilityId));
-      if (res.status !== 200) return;
-      setFacility(res.data);
-      return res.data as FacilityModel;
-    }
-
-    async function fetchData() {
-      setAssets(undefined);
-
-      const filters = {
-        ...qParams,
-        page: qParams.page || 1,
-        limit: PER_PAGE_LIMIT,
-        offset: (qParams.page ? qParams.page - 1 : 0) * PER_PAGE_LIMIT,
-        asset_class: "ONVIF",
-        facility: facilityId || "",
-        location: qParams.location,
-        bed_is_occupied: qParams.bed_is_occupied,
-      };
-
-      const [facilityObj, res] = await Promise.all([
-        fetchFacilityOrObject(),
-        dispatch(listAssets(filters)),
-      ]);
-
-      if (!facilityObj || res.status !== 200) {
-        return;
-      }
-      console.log(facilityObj, res.data);
-      const entries = res.data.results;
-
-      setTotalCount(entries.length);
-      setAssets(entries);
-    }
-    fetchData();
-    setRefreshPresetsHash(Number(new Date()));
-  }, [
-    dispatch,
-    facilityId,
-    qParams.page,
-    qParams.location,
-    qParams.ordering,
-    qParams.bed_is_occupied,
-  ]);
+  const totalCount = data?.count ?? 0;
 
   return (
     <Page
       title="Live Monitoring"
-      backUrl={`/facility/${facilityId}/`}
+      collapseSidebar
+      backUrl={`/facility/${props.facilityId}/`}
       noImplicitPadding
       breadcrumbs={false}
       options={
@@ -137,30 +84,53 @@ export default function LiveFeedScreen({ facilityId }: Props) {
                       <FieldLabel className="text-sm">
                         Filter by Location
                       </FieldLabel>
-                      <div>
+                      <div className="flex w-full items-center gap-2">
                         <LocationSelect
                           key={qParams.location}
                           name="Facilities"
-                          setSelected={(location) => {
-                            location
-                              ? updateQuery({ location })
-                              : removeFilter("location");
-                          }}
+                          setSelected={(location) => updateQuery({ location })}
                           selected={qParams.location}
                           showAll={false}
                           multiple={false}
-                          facilityId={facilityId}
+                          facilityId={props.facilityId}
                           errors=""
                           errorClassName="hidden"
                         />
+                        {qParams.location && (
+                          <ButtonV2
+                            variant="secondary"
+                            circle
+                            border
+                            onClick={() => removeFilter("location")}
+                          >
+                            Clear
+                          </ButtonV2>
+                        )}
                       </div>
                     </div>
                     <CheckBoxFormField
-                      name="bed_is_occupied"
-                      label="Hide Cameras without Patient"
+                      name="in_use_by_consultation"
+                      label="Hide cameras without patient"
                       value={
-                        qParams.bed_is_occupied === "true" ||
-                        qParams.bed_is_occupied === undefined
+                        qParams.in_use_by_consultation === "true" ||
+                        qParams.in_use_by_consultation === undefined
+                      }
+                      onChange={({ name, value }) => {
+                        if (value) {
+                          updateQuery({ [name]: value });
+                        } else {
+                          removeFilter(name);
+                        }
+                      }}
+                      labelClassName="text-sm"
+                      errorClassName="hidden"
+                    />
+                    <CheckBoxFormField
+                      name="is_working"
+                      label="Camera is Working"
+                      value={
+                        qParams.is_working === "true" ||
+                        qParams.is_working === undefined
                       }
                       onChange={({ name, value }) => {
                         if (value) {
@@ -204,26 +174,34 @@ export default function LiveFeedScreen({ facilityId }: Props) {
         </div>
       }
     >
-      {assets === undefined ? (
+      {loading ||
+      data === undefined ||
+      facilityQuery.data === undefined ||
+      facilityQuery.loading ? (
         <Loading />
-      ) : assets.length === 0 ? (
+      ) : data.results.length === 0 ? (
         <div className="flex h-[80vh] w-full items-center justify-center text-center text-black">
           No Camera present in this location or facility.
         </div>
       ) : (
-        <div className="mt-1 grid grid-cols-1 gap-2 pl-4 xl:grid-cols-1 3xl:grid-cols-2">
-          {assets.map((asset, idx) => (
-            <div className="text-clip" key={idx}>
-              {/* <LiveFeedTile assetId={asset.asset.id} key={asset?.bed.id} /> */}
-              <LiveFeedTile
-                middlewareHostname={facility?.middleware_address}
-                asset={getCameraConfig(asset)}
-                showRefreshButton={true}
-                refreshPresetsHash={refresh_presets_hash}
-              />
-            </div>
-          ))}
-        </div>
+        <Fullscreen
+          fullscreen={isFullscreen}
+          onExit={() => setFullscreen(false)}
+        >
+          <div className="mt-1 grid grid-cols-1 place-content-center gap-1 lg:grid-cols-2 3xl:grid-cols-3">
+            {data.results.map((asset) => (
+              <div className="text-clip" key={asset.id}>
+                <LocationFeedTile
+                  asset={asset}
+                  fallbackMiddleware={
+                    asset.location_object.middleware_address ??
+                    facilityQuery.data!.middleware_address
+                  }
+                />
+              </div>
+            ))}
+          </div>
+        </Fullscreen>
       )}
     </Page>
   );

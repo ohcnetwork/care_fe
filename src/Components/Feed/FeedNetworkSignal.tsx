@@ -7,24 +7,39 @@ interface Props {
   playerRef: React.RefObject<HTMLVideoElement>;
   playedOn: Date | undefined;
   status: StreamStatus;
+  onReset: () => void;
 }
 
 export default function FeedNetworkSignal(props: Props) {
   const [videoDelay, setVideoDelay] = useState<number>();
   useEffect(() => {
     const interval = setInterval(() => {
-      setVideoDelay(calculateVideoDelay(props.playerRef, props.playedOn));
+      const delay = calculateVideoDelay(props.playerRef, props.playedOn);
+      setVideoDelay(delay);
+
+      // Voluntarily resetting for negative delays too as:
+      // 1. We should not allow users to see what happens in the future!
+      //    They'll figure out that we have a time machine in our hands.
+      // 2. This value may become negative when the web-socket stream
+      //    disconnects while the tab was not in focus.
+      if (-5 > delay || delay > 5) {
+        props.onReset();
+      }
     }, 500);
 
     return () => {
       clearInterval(interval);
     };
-  }, [props.playedOn]);
+  }, [props.playedOn, props.onReset, setVideoDelay]);
 
   return (
     <NetworkSignal strength={getStrength(props.status, videoDelay)}>
-      <span className="w-14 text-xs font-bold tracking-wide">
-        {!!videoDelay && `${(videoDelay * 1e3) | 1} ms`}
+      <span className="w-14 text-xs font-bold leading-none tracking-wide">
+        {videoDelay ? (
+          `${(videoDelay * 1e3) | 1} ms`
+        ) : (
+          <span className="font-normal text-white/50">No signal</span>
+        )}
       </span>
     </NetworkSignal>
   );
@@ -38,6 +53,6 @@ const getStrength = (status: StreamStatus, videoDelay?: number) => {
   const ms = videoDelay * 1e3;
 
   if (ms < 500) return 3;
-  if (ms < 5000) return 2;
+  if (ms < 2000) return 2;
   return 1;
 };
