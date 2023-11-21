@@ -192,6 +192,7 @@ export const AssetServiceEditModal = (props: {
                 className="mt-2"
                 position="LEFT"
                 value={new Date(form.serviced_on)}
+                max={new Date(props.service_record.created_date)}
                 onChange={(date) => {
                   if (
                     dayjs(date.value).format("YYYY-MM-DD") >
