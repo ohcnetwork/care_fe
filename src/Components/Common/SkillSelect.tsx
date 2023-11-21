@@ -28,7 +28,6 @@ export const SkillSelect = (props: SkillSelectProps) => {
     selected,
     setSelected,
     searchAll,
-    showAll = true,
     showNOptions = 10,
     disabled = false,
     className = "",
@@ -49,19 +48,16 @@ export const SkillSelect = (props: SkillSelectProps) => {
       };
 
       const res = await dispatchAction(getAllSkills(params));
-      console.log(userSkills);
       const skillsID: string[] = [];
       userSkills?.map((skill: SkillModel) =>
         skillsID.push(skill.skill_object.id)
       );
-      console.log(skillsID);
       const skills = res?.data?.results.filter(
         (skill: any) => !skillsID.includes(skill.id)
       );
-      console.log(skills);
       return skills;
     },
-    [dispatchAction, searchAll, userSkills, showAll]
+    [dispatchAction, searchAll, userSkills]
   );
 
   return (
