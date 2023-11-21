@@ -8,7 +8,6 @@ import { FieldChangeEvent } from "../../Form/FormFields/Utils";
 import DistrictAutocompleteFormField from "../../Common/DistrictAutocompleteFormField";
 import LocalBodyAutocompleteFormField from "../../Common/LocalBodyAutocompleteFormField";
 import { SelectFormField } from "../../Form/FormFields/SelectFormField";
-import AccordionV2 from "../../Common/components/AccordionV2";
 
 const clearFilterState = {
   state: "",
@@ -58,9 +57,9 @@ function FacilityFilter(props: any) {
     setFilterState(filterData);
   };
 
-  const field = (name: string, showLabel = true) => ({
+  const field = (name: string) => ({
     name,
-    label: showLabel ? t(name) : undefined,
+    label: t(name),
     value: filterState[name],
     onChange: handleChange,
   });
@@ -92,23 +91,6 @@ function FacilityFilter(props: any) {
           optionValue={(option) => option.id}
           placeholder={t("show_all")}
         />
-        <AccordionV2
-          title={"KASP Empanelled"}
-          expanded={false}
-          className="w-full rounded-md"
-        >
-          <SelectFormField
-            {...field("kasp_empanelled", false)}
-            options={[
-              { id: "true", text: t("yes") },
-              { id: "false", text: t("no") },
-            ]}
-            optionLabel={(option) => option.text}
-            optionValue={(option) => option.id}
-            placeholder={t("show_all")}
-            className="mt-2"
-          />
-        </AccordionV2>
       </div>
     </FiltersSlideover>
   );
