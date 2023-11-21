@@ -6,6 +6,7 @@ import { mergeRequestOptions } from "./utils";
 export interface QueryOptions<TData> extends RequestOptions<TData> {
   prefetch?: boolean;
   refetchOnWindowFocus?: boolean;
+  key?: string;
 }
 
 export default function useQuery<TData>(

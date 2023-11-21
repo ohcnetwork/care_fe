@@ -14,6 +14,7 @@ import Resource from "./Resource.json";
 import SortOptions from "./SortOptions.json";
 import Bed from "./Bed.json";
 import Medicine from "./Medicine.json";
+import Diagnosis from "./Diagnosis.json";
 
 export default {
   ...Auth,
@@ -27,6 +28,7 @@ export default {
   ...Facility,
   ...Hub,
   ...Medicine,
+  ...Diagnosis,
   ...Notifications,
   ...Resource,
   ...Shifting,

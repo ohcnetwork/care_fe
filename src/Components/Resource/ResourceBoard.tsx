@@ -1,17 +1,16 @@
 import { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import {
-  listResourceRequests,
-  downloadResourceRequests,
-} from "../../Redux/actions";
+import { downloadResourceRequests } from "../../Redux/actions";
 import { navigate } from "raviger";
 import { classNames } from "../../Utils/utils";
 import { useDrag, useDrop } from "react-dnd";
 import { formatDateTime } from "../../Utils/utils";
 import { ExportButton } from "../Common/Export";
 import dayjs from "../../Utils/dayjs";
-
-const limit = 14;
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import { PaginatedResponse } from "../../Utils/request/types";
+import { IResource } from "./models";
+import request from "../../Utils/request/request";
 
 interface boardProps {
   board: string;
@@ -118,7 +117,6 @@ const ResourceCard = ({ resource }: any) => {
                   </dd>
                 </dt>
               </div>
-
               {resource.assigned_to_object && (
                 <div className="sm:col-span-1">
                   <dt
@@ -136,11 +134,10 @@ const ResourceCard = ({ resource }: any) => {
               )}
             </dl>
           </div>
-
           <div className="mt-2 flex">
             <button
               data-testid="resource-details"
-              onClick={(_) => navigate(`/resource/${resource.external_id}`)}
+              onClick={(_) => navigate(`/resource/${resource.id}`)}
               className="btn btn-default mr-2 w-full bg-white"
             >
               <i className="fas fa-eye mr-2" /> All Details
@@ -157,11 +154,7 @@ export default function ResourceBoard({
   filterProp,
   formatFilter,
 }: boardProps) {
-  const dispatch: any = useDispatch();
-  const [data, setData] = useState<any[]>([]);
-  const [totalCount, setTotalCount] = useState();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState({ board: false, more: false });
+  const [isLoading, setIsLoading] = useState({ board: "BOARD", more: false });
   const [{ isOver }, drop] = useDrop(() => ({
     accept: "resource-card",
     drop: (item: any) => {
@@ -171,29 +164,13 @@ export default function ResourceBoard({
     },
     collect: (monitor) => ({ isOver: !!monitor.isOver() }),
   }));
-
-  const fetchData = () => {
-    setIsLoading((loading) => reduceLoading("BOARD", loading));
-    dispatch(
-      listResourceRequests(
-        formatFilter({ ...filterProp, status: board }),
-        board
-      )
-    ).then((res: any) => {
-      if (res && res.data) {
-        setData(res.data.results);
-        setTotalCount(res.data.count);
-        setCurrentPage(1);
-      }
-      setIsLoading((loading) => reduceLoading("COMPLETE", loading));
-    });
-  };
+  const [offset, setOffSet] = useState(0);
+  const [data, setData] = useState<PaginatedResponse<IResource>>();
 
   useEffect(() => {
-    fetchData();
+    setIsLoading((loading) => reduceLoading("BOARD", loading));
   }, [
     board,
-    dispatch,
     filterProp.facility,
     filterProp.origin_facility,
     filterProp.approving_facility,
@@ -206,31 +183,50 @@ export default function ResourceBoard({
     filterProp.ordering,
   ]);
 
-  const handlePagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentPage(page);
-    setIsLoading((loading) => reduceLoading("MORE", loading));
-    dispatch(
-      listResourceRequests(
-        formatFilter({ ...filterProp, status: board, offset: offset }),
-        board
-      )
-    ).then((res: any) => {
-      if (res && res.data) {
-        setData((data) => [...data, ...res.data.results]);
-        setTotalCount(res.data.count);
+  useQuery(routes.listResourceRequests, {
+    query: formatFilter({
+      ...filterProp,
+      status: board,
+    }),
+    onResponse: ({ res, data: listResourceData }) => {
+      if (res?.ok && listResourceData) {
+        setData(listResourceData);
       }
       setIsLoading((loading) => reduceLoading("COMPLETE", loading));
-    });
+    },
+  });
+
+  const handlePagination = async () => {
+    setIsLoading((loading) => reduceLoading("MORE", loading));
+    setOffSet(offset + 14);
+    const { res, data: newPageData } = await request(
+      routes.listResourceRequests,
+      {
+        query: formatFilter({
+          ...filterProp,
+          status: board,
+          offset: offset,
+        }),
+      }
+    );
+    if (res?.ok && newPageData) {
+      setData((prev) =>
+        prev
+          ? { ...prev, results: [...prev.results, ...newPageData.results] }
+          : newPageData
+      );
+    }
+    setIsLoading((loading) => reduceLoading("COMPLETE", loading));
   };
 
   const boardFilter = (filter: string) => {
-    return data
+    return data?.results
       .filter(({ status }) => status === filter)
       .map((resource: any) => (
         <ResourceCard key={`resource_${resource.id}`} resource={resource} />
       ));
   };
+
   return (
     <div
       ref={drop}
@@ -254,7 +250,7 @@ export default function ResourceBoard({
             />
           </h3>
           <span className="ml-2 rounded-lg bg-primary-500 px-2 text-white">
-            {totalCount || "0"}
+            {data?.count || "0"}
           </span>
         </div>
       </div>
@@ -273,20 +269,21 @@ export default function ResourceBoard({
               </div>
             </div>
           </div>
-        ) : data?.length > 0 ? (
+        ) : data && data?.results.length > 0 ? (
           boardFilter(board)
         ) : (
           <p className="mx-auto p-4">No requests to show.</p>
         )}
         {!isLoading.board &&
-          data?.length < (totalCount || 0) &&
+          data &&
+          data?.results.length < (data?.count || 0) &&
           (isLoading.more ? (
             <div className="mx-auto my-4 rounded-md bg-gray-100 p-2 px-4 hover:bg-white">
               Loading
             </div>
           ) : (
             <button
-              onClick={(_) => handlePagination(currentPage + 1, limit)}
+              onClick={(_) => handlePagination()}
               className="mx-auto my-4 rounded-md bg-gray-100 p-2 px-4 hover:bg-white"
             >
               More...

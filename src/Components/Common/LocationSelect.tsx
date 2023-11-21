@@ -5,6 +5,7 @@ import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import AutocompleteMultiSelectFormField from "../Form/FormFields/AutocompleteMultiselect";
 interface LocationSelectProps {
   name: string;
+  disabled?: boolean;
   margin?: string;
   errors: string;
   className?: string;
@@ -26,6 +27,7 @@ export const LocationSelect = (props: LocationSelectProps) => {
     errors,
     className = "",
     facilityId,
+    disabled = false,
   } = props;
   const [locations, setLocations] = useState<{ name: string; id: string }[]>(
     []
@@ -40,6 +42,7 @@ export const LocationSelect = (props: LocationSelectProps) => {
   };
 
   useEffect(() => {
+    if (!facilityId) return;
     const params = {
       limit: 14,
       search_text: query,
@@ -56,6 +59,7 @@ export const LocationSelect = (props: LocationSelectProps) => {
   return props.multiple ? (
     <AutocompleteMultiSelectFormField
       name={name}
+      disabled={disabled}
       value={selected as unknown as string[]}
       options={locations}
       onChange={({ value }) => handleValueChange(value as unknown as string[])}
@@ -72,6 +76,7 @@ export const LocationSelect = (props: LocationSelectProps) => {
   ) : (
     <AutocompleteFormField
       name={name}
+      disabled={disabled}
       value={selected as string}
       options={locations}
       onChange={({ value }) => handleValueChange([value])}
