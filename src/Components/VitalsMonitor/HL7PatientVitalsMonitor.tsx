@@ -43,7 +43,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
     <div className="flex flex-col gap-1 rounded bg-[#020617] p-2">
       {props.patientAssetBed && (
         <div className="flex items-center justify-between px-2 tracking-wide">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-2 md:flex-row">
             {patient ? (
               <Link
                 href={`/facility/${patient.last_consultation?.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}`}
@@ -64,7 +64,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
               </span>
             )}
           </div>
-          <div className="flex items-center gap-3 text-xs md:text-sm">
+          <div className="flex flex-col items-center gap-2 text-xs md:flex-row md:text-sm">
             {asset && (
               <Link
                 className="flex items-center gap-1 text-gray-500"
@@ -76,7 +76,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
             )}
             {bed && (
               <Link
-                className="flex items-center gap-2 text-gray-500"
+                className="flex flex-col items-center gap-2 text-gray-500 md:flex-row"
                 href={`/facility/${patient?.facility_object?.id}/location/${bed?.location_object?.id}/beds`}
               >
                 <span className="flex items-center gap-1">
