@@ -1,17 +1,5 @@
 import * as Notification from "../../Utils/Notifications.js";
-import {
-  addUserFacility,
-  clearHomeFacility,
-  deleteUser,
-  deleteUserFacility,
-  getDistrict,
-  getUserList,
-  getUserListFacility,
-  partialUpdateUser,
-} from "../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../Common/utils";
 import { lazy, useCallback, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -36,6 +24,9 @@ import Page from "../Common/components/Page.js";
 import dayjs from "dayjs";
 import TextFormField from "../Form/FormFields/TextFormField.js";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
+import routes from "../../Redux/api.js";
+import useQuery from "../../Utils/request/useQuery.js";
+import request from "../../Utils/request/request.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -49,7 +40,6 @@ export default function ManageUsers() {
     advancedFilter,
     resultsPerPage,
   } = useFilters({ limit: 18 });
-  const dispatch: any = useDispatch();
   const initialData: any[] = [];
   let manageUsers: any = null;
   const [users, setUsers] = useState(initialData);
@@ -79,59 +69,50 @@ export default function ManageUsers() {
   const isExtremeSmallScreen =
     width <= extremeSmallScreenBreakpoint ? true : false;
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const params = {
-        limit: resultsPerPage,
-        offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
-        username: qParams.username,
-        first_name: qParams.first_name,
-        last_name: qParams.last_name,
-        phone_number: qParams.phone_number,
-        alt_phone_number: qParams.alt_phone_number,
-        user_type: qParams.user_type,
-        district_id: qParams.district_id,
-      };
-      if (qParams.district_id) {
-        const dis = await dispatch(getDistrict(qParams.district_id));
-        if (!status.aborted) {
-          if (dis && dis.data) {
-            setDistrictName(dis.data.name);
-          }
-        }
-      } else {
-        setDistrictName(undefined);
-      }
-      const res = await dispatch(getUserList(params));
-      if (!status.aborted) {
-        if (res && res.data) {
-          setUsers(res.data.results);
-          setTotalCount(res.data.count);
-        }
-        setIsLoading(false);
-      }
+  const {
+    data: userListData,
+    loading: userListLoading,
+    refetch: refetchUserList,
+  } = useQuery(routes.userList, {
+    query: {
+      limit: resultsPerPage.toString(),
+      offset: (
+        (qParams.page ? qParams.page - 1 : 0) * resultsPerPage
+      ).toString(),
+      username: qParams.username,
+      first_name: qParams.first_name,
+      last_name: qParams.last_name,
+      phone_number: qParams.phone_number,
+      alt_phone_number: qParams.alt_phone_number,
+      user_type: qParams.user_type,
+      district_id: qParams.district_id,
     },
-    [
-      resultsPerPage,
-      qParams.page,
-      qParams.username,
-      qParams.first_name,
-      qParams.last_name,
-      qParams.phone_number,
-      qParams.alt_phone_number,
-      qParams.user_type,
-      qParams.district_id,
-      dispatch,
-    ]
-  );
+  });
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
-  );
+  const fetchDistrict = useCallback(async () => {
+    setIsLoading(true);
+    if (qParams.district_id) {
+      const { data: districtData } = await request(routes.getDistrict, {
+        pathParams: { id: qParams.district_id },
+      });
+      if (districtData) setDistrictName(districtData.name);
+      else setDistrictName(undefined);
+    }
+    setIsLoading(false);
+  }, [qParams.district_id]);
+
+  useEffect(() => {
+    setIsLoading(true);
+    if (userListData && !userListLoading) {
+      setUsers(userListData.results);
+      setTotalCount(userListData.count);
+    }
+    setIsLoading(false);
+  }, [userListData, userListLoading]);
+
+  useEffect(() => {
+    fetchDistrict();
+  }, [fetchDistrict]);
 
   const addUser = (
     <ButtonV2
@@ -154,13 +135,11 @@ export default function ManageUsers() {
       setWeeklyHoursError("Value should be between 0 and 168");
       return;
     }
-    const res = await dispatch(
-      partialUpdateUser(username, {
-        weekly_working_hours: weeklyHours,
-      })
-    );
-
-    if (res?.data) {
+    const { res, data } = await request(routes.partialUpdateUser, {
+      pathParams: { username },
+      body: { weekly_working_hours: weeklyHours },
+    });
+    if (res && res.status === 200 && data) {
       Notification.Success({
         msg: "Working hours updated successfully",
       });
@@ -168,29 +147,33 @@ export default function ManageUsers() {
       setSelectedUser(null);
     } else {
       Notification.Error({
-        msg: "Error while updating working hours: " + (res.data.detail || ""),
+        msg: "Error while updating working hours: " + (data?.detail || ""),
       });
     }
     setWeeklyHours(0);
     setWeeklyHoursError("");
-    fetchData({ aborted: false });
+    await fetchDistrict();
+    await refetchUserList();
   };
 
   const handleSubmit = async () => {
     const username = userData.username;
-    const res = await dispatch(deleteUser(username));
+    const { res, data } = await request(routes.deleteUser, {
+      body: { username },
+    });
     if (res?.status === 204) {
       Notification.Success({
         msg: "User deleted successfully",
       });
     } else {
       Notification.Error({
-        msg: "Error while deleting User: " + (res?.data?.detail || ""),
+        msg: "Error while deleting User: " + (data?.detail || ""),
       });
     }
 
     setUserData({ show: false, username: "", name: "" });
-    fetchData({ aborted: false });
+    await fetchDistrict();
+    await refetchUserList();
   };
 
   const handleDelete = (user: any) => {
@@ -463,7 +446,7 @@ export default function ManageUsers() {
       );
     }));
 
-  if (isLoading || !users) {
+  if (isLoading || userListLoading || !users) {
     manageUsers = <Loading />;
   } else if (users?.length) {
     manageUsers = (
@@ -540,7 +523,7 @@ export default function ManageUsers() {
         <CountBlock
           text="Total Users"
           count={totalCount}
-          loading={isLoading}
+          loading={isLoading || userListLoading}
           icon="l-user-injured"
           className="flex-1"
         />
@@ -596,7 +579,6 @@ export default function ManageUsers() {
 function UserFacilities(props: { user: any }) {
   const { user } = props;
   const username = user.username;
-  const dispatch: any = useDispatch();
   const [facilities, setFacilities] = useState<any>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [facility, setFacility] = useState<any>(null);
@@ -635,61 +617,64 @@ function UserFacilities(props: { user: any }) {
     });
   };
 
-  const fetchFacilities = async () => {
-    setIsLoading(true);
-    const res = await dispatch(getUserListFacility({ username }));
-    if (res && res.data) {
-      setFacilities(res.data);
-    }
-    setIsLoading(false);
-  };
+  const {
+    data: userFacilities,
+    loading: userFacilitiesLoading,
+    refetch: refetchUserFacilities,
+  } = useQuery(routes.userListFacility, {
+    pathParams: { username },
+  });
 
   const updateHomeFacility = async (username: string, facility: any) => {
     setIsLoading(true);
-    const res = await dispatch(
-      partialUpdateUser(username, { home_facility: facility.id })
-    );
+    const { res } = await request(routes.partialUpdateUser, {
+      pathParams: { username },
+      body: { home_facility: facility.id.toString() },
+    });
     if (res && res.status === 200) user.home_facility_object = facility;
-    fetchFacilities();
+    await refetchUserFacilities();
     setIsLoading(false);
   };
 
   const handleUnlinkFacilitySubmit = async () => {
     setIsLoading(true);
     if (unlinkFacilityData.isHomeFacility) {
-      const res = await dispatch(
-        clearHomeFacility(unlinkFacilityData.userName)
-      );
+      const { res } = await request(routes.clearHomeFacility, {
+        pathParams: { username },
+      });
       if (res && res.status === 204) user.home_facility_object = null;
     } else {
-      await dispatch(
-        deleteUserFacility(
-          unlinkFacilityData.userName,
-          String(unlinkFacilityData?.facility?.id)
-        )
-      );
+      await request(routes.deleteUserFacility, {
+        pathParams: { username },
+        body: { facility: unlinkFacilityData?.facility?.id?.toString() },
+      });
     }
-    fetchFacilities();
+    await refetchUserFacilities();
     setIsLoading(false);
     hideUnlinkFacilityModal();
   };
 
   const addFacility = async (username: string, facility: any) => {
     setIsLoading(true);
-    const res = await dispatch(addUserFacility(username, String(facility.id)));
+    const { res } = await request(routes.addUserFacility, {
+      pathParams: { username },
+      body: { facility: facility.id.toString() },
+    });
     if (res?.status !== 201) {
       Notification.Error({
         msg: "Error while linking facility",
       });
     }
+    await refetchUserFacilities();
     setIsLoading(false);
     setFacility(null);
-    fetchFacilities();
   };
 
   useEffect(() => {
-    fetchFacilities();
-  }, []);
+    if (userFacilities && !userFacilitiesLoading) {
+      setFacilities(userFacilities);
+    }
+  }, [userFacilities, userFacilitiesLoading]);
 
   return (
     <div className="h-full">
@@ -723,7 +708,7 @@ function UserFacilities(props: { user: any }) {
           Add
         </ButtonV2>
       </div>
-      {isLoading ? (
+      {isLoading || userFacilitiesLoading ? (
         <div className="flex items-center justify-center">
           <CircularProgress />
         </div>

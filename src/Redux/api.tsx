@@ -158,6 +158,8 @@ const routes = {
   addUserFacility: {
     path: "/api/v1/users/{username}/add_facility/",
     method: "PUT",
+    TBody: Type<{ facility: string }>(),
+    TRes: undefined,
   },
 
   addUserSkill: {
@@ -170,11 +172,14 @@ const routes = {
   deleteUserFacility: {
     path: "/api/v1/users/{username}/delete_facility/",
     method: "DELETE",
+    TBody: Type<{ facility: string }>(),
+    TRes: undefined,
   },
 
   clearHomeFacility: {
     path: "/api/v1/users/{username}/clear_home_facility/",
     method: "DELETE",
+    TRes: undefined,
   },
 
   deleteUserSkill: {
@@ -198,11 +203,14 @@ const routes = {
     path: "/api/v1/users/{username}/",
     method: "PATCH",
     TRes: Type<{ [key: string]: object }>(),
+    TBody: Type<{ [key: string]: string | object | undefined }>(),
   },
 
   deleteUser: {
     path: "/api/v1/users",
     method: "DELETE",
+    TRes: Type<{ [key: string]: object }>(),
+    TBody: Type<{ username: string }>(),
   },
 
   addUser: {
@@ -632,7 +640,7 @@ const routes = {
   getDistrict: {
     path: "/api/v1/district/{id}/",
     method: "GET",
-    TRes: Type<PaginatedResponse<DistrictModel>>(),
+    TRes: Type<DistrictModel>(),
   },
   getDistrictByState: {
     path: "/api/v1/state/{id}/districts/",
