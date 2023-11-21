@@ -1,6 +1,6 @@
 import * as Notification from "../../Utils/Notifications.js";
 
-import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import {
   CapacityModal,
   DoctorModal,
@@ -602,7 +602,6 @@ export const FacilityHome = (props: any) => {
                     onClick={() => setOpenDeleteDialog(true)}
                     className="flex items-center gap-3"
                     icon={<CareIcon className="care-l-trash-alt text-lg" />}
-                    authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
                   >
                     Delete Facility
                   </DropdownItem>
