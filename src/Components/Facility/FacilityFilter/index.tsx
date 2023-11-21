@@ -1,7 +1,6 @@
 import { navigate } from "raviger";
 import { FACILITY_TYPES } from "../../../Common/constants";
 import useMergeState from "../../../Common/hooks/useMergeState";
-import useConfig from "../../../Common/hooks/useConfig";
 import FiltersSlideover from "../../../CAREUI/interactive/FiltersSlideover";
 import { useTranslation } from "react-i18next";
 import StateAutocompleteFormField from "../../Common/StateAutocompleteFormField";
@@ -9,6 +8,7 @@ import { FieldChangeEvent } from "../../Form/FormFields/Utils";
 import DistrictAutocompleteFormField from "../../Common/DistrictAutocompleteFormField";
 import LocalBodyAutocompleteFormField from "../../Common/LocalBodyAutocompleteFormField";
 import { SelectFormField } from "../../Form/FormFields/SelectFormField";
+import AccordionV2 from "../../Common/components/AccordionV2";
 
 const clearFilterState = {
   state: "",
@@ -21,7 +21,7 @@ const clearFilterState = {
 function FacilityFilter(props: any) {
   const { t } = useTranslation();
   const { filter, onChange, closeFilter } = props;
-  const { kasp_string } = useConfig();
+
   const [filterState, setFilterState] = useMergeState({
     state: filter.state || "",
     district: filter.district || "",
@@ -58,9 +58,9 @@ function FacilityFilter(props: any) {
     setFilterState(filterData);
   };
 
-  const field = (name: string) => ({
+  const field = (name: string, showLabel = true) => ({
     name,
-    label: t(name),
+    label: showLabel ? t(name) : undefined,
     value: filterState[name],
     onChange: handleChange,
   });
@@ -92,17 +92,23 @@ function FacilityFilter(props: any) {
           optionValue={(option) => option.id}
           placeholder={t("show_all")}
         />
-        <SelectFormField
-          {...field("kasp_empanelled")}
-          label={`${kasp_string} Empanelled`}
-          options={[
-            { id: "true", text: t("yes") },
-            { id: "false", text: t("no") },
-          ]}
-          optionLabel={(option) => option.text}
-          optionValue={(option) => option.id}
-          placeholder={t("show_all")}
-        />
+        <AccordionV2
+          title={"KASP Empanelled"}
+          expanded={false}
+          className="w-full rounded-md"
+        >
+          <SelectFormField
+            {...field("kasp_empanelled", false)}
+            options={[
+              { id: "true", text: t("yes") },
+              { id: "false", text: t("no") },
+            ]}
+            optionLabel={(option) => option.text}
+            optionValue={(option) => option.id}
+            placeholder={t("show_all")}
+            className="mt-2"
+          />
+        </AccordionV2>
       </div>
     </FiltersSlideover>
   );
