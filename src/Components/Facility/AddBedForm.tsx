@@ -229,12 +229,21 @@ export const AddBedForm = (props: BedFormProps) => {
                   min={1}
                   max={100}
                   onChange={(e) => setNumberOfBeds(Number(e.value))}
+                  error={
+                    numberOfBeds > 100
+                      ? "Number of beds cannot be greater than 100"
+                      : undefined
+                  }
                 />
               </>
             )}
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-end">
               <Cancel onClick={handleCancel} />
-              <Submit onClick={handleSubmit} label={buttonText} />
+              <Submit
+                onClick={handleSubmit}
+                label={buttonText}
+                disabled={numberOfBeds > 100}
+              />
             </div>
           </form>
         </Card>
