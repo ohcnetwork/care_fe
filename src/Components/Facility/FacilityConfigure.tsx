@@ -1,7 +1,7 @@
 import { lazy, useReducer, useState } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
+import { Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import Page from "../Common/components/Page";
 import { ConfigureHealthFacility } from "../ABDM/ConfigureHealthFacility";
@@ -155,7 +155,6 @@ export const FacilityConfigure = (props: IProps) => {
               </div>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-              <Cancel onClick={() => navigate(`/facility/${facilityId}`)} />
               <Submit onClick={handleSubmit} label="Update" />
             </div>
           </form>
