@@ -58,6 +58,7 @@ import {
 
 import { IComment, IResource } from "../Components/Resource/models";
 import { IShift } from "../Components/Shifting/models";
+import { HCXPolicyModel } from "../Components/HCX/models";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -1232,6 +1233,7 @@ const routes = {
   listHCXPolicies: {
     path: "/api/v1/hcx/policy/",
     method: "GET",
+    TRes: Type<PaginatedResponse<HCXPolicyModel>>(),
   },
 
   createHCXPolicy: {
