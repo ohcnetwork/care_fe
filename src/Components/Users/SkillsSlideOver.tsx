@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
 import { SkillModel, SkillObjectModel } from "../Users/models";
 import { SkillSelect } from "../Common/SkillSelect";
@@ -23,7 +23,6 @@ interface IProps {
 export default ({ show, setShow, username }: IProps) => {
   /* added const {t} hook here and relevant text to Common.json to avoid eslint error  */
   const { t } = useTranslation();
-  const [skills, setSkills] = useState<SkillModel[]>([]);
   const [selectedSkill, setSelectedSkill] = useState<SkillObjectModel | null>(
     null
   );
@@ -31,8 +30,8 @@ export default ({ show, setShow, username }: IProps) => {
   const [deleteSkill, setDeleteSkill] = useState<SkillModel | null>(null);
 
   const {
-    data: userSkills,
-    loading: userSkillsLoading,
+    data: skills,
+    loading: skillsLoading,
     refetch: refetchUserSkills,
   } = useQuery(routes.userListSkill, {
     pathParams: { username },
@@ -46,7 +45,7 @@ export default ({ show, setShow, username }: IProps) => {
         pathParams: { username },
         body: { skill: skill.id },
       });
-      if (res?.status !== 201) {
+      if (!res?.ok) {
         Notification.Error({
           msg: "Error while adding skill",
         });
@@ -78,19 +77,11 @@ export default ({ show, setShow, username }: IProps) => {
     [refetchUserSkills]
   );
 
-  useEffect(() => {
-    setIsLoading(true);
-    if (userSkills && !userSkillsLoading) {
-      setSkills(userSkills.results);
-    }
-    setIsLoading(false);
-  }, [userSkills, userSkillsLoading]);
-
   const authorizeForAddSkill = useIsAuthorized(
     AuthorizeFor(["DistrictAdmin", "StateAdmin"])
   );
 
-  const hasSkills = useMemo(() => skills.length > 0, [skills]);
+  const hasSkills = useMemo(() => skills?.results?.length || 0 > 0, [skills]);
 
   return (
     <div className="col-span-4">
@@ -113,7 +104,7 @@ export default ({ show, setShow, username }: IProps) => {
       >
         <div>
           <div className="col-span-full sm:col-span-3 sm:col-start-2">
-            {!isLoading && (
+            {(!isLoading || !skillsLoading) && (
               <div className="tooltip flex items-center gap-2">
                 <SkillSelect
                   id="select-skill"
@@ -126,7 +117,7 @@ export default ({ show, setShow, username }: IProps) => {
                   setSelected={setSelectedSkill}
                   errors=""
                   username={username}
-                  userSkills={skills}
+                  userSkills={skills?.results || []}
                 />
                 <ButtonV2
                   id="add-skill-button"
@@ -143,7 +134,7 @@ export default ({ show, setShow, username }: IProps) => {
                 )}
               </div>
             )}
-            {isLoading ? (
+            {isLoading || skillsLoading ? (
               <div className="mt-4 flex justify-center">
                 <CircularProgress />
               </div>
@@ -151,8 +142,8 @@ export default ({ show, setShow, username }: IProps) => {
               <div className="mb-2 mt-4" id="added-user-skills">
                 {hasSkills ? (
                   <SkillsArray
-                    isLoading={isLoading}
-                    skills={skills}
+                    isLoading={isLoading || skillsLoading}
+                    skills={skills?.results || []}
                     authorizeForAddSkill={authorizeForAddSkill}
                     setDeleteSkill={setDeleteSkill}
                   />
