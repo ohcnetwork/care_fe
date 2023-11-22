@@ -78,8 +78,20 @@ const DATE_TIME_FORMAT = `${TIME_FORMAT}; ${DATE_FORMAT}`;
 
 type DateLike = Parameters<typeof dayjs>[0];
 
-export const formatDateTime = (date: DateLike, format = DATE_TIME_FORMAT) =>
-  dayjs(date).format(format);
+export const formatDateTime = (date: DateLike, format?: string) => {
+  const obj = dayjs(date);
+
+  if (format) {
+    return obj.format(format);
+  }
+
+  // If time is 00:00:00 of local timezone, format as date only
+  if (obj.isSame(obj.startOf("day"))) {
+    return obj.format(DATE_FORMAT);
+  }
+
+  return obj.format(DATE_TIME_FORMAT);
+};
 
 export const formatDate = (date: DateLike, format = DATE_FORMAT) =>
   formatDateTime(date, format);
@@ -436,4 +448,9 @@ export const formatAge = (
     return `${months} ${monthSuffix} ${days} ${daySuffix}`;
   }
   return `${age} ${yearSuffix}`;
+};
+
+export const scrollTo = (id: string | boolean) => {
+  const element = document.querySelector(`#${id}`);
+  element?.scrollIntoView({ behavior: "smooth", block: "center" });
 };

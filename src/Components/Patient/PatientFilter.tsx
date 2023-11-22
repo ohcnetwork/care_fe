@@ -671,7 +671,7 @@ export default function PatientFilter(props: any) {
             COVID Details based
           </h1>
         }
-        expanded={true}
+        expanded={false}
         className="w-full rounded-md"
       >
         <div className="grid w-full grid-cols-1 gap-4">
