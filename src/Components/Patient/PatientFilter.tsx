@@ -605,6 +605,7 @@ export default function PatientFilter(props: any) {
               <FieldLabel className="text-sm">Location</FieldLabel>
               <LocationSelect
                 name="facility"
+                errorClassName="hidden"
                 selected={filterState.last_consultation_current_bed__location}
                 multiple={false}
                 facilityId={filterState.facility}
