@@ -1,8 +1,8 @@
 export class PatientConsultationPage {
   selectConsultationStatus(status: string) {
-    cy.get("#consultation_status").scrollIntoView();
-    cy.get("#consultation_status").should("be.visible");
-    cy.get("#consultation_status")
+    cy.get("#route_to_facility").scrollIntoView();
+    cy.get("#route_to_facility").should("be.visible");
+    cy.get("#route_to_facility")
       .click()
       .then(() => {
         cy.get("[role='option']").contains(status).click();
@@ -60,7 +60,7 @@ export class PatientConsultationPage {
     cy.get("#principal-diagnosis-select [role='option']").first().click();
 
     cy.get("#consultation_notes").click().type(consulationNotes);
-    cy.get("#verified_by")
+    cy.get("#treating_physician")
       .click()
       .type(verificationBy)
       .then(() => {

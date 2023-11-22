@@ -32,6 +32,9 @@ import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
 import dayjs from "../../Utils/dayjs";
 import { triggerGoal } from "../../Integrations/Plausible";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import { InsuranceDetialsCard } from "./InsuranceDetailsCard";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -90,6 +93,13 @@ export const PatientHome = (props: any) => {
       );
     });
   };
+
+  const { data: insuranceDetials } = useQuery(routes.listHCXPolicies, {
+    query: {
+      patient: id,
+      limit: 1,
+    },
+  });
 
   const handleAssignedVolunteer = () => {
     dispatch(
@@ -975,7 +985,7 @@ export const PatientHome = (props: any) => {
         </section>
 
         <section
-          className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-2"
+          className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-3"
           data-testid="patient-details"
         >
           <div className="w-full">
@@ -1110,6 +1120,14 @@ export const PatientHome = (props: any) => {
               </div>
             </div>
           </div>
+
+          <InsuranceDetialsCard
+            data={insuranceDetials?.results[0]}
+            showViewAllDetails={
+              insuranceDetials?.count !== undefined &&
+              insuranceDetials?.count > 1
+            }
+          />
         </section>
         <section className="mt-4 space-y-2 md:flex">
           <div className="hidden lg:block">
