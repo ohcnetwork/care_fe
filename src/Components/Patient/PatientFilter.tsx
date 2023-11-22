@@ -600,22 +600,23 @@ export default function PatientFilter(props: any) {
               setSelected={(obj) => setFacility(obj, "facility")}
             />
           </div>
-          <div>
-            <FieldLabel className="text-sm">Location</FieldLabel>
-            <LocationSelect
-              disabled={!filterState.facility}
-              name="facility"
-              selected={filterState.last_consultation_current_bed__location}
-              multiple={false}
-              facilityId={filterState.facility}
-              setSelected={(selected) =>
-                setFilterState({
-                  ...filterState,
-                  last_consultation_current_bed__location: selected,
-                })
-              }
-            />
-          </div>
+          {filterState.facility && (
+            <div>
+              <FieldLabel className="text-sm">Location</FieldLabel>
+              <LocationSelect
+                name="facility"
+                selected={filterState.last_consultation_current_bed__location}
+                multiple={false}
+                facilityId={filterState.facility}
+                setSelected={(selected) =>
+                  setFilterState({
+                    ...filterState,
+                    last_consultation_current_bed__location: selected,
+                  })
+                }
+              />
+            </div>
+          )}
           <div>
             <FieldLabel className="text-sm">Facility type</FieldLabel>
             <SelectMenuV2
