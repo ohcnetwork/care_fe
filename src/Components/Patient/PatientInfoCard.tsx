@@ -161,10 +161,10 @@ export default function PatientInfoCard(props: {
                 Number(consultation?.review_interval) > 0 && (
                   <div
                     className={
-                      "mb-2 inline-flex w-full items-center justify-center rounded-lg border border-gray-500 text-xs font-semibold leading-4 " +
+                      "mb-2 inline-flex w-full items-center justify-center rounded-lg border border-gray-500 p-1 text-xs font-semibold leading-4 " +
                       (dayjs().isBefore(patient.review_time)
-                        ? " bg-gray-100"
-                        : " bg-red-400 p-1 text-white")
+                        ? " bg-gray-100 "
+                        : " bg-red-400 text-white")
                     }
                   >
                     <i className="text-md fas fa-clock mr-2"></i>
