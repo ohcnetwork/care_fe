@@ -88,7 +88,10 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       {kasp_string}
                     </div>
                   )}
-                  <div className="flex flex-wrap items-center justify-between">
+                  <div
+                    className="flex flex-wrap items-center justify-between"
+                    id="facility-name-card"
+                  >
                     <Link
                       href={`/facility/${facility.id}`}
                       className="float-left text-xl font-bold capitalize text-inherit hover:text-inherit"
@@ -154,109 +157,109 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                 </div>
               </div>
               <div className="flex flex-wrap border-t bg-gray-50 px-2 py-1 md:px-3">
-                <div className="flex justify-between py-2">
-                  <div className="flex w-full flex-wrap justify-between gap-2">
-                    <div className="flex flex-wrap gap-2">
-                      <div
-                        className={`tooltip ml-auto flex h-[38px] w-fit items-center justify-center rounded-md px-2 text-xl ${
+                {/* <div className="flex justify-between py-2"> */}
+                <div className="flex w-full flex-wrap justify-between gap-2 py-2">
+                  <div className="flex flex-wrap gap-2">
+                    <div
+                      className={`tooltip ml-auto flex h-[38px] w-fit items-center justify-center rounded-md px-2 text-xl ${
+                        facility.patient_count / facility.bed_count > 0.85
+                          ? "button-danger-border bg-red-500"
+                          : "button-primary-border bg-primary-100"
+                      }`}
+                    >
+                      <span className="tooltip-text tooltip-top">
+                        Live Patients / Total beds
+                      </span>{" "}
+                      <CareIcon
+                        className={classNames(
+                          "care-l-bed mr-2",
                           facility.patient_count / facility.bed_count > 0.85
-                            ? "button-danger-border bg-red-500"
-                            : "button-primary-border bg-primary-100"
+                            ? "text-white"
+                            : "text-primary-600"
+                        )}
+                      />{" "}
+                      <dt
+                        className={`my-1 text-sm font-semibold ${
+                          facility.patient_count / facility.bed_count > 0.85
+                            ? "text-white"
+                            : "text-gray-700"
                         }`}
                       >
-                        <span className="tooltip-text tooltip-bottom md:tooltip-right -translate-y-2">
-                          Live Patients / Total beds
-                        </span>{" "}
-                        <CareIcon
-                          className={classNames(
-                            "care-l-bed mr-2",
-                            facility.patient_count / facility.bed_count > 0.85
-                              ? "text-white"
-                              : "text-primary-600"
-                          )}
-                        />{" "}
-                        <dt
-                          className={`my-1 text-sm font-semibold ${
-                            facility.patient_count / facility.bed_count > 0.85
-                              ? "text-white"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          Occupancy: {facility.patient_count} /{" "}
-                          {facility.bed_count}{" "}
-                        </dt>{" "}
-                      </div>
-                      <DialogModal
-                        show={notifyModalFor === facility.id}
-                        title={
-                          <span className="flex justify-center text-2xl">
-                            Notify: {facility.name}
-                          </span>
-                        }
-                        onClose={() => setNotifyModalFor(undefined)}
-                      >
-                        <form
-                          onSubmit={(event) => {
-                            event.preventDefault();
-                            handleNotifySubmit(notifyModalFor);
-                          }}
-                          className="flex w-full flex-col bg-white text-center"
-                        >
-                          <TextAreaFormField
-                            id="NotifyModalMessageInput"
-                            name="message"
-                            rows={5}
-                            className="pb-2 pt-4"
-                            onChange={(e) => setNotifyMessage(e.value)}
-                            placeholder="Type your message..."
-                            error={notifyError}
-                          />
-                          <div className="flex flex-col-reverse justify-between gap-2 md:flex-row">
-                            <Cancel
-                              onClick={() => setNotifyModalFor(undefined)}
-                            />
-                            <Submit label="Notify" />
-                          </div>
-                        </form>
-                      </DialogModal>
+                        Occupancy: {facility.patient_count} /{" "}
+                        {facility.bed_count}{" "}
+                      </dt>{" "}
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      {userType !== "Staff" ? (
-                        <ButtonV2
-                          id="facility-notify"
-                          ghost
-                          border
-                          className="h-[38px]"
-                          onClick={(_) => setNotifyModalFor(facility.id)}
-                        >
-                          <CareIcon className="care-l-megaphone text-lg" />
-                          <span className="hidden md:block">Notify</span>
-                        </ButtonV2>
-                      ) : (
-                        <></>
-                      )}
-                      <ButtonV2
-                        href={`/facility/${facility.id}`}
-                        id="facility-details"
-                        border
-                        ghost
-                        className="h-[38px]"
-                      >
-                        <CareIcon className="care-l-hospital text-lg" />
-                        <span className="hidden md:inline">
-                          {t("view_faciliy")}
+                    <DialogModal
+                      show={notifyModalFor === facility.id}
+                      title={
+                        <span className="flex justify-center text-2xl">
+                          Notify: {facility.name}
                         </span>
-                      </ButtonV2>
-                      <ButtonV2
-                        href={`/patients?facility=${facility.id}`}
-                        id="facility-patients"
-                        border
-                        ghost
+                      }
+                      onClose={() => setNotifyModalFor(undefined)}
+                    >
+                      <form
+                        onSubmit={(event) => {
+                          event.preventDefault();
+                          handleNotifySubmit(notifyModalFor);
+                        }}
+                        className="flex w-full flex-col bg-white text-center"
                       >
-                        <CareIcon className="care-l-user-injured text-lg" />
-                        {t("view_patients")}
+                        <TextAreaFormField
+                          id="NotifyModalMessageInput"
+                          name="message"
+                          rows={5}
+                          className="pb-2 pt-4"
+                          onChange={(e) => setNotifyMessage(e.value)}
+                          placeholder="Type your message..."
+                          error={notifyError}
+                        />
+                        <div className="flex flex-col-reverse justify-between gap-2 md:flex-row">
+                          <Cancel
+                            onClick={() => setNotifyModalFor(undefined)}
+                          />
+                          <Submit label="Notify" />
+                        </div>
+                      </form>
+                    </DialogModal>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {userType !== "Staff" ? (
+                      <ButtonV2
+                        id="facility-notify"
+                        ghost
+                        border
+                        className="h-[38px]"
+                        onClick={(_) => setNotifyModalFor(facility.id)}
+                      >
+                        <CareIcon className="care-l-megaphone text-lg" />
+                        <span className="hidden md:block">Notify</span>
                       </ButtonV2>
-                    </div>
+                    ) : (
+                      <></>
+                    )}
+                    <ButtonV2
+                      href={`/facility/${facility.id}`}
+                      id="facility-details"
+                      border
+                      ghost
+                      className="h-[38px]"
+                    >
+                      <CareIcon className="care-l-hospital text-lg" />
+                      <span className="hidden md:inline">
+                        {t("view_faciliy")}
+                      </span>
+                    </ButtonV2>
+                    <ButtonV2
+                      href={`/patients?facility=${facility.id}`}
+                      id="facility-patients"
+                      border
+                      ghost
+                    >
+                      <CareIcon className="care-l-user-injured text-lg" />
+                      {t("view_patients")}
+                    </ButtonV2>
+                    {/* </div> */}
                   </div>
                 </div>
               </div>

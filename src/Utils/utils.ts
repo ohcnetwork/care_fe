@@ -78,8 +78,20 @@ const DATE_TIME_FORMAT = `${TIME_FORMAT}; ${DATE_FORMAT}`;
 
 type DateLike = Parameters<typeof dayjs>[0];
 
-export const formatDateTime = (date: DateLike, format = DATE_TIME_FORMAT) =>
-  dayjs(date).format(format);
+export const formatDateTime = (date: DateLike, format?: string) => {
+  const obj = dayjs(date);
+
+  if (format) {
+    return obj.format(format);
+  }
+
+  // If time is 00:00:00 of local timezone, format as date only
+  if (obj.isSame(obj.startOf("day"))) {
+    return obj.format(DATE_FORMAT);
+  }
+
+  return obj.format(DATE_TIME_FORMAT);
+};
 
 export const formatDate = (date: DateLike, format = DATE_FORMAT) =>
   formatDateTime(date, format);
@@ -90,6 +102,10 @@ export const formatTime = (date: DateLike, format = TIME_FORMAT) =>
 export const relativeDate = (date: DateLike) => {
   const obj = dayjs(date);
   return `${obj.fromNow()} at ${obj.format(TIME_FORMAT)}`;
+};
+
+export const formatName = (user: { first_name: string; last_name: string }) => {
+  return `${user.first_name} ${user.last_name}`;
 };
 
 export const relativeTime = (time?: DateLike) => {
@@ -107,8 +123,35 @@ export const handleSignOut = (forceReload: boolean) => {
   Object.values(LocalStorageKeys).forEach((key) =>
     localStorage.removeItem(key)
   );
-  if (forceReload) window.location.href = "/";
-  else navigate("/");
+  const redirectURL = new URLSearchParams(window.location.search).get(
+    "redirect"
+  );
+  const url = redirectURL ? `/?redirect=${redirectURL}` : "/";
+  if (forceReload) {
+    window.location.href = url;
+  } else {
+    navigate(url);
+  }
+};
+
+export const handleRedirection = () => {
+  const redirectParam = new URLSearchParams(window.location.search).get(
+    "redirect"
+  );
+  try {
+    if (redirectParam) {
+      const redirectURL = new URL(redirectParam);
+
+      if (redirectURL.origin === window.location.origin) {
+        const newPath = redirectURL.pathname + redirectURL.search;
+        window.location.href = `${window.location.origin}${newPath}`;
+        return;
+      }
+    }
+    window.location.href = "/facility";
+  } catch {
+    window.location.href = "/facility";
+  }
 };
 
 /**
@@ -405,4 +448,9 @@ export const formatAge = (
     return `${months} ${monthSuffix} ${days} ${daySuffix}`;
   }
   return `${age} ${yearSuffix}`;
+};
+
+export const scrollTo = (id: string | boolean) => {
+  const element = document.querySelector(`#${id}`);
+  element?.scrollIntoView({ behavior: "smooth", block: "center" });
 };

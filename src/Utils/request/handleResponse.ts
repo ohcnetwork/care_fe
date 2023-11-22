@@ -29,7 +29,7 @@ export default function handleResponse(
   if (res.status >= 400) {
     // Invalid token
     if (!silent && error?.code === "token_not_valid") {
-      navigate("/session-expired");
+      navigate(`/session-expired?redirect=${window.location.href}`);
     }
 
     notify?.Error({ msg: error?.detail || "Something went wrong...!" });

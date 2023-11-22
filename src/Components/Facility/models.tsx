@@ -3,6 +3,8 @@ import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 import { AssetData } from "../Assets/AssetTypes";
 import { UserBareMinimum } from "../Users/models";
+import { RouteToFacility } from "../Common/RouteToFacilitySelect";
+import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 
 export interface LocalBodyModel {
   name: string;
@@ -10,21 +12,25 @@ export interface LocalBodyModel {
   localbody_code: string;
   district: number;
 }
+
 export interface DistrictModel {
   id: number;
   name: string;
   state: number;
 }
+
 export interface StateModel {
   id: number;
   name: string;
 }
+
 export interface WardModel {
   id: number;
   name: string;
   number: number;
   local_body: number;
 }
+
 export interface FacilityModel {
   id?: number;
   name?: string;
@@ -52,10 +58,10 @@ export interface FacilityModel {
   ward_object?: WardModel;
   modified_date?: string;
   created_date?: string;
-  state: number;
-  district: number;
-  local_body: number;
-  ward: number;
+  state?: number;
+  district?: number;
+  local_body?: number;
+  ward?: number;
 }
 
 export interface CapacityModal {
@@ -86,6 +92,7 @@ export type PatientCategory =
 
 export interface ConsultationModel {
   admission_date?: string;
+  icu_admission_date?: string;
   admitted?: boolean;
   test_id?: string;
   admitted_to?: string;
@@ -105,21 +112,25 @@ export interface ConsultationModel {
   other_symptoms?: string;
   patient?: string;
   treatment_plan?: string;
-  referred_to?: number | null;
+  referred_to?: FacilityModel["id"];
   referred_to_object?: FacilityModel;
   referred_to_external?: string;
+  referred_from_facility?: FacilityModel["id"];
+  referred_from_facility_object?: FacilityModel;
+  referred_from_facility_external?: string;
+  referred_by_external?: string;
+  transferred_from_location?: LocationModel["id"];
+  transferred_from_location_object?: LocationModel;
   suggestion?: string;
   patient_no?: string;
-  consultation_status?: number;
+  route_to_facility?: RouteToFacility;
   is_kasp?: boolean;
   kasp_enabled_date?: string;
-  diagnosis?: string;
-  icd11_diagnoses_object?: ICD11DiagnosisModel[];
-  icd11_provisional_diagnoses_object?: ICD11DiagnosisModel[];
-  icd11_principal_diagnosis?: ICD11DiagnosisModel["id"];
+  readonly diagnoses?: ConsultationDiagnosis[];
+  create_diagnoses?: CreateDiagnosis[]; // Used for bulk creating diagnoses upon consultation creation
   deprecated_verified_by?: string;
-  verified_by?: string;
-  verified_by_object?: UserBareMinimum;
+  treating_physician?: UserBareMinimum["id"];
+  treating_physician_object?: UserBareMinimum;
   suggestion_text?: string;
   symptoms?: Array<number>;
   symptoms_text?: string;
@@ -148,6 +159,7 @@ export interface ConsultationModel {
   is_readmission?: boolean;
   medico_legal_case?: boolean;
 }
+
 export interface PatientStatsModel {
   id?: number;
   entryDate?: string;
@@ -221,6 +233,212 @@ export interface CurrentBed {
   start_date: string;
   end_date: string;
   meta: Record<string, any>;
+}
+
+export type ABGPlotsFields =
+  | "ph"
+  | "pco2"
+  | "po2"
+  | "hco3"
+  | "base_excess"
+  | "lactate"
+  | "sodium"
+  | "potassium"
+  | "ventilator_fi02";
+
+export type ABGPlotsRes = {
+  ph: string;
+  pco2: number;
+  po2: number;
+  hco3: string;
+  base_excess: number;
+  lactate: string;
+  sodium: string;
+  potassium: string;
+  ventilator_fi02: number;
+};
+
+export type DialysisPlotsFields =
+  | "dialysis_fluid_balance"
+  | "dialysis_net_balance";
+
+export type DialysisPlotsRes = {
+  dialysis_fluid_balance: number;
+  dialysis_net_balance: number;
+};
+
+export type NeurologicalTablesFields =
+  | "consciousness_level"
+  | "consciousness_level_detail"
+  | "left_pupil_size"
+  | "left_pupil_size_detail"
+  | "right_pupil_size"
+  | "right_pupil_size_detail"
+  | "left_pupil_light_reaction"
+  | "left_pupil_light_reaction_detail"
+  | "right_pupil_light_reaction"
+  | "right_pupil_light_reaction_detail"
+  | "limb_response_upper_extremity_right"
+  | "limb_response_upper_extremity_left"
+  | "limb_response_lower_extremity_left"
+  | "limb_response_lower_extremity_right"
+  | "glasgow_eye_open"
+  | "glasgow_verbal_response"
+  | "glasgow_motor_response"
+  | "glasgow_total_calculated";
+
+export type NeurologicalTablesRes = {
+  consciousness_level: number;
+  consciousness_level_detail: string;
+  left_pupil_size: number;
+  left_pupil_size_detail: string;
+  right_pupil_size: number;
+  right_pupil_size_detail: string;
+  left_pupil_light_reaction: number;
+  left_pupil_light_reaction_detail: string;
+  right_pupil_light_reaction: number;
+  right_pupil_light_reaction_detail: string;
+  limb_response_upper_extremity_right: number;
+  limb_response_upper_extremity_left: number;
+  limb_response_lower_extremity_left: number;
+  limb_response_lower_extremity_right: number;
+  glasgow_eye_open: number;
+  glasgow_verbal_response: number;
+  glasgow_motor_response: number;
+  glasgow_total_calculated: number;
+};
+
+export type NursingPlotFields = "nursing";
+
+export type NursingPlotRes = {
+  nursing: any[];
+};
+
+export type NutritionPlotsFields =
+  | "infusions"
+  | "iv_fluids"
+  | "feeds"
+  | "total_intake_calculated"
+  | "total_output_calculated"
+  | "output";
+
+export type NutritionPlotsRes = {
+  infusions: any[];
+  iv_fluids: any[];
+  feeds: any[];
+  total_intake_calculated: string;
+  total_output_calculated: string;
+  output: any[];
+};
+
+export type PainDiagramsFields = "pain_scale_enhanced";
+
+export type PainDiagramsRes = {
+  pain_scale_enhanced: any[];
+};
+
+export type PressureSoreDiagramsFields = "pressure_sore";
+
+export type PressureSoreDiagramsRes = {
+  pressure_sore: any[];
+};
+
+export type PrimaryParametersPlotFields =
+  | "bp"
+  | "pulse"
+  | "temperature"
+  | "resp"
+  | "blood_sugar_level"
+  | "insulin_intake_frequency"
+  | "insulin_intake_dose"
+  | "ventilator_spo2"
+  | "ventilator_fi02"
+  | "rhythm"
+  | "rhythm_detail";
+
+export type PrimaryParametersPlotRes = {
+  bp: {
+    mean?: number;
+    systolic?: number;
+    diastolic?: number;
+  };
+  pulse: number;
+  temperature: string;
+  resp: number;
+  blood_sugar_level: number;
+  insulin_intake_frequency: number;
+  insulin_intake_dose: string;
+  ventilator_spo2: number;
+  ventilator_fi02: number;
+  rhythm: number;
+  rhythm_detail: string;
+};
+
+export type VentilatorPlotFields =
+  | "ventilator_pip"
+  | "ventilator_mean_airway_pressure"
+  | "ventilator_resp_rate"
+  | "ventilator_pressure_support"
+  | "ventilator_tidal_volume"
+  | "ventilator_peep"
+  | "ventilator_fi02"
+  | "ventilator_spo2"
+  | "etco2"
+  | "bilateral_air_entry"
+  | "ventilator_oxygen_modality_oxygen_rate"
+  | "ventilator_oxygen_modality_flow_rate";
+
+export type VentilatorPlotRes = {
+  ventilator_pip: number;
+  ventilator_mean_airway_pressure: number;
+  ventilator_resp_rate: number;
+  ventilator_pressure_support: number;
+  ventilator_tidal_volume: number;
+  ventilator_peep: string;
+  ventilator_fi02: number;
+  ventilator_spo2: number;
+  etco2: number;
+  bilateral_air_entry: boolean;
+  ventilator_oxygen_modality_oxygen_rate: number;
+  ventilator_oxygen_modality_flow_rate: number;
+};
+
+export interface DailyRoundsBody {
+  page?: number;
+  fields:
+    | ABGPlotsFields[]
+    | DialysisPlotsFields[]
+    | NeurologicalTablesFields[]
+    | NursingPlotFields[]
+    | NutritionPlotsFields[]
+    | PainDiagramsFields[]
+    | PressureSoreDiagramsFields[]
+    | PrimaryParametersPlotFields[]
+    | VentilatorPlotFields[];
+}
+
+export interface DailyRoundsRes {
+  count: number;
+  page_size: number;
+  results: {
+    [date: string]:
+      | PressureSoreDiagramsRes
+      | ABGPlotsRes
+      | DialysisPlotsRes
+      | NeurologicalTablesRes
+      | NursingPlotRes
+      | NutritionPlotsRes
+      | PainDiagramsRes
+      | PrimaryParametersPlotRes
+      | VentilatorPlotRes;
+  };
+}
+
+export interface CreateBedBody {
+  start_date: string;
+  assets: string[];
+  consultation: string;
+  bed: string;
 }
 
 // Voluntarily made as `type` for it to achieve type-safety when used with

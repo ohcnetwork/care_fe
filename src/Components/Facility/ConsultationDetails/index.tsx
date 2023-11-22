@@ -4,15 +4,15 @@ import {
   OptionsType,
   SYMPTOM_CHOICES,
 } from "../../../Common/constants";
-import { ConsultationModel, ICD11DiagnosisModel } from "../models";
+import { ConsultationModel } from "../models";
 import {
   getConsultation,
   getPatient,
+  listAssetBeds,
   listShiftRequests,
 } from "../../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { lazy, useCallback, useState } from "react";
-import ToolTip from "../../Common/utils/Tooltip";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import DischargeModal from "../DischargeModal";
@@ -42,6 +42,7 @@ import { ConsultationDialysisTab } from "./ConsultationDialysisTab";
 import { ConsultationNeurologicalMonitoringTab } from "./ConsultationNeurologicalMonitoringTab";
 import { ConsultationNutritionTab } from "./ConsultationNutritionTab";
 import PatientNotesSlideover from "../PatientNotesSlideover";
+import LegacyDiagnosesList from "../../Diagnosis/LegacyDiagnosesList";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
@@ -88,6 +89,7 @@ export const ConsultationDetails = (props: any) => {
   const [openDischargeSummaryDialog, setOpenDischargeSummaryDialog] =
     useState(false);
   const [openDischargeDialog, setOpenDischargeDialog] = useState(false);
+  const [isCameraAttached, setIsCameraAttached] = useState(false);
 
   const getPatientGender = (patientData: any) =>
     GENDER_TYPES.find((i) => i.id === patientData.gender)?.text;
@@ -127,6 +129,17 @@ export const ConsultationDetails = (props: any) => {
             data.symptoms_text = symptoms.join(", ");
           }
           setConsultationData(data);
+          const assetRes = await dispatch(
+            listAssetBeds({
+              bed: data?.current_bed?.bed_object?.id,
+            })
+          );
+          const isCameraAttachedRes = assetRes.data.results.some(
+            (asset: { asset_object: { asset_class: string } }) => {
+              return asset?.asset_object?.asset_class === "ONVIF";
+            }
+          );
+          setIsCameraAttached(isCameraAttachedRes);
           const id = res.data.patient;
           const patientRes = await dispatch(getPatient({ id }));
           if (patientRes?.data) {
@@ -206,56 +219,56 @@ export const ConsultationDetails = (props: any) => {
       selected === true ? "border-primary-500 text-primary-600 border-b-2" : ""
     }`;
 
-  const ShowDiagnosis = ({
-    diagnoses = [],
-    label = "Diagnosis",
-    nshow = 2,
-  }: {
-    diagnoses: ICD11DiagnosisModel[] | undefined;
-    label: string;
-    nshow?: number;
-  }) => {
-    const [showMore, setShowMore] = useState(false);
+  // const ShowDiagnosis = ({
+  //   diagnoses = [],
+  //   label = "Diagnosis",
+  //   nshow = 2,
+  // }: {
+  //   diagnoses: ICD11DiagnosisModel[] | undefined;
+  //   label: string;
+  //   nshow?: number;
+  // }) => {
+  //   const [showMore, setShowMore] = useState(false);
 
-    return diagnoses.length ? (
-      <div className="w-full text-sm">
-        <p className="font-semibold leading-relaxed">{label}</p>
-        {diagnoses.slice(0, !showMore ? nshow : undefined).map((diagnosis) =>
-          diagnosis.id === consultationData.icd11_principal_diagnosis ? (
-            <div className="relative flex items-center gap-2">
-              <p>{diagnosis.label}</p>
-              <div>
-                <ToolTip text="Principal Diagnosis" position="BOTTOM">
-                  <CareIcon className="care-l-stethoscope rounded-lg bg-primary-500  p-1 text-2xl text-white" />
-                </ToolTip>
-              </div>
-            </div>
-          ) : (
-            <p>{diagnosis.label}</p>
-          )
-        )}
-        {diagnoses.length > nshow && (
-          <>
-            {!showMore ? (
-              <a
-                onClick={() => setShowMore(true)}
-                className="cursor-pointer text-sm text-blue-600 hover:text-blue-300"
-              >
-                show more
-              </a>
-            ) : (
-              <a
-                onClick={() => setShowMore(false)}
-                className="cursor-pointer text-sm text-blue-600 hover:text-blue-300"
-              >
-                show less
-              </a>
-            )}
-          </>
-        )}
-      </div>
-    ) : null;
-  };
+  //   return diagnoses.length ? (
+  //     <div className="w-full text-sm">
+  //       <p className="font-semibold leading-relaxed">{label}</p>
+  //       {diagnoses.slice(0, !showMore ? nshow : undefined).map((diagnosis) =>
+  //         diagnosis.id === consultationData.icd11_principal_diagnosis ? (
+  //           <div className="relative flex items-center gap-2">
+  //             <p>{diagnosis.label}</p>
+  //             <div>
+  //               <ToolTip text="Principal Diagnosis" position="BOTTOM">
+  //                 <CareIcon className="care-l-stethoscope rounded-lg bg-primary-500  p-1 text-2xl text-white" />
+  //               </ToolTip>
+  //             </div>
+  //           </div>
+  //         ) : (
+  //           <p>{diagnosis.label}</p>
+  //         )
+  //       )}
+  //       {diagnoses.length > nshow && (
+  //         <>
+  //           {!showMore ? (
+  //             <a
+  //               onClick={() => setShowMore(true)}
+  //               className="cursor-pointer text-sm text-blue-600 hover:text-blue-300"
+  //             >
+  //               show more
+  //             </a>
+  //           ) : (
+  //             <a
+  //               onClick={() => setShowMore(false)}
+  //               className="cursor-pointer text-sm text-blue-600 hover:text-blue-300"
+  //             >
+  //               show less
+  //             </a>
+  //           )}
+  //         </>
+  //       )}
+  //     </div>
+  //   ) : null;
+  // };
 
   return (
     <div>
@@ -272,7 +285,7 @@ export const ConsultationDetails = (props: any) => {
       />
 
       <div className="px-2 pb-2">
-        <nav className="relative flex flex-wrap justify-between">
+        <nav className="relative flex flex-wrap items-start justify-between">
           <PageTitle
             title="Patient Dashboard"
             className="sm:m-0 sm:p-0"
@@ -291,9 +304,9 @@ export const ConsultationDetails = (props: any) => {
             breadcrumbs={true}
             backUrl="/patients"
           />
-          <div className="-right-6 top-0 flex w-full flex-col space-y-1 sm:w-min sm:flex-row sm:items-center sm:space-y-0 sm:divide-x-2 lg:absolute xl:right-0">
+          <div className="flex w-full flex-col min-[1150px]:w-min min-[1150px]:flex-row min-[1150px]:items-center">
             {!consultationData.discharge_date && (
-              <div className="flex w-full flex-col px-2 sm:flex-row">
+              <>
                 {hasActiveShiftingRequest() ? (
                   <ButtonV2
                     onClick={() =>
@@ -303,7 +316,7 @@ export const ConsultationDetails = (props: any) => {
                         }`
                       )
                     }
-                    className="btn btn-primary m-1 w-full hover:text-white"
+                    className="btn btn-primary mx-1 w-full p-1.5 px-4 hover:text-white"
                   >
                     <CareIcon className="care-l-ambulance h-5 w-5" />
                     Track Shifting
@@ -316,7 +329,7 @@ export const ConsultationDetails = (props: any) => {
                         `/facility/${patientData.facility}/patient/${patientData.id}/shift/new`
                       )
                     }
-                    className="btn btn-primary m-1 w-full hover:text-white"
+                    className="btn btn-primary mx-1 w-full p-1.5 px-4 hover:text-white"
                   >
                     <CareIcon className="care-l-ambulance h-5 w-5" />
                     Shift Patient
@@ -336,30 +349,33 @@ export const ConsultationDetails = (props: any) => {
                 >
                   Doctor Connect
                 </button>
-                {patientData.last_consultation?.id && (
-                  <Link
-                    href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
-                    className="btn btn-primary m-1 w-full hover:text-white"
-                  >
-                    Camera Feed
-                  </Link>
-                )}
-              </div>
+                {patientData.last_consultation?.id &&
+                  isCameraAttached &&
+                  ["DistrictAdmin", "StateAdmin", "Doctor"].includes(
+                    authUser.user_type
+                  ) && (
+                    <Link
+                      href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
+                      className="btn btn-primary m-1 w-full hover:text-white"
+                    >
+                      Camera Feed
+                    </Link>
+                  )}
+              </>
             )}
-            <div className="flex w-full flex-col px-2 sm:flex-row">
-              <Link
-                href={`/facility/${patientData.facility}/patient/${patientData.id}`}
-                className="btn btn-primary m-1 w-full hover:text-white"
-              >
-                Patient Details
-              </Link>
-              <ButtonV2
-                onClick={() => setShowPatientNotesPopup(true)}
-                className="btn btn-primary m-1 w-full hover:text-white"
-              >
-                Doctor&apos;s Notes
-              </ButtonV2>
-            </div>
+            <Link
+              href={`/facility/${patientData.facility}/patient/${patientData.id}`}
+              className="btn btn-primary m-1 w-full hover:text-white"
+            >
+              Patient Details
+            </Link>
+            <Link
+              id="patient_doctor_notes"
+              onClick={() => setShowPatientNotesPopup(true)}
+              className="btn btn-primary m-1 w-full hover:text-white"
+            >
+              Doctor&apos;s Notes
+            </Link>
           </div>
         </nav>
         <div className="mt-2 flex w-full flex-col md:flex-row">
@@ -415,31 +431,18 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )*/}
 
-                <ShowDiagnosis
-                  diagnoses={
-                    consultationData?.icd11_provisional_diagnoses_object
-                  }
-                  label="Provisional Diagnosis (as per ICD-11 recommended by WHO)"
+                <LegacyDiagnosesList
+                  diagnoses={consultationData.diagnoses || []}
                 />
 
-                <ShowDiagnosis
-                  diagnoses={[
-                    ...(consultationData?.diagnosis
-                      ? [{ id: "0", label: consultationData?.diagnosis }]
-                      : []),
-                    ...(consultationData?.icd11_diagnoses_object ?? []),
-                  ]}
-                  label="Diagnosis (as per ICD-11 recommended by WHO)"
-                />
-
-                {(consultationData.verified_by_object ||
+                {(consultationData.treating_physician_object ||
                   consultationData.deprecated_verified_by) && (
                   <div className="mt-2 text-sm">
                     <span className="font-semibold leading-relaxed">
                       Treating Physician:{" "}
                     </span>
-                    {consultationData.verified_by_object
-                      ? `${consultationData.verified_by_object.first_name} ${consultationData.verified_by_object.last_name}`
+                    {consultationData.treating_physician_object
+                      ? `${consultationData.treating_physician_object.first_name} ${consultationData.treating_physician_object.last_name}`
                       : consultationData.deprecated_verified_by}
                     <i className="fas fa-check ml-2 fill-current text-lg text-green-500"></i>
                   </div>
@@ -506,6 +509,7 @@ export const ConsultationDetails = (props: any) => {
                 {CONSULTATION_TABS.map((p: OptionsType) => {
                   if (p.text === "FEED") {
                     if (
+                      isCameraAttached === false || // No camera attached
                       consultationData?.discharge_date || // Discharged
                       !consultationData?.current_bed?.bed_object?.id || // Not admitted to bed
                       !["DistrictAdmin", "StateAdmin", "Doctor"].includes(

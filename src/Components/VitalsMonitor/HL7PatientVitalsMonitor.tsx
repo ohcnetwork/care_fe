@@ -14,10 +14,6 @@ const minutesAgo = (timestamp: string) => {
   return `${dayjs().diff(dayjs(timestamp), "minute")}m ago`;
 };
 
-const isWithinMinutes = (timestamp: string, minutes: number) => {
-  return dayjs().diff(dayjs(timestamp), "minute") < minutes;
-};
-
 export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
   const { connect, waveformCanvas, data, isOnline } = useHL7VitalsMonitor(
     props.config
@@ -39,15 +35,15 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
     connect(props.socketUrl);
   }, [props.socketUrl]);
 
-  const bpWithinMaxPersistence = !!(
-    (data.bp?.["date-time"] && isWithinMinutes(data.bp?.["date-time"], 30)) // Max blood pressure persistence is 30 minutes
+  const bpWithinMaxPersistence = dayjs(data.bp?.["date-time"]).isAfter(
+    props.patientCurrentBedAssignmentDate
   );
 
   return (
     <div className="flex flex-col gap-1 rounded bg-[#020617] p-2">
       {props.patientAssetBed && (
         <div className="flex items-center justify-between px-2 tracking-wide">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-2 md:flex-row">
             {patient ? (
               <Link
                 href={`/facility/${patient.last_consultation?.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}`}
@@ -68,7 +64,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
               </span>
             )}
           </div>
-          <div className="flex items-center gap-3 text-xs md:text-sm">
+          <div className="flex flex-col items-center gap-2 text-xs md:flex-row md:text-sm">
             {asset && (
               <Link
                 className="flex items-center gap-1 text-gray-500"
@@ -80,7 +76,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
             )}
             {bed && (
               <Link
-                className="flex items-center gap-2 text-gray-500"
+                className="flex flex-col items-center gap-2 text-gray-500 md:flex-row"
                 href={`/facility/${patient?.facility_object?.id}/location/${bed?.location_object?.id}/beds`}
               >
                 <span className="flex items-center gap-1">

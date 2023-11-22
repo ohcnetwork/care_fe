@@ -1,13 +1,5 @@
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import {
-  getNotifications,
-  markNotificationAsRead,
-  getUserPnconfig,
-  updateUserPnconfig,
-  getPublicKey,
-} from "../../Redux/actions";
 import Spinner from "../Common/Spinner";
 import { NOTIFICATION_EVENTS } from "../../Common/constants";
 import { Error } from "../../Utils/Notifications.js";
@@ -24,6 +16,8 @@ import SelectMenuV2 from "../Form/SelectMenuV2";
 import { useTranslation } from "react-i18next";
 import CircularProgress from "../Common/components/CircularProgress";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 const RESULT_LIMIT = 14;
 
@@ -38,14 +32,16 @@ const NotificationTile = ({
   onClickCB,
   setShowNotifications,
 }: NotificationTileProps) => {
-  const dispatch: any = useDispatch();
   const [result, setResult] = useState(notification);
   const [isMarkingAsRead, setIsMarkingAsRead] = useState(false);
   const { t } = useTranslation();
 
   const handleMarkAsRead = async () => {
     setIsMarkingAsRead(true);
-    await dispatch(markNotificationAsRead(result.id));
+    await request(routes.markNotificationAsRead, {
+      pathParams: { id: result.id },
+      body: { read_at: new Date() },
+    });
     setResult({ ...result, read_at: new Date() });
     setIsMarkingAsRead(false);
   };
@@ -155,7 +151,6 @@ export default function NotificationsList({
   handleOverflow,
 }: NotificationsListProps) {
   const { username } = useAuthUser();
-  const dispatch: any = useDispatch();
   const [data, setData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [offset, setOffset] = useState(0);
@@ -182,12 +177,14 @@ export default function NotificationsList({
 
   const intialSubscriptionState = async () => {
     try {
-      const res = await dispatch(getUserPnconfig({ username: username }));
+      const res = await request(routes.getUserPnconfig, {
+        pathParams: { username: username },
+      });
       const reg = await navigator.serviceWorker.ready;
       const subscription = await reg.pushManager.getSubscription();
-      if (!subscription && !res?.data?.pf_endpoint) {
+      if (!subscription && !res.data?.pf_endpoint) {
         setIsSubscribed("NotSubscribed");
-      } else if (subscription?.endpoint === res?.data?.pf_endpoint) {
+      } else if (subscription?.endpoint === res.data?.pf_endpoint) {
         setIsSubscribed("SubscribedOnThisDevice");
       } else {
         setIsSubscribed("SubscribedOnAnotherDevice");
@@ -249,9 +246,11 @@ export default function NotificationsList({
                   pf_p256dh: "",
                   pf_auth: "",
                 };
-                await dispatch(
-                  updateUserPnconfig(data, { username: username })
-                );
+
+                await request(routes.updateUserPnconfig, {
+                  pathParams: { username: username },
+                  body: data,
+                });
 
                 setIsSubscribed("NotSubscribed");
                 setIsSubscribing(false);
@@ -273,8 +272,8 @@ export default function NotificationsList({
 
   async function subscribe() {
     setIsSubscribing(true);
-    const response = await dispatch(getPublicKey());
-    const public_key = response.data.public_key;
+    const response = await request(routes.getPublicKey);
+    const public_key = response.data?.public_key;
     const sw = await navigator.serviceWorker.ready;
     const push = await sw.pushManager.subscribe({
       userVisibleOnly: true,
@@ -299,11 +298,12 @@ export default function NotificationsList({
       pf_auth: auth,
     };
 
-    const res = await dispatch(
-      updateUserPnconfig(data, { username: username })
-    );
+    const { res } = await request(routes.updateUserPnconfig, {
+      pathParams: { username: username },
+      body: data,
+    });
 
-    if (res.status >= 200 && res.status <= 300) {
+    if (res?.ok) {
       setIsSubscribed("SubscribedOnThisDevice");
     }
     setIsSubscribing(false);
@@ -312,8 +312,11 @@ export default function NotificationsList({
   const handleMarkAllAsRead = async () => {
     setIsMarkingAllAsRead(true);
     await Promise.all(
-      data.map(async (notification) => {
-        return await dispatch(markNotificationAsRead(notification.id));
+      data.map((notification) => {
+        return request(routes.markNotificationAsRead, {
+          pathParams: { id: notification.id },
+          body: { read_at: new Date() },
+        });
       })
     );
     setReload(!reload);
@@ -322,10 +325,10 @@ export default function NotificationsList({
 
   useEffect(() => {
     setIsLoading(true);
-    dispatch(
-      getNotifications({ offset, event: eventFilter, medium_sent: "SYSTEM" })
-    )
-      .then((res: any) => {
+    request(routes.getNotifications, {
+      query: { offset, event: eventFilter, medium_set: "SYSTEM" },
+    })
+      .then((res) => {
         if (res && res.data) {
           setData(res.data.results);
           setUnreadCount(
@@ -343,7 +346,7 @@ export default function NotificationsList({
         setOffset((prev) => prev - RESULT_LIMIT);
       });
     intialSubscriptionState();
-  }, [dispatch, reload, open, offset, eventFilter, isSubscribed]);
+  }, [reload, open, offset, eventFilter, isSubscribed]);
 
   if (!offset && isLoading) {
     manageResults = (

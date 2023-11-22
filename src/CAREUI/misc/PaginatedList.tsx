@@ -33,7 +33,10 @@ function useContextualized<TItem>() {
 interface Props<TItem> extends QueryOptions<PaginatedResponse<TItem>> {
   route: QueryRoute<PaginatedResponse<TItem>>;
   perPage?: number;
-  children: (ctx: PaginatedListContext<TItem>) => JSX.Element | JSX.Element[];
+  children: (
+    ctx: PaginatedListContext<TItem>,
+    query: ReturnType<typeof useQuery<PaginatedResponse<TItem>>>
+  ) => JSX.Element | JSX.Element[];
 }
 
 export default function PaginatedList<TItem extends object>({
@@ -59,7 +62,7 @@ export default function PaginatedList<TItem extends object>({
       value={{ ...query, items, perPage, currentPage, setPage }}
     >
       <context.Consumer>
-        {(ctx) => children(ctx as PaginatedListContext<TItem>)}
+        {(ctx) => children(ctx as PaginatedListContext<TItem>, query)}
       </context.Consumer>
     </context.Provider>
   );
@@ -118,7 +121,7 @@ PaginatedList.Refresh = Refresh;
 
 interface ItemsProps<TItem> {
   className?: string;
-  children: (item: TItem) => JSX.Element | JSX.Element[];
+  children: (item: TItem, items: TItem[]) => JSX.Element | JSX.Element[];
   shimmer?: JSX.Element;
   shimmerCount?: number;
 }
@@ -134,9 +137,9 @@ const Items = <TItem extends object>(props: ItemsProps<TItem>) => {
               {props.shimmer}
             </li>
           ))
-        : items.map((item, index) => (
+        : items.map((item, index, items) => (
             <li key={index} className="w-full">
-              {props.children(item)}
+              {props.children(item, items)}
             </li>
           ))}
     </ul>

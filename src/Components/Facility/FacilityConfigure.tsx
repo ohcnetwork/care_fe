@@ -1,7 +1,7 @@
 import { lazy, useReducer, useState } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
+import { Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import Page from "../Common/components/Page";
 import { ConfigureHealthFacility } from "../ABDM/ConfigureHealthFacility";
@@ -139,28 +139,29 @@ export const FacilityConfigure = (props: IProps) => {
       }}
       className="w-full overflow-x-hidden"
     >
-      <div className="cui-card mt-4">
-        <form onSubmit={handleSubmit}>
-          <div className="mt-2 grid grid-cols-1 gap-4">
-            <div>
-              <TextFormField
-                name="middleware_address"
-                label="Facility Middleware Address"
-                required
-                value={state.form.middleware_address}
-                onChange={handleChange}
-                error={state.errors?.middleware_address}
-              />
+      <div className="mx-auto max-w-3xl">
+        <div className="cui-card mt-4">
+          <form onSubmit={handleSubmit}>
+            <div className="mt-2 grid grid-cols-1 gap-4">
+              <div>
+                <TextFormField
+                  name="middleware_address"
+                  label="Facility Middleware Address"
+                  required
+                  value={state.form.middleware_address}
+                  onChange={handleChange}
+                  error={state.errors?.middleware_address}
+                />
+              </div>
             </div>
-          </div>
-          <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-            <Cancel onClick={() => navigate(`/facility/${facilityId}`)} />
-            <Submit onClick={handleSubmit} label="Update" />
-          </div>
-        </form>
-      </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+              <Submit onClick={handleSubmit} label="Update" />
+            </div>
+          </form>
+        </div>
 
-      <ConfigureHealthFacility facilityId={facilityId} />
+        <ConfigureHealthFacility facilityId={facilityId} />
+      </div>
     </Page>
   );
 };
