@@ -35,7 +35,6 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import PatientCategorySelect from "./PatientCategorySelect";
-import { DailyRoundsModel } from "./models";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm: any = {
@@ -68,8 +67,8 @@ const initError = Object.assign(
 );
 
 const initialState = {
-  form: initForm,
-  errors: initError,
+  form: { ...initForm },
+  errors: { ...initError },
 };
 
 const DailyRoundsFormReducer = (state = initialState, action: any) => {
@@ -108,8 +107,7 @@ export const DailyRounds = (props: any) => {
   const [patientName, setPatientName] = useState("");
   const [prevReviewInterval, setPreviousReviewInterval] = useState(-1);
   const [prevAction, setPreviousAction] = useState("NO_ACTION");
-  const [previousLog, setPreviousLog] = useState<DailyRoundsModel>();
-
+  const [hasPreviousLog, setHasPreviousLog] = useState(false);
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id ? "Save" : "Continue";
 
@@ -179,7 +177,7 @@ export const DailyRounds = (props: any) => {
         const res = await dispatchAction(
           getDailyReport({ limit: 1, offset: 0 }, { consultationId })
         );
-        setPreviousLog(res.data.results[0]);
+        setHasPreviousLog(res.data.count > 0);
         dispatch({
           type: "set_form",
           form: {
@@ -194,7 +192,7 @@ export const DailyRounds = (props: any) => {
                 RHYTHM_CHOICES.find((i) => i.text === res.data.rhythm)?.id) ||
               "0",
             temperature: parseFloat(res.data.temperature),
-            clone_last: false,
+            clone_last: res.data.count > 0 ? true : false,
           },
         });
       }
@@ -391,27 +389,6 @@ export const DailyRounds = (props: any) => {
     return <Loading />;
   }
 
-  const clonePreviousLog = () => {
-    const fieldsToNotClone = [
-      "taken_at",
-      "created_date",
-      "modified_date",
-      "rounds_type",
-      "patient_category",
-    ];
-
-    const clonedLog = Object.fromEntries(
-      Object.entries(previousLog).filter(
-        ([key]) => !fieldsToNotClone.includes(key)
-      )
-    );
-
-    dispatch({
-      type: "set_form",
-      form: { ...state.form, ...clonedLog, clone_last: true },
-    });
-  };
-
   return (
     <Page
       title={headerText}
@@ -473,188 +450,182 @@ export const DailyRounds = (props: any) => {
           </div>
         </div>
 
-        {!id && previousLog && (
+        {!id && hasPreviousLog && (
           <CheckBoxFormField
             {...field("clone_last")}
-            value={state.form.clone_last}
-            onChange={(e) => {
-              if (e.value) {
-                clonePreviousLog();
-              } else {
-                dispatch({
-                  type: "set_form",
-                  form: initForm,
-                });
-              }
-            }}
             label="Copy values from previous log?"
           />
         )}
 
-        <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
-          <TextAreaFormField
-            {...field("physical_examination_info")}
-            label="Physical Examination Info"
-            rows={5}
-          />
-          <TextAreaFormField
-            {...field("other_details")}
-            label="Other Details"
-            rows={5}
-          />
-          <SymptomsSelect
-            {...field("additional_symptoms")}
-            label="Symptoms"
-            className="md:col-span-2"
-          />
+        {(state.form.clone_last === false || id) && (
+          <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
+            <TextAreaFormField
+              {...field("physical_examination_info")}
+              label="Physical Examination Info"
+              rows={5}
+            />
+            <TextAreaFormField
+              {...field("other_details")}
+              label="Other Details"
+              rows={5}
+            />
+            <SymptomsSelect
+              {...field("additional_symptoms")}
+              label="Symptoms"
+              className="md:col-span-2"
+            />
 
-          {state.form.additional_symptoms?.includes(9) && (
-            <div className="md:col-span-2">
-              <TextAreaFormField
-                {...field("other_symptoms")}
-                required
-                label="Other Symptoms Details"
-                placeholder="Enter the other symptoms here"
-              />
-            </div>
-          )}
+            {state.form.additional_symptoms?.includes(9) && (
+              <div className="md:col-span-2">
+                <TextAreaFormField
+                  {...field("other_symptoms")}
+                  required
+                  label="Other Symptoms Details"
+                  placeholder="Enter the other symptoms here"
+                />
+              </div>
+            )}
 
-          <SelectFormField
-            {...field("action")}
-            label="Action"
-            options={TELEMEDICINE_ACTIONS}
-            optionLabel={(option) => option.desc}
-            optionValue={(option) => option.text}
-            value={prevAction}
-            onChange={(event) => {
-              handleFormFieldChange(event);
-              setPreviousAction(event.value);
-            }}
-          />
+            <SelectFormField
+              {...field("action")}
+              label="Action"
+              options={TELEMEDICINE_ACTIONS}
+              optionLabel={(option) => option.desc}
+              optionValue={(option) => option.text}
+              value={prevAction}
+              onChange={(event) => {
+                handleFormFieldChange(event);
+                setPreviousAction(event.value);
+              }}
+            />
 
-          <SelectFormField
-            {...field("review_interval")}
-            required
-            label="Review After"
-            labelSuffix={getExpectedReviewTime()}
-            options={REVIEW_AT_CHOICES}
-            optionLabel={(option) => option.text}
-            optionValue={(option) => option.id}
-            value={prevReviewInterval}
-            onChange={(event) => {
-              handleFormFieldChange(event);
-              setPreviousReviewInterval(Number(event.value));
-            }}
-          />
+            <SelectFormField
+              {...field("review_interval")}
+              required
+              label="Review After"
+              labelSuffix={getExpectedReviewTime()}
+              options={REVIEW_AT_CHOICES}
+              optionLabel={(option) => option.text}
+              optionValue={(option) => option.id}
+              value={prevReviewInterval}
+              onChange={(event) => {
+                handleFormFieldChange(event);
+                setPreviousReviewInterval(Number(event.value));
+              }}
+            />
 
-          {state.form.rounds_type === "NORMAL" && (
-            <>
-              <h3 className="mb-6 md:col-span-2">Vitals</h3>
+            {state.form.rounds_type === "NORMAL" && (
+              <>
+                <h3 className="mb-6 md:col-span-2">Vitals</h3>
 
-              <BloodPressureFormField {...field("bp")} label="Blood Pressure" />
+                <BloodPressureFormField
+                  {...field("bp")}
+                  label="Blood Pressure"
+                />
 
-              <RangeAutocompleteFormField
-                {...field("pulse")}
-                label="Pulse"
-                unit="bpm"
-                start={0}
-                end={200}
-                step={1}
-                thresholds={[
-                  {
-                    value: 0,
-                    className: "text-danger-500",
-                    label: "Bradycardia",
-                  },
-                  {
-                    value: 40,
-                    className: "text-primary-500",
-                    label: "Normal",
-                  },
-                  {
-                    value: 100,
-                    className: "text-danger-500",
-                    label: "Tachycardia",
-                  },
-                ]}
-              />
+                <RangeAutocompleteFormField
+                  {...field("pulse")}
+                  label="Pulse"
+                  unit="bpm"
+                  start={0}
+                  end={200}
+                  step={1}
+                  thresholds={[
+                    {
+                      value: 0,
+                      className: "text-danger-500",
+                      label: "Bradycardia",
+                    },
+                    {
+                      value: 40,
+                      className: "text-primary-500",
+                      label: "Normal",
+                    },
+                    {
+                      value: 100,
+                      className: "text-danger-500",
+                      label: "Tachycardia",
+                    },
+                  ]}
+                />
 
-              <TemperatureFormField
-                {...field("temperature")}
-                label="Temperature"
-              />
+                <TemperatureFormField
+                  {...field("temperature")}
+                  label="Temperature"
+                />
 
-              <RangeAutocompleteFormField
-                {...field("resp")}
-                label="Respiratory Rate"
-                unit="bpm"
-                required
-                start={0}
-                end={50}
-                step={1}
-                thresholds={[
-                  {
-                    value: 0,
-                    className: "text-danger-500",
-                    label: "Bradypnea",
-                  },
-                  {
-                    value: 12,
-                    className: "text-primary-500",
-                    label: "Normal",
-                  },
-                  {
-                    value: 16,
-                    className: "text-danger-500",
-                    label: "Tachypnea",
-                  },
-                ]}
-              />
+                <RangeAutocompleteFormField
+                  {...field("resp")}
+                  label="Respiratory Rate"
+                  unit="bpm"
+                  required
+                  start={0}
+                  end={50}
+                  step={1}
+                  thresholds={[
+                    {
+                      value: 0,
+                      className: "text-danger-500",
+                      label: "Bradypnea",
+                    },
+                    {
+                      value: 12,
+                      className: "text-primary-500",
+                      label: "Normal",
+                    },
+                    {
+                      value: 16,
+                      className: "text-danger-500",
+                      label: "Tachypnea",
+                    },
+                  ]}
+                />
 
-              <RangeAutocompleteFormField
-                {...field("ventilator_spo2")}
-                label="SPO2"
-                unit="%"
-                start={0}
-                end={100}
-                step={1}
-                thresholds={[
-                  {
-                    value: 0,
-                    className: "text-danger-500",
-                    label: "Low",
-                  },
-                  {
-                    value: 90,
-                    className: "text-primary-500",
-                    label: "Normal",
-                  },
-                  {
-                    value: 100,
-                    className: "text-danger-500",
-                    label: "High",
-                  },
-                ]}
-              />
+                <RangeAutocompleteFormField
+                  {...field("ventilator_spo2")}
+                  label="SPO2"
+                  unit="%"
+                  start={0}
+                  end={100}
+                  step={1}
+                  thresholds={[
+                    {
+                      value: 0,
+                      className: "text-danger-500",
+                      label: "Low",
+                    },
+                    {
+                      value: 90,
+                      className: "text-primary-500",
+                      label: "Normal",
+                    },
+                    {
+                      value: 100,
+                      className: "text-danger-500",
+                      label: "High",
+                    },
+                  ]}
+                />
 
-              <SelectFormField
-                {...field("rhythm")}
-                required
-                label="Rhythm"
-                options={RHYTHM_CHOICES}
-                optionLabel={(option) => option.desc}
-                optionValue={(option) => option.id}
-              />
+                <SelectFormField
+                  {...field("rhythm")}
+                  required
+                  label="Rhythm"
+                  options={RHYTHM_CHOICES}
+                  optionLabel={(option) => option.desc}
+                  optionValue={(option) => option.id}
+                />
 
-              <TextAreaFormField
-                {...field("rhythm_detail")}
-                className="md:col-span-2"
-                label="Rhythm Description"
-                rows={5}
-              />
-            </>
-          )}
-        </div>
+                <TextAreaFormField
+                  {...field("rhythm_detail")}
+                  className="md:col-span-2"
+                  label="Rhythm Description"
+                  rows={5}
+                />
+              </>
+            )}
+          </div>
+        )}
 
         <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">
           <Cancel onClick={() => goBack()} />
