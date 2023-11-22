@@ -437,3 +437,8 @@ export const formatAge = (
   }
   return `${age} ${yearSuffix}`;
 };
+
+export const scrollTo = (id: string | boolean) => {
+  const element = document.querySelector(`#${id}`);
+  element?.scrollIntoView({ behavior: "smooth", block: "center" });
+};
