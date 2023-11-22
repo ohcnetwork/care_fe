@@ -84,21 +84,13 @@ export default function ManageUsers() {
     },
   });
 
-  const {
-    data: districtData,
-    loading: districtDataLoading,
-    refetch: refetchDistrictData,
-  } = useQuery(routes.getDistrict, {
-    prefetch: false,
-    pathParams: { id: qParams.district_id },
-  });
-
-  useEffect(() => {
-    if (qParams.district_id) {
-      console.log("refetching district data");
-      refetchDistrictData();
+  const { data: districtData, loading: districtDataLoading } = useQuery(
+    routes.getDistrict,
+    {
+      prefetch: !!qParams.district_id,
+      pathParams: { id: qParams.district_id },
     }
-  }, [qParams.district_id, refetchDistrictData]);
+  );
 
   const addUser = (
     <ButtonV2
@@ -121,7 +113,7 @@ export default function ManageUsers() {
       setWeeklyHoursError("Value should be between 0 and 168");
       return;
     }
-    const { res, data } = await request(routes.partialUpdateUser, {
+    const { res, data, error } = await request(routes.partialUpdateUser, {
       pathParams: { username },
       body: { weekly_working_hours: weeklyHours },
     });
@@ -133,7 +125,7 @@ export default function ManageUsers() {
       setSelectedUser(null);
     } else {
       Notification.Error({
-        msg: "Error while updating working hours: " + (data?.detail || ""),
+        msg: "Error while updating working hours: " + (error || ""),
       });
     }
     setWeeklyHours(0);
@@ -143,7 +135,7 @@ export default function ManageUsers() {
 
   const handleSubmit = async () => {
     const username = userData.username;
-    const { res, data } = await request(routes.deleteUser, {
+    const { res, error } = await request(routes.deleteUser, {
       body: { username },
     });
     if (res?.status === 204) {
@@ -152,7 +144,7 @@ export default function ManageUsers() {
       });
     } else {
       Notification.Error({
-        msg: "Error while deleting User: " + (data?.detail || ""),
+        msg: "Error while deleting User: " + (error || ""),
       });
     }
 
