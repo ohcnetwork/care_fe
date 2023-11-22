@@ -1,5 +1,5 @@
 import * as Notification from "../../Utils/Notifications.js";
-import { lazy, useEffect, useState } from "react";
+import { lazy, useState } from "react";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -559,7 +559,6 @@ export default function ManageUsers() {
 function UserFacilities(props: { user: any }) {
   const { user } = props;
   const username = user.username;
-  const [facilities, setFacilities] = useState<any>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [facility, setFacility] = useState<any>(null);
   const [unlinkFacilityData, setUnlinkFacilityData] = useState<{
@@ -630,8 +629,8 @@ function UserFacilities(props: { user: any }) {
       });
     }
     await refetchUserFacilities();
-    setIsLoading(false);
     hideUnlinkFacilityModal();
+    setIsLoading(false);
   };
 
   const addFacility = async (username: string, facility: any) => {
@@ -649,12 +648,6 @@ function UserFacilities(props: { user: any }) {
     setIsLoading(false);
     setFacility(null);
   };
-
-  useEffect(() => {
-    if (userFacilities && !userFacilitiesLoading) {
-      setFacilities(userFacilities);
-    }
-  }, [userFacilities, userFacilitiesLoading]);
 
   return (
     <div className="h-full">
@@ -726,13 +719,13 @@ function UserFacilities(props: { user: any }) {
           )}
 
           {/* Linked Facilities section */}
-          {facilities.length > 0 && (
+          {userFacilities && userFacilities.length > 0 && (
             <div className="mt-2" id="linked-facility-list">
               <div className="mb-2 ml-2 text-lg font-bold">
                 Linked Facilities
               </div>
               <div className="flex flex-col">
-                {facilities.map((facility: any, i: number) => {
+                {userFacilities.map((facility: any, i: number) => {
                   if (user?.home_facility_object?.id === facility.id) {
                     // skip if it's a home facility
                     return null;
@@ -796,20 +789,21 @@ function UserFacilities(props: { user: any }) {
               </div>
             </div>
           )}
-          {!user?.home_facility_object && facilities.length === 0 && (
-            <div className="my-2 flex h-96 flex-col content-center justify-center align-middle">
-              <div className="w-full">
-                <img
-                  src="/images/404.svg"
-                  alt="No linked facilities"
-                  className="mx-auto w-80"
-                />
+          {!user?.home_facility_object &&
+            (userFacilities ? userFacilities.length === 0 : 0) && (
+              <div className="my-2 flex h-96 flex-col content-center justify-center align-middle">
+                <div className="w-full">
+                  <img
+                    src="/images/404.svg"
+                    alt="No linked facilities"
+                    className="mx-auto w-80"
+                  />
+                </div>
+                <p className="pt-4 text-center text-lg font-semibold text-primary">
+                  No Linked Facilities
+                </p>
               </div>
-              <p className="pt-4 text-center text-lg font-semibold text-primary">
-                No Linked Facilities
-              </p>
-            </div>
-          )}
+            )}
         </div>
       )}
       {replaceHomeFacility.show && (
