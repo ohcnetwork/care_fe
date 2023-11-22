@@ -3,6 +3,7 @@ import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 import { AssetData } from "../Assets/AssetTypes";
 import { UserBareMinimum } from "../Users/models";
+import { RouteToFacility } from "../Common/RouteToFacilitySelect";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 
 export interface LocalBodyModel {
@@ -91,6 +92,7 @@ export type PatientCategory =
 
 export interface ConsultationModel {
   admission_date?: string;
+  icu_admission_date?: string;
   admitted?: boolean;
   test_id?: string;
   admitted_to?: string;
@@ -110,19 +112,25 @@ export interface ConsultationModel {
   other_symptoms?: string;
   patient?: string;
   treatment_plan?: string;
-  referred_to?: number | null;
+  referred_to?: FacilityModel["id"];
   referred_to_object?: FacilityModel;
   referred_to_external?: string;
+  referred_from_facility?: FacilityModel["id"];
+  referred_from_facility_object?: FacilityModel;
+  referred_from_facility_external?: string;
+  referred_by_external?: string;
+  transferred_from_location?: LocationModel["id"];
+  transferred_from_location_object?: LocationModel;
   suggestion?: string;
   patient_no?: string;
-  consultation_status?: number;
+  route_to_facility?: RouteToFacility;
   is_kasp?: boolean;
   kasp_enabled_date?: string;
   readonly diagnoses?: ConsultationDiagnosis[];
   create_diagnoses?: CreateDiagnosis[]; // Used for bulk creating diagnoses upon consultation creation
   deprecated_verified_by?: string;
-  verified_by?: string;
-  verified_by_object?: UserBareMinimum;
+  treating_physician?: UserBareMinimum["id"];
+  treating_physician_object?: UserBareMinimum;
   suggestion_text?: string;
   symptoms?: Array<number>;
   symptoms_text?: string;
