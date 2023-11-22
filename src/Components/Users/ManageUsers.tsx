@@ -1,5 +1,5 @@
 import * as Notification from "../../Utils/Notifications.js";
-import { lazy, useCallback, useEffect, useState } from "react";
+import { lazy, useEffect, useState } from "react";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -40,13 +40,8 @@ export default function ManageUsers() {
     advancedFilter,
     resultsPerPage,
   } = useFilters({ limit: 18 });
-  const initialData: any[] = [];
   let manageUsers: any = null;
-  const [users, setUsers] = useState(initialData);
-  const [isLoading, setIsLoading] = useState(false);
   const [expandSkillList, setExpandSkillList] = useState(false);
-  const [totalCount, setTotalCount] = useState(0);
-  const [districtName, setDistrictName] = useState<string>();
   const [expandFacilityList, setExpandFacilityList] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [expandWorkingHours, setExpandWorkingHours] = useState(false);
@@ -89,30 +84,21 @@ export default function ManageUsers() {
     },
   });
 
-  const fetchDistrict = useCallback(async () => {
-    setIsLoading(true);
+  const {
+    data: districtData,
+    loading: districtDataLoading,
+    refetch: refetchDistrictData,
+  } = useQuery(routes.getDistrict, {
+    prefetch: false,
+    pathParams: { id: qParams.district_id },
+  });
+
+  useEffect(() => {
     if (qParams.district_id) {
-      const { data: districtData } = await request(routes.getDistrict, {
-        pathParams: { id: qParams.district_id },
-      });
-      if (districtData) setDistrictName(districtData.name);
-      else setDistrictName(undefined);
+      console.log("refetching district data");
+      refetchDistrictData();
     }
-    setIsLoading(false);
-  }, [qParams.district_id]);
-
-  useEffect(() => {
-    setIsLoading(true);
-    if (userListData && !userListLoading) {
-      setUsers(userListData.results);
-      setTotalCount(userListData.count);
-    }
-    setIsLoading(false);
-  }, [userListData, userListLoading]);
-
-  useEffect(() => {
-    fetchDistrict();
-  }, [fetchDistrict]);
+  }, [qParams.district_id, refetchDistrictData]);
 
   const addUser = (
     <ButtonV2
@@ -152,7 +138,6 @@ export default function ManageUsers() {
     }
     setWeeklyHours(0);
     setWeeklyHoursError("");
-    await fetchDistrict();
     await refetchUserList();
   };
 
@@ -172,7 +157,6 @@ export default function ManageUsers() {
     }
 
     setUserData({ show: false, username: "", name: "" });
-    await fetchDistrict();
     await refetchUserList();
   };
 
@@ -197,9 +181,9 @@ export default function ManageUsers() {
 
   let userList: any[] = [];
 
-  users &&
-    users.length &&
-    (userList = users.map((user: any, idx) => {
+  userListData?.results &&
+    userListData.results.length &&
+    (userList = userListData.results.map((user: any, idx) => {
       const cur_online = isUserOnline(user);
       return (
         <div
@@ -446,16 +430,16 @@ export default function ManageUsers() {
       );
     }));
 
-  if (isLoading || userListLoading || !users) {
+  if (userListLoading || districtDataLoading || !userListData?.results) {
     manageUsers = <Loading />;
-  } else if (users?.length) {
+  } else if (userListData?.results.length) {
     manageUsers = (
       <div>
         <div className="flex flex-wrap md:-mx-4">{userList}</div>
-        <Pagination totalCount={totalCount} />
+        <Pagination totalCount={userListData.count} />
       </div>
     );
-  } else if (users && users.length === 0) {
+  } else if (userListData?.results && userListData?.results.length === 0) {
     manageUsers = (
       <div>
         <h5> No Users Found</h5>
@@ -522,8 +506,8 @@ export default function ManageUsers() {
       <div className="m-4 mt-5 grid grid-cols-1 sm:grid-cols-3 md:gap-5 md:px-2">
         <CountBlock
           text="Total Users"
-          count={totalCount}
-          loading={isLoading || userListLoading}
+          count={userListData?.count || 0}
+          loading={userListLoading || districtDataLoading}
           icon="l-user-injured"
           className="flex-1"
         />
@@ -557,7 +541,11 @@ export default function ManageUsers() {
             phoneNumber(),
             phoneNumber("WhatsApp no.", "alt_phone_number"),
             badge("Role", "user_type"),
-            value("District", "district_id", districtName || ""),
+            value(
+              "District",
+              "district_id",
+              qParams.district_id ? districtData?.name || "" : ""
+            ),
           ]}
         />
       </div>
