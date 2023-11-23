@@ -203,12 +203,13 @@ export class PatientConsultationPage {
   }
 
   addDoctorsNotes(notes: string) {
+    cy.get("#expand_doctor_notes").click();
     cy.get("#doctor_notes_textarea").type(notes);
   }
 
   postDoctorNotes() {
     cy.intercept("POST", "**/api/v1/patient/*/notes").as("postDoctorNotes");
-    cy.get("#submit").contains("Post Your Note").click();
+    cy.get("#add_doctor_note_button").click();
     cy.wait("@postDoctorNotes").its("response.statusCode").should("eq", 201);
   }
 
