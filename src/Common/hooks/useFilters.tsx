@@ -41,10 +41,16 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
     const localFilters = JSON.parse(
       localStorage.getItem("filters--" + window.location.pathname) || "{}"
     );
+    const blacklistLocalFilters = ["page", "limit", "offset"];
     const newFilters = { ...localFilters, ...qParams };
+    const filteredNewFilters = blacklistLocalFilters.reduce(
+      (acc, key) => ({ ...acc, [key]: undefined }),
+      newFilters
+    );
+
     localStorage.setItem(
       "filters--" + window.location.pathname,
-      JSON.stringify(newFilters)
+      JSON.stringify(filteredNewFilters)
     );
 
     updateQuery(newFilters);
