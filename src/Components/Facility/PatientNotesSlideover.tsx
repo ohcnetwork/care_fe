@@ -18,7 +18,7 @@ interface PatientNotesProps {
 }
 
 export default function PatientNotesSlideover(props: PatientNotesProps) {
-  const [show, setShow] = useState(false);
+  const [show, setShow] = useState(true);
   const [patientActive, setPatientActive] = useState(true);
   const [noteField, setNoteField] = useState("");
   const [reload, setReload] = useState(false);
