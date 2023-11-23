@@ -447,3 +447,44 @@ export type ICD11DiagnosisModel = {
   id: string;
   label: string;
 };
+
+// Patient Notes Model
+export interface BaseFacilityModel {
+  id: string;
+  name: string;
+  local_body: number;
+  district: number;
+  state: number;
+  ward_object: WardModel;
+  local_body_object?: LocalBodyModel;
+  district_object?: DistrictModel;
+  state_object?: StateModel;
+  facility_type: FacilityType;
+  read_cover_image_url: any;
+  features: any[];
+  patient_count: number;
+  bed_count: number;
+}
+
+export interface FacilityType {
+  id: number;
+  name: string;
+}
+
+export interface BaseUserModel {
+  id: number;
+  first_name: string;
+  username: string;
+  email: string;
+  last_name: string;
+  user_type: string;
+  last_login: string;
+}
+
+export interface PatientNotesModel {
+  note: string;
+  facility: BaseFacilityModel;
+  created_by_object: BaseUserModel;
+  user_type?: string;
+  created_date: string;
+}
