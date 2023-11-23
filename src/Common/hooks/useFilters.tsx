@@ -1,5 +1,5 @@
 import { useQueryParams } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import GenericFilterBadge from "../../CAREUI/display/FilterBadge";
 import PaginationComponent from "../../Components/Common/Pagination";
@@ -36,6 +36,19 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
   const removeFilter = (param: string) => updateQuery({ [param]: "" });
   const removeFilters = (keys: string[]) =>
     updateQuery(keys.reduce((acc, key) => ({ ...acc, [key]: "" }), qParams));
+
+  useEffect(() => {
+    const localFilters = JSON.parse(
+      localStorage.getItem("filters--" + window.location.pathname) || "{}"
+    );
+    const newFilters = { ...localFilters, ...qParams };
+    localStorage.setItem(
+      "filters--" + window.location.pathname,
+      JSON.stringify(newFilters)
+    );
+
+    updateQuery(newFilters);
+  }, [qParams]);
 
   const FilterBadge = ({ name, value, paramKey }: FilterBadgeProps) => {
     if (Array.isArray(paramKey))
