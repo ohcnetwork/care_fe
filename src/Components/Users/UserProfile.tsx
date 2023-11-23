@@ -1,4 +1,4 @@
-import { useState, useReducer, lazy, FormEvent, useEffect } from "react";
+import { useState, useReducer, lazy, FormEvent } from "react";
 import { GENDER_TYPES } from "../../Common/constants";
 import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
@@ -118,54 +118,47 @@ export default function UserProfile() {
   const initialDetails: any = [{}];
   const [details, setDetails] = useState(initialDetails);
 
-  const { data: res, loading: isUserLoading } = useQuery(
-    routes.getUserDetails,
-    {
-      pathParams: { username: authUser.username },
-    }
-  );
+  const { loading: isUserLoading } = useQuery(routes.getUserDetails, {
+    pathParams: { username: authUser.username },
+    onResponse: (result) => {
+      if (!result || !result.res || !result.data) return;
+      setDetails(result.data);
+      const formData: EditForm = {
+        firstName: result.data.first_name,
+        lastName: result.data.last_name,
+        age: result.data.age?.toString() || "",
+        gender: result.data.gender || "",
+        email: result.data.email,
+        phoneNumber: result.data.phone_number?.toString() || "",
+        altPhoneNumber: result.data.alt_phone_number?.toString() || "",
+        doctor_qualification: result.data.doctor_qualification,
+        doctor_experience_commenced_on: dayjs().diff(
+          dayjs(result.data.doctor_experience_commenced_on),
+          "years"
+        ),
+        doctor_medical_council_registration:
+          result.data.doctor_medical_council_registration,
+        weekly_working_hours: result.data.weekly_working_hours,
+      };
+      dispatch({
+        type: "set_form",
+        form: formData,
+      });
+    },
+  });
 
-  const { data: resSkills, loading: isSkillsLoading } = useQuery(
-    routes.userListSkill,
-    {
-      pathParams: { username: authUser.username },
-    }
-  );
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!isUserLoading && !isSkillsLoading && res && resSkills) {
-        setDetails({
-          ...res,
-          skills: resSkills.results.map(
-            (skill: SkillModel) => skill.skill_object
-          ),
-        });
-        const formData: EditForm = {
-          firstName: res.first_name,
-          lastName: res.last_name,
-          age: res.age?.toString() || "",
-          gender: res.gender || "",
-          email: res.email,
-          phoneNumber: res.phone_number?.toString() || "",
-          altPhoneNumber: res.alt_phone_number?.toString() || "",
-          doctor_qualification: res.doctor_qualification,
-          doctor_experience_commenced_on: dayjs().diff(
-            dayjs(res.doctor_experience_commenced_on),
-            "years"
-          ),
-          doctor_medical_council_registration:
-            res.doctor_medical_council_registration,
-          weekly_working_hours: res.weekly_working_hours,
-        };
-        dispatch({
-          type: "set_form",
-          form: formData,
-        });
-      }
-    };
-    fetchData();
-  }, [isUserLoading, isSkillsLoading, res, resSkills]);
+  const { loading: isSkillsLoading } = useQuery(routes.userListSkill, {
+    pathParams: { username: authUser.username },
+    onResponse: (result) => {
+      if (!result || !result.res || !result.data) return;
+      setDetails({
+        ...details,
+        skills: result.data.results.map(
+          (skill: SkillModel) => skill.skill_object
+        ),
+      });
+    },
+  });
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -431,7 +424,7 @@ export default function UserProfile() {
             </div>
           </div>
           <div className="mt-5 lg:col-span-2 lg:mt-0">
-            {!showEdit && (
+            {!showEdit && !isUserLoading && !isSkillsLoading && (
               <div className="m-2 overflow-hidden rounded-lg bg-white px-4 py-5  shadow sm:rounded-lg sm:px-6">
                 <dl className="col-gap-4 row-gap-8 grid grid-cols-1 sm:grid-cols-2">
                   <div
@@ -442,7 +435,7 @@ export default function UserProfile() {
                       Username
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.username || "-"}
+                      {details.username ? details.username : "-"}
                     </dd>
                   </div>
                   <div
@@ -453,7 +446,7 @@ export default function UserProfile() {
                       Contact No
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.phone_number || "-"}
+                      {details.phone_number ? details.phone_number : "-"}
                     </dd>
                   </div>
 
@@ -465,7 +458,9 @@ export default function UserProfile() {
                       Whatsapp No
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.alt_phone_number || "-"}
+                      {details.alt_phone_number
+                        ? details.alt_phone_number
+                        : "-"}
                     </dd>
                   </div>
                   <div
@@ -476,7 +471,7 @@ export default function UserProfile() {
                       Email address
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.email || "-"}
+                      {details.email ? details.email : "-"}
                     </dd>
                   </div>
                   <div
@@ -487,7 +482,7 @@ export default function UserProfile() {
                       First Name
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.first_name || "-"}
+                      {details.first_name ? details.first_name : "-"}
                     </dd>
                   </div>
                   <div
@@ -498,7 +493,7 @@ export default function UserProfile() {
                       Last Name
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.last_name || "-"}
+                      {details.last_name ? details.last_name : "-"}
                     </dd>
                   </div>
                   <div className="my-2  sm:col-span-1" id="age-profile-details">
@@ -506,7 +501,7 @@ export default function UserProfile() {
                       Age
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.age || "-"}
+                      {details.age ? details.age : "-"}
                     </dd>
                   </div>
                   <div className="my-2  sm:col-span-1">
@@ -515,7 +510,7 @@ export default function UserProfile() {
                     </dt>
                     <dd className="badge badge-pill mt-1 bg-primary-500 text-sm text-white">
                       <i className="fa-solid fa-user-check mr-1"></i>{" "}
-                      {details.user_type || "-"}
+                      {details.user_type ? details.user_type : "-"}
                     </dd>
                   </div>
                   <div
@@ -526,7 +521,7 @@ export default function UserProfile() {
                       Gender
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.gender || "-"}
+                      {details.gender ? details.gender : "-"}
                     </dd>
                   </div>
                   <div className="my-2  sm:col-span-1">
@@ -534,7 +529,9 @@ export default function UserProfile() {
                       Local Body
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.local_body_object?.name || "-"}
+                      {details.local_body_object?.name
+                        ? details.local_body_object.name
+                        : "-"}
                     </dd>
                   </div>
                   <div className="my-2  sm:col-span-1">
@@ -542,7 +539,9 @@ export default function UserProfile() {
                       District
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.district_object?.name || "-"}
+                      {details.district_object?.name
+                        ? details.district_object.name
+                        : "-"}
                     </dd>
                   </div>
                   <div className="my-2  sm:col-span-1">
@@ -550,7 +549,9 @@ export default function UserProfile() {
                       State
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.state_object?.name || "-"}
+                      {details.state_object?.name
+                        ? details.state_object.name
+                        : "-"}
                     </dd>
                   </div>
                   <div className="my-2  sm:col-span-1">

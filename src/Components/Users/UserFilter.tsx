@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { navigate } from "raviger";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
 import { parsePhoneNumber } from "../../Utils/utils";
@@ -68,20 +67,14 @@ export default function UserFilter(props: any) {
     onChange(data);
   };
 
-  const { data: districtData, refetch } = useQuery(routes.getDistrict, {
-    prefetch: false,
+  useQuery(routes.getDistrict, {
+    prefetch: !!filter.district_id,
     pathParams: { id: filter.district_id },
+    onResponse: (result) => {
+      if (!result || !result.data || !result.res) return;
+      setFilterState({ district_ref: result.data });
+    },
   });
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (filter.district_id) {
-        await refetch();
-        setFilterState({ district_ref: districtData });
-      }
-    };
-    fetchData();
-  }, [filter.district_id]);
 
   const handleChange = ({ name, value }: any) =>
     setFilterState({ ...filterState, [name]: value });
