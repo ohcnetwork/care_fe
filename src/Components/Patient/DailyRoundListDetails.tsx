@@ -1,8 +1,8 @@
 import { lazy, useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
+import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
 import { CURRENT_HEALTH_CHANGE, SYMPTOM_CHOICES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getConsultationDailyRoundsDetails } from "../../Redux/actions";
 import { DailyRoundsModel } from "./models";
 import Page from "../Common/components/Page";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -11,23 +11,29 @@ const Loading = lazy(() => import("../Common/Loading"));
 const symptomChoices = [...SYMPTOM_CHOICES];
 const currentHealthChoices = [...CURRENT_HEALTH_CHANGE];
 
+function useConsultationQuery(consultationId: any, id: any) {
+  return useQuery(routes.getDailyReport, {
+    pathParams: {
+      consultationId,
+      id,
+    },
+  });
+}
+
 export const DailyRoundListDetails = (props: any) => {
   const { facilityId, patientId, consultationId, id } = props;
-  const dispatch: any = useDispatch();
   const [dailyRoundListDetailsData, setDailyRoundListDetails] =
     useState<DailyRoundsModel>({});
   const [isLoading, setIsLoading] = useState(false);
 
+  const res = useConsultationQuery(consultationId, id);
   const fetchpatient = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatch(
-        getConsultationDailyRoundsDetails({ consultationId, id })
-      );
       if (!status.aborted) {
         if (res && res.data) {
           const currentHealth = currentHealthChoices.find(
-            (i) => i.text === res.data.current_health
+            (i) => i.text === res.data?.current_health
           );
 
           const data: DailyRoundsModel = {
@@ -37,7 +43,7 @@ export const DailyRoundListDetails = (props: any) => {
               : "",
             additional_symptoms_text: "",
             medication_given:
-              Object.keys(res.data.medication_given).length === 0
+              Object.keys(res.data.medication_given ?? {}).length === 0
                 ? []
                 : res.data.medication_given,
             current_health: currentHealth
@@ -58,13 +64,13 @@ export const DailyRoundListDetails = (props: any) => {
         setIsLoading(false);
       }
     },
-    [consultationId, dispatch, id]
+    [consultationId, id]
   );
   useAbortableEffect(
     (status: statusType) => {
       fetchpatient(status);
     },
-    [dispatch, fetchpatient]
+    [fetchpatient]
   );
 
   if (isLoading) {

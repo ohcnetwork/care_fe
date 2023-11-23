@@ -46,7 +46,7 @@ import { Prescription } from "../Components/Medicine/models";
 
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
-import { PatientModel } from "../Components/Patient/models";
+import { PatientModel, DailyRoundsModel } from "../Components/Patient/models";
 import { IComment, IResource } from "../Components/Resource/models";
 
 /**
@@ -441,6 +441,8 @@ const routes = {
 
   getDailyReport: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/{id}/",
+    method: "GET",
+    TRes: Type<DailyRoundsModel>(),
   },
   dailyRoundsAnalyse: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/analyse/",
