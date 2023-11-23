@@ -63,6 +63,10 @@ const AssetsList = () => {
     asset_class: qParams.asset_class || "",
     location: qParams.facility ? qParams.location || "" : "",
     status: qParams.status || "",
+    warranty_amc_end_of_validity_before:
+      qParams.warranty_amc_end_of_validity_before || "",
+    warranty_amc_end_of_validity_after:
+      qParams.warranty_amc_end_of_validity_after || "",
   };
 
   const { loading } = useQuery(routes.listAssets, {
