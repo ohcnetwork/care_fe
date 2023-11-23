@@ -16,6 +16,7 @@ describe("Facility Creation", () => {
   beforeEach(() => {
     cy.viewport(1280, 720);
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/facility");
   });
 

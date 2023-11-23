@@ -11,6 +11,7 @@ describe("Shifting section filter", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/shifting");
     shiftingPage.advancedFilterButton().click();
   });

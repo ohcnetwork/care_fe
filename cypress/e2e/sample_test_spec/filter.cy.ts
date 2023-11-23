@@ -8,6 +8,7 @@ describe("Sample Filter", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/sample");
     cy.contains("Advanced Filters").click();
   });

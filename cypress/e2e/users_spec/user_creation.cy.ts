@@ -63,6 +63,7 @@ describe("User Creation", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/users");
   });
 

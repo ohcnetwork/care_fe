@@ -9,6 +9,7 @@ describe("Location Management Section", () => {
   beforeEach(() => {
     cy.viewport(1280, 720);
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/");
     cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");
     cy.get("[id='facility-details']").first().click();

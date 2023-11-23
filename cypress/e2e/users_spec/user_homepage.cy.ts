@@ -19,6 +19,7 @@ describe("User Homepage", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/users");
   });
 

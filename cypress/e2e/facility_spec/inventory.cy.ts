@@ -13,6 +13,7 @@ describe("Inventory Management Section", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/");
     cy.viewport(1280, 720);
   });

@@ -27,6 +27,7 @@ describe("Asset Tab", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/assets");
   });
 

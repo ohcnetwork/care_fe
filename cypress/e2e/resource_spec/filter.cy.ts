@@ -8,6 +8,7 @@ describe("Resource filter", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/resource");
     cy.contains("Filters").click();
   });

@@ -8,6 +8,7 @@ describe("Sample List", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/sample");
   });
 
