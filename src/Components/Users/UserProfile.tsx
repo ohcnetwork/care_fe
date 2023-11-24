@@ -10,7 +10,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { SkillModel, SkillObjectModel } from "../Users/models";
+import { SkillModel } from "../Users/models";
 import UpdatableApp, { checkForUpdate } from "../Common/UpdatableApp";
 import dayjs from "../../Utils/dayjs";
 import useAuthUser from "../../Common/hooks/useAuthUser";
@@ -29,6 +29,7 @@ type EditForm = {
   email: string;
   phoneNumber: string;
   altPhoneNumber: string;
+  user_type: string | undefined;
   doctor_qualification: string | undefined;
   doctor_experience_commenced_on: number | string | undefined;
   doctor_medical_council_registration: string | undefined;
@@ -50,6 +51,7 @@ const initForm: EditForm = {
   email: "",
   phoneNumber: "",
   altPhoneNumber: "",
+  user_type: "",
   doctor_qualification: undefined,
   doctor_experience_commenced_on: undefined,
   doctor_medical_council_registration: undefined,
@@ -82,6 +84,7 @@ const editFormReducer = (state: State, action: Action) => {
     }
   }
 };
+
 export default function UserProfile() {
   const [states, dispatch] = useReducer(editFormReducer, initialState);
   const [updateStatus, setUpdateStatus] = useState({
@@ -115,50 +118,44 @@ export default function UserProfile() {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const initialDetails: any = [{}];
-  const [details, setDetails] = useState(initialDetails);
+  const { data: userData, loading: isUserLoading } = useQuery(
+    routes.getUserDetails,
+    {
+      pathParams: { username: authUser.username },
+      onResponse: (result) => {
+        if (!result || !result.res || !result.data) return;
+        const formData: EditForm = {
+          firstName: result.data.first_name,
+          lastName: result.data.last_name,
+          age: result.data.age?.toString() || "",
+          gender: result.data.gender || "",
+          email: result.data.email,
+          phoneNumber: result.data.phone_number?.toString() || "",
+          altPhoneNumber: result.data.alt_phone_number?.toString() || "",
+          user_type: result.data.user_type,
+          doctor_qualification: result.data.doctor_qualification,
+          doctor_experience_commenced_on: dayjs().diff(
+            dayjs(result.data.doctor_experience_commenced_on),
+            "years"
+          ),
+          doctor_medical_council_registration:
+            result.data.doctor_medical_council_registration,
+          weekly_working_hours: result.data.weekly_working_hours,
+        };
+        dispatch({
+          type: "set_form",
+          form: formData,
+        });
+      },
+    }
+  );
 
-  const { loading: isUserLoading } = useQuery(routes.getUserDetails, {
-    pathParams: { username: authUser.username },
-    onResponse: (result) => {
-      if (!result || !result.res || !result.data) return;
-      setDetails(result.data);
-      const formData: EditForm = {
-        firstName: result.data.first_name,
-        lastName: result.data.last_name,
-        age: result.data.age?.toString() || "",
-        gender: result.data.gender || "",
-        email: result.data.email,
-        phoneNumber: result.data.phone_number?.toString() || "",
-        altPhoneNumber: result.data.alt_phone_number?.toString() || "",
-        doctor_qualification: result.data.doctor_qualification,
-        doctor_experience_commenced_on: dayjs().diff(
-          dayjs(result.data.doctor_experience_commenced_on),
-          "years"
-        ),
-        doctor_medical_council_registration:
-          result.data.doctor_medical_council_registration,
-        weekly_working_hours: result.data.weekly_working_hours,
-      };
-      dispatch({
-        type: "set_form",
-        form: formData,
-      });
-    },
-  });
-
-  const { loading: isSkillsLoading } = useQuery(routes.userListSkill, {
-    pathParams: { username: authUser.username },
-    onResponse: (result) => {
-      if (!result || !result.res || !result.data) return;
-      setDetails({
-        ...details,
-        skills: result.data.results.map(
-          (skill: SkillModel) => skill.skill_object
-        ),
-      });
-    },
-  });
+  const { data: skillsView, loading: isSkillsLoading } = useQuery(
+    routes.userListSkill,
+    {
+      pathParams: { username: authUser.username },
+    }
+  );
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -232,7 +229,7 @@ export default function UserProfile() {
         case "doctor_qualification":
         case "doctor_experience_commenced_on":
         case "doctor_medical_council_registration":
-          if (details.user_type === "Doctor" && !states.form[field]) {
+          if (states.form.user_type === "Doctor" && !states.form[field]) {
             errors[field] = "Field is required";
             invalidForm = true;
           }
@@ -288,11 +285,11 @@ export default function UserProfile() {
         gender: states.form.gender,
         age: states.form.age,
         doctor_qualification:
-          details.user_type === "Doctor"
+          states.form.user_type === "Doctor"
             ? states.form.doctor_qualification
             : undefined,
         doctor_experience_commenced_on:
-          details.user_type === "Doctor"
+          states.form.user_type === "Doctor"
             ? dayjs()
                 .subtract(
                   parseInt(
@@ -304,7 +301,7 @@ export default function UserProfile() {
                 .format("YYYY-MM-DD")
             : undefined,
         doctor_medical_council_registration:
-          details.user_type === "Doctor"
+          states.form.user_type === "Doctor"
             ? states.form.doctor_medical_council_registration
             : undefined,
         weekly_working_hours: states.form.weekly_working_hours,
@@ -313,22 +310,11 @@ export default function UserProfile() {
         pathParams: { username: authUser.username },
         body: data,
       });
-      if (res?.status === 200) {
+      if (res?.ok) {
         Notification.Success({
           msg: "Details updated successfully",
         });
         window.location.reload();
-        setDetails({
-          ...details,
-          first_name: states.form.firstName,
-          last_name: states.form.lastName,
-          age: states.form.age,
-          gender: states.form.gender,
-          email: states.form.email,
-          phone_number: states.form.phoneNumber,
-          alt_phone_number: states.form.altPhoneNumber,
-        });
-        setShowEdit(false);
       }
     }
   };
@@ -376,10 +362,7 @@ export default function UserProfile() {
         body: form,
       });
       setIsLoading(false);
-      if (
-        res?.status == 200 &&
-        data?.message === "Password updated successfully"
-      ) {
+      if (res?.ok && data?.message === "Password updated successfully") {
         Notification.Success({
           msg: "Password changed!",
         });
@@ -435,7 +418,7 @@ export default function UserProfile() {
                       Username
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.username ? details.username : "-"}
+                      {userData?.username || "-"}
                     </dd>
                   </div>
                   <div
@@ -446,7 +429,7 @@ export default function UserProfile() {
                       Contact No
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.phone_number ? details.phone_number : "-"}
+                      {userData?.phone_number || "-"}
                     </dd>
                   </div>
 
@@ -458,9 +441,7 @@ export default function UserProfile() {
                       Whatsapp No
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.alt_phone_number
-                        ? details.alt_phone_number
-                        : "-"}
+                      {userData?.alt_phone_number || "-"}
                     </dd>
                   </div>
                   <div
@@ -471,7 +452,7 @@ export default function UserProfile() {
                       Email address
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.email ? details.email : "-"}
+                      {userData?.email || "-"}
                     </dd>
                   </div>
                   <div
@@ -482,7 +463,7 @@ export default function UserProfile() {
                       First Name
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.first_name ? details.first_name : "-"}
+                      {userData?.first_name || "-"}
                     </dd>
                   </div>
                   <div
@@ -493,7 +474,7 @@ export default function UserProfile() {
                       Last Name
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.last_name ? details.last_name : "-"}
+                      {userData?.last_name || "-"}
                     </dd>
                   </div>
                   <div className="my-2  sm:col-span-1" id="age-profile-details">
@@ -501,7 +482,7 @@ export default function UserProfile() {
                       Age
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.age ? details.age : "-"}
+                      {userData?.age || "-"}
                     </dd>
                   </div>
                   <div className="my-2  sm:col-span-1">
@@ -510,7 +491,7 @@ export default function UserProfile() {
                     </dt>
                     <dd className="badge badge-pill mt-1 bg-primary-500 text-sm text-white">
                       <i className="fa-solid fa-user-check mr-1"></i>{" "}
-                      {details.user_type ? details.user_type : "-"}
+                      {userData?.user_type || "-"}
                     </dd>
                   </div>
                   <div
@@ -521,7 +502,7 @@ export default function UserProfile() {
                       Gender
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.gender ? details.gender : "-"}
+                      {userData?.gender || "-"}
                     </dd>
                   </div>
                   <div className="my-2  sm:col-span-1">
@@ -529,9 +510,7 @@ export default function UserProfile() {
                       Local Body
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.local_body_object?.name
-                        ? details.local_body_object.name
-                        : "-"}
+                      {userData?.local_body_object?.name || "-"}
                     </dd>
                   </div>
                   <div className="my-2  sm:col-span-1">
@@ -539,9 +518,7 @@ export default function UserProfile() {
                       District
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.district_object?.name
-                        ? details.district_object.name
-                        : "-"}
+                      {userData?.district_object?.name || "-"}
                     </dd>
                   </div>
                   <div className="my-2  sm:col-span-1">
@@ -549,9 +526,7 @@ export default function UserProfile() {
                       State
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.state_object?.name
-                        ? details.state_object.name
-                        : "-"}
+                      {userData?.state_object?.name || "-"}
                     </dd>
                   </div>
                   <div className="my-2  sm:col-span-1">
@@ -563,11 +538,13 @@ export default function UserProfile() {
                         className="flex flex-wrap gap-2"
                         id="already-linked-skills"
                       >
-                        {details.skills && details.skills.length
-                          ? details.skills?.map((skill: SkillObjectModel) => {
+                        {skillsView?.results?.length
+                          ? skillsView.results?.map((skill: SkillModel) => {
                               return (
                                 <span className="flex items-center gap-2 rounded-full border-gray-300 bg-gray-200 px-3 text-xs text-gray-700">
-                                  <p className="py-1.5">{skill.name}</p>
+                                  <p className="py-1.5">
+                                    {skill.skill_object.name}
+                                  </p>
                                 </span>
                               );
                             })
@@ -583,7 +560,7 @@ export default function UserProfile() {
                       Average weekly working hours
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.weekly_working_hours ?? "-"}
+                      {userData?.weekly_working_hours || "-"}
                     </dd>
                   </div>
                 </dl>
@@ -649,7 +626,7 @@ export default function UserProfile() {
                           required
                           type="email"
                         />
-                        {details.user_type === "Doctor" && (
+                        {states.form.user_type === "Doctor" && (
                           <>
                             <TextFormField
                               {...fieldProps("doctor_qualification")}
