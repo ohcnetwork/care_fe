@@ -358,7 +358,6 @@ export default function NotificationsList({
     manageResults = (
       <>
         {data
-          .filter((notification: any) => notification.event != "PUSH_MESSAGE")
           .filter((notification: any) =>
             showUnread ? notification.read_at === null : true
           )
