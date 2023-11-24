@@ -456,7 +456,11 @@ export const DailyRounds = (props: any) => {
             label="Copy values from previous log?"
           />
         )}
-
+        {state.form.clone_last === true && (
+          <p className="border border-green-800 bg-green-200 p-2 text-green-800">
+            Field values will be copied from previous log update
+          </p>
+        )}
         {(state.form.clone_last === false || id) && (
           <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
             <TextAreaFormField
