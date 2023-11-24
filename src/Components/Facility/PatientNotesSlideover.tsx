@@ -79,6 +79,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
         </Link>
       )}
       <div
+        id="expand_doctor_notes"
         className={classNames(
           "flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100",
           show && "rotate-180"
@@ -129,6 +130,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
           />
           <div className="relative mx-4 flex items-center">
             <TextFormField
+              id="doctor_notes_textarea"
               name="note"
               value={noteField}
               onChange={(e) => setNoteField(e.value)}
@@ -139,6 +141,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
               disabled={!patientActive}
             />
             <ButtonV2
+              id="add_doctor_note_button"
               onClick={onAddNote}
               border={false}
               className="absolute right-2"
