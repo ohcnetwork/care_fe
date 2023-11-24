@@ -249,12 +249,7 @@ export const UserAdd = (props: UserProps) => {
     onResponse: (result) => {
       if (!result || !result.res || !result.data) return;
       if (userIndex <= USER_TYPES.indexOf("DistrictAdmin")) {
-        setDistricts([
-          {
-            id: authUser.district!,
-            name: authUser.district_object?.name as string,
-          },
-        ]);
+        setDistricts([authUser.district_object!]);
       } else {
         setDistricts(result.data);
       }
@@ -269,12 +264,7 @@ export const UserAdd = (props: UserProps) => {
       onResponse: (result) => {
         if (!result || !result.res || !result.data) return;
         if (userIndex <= USER_TYPES.indexOf("LocalBodyAdmin")) {
-          setLocalBodies([
-            {
-              id: authUser.local_body!,
-              name: authUser.local_body_object?.name as string,
-            },
-          ]);
+          setLocalBodies([authUser.local_body_object!]);
         } else {
           setLocalBodies(result.data);
         }
@@ -286,12 +276,7 @@ export const UserAdd = (props: UserProps) => {
     onResponse: (result) => {
       if (!result || !result.res || !result.data) return;
       if (userIndex <= USER_TYPES.indexOf("StateAdmin")) {
-        setStates([
-          {
-            id: authUser.state!,
-            name: authUser.state_object?.name as string,
-          },
-        ]);
+        setStates([authUser.state_object!]);
       } else {
         setStates(result.data.results);
       }
@@ -556,7 +541,7 @@ export const UserAdd = (props: UserProps) => {
       const { res } = await request(routes.addUser, {
         body: data,
       });
-      if (res && res.status >= 200 && res.status < 300) {
+      if (res?.ok) {
         dispatch({ type: "set_form", form: initForm });
         if (!userId) {
           Notification.Success({

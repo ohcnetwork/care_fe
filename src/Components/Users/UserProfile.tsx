@@ -10,7 +10,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { SkillModel } from "../Users/models";
+import { GenderType, SkillModel, UpdatePasswordForm } from "../Users/models";
 import UpdatableApp, { checkForUpdate } from "../Common/UpdatableApp";
 import dayjs from "../../Utils/dayjs";
 import useAuthUser from "../../Common/hooks/useAuthUser";
@@ -22,6 +22,20 @@ import request from "../../Utils/request/request";
 const Loading = lazy(() => import("../Common/Loading"));
 
 type EditForm = {
+  firstName: string;
+  lastName: string;
+  age: string;
+  gender: GenderType;
+  email: string;
+  phoneNumber: string;
+  altPhoneNumber: string;
+  user_type: string | undefined;
+  doctor_qualification: string | undefined;
+  doctor_experience_commenced_on: number | string | undefined;
+  doctor_medical_council_registration: string | undefined;
+  weekly_working_hours: string | undefined;
+};
+type ErrorForm = {
   firstName: string;
   lastName: string;
   age: string;
@@ -37,17 +51,17 @@ type EditForm = {
 };
 type State = {
   form: EditForm;
-  errors: EditForm;
+  errors: ErrorForm;
 };
 type Action =
   | { type: "set_form"; form: EditForm }
-  | { type: "set_error"; errors: EditForm };
+  | { type: "set_error"; errors: ErrorForm };
 
 const initForm: EditForm = {
   firstName: "",
   lastName: "",
   age: "",
-  gender: "",
+  gender: "Male",
   email: "",
   phoneNumber: "",
   altPhoneNumber: "",
@@ -58,7 +72,7 @@ const initForm: EditForm = {
   weekly_working_hours: undefined,
 };
 
-const initError: EditForm = Object.assign(
+const initError: ErrorForm = Object.assign(
   {},
   ...Object.keys(initForm).map((k) => ({ [k]: "" }))
 );
@@ -116,8 +130,6 @@ export default function UserProfile() {
 
   const [showEdit, setShowEdit] = useState<boolean | false>(false);
 
-  const [isLoading, setIsLoading] = useState(false);
-
   const {
     data: userData,
     loading: isUserLoading,
@@ -130,7 +142,7 @@ export default function UserProfile() {
         firstName: result.data.first_name,
         lastName: result.data.last_name,
         age: result.data.age?.toString() || "",
-        gender: result.data.gender || "",
+        gender: result.data.gender || "Male",
         email: result.data.email,
         phoneNumber: result.data.phone_number?.toString() || "",
         altPhoneNumber: result.data.alt_phone_number?.toString() || "",
@@ -284,7 +296,7 @@ export default function UserProfile() {
         phone_number: parsePhoneNumber(states.form.phoneNumber) ?? "",
         alt_phone_number: parsePhoneNumber(states.form.altPhoneNumber) ?? "",
         gender: states.form.gender,
-        age: states.form.age,
+        age: +states.form.age,
         doctor_qualification:
           states.form.user_type === "Doctor"
             ? states.form.doctor_qualification
@@ -321,7 +333,9 @@ export default function UserProfile() {
     }
   };
 
-  if (isLoading || isUserLoading || isSkillsLoading) {
+  const isLoading = isUserLoading || isSkillsLoading;
+
+  if (isLoading) {
     return <Loading />;
   }
 
@@ -354,8 +368,7 @@ export default function UserProfile() {
         msg: "Passwords are different in the new and the confirmation column.",
       });
     } else {
-      setIsLoading(true);
-      const form = {
+      const form: UpdatePasswordForm = {
         old_password: changePasswordForm.old_password,
         username: authUser.username,
         new_password: changePasswordForm.new_password_1,
@@ -363,7 +376,6 @@ export default function UserProfile() {
       const { res, data } = await request(routes.updatePassword, {
         body: form,
       });
-      setIsLoading(false);
       if (res?.ok && data?.message === "Password updated successfully") {
         Notification.Success({
           msg: "Password changed!",
@@ -409,7 +421,7 @@ export default function UserProfile() {
             </div>
           </div>
           <div className="mt-5 lg:col-span-2 lg:mt-0">
-            {!showEdit && !isUserLoading && !isSkillsLoading && (
+            {!showEdit && !isLoading && (
               <div className="m-2 overflow-hidden rounded-lg bg-white px-4 py-5  shadow sm:rounded-lg sm:px-6">
                 <dl className="col-gap-4 row-gap-8 grid grid-cols-1 sm:grid-cols-2">
                   <div

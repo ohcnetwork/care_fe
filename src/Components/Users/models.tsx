@@ -6,6 +6,12 @@ interface HomeFacilityObjectModel {
   name?: string;
 }
 
+export type UpdatePasswordForm = {
+  old_password: string;
+  username: string;
+  new_password: string;
+};
+
 export type UserBareMinimum = {
   id: number;
   username: string;
@@ -28,6 +34,7 @@ export type UserModel = UserBareMinimum & {
   age?: number;
   is_superuser?: boolean;
   verified?: boolean;
+  home_facility?: string;
   home_facility_object?: HomeFacilityObjectModel;
   local_body_object?: LocalBodyModel;
   district_object?: DistrictModel;
@@ -59,6 +66,7 @@ export interface UserAssignedModel extends UserBareMinimum {
   age?: number;
   is_superuser?: boolean;
   verified?: boolean;
+  home_facility?: string;
   home_facility_object?: HomeFacilityObjectModel;
   doctor_qualification?: string;
   doctor_experience_commenced_on?: Date;

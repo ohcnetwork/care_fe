@@ -7,6 +7,7 @@ import { RouteToFacility } from "../Common/RouteToFacilitySelect";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 
 export interface LocalBodyModel {
+  id: number;
   name: string;
   body_type: number;
   localbody_code: string;

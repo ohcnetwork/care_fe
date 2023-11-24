@@ -51,6 +51,7 @@ import {
 import {
   SkillModel,
   SkillObjectModel,
+  UpdatePasswordForm,
   UserModel,
 } from "../Components/Users/models";
 import { Prescription } from "../Components/Medicine/models";
@@ -148,7 +149,8 @@ const routes = {
   updatePassword: {
     path: "/api/v1/password_change/",
     method: "PUT",
-    TRes: Type<{ [key: string]: string | string[] }>(),
+    TRes: Type<Record<string, string | string[]>>(),
+    TBody: Type<UpdatePasswordForm>(),
   },
   // User Endpoints
   currentUser: {
@@ -178,7 +180,7 @@ const routes = {
     path: "/api/v1/users/{username}/add_facility/",
     method: "PUT",
     TBody: Type<{ facility: string }>(),
-    TRes: undefined,
+    TRes: Type<Record<string, never>>(),
   },
 
   addUserSkill: {
@@ -192,19 +194,19 @@ const routes = {
     path: "/api/v1/users/{username}/delete_facility/",
     method: "DELETE",
     TBody: Type<{ facility: string }>(),
-    TRes: undefined,
+    TRes: Type<Record<string, never>>(),
   },
 
   clearHomeFacility: {
     path: "/api/v1/users/{username}/clear_home_facility/",
     method: "DELETE",
-    TRes: undefined,
+    TRes: Type<Record<string, never>>(),
   },
 
   deleteUserSkill: {
     path: "/api/v1/users/{username}/skill/{id}/",
     method: "DELETE",
-    TRes: undefined,
+    TRes: Type<Record<string, never>>(),
   },
 
   createUser: {
@@ -221,15 +223,14 @@ const routes = {
   partialUpdateUser: {
     path: "/api/v1/users/{username}/",
     method: "PATCH",
-    TRes: Type<{ [key: string]: object }>(),
-    TBody: Type<{ [key: string]: string | object | undefined }>(),
+    TRes: Type<UserModel>(),
+    TBody: Type<Partial<UserModel>>(),
   },
 
   deleteUser: {
-    path: "/api/v1/users",
+    path: "/api/v1/users/{username}",
     method: "DELETE",
-    TRes: Type<{ [key: string]: object }>(),
-    TBody: Type<{ username: string }>(),
+    TRes: Type<Record<string, never>>(),
   },
 
   addUser: {
@@ -789,7 +790,7 @@ const routes = {
   checkUsername: {
     path: "/api/v1/users/{username}/check_availability/",
     method: "GET",
-    TRes: undefined,
+    TRes: Type<Record<string, never>>(),
   },
 
   getUserDetails: {

@@ -19,7 +19,7 @@ export const addUser = (params: object) => {
   return fireRequest("addUser", [], params);
 };
 export const deleteUser = (username: string) => {
-  return fireRequest("deleteUser", [username], {});
+  return fireRequest("deleteUser", [], {}, { username });
 };
 
 export const checkResetToken = (params: object) => {

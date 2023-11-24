@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
 import { SkillModel, SkillObjectModel } from "../Users/models";
 import { SkillSelect } from "../Common/SkillSelect";
@@ -81,7 +81,7 @@ export default ({ show, setShow, username }: IProps) => {
     AuthorizeFor(["DistrictAdmin", "StateAdmin"])
   );
 
-  const hasSkills = useMemo(() => skills?.results?.length || 0 > 0, [skills]);
+  const hasSkills = skills?.results?.length || 0 > 0;
 
   return (
     <div className="col-span-4">

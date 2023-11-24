@@ -46,7 +46,7 @@ export default function ManageUsers() {
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [expandWorkingHours, setExpandWorkingHours] = useState(false);
   const authUser = useAuthUser();
-  const [weeklyHours, setWeeklyHours] = useState<any>(0);
+  const [weeklyHours, setWeeklyHours] = useState<string>("0");
   const userIndex = USER_TYPES.indexOf(authUser.user_type);
   const userTypes = authUser.is_superuser
     ? [...USER_TYPES]
@@ -109,7 +109,7 @@ export default function ManageUsers() {
 
   const handleWorkingHourSubmit = async () => {
     const username = selectedUser;
-    if (!username || !weeklyHours || weeklyHours < 0 || weeklyHours > 168) {
+    if (!username || !weeklyHours || +weeklyHours < 0 || +weeklyHours > 168) {
       setWeeklyHoursError("Value should be between 0 and 168");
       return;
     }
@@ -128,15 +128,14 @@ export default function ManageUsers() {
         msg: "Error while updating working hours: " + (error || ""),
       });
     }
-    setWeeklyHours(0);
+    setWeeklyHours("0");
     setWeeklyHoursError("");
     await refetchUserList();
   };
 
   const handleSubmit = async () => {
-    const username = userData.username;
     const { res, error } = await request(routes.deleteUser, {
-      body: { username },
+      pathParams: { username: userData.username },
     });
     if (res?.status === 204) {
       Notification.Success({
@@ -464,7 +463,7 @@ export default function ManageUsers() {
         open={expandWorkingHours}
         setOpen={(state) => {
           setExpandWorkingHours(state);
-          setWeeklyHours(0);
+          setWeeklyHours("0");
           setWeeklyHoursError("");
         }}
         slideFrom="right"
@@ -719,7 +718,7 @@ function UserFacilities(props: { user: any }) {
           )}
 
           {/* Linked Facilities section */}
-          {userFacilities && userFacilities.length > 0 && (
+          {userFacilities?.length && (
             <div className="mt-2" id="linked-facility-list">
               <div className="mb-2 ml-2 text-lg font-bold">
                 Linked Facilities
@@ -789,21 +788,20 @@ function UserFacilities(props: { user: any }) {
               </div>
             </div>
           )}
-          {!user?.home_facility_object &&
-            (userFacilities ? userFacilities.length === 0 : 0) && (
-              <div className="my-2 flex h-96 flex-col content-center justify-center align-middle">
-                <div className="w-full">
-                  <img
-                    src="/images/404.svg"
-                    alt="No linked facilities"
-                    className="mx-auto w-80"
-                  />
-                </div>
-                <p className="pt-4 text-center text-lg font-semibold text-primary">
-                  No Linked Facilities
-                </p>
+          {!user?.home_facility_object && !userFacilities?.length && (
+            <div className="my-2 flex h-96 flex-col content-center justify-center align-middle">
+              <div className="w-full">
+                <img
+                  src="/images/404.svg"
+                  alt="No linked facilities"
+                  className="mx-auto w-80"
+                />
               </div>
-            )}
+              <p className="pt-4 text-center text-lg font-semibold text-primary">
+                No Linked Facilities
+              </p>
+            </div>
+          )}
         </div>
       )}
       {replaceHomeFacility.show && (
