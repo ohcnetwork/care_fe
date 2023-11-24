@@ -1,17 +1,17 @@
 import { lazy, useState } from "react";
-import Pagination from "../Common/Pagination";
-import { USER_TYPES, RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
-import { FacilityModel } from "../Facility/models";
-import LinkFacilityDialog from "../Users/LinkFacilityDialog";
-import UserDeleteDialog from "../Users/UserDeleteDialog";
-import * as Notification from "../../Utils/Notifications.js";
-import UserDetails from "../Common/UserDetails";
-import UnlinkFacilityDialog from "../Users/UnlinkFacilityDialog";
-import { classNames, isUserOnline, relativeTime } from "../../Utils/utils";
 import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
+import * as Notification from "../../Utils/Notifications.js";
+import { classNames, isUserOnline, relativeTime } from "../../Utils/utils";
+import Pagination from "../Common/Pagination";
+import UserDetails from "../Common/UserDetails";
 import ButtonV2 from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
+import { FacilityModel } from "../Facility/models";
+import LinkFacilityDialog from "../Users/LinkFacilityDialog";
+import UnlinkFacilityDialog from "../Users/UnlinkFacilityDialog";
+import UserDeleteDialog from "../Users/UserDeleteDialog";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
@@ -251,26 +251,6 @@ export default function FacilityUsers(props: any) {
     loadFacilities(username);
   };
 
-  const showDelete = (user: any) => {
-    const STATE_ADMIN_LEVEL = USER_TYPES.indexOf("StateAdmin");
-    const STATE_READ_ONLY_ADMIN_LEVEL =
-      USER_TYPES.indexOf("StateReadOnlyAdmin");
-    const DISTRICT_ADMIN_LEVEL = USER_TYPES.indexOf("DistrictAdmin");
-    const level = USER_TYPES.indexOf(user.user_type);
-    const currentUserLevel = USER_TYPES.indexOf(authUser.user_type);
-    if (user.is_superuser) return true;
-
-    if (currentUserLevel >= STATE_ADMIN_LEVEL)
-      return user.state_object?.id === authUser.state;
-    if (
-      currentUserLevel < STATE_READ_ONLY_ADMIN_LEVEL &&
-      currentUserLevel >= DISTRICT_ADMIN_LEVEL &&
-      currentUserLevel > level
-    )
-      return facilityData?.district_object?.id === authUser.district;
-    return false;
-  };
-
   let userList: any[] = [];
 
   facilityUserData &&
@@ -319,7 +299,7 @@ export default function FacilityUsers(props: any) {
                       aria-label="Online"
                     ></i>
                   ) : null}
-                  {showDelete(user) && (
+                  {authUser.user_type === "StateAdmin" && (
                     <button
                       type="button"
                       className="focus:ring-blue m-3 w-20 self-end rounded-md border border-red-500 bg-white px-3 py-2 text-center text-sm font-medium leading-4 text-red-700 transition duration-150 ease-in-out hover:text-red-500 hover:shadow focus:border-red-300 focus:outline-none active:bg-gray-50 active:text-red-800"
