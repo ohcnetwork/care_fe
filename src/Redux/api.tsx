@@ -1006,10 +1006,14 @@ const routes = {
   addWaitingUserToAsset: {
     path: "/api/v1/asset/{asset_external_id}/add_waiting_user/",
     method: "POST",
+    TRes: Type<unknown>(),
+    TBody: Type<unknown>(),
   },
   removeWaitingUserFromAsset: {
     path: "/api/v1/asset/{asset_external_id}/remove_waiting_user/",
     method: "POST",
+    TRes: Type<unknown>(),
+    TBody: Type<unknown>(),
   },
 
   abha: {

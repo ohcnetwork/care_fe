@@ -55,6 +55,10 @@ const LiveFeed = (props: any) => {
 
   // inital lock asset status
   const [lockStatus, setLockStatus] = useState(props.asset.is_locked);
+  const [inWaiting, setInWaiting] = useState(false);
+  const [lockedBy, setLockedBy] = useState(props.asset.locked_by);
+  setLockedBy(props.asset.locked_by);
+  const [user, setUser] = useState<any>({});
 
   const { width } = useWindowDimensions();
   const extremeSmallScreenBreakpoint = 320;
@@ -191,6 +195,13 @@ const LiveFeed = (props: any) => {
     setBed(toUpdate?.bed_object);
   }, [toUpdate]);
 
+  // get current user details
+  useEffect(async () => {
+    const { data } = await request(routes.currentUser, {});
+    setUser(data);
+    console.log(data);
+  }, []);
+
   useEffect(() => {
     getBedPresets(cameraAsset.id);
     if (bedPresets?.[0]?.position) {
@@ -295,6 +306,36 @@ const LiveFeed = (props: any) => {
       ];
     return { ...option, callback: () => cb(option) };
   });
+
+  // add to waiting list method
+  const addToWaitingList = async () => {
+    const { data }: any = await request(routes.addWaitingUserToAsset, {
+      pathParams: {
+        asset_external_id: props.asset?.id ?? "",
+      },
+    });
+
+    Notification.Success({ msg: data?.message });
+
+    // dispatch(addToWaitingList(props.asset?.id)).then((res) => {
+    //   if (!res || res.status !== 201) {
+    //     Notification.Error({ msg: "Failed to add to waiting list" });
+    //   } else {
+    //     Notification.Success({ msg: "Added to waiting list" });
+    //   }
+    //   setLoading(undefined);
+    // });
+  };
+
+  // remove from waiting list method
+  const removeFromWaitingList = async () => {
+    const { data }: any = await request(routes.removeWaitingUserFromAsset, {
+      pathParams: {
+        asset_external_id: props.asset?.id ?? "",
+      },
+    });
+    Notification.Success({ msg: data?.message });
+  };
 
   // lock and unlock asset methods
   const lockAsset = async () => {
@@ -497,18 +538,39 @@ const LiveFeed = (props: any) => {
 
           <div className="mx-4 flex max-w-sm flex-col">
             <div>
-              <button
-                onClick={() => {
-                  if (lockStatus) {
-                    unlockAsset();
-                  } else {
-                    lockAsset();
-                  }
-                  setLockStatus(!lockStatus);
-                }}
-              >
-                Lock Status: <b>{lockStatus ? "Locked" : "Unlocked"}</b>
-              </button>
+              {!lockStatus || (lockStatus && lockedBy === user?.username) ? (
+                <button
+                  onClick={() => {
+                    if (lockStatus) {
+                      unlockAsset();
+                    } else {
+                      lockAsset();
+                    }
+                    setLockStatus(!lockStatus);
+                  }}
+                >
+                  Lock Status: <b>{lockStatus ? "Locked" : "Unlocked"}</b>
+                </button>
+              ) : (
+                <div>
+                  <p>Locked by: {lockedBy}</p>
+                  <button
+                    onClick={() => {
+                      console.log(lockedBy);
+                      console.log(lockStatus);
+                      console.log(user.username);
+                      if (inWaiting) {
+                        removeFromWaitingList();
+                      } else {
+                        addToWaitingList();
+                      }
+                      setInWaiting(!inWaiting);
+                    }}
+                  >
+                    Get {inWaiting ? "out of" : "in"} Waiting List
+                  </button>
+                </div>
+              )}
               <button>Refresh</button>
             </div>
             <nav className="flex flex-wrap">
