@@ -1,13 +1,13 @@
-import { useCallback, useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { dailyRoundsAnalyse } from "../../../Redux/actions";
+import { useEffect, useState } from "react";
+import routes from "../../../Redux/api";
+import request from "../../../Utils/request/request";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import { make as CriticalCare__PainViewer } from "../../CriticalCareRecording/Pain/CriticalCare__PainViewer.bs";
 import { formatDateTime } from "../../../Utils/utils";
 
 export const PainDiagrams = (props: any) => {
   const { consultationId } = props;
-  const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<any>({});
   const [selectedData, setData] = useState<any>({
@@ -15,47 +15,46 @@ export const PainDiagrams = (props: any) => {
     id: "",
   });
 
-  const fetchDailyRounds = useCallback(
-    async (status: statusType) => {
+  useEffect(() => {
+    const fetchDailyRounds = async (consultationId: string) => {
       setIsLoading(true);
-      const res = await dispatch(
-        dailyRoundsAnalyse(
-          {
+      const { res, data: dailyRound } = await request(
+        routes.dailyRoundsAnalyse,
+        {
+          body: {
             fields: ["pain_scale_enhanced"],
           },
-          { consultationId }
-        )
-      );
-      if (!status.aborted) {
-        if (res && res.data) {
-          const keys = Object.keys(res.data.results || {}).filter(
-            (key) => res.data.results[key].pain_scale_enhanced.length
-          );
-          const data: any = {};
-          keys.forEach((key) => (data[key] = res.data.results[key]));
-
-          setResults(data);
-          if (keys.length > 0) {
-            setSelectedDateData(data, keys[0]);
-          }
+          pathParams: {
+            consultationId,
+          },
         }
-        setIsLoading(false);
+      );
+      if (res && res.ok && dailyRound?.results) {
+        const keys = Object.keys(dailyRound.results || {}).filter(
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          (key) => dailyRound.results[key].pain_scale_enhanced.length
+        );
+        const data: any = {};
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        keys.forEach((key) => (data[key] = dailyRound.results[key]));
+
+        setResults(data);
+        if (keys.length > 0) {
+          setSelectedDateData(data, keys[0]);
+        }
       }
-    },
-    [consultationId, dispatch]
-  );
+      setIsLoading(false);
+    };
+
+    fetchDailyRounds(consultationId);
+  }, [consultationId]);
 
   useEffect(() => {
     if (Object.keys(results).length > 0)
       setSelectedDateData(results, Object.keys(results)[0]);
   }, [results]);
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchDailyRounds(status);
-    },
-    [consultationId]
-  );
 
   useEffect(() => {
     if (Object.keys(results).length > 0)
