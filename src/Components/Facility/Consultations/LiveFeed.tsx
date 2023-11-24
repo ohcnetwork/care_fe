@@ -31,7 +31,7 @@ const LiveFeed = (props: any) => {
   const middlewareHostname =
     props.middlewareHostname || "dev_middleware.coronasafe.live";
   const [presetsPage, setPresetsPage] = useState(0);
-  const cameraAsset = props.asset;
+  const cameraAsset = props.cameraAsset;
   const [presets, setPresets] = useState<any>([]);
   const [bedPresets, setBedPresets] = useState<any>([]);
   const [showDefaultPresets, setShowDefaultPresets] = useState<boolean>(false);
@@ -52,7 +52,9 @@ const LiveFeed = (props: any) => {
   const [toDelete, setToDelete] = useState<any>(null);
   const [toUpdate, setToUpdate] = useState<any>(null);
   const [_isFullscreen, setFullscreen] = useFullscreen();
-  const [lockStatus, setLockStatus] = useState(false);
+
+  // inital lock asset status
+  const [lockStatus, setLockStatus] = useState(props.asset.is_locked);
 
   const { width } = useWindowDimensions();
   const extremeSmallScreenBreakpoint = 320;
@@ -296,12 +298,13 @@ const LiveFeed = (props: any) => {
 
   // lock and unlock asset methods
   const lockAsset = async () => {
-    const { data } = await request(routes.lockAsset, {
+    const { data }: any = await request(routes.lockAsset, {
       pathParams: {
         asset_external_id: props.asset?.id ?? "",
       },
     });
-    console.log(data);
+
+    Notification.Success({ msg: data?.message });
 
     // useQuery(routes.lockAsset, {
     //   pathParams: { asset_external_id: "assetId" },
@@ -309,12 +312,13 @@ const LiveFeed = (props: any) => {
   };
 
   const unlockAsset = async () => {
-    const { data } = await request(routes.unlockAsset, {
+    const { data }: any = await request(routes.unlockAsset, {
       pathParams: {
         asset_external_id: props.asset?.id ?? "",
       },
     });
-    console.log(data);
+
+    Notification.Success({ msg: data?.message });
 
     // useQuery(routes.unlockAsset, {
     //   pathParams: { asset_external_id: "assetId" },
@@ -503,8 +507,9 @@ const LiveFeed = (props: any) => {
                   setLockStatus(!lockStatus);
                 }}
               >
-                : Lock Status: <b>{lockStatus ? "Locked" : "Unlocked"}</b>
+                Lock Status: <b>{lockStatus ? "Locked" : "Unlocked"}</b>
               </button>
+              <button>Refresh</button>
             </div>
             <nav className="flex flex-wrap">
               <button
