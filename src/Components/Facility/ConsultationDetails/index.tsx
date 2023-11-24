@@ -23,9 +23,8 @@ import PatientInfoCard from "../../Patient/PatientInfoCard";
 import { PatientModel } from "../../Patient/models";
 import { formatDateTime, relativeTime } from "../../../Utils/utils";
 
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { useDispatch } from "react-redux";
-import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { triggerGoal } from "../../../Integrations/Plausible";
 import useAuthUser from "../../../Common/hooks/useAuthUser";
@@ -42,6 +41,7 @@ import { ConsultationPressureSoreTab } from "./ConsultationPressureSoreTab";
 import { ConsultationDialysisTab } from "./ConsultationDialysisTab";
 import { ConsultationNeurologicalMonitoringTab } from "./ConsultationNeurologicalMonitoringTab";
 import { ConsultationNutritionTab } from "./ConsultationNutritionTab";
+import PatientNotesSlideover from "../PatientNotesSlideover";
 import LegacyDiagnosesList from "../../Diagnosis/LegacyDiagnosesList";
 
 const Loading = lazy(() => import("../../Common/Loading"));
@@ -105,6 +105,7 @@ export const ConsultationDetails = (props: any) => {
       return "None";
     }
   };
+  const [showPatientNotesPopup, setShowPatientNotesPopup] = useState(false);
 
   const authUser = useAuthUser();
 
@@ -370,7 +371,7 @@ export const ConsultationDetails = (props: any) => {
             </Link>
             <Link
               id="patient_doctor_notes"
-              href={`/facility/${patientData.facility}/patient/${patientData.id}/notes`}
+              onClick={() => setShowPatientNotesPopup(true)}
               className="btn btn-primary m-1 w-full hover:text-white"
             >
               Doctor&apos;s Notes
@@ -434,14 +435,14 @@ export const ConsultationDetails = (props: any) => {
                   diagnoses={consultationData.diagnoses || []}
                 />
 
-                {(consultationData.verified_by_object ||
+                {(consultationData.treating_physician_object ||
                   consultationData.deprecated_verified_by) && (
                   <div className="mt-2 text-sm">
                     <span className="font-semibold leading-relaxed">
                       Treating Physician:{" "}
                     </span>
-                    {consultationData.verified_by_object
-                      ? `${consultationData.verified_by_object.first_name} ${consultationData.verified_by_object.last_name}`
+                    {consultationData.treating_physician_object
+                      ? `${consultationData.treating_physician_object.first_name} ${consultationData.treating_physician_object.last_name}`
                       : consultationData.deprecated_verified_by}
                     <i className="fas fa-check ml-2 fill-current text-lg text-green-500"></i>
                   </div>
@@ -540,6 +541,14 @@ export const ConsultationDetails = (props: any) => {
         show={showDoctors}
         setShow={setShowDoctors}
       />
+
+      {showPatientNotesPopup && (
+        <PatientNotesSlideover
+          patientId={patientId}
+          facilityId={facilityId}
+          setShowPatientNotesPopup={setShowPatientNotesPopup}
+        />
+      )}
     </div>
   );
 };
