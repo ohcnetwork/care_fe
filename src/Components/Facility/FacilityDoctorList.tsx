@@ -19,7 +19,7 @@ export const FacilityDoctorList = (props: any) => {
     onResponse: ({ res, data }) => {
       if (res?.ok && data) {
         let totalCount = 0;
-        [data].map((doctor: DoctorModal) => {
+        data.results.map((doctor: DoctorModal) => {
           if (doctor.count) {
             totalCount += doctor.count;
           }
