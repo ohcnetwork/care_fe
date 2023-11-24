@@ -179,8 +179,8 @@ const routes = {
   addUserFacility: {
     path: "/api/v1/users/{username}/add_facility/",
     method: "PUT",
-    TBody: Type<{ facility: string }>(),
     TRes: Type<Record<string, never>>(),
+    TBody: Type<{ facility: string }>(),
   },
 
   addUserSkill: {
