@@ -245,6 +245,7 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
       show: showFilters,
       setShow: setShowFilters,
       filter: qParams,
+      removeFilters,
       onChange: (filter: FilterState) => {
         updateQuery(filter);
         setShowFilters(false);

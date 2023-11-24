@@ -1,4 +1,3 @@
-import { navigate } from "raviger";
 import { FACILITY_TYPES } from "../../../Common/constants";
 import useMergeState from "../../../Common/hooks/useMergeState";
 import useConfig from "../../../Common/hooks/useConfig";
@@ -20,7 +19,7 @@ const clearFilterState = {
 
 function FacilityFilter(props: any) {
   const { t } = useTranslation();
-  const { filter, onChange, closeFilter } = props;
+  const { filter, onChange, closeFilter, removeFilters } = props;
   const { kasp_string } = useConfig();
   const [filterState, setFilterState] = useMergeState({
     state: filter.state || "",
@@ -70,8 +69,7 @@ function FacilityFilter(props: any) {
       advancedFilter={props}
       onApply={applyFilter}
       onClear={() => {
-        navigate("/facility");
-        setFilterState(clearFilterState);
+        removeFilters(Object.keys(clearFilterState));
         closeFilter();
       }}
     >

@@ -15,7 +15,6 @@ import {
   getDistrict,
 } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
-import { navigate } from "raviger";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -41,7 +40,7 @@ const getDate = (value: any) =>
 
 export default function PatientFilter(props: any) {
   const { kasp_enabled, kasp_string } = useConfig();
-  const { filter, onChange, closeFilter } = props;
+  const { filter, onChange, closeFilter, removeFilters } = props;
 
   const [filterState, setFilterState] = useMergeState({
     district: filter.district || "",
@@ -337,8 +336,7 @@ export default function PatientFilter(props: any) {
       advancedFilter={props}
       onApply={applyFilter}
       onClear={() => {
-        navigate("/patients");
-        setFilterState(clearFilterState);
+        removeFilters(Object.keys(clearFilterState));
         closeFilter();
       }}
     >
