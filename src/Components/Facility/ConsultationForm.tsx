@@ -724,6 +724,7 @@ export const ConsultationForm = (props: any) => {
             : undefined,
         consultation_notes: state.form.consultation_notes,
         is_telemedicine: state.form.is_telemedicine,
+        icu_admission_date: state.form.icu_admission_date,
         action: state.form.action,
         review_interval: state.form.review_interval,
         assigned_to:
