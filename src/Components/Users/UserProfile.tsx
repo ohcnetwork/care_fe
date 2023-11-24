@@ -118,37 +118,38 @@ export default function UserProfile() {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const { data: userData, loading: isUserLoading } = useQuery(
-    routes.getUserDetails,
-    {
-      pathParams: { username: authUser.username },
-      onResponse: (result) => {
-        if (!result || !result.res || !result.data) return;
-        const formData: EditForm = {
-          firstName: result.data.first_name,
-          lastName: result.data.last_name,
-          age: result.data.age?.toString() || "",
-          gender: result.data.gender || "",
-          email: result.data.email,
-          phoneNumber: result.data.phone_number?.toString() || "",
-          altPhoneNumber: result.data.alt_phone_number?.toString() || "",
-          user_type: result.data.user_type,
-          doctor_qualification: result.data.doctor_qualification,
-          doctor_experience_commenced_on: dayjs().diff(
-            dayjs(result.data.doctor_experience_commenced_on),
-            "years"
-          ),
-          doctor_medical_council_registration:
-            result.data.doctor_medical_council_registration,
-          weekly_working_hours: result.data.weekly_working_hours,
-        };
-        dispatch({
-          type: "set_form",
-          form: formData,
-        });
-      },
-    }
-  );
+  const {
+    data: userData,
+    loading: isUserLoading,
+    refetch: refetchUserData,
+  } = useQuery(routes.getUserDetails, {
+    pathParams: { username: authUser.username },
+    onResponse: (result) => {
+      if (!result || !result.res || !result.data) return;
+      const formData: EditForm = {
+        firstName: result.data.first_name,
+        lastName: result.data.last_name,
+        age: result.data.age?.toString() || "",
+        gender: result.data.gender || "",
+        email: result.data.email,
+        phoneNumber: result.data.phone_number?.toString() || "",
+        altPhoneNumber: result.data.alt_phone_number?.toString() || "",
+        user_type: result.data.user_type,
+        doctor_qualification: result.data.doctor_qualification,
+        doctor_experience_commenced_on: dayjs().diff(
+          dayjs(result.data.doctor_experience_commenced_on),
+          "years"
+        ),
+        doctor_medical_council_registration:
+          result.data.doctor_medical_council_registration,
+        weekly_working_hours: result.data.weekly_working_hours,
+      };
+      dispatch({
+        type: "set_form",
+        form: formData,
+      });
+    },
+  });
 
   const { data: skillsView, loading: isSkillsLoading } = useQuery(
     routes.userListSkill,
@@ -314,7 +315,8 @@ export default function UserProfile() {
         Notification.Success({
           msg: "Details updated successfully",
         });
-        window.location.reload();
+        await refetchUserData();
+        setShowEdit(false);
       }
     }
   };
