@@ -26,6 +26,7 @@ import {
   getPincodeDetails,
   includesIgnoreCase,
   parsePhoneNumber,
+  scrollTo,
 } from "../../Utils/utils";
 import { navigate, useQueryParams } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -175,11 +176,6 @@ const patientFormReducer = (state = initialState, action: any) => {
     default:
       return state;
   }
-};
-
-const scrollTo = (id: string | boolean) => {
-  const element = document.querySelector(`#${id}`);
-  element?.scrollIntoView({ behavior: "smooth", block: "center" });
 };
 
 export const PatientRegister = (props: PatientRegisterProps) => {
