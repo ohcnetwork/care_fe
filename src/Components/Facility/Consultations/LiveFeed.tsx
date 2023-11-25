@@ -54,10 +54,10 @@ const LiveFeed = (props: any) => {
   const [_isFullscreen, setFullscreen] = useFullscreen();
 
   // inital lock asset status
-  const [lockStatus, setLockStatus] = useState(props.asset.is_locked);
+  const [asset, setAsset] = useState<any>({});
+  const [lockStatus, setLockStatus] = useState(false);
   const [inWaiting, setInWaiting] = useState(false);
-  const [lockedBy, setLockedBy] = useState(props.asset.locked_by);
-  setLockedBy(props.asset.locked_by);
+  const [lockedBy, setLockedBy] = useState(false);
   const [user, setUser] = useState<any>({});
 
   const { width } = useWindowDimensions();
@@ -307,11 +307,27 @@ const LiveFeed = (props: any) => {
     return { ...option, callback: () => cb(option) };
   });
 
+  // fetch asset
+  const fetchAsset = async () => {
+    const { data }: any = await request(routes.getAsset, {
+      pathParams: {
+        external_id: cameraAsset.id,
+      },
+    });
+    setAsset(data);
+    setLockStatus(data.is_locked);
+    setLockedBy(data.locked_by);
+  };
+
+  useEffect(() => {
+    fetchAsset();
+  }, []);
+
   // add to waiting list method
   const addToWaitingList = async () => {
     const { data }: any = await request(routes.addWaitingUserToAsset, {
       pathParams: {
-        asset_external_id: props.asset?.id ?? "",
+        asset_external_id: asset?.id ?? "",
       },
     });
 
@@ -331,7 +347,7 @@ const LiveFeed = (props: any) => {
   const removeFromWaitingList = async () => {
     const { data }: any = await request(routes.removeWaitingUserFromAsset, {
       pathParams: {
-        asset_external_id: props.asset?.id ?? "",
+        asset_external_id: asset?.id ?? "",
       },
     });
     Notification.Success({ msg: data?.message });
@@ -341,9 +357,10 @@ const LiveFeed = (props: any) => {
   const lockAsset = async () => {
     const { data }: any = await request(routes.lockAsset, {
       pathParams: {
-        asset_external_id: props.asset?.id ?? "",
+        asset_external_id: asset?.id ?? "",
       },
     });
+    fetchAsset();
 
     Notification.Success({ msg: data?.message });
 
@@ -355,7 +372,7 @@ const LiveFeed = (props: any) => {
   const unlockAsset = async () => {
     const { data }: any = await request(routes.unlockAsset, {
       pathParams: {
-        asset_external_id: props.asset?.id ?? "",
+        asset_external_id: asset?.id ?? "",
       },
     });
 
@@ -537,7 +554,7 @@ const LiveFeed = (props: any) => {
           </div>
 
           <div className="mx-4 flex max-w-sm flex-col">
-            <div>
+            <div className="flex flex-col gap-4">
               {!lockStatus || (lockStatus && lockedBy === user?.username) ? (
                 <button
                   onClick={() => {
@@ -556,9 +573,6 @@ const LiveFeed = (props: any) => {
                   <p>Locked by: {lockedBy}</p>
                   <button
                     onClick={() => {
-                      console.log(lockedBy);
-                      console.log(lockStatus);
-                      console.log(user.username);
                       if (inWaiting) {
                         removeFromWaitingList();
                       } else {
@@ -571,7 +585,7 @@ const LiveFeed = (props: any) => {
                   </button>
                 </div>
               )}
-              <button>Refresh</button>
+              <button onClick={fetchAsset}>Refresh</button>
             </div>
             <nav className="flex flex-wrap">
               <button
