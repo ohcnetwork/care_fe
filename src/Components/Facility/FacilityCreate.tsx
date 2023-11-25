@@ -57,15 +57,6 @@ interface FacilityProps {
   facilityId?: string;
 }
 
-interface StateObj {
-  id: number;
-  name: string;
-}
-
-interface WardObj extends StateObj {
-  number: number;
-}
-
 type FacilityForm = {
   facility_type: string;
   name: string;
@@ -147,10 +138,6 @@ export const FacilityCreate = (props: FacilityProps) => {
     initialState
   );
   const [isLoading, setIsLoading] = useState(false);
-  const [states, setStates] = useState<StateObj[]>([]);
-  const [districts, setDistricts] = useState<StateObj[]>([]);
-  const [localBodies, setLocalBodies] = useState<StateObj[]>([]);
-  const [ward, setWard] = useState<WardObj[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [createdFacilityId, setCreatedFacilityId] = useState("");
   const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
@@ -172,26 +159,16 @@ export const FacilityCreate = (props: FacilityProps) => {
         id: String(stateId),
       },
       prefetch: stateId !== 0,
-      onResponse: ({ res, data }) => {
-        if (res?.ok && data) {
-          setDistricts(data);
-        }
-      },
     }
   );
 
-  const { loading: isLocalbodyLoading } = useQuery(
+  const { data: localbodyData, loading: isLocalbodyLoading } = useQuery(
     routes.getLocalbodyByDistrict,
     {
       pathParams: {
         id: String(districtId),
       },
       prefetch: districtId !== 0,
-      onResponse: ({ res, data }) => {
-        if (res?.ok && data) {
-          setLocalBodies(data);
-        }
-      },
     }
   );
 
@@ -232,17 +209,15 @@ export const FacilityCreate = (props: FacilityProps) => {
     ];
   };
 
-  const { loading: isWardLoading } = useQuery(routes.getWardByLocalBody, {
-    pathParams: {
-      id: String(localBodyId),
-    },
-    prefetch: localBodyId !== 0,
-    onResponse: ({ res, data }) => {
-      if (res?.ok && data) {
-        setWard([data.results[0]]);
-      }
-    },
-  });
+  const { data: wardData, loading: isWardLoading } = useQuery(
+    routes.getWardByLocalBody,
+    {
+      pathParams: {
+        id: String(localBodyId),
+      },
+      prefetch: localBodyId !== 0,
+    }
+  );
 
   useQuery(routes.getPermittedFacility, {
     pathParams: {
@@ -294,13 +269,9 @@ export const FacilityCreate = (props: FacilityProps) => {
     },
   });
 
-  const { loading: isStateLoading } = useQuery(routes.statesList, {
-    onResponse: ({ res, data }) => {
-      if (res && data) {
-        setStates([...data.results]);
-      }
-    },
-  });
+  const { data: stateData, loading: isStateLoading } = useQuery(
+    routes.statesList
+  );
 
   const handleChange = (e: FieldChangeEvent<unknown>) => {
     dispatch({
@@ -330,7 +301,7 @@ export const FacilityCreate = (props: FacilityProps) => {
     const pincodeDetails = await getPincodeDetails(e.value, gov_data_api_key);
     if (!pincodeDetails) return;
 
-    const matchedState = states.find((state) => {
+    const matchedState = (stateData ? stateData.results : []).find((state) => {
       return includesIgnoreCase(state.name, pincodeDetails.statename);
     });
     if (!matchedState) return;
@@ -780,7 +751,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     placeholder="Choose State"
                     className={isStateLoading ? "animate-pulse" : ""}
                     disabled={isStateLoading}
-                    options={states}
+                    options={stateData ? stateData.results : []}
                     optionLabel={(o) => o.name}
                     optionValue={(o) => o.id}
                     onChange={(event) => {
@@ -795,7 +766,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     required
                     className={isDistrictLoading ? "animate-pulse" : ""}
                     disabled={isDistrictLoading}
-                    options={districts}
+                    options={districtData ? districtData : []}
                     optionLabel={(o) => o.name}
                     optionValue={(o) => o.id}
                     onChange={(event) => {
@@ -810,7 +781,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     className={isLocalbodyLoading ? "animate-pulse" : ""}
                     disabled={isLocalbodyLoading}
                     placeholder="Choose Local Body"
-                    options={localBodies}
+                    options={localbodyData ? localbodyData : []}
                     optionLabel={(o) => o.name}
                     optionValue={(o) => o.id}
                     onChange={(event) => {
@@ -825,7 +796,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     className={isWardLoading ? "animate-pulse" : ""}
                     disabled={isWardLoading}
                     placeholder="Choose Ward"
-                    options={ward
+                    options={(wardData ? [wardData.results[0]] : [])
                       .sort((a, b) => a.number - b.number)
                       .map((e) => {
                         return {
