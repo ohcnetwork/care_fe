@@ -1,13 +1,14 @@
-import { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { dailyRoundsAnalyse } from "../../../Redux/actions";
+import { useEffect, useState } from "react";
+
+import routes from "../../../Redux/api";
+import request from "../../../Utils/request/request";
+
 import Pagination from "../../Common/Pagination";
 import {
-  PAGINATION_LIMIT,
   EYE_OPEN_SCALE,
-  VERBAL_RESPONSE_SCALE,
   MOTOR_RESPONSE_SCALE,
+  PAGINATION_LIMIT,
+  VERBAL_RESPONSE_SCALE,
 } from "../../../Common/constants";
 import { formatDateTime } from "../../../Utils/utils";
 
@@ -87,7 +88,7 @@ const DataDescription = (props: any) => {
 
 export const NeurologicalTable = (props: any) => {
   const { consultationId } = props;
-  const dispatch: any = useDispatch();
+  // const dispatch: any = useDispatch();
   const [results, setResults] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -95,11 +96,10 @@ export const NeurologicalTable = (props: any) => {
   const LOC_OPTIONS = [
     { id: 0, value: "Unknown" },
     { id: 5, value: "Alert" },
-    { id: 10, value: "Responds to Voice" },
-    { id: 15, value: "Responds to Pain" },
-    { id: 20, value: "Unresponsive" },
-    { id: 25, value: "Agitated or Confused" },
-    { id: 30, value: "Onset of Agitation and Confusion" },
+    { id: 10, value: "Drowsy" },
+    { id: 15, value: "Stuporous" },
+    { id: 20, value: "Comatose" },
+    { id: 25, value: "Cannot Be Assessed" },
   ];
 
   const REACTION_OPTIONS = [
@@ -120,52 +120,47 @@ export const NeurologicalTable = (props: any) => {
     { id: 30, value: "None" },
   ];
 
-  const fetchDailyRounds = useCallback(
-    async (status: statusType) => {
-      const res = await dispatch(
-        dailyRoundsAnalyse(
-          {
-            page: currentPage,
-            fields: [
-              "consciousness_level",
-              "consciousness_level_detail",
-              "left_pupil_size",
-              "left_pupil_size_detail",
-              "right_pupil_size",
-              "right_pupil_size_detail",
-              "left_pupil_light_reaction",
-              "left_pupil_light_reaction_detail",
-              "right_pupil_light_reaction",
-              "right_pupil_light_reaction_detail",
-              "limb_response_upper_extremity_right",
-              "limb_response_upper_extremity_left",
-              "limb_response_lower_extremity_left",
-              "limb_response_lower_extremity_right",
-              "glasgow_eye_open",
-              "glasgow_verbal_response",
-              "glasgow_motor_response",
-              "glasgow_total_calculated",
-            ],
-          },
-          { consultationId }
-        )
-      );
-      if (!status.aborted) {
-        if (res && res.data && res.data.results) {
-          setResults(res.data.results);
-          setTotalCount(res.data.count);
-        }
-      }
-    },
-    [consultationId, dispatch, currentPage]
-  );
+  useEffect(() => {
+    const fetchDailyRounds = async (
+      currentPage: number,
+      consultationId: string
+    ) => {
+      const { res, data } = await request(routes.dailyRoundsAnalyse, {
+        body: {
+          page: currentPage,
+          fields: [
+            "consciousness_level",
+            "consciousness_level_detail",
+            "left_pupil_size",
+            "left_pupil_size_detail",
+            "right_pupil_size",
+            "right_pupil_size_detail",
+            "left_pupil_light_reaction",
+            "left_pupil_light_reaction_detail",
+            "right_pupil_light_reaction",
+            "right_pupil_light_reaction_detail",
+            "limb_response_upper_extremity_right",
+            "limb_response_upper_extremity_left",
+            "limb_response_lower_extremity_left",
+            "limb_response_lower_extremity_right",
+            "glasgow_eye_open",
+            "glasgow_verbal_response",
+            "glasgow_motor_response",
+            "glasgow_total_calculated",
+          ],
+        },
+        pathParams: {
+          consultationId,
+        },
+      });
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchDailyRounds(status);
-    },
-    [currentPage]
-  );
+      if (res && res.ok && data?.results) {
+        setResults(data.results);
+        setTotalCount(data.count);
+      }
+    };
+    fetchDailyRounds(currentPage, consultationId);
+  }, [currentPage, consultationId]);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handlePagination = (page: number, limit: number) => {
@@ -299,9 +294,9 @@ export const NeurologicalTable = (props: any) => {
             {locData.map((x: any, i: any) => (
               <div
                 key={`loc_${i}`}
-                className="min-w-max-content flex  flex-col divide-x divide-gray-200"
+                className="min-w-max-content flex  flex-col  divide-x divide-gray-200"
               >
-                <div className="whitespace-nowrap border-r bg-gray-50 px-2 py-3 text-center text-xs font-medium leading-4 text-gray-700">
+                <div className="border-r bg-gray-50 px-2 py-3 text-center text-xs font-medium leading-4 text-gray-700">
                   {x.date}
                 </div>
                 <div className="whitespace-nowrap bg-white px-6 py-4 text-center text-sm leading-5 text-gray-700">

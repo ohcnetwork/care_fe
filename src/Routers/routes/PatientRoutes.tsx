@@ -6,6 +6,7 @@ import PatientNotes from "../../Components/Patient/PatientNotes";
 import { PatientRegister } from "../../Components/Patient/PatientRegister";
 import { DetailRoute } from "../types";
 import DeathReport from "../../Components/DeathReport/DeathReport";
+import { InsuranceDetails } from "../../Components/Patient/InsuranceDetails";
 
 export default {
   "/patients": () => <PatientManager />,
@@ -20,6 +21,9 @@ export default {
   ),
   "/facility/:facilityId/patient/:id": ({ facilityId, id }: any) => (
     <PatientHome facilityId={facilityId} id={id} />
+  ),
+  "/facility/:facilityId/patient/:id/insurance": ({ facilityId, id }: any) => (
+    <InsuranceDetails facilityId={facilityId} id={id} />
   ),
   "/facility/:facilityId/patient/:id/update": ({ facilityId, id }: any) => (
     <PatientRegister facilityId={facilityId} id={id} />

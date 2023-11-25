@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { dailyRoundsAnalyse } from "../../../Redux/actions";
+import { useEffect, useState } from "react";
+import routes from "../../../Redux/api";
+import request from "../../../Utils/request/request";
 import { LinePlot } from "./components/LinePlot";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
@@ -30,52 +29,45 @@ const modality: Array<ModalityType> = [
 
 export const VentilatorPlot = (props: any) => {
   const { consultationId } = props;
-  const dispatch: any = useDispatch();
   const [results, setResults] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
-  const fetchDailyRounds = useCallback(
-    async (status: statusType) => {
-      const res = await dispatch(
-        dailyRoundsAnalyse(
-          {
-            page: currentPage,
-            fields: [
-              "ventilator_pip",
-              "ventilator_mean_airway_pressure",
-              "ventilator_resp_rate",
-              "ventilator_pressure_support",
-              "ventilator_tidal_volume",
-              "ventilator_peep",
-              "ventilator_fi02",
-              "ventilator_spo2",
-              "etco2",
-              "bilateral_air_entry",
-              "ventilator_oxygen_modality_oxygen_rate",
-              "ventilator_oxygen_modality_flow_rate",
-            ],
-          },
-          { consultationId }
-        )
-      );
-      if (!status.aborted) {
-        if (res && res.data) {
-          console.log(res);
-          setResults(res.data.results);
-          setTotalCount(res.data.count);
-        }
+  useEffect(() => {
+    const fetchDailyRounds = async (
+      currentPage: number,
+      consultationId: string
+    ) => {
+      const { res, data } = await request(routes.dailyRoundsAnalyse, {
+        body: {
+          page: currentPage,
+          fields: [
+            "ventilator_pip",
+            "ventilator_mean_airway_pressure",
+            "ventilator_resp_rate",
+            "ventilator_pressure_support",
+            "ventilator_tidal_volume",
+            "ventilator_peep",
+            "ventilator_fi02",
+            "ventilator_spo2",
+            "etco2",
+            "bilateral_air_entry",
+            "ventilator_oxygen_modality_oxygen_rate",
+            "ventilator_oxygen_modality_flow_rate",
+          ],
+        },
+        pathParams: {
+          consultationId,
+        },
+      });
+      if (res && res.ok && data) {
+        setResults(data.results);
+        setTotalCount(data.count);
       }
-    },
-    [consultationId, dispatch, currentPage]
-  );
+    };
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchDailyRounds(status);
-    },
-    [currentPage]
-  );
+    fetchDailyRounds(currentPage, consultationId);
+  }, [consultationId, currentPage]);
 
   const handlePagination = (page: number) => {
     setCurrentPage(page);
