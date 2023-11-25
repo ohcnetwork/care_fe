@@ -228,7 +228,7 @@ const routes = {
   },
 
   deleteUser: {
-    path: "/api/v1/users/{username}",
+    path: "/api/v1/users/{username}/",
     method: "DELETE",
     TRes: Type<Record<string, never>>(),
   },
