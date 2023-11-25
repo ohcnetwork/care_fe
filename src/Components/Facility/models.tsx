@@ -58,6 +58,7 @@ export interface FacilityModel {
   district?: number;
   local_body?: number;
   ward?: number;
+  pincode?: string;
 }
 
 export interface CapacityModal {

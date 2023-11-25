@@ -229,7 +229,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         setIsLoading(true);
         if (res?.ok && data) {
           const formData = {
-            facility_type: String(data.facility_type),
+            facility_type: data.facility_type ? data.facility_type : "",
             name: data.name ? data.name : "",
             state: data.state ? data.state : 0,
             district: data.district ? data.district : 0,
@@ -238,7 +238,7 @@ export const FacilityCreate = (props: FacilityProps) => {
             ward: data.ward_object ? data.ward_object.id : 0,
             kasp_empanelled: "",
             address: data.address ? data.address : "",
-            pincode: "",
+            pincode: data.pincode ? data.pincode : "",
             phone_number: data.phone_number
               ? data.phone_number.length == 10
                 ? "+91" + data.phone_number
@@ -433,6 +433,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         local_body: state.form.local_body,
         features: state.form.features,
         ward: state.form.ward,
+        pincode: state.form.pincode,
         location: {
           latitude: Number(state.form.latitude),
           longitude: Number(state.form.longitude),
