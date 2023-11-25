@@ -13,7 +13,7 @@ import {
   SelectFormField,
 } from "../Form/FormFields/SelectFormField";
 import { Popover, Transition } from "@headlessui/react";
-import { Fragment, lazy, useEffect, useState } from "react";
+import { Fragment, lazy, useState } from "react";
 import Steps, { Step } from "../Common/Steps";
 import {
   getPincodeDetails,
@@ -147,10 +147,6 @@ export const FacilityCreate = (props: FacilityProps) => {
     initialState
   );
   const [isLoading, setIsLoading] = useState(false);
-  const [isStateLoading, setIsStateLoading] = useState(false);
-  const [isDistrictLoading, setIsDistrictLoading] = useState(false);
-  const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
-  const [isWardLoading, setIsWardLoading] = useState(false);
   const [states, setStates] = useState<StateObj[]>([]);
   const [districts, setDistricts] = useState<StateObj[]>([]);
   const [localBodies, setLocalBodies] = useState<StateObj[]>([]);
@@ -162,40 +158,42 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
   const [bedCapacityKey, setBedCapacityKey] = useState(0);
   const [docCapacityKey, setDocCapacityKey] = useState(0);
+  const [stateId, setStateId] = useState(0);
+  const [districtId, setDistrictId] = useState(0);
+  const [localBodyId, setLocalBodyId] = useState(0);
   const { goBack } = useAppHistory();
   const headerText = !facilityId ? "Create Facility" : "Update Facility";
   const buttonText = !facilityId ? "Save Facility" : "Update Facility";
 
-  const fetchDistricts = async (id: number) => {
-    if (id > 0) {
-      setIsDistrictLoading(true);
-      const { res, data } = await request(routes.getDistrictByState, {
-        pathParams: {
-          id: String(id),
-        },
-      });
-      if (res?.ok && data) {
-        setDistricts(data);
-      }
-      setIsDistrictLoading(false);
-      return res ? data : [];
+  const { data: districtData, loading: isDistrictLoading } = useQuery(
+    routes.getDistrictByState,
+    {
+      pathParams: {
+        id: String(stateId),
+      },
+      prefetch: stateId !== 0,
+      onResponse: ({ res, data }) => {
+        if (res?.ok && data) {
+          setDistricts(data);
+        }
+      },
     }
-  };
+  );
 
-  const fetchLocalBody = async (id: number) => {
-    if (id > 0) {
-      setIsLocalbodyLoading(true);
-      const { res, data } = await request(routes.getLocalbodyByDistrict, {
-        pathParams: {
-          id: String(id),
-        },
-      });
-      setIsLocalbodyLoading(false);
-      if (res?.ok && data) {
-        setLocalBodies(data);
-      }
+  const { loading: isLocalbodyLoading } = useQuery(
+    routes.getLocalbodyByDistrict,
+    {
+      pathParams: {
+        id: String(districtId),
+      },
+      prefetch: districtId !== 0,
+      onResponse: ({ res, data }) => {
+        if (res?.ok && data) {
+          setLocalBodies(data);
+        }
+      },
     }
-  };
+  );
 
   const getSteps = (): Step[] => {
     return [
@@ -234,22 +232,19 @@ export const FacilityCreate = (props: FacilityProps) => {
     ];
   };
 
-  const fetchWards = async (id: number) => {
-    if (id > 0) {
-      setIsWardLoading(true);
-      const { res, data } = await request(routes.getWardByLocalBody, {
-        pathParams: {
-          id: String(id),
-        },
-      });
-      setIsWardLoading(false);
+  const { loading: isWardLoading } = useQuery(routes.getWardByLocalBody, {
+    pathParams: {
+      id: String(localBodyId),
+    },
+    prefetch: localBodyId !== 0,
+    onResponse: ({ res, data }) => {
       if (res?.ok && data) {
         setWard([data.results[0]]);
       }
-    }
-  };
+    },
+  });
 
-  const { refetch: facilityFetch } = useQuery(routes.getPermittedFacility, {
+  useQuery(routes.getPermittedFacility, {
     pathParams: {
       id: facilityId || "",
     },
@@ -288,11 +283,9 @@ export const FacilityCreate = (props: FacilityProps) => {
             oxygen_capacity: data.oxygen_capacity,
           };
           dispatch({ type: "set_form", form: formData });
-          Promise.all([
-            fetchDistricts(data.state || 0),
-            fetchLocalBody(data.district || 0),
-            fetchWards(data.local_body || 0),
-          ]);
+          setStateId(data.state || 0);
+          setDistrictId(data.district || 0);
+          setLocalBodyId(data.local_body || 0);
         } else {
           navigate(`/facility/${facilityId}`);
         }
@@ -301,22 +294,13 @@ export const FacilityCreate = (props: FacilityProps) => {
     },
   });
 
-  const { refetch: fetchStates } = useQuery(routes.statesList, {
+  const { loading: isStateLoading } = useQuery(routes.statesList, {
     onResponse: ({ res, data }) => {
-      setIsStateLoading(true);
       if (res && data) {
         setStates([...data.results]);
       }
-      setIsStateLoading(false);
     },
   });
-
-  useEffect(() => {
-    if (facilityId) {
-      facilityFetch();
-    }
-    fetchStates();
-  }, [dispatch]);
 
   const handleChange = (e: FieldChangeEvent<unknown>) => {
     dispatch({
@@ -350,7 +334,8 @@ export const FacilityCreate = (props: FacilityProps) => {
       return includesIgnoreCase(state.name, pincodeDetails.statename);
     });
     if (!matchedState) return;
-    const fetchedDistricts = await fetchDistricts(matchedState.id);
+    setStateId(matchedState.id);
+    const fetchedDistricts = districtData;
     if (!fetchedDistricts) return;
 
     const matchedDistrict = fetchedDistricts.find((district) => {
@@ -370,7 +355,7 @@ export const FacilityCreate = (props: FacilityProps) => {
       },
     });
 
-    fetchLocalBody(matchedDistrict.id);
+    setDistrictId(matchedDistrict.id);
     setShowAutoFilledPincode(true);
     setTimeout(() => {
       setShowAutoFilledPincode(false);
@@ -748,11 +733,9 @@ export const FacilityCreate = (props: FacilityProps) => {
                 <DraftSection
                   handleDraftSelect={(newState: any) => {
                     dispatch({ type: "set_state", state: newState });
-                    Promise.all([
-                      fetchDistricts(newState.form.state),
-                      fetchLocalBody(newState.form.district),
-                      fetchWards(newState.form.local_body),
-                    ]);
+                    setStateId(newState.form.state);
+                    setDistrictId(newState.form.district);
+                    setLocalBodyId(newState.form.local_body);
                   }}
                   formData={state.form}
                 />
@@ -803,7 +786,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     onChange={(event) => {
                       handleChange(event);
                       if (!event) return;
-                      fetchDistricts(event.value);
+                      setStateId(event.value);
                     }}
                   />
                   <SelectFormField
@@ -818,7 +801,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     onChange={(event) => {
                       handleChange(event);
                       if (!event) return;
-                      fetchLocalBody(event.value);
+                      setDistrictId(event.value);
                     }}
                   />
                   <SelectFormField
@@ -833,7 +816,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     onChange={(event) => {
                       handleChange(event);
                       if (!event) return;
-                      fetchWards(event.value);
+                      setLocalBodyId(event.value);
                     }}
                   />
                   <SelectFormField
