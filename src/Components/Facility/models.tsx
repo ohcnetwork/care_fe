@@ -488,3 +488,9 @@ export interface PatientNotesModel {
   user_type?: string;
   created_date: string;
 }
+
+export interface DailyRoundsFilterModel {
+  roundType: string;
+  fromDateTime: string;
+  toDateTime: string;
+}
