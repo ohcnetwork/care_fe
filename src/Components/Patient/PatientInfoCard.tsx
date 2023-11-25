@@ -14,7 +14,6 @@ import { Link } from "raviger";
 import { useState } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import useConfig from "../../Common/hooks/useConfig";
-import { getDimensionOrDash } from "../../Common/utils";
 import dayjs from "../../Utils/dayjs";
 import { classNames, formatDate, formatDateTime } from "../../Utils/utils.js";
 import ABHAProfileModal from "../ABDM/ABHAProfileModal";
@@ -247,17 +246,6 @@ export default function PatientInfoCard(props: {
             </div>
             <div className="flex flex-col items-center gap-2 text-sm sm:flex-row lg:mt-4">
               {[
-                ["Blood Group", patient.blood_group, patient.blood_group],
-                [
-                  "Weight",
-                  getDimensionOrDash(consultation?.weight, " kg"),
-                  true,
-                ],
-                [
-                  "Height",
-                  getDimensionOrDash(consultation?.height, "cm"),
-                  true,
-                ],
                 [
                   "Respiratory Support",
                   RESPIRATORY_SUPPORT.find(
