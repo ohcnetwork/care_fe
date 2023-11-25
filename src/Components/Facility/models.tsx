@@ -5,7 +5,6 @@ import { AssetData } from "../Assets/AssetTypes";
 import { UserBareMinimum } from "../Users/models";
 import { RouteToFacility } from "../Common/RouteToFacilitySelect";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
-import { PaginatedResponse } from "../../Utils/request/types";
 
 export interface LocalBodyModel {
   name: string;
@@ -243,11 +242,6 @@ export type ICD11DiagnosisModel = {
   id: string;
   label: string;
 };
-
-export type IStateListResponse = PaginatedResponse<{
-  id: number;
-  name: string;
-}>;
 
 export type ABGPlotsFields =
   | "ph"
@@ -495,3 +489,11 @@ export interface PatientNotesModel {
   user_type?: string;
   created_date: string;
 }
+
+export type FacilityRequest = Omit<FacilityModel, "location"> & {
+  latitude?: string;
+  longitude?: string;
+  kasp_empanelled?: boolean;
+  patient_count?: string;
+  bed_count?: string;
+};

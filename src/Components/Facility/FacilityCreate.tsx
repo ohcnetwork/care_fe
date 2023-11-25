@@ -1,7 +1,7 @@
 import * as Notification from "../../Utils/Notifications.js";
 
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
-import { CapacityModal, DoctorModal, FacilityModel } from "./models";
+import { CapacityModal, DoctorModal, FacilityRequest } from "./models";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave.js";
 import {
   FACILITY_FEATURE_TYPES,
@@ -145,9 +145,9 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
   const [bedCapacityKey, setBedCapacityKey] = useState(0);
   const [docCapacityKey, setDocCapacityKey] = useState(0);
-  const [stateId, setStateId] = useState(0);
-  const [districtId, setDistrictId] = useState(0);
-  const [localBodyId, setLocalBodyId] = useState(0);
+  const [stateId, setStateId] = useState<number>();
+  const [districtId, setDistrictId] = useState<number>();
+  const [localBodyId, setLocalBodyId] = useState<number>();
   const { goBack } = useAppHistory();
   const headerText = !facilityId ? "Create Facility" : "Update Facility";
   const buttonText = !facilityId ? "Save Facility" : "Update Facility";
@@ -158,7 +158,7 @@ export const FacilityCreate = (props: FacilityProps) => {
       pathParams: {
         id: String(stateId),
       },
-      prefetch: stateId !== 0,
+      prefetch: !!stateId,
     }
   );
 
@@ -168,7 +168,7 @@ export const FacilityCreate = (props: FacilityProps) => {
       pathParams: {
         id: String(districtId),
       },
-      prefetch: districtId !== 0,
+      prefetch: !!districtId,
     }
   );
 
@@ -215,15 +215,15 @@ export const FacilityCreate = (props: FacilityProps) => {
       pathParams: {
         id: String(localBodyId),
       },
-      prefetch: localBodyId !== 0,
+      prefetch: !!localBodyId,
     }
   );
 
   useQuery(routes.getPermittedFacility, {
     pathParams: {
-      id: facilityId || "",
+      id: facilityId!,
     },
-    prefetch: facilityId !== undefined,
+    prefetch: !!facilityId,
     onResponse: ({ res, data }) => {
       if (facilityId) {
         setIsLoading(true);
@@ -244,10 +244,8 @@ export const FacilityCreate = (props: FacilityProps) => {
                 ? "+91" + data.phone_number
                 : data.phone_number
               : "",
-            latitude: data.location ? String(data.location.latitude) : "",
-            longitude: data.location
-              ? String(data.location.latitude)
-              : "" || "",
+            latitude: data ? String(data.latitude) : "",
+            longitude: data ? String(data.longitude) : "",
             type_b_cylinders: data.type_b_cylinders,
             type_c_cylinders: data.type_c_cylinders,
             type_d_cylinders: data.type_d_cylinders,
@@ -258,9 +256,9 @@ export const FacilityCreate = (props: FacilityProps) => {
             oxygen_capacity: data.oxygen_capacity,
           };
           dispatch({ type: "set_form", form: formData });
-          setStateId(data.state || 0);
-          setDistrictId(data.district || 0);
-          setLocalBodyId(data.local_body || 0);
+          setStateId(data.state);
+          setDistrictId(data.district);
+          setLocalBodyId(data.local_body);
         } else {
           navigate(`/facility/${facilityId}`);
         }
@@ -424,7 +422,7 @@ export const FacilityCreate = (props: FacilityProps) => {
     console.log(state.form);
     if (validated) {
       setIsLoading(true);
-      const data: FacilityModel = {
+      const data: FacilityRequest = {
         facility_type: state.form.facility_type,
         name: state.form.name,
         district: state.form.district,
@@ -434,10 +432,8 @@ export const FacilityCreate = (props: FacilityProps) => {
         features: state.form.features,
         ward: state.form.ward,
         pincode: state.form.pincode,
-        location: {
-          latitude: Number(state.form.latitude),
-          longitude: Number(state.form.longitude),
-        },
+        latitude: state.form.latitude,
+        longitude: state.form.longitude,
         phone_number: parsePhoneNumber(state.form.phone_number),
         oxygen_capacity: state.form.oxygen_capacity
           ? state.form.oxygen_capacity

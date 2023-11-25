@@ -38,9 +38,9 @@ import {
   DistrictModel,
   DoctorModal,
   FacilityModel,
-  IStateListResponse,
   LocalBodyModel,
   LocationModel,
+  FacilityRequest,
   StateModel,
   WardModel,
 } from "../Components/Facility/models";
@@ -262,12 +262,13 @@ const routes = {
     path: "/api/v1/facility/",
     method: "POST",
     TRes: Type<FacilityModel>(),
+    TBody: Type<FacilityRequest>(),
   },
 
   getPermittedFacility: {
     path: "/api/v1/facility/{id}/",
     method: "GET",
-    TRes: Type<FacilityModel>(),
+    TRes: Type<FacilityRequest>(),
   },
 
   getAnyFacility: {
@@ -280,6 +281,7 @@ const routes = {
     path: "/api/v1/facility/{id}/",
     method: "PUT",
     TRes: Type<FacilityModel>(),
+    TBody: Type<FacilityRequest>(),
   },
 
   partialUpdateFacility: {
@@ -644,7 +646,7 @@ const routes = {
   // States
   statesList: {
     path: "/api/v1/state/",
-    TRes: Type<IStateListResponse>(),
+    TRes: Type<PaginatedResponse<StateModel>>(),
   },
 
   getState: {
@@ -660,7 +662,7 @@ const routes = {
   },
   getDistrictByState: {
     path: "/api/v1/state/{id}/districts/",
-    TRes: Type<StateModel[]>(),
+    TRes: Type<DistrictModel[]>(),
   },
   getDistrictByName: {
     path: "/api/v1/district/",
