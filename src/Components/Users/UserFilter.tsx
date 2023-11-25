@@ -134,7 +134,7 @@ export default function UserFilter(props: any) {
           errors={""}
         />
       </div>
-      <div className="mb-[-16px]">
+      <div className="-mb-4">
         <PhoneNumberFormField
           label="Phone Number"
           name="phone_number"
@@ -144,7 +144,7 @@ export default function UserFilter(props: any) {
           types={["mobile", "landline"]}
         />
       </div>
-      <div className="mb-[-16px]">
+      <div className="-mb-4">
         <PhoneNumberFormField
           label="Whatsapp Number"
           name="alt_phone_number"
