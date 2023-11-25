@@ -70,9 +70,8 @@ export default function CameraConfigure(props: CameraConfigureProps) {
       </Card>
       <Card className="mt-4">
         <LiveFeed
-          asset={asset}
+          asset={getCameraConfig(asset)}
           middlewareHostname={facilityMiddlewareHostname}
-          cameraAsset={getCameraConfig(asset)}
           showRefreshButton={true}
           refreshPresetsHash={refreshPresetsHash}
         />

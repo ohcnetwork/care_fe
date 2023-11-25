@@ -31,7 +31,7 @@ const LiveFeed = (props: any) => {
   const middlewareHostname =
     props.middlewareHostname || "dev_middleware.coronasafe.live";
   const [presetsPage, setPresetsPage] = useState(0);
-  const cameraAsset = props.cameraAsset;
+  const cameraAsset = props.asset;
   const [presets, setPresets] = useState<any>([]);
   const [bedPresets, setBedPresets] = useState<any>([]);
   const [showDefaultPresets, setShowDefaultPresets] = useState<boolean>(false);
