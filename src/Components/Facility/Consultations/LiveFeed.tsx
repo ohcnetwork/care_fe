@@ -345,15 +345,6 @@ const LiveFeed = (props: any) => {
     });
 
     Notification.Success({ msg: data?.message });
-
-    // dispatch(addToWaitingList(props.asset?.id)).then((res) => {
-    //   if (!res || res.status !== 201) {
-    //     Notification.Error({ msg: "Failed to add to waiting list" });
-    //   } else {
-    //     Notification.Success({ msg: "Added to waiting list" });
-    //   }
-    //   setLoading(undefined);
-    // });
   };
 
   // remove from waiting list method
@@ -379,10 +370,6 @@ const LiveFeed = (props: any) => {
     if (data?.message) {
       Notification.Success({ msg: data?.message });
     }
-
-    // useQuery(routes.lockAsset, {
-    //   pathParams: { asset_external_id: "assetId" },
-    // });
   };
 
   const unlockAsset = async () => {
@@ -393,10 +380,6 @@ const LiveFeed = (props: any) => {
     });
 
     Notification.Success({ msg: data?.message });
-
-    // useQuery(routes.unlockAsset, {
-    //   pathParams: { asset_external_id: "assetId" },
-    // });
   };
 
   // Voluntarily disabling eslint, since length of `cameraPTZ` is constant and
