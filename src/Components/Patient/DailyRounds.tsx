@@ -609,7 +609,6 @@ export const DailyRounds = (props: any) => {
 
                 <SelectFormField
                   {...field("rhythm")}
-                  required
                   label="Rhythm"
                   options={RHYTHM_CHOICES}
                   optionLabel={(option) => option.desc}

@@ -16,6 +16,7 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { InventoryItemsModel } from "./models";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
+
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm = {
@@ -122,6 +123,7 @@ export const AddInventoryForm = (props: any) => {
         setFacilityName("");
       }
     }
+
     fetchFacilityName();
   }, [dispatchAction, facilityId]);
 
@@ -327,7 +329,7 @@ export const AddInventoryForm = (props: any) => {
                 />
               </div>
             </div>
-            <div className="mt-4 flex flex-col justify-between gap-2 md:flex-row">
+            <div className="cui-form-button-group">
               <Cancel onClick={() => goBack()} />
               <Submit onClick={handleSubmit} label="Add/Update Inventory" />
             </div>
