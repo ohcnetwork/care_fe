@@ -1,8 +1,7 @@
-import { lazy, useCallback, useState } from "react";
+import { lazy } from "react";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import { CURRENT_HEALTH_CHANGE, SYMPTOM_CHOICES } from "../../Common/constants";
-import { statusType, useAbortableEffect } from "../../Common/utils";
 import { DailyRoundsModel } from "./models";
 import Page from "../Common/components/Page";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -11,72 +10,45 @@ const Loading = lazy(() => import("../Common/Loading"));
 const symptomChoices = [...SYMPTOM_CHOICES];
 const currentHealthChoices = [...CURRENT_HEALTH_CHANGE];
 
-function useConsultationQuery(consultationId: any, id: any) {
-  return useQuery(routes.getDailyReport, {
+export const DailyRoundListDetails = (props: any) => {
+  const { facilityId, patientId, consultationId, id } = props;
+  const { res, data, loading } = useQuery(routes.getDailyReport, {
     pathParams: {
       consultationId,
       id,
     },
   });
-}
+  const fetchpatient = async () => {
+    if (res && data) {
+      const currentHealth = currentHealthChoices.find(
+        (i) => i.text === data?.current_health
+      );
 
-export const DailyRoundListDetails = (props: any) => {
-  const { facilityId, patientId, consultationId, id } = props;
-  const [dailyRoundListDetailsData, setDailyRoundListDetails] =
-    useState<DailyRoundsModel>({});
-  const [isLoading, setIsLoading] = useState(false);
-
-  const res = useConsultationQuery(consultationId, id);
-  const fetchpatient = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      if (!status.aborted) {
-        if (res && res.data) {
-          const currentHealth = currentHealthChoices.find(
-            (i) => i.text === res.data?.current_health
-          );
-
-          const data: DailyRoundsModel = {
-            ...res.data,
-            temperature: Number(res.data.temperature)
-              ? res.data.temperature
-              : "",
-            additional_symptoms_text: "",
-            medication_given:
-              Object.keys(res.data.medication_given ?? {}).length === 0
-                ? []
-                : res.data.medication_given,
-            current_health: currentHealth
-              ? currentHealth.desc
-              : res.data.current_health,
-          };
-          if (res.data.additional_symptoms?.length) {
-            const symptoms = res.data.additional_symptoms.map(
-              (symptom: number) => {
-                const option = symptomChoices.find((i) => i.id === symptom);
-                return option ? option.text.toLowerCase() : symptom;
-              }
-            );
-            data.additional_symptoms_text = symptoms.join(", ");
-          }
-          setDailyRoundListDetails(data);
-        }
-        setIsLoading(false);
+      const Data: DailyRoundsModel = {
+        ...data,
+        temperature: Number(data?.temperature) ? data.temperature : "",
+        additional_symptoms_text: "",
+        medication_given:
+          Object.keys(data.medication_given ?? {}).length === 0
+            ? []
+            : data.medication_given,
+        current_health: currentHealth
+          ? currentHealth.desc
+          : data.current_health,
+      };
+      if (data.additional_symptoms?.length) {
+        const symptoms = data.additional_symptoms.map((symptom: number) => {
+          const option = symptomChoices.find((i) => i.id === symptom);
+          return option ? option.text.toLowerCase() : symptom;
+        });
+        Data.additional_symptoms_text = symptoms.join(", ");
       }
-    },
-    [consultationId, id]
-  );
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchpatient(status);
-    },
-    [fetchpatient]
-  );
-
-  if (isLoading) {
+    }
+  };
+  fetchpatient();
+  if (loading) {
     return <Loading />;
   }
-
   return (
     <Page
       title={`Consultation Update #${id}`}
@@ -89,7 +61,7 @@ export const DailyRoundListDetails = (props: any) => {
               <span className="font-semibold leading-relaxed">
                 Patient Category:{" "}
               </span>
-              {dailyRoundListDetailsData.patient_category ?? "-"}
+              {data?.patient_category ?? "-"}
             </div>
           </div>
 
@@ -107,51 +79,49 @@ export const DailyRoundListDetails = (props: any) => {
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <span className="font-semibold leading-relaxed">Temperature: </span>
-            {dailyRoundListDetailsData.temperature ?? "-"}
+            {data?.temperature ?? "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Taken at: </span>
-            {dailyRoundListDetailsData.taken_at
-              ? formatDateTime(dailyRoundListDetailsData.taken_at)
-              : "-"}
+            {data?.taken_at ? formatDateTime(data?.taken_at) : "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">SpO2: </span>
-            {dailyRoundListDetailsData.ventilator_spo2 ?? "-"}
+            {data?.ventilator_spo2 ?? "-"}
           </div>
           <div className="capitalize md:col-span-2">
             <span className="font-semibold leading-relaxed">
               Additional Symptoms:{" "}
             </span>
-            {dailyRoundListDetailsData.additional_symptoms_text ?? "-"}
+            {data?.additional_symptoms_text ?? "-"}
           </div>
           <div className="capitalize md:col-span-2">
             <span className="font-semibold leading-relaxed">
               Admitted To *:{" "}
             </span>
-            {dailyRoundListDetailsData.admitted_to ?? "-"}
+            {data?.admitted_to ?? "-"}
           </div>
           <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">
               Physical Examination Info:{" "}
             </span>
-            {dailyRoundListDetailsData.physical_examination_info ?? "-"}
+            {data?.physical_examination_info ?? "-"}
           </div>
           <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">
               Other Symptoms:{" "}
             </span>
-            {dailyRoundListDetailsData.other_symptoms ?? "-"}
+            {data?.other_symptoms ?? "-"}
           </div>
           <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">
               Other Details:{" "}
             </span>
-            {dailyRoundListDetailsData.other_details ?? "-"}
+            {data?.other_details ?? "-"}
           </div>
           <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">Pulse(bpm): </span>
-            {dailyRoundListDetailsData.pulse ?? "-"}
+            {data?.pulse ?? "-"}
           </div>
           <div className="md:col-span-2 ">
             <span className="font-semibold leading-relaxed">BP</span>
@@ -160,14 +130,14 @@ export const DailyRoundListDetails = (props: any) => {
                 <span className="font-semibold leading-relaxed">
                   Systolic:{" "}
                 </span>
-                {dailyRoundListDetailsData.bp?.systolic ?? "-"}
+                {data?.bp?.systolic ?? "-"}
               </div>
               <div className="flex">
                 {" "}
                 <span className="font-semibold leading-relaxed">
                   Diastolic:
                 </span>
-                {dailyRoundListDetailsData.bp?.diastolic ?? "-"}
+                {data?.bp?.diastolic ?? "-"}
               </div>
             </div>
           </div>
@@ -177,23 +147,23 @@ export const DailyRoundListDetails = (props: any) => {
               Respiratory Rate (bpm):
             </span>
 
-            {dailyRoundListDetailsData.resp ?? "-"}
+            {data?.resp ?? "-"}
           </div>
           <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">Rhythm: </span>
-            {dailyRoundListDetailsData.rhythm ?? "-"}
+            {data?.rhythm ?? "-"}
           </div>
           <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">
               Rhythm Description:{" "}
             </span>
-            {dailyRoundListDetailsData.rhythm_detail ?? "-"}
+            {data?.rhythm_detail ?? "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">
               Recommend Discharge:{" "}
             </span>
-            {dailyRoundListDetailsData.recommend_discharge ? (
+            {data?.recommend_discharge ? (
               <span className="badge badge-pill badge-warning">Yes</span>
             ) : (
               <span className="badge badge-pill badge-secondary">No</span>
