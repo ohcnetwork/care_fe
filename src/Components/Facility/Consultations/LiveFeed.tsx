@@ -57,7 +57,8 @@ const LiveFeed = (props: any) => {
   const [asset, setAsset] = useState<any>({});
   const [lockStatus, setLockStatus] = useState(false);
   const [inWaiting, setInWaiting] = useState(false);
-  const [lockedBy, setLockedBy] = useState(false);
+  const [lockedBy, setLockedBy] = useState("");
+  const [waitingUsers, setWaitingUsers] = useState<any[]>([]);
   const [user, setUser] = useState<any>({});
 
   const { width } = useWindowDimensions();
@@ -195,11 +196,16 @@ const LiveFeed = (props: any) => {
     setBed(toUpdate?.bed_object);
   }, [toUpdate]);
 
-  // get current user details
-  useEffect(async () => {
+  // fetch user
+  const fetchUser = async () => {
     const { data } = await request(routes.currentUser, {});
     setUser(data);
     console.log(data);
+  };
+
+  // get current user details
+  useEffect(() => {
+    fetchUser();
   }, []);
 
   useEffect(() => {
@@ -307,7 +313,7 @@ const LiveFeed = (props: any) => {
     return { ...option, callback: () => cb(option) };
   });
 
-  // fetch asset
+  // fetch user and asset
   const fetchAsset = async () => {
     const { data }: any = await request(routes.getAsset, {
       pathParams: {
@@ -317,6 +323,13 @@ const LiveFeed = (props: any) => {
     setAsset(data);
     setLockStatus(data.is_locked);
     setLockedBy(data.locked_by);
+    setWaitingUsers(data.waiting_users);
+    console.log(user);
+
+    // fix: waiting list appropriate text, add slideover to fetch updated data which will
+    // resolve this issue automatically
+    setInWaiting(data.waiting_users.includes(user.id));
+    console.log(data.waiting_users);
   };
 
   useEffect(() => {
@@ -360,9 +373,12 @@ const LiveFeed = (props: any) => {
         asset_external_id: asset?.id ?? "",
       },
     });
+    console.log(data);
     fetchAsset();
 
-    Notification.Success({ msg: data?.message });
+    if (data?.message) {
+      Notification.Success({ msg: data?.message });
+    }
 
     // useQuery(routes.lockAsset, {
     //   pathParams: { asset_external_id: "assetId" },
@@ -556,18 +572,26 @@ const LiveFeed = (props: any) => {
           <div className="mx-4 flex max-w-sm flex-col">
             <div className="flex flex-col gap-4">
               {!lockStatus || (lockStatus && lockedBy === user?.username) ? (
-                <button
-                  onClick={() => {
-                    if (lockStatus) {
-                      unlockAsset();
-                    } else {
-                      lockAsset();
-                    }
-                    setLockStatus(!lockStatus);
-                  }}
-                >
-                  Lock Status: <b>{lockStatus ? "Locked" : "Unlocked"}</b>
-                </button>
+                <div>
+                  <button
+                    onClick={() => {
+                      if (lockStatus) {
+                        unlockAsset();
+                      } else {
+                        lockAsset();
+                      }
+                      setLockStatus(!lockStatus);
+                    }}
+                  >
+                    Lock Status: <b>{lockStatus ? "Locked" : "Unlocked"}</b>
+                  </button>
+                  <b className="mt-2">Waiting List:</b>
+                  {waitingUsers.length > 0 ? (
+                    waitingUsers.map((waitingUser) => <p>{waitingUser}</p>)
+                  ) : (
+                    <p>No one is currently waiting for access.</p>
+                  )}
+                </div>
               ) : (
                 <div>
                   <p>Locked by: {lockedBy}</p>
