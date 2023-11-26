@@ -33,6 +33,7 @@ function useContextualized<TItem>() {
 interface Props<TItem> extends QueryOptions<PaginatedResponse<TItem>> {
   route: QueryRoute<PaginatedResponse<TItem>>;
   perPage?: number;
+  sortFunc?: (item1: any, item2: any) => number;
   children: (
     ctx: PaginatedListContext<TItem>,
     query: ReturnType<typeof useQuery<PaginatedResponse<TItem>>>
@@ -42,6 +43,7 @@ interface Props<TItem> extends QueryOptions<PaginatedResponse<TItem>> {
 export default function PaginatedList<TItem extends object>({
   children,
   route,
+  sortFunc,
   perPage = DEFAULT_PER_PAGE_LIMIT,
   ...queryOptions
 }: Props<TItem>) {
@@ -55,7 +57,11 @@ export default function PaginatedList<TItem extends object>({
     },
   });
 
-  const items = query.data?.results ?? [];
+  const items = query.data?.results
+    ? sortFunc
+      ? query.data?.results.sort(sortFunc)
+      : query.data?.results
+    : [];
 
   return (
     <context.Provider

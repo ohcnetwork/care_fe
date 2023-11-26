@@ -26,6 +26,11 @@ export const DailyRoundsList = (props: any) => {
       query={{
         rounds_type: showAutomatedRounds ? "" : "NORMAL,VENTILATOR,ICU",
       }}
+      sortFunc={(item1, item2) => {
+        const takenAt1 = item1.taken_at;
+        const takenAt2 = item2.taken_at;
+        return Number(new Date(takenAt2)) - Number(new Date(takenAt1));
+      }}
     >
       {(_) => (
         <div className="-mt-2 flex w-full flex-col gap-4">
@@ -52,6 +57,7 @@ export const DailyRoundsList = (props: any) => {
                     />
                   );
                 }
+                console.log(items);
                 return (
                   <DefaultLogUpdateCard
                     round={item}
