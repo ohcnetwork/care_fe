@@ -57,7 +57,6 @@ export const DailyRoundsList = (props: any) => {
                     />
                   );
                 }
-                console.log(items);
                 return (
                   <DefaultLogUpdateCard
                     round={item}
