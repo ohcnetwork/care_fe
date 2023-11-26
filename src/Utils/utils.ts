@@ -454,3 +454,11 @@ export const scrollTo = (id: string | boolean) => {
   const element = document.querySelector(`#${id}`);
   element?.scrollIntoView({ behavior: "smooth", block: "center" });
 };
+
+export const downloadFile = (url: string, name: string) => {
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = name;
+  link.click();
+  link.remove();
+};
