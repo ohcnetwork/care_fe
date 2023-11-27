@@ -366,7 +366,7 @@ const LiveFeed = (props: any) => {
     });
     fetchAsset();
 
-    if (response.res?.status === 403) {
+    if (response.res?.status === 409) {
       Notification.Error({ msg: response.error?.message });
     } else if (response.res?.status === 200) {
       Notification.Success({ msg: response?.data?.message });
