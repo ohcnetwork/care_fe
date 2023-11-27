@@ -32,7 +32,8 @@ jobs:
         run: |
           docker compose -f care/docker-compose.yaml -f care/docker-compose.pre-built.yaml up -d db
           docker cp ./cypress/fixtures/db.sql care-db-1:/db.sql
-          docker exec care-db-1 psql -U postgres password=postgres -f db.sql
+          sleep 5
+          docker exec care-db-1 psql -h localhost -U postgres password=postgres -f db.sql
 
       - name: Start care docker containers 🐳
         run: |
