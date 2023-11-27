@@ -3,6 +3,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { BedModel, FacilityModel } from "./models";
 import {
   CONSULTATION_SUGGESTION,
+  ConsultationSuggestionValue,
   PATIENT_CATEGORIES,
   REVIEW_AT_CHOICES,
   TELEMEDICINE_ACTIONS,
@@ -82,7 +83,7 @@ type FormDetails = {
   symptoms: number[];
   other_symptoms: string;
   symptoms_onset_date?: Date;
-  suggestion: string;
+  suggestion: ConsultationSuggestionValue;
   route_to_facility?: RouteToFacility;
   patient: string;
   facility: string;
@@ -1120,7 +1121,7 @@ export const ConsultationForm = (props: any) => {
                       label="Decision after consultation"
                       {...selectField("suggestion")}
                       options={CONSULTATION_SUGGESTION.filter(
-                        ({ deprecated }) => !deprecated
+                        (option) => !("deprecated" in option)
                       )}
                     />
                   </div>
@@ -1197,11 +1198,18 @@ export const ConsultationForm = (props: any) => {
                   >
                     <TextFormField
                       {...field("encounter_date")}
-                      required
+                      required={["A", "DC", "OP"].includes(
+                        state.form.suggestion
+                      )}
                       label={
-                        state.form.suggestion === "DC" // TODO: change this for all types of consultations
-                          ? "Date & Time of Domiciliary Care commencement"
-                          : "Date & Time of Admission to the Facility"
+                        {
+                          A: "Date & Time of Admission to the Facility",
+                          DC: "Date & Time of Domiciliary Care commencement",
+                          OP: "Date & Time of Out-patient visit",
+                          DD: "Date & Time of Encounter",
+                          HI: "Date & Time of Encounter",
+                          R: "Date & Time of Encounter",
+                        }[state.form.suggestion]
                       }
                       type="datetime-local"
                       value={dayjs(state.form.encounter_date).format(

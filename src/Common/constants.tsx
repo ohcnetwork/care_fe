@@ -330,7 +330,10 @@ export const CONSULTATION_SUGGESTION = [
   { id: "OP", text: "OP Consultation" },
   { id: "DC", text: "Domiciliary Care" },
   { id: "DD", text: "Declare Death" },
-];
+] as const;
+
+export type ConsultationSuggestionValue =
+  (typeof CONSULTATION_SUGGESTION)[number]["id"];
 
 export const ADMITTED_TO = [
   { id: "1", text: "Isolation" },
