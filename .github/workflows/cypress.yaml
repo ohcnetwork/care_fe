@@ -44,6 +44,7 @@ jobs:
             sleep 5
           done
           echo "Migrations are applied"
+          docker compose exec backend bash -c "python manage.py migrate --run-syncdb"
           cd ..
 
       - name: Check care is up ♻
