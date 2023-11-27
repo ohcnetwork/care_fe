@@ -357,6 +357,13 @@ const LiveFeed = (props: any) => {
     Notification.Success({ msg: data?.message });
   };
 
+  // remove user from waiting list if they close the tab or move away
+  useEffect(() => {
+    if (inWaiting) {
+      window.addEventListener("beforeunload", removeFromWaitingList);
+    }
+  }, [inWaiting]);
+
   // lock and unlock asset methods
   const lockAsset = async () => {
     const response = await request(routes.lockAsset, {
