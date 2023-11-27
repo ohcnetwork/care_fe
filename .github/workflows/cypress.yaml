@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        containers: [1,2,3,4,5,6,7,8]
+        containers: [1, 2, 3, 4, 5, 6, 7, 8]
     steps:
       - name: Checkout 📥
         uses: actions/checkout@v3
@@ -28,6 +28,12 @@ jobs:
           repository: coronasafe/care
           path: care
 
+      - name: Load Postgres 🐘 with SQL Dump
+        run: |
+          docker compose up -f care/docker-compose.yaml -f care/docker-compose.pre-built.yaml -d db
+          docker cp ./cypress/fixtures/db.sql care-db-1:/db.sql
+          docker exec -it care-db-1 psql -U postgres password=postgres -f db.sql
+
       - name: Start care docker containers 🐳
         run: |
           cd care
@@ -37,12 +43,6 @@ jobs:
             sleep 5
           done
           echo "Migrations are applied"
-          cd ..
-
-      - name: Load dummy data into care backend 📂
-        run: |
-          cd care
-          docker compose exec backend bash -c "python manage.py load_dummy_data"
           cd ..
 
       - name: Check care is up ♻
@@ -79,4 +79,3 @@ jobs:
         with:
           name: cypress-screenshots
           path: cypress/screenshots
-
