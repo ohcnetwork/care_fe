@@ -2,14 +2,19 @@
 import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import FacilityHome from "../../pageobject/Facility/FacilityHome";
+import ManageUserPage from "../../pageobject/Users/ManageUserPage";
+import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 
 describe("Facility Creation", () => {
   const loginPage = new LoginPage();
   const facilityHome = new FacilityHome();
+  const facilityPage = new FacilityPage();
+  const manageUserPage = new ManageUserPage();
   const facilitiesAlias = "downloadFacilitiesCSV";
   const capacitiesAlias = "downloadCapacitiesCSV";
   const doctorsAlias = "downloadDoctorsCSV";
   const triagesAlias = "downloadTriagesCSV";
+  const facilityname = "Dummy Facility 1";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -17,9 +22,15 @@ describe("Facility Creation", () => {
   });
 
   beforeEach(() => {
-    cy.viewport(1280, 720);
     cy.restoreLocalStorage();
     cy.awaitUrl("/facility");
+  });
+
+  it("Search a facility in homepage", () => {
+    manageUserPage.typeFacilitySearch(facilityname);
+    facilityPage.verifyFacilityBadgeContent(facilityname);
+    manageUserPage.assertFacilityInCard(facilityname);
+    facilityHome.verifyURLContains(facilityname);
   });
 
   it("Verify Facility Export Functionality", () => {
@@ -48,6 +59,7 @@ describe("Facility Creation", () => {
     facilityHome.verifyDownload(triagesAlias);
     facilityHome.clickSearchButton();
   });
+
   afterEach(() => {
     cy.saveLocalStorage();
   });
