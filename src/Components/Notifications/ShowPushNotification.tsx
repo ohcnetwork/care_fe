@@ -29,6 +29,8 @@ export default function ShowPushNotification({ id }: DetailRoute) {
         return `/facility/${caused_objects?.facility}/patient/${caused_objects?.patient}/consultation/${caused_objects?.consultation}/daily-rounds/${caused_objects?.daily_round}`;
       case "INVESTIGATION_SESSION_CREATED":
         return `/facility/${caused_objects?.facility}/patient/${caused_objects?.patient}/consultation/${caused_objects?.consultation}/investigation/${caused_objects?.session}`;
+      case "PATIENT_NOTE_ADDED":
+        return `/facility/${caused_objects.facility}/patient/${caused_objects.patient}/notes`;
       case "MESSAGE":
         return "/notice_board/";
       default:
