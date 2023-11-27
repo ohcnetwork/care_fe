@@ -724,7 +724,10 @@ export const ConsultationForm = (props: any) => {
             : undefined,
         consultation_notes: state.form.consultation_notes,
         is_telemedicine: state.form.is_telemedicine,
-        icu_admission_date: state.form.icu_admission_date,
+        icu_admission_date:
+          state.form.route_to_facility === 30
+            ? state.form.icu_admission_date
+            : undefined,
         action: state.form.action,
         review_interval: state.form.review_interval,
         assigned_to:
@@ -1218,29 +1221,28 @@ export const ConsultationForm = (props: any) => {
                     </div>
                   )}
 
-                  {state.form.route_to_facility &&
-                    [20, 30].includes(state.form.route_to_facility) && (
-                      <div
-                        className={classNames(
-                          "col-span-6",
-                          ["A", "DC"].includes(state.form.suggestion) &&
-                            "xl:col-span-3"
-                        )}
-                        ref={fieldRef["icu_admission_date"]}
-                      >
-                        <TextFormField
-                          {...field("icu_admission_date")}
-                          label="Date & Time  of admission to the ICU"
-                          type="datetime-local"
-                          value={
-                            state.form.icu_admission_date &&
-                            dayjs(state.form.icu_admission_date).format(
-                              "YYYY-MM-DDTHH:mm"
-                            )
-                          }
-                        />
-                      </div>
-                    )}
+                  {state.form.route_to_facility === 30 && (
+                    <div
+                      className={classNames(
+                        "col-span-6",
+                        ["A", "DC"].includes(state.form.suggestion) &&
+                          "xl:col-span-3"
+                      )}
+                      ref={fieldRef["icu_admission_date"]}
+                    >
+                      <TextFormField
+                        {...field("icu_admission_date")}
+                        label="Date & Time  of admission to the ICU"
+                        type="datetime-local"
+                        value={
+                          state.form.icu_admission_date &&
+                          dayjs(state.form.icu_admission_date).format(
+                            "YYYY-MM-DDTHH:mm"
+                          )
+                        }
+                      />
+                    </div>
+                  )}
 
                   {["A", "DC"].includes(state.form.suggestion) && !isUpdate && (
                     <div className="col-span-6 mb-6" ref={fieldRef["bed"]}>
