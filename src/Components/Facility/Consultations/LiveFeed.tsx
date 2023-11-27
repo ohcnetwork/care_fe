@@ -359,16 +359,17 @@ const LiveFeed = (props: any) => {
 
   // lock and unlock asset methods
   const lockAsset = async () => {
-    const { data }: any = await request(routes.lockAsset, {
+    const response = await request(routes.lockAsset, {
       pathParams: {
         asset_external_id: asset?.id ?? "",
       },
     });
-    console.log(data);
     fetchAsset();
 
-    if (data?.message) {
-      Notification.Success({ msg: data?.message });
+    if (response.res?.status === 403) {
+      Notification.Error({ msg: response.error?.message });
+    } else if (response.res?.status === 200) {
+      Notification.Success({ msg: response?.data?.message });
     }
   };
 
