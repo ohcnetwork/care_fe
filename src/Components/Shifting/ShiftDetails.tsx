@@ -22,6 +22,7 @@ import { useTranslation } from "react-i18next";
 import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
+import { ConsultationModel } from "../Facility/models.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -316,7 +317,7 @@ export default function ShiftDetails(props: { id: string }) {
 
   const printData = (data: any) => {
     const patientData = data.patient_object;
-    const consultation = data.patient.last_consultation;
+    const consultation = data.patient.last_consultation as ConsultationModel;
     const patientGender = GENDER_TYPES.find(
       (i) => i.id === patientData?.gender
     )?.text;
@@ -409,7 +410,7 @@ export default function ShiftDetails(props: { id: string }) {
                 {t("date_of_admission")}:{" "}
               </span>
               {formatDateTime(
-                consultation.admission_date || consultation.created_date
+                consultation.encounter_date || consultation.created_date
               ) || "-"}
             </div>
             <div>

@@ -63,14 +63,14 @@ export const ConsultationCard = (props: ConsultationProps) => {
             </div>
           </div>
         )}
-        {itemData.admitted && itemData.admission_date && (
+        {itemData.admitted && itemData.encounter_date && (
           <div className="sm:col-span-1">
             <div className="sm:col-span-1">
               <div className="text-sm font-semibold leading-5 text-zinc-400">
                 Admitted on
               </div>
               <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
-                {formatDateTime(itemData.admission_date)}
+                {formatDateTime(itemData.encounter_date)}
                 {itemData.is_readmission && (
                   <Chip
                     size="small"

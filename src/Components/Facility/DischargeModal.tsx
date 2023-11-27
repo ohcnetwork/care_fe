@@ -272,7 +272,7 @@ const DischargeModal = ({
               name="discharge_date"
               value={dayjs(preDischargeForm?.discharge_date).toDate()}
               min={dayjs(
-                consultationData?.admission_date ??
+                consultationData?.encounter_date ??
                   consultationData?.created_date
               ).toDate()}
               disableFuture={true}
@@ -306,7 +306,7 @@ const DischargeModal = ({
                 });
               }}
               required
-              min={dayjs(consultationData?.admission_date).format(
+              min={dayjs(consultationData?.encounter_date).format(
                 "YYYY-MM-DDTHH:mm"
               )}
               max={dayjs().format("YYYY-MM-DDTHH:mm")}
@@ -335,7 +335,7 @@ const DischargeModal = ({
               name="discharge_date"
               value={dayjs(preDischargeForm.discharge_date).toDate()}
               min={dayjs(
-                consultationData?.admission_date ??
+                consultationData?.encounter_date ??
                   consultationData?.created_date
               ).toDate()}
               disableFuture={true}

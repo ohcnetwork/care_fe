@@ -89,7 +89,7 @@ type FormDetails = {
   admitted: BooleanStrings;
   admitted_to: string;
   category: string;
-  admission_date?: Date;
+  encounter_date?: Date;
   icu_admission_date?: Date;
   discharge_date: null;
   referred_to?: string;
@@ -139,7 +139,7 @@ const initForm: FormDetails = {
   admitted: "false",
   admitted_to: "",
   category: "",
-  admission_date: new Date(),
+  encounter_date: new Date(),
   icu_admission_date: undefined,
   discharge_date: null,
   referred_to: "",
@@ -375,7 +375,7 @@ export const ConsultationForm = (props: any) => {
           const formData = {
             ...res.data,
             symptoms_onset_date: isoStringToDate(res.data.symptoms_onset_date),
-            admission_date: isoStringToDate(res.data.admission_date),
+            encounter_date: isoStringToDate(res.data.encounter_date),
             icu_admission_date: isoStringToDate(res.data.icu_admission_date),
             admitted: res.data.admitted ? String(res.data.admitted) : "false",
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
@@ -483,11 +483,8 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "admission_date":
-          if (
-            ["A", "DC"].includes(state.form.suggestion) &&
-            !state.form[field]
-          ) {
+        case "encounter_date":
+          if (!state.form[field]) {
             errors[field] = "Field is required";
             invalidForm = true;
           }
@@ -679,9 +676,7 @@ export const ConsultationForm = (props: any) => {
         suggestion: state.form.suggestion,
         route_to_facility: state.form.route_to_facility,
         admitted: state.form.suggestion === "A",
-        admission_date: ["A", "DC"].includes(state.form.suggestion)
-          ? state.form.admission_date
-          : undefined,
+        encounter_date: state.form.encounter_date,
         category: state.form.category,
         is_kasp: state.form.is_kasp,
         kasp_enabled_date: JSON.parse(state.form.is_kasp) ? new Date() : null,
@@ -1191,32 +1186,30 @@ export const ConsultationForm = (props: any) => {
                     </>
                   )}
 
-                  {["A", "DC"].includes(state.form.suggestion) && (
-                    <div
-                      className={classNames(
-                        "col-span-6",
-                        state.form.route_to_facility &&
-                          [20, 30].includes(state.form.route_to_facility) &&
-                          "xl:col-span-3"
+                  <div
+                    className={classNames(
+                      "col-span-6",
+                      state.form.route_to_facility &&
+                        [20, 30].includes(state.form.route_to_facility) &&
+                        "xl:col-span-3"
+                    )}
+                    ref={fieldRef["encounter_date"]}
+                  >
+                    <TextFormField
+                      {...field("encounter_date")}
+                      required
+                      label={
+                        state.form.suggestion === "DC" // TODO: change this for all types of consultations
+                          ? "Date & Time of Domiciliary Care commencement"
+                          : "Date & Time of Admission to the Facility"
+                      }
+                      type="datetime-local"
+                      value={dayjs(state.form.encounter_date).format(
+                        "YYYY-MM-DDTHH:mm"
                       )}
-                      ref={fieldRef["admission_date"]}
-                    >
-                      <TextFormField
-                        {...field("admission_date")}
-                        required
-                        label={
-                          state.form.suggestion === "DC"
-                            ? "Date & Time of Domiciliary Care commencement"
-                            : "Date & Time of Admission to the Facility"
-                        }
-                        type="datetime-local"
-                        value={dayjs(state.form.admission_date).format(
-                          "YYYY-MM-DDTHH:mm"
-                        )}
-                        max={dayjs().format("YYYY-MM-DDTHH:mm")}
-                      />
-                    </div>
-                  )}
+                      max={dayjs().format("YYYY-MM-DDTHH:mm")}
+                    />
+                  </div>
 
                   {state.form.route_to_facility &&
                     [20, 30].includes(state.form.route_to_facility) && (

@@ -115,8 +115,8 @@ export default function PrintDeathReport(props: { id: string }) {
           date_declared_positive: res.data?.date_declared_positive
             ? dayjs(res.data?.date_declared_positive).toDate()
             : "",
-          date_of_admission: res.data?.last_consultation?.admission_date
-            ? dayjs(res.data?.last_consultation?.admission_date).toDate()
+          date_of_admission: res.data?.last_consultation?.encounter_date
+            ? dayjs(res.data?.last_consultation?.encounter_date).toDate()
             : "",
           date_of_test: res.data?.date_of_test
             ? dayjs(res.data?.date_of_test).toDate()

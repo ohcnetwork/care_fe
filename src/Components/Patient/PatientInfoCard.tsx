@@ -293,7 +293,7 @@ export default function PatientInfoCard(props: {
                     on{" "}
                     {formatDateTime(
                       ["A", "DC"].includes(consultation?.suggestion ?? "")
-                        ? consultation?.admission_date
+                        ? consultation?.encounter_date
                         : consultation?.created_date
                     )}
                     ,
