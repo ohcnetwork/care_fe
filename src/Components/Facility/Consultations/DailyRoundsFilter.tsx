@@ -10,24 +10,23 @@ import { useTranslation } from "react-i18next";
 import { DailyRoundsFilterModel } from "../models";
 
 export const DailyRoundsFilter = (props: {
-  setFilter: (data: DailyRoundsFilterModel) => void;
+  onApply: (filter: any) => void;
 }) => {
-  const [filter, setFilter] = useState({
-    roundType: "",
-    fromDateTime: "",
-    toDateTime: "",
+  const [filter, setFilter] = useState<DailyRoundsFilterModel>({
+    rounds_type: undefined,
+    fromDateTime: undefined,
+    toDateTime: undefined,
   });
 
   const clearFilter = () => {
     const clearedFilter = {
-      roundType: "",
-      fromDateTime: "",
-      toDateTime: "",
+      rounds_type: undefined,
+      fromDateTime: undefined,
+      toDateTime: undefined,
     };
 
     setFilter(clearedFilter);
-
-    props.setFilter(clearedFilter);
+    props.onApply({ query: filter });
   };
 
   const { t } = useTranslation();
@@ -65,11 +64,11 @@ export const DailyRoundsFilter = (props: {
                   optionValue={(o) => o}
                   labelClassName="text-sm"
                   errorClassName="hidden"
-                  value={filter.roundType}
+                  value={filter?.rounds_type}
                   onChange={({ value }) =>
                     setFilter({
                       ...filter,
-                      roundType: value,
+                      rounds_type: value,
                     })
                   }
                 />
@@ -106,19 +105,21 @@ export const DailyRoundsFilter = (props: {
                     Clear Filter
                   </ButtonV2>
                 </Popover.Button>
-
                 <Popover.Button>
                   <ButtonV2
                     variant="primary"
-                    onClick={() => {
-                      props.setFilter(filter);
-                    }}
+                    onClick={() =>
+                      props.onApply({
+                        query: filter,
+                      })
+                    }
                     border
                     className="tooltip !h-11 w-full"
                   >
                     Apply Filter
                   </ButtonV2>
                 </Popover.Button>
+                ;
               </div>
             </div>
           </Popover.Panel>

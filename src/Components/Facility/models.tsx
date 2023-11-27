@@ -490,7 +490,7 @@ export interface PatientNotesModel {
 }
 
 export interface DailyRoundsFilterModel {
-  roundType: string;
-  fromDateTime: string;
-  toDateTime: string;
+  rounds_type?: string | undefined;
+  fromDateTime?: string | undefined;
+  toDateTime?: string | undefined;
 }
