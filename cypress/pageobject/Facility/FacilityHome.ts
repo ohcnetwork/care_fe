@@ -26,6 +26,15 @@ class FacilityHome {
   verifyDownload(alias: string) {
     cy.wait(`@${alias}`).its("response.statusCode").should("eq", 200);
   }
+
+  getURL() {
+    return cy.url();
+  }
+
+  verifyURLContains(searchText) {
+    const encodedText = encodeURIComponent(searchText).replace(/%20/g, "+");
+    this.getURL().should("include", `search=${encodedText}`);
+  }
 }
 
 export default FacilityHome;
