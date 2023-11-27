@@ -7,25 +7,34 @@ import LoadingLogUpdateCard from "./DailyRounds/LoadingCard";
 import routes from "../../../Redux/api";
 import PaginatedList from "../../../CAREUI/misc/PaginatedList";
 import PageTitle from "../../Common/PageTitle";
-import { DailyRoundsFilter } from "./DailyRoundsFilter";
+import DailyRoundsFilter from "./DailyRoundsFilter";
+import { ConsultationModel } from "../models";
 
-export const DailyRoundsList = (props: any) => {
+interface Props {
+  facilityId: string;
+  patientId: string;
+  consultationId: string;
+  consultationData: ConsultationModel;
+}
+
+export const DailyRoundsList = ({
+  facilityId,
+  patientId,
+  consultationId,
+  consultationData,
+}: Props) => {
   const { t } = useTranslation();
-
-  const { facilityId, patientId, consultationId, consultationData } = props;
 
   return (
     <PaginatedList
       route={routes.getDailyReports}
-      pathParams={{
-        consultationId,
-      }}
+      pathParams={{ consultationId }}
     >
-      {(_, q) => (
+      {({ refetch }) => (
         <>
           <div className="flex flex-1 justify-between">
             <PageTitle title="Update Log" hideBack breadcrumbs={false} />
-            <DailyRoundsFilter onApply={(query) => q.refetch({ query })} />
+            <DailyRoundsFilter onApply={(query) => refetch({ query })} />
           </div>
 
           <div className="-mt-2 flex w-full flex-col gap-4">

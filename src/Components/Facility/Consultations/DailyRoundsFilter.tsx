@@ -7,29 +7,32 @@ import CareIcon from "../../../CAREUI/icons/CareIcon";
 import dayjs from "dayjs";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { DailyRoundsFilterModel } from "../models";
+import { DailyRoundsModel } from "../../Patient/models";
+import { FieldChangeEvent } from "../../Form/FormFields/Utils";
 
-export const DailyRoundsFilter = (props: {
-  onApply: (filter: any) => void;
-}) => {
-  const [filter, setFilter] = useState<DailyRoundsFilterModel>({
-    rounds_type: undefined,
-    fromDateTime: undefined,
-    toDateTime: undefined,
+type FilterState = {
+  rounds_type?: DailyRoundsModel["rounds_type"];
+  taken_at_after?: string;
+  taken_at_before?: string;
+};
+
+interface Props {
+  onApply: (filter: FilterState) => void;
+}
+
+export default function DailyRoundsFilter(props: Props) {
+  const { t } = useTranslation();
+  const [filter, setFilter] = useState<FilterState>({});
+
+  const field = (name: keyof FilterState) => ({
+    name,
+    value: filter[name],
+    onChange: (e: FieldChangeEvent<unknown>) =>
+      setFilter({ ...filter, [e.name]: e.value }),
+    labelClassName: "text-sm",
+    errorClassName: "hidden",
   });
 
-  const clearFilter = () => {
-    const clearedFilter = {
-      rounds_type: undefined,
-      fromDateTime: undefined,
-      toDateTime: undefined,
-    };
-
-    setFilter(clearedFilter);
-    props.onApply({ query: filter });
-  };
-
-  const { t } = useTranslation();
   return (
     <div className="flex flex-row-reverse items-center gap-4 md:flex-row">
       <Popover className="relative ">
@@ -57,50 +60,36 @@ export const DailyRoundsFilter = (props: {
               </div>
               <div className="relative flex flex-col gap-4 rounded-b-lg bg-white p-6">
                 <SelectFormField
-                  options={["NORMAL", "VENTILATOR", "ICU", "AUTOMATED"]}
-                  name="ordering"
+                  {...field("rounds_type")}
                   label={t("Round Type")}
+                  options={
+                    ["NORMAL", "VENTILATOR", "ICU", "AUTOMATED"] as const
+                  }
                   optionLabel={(o) => o}
                   optionValue={(o) => o}
-                  labelClassName="text-sm"
-                  errorClassName="hidden"
-                  value={filter?.rounds_type}
-                  onChange={({ value }) =>
-                    setFilter({
-                      ...filter,
-                      rounds_type: value,
-                    })
-                  }
                 />
-                <div>
-                  <TextFormField
-                    id={"2"}
-                    name="hihih"
-                    labelClassName="hihi"
-                    required
-                    className="w-full"
-                    label="Measured at"
-                    type="datetime-local"
-                    onChange={() => console.log("hi")}
-                    max={dayjs().format("YYYY-MM-DDTHH:mm")}
-                  />
-                  <TextFormField
-                    id={"11"}
-                    name="hihih"
-                    onChange={() => console.log("hi")}
-                    required
-                    className="w-full"
-                    label="From"
-                    type="datetime-local"
-                    max={dayjs().format("YYYY-MM-DDTHH:mm")}
-                  />
-                </div>
+                <TextFormField
+                  {...field("taken_at_after")}
+                  label="Measured after"
+                  type="datetime-local"
+                  max={dayjs().format("YYYY-MM-DDTHH:mm")}
+                />
+                <TextFormField
+                  {...field("taken_at_before")}
+                  label="Measured before"
+                  type="datetime-local"
+                  max={dayjs().format("YYYY-MM-DDTHH:mm")}
+                />
+
                 <Popover.Button>
                   <ButtonV2
                     variant="secondary"
-                    onClick={() => clearFilter()}
+                    onClick={() => {
+                      setFilter({});
+                      props.onApply({});
+                    }}
                     border
-                    className="tooltip !h-11 w-full"
+                    className="w-full"
                   >
                     Clear Filter
                   </ButtonV2>
@@ -108,18 +97,13 @@ export const DailyRoundsFilter = (props: {
                 <Popover.Button>
                   <ButtonV2
                     variant="primary"
-                    onClick={() =>
-                      props.onApply({
-                        query: filter,
-                      })
-                    }
+                    onClick={() => props.onApply(filter)}
                     border
-                    className="tooltip !h-11 w-full"
+                    className="w-full"
                   >
                     Apply Filter
                   </ButtonV2>
                 </Popover.Button>
-                ;
               </div>
             </div>
           </Popover.Panel>
@@ -127,4 +111,4 @@ export const DailyRoundsFilter = (props: {
       </Popover>
     </div>
   );
-};
+}
