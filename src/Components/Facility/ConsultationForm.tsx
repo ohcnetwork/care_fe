@@ -1198,9 +1198,7 @@ export const ConsultationForm = (props: any) => {
                     <div
                       className={classNames(
                         "col-span-6",
-                        state.form.route_to_facility &&
-                          [20, 30].includes(state.form.route_to_facility) &&
-                          "xl:col-span-3"
+                        state.form.route_to_facility === 30 && "xl:col-span-3"
                       )}
                       ref={fieldRef["admission_date"]}
                     >
