@@ -213,10 +213,10 @@ export const getBedTypes = ({
     : [];
 
   return [
-    { id: 1, text: "Non-Covid Ordinary Beds" },
-    { id: 150, text: "Non-Covid Oxygen beds" },
-    { id: 10, text: "Non-Covid ICU (ICU without ventilator)" },
-    { id: 20, text: "Non-Covid Ventilator (ICU with ventilator)" },
+    { id: 1, text: "Ordinary Beds" },
+    { id: 150, text: "Oxygen beds" },
+    { id: 10, text: "ICU (ICU without ventilator)" },
+    { id: 20, text: "Ventilator (ICU with ventilator)" },
     { id: 30, text: "Covid Ordinary Beds" },
     { id: 120, text: "Covid Oxygen beds" },
     { id: 110, text: "Covid ICU (ICU without ventilator)" },
