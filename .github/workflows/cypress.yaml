@@ -30,7 +30,7 @@ jobs:
 
       - name: Load Postgres 🐘 with SQL Dump
         run: |
-          docker compose up -f care/docker-compose.yaml -f care/docker-compose.pre-built.yaml -d db
+          docker compose -f care/docker-compose.yaml -f care/docker-compose.pre-built.yaml up -d db
           docker cp ./cypress/fixtures/db.sql care-db-1:/db.sql
           docker exec -it care-db-1 psql -U postgres password=postgres -f db.sql
 
