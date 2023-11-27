@@ -558,7 +558,6 @@ export const DailyRounds = (props: any) => {
                   {...field("resp")}
                   label="Respiratory Rate"
                   unit="bpm"
-                  required
                   start={0}
                   end={50}
                   step={1}
