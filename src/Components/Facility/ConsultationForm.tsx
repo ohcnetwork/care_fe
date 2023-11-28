@@ -946,7 +946,7 @@ export const ConsultationForm = (props: any) => {
                       required
                       label="Route to Facility"
                       {...field("route_to_facility")}
-                      disabled={isUpdate}
+                      disabled={isUpdate && !!state.form.route_to_facility} // For backwards compatibility; Allow in edit form only if route_to_facility is not set previously
                     />
                   </div>
 
