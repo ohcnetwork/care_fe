@@ -161,10 +161,10 @@ export default function PatientInfoCard(props: {
                 Number(consultation?.review_interval) > 0 && (
                   <div
                     className={
-                      "mb-2 inline-flex w-full items-center justify-center rounded-lg border border-gray-500 text-xs font-semibold leading-4 " +
+                      "mb-2 inline-flex w-full items-center justify-center rounded-lg border border-gray-500 p-1 text-xs font-semibold leading-4 " +
                       (dayjs().isBefore(patient.review_time)
-                        ? " bg-gray-100"
-                        : " bg-red-400 p-1 text-white")
+                        ? " bg-gray-100 "
+                        : " bg-red-400 text-white")
                     }
                   >
                     <i className="text-md fas fa-clock mr-2"></i>
@@ -291,7 +291,7 @@ export default function PatientInfoCard(props: {
                       )?.text
                     }{" "}
                     on{" "}
-                    {formatDate(
+                    {formatDateTime(
                       ["A", "DC"].includes(consultation?.suggestion ?? "")
                         ? consultation?.admission_date
                         : consultation?.created_date
@@ -441,14 +441,14 @@ export default function PatientInfoCard(props: {
                   (action: any, i) =>
                     action[3] && (
                       <div key={i}>
-                        <a
+                        <Link
                           key={i}
                           className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
                           href={
                             consultation?.admitted &&
                             !consultation?.current_bed &&
                             i === 1
-                              ? undefined
+                              ? ""
                               : `${action[0]}`
                           }
                           onClick={() => {
@@ -473,7 +473,7 @@ export default function PatientInfoCard(props: {
                             className={`care-l-${action[2]} text-lg text-primary-500`}
                           />
                           <span>{action[1]}</span>
-                        </a>
+                        </Link>
                         {action?.[4]?.[0] && (
                           <>
                             <p className="mt-1 text-xs text-red-500">

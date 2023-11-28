@@ -1,7 +1,7 @@
 import dayjs from "../../Utils/dayjs";
 import useSlug from "../../Common/hooks/useSlug";
 import useQuery from "../../Utils/request/useQuery";
-import { classNames, formatDateTime } from "../../Utils/utils";
+import { classNames, formatDateTime, formatTime } from "../../Utils/utils";
 import { MedicineAdministrationRecord, Prescription } from "./models";
 import MedicineRoutes from "./routes";
 import Timeline, {
@@ -120,7 +120,9 @@ const MedicineAdministeredNode = ({
         event={event}
         className={classNames(event.cancelled && "opacity-70")}
         // TODO: to add administered dosage when Titrated Prescriptions are implemented
-        // titleSuffix={`administered ${event.administration.dosage}.`}
+        titleSuffix={`administered the medicine at ${formatTime(
+          event.administration.administered_date
+        )}.`}
         actions={
           !event.cancelled &&
           !hideArchive && (
@@ -198,13 +200,14 @@ const compileEvents = (
   administrations
     .sort(
       (a, b) =>
-        new Date(a.created_date).getTime() - new Date(b.created_date).getTime()
+        new Date(a.administered_date!).getTime() -
+        new Date(b.administered_date!).getTime()
     )
     .forEach((administration) => {
       events.push({
         type: "administered",
         icon: "l-syringe",
-        timestamp: administration.created_date,
+        timestamp: administration.administered_date!,
         by: administration.administered_by,
         cancelled: !!administration.archived_on,
         administration,
