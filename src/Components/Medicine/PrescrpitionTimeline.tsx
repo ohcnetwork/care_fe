@@ -208,6 +208,7 @@ const compileEvents = (
         by: administration.administered_by,
         cancelled: !!administration.archived_on,
         administration,
+        dosage: administration.dosage,
         notes: administration.notes,
       });
     });
