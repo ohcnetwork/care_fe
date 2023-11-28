@@ -5,18 +5,18 @@ import {
   IAadhaarOtpTBody,
   ICheckAndGenerateMobileOtp,
   IConfirmMobileOtp,
+  IcreateHealthFacilityTBody,
   ICreateHealthIdRequest,
   ICreateHealthIdResponse,
   IGenerateMobileOtpTBody,
+  IgetAbhaCardTBody,
   IHealthFacility,
   IHealthId,
+  IinitiateAbdmAuthenticationTBody,
   ILinkABHANumber,
+  IpartialUpdateHealthFacilityTBody,
   ISearchByHealthIdTBody,
   IVerifyAadhaarOtpTBody,
-  IcreateHealthFacilityTBody,
-  IgetAbhaCardTBody,
-  IinitiateAbdmAuthenticationTBody,
-  IpartialUpdateHealthFacilityTBody,
 } from "../Components/ABDM/models";
 import {
   AssetBedBody,
@@ -30,7 +30,10 @@ import {
 } from "../Components/Assets/AssetTypes";
 import {
   ConsultationModel,
+  CreateBedBody,
   CurrentBed,
+  DailyRoundsBody,
+  DailyRoundsRes,
   FacilityModel,
   LocationModel,
   WardModel,
@@ -43,15 +46,19 @@ import {
   ILocalBodyByDistrict,
   IPartialUpdateExternalResult,
 } from "../Components/ExternalResult/models";
+
+import { Prescription } from "../Components/Medicine/models";
 import { UserModel } from "../Components/Users/models";
+import { DailyRoundsModel, PatientModel } from "../Components/Patient/models";
 import { PaginatedResponse } from "../Utils/request/types";
 import {
   NotificationData,
   PNconfigData,
 } from "../Components/Notifications/models";
-import { PatientModel } from "../Components/Patient/models";
+
 import { IComment, IResource } from "../Components/Resource/models";
 import { IShift } from "../Components/Shifting/models";
+import { HCXPolicyModel } from "../Components/HCX/models";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -92,7 +99,9 @@ const routes = {
     path: "/api/v1/auth/token/refresh/",
     method: "POST",
     TRes: Type<JwtTokenObtainPair>(),
-    TBody: Type<{ refresh: string }>(),
+    TBody: Type<{
+      refresh: string;
+    }>(),
   },
 
   token_verify: {
@@ -105,7 +114,9 @@ const routes = {
     method: "POST",
     noAuth: true,
     TRes: Type<Record<string, never>>(),
-    TBody: Type<{ token: string }>(),
+    TBody: Type<{
+      token: string;
+    }>(),
   },
 
   resetPassword: {
@@ -113,7 +124,10 @@ const routes = {
     method: "POST",
     noAuth: true,
     TRes: Type<Record<string, never>>(),
-    TBody: Type<{ password: string; confirm: string }>(),
+    TBody: Type<{
+      password: string;
+      confirm: string;
+    }>(),
   },
 
   forgotPassword: {
@@ -121,7 +135,9 @@ const routes = {
     method: "POST",
     noAuth: true,
     TRes: Type<Record<string, never>>(),
-    TBody: Type<{ username: string }>(),
+    TBody: Type<{
+      username: string;
+    }>(),
   },
 
   updatePassword: {
@@ -326,6 +342,9 @@ const routes = {
   deleteAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",
     method: "DELETE",
+    TRes: Type<null | {
+      detail?: string;
+    }>(),
   },
   operateAsset: {
     path: "/api/v1/asset/{external_id}/operate_assets/",
@@ -370,6 +389,8 @@ const routes = {
   createConsultationBed: {
     path: "/api/v1/consultationbed/",
     method: "POST",
+    TBody: Type<CreateBedBody>(),
+    TRes: Type<PaginatedResponse<CurrentBed>>(),
   },
   getConsultationBed: {
     path: "/api/v1/consultationbed/{external_id}/",
@@ -417,6 +438,8 @@ const routes = {
   },
   getConsultation: {
     path: "/api/v1/consultation/{id}/",
+    method: "GET",
+    TRes: Type<ConsultationModel>(),
   },
   updateConsultation: {
     path: "/api/v1/consultation/{id}/",
@@ -446,6 +469,8 @@ const routes = {
   },
   getDailyReports: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<DailyRoundsModel>>(),
   },
 
   getDailyReport: {
@@ -454,6 +479,8 @@ const routes = {
   dailyRoundsAnalyse: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/analyse/",
     method: "POST",
+    TBody: Type<DailyRoundsBody>(),
+    TRes: Type<DailyRoundsRes>(),
   },
 
   // Hospital Beds
@@ -1143,6 +1170,49 @@ const routes = {
     method: "GET",
   },
 
+  // Prescription endpoints
+
+  listPrescriptions: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/",
+    method: "GET",
+  },
+
+  createPrescription: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/",
+    method: "POST",
+    TBody: Type<Prescription>(),
+    TRes: Type<Prescription>(),
+  },
+
+  listAdministrations: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescription_administration/",
+    method: "GET",
+  },
+
+  getAdministration: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescription_administration/{external_id}/",
+    method: "GET",
+  },
+
+  getPrescription: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/",
+    method: "GET",
+  },
+
+  administerPrescription: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/administer/",
+    method: "POST",
+  },
+
+  discontinuePrescription: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/discontinue/",
+    method: "POST",
+    TBody: Type<{
+      discontinued_reason: string;
+    }>(),
+    TRes: Type<Record<string, never>>(),
+  },
+
   // HCX Endpoints
 
   listPMJYPackages: {
@@ -1163,6 +1233,7 @@ const routes = {
   listHCXPolicies: {
     path: "/api/v1/hcx/policy/",
     method: "GET",
+    TRes: Type<PaginatedResponse<HCXPolicyModel>>(),
   },
 
   createHCXPolicy: {
