@@ -457,7 +457,7 @@ export const DailyRounds = (props: any) => {
           />
         )}
         {state.form.clone_last === true && (
-          <p className="border border-green-800 bg-green-200 p-2 text-green-800">
+          <p className="rounded border border-green-800 bg-gray-200 p-2 text-green-800">
             Field values will be copied from previous log update
           </p>
         )}
