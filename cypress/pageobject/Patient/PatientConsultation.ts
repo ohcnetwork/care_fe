@@ -203,7 +203,6 @@ export class PatientConsultationPage {
   }
 
   addDoctorsNotes(notes: string) {
-    cy.get("#expand_doctor_notes").click();
     cy.get("#doctor_notes_textarea").type(notes);
   }
 
