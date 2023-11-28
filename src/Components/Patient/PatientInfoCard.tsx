@@ -443,6 +443,7 @@ export default function PatientInfoCard(props: {
               )
           )}
           <DropdownMenu
+            id="show-more"
             itemClassName="min-w-0 sm:min-w-[225px]"
             title={"Show More"}
             icon={<CareIcon icon="l-sliders-v-alt" />}
