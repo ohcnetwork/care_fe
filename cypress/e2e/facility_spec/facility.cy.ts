@@ -49,7 +49,7 @@ describe("Facility Creation", () => {
     facilityPage.visitUpdateFacilityPage(facilityUrl);
     facilityPage.clickManageFacilityDropdown();
     facilityPage.clickUpdateFacilityOption();
-    facilityPage.clickUpdateFacilityType();
+    facilityPage.clickUpdateFacilityType("Request Approving Center");
     facilityPage.fillFacilityName("cypress facility updated");
     facilityPage.fillAddress("Cypress Facility Updated Address");
     facilityPage.fillOxygenCapacity("100");
