@@ -4,17 +4,22 @@ import LoginPage from "../../pageobject/Login/LoginPage";
 import FacilityHome from "../../pageobject/Facility/FacilityHome";
 import ManageUserPage from "../../pageobject/Users/ManageUserPage";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
+import { UserPage } from "../../pageobject/Users/UserSearch";
 
-describe("Facility Creation", () => {
+describe("Facility Homepage Function", () => {
   const loginPage = new LoginPage();
   const facilityHome = new FacilityHome();
   const facilityPage = new FacilityPage();
   const manageUserPage = new ManageUserPage();
+  const userPage = new UserPage();
   const facilitiesAlias = "downloadFacilitiesCSV";
   const capacitiesAlias = "downloadCapacitiesCSV";
   const doctorsAlias = "downloadDoctorsCSV";
   const triagesAlias = "downloadTriagesCSV";
   const facilityname = "Dummy Facility 1";
+  const statename = "Kerala";
+  const district = "Ernakulam";
+  const facilitytype = "Private Hospital";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -24,6 +29,23 @@ describe("Facility Creation", () => {
   beforeEach(() => {
     cy.restoreLocalStorage();
     cy.awaitUrl("/facility");
+  });
+
+  it("Verify the functionality of advance filter", () => {
+    userPage.clickAdvancedFilters();
+    facilityPage.selectState(statename);
+    facilityPage.selectDistrict(district);
+    // facilityPage.selectLocalBody("Anthikad Grama"); current dummy data have issue in local body
+    facilityPage.clickUpdateFacilityType(facilitytype);
+    userPage.applyFilter();
+    facilityPage.verifyStateBadgeContent(statename);
+    facilityPage.verifyDistrictBadgeContent(district);
+    facilityPage.verifyFacilityTypeBadgeContent(facilitytype);
+    manageUserPage.assertFacilityInCard(facilityname);
+    userPage.clearFilters();
+    userPage.verifyDataTestIdNotVisible("State");
+    userPage.verifyDataTestIdNotVisible("District");
+    userPage.verifyDataTestIdNotVisible("Facility type");
   });
 
   it("Search a facility in homepage", () => {
