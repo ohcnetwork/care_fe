@@ -13,10 +13,6 @@ import {
 } from "../../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { lazy, useCallback, useState } from "react";
-import ButtonV2 from "../../Common/components/ButtonV2";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import DischargeModal from "../DischargeModal";
-import DischargeSummaryModal from "../DischargeSummaryModal";
 import DoctorVideoSlideover from "../DoctorVideoSlideover";
 import { make as Link } from "../../Common/components/Link.bs";
 import PatientInfoCard from "../../Patient/PatientInfoCard";
@@ -25,7 +21,6 @@ import { formatDateTime, relativeTime } from "../../../Utils/utils";
 
 import { navigate, useQueryParams } from "raviger";
 import { useDispatch } from "react-redux";
-import { useTranslation } from "react-i18next";
 import { triggerGoal } from "../../../Integrations/Plausible";
 import useAuthUser from "../../../Common/hooks/useAuthUser";
 import { ConsultationUpdatesTab } from "./ConsultationUpdatesTab";
@@ -73,7 +68,6 @@ const TABS = {
 };
 
 export const ConsultationDetails = (props: any) => {
-  const { t } = useTranslation();
   const { facilityId, patientId, consultationId } = props;
   const tab = props.tab.toUpperCase() as keyof typeof TABS;
   const dispatch: any = useDispatch();
@@ -86,9 +80,6 @@ export const ConsultationDetails = (props: any) => {
   );
   const [patientData, setPatientData] = useState<PatientModel>({});
   const [activeShiftingData, setActiveShiftingData] = useState<Array<any>>([]);
-  const [openDischargeSummaryDialog, setOpenDischargeSummaryDialog] =
-    useState(false);
-  const [openDischargeDialog, setOpenDischargeDialog] = useState(false);
   const [isCameraAttached, setIsCameraAttached] = useState(false);
 
   const getPatientGender = (patientData: any) =>
@@ -197,19 +188,6 @@ export const ConsultationDetails = (props: any) => {
 
   const SelectedTab = TABS[tab];
 
-  const hasActiveShiftingRequest = () => {
-    if (activeShiftingData.length > 0) {
-      return [
-        "PENDING",
-        "APPROVED",
-        "DESTINATION APPROVED",
-        "PATIENT TO BE PICKED UP",
-      ].includes(activeShiftingData[activeShiftingData.length - 1].status);
-    }
-
-    return false;
-  };
-
   if (isLoading) {
     return <Loading />;
   }
@@ -272,18 +250,6 @@ export const ConsultationDetails = (props: any) => {
 
   return (
     <div>
-      <DischargeSummaryModal
-        consultation={consultationData}
-        show={openDischargeSummaryDialog}
-        onClose={() => setOpenDischargeSummaryDialog(false)}
-      />
-
-      <DischargeModal
-        show={openDischargeDialog}
-        onClose={() => setOpenDischargeDialog(false)}
-        consultationData={consultationData}
-      />
-
       <div className="px-2 pb-2">
         <nav className="relative flex flex-wrap items-start justify-between">
           <PageTitle
@@ -307,34 +273,6 @@ export const ConsultationDetails = (props: any) => {
           <div className="flex w-full flex-col min-[1150px]:w-min min-[1150px]:flex-row min-[1150px]:items-center">
             {!consultationData.discharge_date && (
               <>
-                {hasActiveShiftingRequest() ? (
-                  <ButtonV2
-                    onClick={() =>
-                      navigate(
-                        `/shifting/${
-                          activeShiftingData[activeShiftingData.length - 1].id
-                        }`
-                      )
-                    }
-                    className="btn btn-primary mx-1 w-full p-1.5 px-4 hover:text-white"
-                  >
-                    <CareIcon className="care-l-ambulance h-5 w-5" />
-                    Track Shifting
-                  </ButtonV2>
-                ) : (
-                  <ButtonV2
-                    id="create_shift_request"
-                    onClick={() =>
-                      navigate(
-                        `/facility/${patientData.facility}/patient/${patientData.id}/shift/new`
-                      )
-                    }
-                    className="btn btn-primary mx-1 w-full p-1.5 px-4 hover:text-white"
-                  >
-                    <CareIcon className="care-l-ambulance h-5 w-5" />
-                    Shift Patient
-                  </ButtonV2>
-                )}
                 <button
                   onClick={() => {
                     triggerGoal("Doctor Connect Clicked", {
@@ -371,7 +309,13 @@ export const ConsultationDetails = (props: any) => {
             </Link>
             <Link
               id="patient_doctor_notes"
-              onClick={() => setShowPatientNotesPopup(true)}
+              onClick={() =>
+                showPatientNotesPopup
+                  ? navigate(
+                      `/facility/${facilityId}/patient/${patientId}/notes`
+                    )
+                  : setShowPatientNotesPopup(true)
+              }
               className="btn btn-primary m-1 w-full hover:text-white"
             >
               Doctor&apos;s Notes
@@ -385,6 +329,7 @@ export const ConsultationDetails = (props: any) => {
               consultation={consultationData}
               fetchPatientData={fetchData}
               consultationId={consultationId}
+              activeShiftingData={activeShiftingData}
               showAbhaProfile={qParams["show-abha-profile"] === "true"}
             />
 
@@ -447,21 +392,6 @@ export const ConsultationDetails = (props: any) => {
                     <i className="fas fa-check ml-2 fill-current text-lg text-green-500"></i>
                   </div>
                 )}
-              </div>
-              <div className="flex h-full w-full flex-col justify-end gap-2 text-right lg:flex-row">
-                <ButtonV2 onClick={() => setOpenDischargeSummaryDialog(true)}>
-                  <i className="fas fa-clipboard-list"></i>
-                  <span>{t("discharge_summary")}</span>
-                </ButtonV2>
-
-                <ButtonV2
-                  id="discharge_patient_from_care"
-                  onClick={() => setOpenDischargeDialog(true)}
-                  disabled={!!consultationData.discharge_date}
-                >
-                  <i className="fas fa-hospital-user"></i>
-                  <span>{t("discharge_from_care")}</span>
-                </ButtonV2>
               </div>
             </div>
             <div className="flex flex-col justify-between gap-2 p-4 md:flex-row">
