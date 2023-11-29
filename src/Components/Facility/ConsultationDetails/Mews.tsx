@@ -40,10 +40,10 @@ export const Mews = (props: {
   ];
 
   const mewsColorRange = [
-    [0, 2, "green"],
-    [3, 3, "yellow"],
-    [4, 5, "orange"],
-    [6, Infinity, "red"],
+    [0, 2, "bg-primary-500"],
+    [3, 3, "bg-yellow-300"],
+    [4, 5, "bg-warning-500"],
+    [6, Infinity, "bg-danger-500"],
   ];
 
   const getIndividualScore = (value: number | undefined, ranges: any[][]) => {
@@ -60,7 +60,7 @@ export const Mews = (props: {
       return (
         <div className="tooltip mt-2 text-gray-800">
           <p className="my-auto text-center text-2xl font-bold">N/A</p>
-          <div className="tooltip-text tooltip-left  text-sm font-medium lg:-translate-y-1/2">
+          <div className="tooltip-text  tooltip-left  text-sm font-medium lg:-translate-y-1/2">
             <p>Missing : </p>
             <div className="flex flex-col items-center justify-center">
               {typeof data !== "number" && data.map((x) => <span>{x}</span>)}
@@ -85,10 +85,10 @@ export const Mews = (props: {
             <p>Temperature : {props.rounds?.temperature}</p>
           </div>
           <div
-            className="mt-2 flex h-4 w-full flex-col items-center justify-center rounded-b-lg "
-            style={{
-              backgroundColor: getIndividualScore(Number(data), mewsColorRange),
-            }}
+            className={`mt-2 flex h-4 w-full flex-col items-center justify-center rounded-b-lg ${getIndividualScore(
+              Number(data),
+              mewsColorRange
+            )}`}
           ></div>
         </div>
       );
@@ -137,18 +137,14 @@ export const Mews = (props: {
   };
 
   return (
-    <>
-      {props.rounds && (
-        <div
-          className="flex flex-col justify-start rounded-lg border border-black"
-          style={{
-            height: "fit-content",
-          }}
-        >
-          <p className="px-2 pt-2 text-center">Mews Score</p>
-          {mewsScore()}
-        </div>
-      )}
-    </>
+    <div
+      className="flex flex-col justify-start rounded-lg border border-black"
+      style={{
+        height: "fit-content",
+      }}
+    >
+      <p className="px-2 pt-2 text-center">Mews Score</p>
+      {mewsScore()}
+    </div>
   );
 };
