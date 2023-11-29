@@ -188,6 +188,9 @@ const LiveFeed = (props: any) => {
   useEffect(() => {
     if (cameraAsset?.hostname) {
       fetchCameraPresets();
+      setTimeout(() => {
+        startStreamFeed();
+      }, 1000);
     }
   }, []);
 
@@ -214,6 +217,13 @@ const LiveFeed = (props: any) => {
       absoluteMove(bedPresets[0]?.position, {});
     }
   }, [page.offset, cameraAsset.id, refreshPresetsHash]);
+
+  const startStreamFeed = () => {
+    startStream({
+      onSuccess: () => setStreamStatus(StreamStatus.Playing),
+      onError: () => setStreamStatus(StreamStatus.Offline),
+    });
+  };
 
   const viewOptions = (page: number) => {
     return presets

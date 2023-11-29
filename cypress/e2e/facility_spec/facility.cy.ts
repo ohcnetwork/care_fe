@@ -31,7 +31,7 @@ describe("Facility Creation", () => {
     facilityPage.fillPhoneNumber("9898469865");
     facilityPage.submitForm();
 
-    facilityPage.selectBedType("Non-Covid Oxygen beds");
+    facilityPage.selectBedType("Oxygen beds");
     facilityPage.fillTotalCapacity("10");
     facilityPage.fillCurrentlyOccupied("5");
     facilityPage.saveAndExitBedCapacityForm();
