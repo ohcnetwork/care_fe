@@ -226,21 +226,23 @@ const LiveFeed = (props: any) => {
         }));
   };
   useEffect(() => {
-    let tId: any;
-    if (streamStatus !== StreamStatus.Playing) {
-      setStreamStatus(StreamStatus.Loading);
-      tId = setTimeout(() => {
-        startStream({
-          onSuccess: () => setStreamStatus(StreamStatus.Playing),
-          onError: () => setStreamStatus(StreamStatus.Offline),
-        });
-      }, 500);
-    }
+    if (!lockStatus) {
+      let tId: any;
+      if (streamStatus !== StreamStatus.Playing) {
+        setStreamStatus(StreamStatus.Loading);
+        tId = setTimeout(() => {
+          startStream({
+            onSuccess: () => setStreamStatus(StreamStatus.Playing),
+            onError: () => setStreamStatus(StreamStatus.Offline),
+          });
+        }, 500);
+      }
 
-    return () => {
-      clearTimeout(tId);
-    };
-  }, [startStream, streamStatus]);
+      return () => {
+        clearTimeout(tId);
+      };
+    }
+  }, [startStream, streamStatus, lockStatus]);
 
   const handlePagination = (cOffset: number) => {
     setPage({
@@ -324,7 +326,7 @@ const LiveFeed = (props: any) => {
     setLockStatus(data.is_locked);
     setLockedBy(data.locked_by);
     setWaitingUsers(data.waiting_users);
-    console.log(user);
+    console.log(data);
 
     // fix: waiting list appropriate text, add slideover to fetch updated data which will
     // resolve this issue automatically
@@ -448,121 +450,134 @@ const LiveFeed = (props: any) => {
         <div className="relative mt-4 flex flex-col gap-4 lg:flex-row">
           <div className="flex-1">
             {/* ADD VIDEO PLAYER HERE */}
-            <div className="relative mb-4 aspect-video w-full rounded bg-primary-100 lg:mb-0">
-              <video
-                id="mse-video"
-                autoPlay
-                muted
-                playsInline
-                className="z-10 h-full w-full"
-                ref={liveFeedPlayerRef}
-                onPlay={() => {
-                  setVideoStartTime(() => new Date());
-                }}
-                onWaiting={() => {
-                  const delay = calculateVideoLiveDelay();
-                  if (delay > 5) {
-                    setStreamStatus(StreamStatus.Loading);
-                  }
-                }}
-              ></video>
+            {lockStatus && lockedBy !== user?.username ? (
+              <div className="flex w-full items-center justify-center">
+                Asset locked
+              </div>
+            ) : (
+              <div className="relative mb-4 aspect-video w-full rounded bg-primary-100 lg:mb-0">
+                <video
+                  id="mse-video"
+                  autoPlay
+                  muted
+                  playsInline
+                  className="z-10 h-full w-full"
+                  ref={liveFeedPlayerRef}
+                  onPlay={() => {
+                    setVideoStartTime(() => new Date());
+                  }}
+                  onWaiting={() => {
+                    const delay = calculateVideoLiveDelay();
+                    if (delay > 5) {
+                      setStreamStatus(StreamStatus.Loading);
+                    }
+                  }}
+                ></video>
 
-              {streamStatus === StreamStatus.Playing &&
-                calculateVideoLiveDelay() > 3 && (
-                  <div className="absolute left-8 top-12 z-10 flex items-center gap-2 rounded-3xl bg-red-400 px-3 py-1.5 text-xs font-semibold text-gray-100">
-                    <CareIcon className="care-l-wifi-slash h-4 w-4" />
-                    <span>Slow Network Detected</span>
+                {streamStatus === StreamStatus.Playing &&
+                  calculateVideoLiveDelay() > 3 && (
+                    <div className="absolute left-8 top-12 z-10 flex items-center gap-2 rounded-3xl bg-red-400 px-3 py-1.5 text-xs font-semibold text-gray-100">
+                      <CareIcon className="care-l-wifi-slash h-4 w-4" />
+                      <span>Slow Network Detected</span>
+                    </div>
+                  )}
+
+                {loading && (
+                  <div className="absolute bottom-0 right-0 rounded-tl bg-white/75 p-4">
+                    <div className="flex items-center gap-2">
+                      <div className="an h-4 w-4 animate-spin rounded-full border-2 border-b-0 border-primary-500" />
+                      <p className="text-base font-bold">{loading}</p>
+                    </div>
                   </div>
                 )}
-
-              {loading && (
-                <div className="absolute bottom-0 right-0 rounded-tl bg-white/75 p-4">
-                  <div className="flex items-center gap-2">
-                    <div className="an h-4 w-4 animate-spin rounded-full border-2 border-b-0 border-primary-500" />
-                    <p className="text-base font-bold">{loading}</p>
-                  </div>
+                {/* { streamStatus > 0 && */}
+                <div className="absolute bottom-0 right-0 flex h-full w-full items-center justify-center p-4">
+                  {streamStatus === StreamStatus.Offline && (
+                    <div className="text-center">
+                      <p className="font-bold text-black">
+                        STATUS: <span className="text-red-600">OFFLINE</span>
+                      </p>
+                      <p className="font-semibold text-black">
+                        Feed is currently not live.
+                      </p>
+                      <p className="font-semibold text-black">
+                        Click refresh button to try again.
+                      </p>
+                    </div>
+                  )}
+                  {streamStatus === StreamStatus.Stop && (
+                    <div className="text-center">
+                      <p className="font-bold text-black">
+                        STATUS: <span className="text-red-600">STOPPED</span>
+                      </p>
+                      <p className="font-semibold text-black">
+                        Feed is Stooped.
+                      </p>
+                      <p className="font-semibold text-black">
+                        Click refresh button to start feed.
+                      </p>
+                    </div>
+                  )}
+                  {streamStatus === StreamStatus.Loading && (
+                    <div className="text-center">
+                      <p className="font-bold text-black">
+                        STATUS: <span className="text-red-600"> LOADING</span>
+                      </p>
+                      <p className="font-semibold text-black">
+                        Fetching latest feed.
+                      </p>
+                    </div>
+                  )}
                 </div>
-              )}
-              {/* { streamStatus > 0 && */}
-              <div className="absolute bottom-0 right-0 flex h-full w-full items-center justify-center p-4">
-                {streamStatus === StreamStatus.Offline && (
-                  <div className="text-center">
-                    <p className="font-bold text-black">
-                      STATUS: <span className="text-red-600">OFFLINE</span>
-                    </p>
-                    <p className="font-semibold text-black">
-                      Feed is currently not live.
-                    </p>
-                    <p className="font-semibold text-black">
-                      Click refresh button to try again.
-                    </p>
-                  </div>
-                )}
-                {streamStatus === StreamStatus.Stop && (
-                  <div className="text-center">
-                    <p className="font-bold text-black">
-                      STATUS: <span className="text-red-600">STOPPED</span>
-                    </p>
-                    <p className="font-semibold text-black">Feed is Stooped.</p>
-                    <p className="font-semibold text-black">
-                      Click refresh button to start feed.
-                    </p>
-                  </div>
-                )}
-                {streamStatus === StreamStatus.Loading && (
-                  <div className="text-center">
-                    <p className="font-bold text-black">
-                      STATUS: <span className="text-red-600"> LOADING</span>
-                    </p>
-                    <p className="font-semibold text-black">
-                      Fetching latest feed.
-                    </p>
-                  </div>
-                )}
               </div>
-            </div>
-            <div
-              className={`${
-                isExtremeSmallScreen ? " flex flex-wrap " : " md:flex "
-              } mt-4 max-w-lg`}
-            >
-              {cameraPTZ.map((option) => {
-                const shortcutKeyDescription =
-                  option.shortcutKey &&
-                  option.shortcutKey
-                    .join(" + ")
-                    .replace("Control", "Ctrl")
-                    .replace("ArrowUp", "↑")
-                    .replace("ArrowDown", "↓")
-                    .replace("ArrowLeft", "←")
-                    .replace("ArrowRight", "→");
+            )}
 
-                return (
-                  <button
-                    className="tooltip flex-1 border border-green-100 bg-green-100 p-2 hover:bg-green-200"
-                    onClick={option.callback}
-                  >
-                    <span className="sr-only">{option.label}</span>
-                    {option.icon ? (
-                      <CareIcon className={`care-${option.icon}`} />
-                    ) : (
-                      <span className="flex h-full w-8 items-center justify-center px-2 font-bold">
-                        {option.value}x
-                      </span>
-                    )}
-                    <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm font-semibold">{`${option.label}  (${shortcutKeyDescription})`}</span>
-                  </button>
-                );
-              })}
-              <div className="hideonmobilescreen pl-3">
-                <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
+            {lockedBy === user?.username && lockStatus ? (
+              <div
+                className={`${
+                  isExtremeSmallScreen ? " flex flex-wrap " : " md:flex "
+                } mt-4 max-w-lg`}
+              >
+                {cameraPTZ.map((option) => {
+                  const shortcutKeyDescription =
+                    option.shortcutKey &&
+                    option.shortcutKey
+                      .join(" + ")
+                      .replace("Control", "Ctrl")
+                      .replace("ArrowUp", "↑")
+                      .replace("ArrowDown", "↓")
+                      .replace("ArrowLeft", "←")
+                      .replace("ArrowRight", "→");
+
+                  return (
+                    <button
+                      className="tooltip flex-1 border border-green-100 bg-green-100 p-2 hover:bg-green-200"
+                      onClick={option.callback}
+                    >
+                      <span className="sr-only">{option.label}</span>
+                      {option.icon ? (
+                        <CareIcon className={`care-${option.icon}`} />
+                      ) : (
+                        <span className="flex h-full w-8 items-center justify-center px-2 font-bold">
+                          {option.value}x
+                        </span>
+                      )}
+                      <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm font-semibold">{`${option.label}  (${shortcutKeyDescription})`}</span>
+                    </button>
+                  );
+                })}
+                <div className="hideonmobilescreen pl-3">
+                  <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
+                </div>
               </div>
-            </div>
+            ) : (
+              <>Please lock the asset to gain move access</>
+            )}
           </div>
 
           <div className="mx-4 flex max-w-sm flex-col">
             <div className="flex flex-col gap-4">
-              {!lockStatus || (lockStatus && lockedBy === user?.username) ? (
+              {!lockStatus ? (
                 <div>
                   <button
                     onClick={() => {
@@ -602,160 +617,166 @@ const LiveFeed = (props: any) => {
               )}
               <button onClick={fetchAsset}>Refresh</button>
             </div>
-            <nav className="flex flex-wrap">
-              <button
-                className={`flex-1 p-4  text-center font-bold  text-gray-700 hover:text-gray-800  ${
-                  showDefaultPresets
-                    ? "border-b-2 border-primary-500 text-primary-600"
-                    : ""
-                }`}
-                onClick={() => {
-                  setShowDefaultPresets(true);
-                }}
-              >
-                Default Presets
-              </button>
-              <button
-                className={`flex-1 p-4  text-center font-bold  text-gray-700 hover:text-gray-800  ${
-                  !showDefaultPresets
-                    ? "border-b-2 border-primary-500 text-primary-600"
-                    : ""
-                }`}
-                onClick={() => {
-                  setShowDefaultPresets(false);
-                }}
-              >
-                Patient Presets
-              </button>
-            </nav>
-            <div className="my-2 w-full space-y-4">
-              <div
-                className={`grid ${
-                  isExtremeSmallScreen ? " sm:grid-cols-2 " : " grid-cols-2 "
-                } my-auto gap-2`}
-              >
-                {showDefaultPresets ? (
-                  <>
-                    {viewOptions(presetsPage)?.map((option: any, i) => (
+            {(!lockStatus || lockedBy === user?.username) && (
+              <div>
+                <nav className="flex flex-wrap">
+                  <button
+                    className={`flex-1 p-4  text-center font-bold  text-gray-700 hover:text-gray-800  ${
+                      showDefaultPresets
+                        ? "border-b-2 border-primary-500 text-primary-600"
+                        : ""
+                    }`}
+                    onClick={() => {
+                      setShowDefaultPresets(true);
+                    }}
+                  >
+                    Default Presets
+                  </button>
+                  <button
+                    className={`flex-1 p-4  text-center font-bold  text-gray-700 hover:text-gray-800  ${
+                      !showDefaultPresets
+                        ? "border-b-2 border-primary-500 text-primary-600"
+                        : ""
+                    }`}
+                    onClick={() => {
+                      setShowDefaultPresets(false);
+                    }}
+                  >
+                    Patient Presets
+                  </button>
+                </nav>
+                <div className="my-2 w-full space-y-4">
+                  <div
+                    className={`grid ${
+                      isExtremeSmallScreen
+                        ? " sm:grid-cols-2 "
+                        : " grid-cols-2 "
+                    } my-auto gap-2`}
+                  >
+                    {showDefaultPresets ? (
+                      <>
+                        {viewOptions(presetsPage)?.map((option: any, i) => (
+                          <button
+                            key={i}
+                            className="max- flex w-full flex-wrap gap-2 truncate rounded-md border border-white bg-green-100 p-3  text-black hover:bg-green-500 hover:text-white"
+                            onClick={() => {
+                              setLoading(`Moving to Preset ${option.label}`);
+                              gotoPreset(
+                                { preset: option.value },
+                                {
+                                  onSuccess: () => {
+                                    setLoading(undefined);
+                                    console.log("Preset Updated", option);
+                                  },
+                                }
+                              );
+                            }}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </>
+                    ) : (
+                      <>
+                        {bedPresets?.map((preset: any, index: number) => (
+                          <div className="flex flex-col">
+                            <button
+                              key={preset.id}
+                              className="flex flex-col truncate rounded-t-md border border-white bg-green-100 p-2  text-black hover:bg-green-500 hover:text-white"
+                              onClick={() => {
+                                setLoading("Moving");
+                                gotoBedPreset(preset);
+                                setCurrentPreset(preset);
+                                getBedPresets(cameraAsset?.id);
+                                fetchCameraPresets();
+                              }}
+                            >
+                              <span className="justify-start text-xs font-semibold">
+                                {preset.bed_object.name}
+                              </span>
+                              <span className="mx-auto">
+                                {preset.meta.preset_name
+                                  ? preset.meta.preset_name
+                                  : `Unnamed Preset ${index + 1}`}
+                              </span>
+                            </button>
+                            <div className="flex">
+                              <button
+                                onClick={() => setToUpdate(preset)}
+                                className="flex w-1/2 items-center justify-center gap-2 bg-green-200 py-1 text-sm text-green-800 hover:bg-green-800 hover:text-green-200 "
+                              >
+                                <i className="fa-solid fa-pencil"></i>
+                              </button>
+                              <button
+                                onClick={() => setToDelete(preset)}
+                                className="flex w-1/2 items-center justify-center gap-2 bg-red-200 py-1 text-sm text-red-800 hover:bg-red-800 hover:text-red-200 "
+                              >
+                                <i className="fa-solid fa-trash-can"></i>
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                  {/* Page Number Next and Prev buttons */}
+                  {showDefaultPresets ? (
+                    <div className="flex flex-row gap-1">
                       <button
-                        key={i}
-                        className="max- flex w-full flex-wrap gap-2 truncate rounded-md border border-white bg-green-100 p-3  text-black hover:bg-green-500 hover:text-white"
+                        className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
+                        disabled={presetsPage < 10}
                         onClick={() => {
-                          setLoading(`Moving to Preset ${option.label}`);
-                          gotoPreset(
-                            { preset: option.value },
-                            {
-                              onSuccess: () => {
-                                setLoading(undefined);
-                                console.log("Preset Updated", option);
-                              },
-                            }
-                          );
+                          setPresetsPage(presetsPage - 10);
                         }}
                       >
-                        {option.label}
+                        <i className="fas fa-arrow-left"></i>
                       </button>
-                    ))}
-                  </>
-                ) : (
-                  <>
-                    {bedPresets?.map((preset: any, index: number) => (
-                      <div className="flex flex-col">
-                        <button
-                          key={preset.id}
-                          className="flex flex-col truncate rounded-t-md border border-white bg-green-100 p-2  text-black hover:bg-green-500 hover:text-white"
-                          onClick={() => {
-                            setLoading("Moving");
-                            gotoBedPreset(preset);
-                            setCurrentPreset(preset);
-                            getBedPresets(cameraAsset?.id);
-                            fetchCameraPresets();
-                          }}
-                        >
-                          <span className="justify-start text-xs font-semibold">
-                            {preset.bed_object.name}
-                          </span>
-                          <span className="mx-auto">
-                            {preset.meta.preset_name
-                              ? preset.meta.preset_name
-                              : `Unnamed Preset ${index + 1}`}
-                          </span>
-                        </button>
-                        <div className="flex">
-                          <button
-                            onClick={() => setToUpdate(preset)}
-                            className="flex w-1/2 items-center justify-center gap-2 bg-green-200 py-1 text-sm text-green-800 hover:bg-green-800 hover:text-green-200 "
-                          >
-                            <i className="fa-solid fa-pencil"></i>
-                          </button>
-                          <button
-                            onClick={() => setToDelete(preset)}
-                            className="flex w-1/2 items-center justify-center gap-2 bg-red-200 py-1 text-sm text-red-800 hover:bg-red-800 hover:text-red-200 "
-                          >
-                            <i className="fa-solid fa-trash-can"></i>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </>
-                )}
+                      <button
+                        className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
+                        disabled={presetsPage >= presets?.length}
+                        onClick={() => {
+                          setPresetsPage(presetsPage + 10);
+                        }}
+                      >
+                        <i className="fas fa-arrow-right"></i>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-row gap-1">
+                      <button
+                        className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
+                        disabled={page.offset === 0}
+                        onClick={() => {
+                          handlePagination(page.offset - page.limit);
+                        }}
+                      >
+                        <i className="fas fa-arrow-left"></i>
+                      </button>
+                      <button
+                        className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
+                        disabled={page.offset + page.limit >= page.count}
+                        onClick={() => {
+                          handlePagination(page.offset + page.limit);
+                        }}
+                      >
+                        <i className="fas fa-arrow-right"></i>
+                      </button>
+                    </div>
+                  )}
+                  {props?.showRefreshButton && (
+                    <button
+                      className="w-full rounded-md border border-white bg-green-100 px-3 py-2 font-semibold text-black hover:bg-green-500 hover:text-white"
+                      onClick={() => {
+                        getBedPresets(cameraAsset?.id);
+                        fetchCameraPresets();
+                      }}
+                    >
+                      <CareIcon className="care-l-redo h-4 text-lg" /> Refresh
+                    </button>
+                  )}
+                </div>
               </div>
-              {/* Page Number Next and Prev buttons */}
-              {showDefaultPresets ? (
-                <div className="flex flex-row gap-1">
-                  <button
-                    className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
-                    disabled={presetsPage < 10}
-                    onClick={() => {
-                      setPresetsPage(presetsPage - 10);
-                    }}
-                  >
-                    <i className="fas fa-arrow-left"></i>
-                  </button>
-                  <button
-                    className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
-                    disabled={presetsPage >= presets?.length}
-                    onClick={() => {
-                      setPresetsPage(presetsPage + 10);
-                    }}
-                  >
-                    <i className="fas fa-arrow-right"></i>
-                  </button>
-                </div>
-              ) : (
-                <div className="flex flex-row gap-1">
-                  <button
-                    className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
-                    disabled={page.offset === 0}
-                    onClick={() => {
-                      handlePagination(page.offset - page.limit);
-                    }}
-                  >
-                    <i className="fas fa-arrow-left"></i>
-                  </button>
-                  <button
-                    className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
-                    disabled={page.offset + page.limit >= page.count}
-                    onClick={() => {
-                      handlePagination(page.offset + page.limit);
-                    }}
-                  >
-                    <i className="fas fa-arrow-right"></i>
-                  </button>
-                </div>
-              )}
-              {props?.showRefreshButton && (
-                <button
-                  className="w-full rounded-md border border-white bg-green-100 px-3 py-2 font-semibold text-black hover:bg-green-500 hover:text-white"
-                  onClick={() => {
-                    getBedPresets(cameraAsset?.id);
-                    fetchCameraPresets();
-                  }}
-                >
-                  <CareIcon className="care-l-redo h-4 text-lg" /> Refresh
-                </button>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </div>
