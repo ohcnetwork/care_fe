@@ -29,6 +29,7 @@ import routes from "../../Redux/api.js";
 import DropdownMenu from "../Common/components/Menu.js";
 import { triggerGoal } from "../../Integrations/Plausible.js";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
+import { Mews } from "../Facility/ConsultationDetails/Mews.js";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
@@ -313,6 +314,9 @@ export default function PatientInfoCard(props: {
               </div>
             )}
           </div>
+        </div>
+        <div className="flex w-full justify-center bg-white px-4 py-2 lg:w-5/12 lg:flex-row lg:justify-end lg:p-6">
+          <Mews rounds={consultation?.last_daily_round} />
         </div>
 
         <div className="flex w-full flex-col gap-2 px-4 py-1 lg:w-fit lg:p-6">
