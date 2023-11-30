@@ -152,15 +152,16 @@ export const FacilityCreate = (props: FacilityProps) => {
   const headerText = !facilityId ? "Create Facility" : "Update Facility";
   const buttonText = !facilityId ? "Save Facility" : "Update Facility";
 
-  const { data: districtData, loading: isDistrictLoading } = useQuery(
-    routes.getDistrictByState,
-    {
-      pathParams: {
-        id: String(stateId),
-      },
-      prefetch: !!stateId,
-    }
-  );
+  const {
+    data: districtData,
+    refetch: districtFetch,
+    loading: isDistrictLoading,
+  } = useQuery(routes.getDistrictByState, {
+    pathParams: {
+      id: String(stateId),
+    },
+    prefetch: !!stateId,
+  });
 
   const { data: localbodyData, loading: isLocalbodyLoading } = useQuery(
     routes.getLocalbodyByDistrict,
@@ -303,7 +304,10 @@ export const FacilityCreate = (props: FacilityProps) => {
       return includesIgnoreCase(state.name, pincodeDetails.statename);
     });
     if (!matchedState) return;
-    setStateId(matchedState.id);
+    console.log("matchedState.id", matchedState.id);
+    // setStateId(matchedState.id);
+    await districtFetch({ pathParams: { id: String(matchedState.id) } });
+    console.log("districtData", districtData);
     const fetchedDistricts = districtData;
     if (!fetchedDistricts) return;
 
@@ -793,7 +797,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     className={isWardLoading ? "animate-pulse" : ""}
                     disabled={isWardLoading}
                     placeholder="Choose Ward"
-                    options={(wardData ? [wardData.results[0]] : [])
+                    options={(wardData ? wardData.results : [])
                       .sort((a, b) => a.number - b.number)
                       .map((e) => {
                         return {
