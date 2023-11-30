@@ -110,6 +110,7 @@ export const Mews = (props: {
         temperatureRange
       ),
     };
+
     if (
       score.resp === undefined ||
       score.heartRate === undefined ||
