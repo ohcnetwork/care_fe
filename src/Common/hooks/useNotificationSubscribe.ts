@@ -10,10 +10,17 @@ import { useTranslation } from "react-i18next";
 import { Error } from "../../Utils/Notifications.js";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 
+type SubscriptionStatusType =
+  | ""
+  | "NotSubscribed"
+  | "SubscribedOnThisDevice"
+  | "SubscribedOnAnotherDevice";
+
 export default function useNotificationSubscribe() {
   const { username } = useAuthUser();
   const dispatch: any = useDispatch();
-  const [isSubscribed, setIsSubscribed] = useState("");
+  const [subscriptionStatus, setSubscriptionStatus] =
+    useState<SubscriptionStatusType>("");
   const [isSubscribing, setIsSubscribing] = useState(false);
   const { t } = useTranslation();
 
@@ -23,11 +30,11 @@ export default function useNotificationSubscribe() {
       const reg = await navigator.serviceWorker.ready;
       const subscription = await reg.pushManager.getSubscription();
       if (!subscription && !res?.data?.pf_endpoint) {
-        setIsSubscribed("NotSubscribed");
+        setSubscriptionStatus("NotSubscribed");
       } else if (subscription?.endpoint === res?.data?.pf_endpoint) {
-        setIsSubscribed("SubscribedOnThisDevice");
+        setSubscriptionStatus("SubscribedOnThisDevice");
       } else {
-        setIsSubscribed("SubscribedOnAnotherDevice");
+        setSubscriptionStatus("SubscribedOnAnotherDevice");
       }
     } catch (error) {
       Sentry.captureException(error);
@@ -35,7 +42,7 @@ export default function useNotificationSubscribe() {
   };
 
   const handleSubscribeClick = () => {
-    const status = isSubscribed;
+    const status = subscriptionStatus;
     if (status === "NotSubscribed" || status === "SubscribedOnAnotherDevice") {
       subscribe();
     } else {
@@ -62,7 +69,7 @@ export default function useNotificationSubscribe() {
                   updateUserPnconfig(data, { username: username })
                 );
 
-                setIsSubscribed("NotSubscribed");
+                setSubscriptionStatus("NotSubscribed");
                 setIsSubscribing(false);
               })
               .catch(function (_e) {
@@ -113,15 +120,15 @@ export default function useNotificationSubscribe() {
     );
 
     if (res.status >= 200 && res.status <= 300) {
-      setIsSubscribed("SubscribedOnThisDevice");
+      setSubscriptionStatus("SubscribedOnThisDevice");
     }
     setIsSubscribing(false);
   }
 
   return {
-    isSubscribed,
+    subscriptionStatus,
     isSubscribing,
-    setIsSubscribed,
+    setSubscriptionStatus,
     setIsSubscribing,
     handleSubscribeClick,
     intialSubscriptionState,
