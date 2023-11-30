@@ -286,7 +286,7 @@ const DischargeModal = ({
           }
         />
 
-        {preDischargeForm.discharge_reason !== "EXP" && (
+        {preDischargeForm.discharge_reason === "REC" && (
           <>
             <div className="mb-4">
               <FieldLabel>Discharge Prescription Medications</FieldLabel>
@@ -298,7 +298,7 @@ const DischargeModal = ({
             </div>
           </>
         )}
-        {["REF", "LAMA"].includes(preDischargeForm.discharge_reason) && (
+        {preDischargeForm.discharge_reason === "EXP" && (
           <TextFormField
             name="death_confirmed_by"
             label="Confirmed By"
