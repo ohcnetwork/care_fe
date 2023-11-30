@@ -43,6 +43,8 @@ import {
   IUserFacilityRequest,
   PatientStatsModel,
   WardModel,
+  LocationModel,
+  StateModel,
 } from "../Components/Facility/models";
 import {
   IDeleteExternalResult,
