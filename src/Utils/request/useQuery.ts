@@ -31,8 +31,10 @@ export default function useQuery<TData>(
           : options;
 
       setLoading(true);
+      const response = await request(route, resolvedOptions);
       setResponse(await request(route, resolvedOptions));
       setLoading(false);
+      return response;
     },
     [route, JSON.stringify(options)]
   );

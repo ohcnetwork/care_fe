@@ -1,7 +1,12 @@
 import * as Notification from "../../Utils/Notifications.js";
 
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
-import { CapacityModal, DoctorModal, FacilityRequest } from "./models";
+import {
+  CapacityModal,
+  DistrictModel,
+  DoctorModal,
+  FacilityRequest,
+} from "./models";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave.js";
 import {
   FACILITY_FEATURE_TYPES,
@@ -50,6 +55,7 @@ import { PhoneNumberValidator } from "../Form/FieldValidators.js";
 import request from "../../Utils/request/request.js";
 import routes from "../../Redux/api.js";
 import useQuery from "../../Utils/request/useQuery.js";
+import { RequestResult } from "../../Utils/request/types.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -304,11 +310,11 @@ export const FacilityCreate = (props: FacilityProps) => {
       return includesIgnoreCase(state.name, pincodeDetails.statename);
     });
     if (!matchedState) return;
-    console.log("matchedState.id", matchedState.id);
-    // setStateId(matchedState.id);
-    await districtFetch({ pathParams: { id: String(matchedState.id) } });
-    console.log("districtData", districtData);
-    const fetchedDistricts = districtData;
+
+    const newDistrictDataResult: RequestResult<DistrictModel[]> =
+      await districtFetch({ pathParams: { id: String(matchedState.id) } });
+    const fetchedDistricts: DistrictModel[] = newDistrictDataResult.data || [];
+
     if (!fetchedDistricts) return;
 
     const matchedDistrict = fetchedDistricts.find((district) => {
