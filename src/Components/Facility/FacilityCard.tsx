@@ -1,9 +1,6 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
-
-import { sendNotificationMessages } from "../../Redux/actions";
 import { FACILITY_FEATURE_TYPES } from "../../Common/constants";
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import * as Notification from "../../Utils/Notifications.js";
@@ -14,26 +11,28 @@ import DialogModal from "../Common/Dialog";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import useConfig from "../../Common/hooks/useConfig";
 import { classNames } from "../../Utils/utils";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 export const FacilityCard = (props: { facility: any; userType: any }) => {
   const { facility, userType } = props;
   const { kasp_string } = useConfig();
 
   const { t } = useTranslation();
-  const dispatchAction: any = useDispatch();
   const [notifyModalFor, setNotifyModalFor] = useState(undefined);
   const [notifyMessage, setNotifyMessage] = useState("");
   const [notifyError, setNotifyError] = useState("");
 
   const handleNotifySubmit = async (id: any) => {
-    const data = {
-      facility: id,
-      message: notifyMessage,
-    };
-    if (data.message.trim().length >= 1) {
+    if (notifyMessage.trim().length >= 1) {
       setNotifyError("");
-      const res = await dispatchAction(sendNotificationMessages(data));
-      if (res && res.status == 204) {
+      const { res } = await request(routes.sendNotificationMessages, {
+        body: {
+          facility: id,
+          message: notifyMessage,
+        },
+      });
+      if (res?.ok) {
         Notification.Success({
           msg: "Facility Notified",
         });
