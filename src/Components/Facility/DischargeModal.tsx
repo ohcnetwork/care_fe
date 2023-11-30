@@ -8,9 +8,7 @@ import ClaimDetailCard from "../HCX/ClaimDetailCard";
 import { ConsultationModel } from "./models";
 import CreateClaimCard from "../HCX/CreateClaimCard";
 import { DISCHARGE_REASONS } from "../../Common/constants";
-import DateFormField from "../Form/FormFields/DateFormField";
 import DialogModal from "../Common/Dialog";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { HCXActions } from "../../Redux/actions";
 import { HCXClaimModel } from "../HCX/models";
@@ -161,26 +159,12 @@ const DischargeModal = ({
 
     setIsSendingDischargeApi(false);
     if (dischargeResponse?.status === 200) {
-      // TODO: check this later
-      //   const dischargeData = Object.assign({}, patientData);
-      //   dischargeData["discharge"] = value;
-      //   setPatientData(dischargeData);
-
       Notification.Success({
         msg: "Patient Discharged Successfully",
       });
 
       afterSubmit();
     }
-  };
-
-  const handleDateChange = (e: FieldChangeEvent<Date>) => {
-    setPreDischargeForm((form) => {
-      return {
-        ...form,
-        discharge_date: e.value.toString(),
-      };
-    });
   };
 
   const handleFacilitySelect = (selected: FacilityModel) => {
@@ -266,18 +250,27 @@ const DischargeModal = ({
         />
         {preDischargeForm.discharge_reason === "REC" && (
           <div>
-            <DateFormField
-              position="LEFT"
-              label="Discharge Date"
+            <TextFormField
+              label="Date and Time of Discharge"
               name="discharge_date"
-              value={dayjs(preDischargeForm?.discharge_date).toDate()}
+              required
+              type="datetime-local"
+              value={dayjs(preDischargeForm?.discharge_date).format(
+                "YYYY-MM-DDTHH:mm"
+              )}
               min={dayjs(
                 consultationData?.admission_date ??
                   consultationData?.created_date
-              ).toDate()}
-              disableFuture={true}
-              required
-              onChange={handleDateChange}
+              ).format("YYYY-MM-DDTHH:mm")}
+              max={dayjs().format("YYYY-MM-DDTHH:mm")}
+              onChange={(e) => {
+                setPreDischargeForm((form) => {
+                  return {
+                    ...form,
+                    discharge_date: e.value,
+                  };
+                });
+              }}
             />
 
             <div className="mb-4">
@@ -330,17 +323,27 @@ const DischargeModal = ({
         )}
         {["REF", "LAMA"].includes(preDischargeForm.discharge_reason) && (
           <div>
-            <DateFormField
-              label="Date of Discharge"
+            <TextFormField
+              label="Date and Time of Discharge"
               name="discharge_date"
-              value={dayjs(preDischargeForm.discharge_date).toDate()}
+              required
+              type="datetime-local"
+              value={dayjs(preDischargeForm?.discharge_date).format(
+                "YYYY-MM-DDTHH:mm"
+              )}
               min={dayjs(
                 consultationData?.admission_date ??
                   consultationData?.created_date
-              ).toDate()}
-              disableFuture={true}
-              required
-              onChange={handleDateChange}
+              ).format("YYYY-MM-DDTHH:mm")}
+              max={dayjs().format("YYYY-MM-DDTHH:mm")}
+              onChange={(e) => {
+                setPreDischargeForm((form) => {
+                  return {
+                    ...form,
+                    discharge_date: e.value,
+                  };
+                });
+              }}
             />
           </div>
         )}
