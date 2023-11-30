@@ -119,8 +119,9 @@ const MedicineAdministeredNode = ({
         name="medicine"
         event={event}
         className={classNames(event.cancelled && "opacity-70")}
-        // TODO: to add administered dosage when Titrated Prescriptions are implemented
-        titleSuffix={`administered the medicine at ${formatTime(
+        titleSuffix={`administered ${
+          event.administration.dosage
+        } dose of the medicine at ${formatTime(
           event.administration.administered_date
         )}.`}
         actions={
@@ -211,7 +212,6 @@ const compileEvents = (
         by: administration.administered_by,
         cancelled: !!administration.archived_on,
         administration,
-        dosage: administration.dosage,
         notes: administration.notes,
       });
     });

@@ -10,7 +10,6 @@ export interface TimelineEvent<TType = string> {
   by: PerformedByModel | undefined;
   icon: IconName;
   notes?: string;
-  dosage?: string;
   cancelled?: boolean;
 }
 
@@ -100,7 +99,6 @@ export const TimelineNode = (props: TimelineNodeProps) => {
         </div>
 
         <div className="flex w-full flex-col items-start gap-y-2 pl-10">
-          <TimelineNodeDosage>{props.event.dosage}</TimelineNodeDosage>
           <TimelineNodeNotes>{props.event.notes}</TimelineNodeNotes>
           {props.children}
         </div>
@@ -146,22 +144,6 @@ interface TimelineNodeNotesProps {
 export const TimelineNodeNotes = ({
   children,
   icon = "l-notes",
-}: TimelineNodeNotesProps) => {
-  if (!children) {
-    return;
-  }
-
-  return (
-    <div className="flex w-full items-start gap-2 rounded-md p-3 ring-1 ring-inset ring-gray-200">
-      <CareIcon icon={icon} className="text-lg text-gray-700" />
-      <div className="mt-1 flex-auto text-xs text-gray-700">{children}</div>
-    </div>
-  );
-};
-
-export const TimelineNodeDosage = ({
-  children,
-  icon = "l-capsule",
 }: TimelineNodeNotesProps) => {
   if (!children) {
     return;
