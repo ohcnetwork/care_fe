@@ -50,7 +50,7 @@ export const Mews = (props: { consultationId: string }) => {
 
   const consciousnessCalculator = (value: string | undefined) => {
     switch (value) {
-      case "Alert":
+      case "ALERT":
         return 0;
       case "RESPONDS_TO_VOICE":
       case "AGITATED_OR_CONFUSED":
