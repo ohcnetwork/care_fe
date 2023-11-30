@@ -146,7 +146,7 @@ export const AddInventoryForm = (props: any) => {
     if (unitName === "Dozen") {
       return Number(unitData.quantity) * 12;
     }
-    if (unitName === "Gram") {
+    if (unitName === "gram") {
       return Number(unitData.quantity) / 1000;
     }
     return Number(unitData.quantity);
@@ -238,6 +238,11 @@ export const AddInventoryForm = (props: any) => {
     };
     // if user has selected "Add stock" or "stockValidation" function is true
     if (data.is_incoming || stockValidation(data)) {
+      // if user has selected grams as unit then convert it to kg
+      if (data.unit === 5) {
+        data.quantity = data.quantity / 1000;
+        data.unit = 6;
+      }
       const res = await dispatchAction(postInventory(data, { facilityId }));
       setIsLoading(false);
 
