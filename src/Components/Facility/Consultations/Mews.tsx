@@ -1,6 +1,75 @@
 import useQuery from "../../../Utils/request/useQuery";
 import routes from "../../../Redux/api";
 
+const respRange = [
+  [-Infinity, 7, 2],
+  [8, 8, 1],
+  [9, 17, 0],
+  [18, 20, 1],
+  [21, 29, 2],
+  [30, Infinity, 3],
+];
+
+const heartRateRange = [
+  [-Infinity, 39, 2],
+  [40, 50, 1],
+  [51, 100, 0],
+  [101, 110, 1],
+  [111, 129, 2],
+  [130, Infinity, 3],
+];
+
+const systolicBloodPressureRange = [
+  [-Infinity, 70, 3],
+  [71, 80, 2],
+  [81, 100, 1],
+  [101, 159, 0],
+  [160, 199, 1],
+  [200, 220, 2],
+  [221, Infinity, 3],
+];
+
+const temperatureRange = [
+  [-Infinity, 94.9, 2],
+  [95, 96.8, 1],
+  [96.9, 100.4, 0],
+  [100.5, 101.3, 1],
+  [101.4, Infinity, 2],
+];
+
+const consciousnessCalculator = (value: string | undefined) => {
+  switch (value) {
+    case "ALERT":
+      return 0;
+    case "RESPONDS_TO_VOICE":
+    case "AGITATED_OR_CONFUSED":
+      return 1;
+    case "RESPONDS_TO_PAIN":
+    case "ONSET_OF_AGITATION_AND_CONFUSION":
+      return 2;
+    case "UNRESPONSIVE":
+      return 3;
+    default:
+      return undefined;
+  }
+};
+
+const mewsColorRange = [
+  [0, 2, "bg-primary-500"],
+  [3, 3, "bg-yellow-300"],
+  [4, 5, "bg-warning-500"],
+  [6, Infinity, "bg-danger-500"],
+];
+
+const getIndividualScore = (value: number | undefined, ranges: any[][]) => {
+  if (value === undefined || value === null) return undefined;
+  for (const [min, max, score] of ranges) {
+    if (value >= min && value <= max) {
+      return score;
+    }
+  }
+};
+
 export const Mews = (props: { consultationId: string }) => {
   const { data: dailyRoundsData } = useQuery(routes.getDailyReports, {
     pathParams: {
@@ -11,75 +80,6 @@ export const Mews = (props: { consultationId: string }) => {
       limit: 1,
     },
   });
-
-  const respRange = [
-    [-Infinity, 7, 2],
-    [8, 8, 1],
-    [9, 17, 0],
-    [18, 20, 1],
-    [21, 29, 2],
-    [30, Infinity, 3],
-  ];
-
-  const heartRateRange = [
-    [-Infinity, 39, 2],
-    [40, 50, 1],
-    [51, 100, 0],
-    [101, 110, 1],
-    [111, 129, 2],
-    [130, Infinity, 3],
-  ];
-
-  const systolicBloodPressureRange = [
-    [-Infinity, 70, 3],
-    [71, 80, 2],
-    [81, 100, 1],
-    [101, 159, 0],
-    [160, 199, 1],
-    [200, 220, 2],
-    [221, Infinity, 3],
-  ];
-
-  const temperatureRange = [
-    [-Infinity, 94.9, 2],
-    [95, 96.8, 1],
-    [96.9, 100.4, 0],
-    [100.5, 101.3, 1],
-    [101.4, Infinity, 2],
-  ];
-
-  const consciousnessCalculator = (value: string | undefined) => {
-    switch (value) {
-      case "ALERT":
-        return 0;
-      case "RESPONDS_TO_VOICE":
-      case "AGITATED_OR_CONFUSED":
-        return 1;
-      case "RESPONDS_TO_PAIN":
-      case "ONSET_OF_AGITATION_AND_CONFUSION":
-        return 2;
-      case "UNRESPONSIVE":
-        return 3;
-      default:
-        return undefined;
-    }
-  };
-
-  const mewsColorRange = [
-    [0, 2, "bg-primary-500"],
-    [3, 3, "bg-yellow-300"],
-    [4, 5, "bg-warning-500"],
-    [6, Infinity, "bg-danger-500"],
-  ];
-
-  const getIndividualScore = (value: number | undefined, ranges: any[][]) => {
-    if (value === undefined || value === null) return undefined;
-    for (const [min, max, score] of ranges) {
-      if (value >= min && value <= max) {
-        return score;
-      }
-    }
-  };
 
   const mewsCard = (isMissing: boolean, data: string[] | number) => {
     if (isMissing) {
@@ -93,12 +93,7 @@ export const Mews = (props: { consultationId: string }) => {
                 data.map((x, id) => <span key={id}>{x}</span>)}
             </div>
           </div>
-          <div
-            className="mt-2 flex h-4 w-full flex-col items-center justify-center rounded-b-lg "
-            style={{
-              backgroundColor: "gray",
-            }}
-          ></div>
+          <div className="mt-2 flex h-4 w-full flex-col items-center justify-center rounded-b-lg bg-gray-500 "></div>
         </div>
       );
     } else {
@@ -177,13 +172,10 @@ export const Mews = (props: { consultationId: string }) => {
   return (
     <>
       {dailyRoundsData?.results[0].rounds_type === "VENTILATOR" && (
-        <div
-          className="flex flex-col justify-start rounded-lg border border-black"
-          style={{
-            height: "fit-content",
-          }}
-        >
-          <p className="px-2 pt-2 text-center">Mews Score</p>
+        <div className="flex h-fit flex-col justify-start rounded-lg border border-black">
+          <p className="px-2 pt-2 text-center font-bold text-gray-900">
+            Mews Score
+          </p>
           {mewsScore()}
         </div>
       )}
