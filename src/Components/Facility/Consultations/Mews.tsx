@@ -1,8 +1,17 @@
-import { ConsultationModel } from "../models";
+import useQuery from "../../../Utils/request/useQuery";
+import routes from "../../../Redux/api";
 
-export const Mews = (props: {
-  rounds: ConsultationModel["last_daily_round"] | undefined;
-}) => {
+export const Mews = (props: { consultationId: string }) => {
+  const { data: dailyRoundsData } = useQuery(routes.getDailyReports, {
+    pathParams: {
+      consultationId: props.consultationId,
+    },
+    query: {
+      rounds_type: "NORMAL,VENTILATOR,ICU",
+      limit: 1,
+    },
+  });
+
   const respRange = [
     [-Infinity, 7, 2],
     [8, 8, 1],
@@ -39,13 +48,15 @@ export const Mews = (props: {
     [101.4, Infinity, 2],
   ];
 
-  const consciousnessCalculator = (value: string) => {
+  const consciousnessCalculator = (value: string | undefined) => {
     switch (value) {
       case "Alert":
         return 0;
-      case "RESPONDS_TO_VOICE" || "AGITATED_OR_CONFUSED":
+      case "RESPONDS_TO_VOICE":
+      case "AGITATED_OR_CONFUSED":
         return 1;
-      case "RESPONDS_TO_PAIN" || "ONSET_OF_AGITATION_AND_CONFUSION":
+      case "RESPONDS_TO_PAIN":
+      case "ONSET_OF_AGITATION_AND_CONFUSION":
         return 2;
       case "UNRESPONSIVE":
         return 3;
@@ -94,11 +105,14 @@ export const Mews = (props: {
         <div className="tooltip mt-2">
           <p className="my-auto text-center text-2xl font-bold">{data} </p>
           <div className="tooltip-text tooltip-left  text-sm font-medium lg:-translate-y-1/2">
-            <p>Respiratory rate : {props.rounds?.resp}</p>
-            <p>Heart rate : {props.rounds?.pulse}</p>
-            <p>Systolic BP : {props.rounds?.bp.systolic}</p>
-            <p>Temperature : {props.rounds?.temperature}</p>
-            <p>Consciousness Level : {props.rounds?.consciousness_level}</p>
+            <p>Respiratory rate : {dailyRoundsData?.results[0].resp}</p>
+            <p>Heart rate : {dailyRoundsData?.results[0].pulse}</p>
+            <p>Systolic BP : {dailyRoundsData?.results[0].bp?.systolic}</p>
+            <p>Temperature : {dailyRoundsData?.results[0].temperature}</p>
+            <p>
+              Consciousness Level :{" "}
+              {dailyRoundsData?.results[0].consciousness_level}
+            </p>
           </div>
           <div
             className={`mt-2 flex h-4 w-full flex-col items-center justify-center rounded-b-lg ${getIndividualScore(
@@ -112,25 +126,23 @@ export const Mews = (props: {
   };
 
   const mewsScore = () => {
-    const lastDailyRound = props.rounds || {};
+    const lastDailyRound = dailyRoundsData?.results[0];
 
     const score = {
-      resp: getIndividualScore(lastDailyRound.resp, respRange),
-      heartRate: getIndividualScore(lastDailyRound.pulse, heartRateRange),
+      resp: getIndividualScore(lastDailyRound?.resp, respRange),
+      heartRate: getIndividualScore(lastDailyRound?.pulse, heartRateRange),
       systolicBloodPressure: getIndividualScore(
-        lastDailyRound.bp.systolic,
+        lastDailyRound?.bp?.systolic,
         systolicBloodPressureRange
       ),
       temperature: getIndividualScore(
-        lastDailyRound.temperature,
+        Number(lastDailyRound?.temperature),
         temperatureRange
       ),
       consciousnessLevel: consciousnessCalculator(
-        lastDailyRound.consciousness_level
+        lastDailyRound?.consciousness_level
       ),
     };
-
-    console.log(score);
 
     if (
       score.resp === undefined ||
@@ -162,14 +174,18 @@ export const Mews = (props: {
   };
 
   return (
-    <div
-      className="flex flex-col justify-start rounded-lg border border-black"
-      style={{
-        height: "fit-content",
-      }}
-    >
-      <p className="px-2 pt-2 text-center">Mews Score</p>
-      {mewsScore()}
-    </div>
+    <>
+      {dailyRoundsData?.results[0].rounds_type === "VENTILATOR" && (
+        <div
+          className="flex flex-col justify-start rounded-lg border border-black"
+          style={{
+            height: "fit-content",
+          }}
+        >
+          <p className="px-2 pt-2 text-center">Mews Score</p>
+          {mewsScore()}
+        </div>
+      )}
+    </>
   );
 };
