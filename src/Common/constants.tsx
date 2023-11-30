@@ -213,10 +213,10 @@ export const getBedTypes = ({
     : [];
 
   return [
-    { id: 1, text: "Non-Covid Ordinary Beds" },
-    { id: 150, text: "Non-Covid Oxygen beds" },
-    { id: 10, text: "Non-Covid ICU (ICU without ventilator)" },
-    { id: 20, text: "Non-Covid Ventilator (ICU with ventilator)" },
+    { id: 1, text: "Ordinary Beds" },
+    { id: 150, text: "Oxygen beds" },
+    { id: 10, text: "ICU (ICU without ventilator)" },
+    { id: 20, text: "Ventilator (ICU with ventilator)" },
     { id: 30, text: "Covid Ordinary Beds" },
     { id: 120, text: "Covid Oxygen beds" },
     { id: 110, text: "Covid ICU (ICU without ventilator)" },
@@ -330,14 +330,6 @@ export const CONSULTATION_SUGGESTION = [
   { id: "OP", text: "OP Consultation" },
   { id: "DC", text: "Domiciliary Care" },
   { id: "DD", text: "Declare Death" },
-];
-
-export const CONSULTATION_STATUS = [
-  { id: "1", text: "Brought Dead" },
-  { id: "2", text: "Transferred from ward" },
-  { id: "3", text: "Transferred from ICU" },
-  { id: "4", text: "Referred from other hospital" },
-  { id: "5", text: "Out-patient (walk in)" },
 ];
 
 export const ADMITTED_TO = [
@@ -609,6 +601,11 @@ export const NOTIFICATION_EVENTS = [
     id: "SHIFTING_UPDATED",
     text: "Shifting Updated",
     icon: "fa-solid fa-truck-medical",
+  },
+  {
+    id: "PATIENT_NOTE_ADDED",
+    text: "Patient Note Added",
+    icon: "fa-solid fa-message",
   },
 ];
 
@@ -1021,6 +1018,23 @@ export const XLSXAssetImportSchema = {
       },
     },
   },
+};
+
+export const USER_TYPES_MAP = {
+  Pharmacist: "Pharmacist",
+  Volunteer: "Volunteer",
+  StaffReadOnly: "Staff",
+  Staff: "Staff",
+  Doctor: "Doctor",
+  WardAdmin: "Ward Admin",
+  LocalBodyAdmin: "Local Body Admin",
+  DistrictLabAdmin: "District Lab Admin",
+  DistrictReadOnlyAdmin: "District Admin",
+  DistrictAdmin: "District Admin",
+  StateLabAdmin: "State Lab Admin",
+  StateReadOnlyAdmin: "State Admin",
+  StateAdmin: "State Admin",
+  RemoteSpecialist: "Remote Specialist",
 };
 
 export const AREACODES: Record<string, string[]> = {
