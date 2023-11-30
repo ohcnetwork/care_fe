@@ -177,7 +177,7 @@ const routes = {
   userListFacility: {
     path: "/api/v1/users/{username}/get_facilities/",
     method: "GET",
-    TRes: Type<UserModel>(),
+    TRes: Type<FacilityModel[]>(),
   },
 
   addUserFacility: {
