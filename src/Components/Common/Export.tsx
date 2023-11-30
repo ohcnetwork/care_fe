@@ -40,7 +40,7 @@ export const ExportMenu = ({
   const { isExporting, exportFile } = useExport();
 
   return (
-    <div key="export-menu">
+    <div key="export-menu" id="export-button">
       <DropdownMenu
         disabled={isExporting || disabled}
         title={isExporting ? "Exporting..." : label}

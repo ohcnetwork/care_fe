@@ -203,7 +203,6 @@ export class PatientConsultationPage {
   }
 
   addDoctorsNotes(notes: string) {
-    cy.get("#expand_doctor_notes").click();
     cy.get("#doctor_notes_textarea").type(notes);
   }
 
@@ -214,7 +213,8 @@ export class PatientConsultationPage {
   }
 
   clickDischargePatient() {
-    cy.get("#discharge_patient_from_care").click();
+    cy.get("#show-more").click();
+    cy.contains("p", "Discharge from CARE").click();
   }
 
   selectDischargeReason(reason: string) {

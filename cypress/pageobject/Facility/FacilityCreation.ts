@@ -17,11 +17,11 @@ class FacilityPage {
     cy.get("#manage-facility-dropdown button").should("be.visible");
   }
 
-  clickUpdateFacilityType() {
+  clickUpdateFacilityType(facilityType) {
     cy.get("#facility_type")
       .click()
       .then(() => {
-        cy.get("[role='option']").contains("Request Approving Center").click();
+        cy.get("[role='option']").contains(facilityType).click();
       });
   }
 
@@ -193,6 +193,18 @@ class FacilityPage {
       "contain",
       expectedText
     );
+  }
+
+  verifyStateBadgeContent(expectedText: string) {
+    cy.get("[data-testid='State']").should("contain", expectedText);
+  }
+
+  verifyDistrictBadgeContent(expectedText: string) {
+    cy.get("[data-testid='District']").should("contain", expectedText);
+  }
+
+  verifyFacilityTypeBadgeContent(expectedText: string) {
+    cy.get("[data-testid='Facility type']").should("contain", expectedText);
   }
 
   verifyfacilitycreateassetredirection() {
