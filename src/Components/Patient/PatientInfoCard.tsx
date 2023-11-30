@@ -29,7 +29,7 @@ import routes from "../../Redux/api.js";
 import DropdownMenu from "../Common/components/Menu.js";
 import { triggerGoal } from "../../Integrations/Plausible.js";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
-import { Mews } from "../Facility/ConsultationDetails/Mews.js";
+import { Mews } from "../Facility/Consultations/Mews.js";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;

@@ -39,6 +39,21 @@ export const Mews = (props: {
     [101.4, Infinity, 2],
   ];
 
+  const consciousnessCalculator = (value: string) => {
+    switch (value) {
+      case "Alert":
+        return 0;
+      case "RESPONDS_TO_VOICE" || "AGITATED_OR_CONFUSED":
+        return 1;
+      case "RESPONDS_TO_PAIN" || "ONSET_OF_AGITATION_AND_CONFUSION":
+        return 2;
+      case "UNRESPONSIVE":
+        return 3;
+      default:
+        return undefined;
+    }
+  };
+
   const mewsColorRange = [
     [0, 2, "bg-primary-500"],
     [3, 3, "bg-yellow-300"],
@@ -83,6 +98,7 @@ export const Mews = (props: {
             <p>Heart rate : {props.rounds?.pulse}</p>
             <p>Systolic BP : {props.rounds?.bp.systolic}</p>
             <p>Temperature : {props.rounds?.temperature}</p>
+            <p>Consciousness Level : {props.rounds?.consciousness_level}</p>
           </div>
           <div
             className={`mt-2 flex h-4 w-full flex-col items-center justify-center rounded-b-lg ${getIndividualScore(
@@ -109,13 +125,19 @@ export const Mews = (props: {
         lastDailyRound.temperature,
         temperatureRange
       ),
+      consciousnessLevel: consciousnessCalculator(
+        lastDailyRound.consciousness_level
+      ),
     };
+
+    console.log(score);
 
     if (
       score.resp === undefined ||
       score.heartRate === undefined ||
       score.systolicBloodPressure === undefined ||
-      score.temperature === undefined
+      score.temperature === undefined ||
+      score.consciousnessLevel === undefined
     ) {
       return mewsCard(
         true,
@@ -124,6 +146,7 @@ export const Mews = (props: {
           score.heartRate === undefined ? "Heart rate" : "",
           score.systolicBloodPressure === undefined ? "Systolic BP" : "",
           score.temperature === undefined ? "Temperature" : "",
+          score.consciousnessLevel === undefined ? "Consciousness Level" : "",
         ].filter((x) => x !== "")
       );
     }
@@ -132,7 +155,8 @@ export const Mews = (props: {
       score.resp +
       score.heartRate +
       score.systolicBloodPressure +
-      score.temperature;
+      score.temperature +
+      score.consciousnessLevel;
 
     return mewsCard(false, totalScore);
   };
