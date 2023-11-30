@@ -89,7 +89,8 @@ export const Mews = (props: { consultationId: string }) => {
           <div className="tooltip-text  tooltip-left  text-sm font-medium lg:-translate-y-1/2">
             <p>Missing : </p>
             <div className="flex flex-col items-center justify-center">
-              {typeof data !== "number" && data.map((x) => <span>{x}</span>)}
+              {typeof data !== "number" &&
+                data.map((x, id) => <span key={id}>{x}</span>)}
             </div>
           </div>
           <div
