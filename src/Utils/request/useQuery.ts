@@ -32,7 +32,7 @@ export default function useQuery<TData>(
 
       setLoading(true);
       const response = await request(route, resolvedOptions);
-      setResponse(await request(route, resolvedOptions));
+      setResponse(response);
       setLoading(false);
       return response;
     },
