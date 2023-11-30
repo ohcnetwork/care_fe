@@ -7,7 +7,7 @@ interface LocationSelectProps {
   name: string;
   disabled?: boolean;
   margin?: string;
-  errors: string;
+  errors?: string;
   className?: string;
   searchAll?: boolean;
   multiple?: boolean;
