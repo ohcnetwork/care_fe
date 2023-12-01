@@ -21,7 +21,7 @@ import { FieldChangeEvent } from "../Form/FormFields/Utils";
 const Loading = lazy(() => import("../Common/Loading"));
 import Page from "../Common/components/Page";
 import dayjs from "dayjs";
-import { dateQueryString } from "../../Utils/utils";
+import { dateQueryString, scrollTo } from "../../Utils/utils";
 
 interface triageFormProps extends PatientStatsModel {
   facilityId: number;
@@ -172,6 +172,10 @@ export const TriageForm = (props: triageFormProps) => {
     });
     if (invalidForm) {
       dispatch({ type: "set_error", errors });
+      const firstError = Object.keys(errors).find((e) => errors[e]);
+      if (firstError) {
+        scrollTo(firstError);
+      }
       return false;
     }
     dispatch({ type: "set_error", errors });
