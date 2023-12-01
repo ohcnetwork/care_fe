@@ -9,26 +9,22 @@ import PaginatedList from "../../../CAREUI/misc/PaginatedList";
 import PageTitle from "../../Common/PageTitle";
 import DailyRoundsFilter from "./DailyRoundsFilter";
 import { ConsultationModel } from "../models";
+import { useSlugs } from "../../../Common/hooks/useSlug";
 
 interface Props {
-  facilityId: string;
-  patientId: string;
-  consultationId: string;
-  consultationData: ConsultationModel;
+  consultation: ConsultationModel;
 }
 
-export const DailyRoundsList = ({
-  facilityId,
-  patientId,
-  consultationId,
-  consultationData,
-}: Props) => {
+export default function DailyRoundsList({ consultation }: Props) {
+  const [facilityId, patientId] = useSlugs("facility", "patient");
   const { t } = useTranslation();
+
+  const consultationUrl = `/facility/${facilityId}/patient/${patientId}/consultation/${consultation.id}`;
 
   return (
     <PaginatedList
       route={routes.getDailyReports}
-      pathParams={{ consultationId }}
+      pathParams={{ consultationId: consultation.id }}
     >
       {({ refetch }) => (
         <>
@@ -61,32 +57,18 @@ export const DailyRoundsList = ({
                       />
                     );
                   }
+
+                  const itemUrl =
+                    item.rounds_type === "NORMAL"
+                      ? `${consultationUrl}/daily-rounds/${item.id}`
+                      : `${consultationUrl}/daily_rounds/${item.id}`;
+
                   return (
                     <DefaultLogUpdateCard
                       round={item}
-                      consultationData={consultationData}
-                      onViewDetails={() => {
-                        if (item.rounds_type === "NORMAL") {
-                          navigate(
-                            `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${item.id}`
-                          );
-                        } else {
-                          navigate(
-                            `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${item.id}`
-                          );
-                        }
-                      }}
-                      onUpdateLog={() => {
-                        if (item.rounds_type === "NORMAL") {
-                          navigate(
-                            `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${item.id}/update`
-                          );
-                        } else {
-                          navigate(
-                            `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${item.id}/update`
-                          );
-                        }
-                      }}
+                      consultationData={consultation}
+                      onViewDetails={() => navigate(itemUrl)}
+                      onUpdateLog={() => navigate(`${itemUrl}/update`)}
                     />
                   );
                 }}
@@ -100,4 +82,4 @@ export const DailyRoundsList = ({
       )}
     </PaginatedList>
   );
-};
+}

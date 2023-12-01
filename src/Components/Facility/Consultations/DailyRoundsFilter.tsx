@@ -7,7 +7,7 @@ import CareIcon from "../../../CAREUI/icons/CareIcon";
 import dayjs from "dayjs";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { DailyRoundsModel } from "../../Patient/models";
+import { DailyRoundTypes, DailyRoundsModel } from "../../Patient/models";
 import { FieldChangeEvent } from "../../Form/FormFields/Utils";
 
 type FilterState = {
@@ -19,12 +19,6 @@ type FilterState = {
 interface Props {
   onApply: (filter: FilterState) => void;
 }
-
-const roundTypeOptions: DailyRoundsModel["rounds_type"][] = [
-  "NORMAL",
-  "VENTILATOR",
-  "AUTOMATED",
-];
 
 export default function DailyRoundsFilter(props: Props) {
   const { t } = useTranslation();
@@ -45,7 +39,7 @@ export default function DailyRoundsFilter(props: Props) {
         <Popover.Button>
           <ButtonV2 variant="secondary" className="mr-5 border">
             <CareIcon className="care-l-filter" />
-            Filter
+            {t("filter")}
           </ButtonV2>
         </Popover.Button>
         <Transition
@@ -61,16 +55,18 @@ export default function DailyRoundsFilter(props: Props) {
             <div className="rounded-lg shadow-lg ring-1 ring-gray-400">
               <div className="rounded-t-lg bg-gray-100 px-6 py-4">
                 <div className="flow-root rounded-md">
-                  <span className="block text-sm text-gray-800">Filter by</span>
+                  <span className="block text-sm text-gray-800">
+                    {t("filter_by")}
+                  </span>
                 </div>
               </div>
               <div className="relative flex flex-col gap-4 rounded-b-lg bg-white p-6">
                 <SelectFormField
                   {...field("rounds_type")}
                   label={t("Round Type")}
-                  options={roundTypeOptions}
-                  placeholder={"Show all"}
-                  optionLabel={(o) => t(o as string)}
+                  options={DailyRoundTypes}
+                  placeholder={t("show_all")}
+                  optionLabel={(o) => t(o)}
                   optionValue={(o) => o}
                 />
                 <TextFormField
@@ -96,7 +92,7 @@ export default function DailyRoundsFilter(props: Props) {
                     border
                     className="w-full"
                   >
-                    Clear Filter
+                    {t("clear")}
                   </ButtonV2>
                 </Popover.Button>
                 <Popover.Button>
@@ -106,7 +102,7 @@ export default function DailyRoundsFilter(props: Props) {
                     border
                     className="w-full"
                   >
-                    Apply Filter
+                    {t("apply")}
                   </ButtonV2>
                 </Popover.Button>
               </div>

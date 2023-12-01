@@ -12,7 +12,7 @@ import PrescriptionsTable from "../../Medicine/PrescriptionsTable";
 import Chip from "../../../CAREUI/display/Chip";
 import { formatAge, formatDate, formatDateTime } from "../../../Utils/utils";
 import ReadMore from "../../Common/components/Readmore";
-import { DailyRoundsList } from "../Consultations/DailyRoundsList";
+import DailyRoundsList from "../Consultations/DailyRoundsList";
 
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
 
@@ -668,12 +668,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
           </div>
         </div>
         <div className="w-full pl-4 xl:w-1/3">
-          <DailyRoundsList
-            facilityId={props.facilityId}
-            patientId={props.patientId}
-            consultationId={props.consultationId}
-            consultationData={props.consultationData}
-          />
+          <DailyRoundsList consultation={props.consultationData} />
         </div>
       </div>
     </div>
