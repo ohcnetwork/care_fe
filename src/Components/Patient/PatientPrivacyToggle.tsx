@@ -114,40 +114,42 @@ export default function PatientPrivacyToggle(props: PatientPrivacyToggleProps) {
       });
     }
   };
-  if (allowPrivacyToggle() && consultation?.current_bed?.id)
-    return (
-      <div className="flex flex-row justify-start gap-2 pt-2">
-        <div className="tooltip rounded-md bg-gray-300  px-3 py-2 text-sm font-semibold">
-          Privacy Mode: {privacy ? "ON" : "OFF"}
-          <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-sm">
-            privacy setting for camera feed visual
-          </span>
-        </div>
-        {!privacy ? (
-          <button
-            className=" tooltip items-center rounded-md bg-gray-300 p-1 text-red-500 hover:bg-red-500 hover:text-gray-200"
-            onClick={togglePrivacy}
-            id="privacy-toggle"
-          >
-            <CareIcon className="care-l-lock text-3xl" />
-            <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-sm">
-              Lock Privacy
-            </span>
-          </button>
-        ) : (
-          <button
-            className="tooltip items-center rounded-md bg-gray-300 p-1 text-black hover:bg-gray-500 hover:text-gray-200"
-            onClick={togglePrivacy}
-            id="privacy-toggle"
-          >
-            <CareIcon className="care-l-unlock text-3xl" />
-            <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-sm">
-              Unlock Privacy
-            </span>
-          </button>
-        )}
-      </div>
-    );
 
-  return <></>;
+  if (!allowPrivacyToggle() || !consultation?.current_bed?.id) {
+    return <></>;
+  }
+
+  return (
+    <div className="flex flex-row justify-start gap-2 pt-2">
+      <div className="tooltip rounded-md bg-gray-300  px-3 py-2 text-sm font-semibold">
+        Privacy Mode: {privacy ? "ON" : "OFF"}
+        <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-sm">
+          privacy setting for camera feed visual
+        </span>
+      </div>
+      {!privacy ? (
+        <button
+          className=" tooltip items-center rounded-md bg-gray-300 p-1 text-red-500 hover:bg-red-500 hover:text-gray-200"
+          onClick={togglePrivacy}
+          id="privacy-toggle"
+        >
+          <CareIcon className="care-l-lock text-3xl" />
+          <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-sm">
+            Lock Privacy
+          </span>
+        </button>
+      ) : (
+        <button
+          className="tooltip items-center rounded-md bg-gray-300 p-1 text-black hover:bg-gray-500 hover:text-gray-200"
+          onClick={togglePrivacy}
+          id="privacy-toggle"
+        >
+          <CareIcon className="care-l-unlock text-3xl" />
+          <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-sm">
+            Unlock Privacy
+          </span>
+        </button>
+      )}
+    </div>
+  );
 }
