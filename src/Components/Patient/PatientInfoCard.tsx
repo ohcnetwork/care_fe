@@ -332,7 +332,8 @@ export default function PatientInfoCard(props: {
                     ) : (
                       <span>
                         {" "}
-                        Discharged on {formatDate(consultation?.discharge_date)}
+                        Discharged on{" "}
+                        {formatDateTime(consultation?.discharge_date)}
                       </span>
                     )}
                   </span>
