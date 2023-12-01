@@ -800,37 +800,31 @@ export default function ShiftDetails(props: { id: string }) {
             <div className="col-span-2">
               <h4 className="mt-8">{t("audit_log")}</h4>
 
-              <div className="mt-2 grid rounded-lg bg-white p-2 px-4 text-center shadow lg:grid-rows-2">
-                <div className="flex flex-col items-center  border-b-2 pb-2">
-                  <div className="text-md font-medium leading-5 text-gray-500">
+              <div className="mt-2 grid rounded-lg bg-white p-2 px-4 text-center shadow lg:grid-cols-2">
+                <div className="border-b-2 pb-2 lg:border-b-0 lg:border-r-2 lg:pb-0">
+                  <div className="text-sm font-medium leading-5 text-gray-500">
+                    {t("created")}
+                  </div>
+                  <div className="mt-2 whitespace-pre text-sm leading-5 text-gray-900">
+                    <RecordMeta
+                      time={data?.created_date}
+                      user={data?.created_by_object}
+                      inlineUser={true}
+                      inlineClassName={"flex-wrap justify-center"}
+                    />
+                  </div>
+                </div>
+                <div className="mt-2 lg:mt-0">
+                  <div className="text-sm font-medium leading-5 text-gray-500">
                     {t("last_edited")}
                   </div>
                   <div className="mt-1 whitespace-pre text-sm leading-5 text-gray-900">
-                    <div className="text-sm">
-                      {data?.modified_date && (
-                        <RecordMeta
-                          user={data?.last_edited_by_object}
-                          inlineUser={true}
-                          time={data?.modified_date}
-                        />
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-2 flex flex-col items-center">
-                  <div className="text-md font-medium leading-5 text-gray-500">
-                    {t("created")}
-                  </div>
-                  <div className="mt-1 whitespace-pre text-sm leading-5 text-gray-900">
-                    <div className="text-sm">
-                      {data?.created_date && (
-                        <RecordMeta
-                          user={data?.created_by_object}
-                          inlineUser={true}
-                          time={data?.created_date}
-                        />
-                      )}
-                    </div>
+                    <RecordMeta
+                      time={data?.modified_date}
+                      user={data?.last_edited_by_object}
+                      inlineUser={true}
+                      inlineClassName={"flex-wrap justify-center"}
+                    />
                   </div>
                 </div>
               </div>
