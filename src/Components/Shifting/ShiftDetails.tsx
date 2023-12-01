@@ -805,7 +805,7 @@ export default function ShiftDetails(props: { id: string }) {
                   <div className="text-sm font-medium leading-5 text-gray-500">
                     {t("created")}
                   </div>
-                  <div className="mt-2 whitespace-pre text-sm leading-5 text-gray-900">
+                  <div className="mt-1 whitespace-pre text-sm leading-5 text-gray-900">
                     <RecordMeta
                       time={data?.created_date}
                       user={data?.created_by_object}
