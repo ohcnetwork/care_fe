@@ -11,7 +11,6 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { IExternalResult } from "./models";
-import { downloadFile } from "../../Utils/utils";
 
 export default function ExternalResultUpload() {
   const { sample_format_external_result_import } = useConfig();
@@ -112,13 +111,9 @@ export default function ExternalResultUpload() {
                 />
                 <a
                   className="focus:ring-blue mx-auto mt-4 max-w-xs items-center rounded-md border border-primary-500 bg-white px-3 py-2 text-sm font-medium leading-4 text-primary-700 transition duration-150 ease-in-out hover:text-primary-500 hover:shadow focus:border-primary-300 focus:outline-none active:bg-gray-50 active:text-primary-800"
-                  href="#"
-                  onClick={() =>
-                    downloadFile(
-                      sample_format_external_result_import,
-                      "sample_format"
-                    )
-                  }
+                  href={sample_format_external_result_import}
+                  target="_blank"
+                  download
                 >
                   <i className="fa fa-download mr-1" aria-hidden="true"></i>{" "}
                   <span>{t("sample_format")}</span>
