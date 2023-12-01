@@ -20,6 +20,25 @@ interface Props {
   onApply: (filter: FilterState) => void;
 }
 
+const roundTypeOptions = [
+  {
+    id: "NORMAL",
+    text: "Normal",
+  },
+  {
+    id: "VENTILATOR",
+    text: "Critical Care",
+  },
+  {
+    id: "ICU",
+    text: "ICU",
+  },
+  {
+    id: "AUTOMATED",
+    text: "Automated",
+  },
+];
+
 export default function DailyRoundsFilter(props: Props) {
   const { t } = useTranslation();
   const [filter, setFilter] = useState<FilterState>({});
@@ -62,11 +81,10 @@ export default function DailyRoundsFilter(props: Props) {
                 <SelectFormField
                   {...field("rounds_type")}
                   label={t("Round Type")}
-                  options={
-                    ["NORMAL", "VENTILATOR", "ICU", "AUTOMATED"] as const
-                  }
-                  optionLabel={(o) => o}
-                  optionValue={(o) => o}
+                  options={roundTypeOptions}
+                  placeholder={"Show all"}
+                  optionLabel={(o) => o.text}
+                  optionValue={(o) => o.id}
                 />
                 <TextFormField
                   {...field("taken_at_after")}
