@@ -16,15 +16,19 @@ interface Props {
 }
 
 export default function DailyRoundsList({ consultation }: Props) {
-  const [facilityId, patientId] = useSlugs("facility", "patient");
+  const [facilityId, patientId, consultationId] = useSlugs(
+    "facility",
+    "patient",
+    "consultation"
+  );
   const { t } = useTranslation();
 
-  const consultationUrl = `/facility/${facilityId}/patient/${patientId}/consultation/${consultation.id}`;
+  const consultationUrl = `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`;
 
   return (
     <PaginatedList
       route={routes.getDailyReports}
-      pathParams={{ consultationId: consultation.id }}
+      pathParams={{ consultationId }}
     >
       {({ refetch }) => (
         <>
