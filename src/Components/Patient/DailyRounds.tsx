@@ -225,16 +225,7 @@ export const DailyRounds = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "resp":
-          if (
-            state.form.resp === null &&
-            state.form.rounds_type === "NORMAL" &&
-            state.form.clone_last !== true
-          ) {
-            errors[field] = "Please enter a respiratory rate";
-            invalidForm = true;
-          }
-          return;
+
         default:
           return;
       }
