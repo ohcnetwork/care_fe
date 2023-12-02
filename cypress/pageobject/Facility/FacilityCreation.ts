@@ -70,6 +70,10 @@ class FacilityPage {
     cy.get("[role='option']").contains(bedType).click();
   }
 
+  isVisibleselectBedType() {
+    cy.get("div#bed-type button").should("be.visible");
+  }
+
   fillTotalCapacity(capacity: string) {
     cy.get("input#total-capacity").click().type(capacity);
   }
@@ -87,6 +91,10 @@ class FacilityPage {
     cy.get("[role='option']").contains(area).click();
   }
 
+  isVisibleAreaOfSpecialization() {
+    cy.get("div#area-of-specialization button").should("be.visible");
+  }
+
   fillDoctorCount(count: string) {
     cy.get("input#count").click().type(count);
   }
@@ -97,6 +105,33 @@ class FacilityPage {
 
   fillExpectedOxygenRequirement(requirement: string) {
     cy.get("#expected_oxygen_requirement").click().clear().type(requirement);
+  }
+
+  fillBTypeCylinderCapacity(capacity: string) {
+    cy.get("#type_b_cylinders").click().clear().type(capacity);
+  }
+
+  fillExpectedBTypeCylinderRequirement(requirement: string) {
+    cy.get("#expected_type_b_cylinders").focus().clear();
+    cy.get("#expected_type_b_cylinders").focus().type(requirement);
+  }
+
+  fillCTypeCylinderCapacity(capacity: string) {
+    cy.get("#type_c_cylinders").click().clear().type(capacity);
+  }
+
+  fillExpectedCTypeCylinderRequirement(requirement: string) {
+    cy.get("#expected_type_c_cylinders").focus().clear();
+    cy.get("#expected_type_c_cylinders").focus().type(requirement);
+  }
+
+  fillDTypeCylinderCapacity(capacity: string) {
+    cy.get("#type_d_cylinders").click().clear().type(capacity);
+  }
+
+  fillExpectedDTypeCylinderRequirement(requirement: string) {
+    cy.get("#expected_type_d_cylinders").focus().clear();
+    cy.get("#expected_type_d_cylinders").focus().type(requirement);
   }
 
   saveAndExitDoctorForm() {
@@ -144,6 +179,22 @@ class FacilityPage {
 
   clickDeleteFacilityOption() {
     cy.get("#delete-facility").contains("Delete Facility").click();
+  }
+
+  clickfacilityfeatureoption() {
+    cy.get("#features").click();
+  }
+
+  clickbedcapcityaddmore() {
+    cy.get("#bed-capacity-save").click();
+  }
+
+  clickdoctorcapacityaddmore() {
+    cy.get("#doctor-save").click();
+  }
+
+  clickcancelbutton() {
+    cy.get("#cancel").click();
   }
 
   verifyfacilitynewurl() {
