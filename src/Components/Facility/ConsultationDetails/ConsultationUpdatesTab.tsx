@@ -365,7 +365,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                     <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
                       <div>
                         <div className="text-sm font-semibold uppercase">
-                          Admission On
+                          Admission Date
                         </div>
                         {formatDateTime(props.consultationData?.admission_date)}
                       </div>
