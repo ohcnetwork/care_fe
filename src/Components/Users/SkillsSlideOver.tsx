@@ -115,7 +115,11 @@ export default ({ show, setShow, username }: IProps) => {
         <div>
           <div className="col-span-full sm:col-span-3 sm:col-start-2">
             {!isLoading && (
-              <div className="tooltip flex items-center gap-2">
+              <div
+                className={`${
+                  !authorizeForAddSkill && "tooltip"
+                } flex items-center gap-2`}
+              >
                 <SkillSelect
                   id="select-skill"
                   multiple={false}
