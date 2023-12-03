@@ -3,6 +3,7 @@ import {
   AREACODES,
   IN_LANDLINE_AREA_CODES,
   LocalStorageKeys,
+  USER_TYPES,
 } from "../Common/constants";
 import phoneCodesJson from "../Common/static/countryPhoneAndFlags.json";
 import dayjs from "./dayjs";
@@ -457,6 +458,13 @@ export const scrollTo = (id: string | boolean) => {
 };
 
 export const showUserDelete = (authUser: UserModel, targetUser: UserModel) => {
+  // Auth user should be higher in hierarchy than target user
+  if (
+    USER_TYPES.indexOf(authUser.user_type) <=
+    USER_TYPES.indexOf(targetUser.user_type)
+  )
+    return false;
+
   if (
     authUser.user_type === "StateAdmin" &&
     targetUser.state_object?.id === authUser.state
@@ -468,5 +476,6 @@ export const showUserDelete = (authUser: UserModel, targetUser: UserModel) => {
     targetUser.district_object?.id === authUser.district
   )
     return true;
+
   return false;
 };
