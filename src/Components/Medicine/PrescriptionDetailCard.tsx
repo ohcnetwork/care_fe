@@ -82,15 +82,15 @@ export default function PrescriptionDetailCard({
           </div>
         </div>
 
-        <div className="mt-4 grid grid-cols-9 items-center gap-2">
-          <Detail className="col-span-9 md:col-span-5" label={t("medicine")}>
+        <div className="mt-4 grid min-w-[250px] grid-cols-9 items-center gap-2">
+          <Detail className="col-span-8 md:col-span-5" label={t("medicine")}>
             {prescription.medicine_object?.name ?? prescription.medicine_old}
           </Detail>
-          <Detail className="col-span-5 md:col-span-2" label={t("route")}>
+          <Detail className="col-span-5 md:col-span-3" label={t("route")}>
             {prescription.route &&
               t("PRESCRIPTION_ROUTE_" + prescription.route)}
           </Detail>
-          <Detail className="col-span-4 md:col-span-2" label={t("dosage")}>
+          <Detail className="col-span-4 md:col-span-4" label={t("dosage")}>
             {prescription.dosage}
           </Detail>
 
