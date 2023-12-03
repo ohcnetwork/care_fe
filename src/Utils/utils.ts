@@ -6,6 +6,7 @@ import {
 } from "../Common/constants";
 import phoneCodesJson from "../Common/static/countryPhoneAndFlags.json";
 import dayjs from "./dayjs";
+import { UserModel } from "../Components/Users/models";
 
 interface ApacheParams {
   age: number;
@@ -453,4 +454,19 @@ export const formatAge = (
 export const scrollTo = (id: string | boolean) => {
   const element = document.querySelector(`#${id}`);
   element?.scrollIntoView({ behavior: "smooth", block: "center" });
+};
+
+export const showUserDelete = (authUser: UserModel, targetUser: UserModel) => {
+  if (
+    authUser.user_type === "StateAdmin" &&
+    targetUser.state_object?.id === authUser.state
+  )
+    return true;
+
+  if (
+    authUser.user_type === "DistrictAdmin" &&
+    targetUser.district_object?.id === authUser.district
+  )
+    return true;
+  return false;
 };

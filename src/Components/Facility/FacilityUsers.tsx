@@ -3,7 +3,12 @@ import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import * as Notification from "../../Utils/Notifications.js";
-import { classNames, isUserOnline, relativeTime } from "../../Utils/utils";
+import {
+  classNames,
+  isUserOnline,
+  relativeTime,
+  showUserDelete,
+} from "../../Utils/utils";
 import Pagination from "../Common/Pagination";
 import UserDetails from "../Common/UserDetails";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -16,6 +21,7 @@ import useAuthUser from "../../Common/hooks/useAuthUser";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
+import { UserModel } from "../Users/models";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -256,7 +262,7 @@ export default function FacilityUsers(props: any) {
   facilityUserData &&
     facilityUserData.results &&
     facilityUserData.results.length &&
-    (userList = facilityUserData.results.map((user: any) => {
+    (userList = facilityUserData.results.map((user: UserModel) => {
       return (
         <div
           key={`usr_${user.id}`}
@@ -299,7 +305,7 @@ export default function FacilityUsers(props: any) {
                       aria-label="Online"
                     ></i>
                   ) : null}
-                  {authUser.user_type === "StateAdmin" && (
+                  {showUserDelete(authUser, user) && (
                     <button
                       type="button"
                       className="focus:ring-blue m-3 w-20 self-end rounded-md border border-red-500 bg-white px-3 py-2 text-center text-sm font-medium leading-4 text-red-700 transition duration-150 ease-in-out hover:text-red-500 hover:shadow focus:border-red-300 focus:outline-none active:bg-gray-50 active:text-red-800"
