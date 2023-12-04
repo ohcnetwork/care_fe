@@ -58,9 +58,14 @@ const LiveMonitoringFilters = (props: Props) => {
                   </FieldLabel>
                   <div className="flex w-full items-center gap-2">
                     <LocationSelect
+                      className="w-full"
                       key={qParams.location}
-                      name="Facilities"
-                      setSelected={(location) => updateQuery({ location })}
+                      name="location"
+                      setSelected={(location) =>
+                        location
+                          ? updateQuery({ location })
+                          : removeFilter("location")
+                      }
                       selected={qParams.location}
                       showAll={false}
                       multiple={false}
@@ -68,25 +73,12 @@ const LiveMonitoringFilters = (props: Props) => {
                       errors=""
                       errorClassName="hidden"
                     />
-                    {qParams.location && (
-                      <ButtonV2
-                        variant="secondary"
-                        circle
-                        border
-                        onClick={() => removeFilter("location")}
-                      >
-                        Clear
-                      </ButtonV2>
-                    )}
                   </div>
                 </div>
                 <CheckBoxFormField
                   name="in_use_by_consultation"
                   label="Hide cameras without patient"
-                  value={
-                    qParams.in_use_by_consultation === "true" ||
-                    qParams.in_use_by_consultation === undefined
-                  }
+                  value={qParams.in_use_by_consultation === "true"}
                   onChange={({ name, value }) => {
                     if (value) {
                       updateQuery({ [name]: value });

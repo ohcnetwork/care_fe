@@ -30,7 +30,7 @@ export default function CentralLiveMonitoring(props: Props) {
       facility: props.facilityId,
       location: props.locationId,
       asset_class: "ONVIF",
-      in_use_by_consultation: qParams.in_use_by_consultation ?? true,
+      in_use_by_consultation: qParams.in_use_by_consultation,
     },
   });
 
