@@ -264,11 +264,11 @@ export default function ResultList() {
               value={qParams.name}
               placeholder="Search by name"
             />
-            <div className="my-2 text-sm font-medium">Search by number</div>
             <div className="w-full max-w-sm">
               <PhoneNumberFormField
+                label="Search by number"
                 name="mobile_number"
-                labelClassName="hidden"
+                labelClassName="my-2 text-sm font-medium"
                 value={phone_number}
                 onChange={(e) => setPhoneNum(e.value)}
                 error={phoneNumberError}
