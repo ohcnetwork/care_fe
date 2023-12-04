@@ -12,16 +12,15 @@ import {
   useMSEMediaPlayer,
 } from "../../../Common/hooks/useMSEplayer";
 import { PTZState, useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  getConsultation,
+  // getConsultation,
   getPermittedFacility,
   listAssetBeds,
-  partialUpdateAssetBed,
+  // partialUpdateAssetBed,
 } from "../../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
+// import { statusType, useAbortableEffect } from "../../../Common/utils";
 import ButtonV2 from "../../Common/components/ButtonV2.js";
-import Spinner from "../../Common/Spinner.js";
 
 import CareIcon from "../../../CAREUI/icons/CareIcon.js";
 import FeedButton from "./FeedButton";
@@ -91,12 +90,16 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const authUser = useAuthUser();
 
   // Notification hook to get subscription info
-  const { isSubscribed, isSubscribing, intialSubscriptionState, subscribe } =
-    useNotificationSubscribe();
+  const {
+    subscriptionStatus,
+    isSubscribing,
+    intialSubscriptionState,
+    subscribe,
+  } = useNotificationSubscribe();
 
   useEffect(() => {
     intialSubscriptionState();
-  }, [dispatch, isSubscribed]);
+  }, [dispatch, subscriptionStatus]);
 
   // display subscription info
   const subscriptionInfo = () => {
@@ -110,11 +113,11 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
         {showSubscriptionInfo && (
           <div className="absolute z-10 flex -translate-x-16 translate-y-32 flex-col gap-2 rounded-md bg-white p-2  drop-shadow-md">
             <div className="text-xs">
-              {isSubscribed != "SubscribedOnThisDevice"
+              {subscriptionStatus != "SubscribedOnThisDevice"
                 ? "Subscribe to get real time information about camera access"
                 : "You are subscribed, and will get real time information about camera access"}
             </div>
-            {isSubscribed != "SubscribedOnThisDevice" && (
+            {subscriptionStatus != "SubscribedOnThisDevice" && (
               <ButtonV2
                 onClick={subscribe}
                 ghost
@@ -205,20 +208,20 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     );
   };
 
-  useEffect(() => {
-    const fetchFacility = async () => {
-      const res = await dispatch(getPermittedFacility(facilityId));
+  // useEffect(() => {
+  //   const fetchFacility = async () => {
+  //     const res = await dispatch(getPermittedFacility(facilityId));
 
-      if (res?.status === 200 && res?.data) {
-        setFacilityMiddlewareHostname(res.data.middleware_address);
-//   useQuery(routes.getPermittedFacility, {
-//     pathParams: { id: facilityId || "" },
-//     onResponse: ({ res, data }) => {
-//       if (res && res.status === 200 && data && data.middleware_address) {
-//         setFacilityMiddlewareHostname(data.middleware_address);
-      }
-    },
-  });
+  //     if (res?.status === 200 && res?.data) {
+  //       setFacilityMiddlewareHostname(res.data.middleware_address);
+  //       //   useQuery(routes.getPermittedFacility, {
+  //       //     pathParams: { id: facilityId || "" },
+  //       //     onResponse: ({ res, data }) => {
+  //       //       if (res && res.status === 200 && data && data.middleware_address) {
+  //       //         setFacilityMiddlewareHostname(data.middleware_address);
+  //     }
+  //   };
+  // });
 
   const fallbackMiddleware =
     cameraAsset.location_middleware || facilityMiddlewareHostname;
@@ -250,69 +253,66 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
 
   const liveFeedPlayerRef = useRef<HTMLVideoElement | ReactPlayer | null>(null);
 
-  const { loading: getConsultationLoading } = useQuery(routes.getConsultation, {
-    pathParams: { id: consultationId },
-    onResponse: ({ res, data }) => {
-      if (res && res.status === 200 && data) {
-        const consultationBedId = data.current_bed?.bed_object?.id;
-        if (consultationBedId) {
-          (async () => {
-            const { res: listAssetBedsRes, data: listAssetBedsData } =
-              await request(routes.listAssetBeds, {
-                query: {
-                  bed: consultationBedId,
+  const { data: consultation, loading: getConsultationLoading } = useQuery(
+    routes.getConsultation,
+    {
+      pathParams: { id: consultationId },
+      onResponse: ({ res, data }) => {
+        if (res && res.status === 200 && data) {
+          const consultationBedId = data.current_bed?.bed_object?.id;
+          if (consultationBedId) {
+            async () => {
+              const { res: listAssetBedsRes, data: listAssetBedsData } =
+                await request(routes.listAssetBeds, {
+                  query: {
+                    bed: consultationBedId,
+                  },
+                });
+              setBed(consultationBedId);
+              const bedAssets: any = {
+                ...listAssetBedsRes,
+                data: {
+                  ...listAssetBedsData,
+                  results: listAssetBedsData?.results.filter((asset) => {
+                    return asset?.asset_object?.meta?.asset_type === "CAMERA";
+                  }),
                 },
-              });
-            setBed(consultationBedId);
-            const bedAssets: any = {
-              ...listAssetBedsRes,
-              data: {
-                ...listAssetBedsData,
-                results: listAssetBedsData?.results.filter((asset) => {
-                  return asset?.asset_object?.meta?.asset_type === "CAMERA";
+              };
+
+              if (bedAssets?.data?.results?.length) {
+                bedAssets.data.results = bedAssets.data.results.filter(
+                  (bedAsset: any) => bedAsset.meta.type !== "boundary"
+                );
+                if (bedAssets.data?.results?.length) {
+                  const { camera_access_key } =
+                    bedAssets.data.results[0].asset_object.meta;
+                  const config = camera_access_key.split(":");
+                  setCameraAsset({
+                    id: bedAssets.data.results[0].asset_object.id,
+                    accessKey: config[2] || "",
+                    middleware_address:
+                      bedAssets.data.results[0].asset_object?.meta
+                        ?.middleware_hostname,
+                    location_middleware:
+                      bedAssets.data.results[0].asset_object.location_object
+                        ?.middleware_address,
+                  });
+                  setCameraConfig(bedAssets.data.results[0].meta);
+                  setCameraState({
+                    ...bedAssets.data.results[0].meta.position,
+                    precision: 1,
+                  });
                 }
-              ),
-            },
-          };
-
-          if (bedAssets?.data?.results?.length) {
-            bedAssets.data.results = bedAssets.data.results.filter(
-              (bedAsset: any) => bedAsset.meta.type !== "boundary"
-            );
-            if (bedAssets.data?.results?.length) {
-//                 }),
-//               },
-//             };
-
-//             if (bedAssets?.data?.results?.length) {
-              const { camera_access_key } =
-                bedAssets.data.results[0].asset_object.meta;
-              const config = camera_access_key.split(":");
-              setCameraAsset({
-                id: bedAssets.data.results[0].asset_object.id,
-                accessKey: config[2] || "",
-                middleware_address:
-                  bedAssets.data.results[0].asset_object?.meta
-                    ?.middleware_hostname,
-                location_middleware:
-                  bedAssets.data.results[0].asset_object.location_object
-                    ?.middleware_address,
-              });
-              setCameraConfig(bedAssets.data.results[0].meta);
-              setCameraState({
-                ...bedAssets.data.results[0].meta.position,
-                precision: 1,
-              });
-            }
+              }
+              if (consultation?.current_bed?.privacy) {
+                setPrivacy(consultation?.current_bed?.privacy);
+              }
+            };
           }
-          if (consultation?.current_bed?.privacy) {
-            setPrivacy(consultation?.current_bed?.privacy);
-          }
-//           })();
         }
-      }
-    },
-  });
+      },
+    }
+  );
 
   // const [position, setPosition] = useState<any>();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -398,10 +398,10 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
         );
       }
       setBedPresets(bedAssets?.data?.results);
-//       const { data: bedAssets } = await request(routes.listAssetBeds, {
-//         query: { asset: asset.id, bed },
-//       });
-//       setBedPresets(bedAssets?.results);
+      //       const { data: bedAssets } = await request(routes.listAssetBeds, {
+      //         query: { asset: asset.id, bed },
+      //       });
+      //       setBedPresets(bedAssets?.results);
     }
   };
 
@@ -705,8 +705,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
                   }
                 },
               });
-//               await getBedPresets(cameraAsset?.id);
-//               getPresets({});
+              //               await getBedPresets(cameraAsset?.id);
+              //               getPresets({});
             }
             setLoading(CAMERA_STATES.IDLE);
           }
@@ -855,8 +855,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     return <PrivacyOnCard />;
   }
 
-//   if (isLoading) return <Loading />;
-//   if (getConsultationLoading) return <Loading />;
+  //   if (isLoading) return <Loading />;
+  if (getConsultationLoading) return <Loading />;
 
   return (
     <div className="flex h-[calc(100vh-1.5rem)] flex-col px-2">
