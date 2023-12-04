@@ -30,7 +30,9 @@ describe("Facility Creation", () => {
   const doctorCapacity = "5";
   const totalDoctor = "10";
   const facilityName = "cypress facility";
+  const facilityName2 = "Dummy Request Approving Center";
   const facilityAddress = "cypress address";
+  const facilityUpdateAddress = "cypress updated address";
   const facilityNumber = "9898469865";
   const facilityErrorMessage = [
     "Required",
@@ -59,6 +61,35 @@ describe("Facility Creation", () => {
     cy.viewport(1280, 720);
     cy.restoreLocalStorage();
     cy.awaitUrl("/facility");
+  });
+
+  it("Update the existing facility", () => {
+    // update a existing dummy data facility
+    manageUserPage.typeFacilitySearch(facilityName2);
+    facilityPage.verifyFacilityBadgeContent(facilityName2);
+    manageUserPage.assertFacilityInCard(facilityName2);
+    facilityHome.verifyURLContains(facilityName2);
+    facilityPage.visitAlreadyCreatedFacility();
+    facilityPage.clickManageFacilityDropdown();
+    facilityPage.clickUpdateFacilityOption();
+    facilityPage.clickUpdateFacilityType("Govt Hospital");
+    facilityPage.fillAddress(facilityUpdateAddress);
+    facilityPage.fillOxygenCapacity(oxygenCapacity);
+    facilityPage.fillExpectedOxygenRequirement(oxygenExpected);
+    facilityPage.selectLocation("Kochi, Kerala");
+    facilityPage.submitForm();
+    cy.url().should("not.include", "/update");
+    // verify the updated data
+    facilityPage.getFacilityOxygenInfo().scrollIntoView();
+    facilityPage
+      .getFacilityOxygenInfo()
+      .contains(oxygenCapacity)
+      .should("be.visible");
+    facilityPage.getAddressDetailsView().scrollIntoView();
+    facilityPage
+      .getAddressDetailsView()
+      .contains(facilityUpdateAddress)
+      .should("be.visible");
   });
 
   it("Create a new facility with multiple bed and doctor capacity", () => {
@@ -207,20 +238,6 @@ describe("Facility Creation", () => {
       .getPhoneNumberView()
       .contains(facilityNumber)
       .should("be.visible");
-  });
-
-  it("Update the existing facility", () => {
-    facilityPage.visitUpdateFacilityPage(facilityUrl1);
-    facilityPage.clickManageFacilityDropdown();
-    facilityPage.clickUpdateFacilityOption();
-    facilityPage.clickUpdateFacilityType("Request Approving Center");
-    facilityPage.fillFacilityName("cypress facility updated");
-    facilityPage.fillAddress("Cypress Facility Updated Address");
-    facilityPage.fillOxygenCapacity("100");
-    facilityPage.fillExpectedOxygenRequirement("80");
-    facilityPage.selectLocation("Kochi, Kerala");
-    facilityPage.submitForm();
-    cy.url().should("not.include", "/update");
   });
 
   it("Configure the existing facility", () => {
