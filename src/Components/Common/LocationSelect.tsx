@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { listFacilityAssetLocation } from "../../Redux/actions";
 import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import AutocompleteMultiSelectFormField from "../Form/FormFields/AutocompleteMultiselect";
+import { useAsyncOptions } from "../../Common/hooks/useAsyncOptions";
 interface LocationSelectProps {
   name: string;
   disabled?: boolean;
@@ -32,8 +33,13 @@ export const LocationSelect = (props: LocationSelectProps) => {
   const [locations, setLocations] = useState<{ name: string; id: string }[]>(
     []
   );
+
+  const { fetchOptions, isLoading, options } = useAsyncOptions<{
+    id: string;
+    name: string;
+  }>("id");
+
   const [query, setQuery] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
   const dispatchAction: any = useDispatch();
 
   const handleValueChange = (current: string[]) => {
@@ -47,12 +53,10 @@ export const LocationSelect = (props: LocationSelectProps) => {
       limit: 14,
       search_text: query,
     };
-    setLoading(true);
     dispatchAction(
       listFacilityAssetLocation(params, { facility_external_id: facilityId })
     ).then(({ data }: any) => {
       setLocations(data.results);
-      setLoading(false);
     });
   }, [query, facilityId]);
 
@@ -78,12 +82,21 @@ export const LocationSelect = (props: LocationSelectProps) => {
       name={name}
       disabled={disabled}
       value={selected as string}
-      options={locations}
+      options={options(locations)}
       onChange={({ value }) => handleValueChange([value])}
-      onQuery={(query) => {
-        setQuery(query);
-      }}
-      isLoading={loading}
+      onQuery={(query) =>
+        facilityId ??
+        fetchOptions(
+          listFacilityAssetLocation(
+            {
+              limit: 14,
+              search_text: query,
+            },
+            { facility_external_id: facilityId }
+          )
+        )
+      }
+      isLoading={isLoading}
       placeholder="Search by location name"
       optionLabel={(option) => option.name}
       optionValue={(option) => option.id}
