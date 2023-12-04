@@ -5,7 +5,6 @@
  * co-related PR. Will be removed in the future.
  */
 
-import { getPTZPayload } from "../../Components/Feed/utils";
 import { operateAsset } from "../../Redux/actions";
 
 export interface IAsset {
@@ -163,6 +162,39 @@ const relativeMove =
         ? options?.onSuccess && options.onSuccess(resp.data.result)
         : options?.onError && options.onError(resp));
   };
+
+export const getPTZPayload = (
+  action: PTZ,
+  precision = 1,
+  value?: number
+): PTZPayload => {
+  let x = 0;
+  let y = 0;
+  let zoom = 0;
+  const delta = !value ? 0.1 / Math.max(1, precision) : value;
+  switch (action) {
+    case PTZ.Up:
+      y = delta;
+      break;
+    case PTZ.Down:
+      y = -delta;
+      break;
+    case PTZ.Left:
+      x = -delta;
+      break;
+    case PTZ.Right:
+      x = delta;
+      break;
+    case PTZ.ZoomIn:
+      zoom = delta;
+      break;
+    case PTZ.ZoomOut:
+      zoom = -delta;
+      break;
+  }
+
+  return { x, y, zoom };
+};
 
 export const useFeedPTZ = ({
   config,

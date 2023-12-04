@@ -18,10 +18,11 @@ export default function NoFeedAvailable(props: Props) {
     .replace(/[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12}/gi, "***")
     // Replace all numbers in the URL's path params with "ID_REDACTED"
     .replace(/\/\d+/g, "/***");
+
   return (
     <div
       className={classNames(
-        "flex h-full w-full flex-col items-center justify-center gap-2 text-center",
+        "absolute inset-x-0 inset-y-0 flex flex-col items-center justify-center gap-2 text-center",
         props.className
       )}
     >

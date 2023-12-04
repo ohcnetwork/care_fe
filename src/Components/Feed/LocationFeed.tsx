@@ -15,15 +15,18 @@ import routes from "../../Redux/api";
 import { RouteParams } from "../../Routers/types";
 import LocationFeedTile from "./LocationFeedTile";
 import Fullscreen from "../../CAREUI/misc/Fullscreen";
-
-const PER_PAGE_LIMIT = 4;
+import useBreakpoints from "../../Common/hooks/useBreakpoints";
 
 type Props = RouteParams<"facilityId" | "locationId">;
 
 export default function LocationFeed(props: Props) {
   const [isFullscreen, setFullscreen] = useState(false);
+  const limit = useBreakpoints({
+    default: 4,
+    "3xl": 9,
+  });
   const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
-    limit: PER_PAGE_LIMIT,
+    limit,
   });
 
   const facilityQuery = useQuery(routes.getPermittedFacility, {
@@ -33,8 +36,8 @@ export default function LocationFeed(props: Props) {
   const { data, loading } = useQuery(routes.listAssets, {
     query: {
       ...qParams,
-      limit: PER_PAGE_LIMIT,
-      offset: (qParams.page ? qParams.page - 1 : 0) * PER_PAGE_LIMIT,
+      limit,
+      offset: (qParams.page ? qParams.page - 1 : 0) * limit,
       facility: props.facilityId,
       location: props.locationId,
       asset_class: "ONVIF",
@@ -167,7 +170,7 @@ export default function LocationFeed(props: Props) {
           <Pagination
             className=""
             cPage={qParams.page}
-            defaultPerPage={PER_PAGE_LIMIT}
+            defaultPerPage={limit}
             data={{ totalCount }}
             onChange={(page) => updatePage(page)}
           />
@@ -185,6 +188,7 @@ export default function LocationFeed(props: Props) {
         </div>
       ) : (
         <Fullscreen
+          fullscreenClassName="h-screen overflow-auto"
           fullscreen={isFullscreen}
           onExit={() => setFullscreen(false)}
         >
@@ -194,8 +198,8 @@ export default function LocationFeed(props: Props) {
                 <LocationFeedTile
                   asset={asset}
                   fallbackMiddleware={
-                    asset.location_object.middleware_address ??
-                    facilityQuery.data!.middleware_address
+                    asset.location_object.middleware_address ||
+                    facilityQuery.data?.middleware_address
                   }
                 />
               </div>

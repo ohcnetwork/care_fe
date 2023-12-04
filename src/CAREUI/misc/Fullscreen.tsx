@@ -1,26 +1,28 @@
 import { useEffect, useRef } from "react";
 
 interface Props {
+  className?: string;
+  fullscreenClassName?: string;
   children: React.ReactNode;
   fullscreen: boolean;
   onExit: () => void;
 }
 
-export default function Fullscreen({ children, fullscreen, onExit }: Props) {
+export default function Fullscreen(props: Props) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (fullscreen) {
+    if (props.fullscreen) {
       ref.current?.requestFullscreen();
     } else {
       document.exitFullscreen();
     }
-  }, [fullscreen]);
+  }, [props.fullscreen]);
 
   useEffect(() => {
     const listener = () => {
       if (!document.fullscreenElement) {
-        onExit();
+        props.onExit();
       }
     };
 
@@ -28,7 +30,14 @@ export default function Fullscreen({ children, fullscreen, onExit }: Props) {
     return () => {
       document.removeEventListener("fullscreenchange", listener);
     };
-  }, [onExit]);
+  }, [props.onExit]);
 
-  return <div ref={ref}>{children}</div>;
+  return (
+    <div
+      ref={ref}
+      className={props.fullscreen ? props.fullscreenClassName : props.className}
+    >
+      {props.children}
+    </div>
+  );
 }

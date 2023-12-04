@@ -17,6 +17,7 @@ export default function LocationFeedTile(props: Props) {
       fallbackMiddleware={props.fallbackMiddleware as string}
       silent
       preset={preset?.meta.position}
+      shortcutsDisabled
     >
       <div className="w-32">
         <AssetBedSelect

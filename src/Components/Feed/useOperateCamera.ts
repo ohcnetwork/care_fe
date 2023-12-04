@@ -1,4 +1,3 @@
-import { useState } from "react";
 import request from "../../Utils/request/request";
 import { FeedRoutes } from "./routes";
 
@@ -45,23 +44,11 @@ export type OperationAction =
  * @param id The external id of the camera asset
  */
 export default function useOperateCamera(id: string, silent = false) {
-  const [precision, setPrecision] = useState(1);
-
-  const togglePrecision = () => {
-    setPrecision((p) => (p === 16 ? 1 : p << 1));
-  };
-
-  const operate = (action: OperationAction) => {
+  return (action: OperationAction) => {
     return request(FeedRoutes.operateAsset, {
       pathParams: { id },
       body: { action },
       silent,
     });
-  };
-
-  return {
-    precision,
-    togglePrecision,
-    operate,
   };
 }

@@ -2,18 +2,19 @@ import { LegacyRef, useCallback, useEffect, useRef, useState } from "react";
 import { AssetData } from "../Assets/AssetTypes";
 import useOperateCamera, { PTZPayload } from "./useOperateCamera";
 import usePlayer from "./usePlayer";
-import { getPTZPayload, getStreamUrl } from "./utils";
+import { getStreamUrl } from "./utils";
 import ReactPlayer from "react-player";
 import { classNames, isIOS } from "../../Utils/utils";
 import FeedAlert, { FeedAlertState } from "./FeedAlert";
 import FeedNetworkSignal from "./FeedNetworkSignal";
 import NoFeedAvailable from "./NoFeedAvailable";
 import FeedControls from "./FeedControls";
+import Fullscreen from "../../CAREUI/misc/Fullscreen";
 
 interface Props {
   children?: React.ReactNode;
   asset: AssetData;
-  fallbackMiddleware: string;
+  fallbackMiddleware: string; // TODO: remove this in favour of `asset.resolved_middleware.hostname` once https://github.com/coronasafe/care/pull/1741 is merged
   preset?: PTZPayload;
   silent?: boolean;
   className?: string;
@@ -31,11 +32,9 @@ export default function CameraFeed(props: Props) {
   const streamUrl = getStreamUrl(props.asset, props.fallbackMiddleware);
 
   const player = usePlayer(streamUrl, playerRef);
-  const { precision, togglePrecision, operate } = useOperateCamera(
-    props.asset.id,
-    props.silent
-  );
+  const operate = useOperateCamera(props.asset.id, props.silent);
 
+  const [isFullscreen, setFullscreen] = useState(false);
   const [state, setState] = useState<FeedAlertState>();
   useEffect(() => setState(player.status), [player.status, setState]);
 
@@ -82,117 +81,119 @@ export default function CameraFeed(props: Props) {
 
   // Start stream on mount
   useEffect(() => initializeStream(), [initializeStream]);
+
   const resetStream = () => {
     setState("loading");
     initializeStream();
   };
-  // console.log({ assetId: props.asset.id, state, precision });
 
   return (
-    <div
-      className={classNames(
-        "flex flex-col overflow-clip rounded-xl bg-black",
-        props.className
-      )}
-    >
-      <div className="flex items-center justify-between bg-zinc-900 px-4 py-0.5">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-white">
-            {props.asset.name}
-          </span>
-          <div className={state === "loading" ? "animate-pulse" : ""}>
-            <FeedNetworkSignal
-              playerRef={playerRef as any}
-              playedOn={player.playedOn}
-              status={player.status}
-              onReset={resetStream}
-            />
+    <Fullscreen fullscreen={isFullscreen} onExit={() => setFullscreen(false)}>
+      <div
+        className={classNames(
+          "flex flex-col overflow-clip rounded-xl bg-black",
+          props.className
+        )}
+      >
+        <div className="flex items-center justify-between bg-zinc-900 px-4 py-0.5">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-white">
+              {props.asset.name}
+            </span>
+            <div className={state === "loading" ? "animate-pulse" : ""}>
+              <FeedNetworkSignal
+                playerRef={playerRef as any}
+                playedOn={player.playedOn}
+                status={player.status}
+                onReset={resetStream}
+              />
+            </div>
           </div>
+          {props.children}
         </div>
-        {props.children}
+
+        <div className="group relative aspect-video">
+          {/* Notifications */}
+          <FeedAlert state={state} />
+
+          {/* No Feed informations */}
+          {state === "host_unreachable" && (
+            <NoFeedAvailable
+              message="Host Unreachable"
+              className="text-warning-500"
+              icon="l-exclamation-triangle"
+              streamUrl={streamUrl}
+              asset={props.asset}
+              onResetClick={resetStream}
+            />
+          )}
+          {player.status === "offline" && (
+            <NoFeedAvailable
+              message="Offline"
+              className="text-gray-500"
+              icon="l-exclamation-triangle"
+              streamUrl={streamUrl}
+              asset={props.asset}
+              onResetClick={resetStream}
+            />
+          )}
+
+          {/* Video Player */}
+          {isIOS ? (
+            <div className="absolute inset-0">
+              <ReactPlayer
+                url={streamUrl}
+                ref={playerRef.current as LegacyRef<ReactPlayer>}
+                controls={false}
+                playsinline
+                playing
+                muted
+                width="100%"
+                height="100%"
+                onPlay={player.onPlayCB}
+                onEnded={() => player.setStatus("stop")}
+                onError={(e, _, hlsInstance) => {
+                  if (e === "hlsError") {
+                    const recovered = hlsInstance.recoverMediaError();
+                    console.info(recovered);
+                  }
+                }}
+              />
+            </div>
+          ) : (
+            <video
+              className="absolute inset-0"
+              id="mse-video"
+              autoPlay
+              muted
+              playsInline
+              onPlay={player.onPlayCB}
+              onEnded={() => player.setStatus("stop")}
+              ref={playerRef as LegacyRef<HTMLVideoElement>}
+            />
+          )}
+
+          {/* Controls */}
+          {!props.constrolsDisabled && player.status === "playing" && (
+            <FeedControls
+              shortcutsDisabled={props.shortcutsDisabled}
+              isFullscreen={isFullscreen}
+              setFullscreen={setFullscreen}
+              onReset={resetStream}
+              onMove={async (data) => {
+                setState("moving");
+                const { res } = await operate({ type: "relative_move", data });
+                setTimeout(() => {
+                  setState((state) => (state === "moving" ? undefined : state));
+                }, 4000);
+                if (res?.status === 500) {
+                  setState("host_unreachable");
+                }
+              }}
+            />
+          )}
+        </div>
       </div>
-
-      <div className="group relative aspect-video">
-        {/* Notifications */}
-        <FeedAlert state={state} />
-
-        {/* No Feed informations */}
-        {state === "host_unreachable" && (
-          <NoFeedAvailable
-            message="Host Unreachable"
-            className="text-warning-500"
-            icon="l-exclamation-triangle"
-            streamUrl={streamUrl}
-            asset={props.asset}
-            onResetClick={resetStream}
-          />
-        )}
-        {player.status === "offline" && (
-          <NoFeedAvailable
-            message="Offline"
-            className="text-gray-500"
-            icon="l-exclamation-triangle"
-            streamUrl={streamUrl}
-            asset={props.asset}
-            onResetClick={resetStream}
-          />
-        )}
-
-        {/* Video Player */}
-        {isIOS ? (
-          <ReactPlayer
-            url={streamUrl}
-            ref={playerRef.current as LegacyRef<ReactPlayer>}
-            controls={false}
-            playsinline
-            playing
-            muted
-            width="100%"
-            height="100%"
-            onPlay={player.onPlayCB}
-            // onBuffer={props.onWait}
-            onEnded={() => player.setStatus("stop")}
-            onError={(e, _, hlsInstance) => {
-              if (e === "hlsError") {
-                const recovered = hlsInstance.recoverMediaError();
-                console.info(recovered);
-              }
-            }}
-          />
-        ) : (
-          <video
-            id="mse-video"
-            autoPlay
-            muted
-            playsInline
-            // className="h-full w-full"
-            onPlay={player.onPlayCB}
-            // onWaiting={props.onWait}
-            onEnded={() => player.setStatus("stop")}
-            ref={playerRef as LegacyRef<HTMLVideoElement>}
-          />
-        )}
-
-        {/* Controls */}
-        {!props.constrolsDisabled && player.status === "playing" && (
-          <FeedControls
-            shortcutsDisabled={props.shortcutsDisabled}
-            onMove={async (action) => {
-              setState("moving");
-              const { res } = await operate({
-                type: "relative_move",
-                data: getPTZPayload(action, precision),
-              });
-              setTimeout(() => {
-                setState((state) => (state === "moving" ? undefined : state));
-              }, 4000);
-              if (res?.status === 500) {
-                setState("host_unreachable");
-              }
-            }}
-          />
-        )}
-      </div>
-    </div>
+    </Fullscreen>
   );
 }
