@@ -30,9 +30,13 @@ describe("Facility Creation", () => {
   const doctorCapacity = "5";
   const totalDoctor = "10";
   const facilityName = "cypress facility";
+  const facilityName2 = "Dummy Facility 1";
   const facilityAddress = "cypress address";
   const facilityUpdateAddress = "cypress updated address";
   const facilityNumber = "9898469865";
+  const triageDate = "02122023";
+  const initialTriageValue = "60";
+  const modifiedTriageValue = "50";
   const facilityErrorMessage = [
     "Required",
     "Invalid Pincode",
@@ -50,6 +54,7 @@ describe("Facility Creation", () => {
     "Field is required",
   ];
   const doctorErrorMessage = ["Field is required", "Field is required"];
+  const triageErrorMessage = ["Field is required"];
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -60,6 +65,48 @@ describe("Facility Creation", () => {
     cy.viewport(1280, 720);
     cy.restoreLocalStorage();
     cy.awaitUrl("/facility");
+  });
+
+  it("Verify Facility Triage Function", () => {
+    // mandatory field error throw
+    manageUserPage.typeFacilitySearch(facilityName2);
+    facilityPage.verifyFacilityBadgeContent(facilityName2);
+    manageUserPage.assertFacilityInCard(facilityName2);
+    facilityHome.verifyURLContains(facilityName2);
+    facilityPage.visitAlreadyCreatedFacility();
+    facilityPage.scrollToFacilityTriage();
+    facilityPage.clickAddFacilityTriage();
+    manageUserPage.clickSubmit();
+    userCreationPage.verifyErrorMessages(triageErrorMessage);
+    // create a entry and verify reflection
+    facilityPage.fillEntryDate(triageDate);
+    facilityPage.fillTriageEntryFields(
+      initialTriageValue,
+      initialTriageValue,
+      initialTriageValue,
+      initialTriageValue,
+      initialTriageValue
+    );
+    manageUserPage.clickSubmit();
+    // edit the entry and verify reflection
+    facilityPage.scrollToFacilityTriage();
+    facilityPage.verifyTriageTableContains(initialTriageValue);
+    facilityPage.clickEditButton();
+    facilityPage.fillTriageEntryFields(
+      modifiedTriageValue,
+      modifiedTriageValue,
+      modifiedTriageValue,
+      modifiedTriageValue,
+      modifiedTriageValue
+    );
+    manageUserPage.clickSubmit();
+    facilityPage.scrollToFacilityTriage();
+    facilityPage.verifyTriageTableContains(modifiedTriageValue);
+    // validate error of filling data on same date already data exist and verify reflection
+    facilityPage.scrollToFacilityTriage();
+    facilityPage.clickAddFacilityTriage();
+    facilityPage.fillEntryDate(triageDate);
+    facilityPage.clickButtonsMultipleTimes("button#submit");
   });
 
   it("Create a new facility with multiple bed and doctor capacity", () => {
