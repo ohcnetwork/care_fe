@@ -3,16 +3,13 @@ import Loading from "../../Common/Loading";
 import Page from "../../Common/components/Page";
 import useQuery from "../../../Utils/request/useQuery";
 import routes from "../../../Redux/api";
-import { RouteParams } from "../../../Routers/types";
 import LocationFeedTile from "../CameraFeedWithBedPresets";
 import Fullscreen from "../../../CAREUI/misc/Fullscreen";
 import useBreakpoints from "../../../Common/hooks/useBreakpoints";
 import { useQueryParams } from "raviger";
 import LiveMonitoringFilters from "./LiveMonitoringFilters";
 
-type Props = RouteParams<"facilityId" | "locationId">;
-
-export default function CentralLiveMonitoring(props: Props) {
+export default function CentralLiveMonitoring(props: { facilityId: string }) {
   const [isFullscreen, setFullscreen] = useState(false);
   const limit = useBreakpoints({ default: 4, "3xl": 9 });
 
@@ -27,9 +24,9 @@ export default function CentralLiveMonitoring(props: Props) {
       ...qParams,
       limit,
       offset: (qParams.page ? qParams.page - 1 : 0) * limit,
-      facility: props.facilityId,
-      location: props.locationId,
       asset_class: "ONVIF",
+      facility: props.facilityId,
+      location: qParams.location,
       in_use_by_consultation: qParams.in_use_by_consultation,
     },
   });

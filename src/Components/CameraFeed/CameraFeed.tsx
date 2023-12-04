@@ -162,7 +162,7 @@ export default function CameraFeed(props: Props) {
             </div>
           ) : (
             <video
-              className="absolute inset-0"
+              className="absolute inset-0 w-full"
               id="mse-video"
               autoPlay
               muted

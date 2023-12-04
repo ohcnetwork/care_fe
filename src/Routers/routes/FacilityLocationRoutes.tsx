@@ -36,7 +36,7 @@ export default {
   }: any) => (
     <AddBedForm facilityId={facilityId} locationId={locationId} bedId={bedId} />
   ),
-  "/facility/:facilityId/location/:locationId/live-monitoring": (
-    props: any
-  ) => <CentralLiveMonitoring {...props} />,
+  "/facility/:facilityId/live-monitoring": (props: any) => (
+    <CentralLiveMonitoring {...props} />
+  ),
 };

@@ -511,7 +511,7 @@ const LiveMonitoringButton = () => {
               <ButtonV2
                 disabled={!location}
                 className="w-full"
-                href={`/facility/${facilityId}/location/${location}/live-monitoring`}
+                href={`/facility/${facilityId}/live-monitoring?location=${location}`}
               >
                 Open Live Monitoring
               </ButtonV2>
