@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { AssetBedModel, AssetData } from "../../Assets/AssetTypes";
-import CameraFeed from "../CameraFeed";
-import AssetBedSelect from "../AssetBedSelect";
+import { AssetBedModel, AssetData } from "../Assets/AssetTypes";
+import CameraFeed from "./CameraFeed";
+import AssetBedSelect from "./AssetBedSelect";
 
 interface Props {
   asset: AssetData;

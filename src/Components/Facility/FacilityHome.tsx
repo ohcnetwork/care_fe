@@ -397,7 +397,7 @@ export const FacilityHome = (props: any) => {
                 className="mt-2 flex w-full flex-row justify-center md:w-auto"
                 onClick={() =>
                   navigate(
-                    `/facility/${facilityId}/location/09ab6e88-9132-434a-b8ab-b342b10e7bef/feed`
+                    `/facility/${facilityId}/location/09ab6e88-9132-434a-b8ab-b342b10e7bef/live-monitoring`
                   )
                 }
               >

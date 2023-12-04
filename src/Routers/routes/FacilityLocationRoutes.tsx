@@ -3,7 +3,7 @@ import { AddInventoryForm } from "../../Components/Facility/AddInventoryForm";
 import { AddLocationForm } from "../../Components/Facility/AddLocationForm";
 import { BedManagement } from "../../Components/Facility/BedManagement";
 import LocationManagement from "../../Components/Facility/LocationManagement";
-import LocationFeed from "../../Components/CameraFeed/CentralLiveMonitoring/LocationFeed";
+import CentralLiveMonitoring from "../../Components/CameraFeed/CentralLiveMonitoring";
 
 export default {
   "/facility/:facilityId/location": ({ facilityId }: any) => (
@@ -36,7 +36,7 @@ export default {
   }: any) => (
     <AddBedForm facilityId={facilityId} locationId={locationId} bedId={bedId} />
   ),
-  "/facility/:facilityId/location/:locationId/feed": (props: any) => (
-    <LocationFeed {...props} />
-  ),
+  "/facility/:facilityId/location/:locationId/live-monitoring": (
+    props: any
+  ) => <CentralLiveMonitoring {...props} />,
 };
