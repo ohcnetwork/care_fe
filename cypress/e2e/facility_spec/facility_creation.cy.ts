@@ -72,8 +72,6 @@ describe("Facility Creation", () => {
       cy.get("[role='option']").contains(featureText).click();
     });
     facilityPage.fillPincode("682001");
-    facilityPage.selectState("Kerala");
-    facilityPage.selectDistrict("Ernakulam");
     facilityPage.selectLocalBody("Aluva");
     facilityPage.selectWard("4");
     facilityPage.fillAddress(facilityAddress);
@@ -144,23 +142,17 @@ describe("Facility Creation", () => {
     facilityPage.visitCreateFacilityPage();
     facilityPage.fillFacilityName(facilityName);
     facilityPage.fillPincode("682001");
-    facilityPage.selectState("Kerala");
-    facilityPage.selectDistrict("Ernakulam");
     facilityPage.selectLocalBody("Aluva");
     facilityPage.selectWard("4");
     facilityPage.fillAddress(facilityAddress);
     facilityPage.fillPhoneNumber(facilityNumber);
     facilityPage.submitForm();
-    // add the bed capacity and verify form error message
-    facilityPage.saveAndExitBedCapacityForm();
-    userCreationPage.verifyErrorMessages(bedErrorMessage);
+    // add the bed capacity
     facilityPage.selectBedType("Oxygen beds");
     facilityPage.fillTotalCapacity(oxygenCapacity);
     facilityPage.fillCurrentlyOccupied(oxygenExpected);
     facilityPage.saveAndExitBedCapacityForm();
-    // add the doctor capacity and verify form error message
-    facilityPage.saveAndExitDoctorForm();
-    userCreationPage.verifyErrorMessages(doctorErrorMessage);
+    // add the doctor capacity
     facilityPage.selectAreaOfSpecialization("General Medicine");
     facilityPage.fillDoctorCount(doctorCapacity);
     facilityPage.saveAndExitDoctorForm();
@@ -187,18 +179,20 @@ describe("Facility Creation", () => {
     facilityPage.visitCreateFacilityPage();
     facilityPage.fillFacilityName(facilityName);
     facilityPage.fillPincode("682001");
-    facilityPage.selectState("Kerala");
-    facilityPage.selectDistrict("Ernakulam");
     facilityPage.selectLocalBody("Aluva");
     facilityPage.selectWard("4");
     facilityPage.fillAddress(facilityAddress);
     facilityPage.fillPhoneNumber(facilityNumber);
     facilityPage.submitForm();
-    // add no bed capacity
+    // add no bed capacity and verify form error message
     facilityPage.isVisibleselectBedType();
+    facilityPage.saveAndExitBedCapacityForm();
+    userCreationPage.verifyErrorMessages(bedErrorMessage);
     facilityPage.clickcancelbutton();
-    // add no doctor capacity
+    // add no doctor capacity and verify form error message
     facilityPage.isVisibleAreaOfSpecialization();
+    facilityPage.saveAndExitDoctorForm();
+    userCreationPage.verifyErrorMessages(doctorErrorMessage);
     facilityPage.clickcancelbutton();
     cy.url().then((newUrl) => {
       facilityUrl1 = newUrl;
