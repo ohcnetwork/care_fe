@@ -173,6 +173,42 @@ class FacilityPage {
     cy.get("#inventory-management").click();
   }
 
+  getTotalBedCapacity() {
+    return cy.get("#total-bed-capacity");
+  }
+
+  getFacilityTotalBedCapacity() {
+    return cy.get("#facility-bed-capacity-details");
+  }
+
+  getFacilityTotalDoctorCapacity() {
+    return cy.get("#facility-doctor-capacity-details");
+  }
+
+  getTotalDoctorCapacity() {
+    return cy.get("#total-doctor-capacity");
+  }
+
+  getFacilityName() {
+    return cy.get("#facility-name");
+  }
+
+  getAddressDetailsView() {
+    return cy.get("#address-details-view");
+  }
+
+  getPhoneNumberView() {
+    return cy.get("#phone-number-view");
+  }
+
+  getFacilityAvailableFeatures() {
+    return cy.get("#facility-available-features");
+  }
+
+  getFacilityOxygenInfo() {
+    return cy.get("#facility-oxygen-info");
+  }
+
   clickResourceRequestOption() {
     cy.get("#resource-request").contains("Resource Request").click();
   }
