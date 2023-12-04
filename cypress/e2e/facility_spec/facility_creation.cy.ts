@@ -191,7 +191,7 @@ describe("Facility Creation", () => {
     facilityPage.clickcancelbutton();
     // add no doctor capacity and verify form error message
     facilityPage.isVisibleAreaOfSpecialization();
-    facilityPage.saveAndExitDoctorForm();
+    facilityPage.clickdoctorcapacityaddmore();
     userCreationPage.verifyErrorMessages(doctorErrorMessage);
     facilityPage.clickcancelbutton();
     cy.url().then((newUrl) => {
