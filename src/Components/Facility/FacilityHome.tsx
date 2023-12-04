@@ -4,7 +4,7 @@ import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import { FacilityModel } from "./models";
 import { FACILITY_FEATURE_TYPES, USER_TYPES } from "../../Common/constants";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
-import { lazy, useState } from "react";
+import { Fragment, lazy, useState } from "react";
 
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -27,6 +27,10 @@ import useQuery from "../../Utils/request/useQuery.js";
 import { FacilityHomeTriage } from "./FacilityHomeTriage.js";
 import { FacilityDoctorList } from "./FacilityDoctorList.js";
 import { FacilityBedCapacity } from "./FacilityBedCapacity.js";
+import useSlug from "../../Common/hooks/useSlug.js";
+import { Popover, Transition } from "@headlessui/react";
+import { FieldLabel } from "../Form/FormFields/FormField.js";
+import { LocationSelect } from "../Common/LocationSelect.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -390,20 +394,7 @@ export const FacilityHome = (props: any) => {
                 <CareIcon className="care-l-monitor-heart-rate text-lg" />
                 <span>Central Nursing Station</span>
               </ButtonV2>
-              <ButtonV2
-                variant="primary"
-                ghost
-                border
-                className="mt-2 flex w-full flex-row justify-center md:w-auto"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/location/09ab6e88-9132-434a-b8ab-b342b10e7bef/live-monitoring`
-                  )
-                }
-              >
-                <CareIcon icon="l-video" className="text-lg" />
-                <span>Live Monitoring</span>
-              </ButtonV2>
+              <LiveMonitoringButton />
               <ButtonV2
                 variant="primary"
                 ghost
@@ -472,5 +463,62 @@ export const FacilityHome = (props: any) => {
         NonReadOnlyUsers={NonReadOnlyUsers}
       />
     </Page>
+  );
+};
+
+const LiveMonitoringButton = () => {
+  const facilityId = useSlug("facility");
+  const [location, setLocation] = useState<string>();
+
+  return (
+    <Popover className="relative">
+      <Popover.Button className="mt-2 w-full">
+        <ButtonV2 variant="primary" ghost border className="w-full">
+          <CareIcon icon="l-video" className="text-lg" />
+          <span>Live Monitoring</span>
+        </ButtonV2>
+      </Popover.Button>
+      <Transition
+        as={Fragment}
+        enter="transition ease-out duration-200"
+        enterFrom="opacity-0 translate-y-1"
+        enterTo="opacity-100 translate-y-0"
+        leave="transition ease-in duration-150"
+        leaveFrom="opacity-100 translate-y-0"
+        leaveTo="opacity-0 translate-y-1"
+      >
+        <Popover.Panel className="absolute z-30 mt-1 w-full px-4 sm:px-0 md:w-96 lg:max-w-3xl lg:translate-x-[-168px]">
+          <div className="rounded-lg shadow-lg ring-1 ring-gray-400">
+            <div className="relative flex flex-col gap-4 rounded-b-lg bg-white p-6">
+              <div>
+                <FieldLabel htmlFor="location" className="text-sm">
+                  Choose a location
+                </FieldLabel>
+                <div className="flex w-full items-center gap-2">
+                  <LocationSelect
+                    className="w-full"
+                    name="location"
+                    setSelected={(v) => setLocation(v as string | undefined)}
+                    selected={location ?? null}
+                    showAll={false}
+                    multiple={false}
+                    facilityId={facilityId}
+                    errors=""
+                    errorClassName="hidden"
+                  />
+                </div>
+              </div>
+              <ButtonV2
+                disabled={!location}
+                className="w-full"
+                href={`/facility/${facilityId}/location/${location}/live-monitoring`}
+              >
+                Open Live Monitoring
+              </ButtonV2>
+            </div>
+          </div>
+        </Popover.Panel>
+      </Transition>
+    </Popover>
   );
 };
