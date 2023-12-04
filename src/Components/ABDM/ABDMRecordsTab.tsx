@@ -125,7 +125,9 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
       ) : (
         <div className="border-t border-gray-200 bg-gray-50 px-4 py-5 sm:gap-4">
           <p className="text-center text-sm text-gray-800">
-            Waiting for the Patient to approve the consent request
+            {consent.status === "REQUESTED"
+              ? "Waiting for the Patient to approve the consent request"
+              : "Patient has rejected the consent request"}
           </p>
         </div>
       )}

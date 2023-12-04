@@ -40,6 +40,7 @@ export type ConsentModel = {
   patient_abha: string;
   care_contexts: ConsentCareContext[];
 
+  status: ConsentStatus;
   purpose: ConsentPurpose;
   hi_types: ConsentHIType[];
 
@@ -61,8 +62,6 @@ export type ConsentModel = {
 
 export type ConsentArtefactModel = {
   consent_request: string;
-
-  status: ConsentStatus;
 
   cm: null | string;
 } & ConsentModel;
