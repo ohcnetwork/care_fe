@@ -221,18 +221,6 @@ const Location = (props: LocationProps) => {
             show={toggle}
             onClose={() => setToggle((prev) => !prev)}
           >
-            <div className="grid grid-cols-2 gap-2 py-4">
-              {dutyStaffList?.map((user) => (
-                <button onClick={() => handleDelete(user.id)}>
-                  <div className="rounded-lg border border-primary-600 bg-primary-100 text-primary-900">
-                    <div className="flex px-3 py-1">
-                      <CareIcon className="care-l-user-md" />
-                      <div className="ml-3">{`${user.first_name} ${user.last_name}`}</div>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
             <div className="flex w-full items-start gap-2">
               <AutocompleteFormField
                 id="user-search"
@@ -258,6 +246,28 @@ const Location = (props: LocationProps) => {
               >
                 {t("assign")}
               </ButtonV2>
+            </div>
+            <div className="grid grid-cols-1 gap-2">
+              {dutyStaffList?.map((user) => (
+                <div
+                  id={`user-${user.id}`}
+                  className="flex rounded-lg px-3 py-1 text-primary-900"
+                >
+                  <div className="flex w-full">
+                    <CareIcon className="care-l-user-md" />
+                    <div className="ml-3">{`${user.first_name} ${user.last_name} (${user.user_type})`}</div>
+                  </div>
+                  <ButtonV2
+                    variant="danger"
+                    border
+                    className="ml-auto"
+                    disabled={disabled}
+                    onClick={() => handleDelete(user.id)}
+                  >
+                    {t("remove")}
+                  </ButtonV2>
+                </div>
+              ))}
             </div>
           </DialogModal>
         )}
