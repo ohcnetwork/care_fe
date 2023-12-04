@@ -18,34 +18,36 @@ export const DailyRoundListDetails = (props: any) => {
       id,
     },
   });
-  const fetchpatient = async () => {
-    if (res && data) {
-      const currentHealth = currentHealthChoices.find(
-        (i) => i.text === data?.current_health
-      );
-
-      const Data: DailyRoundsModel = {
-        ...data,
-        temperature: Number(data?.temperature) ? data.temperature : "",
-        additional_symptoms_text: "",
-        medication_given:
-          Object.keys(data.medication_given ?? {}).length === 0
-            ? []
-            : data.medication_given,
-        current_health: currentHealth
-          ? currentHealth.desc
-          : data.current_health,
-      };
-      if (data.additional_symptoms?.length) {
-        const symptoms = data.additional_symptoms.map((symptom: number) => {
-          const option = symptomChoices.find((i) => i.id === symptom);
-          return option ? option.text.toLowerCase() : symptom;
-        });
-        Data.additional_symptoms_text = symptoms.join(", ");
+  let currentHealth:
+    | {
+        id: number;
+        text: string;
+        desc: string;
       }
-    }
+    | undefined;
+  if (res && data) {
+    currentHealth = currentHealthChoices.find(
+      (i) => i.text === data?.current_health
+    );
+  }
+
+  const Data: DailyRoundsModel = {
+    ...data,
+    temperature: Number(data?.temperature) ? data?.temperature : "",
+    additional_symptoms_text: "",
+    medication_given:
+      Object.keys(data?.medication_given ?? {}).length === 0
+        ? []
+        : data?.medication_given,
+    current_health: currentHealth ? currentHealth.desc : data?.current_health,
   };
-  fetchpatient();
+  if (data?.additional_symptoms?.length) {
+    const symptoms = data.additional_symptoms.map((symptom: number) => {
+      const option = symptomChoices.find((i) => i.id === symptom);
+      return option ? option.text.toLowerCase() : symptom;
+    });
+    data.additional_symptoms_text = symptoms.join(", ");
+  }
   if (loading) {
     return <Loading />;
   }
@@ -61,7 +63,7 @@ export const DailyRoundListDetails = (props: any) => {
               <span className="font-semibold leading-relaxed">
                 Patient Category:{" "}
               </span>
-              {data?.patient_category ?? "-"}
+              {Data.patient_category ?? "-"}
             </div>
           </div>
 
@@ -79,49 +81,49 @@ export const DailyRoundListDetails = (props: any) => {
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <span className="font-semibold leading-relaxed">Temperature: </span>
-            {data?.temperature ?? "-"}
+            {Data.temperature ?? "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Taken at: </span>
-            {data?.taken_at ? formatDateTime(data?.taken_at) : "-"}
+            {Data.taken_at ? formatDateTime(data?.taken_at) : "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">SpO2: </span>
-            {data?.ventilator_spo2 ?? "-"}
+            {Data.ventilator_spo2 ?? "-"}
           </div>
           <div className="capitalize md:col-span-2">
             <span className="font-semibold leading-relaxed">
               Additional Symptoms:{" "}
             </span>
-            {data?.additional_symptoms_text ?? "-"}
+            {Data.additional_symptoms_text ?? "-"}
           </div>
           <div className="capitalize md:col-span-2">
             <span className="font-semibold leading-relaxed">
               Admitted To *:{" "}
             </span>
-            {data?.admitted_to ?? "-"}
+            {Data.admitted_to ?? "-"}
           </div>
           <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">
               Physical Examination Info:{" "}
             </span>
-            {data?.physical_examination_info ?? "-"}
+            {Data.physical_examination_info ?? "-"}
           </div>
           <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">
               Other Symptoms:{" "}
             </span>
-            {data?.other_symptoms ?? "-"}
+            {Data.other_symptoms ?? "-"}
           </div>
           <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">
               Other Details:{" "}
             </span>
-            {data?.other_details ?? "-"}
+            {Data.other_details ?? "-"}
           </div>
           <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">Pulse(bpm): </span>
-            {data?.pulse ?? "-"}
+            {Data.pulse ?? "-"}
           </div>
           <div className="md:col-span-2 ">
             <span className="font-semibold leading-relaxed">BP</span>
@@ -130,14 +132,14 @@ export const DailyRoundListDetails = (props: any) => {
                 <span className="font-semibold leading-relaxed">
                   Systolic:{" "}
                 </span>
-                {data?.bp?.systolic ?? "-"}
+                {Data.bp?.systolic ?? "-"}
               </div>
               <div className="flex">
                 {" "}
                 <span className="font-semibold leading-relaxed">
                   Diastolic:
                 </span>
-                {data?.bp?.diastolic ?? "-"}
+                {Data.bp?.diastolic ?? "-"}
               </div>
             </div>
           </div>
@@ -147,23 +149,23 @@ export const DailyRoundListDetails = (props: any) => {
               Respiratory Rate (bpm):
             </span>
 
-            {data?.resp ?? "-"}
+            {Data.resp ?? "-"}
           </div>
           <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">Rhythm: </span>
-            {data?.rhythm ?? "-"}
+            {Data.rhythm ?? "-"}
           </div>
           <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">
               Rhythm Description:{" "}
             </span>
-            {data?.rhythm_detail ?? "-"}
+            {Data.rhythm_detail ?? "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">
               Recommend Discharge:{" "}
             </span>
-            {data?.recommend_discharge ? (
+            {Data.recommend_discharge ? (
               <span className="badge badge-pill badge-warning">Yes</span>
             ) : (
               <span className="badge badge-pill badge-secondary">No</span>
