@@ -83,7 +83,7 @@ export const FacilityDoctorList = (props: any) => {
   }
 
   return (
-    <div>
+    <section id="facility-doctor-capacity-details">
       <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
         <div className="justify-between md:flex md:pb-2">
           <div className="mb-2 text-xl font-bold">Doctors List</div>
@@ -116,6 +116,6 @@ export const FacilityDoctorList = (props: any) => {
           />
         </DialogModal>
       )}
-    </div>
+    </section>
   );
 };

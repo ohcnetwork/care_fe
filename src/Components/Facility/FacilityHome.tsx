@@ -198,7 +198,7 @@ export const FacilityHome = (props: any) => {
                   )}
                   {editCoverImageTooltip}
                 </div>
-                <div>
+                <div id="facility-name">
                   <h1 className="text-3xl font-bold">{facilityData?.name}</h1>
                   {facilityData?.modified_date && (
                     <RecordMeta
@@ -212,7 +212,7 @@ export const FacilityHome = (props: any) => {
               <div className="flex flex-1 items-center">
                 <div className="mb-6 grid  w-full grid-cols-1 gap-4 md:mb-0 lg:grid-cols-2">
                   <div className="flex-col justify-between md:flex lg:flex-1 ">
-                    <div className="mb-10">
+                    <div className="mb-10" id="address-details-view">
                       <h1 className="text-base font-semibold text-[#B9B9B9]">
                         Address
                       </h1>
@@ -222,7 +222,7 @@ export const FacilityHome = (props: any) => {
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <div>
+                      <div id="phone-number-view">
                         <h1 className="text-base font-semibold text-[#B9B9B9]">
                           Phone Number
                         </h1>
@@ -270,7 +270,10 @@ export const FacilityHome = (props: any) => {
                 ) && (
                   <h1 className="text-lg font-semibold">Available features</h1>
                 )}
-                <div className="mt-5 flex flex-wrap gap-2">
+                <div
+                  className="mt-5 flex flex-wrap gap-2"
+                  id="facility-available-features"
+                >
                   {facilityData?.features?.map(
                     (feature: number, i: number) =>
                       FACILITY_FEATURE_TYPES.some((f) => f.id === feature) && (
@@ -430,7 +433,10 @@ export const FacilityHome = (props: any) => {
 
       <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
         <h1 className="mb-6 text-xl font-bold">Oxygen Information</h1>
-        <div className="overflow-x-auto overflow-y-hidden">
+        <div
+          className="overflow-x-auto overflow-y-hidden"
+          id="facility-oxygen-info"
+        >
           <Table
             headings={[
               "",
