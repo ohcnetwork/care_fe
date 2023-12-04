@@ -43,7 +43,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
     <div className="flex flex-col gap-1 rounded bg-[#020617] p-2">
       {props.patientAssetBed && (
         <div className="flex items-center justify-between px-2 tracking-wide">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-2 md:flex-row">
             {patient ? (
               <Link
                 href={`/facility/${patient.last_consultation?.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}`}
@@ -64,7 +64,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
               </span>
             )}
           </div>
-          <div className="flex items-center gap-3 text-xs md:text-sm">
+          <div className="flex flex-col items-center gap-2 text-xs md:flex-row md:text-sm">
             {asset && (
               <Link
                 className="flex items-center gap-1 text-gray-500"
@@ -76,7 +76,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
             )}
             {bed && (
               <Link
-                className="flex items-center gap-2 text-gray-500"
+                className="flex flex-col items-center gap-2 text-gray-500 md:flex-row"
                 href={`/facility/${patient?.facility_object?.id}/location/${bed?.location_object?.id}/beds`}
               >
                 <span className="flex items-center gap-1">
@@ -236,7 +236,7 @@ export const VitalsNonWaveformContent = ({
 }: {
   children: JSX.Element | JSX.Element[];
 }) => (
-  <div className="z-10 grid grid-cols-2 gap-x-8 gap-y-4 divide-blue-600 border-b border-blue-600 bg-[#020617] tracking-wider text-white md:absolute md:inset-y-0 md:right-0 md:grid-cols-1 md:gap-0 md:divide-y md:border-b-0 md:border-l">
+  <div className="z-[5] grid grid-cols-2 gap-x-8 gap-y-4 divide-blue-600 border-b border-blue-600 bg-[#020617] tracking-wider text-white md:absolute md:inset-y-0 md:right-0 md:grid-cols-1 md:gap-0 md:divide-y md:border-b-0 md:border-l">
     {children}
   </div>
 );

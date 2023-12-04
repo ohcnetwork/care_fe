@@ -56,9 +56,6 @@ export const updateFacility = (id: string, params: object) => {
 export const partialUpdateFacility = (id: string, params: object) => {
   return fireRequest("partialUpdateFacility", [id], params);
 };
-export const deleteFacility = (id: string) => {
-  return fireRequest("deleteFacility", [id], {});
-};
 export const deleteFacilityCoverImage = (id: string) => {
   return fireRequest("deleteFacilityCoverImage", [], {}, { id });
 };
@@ -689,10 +686,6 @@ export const markNotificationAsRead = (id: string) => {
 
 export const getPublicKey = () => {
   return fireRequest("getPublicKey", [], {}, {});
-};
-
-export const sendNotificationMessages = (params: object) => {
-  return fireRequest("sendNotificationMessages", [], params, {});
 };
 
 // FileUpload

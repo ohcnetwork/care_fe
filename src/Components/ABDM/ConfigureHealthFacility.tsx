@@ -1,7 +1,7 @@
 import { lazy, useReducer, useState } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
+import { Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { classNames } from "../../Utils/utils";
 import useQuery from "../../Utils/request/useQuery";
@@ -178,7 +178,7 @@ export const ConfigureHealthFacility = (props: any) => {
                 >
                   {state.form.health_facility?.registered ? (
                     <>
-                      <div className="tooltip-text tooltip-top -left-48 flex flex-col gap-4">
+                      <div className="tooltip-text -ml-20 -mt-36 flex w-48 flex-col gap-4 whitespace-break-spaces">
                         <span className="text-gray-100">
                           The ABDM health facility is successfully linked with
                           care{" "}
@@ -192,7 +192,7 @@ export const ConfigureHealthFacility = (props: any) => {
                     </>
                   ) : (
                     <>
-                      <div className="tooltip-text tooltip-top -left-48 flex flex-col gap-4">
+                      <div className="tooltip-text -ml-20 -mt-44 flex w-48 flex-col gap-4 whitespace-break-spaces">
                         <span className="text-gray-100">
                           The ABDM health facility is successfully linked with
                           care{" "}
@@ -218,7 +218,6 @@ export const ConfigureHealthFacility = (props: any) => {
           </div>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-          <Cancel onClick={() => navigate(`/facility/${facilityId}`)} />
           <Submit
             onClick={handleSubmit}
             disabled={
