@@ -208,20 +208,22 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     );
   };
 
-  // useEffect(() => {
-  //   const fetchFacility = async () => {
-  //     const res = await dispatch(getPermittedFacility(facilityId));
+  useEffect(() => {
+    const fetchFacility = async () => {
+      const res = await dispatch(getPermittedFacility(facilityId));
 
-  //     if (res?.status === 200 && res?.data) {
-  //       setFacilityMiddlewareHostname(res.data.middleware_address);
-  //       //   useQuery(routes.getPermittedFacility, {
-  //       //     pathParams: { id: facilityId || "" },
-  //       //     onResponse: ({ res, data }) => {
-  //       //       if (res && res.status === 200 && data && data.middleware_address) {
-  //       //         setFacilityMiddlewareHostname(data.middleware_address);
-  //     }
-  //   };
-  // });
+      if (res?.status === 200 && res?.data) {
+        setFacilityMiddlewareHostname(res.data.middleware_address);
+        //   useQuery(routes.getPermittedFacility, {
+        //     pathParams: { id: facilityId || "" },
+        //     onResponse: ({ res, data }) => {
+        //       if (res && res.status === 200 && data && data.middleware_address) {
+        //         setFacilityMiddlewareHostname(data.middleware_address);
+      }
+    };
+
+    fetchFacility();
+  }, []);
 
   const fallbackMiddleware =
     cameraAsset.location_middleware || facilityMiddlewareHostname;
