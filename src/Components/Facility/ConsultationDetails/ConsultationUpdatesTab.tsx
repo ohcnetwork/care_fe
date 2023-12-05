@@ -60,7 +60,10 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
       setMonitorBedData(monitorBedData);
       const assetDataForMonitor = monitorBedData?.asset_object;
       const hl7Meta = assetDataForMonitor?.meta;
-      const hl7Middleware = hl7Meta?.middleware_hostname || middleware_address;
+      const hl7Middleware =
+        hl7Meta?.middleware_hostname ||
+        assetDataForMonitor?.location_object?.middleware_address ||
+        middleware_address;
       if (hl7Middleware && hl7Meta?.local_ip_address) {
         setHL7SocketUrl(
           `wss://${hl7Middleware}/observations/${hl7Meta.local_ip_address}`
@@ -85,7 +88,9 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
       setVentilatorBedData(ventilatorBedData);
       const ventilatorMeta = ventilatorBedData?.asset_object?.meta;
       const ventilatorMiddleware =
-        ventilatorMeta?.middleware_hostname || middleware_address;
+        ventilatorMeta?.middleware_hostname ||
+        consultationBedVentilator?.location_object.middleware_address ||
+        middleware_address;
       if (ventilatorMiddleware && ventilatorMeta?.local_ip_address) {
         setVentilatorSocketUrl(
           `wss://${ventilatorMiddleware}/observations/${ventilatorMeta?.local_ip_address}`
