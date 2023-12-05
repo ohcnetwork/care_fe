@@ -345,8 +345,8 @@ export const ConsultationDetails = (props: any) => {
                       {consultationData.admitted_to}
                     </span>
                   </div>
-                  {(consultationData.encounter_date ??
-                    consultationData.discharge_date) && (
+                  {(consultationData.discharge_date ??
+                    consultationData.encounter_date) && (
                     <div className="text-3xl font-bold">
                       {relativeTime(
                         consultationData.discharge_date

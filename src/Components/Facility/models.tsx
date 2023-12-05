@@ -92,7 +92,7 @@ export type PatientCategory =
   | "Critical";
 
 export interface ConsultationModel {
-  encounter_date?: string;
+  encounter_date: string;
   icu_admission_date?: string;
   admitted?: boolean;
   test_id?: string;
