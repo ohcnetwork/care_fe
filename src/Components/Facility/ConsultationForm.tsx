@@ -491,6 +491,10 @@ export const ConsultationForm = (props: any) => {
             errors[field] = "Field is required";
             invalidForm = true;
           }
+          if (dayjs(state.form.admission_date).isBefore(dayjs("2000-01-01"))) {
+            errors[field] = "Admission date cannot be before 01/01/2000";
+            invalidForm = true;
+          }
           return;
         case "cause_of_death":
           if (state.form.suggestion === "DD" && !state.form[field]) {

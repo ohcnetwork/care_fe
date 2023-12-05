@@ -501,7 +501,6 @@ export const DailyRounds = (props: any) => {
 
             <SelectFormField
               {...field("review_interval")}
-              required
               label="Review After"
               labelSuffix={getExpectedReviewTime()}
               options={REVIEW_AT_CHOICES}
