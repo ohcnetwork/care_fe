@@ -76,47 +76,50 @@ export default function LocationManagement({ facilityId }: Props) {
     </PaginatedList>
   );
 }
-interface LocationProps extends LocationModel {
-  facilityId: string;
-}
 
-const Location = (props: LocationProps) => {
+const DutyStaff = ({
+  facilityId,
+  locationId,
+  toggle,
+  setToggle,
+}: {
+  facilityId: string;
+  locationId: string;
+  toggle: boolean;
+  setToggle: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
   const { t } = useTranslation();
-  const {
-    id,
-    name,
-    description,
-    middleware_address,
-    location_type,
-    created_date,
-    modified_date,
-    facilityId,
-  } = props;
-  const [toggle, setToggle] = useState(false);
   const [disabled, setDisabled] = useState(false);
   const { data, loading } = useQuery(routes.getFacilityUsers, {
     pathParams: { facility_id: facilityId },
   });
   const [selected, setSelected] = useState<UserModel>();
-  const userList =
-    data?.results.filter(
-      (u) => u.user_type === "Doctor" || u.user_type === "Staff"
-    ) || [];
-
   const {
     data: dutyStaffList,
-    loading: dutyStaffLoading,
+    loading: _dutyStaffLoading,
     refetch,
   } = useQuery(routes.getFacilityAssetLocationDutyStaff, {
-    pathParams: { facility_external_id: facilityId, external_id: id ?? "" },
+    pathParams: {
+      facility_external_id: facilityId,
+      external_id: locationId ?? "",
+    },
   });
+
+  const dutyStaffIds = dutyStaffList?.map((u) => u.id) || [];
+  const userList =
+    data?.results
+      .filter((u) => u.user_type === "Doctor" || u.user_type === "Staff")
+      .filter((u) => !dutyStaffIds.includes(u.id)) || [];
 
   const handleAssign = async () => {
     if (!selected) return;
     setDisabled(true);
 
     const { res } = await request(routes.createFacilityAssetLocationDutyStaff, {
-      pathParams: { facility_external_id: facilityId, external_id: id ?? "" },
+      pathParams: {
+        facility_external_id: facilityId,
+        external_id: locationId ?? "",
+      },
       body: { duty_staff: selected.id },
     });
 
@@ -142,7 +145,10 @@ const Location = (props: LocationProps) => {
     setDisabled(true);
 
     const { res } = await request(routes.removeFacilityAssetLocationDutyStaff, {
-      pathParams: { facility_external_id: facilityId, external_id: id ?? "" },
+      pathParams: {
+        facility_external_id: facilityId,
+        external_id: locationId ?? "",
+      },
       body: { duty_staff: userId },
     });
 
@@ -161,9 +167,83 @@ const Location = (props: LocationProps) => {
     setDisabled(false);
   };
 
-  if (loading || dutyStaffLoading) {
-    return <Loading />;
-  }
+  return (
+    <DialogModal
+      title={t("assign_duty_staff")}
+      show={toggle}
+      onClose={() => setToggle((prev) => !prev)}
+    >
+      <div className="flex w-full items-start gap-2">
+        <AutocompleteFormField
+          id="user-search"
+          name="user_search"
+          className="w-full"
+          disabled={disabled}
+          placeholder={t("search_user_placeholder")}
+          value={selected}
+          onChange={(e) => setSelected(e.value)}
+          options={userList}
+          optionLabel={(option) =>
+            `${option.first_name} ${option.last_name} (${option.user_type})`
+          }
+          optionValue={(option) => option}
+          isLoading={loading}
+        />
+        <ButtonV2
+          variant="primary"
+          border
+          className="mt-0.5"
+          onClick={() => handleAssign()}
+          disabled={!selected}
+        >
+          {t("assign")}
+        </ButtonV2>
+      </div>
+      <div className="grid grid-cols-1 gap-2">
+        {dutyStaffList?.map((user) => (
+          <div
+            id={`user-${user.id}`}
+            className="flex rounded-lg px-3 py-1 text-primary-900"
+          >
+            <div className="flex w-full">
+              <CareIcon className="care-l-user-md" />
+              <div className="ml-3">{`${user.first_name} ${user.last_name} (${user.user_type})`}</div>
+            </div>
+            <ButtonV2
+              id="unlink-duty-staff"
+              size="small"
+              variant="danger"
+              ghost={true}
+              className="ml-auto"
+              disabled={disabled}
+              onClick={() => handleDelete(user.id)}
+            >
+              <CareIcon className="care-l-times text-lg" />
+            </ButtonV2>
+          </div>
+        ))}
+      </div>
+    </DialogModal>
+  );
+};
+
+interface LocationProps extends LocationModel {
+  facilityId: string;
+}
+
+const Location = (props: LocationProps) => {
+  const { t } = useTranslation();
+  const {
+    id,
+    name,
+    description,
+    middleware_address,
+    location_type,
+    created_date,
+    modified_date,
+    facilityId,
+  } = props;
+  const [toggle, setToggle] = useState(false);
 
   return (
     <div className="flex h-full w-full flex-col rounded border border-gray-300 bg-white p-6 shadow-sm transition-all duration-200 ease-in-out hover:border-primary-400">
@@ -216,60 +296,12 @@ const Location = (props: LocationProps) => {
 
       <div className="mt-4 flex flex-col gap-2 lg:mt-0 lg:flex-row">
         {toggle && (
-          <DialogModal
-            title={t("assign_duty_staff")}
-            show={toggle}
-            onClose={() => setToggle((prev) => !prev)}
-          >
-            <div className="flex w-full items-start gap-2">
-              <AutocompleteFormField
-                id="user-search"
-                name="user_search"
-                className="w-full"
-                disabled={disabled}
-                placeholder={t("search_user_placeholder")}
-                value={selected}
-                onChange={(e) => setSelected(e.value)}
-                options={userList}
-                optionLabel={(option) =>
-                  `${option.first_name} ${option.last_name} (${option.user_type})`
-                }
-                optionValue={(option) => option}
-                isLoading={loading}
-              />
-              <ButtonV2
-                variant="primary"
-                border
-                className="mt-0.5"
-                onClick={() => handleAssign()}
-                disabled={!selected}
-              >
-                {t("assign")}
-              </ButtonV2>
-            </div>
-            <div className="grid grid-cols-1 gap-2">
-              {dutyStaffList?.map((user) => (
-                <div
-                  id={`user-${user.id}`}
-                  className="flex rounded-lg px-3 py-1 text-primary-900"
-                >
-                  <div className="flex w-full">
-                    <CareIcon className="care-l-user-md" />
-                    <div className="ml-3">{`${user.first_name} ${user.last_name} (${user.user_type})`}</div>
-                  </div>
-                  <ButtonV2
-                    variant="danger"
-                    border
-                    className="ml-auto"
-                    disabled={disabled}
-                    onClick={() => handleDelete(user.id)}
-                  >
-                    {t("remove")}
-                  </ButtonV2>
-                </div>
-              ))}
-            </div>
-          </DialogModal>
+          <DutyStaff
+            facilityId={facilityId}
+            locationId={id || ""}
+            toggle={toggle}
+            setToggle={setToggle}
+          />
         )}
       </div>
       <div className="flex gap-3 pt-3">
