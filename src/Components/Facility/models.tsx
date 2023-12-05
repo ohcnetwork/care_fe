@@ -489,3 +489,16 @@ export interface PatientNotesModel {
   user_type?: string;
   created_date: string;
 }
+
+export type IFacilityNotificationRequest = {
+  facility: string;
+  message: string;
+};
+
+export type IFacilityNotificationResponse = {
+  [key: string]: string;
+};
+
+export type IUserFacilityRequest = {
+  facility: string;
+};

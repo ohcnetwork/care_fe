@@ -134,26 +134,26 @@ export default function UserFilter(props: any) {
           errors={""}
         />
       </div>
-
-      <PhoneNumberFormField
-        label="Phone Number"
-        name="phone_number"
-        placeholder="Phone Number"
-        value={filterState.phone_number}
-        onChange={handleChange}
-        errorClassName="hidden"
-        types={["mobile", "landline"]}
-      />
-
-      <PhoneNumberFormField
-        label="Whatsapp Number"
-        name="alt_phone_number"
-        placeholder="WhatsApp Phone Number"
-        value={filterState.alt_phone_number}
-        onChange={handleChange}
-        errorClassName="hidden"
-        types={["mobile"]}
-      />
+      <div className="-mb-4">
+        <PhoneNumberFormField
+          label="Phone Number"
+          name="phone_number"
+          placeholder="Phone Number"
+          value={filterState.phone_number}
+          onChange={handleChange}
+          types={["mobile", "landline"]}
+        />
+      </div>
+      <div className="-mb-4">
+        <PhoneNumberFormField
+          label="Whatsapp Number"
+          name="alt_phone_number"
+          placeholder="WhatsApp Phone Number"
+          value={filterState.alt_phone_number}
+          onChange={handleChange}
+          types={["mobile"]}
+        />
+      </div>
     </FiltersSlideover>
   );
 }
