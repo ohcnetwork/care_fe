@@ -1,50 +1,32 @@
 import * as Notification from "../../Utils/Notifications.js";
 
 import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import {
-  CapacityModal,
-  DoctorModal,
-  FacilityModel,
-  PatientStatsModel,
-} from "./models";
-import {
-  DOCTOR_SPECIALIZATION,
-  FACILITY_FEATURE_TYPES,
-  USER_TYPES,
-  getBedTypes,
-} from "../../Common/constants";
+import { FacilityModel } from "./models";
+import { FACILITY_FEATURE_TYPES, USER_TYPES } from "../../Common/constants";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
-import {
-  deleteFacility,
-  getPermittedFacility,
-  getTriageInfo,
-  listCapacity,
-  listDoctor,
-} from "../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { lazy, useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import { BedCapacity } from "./BedCapacity";
-import BedTypeCard from "./BedTypeCard";
+import { lazy, useState } from "react";
+
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import Chip from "../../CAREUI/display/Chip";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import ContactLink from "../Common/components/ContactLink";
 import CoverImageEditModal from "./CoverImageEditModal";
-import DialogModal from "../Common/Dialog";
-import { DoctorCapacity } from "./DoctorCapacity";
-import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
-import DoctorsCountCard from "./DoctorsCountCard";
+
 import Page from "../Common/components/Page";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import Table from "../Common/components/Table";
 
 import { navigate } from "raviger";
-import useConfig from "../../Common/hooks/useConfig";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import { useTranslation } from "react-i18next";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
+import request from "../../Utils/request/request.js";
+import routes from "../../Redux/api.js";
+import useQuery from "../../Utils/request/useQuery.js";
+import { FacilityHomeTriage } from "./FacilityHomeTriage.js";
+import { FacilityDoctorList } from "./FacilityDoctorList.js";
+import { FacilityBedCapacity } from "./FacilityBedCapacity.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -61,80 +43,25 @@ export const getFacilityFeatureIcon = (featureId: number) => {
 export const FacilityHome = (props: any) => {
   const { t } = useTranslation();
   const { facilityId } = props;
-  const dispatch: any = useDispatch();
-  const [facilityData, setFacilityData] = useState<FacilityModel | any>({});
-  const [capacityData, setCapacityData] = useState<Array<CapacityModal>>([]);
-  const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [editCoverImage, setEditCoverImage] = useState(false);
   const [imageKey, setImageKey] = useState(Date.now());
-  const [totalDoctors, setTotalDoctors] = useState(0);
-  const [patientStatsData, setPatientStatsData] = useState<
-    Array<PatientStatsModel>
-  >([]);
-  const [bedCapacityModalOpen, setBedCapacityModalOpen] = useState(false);
-  const [doctorCapacityModalOpen, setDoctorCapacityModalOpen] = useState(false);
   const authUser = useAuthUser();
-  const config = useConfig();
 
   useMessageListener((data) => console.log(data));
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const facilityRes = await dispatch(getPermittedFacility(facilityId));
-      if (facilityRes) {
-        const [capacityRes, doctorRes, triageRes] = await Promise.all([
-          dispatch(listCapacity({}, { facilityId })),
-          dispatch(listDoctor({}, { facilityId })),
-          dispatch(getTriageInfo({ facilityId })),
-        ]);
-        if (!status.aborted) {
-          setIsLoading(false);
-          if (!facilityRes.data) {
-            Notification.Error({
-              msg: "Something went wrong..!",
-            });
-          } else {
-            setFacilityData(facilityRes.data);
-            if (capacityRes && capacityRes.data) {
-              setCapacityData(capacityRes.data.results);
-            }
-            if (doctorRes && doctorRes.data) {
-              setDoctorData(doctorRes.data.results);
-              // calculating total doctors count
-              let totalCount = 0;
-              doctorRes.data.results.map((doctor: DoctorModal) => {
-                if (doctor.count) {
-                  totalCount += doctor.count;
-                }
-              });
-              setTotalDoctors(totalCount);
-            }
-            if (
-              triageRes &&
-              triageRes.data &&
-              triageRes.data.results &&
-              triageRes.data.results.length
-            ) {
-              setPatientStatsData(triageRes.data.results);
-            }
-          }
+  const { data: facilityData, loading: isLoading } = useQuery(
+    routes.getPermittedFacility,
+    {
+      pathParams: {
+        id: facilityId,
+      },
+      onResponse: ({ res }) => {
+        if (!res?.ok) {
+          navigate("/not-found");
         }
-      } else {
-        navigate("/not-found");
-        setIsLoading(false);
-      }
-    },
-    [dispatch, facilityId]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [dispatch, fetchData]
+      },
+    }
   );
 
   const handleDeleteClose = () => {
@@ -142,179 +69,24 @@ export const FacilityHome = (props: any) => {
   };
 
   const handleDeleteSubmit = async () => {
-    const res = await dispatch(deleteFacility(facilityId));
-    if (res?.status === 204) {
-      Notification.Success({
-        msg: "Facility deleted successfully",
-      });
-    } else {
-      Notification.Error({
-        msg: "Error while deleting Facility: " + (res?.data?.detail || ""),
-      });
-    }
-    navigate("/facility");
+    await request(routes.deleteFacility, {
+      pathParams: { id: facilityId },
+      onResponse: ({ res }) => {
+        if (res?.ok) {
+          Notification.Success({
+            msg: "Facility deleted successfully",
+          });
+        }
+        navigate("/facility");
+      },
+    });
   };
 
   if (isLoading) {
     return <Loading />;
   }
-  let capacityList: any = null;
-  let totalBedCount = 0;
-  let totalOccupiedBedCount = 0;
-  if (!capacityData || !capacityData.length) {
-    capacityList = (
-      <h5 className="mt-4 flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-gray-500 shadow">
-        No Bed Types Found
-      </h5>
-    );
-  } else {
-    capacityData.forEach((x) => {
-      totalBedCount += x.total_capacity ? x.total_capacity : 0;
-      totalOccupiedBedCount += x.current_capacity ? x.current_capacity : 0;
-    });
 
-    capacityList = (
-      <div className="mt-4 grid w-full gap-7 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-        <BedTypeCard
-          label="Total Beds"
-          used={totalOccupiedBedCount}
-          total={totalBedCount}
-          handleUpdate={() => {
-            return;
-          }}
-        />
-        {getBedTypes(config).map((x) => {
-          const res = capacityData.find((data) => {
-            return data.room_type === x.id;
-          });
-          if (
-            res &&
-            res.current_capacity !== undefined &&
-            res.total_capacity !== undefined
-          ) {
-            const removeCurrentBedType = (bedTypeId: number | undefined) => {
-              setCapacityData((state) =>
-                state.filter((i) => i.id !== bedTypeId)
-              );
-            };
-            return (
-              <BedTypeCard
-                facilityId={facilityId}
-                bedCapacityId={res.id}
-                key={`bed_${res.id}`}
-                room_type={res.room_type}
-                label={x.text}
-                used={res.current_capacity}
-                total={res.total_capacity}
-                lastUpdated={res.modified_date}
-                removeBedType={removeCurrentBedType}
-                handleUpdate={async () => {
-                  const capacityRes = await dispatch(
-                    listCapacity({}, { facilityId })
-                  );
-                  if (capacityRes && capacityRes.data) {
-                    setCapacityData(capacityRes.data.results);
-                  }
-                }}
-              />
-            );
-          }
-        })}
-      </div>
-    );
-  }
-
-  let doctorList: any = null;
-  if (!doctorData || !doctorData.length) {
-    doctorList = (
-      <h5 className="flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-gray-500 shadow">
-        No Doctors Found
-      </h5>
-    );
-  } else {
-    doctorList = (
-      <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {/* Total Doctors Count Card */}
-        <div className="w-full">
-          <div className="flex h-full flex-col rounded-sm border border-primary-500 bg-primary-100 shadow-sm">
-            <div className="flex flex-1 items-center justify-start gap-3 px-4 py-6">
-              <div className="rounded-full bg-primary-500 p-4">
-                <DoctorIcon className="h-5 w-5 fill-current text-white" />
-              </div>
-              <div>
-                <div className="text-sm font-medium text-[#808080]">
-                  Total Doctors
-                </div>
-                <h2 className="mt-2 text-xl font-bold">{totalDoctors}</h2>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {doctorData.map((data: DoctorModal) => {
-          const removeCurrentDoctorData = (doctorId: number | undefined) => {
-            setDoctorData((state) =>
-              state.filter((i: DoctorModal) => i.id !== doctorId)
-            );
-          };
-
-          return (
-            <DoctorsCountCard
-              facilityId={facilityId}
-              key={`bed_${data.id}`}
-              handleUpdate={async () => {
-                const doctorRes = await dispatch(
-                  listDoctor({}, { facilityId })
-                );
-                if (doctorRes && doctorRes.data) {
-                  setDoctorData(doctorRes.data.results);
-                  // update total doctors count
-                  let totalCount = 0;
-                  doctorRes.data.results.map((doctor: DoctorModal) => {
-                    if (doctor.count) {
-                      totalCount += doctor.count;
-                    }
-                  });
-                  setTotalDoctors(totalCount);
-                }
-              }}
-              {...data}
-              removeDoctor={removeCurrentDoctorData}
-            />
-          );
-        })}
-      </div>
-    );
-  }
-
-  const stats: (string | JSX.Element)[][] = [];
-  for (let i = 0; i < patientStatsData.length; i++) {
-    const temp: (string | JSX.Element)[] = [];
-    temp.push(String(patientStatsData[i].entry_date) || "0");
-    temp.push(String(patientStatsData[i].num_patients_visited) || "0");
-    temp.push(String(patientStatsData[i].num_patients_home_quarantine) || "0");
-    temp.push(String(patientStatsData[i].num_patients_isolation) || "0");
-    temp.push(String(patientStatsData[i].num_patient_referred) || "0");
-    temp.push(
-      String(patientStatsData[i].num_patient_confirmed_positive) || "0"
-    );
-    temp.push(
-      <ButtonV2
-        variant="secondary"
-        ghost
-        border
-        onClick={() =>
-          navigate(`/facility/${facilityId}/triage/${patientStatsData[i].id}`)
-        }
-        authorizeFor={NonReadOnlyUsers}
-      >
-        Edit
-      </ButtonV2>
-    );
-    stats.push(temp);
-  }
-
-  const hasCoverImage = !!facilityData.read_cover_image_url;
+  const hasCoverImage = !!facilityData?.read_cover_image_url;
 
   const StaffUserTypeIndex = USER_TYPES.findIndex((type) => type === "Staff");
   const hasPermissionToEditCoverImage =
@@ -331,24 +103,25 @@ export const FacilityHome = (props: any) => {
 
   const CoverImage = () => (
     <img
-      src={`${facilityData.read_cover_image_url}?imgKey=${imageKey}`}
-      alt={facilityData.name}
+      src={`${facilityData?.read_cover_image_url}?imgKey=${imageKey}`}
+      alt={facilityData?.name}
       className="h-full w-full object-cover"
     />
   );
 
   return (
     <Page
-      title={facilityData.name || "Facility"}
-      crumbsReplacements={{ [facilityId]: { name: facilityData.name } }}
+      title={facilityData?.name || "Facility"}
+      crumbsReplacements={{ [facilityId]: { name: facilityData?.name } }}
       focusOnLoad={true}
       backUrl="/facility"
     >
       <ConfirmDialog
-        title={`Delete ${facilityData.name}`}
+        title={`Delete ${facilityData?.name}`}
         description={
           <span>
-            Are you sure you want to delete <strong>{facilityData.name}</strong>
+            Are you sure you want to delete{" "}
+            <strong>{facilityData?.name}</strong>
           </span>
         }
         action="Delete"
@@ -360,13 +133,13 @@ export const FacilityHome = (props: any) => {
       <CoverImageEditModal
         open={editCoverImage}
         onSave={() =>
-          facilityData.read_cover_image_url
+          facilityData?.read_cover_image_url
             ? setImageKey(Date.now())
             : window.location.reload()
         }
         onClose={() => setEditCoverImage(false)}
         onDelete={() => window.location.reload()}
-        facility={facilityData}
+        facility={facilityData ?? ({} as FacilityModel)}
       />
       {hasCoverImage ? (
         <div
@@ -425,8 +198,8 @@ export const FacilityHome = (props: any) => {
                   )}
                   {editCoverImageTooltip}
                 </div>
-                <div>
-                  <h1 className="text-3xl font-bold">{facilityData.name}</h1>
+                <div id="facility-name">
+                  <h1 className="text-3xl font-bold">{facilityData?.name}</h1>
                   {facilityData?.modified_date && (
                     <RecordMeta
                       className="mt-1 text-sm text-gray-700"
@@ -439,21 +212,21 @@ export const FacilityHome = (props: any) => {
               <div className="flex flex-1 items-center">
                 <div className="mb-6 grid  w-full grid-cols-1 gap-4 md:mb-0 lg:grid-cols-2">
                   <div className="flex-col justify-between md:flex lg:flex-1 ">
-                    <div className="mb-10">
+                    <div className="mb-10" id="address-details-view">
                       <h1 className="text-base font-semibold text-[#B9B9B9]">
                         Address
                       </h1>
                       <p className="text-base font-medium">
-                        {facilityData.address}
+                        {facilityData?.address}
                       </p>
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <div>
+                      <div id="phone-number-view">
                         <h1 className="text-base font-semibold text-[#B9B9B9]">
                           Phone Number
                         </h1>
-                        <ContactLink tel={String(facilityData.phone_number)} />
+                        <ContactLink tel={String(facilityData?.phone_number)} />
                       </div>
                     </div>
                   </div>
@@ -492,13 +265,16 @@ export const FacilityHome = (props: any) => {
             </div>
             <div className="mt-10 flex items-center gap-3">
               <div>
-                {facilityData.features?.some((feature: any) =>
+                {facilityData?.features?.some((feature: any) =>
                   FACILITY_FEATURE_TYPES.some((f) => f.id === feature)
                 ) && (
                   <h1 className="text-lg font-semibold">Available features</h1>
                 )}
-                <div className="mt-5 flex flex-wrap gap-2">
-                  {facilityData.features?.map(
+                <div
+                  className="mt-5 flex flex-wrap gap-2"
+                  id="facility-available-features"
+                >
+                  {facilityData?.features?.map(
                     (feature: number, i: number) =>
                       FACILITY_FEATURE_TYPES.some((f) => f.id === feature) && (
                         <Chip
@@ -653,7 +429,10 @@ export const FacilityHome = (props: any) => {
 
       <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
         <h1 className="mb-6 text-xl font-bold">Oxygen Information</h1>
-        <div className="overflow-x-auto overflow-y-hidden">
+        <div
+          className="overflow-x-auto overflow-y-hidden"
+          id="facility-oxygen-info"
+        >
           <Table
             headings={[
               "",
@@ -665,136 +444,29 @@ export const FacilityHome = (props: any) => {
             rows={[
               [
                 "Capacity",
-                String(facilityData.oxygen_capacity),
-                String(facilityData.type_b_cylinders),
-                String(facilityData.type_c_cylinders),
-                String(facilityData.type_d_cylinders),
+                String(facilityData?.oxygen_capacity),
+                String(facilityData?.type_b_cylinders),
+                String(facilityData?.type_c_cylinders),
+                String(facilityData?.type_d_cylinders),
               ],
               [
                 "Daily Expected Consumption",
-                String(facilityData.expected_oxygen_requirement),
-                String(facilityData.expected_type_b_cylinders),
-                String(facilityData.expected_type_c_cylinders),
-                String(facilityData.expected_type_d_cylinders),
+                String(facilityData?.expected_oxygen_requirement),
+                String(facilityData?.expected_type_b_cylinders),
+                String(facilityData?.expected_type_c_cylinders),
+                String(facilityData?.expected_type_d_cylinders),
               ],
             ]}
           />
         </div>
       </div>
-      <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
-        <div className="justify-between md:flex  md:border-b md:pb-2">
-          <div className="mb-2 text-xl font-semibold">Bed Capacity</div>
-          <ButtonV2
-            className="w-full md:w-auto"
-            onClick={() => setBedCapacityModalOpen(true)}
-            authorizeFor={NonReadOnlyUsers}
-          >
-            <i className="fas fa-bed mr-2 text-white" />
-            Add More Bed Types
-          </ButtonV2>
-        </div>
-        <div>{capacityList}</div>
-      </div>
-      <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
-        <div className="justify-between md:flex md:pb-2">
-          <div className="mb-2 text-xl font-bold">Doctors List</div>
-          <ButtonV2
-            className="w-full md:w-auto"
-            onClick={() => setDoctorCapacityModalOpen(true)}
-            disabled={doctorList.length === DOCTOR_SPECIALIZATION.length}
-            authorizeFor={NonReadOnlyUsers}
-          >
-            <i className="fas fa-user-md mr-2 text-white" />
-            Add Doctor Types
-          </ButtonV2>
-        </div>
-        <div className="mt-4">{doctorList}</div>
-      </div>
-      <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
-        <div className="-my-2 py-2 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-          <div className="justify-between md:flex md:pb-2">
-            <div className="mb-2 text-xl font-bold">Corona Triage</div>
-            <ButtonV2
-              className="w-full md:w-auto"
-              onClick={() => navigate(`/facility/${facilityId}/triage`)}
-              authorizeFor={NonReadOnlyUsers}
-            >
-              <i className="fas fa-notes-medical mr-2 text-white" />
-              Add Triage
-            </ButtonV2>
-          </div>
-          <div className="mt-4 overflow-x-auto overflow-y-hidden">
-            <Table
-              rows={stats}
-              headings={[
-                "Date",
-                "Total Triaged",
-                "Advised Home Quarantine",
-                "Suspects Isolated",
-                "Referred",
-                "Confirmed positives",
-                "Actions",
-              ]}
-            />
-            {stats.length === 0 && (
-              <>
-                <hr />
-                <div className="mt-3 flex min-w-[1000px] items-center justify-center rounded-sm border border-[#D2D6DC] p-4 text-xl font-bold text-gray-600">
-                  No Data Found
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-      {bedCapacityModalOpen && (
-        <DialogModal
-          show={bedCapacityModalOpen}
-          onClose={() => setBedCapacityModalOpen(false)}
-          title="Add Bed Capacity"
-          className="max-w-md md:min-w-[600px]"
-        >
-          <BedCapacity
-            facilityId={facilityId}
-            handleClose={() => setBedCapacityModalOpen(false)}
-            handleUpdate={async () => {
-              const capacityRes = await dispatch(
-                listCapacity({}, { facilityId })
-              );
-              if (capacityRes && capacityRes.data) {
-                setCapacityData(capacityRes.data.results);
-              }
-            }}
-          />
-        </DialogModal>
-      )}
-      {doctorCapacityModalOpen && (
-        <DialogModal
-          show={doctorCapacityModalOpen}
-          onClose={() => setDoctorCapacityModalOpen(false)}
-          title="Add Doctor Capacity"
-          className="max-w-md md:min-w-[600px]"
-        >
-          <DoctorCapacity
-            facilityId={facilityId}
-            handleClose={() => setDoctorCapacityModalOpen(false)}
-            handleUpdate={async () => {
-              const doctorRes = await dispatch(listDoctor({}, { facilityId }));
-              if (doctorRes && doctorRes.data) {
-                setDoctorData(doctorRes.data.results);
-                // update total doctors count
-                setTotalDoctors(
-                  doctorRes.data.results.reduce(
-                    (acc: number, doctor: DoctorModal) =>
-                      acc + (doctor.count || 0),
-                    0
-                  )
-                );
-              }
-            }}
-          />
-        </DialogModal>
-      )}
+
+      <FacilityBedCapacity facilityId={facilityId} />
+      <FacilityDoctorList facilityId={facilityId} />
+      <FacilityHomeTriage
+        facilityId={facilityId}
+        NonReadOnlyUsers={NonReadOnlyUsers}
+      />
     </Page>
   );
 };

@@ -213,7 +213,8 @@ export class PatientConsultationPage {
   }
 
   clickDischargePatient() {
-    cy.get("#discharge_patient_from_care").click();
+    cy.get("#show-more").click();
+    cy.contains("p", "Discharge from CARE").click();
   }
 
   selectDischargeReason(reason: string) {
