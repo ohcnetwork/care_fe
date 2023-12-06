@@ -112,21 +112,25 @@ export const ConsultationCard = (props: ConsultationProps) => {
       <div className="mt-8 flex flex-col">
         {
           <div className="flex flex-col items-center text-sm text-gray-700 md:flex-row">
-            Created:{" "}
-            <RelativeDateUserMention
-              tooltipPosition="right"
-              actionDate={itemData.created_date}
-              user={itemData.created_by}
-            />
+            Created :{" "}
+            <div className=" ml-1 text-black">
+              <RelativeDateUserMention
+                tooltipPosition="right"
+                actionDate={itemData.created_date}
+                user={itemData.created_by}
+              />
+            </div>
           </div>
         }
         <div className="flex flex-col items-center text-sm text-gray-700 md:flex-row">
-          Last Modified:{" "}
-          <RelativeDateUserMention
-            tooltipPosition="right"
-            actionDate={itemData.modified_date}
-            user={itemData.last_edited_by}
-          />
+          Last Modified :{" "}
+          <div className=" ml-1 text-black">
+            <RelativeDateUserMention
+              tooltipPosition="right"
+              actionDate={itemData.modified_date}
+              user={itemData.last_edited_by}
+            />
+          </div>
         </div>
       </div>
       <div className="mt-4 flex w-full flex-col justify-between gap-1 md:flex-row">

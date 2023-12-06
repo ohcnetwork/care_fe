@@ -15,11 +15,8 @@ export const getCurrentUser = () => {
 export const signupUser = (params: object) => {
   return fireRequest("createUser", [], params);
 };
-export const addUser = (params: object) => {
-  return fireRequest("addUser", [], params);
-};
 export const deleteUser = (username: string) => {
-  return fireRequest("deleteUser", [username], {});
+  return fireRequest("deleteUser", [], {}, { username });
 };
 
 export const checkResetToken = (params: object) => {
@@ -32,10 +29,6 @@ export const postResetPassword = (form: object) => {
 
 export const postForgotPassword = (form: object) => {
   return fireRequest("forgotPassword", [], form);
-};
-
-export const updateUserPassword = (form: object) => {
-  return fireRequest("updatePassword", [], form);
 };
 
 export const getUserPnconfig = (pathParams: object) => {
@@ -56,22 +49,11 @@ export const updateFacility = (id: string, params: object) => {
 export const partialUpdateFacility = (id: string, params: object) => {
   return fireRequest("partialUpdateFacility", [id], params);
 };
-export const deleteFacility = (id: string) => {
-  return fireRequest("deleteFacility", [id], {});
-};
 export const deleteFacilityCoverImage = (id: string) => {
   return fireRequest("deleteFacilityCoverImage", [], {}, { id });
 };
 export const getUserList = (params: object, key?: string) => {
   return fireRequest("userList", [], params, null, key);
-};
-
-export const getUserListSkills = (pathParam: object) => {
-  return fireRequest("userListSkill", [], {}, pathParam);
-};
-
-export const partialUpdateUser = (username: string, data: any) => {
-  return fireRequest("partialUpdateUser", [], data, { username });
 };
 export const getUserListFacility = (pathParam: object) => {
   return fireRequest("userListFacility", [], {}, pathParam);
@@ -96,10 +78,6 @@ export const deleteUserFacility = (username: string, facility: string) => {
     { data: { facility } },
     { username }
   );
-};
-
-export const clearHomeFacility = (username: string) => {
-  return fireRequest("clearHomeFacility", [], {}, { username });
 };
 
 export const getPermittedFacilities = (params: object) => {
@@ -608,20 +586,6 @@ export const dischargePatient = (params: object, pathParams: object) => {
 
 //Profile
 
-export const checkUsername = (params: object) => {
-  return fireRequest("checkUsername", [], {}, params, undefined, true);
-};
-
-export const getUserDetails = (username: string, suppress?: boolean) => {
-  return fireRequest(
-    "getUserDetails",
-    [],
-    {},
-    { username: username },
-    undefined,
-    suppress ?? true
-  );
-};
 export const updateUserDetails = (username: string, data: object) => {
   return fireRequest("updateUserDetails", [username], data);
 };
@@ -679,10 +643,6 @@ export const markNotificationAsRead = (id: string) => {
 
 export const getPublicKey = () => {
   return fireRequest("getPublicKey", [], {}, {});
-};
-
-export const sendNotificationMessages = (params: object) => {
-  return fireRequest("sendNotificationMessages", [], params, {});
 };
 
 // FileUpload

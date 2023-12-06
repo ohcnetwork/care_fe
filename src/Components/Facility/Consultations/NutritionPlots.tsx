@@ -1,7 +1,7 @@
-import { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { dailyRoundsAnalyse } from "../../../Redux/actions";
+import { useEffect, useState } from "react";
+import routes from "../../../Redux/api";
+import request from "../../../Utils/request/request";
+
 import { LinePlot } from "./components/LinePlot";
 import { StackedLinePlot } from "./components/StackedLinePlot";
 import Pagination from "../../Common/Pagination";
@@ -11,7 +11,6 @@ import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 export const NutritionPlots = (props: any) => {
   const { consultationId } = props;
-  const dispatch: any = useDispatch();
   const [results, setResults] = useState({});
   const [showIO, setShowIO] = useState(true);
   const [showIntake, setShowIntake] = useState(false);
@@ -19,40 +18,35 @@ export const NutritionPlots = (props: any) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
-  const fetchDailyRounds = useCallback(
-    async (status: statusType) => {
-      const res = await dispatch(
-        dailyRoundsAnalyse(
-          {
-            page: currentPage,
-            fields: [
-              "infusions",
-              "iv_fluids",
-              "feeds",
-              "total_intake_calculated",
-              "total_output_calculated",
-              "output",
-            ],
-          },
-          { consultationId }
-        )
-      );
-      if (!status.aborted) {
-        if (res && res.data) {
-          setResults(res.data.results);
-          setTotalCount(res.data.count);
-        }
+  useEffect(() => {
+    const fetchDailyRounds = async (
+      currentPage: number,
+      consultationId: string
+    ) => {
+      const { res, data } = await request(routes.dailyRoundsAnalyse, {
+        body: {
+          page: currentPage,
+          fields: [
+            "infusions",
+            "iv_fluids",
+            "feeds",
+            "total_intake_calculated",
+            "total_output_calculated",
+            "output",
+          ],
+        },
+        pathParams: {
+          consultationId,
+        },
+      });
+      if (res && res.ok && data) {
+        setResults(data.results);
+        setTotalCount(data.count);
       }
-    },
-    [consultationId, dispatch, currentPage]
-  );
+    };
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchDailyRounds(status);
-    },
-    [currentPage]
-  );
+    fetchDailyRounds(currentPage, consultationId);
+  }, [consultationId, currentPage]);
 
   const handlePagination = (page: number) => {
     setCurrentPage(page);

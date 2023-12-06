@@ -192,6 +192,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                           />
                         ) : (
                           <iframe
+                            sandbox
                             title="Source Files"
                             src={fileUrl}
                             className="mx-auto h-5/6 w-5/6 border-2 border-black bg-white md:my-6 md:w-4/6"

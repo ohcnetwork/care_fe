@@ -501,7 +501,6 @@ export const DailyRounds = (props: any) => {
 
             <SelectFormField
               {...field("review_interval")}
-              required
               label="Review After"
               labelSuffix={getExpectedReviewTime()}
               options={REVIEW_AT_CHOICES}
@@ -609,7 +608,6 @@ export const DailyRounds = (props: any) => {
 
                 <SelectFormField
                   {...field("rhythm")}
-                  required
                   label="Rhythm"
                   options={RHYTHM_CHOICES}
                   optionLabel={(option) => option.desc}

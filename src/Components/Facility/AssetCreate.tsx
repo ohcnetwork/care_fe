@@ -883,6 +883,7 @@ const AssetCreate = (props: AssetProps) => {
                         name="last_serviced_on"
                         className="mt-2"
                         position="RIGHT"
+                        disableFuture
                         value={last_serviced_on && new Date(last_serviced_on)}
                         onChange={(date) => {
                           if (

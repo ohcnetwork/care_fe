@@ -1,48 +1,42 @@
-import { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useEffect, useState } from "react";
+import routes from "../../../Redux/api";
+import request from "../../../Utils/request/request";
 import {
   NURSING_CARE_FIELDS,
   PAGINATION_LIMIT,
 } from "../../../Common/constants";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { dailyRoundsAnalyse } from "../../../Redux/actions";
+
 import Pagination from "../../Common/Pagination";
 import { formatDateTime } from "../../../Utils/utils";
 
 export const NursingPlot = (props: any) => {
   const { consultationId } = props;
-  const dispatch: any = useDispatch();
   const [results, setResults] = useState<any>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
-  const fetchDailyRounds = useCallback(
-    async (status: statusType) => {
-      const res = await dispatch(
-        dailyRoundsAnalyse(
-          {
-            page: currentPage,
-            fields: ["nursing"],
-          },
-          { consultationId }
-        )
-      );
-      if (!status.aborted) {
-        if (res?.data) {
-          setResults(res.data.results);
-          setTotalCount(res.data.count);
-        }
+  useEffect(() => {
+    const fetchDailyRounds = async (
+      currentPage: number,
+      consultationId: string
+    ) => {
+      const { res, data } = await request(routes.dailyRoundsAnalyse, {
+        body: {
+          page: currentPage,
+          fields: ["nursing"],
+        },
+        pathParams: {
+          consultationId,
+        },
+      });
+      if (res && res.ok && data) {
+        setResults(data.results);
+        setTotalCount(data.count);
       }
-    },
-    [consultationId, dispatch, currentPage]
-  );
+    };
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchDailyRounds(status);
-    },
-    [currentPage]
-  );
+    fetchDailyRounds(currentPage, consultationId);
+  }, [consultationId, currentPage]);
 
   const handlePagination = (page: number) => {
     setCurrentPage(page);

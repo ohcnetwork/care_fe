@@ -806,13 +806,12 @@ export default function ShiftDetails(props: { id: string }) {
                     {t("created")}
                   </div>
                   <div className="mt-1 whitespace-pre text-sm leading-5 text-gray-900">
-                    <div className="text-sm">
-                      {data?.created_by_object?.first_name}
-                      {data?.created_by_object?.last_name}
-                    </div>
-                    <div className="text-xs">
-                      {data?.created_date && formatDateTime(data?.created_date)}
-                    </div>
+                    <RecordMeta
+                      time={data?.created_date}
+                      user={data?.created_by_object}
+                      inlineUser={true}
+                      inlineClassName={"flex-wrap justify-center"}
+                    />
                   </div>
                 </div>
                 <div className="mt-2 lg:mt-0">
@@ -820,14 +819,12 @@ export default function ShiftDetails(props: { id: string }) {
                     {t("last_edited")}
                   </div>
                   <div className="mt-1 whitespace-pre text-sm leading-5 text-gray-900">
-                    <div className="text-sm">
-                      {data?.last_edited_by_object?.first_name}{" "}
-                      {data?.last_edited_by_object?.last_name}
-                    </div>
-                    <div className="text-xs">
-                      {data?.modified_date &&
-                        formatDateTime(data?.modified_date)}
-                    </div>
+                    <RecordMeta
+                      time={data?.modified_date}
+                      user={data?.last_edited_by_object}
+                      inlineUser={true}
+                      inlineClassName={"flex-wrap justify-center"}
+                    />
                   </div>
                 </div>
               </div>

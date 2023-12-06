@@ -15,6 +15,7 @@ export interface AssetLocationObject {
   created_date?: string;
   modified_date?: string;
   location_type: AssetLocationType;
+  middleware_address?: string;
   facility: {
     id: string;
     name: string;

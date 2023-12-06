@@ -570,7 +570,10 @@ export const FacilityCreate = (props: FacilityProps) => {
     });
 
     capacityList = (
-      <div className="mt-4 grid w-full gap-7 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div
+        className="mt-4 grid w-full gap-7 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        id="total-bed-capacity"
+      >
         <BedTypeCard
           label={t("total_beds")}
           bedCapacityId={0}
@@ -699,7 +702,9 @@ export const FacilityCreate = (props: FacilityProps) => {
             <div className="justify-between md:flex md:pb-2">
               <div className="mb-2 text-xl font-bold">{t("doctors_list")}</div>
             </div>
-            <div className="mt-4">{doctorList}</div>
+            <div className="mt-4" id="total-doctor-capacity">
+              {doctorList}
+            </div>
           </div>
         </Page>
       );

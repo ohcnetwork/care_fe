@@ -63,6 +63,10 @@ const AssetsList = () => {
     asset_class: qParams.asset_class || "",
     location: qParams.facility ? qParams.location || "" : "",
     status: qParams.status || "",
+    warranty_amc_end_of_validity_before:
+      qParams.warranty_amc_end_of_validity_before || "",
+    warranty_amc_end_of_validity_after:
+      qParams.warranty_amc_end_of_validity_after || "",
   };
 
   const { loading } = useQuery(routes.listAssets, {
@@ -189,12 +193,12 @@ const AssetsList = () => {
           <Link
             key={asset.id}
             href={`/facility/${asset?.location_object.facility.id}/assets/${asset.id}`}
-            className="text-inherit"
+            className="h-full text-inherit"
             data-testid="created-asset-list"
           >
             <div
               key={asset.id}
-              className="border-1 w-full cursor-pointer items-center justify-center rounded-lg border border-transparent bg-white p-5 shadow hover:border-primary-500"
+              className="border-1 h-full w-full cursor-pointer items-center justify-center rounded-lg border border-transparent bg-white p-5 shadow hover:border-primary-500"
             >
               <div className="md:flex">
                 <p className="flex break-words text-xl font-medium capitalize">

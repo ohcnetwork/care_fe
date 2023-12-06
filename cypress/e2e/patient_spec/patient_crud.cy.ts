@@ -111,7 +111,9 @@ describe("Patient Creation with consultation", () => {
     updatePatientPage.visitConsultationPage();
     patientPage.verifyStatusCode();
     patientConsultationPage.fillIllnessHistory("history");
-    patientConsultationPage.selectConsultationStatus("Out-patient (walk in)");
+    patientConsultationPage.selectConsultationStatus(
+      "Outpatient/Emergency Room"
+    );
     patientConsultationPage.selectSymptoms("ASYMPTOMATIC");
 
     patientConsultationPage.enterConsultationDetails(
@@ -140,9 +142,6 @@ describe("Patient Creation with consultation", () => {
     updatePatientPage.visitUpdatedPatient();
     patientConsultationPage.visitEditConsultationPage();
     patientConsultationPage.fillIllnessHistory("editted");
-    patientConsultationPage.selectConsultationStatus(
-      "Referred from other hospital"
-    );
     patientConsultationPage.updateSymptoms("FEVER");
     patientConsultationPage.setSymptomsDate("01082023");
     patientConsultationPage.updateConsultation();
