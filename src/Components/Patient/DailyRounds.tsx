@@ -26,9 +26,8 @@ import BloodPressureFormField, {
 } from "../Common/BloodPressureFormField";
 import { SymptomsSelect } from "../Common/SymptomsSelect";
 import TemperatureFormField from "../Common/TemperatureFormField";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
+import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import RangeAutocompleteFormField from "../Form/FormFields/RangeAutocompleteFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
@@ -192,7 +191,7 @@ export const DailyRounds = (props: any) => {
                 RHYTHM_CHOICES.find((i) => i.text === res.data.rhythm)?.id) ||
               "0",
             temperature: parseFloat(res.data.temperature),
-            clone_last: res.data.count > 0 ? true : false,
+            clone_last: false,
           },
         });
       }
@@ -451,17 +450,25 @@ export const DailyRounds = (props: any) => {
         </div>
 
         {!id && hasPreviousLog && (
-          <CheckBoxFormField
-            {...field("clone_last")}
-            label="Copy values from previous log?"
-          />
+          <ButtonV2
+            className="mb-6"
+            onClick={(e) => {
+              e.preventDefault();
+              dispatch({
+                type: "set_form",
+                form: { ...state.form, clone_last: true },
+              });
+            }}
+          >
+            Copy values from previous log
+          </ButtonV2>
         )}
-        {state.form.clone_last === true && (
+        {state.form.clone_last && (
           <p className="rounded border border-green-800 bg-gray-200 p-2 text-green-800">
             Field values will be copied from previous log update
           </p>
         )}
-        {(state.form.clone_last === false || id) && (
+        {!state.form.clone_last && (
           <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
             <TextAreaFormField
               {...field("physical_examination_info")}
