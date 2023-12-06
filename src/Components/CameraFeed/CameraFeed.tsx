@@ -96,8 +96,8 @@ export default function CameraFeed(props: Props) {
         )}
       >
         <div className="flex items-center justify-between bg-zinc-900 px-4 py-0.5">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-white">
+          <div className="flex items-center gap-1 md:gap-2">
+            <span className="text-xs font-semibold text-white md:text-sm">
               {props.asset.name}
             </span>
             <div className={state === "loading" ? "animate-pulse" : ""}>

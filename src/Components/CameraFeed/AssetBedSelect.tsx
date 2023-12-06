@@ -31,7 +31,7 @@ export default function AssetBedSelect(props: Props) {
   return (
     <Listbox value={selected} onChange={props.onChange} disabled={loading}>
       <div className="relative">
-        <Listbox.Button className="relative w-full cursor-default pr-6 text-left text-zinc-400 focus:outline-none disabled:cursor-not-allowed disabled:bg-transparent disabled:text-zinc-700 sm:text-sm">
+        <Listbox.Button className="relative w-full cursor-default pr-6 text-right text-xs text-zinc-400 focus:outline-none disabled:cursor-not-allowed disabled:bg-transparent disabled:text-zinc-700 sm:text-sm">
           <span className="block truncate">
             {selected?.bed_object.name ?? "No Preset"}
           </span>
@@ -45,7 +45,7 @@ export default function AssetBedSelect(props: Props) {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <Listbox.Options className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-b-lg bg-zinc-900/75 py-1 text-base shadow-lg ring-1 ring-white/5 backdrop-blur-sm focus:outline-none sm:text-sm">
+          <Listbox.Options className="absolute z-20 mt-1 max-h-48 w-full overflow-auto rounded-b-lg bg-zinc-900/75 py-1 text-base shadow-lg ring-1 ring-white/5 backdrop-blur-sm focus:outline-none sm:text-sm md:max-h-60">
             {data?.results.map((obj) => (
               <Listbox.Option
                 key={obj.id}
@@ -59,11 +59,11 @@ export default function AssetBedSelect(props: Props) {
                 {({ selected }) => (
                   <>
                     <span
-                      className={`block truncate ${
+                      className={`block truncate text-xs md:text-sm ${
                         selected ? "font-bold text-white" : "font-normal"
                       }`}
                     >
-                      {obj.bed_object.name}
+                      {obj.bed_object.name}: {obj.meta.preset_name}
                     </span>
                   </>
                 )}

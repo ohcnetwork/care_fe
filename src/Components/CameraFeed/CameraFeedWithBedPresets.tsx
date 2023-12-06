@@ -19,7 +19,7 @@ export default function LocationFeedTile(props: Props) {
       preset={preset?.meta.position}
       shortcutsDisabled
     >
-      <div className="w-32">
+      <div className="w-64">
         <AssetBedSelect
           asset={props.asset}
           value={preset}
