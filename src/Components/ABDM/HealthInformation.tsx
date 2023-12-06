@@ -17,6 +17,16 @@ export default function HealthInformation({ artefactId }: IProps) {
     return <Loading />;
   }
 
+  const parseData = (data: any) => {
+    try {
+      return JSON.parse(data);
+    } catch (e) {
+      return JSON.parse(
+        data.replace(/"/g, '\\"').replace(/'/g, '"') // eslint-disable-line
+      );
+    }
+  };
+
   return (
     <Page title="Health Information">
       <div className="mt-10 flex flex-col items-center justify-center gap-6">
@@ -52,9 +62,7 @@ export default function HealthInformation({ artefactId }: IProps) {
         {data?.data.map((item) => (
           <HIProfile
             key={item.care_context_reference}
-            bundle={JSON.parse(
-              item.content.replace(/"/g, '\\"').replace(/'/g, '"') // eslint-disable-line
-            )}
+            bundle={parseData(item.content)}
           />
         ))}
       </div>
