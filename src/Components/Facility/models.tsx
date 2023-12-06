@@ -107,7 +107,7 @@ export interface ConsultationModel {
   history_of_present_illness?: string;
   facility?: number;
   facility_name?: string;
-  id?: string;
+  id: string;
   modified_date?: string;
   other_symptoms?: string;
   patient?: string;
