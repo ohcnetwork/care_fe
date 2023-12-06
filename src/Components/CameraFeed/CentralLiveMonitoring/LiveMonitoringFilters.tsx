@@ -2,7 +2,6 @@ import { Popover, Transition } from "@headlessui/react";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import { FieldLabel } from "../../Form/FormFields/FormField";
 import { LocationSelect } from "../../Common/LocationSelect";
-import CheckBoxFormField from "../../Form/FormFields/CheckBoxFormField";
 import Pagination from "../../Common/Pagination";
 import useFilters from "../../../Common/hooks/useFilters";
 import { Fragment } from "react";
@@ -75,7 +74,7 @@ const LiveMonitoringFilters = (props: Props) => {
                     />
                   </div>
                 </div>
-                <CheckBoxFormField
+                {/* <CheckBoxFormField
                   name="in_use_by_consultation"
                   label="Hide cameras without patient"
                   value={qParams.in_use_by_consultation === "true"}
@@ -105,7 +104,7 @@ const LiveMonitoringFilters = (props: Props) => {
                   }}
                   labelClassName="text-sm"
                   errorClassName="hidden"
-                />
+                /> */}
                 <ButtonV2
                   variant="secondary"
                   border
