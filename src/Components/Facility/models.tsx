@@ -7,6 +7,7 @@ import { RouteToFacility } from "../Common/RouteToFacilitySelect";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 
 export interface LocalBodyModel {
+  id: number;
   name: string;
   body_type: number;
   localbody_code: string;
@@ -107,7 +108,7 @@ export interface ConsultationModel {
   history_of_present_illness?: string;
   facility?: number;
   facility_name?: string;
-  id?: string;
+  id: string;
   modified_date?: string;
   other_symptoms?: string;
   patient?: string;
@@ -488,3 +489,16 @@ export interface PatientNotesModel {
   user_type?: string;
   created_date: string;
 }
+
+export type IFacilityNotificationRequest = {
+  facility: string;
+  message: string;
+};
+
+export type IFacilityNotificationResponse = {
+  [key: string]: string;
+};
+
+export type IUserFacilityRequest = {
+  facility: string;
+};

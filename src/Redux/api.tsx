@@ -29,14 +29,22 @@ import {
   AssetUpdate,
 } from "../Components/Assets/AssetTypes";
 import {
+  CapacityModal,
   ConsultationModel,
   CreateBedBody,
   CurrentBed,
+  DistrictModel,
   DailyRoundsBody,
   DailyRoundsRes,
+  DoctorModal,
   FacilityModel,
-  LocationModel,
+  IFacilityNotificationRequest,
+  IFacilityNotificationResponse,
+  IUserFacilityRequest,
+  PatientStatsModel,
   WardModel,
+  LocationModel,
+  StateModel,
 } from "../Components/Facility/models";
 import {
   IDeleteExternalResult,
@@ -46,9 +54,13 @@ import {
   ILocalBodyByDistrict,
   IPartialUpdateExternalResult,
 } from "../Components/ExternalResult/models";
-
+import {
+  SkillModel,
+  SkillObjectModel,
+  UpdatePasswordForm,
+  UserModel,
+} from "../Components/Users/models";
 import { Prescription } from "../Components/Medicine/models";
-import { UserModel } from "../Components/Users/models";
 import { DailyRoundsModel, PatientModel } from "../Components/Patient/models";
 import { PaginatedResponse } from "../Utils/request/types";
 import {
@@ -143,6 +155,8 @@ const routes = {
   updatePassword: {
     path: "/api/v1/password_change/",
     method: "PUT",
+    TRes: Type<Record<string, string | string[]>>(),
+    TBody: Type<UpdatePasswordForm>(),
   },
   // User Endpoints
   currentUser: {
@@ -158,35 +172,47 @@ const routes = {
 
   userListSkill: {
     path: "/api/v1/users/{username}/skill/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<SkillModel>>(),
   },
 
   userListFacility: {
     path: "/api/v1/users/{username}/get_facilities/",
+    method: "GET",
+    TRes: Type<FacilityModel[]>(),
   },
 
   addUserFacility: {
     path: "/api/v1/users/{username}/add_facility/",
     method: "PUT",
+    TBody: Type<IUserFacilityRequest>(),
+    TRes: Type<UserModel>(),
   },
 
   addUserSkill: {
     path: "/api/v1/users/{username}/skill/",
     method: "POST",
+    TBody: Type<{ skill: string }>(),
+    TRes: Type<SkillModel>(),
   },
 
   deleteUserFacility: {
     path: "/api/v1/users/{username}/delete_facility/",
     method: "DELETE",
+    TBody: Type<IUserFacilityRequest>(),
+    TRes: Type<Record<string, never>>(),
   },
 
   clearHomeFacility: {
     path: "/api/v1/users/{username}/clear_home_facility/",
     method: "DELETE",
+    TRes: Type<Record<string, never>>(),
   },
 
   deleteUserSkill: {
     path: "/api/v1/users/{username}/skill/{id}/",
     method: "DELETE",
+    TRes: Type<Record<string, never>>(),
   },
 
   createUser: {
@@ -203,16 +229,20 @@ const routes = {
   partialUpdateUser: {
     path: "/api/v1/users/{username}/",
     method: "PATCH",
+    TRes: Type<UserModel>(),
+    TBody: Type<Partial<UserModel>>(),
   },
 
   deleteUser: {
-    path: "/api/v1/users",
+    path: "/api/v1/users/{username}/",
     method: "DELETE",
+    TRes: Type<Record<string, never>>(),
   },
 
   addUser: {
     path: "/api/v1/users/add_user/",
     method: "POST",
+    TRes: Type<UserModel>(),
   },
 
   searchUser: {
@@ -239,6 +269,8 @@ const routes = {
 
   getAllSkills: {
     path: "/api/v1/skill/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<SkillObjectModel>>(),
   },
 
   // Facility Endpoints
@@ -288,6 +320,7 @@ const routes = {
 
   getFacilityUsers: {
     path: "/api/v1/facility/{facility_id}/get_users/",
+    TRes: Type<PaginatedResponse<UserModel>>(),
   },
 
   listFacilityAssetLocation: {
@@ -403,8 +436,9 @@ const routes = {
 
   // Download Api
   deleteFacility: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/{id}/",
     method: "DELETE",
+    TRes: Type<Record<string, never>>(),
   },
 
   downloadFacility: {
@@ -496,6 +530,7 @@ const routes = {
 
   getCapacity: {
     path: "/api/v1/facility/{facilityId}/capacity/",
+    TRes: Type<PaginatedResponse<CapacityModal>>(),
   },
 
   getCapacityBed: {
@@ -509,6 +544,7 @@ const routes = {
 
   listDoctor: {
     path: "/api/v1/facility/{facilityId}/hospital_doctor/",
+    TRes: Type<PaginatedResponse<DoctorModal>>(),
   },
   getDoctor: {
     path: "/api/v1/facility/{facilityId}/hospital_doctor/{id}/",
@@ -536,6 +572,7 @@ const routes = {
   },
   getTriage: {
     path: "/api/v1/facility/{facilityId}/patient_stats/",
+    TRes: Type<PaginatedResponse<PatientStatsModel>>(),
   },
 
   getTriageDetails: {
@@ -634,6 +671,8 @@ const routes = {
   // States
   statesList: {
     path: "/api/v1/state/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<StateModel>>(),
   },
 
   getState: {
@@ -644,9 +683,13 @@ const routes = {
 
   getDistrict: {
     path: "/api/v1/district/{id}/",
+    method: "GET",
+    TRes: Type<DistrictModel>(),
   },
   getDistrictByState: {
     path: "/api/v1/state/{id}/districts/",
+    method: "GET",
+    TRes: Type<DistrictModel[]>(),
   },
   getDistrictByName: {
     path: "/api/v1/district/",
@@ -758,11 +801,13 @@ const routes = {
   checkUsername: {
     path: "/api/v1/users/{username}/check_availability/",
     method: "GET",
+    TRes: Type<Record<string, never>>(),
   },
 
   getUserDetails: {
     path: "/api/v1/users/{username}/",
     method: "GET",
+    TRes: Type<UserModel>(),
   },
   updateUserDetails: {
     path: "/api/v1/users",
@@ -841,6 +886,8 @@ const routes = {
   sendNotificationMessages: {
     path: "/api/v1/notification/notify/",
     method: "POST",
+    TRes: Type<IFacilityNotificationResponse>(),
+    Tbody: Type<IFacilityNotificationRequest>(),
   },
 
   // FileUpload Create
