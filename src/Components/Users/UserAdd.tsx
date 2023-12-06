@@ -1,26 +1,17 @@
 import { Link, navigate } from "raviger";
-import { lazy, useCallback, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { lazy, useEffect, useState } from "react";
 import {
   GENDER_TYPES,
   USER_TYPES,
   USER_TYPE_OPTIONS,
 } from "../../Common/constants";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+import { useAbortableEffect } from "../../Common/utils";
 import {
   validateEmailAddress,
   validateName,
   validatePassword,
   validateUsername,
 } from "../../Common/validation";
-import {
-  addUser,
-  getDistrictByState,
-  getLocalbodyByDistrict,
-  getStates,
-  getUserListFacility,
-  checkUsername,
-} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
@@ -45,6 +36,9 @@ import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 import dayjs from "../../Utils/dayjs";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { PhoneNumberValidator } from "../Form/FieldValidators";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
+import useQuery from "../../Utils/request/useQuery";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -163,7 +157,6 @@ export const validateRule = (
 
 export const UserAdd = (props: UserProps) => {
   const { goBack } = useAppHistory();
-  const dispatchAction: any = useDispatch();
   const { userId } = props;
 
   const [state, dispatch] = useAutoSaveReducer<UserForm>(
@@ -171,13 +164,9 @@ export const UserAdd = (props: UserProps) => {
     initialState
   );
   const [isLoading, setIsLoading] = useState(false);
-  const [isStateLoading, setIsStateLoading] = useState(false);
-  const [isDistrictLoading, setIsDistrictLoading] = useState(false);
-  const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
-  const [_current_user_facilities, setFacilities] = useState<
-    Array<FacilityModel>
-  >([]);
   const [states, setStates] = useState<StateObj[]>([]);
+  const [selectedStateId, setSelectedStateId] = useState<number>(0);
+  const [selectedDistrictId, setSelectedDistrictId] = useState<number>(0);
   const [districts, setDistricts] = useState<StateObj[]>([]);
   const [localBodies, setLocalBodies] = useState<StateObj[]>([]);
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel[]>([]);
@@ -198,9 +187,9 @@ export const UserAdd = (props: UserProps) => {
 
   const check_username = async (username: string) => {
     setUsernameExists(userExistsEnums.checking);
-    const usernameCheck = await dispatchAction(
-      checkUsername({ username: username })
-    );
+    const { res: usernameCheck } = await request(routes.checkUsername, {
+      pathParams: { username },
+    });
     if (usernameCheck === undefined || usernameCheck.status === 409)
       setUsernameExists(userExistsEnums.exists);
     else if (usernameCheck.status === 200)
@@ -254,101 +243,45 @@ export const UserAdd = (props: UserProps) => {
     state.form.user_type === "StaffReadOnly"
   );
 
-  const fetchDistricts = useCallback(
-    async (id: number) => {
-      if (id > 0) {
-        setIsDistrictLoading(true);
-        const districtList = await dispatchAction(getDistrictByState({ id }));
-        if (districtList) {
-          if (userIndex <= USER_TYPES.indexOf("DistrictAdmin")) {
-            setDistricts([
-              {
-                id: authUser.district!,
-                name: authUser.district_object?.name as string,
-              },
-            ]);
-          } else {
-            setDistricts(districtList.data);
-          }
-        }
-        setIsDistrictLoading(false);
+  const { loading: isDistrictLoading } = useQuery(routes.getDistrictByState, {
+    prefetch: !!(selectedStateId > 0),
+    pathParams: { id: selectedStateId.toString() },
+    onResponse: (result) => {
+      if (!result || !result.res || !result.data) return;
+      if (userIndex <= USER_TYPES.indexOf("DistrictAdmin")) {
+        setDistricts([authUser.district_object!]);
+      } else {
+        setDistricts(result.data);
       }
     },
-    [dispatchAction]
-  );
+  });
 
-  const fetchLocalBody = useCallback(
-    async (id: number) => {
-      if (id > 0) {
-        setIsLocalbodyLoading(true);
-        const localBodyList = await dispatchAction(
-          getLocalbodyByDistrict({ id })
-        );
-        setIsLocalbodyLoading(false);
-        if (localBodyList) {
-          if (userIndex <= USER_TYPES.indexOf("LocalBodyAdmin")) {
-            setLocalBodies([
-              {
-                id: authUser.local_body!,
-                name: authUser.local_body_object?.name as string,
-              },
-            ]);
-          } else {
-            setLocalBodies(localBodyList.data);
-          }
-        }
-      }
-    },
-    [dispatchAction]
-  );
-
-  const fetchStates = useCallback(
-    async (status: statusType) => {
-      setIsStateLoading(true);
-      const statesRes = await dispatchAction(getStates());
-      if (!status.aborted && statesRes.data.results) {
-        if (userIndex <= USER_TYPES.indexOf("StateAdmin")) {
-          setStates([
-            {
-              id: authUser.state!,
-              name: authUser.state_object?.name as string,
-            },
-          ]);
+  const { loading: isLocalbodyLoading } = useQuery(
+    routes.getAllLocalBodyByDistrict,
+    {
+      prefetch: !!(selectedDistrictId > 0),
+      pathParams: { id: selectedDistrictId.toString() },
+      onResponse: (result) => {
+        if (!result || !result.res || !result.data) return;
+        if (userIndex <= USER_TYPES.indexOf("LocalBodyAdmin")) {
+          setLocalBodies([authUser.local_body_object!]);
         } else {
-          setStates(statesRes.data.results);
+          setLocalBodies(result.data);
         }
-      }
-      setIsStateLoading(false);
-    },
-    [dispatchAction]
+      },
+    }
   );
 
-  const fetchFacilities = useCallback(
-    async (status: any) => {
-      setIsStateLoading(true);
-      const res = await dispatchAction(
-        getUserListFacility({ username: authUser.username })
-      );
-      if (!status.aborted && res && res.data) {
-        setFacilities(res.data);
-      }
-      setIsStateLoading(false);
-    },
-    [dispatchAction, authUser.username]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchStates(status);
-      if (
-        authUser.user_type === "Staff" ||
-        authUser.user_type === "StaffReadOnly"
-      ) {
-        fetchFacilities(status);
+  const { loading: isStateLoading } = useQuery(routes.statesList, {
+    onResponse: (result) => {
+      if (!result || !result.res || !result.data) return;
+      if (userIndex <= USER_TYPES.indexOf("StateAdmin")) {
+        setStates([authUser.state_object!]);
+      } else {
+        setStates(result.data.results);
       }
     },
-    [dispatch]
-  );
+  });
 
   const handleDateChange = (e: FieldChangeEvent<Date>) => {
     if (dayjs(e.value).isValid()) {
@@ -605,13 +538,10 @@ export const UserAdd = (props: UserProps) => {
             : undefined,
       };
 
-      const res = await dispatchAction(addUser(data));
-      if (
-        res &&
-        (res.data || res.data === "") &&
-        res.status >= 200 &&
-        res.status < 300
-      ) {
+      const { res } = await request(routes.addUser, {
+        body: data,
+      });
+      if (res?.ok) {
         dispatch({ type: "set_form", form: initForm });
         if (!userId) {
           Notification.Success({
@@ -916,7 +846,7 @@ export const UserAdd = (props: UserProps) => {
                 optionValue={(o) => o.id}
                 onChange={(e) => {
                   handleFieldChange(e);
-                  if (e) fetchDistricts(e.value);
+                  if (e) setSelectedStateId(e.value);
                 }}
               />
             )}
@@ -934,7 +864,7 @@ export const UserAdd = (props: UserProps) => {
                 optionValue={(o) => o.id}
                 onChange={(e) => {
                   handleFieldChange(e);
-                  if (e) fetchLocalBody(e.value);
+                  if (e) setSelectedDistrictId(e.value);
                 }}
               />
             )}
