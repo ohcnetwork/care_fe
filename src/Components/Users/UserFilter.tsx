@@ -1,6 +1,3 @@
-import { useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { getDistrict } from "../../Redux/actions";
 import { navigate } from "raviger";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
 import { parsePhoneNumber } from "../../Utils/utils";
@@ -11,6 +8,8 @@ import { USER_TYPE_OPTIONS } from "../../Common/constants";
 import useMergeState from "../../Common/hooks/useMergeState";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 
 const parsePhoneNumberForFilterParam = (phoneNumber: string) => {
   if (!phoneNumber) return "";
@@ -21,7 +20,6 @@ const parsePhoneNumberForFilterParam = (phoneNumber: string) => {
 
 export default function UserFilter(props: any) {
   const { filter, onChange, closeFilter } = props;
-  const dispatch: any = useDispatch();
   const [filterState, setFilterState] = useMergeState({
     first_name: filter.first_name || "",
     last_name: filter.last_name || "",
@@ -69,17 +67,14 @@ export default function UserFilter(props: any) {
     onChange(data);
   };
 
-  useEffect(() => {
-    async function fetchData() {
-      if (filter.district_id) {
-        const { data: districtData } = await dispatch(
-          getDistrict(filter.district_id, "district")
-        );
-        setFilterState({ district_ref: districtData });
-      }
-    }
-    fetchData();
-  }, [dispatch]);
+  useQuery(routes.getDistrict, {
+    prefetch: !!filter.district_id,
+    pathParams: { id: filter.district_id },
+    onResponse: (result) => {
+      if (!result || !result.data || !result.res) return;
+      setFilterState({ district_ref: result.data });
+    },
+  });
 
   const handleChange = ({ name, value }: any) =>
     setFilterState({ ...filterState, [name]: value });

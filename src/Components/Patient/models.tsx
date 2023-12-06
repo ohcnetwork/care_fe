@@ -269,6 +269,8 @@ export interface DailyRoundsOutput {
   quantity: number;
 }
 
+export const DailyRoundTypes = ["NORMAL", "VENTILATOR", "AUTOMATED"] as const;
+
 export interface DailyRoundsModel {
   ventilator_spo2?: number;
   spo2?: string;
@@ -290,7 +292,7 @@ export interface DailyRoundsModel {
   medication_given?: Array<any>;
   additional_symptoms_text?: string;
   current_health?: string;
-  id?: any;
+  id: string;
   other_symptoms?: string;
   admitted_to?: string;
   patient_category?: PatientCategory;
@@ -300,7 +302,7 @@ export interface DailyRoundsModel {
   modified_date?: string;
   taken_at?: string;
   consciousness_level?: string;
-  rounds_type?: "NORMAL" | "VENTILATOR" | "ICU" | "AUTOMATED";
+  rounds_type: (typeof DailyRoundTypes)[number];
   last_updated_by_telemedicine?: boolean;
   created_by_telemedicine?: boolean;
   created_by?: {
@@ -315,6 +317,7 @@ export interface DailyRoundsModel {
   };
   bed?: string;
 }
+
 export interface FacilityNameModel {
   id?: string;
   name?: string;
