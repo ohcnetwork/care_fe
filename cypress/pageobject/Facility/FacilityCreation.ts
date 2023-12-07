@@ -217,6 +217,53 @@ class FacilityPage {
     cy.get("#delete-facility").contains("Delete Facility").click();
   }
 
+  scrollToFacilityTriage() {
+    cy.get("#add-facility-triage").scrollIntoView();
+  }
+
+  fillTriageEntryFields(
+    visited,
+    homeQuarantine,
+    isolation,
+    referred,
+    confirmedPositive
+  ) {
+    cy.get("#num_patients_visited").clear().click().type(visited);
+    cy.get("#num_patients_home_quarantine")
+      .clear()
+      .click()
+      .type(homeQuarantine);
+    cy.get("#num_patients_isolation").clear().click().type(isolation);
+    cy.get("#num_patient_referred").clear().click().type(referred);
+    cy.get("#num_patient_confirmed_positive")
+      .clear()
+      .click()
+      .type(confirmedPositive);
+  }
+
+  fillEntryDate(date) {
+    cy.get("#entry_date").click();
+    cy.get("#date-input").click().type(date);
+  }
+
+  clickEditButton() {
+    cy.get("#edit-button").click();
+  }
+
+  clickButtonsMultipleTimes(selector) {
+    cy.get(selector).each(($button) => {
+      cy.wrap($button).click();
+    });
+  }
+
+  verifyTriageTableContains(value) {
+    cy.get("#triage-table").contains(value);
+  }
+
+  clickAddFacilityTriage() {
+    cy.get("#add-facility-triage").click();
+  }
+
   clickfacilityfeatureoption() {
     cy.get("#features").click();
   }
