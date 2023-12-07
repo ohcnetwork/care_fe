@@ -25,7 +25,7 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
   // const by = props.consultationData.assigned_to_object || round.created_by;
 
   return (
-    <div className="flex w-full flex-col gap-4 rounded-lg p-2 @container">
+    <div className="flex w-full flex-col gap-4 rounded-lg border border-gray-400 p-4 @container">
       <LogUpdateCardAttribute
         attributeKey="patient_category"
         attributeValue={round.patient_category}

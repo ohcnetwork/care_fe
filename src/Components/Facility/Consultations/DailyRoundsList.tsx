@@ -59,7 +59,7 @@ export default function DailyRoundsList({ consultation }: Props) {
                 </>
               </PaginatedList.WhenLoading>
               <Timeline
-                className="rounded-lg bg-white py-4 shadow"
+                className="rounded-lg bg-white p-2 shadow"
                 name="log update"
               >
                 <PaginatedList.Items<DailyRoundsModel> className="flex grow flex-col gap-3">
@@ -80,9 +80,9 @@ export default function DailyRoundsList({ consultation }: Props) {
                               email: "",
                               last_login: "",
                             },
-                            icon: "l-history",
+                            icon: "l-robot",
                           }}
-                          isLast={false}
+                          isLast={items.indexOf(item) == items.length - 1}
                         >
                           <VirtualNursingAssistantLogUpdateCard
                             round={item}
@@ -112,7 +112,7 @@ export default function DailyRoundsList({ consultation }: Props) {
                             email: "",
                             last_login: "",
                           },
-                          icon: "l-history",
+                          icon: "l-user-nurse",
                         }}
                         isLast={items.indexOf(item) == items.length - 1}
                       >
