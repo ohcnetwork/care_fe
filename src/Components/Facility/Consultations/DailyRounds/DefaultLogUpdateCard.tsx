@@ -43,6 +43,7 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
           variant="secondary"
           border
           ghost
+          size="small"
           onClick={props.onViewDetails}
         >
           <CareIcon className="care-l-eye text-lg" />
