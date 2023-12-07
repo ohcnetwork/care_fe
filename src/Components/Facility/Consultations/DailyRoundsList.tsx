@@ -102,7 +102,7 @@ export default function DailyRoundsList({ consultation }: Props) {
                     return (
                       <TimelineNode
                         event={{
-                          type: "updated",
+                          type: "created",
                           timestamp: item.created_date?.toString() ?? "",
                           by: {
                             // ...item.created_by,
