@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import RecordMeta from "../../../../CAREUI/display/RecordMeta";
+// import RecordMeta from "../../../../CAREUI/display/RecordMeta";
 import CareIcon from "../../../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../../../Common/components/ButtonV2";
 import { DailyRoundsModel } from "../../../Patient/models";
@@ -13,24 +13,53 @@ interface Props {
   onUpdateLog?: () => void;
 }
 
-const getName = (item: any) => {
-  return `${item?.first_name} ${item?.last_name} (${item?.user_type})`;
-};
+// const getName = (item: any) => {
+//   return `${item?.first_name} ${item?.last_name} (${item?.user_type})`;
+// };
 
 const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
   const { t } = useTranslation();
-  const telemedicine_doctor_update =
-    round.created_by_telemedicine || round.last_updated_by_telemedicine;
+  // const telemedicine_doctor_update =
+  //   round.created_by_telemedicine || round.last_updated_by_telemedicine;
 
-  const by = props.consultationData.assigned_to_object || round.created_by;
+  // const by = props.consultationData.assigned_to_object || round.created_by;
 
   return (
-    <div
-      className={`flex w-full flex-col gap-4 rounded-lg p-4 shadow @container ${
-        telemedicine_doctor_update ? "bg-purple-200" : "bg-white"
-      }`}
-    >
-      <div className="flex flex-col items-start gap-1">
+    <div className="flex w-full flex-col gap-4 rounded-lg p-2 @container">
+      <LogUpdateCardAttribute
+        attributeKey="patient_category"
+        attributeValue={round.patient_category}
+      />
+      <LogUpdateCardAttribute
+        attributeKey="physical_examination_info"
+        attributeValue={round.physical_examination_info}
+      />
+      <LogUpdateCardAttribute
+        attributeKey="other_details"
+        attributeValue={round.other_details}
+      />
+      <div className="mt-2 flex items-center gap-2">
+        <ButtonV2
+          variant="secondary"
+          border
+          ghost
+          onClick={props.onViewDetails}
+        >
+          <CareIcon className="care-l-eye text-lg" />
+          <span>{t("view_details")}</span>
+        </ButtonV2>
+        <ButtonV2
+          variant="secondary"
+          border
+          ghost
+          className="tooltip"
+          onClick={props.onUpdateLog}
+        >
+          <CareIcon className="care-l-pen text-lg" />
+          <span>{t("update_log")}</span>
+        </ButtonV2>
+      </div>
+      {/* <div className="flex flex-col items-start gap-1">
         <div className="flex w-min items-center gap-2 rounded-full border bg-gray-50 text-gray-500">
           <div className="rounded-full bg-gray-100 px-1.5 py-0.5">
             <CareIcon className="care-l-user-nurse text-lg" />
@@ -89,7 +118,7 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
             </ButtonV2>
           )}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

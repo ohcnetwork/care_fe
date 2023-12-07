@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
-import RecordMeta from "../../../../CAREUI/display/RecordMeta";
-import CareIcon from "../../../../CAREUI/icons/CareIcon";
+// import RecordMeta from "../../../../CAREUI/display/RecordMeta";
+// import CareIcon from "../../../../CAREUI/icons/CareIcon";
 import { DailyRoundsModel } from "../../../Patient/models";
 import LogUpdateCardAttribute from "./LogUpdateCardAttribute";
 
@@ -67,8 +67,8 @@ const VirtualNursingAssistantLogUpdateCard = (props: Props) => {
   const diffKeys = Object.keys(diff);
 
   return (
-    <div className="flex w-full flex-col gap-4 rounded-lg border border-green-300 bg-white p-4 shadow shadow-primary-500/20">
-      <div className="flex flex-col items-start gap-1">
+    <div className="flex w-full flex-col gap-4 rounded-lg border border-green-300 bg-white p-4 shadow-primary-500/20">
+      {/* <div className="flex flex-col items-start gap-1">
         <div className="flex w-min items-center gap-2 rounded-full border bg-green-50 text-primary-400">
           <div className="rounded-full bg-green-100 px-1.5 py-0.5">
             <CareIcon className="care-l-robot text-lg" />
@@ -80,7 +80,7 @@ const VirtualNursingAssistantLogUpdateCard = (props: Props) => {
         <span className="flex gap-1 text-xs text-gray-700">
           {t("created")} <RecordMeta time={props.round.created_date} />
         </span>
-      </div>
+      </div> */}
       <div className="flex flex-col gap-1">
         {diffKeys.length > 0 ? (
           Object.keys(diff).map((key) => (
