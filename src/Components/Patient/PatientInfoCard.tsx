@@ -330,7 +330,8 @@ export default function PatientInfoCard(props: {
                     ) : (
                       <span>
                         {" "}
-                        Discharged on {formatDate(consultation?.discharge_date)}
+                        Discharged on{" "}
+                        {formatDateTime(consultation?.discharge_date)}
                       </span>
                     )}
                   </span>
@@ -348,7 +349,11 @@ export default function PatientInfoCard(props: {
               </div>
               <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
                 {!consultation?.discharge_reason ? (
-                  <span className="text-gray-800">UNKNOWN</span>
+                  <span className="text-gray-800">
+                    {consultation.suggestion === "OP"
+                      ? "OP file closed"
+                      : "UNKNOWN"}
+                  </span>
                 ) : consultation?.discharge_reason === "EXP" ? (
                   <span className="text-red-600">EXPIRED</span>
                 ) : (

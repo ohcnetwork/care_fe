@@ -55,15 +55,15 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const [isFullscreen, setFullscreen] = useFullscreen();
   const [videoStartTime, setVideoStartTime] = useState<Date | null>(null);
   const [statusReported, setStatusReported] = useState(false);
+  const [facilityMiddlewareHostname, setFacilityMiddlewareHostname] =
+    useState("");
   const authUser = useAuthUser();
-
-  let facilityMiddlewareHostname = "";
 
   useQuery(routes.getPermittedFacility, {
     pathParams: { id: facilityId || "" },
     onResponse: ({ res, data }) => {
       if (res && res.status === 200 && data && data.middleware_address) {
-        facilityMiddlewareHostname = data.middleware_address;
+        setFacilityMiddlewareHostname(data.middleware_address);
       }
     },
   });
@@ -577,7 +577,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
               );
             }
           )}
-          <div className="hideonmobilescreen pl-3">
+          <div className="hidden pl-3 md:block">
             <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
           </div>
         </div>

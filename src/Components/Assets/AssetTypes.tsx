@@ -8,10 +8,12 @@ export interface AssetLocationObject {
   description: string;
   created_date?: string;
   modified_date?: string;
+  middleware_address?: string;
   facility: {
     id: string;
     name: string;
   };
+  middleware_address?: string;
 }
 
 export enum AssetType {
