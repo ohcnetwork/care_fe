@@ -412,7 +412,7 @@ export const ConsultationForm = (props: any) => {
           dispatch({ type: "set_form", form: { ...state.form, ...formData } });
           setBed(formData.bed);
 
-          if (res.data.last_daily_round) {
+          if (res.data.last_daily_round && state.form.category) {
             setDisabledFields((fields) => [...fields, "category"]);
           }
         } else {
