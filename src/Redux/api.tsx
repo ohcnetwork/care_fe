@@ -996,7 +996,7 @@ const routes = {
   // Assets endpoints
 
   listAssets: {
-    path: "/api/v1/asset",
+    path: "/api/v1/asset/",
     method: "GET",
     TRes: Type<PaginatedResponse<AssetData>>(),
   },

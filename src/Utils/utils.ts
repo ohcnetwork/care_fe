@@ -175,9 +175,14 @@ function _isAppleDevice() {
 }
 
 /**
- * `true` if device is iOS, else `false`
+ * `true` if device is an Apple device, else `false`
  */
 export const isAppleDevice = _isAppleDevice();
+
+/**
+ * `true` if device is an iOS device, else `false`
+ */
+export const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
 /**
  * Conditionally concatenate classes. An alternate replacement for `clsx`.
