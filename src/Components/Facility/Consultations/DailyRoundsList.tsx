@@ -62,7 +62,7 @@ export default function DailyRoundsList({ consultation }: Props) {
                 className={
                   "animate-pulse rounded-lg bg-white p-2 py-4 opacity-70 shadow md:px-3"
                 }
-                name="Daily Rounds"
+                name="log update"
               >
                 <PaginatedList.Items<DailyRoundsModel> className="flex grow flex-col gap-3">
                   {(item, items) => {
