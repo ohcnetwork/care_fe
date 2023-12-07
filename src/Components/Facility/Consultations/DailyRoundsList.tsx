@@ -10,13 +10,7 @@ import PageTitle from "../../Common/PageTitle";
 import DailyRoundsFilter from "./DailyRoundsFilter";
 import { ConsultationModel } from "../models";
 import { useSlugs } from "../../../Common/hooks/useSlug";
-import Timeline, {
-  TimelineNode,
-  // TimelineNodeNotes,
-} from "../../../CAREUI/display/Timeline";
-// import CareIcon from "../../../CAREUI/icons/CareIcon";
-// import ButtonV2 from "../../Common/components/ButtonV2";
-// import LogUpdateCardAttribute from "./DailyRounds/LogUpdateCardAttribute";
+import Timeline, { TimelineNode } from "../../../CAREUI/display/Timeline";
 
 interface Props {
   consultation: ConsultationModel;
@@ -71,7 +65,6 @@ export default function DailyRoundsList({ consultation }: Props) {
                             type: "created",
                             timestamp: item.created_date?.toString() ?? "",
                             by: {
-                              // ...item.created_by,
                               user_type: item.created_by?.user_type ?? "",
                               first_name: "Virtual",
                               last_name: "Assistant",
@@ -103,7 +96,6 @@ export default function DailyRoundsList({ consultation }: Props) {
                           type: "created",
                           timestamp: item.created_date?.toString() ?? "",
                           by: {
-                            // ...item.created_by,
                             user_type: item.created_by?.user_type ?? "",
                             first_name: item.created_by?.first_name ?? "",
                             last_name: item.created_by?.last_name ?? "",
@@ -116,39 +108,6 @@ export default function DailyRoundsList({ consultation }: Props) {
                         }}
                         isLast={items.indexOf(item) == items.length - 1}
                       >
-                        {/* <LogUpdateCardAttribute
-                          attributeKey="patient_category"
-                          attributeValue={item.patient_category}
-                        />
-                        <LogUpdateCardAttribute
-                          attributeKey="physical_examination_info"
-                          attributeValue={item.physical_examination_info}
-                        />
-                        <LogUpdateCardAttribute
-                          attributeKey="other_details"
-                          attributeValue={item.other_details}
-                        />
-                        <div className="mt-2 flex items-center gap-2">
-                          <ButtonV2
-                            variant="secondary"
-                            border
-                            ghost
-                            onClick={() => navigate(itemUrl)}
-                          >
-                            <CareIcon className="care-l-eye text-lg" />
-                            <span>{t("view_details")}</span>
-                          </ButtonV2>
-                          <ButtonV2
-                            variant="secondary"
-                            border
-                            ghost
-                            className="tooltip"
-                            onClick={() => navigate(`${itemUrl}/update`)}
-                          >
-                            <CareIcon className="care-l-pen text-lg" />
-                            <span>{t("update_log")}</span>
-                          </ButtonV2>
-                        </div> */}
                         <DefaultLogUpdateCard
                           round={item}
                           consultationData={consultation}
