@@ -59,9 +59,7 @@ export default function DailyRoundsList({ consultation }: Props) {
                 </>
               </PaginatedList.WhenLoading>
               <Timeline
-                className={
-                  "animate-pulse rounded-lg bg-white p-2 py-4 opacity-70 shadow md:px-3"
-                }
+                className="rounded-lg bg-white py-4 shadow"
                 name="log update"
               >
                 <PaginatedList.Items<DailyRoundsModel> className="flex grow flex-col gap-3">
