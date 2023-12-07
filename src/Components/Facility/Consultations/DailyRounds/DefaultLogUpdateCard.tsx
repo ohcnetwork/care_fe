@@ -53,7 +53,7 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
           variant="secondary"
           border
           ghost
-          className="tooltip"
+          size="small"
           onClick={props.onUpdateLog}
         >
           <CareIcon className="care-l-pen text-lg" />
