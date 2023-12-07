@@ -1,5 +1,5 @@
 import { useQueryParams } from "raviger";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import GenericFilterBadge from "../../CAREUI/display/FilterBadge";
 import PaginationComponent from "../../Components/Common/Pagination";
@@ -36,6 +36,25 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
   const removeFilter = (param: string) => updateQuery({ [param]: "" });
   const removeFilters = (keys: string[]) =>
     updateQuery(keys.reduce((acc, key) => ({ ...acc, [key]: "" }), qParams));
+
+  useEffect(() => {
+    const localFilters = JSON.parse(
+      localStorage.getItem("filters--" + window.location.pathname) || "{}"
+    );
+    const blacklistLocalFilters = ["page", "limit", "offset"];
+    const newFilters = { ...localFilters, ...qParams };
+    const filteredNewFilters = blacklistLocalFilters.reduce(
+      (acc, key) => ({ ...acc, [key]: undefined }),
+      newFilters
+    );
+
+    localStorage.setItem(
+      "filters--" + window.location.pathname,
+      JSON.stringify(filteredNewFilters)
+    );
+
+    updateQuery(newFilters);
+  }, [qParams]);
 
   const FilterBadge = ({ name, value, paramKey }: FilterBadgeProps) => {
     if (Array.isArray(paramKey))
@@ -131,11 +150,36 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
   }) => {
     const compiledBadges = badges(badgeUtils);
     const { t } = useTranslation();
+
+    const activeFilters = compiledBadges.reduce((acc, badge) => {
+      const { paramKey } = badge;
+
+      if (Array.isArray(paramKey)) {
+        const active = paramKey.filter((key) => qParams[key]);
+        if (active) acc.concat(active);
+      } else {
+        if (qParams[paramKey]) acc.push(paramKey);
+      }
+
+      return acc;
+    }, [] as string[]);
+
     return (
       <div className="col-span-3 my-2 flex w-full flex-wrap items-center gap-2">
         {compiledBadges.map((props) => (
           <FilterBadge {...props} name={t(props.name)} key={props.name} />
         ))}
+        {activeFilters.length >= 1 && (
+          <button
+            id="clear-all-filters"
+            className="rounded-full border border-gray-300 bg-white px-2 py-1 text-xs text-gray-600 hover:text-gray-800"
+            onClick={() => {
+              removeFilters(activeFilters);
+            }}
+          >
+            {t("clear_all_filters")}
+          </button>
+        )}
         {children}
       </div>
     );
@@ -201,6 +245,7 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
       show: showFilters,
       setShow: setShowFilters,
       filter: qParams,
+      removeFilters,
       onChange: (filter: FilterState) => {
         updateQuery(filter);
         setShowFilters(false);
