@@ -1,7 +1,3 @@
-import { useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { getDistrict } from "../../Redux/actions";
-import { navigate } from "raviger";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
 import { parsePhoneNumber } from "../../Utils/utils";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -23,7 +19,6 @@ const parsePhoneNumberForFilterParam = (phoneNumber: string) => {
 
 export default function UserFilter(props: any) {
   const { filter, onChange, closeFilter, removeFilters } = props;
-  const dispatch: any = useDispatch();
   const [filterState, setFilterState] = useMergeState({
     first_name: filter.first_name || "",
     last_name: filter.last_name || "",
