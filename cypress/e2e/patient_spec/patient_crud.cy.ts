@@ -27,6 +27,7 @@ describe("Patient Creation with consultation", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/patients");
   });
 
