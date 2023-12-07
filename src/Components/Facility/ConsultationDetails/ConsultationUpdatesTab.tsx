@@ -196,7 +196,8 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             {props.consultationData.discharge_date && (
               <div
                 className={`gap-4 overflow-hidden rounded-lg bg-white shadow ${
-                  props.consultationData.discharge_reason === "REC" &&
+                  props.consultationData.discharge_reason ===
+                    DISCHARGE_REASONS.find((i) => i.text == "Recovered")?.id &&
                   "lg:col-span-2"
                 }`}
               >
@@ -214,7 +215,9 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         )?.text ?? "--"}
                       </span>
                     </div>
-                    {props.consultationData.discharge_reason === "REF" && (
+                    {props.consultationData.discharge_reason ===
+                      DISCHARGE_REASONS.find((i) => i.text == "Referred")
+                        ?.id && (
                       <div>
                         Referred Facility {" - "}
                         <span className="font-semibold">
@@ -224,7 +227,9 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         </span>
                       </div>
                     )}
-                    {props.consultationData.discharge_reason === "REC" && (
+                    {props.consultationData.discharge_reason ===
+                      DISCHARGE_REASONS.find((i) => i.text == "Recovered")
+                        ?.id && (
                       <div className="grid gap-4">
                         <div>
                           Discharge Date {" - "}
@@ -259,7 +264,9 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         </div>
                       </div>
                     )}
-                    {props.consultationData.discharge_reason === "EXP" && (
+                    {props.consultationData.discharge_reason ===
+                      DISCHARGE_REASONS.find((i) => i.text == "Expired")
+                        ?.id && (
                       <div className="grid gap-4">
                         <div>
                           Date of Death {" - "}
@@ -286,8 +293,8 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         </div>
                       </div>
                     )}
-                    {["REF", "LAMA"].includes(
-                      props.consultationData.discharge_reason ?? ""
+                    {[2, 4].includes(
+                      props.consultationData.discharge_reason ?? 0
                     ) && (
                       <div className="grid gap-4">
                         <div>

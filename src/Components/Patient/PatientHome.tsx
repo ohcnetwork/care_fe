@@ -1,7 +1,11 @@
 import { navigate } from "raviger";
 import { lazy, useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { GENDER_TYPES, SAMPLE_TEST_STATUS } from "../../Common/constants";
+import {
+  DISCHARGE_REASONS,
+  GENDER_TYPES,
+  SAMPLE_TEST_STATUS,
+} from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   getConsultationList,
@@ -757,7 +761,8 @@ export const PatientHome = (props: any) => {
                 </div>
               </div>
               <div className="py-2">
-                {patientData.last_consultation?.discharge_reason === "EXP" && (
+                {patientData.last_consultation?.discharge_reason ===
+                  DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id && (
                   <div>
                     <ButtonV2
                       className="mt-6 w-full"

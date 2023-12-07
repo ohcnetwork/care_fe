@@ -294,10 +294,10 @@ export const SYMPTOM_CHOICES = [
 ];
 
 export const DISCHARGE_REASONS = [
-  { id: "REC", text: "Recovered" },
-  { id: "EXP", text: "Expired" },
-  { id: "REF", text: "Referred" },
-  { id: "LAMA", text: "LAMA" },
+  { id: 1, text: "Recovered" },
+  { id: 2, text: "Referred" },
+  { id: 3, text: "Expired" },
+  { id: 4, text: "LAMA" },
 ];
 
 export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
