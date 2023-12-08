@@ -16,11 +16,17 @@ export const AuthUserContext = createContext<AuthContextType | null>(null);
 export const useAuthContext = () => {
   const ctx = useContext(AuthUserContext);
   if (!ctx) {
-    throw new Error("useAuthUser must be used within an AuthUserProvider");
+    throw new Error(
+      "'useAuthContext' must be used within 'AuthUserProvider' only"
+    );
   }
   return ctx;
 };
 
 export default function useAuthUser() {
-  return useAuthContext().user;
+  const user = useAuthContext().user;
+  if (!user) {
+    throw new Error("'useAuthUser' must be used within 'AppRouter' only");
+  }
+  return user;
 }

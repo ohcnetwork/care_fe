@@ -1,9 +1,4 @@
-import { navigate } from "raviger";
-import {
-  AREACODES,
-  IN_LANDLINE_AREA_CODES,
-  LocalStorageKeys,
-} from "../Common/constants";
+import { AREACODES, IN_LANDLINE_AREA_CODES } from "../Common/constants";
 import phoneCodesJson from "../Common/static/countryPhoneAndFlags.json";
 import dayjs from "./dayjs";
 
@@ -118,21 +113,6 @@ export const dateQueryString = (date: DateLike) => {
 };
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-export const handleSignOut = (forceReload: boolean) => {
-  Object.values(LocalStorageKeys).forEach((key) =>
-    localStorage.removeItem(key)
-  );
-  const redirectURL = new URLSearchParams(window.location.search).get(
-    "redirect"
-  );
-  const url = redirectURL ? `/?redirect=${redirectURL}` : "/";
-  if (forceReload) {
-    window.location.href = url;
-  } else {
-    navigate(url);
-  }
-};
 
 /**
  * Referred from: https://stackoverflow.com/a/9039885/7887936

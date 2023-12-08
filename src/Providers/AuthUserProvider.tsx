@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { AuthUserContext } from "../Common/hooks/useAuthUser";
 import Loading from "../Components/Common/Loading";
 import routes from "../Redux/api";
@@ -33,34 +33,55 @@ export default function AuthUserProvider({ children, unauthorized }: Props) {
     setInterval(() => updateRefreshToken(), tokenRefreshInterval);
   }, [user, tokenRefreshInterval]);
 
-  if (loading || !res) {
-    return <Loading />;
-  }
+  const signIn = useCallback(
+    async (creds: { username: string; password: string }) => {
+      const query = await request(routes.login, { body: creds });
 
-  const signIn = async (creds: { username: string; password: string }) => {
-    const query = await request(routes.login, { body: creds });
+      if (query.res?.ok && query.data) {
+        localStorage.setItem(LocalStorageKeys.accessToken, query.data.access);
+        localStorage.setItem(LocalStorageKeys.refreshToken, query.data.refresh);
 
-    if (query.res?.ok && query.data) {
-      localStorage.setItem(LocalStorageKeys.accessToken, query.data.access);
-      localStorage.setItem(LocalStorageKeys.refreshToken, query.data.refresh);
+        await refetch();
+        navigate(getRedirectOr("/"));
+      }
 
-      await refetch();
-      navigate(getRedirectOr("/"));
-    }
+      return query;
+    },
+    [refetch]
+  );
 
-    return query;
-  };
-
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     localStorage.removeItem(LocalStorageKeys.accessToken);
     localStorage.removeItem(LocalStorageKeys.refreshToken);
 
-    const redirectURL = getRedirectURL();
-
     await refetch();
 
+    const redirectURL = getRedirectURL();
     navigate(redirectURL ? `/?redirect=${redirectURL}` : "/");
-  };
+  }, [refetch]);
+
+  // Handles signout from current tab, if signed out from another tab.
+  useEffect(() => {
+    const listener = (event: any) => {
+      if (
+        !event.newValue &&
+        (LocalStorageKeys.accessToken === event.key ||
+          LocalStorageKeys.refreshToken === event.key)
+      ) {
+        signOut();
+      }
+    };
+
+    addEventListener("storage", listener);
+
+    return () => {
+      removeEventListener("storage", listener);
+    };
+  }, [signOut]);
+
+  if (loading || !res) {
+    return <Loading />;
+  }
 
   return (
     <AuthUserContext.Provider value={{ signIn, signOut, user }}>
