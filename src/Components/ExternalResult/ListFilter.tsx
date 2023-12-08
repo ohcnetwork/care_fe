@@ -1,6 +1,5 @@
 import { useState } from "react";
 import useMergeState from "../../Common/hooks/useMergeState";
-import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -27,7 +26,7 @@ const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
 
 export default function ListFilter(props: any) {
-  const { filter, onChange, closeFilter, dataList } = props;
+  const { filter, onChange, closeFilter, dataList, removeFilters } = props;
   const [wardList, setWardList] = useState<any[]>([]);
   const [lsgList, setLsgList] = useState<any[]>([]);
   const [wards, setWards] = useState<any[]>([]);
@@ -198,10 +197,11 @@ export default function ListFilter(props: any) {
       advancedFilter={props}
       onApply={applyFilter}
       onClear={() => {
-        navigate("/external_results");
-        setFilterState(clearFilterState);
-        setSelectedLsgs([]);
-        setWards([]);
+        removeFilters([
+          ...Object.keys(clearFilterState),
+          "wards",
+          "local_bodies",
+        ]);
         closeFilter();
       }}
     >
