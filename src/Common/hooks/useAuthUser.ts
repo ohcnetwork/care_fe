@@ -1,14 +1,26 @@
 import { createContext, useContext } from "react";
 import { UserModel } from "../../Components/Users/models";
+import { RequestResult } from "../../Utils/request/types";
+import { JwtTokenObtainPair, LoginCredentials } from "../../Redux/api";
 
-export const AuthUserContext = createContext<UserModel | null>(null);
+type SignInReturnType = RequestResult<JwtTokenObtainPair>;
 
-export default function useAuthUser() {
-  const user = useContext(AuthUserContext);
+type AuthContextType = {
+  user: UserModel | undefined;
+  signIn: (creds: LoginCredentials) => Promise<SignInReturnType>;
+  signOut: () => Promise<void>;
+};
 
-  if (!user) {
+export const AuthUserContext = createContext<AuthContextType | null>(null);
+
+export const useAuthContext = () => {
+  const ctx = useContext(AuthUserContext);
+  if (!ctx) {
     throw new Error("useAuthUser must be used within an AuthUserProvider");
   }
+  return ctx;
+};
 
-  return user;
+export default function useAuthUser() {
+  return useAuthContext().user;
 }

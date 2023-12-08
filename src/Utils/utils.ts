@@ -134,26 +134,6 @@ export const handleSignOut = (forceReload: boolean) => {
   }
 };
 
-export const handleRedirection = () => {
-  const redirectParam = new URLSearchParams(window.location.search).get(
-    "redirect"
-  );
-  try {
-    if (redirectParam) {
-      const redirectURL = new URL(redirectParam);
-
-      if (redirectURL.origin === window.location.origin) {
-        const newPath = redirectURL.pathname + redirectURL.search;
-        window.location.href = `${window.location.origin}${newPath}`;
-        return;
-      }
-    }
-    window.location.href = "/facility";
-  } catch {
-    window.location.href = "/facility";
-  }
-};
-
 /**
  * Referred from: https://stackoverflow.com/a/9039885/7887936
  * @returns `true` if device is iOS, else `false`
