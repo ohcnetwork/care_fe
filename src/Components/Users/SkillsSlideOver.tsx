@@ -1,18 +1,21 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
 import { SkillModel, SkillObjectModel } from "../Users/models";
 import { SkillSelect } from "../Common/SkillSelect";
+import {
+  addUserSkill,
+  getUserListSkills,
+  deleteUserSkill,
+} from "../../Redux/actions";
 import UnlinkSkillDialog from "./UnlinkSkillDialog";
 import * as Notification from "../../Utils/Notifications.js";
+import { useDispatch } from "react-redux";
 import ButtonV2 from "../Common/components/ButtonV2";
 import AuthorizeFor from "../../Utils/AuthorizeFor";
 import { useIsAuthorized } from "../../Common/hooks/useIsAuthorized";
 import { AddSkillsPlaceholder, SkillsArray } from "./SkillsSlideOverComponents";
 import { useTranslation } from "react-i18next";
 import CircularProgress from "../Common/components/CircularProgress";
-import useQuery from "../../Utils/request/useQuery";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
 
 interface IProps {
   username: string;
@@ -23,29 +26,32 @@ interface IProps {
 export default ({ show, setShow, username }: IProps) => {
   /* added const {t} hook here and relevant text to Common.json to avoid eslint error  */
   const { t } = useTranslation();
+  const [skills, setSkills] = useState<SkillModel[]>([]);
   const [selectedSkill, setSelectedSkill] = useState<SkillObjectModel | null>(
     null
   );
   const [isLoading, setIsLoading] = useState(false);
   const [deleteSkill, setDeleteSkill] = useState<SkillModel | null>(null);
+  const dispatch: any = useDispatch();
 
-  const {
-    data: skills,
-    loading: skillsLoading,
-    refetch: refetchUserSkills,
-  } = useQuery(routes.userListSkill, {
-    pathParams: { username },
-  });
+  const fetchSkills = useCallback(
+    async (username: string) => {
+      setIsLoading(true);
+      const res = await dispatch(getUserListSkills({ username }));
+      if (res && res.data) {
+        setSkills(res.data.results);
+      }
+      setIsLoading(false);
+    },
+    [dispatch]
+  );
 
   const addSkill = useCallback(
     async (username: string, skill: SkillObjectModel | null) => {
       if (!skill) return;
       setIsLoading(true);
-      const { res } = await request(routes.addUserSkill, {
-        pathParams: { username },
-        body: { skill: skill.id },
-      });
-      if (!res?.ok) {
+      const res = await dispatch(addUserSkill(username, skill.id));
+      if (res?.status !== 201) {
         Notification.Error({
           msg: "Error while adding skill",
         });
@@ -56,32 +62,36 @@ export default ({ show, setShow, username }: IProps) => {
       }
       setSelectedSkill(null);
       setIsLoading(false);
-      await refetchUserSkills();
+      fetchSkills(username);
     },
-    [refetchUserSkills]
+    [dispatch, fetchSkills]
   );
 
   const removeSkill = useCallback(
     async (username: string, skillId: string) => {
-      const { res } = await request(routes.deleteUserSkill, {
-        pathParams: { username, id: skillId },
-      });
+      const res = await dispatch(deleteUserSkill(username, skillId));
       if (res?.status !== 204) {
         Notification.Error({
           msg: "Error while unlinking skill",
         });
       }
       setDeleteSkill(null);
-      await refetchUserSkills();
+      fetchSkills(username);
     },
-    [refetchUserSkills]
+    [dispatch, fetchSkills]
   );
+
+  useEffect(() => {
+    setIsLoading(true);
+    if (username) fetchSkills(username);
+    setIsLoading(false);
+  }, [username, fetchSkills]);
 
   const authorizeForAddSkill = useIsAuthorized(
     AuthorizeFor(["DistrictAdmin", "StateAdmin"])
   );
 
-  const hasSkills = skills?.results?.length || 0 > 0;
+  const hasSkills = useMemo(() => skills.length > 0, [skills]);
 
   return (
     <div className="col-span-4">
@@ -104,12 +114,12 @@ export default ({ show, setShow, username }: IProps) => {
       >
         <div>
           <div className="col-span-full sm:col-span-3 sm:col-start-2">
-
-            {(!isLoading || !skillsLoading) && (
-              <div className={`${
+            {!isLoading && (
+              <div
+                className={`${
                   !authorizeForAddSkill && "tooltip"
-                } flex items-center gap-2`}>
-                
+                } flex items-center gap-2`}
+              >
                 <SkillSelect
                   id="select-skill"
                   multiple={false}
@@ -121,7 +131,6 @@ export default ({ show, setShow, username }: IProps) => {
                   setSelected={setSelectedSkill}
                   errors=""
                   username={username}
-                  userSkills={skills?.results || []}
                 />
                 <ButtonV2
                   id="add-skill-button"
@@ -138,7 +147,7 @@ export default ({ show, setShow, username }: IProps) => {
                 )}
               </div>
             )}
-            {isLoading || skillsLoading ? (
+            {isLoading ? (
               <div className="mt-4 flex justify-center">
                 <CircularProgress />
               </div>
@@ -146,8 +155,8 @@ export default ({ show, setShow, username }: IProps) => {
               <div className="mb-2 mt-4" id="added-user-skills">
                 {hasSkills ? (
                   <SkillsArray
-                    isLoading={isLoading || skillsLoading}
-                    skills={skills?.results || []}
+                    isLoading={isLoading}
+                    skills={skills}
                     authorizeForAddSkill={authorizeForAddSkill}
                     setDeleteSkill={setDeleteSkill}
                   />
