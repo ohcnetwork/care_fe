@@ -1057,7 +1057,7 @@ const routes = {
     method: "GET",
   },
   updateAssetService: {
-    path: "/api/v1/asset/{asset_external_id}/service_records/{external_id}",
+    path: "/api/v1/asset/{asset_external_id}/service_records/{external_id}/",
     method: "PUT",
     TRes: Type<AssetService>(),
     TBody: Type<AssetServiceUpdate>(),
