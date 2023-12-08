@@ -1101,6 +1101,32 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
                       });
 
                       button.callback();
+                      if (cameraState) {
+                        let x = cameraState.x;
+                        let y = cameraState.y;
+                        switch (button.action) {
+                          case "left":
+                            x += -0.1 / cameraState.precision;
+                            break;
+
+                          case "right":
+                            x += 0.1 / cameraState.precision;
+                            break;
+
+                          case "down":
+                            y += -0.1 / cameraState.precision;
+                            break;
+
+                          case "up":
+                            y += 0.1 / cameraState.precision;
+                            break;
+
+                          default:
+                            break;
+                        }
+
+                        setCameraState({ ...cameraState, x: x, y: y });
+                      }
                     }}
                   />
                 );

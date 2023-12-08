@@ -18,7 +18,7 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=coronasafe_care_fe&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=coronasafe_care_fe)
 ![Code scanning - action](https://github.com/coronasafe/care_fe/workflows/Code%20scanning%20-%20action/badge.svg)
 ![OSSAR](https://github.com/coronasafe/care_fe/workflows/OSSAR/badge.svg)
-[![Cypress Tests](https://github.com/coronasafe/care_fe/actions/workflows/cypress.yaml/badge.svg)](https://github.com/coronasafe/care_fe/actions/workflows/cypress.yaml)
+[![Cypress Tests](https://img.shields.io/endpoint?url=https://cloud.cypress.io/badge/simple/wf7d2m/develop&style=flat&logo=cypress)](https://cloud.cypress.io/projects/wf7d2m/runs)
 ![Staging Release](https://github.com/coronasafe/care_fe/workflows/CARE%20Develop%20Registry/badge.svg)
 ![Production Release](https://github.com/coronasafe/care_fe/workflows/Production%20Release/badge.svg)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/200482ab117e4b5397ff3f5ae5719aa2)](https://www.codacy.com/gh/coronasafe/care_fe?utm_source=github.com&utm_medium=referral&utm_content=coronasafe/care_fe&utm_campaign=Badge_Grade)
