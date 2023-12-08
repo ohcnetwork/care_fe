@@ -30,6 +30,7 @@ export const FacilityHomeTriage = (props: any) => {
     );
     temp.push(
       <ButtonV2
+        id="edit-button"
         variant="secondary"
         ghost
         border
@@ -52,6 +53,7 @@ export const FacilityHomeTriage = (props: any) => {
         <div className="justify-between md:flex md:pb-2">
           <div className="mb-2 text-xl font-bold">Corona Triage</div>
           <ButtonV2
+            id="add-facility-triage"
             className="w-full md:w-auto"
             onClick={() => navigate(`/facility/${props.facilityId}/triage`)}
             authorizeFor={props.NonReadOnlyUsers}
@@ -60,7 +62,10 @@ export const FacilityHomeTriage = (props: any) => {
             Add Triage
           </ButtonV2>
         </div>
-        <div className="mt-4 overflow-x-auto overflow-y-hidden">
+        <div
+          className="mt-4 overflow-x-auto overflow-y-hidden"
+          id="triage-table"
+        >
           <Table
             rows={stats}
             headings={[
