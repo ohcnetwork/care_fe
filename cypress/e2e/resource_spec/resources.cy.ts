@@ -17,6 +17,7 @@ describe("Resource Page", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/resource");
   });
 

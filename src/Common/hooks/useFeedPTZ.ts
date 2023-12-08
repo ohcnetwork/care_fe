@@ -1,3 +1,10 @@
+/**
+ * Deprecated. Use `useOperateAsset` instead.
+ *
+ * Preserving for backwards compatibility and preventing merge conflict with a
+ * co-related PR. Will be removed in the future.
+ */
+
 import { operateAsset } from "../../Redux/actions";
 
 export interface IAsset {
