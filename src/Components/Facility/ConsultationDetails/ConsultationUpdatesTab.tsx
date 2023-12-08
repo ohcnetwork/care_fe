@@ -12,13 +12,12 @@ import PrescriptionsTable from "../../Medicine/PrescriptionsTable";
 import Chip from "../../../CAREUI/display/Chip";
 import { formatAge, formatDate, formatDateTime } from "../../../Utils/utils";
 import ReadMore from "../../Common/components/Readmore";
-import { DailyRoundsList } from "../Consultations/DailyRoundsList";
+import DailyRoundsList from "../Consultations/DailyRoundsList";
 
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
 
 export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
   const dispatch: any = useDispatch();
-  const [showAutomatedRounds, setShowAutomatedRounds] = useState(true);
   const [hl7SocketUrl, setHL7SocketUrl] = useState<string>();
   const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
   const [monitorBedData, setMonitorBedData] = useState<AssetBedModel>();
@@ -60,7 +59,10 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
       setMonitorBedData(monitorBedData);
       const assetDataForMonitor = monitorBedData?.asset_object;
       const hl7Meta = assetDataForMonitor?.meta;
-      const hl7Middleware = hl7Meta?.middleware_hostname || middleware_address;
+      const hl7Middleware =
+        hl7Meta?.middleware_hostname ||
+        assetDataForMonitor?.location_object?.middleware_address ||
+        middleware_address;
       if (hl7Middleware && hl7Meta?.local_ip_address) {
         setHL7SocketUrl(
           `wss://${hl7Middleware}/observations/${hl7Meta.local_ip_address}`
@@ -85,7 +87,9 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
       setVentilatorBedData(ventilatorBedData);
       const ventilatorMeta = ventilatorBedData?.asset_object?.meta;
       const ventilatorMiddleware =
-        ventilatorMeta?.middleware_hostname || middleware_address;
+        ventilatorMeta?.middleware_hostname ||
+        consultationBedVentilator?.location_object.middleware_address ||
+        middleware_address;
       if (ventilatorMiddleware && ventilatorMeta?.local_ip_address) {
         setVentilatorSocketUrl(
           `wss://${ventilatorMiddleware}/observations/${ventilatorMeta?.local_ip_address}`
@@ -669,31 +673,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
           </div>
         </div>
         <div className="w-full pl-4 xl:w-1/3">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-            <PageTitle title="Update Log" hideBack breadcrumbs={false} />
-            <div className="mb-[2rem] pl-[1.5rem] md:mb-[0.125rem]">
-              <input
-                className="relative float-left ml-[-1.5rem] mr-[6px] mt-[0.15rem] h-[1.125rem] w-[1.125rem] appearance-none rounded-[0.25rem] border-[0.125rem] border-solid border-[rgba(0,0,0,0.25)] bg-white outline-none before:pointer-events-none before:absolute before:h-[0.875rem] before:w-[0.875rem] before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:shadow-[0px_0px_0px_13px_transparent] before:content-[''] checked:border-primary checked:bg-primary checked:before:opacity-[0.16] checked:after:absolute checked:after:-mt-px checked:after:ml-[0.25rem] checked:after:block checked:after:h-[0.8125rem] checked:after:w-[0.375rem] checked:after:rotate-45 checked:after:border-[0.125rem] checked:after:border-l-0 checked:after:border-t-0 checked:after:border-solid checked:after:border-white checked:after:bg-transparent checked:after:content-[''] hover:cursor-pointer hover:before:opacity-[0.04] hover:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:shadow-none focus:transition-[border-color_0.2s] focus:before:scale-100 focus:before:opacity-[0.12] focus:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:before:transition-[box-shadow_0.2s,transform_0.2s] focus:after:absolute focus:after:z-[1] focus:after:block focus:after:h-[0.875rem] focus:after:w-[0.875rem] focus:after:rounded-[0.125rem] focus:after:bg-white focus:after:content-[''] checked:focus:border-primary checked:focus:bg-primary checked:focus:before:scale-100 checked:focus:before:shadow-[0px_0px_0px_13px_#3b71ca] checked:focus:before:transition-[box-shadow_0.2s,transform_0.2s] checked:focus:after:-mt-px checked:focus:after:ml-[0.25rem] checked:focus:after:h-[0.8125rem] checked:focus:after:w-[0.375rem] checked:focus:after:rotate-45 checked:focus:after:rounded-none checked:focus:after:border-[0.125rem] checked:focus:after:border-l-0 checked:focus:after:border-t-0 checked:focus:after:border-solid checked:focus:after:border-white checked:focus:after:bg-transparent"
-                type="checkbox"
-                id="automated-rounds-visible-checkbox"
-                checked={showAutomatedRounds}
-                onChange={() => setShowAutomatedRounds((s) => !s)}
-              />
-              <label
-                className="inline-block pl-[0.15rem] hover:cursor-pointer"
-                htmlFor="automated-rounds-visible-checkbox"
-              >
-                Show Automated Rounds
-              </label>
-            </div>
-          </div>
-          <DailyRoundsList
-            facilityId={props.facilityId}
-            patientId={props.patientId}
-            consultationId={props.consultationId}
-            consultationData={props.consultationData}
-            showAutomatedRounds={showAutomatedRounds}
-          />
+          <DailyRoundsList consultation={props.consultationData} />
         </div>
       </div>
     </div>
