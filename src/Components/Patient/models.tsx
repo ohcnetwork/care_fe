@@ -269,7 +269,12 @@ export interface DailyRoundsOutput {
   quantity: number;
 }
 
-export const DailyRoundTypes = ["NORMAL", "VENTILATOR", "AUTOMATED"] as const;
+export const DailyRoundTypes = [
+  "NORMAL",
+  "VENTILATOR",
+  "AUTOMATED",
+  "TELEMEDICINE",
+] as const;
 
 export interface DailyRoundsModel {
   ventilator_spo2?: number;

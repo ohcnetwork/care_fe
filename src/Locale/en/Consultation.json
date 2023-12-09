@@ -15,5 +15,6 @@
   "generated_summary_caution": "This is a computer generated summary using the information captured in the CARE system.",
   "NORMAL": "Normal",
   "VENTILATOR": "Critical Care",
-  "AUTOMATED": "Automated"
+  "AUTOMATED": "Automated",
+  "TELEMEDICINE": "Telemedicine"
 }
