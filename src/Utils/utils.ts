@@ -175,9 +175,14 @@ function _isAppleDevice() {
 }
 
 /**
- * `true` if device is iOS, else `false`
+ * `true` if device is an Apple device, else `false`
  */
 export const isAppleDevice = _isAppleDevice();
+
+/**
+ * `true` if device is an iOS device, else `false`
+ */
+export const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
 /**
  * Conditionally concatenate classes. An alternate replacement for `clsx`.
@@ -453,4 +458,12 @@ export const formatAge = (
 export const scrollTo = (id: string | boolean) => {
   const element = document.querySelector(`#${id}`);
   element?.scrollIntoView({ behavior: "smooth", block: "center" });
+};
+
+export const invalidateFiltersCache = () => {
+  for (const key in localStorage) {
+    if (key.startsWith("filters--")) {
+      localStorage.removeItem(key);
+    }
+  }
 };

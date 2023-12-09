@@ -461,7 +461,7 @@ const LiveFeed = (props: any) => {
                   </button>
                 );
               })}
-              <div className="hideonmobilescreen pl-3">
+              <div className="hidden pl-3 md:block">
                 <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
               </div>
             </div>

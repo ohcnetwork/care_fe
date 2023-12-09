@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { navigate, useQueryParams } from "raviger";
+import { useQueryParams } from "raviger";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
 import { LocationSelect } from "../Common/LocationSelect";
@@ -19,7 +19,7 @@ const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
 
 function AssetFilter(props: any) {
-  const { filter, onChange, closeFilter } = props;
+  const { filter, onChange, closeFilter, removeFilters } = props;
   const [facility, setFacility] = useState<FacilityModel>({ name: "" });
   const [asset_status, setAssetStatus] = useState<string>(filter.status || "");
   const [asset_class, setAssetClass] = useState<string>(
@@ -51,15 +51,16 @@ function AssetFilter(props: any) {
   }, [facility.id, qParams.facility, qParams.location]);
 
   const clearFilter = useCallback(() => {
-    setFacility({ name: "" });
-    setAssetStatus("");
-    setAssetClass("");
-    setFacilityId("");
-    setLocationId("");
+    removeFilters([
+      "facility",
+      "asset_type",
+      "asset_class",
+      "status",
+      "location",
+      "warranty_amc_end_of_validity_before",
+      "warranty_amc_end_of_validity_after",
+    ]);
     closeFilter();
-    const searchQuery = qParams?.search && `?search=${qParams?.search}`;
-    if (searchQuery) navigate(`/assets${searchQuery}`);
-    else navigate("/assets");
   }, [qParams]);
 
   const applyFilter = () => {

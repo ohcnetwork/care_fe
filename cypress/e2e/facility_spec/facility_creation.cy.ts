@@ -30,8 +30,13 @@ describe("Facility Creation", () => {
   const doctorCapacity = "5";
   const totalDoctor = "10";
   const facilityName = "cypress facility";
+  const facilityName2 = "Dummy Facility 1";
   const facilityAddress = "cypress address";
+  const facilityUpdateAddress = "cypress updated address";
   const facilityNumber = "9898469865";
+  const triageDate = "02122023";
+  const initialTriageValue = "60";
+  const modifiedTriageValue = "50";
   const facilityErrorMessage = [
     "Required",
     "Invalid Pincode",
@@ -49,6 +54,7 @@ describe("Facility Creation", () => {
     "Field is required",
   ];
   const doctorErrorMessage = ["Field is required", "Field is required"];
+  const triageErrorMessage = ["Field is required"];
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -59,6 +65,48 @@ describe("Facility Creation", () => {
     cy.viewport(1280, 720);
     cy.restoreLocalStorage();
     cy.awaitUrl("/facility");
+  });
+
+  it("Verify Facility Triage Function", () => {
+    // mandatory field error throw
+    manageUserPage.typeFacilitySearch(facilityName2);
+    facilityPage.verifyFacilityBadgeContent(facilityName2);
+    manageUserPage.assertFacilityInCard(facilityName2);
+    facilityHome.verifyURLContains(facilityName2);
+    facilityPage.visitAlreadyCreatedFacility();
+    facilityPage.scrollToFacilityTriage();
+    facilityPage.clickAddFacilityTriage();
+    manageUserPage.clickSubmit();
+    userCreationPage.verifyErrorMessages(triageErrorMessage);
+    // create a entry and verify reflection
+    facilityPage.fillEntryDate(triageDate);
+    facilityPage.fillTriageEntryFields(
+      initialTriageValue,
+      initialTriageValue,
+      initialTriageValue,
+      initialTriageValue,
+      initialTriageValue
+    );
+    manageUserPage.clickSubmit();
+    // edit the entry and verify reflection
+    facilityPage.scrollToFacilityTriage();
+    facilityPage.verifyTriageTableContains(initialTriageValue);
+    facilityPage.clickEditButton();
+    facilityPage.fillTriageEntryFields(
+      modifiedTriageValue,
+      modifiedTriageValue,
+      modifiedTriageValue,
+      modifiedTriageValue,
+      modifiedTriageValue
+    );
+    manageUserPage.clickSubmit();
+    facilityPage.scrollToFacilityTriage();
+    facilityPage.verifyTriageTableContains(modifiedTriageValue);
+    // validate error of filling data on same date already data exist and verify reflection
+    facilityPage.scrollToFacilityTriage();
+    facilityPage.clickAddFacilityTriage();
+    facilityPage.fillEntryDate(triageDate);
+    facilityPage.clickButtonsMultipleTimes("button#submit");
   });
 
   it("Create a new facility with multiple bed and doctor capacity", () => {
@@ -169,6 +217,7 @@ describe("Facility Creation", () => {
       .should("be.visible");
     // verify the facility homepage
     cy.visit("/facility");
+    cy.clearAllFilters();
     manageUserPage.typeFacilitySearch(facilityName);
     facilityPage.verifyFacilityBadgeContent(facilityName);
     manageUserPage.assertFacilityInCard(facilityName);
@@ -210,17 +259,28 @@ describe("Facility Creation", () => {
   });
 
   it("Update the existing facility", () => {
+    // update a existing dummy data facility
     facilityPage.visitUpdateFacilityPage(facilityUrl1);
     facilityPage.clickManageFacilityDropdown();
     facilityPage.clickUpdateFacilityOption();
-    facilityPage.clickUpdateFacilityType("Request Approving Center");
-    facilityPage.fillFacilityName("cypress facility updated");
-    facilityPage.fillAddress("Cypress Facility Updated Address");
-    facilityPage.fillOxygenCapacity("100");
-    facilityPage.fillExpectedOxygenRequirement("80");
+    facilityPage.clickUpdateFacilityType("Govt Hospital");
+    facilityPage.fillAddress(facilityUpdateAddress);
+    facilityPage.fillOxygenCapacity(oxygenCapacity);
+    facilityPage.fillExpectedOxygenRequirement(oxygenExpected);
     facilityPage.selectLocation("Kochi, Kerala");
     facilityPage.submitForm();
     cy.url().should("not.include", "/update");
+    // verify the updated data
+    facilityPage.getFacilityOxygenInfo().scrollIntoView();
+    facilityPage
+      .getFacilityOxygenInfo()
+      .contains(oxygenCapacity)
+      .should("be.visible");
+    facilityPage.getAddressDetailsView().scrollIntoView();
+    facilityPage
+      .getAddressDetailsView()
+      .contains(facilityUpdateAddress)
+      .should("be.visible");
   });
 
   it("Configure the existing facility", () => {
