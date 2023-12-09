@@ -107,12 +107,10 @@ const AssetCreate = (props: AssetProps) => {
   const { goBack } = useAppHistory();
   const { facilityId, assetId } = props;
 
-  let assetTypeInitial: AssetType;
   let assetClassInitial: AssetClass;
 
   const [state, dispatch] = useReducer(asset_create_reducer, initialState);
   const [name, setName] = useState("");
-  const [asset_type, setAssetType] = useState<AssetType>();
   const [asset_class, setAssetClass] = useState<AssetClass>();
   const [not_working_reason, setNotWorkingReason] = useState("");
   const [description, setDescription] = useState("");
@@ -199,7 +197,6 @@ const AssetCreate = (props: AssetProps) => {
       setName(asset.name);
       setDescription(asset.description);
       setLocation(asset.location_object.id);
-      setAssetType(asset.asset_type);
       setAssetClass(asset.asset_class);
       setIsWorking(String(asset.is_working));
       setNotWorkingReason(asset.not_working_reason);
@@ -238,12 +235,6 @@ const AssetCreate = (props: AssetProps) => {
         case "location":
           if (!location || location === "0" || location === "") {
             errors[field] = "Select a location";
-            invalidForm = true;
-          }
-          return;
-        case "asset_type":
-          if (!asset_type || asset_type == "NONE") {
-            errors[field] = "Select an asset type";
             invalidForm = true;
           }
           return;
@@ -304,7 +295,6 @@ const AssetCreate = (props: AssetProps) => {
     setName("");
     setDescription("");
     setLocation("");
-    setAssetType(assetTypeInitial);
     setAssetClass(assetClassInitial);
     setIsWorking(undefined);
     setNotWorkingReason("");
@@ -329,7 +319,7 @@ const AssetCreate = (props: AssetProps) => {
       setIsLoading(true);
       const data: any = {
         name: name,
-        asset_type: asset_type,
+        asset_type: AssetType.INTERNAL,
         asset_class: asset_class || "",
         description: description,
         is_working: is_working,
@@ -567,40 +557,7 @@ const AssetCreate = (props: AssetProps) => {
                         errors={state.errors.location}
                       />
                     </div>
-                    {/* Asset Type */}
                     <div className="col-span-6 flex flex-col gap-x-12 transition-all lg:flex-row xl:gap-x-16">
-                      <div
-                        ref={fieldRef["asset_type"]}
-                        className="flex-1"
-                        data-testid="asset-type-input"
-                      >
-                        <SelectFormField
-                          label={t("asset_type")}
-                          name="asset_type"
-                          required
-                          options={[
-                            {
-                              title: "Internal",
-                              description:
-                                "Asset is inside the facility premises.",
-                              value: AssetType.INTERNAL,
-                            },
-                            {
-                              title: "External",
-                              description:
-                                "Asset is outside the facility premises.",
-                              value: AssetType.EXTERNAL,
-                            },
-                          ]}
-                          value={asset_type}
-                          optionLabel={({ title }) => title}
-                          optionDescription={({ description }) => description}
-                          optionValue={({ value }) => value}
-                          onChange={({ value }) => setAssetType(value)}
-                          error={state.errors.asset_type}
-                        />
-                      </div>
-
                       {/* Asset Class */}
                       <div
                         ref={fieldRef["asset_class"]}
