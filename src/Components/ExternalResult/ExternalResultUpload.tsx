@@ -1,6 +1,6 @@
 import _ from "lodash-es";
 import { navigate } from "raviger";
-import { lazy, useState } from "react";
+import { lazy, useEffect, useState } from "react";
 import CSVReader from "react-csv-reader";
 import useConfig from "../../Common/hooks/useConfig";
 import * as Notification from "../../Utils/Notifications.js";
@@ -18,11 +18,31 @@ export default function ExternalResultUpload() {
   const [loading, setLoading] = useState(false);
   const [csvData, setCsvData] = useState(new Array<IExternalResult>());
   const [errors, setErrors] = useState<any>([]);
+  const [validationError, setValidationError] = useState<any>([]);
+  const [user, setUser] = useState<any>({});
   const handleForce = (data: any) => {
     setCsvData(data);
+    setValidationError([]);
+
+    data.map((row: any, index: number) => {
+      if (row.district !== user.district_object.name) {
+        setValidationError([...validationError, index]);
+      }
+    });
   };
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
+
+  const fetchUser = async () => {
+    const { data: userData } = await request(routes.currentUser, {
+      pathParams: {},
+    });
+    setUser(userData);
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
 
   const papaparseOptions = {
     header: true,
@@ -44,7 +64,13 @@ export default function ExternalResultUpload() {
         try {
           const { res, data } = await request(routes.externalResultUploadCsv, {
             body: {
-              sample_tests: csvData,
+              sample_tests:
+                validationError.length > 0
+                  ? csvData.filter(
+                      (data: any, index: number) =>
+                        !validationError.includes(index)
+                    )
+                  : csvData,
             },
           });
 
@@ -121,6 +147,9 @@ export default function ExternalResultUpload() {
               </div>
             </div>
           </div>
+          {csvData.length > 0 && (
+            <p className="flex justify-end p-2">Total: {csvData.length}</p>
+          )}
           <div className=" rounded bg-white shadow">
             {csvData.map((data: any, index: number) => {
               return (
@@ -140,6 +169,13 @@ export default function ExternalResultUpload() {
                         })
                       : null}
                   </div>
+                  <div>
+                    {validationError.includes(index) && (
+                      <p className="mt-2 flex items-center justify-center text-red-500">
+                        Different districts
+                      </p>
+                    )}
+                  </div>
                 </div>
               );
             })}
@@ -149,8 +185,14 @@ export default function ExternalResultUpload() {
             <Cancel onClick={() => goBack()} />
             <Submit
               onClick={handleSubmit}
-              disabled={loading}
-              label={t("save")}
+              disabled={loading || csvData.length === validationError.length}
+              label={
+                validationError.length
+                  ? `Save Valid Records(${
+                      csvData.length - validationError.length
+                    })`
+                  : t("save")
+              }
               data-testid="submit-button"
             />
           </div>
