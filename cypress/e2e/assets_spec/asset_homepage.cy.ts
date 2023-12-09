@@ -27,6 +27,7 @@ describe("Asset Tab", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/assets");
   });
 
@@ -90,7 +91,7 @@ describe("Asset Tab", () => {
     assetPage.selectImportOption();
     assetPage.selectImportFacility("Dummy Facility 1");
     assetPage.importAssetFile();
-    assetPage.selectImportLocation("Camera Locations");
+    assetPage.selectImportLocation("Camera Loc");
     assetPage.clickImportAsset();
   });
 
