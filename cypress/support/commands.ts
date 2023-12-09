@@ -109,3 +109,7 @@ Cypress.Commands.add("getAttached", (selector) => {
     })
     .then(() => cy.wrap($el));
 });
+
+Cypress.Commands.add("clearAllFilters", () => {
+  return cy.get("#clear-all-filters").click();
+});

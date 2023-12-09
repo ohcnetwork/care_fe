@@ -2,7 +2,6 @@ import { FacilitySelect } from "../Common/FacilitySelect";
 import { RESOURCE_FILTER_ORDER } from "../../Common/constants";
 import { RESOURCE_CHOICES } from "../../Common/constants";
 import useMergeState from "../../Common/hooks/useMergeState";
-import { navigate } from "raviger";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import CircularProgress from "../Common/components/CircularProgress";
@@ -35,7 +34,7 @@ const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
 
 export default function ListFilter(props: any) {
-  const { filter, onChange, closeFilter } = props;
+  const { filter, onChange, closeFilter, removeFilters } = props;
   const [filterState, setFilterState] = useMergeState({
     origin_facility: filter.origin_facility || "",
     origin_facility_ref: null,
@@ -140,8 +139,7 @@ export default function ListFilter(props: any) {
       advancedFilter={props}
       onApply={applyFilter}
       onClear={() => {
-        navigate("/resource");
-        setFilterState(clearFilterState);
+        removeFilters(Object.keys(clearFilterState));
         closeFilter();
       }}
     >
