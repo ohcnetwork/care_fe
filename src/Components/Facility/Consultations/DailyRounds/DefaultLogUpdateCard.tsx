@@ -42,7 +42,7 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
           </span>
         </div>
         <span className="flex gap-1 text-xs text-gray-700">
-          {t("created")} <RecordMeta time={round.created_date} />
+          {t("Measured")} <RecordMeta time={round.created_date} />
         </span>
       </div>
       <div className="flex flex-col gap-2">
