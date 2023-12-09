@@ -1,5 +1,5 @@
-import useQuery from "../../../Utils/request/useQuery";
-import routes from "../../../Redux/api";
+import { DailyRoundsModel } from "../../Patient/models";
+import RecordMeta from "../../../CAREUI/display/RecordMeta";
 
 const respRange = [
   [-Infinity, 7, 2],
@@ -70,59 +70,72 @@ const getIndividualScore = (value: number | undefined, ranges: any[][]) => {
   }
 };
 
-export const Mews = (props: { consultationId: string }) => {
-  const { data: dailyRoundsData } = useQuery(routes.getDailyReports, {
-    pathParams: {
-      consultationId: props.consultationId,
-    },
-    query: {
-      rounds_type: "NORMAL,VENTILATOR,ICU",
-      limit: 1,
-    },
-  });
-
+export const Mews = (props: { lastDailyRound: DailyRoundsModel }) => {
   const mewsCard = (isMissing: boolean, data: string[] | number) => {
     if (isMissing) {
       return (
-        <div className="tooltip mt-2 text-gray-800">
-          <p className="my-auto text-center text-2xl font-bold">N/A</p>
-          <div className="tooltip-text  tooltip-left  text-sm font-medium lg:-translate-y-1/2">
-            <p>Missing : </p>
-            <div className="flex flex-col items-center justify-center">
-              {typeof data !== "number" &&
-                data.map((x, id) => <span key={id}>{x}</span>)}
+        <>
+          <div className="tooltip mt-2 text-gray-800">
+            <p className="my-auto text-center text-2xl font-bold">N/A</p>
+            <div className="tooltip-text tooltip-left translate-x-1/2 translate-y-1/4 text-xs font-medium">
+              <p>Missing : </p>
+              <div className="flex flex-col items-center justify-center">
+                {typeof data !== "number" &&
+                  data.map((x, id) => <span key={id}>{x}</span>)}
+              </div>
             </div>
           </div>
-          <div className="mt-2 flex h-4 w-full flex-col items-center justify-center rounded-b-lg bg-gray-500 "></div>
-        </div>
+          <div>
+            <RecordMeta
+              time={props.lastDailyRound.modified_date}
+              prefix={"Updated"}
+              className="mx-auto mt-2 w-10/12 text-xs font-medium text-gray-800"
+              inlineClassName="flex flex-wrap items-center justify-center"
+            />
+            <div className="mt-1 flex h-2 w-full flex-col items-center justify-center rounded-b-lg bg-gray-500"></div>
+          </div>
+        </>
       );
     } else {
       return (
-        <div className="tooltip mt-2">
-          <p className="my-auto text-center text-2xl font-bold">{data} </p>
-          <div className="tooltip-text tooltip-left  text-sm font-medium lg:-translate-y-1/2">
-            <p>Respiratory rate : {dailyRoundsData?.results[0].resp}</p>
-            <p>Heart rate : {dailyRoundsData?.results[0].pulse}</p>
-            <p>Systolic BP : {dailyRoundsData?.results[0].bp?.systolic}</p>
-            <p>Temperature : {dailyRoundsData?.results[0].temperature}</p>
-            <p>
-              Consciousness Level :{" "}
-              {dailyRoundsData?.results[0].consciousness_level}
-            </p>
+        <>
+          <div className="tooltip mt-2">
+            <p className="my-auto text-center text-2xl font-bold">{data}</p>
+            <div className="tooltip-text tooltip-left translate-x-1/2 translate-y-1/4 text-xs font-medium">
+              <p>Resp Rate : {props.lastDailyRound.resp}</p>
+              <p>Pulse : {props.lastDailyRound.pulse}</p>
+              <p>Sys BP : {props.lastDailyRound.bp?.systolic}</p>
+              <p>Temp : {props.lastDailyRound.temperature}</p>
+              <p>Conscious : </p>
+              <p>
+                {props.lastDailyRound.consciousness_level
+                  ?.split("_")
+                  .map((x) => x[0] + x.slice(1).toLowerCase())
+                  .join(" ")}
+              </p>
+            </div>
           </div>
-          <div
-            className={`mt-2 flex h-4 w-full flex-col items-center justify-center rounded-b-lg ${getIndividualScore(
-              Number(data),
-              mewsColorRange
-            )}`}
-          ></div>
-        </div>
+          <div>
+            <RecordMeta
+              time={props.lastDailyRound.modified_date}
+              prefix={"Updated"}
+              className="mx-auto mt-2 w-10/12 text-xs font-medium text-gray-800"
+              inlineClassName="flex flex-wrap items-center justify-center"
+            />
+            <div
+              className={`mt-1 flex h-2 w-full flex-col items-center justify-center rounded-b-lg ${getIndividualScore(
+                Number(data),
+                mewsColorRange
+              )}`}
+            ></div>
+          </div>
+        </>
       );
     }
   };
 
   const mewsScore = () => {
-    const lastDailyRound = dailyRoundsData?.results[0];
+    const lastDailyRound = props.lastDailyRound;
 
     const score = {
       resp: getIndividualScore(lastDailyRound?.resp, respRange),
@@ -154,7 +167,7 @@ export const Mews = (props: { consultationId: string }) => {
           score.heartRate === undefined ? "Heart rate" : "",
           score.systolicBloodPressure === undefined ? "Systolic BP" : "",
           score.temperature === undefined ? "Temperature" : "",
-          score.consciousnessLevel === undefined ? "Consciousness Level" : "",
+          score.consciousnessLevel === undefined ? "Consciousness" : "",
         ].filter((x) => x !== "")
       );
     }
@@ -170,15 +183,9 @@ export const Mews = (props: { consultationId: string }) => {
   };
 
   return (
-    <>
-      {dailyRoundsData?.results[0].rounds_type === "VENTILATOR" && (
-        <div className="flex h-fit flex-col justify-start rounded-lg border border-black">
-          <p className="px-2 pt-2 text-center font-bold text-gray-900">
-            Mews Score
-          </p>
-          {mewsScore()}
-        </div>
-      )}
-    </>
+    <div className="flex h-fit flex-col justify-start rounded-lg border border-black">
+      <p className="pt-1 text-center font-bold text-gray-900">Mews Score</p>
+      {mewsScore()}
+    </div>
   );
 };

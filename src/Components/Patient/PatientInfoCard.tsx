@@ -344,7 +344,7 @@ export default function PatientInfoCard(props: {
         </div>
         {consultation?.last_daily_round && (
           <div className="flex w-full justify-center bg-white px-4 py-2 lg:w-5/12 lg:flex-row lg:justify-end lg:p-6">
-            <Mews consultationId={props.consultationId} />
+            <Mews lastDailyRound={consultation?.last_daily_round} />
           </div>
         )}
 
