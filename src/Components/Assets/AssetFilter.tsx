@@ -53,7 +53,6 @@ function AssetFilter(props: any) {
   const clearFilter = useCallback(() => {
     removeFilters([
       "facility",
-      "asset_type",
       "asset_class",
       "status",
       "location",
