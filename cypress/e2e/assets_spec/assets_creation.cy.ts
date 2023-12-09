@@ -19,6 +19,7 @@ describe("Asset", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/assets");
   });
 

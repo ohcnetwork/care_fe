@@ -11,6 +11,7 @@ describe("Death Report", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/");
     cy.intercept("**/api/v1/patient/**").as("getPatients");
     cy.get("#facility-patients").contains("Patients").click({ force: true });
