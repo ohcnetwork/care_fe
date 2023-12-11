@@ -34,7 +34,7 @@ jobs:
           make docker_config_file=docker-compose.pre-built.yaml up 
           while docker compose exec celery-beat bash -c "python manage.py showmigrations 2>/dev/null | cat | grep -q '\[ \]'"; do
             >&2 echo "Migrations are not yet applied - sleeping"
-            sleep 5
+            sleep 10
           done
           echo "Migrations are applied"
           cd ..
