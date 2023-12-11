@@ -77,7 +77,7 @@ export const TimelineNode = (props: TimelineNodeProps) => {
             {props.title || (
               <TimelineNodeTitle event={props.event}>
                 <div className="flex w-full justify-between gap-2">
-                  <p className="flex-auto py-0.5 text-xs leading-5 text-gray-600">
+                  <p className="flex-auto py-0.5 text-xs leading-5 text-gray-600 md:w-2/3">
                     {props.event.by && (
                       <span className="font-medium text-gray-900">
                         {formatName(props.event.by)}{" "}
@@ -87,7 +87,7 @@ export const TimelineNode = (props: TimelineNodeProps) => {
                       ? props.titleSuffix
                       : `${props.event.type} the ${props.name || name}.`}
                   </p>
-                  <div>
+                  <div className="md:w-fit">
                     {props.actions && (
                       <TimelineNodeActions>{props.actions}</TimelineNodeActions>
                     )}
