@@ -11,6 +11,7 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { IExternalResult } from "./models";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 export default function ExternalResultUpload() {
   const { sample_format_external_result_import } = useConfig();
@@ -175,8 +176,9 @@ export default function ExternalResultUpload() {
                   </div>
                   <div>
                     {data.district !== user.district_object.name && (
-                      <p className="mt-2 flex items-center justify-center text-red-500">
-                        Different districts
+                      <p className="mt-2 flex items-center justify-center gap-1 text-red-500">
+                        <CareIcon icon="l-exclamation-triangle" /> Different
+                        districts
                       </p>
                     )}
                   </div>
