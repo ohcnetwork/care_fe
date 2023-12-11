@@ -12,7 +12,7 @@ import CircularProgress from "../Common/components/CircularProgress";
 import { LocalStorageKeys } from "../../Common/constants";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
-import { handleRedirection } from "../../Utils/utils";
+import { handleRedirection, invalidateFiltersCache } from "../../Utils/utils";
 
 export const Login = (props: { forgot?: boolean }) => {
   const {
@@ -91,6 +91,7 @@ export const Login = (props: { forgot?: boolean }) => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+    invalidateFiltersCache();
     const valid = validateData();
     if (valid) {
       // replaces button with spinner
