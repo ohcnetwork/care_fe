@@ -127,7 +127,7 @@ export const AddBedForm = (props: BedFormProps) => {
       name,
       description,
       bed_type: bedType,
-      number_of_beds: headerText === "Update Bed" ? 1 : numberOfBeds,
+      number_of_beds: bedId ? 1 : numberOfBeds,
     };
 
     if (!validateInputs(data)) return;
