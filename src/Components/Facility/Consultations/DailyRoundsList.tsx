@@ -63,7 +63,7 @@ export default function DailyRoundsList({ consultation }: Props) {
                         <TimelineNode
                           event={{
                             type: "created",
-                            timestamp: item.created_date?.toString() ?? "",
+                            timestamp: item.taken_at?.toString() ?? "",
                             by: {
                               user_type: item.created_by?.user_type ?? "",
                               first_name: "Virtual",
@@ -94,7 +94,7 @@ export default function DailyRoundsList({ consultation }: Props) {
                       <TimelineNode
                         event={{
                           type: "created",
-                          timestamp: item.created_date?.toString() ?? "",
+                          timestamp: item.taken_at?.toString() ?? "",
                           by: {
                             user_type: item.created_by?.user_type ?? "",
                             first_name: item.created_by?.first_name ?? "",
