@@ -18,17 +18,16 @@ export default function ExternalResultUpload() {
   const [loading, setLoading] = useState(false);
   const [csvData, setCsvData] = useState(new Array<IExternalResult>());
   const [errors, setErrors] = useState<any>([]);
-  const [validationError, setValidationError] = useState<any>([]);
+  const [validationErrorCount, setValidationErrorCount] = useState(0);
   const [user, setUser] = useState<any>({});
   const handleForce = (data: any) => {
     setCsvData(data);
-    setValidationError([]);
-
-    data.map((row: any, index: number) => {
-      if (row.district !== user.district_object.name) {
-        setValidationError([...validationError, index]);
-      }
-    });
+    setValidationErrorCount(
+      data.filter(
+        (result: IExternalResult) =>
+          result.district !== user.district_object.name
+      ).length
+    );
   };
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
@@ -64,19 +63,21 @@ export default function ExternalResultUpload() {
         try {
           const { res, data } = await request(routes.externalResultUploadCsv, {
             body: {
-              sample_tests:
-                validationError.length > 0
-                  ? csvData.filter(
-                      (data: any, index: number) =>
-                        !validationError.includes(index)
-                    )
-                  : csvData,
+              sample_tests: validationErrorCount
+                ? csvData.filter(
+                    (data: IExternalResult) =>
+                      data.district === user.district_object.name
+                  )
+                : csvData,
             },
           });
 
           if (res && res.status === 202) {
             setLoading(false);
             navigate("/external_results");
+            Notification.Success({
+              msg: "External Results imported successfully",
+            });
           } else {
             if (data) {
               setErrors(data.map((err: any) => Object.entries(err)));
@@ -85,6 +86,9 @@ export default function ExternalResultUpload() {
           }
         } catch (error) {
           console.error("An error occurred:", error);
+          Notification.Error({
+            msg: "Something went wrong: " + error,
+          });
           setLoading(false);
         }
       } else {
@@ -170,7 +174,7 @@ export default function ExternalResultUpload() {
                       : null}
                   </div>
                   <div>
-                    {validationError.includes(index) && (
+                    {data.district !== user.district_object.name && (
                       <p className="mt-2 flex items-center justify-center text-red-500">
                         Different districts
                       </p>
@@ -185,11 +189,11 @@ export default function ExternalResultUpload() {
             <Cancel onClick={() => goBack()} />
             <Submit
               onClick={handleSubmit}
-              disabled={loading || csvData.length === validationError.length}
+              disabled={loading || csvData.length === validationErrorCount}
               label={
-                validationError.length
+                validationErrorCount
                   ? `Save Valid Records(${
-                      csvData.length - validationError.length
+                      csvData.length - validationErrorCount
                     })`
                   : t("save")
               }
