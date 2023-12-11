@@ -2,17 +2,25 @@ import { BedModel } from "../Facility/models";
 import { PerformedByModel } from "../HCX/misc";
 import { PatientModel } from "../Patient/models";
 
+export enum AssetLocationType {
+  OTHER = "OTHER",
+  WARD = "WARD",
+  ICU = "ICU",
+}
+
 export interface AssetLocationObject {
   id: string;
   name: string;
   description: string;
   created_date?: string;
   modified_date?: string;
+  location_type: AssetLocationType;
   middleware_address?: string;
   facility: {
     id: string;
     name: string;
   };
+  middleware_address?: string;
 }
 
 export enum AssetType {

@@ -12,6 +12,8 @@ declare global {
         url: string,
         disableLoginVerification?: boolean
       ): Chainable<Subject>;
+      getAttached(selector: string): Chainable<Subject>;
+      clearAllFilters(): Chainable<Subject>;
     }
   }
 }
