@@ -1,7 +1,7 @@
 import { AssignedToObjectModel } from "../Patient/models";
 import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
-import { AssetData } from "../Assets/AssetTypes";
+import { AssetData, AssetLocationType } from "../Assets/AssetTypes";
 import { UserBareMinimum } from "../Users/models";
 import { RouteToFacility } from "../Common/RouteToFacilitySelect";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
@@ -204,7 +204,7 @@ export interface LocationModel {
   name?: string;
   description?: string;
   middleware_address?: string;
-  location_type?: string;
+  location_type?: AssetLocationType;
   facility?: {
     name: string;
   };

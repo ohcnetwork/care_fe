@@ -6,6 +6,7 @@ import Page from "../Common/components/Page";
 import routes from "../../Redux/api";
 import PaginatedList from "../../CAREUI/misc/PaginatedList";
 import { LocationModel } from "./models";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -118,12 +119,8 @@ const Location = ({
     </ButtonV2>
 
     <div className="mt-3 flex items-center justify-between gap-4 text-sm font-medium text-gray-700">
-      <p>
-        <strong>Created:</strong> {created_date?.slice(0, 10)}
-      </p>
-      <p>
-        <strong>Modified:</strong> {modified_date?.slice(0, 10)}
-      </p>
+      <RecordMeta time={created_date} prefix="Created:" />
+      <RecordMeta time={modified_date} prefix="Modified:" />
     </div>
   </div>
 );
