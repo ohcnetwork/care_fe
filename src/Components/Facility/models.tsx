@@ -1,4 +1,4 @@
-import { AssignedToObjectModel } from "../Patient/models";
+import { AssignedToObjectModel, DailyRoundsModel } from "../Patient/models";
 import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 import { AssetData } from "../Assets/AssetTypes";
@@ -151,7 +151,7 @@ export interface ConsultationModel {
   ett_tt?: number;
   cuff_pressure?: number;
   lines?: any;
-  last_daily_round?: any;
+  last_daily_round?: DailyRoundsModel;
   current_bed?: CurrentBed;
   review_interval?: number;
   cause_of_death?: string;
