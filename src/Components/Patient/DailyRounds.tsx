@@ -50,7 +50,7 @@ const initForm: any = {
   admitted_to: "",
   taken_at: null,
   rounds_type: "NORMAL",
-  clone_last: null,
+  clone_last: true,
   systolic: null,
   diastolic: null,
   pulse: null,
@@ -666,7 +666,8 @@ export const DailyRounds = (props: any) => {
                 (field: string) => state.form[field] == initialData[field]
               ) &&
               (state.form.temperature == initialData.temperature ||
-                isNaN(state.form.temperature))
+                isNaN(state.form.temperature)) &&
+              state.form.rounds_type !== "VENTILATOR"
             }
             onClick={(e) => handleSubmit(e)}
             label={buttonText}
