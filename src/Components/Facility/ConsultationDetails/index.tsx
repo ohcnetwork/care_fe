@@ -462,9 +462,7 @@ export const ConsultationDetails = (props: any) => {
             </div>
           </div>
         </div>
-        <div className="min-h-screen">
-          <SelectedTab {...consultationTabProps} />
-        </div>
+        <SelectedTab {...consultationTabProps} />
       </div>
 
       <DoctorVideoSlideover
