@@ -761,7 +761,7 @@ export const PatientHome = (props: any) => {
                 </div>
               </div>
               <div className="py-2">
-                {patientData.last_consultation?.discharge_reason ===
+                {patientData.last_consultation?.new_discharge_reason ===
                   DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id && (
                   <div>
                     <ButtonV2

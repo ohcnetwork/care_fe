@@ -196,7 +196,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             {props.consultationData.discharge_date && (
               <div
                 className={`gap-4 overflow-hidden rounded-lg bg-white shadow ${
-                  props.consultationData.discharge_reason ===
+                  props.consultationData.new_discharge_reason ===
                     DISCHARGE_REASONS.find((i) => i.text == "Recovered")?.id &&
                   "lg:col-span-2"
                 }`}
@@ -211,11 +211,11 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                       <span className="font-semibold">
                         {DISCHARGE_REASONS.find(
                           (d) =>
-                            d.id === props.consultationData.discharge_reason
+                            d.id === props.consultationData.new_discharge_reason
                         )?.text ?? "--"}
                       </span>
                     </div>
-                    {props.consultationData.discharge_reason ===
+                    {props.consultationData.new_discharge_reason ===
                       DISCHARGE_REASONS.find((i) => i.text == "Referred")
                         ?.id && (
                       <div>
@@ -227,7 +227,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         </span>
                       </div>
                     )}
-                    {props.consultationData.discharge_reason ===
+                    {props.consultationData.new_discharge_reason ===
                       DISCHARGE_REASONS.find((i) => i.text == "Recovered")
                         ?.id && (
                       <div className="grid gap-4">
@@ -264,7 +264,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         </div>
                       </div>
                     )}
-                    {props.consultationData.discharge_reason ===
+                    {props.consultationData.new_discharge_reason ===
                       DISCHARGE_REASONS.find((i) => i.text == "Expired")
                         ?.id && (
                       <div className="grid gap-4">
@@ -294,7 +294,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                       </div>
                     )}
                     {[2, 4].includes(
-                      props.consultationData.discharge_reason ?? 0
+                      props.consultationData.new_discharge_reason ?? 0
                     ) && (
                       <div className="grid gap-4">
                         <div>

@@ -121,7 +121,7 @@ type FormDetails = {
   weight: string;
   height: string;
   bed: BedModel | null;
-  discharge_reason: number | null;
+  new_discharge_reason: number | null;
   cause_of_death: string;
   death_datetime: string;
   death_confirmed_doctor: string;
@@ -171,7 +171,7 @@ const initForm: FormDetails = {
   weight: "",
   height: "",
   bed: null,
-  discharge_reason: null,
+  new_discharge_reason: null,
   cause_of_death: "",
   death_datetime: "",
   death_confirmed_doctor: "",
@@ -397,7 +397,7 @@ export const ConsultationForm = (props: any) => {
             weight: res.data.weight ? res.data.weight : "",
             height: res.data.height ? res.data.height : "",
             bed: res.data?.current_bed?.bed_object || null,
-            discharge_reason: res.data?.discharge_reason || null,
+            new_discharge_reason: res.data?.new_discharge_reason || null,
             cause_of_death: res.data?.discharge_notes || "",
             death_datetime: res.data?.death_datetime || "",
             death_confirmed_doctor: res.data?.death_confirmed_doctor || "",
@@ -649,8 +649,9 @@ export const ConsultationForm = (props: any) => {
     const dischargeResponse = await dispatchAction(
       dischargePatient(
         {
-          discharge_reason: DISCHARGE_REASONS.find((i) => i.text === "Expired")
-            ?.id,
+          new_discharge_reason: DISCHARGE_REASONS.find(
+            (i) => i.text === "Expired"
+          )?.id,
           discharge_notes: cause_of_death,
           death_datetime: death_datetime,
           death_confirmed_doctor: death_confirmed_doctor,

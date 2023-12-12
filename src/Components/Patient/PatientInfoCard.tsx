@@ -322,7 +322,7 @@ export default function PatientInfoCard(props: {
                         : consultation?.created_date
                     )}
                     ,
-                    {consultation?.discharge_reason ===
+                    {consultation?.new_discharge_reason ===
                     DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id ? (
                       <span>
                         {" "}
@@ -349,18 +349,18 @@ export default function PatientInfoCard(props: {
                 Discharge Reason
               </div>
               <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
-                {!consultation?.discharge_reason ? (
+                {!consultation?.new_discharge_reason ? (
                   <span className="text-gray-800">
                     {consultation.suggestion === "OP"
                       ? "OP file closed"
                       : "UNKNOWN"}
                   </span>
-                ) : consultation?.discharge_reason ===
+                ) : consultation?.new_discharge_reason ===
                   DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id ? (
                   <span className="text-red-600">EXPIRED</span>
                 ) : (
                   DISCHARGE_REASONS.find(
-                    (reason) => reason.id === consultation?.discharge_reason
+                    (reason) => reason.id === consultation?.new_discharge_reason
                   )?.text
                 )}
               </div>

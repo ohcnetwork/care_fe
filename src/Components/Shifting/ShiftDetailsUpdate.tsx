@@ -283,7 +283,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         show={showDischargeModal}
         onClose={() => setShowDischargeModal(false)}
         consultationData={consultationData}
-        discharge_reason={
+        new_discharge_reason={
           DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
         }
         afterSubmit={() => {
