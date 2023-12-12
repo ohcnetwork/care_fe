@@ -85,7 +85,7 @@ export default defineConfig({
     port: 4000,
     proxy: {
       "/api": {
-        target: "http://127.0.0.1:8000",
+        target: process.env.CARE_API ?? "https://careapi.ohc.network",
         changeOrigin: true,
       },
     },
