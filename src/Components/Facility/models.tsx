@@ -204,9 +204,12 @@ export interface LocationModel {
   name?: string;
   description?: string;
   middleware_address?: string;
+  location_type?: string;
   facility?: {
     name: string;
   };
+  created_date?: string;
+  modified_date?: string;
 }
 
 export interface BedModel {
