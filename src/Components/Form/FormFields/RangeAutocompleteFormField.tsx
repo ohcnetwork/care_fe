@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import AutocompleteFormField from "./Autocomplete";
 import { FormFieldBaseProps } from "./Utils";
-import { classNames } from "../../../Utils/utils";
+import { classNames, compareByKey } from "../../../Utils/utils";
 import ButtonV2 from "../../Common/components/ButtonV2";
 
 interface Threshold {
@@ -24,7 +24,7 @@ type Props = FormFieldBaseProps<number> & {
 export default function RangeAutocompleteFormField(props: Props) {
   const options = useMemo(() => {
     const sortedThresholds =
-      props.thresholds?.sort((a, b) => a.value - b.value) || [];
+      props.thresholds?.sort(compareByKey("value")) || [];
 
     const getThreshold = (value: number) => {
       const threshold = sortedThresholds.findLast(
