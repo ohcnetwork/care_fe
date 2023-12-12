@@ -37,6 +37,7 @@ const getSystolicBPScore = (value?: number) => {
 };
 
 const getTempRange = (value?: number) => {
+  console.log(value);
   if (typeof value !== "number") return;
 
   if (value < 95) return 2;
@@ -141,7 +142,9 @@ export const Mews = ({ dailyRound }: { dailyRound: DailyRoundsModel }) => {
     "Respiratory rate": getRespScore(dailyRound.resp),
     "Heart rate": getHeartRateScore(dailyRound.pulse),
     "Systolic BP": getSystolicBPScore(dailyRound.bp?.systolic),
-    Temperature: getTempRange(Number(dailyRound.temperature)),
+    Temperature: getTempRange(
+      dailyRound.temperature ? parseFloat(dailyRound.temperature) : undefined
+    ),
     "Level of Consciousness": getLOCRange(dailyRound.consciousness_level),
   };
 
