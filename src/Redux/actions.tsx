@@ -405,6 +405,19 @@ export const getPatientNotes = (
 ) => {
   return fireRequest("getPatientNotes", [], { limit, offset }, { patientId });
 };
+export const getPatientNotesByConsultation = (
+  patientId: string,
+  consultation: string,
+  limit: number,
+  offset: number
+) => {
+  return fireRequest(
+    "getPatientNotes",
+    [],
+    { limit, offset, consultation },
+    { patientId }
+  );
+};
 export const addPatientNote = (patientId: string, params: object) => {
   return fireRequest("addPatientNote", [], params, { patientId });
 };

@@ -1,7 +1,10 @@
 import { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getPatientNotes } from "../../Redux/actions";
+import {
+  getPatientNotes,
+  getPatientNotesByConsultation,
+} from "../../Redux/actions";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import CircularProgress from "../Common/components/CircularProgress";
 import PatientNoteCard from "./PatientNoteCard";
@@ -11,6 +14,7 @@ import { NoteType } from "./PatientNoteCard";
 interface PatientNotesProps {
   patientId: any;
   facilityId: any;
+  consultationId?: any;
   reload?: boolean;
   setReload?: any;
 }
@@ -35,7 +39,14 @@ const PatientNotesList = (props: PatientNotesProps) => {
     async (page = 1, status: statusType = { aborted: false }) => {
       setIsLoading(true);
       const res = await dispatch(
-        getPatientNotes(props.patientId, pageSize, (page - 1) * pageSize)
+        props.consultationId
+          ? getPatientNotesByConsultation(
+              props.patientId,
+              props.consultationId,
+              pageSize,
+              (page - 1) * pageSize
+            )
+          : getPatientNotes(props.patientId, pageSize, (page - 1) * pageSize)
       );
       if (!status.aborted) {
         if (res && res.data) {

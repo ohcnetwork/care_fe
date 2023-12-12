@@ -27,11 +27,10 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
 
   const dispatch = useDispatch();
 
-  console.log(consultationId);
-
   const onAddNote = () => {
     const payload = {
       note: noteField,
+      consultation: consultationId,
     };
     if (!/\S+/.test(noteField)) {
       Notification.Error({
@@ -86,6 +85,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
         <PatientNotesList
           patientId={patientId}
           facilityId={facilityId}
+          consultationId={consultationId}
           reload={reload}
           setReload={setReload}
         />
