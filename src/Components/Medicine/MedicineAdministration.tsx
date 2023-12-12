@@ -87,7 +87,7 @@ export default function MedicineAdministration(props: Props) {
         >
           <div
             className={classNames(
-              "mt-4 flex w-full flex-col gap-2 border-t-2 border-dashed border-gray-500 py-2 pt-4 md:ml-4 md:mt-0 md:border-l-2 md:border-t-0 md:pl-4 md:pt-0",
+              "mt-4 flex flex-col gap-2 border-t-2 border-dashed border-gray-500 py-2 pt-4 md:ml-4 md:mt-0 md:w-[44%] md:border-l-2 md:border-t-0 md:pl-4 md:pt-0 lg:w-full",
               is_prn ? "max-w-sm" : "max-w-[600px]"
             )}
           >
