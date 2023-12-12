@@ -284,6 +284,13 @@ export default function ResultList() {
           </div>
         </div>
 
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          {qParams.local_bodies &&
+            dataList.lsgList.map((x) => lsgWardBadge("LSG", x, "local_bodies"))}
+          {qParams.wards &&
+            dataList.wardList.map((x) => lsgWardBadge("Ward", x, "wards"))}
+        </div>
+
         <FilterBadges
           badges={({ badge, phoneNumber, dateRange }) => [
             badge("Name", "name"),
@@ -294,10 +301,7 @@ export default function ResultList() {
             badge("SRF ID", "srf_id"),
           ]}
         />
-        <div className="mb-4 flex flex-wrap items-center gap-2">
-          {dataList.lsgList.map((x) => lsgWardBadge("LSG", x, "local_bodies"))}
-          {dataList.wardList.map((x) => lsgWardBadge("Ward", x, "wards"))}
-        </div>
+
         <div className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-t-lg">
           <table className="min-w-full divide-y divide-gray-200">
             <thead>

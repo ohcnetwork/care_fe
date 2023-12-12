@@ -15,6 +15,7 @@ describe("Patient", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/patients");
   });
 

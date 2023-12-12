@@ -4,7 +4,6 @@ import {
   SAMPLE_TEST_RESULT,
   SAMPLE_TYPE_CHOICES,
 } from "../../Common/constants";
-import { navigate } from "raviger";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
 import { getAnyFacility } from "../../Redux/actions";
@@ -25,7 +24,7 @@ const clearFilterState = {
 };
 
 export default function UserFilter(props: any) {
-  const { filter, onChange, closeFilter } = props;
+  const { filter, onChange, closeFilter, removeFilters } = props;
 
   const [filterState, setFilterState] = useMergeState({
     status: filter.status || "",
@@ -74,8 +73,7 @@ export default function UserFilter(props: any) {
       advancedFilter={props}
       onApply={applyFilter}
       onClear={() => {
-        navigate("/sample");
-        setFilterState(clearFilterState);
+        removeFilters(Object.keys(clearFilterState));
         closeFilter();
       }}
     >

@@ -4,10 +4,11 @@ import CareIcon from "../../../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../../../Common/components/ButtonV2";
 import { DailyRoundsModel } from "../../../Patient/models";
 import LogUpdateCardAttribute from "./LogUpdateCardAttribute";
+import { ConsultationModel } from "../../models";
 
 interface Props {
   round: DailyRoundsModel;
-  consultationData: any;
+  consultationData: ConsultationModel;
   onViewDetails: () => void;
   onUpdateLog?: () => void;
 }

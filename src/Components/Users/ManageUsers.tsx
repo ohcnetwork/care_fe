@@ -1,17 +1,5 @@
 import * as Notification from "../../Utils/Notifications.js";
-import {
-  addUserFacility,
-  clearHomeFacility,
-  deleteUser,
-  deleteUserFacility,
-  getDistrict,
-  getUserList,
-  getUserListFacility,
-  partialUpdateUser,
-} from "../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { lazy, useCallback, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { lazy, useState } from "react";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -41,6 +29,9 @@ import Page from "../Common/components/Page.js";
 import dayjs from "dayjs";
 import TextFormField from "../Form/FormFields/TextFormField.js";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
+import routes from "../../Redux/api.js";
+import useQuery from "../../Utils/request/useQuery.js";
+import request from "../../Utils/request/request.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -54,19 +45,13 @@ export default function ManageUsers() {
     advancedFilter,
     resultsPerPage,
   } = useFilters({ limit: 18 });
-  const dispatch: any = useDispatch();
-  const initialData: any[] = [];
   let manageUsers: any = null;
-  const [users, setUsers] = useState(initialData);
-  const [isLoading, setIsLoading] = useState(false);
   const [expandSkillList, setExpandSkillList] = useState(false);
-  const [totalCount, setTotalCount] = useState(0);
-  const [districtName, setDistrictName] = useState<string>();
   const [expandFacilityList, setExpandFacilityList] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [expandWorkingHours, setExpandWorkingHours] = useState(false);
   const authUser = useAuthUser();
-  const [weeklyHours, setWeeklyHours] = useState<any>(0);
+  const [weeklyHours, setWeeklyHours] = useState<string>("0");
   const userIndex = USER_TYPES.indexOf(authUser.user_type);
   const userTypes = authUser.is_superuser
     ? [...USER_TYPES]
@@ -84,58 +69,32 @@ export default function ManageUsers() {
   const isExtremeSmallScreen =
     width <= extremeSmallScreenBreakpoint ? true : false;
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const params = {
-        limit: resultsPerPage,
-        offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
-        username: qParams.username,
-        first_name: qParams.first_name,
-        last_name: qParams.last_name,
-        phone_number: qParams.phone_number,
-        alt_phone_number: qParams.alt_phone_number,
-        user_type: qParams.user_type,
-        district_id: qParams.district_id,
-      };
-      if (qParams.district_id) {
-        const dis = await dispatch(getDistrict(qParams.district_id));
-        if (!status.aborted) {
-          if (dis && dis.data) {
-            setDistrictName(dis.data.name);
-          }
-        }
-      } else {
-        setDistrictName(undefined);
-      }
-      const res = await dispatch(getUserList(params));
-      if (!status.aborted) {
-        if (res && res.data) {
-          setUsers(res.data.results);
-          setTotalCount(res.data.count);
-        }
-        setIsLoading(false);
-      }
+  const {
+    data: userListData,
+    loading: userListLoading,
+    refetch: refetchUserList,
+  } = useQuery(routes.userList, {
+    query: {
+      limit: resultsPerPage.toString(),
+      offset: (
+        (qParams.page ? qParams.page - 1 : 0) * resultsPerPage
+      ).toString(),
+      username: qParams.username,
+      first_name: qParams.first_name,
+      last_name: qParams.last_name,
+      phone_number: qParams.phone_number,
+      alt_phone_number: qParams.alt_phone_number,
+      user_type: qParams.user_type,
+      district_id: qParams.district_id,
     },
-    [
-      resultsPerPage,
-      qParams.page,
-      qParams.username,
-      qParams.first_name,
-      qParams.last_name,
-      qParams.phone_number,
-      qParams.alt_phone_number,
-      qParams.user_type,
-      qParams.district_id,
-      dispatch,
-    ]
-  );
+  });
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
+  const { data: districtData, loading: districtDataLoading } = useQuery(
+    routes.getDistrict,
+    {
+      prefetch: !!qParams.district_id,
+      pathParams: { id: qParams.district_id },
+    }
   );
 
   const addUser = (
@@ -155,17 +114,15 @@ export default function ManageUsers() {
 
   const handleWorkingHourSubmit = async () => {
     const username = selectedUser;
-    if (!username || !weeklyHours || weeklyHours < 0 || weeklyHours > 168) {
+    if (!username || !weeklyHours || +weeklyHours < 0 || +weeklyHours > 168) {
       setWeeklyHoursError("Value should be between 0 and 168");
       return;
     }
-    const res = await dispatch(
-      partialUpdateUser(username, {
-        weekly_working_hours: weeklyHours,
-      })
-    );
-
-    if (res?.data) {
+    const { res, data, error } = await request(routes.partialUpdateUser, {
+      pathParams: { username },
+      body: { weekly_working_hours: weeklyHours },
+    });
+    if (res && res.status === 200 && data) {
       Notification.Success({
         msg: "Working hours updated successfully",
       });
@@ -173,29 +130,30 @@ export default function ManageUsers() {
       setSelectedUser(null);
     } else {
       Notification.Error({
-        msg: "Error while updating working hours: " + (res.data.detail || ""),
+        msg: "Error while updating working hours: " + (error || ""),
       });
     }
-    setWeeklyHours(0);
+    setWeeklyHours("0");
     setWeeklyHoursError("");
-    fetchData({ aborted: false });
+    await refetchUserList();
   };
 
   const handleSubmit = async () => {
-    const username = userData.username;
-    const res = await dispatch(deleteUser(username));
+    const { res, error } = await request(routes.deleteUser, {
+      pathParams: { username: userData.username },
+    });
     if (res?.status === 204) {
       Notification.Success({
         msg: "User deleted successfully",
       });
     } else {
       Notification.Error({
-        msg: "Error while deleting User: " + (res?.data?.detail || ""),
+        msg: "Error while deleting User: " + (error || ""),
       });
     }
 
     setUserData({ show: false, username: "", name: "" });
-    fetchData({ aborted: false });
+    await refetchUserList();
   };
 
   const handleDelete = (user: any) => {
@@ -208,9 +166,9 @@ export default function ManageUsers() {
 
   let userList: any[] = [];
 
-  users &&
-    users.length &&
-    (userList = users.map((user: any, idx) => {
+  userListData?.results &&
+    userListData.results.length &&
+    (userList = userListData.results.map((user: any, idx) => {
       const cur_online = isUserOnline(user);
       return (
         <div
@@ -457,16 +415,16 @@ export default function ManageUsers() {
       );
     }));
 
-  if (isLoading || !users) {
+  if (userListLoading || districtDataLoading || !userListData?.results) {
     manageUsers = <Loading />;
-  } else if (users?.length) {
+  } else if (userListData?.results.length) {
     manageUsers = (
       <div>
         <div className="flex flex-wrap md:-mx-4">{userList}</div>
-        <Pagination totalCount={totalCount} />
+        <Pagination totalCount={userListData.count} />
       </div>
     );
-  } else if (users && users.length === 0) {
+  } else if (userListData?.results && userListData?.results.length === 0) {
     manageUsers = (
       <div>
         <h5> No Users Found</h5>
@@ -499,7 +457,7 @@ export default function ManageUsers() {
         open={expandWorkingHours}
         setOpen={(state) => {
           setExpandWorkingHours(state);
-          setWeeklyHours(0);
+          setWeeklyHours("0");
           setWeeklyHoursError("");
         }}
         slideFrom="right"
@@ -533,8 +491,8 @@ export default function ManageUsers() {
       <div className="m-4 mt-5 grid grid-cols-1 sm:grid-cols-3 md:gap-5 md:px-2">
         <CountBlock
           text="Total Users"
-          count={totalCount}
-          loading={isLoading}
+          count={userListData?.count || 0}
+          loading={userListLoading || districtDataLoading}
           icon="l-user-injured"
           className="flex-1"
         />
@@ -568,7 +526,11 @@ export default function ManageUsers() {
             phoneNumber(),
             phoneNumber("WhatsApp no.", "alt_phone_number"),
             badge("Role", "user_type"),
-            value("District", "district_id", districtName || ""),
+            value(
+              "District",
+              "district_id",
+              qParams.district_id ? districtData?.name || "" : ""
+            ),
           ]}
         />
       </div>
@@ -590,8 +552,6 @@ export default function ManageUsers() {
 function UserFacilities(props: { user: any }) {
   const { user } = props;
   const username = user.username;
-  const dispatch: any = useDispatch();
-  const [facilities, setFacilities] = useState<any>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [facility, setFacility] = useState<any>(null);
   const [unlinkFacilityData, setUnlinkFacilityData] = useState<{
@@ -629,61 +589,58 @@ function UserFacilities(props: { user: any }) {
     });
   };
 
-  const fetchFacilities = async () => {
-    setIsLoading(true);
-    const res = await dispatch(getUserListFacility({ username }));
-    if (res && res.data) {
-      setFacilities(res.data);
-    }
-    setIsLoading(false);
-  };
+  const {
+    data: userFacilities,
+    loading: userFacilitiesLoading,
+    refetch: refetchUserFacilities,
+  } = useQuery(routes.userListFacility, {
+    pathParams: { username },
+  });
 
   const updateHomeFacility = async (username: string, facility: any) => {
     setIsLoading(true);
-    const res = await dispatch(
-      partialUpdateUser(username, { home_facility: facility.id })
-    );
+    const { res } = await request(routes.partialUpdateUser, {
+      pathParams: { username },
+      body: { home_facility: facility.id.toString() },
+    });
     if (res && res.status === 200) user.home_facility_object = facility;
-    fetchFacilities();
+    await refetchUserFacilities();
     setIsLoading(false);
   };
 
   const handleUnlinkFacilitySubmit = async () => {
     setIsLoading(true);
     if (unlinkFacilityData.isHomeFacility) {
-      const res = await dispatch(
-        clearHomeFacility(unlinkFacilityData.userName)
-      );
+      const { res } = await request(routes.clearHomeFacility, {
+        pathParams: { username },
+      });
       if (res && res.status === 204) user.home_facility_object = null;
     } else {
-      await dispatch(
-        deleteUserFacility(
-          unlinkFacilityData.userName,
-          String(unlinkFacilityData?.facility?.id)
-        )
-      );
+      await request(routes.deleteUserFacility, {
+        pathParams: { username },
+        body: { facility: unlinkFacilityData?.facility?.id?.toString() },
+      });
     }
-    fetchFacilities();
-    setIsLoading(false);
+    await refetchUserFacilities();
     hideUnlinkFacilityModal();
+    setIsLoading(false);
   };
 
   const addFacility = async (username: string, facility: any) => {
     setIsLoading(true);
-    const res = await dispatch(addUserFacility(username, String(facility.id)));
+    const { res } = await request(routes.addUserFacility, {
+      pathParams: { username },
+      body: { facility: facility.id.toString() },
+    });
     if (res?.status !== 201) {
       Notification.Error({
         msg: "Error while linking facility",
       });
     }
+    await refetchUserFacilities();
     setIsLoading(false);
     setFacility(null);
-    fetchFacilities();
   };
-
-  useEffect(() => {
-    fetchFacilities();
-  }, []);
 
   return (
     <div className="h-full">
@@ -717,7 +674,7 @@ function UserFacilities(props: { user: any }) {
           Add
         </ButtonV2>
       </div>
-      {isLoading ? (
+      {isLoading || userFacilitiesLoading ? (
         <div className="flex items-center justify-center">
           <CircularProgress />
         </div>
@@ -755,13 +712,13 @@ function UserFacilities(props: { user: any }) {
           )}
 
           {/* Linked Facilities section */}
-          {facilities.length > 0 && (
+          {userFacilities?.length && (
             <div className="mt-2" id="linked-facility-list">
               <div className="mb-2 ml-2 text-lg font-bold">
                 Linked Facilities
               </div>
               <div className="flex flex-col">
-                {facilities.map((facility: any, i: number) => {
+                {userFacilities.map((facility: any, i: number) => {
                   if (user?.home_facility_object?.id === facility.id) {
                     // skip if it's a home facility
                     return null;
@@ -825,7 +782,7 @@ function UserFacilities(props: { user: any }) {
               </div>
             </div>
           )}
-          {!user?.home_facility_object && facilities.length === 0 && (
+          {!user?.home_facility_object && !userFacilities?.length && (
             <div className="my-2 flex h-96 flex-col content-center justify-center align-middle">
               <div className="w-full">
                 <img
