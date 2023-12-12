@@ -476,6 +476,7 @@ export const ConsultationDetails = (props: any) => {
         <PatientNotesSlideover
           patientId={patientId}
           facilityId={facilityId}
+          consultationId={consultationId}
           setShowPatientNotesPopup={setShowPatientNotesPopup}
         />
       )}
