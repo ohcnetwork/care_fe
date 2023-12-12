@@ -6,7 +6,7 @@ import {
 } from "./types";
 import { useTranslation } from "react-i18next";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { compareByKey } from "../../Utils/utils";
+import { compareBy } from "../../Utils/utils";
 
 interface Props {
   diagnoses: ConsultationDiagnosis[];
@@ -23,7 +23,7 @@ function groupDiagnoses(diagnoses: ConsultationDiagnosis[]) {
   for (const status of ActiveConditionVerificationStatuses) {
     groupedDiagnoses[status] = diagnoses
       .filter((d) => d.verification_status === status)
-      .sort(compareByKey("is_principal"));
+      .sort(compareBy("is_principal"));
   }
 
   return groupedDiagnoses;

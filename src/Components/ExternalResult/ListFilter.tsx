@@ -6,7 +6,7 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { MultiSelectFormField } from "../Form/FormFields/SelectFormField";
 import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
 import dayjs from "dayjs";
-import { dateQueryString, compareByKey } from "../../Utils/utils";
+import { dateQueryString, compareBy } from "../../Utils/utils";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
@@ -68,8 +68,8 @@ export default function ListFilter(props: any) {
           });
         }
 
-        allWards.sort(compareByKey("number"));
-        allLsgs.sort(compareByKey("name"));
+        allWards.sort(compareBy("number"));
+        allLsgs.sort(compareBy("name"));
 
         setWardList(allWards);
         setLsgList(allLsgs);

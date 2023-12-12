@@ -37,7 +37,7 @@ import {
   getPincodeDetails,
   includesIgnoreCase,
   parsePhoneNumber,
-  compareByKey,
+  compareBy,
 } from "../../Utils/utils";
 import {
   phonePreg,
@@ -854,7 +854,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     className={isWardLoading ? "animate-pulse" : ""}
                     disabled={isWardLoading}
                     placeholder="Choose Ward"
-                    options={ward.sort(compareByKey("number")).map((e) => {
+                    options={ward.sort(compareBy("number")).map((e) => {
                       return {
                         id: e.id,
                         name: e.number + ": " + e.name,

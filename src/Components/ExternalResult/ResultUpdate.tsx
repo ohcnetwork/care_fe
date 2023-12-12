@@ -11,7 +11,7 @@ import Page from "../Common/components/Page.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
-import { compareByKey } from "../../Utils/utils.js";
+import { compareBy } from "../../Utils/utils.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -266,7 +266,7 @@ export default function UpdateResult(props: any) {
                     name="ward"
                     label="Ward/Division of respective LSGI"
                     required
-                    options={ward.sort(compareByKey("number")).map((e) => {
+                    options={ward.sort(compareBy("number")).map((e) => {
                       return { id: e.id, name: e.number + ": " + e.name };
                     })}
                     value={state.form.ward}
