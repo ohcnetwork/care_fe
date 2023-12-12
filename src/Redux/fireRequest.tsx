@@ -170,9 +170,15 @@ export const fireRequest = (
 
           // 5xx Errors
           if (error.response.status >= 500 && error.response.status <= 599) {
-            Notification.Error({
-              msg: "Something went wrong...!",
-            });
+            if (error.response.data && error.response.data.detail) {
+              Notification.Error({
+                msg: error.response.data.detail,
+              });
+            } else {
+              Notification.Error({
+                msg: "Something went wrong...!",
+              });
+            }
             return;
           }
         } else {
@@ -282,9 +288,15 @@ export const fireRequestV2 = (
 
         // 5xx Errors
         if (error.response.status >= 500 && error.response.status <= 599) {
-          Notification.Error({
-            msg: "Something went wrong...!",
-          });
+          if (error.response.data && error.response.data.detail) {
+            Notification.Error({
+              msg: error.response.data.detail,
+            });
+          } else {
+            Notification.Error({
+              msg: "Something went wrong...!",
+            });
+          }
           return;
         }
       }
@@ -391,9 +403,15 @@ export const fireRequestForFiles = (
 
           // 5xx Errors
           if (error.response.status >= 500 && error.response.status <= 599) {
-            Notification.Error({
-              msg: "Something went wrong...!",
-            });
+            if (error.response.data && error.response.data.detail) {
+              Notification.Error({
+                msg: error.response.data.detail,
+              });
+            } else {
+              Notification.Error({
+                msg: "Something went wrong...!",
+              });
+            }
             return;
           }
         }
