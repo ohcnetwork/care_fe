@@ -10,9 +10,8 @@ import {
   SIDEBAR_SHRINK_PREFERENCE_KEY,
   SidebarShrinkContext,
 } from "../Components/Common/Sidebar/Sidebar";
-import { BLACKLISTED_PATHS, LocalStorageKeys } from "../Common/constants";
+import { BLACKLISTED_PATHS } from "../Common/constants";
 import useConfig from "../Common/hooks/useConfig";
-import { handleSignOut } from "../Utils/utils";
 import SessionExpired from "../Components/ErrorPages/SessionExpired";
 
 import UserRoutes from "./routes/UserRoutes";
@@ -62,19 +61,6 @@ export default function AppRouter() {
   const pages = useRoutes(routes) || <Error404 />;
   const path = usePath();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  useEffect(() => {
-    addEventListener("storage", (event: any) => {
-      if (
-        [LocalStorageKeys.accessToken, LocalStorageKeys.refreshToken].includes(
-          event.key
-        ) &&
-        !event.newValue
-      ) {
-        handleSignOut(true);
-      }
-    });
-  }, []);
 
   useEffect(() => {
     setSidebarOpen(false);
