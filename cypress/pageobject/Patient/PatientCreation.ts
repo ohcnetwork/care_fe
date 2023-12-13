@@ -41,7 +41,6 @@ export class PatientPage {
     gender: string,
     address: string,
     pincode: string,
-    wardName: string,
     bloodGroup: string,
     dateOfBirth: string
   ) {
@@ -58,16 +57,6 @@ export class PatientPage {
     cy.get("[data-testid=current-address] textarea").type(address);
     cy.get("[data-testid=permanent-address] input").check();
     cy.get("#pincode").type(pincode);
-    cy.get("[data-testid=localbody] button")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").first().click();
-      });
-    cy.get("[data-testid=ward-respective-lsgi] button")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains(wardName).click();
-      });
     cy.get("[name=medical_history_check_1]").check();
     cy.get("[data-testid=blood-group] button")
       .click()
