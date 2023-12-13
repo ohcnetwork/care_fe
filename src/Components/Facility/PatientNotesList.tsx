@@ -10,11 +10,12 @@ import CircularProgress from "../Common/components/CircularProgress";
 import PatientNoteCard from "./PatientNoteCard";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { NoteType } from "./PatientNoteCard";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 
 interface PatientNotesProps {
   patientId: any;
   facilityId: any;
-  consultationId?: any;
   reload?: boolean;
   setReload?: any;
 }
@@ -27,22 +28,63 @@ interface StateType {
 
 const pageSize = RESULTS_PER_PAGE_LIMIT;
 
-const PatientNotesList = (props: PatientNotesProps) => {
+const PatientNotesList: React.FC<
+  PatientNotesProps & { consultationId: string }
+> = ({ consultationId, ...props }) => {
   const { reload, setReload } = props;
+  // console.log(props);
 
   const dispatch: any = useDispatch();
   const initialData: StateType = { notes: [], cPage: 1, totalPages: 1 };
   const [state, setState] = useState(initialData);
   const [isLoading, setIsLoading] = useState(true);
 
+  useQuery(routes.getPatientNotes, {
+    pathParams: {
+      patientId: props.patientId,
+    },
+    query: {
+      consultation: consultationId,
+      // offset: state.cPage * RESULTS_PER_PAGE_LIMIT,
+    },
+    prefetch: reload,
+    onResponse: ({ res, data }) => {
+      setIsLoading(true);
+      console.log(data);
+      if (res?.status === 200 && data) {
+        setState((prevState: any) => ({
+          ...prevState,
+          notes: [...prevState.notes, ...data.results],
+          totalPages: Math.ceil(data.count / pageSize),
+        }));
+        // if (!data?.next) {
+        //   setState({
+        //     notes: data?.results,
+        //     cPage: 1,
+        //     totalPages: Math.ceil(data.count / pageSize),
+        //   });
+        // } else {
+        //   setState((prevState: any) => ({
+        //     ...prevState,
+        //     notes: [...prevState.notes, ...data.results],
+        //     cPage: 2,
+        //     totalPages: Math.ceil(data.count / pageSize),
+        //   }));
+        // }
+        setIsLoading(false);
+      }
+    },
+  });
+  // console.log(res);
+
   const fetchData = useCallback(
     async (page = 1, status: statusType = { aborted: false }) => {
       setIsLoading(true);
       const res = await dispatch(
-        props.consultationId
+        consultationId
           ? getPatientNotesByConsultation(
               props.patientId,
-              props.consultationId,
+              consultationId,
               pageSize,
               (page - 1) * pageSize
             )
@@ -50,20 +92,20 @@ const PatientNotesList = (props: PatientNotesProps) => {
       );
       if (!status.aborted) {
         if (res && res.data) {
-          if (page === 1) {
-            setState({
-              notes: res.data?.results,
-              cPage: page,
-              totalPages: Math.ceil(res.data.count / pageSize),
-            });
-          } else {
-            setState((prevState: any) => ({
-              ...prevState,
-              notes: [...prevState.notes, ...res.data.results],
-              cPage: page,
-              totalPages: Math.ceil(res.data.count / pageSize),
-            }));
-          }
+          // if (page === 1) {
+          //   setState({
+          //     notes: res.data?.results,
+          //     cPage: page,
+          //     totalPages: Math.ceil(res.data.count / pageSize),
+          //   });
+          // } else {
+          //   setState((prevState: any) => ({
+          //     ...prevState,
+          //     notes: [...prevState.notes, ...res.data.results],
+          //     cPage: page,
+          //     totalPages: Math.ceil(res.data.count / pageSize),
+          //   }));
+          // }
         }
         setIsLoading(false);
       }
