@@ -589,10 +589,10 @@ export const PatientManager = () => {
               )}
             </div>
             <div className="flex w-full flex-col gap-2 pl-2 md:block md:flex-row">
-              <div className="flex w-full justify-between gap-2">
-                <div className="font-semibold">
+              <div className="flex w-full items-center justify-between gap-2">
+                <div className="flex flex-wrap gap-2 font-semibold">
                   <span className="text-xl capitalize">{patient.name}</span>
-                  <span className="ml-4 text-gray-800">
+                  <span className="text-gray-800">
                     {formatAge(patient.age, patient.date_of_birth, true)}
                   </span>
                 </div>
