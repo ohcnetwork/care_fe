@@ -8,6 +8,7 @@ import { FileUpload } from "../../Components/Patient/FileUpload";
 import { make as CriticalCareRecording } from "../../Components/CriticalCareRecording/CriticalCareRecording.bs";
 import { ConsultationDetails } from "../../Components/Facility/ConsultationDetails";
 import TreatmentSummary from "../../Components/Facility/TreatmentSummary";
+import { Redirect } from "raviger";
 
 export default {
   "/facility/:facilityId/patient/:patientId/consultation": ({
@@ -139,6 +140,6 @@ export default {
       />
     ),
   "/consultation/:consultationId": ({ consultationId }: any) => (
-    <ConsultationDetails consultationId={consultationId} tab={"updates"} />
+    <Redirect to={`/facility/id/patient/id/consultation/${consultationId}/`} />
   ),
 };

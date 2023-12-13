@@ -522,7 +522,7 @@ export const PatientManager = () => {
         patient.last_consultation?.facility === patient.facility &&
         !(patient.last_consultation?.discharge_date && patient.is_active)
       ) {
-        patientUrl = `/consultation/${patient.last_consultation.id}`;
+        patientUrl = `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation.id}`;
       } else if (patient.facility) {
         patientUrl = `/facility/${patient.facility}/patient/${patient.id}`;
       } else {

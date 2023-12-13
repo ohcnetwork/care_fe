@@ -16,11 +16,14 @@ interface Props {
 }
 
 export default function DailyRoundsList({ consultation }: Props) {
-  const [consultationId] = useSlugs("consultation");
+  const [facilityId, patientId, consultationId] = useSlugs(
+    "facility",
+    "patient",
+    "consultation"
+  );
   const { t } = useTranslation();
 
-  const consultationUrl = `/consultation/${consultationId}`;
-
+  const consultationUrl = `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`;
   return (
     <PaginatedList
       route={routes.getDailyReports}
