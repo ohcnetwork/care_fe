@@ -26,6 +26,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: coronasafe/care
+          ref: sainak/fix/dummy-data-2
           path: care
 
       - name: Start care docker containers 🐳
