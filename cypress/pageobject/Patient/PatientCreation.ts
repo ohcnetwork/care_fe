@@ -10,10 +10,14 @@ export class PatientPage {
     cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
   }
 
-  visitPatient() {
+  visitPatient(patientName) {
+    cy.get("#name").click().type(patientName);
     cy.intercept("GET", "**/api/v1/consultation/**").as("getPatient");
-    cy.get("[data-cy='patient']").first().click();
+    cy.get("#patient-name-list").contains(patientName).click();
     cy.wait("@getPatient").its("response.statusCode").should("eq", 200);
+    cy.get("#patient-name-consultation")
+      .should("be.visible")
+      .contains(patientName);
   }
 
   selectFacility(facilityName: string) {

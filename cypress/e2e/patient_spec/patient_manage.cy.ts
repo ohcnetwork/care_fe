@@ -36,8 +36,7 @@ describe("Patient", () => {
   // commented out the shifting request, as logic need to be re-visited
 
   it("Post doctor notes for an already created patient", () => {
-    patientPage.visitPatient();
-    cy.wait(5000);
+    patientPage.visitPatient("Dummy Patient 3");
     patientConsultationPage.visitDoctorNotesPage();
     patientConsultationPage.addDoctorsNotes("Test Doctor Notes");
     patientConsultationPage.postDoctorNotes();
@@ -47,8 +46,7 @@ describe("Patient", () => {
   });
 
   it("Edit prescription for an already created patient", () => {
-    patientPage.visitPatient();
-    cy.wait(5000);
+    patientPage.visitPatient("Dummy Patient 4");
     patientConsultationPage.visitEditPrescriptionPage();
     patientConsultationPage.clickAddPrescription();
     patientConsultationPage.interceptMediaBase();
@@ -61,16 +59,14 @@ describe("Patient", () => {
   });
 
   it("Upload consultations file ", () => {
-    patientPage.visitPatient();
-    cy.wait(5000);
+    patientPage.visitPatient("Dummy Patient 5");
     patientConsultationPage.visitFilesPage();
     patientConsultationPage.uploadFile();
     patientConsultationPage.clickUploadFile();
   });
 
   it("Discharge a patient", () => {
-    patientPage.visitPatient();
-    cy.wait(5000);
+    patientPage.visitPatient("Dummy Patient 6");
     patientConsultationPage.clickDischargePatient();
     patientConsultationPage.selectDischargeReason("Recovered");
     patientConsultationPage.addDischargeNotes("Discharge notes");
