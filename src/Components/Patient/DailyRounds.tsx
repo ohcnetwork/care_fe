@@ -45,11 +45,12 @@ const initForm: any = {
   patient_category: "",
   current_health: 0,
   actions: null,
+  action: "",
   review_interval: 0,
   admitted_to: "",
   taken_at: null,
   rounds_type: "NORMAL",
-  clone_last: null,
+  clone_last: true,
   systolic: null,
   diastolic: null,
   pulse: null,
@@ -108,8 +109,26 @@ export const DailyRounds = (props: any) => {
   const [prevReviewInterval, setPreviousReviewInterval] = useState(-1);
   const [prevAction, setPreviousAction] = useState("NO_ACTION");
   const [hasPreviousLog, setHasPreviousLog] = useState(false);
+  const [initialData, setInitialData] = useState<any>({
+    ...initForm,
+    action: "",
+  });
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id ? "Save" : "Continue";
+
+  const formFields = [
+    "physical_examination_info",
+    "other_details",
+    "additional_symptoms",
+    "action",
+    "review_interval",
+    "bp",
+    "pulse",
+    "resp",
+    "ventilator_spo2",
+    "rhythm",
+    "rhythm_detail",
+  ];
 
   useEffect(() => {
     (async () => {
@@ -121,10 +140,21 @@ export const DailyRounds = (props: any) => {
           setPreviousReviewInterval(
             Number(res.data.last_consultation.review_interval)
           );
-          setPreviousAction(
+          const getAction =
             TELEMEDICINE_ACTIONS.find((action) => action.id === res.data.action)
-              ?.text || "NO_ACTION"
-          );
+              ?.text || "NO_ACTION";
+          setPreviousAction(getAction);
+          setInitialData({
+            ...initialData,
+            action: getAction,
+          });
+          dispatch({
+            type: "set_form",
+            form: {
+              ...state.form,
+              action: getAction,
+            },
+          });
         }
       } else {
         setPatientName("");
@@ -156,6 +186,7 @@ export const DailyRounds = (props: any) => {
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "Select",
           };
           dispatch({ type: "set_form", form: data });
+          setInitialData(data);
         }
         setIsLoading(false);
       }
@@ -627,7 +658,20 @@ export const DailyRounds = (props: any) => {
 
         <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">
           <Cancel onClick={() => goBack()} />
-          <Submit onClick={(e) => handleSubmit(e)} label={buttonText} />
+          <Submit
+            disabled={
+              state.form.clone_last !== null &&
+              !state.form.clone_last &&
+              formFields.every(
+                (field: string) => state.form[field] == initialData[field]
+              ) &&
+              (state.form.temperature == initialData.temperature ||
+                isNaN(state.form.temperature)) &&
+              state.form.rounds_type !== "VENTILATOR"
+            }
+            onClick={(e) => handleSubmit(e)}
+            label={buttonText}
+          />
         </div>
       </form>
     </Page>
