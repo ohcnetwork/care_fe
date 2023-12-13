@@ -8,8 +8,9 @@ import routes from "../../Redux/api";
 import { PatientNotesModel } from "./models";
 
 interface PatientNotesProps {
-  patientId: any;
-  facilityId: any;
+  patientId: string;
+  facilityId: string;
+  consultationId: string;
   reload?: boolean;
   setReload?: any;
 }
@@ -22,10 +23,8 @@ interface StateType {
 
 const pageSize = RESULTS_PER_PAGE_LIMIT;
 
-const PatientNotesList: React.FC<
-  PatientNotesProps & { consultationId: string }
-> = ({ consultationId, ...props }) => {
-  const { reload, setReload } = props;
+const PatientNotesList: React.FC<PatientNotesProps> = (props) => {
+  const { consultationId, reload, setReload } = props;
   // console.log(props);
 
   const initialData: StateType = { notes: [], cPage: 1, totalPages: 1 };
@@ -40,17 +39,18 @@ const PatientNotesList: React.FC<
       consultation: consultationId,
       offset: (state.cPage - 1) * RESULTS_PER_PAGE_LIMIT,
     },
-    prefetch: reload,
+    prefetch: reload && state.cPage <= state.totalPages,
     onResponse: ({ res, data }) => {
       setIsLoading(true);
-      if (res?.status === 200 && data) {
+      console.log(state);
+      if (res?.status === 200 && data && state.cPage <= state.totalPages) {
         setState((prevState: any) => ({
           ...prevState,
           notes: [...prevState.notes, ...data.results],
           totalPages: Math.ceil(data.count / pageSize),
         }));
-        setReload(false);
       }
+      setReload(false);
       setIsLoading(false);
     },
   });
