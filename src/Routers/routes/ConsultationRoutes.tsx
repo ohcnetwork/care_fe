@@ -138,4 +138,7 @@ export default {
         tab={tab}
       />
     ),
+  "/consultation/:consultationId": ({ consultationId }: any) => (
+    <ConsultationDetails consultationId={consultationId} tab={"updates"} />
+  ),
 };

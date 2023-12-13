@@ -45,8 +45,6 @@ const symptomChoices = [...SYMPTOM_CHOICES];
 
 export interface ConsultationTabProps {
   consultationId: string;
-  facilityId: string;
-  patientId: string;
   consultationData: ConsultationModel;
   patientData: PatientModel;
 }
@@ -68,7 +66,7 @@ const TABS = {
 };
 
 export const ConsultationDetails = (props: any) => {
-  const { facilityId, patientId, consultationId } = props;
+  const { consultationId } = props;
   const tab = props.tab.toUpperCase() as keyof typeof TABS;
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
@@ -149,6 +147,9 @@ export const ConsultationDetails = (props: any) => {
                 : "No",
               is_vaccinated: patientData.is_vaccinated ? "Yes" : "No",
             };
+            navigate(
+              `/facility/${data.facility_object?.id}/patient/${data.id}/consultation/${data?.last_consultation?.id}`
+            );
             setPatientData(data);
           }
 
@@ -172,7 +173,7 @@ export const ConsultationDetails = (props: any) => {
   useAbortableEffect((status: statusType) => {
     fetchData(status);
     triggerGoal("Patient Consultation Viewed", {
-      facilityId: facilityId,
+      facilityId: patientData?.facility_object?.id,
       consultationId: consultationId,
       userId: authUser.id,
     });
@@ -180,8 +181,7 @@ export const ConsultationDetails = (props: any) => {
 
   const consultationTabProps: ConsultationTabProps = {
     consultationId,
-    facilityId,
-    patientId,
+
     consultationData,
     patientData,
   };
@@ -256,8 +256,10 @@ export const ConsultationDetails = (props: any) => {
             title="Patient Dashboard"
             className="sm:m-0 sm:p-0"
             crumbsReplacements={{
-              [facilityId]: { name: patientData?.facility_object?.name },
-              [patientId]: { name: patientData?.name },
+              [patientData?.facility_object?.id || ""]: {
+                name: patientData?.facility_object?.name,
+              },
+              [patientData?.id || ""]: { name: patientData?.name },
               [consultationId]: {
                 name:
                   consultationData.suggestion === "A"
@@ -312,7 +314,7 @@ export const ConsultationDetails = (props: any) => {
               onClick={() =>
                 showPatientNotesPopup
                   ? navigate(
-                      `/facility/${facilityId}/patient/${patientId}/notes`
+                      `/facility/${patientData?.facility_object?.id}/patient/${patientData?.id}/notes`
                     )
                   : setShowPatientNotesPopup(true)
               }
@@ -452,7 +454,11 @@ export const ConsultationDetails = (props: any) => {
                     <Link
                       key={p.text}
                       className={tabButtonClasses(tab === p.text)}
-                      href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.text.toLocaleLowerCase()}`}
+                      href={`/facility/${
+                        patientData?.facility_object?.id
+                      }/patient/${
+                        patientData?.id
+                      }/consultation/${consultationId}/${p.text.toLocaleLowerCase()}`}
                     >
                       {p.desc}
                     </Link>
@@ -467,15 +473,15 @@ export const ConsultationDetails = (props: any) => {
       </div>
 
       <DoctorVideoSlideover
-        facilityId={facilityId}
+        facilityId={String(patientData?.facility_object?.id)}
         show={showDoctors}
         setShow={setShowDoctors}
       />
 
       {showPatientNotesPopup && (
         <PatientNotesSlideover
-          patientId={patientId}
-          facilityId={facilityId}
+          patientId={String(patientData?.id)}
+          facilityId={String(patientData?.facility_object?.id)}
           setShowPatientNotesPopup={setShowPatientNotesPopup}
         />
       )}
