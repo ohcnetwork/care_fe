@@ -15,7 +15,7 @@ export default function handleResponse(
   // 5xx errors
   if (res.status >= 500 && res.status < 600) {
     console.error("Server error", res);
-    notify?.Error({ msg: "Something went wrong...!" });
+    notify?.Error({ msg: error?.detail || "Something went wrong...!" });
     return;
   }
 
