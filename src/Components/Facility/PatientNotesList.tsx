@@ -1,10 +1,10 @@
-import { useCallback, useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  getPatientNotes,
-  getPatientNotesByConsultation,
-} from "../../Redux/actions";
+import { useState } from "react";
+// import { useDispatch } from "react-redux";
+// import { statusType, useAbortableEffect } from "../../Common/utils";
+// import {
+//   getPatientNotes,
+//   getPatientNotesByConsultation,
+// } from "../../Redux/actions";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import CircularProgress from "../Common/components/CircularProgress";
 import PatientNoteCard from "./PatientNoteCard";
@@ -34,7 +34,7 @@ const PatientNotesList: React.FC<
   const { reload, setReload } = props;
   // console.log(props);
 
-  const dispatch: any = useDispatch();
+  // const dispatch: any = useDispatch();
   const initialData: StateType = { notes: [], cPage: 1, totalPages: 1 };
   const [state, setState] = useState(initialData);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,7 +45,7 @@ const PatientNotesList: React.FC<
     },
     query: {
       consultation: consultationId,
-      // offset: state.cPage * RESULTS_PER_PAGE_LIMIT,
+      offset: state.cPage * RESULTS_PER_PAGE_LIMIT,
     },
     prefetch: reload,
     onResponse: ({ res, data }) => {
@@ -57,6 +57,7 @@ const PatientNotesList: React.FC<
           notes: [...prevState.notes, ...data.results],
           totalPages: Math.ceil(data.count / pageSize),
         }));
+        setReload(false);
         // if (!data?.next) {
         //   setState({
         //     notes: data?.results,
@@ -77,63 +78,64 @@ const PatientNotesList: React.FC<
   });
   // console.log(res);
 
-  const fetchData = useCallback(
-    async (page = 1, status: statusType = { aborted: false }) => {
-      setIsLoading(true);
-      const res = await dispatch(
-        consultationId
-          ? getPatientNotesByConsultation(
-              props.patientId,
-              consultationId,
-              pageSize,
-              (page - 1) * pageSize
-            )
-          : getPatientNotes(props.patientId, pageSize, (page - 1) * pageSize)
-      );
-      if (!status.aborted) {
-        if (res && res.data) {
-          // if (page === 1) {
-          //   setState({
-          //     notes: res.data?.results,
-          //     cPage: page,
-          //     totalPages: Math.ceil(res.data.count / pageSize),
-          //   });
-          // } else {
-          //   setState((prevState: any) => ({
-          //     ...prevState,
-          //     notes: [...prevState.notes, ...res.data.results],
-          //     cPage: page,
-          //     totalPages: Math.ceil(res.data.count / pageSize),
-          //   }));
-          // }
-        }
-        setIsLoading(false);
-      }
-    },
-    [props.patientId, dispatch]
-  );
+  // const fetchData = useCallback(
+  //   async (page = 1, status: statusType = { aborted: false }) => {
+  //     setIsLoading(true);
+  //     const res = await dispatch(
+  //       consultationId
+  //         ? getPatientNotesByConsultation(
+  //             props.patientId,
+  //             consultationId,
+  //             pageSize,
+  //             (page - 1) * pageSize
+  //           )
+  //         : getPatientNotes(props.patientId, pageSize, (page - 1) * pageSize)
+  //     );
+  //     if (!status.aborted) {
+  //       if (res && res.data) {
+  //         // if (page === 1) {
+  //         //   setState({
+  //         //     notes: res.data?.results,
+  //         //     cPage: page,
+  //         //     totalPages: Math.ceil(res.data.count / pageSize),
+  //         //   });
+  //         // } else {
+  //         //   setState((prevState: any) => ({
+  //         //     ...prevState,
+  //         //     notes: [...prevState.notes, ...res.data.results],
+  //         //     cPage: page,
+  //         //     totalPages: Math.ceil(res.data.count / pageSize),
+  //         //   }));
+  //         // }
+  //       }
+  //       setIsLoading(false);
+  //     }
+  //   },
+  //   [props.patientId, dispatch]
+  // );
 
-  useEffect(() => {
-    if (reload) {
-      fetchData(1);
-      setReload(false);
-    }
-  }, [reload]);
+  // useEffect(() => {
+  //   if (reload) {
+  //     fetchData(1);
+  //     setReload(false);
+  //   }
+  // }, [reload]);
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(1, status);
-    },
-    [fetchData]
-  );
+  // useAbortableEffect(
+  //   (status: statusType) => {
+  //     fetchData(1, status);
+  //   },
+  //   [fetchData]
+  // );
 
   const handleNext = () => {
     if (state.cPage < state.totalPages) {
-      fetchData(state.cPage + 1);
+      // fetchData(state.cPage + 1);
       setState((prevState: any) => ({
         ...prevState,
         cPage: prevState.cPage + 1,
       }));
+      setReload(true);
     }
   };
 
