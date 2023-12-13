@@ -37,6 +37,7 @@ describe("Patient", () => {
 
   it("Post doctor notes for an already created patient", () => {
     patientPage.visitPatient();
+    cy.wait(5000);
     patientConsultationPage.visitDoctorNotesPage();
     patientConsultationPage.addDoctorsNotes("Test Doctor Notes");
     patientConsultationPage.postDoctorNotes();
@@ -47,6 +48,7 @@ describe("Patient", () => {
 
   it("Edit prescription for an already created patient", () => {
     patientPage.visitPatient();
+    cy.wait(5000);
     patientConsultationPage.visitEditPrescriptionPage();
     patientConsultationPage.clickAddPrescription();
     patientConsultationPage.interceptMediaBase();
@@ -60,6 +62,7 @@ describe("Patient", () => {
 
   it("Upload consultations file ", () => {
     patientPage.visitPatient();
+    cy.wait(5000);
     patientConsultationPage.visitFilesPage();
     patientConsultationPage.uploadFile();
     patientConsultationPage.clickUploadFile();
@@ -67,6 +70,7 @@ describe("Patient", () => {
 
   it("Discharge a patient", () => {
     patientPage.visitPatient();
+    cy.wait(5000);
     patientConsultationPage.clickDischargePatient();
     patientConsultationPage.selectDischargeReason("Recovered");
     patientConsultationPage.addDischargeNotes("Discharge notes");
