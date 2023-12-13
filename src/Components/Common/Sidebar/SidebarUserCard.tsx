@@ -1,13 +1,13 @@
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { handleSignOut } from "../../../Utils/utils";
-import useAuthUser from "../../../Common/hooks/useAuthUser";
+import { formatName } from "../../../Utils/utils";
+import useAuthUser, { useAuthContext } from "../../../Common/hooks/useAuthUser";
 
 const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
   const { t } = useTranslation();
   const user = useAuthUser();
-  const profileName = `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim();
+  const { signOut } = useAuthContext();
 
   return (
     <div
@@ -18,10 +18,7 @@ const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
       <Link href="/user/profile" className="flex-none py-3">
         <CareIcon className="care-l-user-circle text-3xl text-white" />
       </Link>
-      <div
-        className="flex cursor-pointer justify-center"
-        onClick={() => handleSignOut(true)}
-      >
+      <div className="flex cursor-pointer justify-center" onClick={signOut}>
         <CareIcon
           className={`care-l-sign-out-alt text-2xl text-gray-400 ${
             shrinked ? "visible" : "hidden"
@@ -39,12 +36,12 @@ const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
             className="flex-nowrap overflow-hidden break-words font-semibold text-white"
             id="profilenamelink"
           >
-            {profileName}
+            {formatName(user)}
           </Link>
         </div>
         <div
           className="min-h-6 flex cursor-pointer items-center"
-          onClick={() => handleSignOut(true)}
+          onClick={signOut}
         >
           <CareIcon
             className={`care-l-sign-out-alt ${
