@@ -221,6 +221,7 @@ describe("Facility Creation", () => {
       .should("be.visible");
     // verify the facility homepage
     cy.visit("/facility");
+    cy.get("#removeicon").click();
     manageUserPage.typeFacilitySearch(facilityName);
     facilityPage.verifyFacilityBadgeContent(facilityName);
     manageUserPage.assertFacilityInCard(facilityName);
