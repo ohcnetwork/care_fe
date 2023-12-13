@@ -80,12 +80,12 @@ export function Type<T>(): T {
   return {} as T;
 }
 
-interface JwtTokenObtainPair {
+export interface JwtTokenObtainPair {
   access: string;
   refresh: string;
 }
 
-interface LoginInput {
+export interface LoginCredentials {
   username: string;
   password: string;
 }
@@ -104,16 +104,14 @@ const routes = {
     method: "POST",
     noAuth: true,
     TRes: Type<JwtTokenObtainPair>(),
-    TBody: Type<LoginInput>(),
+    TBody: Type<LoginCredentials>(),
   },
 
   token_refresh: {
     path: "/api/v1/auth/token/refresh/",
     method: "POST",
     TRes: Type<JwtTokenObtainPair>(),
-    TBody: Type<{
-      refresh: string;
-    }>(),
+    TBody: Type<{ refresh: JwtTokenObtainPair["refresh"] }>(),
   },
 
   token_verify: {
