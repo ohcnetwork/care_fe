@@ -955,7 +955,7 @@ const routes = {
     TBody: Type<Partial<IResource>>(),
   },
   updateResource: {
-    path: "/api/v1/resource/{id}",
+    path: "/api/v1/resource/{id}/",
     method: "PUT",
     TRes: Type<IResource>(),
     TBody: Type<Partial<IResource>>(),
