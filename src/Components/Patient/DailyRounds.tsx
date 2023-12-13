@@ -230,7 +230,7 @@ export const DailyRounds = (props: any) => {
         case "resp":
           if (
             state.form.resp === null &&
-            state.form.rounds_type === "NORMAL" &&
+            ["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type) &&
             state.form.clone_last !== true
           ) {
             errors[field] = "Please enter a respiratory rate";
@@ -278,7 +278,7 @@ export const DailyRounds = (props: any) => {
           action: prevAction,
           review_interval: Number(prevReviewInterval),
         };
-        if (state.form.rounds_type === "NORMAL") {
+        if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
           data = {
             ...data,
             bp:
@@ -320,7 +320,7 @@ export const DailyRounds = (props: any) => {
           Notification.Success({
             msg: "Consultation Updates details updated successfully",
           });
-          if (state.form.rounds_type === "NORMAL") {
+          if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
             navigate(
               `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
             );
@@ -333,7 +333,7 @@ export const DailyRounds = (props: any) => {
           Notification.Success({
             msg: "Consultation Updates details created successfully",
           });
-          if (state.form.rounds_type === "NORMAL") {
+          if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
             if (data.clone_last) {
               navigate(
                 `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${res.data.external_id}/update`
