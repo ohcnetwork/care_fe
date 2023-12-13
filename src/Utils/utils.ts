@@ -1,5 +1,8 @@
-import { navigate } from "raviger";
-import { AREACODES, IN_LANDLINE_AREA_CODES, USER_TYPES } from "../Common/constants";
+import { 
+  AREACODES, 
+  IN_LANDLINE_AREA_CODES, 
+  USER_TYPES 
+} from "../Common/constants";
 import phoneCodesJson from "../Common/static/countryPhoneAndFlags.json";
 import dayjs from "./dayjs";
 import { UserModel } from "../Components/Users/models";
