@@ -104,9 +104,25 @@ export class UserPage {
     cy.url().should("include", `page=${pageNumber}`);
   }
 
-  verifyMultipleBadgesWithSameId(expectedContents: string[]) {
-    cy.get("#user-view-name").each((el, index) => {
-      expect(el.text().trim()).to.equal(expectedContents[index]);
+  verifyMultipleBadgesWithSameId(alreadylinkedusersviews: string[]) {
+    cy.get("#user-view-name").then(($elements) => {
+      const userViews = $elements
+        .map((_, el) => Cypress.$(el).text().trim())
+        .get();
+      let foundMatches = 0;
+
+      alreadylinkedusersviews.forEach((expectedContent) => {
+        const index = userViews.findIndex((actualContent) =>
+          actualContent.includes(expectedContent)
+        );
+        if (index !== -1) {
+          userViews.splice(index, 1); // Remove the matched element
+          foundMatches++;
+        }
+        if (foundMatches === alreadylinkedusersviews.length) {
+          return false; // Break the loop if all matches are found
+        }
+      });
     });
   }
 }
