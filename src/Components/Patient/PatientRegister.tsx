@@ -27,6 +27,7 @@ import {
   includesIgnoreCase,
   parsePhoneNumber,
   scrollTo,
+  compareBy,
 } from "../../Utils/utils";
 import { navigate, useQueryParams } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -1507,7 +1508,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     {...field("ward")}
                                     label="Ward"
                                     options={ward
-                                      .sort((a, b) => a.number - b.number)
+                                      .sort(compareBy("number"))
                                       .map((e) => {
                                         return {
                                           id: e.id,
