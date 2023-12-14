@@ -462,7 +462,6 @@ export const ConsultationDetails = (props: any) => {
             </div>
           </div>
         </div>
-
         <SelectedTab {...consultationTabProps} />
       </div>
 
