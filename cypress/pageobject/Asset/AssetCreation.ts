@@ -24,14 +24,6 @@ export class AssetPage {
       });
   }
 
-  selectAssetType(assetType: string) {
-    cy.get("[data-testid=asset-type-input] button")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains(assetType).click();
-      });
-  }
-
   selectAssetClass(assetClass: string) {
     cy.get("[data-testid=asset-class-input] button")
       .click()
@@ -202,13 +194,6 @@ export class AssetPage {
     cy.get("[data-testid=asset-location-input] span").should(
       "contain",
       "Select a location"
-    );
-  }
-
-  verifyEmptyAssetTypeError() {
-    cy.get("[data-testid=asset-type-input] span").should(
-      "contain",
-      "Select an asset type"
     );
   }
 
