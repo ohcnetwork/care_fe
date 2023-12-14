@@ -8,7 +8,7 @@ export const ConsultationDialysisTab = (props: ConsultationTabProps) => {
   return (
     <div>
       <PageTitle title="Dialysis Plots" hideBack={true} breadcrumbs={false} />
-      <DialysisPlots consultationId={props.consultationId}></DialysisPlots>
+      <DialysisPlots consultationId={props.consultationId} />
     </div>
   );
 };

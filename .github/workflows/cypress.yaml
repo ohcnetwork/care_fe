@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        containers: [1,2,3,4,5,6,7,8]
+        containers: [1, 2, 3, 4, 5, 6, 7, 8]
     steps:
       - name: Checkout 📥
         uses: actions/checkout@v3
@@ -32,9 +32,9 @@ jobs:
         run: |
           cd care
           make docker_config_file=docker-compose.pre-built.yaml up 
-          while docker compose exec backend bash -c "python manage.py showmigrations 2>/dev/null | cat | grep -q '\[ \]'"; do
+          while docker compose exec celery-beat bash -c "python manage.py showmigrations 2>/dev/null | cat | grep -q '\[ \]'"; do
             >&2 echo "Migrations are not yet applied - sleeping"
-            sleep 5
+            sleep 10
           done
           echo "Migrations are applied"
           cd ..
@@ -43,10 +43,16 @@ jobs:
         run: |
           cd care
           docker compose exec backend bash -c "python manage.py load_dummy_data"
+          docker restart care-backend-1
           cd ..
 
-      - name: Check care is up ♻
-        run: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
+      - name: Wait for care to be up ♻
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 1
+          max_attempts: 5
+          command: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
+          on_retry_command: sleep 5
 
       - name: Install dependencies 📦
         run: npm install
@@ -79,4 +85,3 @@ jobs:
         with:
           name: cypress-screenshots
           path: cypress/screenshots
-

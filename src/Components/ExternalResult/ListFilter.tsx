@@ -6,11 +6,12 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { MultiSelectFormField } from "../Form/FormFields/SelectFormField";
 import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
 import dayjs from "dayjs";
-import { dateQueryString } from "../../Utils/utils";
+import { dateQueryString, compareBy } from "../../Utils/utils";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import Loading from "../Common/Loading";
+import { LocalBodyModel, WardModel } from "../Facility/models";
 
 const clearFilterState = {
   created_date_before: "",
@@ -27,10 +28,10 @@ const getDate = (value: any) =>
 
 export default function ListFilter(props: any) {
   const { filter, onChange, closeFilter, dataList, removeFilters } = props;
-  const [wardList, setWardList] = useState<any[]>([]);
-  const [lsgList, setLsgList] = useState<any[]>([]);
-  const [wards, setWards] = useState<any[]>([]);
-  const [selectedLsgs, setSelectedLsgs] = useState<any[]>([]);
+  const [wardList, setWardList] = useState<WardModel[]>([]);
+  const [lsgList, setLsgList] = useState<LocalBodyModel[]>([]);
+  const [wards, setWards] = useState<WardModel[]>([]);
+  const [selectedLsgs, setSelectedLsgs] = useState<LocalBodyModel[]>([]);
   const authUser = useAuthUser();
   const [filterState, setFilterState] = useMergeState({
     created_date_before: filter.created_date_before || null,
@@ -47,32 +48,32 @@ export default function ListFilter(props: any) {
     pathParams: { id: String(authUser.district) },
     onResponse: ({ res, data }) => {
       if (res && data) {
-        let allWards: any[] = [];
-        let allLsgs: any[] = [];
+        const allWards: any[] = [];
+        const allLsgs: any[] = [];
+
         if (res && data) {
           data.forEach((local: any) => {
-            allLsgs = [...allLsgs, { id: local.id, name: local.name }];
+            allLsgs.push({ id: local.id, name: local.name });
             if (local.wards) {
               local.wards.forEach((ward: any) => {
-                allWards = [
-                  ...allWards,
-                  {
-                    id: ward.id,
-                    name: ward.number + ": " + ward.name,
-                    panchayath: local.name,
-                    number: ward.number,
-                    local_body_id: local.id,
-                  },
-                ];
+                allWards.push({
+                  id: ward.id,
+                  name: ward.number + ": " + ward.name,
+                  panchayath: local.name,
+                  number: ward.number,
+                  local_body_id: local.id,
+                });
               });
             }
           });
         }
 
-        sortByName(allWards);
-        sortByName(allLsgs);
-        setWardList(allWards || []);
-        setLsgList(allLsgs || []);
+        allWards.sort(compareBy("number"));
+        allLsgs.sort(compareBy("name"));
+
+        setWardList(allWards);
+        setLsgList(allLsgs);
+
         const filteredWard = filter?.wards?.split(",").map(Number);
         const selectedWards: any =
           filteredWard && allWards
@@ -104,13 +105,6 @@ export default function ListFilter(props: any) {
     filterData[endDateId] = e.value.end?.toString();
 
     setFilterState(filterData);
-  };
-
-  const handleWardChange = (value: any) => {
-    setWards(value);
-  };
-  const handleLsgChange = (value: any) => {
-    setSelectedLsgs(value);
   };
 
   const field = (name: string) => ({
@@ -161,12 +155,6 @@ export default function ListFilter(props: any) {
     dataList(selectedLsgs, wards);
   };
 
-  const sortByName = (items: any) => {
-    items.sort(function (a: any, b: any) {
-      return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
-    });
-  };
-
   const filterWards = () => {
     const selectedLsgIds: any = selectedLsgs.map((e) => {
       return e.id;
@@ -205,29 +193,27 @@ export default function ListFilter(props: any) {
         closeFilter();
       }}
     >
-      <div>
-        <MultiSelectFormField
-          name="local_bodies"
-          options={lsgList}
-          label={t("Local Body")}
-          placeholder={t("select_local_body")}
-          value={selectedLsgs}
-          optionLabel={(option: any) => option.name}
-          onChange={(e: any) => handleLsgChange(e.value)}
-        />
-      </div>
+      <MultiSelectFormField
+        name="local_bodies"
+        options={lsgList}
+        label={t("Local Body")}
+        placeholder={t("select_local_body")}
+        value={selectedLsgs}
+        optionLabel={(option) => option.name}
+        optionDescription={(option) => option.localbody_code}
+        onChange={({ value }) => setSelectedLsgs(value)}
+      />
 
-      <div>
-        <MultiSelectFormField
-          name="wards"
-          options={filterWards()}
-          label={t("Ward")}
-          placeholder={t("select_wards")}
-          value={wards}
-          optionLabel={(option: any) => option.name}
-          onChange={(e: any) => handleWardChange(e.value)}
-        />
-      </div>
+      <MultiSelectFormField
+        name="wards"
+        options={filterWards() as WardModel[]}
+        label={t("Ward")}
+        placeholder={t("select_wards")}
+        value={wards}
+        optionLabel={(option) => option.name}
+        optionDescription={(option) => option.panchayath}
+        onChange={({ value }) => setWards(value)}
+      />
       <DateRangeFormField
         name="created_date"
         id="created_date"

@@ -306,6 +306,14 @@ export interface DailyRoundsModel {
   created_date?: string;
   modified_date?: string;
   taken_at?: string;
+  consciousness_level?:
+    | "UNRESPONSIVE"
+    | "RESPONDS_TO_PAIN"
+    | "RESPONDS_TO_VOICE"
+    | "ALERT"
+    | "AGITATED_OR_CONFUSED"
+    | "ONSET_OF_AGITATION_AND_CONFUSION"
+    | "UNKNOWN";
   rounds_type: (typeof DailyRoundTypes)[number];
   last_updated_by_telemedicine?: boolean;
   created_by_telemedicine?: boolean;

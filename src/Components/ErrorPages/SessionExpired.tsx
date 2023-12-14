@@ -1,12 +1,12 @@
 import * as Notification from "../../Utils/Notifications";
 import { useNavigate } from "raviger";
-import { useContext, useEffect } from "react";
-import { handleSignOut } from "../../Utils/utils";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { AuthUserContext } from "../../Common/hooks/useAuthUser";
+import { useAuthContext } from "../../Common/hooks/useAuthUser";
 
 export default function SessionExpired() {
-  const isAuthenticated = !!useContext(AuthUserContext);
+  const { signOut, user } = useAuthContext();
+  const isAuthenticated = !!user;
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -32,9 +32,7 @@ export default function SessionExpired() {
           <br />
           <br />
           <div
-            onClick={() => {
-              handleSignOut(false);
-            }}
+            onClick={signOut}
             className="hover:bg-primary- inline-block cursor-pointer rounded-lg bg-primary-600 px-4 py-2 text-white hover:text-white"
           >
             {t("return_to_login")}
