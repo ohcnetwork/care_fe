@@ -43,6 +43,7 @@ jobs:
         run: |
           cd care
           docker compose exec backend bash -c "python manage.py load_dummy_data"
+          docker compose restart backend
           cd ..
 
       - name: Check care is up ♻
