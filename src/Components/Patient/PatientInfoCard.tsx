@@ -156,12 +156,7 @@ export default function PatientInfoCard(props: {
             >
               {consultation?.current_bed &&
               consultation?.discharge_date === null ? (
-                <div
-                  className="flex h-full flex-col items-center justify-center"
-                  title={`
-                ${consultation?.current_bed?.bed_object?.location_object?.name}\n${consultation?.current_bed?.bed_object.name}
-              `}
-                >
+                <div className="tooltip flex h-full flex-col items-center justify-center">
                   <p className="w-full truncate px-2 text-center text-sm text-gray-900">
                     {
                       consultation?.current_bed?.bed_object?.location_object
@@ -171,6 +166,15 @@ export default function PatientInfoCard(props: {
                   <p className="w-full truncate px-2 text-center text-base font-bold">
                     {consultation?.current_bed?.bed_object.name}
                   </p>
+                  <div className="tooltip-text tooltip-right flex -translate-x-1/3 translate-y-1/2 flex-col items-center justify-center text-sm ">
+                    <span>
+                      {
+                        consultation?.current_bed?.bed_object?.location_object
+                          ?.name
+                      }
+                    </span>
+                    <span>{consultation?.current_bed?.bed_object.name}</span>
+                  </div>
                 </div>
               ) : (
                 <div className="flex h-full items-center justify-center">
