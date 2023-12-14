@@ -402,6 +402,40 @@ class FacilityPage {
       .its("response.statusCode")
       .should("eq", 201);
   }
+
+  getStateElement() {
+    return cy.get("#state");
+  }
+
+  getDistrictElement() {
+    return cy.get("#district");
+  }
+
+  selectStateOnPincode(stateName) {
+    this.getStateElement()
+      .scrollIntoView()
+      .should("be.visible")
+      .then(($element) => {
+        const text = $element.text();
+        if (!text.includes(stateName)) {
+          this.getStateElement().click();
+          cy.get("li[role=option]").contains(stateName).click();
+        }
+      });
+  }
+
+  selectDistrictOnPincode(districtName) {
+    this.getDistrictElement()
+      .scrollIntoView()
+      .should("be.visible")
+      .then(($element) => {
+        const text = $element.text();
+        if (!text.includes(districtName)) {
+          this.getDistrictElement().click();
+          cy.get("li[role=option]").contains(districtName).click();
+        }
+      });
+  }
 }
 
 export default FacilityPage;
