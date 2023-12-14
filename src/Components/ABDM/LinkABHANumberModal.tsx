@@ -423,7 +423,7 @@ const VerifyAadhaarSection = ({
     if (!validateAadhaar() || !txnId) return;
 
     setIsSendingOtp(true);
-    const { res, data } = await request(routes.abha.generateAadhaarOtp, {
+    const { res, data } = await request(routes.abha.resendAadhaarOtp, {
       body: {
         txnId: txnId,
       },
