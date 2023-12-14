@@ -92,6 +92,6 @@ export function mergeRequestOptions<TData>(
       options.onResponse?.(res);
       overrides.onResponse?.(res);
     },
-    silent: overrides.silent || options.silent,
+    silent: overrides.silent ?? options.silent,
   };
 }

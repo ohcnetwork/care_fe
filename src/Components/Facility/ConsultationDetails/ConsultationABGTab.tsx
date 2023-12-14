@@ -16,7 +16,7 @@ export const ConsultationABGTab = (props: ConsultationTabProps) => {
         facilityId={props.facilityId}
         patientId={props.patientId}
         consultationId={props.consultationId}
-      ></ABGPlots>
+      />
     </div>
   );
 };

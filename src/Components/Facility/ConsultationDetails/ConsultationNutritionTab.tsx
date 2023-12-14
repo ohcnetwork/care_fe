@@ -12,7 +12,7 @@ export const ConsultationNutritionTab = (props: ConsultationTabProps) => {
         facilityId={props.facilityId}
         patientId={props.patientId}
         consultationId={props.consultationId}
-      ></NutritionPlots>
+      />
     </div>
   );
 };

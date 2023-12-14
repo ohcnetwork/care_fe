@@ -5,7 +5,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
 import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
-import { classNames, handleSignOut, parsePhoneNumber } from "../../Utils/utils";
+import { classNames, parsePhoneNumber } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
@@ -13,7 +13,7 @@ import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { GenderType, SkillModel, UpdatePasswordForm } from "../Users/models";
 import UpdatableApp, { checkForUpdate } from "../Common/UpdatableApp";
 import dayjs from "../../Utils/dayjs";
-import useAuthUser from "../../Common/hooks/useAuthUser";
+import useAuthUser, { useAuthContext } from "../../Common/hooks/useAuthUser";
 import { PhoneNumberValidator } from "../Form/FieldValidators";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
@@ -100,6 +100,7 @@ const editFormReducer = (state: State, action: Action) => {
 };
 
 export default function UserProfile() {
+  const { signOut } = useAuthContext();
   const [states, dispatch] = useReducer(editFormReducer, initialState);
   const [updateStatus, setUpdateStatus] = useState({
     isChecking: false,
@@ -413,7 +414,7 @@ export default function UserProfile() {
                 >
                   {showEdit ? "Cancel" : "Edit User Profile"}
                 </ButtonV2>
-                <ButtonV2 variant="danger" onClick={(_) => handleSignOut(true)}>
+                <ButtonV2 variant="danger" onClick={signOut}>
                   <CareIcon className="care-l-sign-out-alt" />
                   Sign out
                 </ButtonV2>

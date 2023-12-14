@@ -125,8 +125,11 @@ const TransferPatientDialog = (props: Props) => {
       if (res && res.data && res.status === 200) {
         dispatch({ type: "set_form", form: initForm });
         handleOk();
+
+        const patientName =
+          patientOptions.find((p) => p.id === state.form.patient)?.text || "";
         Notification.Success({
-          msg: `Patient ${res.data.patient} transferred successfully`,
+          msg: `Patient ${patientName} transferred successfully`,
         });
         const newFacilityId =
           res.data && res.data.facility_object && res.data.facility_object.id;
