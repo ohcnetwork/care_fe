@@ -256,16 +256,7 @@ export const DailyRounds = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "resp":
-          if (
-            state.form.resp === null &&
-            state.form.rounds_type === "NORMAL" &&
-            state.form.clone_last !== true
-          ) {
-            errors[field] = "Please enter a respiratory rate";
-            invalidForm = true;
-          }
-          return;
+
         default:
           return;
       }
@@ -588,7 +579,6 @@ export const DailyRounds = (props: any) => {
                   {...field("resp")}
                   label="Respiratory Rate"
                   unit="bpm"
-                  required
                   start={0}
                   end={50}
                   step={1}

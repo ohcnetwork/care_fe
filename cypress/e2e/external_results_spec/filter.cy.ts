@@ -20,7 +20,7 @@ describe("External Results Filters", () => {
     cy.get("#local_bodies").click();
     cy.get("#wards").click();
     cy.get("[role='option']").should("be.visible");
-    cy.contains("[role='option']", "12").click();
+    cy.contains("[role='option']", "4").click();
     cy.contains("Apply").click();
   });
 

@@ -190,7 +190,10 @@ export default function PatientInfoCard(props: {
             </ButtonV2>
           </div>
           <div className="flex flex-col items-center gap-4 lg:items-start lg:gap-0 lg:pl-6">
-            <div className="mb-1 font-semibold sm:text-xl md:text-4xl">
+            <div
+              className="mb-1 font-semibold sm:text-xl md:text-4xl"
+              id="patient-name-consultation"
+            >
               {patient.name}
             </div>
             <div>
