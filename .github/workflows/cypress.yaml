@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        containers: [1,2,3,4,5,6,7,8]
+        containers: [1, 2, 3, 4, 5, 6, 7, 8]
     steps:
       - name: Checkout 📥
         uses: actions/checkout@v3
@@ -46,8 +46,13 @@ jobs:
           docker restart care-backend-1
           cd ..
 
-      - name: Check care is up ♻
-        run: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
+      - name: Wait for care to be up ♻
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 1
+          max_attempts: 5
+          command: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
+          on_retry_command: sleep 5
 
       - name: Install dependencies 📦
         run: npm install
@@ -80,4 +85,3 @@ jobs:
         with:
           name: cypress-screenshots
           path: cypress/screenshots
-
