@@ -13,6 +13,7 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { classNames } from "../../Utils/utils";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
+import { ABDMError } from "./models";
 
 export const validateRule = (
   condition: boolean,
@@ -427,6 +428,7 @@ const VerifyAadhaarSection = ({
       body: {
         txnId: txnId,
       },
+      silent: true,
     });
     setIsSendingOtp(false);
 
@@ -436,7 +438,15 @@ const VerifyAadhaarSection = ({
         msg: "OTP has been resent to the mobile number registered with the Aadhar number.",
       });
     } else {
-      Notify.Error({ msg: JSON.stringify(data) });
+      Notify.Error({
+        msg:
+          (data as unknown as ABDMError).details
+            ?.map((detail) => detail.message)
+            .join(", ")
+            .trim() ||
+          (data as unknown as ABDMError).message ||
+          "OTP resend failed",
+      });
     }
   };
 
