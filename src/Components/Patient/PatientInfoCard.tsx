@@ -27,7 +27,9 @@ import request from "../../Utils/request/request.js";
 import routes from "../../Redux/api.js";
 import DropdownMenu from "../Common/components/Menu.js";
 import { triggerGoal } from "../../Integrations/Plausible.js";
-import useAuthUser from "../../Common/hooks/useAuthUser.js";
+
+import useAuthUser from "../../Common/hooks/useAuthUser";
+import { Mews } from "../Facility/Consultations/Mews.js";
 import DischargeSummaryModal from "../Facility/DischargeSummaryModal.js";
 import DischargeModal from "../Facility/DischargeModal.js";
 import { useTranslation } from "react-i18next";
@@ -192,7 +194,10 @@ export default function PatientInfoCard(props: {
             </ButtonV2>
           </div>
           <div className="flex flex-col items-center gap-4 lg:items-start lg:gap-0 lg:pl-6">
-            <div className="mb-1 font-semibold sm:text-xl md:text-4xl">
+            <div
+              className="mb-1 font-semibold sm:text-xl md:text-4xl"
+              id="patient-name-consultation"
+            >
               {patient.name}
             </div>
             <div>
@@ -344,6 +349,11 @@ export default function PatientInfoCard(props: {
             )}
           </div>
         </div>
+        {consultation?.last_daily_round && (
+          <div className="flex w-full justify-center bg-white px-4 py-2 lg:w-5/12 lg:flex-row lg:justify-end lg:p-6">
+            <Mews dailyRound={consultation?.last_daily_round} />
+          </div>
+        )}
 
         <div className="flex w-full flex-col gap-2 px-4 py-1 lg:w-fit lg:p-6">
           {!!consultation?.discharge_date && (
