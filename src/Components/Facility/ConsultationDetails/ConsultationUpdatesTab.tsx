@@ -233,7 +233,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                               ? formatDate(
                                   props.consultationData.discharge_date
                                 )
-                              : "--/--/----"}
+                              : "--/--/---- --:-- --"}
                           </span>
                         </div>
                         <div>
@@ -294,10 +294,10 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                           Discharge Date {" - "}
                           <span className="font-semibold">
                             {props.consultationData.discharge_date
-                              ? formatDate(
+                              ? formatDateTime(
                                   props.consultationData.discharge_date
                                 )
-                              : "--/--/----"}
+                              : "--/--/---- --:-- --"}
                           </span>
                         </div>
                         <div>

@@ -34,7 +34,34 @@
 
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
+    <div id="root">
+      <style>
+        .App-logo {
+          height: 10vmin;
+          pointer-events: none;
+          filter: brightness(80%);
+        }
+       @media (prefers-reduced-motion: no-preference) {
+          .App-logo {
+            animation: App-logo-blink 1s linear infinite;
+          }
+        }
+        @keyframes App-logo-blink {
+          0% { opacity: 0;}
+          25% { opacity: 0.5;}
+          50% {opacity: 1;}
+          75% {opacity: 0.5;}
+          100% {opacity: 0;}
+        }
+      </style>
+      <div style="display: grid;place-items: center;height: 100vh; text-align: center;">
+        <img 
+        class="App-logo"
+        src="https://cdn.coronasafe.network/light-logo.svg"
+        alt="Care is loading"
+        />
+      </div>
+    </div>
     <script type="module" src="/src/index.tsx"></script>
     <script
       src="https://kit.fontawesome.com/d69454c2e7.js"
