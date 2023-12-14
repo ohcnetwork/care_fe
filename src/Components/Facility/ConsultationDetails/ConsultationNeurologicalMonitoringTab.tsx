@@ -18,7 +18,7 @@ export const ConsultationNeurologicalMonitoringTab = (
         facilityId={props.facilityId}
         patientId={props.patientId}
         consultationId={props.consultationId}
-      ></NeurologicalTable>
+      />
     </div>
   );
 };
