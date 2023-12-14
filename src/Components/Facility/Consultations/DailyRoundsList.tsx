@@ -65,7 +65,7 @@ export default function DailyRoundsList({ consultation }: Props) {
                             type: "created",
                             timestamp: item.taken_at?.toString() ?? "",
                             by: {
-                              user_type: item.created_by?.user_type ?? "",
+                              user_type: "",
                               first_name: "Virtual",
                               last_name: "Assistant",
                               username: "",

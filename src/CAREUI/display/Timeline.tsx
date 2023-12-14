@@ -81,6 +81,8 @@ export const TimelineNode = (props: TimelineNodeProps) => {
                     {props.event.by && (
                       <span className="font-medium text-gray-900">
                         {formatName(props.event.by)}{" "}
+                        {props.event.by.user_type &&
+                          `(${props.event.by.user_type}) `}
                       </span>
                     )}
                     {props.titleSuffix
