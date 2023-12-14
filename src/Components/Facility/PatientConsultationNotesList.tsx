@@ -14,6 +14,9 @@ interface PatientNotesProps {
   setReload?: any;
 }
 
+// TODO:
+// 1. Adding new note isn't refetching the notes (fix needed in PatientNotesList.tsx as)
+
 const pageSize = RESULTS_PER_PAGE_LIMIT;
 
 const PatientConsultationNotesList = (props: PatientNotesProps) => {
