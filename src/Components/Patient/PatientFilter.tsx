@@ -1,7 +1,5 @@
 import dayjs from "dayjs";
-import { navigate } from "raviger";
 import { useCallback, useEffect } from "react";
-import { useDispatch } from "react-redux";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import {
@@ -19,6 +17,7 @@ import {
   getAnyFacility,
   getDistrict,
 } from "../../Redux/actions";
+import { useDispatch } from "react-redux";
 import { dateQueryString } from "../../Utils/utils";
 import { DateRange } from "../Common/DateRangeInputV2";
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -41,7 +40,7 @@ const getDate = (value: any) =>
 
 export default function PatientFilter(props: any) {
   const { kasp_enabled, kasp_string } = useConfig();
-  const { filter, onChange, closeFilter } = props;
+  const { filter, onChange, closeFilter, removeFilters } = props;
 
   const [filterState, setFilterState] = useMergeState({
     district: filter.district || "",
@@ -337,8 +336,7 @@ export default function PatientFilter(props: any) {
       advancedFilter={props}
       onApply={applyFilter}
       onClear={() => {
-        navigate("/patients");
-        setFilterState(clearFilterState);
+        removeFilters(Object.keys(clearFilterState));
         closeFilter();
       }}
     >

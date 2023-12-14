@@ -1,11 +1,11 @@
-import { navigate } from "raviger";
 import {
   AREACODES,
   IN_LANDLINE_AREA_CODES,
-  LocalStorageKeys,
+  USER_TYPES,
 } from "../Common/constants";
 import phoneCodesJson from "../Common/static/countryPhoneAndFlags.json";
 import dayjs from "./dayjs";
+import { UserModel } from "../Components/Users/models";
 
 interface ApacheParams {
   age: number;
@@ -119,41 +119,6 @@ export const dateQueryString = (date: DateLike) => {
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-export const handleSignOut = (forceReload: boolean) => {
-  Object.values(LocalStorageKeys).forEach((key) =>
-    localStorage.removeItem(key)
-  );
-  const redirectURL = new URLSearchParams(window.location.search).get(
-    "redirect"
-  );
-  const url = redirectURL ? `/?redirect=${redirectURL}` : "/";
-  if (forceReload) {
-    window.location.href = url;
-  } else {
-    navigate(url);
-  }
-};
-
-export const handleRedirection = () => {
-  const redirectParam = new URLSearchParams(window.location.search).get(
-    "redirect"
-  );
-  try {
-    if (redirectParam) {
-      const redirectURL = new URL(redirectParam);
-
-      if (redirectURL.origin === window.location.origin) {
-        const newPath = redirectURL.pathname + redirectURL.search;
-        window.location.href = `${window.location.origin}${newPath}`;
-        return;
-      }
-    }
-    window.location.href = "/facility";
-  } catch {
-    window.location.href = "/facility";
-  }
-};
-
 /**
  * Referred from: https://stackoverflow.com/a/9039885/7887936
  * @returns `true` if device is iOS, else `false`
@@ -175,9 +140,14 @@ function _isAppleDevice() {
 }
 
 /**
- * `true` if device is iOS, else `false`
+ * `true` if device is an Apple device, else `false`
  */
 export const isAppleDevice = _isAppleDevice();
+
+/**
+ * `true` if device is an iOS device, else `false`
+ */
+export const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
 /**
  * Conditionally concatenate classes. An alternate replacement for `clsx`.
@@ -453,4 +423,35 @@ export const formatAge = (
 export const scrollTo = (id: string | boolean) => {
   const element = document.querySelector(`#${id}`);
   element?.scrollIntoView({ behavior: "smooth", block: "center" });
+};
+
+export const showUserDelete = (authUser: UserModel, targetUser: UserModel) => {
+  // Auth user should be higher in hierarchy than target user
+  if (
+    USER_TYPES.indexOf(authUser.user_type) <=
+    USER_TYPES.indexOf(targetUser.user_type)
+  )
+    return false;
+
+  if (
+    authUser.user_type === "StateAdmin" &&
+    targetUser.state_object?.id === authUser.state
+  )
+    return true;
+
+  if (
+    authUser.user_type === "DistrictAdmin" &&
+    targetUser.district_object?.id === authUser.district
+  )
+    return true;
+
+  return false;
+};
+
+export const invalidateFiltersCache = () => {
+  for (const key in localStorage) {
+    if (key.startsWith("filters--")) {
+      localStorage.removeItem(key);
+    }
+  }
 };
