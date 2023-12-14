@@ -8,7 +8,7 @@ import ButtonV2 from "../../Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { NonReadOnlyUsers } from "../../../Utils/AuthorizeFor";
 import { useMessageListener } from "../../../Common/hooks/useMessageListener";
-import PatientNotesList from "../../Facility/PatientNotesList";
+import PatientConsultationNotesList from "../PatientConsultationNotesList.js";
 
 interface ConsultationDoctorNotesProps {
   patientId: string;
@@ -82,10 +82,9 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       backUrl={`/facility/${facilityId}/patient/${patientId}`}
     >
       <div className="mx-3 my-2 flex grow flex-col rounded-lg bg-white p-2 sm:mx-10 sm:my-5 sm:p-5">
-        <PatientNotesList
+        <PatientConsultationNotesList
           patientId={patientId}
           facilityId={facilityId}
-          consultationId={consultationId}
           reload={reload}
           setReload={setReload}
         />

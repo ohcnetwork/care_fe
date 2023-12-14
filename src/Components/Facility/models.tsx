@@ -490,6 +490,12 @@ export interface PatientNotesModel {
   created_date: string;
 }
 
+export interface StateType {
+  notes: PatientNotesModel[];
+  cPage: number;
+  totalPages: number;
+}
+
 export type IFacilityNotificationRequest = {
   facility: string;
   message: string;

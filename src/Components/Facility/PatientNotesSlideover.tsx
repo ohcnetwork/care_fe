@@ -2,7 +2,6 @@ import { useState, useEffect, Dispatch, SetStateAction } from "react";
 import { getPatient, addPatientNote } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
-import PatientNotesList from "./PatientNotesList";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
@@ -10,6 +9,7 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { make as Link } from "../Common/components/Link.bs";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
+import PatientConsultationNotesList from "./PatientConsultationNotesList";
 
 interface PatientNotesProps {
   patientId: string;
@@ -32,6 +32,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   const onAddNote = () => {
     const payload = {
       note: noteField,
+      consultation: consultationId,
     };
     if (!/\S+/.test(noteField)) {
       Notification.Error({
@@ -42,7 +43,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
     dispatch(addPatientNote(patientId, payload)).then(() => {
       Notification.Success({ msg: "Note added successfully" });
       setNoteField("");
-      setReload(!reload);
+      setReload(true);
     });
   };
 
@@ -124,7 +125,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
             {notesActionIcons}
           </div>
           {/* Doctor Notes Body */}
-          <PatientNotesList
+          <PatientConsultationNotesList
             facilityId={facilityId}
             patientId={patientId}
             reload={reload}
