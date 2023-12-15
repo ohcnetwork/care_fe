@@ -147,8 +147,8 @@ export default function PatientInfoCard(props: {
         </>
       )}
 
-      <section className="flex flex-col items-center justify-between space-y-3 lg:flex-row lg:space-x-2 lg:space-y-0">
-        <div className="flex w-full flex-col bg-white px-4 py-2 lg:w-7/12 lg:flex-row lg:p-6">
+      <section className="flex flex-col items-center justify-between space-y-3 lg:space-x-2 lg:space-y-0 xl:flex-row">
+        <div className="flex w-full flex-col items-center justify-center bg-white px-4 py-3 md:flex-row xl:justify-start">
           {/* Can support for patient picture in the future */}
           <div className="mt-2 flex flex-col items-center">
             <div
@@ -349,369 +349,371 @@ export default function PatientInfoCard(props: {
             )}
           </div>
         </div>
-        {consultation?.last_daily_round && (
-          <div className="flex w-full justify-center bg-white px-4 py-2 lg:w-5/12 lg:flex-row lg:justify-end lg:p-6">
-            <Mews dailyRound={consultation?.last_daily_round} />
-          </div>
-        )}
 
-        <div className="flex w-full flex-col gap-2 px-4 py-1 lg:w-fit lg:p-6">
-          {!!consultation?.discharge_date && (
-            <div className="flex flex-col items-center justify-center">
-              <div className="text-sm font-normal leading-5 text-gray-500">
-                Discharge Reason
-              </div>
-              <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
-                {!consultation?.discharge_reason ? (
-                  <span className="text-gray-800">
-                    {consultation.suggestion === "OP"
-                      ? "OP file closed"
-                      : "UNKNOWN"}
-                  </span>
-                ) : consultation?.discharge_reason === "EXP" ? (
-                  <span className="text-red-600">EXPIRED</span>
-                ) : (
-                  DISCHARGE_REASONS.find(
-                    (reason) => reason.id === consultation?.discharge_reason
-                  )?.text
-                )}
-              </div>
+        <div className="flex w-full flex-col justify-center gap-2 px-4 py-1 md:flex-row lg:p-6 xl:justify-end">
+          {consultation?.last_daily_round && (
+            <div className="flex justify-center bg-white px-4 py-2 lg:flex-row lg:p-6">
+              <Mews dailyRound={consultation?.last_daily_round} />
             </div>
           )}
-          {[
-            [
-              `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/update`,
-              "Edit Consultation Details",
-              "pen",
-              patient.is_active &&
-                consultation?.id &&
-                !consultation?.discharge_date,
-            ],
-            [
-              `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/daily-rounds`,
-              "Log Update",
-              "plus",
-              patient.is_active &&
-                consultation?.id &&
-                !consultation?.discharge_date,
+          <div className="flex flex-col justify-center">
+            {!!consultation?.discharge_date && (
+              <div className="flex flex-col items-center justify-center">
+                <div className="text-sm font-normal leading-5 text-gray-500">
+                  Discharge Reason
+                </div>
+                <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
+                  {!consultation?.discharge_reason ? (
+                    <span className="text-gray-800">
+                      {consultation.suggestion === "OP"
+                        ? "OP file closed"
+                        : "UNKNOWN"}
+                    </span>
+                  ) : consultation?.discharge_reason === "EXP" ? (
+                    <span className="text-red-600">EXPIRED</span>
+                  ) : (
+                    DISCHARGE_REASONS.find(
+                      (reason) => reason.id === consultation?.discharge_reason
+                    )?.text
+                  )}
+                </div>
+              </div>
+            )}
+            {[
               [
-                !(consultation?.facility !== patient.facility) &&
-                  !(consultation?.discharge_date ?? !patient.is_active) &&
-                  dayjs(consultation?.modified_date).isBefore(
-                    dayjs().subtract(1, "day")
-                  ),
-                <div className="text-center">
-                  <CareIcon className="care-l-exclamation-triangle" /> No update
-                  filed in the last 24 hours
-                </div>,
+                `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/update`,
+                "Edit Consultation Details",
+                "pen",
+                patient.is_active &&
+                  consultation?.id &&
+                  !consultation?.discharge_date,
               ],
-            ],
-          ].map(
-            (action: any, i) =>
-              action[3] && (
-                <div className="relative" key={i}>
-                  <ButtonV2
-                    key={i}
-                    variant={action?.[4]?.[0] ? "danger" : "primary"}
-                    href={
-                      consultation?.admitted &&
-                      !consultation?.current_bed &&
-                      i === 1
-                        ? undefined
-                        : `${action[0]}`
-                    }
-                    onClick={() => {
-                      if (
+              [
+                `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/daily-rounds`,
+                "Log Update",
+                "plus",
+                patient.is_active &&
+                  consultation?.id &&
+                  !consultation?.discharge_date,
+                [
+                  !(consultation?.facility !== patient.facility) &&
+                    !(consultation?.discharge_date ?? !patient.is_active) &&
+                    dayjs(consultation?.modified_date).isBefore(
+                      dayjs().subtract(1, "day")
+                    ),
+                  <div className="text-center">
+                    <CareIcon className="care-l-exclamation-triangle" /> No
+                    update filed in the last 24 hours
+                  </div>,
+                ],
+              ],
+            ].map(
+              (action: any, i) =>
+                action[3] && (
+                  <div className="relative" key={i}>
+                    <ButtonV2
+                      key={i}
+                      variant={action?.[4]?.[0] ? "danger" : "primary"}
+                      href={
                         consultation?.admitted &&
                         !consultation?.current_bed &&
                         i === 1
-                      ) {
-                        Notification.Error({
-                          msg: "Please assign a bed to the patient",
-                        });
-                        setOpen(true);
+                          ? undefined
+                          : `${action[0]}`
                       }
-                    }}
-                    className="w-full"
-                  >
-                    <span className="flex w-full items-center justify-center gap-2 lg:justify-start">
-                      <CareIcon className={`care-l-${action[2]} text-lg`} />
-                      <p className="font-semibold">{action[1]}</p>
-                    </span>
-                  </ButtonV2>
-                  {action?.[4]?.[0] && (
-                    <>
-                      <p className="mt-1 text-xs text-red-500">
-                        {action[4][1]}
-                      </p>
-                    </>
-                  )}
-                </div>
-              )
-          )}
-          <DropdownMenu
-            id="show-more"
-            itemClassName="min-w-0 sm:min-w-[225px]"
-            title={"Show More"}
-            icon={<CareIcon icon="l-sliders-v-alt" />}
-          >
-            <div>
-              {[
-                [
-                  `/patient/${patient.id}/investigation_reports`,
-                  "Investigation Summary",
-                  "align-alt",
-                  true,
-                ],
-                [
-                  `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/treatment-summary`,
-                  "Treatment Summary",
-                  "file-medical",
-                  consultation?.id,
-                ],
-              ]
-                .concat(
-                  enable_hcx
-                    ? [
-                        [
-                          `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/claims`,
-                          "Claims",
-                          "copy-landscape",
-                          consultation?.id,
-                        ],
-                      ]
-                    : []
+                      onClick={() => {
+                        if (
+                          consultation?.admitted &&
+                          !consultation?.current_bed &&
+                          i === 1
+                        ) {
+                          Notification.Error({
+                            msg: "Please assign a bed to the patient",
+                          });
+                          setOpen(true);
+                        }
+                      }}
+                      className="w-full"
+                    >
+                      <span className="flex w-full items-center justify-center gap-2 lg:justify-start">
+                        <CareIcon className={`care-l-${action[2]} text-lg`} />
+                        <p className="font-semibold">{action[1]}</p>
+                      </span>
+                    </ButtonV2>
+                    {action?.[4]?.[0] && (
+                      <>
+                        <p className="mt-1 text-xs text-red-500">
+                          {action[4][1]}
+                        </p>
+                      </>
+                    )}
+                  </div>
                 )
-                .map(
-                  (action: any, i) =>
-                    action[3] && (
-                      <div key={i}>
-                        <Link
-                          key={i}
-                          className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
-                          href={
-                            consultation?.admitted &&
-                            !consultation?.current_bed &&
-                            i === 1
-                              ? ""
-                              : `${action[0]}`
-                          }
-                          onClick={() => {
-                            if (
+            )}
+            <DropdownMenu
+              id="show-more"
+              itemClassName="min-w-0 sm:min-w-[225px]"
+              title={"Show More"}
+              icon={<CareIcon icon="l-sliders-v-alt" />}
+            >
+              <div>
+                {[
+                  [
+                    `/patient/${patient.id}/investigation_reports`,
+                    "Investigation Summary",
+                    "align-alt",
+                    true,
+                  ],
+                  [
+                    `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/treatment-summary`,
+                    "Treatment Summary",
+                    "file-medical",
+                    consultation?.id,
+                  ],
+                ]
+                  .concat(
+                    enable_hcx
+                      ? [
+                          [
+                            `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/claims`,
+                            "Claims",
+                            "copy-landscape",
+                            consultation?.id,
+                          ],
+                        ]
+                      : []
+                  )
+                  .map(
+                    (action: any, i) =>
+                      action[3] && (
+                        <div key={i}>
+                          <Link
+                            key={i}
+                            className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
+                            href={
                               consultation?.admitted &&
                               !consultation?.current_bed &&
                               i === 1
-                            ) {
-                              Notification.Error({
-                                msg: "Please assign a bed to the patient",
-                              });
-                              setOpen(true);
+                                ? ""
+                                : `${action[0]}`
                             }
-                            triggerGoal("Patient Card Button Clicked", {
-                              buttonName: action[1],
-                              consultationId: consultation?.id,
-                              userId: authUser?.id,
-                            });
-                          }}
-                        >
-                          <CareIcon
-                            className={`care-l-${action[2]} text-lg text-primary-500`}
-                          />
-                          <span>{action[1]}</span>
-                        </Link>
-                        {action?.[4]?.[0] && (
+                            onClick={() => {
+                              if (
+                                consultation?.admitted &&
+                                !consultation?.current_bed &&
+                                i === 1
+                              ) {
+                                Notification.Error({
+                                  msg: "Please assign a bed to the patient",
+                                });
+                                setOpen(true);
+                              }
+                              triggerGoal("Patient Card Button Clicked", {
+                                buttonName: action[1],
+                                consultationId: consultation?.id,
+                                userId: authUser?.id,
+                              });
+                            }}
+                          >
+                            <CareIcon
+                              className={`care-l-${action[2]} text-lg text-primary-500`}
+                            />
+                            <span>{action[1]}</span>
+                          </Link>
+                          {action?.[4]?.[0] && (
+                            <>
+                              <p className="mt-1 text-xs text-red-500">
+                                {action[4][1]}
+                              </p>
+                            </>
+                          )}
+                        </div>
+                      )
+                  )}
+              </div>
+              <div>
+                {enable_abdm &&
+                  (patient.abha_number ? (
+                    <>
+                      <Menu.Item>
+                        {({ close }) => (
                           <>
-                            <p className="mt-1 text-xs text-red-500">
-                              {action[4][1]}
-                            </p>
+                            <div
+                              className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
+                              onClick={() => {
+                                close();
+                                setShowABHAProfile(true);
+                                triggerGoal("Patient Card Button Clicked", {
+                                  buttonName: "Show ABHA Profile",
+                                  consultationId: consultation?.id,
+                                  userId: authUser?.id,
+                                });
+                              }}
+                            >
+                              <CareIcon className="care-l-user-square text-lg text-primary-500" />
+                              <span>Show ABHA Profile</span>
+                            </div>
+                            <div
+                              className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
+                              onClick={() => {
+                                triggerGoal("Patient Card Button Clicked", {
+                                  buttonName: "Link Care Context",
+                                  consultationId: consultation?.id,
+                                  userId: authUser?.id,
+                                });
+                                close();
+                                setShowLinkCareContext(true);
+                              }}
+                            >
+                              <CareIcon className="care-l-link text-lg text-primary-500" />
+                              <span>Link Care Context</span>
+                            </div>
                           </>
                         )}
-                      </div>
-                    )
-                )}
-            </div>
-            <div>
-              {enable_abdm &&
-                (patient.abha_number ? (
-                  <>
+                      </Menu.Item>
+                    </>
+                  ) : (
                     <Menu.Item>
                       {({ close }) => (
-                        <>
-                          <div
-                            className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
-                            onClick={() => {
-                              close();
-                              setShowABHAProfile(true);
-                              triggerGoal("Patient Card Button Clicked", {
-                                buttonName: "Show ABHA Profile",
-                                consultationId: consultation?.id,
-                                userId: authUser?.id,
-                              });
-                            }}
-                          >
-                            <CareIcon className="care-l-user-square text-lg text-primary-500" />
-                            <span>Show ABHA Profile</span>
-                          </div>
-                          <div
-                            className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
-                            onClick={() => {
-                              triggerGoal("Patient Card Button Clicked", {
-                                buttonName: "Link Care Context",
-                                consultationId: consultation?.id,
-                                userId: authUser?.id,
-                              });
-                              close();
-                              setShowLinkCareContext(true);
-                            }}
-                          >
+                        <div
+                          className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
+                          onClick={() => {
+                            close();
+                            setShowLinkABHANumber(true);
+                          }}
+                        >
+                          <span className="flex w-full items-center justify-start gap-2">
                             <CareIcon className="care-l-link text-lg text-primary-500" />
-                            <span>Link Care Context</span>
-                          </div>
-                        </>
+                            <p>Link ABHA Number</p>
+                          </span>
+                        </div>
                       )}
                     </Menu.Item>
-                  </>
-                ) : (
+                  ))}
+              </div>
+              <div>
+                {!consultation?.discharge_date && (
                   <Menu.Item>
                     {({ close }) => (
-                      <div
-                        className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
-                        onClick={() => {
-                          close();
-                          setShowLinkABHANumber(true);
-                        }}
-                      >
-                        <span className="flex w-full items-center justify-start gap-2">
-                          <CareIcon className="care-l-link text-lg text-primary-500" />
-                          <p>Link ABHA Number</p>
-                        </span>
-                      </div>
+                      <>
+                        {hasActiveShiftingRequest() ? (
+                          <div
+                            className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
+                            onClick={() => {
+                              close();
+                              navigate(
+                                `/shifting/${
+                                  activeShiftingData[
+                                    activeShiftingData.length - 1
+                                  ].id
+                                }`
+                              );
+                            }}
+                          >
+                            <span className="flex w-full items-center justify-start gap-2">
+                              <CareIcon className="care-l-ambulance text-lg text-primary-500" />
+                              <p>Track Shifting</p>
+                            </span>
+                          </div>
+                        ) : (
+                          <div
+                            className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
+                            onClick={() => {
+                              close();
+                              navigate(
+                                `/facility/${patient.facility}/patient/${patient.id}/shift/new`
+                              );
+                            }}
+                          >
+                            <span className="flex w-full items-center justify-start gap-2">
+                              <CareIcon className="care-l-ambulance text-lg text-primary-500" />
+                              <p>Shift Patient</p>
+                            </span>
+                          </div>
+                        )}
+                      </>
                     )}
                   </Menu.Item>
-                ))}
-            </div>
-            <div>
-              {!consultation?.discharge_date && (
+                )}
                 <Menu.Item>
                   {({ close }) => (
-                    <>
-                      {hasActiveShiftingRequest() ? (
-                        <div
-                          className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
-                          onClick={() => {
-                            close();
-                            navigate(
-                              `/shifting/${
-                                activeShiftingData[
-                                  activeShiftingData.length - 1
-                                ].id
-                              }`
-                            );
-                          }}
-                        >
-                          <span className="flex w-full items-center justify-start gap-2">
-                            <CareIcon className="care-l-ambulance text-lg text-primary-500" />
-                            <p>Track Shifting</p>
-                          </span>
-                        </div>
-                      ) : (
-                        <div
-                          className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
-                          onClick={() => {
-                            close();
-                            navigate(
-                              `/facility/${patient.facility}/patient/${patient.id}/shift/new`
-                            );
-                          }}
-                        >
-                          <span className="flex w-full items-center justify-start gap-2">
-                            <CareIcon className="care-l-ambulance text-lg text-primary-500" />
-                            <p>Shift Patient</p>
-                          </span>
-                        </div>
-                      )}
-                    </>
+                    <div
+                      className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
+                      onClick={() => {
+                        close();
+                        setOpenDischargeSummaryDialog(true);
+                      }}
+                    >
+                      <span className="flex w-full items-center justify-start gap-2">
+                        <CareIcon className="care-l-clipboard-notes text-lg text-primary-500" />
+                        <p>{t("discharge_summary")}</p>
+                      </span>
+                    </div>
                   )}
                 </Menu.Item>
-              )}
-              <Menu.Item>
-                {({ close }) => (
-                  <div
-                    className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
-                    onClick={() => {
-                      close();
-                      setOpenDischargeSummaryDialog(true);
-                    }}
-                  >
-                    <span className="flex w-full items-center justify-start gap-2">
-                      <CareIcon className="care-l-clipboard-notes text-lg text-primary-500" />
-                      <p>{t("discharge_summary")}</p>
-                    </span>
-                  </div>
-                )}
-              </Menu.Item>
-              <Menu.Item>
-                {({ close }) => (
-                  <div
-                    className={`dropdown-item-primary pointer-events-auto ${
-                      consultation?.discharge_date &&
-                      "text-gray-500 accent-gray-500 hover:bg-white"
-                    } m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out`}
-                    onClick={() => {
-                      if (!consultation?.discharge_date) {
-                        close();
-                        setOpenDischargeDialog(true);
-                      }
-                    }}
-                  >
-                    <span className="flex w-full items-center justify-start gap-2">
-                      <CareIcon
-                        className={`care-l-hospital text-lg ${
-                          consultation?.discharge_date
-                            ? "text-gray-500"
-                            : "text-primary-500"
-                        }`}
-                      />
-                      <p>{t("discharge_from_care")}</p>
-                    </span>
-                  </div>
-                )}
-              </Menu.Item>
-            </div>
-            <div className="px-4 py-2">
-              <Switch.Group as="div" className="flex items-center">
-                <Switch
-                  checked={medicoLegalCase}
-                  onChange={(checked) => {
-                    triggerGoal("Patient Card Button Clicked", {
-                      buttonName: "Medico Legal Case",
-                      consultationId: consultation?.id,
-                      userId: authUser?.id,
-                    });
-                    setMedicoLegalCase(checked);
-                    switchMedicoLegalCase(checked);
-                  }}
-                  className={classNames(
-                    medicoLegalCase ? "bg-primary" : "bg-gray-200",
-                    "relative inline-flex h-4 w-8 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none "
+                <Menu.Item>
+                  {({ close }) => (
+                    <div
+                      className={`dropdown-item-primary pointer-events-auto ${
+                        consultation?.discharge_date &&
+                        "text-gray-500 accent-gray-500 hover:bg-white"
+                      } m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out`}
+                      onClick={() => {
+                        if (!consultation?.discharge_date) {
+                          close();
+                          setOpenDischargeDialog(true);
+                        }
+                      }}
+                    >
+                      <span className="flex w-full items-center justify-start gap-2">
+                        <CareIcon
+                          className={`care-l-hospital text-lg ${
+                            consultation?.discharge_date
+                              ? "text-gray-500"
+                              : "text-primary-500"
+                          }`}
+                        />
+                        <p>{t("discharge_from_care")}</p>
+                      </span>
+                    </div>
                   )}
-                >
-                  <span
-                    aria-hidden="true"
+                </Menu.Item>
+              </div>
+              <div className="px-4 py-2">
+                <Switch.Group as="div" className="flex items-center">
+                  <Switch
+                    checked={medicoLegalCase}
+                    onChange={(checked) => {
+                      triggerGoal("Patient Card Button Clicked", {
+                        buttonName: "Medico Legal Case",
+                        consultationId: consultation?.id,
+                        userId: authUser?.id,
+                      });
+                      setMedicoLegalCase(checked);
+                      switchMedicoLegalCase(checked);
+                    }}
                     className={classNames(
-                      medicoLegalCase ? "translate-x-4" : "translate-x-0",
-                      "pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                      medicoLegalCase ? "bg-primary" : "bg-gray-200",
+                      "relative inline-flex h-4 w-8 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none "
                     )}
-                  />
-                </Switch>
-                <Switch.Label as="span" className="ml-3 text-sm">
-                  <span className="font-medium text-gray-900">
-                    Medico-Legal Case
-                  </span>{" "}
-                </Switch.Label>
-              </Switch.Group>
-            </div>
-          </DropdownMenu>
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={classNames(
+                        medicoLegalCase ? "translate-x-4" : "translate-x-0",
+                        "pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                      )}
+                    />
+                  </Switch>
+                  <Switch.Label as="span" className="ml-3 text-sm">
+                    <span className="font-medium text-gray-900">
+                      Medico-Legal Case
+                    </span>{" "}
+                  </Switch.Label>
+                </Switch.Group>
+              </div>
+            </DropdownMenu>
+          </div>
         </div>
       </section>
       <LinkABHANumberModal
