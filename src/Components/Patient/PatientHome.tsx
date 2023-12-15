@@ -85,6 +85,20 @@ export const PatientHome = (props: any) => {
     setAssignedVolunteerObject(patientData.assigned_to_object);
   }, [patientData.assigned_to_object]);
 
+  function formatDateOfBirth(dateString) {
+    if (!dateString) return null;
+
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+
+    const formattedDay = day < 10 ? `0${day}` : day;
+    const formattedMonth = month < 10 ? `0${month}` : month;
+
+    return `${formattedDay}/${formattedMonth}/${year}`;
+  }
+
   const handleTransferComplete = (shift: any) => {
     setModalFor({ ...modalFor, loading: true });
     dispatch(completeTransfer({ externalId: modalFor })).then(() => {
@@ -572,7 +586,7 @@ export const PatientHome = (props: any) => {
                     Date of Birth
                   </div>
                   <div className="mt-1 text-sm font-medium leading-5">
-                    {patientData?.date_of_birth}
+                    {formatDateOfBirth(patientData?.date_of_birth)}
                   </div>
                 </div>
                 <div className="sm:col-span-1">
