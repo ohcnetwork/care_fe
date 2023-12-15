@@ -50,7 +50,7 @@ const initForm: any = {
   admitted_to: "",
   taken_at: null,
   rounds_type: "NORMAL",
-  clone_last: null,
+  clone_last: false,
   systolic: null,
   diastolic: null,
   pulse: null,
@@ -223,7 +223,7 @@ export const DailyRounds = (props: any) => {
                 RHYTHM_CHOICES.find((i) => i.text === res.data.rhythm)?.id) ||
               "0",
             temperature: parseFloat(res.data.temperature),
-            clone_last: res.data.count > 0 ? true : false,
+            // clone_last: res.data.count > 0 ? true : false,
           },
         });
       }
@@ -250,12 +250,6 @@ export const DailyRounds = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "clone_last":
-          if (state.form.clone_last === null) {
-            errors[field] = "Please choose a value";
-            invalidForm = true;
-          }
-          return;
 
         default:
           return;
@@ -271,7 +265,7 @@ export const DailyRounds = (props: any) => {
     if (validForm) {
       setIsLoading(true);
       const baseData = {
-        clone_last: state.form.clone_last,
+        clone_last: state.form.clone_last ?? false,
         rounds_type: state.form.rounds_type,
         patient_category: state.form.patient_category,
         taken_at: state.form.taken_at
@@ -479,7 +473,7 @@ export const DailyRounds = (props: any) => {
           />
         )}
 
-        {(state.form.clone_last === false || id) && (
+        {(!state.form.clone_last || id) && (
           <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
             <TextAreaFormField
               {...field("physical_examination_info")}
