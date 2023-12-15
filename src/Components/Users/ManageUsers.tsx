@@ -15,7 +15,12 @@ import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
 import UserDetails from "../Common/UserDetails";
 import UserFilter from "./UserFilter";
-import { classNames, isUserOnline, relativeTime } from "../../Utils/utils";
+import {
+  classNames,
+  isUserOnline,
+  relativeTime,
+  showUserDelete,
+} from "../../Utils/utils";
 import { navigate } from "raviger";
 import useFilters from "../../Common/hooks/useFilters";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
@@ -159,17 +164,6 @@ export default function ManageUsers() {
     });
   };
 
-  const showDelete = (user: any) => {
-    if (user.is_superuser) return true;
-
-    if (
-      USER_TYPES.indexOf(authUser.user_type) >= USER_TYPES.indexOf("StateAdmin")
-    )
-      return user.state_object?.id === authUser.state;
-
-    return false;
-  };
-
   let userList: any[] = [];
 
   userListData?.results &&
@@ -233,7 +227,7 @@ export default function ManageUsers() {
                       aria-label="Online"
                     ></i>
                   ) : null}
-                  {showDelete(user) && (
+                  {showUserDelete(authUser, user) && (
                     <ButtonV2
                       variant="danger"
                       ghost
