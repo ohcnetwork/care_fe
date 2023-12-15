@@ -32,8 +32,6 @@ const PatientNotesList = (props: PatientNotesProps) => {
     prefetch: reload,
     onResponse: ({ res, data }) => {
       setIsLoading(true);
-      console.log(data);
-      console.log(state);
       if (res?.status === 200 && data) {
         if (state.cPage === 1) {
           setState((prevState: any) => ({
