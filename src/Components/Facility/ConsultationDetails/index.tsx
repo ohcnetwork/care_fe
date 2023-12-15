@@ -270,56 +270,60 @@ export const ConsultationDetails = (props: any) => {
             breadcrumbs={true}
             backUrl="/patients"
           />
-          <div className="flex w-full flex-col min-[1150px]:w-min min-[1150px]:flex-row min-[1150px]:items-center">
-            {!consultationData.discharge_date && (
-              <>
-                <button
-                  onClick={() => {
-                    triggerGoal("Doctor Connect Clicked", {
-                      consultationId,
-                      facilityId: patientData.facility,
-                      userId: authUser.id,
-                      page: "ConsultationDetails",
-                    });
-                    setShowDoctors(true);
-                  }}
-                  className="btn btn-primary m-1 w-full hover:text-white"
-                >
-                  Doctor Connect
-                </button>
-                {patientData.last_consultation?.id &&
-                  isCameraAttached &&
-                  ["DistrictAdmin", "StateAdmin", "Doctor"].includes(
-                    authUser.user_type
-                  ) && (
-                    <Link
-                      href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
-                      className="btn btn-primary m-1 w-full hover:text-white"
-                    >
-                      Camera Feed
-                    </Link>
-                  )}
-              </>
-            )}
-            <Link
-              href={`/facility/${patientData.facility}/patient/${patientData.id}`}
-              className="btn btn-primary m-1 w-full hover:text-white"
-            >
-              Patient Details
-            </Link>
-            <Link
-              id="patient_doctor_notes"
-              onClick={() =>
-                showPatientNotesPopup
-                  ? navigate(
-                      `/facility/${facilityId}/patient/${patientId}/notes`
-                    )
-                  : setShowPatientNotesPopup(true)
-              }
-              className="btn btn-primary m-1 w-full hover:text-white"
-            >
-              Doctor&apos;s Notes
-            </Link>
+          <div className="x:items-center flex grow flex-wrap justify-end xl:w-min">
+            <div className="flex grow xl:grow-0">
+              {!consultationData.discharge_date && (
+                <>
+                  <button
+                    onClick={() => {
+                      triggerGoal("Doctor Connect Clicked", {
+                        consultationId,
+                        facilityId: patientData.facility,
+                        userId: authUser.id,
+                        page: "ConsultationDetails",
+                      });
+                      setShowDoctors(true);
+                    }}
+                    className="btn btn-primary m-1 grow basis-1/4 hover:text-white xl:grow-0"
+                  >
+                    Doctor Connect
+                  </button>
+                  {patientData.last_consultation?.id &&
+                    isCameraAttached &&
+                    ["DistrictAdmin", "StateAdmin", "Doctor"].includes(
+                      authUser.user_type
+                    ) && (
+                      <Link
+                        href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
+                        className="btn btn-primary m-1 grow basis-1/4 hover:text-white xl:grow-0"
+                      >
+                        Camera Feed
+                      </Link>
+                    )}
+                </>
+              )}
+            </div>
+            <div className="flex grow xl:grow-0">
+              <Link
+                href={`/facility/${patientData.facility}/patient/${patientData.id}`}
+                className="btn btn-primary m-1 grow basis-1/4 hover:text-white xl:grow-0"
+              >
+                Patient Details
+              </Link>
+              <Link
+                id="patient_doctor_notes"
+                onClick={() =>
+                  showPatientNotesPopup
+                    ? navigate(
+                        `/facility/${facilityId}/patient/${patientId}/notes`
+                      )
+                    : setShowPatientNotesPopup(true)
+                }
+                className="btn btn-primary m-1 grow basis-1/4 hover:text-white xl:grow-0"
+              >
+                Doctor&apos;s Notes
+              </Link>
+            </div>
           </div>
         </nav>
         <div className="mt-2 flex w-full flex-col md:flex-row">
