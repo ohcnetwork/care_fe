@@ -50,7 +50,7 @@ const initForm: any = {
   admitted_to: "",
   taken_at: null,
   rounds_type: "NORMAL",
-  clone_last: true,
+  clone_last: null,
   systolic: null,
   diastolic: null,
   pulse: null,
