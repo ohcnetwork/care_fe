@@ -618,7 +618,7 @@ const routes = {
     path: "/api/v1/patient/{patientId}/notes/",
     method: "GET",
     TBody: Type<PatientNotesModel[]>(),
-    TRes: Type<PaginatedResponse<PatientNotesModel[]>>(),
+    TRes: Type<PaginatedResponse<PatientNotesModel>>(),
   },
   addPatientNote: {
     path: "/api/v1/patient/{patientId}/notes/",

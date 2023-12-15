@@ -7,6 +7,8 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 
 interface PatientNotesProps {
+  state: StateType;
+  setState: any;
   patientId: string;
   facilityId: string;
   reload?: boolean;
@@ -16,10 +18,8 @@ interface PatientNotesProps {
 const pageSize = RESULTS_PER_PAGE_LIMIT;
 
 const PatientNotesList = (props: PatientNotesProps) => {
-  const { reload, setReload } = props;
+  const { state, setState, reload, setReload } = props;
 
-  const initialData: StateType = { notes: [], cPage: 0, totalPages: 1 };
-  const [state, setState] = useState(initialData);
   const [isLoading, setIsLoading] = useState(true);
 
   useQuery(routes.getPatientNotes, {
@@ -27,17 +27,27 @@ const PatientNotesList = (props: PatientNotesProps) => {
       patientId: props.patientId,
     },
     query: {
-      offset: state.cPage * RESULTS_PER_PAGE_LIMIT,
+      offset: (state.cPage - 1) * RESULTS_PER_PAGE_LIMIT,
     },
-    prefetch: reload && state.cPage < state.totalPages,
+    prefetch: reload,
     onResponse: ({ res, data }) => {
       setIsLoading(true);
+      console.log(data);
+      console.log(state);
       if (res?.status === 200 && data) {
-        setState((prevState: any) => ({
-          cPage: prevState.cPage + 1,
-          notes: [...prevState.notes, ...data.results],
-          totalPages: Math.ceil(data.count / pageSize),
-        }));
+        if (state.cPage === 1) {
+          setState((prevState: any) => ({
+            ...prevState,
+            notes: data.results,
+            totalPages: Math.ceil(data.count / pageSize),
+          }));
+        } else {
+          setState((prevState: any) => ({
+            ...prevState,
+            notes: [...prevState.notes, ...data.results],
+            totalPages: Math.ceil(data.count / pageSize),
+          }));
+        }
       }
       setReload(false);
       setIsLoading(false);

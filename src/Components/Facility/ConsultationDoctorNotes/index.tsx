@@ -9,6 +9,7 @@ import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { NonReadOnlyUsers } from "../../../Utils/AuthorizeFor";
 import { useMessageListener } from "../../../Common/hooks/useMessageListener";
 import PatientConsultationNotesList from "../PatientConsultationNotesList.js";
+import { StateType } from "../models.js";
 
 interface ConsultationDoctorNotesProps {
   patientId: string;
@@ -27,6 +28,13 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
 
   const dispatch = useDispatch();
 
+  const initialData: StateType = {
+    notes: [],
+    cPage: 1,
+    totalPages: 1,
+  };
+  const [state, setState] = useState(initialData);
+
   const onAddNote = () => {
     const payload = {
       note: noteField,
@@ -42,6 +50,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       Notification.Success({ msg: "Note added successfully" });
       setNoteField("");
       setReload(!reload);
+      setState({ ...state, cPage: 1 });
     });
   };
 
@@ -83,6 +92,8 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
     >
       <div className="mx-3 my-2 flex grow flex-col rounded-lg bg-white p-2 sm:mx-10 sm:my-5 sm:p-5">
         <PatientConsultationNotesList
+          state={state}
+          setState={setState}
           patientId={patientId}
           facilityId={facilityId}
           reload={reload}

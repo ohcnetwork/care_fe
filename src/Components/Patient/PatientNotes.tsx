@@ -9,6 +9,7 @@ import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import PatientNotesList from "../Facility/PatientNotesList";
 import Page from "../Common/components/Page";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
+import { StateType } from "../Facility/models";
 
 interface PatientNotesProps {
   patientId: any;
@@ -26,6 +27,9 @@ const PatientNotes = (props: PatientNotesProps) => {
 
   const dispatch = useDispatch();
 
+  const initialData: StateType = { notes: [], cPage: 0, totalPages: 1 };
+  const [state, setState] = useState(initialData);
+
   const onAddNote = () => {
     const payload = {
       note: noteField,
@@ -40,6 +44,7 @@ const PatientNotes = (props: PatientNotesProps) => {
       Notification.Success({ msg: "Note added successfully" });
       setNoteField("");
       setReload(!reload);
+      setState({ ...state, cPage: 1 });
     });
   };
 
@@ -81,6 +86,8 @@ const PatientNotes = (props: PatientNotesProps) => {
     >
       <div className="mx-3 my-2 flex grow flex-col rounded-lg bg-white p-2 sm:mx-10 sm:my-5 sm:p-5">
         <PatientNotesList
+          state={state}
+          setState={setState}
           patientId={patientId}
           facilityId={facilityId}
           reload={reload}
