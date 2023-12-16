@@ -623,6 +623,7 @@ const routes = {
   addPatientNote: {
     path: "/api/v1/patient/{patientId}/notes/",
     method: "POST",
+    TRes: Type<any>(),
   },
   sampleTestList: {
     path: "/api/v1/patient/{patientId}/test_sample/",

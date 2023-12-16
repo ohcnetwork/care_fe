@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
 import * as Notification from "../../../Utils/Notifications.js";
-import { addPatientNote, getPatient } from "../../../Redux/actions";
 import Page from "../../Common/components/Page";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import ButtonV2 from "../../Common/components/ButtonV2";
@@ -10,6 +8,8 @@ import { NonReadOnlyUsers } from "../../../Utils/AuthorizeFor";
 import { useMessageListener } from "../../../Common/hooks/useMessageListener";
 import PatientConsultationNotesList from "../PatientConsultationNotesList.js";
 import { StateType } from "../models.js";
+import routes from "../../../Redux/api.js";
+import request from "../../../Utils/request/request.js";
 
 interface ConsultationDoctorNotesProps {
   patientId: string;
@@ -26,8 +26,6 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
 
-  const dispatch = useDispatch();
-
   const initialData: StateType = {
     notes: [],
     cPage: 1,
@@ -35,7 +33,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
   };
   const [state, setState] = useState(initialData);
 
-  const onAddNote = () => {
+  const onAddNote = async () => {
     const payload = {
       note: noteField,
       consultation: consultationId,
@@ -46,27 +44,37 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       });
       return;
     }
-    dispatch(addPatientNote(patientId, payload)).then(() => {
+
+    const { res } = await request(routes.addPatientNote, {
+      pathParams: {
+        patientId: patientId,
+      },
+      body: payload,
+    });
+
+    if (res?.status === 201) {
       Notification.Success({ msg: "Note added successfully" });
       setNoteField("");
       setReload(!reload);
       setState({ ...state, cPage: 1 });
-    });
+    }
   };
 
   useEffect(() => {
     async function fetchPatientName() {
       if (patientId) {
-        const res = await dispatch(getPatient({ id: patientId }));
-        if (res.data) {
-          setPatientActive(res.data.is_active);
-          setPatientName(res.data.name);
-          setFacilityName(res.data.facility_object.name);
+        const { data }: any = await request(routes.getPatient, {
+          pathParams: { id: patientId },
+        });
+        if (data) {
+          setPatientActive(data.is_active);
+          setPatientName(data.name);
+          setFacilityName(data.facility_object.name);
         }
       }
     }
     fetchPatientName();
-  }, [dispatch, patientId]);
+  }, [patientId]);
 
   useMessageListener((data) => {
     const message = data?.message;

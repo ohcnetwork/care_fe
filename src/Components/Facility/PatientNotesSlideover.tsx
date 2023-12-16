@@ -26,6 +26,13 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
 
   const dispatch = useDispatch();
 
+  const initialData: StateType = {
+    notes: [],
+    cPage: 1,
+    totalPages: 1,
+  };
+  const [state, setState] = useState(initialData);
+
   const { facilityId, patientId, consultationId, setShowPatientNotesPopup } =
     props;
 
@@ -126,6 +133,8 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
           </div>
           {/* Doctor Notes Body */}
           <PatientConsultationNotesList
+            state={state}
+            setState={setState}
             facilityId={facilityId}
             patientId={patientId}
             reload={reload}
