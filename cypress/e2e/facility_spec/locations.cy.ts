@@ -9,6 +9,7 @@ describe("Location Management Section", () => {
   beforeEach(() => {
     cy.viewport(1280, 720);
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/");
     cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");
     cy.get("[id='facility-details']").first().click();
@@ -23,6 +24,8 @@ describe("Location Management Section", () => {
     cy.contains("Add New Location").click();
     cy.get("[name='name']").type("Test Location");
     cy.get("textarea[name='description']").type("Test Description");
+    cy.get("#location-type").click();
+    cy.get("#location-type-option-ICU").click();
     cy.intercept(/\/api\/v1\/facility\/[\w-]+\/asset_location\//).as(
       "addLocation"
     );

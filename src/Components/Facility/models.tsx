@@ -1,4 +1,4 @@
-import { AssignedToObjectModel } from "../Patient/models";
+import { AssignedToObjectModel, DailyRoundsModel } from "../Patient/models";
 import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 import { AssetData } from "../Assets/AssetTypes";
@@ -7,6 +7,7 @@ import { RouteToFacility } from "../Common/RouteToFacilitySelect";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 
 export interface LocalBodyModel {
+  id: number;
   name: string;
   body_type: number;
   localbody_code: string;
@@ -28,7 +29,8 @@ export interface WardModel {
   id: number;
   name: string;
   number: number;
-  local_body: number;
+  panchayath: string;
+  local_body_id: LocalBodyModel["id"];
 }
 
 export interface FacilityModel {
@@ -108,7 +110,7 @@ export interface ConsultationModel {
   history_of_present_illness?: string;
   facility?: number;
   facility_name?: string;
-  id?: string;
+  id: string;
   modified_date?: string;
   other_symptoms?: string;
   patient?: string;
@@ -151,7 +153,7 @@ export interface ConsultationModel {
   ett_tt?: number;
   cuff_pressure?: number;
   lines?: any;
-  last_daily_round?: any;
+  last_daily_round?: DailyRoundsModel;
   current_bed?: CurrentBed;
   review_interval?: number;
   cause_of_death?: string;

@@ -121,7 +121,7 @@ export const NursingPlot = (props: any) => {
         </div>
       </div>
 
-      {totalCount > PAGINATION_LIMIT && (
+      {!areFieldsEmpty() && totalCount > PAGINATION_LIMIT && (
         <div className="mt-4 flex w-full justify-center">
           <Pagination
             cPage={currentPage}

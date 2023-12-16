@@ -70,6 +70,10 @@ class FacilityPage {
     cy.get("[role='option']").contains(bedType).click();
   }
 
+  isVisibleselectBedType() {
+    cy.get("div#bed-type button").should("be.visible");
+  }
+
   fillTotalCapacity(capacity: string) {
     cy.get("input#total-capacity").click().type(capacity);
   }
@@ -87,6 +91,10 @@ class FacilityPage {
     cy.get("[role='option']").contains(area).click();
   }
 
+  isVisibleAreaOfSpecialization() {
+    cy.get("div#area-of-specialization button").should("be.visible");
+  }
+
   fillDoctorCount(count: string) {
     cy.get("input#count").click().type(count);
   }
@@ -97,6 +105,33 @@ class FacilityPage {
 
   fillExpectedOxygenRequirement(requirement: string) {
     cy.get("#expected_oxygen_requirement").click().clear().type(requirement);
+  }
+
+  fillBTypeCylinderCapacity(capacity: string) {
+    cy.get("#type_b_cylinders").click().clear().type(capacity);
+  }
+
+  fillExpectedBTypeCylinderRequirement(requirement: string) {
+    cy.get("#expected_type_b_cylinders").focus().clear();
+    cy.get("#expected_type_b_cylinders").focus().type(requirement);
+  }
+
+  fillCTypeCylinderCapacity(capacity: string) {
+    cy.get("#type_c_cylinders").click().clear().type(capacity);
+  }
+
+  fillExpectedCTypeCylinderRequirement(requirement: string) {
+    cy.get("#expected_type_c_cylinders").focus().clear();
+    cy.get("#expected_type_c_cylinders").focus().type(requirement);
+  }
+
+  fillDTypeCylinderCapacity(capacity: string) {
+    cy.get("#type_d_cylinders").click().clear().type(capacity);
+  }
+
+  fillExpectedDTypeCylinderRequirement(requirement: string) {
+    cy.get("#expected_type_d_cylinders").focus().clear();
+    cy.get("#expected_type_d_cylinders").focus().type(requirement);
   }
 
   saveAndExitDoctorForm() {
@@ -138,12 +173,111 @@ class FacilityPage {
     cy.get("#inventory-management").click();
   }
 
+  getTotalBedCapacity() {
+    return cy.get("#total-bed-capacity");
+  }
+
+  getFacilityTotalBedCapacity() {
+    return cy.get("#facility-bed-capacity-details");
+  }
+
+  getFacilityTotalDoctorCapacity() {
+    return cy.get("#facility-doctor-capacity-details");
+  }
+
+  getTotalDoctorCapacity() {
+    return cy.get("#total-doctor-capacity");
+  }
+
+  getFacilityName() {
+    return cy.get("#facility-name");
+  }
+
+  getAddressDetailsView() {
+    return cy.get("#address-details-view");
+  }
+
+  getPhoneNumberView() {
+    return cy.get("#phone-number-view");
+  }
+
+  getFacilityAvailableFeatures() {
+    return cy.get("#facility-available-features");
+  }
+
+  getFacilityOxygenInfo() {
+    return cy.get("#facility-oxygen-info");
+  }
+
   clickResourceRequestOption() {
     cy.get("#resource-request").contains("Resource Request").click();
   }
 
   clickDeleteFacilityOption() {
     cy.get("#delete-facility").contains("Delete Facility").click();
+  }
+
+  scrollToFacilityTriage() {
+    cy.get("#add-facility-triage").scrollIntoView();
+  }
+
+  fillTriageEntryFields(
+    visited,
+    homeQuarantine,
+    isolation,
+    referred,
+    confirmedPositive
+  ) {
+    cy.get("#num_patients_visited").clear().click().type(visited);
+    cy.get("#num_patients_home_quarantine")
+      .clear()
+      .click()
+      .type(homeQuarantine);
+    cy.get("#num_patients_isolation").clear().click().type(isolation);
+    cy.get("#num_patient_referred").clear().click().type(referred);
+    cy.get("#num_patient_confirmed_positive")
+      .clear()
+      .click()
+      .type(confirmedPositive);
+  }
+
+  fillEntryDate(date) {
+    cy.get("#entry_date").click();
+    cy.get("#date-input").click().type(date);
+  }
+
+  clickEditButton() {
+    cy.get("#edit-button").click();
+  }
+
+  clickButtonsMultipleTimes(selector) {
+    cy.get(selector).each(($button) => {
+      cy.wrap($button).click();
+    });
+  }
+
+  verifyTriageTableContains(value) {
+    cy.get("#triage-table").contains(value);
+  }
+
+  clickAddFacilityTriage() {
+    cy.get("#add-facility-triage").click();
+  }
+
+  clickfacilityfeatureoption() {
+    cy.get("#features").click();
+  }
+
+  clickbedcapcityaddmore() {
+    cy.get("#bed-capacity-save").click();
+  }
+
+  clickdoctorcapacityaddmore() {
+    cy.get("#doctor-save").click();
+  }
+
+  clickcancelbutton() {
+    cy.get("#cancel").click();
   }
 
   verifyfacilitynewurl() {
@@ -267,6 +401,40 @@ class FacilityPage {
     cy.wait("@createResourceRequest")
       .its("response.statusCode")
       .should("eq", 201);
+  }
+
+  getStateElement() {
+    return cy.get("#state");
+  }
+
+  getDistrictElement() {
+    return cy.get("#district");
+  }
+
+  selectStateOnPincode(stateName) {
+    this.getStateElement()
+      .scrollIntoView()
+      .should("be.visible")
+      .then(($element) => {
+        const text = $element.text();
+        if (!text.includes(stateName)) {
+          this.getStateElement().click();
+          cy.get("li[role=option]").contains(stateName).click();
+        }
+      });
+  }
+
+  selectDistrictOnPincode(districtName) {
+    this.getDistrictElement()
+      .scrollIntoView()
+      .should("be.visible")
+      .then(($element) => {
+        const text = $element.text();
+        if (!text.includes(districtName)) {
+          this.getDistrictElement().click();
+          cy.get("li[role=option]").contains(districtName).click();
+        }
+      });
   }
 }
 

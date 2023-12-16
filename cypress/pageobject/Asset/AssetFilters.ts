@@ -40,7 +40,20 @@ export class AssetFilters {
     cy.intercept("GET", "**/api/v1/asset/**").as("clearAssets");
     cy.get("#clear-filter").click();
     cy.wait("@clearAssets").its("response.statusCode").should("eq", 200);
-    cy.url().should("match", /\/assets$/);
+    cy.location("pathname").should("match", /\/assets$/);
+    cy.url().then((url) => {
+      const queryParams = new URL(url).searchParams;
+      let allEmpty = true;
+      const blacklistedKeys = ["page", "limit", "offset"];
+
+      queryParams.forEach((value, key) => {
+        if (value !== "" && !blacklistedKeys.includes(key)) {
+          allEmpty = false;
+        }
+      });
+
+      expect(allEmpty).to.be.true;
+    });
   }
   clickadvancefilter() {
     cy.intercept("GET", "**/api/v1/getallfacilities/**").as("advancefilter");

@@ -8,6 +8,7 @@ describe("Shifting Page", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/shifting");
   });
 
