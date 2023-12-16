@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { addPatientNote, getPatient } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -10,6 +8,8 @@ import PatientNotesList from "../Facility/PatientNotesList";
 import Page from "../Common/components/Page";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import { StateType } from "../Facility/models";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 interface PatientNotesProps {
   patientId: any;
@@ -25,12 +25,10 @@ const PatientNotes = (props: PatientNotesProps) => {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
 
-  const dispatch = useDispatch();
-
   const initialData: StateType = { notes: [], cPage: 0, totalPages: 1 };
   const [state, setState] = useState(initialData);
 
-  const onAddNote = () => {
+  const onAddNote = async () => {
     const payload = {
       note: noteField,
     };
@@ -40,27 +38,34 @@ const PatientNotes = (props: PatientNotesProps) => {
       });
       return;
     }
-    dispatch(addPatientNote(patientId, payload)).then(() => {
+
+    const { res } = await request(routes.addPatientNote, {
+      pathParams: { patientId: patientId },
+      body: payload,
+    });
+    if (res?.status === 201) {
       Notification.Success({ msg: "Note added successfully" });
       setNoteField("");
       setReload(!reload);
       setState({ ...state, cPage: 1 });
-    });
+    }
   };
 
   useEffect(() => {
     async function fetchPatientName() {
       if (patientId) {
-        const res = await dispatch(getPatient({ id: patientId }));
-        if (res.data) {
-          setPatientActive(res.data.is_active);
-          setPatientName(res.data.name);
-          setFacilityName(res.data.facility_object.name);
+        const { data } = await request(routes.getPatient, {
+          pathParams: { id: patientId },
+        });
+        if (data) {
+          setPatientActive(data.is_active ?? true);
+          setPatientName(data.name ?? "");
+          setFacilityName(data.facility_object?.name ?? "");
         }
       }
     }
     fetchPatientName();
-  }, [dispatch, patientId]);
+  }, [patientId]);
 
   useMessageListener((data) => {
     const message = data?.message;

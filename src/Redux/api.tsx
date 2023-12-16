@@ -600,6 +600,7 @@ const routes = {
   },
   getPatient: {
     path: "/api/v1/patient/{id}/",
+    TBody: Type<PatientModel>(),
     TRes: Type<PatientModel>(),
   },
   updatePatient: {

@@ -63,13 +63,13 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
   useEffect(() => {
     async function fetchPatientName() {
       if (patientId) {
-        const { data }: any = await request(routes.getPatient, {
+        const { data } = await request(routes.getPatient, {
           pathParams: { id: patientId },
         });
         if (data) {
-          setPatientActive(data.is_active);
-          setPatientName(data.name);
-          setFacilityName(data.facility_object.name);
+          setPatientActive(data.is_active ?? true);
+          setPatientName(data.name ?? "");
+          setFacilityName(data.facility_object?.name ?? "");
         }
       }
     }
