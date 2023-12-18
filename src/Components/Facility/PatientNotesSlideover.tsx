@@ -50,6 +50,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
     dispatch(addPatientNote(patientId, payload)).then(() => {
       Notification.Success({ msg: "Note added successfully" });
       setNoteField("");
+      setState({ ...state, cPage: 1 });
       setReload(true);
     });
   };

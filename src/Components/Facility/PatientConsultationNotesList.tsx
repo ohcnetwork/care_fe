@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import CircularProgress from "../Common/components/CircularProgress";
-import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import { StateType } from "./models";
 import useSlug from "../../Common/hooks/useSlug";
 import DoctorNote from "./DoctorNote";
+import request from "../../Utils/request/request";
 
 interface PatientNotesProps {
   state: StateType;
@@ -24,36 +24,40 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
 
   const [isLoading, setIsLoading] = useState(true);
 
-  useQuery(routes.getPatientNotes, {
-    pathParams: {
-      patientId: props.patientId,
-    },
-    query: {
-      consultation: consultationId,
-      offset: (state.cPage - 1) * RESULTS_PER_PAGE_LIMIT,
-    },
-    prefetch: reload,
-    onResponse: ({ res, data }) => {
-      setIsLoading(true);
-      if (res?.status === 200 && data) {
-        if (state.cPage === 1) {
-          setState((prevState: any) => ({
-            ...prevState,
-            notes: data.results,
-            totalPages: Math.ceil(data.count / pageSize),
-          }));
-        } else {
-          setState((prevState: any) => ({
-            ...prevState,
-            notes: [...prevState.notes, ...data.results],
-            totalPages: Math.ceil(data.count / pageSize),
-          }));
-        }
-      }
-      setReload(false);
-      setIsLoading(false);
-    },
-  });
+  const fetchNotes = async () => {
+    setIsLoading(true);
+    const { data }: any = await request(routes.getPatientNotes, {
+      pathParams: {
+        patientId: props.patientId,
+      },
+      query: {
+        consultation: consultationId,
+        offset: (state.cPage - 1) * RESULTS_PER_PAGE_LIMIT,
+      },
+    });
+
+    if (state.cPage === 1) {
+      setState((prevState: any) => ({
+        ...prevState,
+        notes: data.results,
+        totalPages: Math.ceil(data.count / pageSize),
+      }));
+    } else {
+      setState((prevState: any) => ({
+        ...prevState,
+        notes: [...prevState.notes, ...data.results],
+        totalPages: Math.ceil(data.count / pageSize),
+      }));
+    }
+    setIsLoading(false);
+    setReload(false);
+  };
+
+  useEffect(() => {
+    if (reload) {
+      fetchNotes();
+    }
+  }, [reload]);
 
   useEffect(() => {
     setReload(true);
