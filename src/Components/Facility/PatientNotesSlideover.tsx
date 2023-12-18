@@ -1,7 +1,5 @@
 import { useState, useEffect, Dispatch, SetStateAction } from "react";
-import { getPatient, addPatientNote } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { useDispatch } from "react-redux";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
@@ -10,6 +8,9 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { make as Link } from "../Common/components/Link.bs";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import PatientConsultationNotesList from "./PatientConsultationNotesList";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import { StateType } from "./models";
 
 interface PatientNotesProps {
   patientId: string;
@@ -24,8 +25,6 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   const [noteField, setNoteField] = useState("");
   const [reload, setReload] = useState(false);
 
-  const dispatch = useDispatch();
-
   const initialData: StateType = {
     notes: [],
     cPage: 1,
@@ -36,7 +35,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   const { facilityId, patientId, consultationId, setShowPatientNotesPopup } =
     props;
 
-  const onAddNote = () => {
+  const onAddNote = async () => {
     const payload = {
       note: noteField,
       consultation: consultationId,
@@ -47,12 +46,16 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       });
       return;
     }
-    dispatch(addPatientNote(patientId, payload)).then(() => {
+    const { res } = await request(routes.addPatientNote, {
+      pathParams: { patientId: patientId },
+      body: payload,
+    });
+    if (res?.status === 201) {
       Notification.Success({ msg: "Note added successfully" });
       setNoteField("");
       setState({ ...state, cPage: 1 });
       setReload(true);
-    });
+    }
   };
 
   useMessageListener((data) => {
@@ -70,14 +73,16 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   useEffect(() => {
     async function fetchPatientName() {
       if (patientId) {
-        const res = await dispatch(getPatient({ id: patientId }));
-        if (res.data) {
-          setPatientActive(res.data.is_active);
+        const { data } = await request(routes.getPatient, {
+          pathParams: { id: patientId },
+        });
+        if (data) {
+          setPatientActive(data.is_active ?? true);
         }
       }
     }
     fetchPatientName();
-  }, [dispatch, patientId]);
+  }, [patientId]);
 
   const notesActionIcons = (
     <div className="flex gap-1">
