@@ -25,7 +25,7 @@ const PatientNotes = (props: PatientNotesProps) => {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
 
-  const initialData: StateType = { notes: [], cPage: 0, totalPages: 1 };
+  const initialData: StateType = { notes: [], cPage: 1, totalPages: 1 };
   const [state, setState] = useState(initialData);
 
   const onAddNote = async () => {
