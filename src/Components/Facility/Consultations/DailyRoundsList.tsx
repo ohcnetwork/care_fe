@@ -46,79 +46,77 @@ export default function DailyRoundsList({ consultation }: Props) {
                 </span>
               </PaginatedList.WhenEmpty>
               <PaginatedList.WhenLoading>
-                <>
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <LoadingLogUpdateCard key={i} />
-                  ))}
-                </>
+                <LoadingLogUpdateCard />
               </PaginatedList.WhenLoading>
-              <Timeline
-                className="rounded-lg bg-white p-2 shadow"
-                name="log update"
-              >
-                <PaginatedList.Items<DailyRoundsModel> className="flex grow flex-col gap-3">
-                  {(item, items) => {
-                    if (item.rounds_type === "AUTOMATED") {
+              <PaginatedList.Display>
+                <Timeline
+                  className="rounded-lg bg-white p-2 shadow"
+                  name="log update"
+                >
+                  <PaginatedList.Items<DailyRoundsModel> className="flex grow flex-col gap-3">
+                    {(item, items) => {
+                      if (item.rounds_type === "AUTOMATED") {
+                        return (
+                          <TimelineNode
+                            event={{
+                              type: "created",
+                              timestamp: item.taken_at?.toString() ?? "",
+                              by: {
+                                user_type: "",
+                                first_name: "Virtual",
+                                last_name: "Assistant",
+                                username: "",
+                                id: "",
+                                email: "",
+                                last_login: "",
+                              },
+                              icon: "l-robot",
+                            }}
+                            isLast={items.indexOf(item) == items.length - 1}
+                          >
+                            <VirtualNursingAssistantLogUpdateCard
+                              round={item}
+                              previousRound={items[items.indexOf(item) + 1]}
+                            />
+                          </TimelineNode>
+                        );
+                      }
+
+                      const itemUrl =
+                        item.rounds_type === "NORMAL"
+                          ? `${consultationUrl}/daily-rounds/${item.id}`
+                          : `${consultationUrl}/daily_rounds/${item.id}`;
+
                       return (
                         <TimelineNode
                           event={{
                             type: "created",
                             timestamp: item.taken_at?.toString() ?? "",
                             by: {
-                              user_type: "",
-                              first_name: "Virtual",
-                              last_name: "Assistant",
+                              user_type: item.created_by?.user_type ?? "",
+                              first_name: item.created_by?.first_name ?? "",
+                              last_name: item.created_by?.last_name ?? "",
                               username: "",
                               id: "",
                               email: "",
                               last_login: "",
                             },
-                            icon: "l-robot",
+                            icon: "l-user-nurse",
                           }}
                           isLast={items.indexOf(item) == items.length - 1}
                         >
-                          <VirtualNursingAssistantLogUpdateCard
+                          <DefaultLogUpdateCard
                             round={item}
-                            previousRound={items[items.indexOf(item) + 1]}
+                            consultationData={consultation}
+                            onViewDetails={() => navigate(itemUrl)}
+                            onUpdateLog={() => navigate(`${itemUrl}/update`)}
                           />
                         </TimelineNode>
                       );
-                    }
-
-                    const itemUrl =
-                      item.rounds_type === "NORMAL"
-                        ? `${consultationUrl}/daily-rounds/${item.id}`
-                        : `${consultationUrl}/daily_rounds/${item.id}`;
-
-                    return (
-                      <TimelineNode
-                        event={{
-                          type: "created",
-                          timestamp: item.taken_at?.toString() ?? "",
-                          by: {
-                            user_type: item.created_by?.user_type ?? "",
-                            first_name: item.created_by?.first_name ?? "",
-                            last_name: item.created_by?.last_name ?? "",
-                            username: "",
-                            id: "",
-                            email: "",
-                            last_login: "",
-                          },
-                          icon: "l-user-nurse",
-                        }}
-                        isLast={items.indexOf(item) == items.length - 1}
-                      >
-                        <DefaultLogUpdateCard
-                          round={item}
-                          consultationData={consultation}
-                          onViewDetails={() => navigate(itemUrl)}
-                          onUpdateLog={() => navigate(`${itemUrl}/update`)}
-                        />
-                      </TimelineNode>
-                    );
-                  }}
-                </PaginatedList.Items>
-              </Timeline>
+                    }}
+                  </PaginatedList.Items>
+                </Timeline>
+              </PaginatedList.Display>
               <div className="flex w-full items-center justify-center">
                 <PaginatedList.Paginator hideIfSinglePage />
               </div>
