@@ -7,7 +7,7 @@ import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import PatientNotesList from "../Facility/PatientNotesList";
 import Page from "../Common/components/Page";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
-import { StateType } from "../Facility/models";
+import { PatientNoteStateType } from "../Facility/models";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 
@@ -25,7 +25,11 @@ const PatientNotes = (props: PatientNotesProps) => {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
 
-  const initialData: StateType = { notes: [], cPage: 1, totalPages: 1 };
+  const initialData: PatientNoteStateType = {
+    notes: [],
+    cPage: 1,
+    totalPages: 1,
+  };
   const [state, setState] = useState(initialData);
 
   const onAddNote = async () => {

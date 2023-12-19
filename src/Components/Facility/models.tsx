@@ -490,7 +490,7 @@ export interface PatientNotesModel {
   created_date: string;
 }
 
-export interface StateType {
+export interface PatientNoteStateType {
   notes: PatientNotesModel[];
   cPage: number;
   totalPages: number;

@@ -10,7 +10,7 @@ import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import PatientConsultationNotesList from "./PatientConsultationNotesList";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
-import { StateType } from "./models";
+import { PatientNoteStateType } from "./models";
 
 interface PatientNotesProps {
   patientId: string;
@@ -25,7 +25,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   const [noteField, setNoteField] = useState("");
   const [reload, setReload] = useState(false);
 
-  const initialData: StateType = {
+  const initialData: PatientNoteStateType = {
     notes: [],
     cPage: 1,
     totalPages: 1,

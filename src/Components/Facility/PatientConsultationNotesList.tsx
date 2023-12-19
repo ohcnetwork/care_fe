@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import CircularProgress from "../Common/components/CircularProgress";
 import routes from "../../Redux/api";
-import { StateType } from "./models";
+import { PatientNoteStateType } from "./models";
 import useSlug from "../../Common/hooks/useSlug";
 import DoctorNote from "./DoctorNote";
 import request from "../../Utils/request/request";
 
 interface PatientNotesProps {
-  state: StateType;
+  state: PatientNoteStateType;
   setState: any;
   patientId: string;
   facilityId: string;

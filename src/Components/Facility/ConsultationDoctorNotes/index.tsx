@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import * as Notification from "../../../Utils/Notifications.js";
 import Page from "../../Common/components/Page";
 import TextFormField from "../../Form/FormFields/TextFormField";
@@ -7,9 +7,10 @@ import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { NonReadOnlyUsers } from "../../../Utils/AuthorizeFor";
 import { useMessageListener } from "../../../Common/hooks/useMessageListener";
 import PatientConsultationNotesList from "../PatientConsultationNotesList.js";
-import { StateType } from "../models.js";
+import { PatientNoteStateType } from "../models.js";
 import routes from "../../../Redux/api.js";
 import request from "../../../Utils/request/request.js";
+import useQuery from "../../../Utils/request/useQuery.js";
 
 interface ConsultationDoctorNotesProps {
   patientId: string;
@@ -26,7 +27,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
 
-  const initialData: StateType = {
+  const initialData: PatientNoteStateType = {
     notes: [],
     cPage: 1,
     totalPages: 1,
@@ -60,21 +61,16 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
     }
   };
 
-  useEffect(() => {
-    async function fetchPatientName() {
-      if (patientId) {
-        const { data } = await request(routes.getPatient, {
-          pathParams: { id: patientId },
-        });
-        if (data) {
-          setPatientActive(data.is_active ?? true);
-          setPatientName(data.name ?? "");
-          setFacilityName(data.facility_object?.name ?? "");
-        }
+  useQuery(routes.getPatient, {
+    pathParams: { id: patientId },
+    onResponse: ({ data }) => {
+      if (data) {
+        setPatientActive(data.is_active ?? true);
+        setPatientName(data.name ?? "");
+        setFacilityName(data.facility_object?.name ?? "");
       }
-    }
-    fetchPatientName();
-  }, [patientId]);
+    },
+  });
 
   useMessageListener((data) => {
     const message = data?.message;
