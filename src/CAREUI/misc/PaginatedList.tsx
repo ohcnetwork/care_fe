@@ -73,11 +73,6 @@ interface WhenEmptyProps {
   children: JSX.Element | JSX.Element[];
 }
 
-interface DisplayProps {
-  className?: string;
-  children: JSX.Element | JSX.Element[];
-}
-
 const WhenEmpty = <TItem extends object>(props: WhenEmptyProps) => {
   const { items, loading } = useContextualized<TItem>();
 
@@ -101,18 +96,6 @@ const WhenLoading = <TItem extends object>(props: WhenEmptyProps) => {
 };
 
 PaginatedList.WhenLoading = WhenLoading;
-
-const Display = <TItem extends object>(props: DisplayProps) => {
-  const { loading } = useContextualized<TItem>();
-
-  if (loading) {
-    return null;
-  }
-
-  return <div className={props.className}>{props.children}</div>;
-};
-
-PaginatedList.Display = Display;
 
 const Refresh = ({ label = "Refresh", ...props }: CommonButtonProps) => {
   const { loading, refetch } = useContextualized<object>();
@@ -145,6 +128,10 @@ interface ItemsProps<TItem> {
 
 const Items = <TItem extends object>(props: ItemsProps<TItem>) => {
   const { loading, items } = useContextualized<TItem>();
+
+  if (loading) {
+    return null;
+  }
 
   return (
     <ul className={props.className}>
