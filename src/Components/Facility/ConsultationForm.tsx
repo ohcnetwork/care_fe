@@ -401,7 +401,9 @@ export const ConsultationForm = (props: any) => {
             cause_of_death: res.data?.discharge_notes || "",
             death_datetime: res.data?.death_datetime || "",
             death_confirmed_doctor: res.data?.death_confirmed_doctor || "",
-            InvestigationAdvice: res.data.investigation,
+            InvestigationAdvice: Array.isArray(res.data.investigation)
+              ? res.data.investigation
+              : [],
             diagnoses: res.data.diagnoses.sort(
               (a: ConsultationDiagnosis, b: ConsultationDiagnosis) =>
                 ConditionVerificationStatuses.indexOf(a.verification_status) -
@@ -411,7 +413,7 @@ export const ConsultationForm = (props: any) => {
           dispatch({ type: "set_form", form: { ...state.form, ...formData } });
           setBed(formData.bed);
 
-          if (res.data.last_daily_round) {
+          if (res.data.last_daily_round && state.form.category) {
             setDisabledFields((fields) => [...fields, "category"]);
           }
         } else {

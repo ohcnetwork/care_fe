@@ -12,7 +12,7 @@ export const ConsultationNursingTab = (props: ConsultationTabProps) => {
         facilityId={props.facilityId}
         patientId={props.patientId}
         consultationId={props.consultationId}
-      ></NursingPlot>
+      />
     </div>
   );
 };
