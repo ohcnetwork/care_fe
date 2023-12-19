@@ -1,4 +1,5 @@
 import { UserBaseModel } from "../../Users/models";
+import { AbhaNumberModel } from "./abha";
 
 export type ConsentPurpose =
   | "CAREMGT"
@@ -68,5 +69,6 @@ export type ConsentArtefactModel = {
 
 export type ConsentRequestModel = {
   requester: UserBaseModel;
+  patient_abha_object: AbhaNumberModel;
   consent_artefacts: ConsentArtefactModel[];
 } & ConsentModel;

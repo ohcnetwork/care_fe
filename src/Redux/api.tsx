@@ -1,4 +1,5 @@
 import { IConfig } from "../Common/hooks/useConfig";
+import { ConsentRequestModel } from "../Components/ABDM/types/consent";
 import { HealthInformationModel } from "../Components/ABDM/types/health-information";
 import { AssetData } from "../Components/Assets/AssetTypes";
 import { LocationModel } from "../Components/Facility/models";
@@ -957,6 +958,12 @@ const routes = {
   listConsents: {
     path: "/api/v1/abdm/consent/",
     method: "GET",
+    TRes: Type<{
+      results: ConsentRequestModel[];
+      count: number;
+      next: string | null;
+      previous: string | null;
+    }>(),
   },
 
   createConsent: {

@@ -11,6 +11,7 @@ interface IProps {
 export default function HealthInformation({ artefactId }: IProps) {
   const { data, loading, error } = useQuery(routes.getHealthInformation, {
     pathParams: { artefactId },
+    silent: true,
   });
 
   if (loading) {

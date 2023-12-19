@@ -597,6 +597,13 @@ export const FacilityHome = (props: any) => {
                   View Users
                 </DropdownItem>
                 <DropdownItem
+                  id="view-abdm-records"
+                  onClick={() => navigate(`/facility/${facilityId}/abdm`)}
+                  icon={<CareIcon className="care-l-file-network text-lg" />}
+                >
+                  View ABDM Records
+                </DropdownItem>
+                <DropdownItem
                   id="delete-facility"
                   variant="danger"
                   onClick={() => setOpenDeleteDialog(true)}

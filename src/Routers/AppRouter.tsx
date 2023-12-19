@@ -74,6 +74,7 @@ import SessionExpired from "../Components/ErrorPages/SessionExpired";
 import ManagePrescriptions from "../Components/Medicine/ManagePrescriptions";
 import CentralNursingStation from "../Components/Facility/CentralNursingStation";
 import HealthInformation from "../Components/ABDM/HealthInformation";
+import ABDMFacilityRecords from "../Components/ABDM/ABDMFacilityRecords";
 
 export default function AppRouter() {
   const { main_logo, enable_hcx } = useConfig();
@@ -405,6 +406,9 @@ export default function AppRouter() {
       ),
     "/abdm/health-information/:id": ({ id }: { id: string }) => (
       <HealthInformation artefactId={id} />
+    ),
+    "/facility/:facilityId/abdm": ({ facilityId }: any) => (
+      <ABDMFacilityRecords facilityId={facilityId} />
     ),
     "/session-expired": () => <SessionExpired />,
     "/not-found": () => <Error404 />,

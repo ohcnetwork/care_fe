@@ -44,7 +44,7 @@ export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
   const [isMakingConsentRequest, setIsMakingConsentRequest] = useState(false);
   const [hiTypes, setHiTypes] = useState<string[]>([]);
   const [expiryDate, setExpiryDate] = useState<Date>(
-    dayjs().add(30, "days").toDate()
+    dayjs().add(5, "minutes").toDate()
   );
   const [errors, setErrors] = useState<any>({});
 
@@ -196,7 +196,8 @@ export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
               });
 
               navigate(
-                `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/abdm`
+                `/facility/${patient.facility}/abdm` ??
+                  `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/abdm`
               );
             } else {
               Notification.Error({
