@@ -67,7 +67,12 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                         </td>
 
                         <td className="px-3 py-4 text-center text-sm capitalize">
-                          {consent.status}
+                          {new Date(
+                            consent.consent_artefacts?.[0]?.expiry ??
+                              consent.expiry
+                          ) > new Date()
+                            ? "EXPIRED"
+                            : consent.status}
                         </td>
 
                         <td className="px-3 py-4 text-center text-sm">
@@ -115,20 +120,24 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
 
                         <td className="sticky right-0 whitespace-nowrap bg-white py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <div className="flex flex-col items-center justify-center gap-2">
-                            {consent.consent_artefacts?.map((artefact, i) =>
-                              artefact.status === "GRANTED" ? (
-                                <Link
-                                  key={artefact.id}
-                                  href={`/abdm/health-information/${artefact.id}`}
-                                  className="cursor-pointer text-primary-600 hover:text-primary-900"
-                                >
-                                  View Artefact {i + 1}
-                                </Link>
-                              ) : (
-                                <p className="cursor-not-allowed text-gray-600 opacity-70 ">
-                                  Artefact {i + 1}
-                                </p>
-                              )
+                            {consent.status === "GRANTED" &&
+                            new Date(
+                              consent.consent_artefacts?.[0]?.expiry ??
+                                consent.expiry
+                            ) > new Date() ? (
+                              <Link
+                                key={consent.id}
+                                href={`/abdm/health-information/${consent.id}`}
+                                className={
+                                  "cursor-pointer text-primary-600 hover:text-primary-900"
+                                }
+                              >
+                                View
+                              </Link>
+                            ) : (
+                              <p className="cursor-not-allowed text-gray-600 opacity-70 ">
+                                View
+                              </p>
                             )}
                           </div>
                         </td>
