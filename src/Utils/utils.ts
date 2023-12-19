@@ -455,3 +455,9 @@ export const invalidateFiltersCache = () => {
     }
   }
 };
+
+export const compareBy = <T extends object>(key: keyof T) => {
+  return (a: T, b: T) => {
+    return a[key] < b[key] ? -1 : a[key] > b[key] ? 1 : 0;
+  };
+};
