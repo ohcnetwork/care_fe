@@ -11,6 +11,7 @@ import { PatientModel } from "../Patient/models";
 
 import { GENDER_TYPES } from "../../Common/constants";
 import { formatAge, formatDate, formatDateTime } from "../../Utils/utils";
+
 const Loading = lazy(() => import("../Common/Loading"));
 
 const TreatmentSummary = (props: any) => {
@@ -135,19 +136,13 @@ const TreatmentSummary = (props: any) => {
                   <b>Age :</b>{" "}
                   {formatAge(patientData.age, patientData.date_of_birth, true)}
                 </div>
-                <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0 print:border-r-2 md:border-b-0 md:border-r-2">
+                <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0  md:border-b-0 ">
                   <b>Date of admission :</b>
                   <span>
                     {consultationData.admitted
                       ? formatDateTime(consultationData.admission_date)
                       : " --/--/----"}
                   </span>
-                </div>
-                <div className="col-span-1 px-3 py-2">
-                  <b>Date of positive :</b>
-                  {patientData.date_of_result
-                    ? formatDate(patientData.date_of_result)
-                    : " --/--/----"}
                 </div>
               </div>
 
@@ -157,22 +152,13 @@ const TreatmentSummary = (props: any) => {
                   {GENDER_TYPES.find((i) => i.id === patientData.gender)?.text}
                 </div>
 
-                <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0 print:border-r-2 md:border-b-0 md:border-r-2">
+                <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0  md:border-b-0 ">
                   <b>Contact person :</b>
                   <span>
                     {" "}
                     {patientData.emergency_phone_number
                       ? patientData.emergency_phone_number
                       : "   -"}
-                  </span>
-                </div>
-
-                <div className="col-span-1 px-3 py-2">
-                  <b>Date of negative :</b>
-                  <span>
-                    {patientData.disease_status == "NEGATIVE"
-                      ? formatDate(patientData.modified_date)
-                      : " --/--/----"}
                   </span>
                 </div>
               </div>
