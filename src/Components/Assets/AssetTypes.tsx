@@ -20,7 +20,6 @@ export interface AssetLocationObject {
     id: string;
     name: string;
   };
-  middleware_address?: string;
 }
 
 export enum AssetType {

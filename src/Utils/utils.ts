@@ -214,13 +214,14 @@ export const parseCsvFile = async (
 
 export const getPincodeDetails = async (pincode: string, apiKey: string) => {
   const response = await fetch(
-    `https://api.data.gov.in/resource/5c2f62fe-5afa-4119-a499-fec9d604d5bd?api-key=${apiKey}&format=json&filters[pincode]=${pincode}&limit=1`
+    `https://api.data.gov.in/resource/6176ee09-3d56-4a3b-8115-21841576b2f6?api-key=${apiKey}&format=json&filters[pincode]=${pincode}&limit=1`
   );
   const data = await response.json();
   return data.records[0];
 };
 
 export const includesIgnoreCase = (str1: string, str2: string) => {
+  if (!str1 || !str2) return false;
   const lowerCaseStr1 = str1.toLowerCase();
   const lowerCaseStr2 = str2.toLowerCase();
   return (
