@@ -252,22 +252,6 @@ export const DailyRounds = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "clone_last":
-          if (state.form.clone_last === null) {
-            errors[field] = "Please choose a value";
-            invalidForm = true;
-          }
-          return;
-        case "resp":
-          if (
-            state.form.resp === null &&
-            ["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type) &&
-            state.form.clone_last !== true
-          ) {
-            errors[field] = "Please enter a respiratory rate";
-            invalidForm = true;
-          }
-          return;
         default:
           return;
       }
