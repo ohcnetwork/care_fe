@@ -121,7 +121,9 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
           }
         >
           {loading ? (
-            <Loading />
+            <div className="min-h-screen">
+              <Loading />
+            </div>
           ) : (
             <>
               {prescriptions?.length === 0 && <NoPrescriptions prn={is_prn} />}
