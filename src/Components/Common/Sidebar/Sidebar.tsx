@@ -55,6 +55,7 @@ const StatelessSidebar = ({
   const { dashboard_url } = useConfig();
 
   const indicatorRef = useRef<HTMLDivElement>(null);
+  const activeLinkRef = useRef<HTMLAnchorElement>(null);
   const [lastIndicatorPosition, setLastIndicatorPosition] = useState(0);
   const [isOverflowVisible, setOverflowVisisble] = useState(false);
 
@@ -65,47 +66,19 @@ const StatelessSidebar = ({
       // Haha math go brrrrrrrrr
 
       const e = indicatorRef.current;
-
-      const itemHeight = 44;
-      const bottomItemOffset = 2;
-
-      const indexDifference = index - lastIndicatorPosition;
-      e.style.display = "block";
-
-      if (indexDifference > 0) {
-        e.style.top = lastIndicatorPosition * itemHeight + 16 + "px";
-        e.style.bottom = "auto";
+      const itemHeight = activeLinkRef.current?.clientHeight || 0;
+      if (lastIndicatorPosition > index) {
+        e.style.top = `${itemHeight * index + 0.3 * itemHeight}px`;
+        setTimeout(() => {
+          e.style.bottom = `${itemHeight * (NavItems.length - index + 1.3)}px`;
+        }, 50);
       } else {
-        e.style.bottom =
-          itemHeight * (NavItems.length + bottomItemOffset) -
-          lastIndicatorPosition * itemHeight -
-          28 +
-          "px";
-        e.style.top = "auto";
+        e.style.bottom = `${itemHeight * (NavItems.length - index + 1.3)}px`;
+        setTimeout(() => {
+          e.style.top = `${itemHeight * index + 0.3 * itemHeight}px`;
+        }, 50);
       }
-
-      const variableHeight = Math.min(
-        Math.abs(indexDifference) * itemHeight,
-        70
-      );
-
-      e.style.height = `${variableHeight}px`;
-      setTimeout(() => {
-        if (!e) return;
-        if (indexDifference > 0) {
-          e.style.top = index * itemHeight + 16 + "px";
-          e.style.bottom = "auto";
-        } else {
-          e.style.bottom =
-            itemHeight * (NavItems.length + bottomItemOffset) -
-            index * itemHeight -
-            28 +
-            "px";
-          e.style.top = "auto";
-        }
-        e.style.height = "0.75rem";
-        setLastIndicatorPosition(index);
-      }, 300);
+      setLastIndicatorPosition(index);
     } else {
       indicatorRef.current.style.display = "none";
     }
@@ -147,6 +120,7 @@ const StatelessSidebar = ({
           {NavItems.map((i) => {
             return (
               <Item
+                ref={i.to === activeLink ? activeLinkRef : undefined}
                 key={i.text}
                 {...i}
                 icon={<CareIcon className={`${i.icon} h-5`} />}
