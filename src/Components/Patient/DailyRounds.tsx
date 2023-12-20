@@ -106,6 +106,7 @@ export const DailyRounds = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
+  const [consultationSuggestion, setConsultationSuggestion] = useState<any>("");
   const [prevReviewInterval, setPreviousReviewInterval] = useState(-1);
   const [prevAction, setPreviousAction] = useState("NO_ACTION");
   const [hasPreviousLog, setHasPreviousLog] = useState(false);
@@ -137,6 +138,7 @@ export const DailyRounds = (props: any) => {
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
+          setConsultationSuggestion(res.data.last_consultation?.suggestion);
           setPreviousReviewInterval(
             Number(res.data.last_consultation.review_interval)
           );
@@ -250,7 +252,6 @@ export const DailyRounds = (props: any) => {
             invalidForm = true;
           }
           return;
-
         default:
           return;
       }
@@ -292,7 +293,7 @@ export const DailyRounds = (props: any) => {
           action: prevAction,
           review_interval: Number(prevReviewInterval),
         };
-        if (state.form.rounds_type === "NORMAL") {
+        if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
           data = {
             ...data,
             bp:
@@ -334,7 +335,7 @@ export const DailyRounds = (props: any) => {
           Notification.Success({
             msg: "Consultation Updates details updated successfully",
           });
-          if (state.form.rounds_type === "NORMAL") {
+          if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
             navigate(
               `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
             );
@@ -347,7 +348,7 @@ export const DailyRounds = (props: any) => {
           Notification.Success({
             msg: "Consultation Updates details created successfully",
           });
-          if (state.form.rounds_type === "NORMAL") {
+          if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
             if (data.clone_last) {
               navigate(
                 `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${res.data.external_id}/update`
@@ -450,8 +451,13 @@ export const DailyRounds = (props: any) => {
               className="w-full"
               label="Round Type"
               options={[
-                { id: "NORMAL", text: "Normal" },
-                { id: "VENTILATOR", text: "Critical Care" },
+                ...[
+                  { id: "NORMAL", text: "Normal" },
+                  { id: "VENTILATOR", text: "Critical Care" },
+                ],
+                ...(consultationSuggestion == "DC"
+                  ? [{ id: "TELEMEDICINE", text: "Telemedicine" }]
+                  : []),
               ]}
               optionLabel={(option) => option.text}
               optionValue={(option) => option.id}
@@ -529,7 +535,7 @@ export const DailyRounds = (props: any) => {
               }}
             />
 
-            {state.form.rounds_type === "NORMAL" && (
+            {["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type) && (
               <>
                 <h3 className="mb-6 md:col-span-2">Vitals</h3>
 
