@@ -189,6 +189,7 @@ export const UserAdd = (props: UserProps) => {
     setUsernameExists(userExistsEnums.checking);
     const { res: usernameCheck } = await request(routes.checkUsername, {
       pathParams: { username },
+      silent: true,
     });
     if (usernameCheck === undefined || usernameCheck.status === 409)
       setUsernameExists(userExistsEnums.exists);
@@ -357,6 +358,7 @@ export const UserAdd = (props: UserProps) => {
           return;
         case "first_name":
         case "last_name":
+          state.form[field] = state.form[field].trim();
           if (!state.form[field]) {
             errors[field] = `${field
               .split("_")
@@ -440,6 +442,7 @@ export const UserAdd = (props: UserProps) => {
           }
           return;
         case "email":
+          state.form[field] = state.form[field].trim();
           if (
             state.form[field].length === 0 ||
             !validateEmailAddress(state.form[field])
