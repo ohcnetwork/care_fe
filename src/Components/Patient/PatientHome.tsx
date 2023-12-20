@@ -385,8 +385,9 @@ export const PatientHome = (props: any) => {
   };
 
   const isPatientEligibleForNewConsultation = (patientData: PatientModel) => {
-    return !patientData.last_consultation ||
-      patientData.last_consultation?.discharge_date
+    return patientData.is_active &&
+      (!patientData?.last_consultation ||
+        patientData?.last_consultation?.discharge_date)
       ? true
       : false;
   };

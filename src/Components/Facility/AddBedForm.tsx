@@ -18,6 +18,7 @@ import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import Page from "../Common/components/Page";
+
 const Loading = lazy(() => import("../Common/Loading"));
 
 interface BedFormProps {
@@ -73,6 +74,7 @@ export const AddBedForm = (props: BedFormProps) => {
       }
       setIsLoading(false);
     }
+
     fetchFacilityLocationAndBed();
   }, [dispatchAction, facilityId, locationId]);
 
@@ -125,7 +127,7 @@ export const AddBedForm = (props: BedFormProps) => {
       name,
       description,
       bed_type: bedType,
-      number_of_beds: numberOfBeds,
+      number_of_beds: bedId ? 1 : numberOfBeds,
     };
 
     if (!validateInputs(data)) return;

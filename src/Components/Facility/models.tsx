@@ -29,7 +29,8 @@ export interface WardModel {
   id: number;
   name: string;
   number: number;
-  local_body: number;
+  panchayath: string;
+  local_body_id: LocalBodyModel["id"];
 }
 
 export interface FacilityModel {
