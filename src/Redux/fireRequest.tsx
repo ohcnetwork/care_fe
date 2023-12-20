@@ -149,7 +149,7 @@ export const fireRequest = (
           }
 
           // 4xx Errors
-          if (error.response.status > 400 && error.response.status < 500) {
+          if (error.response.status > 400 && error.response.status < 600) {
             if (error.response.data && error.response.data.detail) {
               if (error.response.data.code === "token_not_valid") {
                 window.location.href = `/session-expired?redirect=${window.location.href}`;
@@ -165,14 +165,6 @@ export const fireRequest = (
             if (error.response.status === 429) {
               return error.response;
             }
-            return;
-          }
-
-          // 5xx Errors
-          if (error.response.status >= 500 && error.response.status <= 599) {
-            Notification.Error({
-              msg: "Something went wrong...!",
-            });
             return;
           }
         } else {
@@ -264,7 +256,7 @@ export const fireRequestV2 = (
         }
 
         // 4xx Errors
-        if (error.response.status > 400 && error.response.status < 500) {
+        if (error.response.status > 400 && error.response.status < 600) {
           if (error.response.data && error.response.data.detail) {
             Notification.Error({
               msg: error.response.data.detail,
@@ -277,14 +269,6 @@ export const fireRequestV2 = (
           if (error.response.status === 429) {
             return error.response;
           }
-          return;
-        }
-
-        // 5xx Errors
-        if (error.response.status >= 500 && error.response.status <= 599) {
-          Notification.Error({
-            msg: "Something went wrong...!",
-          });
           return;
         }
       }
@@ -374,7 +358,7 @@ export const fireRequestForFiles = (
           }
 
           // 4xx Errors
-          if (error.response.status > 400 && error.response.status < 500) {
+          if (error.response.status > 400 && error.response.status < 600) {
             if (error.response.status === 429) {
               return error.response;
             } else if (error.response.data && error.response.data.detail) {
@@ -386,14 +370,6 @@ export const fireRequestForFiles = (
                 msg: "Something went wrong...!",
               });
             }
-            return;
-          }
-
-          // 5xx Errors
-          if (error.response.status >= 500 && error.response.status <= 599) {
-            Notification.Error({
-              msg: "Something went wrong...!",
-            });
             return;
           }
         }
