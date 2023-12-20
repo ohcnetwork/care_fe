@@ -13,7 +13,8 @@ const TableHeads = [
   "Patient",
   "Status",
   "Created On",
-  "Requested By",
+  "Consent Granted On",
+  // "Requested By",
   "Health Information Range",
   "Expires On",
   "HI Profiles",
@@ -29,7 +30,7 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
   }
 
   return (
-    <Page title="ABDM Consent Requests">
+    <Page title="Patient Consent List">
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="sm:flex sm:items-center"></div>
         <div className="mt-8 flow-root">
@@ -80,11 +81,19 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                         </td>
 
                         <td className="px-3 py-4 text-center text-sm">
+                          {consent.consent_artefacts.length
+                            ? formatDateTime(
+                                consent.consent_artefacts[0].created_date
+                              )
+                            : "-"}
+                        </td>
+
+                        {/* <td className="px-3 py-4 text-center text-sm">
                           {`${consent.requester?.first_name} ${consent.requester?.last_name}`.trim()}
                           <p className="text-gray-600">
                             ({consent.requester.username})
                           </p>
-                        </td>
+                        </td> */}
 
                         <td className="px-3 py-4 text-center text-sm">
                           {formatDateTime(
