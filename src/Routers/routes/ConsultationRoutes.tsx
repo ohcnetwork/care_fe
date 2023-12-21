@@ -121,6 +121,9 @@ export default {
       tab={"updates"}
     />
   ),
+  "/consultation/:consultationId": ({ consultationId }: any) => (
+    <ConsultationDetails consultationId={consultationId} tab={"updates"} />
+  ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/treatment-summary":
     ({ facilityId, patientId, consultationId }: any) => (
       <TreatmentSummary
