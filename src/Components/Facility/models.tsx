@@ -5,6 +5,7 @@ import { AssetData, AssetLocationType } from "../Assets/AssetTypes";
 import { UserBareMinimum } from "../Users/models";
 import { RouteToFacility } from "../Common/RouteToFacilitySelect";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
+import { ConsultationSuggestionValue } from "../../Common/constants";
 
 export interface LocalBodyModel {
   id: number;
@@ -93,7 +94,7 @@ export type PatientCategory =
   | "Critical";
 
 export interface ConsultationModel {
-  admission_date?: string;
+  encounter_date: string;
   icu_admission_date?: string;
   admitted?: boolean;
   test_id?: string;
@@ -123,7 +124,7 @@ export interface ConsultationModel {
   referred_by_external?: string;
   transferred_from_location?: LocationModel["id"];
   transferred_from_location_object?: LocationModel;
-  suggestion?: string;
+  suggestion?: ConsultationSuggestionValue;
   patient_no?: string;
   route_to_facility?: RouteToFacility;
   is_kasp?: boolean;
