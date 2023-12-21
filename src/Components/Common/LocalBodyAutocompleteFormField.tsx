@@ -4,7 +4,7 @@ import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useCallback, useState } from "react";
 import { getLocalbodyByDistrict } from "../../Redux/actions";
-import { IDistrict } from "./DistrictAutocompleteFormField";
+import { DistrictModel } from "../Facility/models";
 
 export type ILocalBody = {
   id: number;
@@ -13,7 +13,7 @@ export type ILocalBody = {
 
 type Props = FormFieldBaseProps<ILocalBody["id"]> & {
   placeholder?: string;
-  district?: IDistrict["id"];
+  district?: DistrictModel["id"];
 };
 
 export default function LocalBodyAutocompleteFormField(props: Props) {
