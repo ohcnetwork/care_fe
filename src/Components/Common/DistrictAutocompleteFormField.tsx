@@ -1,13 +1,12 @@
 import { FormFieldBaseProps } from "../Form/FormFields/Utils";
-import { IState } from "./StateAutocompleteFormField";
 import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
-import { DistrictModel } from "../Facility/models";
+import { DistrictModel, StateModel } from "../Facility/models";
 
 type Props = FormFieldBaseProps<DistrictModel["id"]> & {
   placeholder?: string;
-  state?: IState["id"];
+  state?: StateModel["id"];
 };
 
 export default function DistrictAutocompleteFormField(props: Props) {
