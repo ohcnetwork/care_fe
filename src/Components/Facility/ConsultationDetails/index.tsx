@@ -462,7 +462,6 @@ export const ConsultationDetails = (props: any) => {
             </div>
           </div>
         </div>
-
         <SelectedTab {...consultationTabProps} />
       </div>
 
@@ -476,6 +475,7 @@ export const ConsultationDetails = (props: any) => {
         <PatientNotesSlideover
           patientId={patientId}
           facilityId={facilityId}
+          consultationId={consultationId}
           setShowPatientNotesPopup={setShowPatientNotesPopup}
         />
       )}

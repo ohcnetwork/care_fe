@@ -239,7 +239,7 @@ export class AssetPage {
   }
 
   selectjsonexportbutton() {
-    cy.intercept("GET", "**/api/v1/asset/?json=true**").as("getJsonexport");
+    cy.intercept("GET", "**/api/v1/asset/?**json=true**").as("getJsonexport");
     cy.get("#export-json-option").click();
     cy.wait("@getJsonexport").then(({ request, response }) => {
       expect(response.statusCode).to.eq(200);
@@ -248,7 +248,7 @@ export class AssetPage {
   }
 
   selectcsvexportbutton() {
-    cy.intercept("GET", "**/api/v1/asset/?csv=true**").as("getCsvexport");
+    cy.intercept("GET", "**/api/v1/asset/?**csv=true**").as("getCsvexport");
     cy.get("#export-csv-option").click();
     cy.wait("@getCsvexport").then(({ request, response }) => {
       expect(response.statusCode).to.eq(200);

@@ -9,12 +9,13 @@ import LanguageSelectorLogin from "../Common/LanguageSelectorLogin";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import useConfig from "../../Common/hooks/useConfig";
 import CircularProgress from "../Common/components/CircularProgress";
-import { LocalStorageKeys } from "../../Common/constants";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
-import { handleRedirection } from "../../Utils/utils";
+import { invalidateFiltersCache } from "../../Utils/utils";
+import { useAuthContext } from "../../Common/hooks/useAuthUser";
 
 export const Login = (props: { forgot?: boolean }) => {
+  const { signIn } = useAuthContext();
   const {
     main_logo,
     recaptcha_site_key,
@@ -82,7 +83,7 @@ export const Login = (props: { forgot?: boolean }) => {
     return form;
   };
 
-  // set loading to false when component is dismounted
+  // set loading to false when component is unmounted
   useEffect(() => {
     return () => {
       setLoading(false);
@@ -91,34 +92,17 @@ export const Login = (props: { forgot?: boolean }) => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    const valid = validateData();
-    if (valid) {
-      // replaces button with spinner
-      setLoading(true);
 
-      const { res, data } = await request(routes.login, {
-        body: { ...valid },
-      });
-      if (res && res.status === 429) {
-        setCaptcha(true);
-        // captcha displayed set back to login button
-        setLoading(false);
-      } else if (res && res.status === 200 && data) {
-        localStorage.setItem(LocalStorageKeys.accessToken, data.access);
-        localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
-        if (
-          window.location.pathname === "/" ||
-          window.location.pathname === "/login"
-        ) {
-          handleRedirection();
-        } else {
-          window.location.href = window.location.pathname.toString();
-        }
-      } else {
-        // error from server set back to login button
-        setLoading(false);
-      }
-    }
+    setLoading(true);
+    invalidateFiltersCache();
+
+    const validated = validateData();
+    if (!validated) return;
+
+    const { res } = await signIn(validated);
+
+    setCaptcha(res?.status === 429);
+    setLoading(false);
   };
 
   const validateForgetData = () => {
