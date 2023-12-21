@@ -171,7 +171,7 @@ const AssetImportModal = ({ open, onClose, facility, onUpdate }: Props) => {
       Notification.Success({ msg: "Assets imported successfully" });
       await sleep(1000);
       setIsImporting(false);
-      onUpdate && onUpdate();
+      onUpdate?.();
     } else {
       Notification.Error({ msg: "Error importing some assets" });
       await sleep(1000);
