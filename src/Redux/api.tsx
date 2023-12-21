@@ -73,6 +73,10 @@ import {
 import { IComment, IResource } from "../Components/Resource/models";
 import { IShift } from "../Components/Shifting/models";
 import { HCXPolicyModel } from "../Components/HCX/models";
+import {
+  InvestigationGroup,
+  InvestigationType,
+} from "../Components/Facility/Investigations";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -918,10 +922,12 @@ const routes = {
   listInvestigations: {
     path: "/api/v1/investigation/",
     method: "GET",
+    TRes: Type<PaginatedResponse<InvestigationType>>(),
   },
   listInvestigationGroups: {
-    path: "/api/v1/investigation/group",
+    path: "/api/v1/investigation/group/",
     method: "GET",
+    TRes: Type<PaginatedResponse<InvestigationGroup>>(),
   },
   createInvestigation: {
     path: "/api/v1/consultation/{consultation_external_id}/investigation/",
