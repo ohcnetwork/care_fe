@@ -282,6 +282,7 @@ const routes = {
 
   getAllFacilities: {
     path: "/api/v1/getallfacilities",
+    TRes: Type<PaginatedResponse<FacilityModel>>(),
   },
 
   createFacility: {
