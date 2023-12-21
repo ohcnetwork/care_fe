@@ -530,9 +530,6 @@ export const updateAsset = (id: string, params: object) =>
 export const operateAsset = (id: string, params: object) =>
   fireRequest("operateAsset", [], params, { external_id: id });
 
-export const listAssetAvailability = (params: object) =>
-  fireRequest("listAssetAvailability", [], params);
-
 export const listPMJYPackages = (query?: string) =>
   fireRequest("listPMJYPackages", [], { query });
 
