@@ -11,7 +11,6 @@ const APP_UPDATED_KEY = "app-updated";
 interface UpdatableAppProps {
   children: ReactNode;
   silentlyAutoUpdate?: boolean;
-  onUpdateLocalStorage?: (() => void) | undefined;
 }
 
 export const checkForUpdate = async () => {
@@ -47,11 +46,7 @@ export const checkForUpdate = async () => {
   }
 };
 
-const UpdatableApp = ({
-  children,
-  silentlyAutoUpdate,
-  onUpdateLocalStorage,
-}: UpdatableAppProps) => {
+const UpdatableApp = ({ children, silentlyAutoUpdate }: UpdatableAppProps) => {
   const [newVersion, setNewVersion] = useState<string>();
   const [appUpdated, setAppUpdated] = useState(false);
 
@@ -82,7 +77,7 @@ const UpdatableApp = ({
     // A second of delay to appreciate the update animation.
     const updateLocalStorageAndReload = () => {
       localStorage.setItem(APP_UPDATED_KEY, "true");
-      onUpdateLocalStorage && onUpdateLocalStorage();
+      window.location.reload();
       localStorage.setItem(APP_VERSION_KEY, newVersion);
     };
 
