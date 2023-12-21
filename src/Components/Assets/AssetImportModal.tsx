@@ -22,9 +22,10 @@ interface Props {
   open: boolean;
   onClose: (() => void) | undefined;
   facility: FacilityModel;
+  onUpdate?: (() => void) | undefined;
 }
 
-const AssetImportModal = ({ open, onClose, facility }: Props) => {
+const AssetImportModal = ({ open, onClose, facility, onUpdate }: Props) => {
   const [isImporting, setIsImporting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<any>();
   const [preview, setPreview] =
@@ -170,7 +171,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
       Notification.Success({ msg: "Assets imported successfully" });
       await sleep(1000);
       setIsImporting(false);
-      window.location.reload();
+      onUpdate && onUpdate();
     } else {
       Notification.Error({ msg: "Error importing some assets" });
       await sleep(1000);

@@ -69,7 +69,7 @@ const AssetsList = () => {
       qParams.warranty_amc_end_of_validity_after || "",
   };
 
-  const { loading } = useQuery(routes.listAssets, {
+  const { refetch: assetsFetch, loading } = useQuery(routes.listAssets, {
     query: params,
     onResponse: ({ res, data }) => {
       if (res?.status === 200 && data) {
@@ -79,16 +79,19 @@ const AssetsList = () => {
     },
   });
 
-  const { data: facilityObject } = useQuery(routes.getAnyFacility, {
-    pathParams: { id: qParams.facility },
-    onResponse: ({ res, data }) => {
-      if (res?.status === 200 && data) {
-        setFacility(data);
-        setSelectedFacility(data);
-      }
-    },
-    prefetch: !!qParams.facility,
-  });
+  const { data: facilityObject, refetch: facilityFetch } = useQuery(
+    routes.getAnyFacility,
+    {
+      pathParams: { id: qParams.facility },
+      onResponse: ({ res, data }) => {
+        if (res?.status === 200 && data) {
+          setFacility(data);
+          setSelectedFacility(data);
+        }
+      },
+      prefetch: !!qParams.facility,
+    }
+  );
 
   useEffect(() => {
     setAssetType(qParams.asset_type);
@@ -102,13 +105,16 @@ const AssetsList = () => {
     setAssetClass(qParams.asset_class);
   }, [qParams.asset_class]);
 
-  const { data: locationObject } = useQuery(routes.getFacilityAssetLocation, {
-    pathParams: {
-      facility_external_id: String(qParams.facility),
-      external_id: String(qParams.location),
-    },
-    prefetch: !!(qParams.facility && qParams.location),
-  });
+  const { data: locationObject, refetch: locationFetch } = useQuery(
+    routes.getFacilityAssetLocation,
+    {
+      pathParams: {
+        facility_external_id: String(qParams.facility),
+        external_id: String(qParams.location),
+      },
+      prefetch: !!(qParams.facility && qParams.location),
+    }
+  );
 
   const getAssetIdFromQR = async (assetUrl: string) => {
     try {
@@ -126,6 +132,12 @@ const AssetsList = () => {
     } catch (err) {
       console.log(err);
     }
+  };
+
+  const handleUpdate = () => {
+    assetsFetch();
+    facilityFetch();
+    locationFetch();
   };
 
   const checkValidAssetId = async (assetId: string) => {
@@ -436,6 +448,7 @@ const AssetsList = () => {
               return f;
             });
           }}
+          onUpdate={handleUpdate}
           facility={facility}
         />
       )}
