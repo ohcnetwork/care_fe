@@ -52,7 +52,6 @@ const DischargeModal = ({
   consultationData,
   afterSubmit = () => {
     onClose();
-    window.location.reload();
   },
   discharge_reason = "",
   discharge_notes = "",
