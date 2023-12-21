@@ -164,12 +164,18 @@ export default function UserProfile() {
     },
   });
 
-  const { data: skillsView, loading: isSkillsLoading } = useQuery(
-    routes.userListSkill,
-    {
-      pathParams: { username: authUser.username },
-    }
-  );
+  const {
+    data: skillsView,
+    refetch: skillsFetch,
+    loading: isSkillsLoading,
+  } = useQuery(routes.userListSkill, {
+    pathParams: { username: authUser.username },
+  });
+
+  const onUpdateLocalStorage = () => {
+    skillsFetch();
+    refetchUserData();
+  };
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -776,7 +782,10 @@ export default function UserProfile() {
             </div>
           </div>
           {updateStatus.isUpdateAvailable && (
-            <UpdatableApp silentlyAutoUpdate={false}>
+            <UpdatableApp
+              silentlyAutoUpdate={false}
+              onUpdateLocalStorage={onUpdateLocalStorage}
+            >
               <ButtonV2 disabled={true}>
                 <div className="flex items-center gap-4">
                   <CareIcon className="care-l-exclamation text-2xl" />
