@@ -20,10 +20,6 @@ export const getPermittedFacilities = (params: object) => {
   return fireRequest("getPermittedFacilities", [], params);
 };
 
-export const getAllSkills = (params: object) => {
-  return fireRequest("getAllSkills", [], params);
-};
-
 export const getPermittedFacility = (id: number | string, key?: string) => {
   return fireRequest("getPermittedFacility", [], {}, { id: id }, key);
 };
