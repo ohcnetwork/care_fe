@@ -324,10 +324,10 @@ export const createConsultation = (params: object) => {
 export const getConsultationList = (params: object) => {
   return fireRequest("getConsultationList", [], params);
 };
-export const getConsultation = (id: number) => {
+export const getConsultation = (id: string) => {
   return fireRequest("getConsultation", [], {}, { id: id });
 };
-export const updateConsultation = (id: number, params: object) => {
+export const updateConsultation = (id: string, params: object) => {
   return fireRequest("updateConsultation", [], params, { id: id });
 };
 //Inventory

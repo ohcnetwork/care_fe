@@ -229,11 +229,16 @@ type ConsultationFormSection =
   | "Treatment Plan"
   | "Bed Status";
 
-export const ConsultationForm = (props: any) => {
+type Props = {
+  facilityId: string;
+  patientId: string;
+  id?: string;
+};
+
+export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   const { goBack } = useAppHistory();
   const { kasp_enabled, kasp_string } = useConfig();
   const dispatchAction: any = useDispatch();
-  const { facilityId, patientId, id } = props;
   const [state, dispatch] = useAutoSaveReducer<FormDetails>(
     consultationFormReducer,
     initialState
@@ -344,7 +349,7 @@ export const ConsultationForm = (props: any) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       if (!patientId) setIsLoading(true);
-      const res = await dispatchAction(getConsultation(id));
+      const res = await dispatchAction(getConsultation(id!));
       handleFormFieldChange({
         name: "InvestigationAdvice",
         value: !Array.isArray(res.data.investigation)
@@ -743,7 +748,7 @@ export const ConsultationForm = (props: any) => {
       };
 
       const res = await dispatchAction(
-        id ? updateConsultation(id, data) : createConsultation(data)
+        id ? updateConsultation(id!, data) : createConsultation(data)
       );
       setIsLoading(false);
       if (res?.data && res.status !== 400) {

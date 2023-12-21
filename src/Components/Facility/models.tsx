@@ -202,11 +202,11 @@ export interface InventoryItemsModel {
 }
 
 export interface LocationModel {
-  id?: string;
-  name?: string;
+  id: string;
+  name: string;
   description?: string;
   middleware_address?: string;
-  location_type?: AssetLocationType;
+  location_type: AssetLocationType;
   facility?: {
     name: string;
   };

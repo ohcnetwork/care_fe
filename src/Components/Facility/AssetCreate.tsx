@@ -563,7 +563,7 @@ const AssetCreate = (props: AssetProps) => {
                         selected={location}
                         showAll={false}
                         multiple={false}
-                        facilityId={facilityId as unknown as number}
+                        facilityId={facilityId}
                         errors={state.errors.location}
                       />
                     </div>
