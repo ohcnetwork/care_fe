@@ -176,7 +176,7 @@ export const ConsultationDetails = (props: any) => {
   useAbortableEffect((status: statusType) => {
     fetchData(status);
     triggerGoal("Patient Consultation Viewed", {
-      facilityId: consultationData.facility,
+      facilityId: facilityId,
       consultationId: consultationId,
       userId: authUser.id,
     });
@@ -258,10 +258,8 @@ export const ConsultationDetails = (props: any) => {
             title="Patient Dashboard"
             className="sm:m-0 sm:p-0"
             crumbsReplacements={{
-              [consultationData.facility || ""]: {
-                name: consultationData.facility_name,
-              },
-              [patientData?.id || ""]: { name: patientData?.name },
+              [facilityId]: { name: patientData?.facility_object?.name },
+              [patientId]: { name: patientData?.name },
               [consultationId]: {
                 name:
                   consultationData.suggestion === "A"
