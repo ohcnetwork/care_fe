@@ -117,6 +117,11 @@ export const ConsultationDetails = (props: any) => {
               });
             data.symptoms_text = symptoms.join(", ");
           }
+          if (facilityId != data.facility || patientId != data.patient) {
+            navigate(
+              `/facility/${data.facility}/patient/${data.patient}/consultation/${data?.id}`
+            );
+          }
           setConsultationData(data);
           const assetRes = await dispatch(
             listAssetBeds({
@@ -147,14 +152,7 @@ export const ConsultationDetails = (props: any) => {
                 : "No",
               is_vaccinated: patientData.is_vaccinated ? "Yes" : "No",
             };
-            if (
-              facilityId != data.facility_object?.id ||
-              patientId != data.id
-            ) {
-              navigate(
-                `/facility/${data.facility_object?.id}/patient/${data.id}/consultation/${data?.last_consultation?.id}`
-              );
-            }
+
             setPatientData(data);
           }
 
@@ -458,11 +456,7 @@ export const ConsultationDetails = (props: any) => {
                     <Link
                       key={p.text}
                       className={tabButtonClasses(tab === p.text)}
-                      href={`/facility/${
-                        patientData?.facility_object?.id
-                      }/patient/${
-                        patientData?.id
-                      }/consultation/${consultationId}/${p.text.toLocaleLowerCase()}`}
+                      href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/${p.text.toLocaleLowerCase()}`}
                     >
                       {p.desc}
                     </Link>
@@ -476,15 +470,15 @@ export const ConsultationDetails = (props: any) => {
       </div>
 
       <DoctorVideoSlideover
-        facilityId={String(patientData?.facility_object?.id)}
+        facilityId={facilityId}
         show={showDoctors}
         setShow={setShowDoctors}
       />
 
       {showPatientNotesPopup && (
         <PatientNotesSlideover
-          patientId={String(patientData?.id)}
-          facilityId={String(patientData?.facility_object?.id)}
+          patientId={patientId}
+          facilityId={facilityId}
           consultationId={consultationId}
           setShowPatientNotesPopup={setShowPatientNotesPopup}
         />
