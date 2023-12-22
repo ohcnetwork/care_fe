@@ -176,7 +176,7 @@ export const ConsultationDetails = (props: any) => {
   useAbortableEffect((status: statusType) => {
     fetchData(status);
     triggerGoal("Patient Consultation Viewed", {
-      facilityId: patientData?.facility_object?.id,
+      facilityId: consultationData.facility,
       consultationId: consultationId,
       userId: authUser.id,
     });
@@ -258,8 +258,8 @@ export const ConsultationDetails = (props: any) => {
             title="Patient Dashboard"
             className="sm:m-0 sm:p-0"
             crumbsReplacements={{
-              [patientData?.facility_object?.id || ""]: {
-                name: patientData?.facility_object?.name,
+              [consultationData.facility || ""]: {
+                name: consultationData.facility_name,
               },
               [patientData?.id || ""]: { name: patientData?.name },
               [consultationId]: {
@@ -316,7 +316,7 @@ export const ConsultationDetails = (props: any) => {
               onClick={() =>
                 showPatientNotesPopup
                   ? navigate(
-                      `/facility/${patientData?.facility_object?.id}/patient/${patientData?.id}/notes`
+                      `/facility/${facilityId}/patient/${patientId}/notes`
                     )
                   : setShowPatientNotesPopup(true)
               }
