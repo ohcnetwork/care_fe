@@ -13,7 +13,6 @@ import CircularProgress from "../../Common/components/CircularProgress.js";
 import { FieldLabel } from "../../Form/FormFields/FormField";
 import Loading from "../../Common/Loading";
 import TextFormField from "../../Form/FormFields/TextFormField";
-import { formatDateTime } from "../../../Utils/utils";
 import dayjs from "../../../Utils/dayjs";
 import { AssetSelect } from "../../Common/AssetSelect.js";
 import DialogModal from "../../Common/Dialog.js";
@@ -24,6 +23,7 @@ import {
   AssetData,
 } from "../../Assets/AssetTypes.js";
 import Chip from "../../../CAREUI/display/Chip.js";
+import BedActivityTimeline from "./BedAdministration/BedActivityTimeline.js";
 
 interface BedsProps {
   facilityId: string;
@@ -236,62 +236,16 @@ const Beds = (props: BedsProps) => {
       )}
       <div>
         <h3 className="my-4 text-lg">Previous beds: </h3>
-        <div className="overflow-hidden rounded-xl">
-          <div className="grid grid-cols-4 gap-[1px]">
-            <div className="bg-primary-500 py-2 text-center font-bold text-white">
-              Bed
-            </div>
-            <div className="bg-primary-500 py-2 text-center font-bold text-white">
-              Location
-            </div>
-            <div className="bg-primary-500 py-2 text-center font-bold text-white">
-              Start Date
-            </div>
-            <div className="bg-primary-500 py-2 text-center font-bold text-white">
-              End Date
-            </div>
+        {consultationBeds.length > 0 ? (
+          <BedActivityTimeline
+            consultationBeds={consultationBeds}
+            loading={loading}
+          />
+        ) : (
+          <div className="bg-primary-100 py-2 text-center">
+            No beds allocated yet
           </div>
-          {consultationBeds.length > 0 ? (
-            consultationBeds.map((bed) => (
-              <div className="grid grid-cols-4 gap-[1px]" key={bed?.id}>
-                <div className="break-words bg-primary-100 p-2 text-center">
-                  {bed?.bed_object?.name}
-                  {bed?.assets_objects && bed.assets_objects.length > 0 && (
-                    <span
-                      className={
-                        " ml-2 h-6 cursor-pointer rounded-md bg-primary-500 px-2 text-xs font-semibold text-white"
-                      }
-                      onClick={() => setShowBedDetails(bed)}
-                    >
-                      {bed.assets_objects.length}
-                    </span>
-                  )}
-                </div>
-                <div className="bg-primary-100 py-2 text-center">
-                  {bed?.bed_object?.location_object?.name}
-                </div>
-                <div className="break-words bg-primary-100 p-2 text-center">
-                  {formatDateTime(bed?.start_date)}
-                </div>
-                {bed?.end_date ? (
-                  <div className="break-words bg-primary-100 p-2 text-center">
-                    {formatDateTime(bed?.end_date)}
-                  </div>
-                ) : (
-                  <div className="bg-primary-100 p-2 text-center">
-                    <span className="rounded-full border border-yellow-500 bg-yellow-100 px-1 text-sm text-yellow-500 ">
-                      In Use
-                    </span>
-                  </div>
-                )}
-              </div>
-            ))
-          ) : (
-            <div className="bg-primary-100 py-2 text-center">
-              No beds allocated yet
-            </div>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );
