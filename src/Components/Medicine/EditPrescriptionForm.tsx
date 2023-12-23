@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Form from "../Form/Form";
-import { Prescription } from "./models";
+import { DOSAGE_UNITS, Prescription } from "./models";
 import request from "../../Utils/request/request";
 import * as Notification from "../../Utils/Notifications";
 import useSlug from "../../Common/hooks/useSlug";
@@ -102,7 +102,7 @@ export default function EditPrescriptionForm(props: Props) {
               label={t("dosage")}
               {...field("dosage", RequiredFieldValidator())}
               required
-              units={["mg", "g", "ml", "drop(s)", "ampule(s)", "tsp"]}
+              units={DOSAGE_UNITS}
               min={0}
             />
           </div>
@@ -114,9 +114,10 @@ export default function EditPrescriptionForm(props: Props) {
                 {...field("indicator", RequiredFieldValidator())}
                 required
               />
-              <TextFormField
+              <NumericWithUnitsFormField
+                className="flex-1"
                 label={t("max_dosage_24_hrs")}
-                type="number"
+                units={DOSAGE_UNITS}
                 min={0}
                 {...field("max_dosage")}
               />
