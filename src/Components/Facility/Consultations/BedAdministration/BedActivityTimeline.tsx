@@ -58,6 +58,13 @@ const BedAllocationNode = ({
         }) was allocated at ${formatDateTime(bed.start_date)} | ${
           bed.bed_object.location_object?.name
         }`}
+        actions={
+          isLastNode && (
+            <p className="mr-10 rounded-full border border-yellow-600 bg-yellow-500 px-2 text-white">
+              IN USE
+            </p>
+          )
+        }
         isLast={isLastNode}
       />
     </>
