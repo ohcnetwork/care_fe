@@ -38,6 +38,7 @@ import { ConsultationNeurologicalMonitoringTab } from "./ConsultationNeurologica
 import { ConsultationNutritionTab } from "./ConsultationNutritionTab";
 import PatientNotesSlideover from "../PatientNotesSlideover";
 import LegacyDiagnosesList from "../../Diagnosis/LegacyDiagnosesList";
+import { AssetBedModel } from "../../Assets/AssetTypes";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
@@ -129,11 +130,9 @@ export const ConsultationDetails = (props: any) => {
             : null;
           const isCameraAttachedRes =
             assetRes != null
-              ? assetRes.data.results.some(
-                  (asset: { asset_object: { asset_class: string } }) => {
-                    return asset?.asset_object?.asset_class === "ONVIF";
-                  }
-                )
+              ? assetRes.data.results.some((asset: AssetBedModel) => {
+                  return asset?.asset_object?.asset_class === "ONVIF";
+                })
               : false;
           setIsCameraAttached(isCameraAttachedRes);
           const id = res.data.patient;
