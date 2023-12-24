@@ -68,21 +68,22 @@ const StatelessSidebar = ({
       const e = indicatorRef.current;
       const itemHeight = activeLinkRef.current?.clientHeight || 0;
       if (lastIndicatorPosition > index) {
-        e.style.top = `${itemHeight * index + 0.3 * itemHeight}px`;
+        e.style.top = `${itemHeight * (index + 0.37)}px`;
         setTimeout(() => {
-          e.style.bottom = `${itemHeight * (NavItems.length - index + 1.3)}px`;
+          e.style.bottom = `${itemHeight * (NavItems.length + 1.37 - index)}px`;
         }, 50);
       } else {
-        e.style.bottom = `${itemHeight * (NavItems.length - index + 1.3)}px`;
+        e.style.bottom = `${itemHeight * (NavItems.length + 1.37 - index)}px`;
         setTimeout(() => {
-          e.style.top = `${itemHeight * index + 0.3 * itemHeight}px`;
+          e.style.top = `${itemHeight * (index + 0.37)}px`;
         }, 50);
       }
       setLastIndicatorPosition(index);
     } else {
       indicatorRef.current.style.display = "none";
     }
-  }, [activeLink]);
+  }, [activeLink, lastIndicatorPosition]);
+
   const handleOverflow = (value: boolean) => {
     setOverflowVisisble(value);
   };
