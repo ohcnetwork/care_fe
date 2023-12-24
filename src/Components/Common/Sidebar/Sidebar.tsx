@@ -62,6 +62,7 @@ const StatelessSidebar = ({
   useEffect(() => {
     if (!indicatorRef.current) return;
     const index = NavItems.findIndex((item) => item.to === activeLink);
+    const navItemCount = NavItems.length + 2; // +2 for notification and dashboard
     if (index !== -1) {
       // Haha math go brrrrrrrrr
 
@@ -70,10 +71,10 @@ const StatelessSidebar = ({
       if (lastIndicatorPosition > index) {
         e.style.top = `${itemHeight * (index + 0.37)}px`;
         setTimeout(() => {
-          e.style.bottom = `${itemHeight * (NavItems.length + 1.37 - index)}px`;
+          e.style.bottom = `${itemHeight * (navItemCount - 0.63 - index)}px`;
         }, 50);
       } else {
-        e.style.bottom = `${itemHeight * (NavItems.length + 1.37 - index)}px`;
+        e.style.bottom = `${itemHeight * (navItemCount - 0.63 - index)}px`;
         setTimeout(() => {
           e.style.top = `${itemHeight * (index + 0.37)}px`;
         }, 50);
