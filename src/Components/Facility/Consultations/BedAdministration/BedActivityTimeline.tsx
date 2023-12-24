@@ -22,13 +22,11 @@ export default function BedActivityTimeline({
       >
         {consultationBeds.map((bed, index) => {
           return (
-            <>
-              <BedAllocationNode
-                key={`activity-${bed.id}`}
-                bed={bed}
-                isLastNode={index === 0}
-              />
-            </>
+            <BedAllocationNode
+              key={`activity-${bed.id}`}
+              bed={bed}
+              isLastNode={index === 0}
+            />
           );
         })}
       </Timeline>
