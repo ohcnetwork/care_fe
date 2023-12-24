@@ -19,8 +19,8 @@ describe("Asset", () => {
   const assetFilters = new AssetFilters();
   const fillFacilityName = "Dummy Facility 1";
   const assetname = "Dummy Camera";
-  const locationName = "Test Location1";
-  const initiallocationName = "Test Location";
+  const locationName = "Dummy Location 1";
+  const initiallocationName = "Camera Location";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
