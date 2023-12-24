@@ -48,7 +48,6 @@ export default function DailyRoundsList({ consultation }: Props) {
               <PaginatedList.WhenLoading>
                 <LoadingLogUpdateCard />
               </PaginatedList.WhenLoading>
-              {/* <PaginatedList.Display> */}
               <Timeline
                 className="rounded-lg bg-white p-2 shadow"
                 name="log update"
@@ -117,7 +116,6 @@ export default function DailyRoundsList({ consultation }: Props) {
                   }}
                 </PaginatedList.Items>
               </Timeline>
-              {/* </PaginatedList.Display> */}
               <div className="flex w-full items-center justify-center">
                 <PaginatedList.Paginator hideIfSinglePage />
               </div>

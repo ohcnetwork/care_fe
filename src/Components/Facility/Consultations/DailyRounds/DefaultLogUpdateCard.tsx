@@ -17,6 +17,10 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
   return (
     <div className="flex w-full flex-col gap-4 rounded-lg border border-gray-400 p-4 @container">
       <LogUpdateCardAttribute
+        attributeKey={"Round Type" as any}
+        attributeValue={t(round.rounds_type)}
+      />
+      <LogUpdateCardAttribute
         attributeKey="patient_category"
         attributeValue={round.patient_category}
       />
