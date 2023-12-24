@@ -50,7 +50,7 @@ const initForm: any = {
   admitted_to: "",
   taken_at: null,
   rounds_type: "NORMAL",
-  clone_last: true,
+  clone_last: false,
   systolic: null,
   diastolic: null,
   pulse: null,
@@ -106,6 +106,7 @@ export const DailyRounds = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
+  const [consultationSuggestion, setConsultationSuggestion] = useState<any>("");
   const [prevReviewInterval, setPreviousReviewInterval] = useState(-1);
   const [prevAction, setPreviousAction] = useState("NO_ACTION");
   const [hasPreviousLog, setHasPreviousLog] = useState(false);
@@ -137,6 +138,7 @@ export const DailyRounds = (props: any) => {
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
+          setConsultationSuggestion(res.data.last_consultation?.suggestion);
           setPreviousReviewInterval(
             Number(res.data.last_consultation.review_interval)
           );
@@ -223,7 +225,7 @@ export const DailyRounds = (props: any) => {
                 RHYTHM_CHOICES.find((i) => i.text === res.data.rhythm)?.id) ||
               "0",
             temperature: parseFloat(res.data.temperature),
-            clone_last: res.data.count > 0 ? true : false,
+            // clone_last: res.data.count > 0 ? true : false,
           },
         });
       }
@@ -250,13 +252,6 @@ export const DailyRounds = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "clone_last":
-          if (state.form.clone_last === null) {
-            errors[field] = "Please choose a value";
-            invalidForm = true;
-          }
-          return;
-
         default:
           return;
       }
@@ -271,7 +266,7 @@ export const DailyRounds = (props: any) => {
     if (validForm) {
       setIsLoading(true);
       const baseData = {
-        clone_last: state.form.clone_last,
+        clone_last: state.form.clone_last ?? false,
         rounds_type: state.form.rounds_type,
         patient_category: state.form.patient_category,
         taken_at: state.form.taken_at
@@ -298,7 +293,7 @@ export const DailyRounds = (props: any) => {
           action: prevAction,
           review_interval: Number(prevReviewInterval),
         };
-        if (state.form.rounds_type === "NORMAL") {
+        if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
           data = {
             ...data,
             bp:
@@ -340,7 +335,7 @@ export const DailyRounds = (props: any) => {
           Notification.Success({
             msg: "Consultation Updates details updated successfully",
           });
-          if (state.form.rounds_type === "NORMAL") {
+          if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
             navigate(
               `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
             );
@@ -353,7 +348,7 @@ export const DailyRounds = (props: any) => {
           Notification.Success({
             msg: "Consultation Updates details created successfully",
           });
-          if (state.form.rounds_type === "NORMAL") {
+          if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
             if (data.clone_last) {
               navigate(
                 `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${res.data.external_id}/update`
@@ -456,8 +451,13 @@ export const DailyRounds = (props: any) => {
               className="w-full"
               label="Round Type"
               options={[
-                { id: "NORMAL", text: "Normal" },
-                { id: "VENTILATOR", text: "Critical Care" },
+                ...[
+                  { id: "NORMAL", text: "Normal" },
+                  { id: "VENTILATOR", text: "Critical Care" },
+                ],
+                ...(consultationSuggestion == "DC"
+                  ? [{ id: "TELEMEDICINE", text: "Telemedicine" }]
+                  : []),
               ]}
               optionLabel={(option) => option.text}
               optionValue={(option) => option.id}
@@ -479,7 +479,7 @@ export const DailyRounds = (props: any) => {
           />
         )}
 
-        {(state.form.clone_last === false || id) && (
+        {(!state.form.clone_last || id) && (
           <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
             <TextAreaFormField
               {...field("physical_examination_info")}
@@ -535,7 +535,7 @@ export const DailyRounds = (props: any) => {
               }}
             />
 
-            {state.form.rounds_type === "NORMAL" && (
+            {["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type) && (
               <>
                 <h3 className="mb-6 md:col-span-2">Vitals</h3>
 
@@ -650,6 +650,7 @@ export const DailyRounds = (props: any) => {
           <Cancel onClick={() => goBack()} />
           <Submit
             disabled={
+              buttonText === "Save" &&
               state.form.clone_last !== null &&
               !state.form.clone_last &&
               formFields.every(

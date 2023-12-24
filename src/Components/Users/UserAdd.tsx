@@ -189,6 +189,7 @@ export const UserAdd = (props: UserProps) => {
     setUsernameExists(userExistsEnums.checking);
     const { res: usernameCheck } = await request(routes.checkUsername, {
       pathParams: { username },
+      silent: true,
     });
     if (usernameCheck === undefined || usernameCheck.status === 409)
       setUsernameExists(userExistsEnums.exists);
