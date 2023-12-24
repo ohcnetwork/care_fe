@@ -154,9 +154,9 @@ export default function EditPrescriptionForm(props: Props) {
                 {...field("indicator", RequiredFieldValidator())}
                 required
               />
-              <TextFormField
+              <DosageFormField
+                className="flex-1"
                 label={t("max_dosage_24_hrs")}
-                type="number"
                 min={0}
                 {...field("max_dosage")}
               />

@@ -1,5 +1,16 @@
 import { PerformedByModel } from "../HCX/misc";
 
+export const DOSAGE_UNITS = [
+  "mg",
+  "g",
+  "ml",
+  "drop(s)",
+  "ampule(s)",
+  "tsp",
+] as const;
+
+export type DosageValue = `${number} ${(typeof DOSAGE_UNITS)[number]}`;
+
 interface BasePrescription {
   readonly id: string;
   medicine?: string;
@@ -7,8 +18,8 @@ interface BasePrescription {
   medicine_old?: string;
   route?: "ORAL" | "IV" | "IM" | "SC";
   dosage_type?: "REGULAR" | "TITRATED" | "PRN";
-  base_dosage?: string;
-  target_dosage?: string;
+  base_dosage?: DosageValue;
+  target_dosage?: DosageValue;
   instruction_on_titration?: string;
   notes?: string;
   meta?: object;
@@ -43,7 +54,7 @@ export interface NormalPrescription extends BasePrescription {
 
 export interface PRNPrescription extends BasePrescription {
   indicator: string;
-  max_dosage?: string;
+  max_dosage?: DosageValue;
   min_hours_between_doses?: number;
   dosage_type: "PRN";
   frequency?: undefined;
