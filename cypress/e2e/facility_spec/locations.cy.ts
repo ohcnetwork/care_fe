@@ -13,6 +13,10 @@ describe("Location Management Section", () => {
     "Name is required",
     "Location Type is required",
   ];
+  const EXPECTED_BED_ERROR_MESSAGES = [
+    "Please enter a name",
+    "Please select a bed type",
+  ];
   const locationName = "Test-location";
   const locationDescription = "Test Description";
   const locationType = "WARD";
@@ -69,6 +73,33 @@ describe("Location Management Section", () => {
     facilityLocation.verifyLocationType(locationModifiedType);
     facilityLocation.verifyLocationDescription(locationModifiedDescription);
     facilityLocation.verifyLocationMiddleware(locationModifiedMiddleware);
+  });
+
+  it("Add Single Bed to a facility location and modify it", () => {
+    // mandatory field verification in bed creation
+    cy.get("#manage-bed-button").first().click();
+    cy.get("#add-new-bed").click();
+    assetPage.clickassetupdatebutton();
+    userCreationPage.verifyErrorMessages(EXPECTED_BED_ERROR_MESSAGES);
+    // create a new single bed and verify
+    cy.get("#bed-name").clear().click().type("bed-name");
+    cy.get("#bed-description").clear().click().type("bed-description");
+    cy.get("#bed-type").click();
+    cy.get("li[role=option]").contains("ICU").click();
+    assetPage.clickassetupdatebutton();
+    // Verify the bed creation
+    cy.get("#view-bed-name").contains("bed-name");
+    cy.get("#view-bedbadges").contains("ICU");
+    cy.get("#view-bedbadges").contains("Vacant");
+    // edit the created bed
+
+    // verify the modification
+  });
+
+  it("Add Multiple Bed to a facility location and delete one bed", () => {
+    // create multiple bed and verify
+    // verify the bed creation
+    // delete a bed and verify it
   });
 
   afterEach(() => {

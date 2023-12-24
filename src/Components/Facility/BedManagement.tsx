@@ -94,9 +94,14 @@ const BedRow = (props: BedRowProps) => {
       >
         <div className="mt-2 space-y-2 px-4 lg:w-3/4">
           <div className="flex flex-col sm:flex-row">
-            <p className="inline break-words text-xl capitalize">{name}</p>{" "}
+            <p
+              className="inline break-words text-xl capitalize"
+              id="view-bed-name"
+            >
+              {name}
+            </p>{" "}
             &nbsp;
-            <div>
+            <div id="view-bedbadges">
               {LOCATION_BED_TYPES.find((item) => item.id === bedType) && (
                 <p className="mb-1 inline-flex w-fit items-center rounded-md bg-blue-100 px-2.5 py-0.5 text-sm font-medium capitalize leading-5 text-blue-800">
                   {LOCATION_BED_TYPES.find(
@@ -272,6 +277,7 @@ export const BedManagement = (props: BedManagementProps) => {
       <div className="container mx-auto px-4 py-2 sm:px-8">
         <div className="flex justify-end">
           <ButtonV2
+            id="add-new-bed"
             href={`/facility/${facilityId}/location/${locationId}/beds/add`}
             authorizeFor={NonReadOnlyUsers}
           >

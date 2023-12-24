@@ -183,13 +183,14 @@ export const AddBedForm = (props: BedFormProps) => {
               name="name"
               type="text"
               label="Name"
-              id="name"
+              id="bed-name"
               required
               value={name}
               onChange={(e) => setName(e.value)}
               error={errors.name}
             />
             <TextAreaFormField
+              id="bed-description"
               rows={5}
               label="Description"
               name="description"
@@ -223,6 +224,7 @@ export const AddBedForm = (props: BedFormProps) => {
                   name={"multipleBeds"}
                 />
                 <TextFormField
+                  id="numberofbed"
                   name="number_of_beds"
                   disabled={!multipleBeds}
                   label="Number of beds"
