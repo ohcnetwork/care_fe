@@ -62,10 +62,11 @@ export default function DailyRoundsList({ consultation }: Props) {
                     );
                   }
 
-                  const itemUrl =
-                    item.rounds_type === "NORMAL"
-                      ? `${consultationUrl}/daily-rounds/${item.id}`
-                      : `${consultationUrl}/daily_rounds/${item.id}`;
+                  const itemUrl = ["NORMAL", "TELEMEDICINE"].includes(
+                    item.rounds_type
+                  )
+                    ? `${consultationUrl}/daily-rounds/${item.id}`
+                    : `${consultationUrl}/daily_rounds/${item.id}`;
 
                   return (
                     <DefaultLogUpdateCard

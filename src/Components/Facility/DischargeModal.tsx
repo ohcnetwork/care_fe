@@ -275,9 +275,9 @@ const DischargeModal = ({
             setPreDischargeForm((form) => ({ ...form, ...updates }));
           }}
           required
-          min={dayjs(
-            consultationData?.admission_date ?? consultationData?.created_date
-          ).format("YYYY-MM-DDTHH:mm")}
+          min={dayjs(consultationData?.encounter_date).format(
+            "YYYY-MM-DDTHH:mm"
+          )}
           max={dayjs().format("YYYY-MM-DDTHH:mm")}
           error={
             preDischargeForm.discharge_reason === "EXP"
