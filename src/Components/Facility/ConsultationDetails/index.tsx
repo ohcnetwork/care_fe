@@ -262,7 +262,7 @@ export const ConsultationDetails = (props: any) => {
                 name:
                   consultationData.suggestion === "A"
                     ? `Admitted on ${formatDateTime(
-                        consultationData.admission_date!
+                        consultationData.encounter_date!
                       )}`
                     : consultationData.suggestion_text,
               },
@@ -349,19 +349,19 @@ export const ConsultationDetails = (props: any) => {
                       {consultationData.admitted_to}
                     </span>
                   </div>
-                  {(consultationData.admission_date ??
-                    consultationData.discharge_date) && (
+                  {(consultationData.discharge_date ??
+                    consultationData.encounter_date) && (
                     <div className="text-3xl font-bold">
                       {relativeTime(
                         consultationData.discharge_date
                           ? consultationData.discharge_date
-                          : consultationData.admission_date
+                          : consultationData.encounter_date
                       )}
                     </div>
                   )}
                   <div className="-mt-2 text-xs">
-                    {consultationData.admission_date &&
-                      formatDateTime(consultationData.admission_date)}
+                    {consultationData.encounter_date &&
+                      formatDateTime(consultationData.encounter_date)}
                     {consultationData.discharge_date &&
                       ` - ${formatDateTime(consultationData.discharge_date)}`}
                   </div>
@@ -479,6 +479,7 @@ export const ConsultationDetails = (props: any) => {
         <PatientNotesSlideover
           patientId={patientId}
           facilityId={facilityId}
+          consultationId={consultationId}
           setShowPatientNotesPopup={setShowPatientNotesPopup}
         />
       )}
