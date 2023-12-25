@@ -42,7 +42,6 @@ export default function AuthUserProvider({ children, unauthorized }: Props) {
         localStorage.setItem(LocalStorageKeys.refreshToken, query.data.refresh);
 
         await refetch();
-        navigate(getRedirectOr("/"));
       }
 
       return query;
@@ -55,6 +54,7 @@ export default function AuthUserProvider({ children, unauthorized }: Props) {
     localStorage.removeItem(LocalStorageKeys.refreshToken);
 
     await refetch();
+    navigate(getRedirectOr("/"));
   }, [refetch]);
 
   // Handles signout from current tab, if signed out from another tab.
@@ -111,6 +111,10 @@ const updateRefreshToken = async (silent = false) => {
 
 const getRedirectOr = (fallback: string) => {
   const url = window.location.href;
+  const redirect = new URLSearchParams(window.location.search).get("redirect");
+  if (redirect) {
+    return redirect;
+  }
   if (
     url == `${window.location.origin}/login` ||
     url == window.location.origin
