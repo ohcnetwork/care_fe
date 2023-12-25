@@ -61,7 +61,7 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
       required={field.required}
       onFocus={props.onFocus}
       onBlur={props.onBlur}
-      onChange={(e) => field.handleChange(e.target.value)}
+      onChange={props.onChange}
     />
   );
 

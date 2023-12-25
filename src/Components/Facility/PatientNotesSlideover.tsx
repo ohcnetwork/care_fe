@@ -22,10 +22,26 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   const [patientActive, setPatientActive] = useState(true);
   const [noteField, setNoteField] = useState("");
   const [reload, setReload] = useState(false);
+  // const [isSubmitting, setIsSubmitting] = useState(false);
 
   const dispatch = useDispatch();
 
   const { facilityId, patientId, setShowPatientNotesPopup } = props;
+
+  useEffect(() => {
+    // Load draft message from localStorage on component mount
+    const savedDraft = localStorage.getItem("doctorNotesDraft");
+
+    if (savedDraft !== noteField) {
+      setNoteField(savedDraft || ""); // Update state only if needed
+    }
+  }, [noteField]); // Add noteField to dependency array
+
+  const handleInput = (e) => {
+    const newDraft = e.target.value;
+    setNoteField(newDraft);
+    localStorage.setItem("doctorNotesDraft", newDraft);
+  };
 
   const onAddNote = () => {
     const payload = {
@@ -42,6 +58,13 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       setNoteField("");
       setReload(!reload);
     });
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      onAddNote();
+    }
   };
 
   useMessageListener((data) => {
@@ -98,63 +121,67 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   );
 
   return (
-    <div
-      className={classNames(
-        "fixed bottom-0 z-20 sm:right-8",
-        show
-          ? "right-0 h-screen w-screen sm:h-fit sm:w-[400px]"
-          : "right-8 w-[250px]"
-      )}
-    >
-      {!show ? (
+    <>
+      <form onKeyDown={handleKeyDown}>
         <div
-          className="flex w-full cursor-pointer items-center justify-around rounded-t-md bg-primary-800 p-2 text-white"
-          onClick={() => setShow(!show)}
+          className={classNames(
+            "fixed bottom-0 z-20 sm:right-8",
+            show
+              ? "right-0 h-screen w-screen sm:h-fit sm:w-[400px]"
+              : "right-8 w-[250px]"
+          )}
         >
-          <span className="font-semibold">{"Doctor's Notes"}</span>
-          {notesActionIcons}
-        </div>
-      ) : (
-        <div className="flex h-screen w-full -translate-y-0 flex-col text-clip border-2 border-b-0 border-primary-800 bg-white pb-3 transition-all sm:h-[500px] sm:rounded-t-md ">
-          {/* Doctor Notes Header */}
-          <div className="flex w-full items-center justify-between bg-primary-800 p-2 px-4 text-white">
-            <span className="font-semibold">{"Doctor's Notes"}</span>
-            {notesActionIcons}
-          </div>
-          {/* Doctor Notes Body */}
-          <PatientNotesList
-            facilityId={facilityId}
-            patientId={patientId}
-            reload={reload}
-            setReload={setReload}
-          />
-          <div className="relative mx-4 flex items-center">
-            <TextFormField
-              id="doctor_notes_textarea"
-              name="note"
-              value={noteField}
-              onChange={(e) => setNoteField(e.value)}
-              className="grow"
-              type="text"
-              errorClassName="hidden"
-              placeholder="Type your Note"
-              disabled={!patientActive}
-            />
-            <ButtonV2
-              id="add_doctor_note_button"
-              onClick={onAddNote}
-              border={false}
-              className="absolute right-2"
-              ghost
-              size="small"
-              disabled={!patientActive}
-              authorizeFor={NonReadOnlyUsers}
+          {!show ? (
+            <div
+              className="flex w-full cursor-pointer items-center justify-around rounded-t-md bg-primary-800 p-2 text-white"
+              onClick={() => setShow(!show)}
             >
-              <CareIcon className="care-l-message text-lg" />
-            </ButtonV2>
-          </div>
+              <span className="font-semibold">{"Doctor's Notes"}</span>
+              {notesActionIcons}
+            </div>
+          ) : (
+            <div className="flex h-screen w-full -translate-y-0 flex-col text-clip border-2 border-b-0 border-primary-800 bg-white pb-3 transition-all sm:h-[500px] sm:rounded-t-md ">
+              {/* Doctor Notes Header */}
+              <div className="flex w-full items-center justify-between bg-primary-800 p-2 px-4 text-white">
+                <span className="font-semibold">{"Doctor's Notes"}</span>
+                {notesActionIcons}
+              </div>
+              {/* Doctor Notes Body */}
+              <PatientNotesList
+                facilityId={facilityId}
+                patientId={patientId}
+                reload={reload}
+                setReload={setReload}
+              />
+              <div className="relative mx-4 flex items-center">
+                <TextFormField
+                  id="doctor_notes_textarea"
+                  name="note"
+                  onChange={handleInput}
+                  value={noteField}
+                  className="grow"
+                  type="text"
+                  errorClassName="hidden"
+                  placeholder="Type your Note"
+                  disabled={!patientActive}
+                />
+                <ButtonV2
+                  id="add_doctor_note_button"
+                  onClick={onAddNote}
+                  border={false}
+                  className="absolute right-2"
+                  ghost
+                  size="small"
+                  disabled={!patientActive}
+                  authorizeFor={NonReadOnlyUsers}
+                >
+                  <CareIcon className="care-l-message text-lg" />
+                </ButtonV2>
+              </div>
+            </div>
+          )}
         </div>
-      )}
-    </div>
+      </form>
+    </>
   );
 }
