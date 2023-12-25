@@ -25,6 +25,13 @@ describe("Location Management Section", () => {
   const locationModifiedDescription = "Test Modified Description";
   const locationModifiedType = "ICU";
   const locationModifiedMiddleware = "dev-middleware.coronasafe.live";
+  const bedName = "test bed";
+  const bedDescrption = "test description";
+  const bedType = "ICU";
+  const bedStatus = "Vacant";
+  const bedModifiedName = "test modified bed";
+  const bedModifiedDescrption = "test modified description";
+  const bedModifiedType = "Isolation";
 
   before(() => {
     cy.loginByApi("devdistrictadmin", "Coronasafe@123");
@@ -82,18 +89,26 @@ describe("Location Management Section", () => {
     assetPage.clickassetupdatebutton();
     userCreationPage.verifyErrorMessages(EXPECTED_BED_ERROR_MESSAGES);
     // create a new single bed and verify
-    cy.get("#bed-name").clear().click().type("bed-name");
-    cy.get("#bed-description").clear().click().type("bed-description");
+    cy.get("#bed-name").clear().click().type(bedName);
+    cy.get("#bed-description").clear().click().type(bedDescrption);
     cy.get("#bed-type").click();
-    cy.get("li[role=option]").contains("ICU").click();
+    cy.get("li[role=option]").contains(bedType).click();
     assetPage.clickassetupdatebutton();
     // Verify the bed creation
-    cy.get("#view-bed-name").contains("bed-name");
-    cy.get("#view-bedbadges").contains("ICU");
-    cy.get("#view-bedbadges").contains("Vacant");
+    cy.get("#view-bed-name").contains(bedName);
+    cy.get("#view-bedbadges").contains(bedType);
+    cy.get("#view-bedbadges").contains(bedStatus);
     // edit the created bed
-
+    cy.get("#edit-bed-button").click();
+    cy.get("#bed-name").clear().click().type(bedModifiedName);
+    cy.get("#bed-description").clear().click().type(bedModifiedDescrption);
+    cy.get("#bed-type").click();
+    cy.get("li[role=option]").contains(bedModifiedType).click();
+    assetPage.clickassetupdatebutton();
     // verify the modification
+    cy.get("#view-bed-name").contains(bedModifiedName);
+    cy.get("#view-bedbadges").contains(bedModifiedType);
+    cy.get("#view-bedbadges").contains(bedStatus);
   });
 
   it("Add Multiple Bed to a facility location and delete one bed", () => {
