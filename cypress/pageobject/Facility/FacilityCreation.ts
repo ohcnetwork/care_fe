@@ -337,6 +337,10 @@ class FacilityPage {
     cy.get("[data-testid='District']").should("contain", expectedText);
   }
 
+  verifyLocalBodyBadgeContent(expectedText: string) {
+    cy.get("[data-testid='Local Body']").should("contain", expectedText);
+  }
+
   verifyFacilityTypeBadgeContent(expectedText: string) {
     cy.get("[data-testid='Facility type']").should("contain", expectedText);
   }
