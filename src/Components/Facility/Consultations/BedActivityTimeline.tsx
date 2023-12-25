@@ -1,6 +1,6 @@
-import Timeline, { TimelineNode } from "../../../../CAREUI/display/Timeline";
-import { classNames, formatDateTime } from "../../../../Utils/utils";
-import { CurrentBed } from "../../models";
+import Timeline, { TimelineNode } from "../../../CAREUI/display/Timeline";
+import { classNames, formatDateTime } from "../../../Utils/utils";
+import { CurrentBed } from "../models";
 
 interface Props {
   consultationBeds: CurrentBed[];
