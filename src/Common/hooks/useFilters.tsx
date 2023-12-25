@@ -33,28 +33,24 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
     if (!hasPagination) return;
     setQueryParams(Object.assign({}, qParams, { page }), { replace: true });
   };
-  const removeFilter = (param: string) => updateQuery({ [param]: "" });
-  const removeFilters = (keys: string[]) =>
-    updateQuery(keys.reduce((acc, key) => ({ ...acc, [key]: "" }), qParams));
+  const removeFilters = (params: string[]) => {
+    setQueryParams(removeFromQuery(qParams, params));
+  };
+  const removeFilter = (param: string) => removeFilters([param]);
+
+  useEffect(() => updateFiltersCache(qParams), [qParams]);
 
   useEffect(() => {
-    const localFilters = JSON.parse(
-      localStorage.getItem("filters--" + window.location.pathname) || "{}"
+    const cache = getFiltersCache();
+    const qParamKeys = Object.keys(qParams);
+    const canSkip = Object.keys(cache).every(
+      (key) => qParamKeys.includes(key) && qParams[key] === cache[key]
     );
-    const blacklistLocalFilters = ["page", "limit", "offset"];
-    const newFilters = { ...localFilters, ...qParams };
-    const filteredNewFilters = blacklistLocalFilters.reduce(
-      (acc, key) => ({ ...acc, [key]: undefined }),
-      newFilters
-    );
-
-    localStorage.setItem(
-      "filters--" + window.location.pathname,
-      JSON.stringify(filteredNewFilters)
-    );
-
-    updateQuery(newFilters);
-  }, [qParams]);
+    if (canSkip) return;
+    if (Object.keys(cache).length) {
+      setQueryParams(cache);
+    }
+  }, []);
 
   const FilterBadge = ({ name, value, paramKey }: FilterBadgeProps) => {
     if (Array.isArray(paramKey))
@@ -174,7 +170,8 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
             id="clear-all-filters"
             className="rounded-full border border-gray-300 bg-white px-2 py-1 text-xs text-gray-600 hover:text-gray-800"
             onClick={() => {
-              removeFilters(activeFilters);
+              updateFiltersCache({});
+              removeFilters(Object.keys(qParams));
             }}
           >
             {t("clear_all_filters")}
@@ -254,3 +251,25 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
     },
   };
 }
+
+const removeFromQuery = (query: Record<string, unknown>, params: string[]) => {
+  const result = { ...query };
+  for (const param of params) {
+    delete result[param];
+  }
+  return result;
+};
+
+const FILTERS_CACHE_BLACKLIST = ["page", "limit", "offset"];
+
+const getFiltersCacheKey = () => `filters--${window.location.pathname}`;
+const getFiltersCache = () => {
+  return JSON.parse(localStorage.getItem(getFiltersCacheKey()) || "{}");
+};
+const updateFiltersCache = (cache: Record<string, unknown>) => {
+  const result = { ...cache };
+  for (const param of FILTERS_CACHE_BLACKLIST) {
+    delete result[param];
+  }
+  localStorage.setItem(getFiltersCacheKey(), JSON.stringify(result));
+};
