@@ -7,6 +7,7 @@ import ButtonV2, {
 import CareIcon from "../icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import Pagination from "../../Components/Common/Pagination";
+import Timeline from "../display/Timeline";
 
 const DEFAULT_PER_PAGE_LIMIT = 14;
 
@@ -134,19 +135,21 @@ const Items = <TItem extends object>(props: ItemsProps<TItem>) => {
   }
 
   return (
-    <ul className={props.className}>
-      {loading && props.shimmer
-        ? Array.from({ length: props.shimmerCount ?? 8 }).map((_, i) => (
-            <li key={i} className="w-full">
-              {props.shimmer}
-            </li>
-          ))
-        : items.map((item, index, items) => (
-            <li key={index} className="w-full">
-              {props.children(item, items)}
-            </li>
-          ))}
-    </ul>
+    <Timeline className="rounded-lg bg-white p-2 shadow" name="log update">
+      <ul className={props.className}>
+        {loading && props.shimmer
+          ? Array.from({ length: props.shimmerCount ?? 8 }).map((_, i) => (
+              <li key={i} className="w-full">
+                {props.shimmer}
+              </li>
+            ))
+          : items.map((item, index, items) => (
+              <li key={index} className="w-full">
+                {props.children(item, items)}
+              </li>
+            ))}
+      </ul>
+    </Timeline>
   );
 };
 
@@ -157,8 +160,16 @@ interface PaginatorProps {
   hideIfSinglePage?: boolean;
 }
 
-const Paginator = ({ className, hideIfSinglePage }: PaginatorProps) => {
+const Paginator = <TItem extends object>({
+  className,
+  hideIfSinglePage,
+}: PaginatorProps) => {
   const { data, perPage, currentPage, setPage } = useContextualized<object>();
+  const { loading } = useContextualized<TItem>();
+
+  if (loading) {
+    return null;
+  }
 
   if (hideIfSinglePage && (data?.count ?? 0) <= perPage) {
     return null;
