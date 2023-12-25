@@ -1,11 +1,11 @@
-import { navigate } from "raviger";
 import {
   AREACODES,
   IN_LANDLINE_AREA_CODES,
-  LocalStorageKeys,
+  USER_TYPES,
 } from "../Common/constants";
 import phoneCodesJson from "../Common/static/countryPhoneAndFlags.json";
 import dayjs from "./dayjs";
+import { UserModel } from "../Components/Users/models";
 
 interface ApacheParams {
   age: number;
@@ -119,41 +119,6 @@ export const dateQueryString = (date: DateLike) => {
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-export const handleSignOut = (forceReload: boolean) => {
-  Object.values(LocalStorageKeys).forEach((key) =>
-    localStorage.removeItem(key)
-  );
-  const redirectURL = new URLSearchParams(window.location.search).get(
-    "redirect"
-  );
-  const url = redirectURL ? `/?redirect=${redirectURL}` : "/";
-  if (forceReload) {
-    window.location.href = url;
-  } else {
-    navigate(url);
-  }
-};
-
-export const handleRedirection = () => {
-  const redirectParam = new URLSearchParams(window.location.search).get(
-    "redirect"
-  );
-  try {
-    if (redirectParam) {
-      const redirectURL = new URL(redirectParam);
-
-      if (redirectURL.origin === window.location.origin) {
-        const newPath = redirectURL.pathname + redirectURL.search;
-        window.location.href = `${window.location.origin}${newPath}`;
-        return;
-      }
-    }
-    window.location.href = "/facility";
-  } catch {
-    window.location.href = "/facility";
-  }
-};
-
 /**
  * Referred from: https://stackoverflow.com/a/9039885/7887936
  * @returns `true` if device is iOS, else `false`
@@ -249,13 +214,14 @@ export const parseCsvFile = async (
 
 export const getPincodeDetails = async (pincode: string, apiKey: string) => {
   const response = await fetch(
-    `https://api.data.gov.in/resource/5c2f62fe-5afa-4119-a499-fec9d604d5bd?api-key=${apiKey}&format=json&filters[pincode]=${pincode}&limit=1`
+    `https://api.data.gov.in/resource/6176ee09-3d56-4a3b-8115-21841576b2f6?api-key=${apiKey}&format=json&filters[pincode]=${pincode}&limit=1`
   );
   const data = await response.json();
   return data.records[0];
 };
 
 export const includesIgnoreCase = (str1: string, str2: string) => {
+  if (!str1 || !str2) return false;
   const lowerCaseStr1 = str1.toLowerCase();
   const lowerCaseStr2 = str2.toLowerCase();
   return (
@@ -460,10 +426,39 @@ export const scrollTo = (id: string | boolean) => {
   element?.scrollIntoView({ behavior: "smooth", block: "center" });
 };
 
+export const showUserDelete = (authUser: UserModel, targetUser: UserModel) => {
+  // Auth user should be higher in hierarchy than target user
+  if (
+    USER_TYPES.indexOf(authUser.user_type) <=
+    USER_TYPES.indexOf(targetUser.user_type)
+  )
+    return false;
+
+  if (
+    authUser.user_type === "StateAdmin" &&
+    targetUser.state_object?.id === authUser.state
+  )
+    return true;
+
+  if (
+    authUser.user_type === "DistrictAdmin" &&
+    targetUser.district_object?.id === authUser.district
+  )
+    return true;
+
+  return false;
+};
+
 export const invalidateFiltersCache = () => {
   for (const key in localStorage) {
     if (key.startsWith("filters--")) {
       localStorage.removeItem(key);
     }
   }
+};
+
+export const compareBy = <T extends object>(key: keyof T) => {
+  return (a: T, b: T) => {
+    return a[key] < b[key] ? -1 : a[key] > b[key] ? 1 : 0;
+  };
 };

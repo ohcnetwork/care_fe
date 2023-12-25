@@ -39,7 +39,6 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
 
   const handleInput = (e) => {
     const newDraft = e.target.value;
-    setNoteField(newDraft);
     localStorage.setItem("doctorNotesDraft", newDraft);
   };
 

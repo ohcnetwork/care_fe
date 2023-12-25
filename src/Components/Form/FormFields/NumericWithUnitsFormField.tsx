@@ -9,7 +9,7 @@ type Props = FormFieldBaseProps<string> & {
   className?: string | undefined;
   min?: string | number;
   max?: string | number;
-  units: string[];
+  units: readonly string[];
 };
 
 export default function NumericWithUnitsFormField(props: Props) {

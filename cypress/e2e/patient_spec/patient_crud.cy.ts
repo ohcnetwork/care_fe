@@ -2,6 +2,7 @@ import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import { UpdatePatientPage } from "../../pageobject/Patient/PatientUpdate";
+import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import { PatientConsultationPage } from "../../pageobject/Patient/PatientConsultation";
 import {
   emergency_phone_number,
@@ -19,6 +20,7 @@ describe("Patient Creation with consultation", () => {
   const patientPage = new PatientPage();
   const updatePatientPage = new UpdatePatientPage();
   const patientConsultationPage = new PatientConsultationPage();
+  const facilityPage = new FacilityPage();
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -42,10 +44,13 @@ describe("Patient Creation with consultation", () => {
       "Male",
       "Test Patient Address",
       "682001",
-      "1: PAZHAMTHOTTAM",
       "O+",
       "01012001"
     );
+    facilityPage.selectStateOnPincode("Kerala");
+    facilityPage.selectDistrictOnPincode("Ernakulam");
+    facilityPage.selectLocalBody("Aluva");
+    facilityPage.selectWard("4");
     patientPage.clickCreatePatient();
 
     patientPage.verifyPatientIsCreated();
