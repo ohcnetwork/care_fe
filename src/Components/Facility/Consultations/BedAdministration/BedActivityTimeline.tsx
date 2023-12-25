@@ -25,7 +25,7 @@ export default function BedActivityTimeline({
             <BedAllocationNode
               key={`activity-${bed.id}`}
               bed={bed}
-              isLastNode={index === 0}
+              isLastNode={index === consultationBeds.length - 1}
             />
           );
         })}
@@ -49,16 +49,12 @@ const BedAllocationNode = ({
           type: "allocated",
           timestamp: bed.start_date,
           by: undefined,
-          icon: "l-bed",
+          icon: bed.end_date === null ? "l-map-pin-alt" : "l-bed",
         }}
-        titleSuffix={`${bed.bed_object.name} (${
-          bed.bed_object.bed_type
-        }) was allocated at ${formatDateTime(bed.start_date)} | ${
-          bed.bed_object.location_object?.name
-        }`}
+        titleSuffix={<BedTitleSuffix bed={bed} isLastNode={isLastNode} />}
         actions={
-          isLastNode && (
-            <p className="mr-10 rounded-full border border-yellow-600 bg-yellow-500 px-2 text-white">
+          bed.end_date === null && (
+            <p className="mr-10 self-center rounded-full border border-yellow-600 bg-yellow-500 px-2 py-1 text-xs font-semibold text-white hover:bg-red-500">
               IN USE
             </p>
           )
@@ -66,5 +62,20 @@ const BedAllocationNode = ({
         isLast={isLastNode}
       />
     </>
+  );
+};
+
+const BedTitleSuffix = ({ bed }: { bed: CurrentBed; isLastNode?: boolean }) => {
+  return (
+    <div className="flex flex-col">
+      <p
+        className={classNames("font-semibold")}
+      >{`${bed.bed_object.name} (${bed.bed_object.bed_type}) | ${bed.bed_object.location_object?.name}`}</p>
+      <p className="mt-1 text-xs text-gray-500">
+        {`${formatDateTime(bed.start_date).split(";")[0]} | ${
+          formatDateTime(bed.start_date).split(";")[1]
+        }`}
+      </p>
+    </div>
   );
 };
