@@ -26,6 +26,7 @@ export default function LocationManagement({ facilityId }: Props) {
           backUrl={`/facility/${facilityId}`}
           options={
             <ButtonV2
+              id="add-new-location"
               href={`/facility/${facilityId}/location/add`}
               authorizeFor={NonReadOnlyUsers}
               className="mr-8 hidden lg:block"
@@ -80,14 +81,23 @@ const Location = ({
     <div className="flex-1">
       <div className="flex w-full items-center justify-between gap-2">
         <div className="flex items-center gap-3">
-          <p className="break-words text-xl font-medium">{name}</p>
-          <div className="h-fit rounded-full border-2 border-primary-500 bg-primary-100 px-3 py-[3px]">
+          <p
+            className="break-words text-xl font-medium"
+            id="view-location-name"
+          >
+            {name}
+          </p>
+          <div
+            className="h-fit rounded-full border-2 border-primary-500 bg-primary-100 px-3 py-[3px]"
+            id="location-type"
+          >
             <p className="text-xs font-bold text-primary-500">
               {location_type}
             </p>
           </div>
         </div>
         <ButtonV2
+          id="edit-location-button"
           variant="secondary"
           border
           href={`location/${id}/update`}
@@ -97,18 +107,25 @@ const Location = ({
           Edit
         </ButtonV2>
       </div>
-      <p className="mt-3 break-all text-sm font-medium text-gray-700">
+      <p
+        className="mt-3 break-all text-sm font-medium text-gray-700"
+        id="view-location-description"
+      >
         {description || "-"}
       </p>
       <p className="mt-3 text-sm font-semibold text-gray-700">
         Middleware Address:
       </p>
-      <p className="mt-1 break-all font-mono text-sm font-bold text-gray-700">
+      <p
+        className="mt-1 break-all font-mono text-sm font-bold text-gray-700"
+        id="view-location-middleware"
+      >
         {middleware_address || "-"}
       </p>
     </div>
 
     <ButtonV2
+      id="manage-bed-button"
       variant="secondary"
       border
       className="mt-3 w-full"
