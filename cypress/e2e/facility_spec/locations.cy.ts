@@ -3,12 +3,14 @@ import { AssetPage } from "../../pageobject/Asset/AssetCreation";
 import { UserCreationPage } from "../../pageobject/Users/UserCreation";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import FacilityLocation from "../../pageobject/Facility/FacilityLocation";
+// import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
 
 describe("Location Management Section", () => {
   const assetPage = new AssetPage();
   const userCreationPage = new UserCreationPage();
   const facilityPage = new FacilityPage();
   const facilityLocation = new FacilityLocation();
+  // const assetPagination = new AssetPagination();
   const EXPECTED_LOCATION_ERROR_MESSAGES = [
     "Name is required",
     "Location Type is required",
@@ -32,7 +34,8 @@ describe("Location Management Section", () => {
   const bedModifiedName = "test modified bed";
   const bedModifiedDescrption = "test modified description";
   const bedModifiedType = "Isolation";
-  const numberOfBeds = 8;
+  const numberOfBeds = 10;
+  //  const numberOfModifiedBeds = 25;
 
   before(() => {
     cy.loginByApi("devdistrictadmin", "Coronasafe@123");
@@ -51,68 +54,6 @@ describe("Location Management Section", () => {
     cy.get("#manage-facility-dropdown button").should("be.visible");
     cy.get("[id='manage-facility-dropdown']").scrollIntoView().click();
     cy.get("[id=location-management]").click();
-  });
-
-  it("Add Multiple Bed to a facility location and delete one bed", () => {
-    // create multiple bed and verify
-    cy.get("#manage-bed-button").first().click();
-    cy.get("#add-new-bed").click();
-    cy.get("#bed-name").click().clear().click().type(bedName);
-    cy.get("#bed-description").clear().click().type(bedDescrption);
-    cy.get("#bed-type").click();
-    cy.get("li[role=option]").contains(bedType).click();
-    cy.get("#multiplebed-checkbox").click();
-    cy.get("#numberofbed").clear().click().type(numberOfBeds.toString());
-    assetPage.clickassetupdatebutton();
-    // verify the bed creation
-    cy.get("#view-bedbadges").contains(bedType);
-    cy.get("#view-bedbadges").contains(bedStatus);
-    const expectedBedNames = [];
-    for (let i = 1; i <= 8; i++) {
-      const elementName = `${bedName} ${i}`;
-      expectedBedNames.push(elementName);
-    }
-    expectedBedNames.forEach((elementName) => {
-      cy.get("p#view-bed-name.inline.break-words.text-xl.capitalize")
-        .should("be.visible")
-        .contains(elementName);
-    });
-    cy.get("#view-bedbadges").contains(bedType);
-    cy.get("#view-bedbadges").contains(bedStatus);
-    // delete a bed and verify it
-    cy.get("#delete-bed-button").first().click();
-    cy.intercept("DELETE", "**/api/v1/bed/**").as("deleteRequest");
-    assetPage.clickassetupdatebutton();
-    cy.wait("@deleteRequest").its("response.statusCode").should("eq", 204);
-  });
-
-  it("Add Single Bed to a facility location and modify it", () => {
-    // mandatory field verification in bed creation
-    cy.get("#manage-bed-button").first().click();
-    cy.get("#add-new-bed").click();
-    assetPage.clickassetupdatebutton();
-    userCreationPage.verifyErrorMessages(EXPECTED_BED_ERROR_MESSAGES);
-    // create a new single bed and verify
-    cy.get("#bed-name").clear().click().type(bedName);
-    cy.get("#bed-description").clear().click().type(bedDescrption);
-    cy.get("#bed-type").click();
-    cy.get("li[role=option]").contains(bedType).click();
-    assetPage.clickassetupdatebutton();
-    // Verify the bed creation
-    cy.get("#view-bed-name").contains(bedName);
-    cy.get("#view-bedbadges").contains(bedType);
-    cy.get("#view-bedbadges").contains(bedStatus);
-    // edit the created bed
-    cy.get("#edit-bed-button").click();
-    cy.get("#bed-name").clear().click().type(bedModifiedName);
-    cy.get("#bed-description").clear().click().type(bedModifiedDescrption);
-    cy.get("#bed-type").click();
-    cy.get("li[role=option]").contains(bedModifiedType).click();
-    assetPage.clickassetupdatebutton();
-    // verify the modification
-    cy.get("#view-bed-name").contains(bedModifiedName);
-    cy.get("#view-bedbadges").contains(bedModifiedType);
-    cy.get("#view-bedbadges").contains(bedStatus);
   });
 
   it("Adds Location to a facility and modify it", () => {
@@ -143,6 +84,67 @@ describe("Location Management Section", () => {
     facilityLocation.verifyLocationType(locationModifiedType);
     facilityLocation.verifyLocationDescription(locationModifiedDescription);
     facilityLocation.verifyLocationMiddleware(locationModifiedMiddleware);
+  });
+
+  it("Add Multiple Bed to a facility location and delete a bed", () => {
+    // create multiple bed and verify
+    facilityLocation.clickManageBedButton();
+    facilityLocation.clickAddBedButton();
+    facilityLocation.enterBedName(bedName);
+    facilityLocation.enterBedDescription(bedDescrption);
+    facilityLocation.selectBedType(bedType);
+    facilityLocation.setMultipleBeds(numberOfBeds);
+    assetPage.clickassetupdatebutton();
+    // verify the bed creation
+    facilityLocation.verifyBedBadge(bedType);
+    facilityLocation.verifyBedBadge(bedStatus);
+    facilityLocation.verifyIndividualBedName(bedName, numberOfBeds);
+    // delete a bed and verify it
+    facilityLocation.deleteFirstBed();
+    facilityLocation.deleteBedRequest();
+    assetPage.clickassetupdatebutton();
+    facilityLocation.deleteBedRequest();
+  });
+
+  // it("Add Multiple Bed to a facility location and verify pagination", () => {
+  //   // bed creation
+  //   facilityLocation.clickManageBedButton();
+  //   facilityLocation.clickAddBedButton();
+  //   facilityLocation.enterBedName(bedModifiedName);
+  //   facilityLocation.enterBedDescription(bedModifiedDescrption);
+  //   facilityLocation.selectBedType(bedModifiedType);
+  //   facilityLocation.setMultipleBeds(numberOfModifiedBeds);
+  //   assetPage.clickassetupdatebutton();
+  //   // pagination
+  //   assetPagination.navigateToNextPage();
+  //   assetPagination.navigateToPreviousPage();
+  // }); need to be unblocked upon issue #6906 is solved
+
+  it("Add Single Bed to a facility location and modify it", () => {
+    // mandatory field verification in bed creation
+    facilityLocation.clickManageBedButton();
+    facilityLocation.clickAddBedButton();
+    assetPage.clickassetupdatebutton();
+    userCreationPage.verifyErrorMessages(EXPECTED_BED_ERROR_MESSAGES);
+    // create a new single bed and verify
+    facilityLocation.enterBedName(bedName);
+    facilityLocation.enterBedDescription(bedDescrption);
+    facilityLocation.selectBedType(bedType);
+    assetPage.clickassetupdatebutton();
+    // Verify the bed creation
+    facilityLocation.verifyBedNameBadge(bedName);
+    facilityLocation.verifyBedBadge(bedType);
+    facilityLocation.verifyBedBadge(bedStatus);
+    // edit the created bed
+    facilityLocation.clickEditBedButton();
+    facilityLocation.enterBedName(bedModifiedName);
+    facilityLocation.enterBedDescription(bedModifiedDescrption);
+    facilityLocation.selectBedType(bedModifiedType);
+    assetPage.clickassetupdatebutton();
+    // verify the modification
+    facilityLocation.verifyBedNameBadge(bedModifiedName);
+    facilityLocation.verifyBedBadge(bedModifiedType);
+    facilityLocation.verifyBedBadge(bedStatus);
   });
 
   afterEach(() => {
