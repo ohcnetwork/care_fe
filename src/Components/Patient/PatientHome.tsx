@@ -312,18 +312,18 @@ export const PatientHome = (props: any) => {
   ) {
     const medHis = patientData.medical_history;
     patientMedHis = medHis.map((item: any, idx: number) => (
-      <div className="sm:col-span-1" key={`med_his_${idx}`}>
+      <>
         {item?.disease !== "NO" && (
-          <>
-            <div className="overflow-x-scroll text-sm font-semibold leading-5 text-zinc-400">
+          <div className="sm:col-span-1" key={`med_his_${idx}`}>
+            <div className="break-words text-sm font-semibold leading-5 text-zinc-400">
               {item.disease}
             </div>
-            <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
+            <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
               {item.details}
             </div>
-          </>
+          </div>
         )}
-      </div>
+      </>
     ));
   }
 
