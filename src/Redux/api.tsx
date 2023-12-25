@@ -46,6 +46,7 @@ import {
   LocationModel,
   StateModel,
   PatientNotesModel,
+  BedModel,
 } from "../Components/Facility/models";
 import {
   IDeleteExternalResult,
@@ -393,6 +394,7 @@ const routes = {
   listFacilityBeds: {
     path: "/api/v1/bed/",
     method: "GET",
+    TRes: Type<PaginatedResponse<BedModel>>(),
   },
   createFacilityBed: {
     path: "/api/v1/bed/",
@@ -409,6 +411,7 @@ const routes = {
   deleteFacilityBed: {
     path: "/api/v1/bed/{external_id}/",
     method: "DELETE",
+    TRes: Type<Record<string, never>>(),
   },
 
   // Consultation beds
