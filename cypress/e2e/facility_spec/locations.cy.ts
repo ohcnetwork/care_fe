@@ -3,14 +3,14 @@ import { AssetPage } from "../../pageobject/Asset/AssetCreation";
 import { UserCreationPage } from "../../pageobject/Users/UserCreation";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import FacilityLocation from "../../pageobject/Facility/FacilityLocation";
-// import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
+import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
 
 describe("Location Management Section", () => {
   const assetPage = new AssetPage();
   const userCreationPage = new UserCreationPage();
   const facilityPage = new FacilityPage();
   const facilityLocation = new FacilityLocation();
-  // const assetPagination = new AssetPagination();
+  const assetPagination = new AssetPagination();
   const EXPECTED_LOCATION_ERROR_MESSAGES = [
     "Name is required",
     "Location Type is required",
@@ -35,7 +35,7 @@ describe("Location Management Section", () => {
   const bedModifiedDescrption = "test modified description";
   const bedModifiedType = "Isolation";
   const numberOfBeds = 10;
-  //  const numberOfModifiedBeds = 25;
+  const numberOfModifiedBeds = 25;
 
   before(() => {
     cy.loginByApi("devdistrictadmin", "Coronasafe@123");
@@ -106,19 +106,19 @@ describe("Location Management Section", () => {
     facilityLocation.deleteBedRequest();
   });
 
-  // it("Add Multiple Bed to a facility location and verify pagination", () => {
-  //   // bed creation
-  //   facilityLocation.clickManageBedButton();
-  //   facilityLocation.clickAddBedButton();
-  //   facilityLocation.enterBedName(bedModifiedName);
-  //   facilityLocation.enterBedDescription(bedModifiedDescrption);
-  //   facilityLocation.selectBedType(bedModifiedType);
-  //   facilityLocation.setMultipleBeds(numberOfModifiedBeds);
-  //   assetPage.clickassetupdatebutton();
-  //   // pagination
-  //   assetPagination.navigateToNextPage();
-  //   assetPagination.navigateToPreviousPage();
-  // }); need to be unblocked upon issue #6906 is solved
+  it("Add Multiple Bed to a facility location and verify pagination", () => {
+    // bed creation
+    facilityLocation.clickManageBedButton();
+    facilityLocation.clickAddBedButton();
+    facilityLocation.enterBedName(bedModifiedName);
+    facilityLocation.enterBedDescription(bedModifiedDescrption);
+    facilityLocation.selectBedType(bedModifiedType);
+    facilityLocation.setMultipleBeds(numberOfModifiedBeds);
+    assetPage.clickassetupdatebutton();
+    // pagination
+    assetPagination.navigateToNextPage();
+    assetPagination.navigateToPreviousPage();
+  });
 
   it("Add Single Bed to a facility location and modify it", () => {
     // mandatory field verification in bed creation
