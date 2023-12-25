@@ -117,7 +117,8 @@ const getRedirectOr = (fallback: string) => {
   }
   if (
     url == `${window.location.origin}/login` ||
-    url == window.location.origin
+    url == window.location.origin ||
+    url == `${window.location.origin}/session-expired`
   ) {
     return fallback;
   } else {
