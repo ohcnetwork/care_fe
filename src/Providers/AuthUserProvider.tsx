@@ -55,9 +55,6 @@ export default function AuthUserProvider({ children, unauthorized }: Props) {
     localStorage.removeItem(LocalStorageKeys.refreshToken);
 
     await refetch();
-
-    const redirectURL = getRedirectURL();
-    navigate(redirectURL ? `/?redirect=${redirectURL}` : "/");
   }, [refetch]);
 
   // Handles signout from current tab, if signed out from another tab.
@@ -112,24 +109,14 @@ const updateRefreshToken = async (silent = false) => {
   localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
 };
 
-const getRedirectURL = () => {
-  return new URLSearchParams(window.location.search).get("redirect");
-};
-
 const getRedirectOr = (fallback: string) => {
-  const url = getRedirectURL();
-
-  if (url) {
-    try {
-      const redirect = new URL(url);
-      if (window.location.origin === redirect.origin) {
-        return redirect.pathname + redirect.search;
-      }
-      console.error("Redirect does not belong to same origin.");
-    } catch {
-      console.error(`Invalid redirect URL: ${url}`);
-    }
+  const url = window.location.href;
+  if (
+    url == `${window.location.origin}/login` ||
+    url == window.location.origin
+  ) {
+    return fallback;
+  } else {
+    return url;
   }
-
-  return fallback;
 };
