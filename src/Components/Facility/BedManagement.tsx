@@ -136,6 +136,7 @@ const BedRow = (props: BedRowProps) => {
             Edit
           </ButtonV2>
           <ButtonV2
+            id="delete-bed-button"
             onClick={() => handleDelete(name, id)}
             authorizeFor={NonReadOnlyUsers}
             variant="danger"

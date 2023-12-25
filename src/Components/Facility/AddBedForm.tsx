@@ -216,6 +216,7 @@ export const AddBedForm = (props: BedFormProps) => {
             {!bedId && (
               <>
                 <CheckBoxFormField
+                  id="multiplebed-checkbox"
                   label="Do you want to make multiple beds?"
                   onChange={() => {
                     if (multipleBeds) setNumberOfBeds(1);
