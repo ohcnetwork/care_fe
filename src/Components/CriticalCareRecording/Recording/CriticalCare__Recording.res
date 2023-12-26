@@ -237,9 +237,7 @@ let make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
             <button
               onClick={_ =>
                 Notifications.success({msg: "Critical care log updates are filed successfully"})}
-              className="btn btn-primary w-full mt-6"
-              disabled={Js.Array.length(state.updatedEditors) === 0}
-              >
+              className="btn btn-primary w-full mt-6">
               {str("Complete")}
             </button>
           </Link>
