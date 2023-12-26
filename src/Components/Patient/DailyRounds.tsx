@@ -656,6 +656,7 @@ export const DailyRounds = (props: any) => {
           <Cancel onClick={() => goBack()} />
           <Submit
             disabled={
+              buttonText === "Save" &&
               state.form.clone_last !== null &&
               !state.form.clone_last &&
               formFields.every(
