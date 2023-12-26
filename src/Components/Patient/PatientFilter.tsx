@@ -67,10 +67,10 @@ export default function PatientFilter(props: any) {
     date_declared_positive: filter.date_declared_positive || null,
     last_consultation_medico_legal_case:
       filter.last_consultation_medico_legal_case || null,
-    last_consultation_admission_date_before:
-      filter.last_consultation_admission_date_before || null,
-    last_consultation_admission_date_after:
-      filter.last_consultation_admission_date_after || null,
+    last_consultation_encounter_date_before:
+      filter.last_consultation_encounter_date_before || null,
+    last_consultation_encounter_date_after:
+      filter.last_consultation_encounter_date_after || null,
     last_consultation_discharge_date_before:
       filter.last_consultation_discharge_date_before || null,
     last_consultation_discharge_date_after:
@@ -125,8 +125,8 @@ export default function PatientFilter(props: any) {
     date_of_result: null,
     date_declared_positive: null,
     last_consultation_medico_legal_case: null,
-    last_consultation_admission_date_before: "",
-    last_consultation_admission_date_after: "",
+    last_consultation_encounter_date_before: "",
+    last_consultation_encounter_date_after: "",
     last_consultation_discharge_date_before: "",
     last_consultation_discharge_date_after: "",
     last_consultation_admitted_to_list: [],
@@ -236,8 +236,8 @@ export default function PatientFilter(props: any) {
       age_max,
       date_of_result,
       last_consultation_medico_legal_case,
-      last_consultation_admission_date_before,
-      last_consultation_admission_date_after,
+      last_consultation_encounter_date_before,
+      last_consultation_encounter_date_after,
       last_consultation_discharge_date_before,
       last_consultation_discharge_date_after,
       last_consultation_admitted_bed_type_list,
@@ -278,11 +278,11 @@ export default function PatientFilter(props: any) {
       date_of_result: dateQueryString(date_of_result),
       last_consultation_medico_legal_case:
         last_consultation_medico_legal_case || "",
-      last_consultation_admission_date_before: dateQueryString(
-        last_consultation_admission_date_before
+      last_consultation_encounter_date_before: dateQueryString(
+        last_consultation_encounter_date_before
       ),
-      last_consultation_admission_date_after: dateQueryString(
-        last_consultation_admission_date_after
+      last_consultation_encounter_date_after: dateQueryString(
+        last_consultation_encounter_date_after
       ),
       last_consultation_discharge_date_before: dateQueryString(
         last_consultation_discharge_date_before
@@ -537,13 +537,13 @@ export default function PatientFilter(props: any) {
           />
           <DateRangeFormField
             labelClassName="text-sm"
-            name="last_consultation_admission_date"
+            name="last_consultation_encounter_date"
             label="Admit Date"
             value={{
               start: getDate(
-                filterState.last_consultation_admission_date_after
+                filterState.last_consultation_encounter_date_after
               ),
-              end: getDate(filterState.last_consultation_admission_date_before),
+              end: getDate(filterState.last_consultation_encounter_date_before),
             }}
             onChange={handleDateRangeChange}
             errorClassName="hidden"
