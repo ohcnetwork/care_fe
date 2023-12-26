@@ -42,6 +42,7 @@ export default function AuthUserProvider({ children, unauthorized }: Props) {
         localStorage.setItem(LocalStorageKeys.refreshToken, query.data.refresh);
 
         await refetch();
+        navigate(getRedirectOr(location.pathname));
       }
 
       return query;
@@ -54,7 +55,7 @@ export default function AuthUserProvider({ children, unauthorized }: Props) {
     localStorage.removeItem(LocalStorageKeys.refreshToken);
 
     await refetch();
-    navigate(getRedirectOr("/"));
+    navigate(getRedirectOr(`/login?redirect=${location.href}`));
   }, [refetch]);
 
   // Handles signout from current tab, if signed out from another tab.
@@ -109,24 +110,30 @@ const updateRefreshToken = async (silent = false) => {
   localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
 };
 
+const getRedirectURL = () => {
+  return new URLSearchParams(window.location.search).get("redirect");
+};
+
 const getRedirectOr = (fallback: string) => {
-  const url = window.location.href;
-  const redirect = new URLSearchParams(window.location.search).get("redirect");
-  if (redirect) {
-    const r = new URL(redirect);
-    if (r.origin == window.location.origin) {
-      return redirect;
-    } else {
-      return fallback;
+  const url = getRedirectURL();
+  const reserverdURLS = ["/login", "/session-expired"];
+  if (url) {
+    try {
+      const redirect = new URL(url);
+      console.log(redirect);
+      if (window.location.origin === redirect.origin) {
+        console.log(redirect);
+        return redirect.href;
+      }
+      console.error("Redirect does not belong to same origin.");
+    } catch {
+      console.error(`Invalid redirect URL: ${url}`);
     }
-  }
-  if (
-    url == `${window.location.origin}/login` ||
-    url == window.location.origin ||
-    url == `${window.location.origin}/session-expired`
-  ) {
-    return fallback;
+    if (reserverdURLS.includes(location.pathname)) {
+      return "/";
+    }
+    return location.origin + location.pathname;
   } else {
-    return url;
+    return fallback;
   }
 };
