@@ -58,7 +58,7 @@ export default function BoardView() {
   const { t } = useTranslation();
 
   return (
-    <div className="flex h-screen flex-col px-2 pb-2">
+    <div className="flex  flex-col px-2 pb-2">
       <div className="flex w-full flex-col items-center justify-between lg:flex-row">
         <div className="w-1/3 lg:w-1/4">
           <PageTitle
