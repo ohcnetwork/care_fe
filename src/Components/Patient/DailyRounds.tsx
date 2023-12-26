@@ -50,7 +50,7 @@ const initForm: any = {
   admitted_to: "",
   taken_at: null,
   rounds_type: "NORMAL",
-  clone_last: null,
+  clone_last: true,
   systolic: null,
   diastolic: null,
   pulse: null,
@@ -89,7 +89,13 @@ const DailyRoundsFormReducer = (state = initialState, action: any) => {
     case "set_state": {
       if (action.state) return action.state;
       return state;
-    }
+    }        
+    case "clone_last":
+      if (state.form.clone_last === null) {
+        errors[field] = "Please choose a value";
+        invalidForm = true;
+      }
+      return;
     default:
       return state;
   }
