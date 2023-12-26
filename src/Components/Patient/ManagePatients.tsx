@@ -194,10 +194,10 @@ export const PatientManager = () => {
     date_of_result_after: qParams.date_of_result_after || undefined,
     last_consultation_medico_legal_case:
       qParams.last_consultation_medico_legal_case || undefined,
-    last_consultation_admission_date_before:
-      qParams.last_consultation_admission_date_before || undefined,
-    last_consultation_admission_date_after:
-      qParams.last_consultation_admission_date_after || undefined,
+    last_consultation_encounter_date_before:
+      qParams.last_consultation_encounter_date_before || undefined,
+    last_consultation_encounter_date_after:
+      qParams.last_consultation_encounter_date_after || undefined,
     last_consultation_discharge_date_before:
       qParams.last_consultation_discharge_date_before || undefined,
     last_consultation_discharge_date_after:
@@ -239,8 +239,8 @@ export const PatientManager = () => {
     [params.date_of_result_before, params.date_of_result_after],
     [params.last_vaccinated_date_before, params.last_vaccinated_date_after],
     [
-      params.last_consultation_admission_date_before,
-      params.last_consultation_admission_date_after,
+      params.last_consultation_encounter_date_before,
+      params.last_consultation_encounter_date_after,
     ],
     [
       params.last_consultation_discharge_date_before,
@@ -345,8 +345,8 @@ export const PatientManager = () => {
   }, [
     dispatch,
     qParams.last_consultation_medico_legal_case,
-    qParams.last_consultation_admission_date_before,
-    qParams.last_consultation_admission_date_after,
+    qParams.last_consultation_encounter_date_before,
+    qParams.last_consultation_encounter_date_after,
     qParams.last_consultation_discharge_date_before,
     qParams.last_consultation_discharge_date_after,
     qParams.age_max,
@@ -589,10 +589,13 @@ export const PatientManager = () => {
               )}
             </div>
             <div className="flex w-full flex-col gap-2 pl-2 md:block md:flex-row">
-              <div className="flex w-full justify-between gap-2">
-                <div className="font-semibold">
+              <div className="flex w-full items-center justify-between gap-2">
+                <div
+                  className="flex flex-wrap gap-2 font-semibold"
+                  id="patient-name-list"
+                >
                   <span className="text-xl capitalize">{patient.name}</span>
-                  <span className="ml-4 text-gray-800">
+                  <span className="text-gray-800">
                     {formatAge(patient.age, patient.date_of_birth, true)}
                   </span>
                 </div>
@@ -964,7 +967,7 @@ export const PatientManager = () => {
             badge("IP/OP number", "patient_no"),
             ...dateRange("Modified", "modified_date"),
             ...dateRange("Created", "created_date"),
-            ...dateRange("Admitted", "last_consultation_admission_date"),
+            ...dateRange("Admitted", "last_consultation_encounter_date"),
             ...dateRange("Discharged", "last_consultation_discharge_date"),
             // Admitted to type badges
             badge("No. of vaccination doses", "number_of_doses"),

@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import CircularProgress from "../Common/components/CircularProgress";
-import DoctorNote from "./DoctorNote";
-import { PatientNoteStateType } from "./models";
 import routes from "../../Redux/api";
+import { PatientNoteStateType } from "./models";
+import useSlug from "../../Common/hooks/useSlug";
+import DoctorNote from "./DoctorNote";
 import request from "../../Utils/request/request";
 
 interface PatientNotesProps {
@@ -17,16 +18,22 @@ interface PatientNotesProps {
 
 const pageSize = RESULTS_PER_PAGE_LIMIT;
 
-const PatientNotesList = (props: PatientNotesProps) => {
+const PatientConsultationNotesList = (props: PatientNotesProps) => {
   const { state, setState, reload, setReload } = props;
+  const consultationId = useSlug("consultation") ?? "";
 
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchNotes = async () => {
     setIsLoading(true);
     const { data }: any = await request(routes.getPatientNotes, {
-      pathParams: { patientId: props.patientId },
-      query: { offset: (state.cPage - 1) * RESULTS_PER_PAGE_LIMIT },
+      pathParams: {
+        patientId: props.patientId,
+      },
+      query: {
+        consultation: consultationId,
+        offset: (state.cPage - 1) * RESULTS_PER_PAGE_LIMIT,
+      },
     });
 
     if (state.cPage === 1) {
@@ -77,4 +84,4 @@ const PatientNotesList = (props: PatientNotesProps) => {
   return <DoctorNote state={state} handleNext={handleNext} />;
 };
 
-export default PatientNotesList;
+export default PatientConsultationNotesList;

@@ -1,23 +1,25 @@
-import { useState, useEffect } from "react";
-import * as Notification from "../../Utils/Notifications.js";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import TextFormField from "../Form/FormFields/TextFormField";
-import ButtonV2 from "../Common/components/ButtonV2";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import PatientNotesList from "../Facility/PatientNotesList";
-import Page from "../Common/components/Page";
-import { useMessageListener } from "../../Common/hooks/useMessageListener";
-import { PatientNoteStateType } from "../Facility/models";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
+import { useState } from "react";
+import * as Notification from "../../../Utils/Notifications.js";
+import Page from "../../Common/components/Page";
+import TextFormField from "../../Form/FormFields/TextFormField";
+import ButtonV2 from "../../Common/components/ButtonV2";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
+import { NonReadOnlyUsers } from "../../../Utils/AuthorizeFor";
+import { useMessageListener } from "../../../Common/hooks/useMessageListener";
+import PatientConsultationNotesList from "../PatientConsultationNotesList.js";
+import { PatientNoteStateType } from "../models.js";
+import routes from "../../../Redux/api.js";
+import request from "../../../Utils/request/request.js";
+import useQuery from "../../../Utils/request/useQuery.js";
 
-interface PatientNotesProps {
-  patientId: any;
-  facilityId: any;
+interface ConsultationDoctorNotesProps {
+  patientId: string;
+  facilityId: string;
+  consultationId: string;
 }
 
-const PatientNotes = (props: PatientNotesProps) => {
-  const { patientId, facilityId } = props;
+const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
+  const { patientId, facilityId, consultationId } = props;
 
   const [patientActive, setPatientActive] = useState(true);
   const [noteField, setNoteField] = useState("");
@@ -35,6 +37,7 @@ const PatientNotes = (props: PatientNotesProps) => {
   const onAddNote = async () => {
     const payload = {
       note: noteField,
+      consultation: consultationId,
     };
     if (!/\S+/.test(noteField)) {
       Notification.Error({
@@ -44,32 +47,30 @@ const PatientNotes = (props: PatientNotesProps) => {
     }
 
     const { res } = await request(routes.addPatientNote, {
-      pathParams: { patientId: patientId },
+      pathParams: {
+        patientId: patientId,
+      },
       body: payload,
     });
+
     if (res?.status === 201) {
       Notification.Success({ msg: "Note added successfully" });
-      setNoteField("");
-      setReload(!reload);
       setState({ ...state, cPage: 1 });
+      setNoteField("");
+      setReload(true);
     }
   };
 
-  useEffect(() => {
-    async function fetchPatientName() {
-      if (patientId) {
-        const { data } = await request(routes.getPatient, {
-          pathParams: { id: patientId },
-        });
-        if (data) {
-          setPatientActive(data.is_active ?? true);
-          setPatientName(data.name ?? "");
-          setFacilityName(data.facility_object?.name ?? "");
-        }
+  useQuery(routes.getPatient, {
+    pathParams: { id: patientId },
+    onResponse: ({ data }) => {
+      if (data) {
+        setPatientActive(data.is_active ?? true);
+        setPatientName(data.name ?? "");
+        setFacilityName(data.facility_object?.name ?? "");
       }
-    }
-    fetchPatientName();
-  }, [patientId]);
+    },
+  });
 
   useMessageListener((data) => {
     const message = data?.message;
@@ -85,7 +86,7 @@ const PatientNotes = (props: PatientNotesProps) => {
 
   return (
     <Page
-      title="Patient Notes"
+      title="Doctor Notes"
       className="flex h-screen flex-col"
       crumbsReplacements={{
         [facilityId]: { name: facilityName },
@@ -94,7 +95,7 @@ const PatientNotes = (props: PatientNotesProps) => {
       backUrl={`/facility/${facilityId}/patient/${patientId}`}
     >
       <div className="mx-3 my-2 flex grow flex-col rounded-lg bg-white p-2 sm:mx-10 sm:my-5 sm:p-5">
-        <PatientNotesList
+        <PatientConsultationNotesList
           state={state}
           setState={setState}
           patientId={patientId}
@@ -131,4 +132,4 @@ const PatientNotes = (props: PatientNotesProps) => {
   );
 };
 
-export default PatientNotes;
+export default ConsultationDoctorNotes;

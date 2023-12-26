@@ -239,6 +239,7 @@ export const FileUpload = (props: FileUploadProps) => {
         setFacilityName("");
       }
     }
+
     fetchPatientName();
   }, [dispatch, patientId]);
 
@@ -898,7 +899,11 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   if (isLoading) {
-    return <Loading />;
+    return (
+      <div className="min-h-screen">
+        <Loading />
+      </div>
+    );
   }
 
   const onFileChange = (e: ChangeEvent<HTMLInputElement>): any => {

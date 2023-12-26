@@ -120,6 +120,8 @@ describe("Facility Creation", () => {
       cy.get("[role='option']").contains(featureText).click();
     });
     facilityPage.fillPincode("682001");
+    facilityPage.selectStateOnPincode("Kerala");
+    facilityPage.selectDistrictOnPincode("Ernakulam");
     facilityPage.selectLocalBody("Aluva");
     facilityPage.selectWard("4");
     facilityPage.fillAddress(facilityAddress);
@@ -190,6 +192,8 @@ describe("Facility Creation", () => {
     facilityPage.visitCreateFacilityPage();
     facilityPage.fillFacilityName(facilityName);
     facilityPage.fillPincode("682001");
+    facilityPage.selectStateOnPincode("Kerala");
+    facilityPage.selectDistrictOnPincode("Ernakulam");
     facilityPage.selectLocalBody("Aluva");
     facilityPage.selectWard("4");
     facilityPage.fillAddress(facilityAddress);
@@ -217,7 +221,6 @@ describe("Facility Creation", () => {
       .should("be.visible");
     // verify the facility homepage
     cy.visit("/facility");
-    cy.clearAllFilters();
     manageUserPage.typeFacilitySearch(facilityName);
     facilityPage.verifyFacilityBadgeContent(facilityName);
     manageUserPage.assertFacilityInCard(facilityName);
@@ -228,6 +231,8 @@ describe("Facility Creation", () => {
     facilityPage.visitCreateFacilityPage();
     facilityPage.fillFacilityName(facilityName);
     facilityPage.fillPincode("682001");
+    facilityPage.selectStateOnPincode("Kerala");
+    facilityPage.selectDistrictOnPincode("Ernakulam");
     facilityPage.selectLocalBody("Aluva");
     facilityPage.selectWard("4");
     facilityPage.fillAddress(facilityAddress);
