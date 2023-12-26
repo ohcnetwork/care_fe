@@ -10,8 +10,6 @@ import request from "../../Utils/request/request";
 interface PatientNotesProps {
   state: PatientNoteStateType;
   setState: any;
-  patientId: string;
-  facilityId: string;
   reload?: boolean;
   setReload?: any;
 }
@@ -28,7 +26,7 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
     setIsLoading(true);
     const { data }: any = await request(routes.getPatientNotes, {
       pathParams: {
-        patientId: props.patientId,
+        patientId: props.state.patientId,
       },
       query: {
         consultation: consultationId,
@@ -81,7 +79,9 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
     );
   }
 
-  return <DoctorNote state={state} handleNext={handleNext} />;
+  return (
+    <DoctorNote state={state} handleNext={handleNext} setReload={setReload} />
+  );
 };
 
 export default PatientConsultationNotesList;

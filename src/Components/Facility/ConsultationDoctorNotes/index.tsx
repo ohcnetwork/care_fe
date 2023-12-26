@@ -31,6 +31,8 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
     notes: [],
     cPage: 1,
     totalPages: 1,
+    facilityId: facilityId,
+    patientId: patientId,
   };
   const [state, setState] = useState(initialData);
 
@@ -98,8 +100,6 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
         <PatientConsultationNotesList
           state={state}
           setState={setState}
-          patientId={patientId}
-          facilityId={facilityId}
           reload={reload}
           setReload={setReload}
         />

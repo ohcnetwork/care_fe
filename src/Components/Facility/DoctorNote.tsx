@@ -5,11 +5,12 @@ import { PatientNoteStateType } from "./models";
 
 interface DoctorNoteProps {
   state: PatientNoteStateType;
+  setReload: any;
   handleNext: () => void;
 }
 
 const DoctorNote = (props: DoctorNoteProps) => {
-  const { state, handleNext } = props;
+  const { state, handleNext, setReload } = props;
   return (
     <div
       className="m-2 flex h-[390px] grow flex-col-reverse overflow-auto bg-white"
@@ -30,7 +31,12 @@ const DoctorNote = (props: DoctorNoteProps) => {
           scrollableTarget="patient-notes-list"
         >
           {state.notes.map((note: any) => (
-            <PatientNoteCard note={note} key={note.id} />
+            <PatientNoteCard
+              state={state}
+              note={note}
+              key={note.id}
+              setReload={setReload}
+            />
           ))}
         </InfiniteScroll>
       ) : (

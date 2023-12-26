@@ -624,6 +624,11 @@ const routes = {
     method: "POST",
     TRes: Type<PatientNotesModel>(),
   },
+  updatePatientNote: {
+    path: "/api/v1/patient/{patientId}/notes/{noteId}/",
+    method: "PUT",
+    TRes: Type<PatientNotesModel>(),
+  },
   sampleTestList: {
     path: "/api/v1/patient/{patientId}/test_sample/",
   },

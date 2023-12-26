@@ -29,6 +29,8 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
     notes: [],
     cPage: 1,
     totalPages: 1,
+    patientId: props.patientId,
+    facilityId: props.facilityId,
   };
   const [state, setState] = useState(initialData);
 
@@ -141,8 +143,6 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
           <PatientConsultationNotesList
             state={state}
             setState={setState}
-            facilityId={facilityId}
-            patientId={patientId}
             reload={reload}
             setReload={setReload}
           />
@@ -157,6 +157,11 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
               errorClassName="hidden"
               placeholder="Type your Note"
               disabled={!patientActive}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  onAddNote();
+                }
+              }}
             />
             <ButtonV2
               id="add_doctor_note_button"
