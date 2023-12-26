@@ -171,15 +171,13 @@ export const HospitalList = () => {
       }
     >
       <div className="mt-4 gap-2 lg:flex">
-        {permittedData && (
-          <CountBlock
-            text="Total Facilities"
-            count={permittedData.count}
-            loading={isLoading}
-            icon="l-hospital"
-            className="flex-1"
-          />
-        )}
+        <CountBlock
+          text="Total Facilities"
+          count={permittedData ? permittedData.count : 0}
+          loading={isLoading}
+          icon="l-hospital"
+          className="flex-1"
+        />
         <div className="my-4 flex grow flex-col justify-between gap-2 sm:flex-row">
           <SearchInput
             name="search"
