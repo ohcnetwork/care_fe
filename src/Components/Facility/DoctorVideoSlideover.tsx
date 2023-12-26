@@ -152,6 +152,20 @@ function UserListItem(props: { user: UserAssignedModel }) {
                 {user.first_name} {user.last_name}
               </span>
               <div className="flex gap-2">
+                {user.video_connect_link && (
+                  <a
+                    href={user.video_connect_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <div className="tooltip">
+                      <span className="tooltip-text tooltip-left">
+                        Connect on a Video Call
+                      </span>
+                      <CareIcon icon="l-video" className="h-5 w-5" />
+                    </div>
+                  </a>
+                )}
                 <a
                   href={
                     user.alt_phone_number
