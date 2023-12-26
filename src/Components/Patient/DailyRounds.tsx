@@ -89,13 +89,7 @@ const DailyRoundsFormReducer = (state = initialState, action: any) => {
     case "set_state": {
       if (action.state) return action.state;
       return state;
-    }        
-    case "clone_last":
-      if (state.form.clone_last === null) {
-        errors[field] = "Please choose a value";
-        invalidForm = true;
-      }
-      return;
+    }
     default:
       return state;
   }
@@ -255,6 +249,12 @@ export const DailyRounds = (props: any) => {
             !state.form[field]
           ) {
             errors[field] = "Please enter the other symptom details";
+            invalidForm = true;
+          }
+          return;
+        case "clone_last":
+          if (state.form.clone_last === null) {
+            errors[field] = "Please choose a value";
             invalidForm = true;
           }
           return;
