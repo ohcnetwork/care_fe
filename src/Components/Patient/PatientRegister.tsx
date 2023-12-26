@@ -707,7 +707,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     if (!fetchedDistricts) return;
 
     const matchedDistrict = fetchedDistricts.find((district) => {
-      return includesIgnoreCase(district.name, pincodeDetails.district);
+      return includesIgnoreCase(district.name, pincodeDetails.districtname);
     });
     if (!matchedDistrict) return;
 
