@@ -113,7 +113,12 @@ const getRedirectOr = (fallback: string) => {
   const url = window.location.href;
   const redirect = new URLSearchParams(window.location.search).get("redirect");
   if (redirect) {
-    return redirect;
+    const r = new URL(redirect);
+    if (r.origin == window.location.origin) {
+      return redirect;
+    } else {
+      return fallback;
+    }
   }
   if (
     url == `${window.location.origin}/login` ||
