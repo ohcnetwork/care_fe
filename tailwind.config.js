@@ -24,6 +24,16 @@ module.exports = {
       "3xl": "1920px",
     },
     extend: {
+      animation: {
+        "reverse-spin": "reverse-spin 1s linear infinite",
+      },
+      keyframes: {
+        "reverse-spin": {
+          from: {
+            transform: "rotate(360deg)",
+          },
+        },
+      },
       fontFamily: {
         sans: ["Inter", "sans-serif"],
       },
