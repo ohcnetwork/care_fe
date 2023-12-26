@@ -595,6 +595,18 @@ export const listAssetAvailability = (params: object) =>
 export const listPMJYPackages = (query?: string) =>
   fireRequest("listPMJYPackages", [], { query });
 
+export const getPublicKey = () => {
+  return fireRequest("getPublicKey", [], {}, {});
+};
+
+export const getUserPnconfig = (pathParams: object) => {
+  return fireRequest("getUserPnconfig", [], {}, pathParams);
+};
+
+export const updateUserPnconfig = (params: object, pathParams: object) => {
+  return fireRequest("updateUserPnconfig", [], params, pathParams);
+};
+
 // HCX Actions
 export const HCXActions = {
   checkEligibility: (policy: string) => {
