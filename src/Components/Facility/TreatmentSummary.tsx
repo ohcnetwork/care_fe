@@ -122,26 +122,31 @@ const TreatmentSummary = (props: any) => {
             <div className="text-right font-bold">{formatDate(date)}</div>
 
             <div className="mb-5 mt-2 border border-gray-800">
-              <div className="grid border-b-2 border-gray-800 print:grid-cols-3 sm:grid-cols-2 md:grid-cols-3">
+              <div className="grid border-b-2 border-gray-800 print:grid-cols-2 sm:grid-cols-2 md:grid-cols-2">
                 <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0 print:border-r-2 sm:border-b-0 sm:border-r-2">
-                  <b>OP :</b> {consultationData.patient_no}
-                </div>
-                <div className="col-span-1 px-3 py-2">
                   <b>Name :</b> {patientData.name}
                 </div>
-              </div>
-              <div className="grid border-b-2 border-gray-800 print:grid-cols-1 sm:grid-cols-1">
-                <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0 print:border-r-2 sm:border-b-0 sm:border-r-2">
+                <div className="col-span-1 px-3 py-2">
                   <b>Address : </b> {patientData.address}
                 </div>
               </div>
 
-              <div className="grid border-b-2 border-gray-800 print:grid-cols-3 sm:grid-cols-2 md:grid-cols-3">
-                <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0 print:border-r-2 sm:border-r-2 md:border-b-0 ">
-                  <b>Age :</b>{" "}
-                  {formatAge(patientData.age, patientData.date_of_birth, true)}
+              <div className="grid border-b-2 border-gray-800 print:grid-cols-2 sm:grid-cols-2 md:grid-cols-2">
+                <div className="col-span-1 grid print:grid-cols-2 sm:grid-cols-2 md:grid-cols-2">
+                  <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0 print:border-r-2 sm:border-b-0 sm:border-r-2">
+                    <b>Age :</b>{" "}
+                    {formatAge(
+                      patientData.age,
+                      patientData.date_of_birth,
+                      true
+                    )}
+                  </div>
+                  <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0 print:border-r-2 sm:border-b-0 sm:border-r-2">
+                    <b>OP :</b> {consultationData.patient_no}
+                  </div>
                 </div>
-                <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0  md:border-b-0 ">
+
+                <div className="col-span-1 px-3 py-2">
                   <b>Date of admission :</b>
                   <span>
                     {consultationData.admitted
@@ -151,13 +156,13 @@ const TreatmentSummary = (props: any) => {
                 </div>
               </div>
 
-              <div className="grid border-b-2 border-gray-800 print:grid-cols-3 sm:grid-cols-2 md:grid-cols-3">
-                <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0 print:border-r-2 sm:border-r-2 md:border-b-0">
+              <div className="grid border-b-2 border-gray-800 print:grid-cols-2 sm:grid-cols-2 md:grid-cols-2">
+                <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0 print:border-r-2 sm:border-b-0 sm:border-r-2">
                   <b>Gender :</b>
                   {GENDER_TYPES.find((i) => i.id === patientData.gender)?.text}
                 </div>
 
-                <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0  md:border-b-0 ">
+                <div className="col-span-1 px-3 py-2">
                   <b>Contact person :</b>
                   <span>
                     {" "}
