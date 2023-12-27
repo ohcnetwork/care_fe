@@ -36,13 +36,11 @@ export const AddLocationForm = (props: LocationFormProps) => {
     name: string;
     description: string;
     middlewareAddress: string;
-    duty_staff: string;
     locationType: string;
   }>({
     name: "",
     description: "",
     middlewareAddress: "",
-    duty_staff: "",
     locationType: "",
   });
   const headerText = !locationId ? "Add Location" : "Update Location";
@@ -171,12 +169,6 @@ export const AddLocationForm = (props: LocationFormProps) => {
         <div className="cui-card">
           <form onSubmit={handleSubmit}>
             <div className="mt-2 grid grid-cols-1 gap-4">
-              <div className="flex flex-row items-center">
-                <label className="text-lg font-bold text-gray-900">
-                  General Details
-                </label>
-                <hr className="ml-6 flex-1 border border-gray-400" />
-              </div>
               <div>
                 <TextFormField
                   name="name"
