@@ -124,7 +124,7 @@ export default function PatientPrivacyToggle(props: PatientPrivacyToggleProps) {
       <div className="tooltip rounded-md bg-gray-300  px-3 py-2 text-sm font-semibold">
         Privacy Mode: {privacy ? "ON" : "OFF"}
         <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-sm">
-          privacy setting for camera feed visual
+          Privacy setting for camera feed visual
         </span>
       </div>
       {!privacy ? (

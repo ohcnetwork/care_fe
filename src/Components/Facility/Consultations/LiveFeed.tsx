@@ -302,13 +302,13 @@ const LiveFeed = (props: any) => {
       setLoading("Previewing Boundary");
       const { max_x, max_y, min_x, min_y }: BoundaryRange =
         boundaryPreset.meta.range;
-      const edegs: any[] = [
+      const edges: any[] = [
         { x: max_x, y: (max_y + min_y) / 2, zoom: 0.2 },
         { x: (max_x + min_x) / 2, y: max_y, zoom: 0.2 },
         { x: min_x, y: (max_y + min_y) / 2, zoom: 0.2 },
         { x: (max_x + min_x) / 2, y: min_y, zoom: 0.2 },
       ];
-      for (const edge of edegs) {
+      for (const edge of edges) {
         await runFunctionWithDelay(() => absoluteMove(edge, {}), 3000);
       }
       setIsPreview(false);
