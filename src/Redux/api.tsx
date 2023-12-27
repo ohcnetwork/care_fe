@@ -45,6 +45,7 @@ import {
   WardModel,
   LocationModel,
   StateModel,
+  PatientNotesModel,
 } from "../Components/Facility/models";
 import {
   IDeleteExternalResult,
@@ -80,12 +81,12 @@ export function Type<T>(): T {
   return {} as T;
 }
 
-interface JwtTokenObtainPair {
+export interface JwtTokenObtainPair {
   access: string;
   refresh: string;
 }
 
-interface LoginInput {
+export interface LoginCredentials {
   username: string;
   password: string;
 }
@@ -104,16 +105,14 @@ const routes = {
     method: "POST",
     noAuth: true,
     TRes: Type<JwtTokenObtainPair>(),
-    TBody: Type<LoginInput>(),
+    TBody: Type<LoginCredentials>(),
   },
 
   token_refresh: {
     path: "/api/v1/auth/token/refresh/",
     method: "POST",
     TRes: Type<JwtTokenObtainPair>(),
-    TBody: Type<{
-      refresh: string;
-    }>(),
+    TBody: Type<{ refresh: JwtTokenObtainPair["refresh"] }>(),
   },
 
   token_verify: {
@@ -599,6 +598,7 @@ const routes = {
   },
   getPatient: {
     path: "/api/v1/patient/{id}/",
+    TBody: Type<PatientModel>(),
     TRes: Type<PatientModel>(),
   },
   updatePatient: {
@@ -616,10 +616,13 @@ const routes = {
   getPatientNotes: {
     path: "/api/v1/patient/{patientId}/notes/",
     method: "GET",
+    TBody: Type<PatientNotesModel[]>(),
+    TRes: Type<PaginatedResponse<PatientNotesModel>>(),
   },
   addPatientNote: {
     path: "/api/v1/patient/{patientId}/notes/",
     method: "POST",
+    TRes: Type<PatientNotesModel>(),
   },
   sampleTestList: {
     path: "/api/v1/patient/{patientId}/test_sample/",
@@ -955,7 +958,7 @@ const routes = {
     TBody: Type<Partial<IResource>>(),
   },
   updateResource: {
-    path: "/api/v1/resource/{id}",
+    path: "/api/v1/resource/{id}/",
     method: "PUT",
     TRes: Type<IResource>(),
     TBody: Type<Partial<IResource>>(),
@@ -1057,7 +1060,7 @@ const routes = {
     method: "GET",
   },
   updateAssetService: {
-    path: "/api/v1/asset/{asset_external_id}/service_records/{external_id}",
+    path: "/api/v1/asset/{asset_external_id}/service_records/{external_id}/",
     method: "PUT",
     TRes: Type<AssetService>(),
     TBody: Type<AssetServiceUpdate>(),
