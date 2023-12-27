@@ -45,6 +45,7 @@ import {
   WardModel,
   LocationModel,
   StateModel,
+  PatientNotesModel,
 } from "../Components/Facility/models";
 import {
   IDeleteExternalResult,
@@ -597,6 +598,7 @@ const routes = {
   },
   getPatient: {
     path: "/api/v1/patient/{id}/",
+    TBody: Type<PatientModel>(),
     TRes: Type<PatientModel>(),
   },
   updatePatient: {
@@ -614,10 +616,13 @@ const routes = {
   getPatientNotes: {
     path: "/api/v1/patient/{patientId}/notes/",
     method: "GET",
+    TBody: Type<PatientNotesModel[]>(),
+    TRes: Type<PaginatedResponse<PatientNotesModel>>(),
   },
   addPatientNote: {
     path: "/api/v1/patient/{patientId}/notes/",
     method: "POST",
+    TRes: Type<PatientNotesModel>(),
   },
   sampleTestList: {
     path: "/api/v1/patient/{patientId}/test_sample/",

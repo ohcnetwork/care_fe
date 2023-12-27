@@ -207,6 +207,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
               </div>
               <div>
                 <TextFormField
+                  id="location-middleware-address"
                   name="Location Middleware Address"
                   type="text"
                   label="Location Middleware Address"

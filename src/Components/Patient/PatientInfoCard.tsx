@@ -324,13 +324,7 @@ export default function PatientInfoCard(props: {
                           suggestion.id === consultation?.suggestion
                       )?.text
                     }{" "}
-                    on{" "}
-                    {formatDateTime(
-                      ["A", "DC"].includes(consultation?.suggestion ?? "")
-                        ? consultation?.admission_date
-                        : consultation?.created_date
-                    )}
-                    ,
+                    on {formatDateTime(consultation.encounter_date)},
                     {consultation?.new_discharge_reason ===
                     DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id ? (
                       <span>

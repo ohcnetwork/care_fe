@@ -3,7 +3,11 @@ import Form from "../Form/Form";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-import { MedicineAdministrationRecord, Prescription } from "./models";
+import {
+  DOSAGE_UNITS,
+  MedicineAdministrationRecord,
+  Prescription,
+} from "./models";
 import { useState } from "react";
 import NumericWithUnitsFormField from "../Form/FormFields/NumericWithUnitsFormField";
 import { useTranslation } from "react-i18next";
@@ -74,7 +78,7 @@ export default function CreatePrescriptionForm(props: {
               label={t("dosage")}
               {...field("dosage", RequiredFieldValidator())}
               required
-              units={["mg", "g", "ml", "drop(s)", "ampule(s)", "tsp"]}
+              units={DOSAGE_UNITS}
               min={0}
             />
           </div>
@@ -86,9 +90,10 @@ export default function CreatePrescriptionForm(props: {
                 {...field("indicator", RequiredFieldValidator())}
                 required
               />
-              <TextFormField
+              <NumericWithUnitsFormField
+                className="flex-1"
                 label={t("max_dosage_24_hrs")}
-                type="number"
+                units={DOSAGE_UNITS}
                 min={0}
                 {...field("max_dosage")}
               />
