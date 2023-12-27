@@ -89,9 +89,9 @@ const PatientNoteCard = ({
                 >
                   <div className="tooltip inline">
                     <span className="tooltip-text tooltip-bottom">
-                      {formatDateTime(note.edits[0].edited_on)}
+                      {formatDateTime(note.edits[0].edited_date)}
                     </span>
-                    Edited {relativeDate(note.edits[0].edited_on, true)}
+                    Edited {relativeDate(note.edits[0].edited_date, true)}
                   </div>
                   <CareIcon
                     icon="l-history"
@@ -162,7 +162,7 @@ const PatientNoteCard = ({
                           {isLast ? "Created" : "Edited"} On
                         </p>
                         <p className="text-sm text-gray-900">
-                          {formatDateTime(edit.edited_on)}
+                          {formatDateTime(edit.edited_date)}
                         </p>
                       </div>
                       <div className="grow">
