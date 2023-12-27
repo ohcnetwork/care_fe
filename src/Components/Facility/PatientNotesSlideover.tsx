@@ -22,7 +22,9 @@ interface PatientNotesProps {
 export default function PatientNotesSlideover(props: PatientNotesProps) {
   const [show, setShow] = useState(true);
   const [patientActive, setPatientActive] = useState(true);
-  const [noteField, setNoteField] = useState("");
+  const [noteField, setNoteField] = useState(
+    localStorage.getItem("patientNotesNoteField") || ""
+  );
   const [reload, setReload] = useState(false);
 
   const initialData: PatientNoteStateType = {
@@ -55,6 +57,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       setNoteField("");
       setState({ ...state, cPage: 1 });
       setReload(true);
+      // localStorage.removeItem('patientNotesNoteField');
     }
   };
 
@@ -82,6 +85,8 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       }
     }
     fetchPatientName();
+    // const initialNoteField = localStorage.getItem('patientNotesNoteField') || '';
+    // setNoteField(initialNoteField);
   }, [patientId]);
 
   const notesActionIcons = (
@@ -112,6 +117,10 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       </div>
     </div>
   );
+
+  useEffect(() => {
+    localStorage.setItem("patientNotesNoteField", noteField);
+  }, [noteField]);
 
   return (
     <div
