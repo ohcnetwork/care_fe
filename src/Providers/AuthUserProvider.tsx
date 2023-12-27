@@ -50,13 +50,20 @@ export default function AuthUserProvider({ children, unauthorized }: Props) {
     [refetch]
   );
 
-  const signOut = useCallback(async () => {
-    localStorage.removeItem(LocalStorageKeys.accessToken);
-    localStorage.removeItem(LocalStorageKeys.refreshToken);
+  const signOut = useCallback(
+    async (noRedirect = false) => {
+      localStorage.removeItem(LocalStorageKeys.accessToken);
+      localStorage.removeItem(LocalStorageKeys.refreshToken);
 
-    await refetch();
-    navigate(getRedirectOr(`/login?redirect=${location.href}`));
-  }, [refetch]);
+      await refetch();
+      navigate(
+        getRedirectOr(
+          noRedirect ? "/login" : `/login?redirect=${location.href}`
+        )
+      );
+    },
+    [refetch]
+  );
 
   // Handles signout from current tab, if signed out from another tab.
   useEffect(() => {
@@ -117,23 +124,19 @@ const getRedirectURL = () => {
 const getRedirectOr = (fallback: string) => {
   const url = getRedirectURL();
   const reserverdURLS = ["/login", "/session-expired"];
+  if (reserverdURLS.includes(fallback)) {
+    fallback = "/";
+  }
   if (url) {
     try {
       const redirect = new URL(url);
-      console.log(redirect);
       if (window.location.origin === redirect.origin) {
-        console.log(redirect);
         return redirect.href;
       }
       console.error("Redirect does not belong to same origin.");
     } catch {
       console.error(`Invalid redirect URL: ${url}`);
     }
-    if (reserverdURLS.includes(location.pathname)) {
-      return "/";
-    }
-    return location.origin + location.pathname;
-  } else {
-    return fallback;
   }
+  return fallback;
 };

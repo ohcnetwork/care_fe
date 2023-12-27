@@ -8,7 +8,7 @@ type SignInReturnType = RequestResult<JwtTokenObtainPair>;
 type AuthContextType = {
   user: UserModel | undefined;
   signIn: (creds: LoginCredentials) => Promise<SignInReturnType>;
-  signOut: () => Promise<void>;
+  signOut: (noRedirect: boolean | undefined) => Promise<void>;
 };
 
 export const AuthUserContext = createContext<AuthContextType | null>(null);

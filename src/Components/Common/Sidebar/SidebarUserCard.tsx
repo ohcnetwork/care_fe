@@ -18,7 +18,10 @@ const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
       <Link href="/user/profile" className="flex-none py-3">
         <CareIcon className="care-l-user-circle text-3xl text-white" />
       </Link>
-      <div className="flex cursor-pointer justify-center" onClick={signOut}>
+      <div
+        className="flex cursor-pointer justify-center"
+        onClick={() => signOut(true)}
+      >
         <CareIcon
           className={`care-l-sign-out-alt text-2xl text-gray-400 ${
             shrinked ? "visible" : "hidden"
@@ -41,7 +44,7 @@ const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
         </div>
         <div
           className="min-h-6 flex cursor-pointer items-center"
-          onClick={signOut}
+          onClick={() => signOut(true)}
         >
           <CareIcon
             className={`care-l-sign-out-alt ${
