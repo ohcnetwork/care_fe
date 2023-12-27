@@ -57,7 +57,6 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       setNoteField("");
       setState({ ...state, cPage: 1 });
       setReload(true);
-      // localStorage.removeItem('patientNotesNoteField');
     }
   };
 
@@ -85,8 +84,6 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       }
     }
     fetchPatientName();
-    // const initialNoteField = localStorage.getItem('patientNotesNoteField') || '';
-    // setNoteField(initialNoteField);
   }, [patientId]);
 
   const notesActionIcons = (
