@@ -150,7 +150,7 @@ const TreatmentSummary = (props: any) => {
                   <b>Date of admission :</b>
                   <span>
                     {consultationData.admitted
-                      ? formatDateTime(consultationData.admission_date)
+                      ? formatDateTime(consultationData.encounter_date)
                       : " --/--/----"}
                   </span>
                 </div>
