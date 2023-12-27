@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import * as Notification from "../../Utils/Notifications";
-import { useDispatch } from "react-redux";
-import { deleteCapacity } from "../../Redux/actions";
 import { BedCapacity } from "./BedCapacity";
 import DialogModal from "../Common/Dialog";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -9,6 +7,8 @@ import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import ConfirmDialog from "../Common/ConfirmDialog";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 
 interface BedTypeCardProps {
   facilityId?: string;
@@ -34,19 +34,18 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
   handleUpdate,
 }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const dispatchAction: any = useDispatch();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [open, setOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<number>(-1);
   const handleDeleteSubmit = async () => {
     if (room_type) {
-      const res = await dispatchAction(
-        deleteCapacity({
-          facilityId: facilityId,
-          bed_id: room_type,
-        })
-      );
-      if (res && res.status == 204) {
+      const { res } = await request(routes.deleteCapacityBed, {
+        pathParams: {
+          facilityId: facilityId ?? "",
+          bed_id: room_type.toString(),
+        },
+      });
+      if (res?.status == 204) {
         Notification.Success({
           msg: "Bed type deleted successfully",
         });

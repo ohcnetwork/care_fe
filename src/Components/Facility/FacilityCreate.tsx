@@ -29,7 +29,6 @@ import {
   getPermittedFacility,
   getStates,
   getWardByLocalBody,
-  listCapacity,
   listDoctor,
   updateFacility,
 } from "../../Redux/actions";
@@ -68,6 +67,8 @@ import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { PhoneNumberValidator } from "../Form/FieldValidators.js";
+import request from "../../Utils/request/request.js";
+import routes from "../../Redux/api.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -605,10 +606,10 @@ export const FacilityCreate = (props: FacilityProps) => {
                 lastUpdated={res.modified_date}
                 removeBedType={removeCurrentBedType}
                 handleUpdate={async () => {
-                  const capacityRes = await dispatchAction(
-                    listCapacity({}, { facilityId: createdFacilityId })
-                  );
-                  if (capacityRes && capacityRes.data) {
+                  const capacityRes = await request(routes.getCapacity, {
+                    pathParams: { facilityId: props.facilityId ?? "" },
+                  });
+                  if (capacityRes?.data) {
                     setCapacityData(capacityRes.data.results);
                   }
                 }}
@@ -725,10 +726,10 @@ export const FacilityCreate = (props: FacilityProps) => {
                 setCurrentStep(3);
               }}
               handleUpdate={async () => {
-                const capacityRes = await dispatchAction(
-                  listCapacity({}, { facilityId: createdFacilityId })
-                );
-                if (capacityRes && capacityRes.data) {
+                const capacityRes = await request(routes.getCapacity, {
+                  pathParams: { facilityId: createdFacilityId ?? "" },
+                });
+                if (capacityRes?.data) {
                   setCapacityData(capacityRes.data.results);
                 }
               }}
