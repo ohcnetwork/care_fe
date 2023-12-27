@@ -120,7 +120,7 @@ export const Mews = ({ dailyRound }: { dailyRound: DailyRoundsModel }) => {
             <RecordMeta
               time={dailyRound.modified_date}
               prefix={"Updated"}
-              className="mx-auto mt-2 w-10/12 text-xs font-medium leading-none text-gray-800"
+              className="mx-auto mt-2 w-10/12 text-center text-xs font-medium leading-none text-gray-800"
               inlineClassName="flex flex-wrap items-center justify-center"
             />
             <div
