@@ -147,7 +147,7 @@ const TreatmentSummary = (props: any) => {
                 </div>
 
                 <div className="col-span-1 px-3 py-2">
-                  <b>Date of admission :</b>
+                  <b>Date of admission : </b>
                   <span>
                     {consultationData.admitted
                       ? formatDateTime(consultationData.encounter_date)
@@ -158,7 +158,7 @@ const TreatmentSummary = (props: any) => {
 
               <div className="grid border-b-2 border-gray-800 print:grid-cols-2 sm:grid-cols-2 md:grid-cols-2">
                 <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0 print:border-r-2 sm:border-b-0 sm:border-r-2">
-                  <b>Gender :</b>
+                  <b>Gender : </b>
                   {GENDER_TYPES.find((i) => i.id === patientData.gender)?.text}
                 </div>
 
