@@ -97,7 +97,7 @@ export default function CameraBoundaryConfigure(
               </div>
               <div className="mt-1 flex flex-initial justify-start gap-1">
                 <button
-                  className="items-center rounded-md  bg-green-200 p-2 text-sm text-green-800 hover:bg-green-800 hover:text-green-200 "
+                  className="w-1/3 items-center rounded-md  bg-green-200 p-2 text-sm text-green-800 hover:bg-green-800 hover:text-green-200 "
                   onClick={() => {
                     setToUpdateBoundary(true);
                     setDirection("left");
@@ -108,7 +108,7 @@ export default function CameraBoundaryConfigure(
                   <CareIcon className="care-l-pen" />
                 </button>
                 <button
-                  className="items-center gap-2 rounded-md bg-red-200 p-2 py-1 text-sm text-red-800 hover:bg-red-800 hover:text-red-200"
+                  className="w-1/3 items-center gap-2 rounded-md bg-red-200 p-2 py-1 text-sm text-red-800 hover:bg-red-800 hover:text-red-200"
                   onClick={() => {
                     setToDeleteBoundary(boundaryPreset);
                   }}
@@ -118,7 +118,7 @@ export default function CameraBoundaryConfigure(
                   <CareIcon className="care-l-trash" />
                 </button>
                 <button
-                  className="items-center gap-2 rounded-md bg-gray-200 p-2 py-1 text-sm text-gray-800 hover:bg-gray-800 hover:text-gray-200"
+                  className="w-1/3 items-center gap-2 rounded-md bg-gray-200 p-2 py-1 text-sm text-gray-800 hover:bg-gray-800 hover:text-gray-200"
                   onClick={() => {
                     previewBoundary();
                   }}
@@ -196,20 +196,20 @@ export function UpdateCameraBoundaryConfigure(
     if (dir == direction) {
       return (
         <div className="rounded-md bg-purple-100 py-1 text-center text-purple-700">
-          updating
+          Updating
         </div>
       );
     }
     if (updated) {
       return (
         <div className="rounded-md bg-green-100 py-1 text-center text-green-700">
-          updated
+          Updated
         </div>
       );
     }
     return (
       <div className="rounded-md bg-gray-100 py-1 text-center text-gray-700">
-        not updated
+        Not updated
       </div>
     );
   };
