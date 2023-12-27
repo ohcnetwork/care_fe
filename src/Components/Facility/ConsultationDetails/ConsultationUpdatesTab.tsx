@@ -363,13 +363,13 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                     )}
                     <hr className="my-4 border border-gray-300" />
                     <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
-                      {props.consultationData.admission_date && (
+                      {props.consultationData.encounter_date && (
                         <div className="mb-4">
                           <div className="text-sm font-semibold uppercase">
                             Admission Date
                           </div>
                           {formatDateTime(
-                            props.consultationData?.admission_date
+                            props.consultationData?.encounter_date
                           )}
                         </div>
                       )}
