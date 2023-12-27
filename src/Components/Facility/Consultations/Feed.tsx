@@ -111,7 +111,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
         }}
       >
         {showSubscriptionInfo && (
-          <div className="absolute z-10 flex -translate-x-16 translate-y-32 flex-col gap-2 rounded-md bg-white p-2  drop-shadow-md">
+          <div className="absolute z-10 flex -translate-x-24 translate-y-32 flex-col gap-2 rounded-md bg-white p-2  drop-shadow-md">
             <div className="text-xs">
               {subscriptionStatus != "SubscribedOnThisDevice"
                 ? "Subscribe to get real time information about camera access"
