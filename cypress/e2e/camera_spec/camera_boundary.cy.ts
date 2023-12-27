@@ -8,14 +8,14 @@ describe("Camera Boundary", () => {
   beforeEach(() => {
     cy.restoreLocalStorage();
     cy.awaitUrl("/assets");
-    cy.get("input[id='search']").type("Dev Camera");
-    cy.contains("a", "Dev Camera").contains("a", "ICU").click();
+    cy.get("input[id='search']").type("Dummy Camera 30");
+    cy.contains("a", "Dummy Camera").click();
     cy.get("button[id='configure-asset']").click();
   });
 
   it("Add new boundary", () => {
-    cy.get("input[name='bed']").type("bed 01");
-    cy.get("li[role='option']").contains("Bed 01").click();
+    cy.get("input[name='bed']").type("Dummy Bed 4");
+    cy.get("li[role='option']").contains("Dummy Bed 4").click();
     cy.wait(2000);
     cy.intercept("**/api/v1/assetbed/**").as("addBoundary");
     cy.get("button[id='add-boundary-preset']").click();
@@ -23,8 +23,8 @@ describe("Camera Boundary", () => {
   });
 
   it("Update boundary", () => {
-    cy.get("input[name='bed']").type("bed 01");
-    cy.get("li[role='option']").contains("Bed 01").click();
+    cy.get("input[name='bed']").type("Dummy Bed 4");
+    cy.get("li[role='option']").contains("Dummy Bed 4").click();
     cy.wait(2000);
     cy.get("button[id='update-boundary-preset']").click();
     cy.intercept("**/api/v1/assetbed/**").as("updateBoundary");
@@ -59,8 +59,8 @@ describe("Camera Boundary", () => {
   });
 
   it("Delete boundary", () => {
-    cy.get("input[name='bed']").type("bed 01");
-    cy.get("li[role='option']").contains("Bed 01").click();
+    cy.get("input[name='bed']").type("Dummy Bed 4");
+    cy.get("li[role='option']").contains("Dummy Bed 4").click();
     cy.wait(1000);
     cy.intercept("**/api/v1/assetbed/**").as("deleteBoundary");
     cy.get("button[id='delete-boundary-preset']").click();
