@@ -188,9 +188,6 @@ jobs:
     needs: build-staging
     name: Deploy to staging GCP cluster
     runs-on: ubuntu-latest
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '20'
     environment:
       name: Staging-GCP
       url: https://care-staging.ohc.network/
@@ -202,15 +199,19 @@ jobs:
           token: ${{ secrets.GIT_ACCESS_TOKEN }}
           path: kube
           ref: main
+      
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20'
 
       # Setup gcloud CLI
-      - uses: google-github-actions/setup-gcloud@v2
+      - uses: google-github-actions/setup-gcloud@94337306dda8180d967a56932ceb4ddcf01edae7
         with:
           service_account_key: ${{ secrets.GKE_SA_KEY }}
           project_id: ${{ secrets.GKE_PROJECT }}
 
       # Get the GKE credentials so we can deploy to the cluster
-      - uses: google-github-actions/get-gke-credentials@v2
+      - uses: google-github-actions/get-gke-credentials@fb08709ba27618c31c09e014e1d8364b02e5042e
         with:
           cluster_name: ${{ secrets.GKE_CLUSTER }}
           location: ${{ secrets.GKE_ZONE }}
@@ -233,9 +234,6 @@ jobs:
     needs: build-production
     name: Deploy to GKE Manipur
     runs-on: ubuntu-latest
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '20'
     environment:
       name: Production-Manipur
       url: https://care.mn.gov.in
@@ -248,14 +246,18 @@ jobs:
           path: kube
           ref: main
 
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
       # Setup gcloud CLI
-      - uses: google-github-actions/setup-gcloud@v2
+      - uses: google-github-actions/setup-gcloud@94337306dda8180d967a56932ceb4ddcf01edae7
         with:
           service_account_key: ${{ secrets.GKE_SA_KEY }}
           project_id: ${{ secrets.GKE_PROJECT }}
 
       # Get the GKE credentials so we can deploy to the cluster
-      - uses: google-github-actions/get-gke-credentials@v2
+      - uses: google-github-actions/get-gke-credentials@fb08709ba27618c31c09e014e1d8364b02e5042e
         with:
           cluster_name: ${{ secrets.GKE_CLUSTER }}
           location: ${{ secrets.GKE_ZONE }}
@@ -278,9 +280,6 @@ jobs:
     needs: build-production
     name: Deploy to GKE Karnataka
     runs-on: ubuntu-latest
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '20'
     environment:
       name: Production-Karnataka
       url: https://karnataka.care
@@ -293,14 +292,18 @@ jobs:
           path: kube
           ref: main
 
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
       # Setup gcloud CLI
-      - uses: google-github-actions/setup-gcloud@v2
+      - uses: google-github-actions/setup-gcloud@94337306dda8180d967a56932ceb4ddcf01edae7
         with:
           service_account_key: ${{ secrets.GKE_SA_KEY }}
           project_id: ${{ secrets.GKE_PROJECT }}
 
       # Get the GKE credentials so we can deploy to the cluster
-      - uses: google-github-actions/get-gke-credentials@v2
+      - uses: google-github-actions/get-gke-credentials@fb08709ba27618c31c09e014e1d8364b02e5042e
         with:
           cluster_name: ${{ secrets.GKE_CLUSTER }}
           location: ${{ secrets.GKE_ZONE }}
@@ -323,9 +326,6 @@ jobs:
     needs: build-production
     name: Deploy to GKE Sikkim
     runs-on: ubuntu-latest
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '20'
     environment:
       name: Production-Sikkim
       url: https://care.sikkim.gov.in
@@ -338,14 +338,18 @@ jobs:
           path: kube
           ref: main
 
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
       # Setup gcloud CLI
-      - uses: google-github-actions/setup-gcloud@v2
+      - uses: google-github-actions/setup-gcloud@94337306dda8180d967a56932ceb4ddcf01edae7
         with:
           service_account_key: ${{ secrets.GKE_SA_KEY }}
           project_id: ${{ secrets.GKE_PROJECT }}
 
       # Get the GKE credentials so we can deploy to the cluster
-      - uses: google-github-actions/get-gke-credentials@v2
+      - uses: google-github-actions/get-gke-credentials@fb08709ba27618c31c09e014e1d8364b02e5042e
         with:
           cluster_name: ${{ secrets.GKE_CLUSTER }}
           location: ${{ secrets.GKE_ZONE }}
@@ -368,9 +372,6 @@ jobs:
     needs: build-production
     name: Deploy to GKE Assam
     runs-on: ubuntu-latest
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '20'
     environment:
       name: Production-Assam
       url: https://care.assam.gov.in
@@ -383,14 +384,18 @@ jobs:
           path: kube
           ref: main
 
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
       # Setup gcloud CLI
-      - uses: google-github-actions/setup-gcloud@v2
+      - uses: google-github-actions/setup-gcloud@94337306dda8180d967a56932ceb4ddcf01edae7
         with:
           service_account_key: ${{ secrets.GKE_SA_KEY }}
           project_id: ${{ secrets.GKE_PROJECT }}
 
       # Get the GKE credentials so we can deploy to the cluster
-      - uses: google-github-actions/get-gke-credentials@v2
+      - uses: google-github-actions/get-gke-credentials@fb08709ba27618c31c09e014e1d8364b02e5042e
         with:
           cluster_name: ${{ secrets.GKE_CLUSTER }}
           location: ${{ secrets.GKE_ZONE }}
@@ -413,9 +418,6 @@ jobs:
     needs: build-production
     name: Deploy to GKE Nagaland
     runs-on: ubuntu-latest
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '20'
     environment:
       name: Production - Nagaland
       url: https://care.nagaland.gov.in
@@ -427,15 +429,19 @@ jobs:
           token: ${{ secrets.GIT_ACCESS_TOKEN  }}
           path: kube
           ref: main
+      
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20'
 
       # Setup gcloud CLI
-      - uses: google-github-actions/setup-gcloud@v2
+      - uses: google-github-actions/setup-gcloud@94337306dda8180d967a56932ceb4ddcf01edae7
         with:
           service_account_key: ${{ secrets.GKE_SA_KEY }}
           project_id: ${{ secrets.GKE_PROJECT }}
 
       # Get the GKE credentials, so we can deploy to the cluster
-      - uses: google-github-actions/get-gke-credentials@v2
+      - uses: google-github-actions/get-gke-credentials@fb08709ba27618c31c09e014e1d8364b02e5042e
         with:
           cluster_name: ${{ secrets.GKE_CLUSTER }}
           location: ${{ secrets.GKE_ZONE }}
@@ -458,9 +464,6 @@ jobs:
     needs: build-production
     name: Deploy to GKE Meghalaya
     runs-on: ubuntu-latest
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '20'
     environment:
       name: Production-Meghalaya
       url: https://care.meghealth.gov.in
@@ -472,15 +475,19 @@ jobs:
           token: ${{ secrets.GIT_ACCESS_TOKEN }}
           path: kube
           ref: main
+      
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20'
 
       # Setup gcloud CLI
-      - uses: google-github-actions/setup-gcloud@v2
+      - uses: google-github-actions/setup-gcloud@94337306dda8180d967a56932ceb4ddcf01edae7
         with:
           service_account_key: ${{ secrets.GKE_SA_KEY }}
           project_id: ${{ secrets.GKE_PROJECT }}
 
       # Get the GKE credentials, so we can deploy to the cluster
-      - uses: google-github-actions/get-gke-credentials@v2
+      - uses: google-github-actions/get-gke-credentials@fb08709ba27618c31c09e014e1d8364b02e5042e
         with:
           cluster_name: ${{ secrets.GKE_CLUSTER }}
           location: ${{ secrets.GKE_ZONE }}
