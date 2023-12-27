@@ -4,10 +4,11 @@ import CareIcon from "../../../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../../../Common/components/ButtonV2";
 import { DailyRoundsModel } from "../../../Patient/models";
 import LogUpdateCardAttribute from "./LogUpdateCardAttribute";
+import { ConsultationModel } from "../../models";
 
 interface Props {
   round: DailyRoundsModel;
-  consultationData: any;
+  consultationData: ConsultationModel;
   onViewDetails: () => void;
   onUpdateLog?: () => void;
 }
@@ -52,6 +53,10 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
             attributeValue={getName(round.last_edited_by)}
           />
         )}
+        <LogUpdateCardAttribute
+          attributeKey={"Round Type" as any}
+          attributeValue={t(round.rounds_type)}
+        />
         <LogUpdateCardAttribute
           attributeKey="patient_category"
           attributeValue={round.patient_category}

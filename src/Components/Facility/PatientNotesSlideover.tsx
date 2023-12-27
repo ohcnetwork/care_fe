@@ -1,8 +1,5 @@
 import { useState, useEffect, Dispatch, SetStateAction } from "react";
-import { getPatient, addPatientNote } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { useDispatch } from "react-redux";
-import PatientNotesList from "./PatientNotesList";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
@@ -10,10 +7,15 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { make as Link } from "../Common/components/Link.bs";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
+import PatientConsultationNotesList from "./PatientConsultationNotesList";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import { PatientNoteStateType } from "./models";
 
 interface PatientNotesProps {
   patientId: string;
   facilityId: string;
+  consultationId: string;
   setShowPatientNotesPopup: Dispatch<SetStateAction<boolean>>;
 }
 
@@ -23,13 +25,20 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   const [noteField, setNoteField] = useState("");
   const [reload, setReload] = useState(false);
 
-  const dispatch = useDispatch();
+  const initialData: PatientNoteStateType = {
+    notes: [],
+    cPage: 1,
+    totalPages: 1,
+  };
+  const [state, setState] = useState(initialData);
 
-  const { facilityId, patientId, setShowPatientNotesPopup } = props;
+  const { facilityId, patientId, consultationId, setShowPatientNotesPopup } =
+    props;
 
-  const onAddNote = () => {
+  const onAddNote = async () => {
     const payload = {
       note: noteField,
+      consultation: consultationId,
     };
     if (!/\S+/.test(noteField)) {
       Notification.Error({
@@ -37,11 +46,16 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       });
       return;
     }
-    dispatch(addPatientNote(patientId, payload)).then(() => {
+    const { res } = await request(routes.addPatientNote, {
+      pathParams: { patientId: patientId },
+      body: payload,
+    });
+    if (res?.status === 201) {
       Notification.Success({ msg: "Note added successfully" });
       setNoteField("");
-      setReload(!reload);
-    });
+      setState({ ...state, cPage: 1 });
+      setReload(true);
+    }
   };
 
   useMessageListener((data) => {
@@ -59,21 +73,23 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   useEffect(() => {
     async function fetchPatientName() {
       if (patientId) {
-        const res = await dispatch(getPatient({ id: patientId }));
-        if (res.data) {
-          setPatientActive(res.data.is_active);
+        const { data } = await request(routes.getPatient, {
+          pathParams: { id: patientId },
+        });
+        if (data) {
+          setPatientActive(data.is_active ?? true);
         }
       }
     }
     fetchPatientName();
-  }, [dispatch, patientId]);
+  }, [patientId]);
 
   const notesActionIcons = (
     <div className="flex gap-1">
       {show && (
         <Link
           className="flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
-          href={`/facility/${facilityId}/patient/${patientId}/notes`}
+          href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/notes`}
         >
           <CareIcon className="care-l-window-maximize text-lg transition-all delay-150 duration-300 ease-out" />
         </Link>
@@ -122,7 +138,9 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
             {notesActionIcons}
           </div>
           {/* Doctor Notes Body */}
-          <PatientNotesList
+          <PatientConsultationNotesList
+            state={state}
+            setState={setState}
             facilityId={facilityId}
             patientId={patientId}
             reload={reload}

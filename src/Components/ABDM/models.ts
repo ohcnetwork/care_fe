@@ -48,6 +48,15 @@ export interface IHealthId {
   authMethods?: string[];
 }
 
+export interface ABDMError {
+  code: string;
+  details?: {
+    code: string;
+    message: string;
+  }[];
+  message: string;
+}
+
 export interface IAadhaarOtp {
   txnId: string;
 }

@@ -33,6 +33,7 @@ import {
   ConsultationModel,
   CreateBedBody,
   CurrentBed,
+  DistrictModel,
   DailyRoundsBody,
   DailyRoundsRes,
   DoctorModal,
@@ -40,9 +41,11 @@ import {
   IFacilityNotificationRequest,
   IFacilityNotificationResponse,
   IUserFacilityRequest,
-  LocationModel,
   PatientStatsModel,
   WardModel,
+  LocationModel,
+  StateModel,
+  PatientNotesModel,
 } from "../Components/Facility/models";
 import {
   IDeleteExternalResult,
@@ -52,9 +55,13 @@ import {
   ILocalBodyByDistrict,
   IPartialUpdateExternalResult,
 } from "../Components/ExternalResult/models";
-
+import {
+  SkillModel,
+  SkillObjectModel,
+  UpdatePasswordForm,
+  UserModel,
+} from "../Components/Users/models";
 import { Prescription } from "../Components/Medicine/models";
-import { UserModel } from "../Components/Users/models";
 import { DailyRoundsModel, PatientModel } from "../Components/Patient/models";
 import { PaginatedResponse } from "../Utils/request/types";
 import {
@@ -74,12 +81,12 @@ export function Type<T>(): T {
   return {} as T;
 }
 
-interface JwtTokenObtainPair {
+export interface JwtTokenObtainPair {
   access: string;
   refresh: string;
 }
 
-interface LoginInput {
+export interface LoginCredentials {
   username: string;
   password: string;
 }
@@ -98,16 +105,14 @@ const routes = {
     method: "POST",
     noAuth: true,
     TRes: Type<JwtTokenObtainPair>(),
-    TBody: Type<LoginInput>(),
+    TBody: Type<LoginCredentials>(),
   },
 
   token_refresh: {
     path: "/api/v1/auth/token/refresh/",
     method: "POST",
     TRes: Type<JwtTokenObtainPair>(),
-    TBody: Type<{
-      refresh: string;
-    }>(),
+    TBody: Type<{ refresh: JwtTokenObtainPair["refresh"] }>(),
   },
 
   token_verify: {
@@ -149,6 +154,8 @@ const routes = {
   updatePassword: {
     path: "/api/v1/password_change/",
     method: "PUT",
+    TRes: Type<Record<string, string | string[]>>(),
+    TBody: Type<UpdatePasswordForm>(),
   },
   // User Endpoints
   currentUser: {
@@ -164,11 +171,14 @@ const routes = {
 
   userListSkill: {
     path: "/api/v1/users/{username}/skill/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<SkillModel>>(),
   },
 
   userListFacility: {
     path: "/api/v1/users/{username}/get_facilities/",
-    TRes: Type<UserModel>(),
+    method: "GET",
+    TRes: Type<FacilityModel[]>(),
   },
 
   addUserFacility: {
@@ -181,6 +191,8 @@ const routes = {
   addUserSkill: {
     path: "/api/v1/users/{username}/skill/",
     method: "POST",
+    TBody: Type<{ skill: string }>(),
+    TRes: Type<SkillModel>(),
   },
 
   deleteUserFacility: {
@@ -193,11 +205,13 @@ const routes = {
   clearHomeFacility: {
     path: "/api/v1/users/{username}/clear_home_facility/",
     method: "DELETE",
+    TRes: Type<Record<string, never>>(),
   },
 
   deleteUserSkill: {
     path: "/api/v1/users/{username}/skill/{id}/",
     method: "DELETE",
+    TRes: Type<Record<string, never>>(),
   },
 
   createUser: {
@@ -214,6 +228,8 @@ const routes = {
   partialUpdateUser: {
     path: "/api/v1/users/{username}/",
     method: "PATCH",
+    TRes: Type<UserModel>(),
+    TBody: Type<Partial<UserModel>>(),
   },
 
   deleteUser: {
@@ -225,6 +241,7 @@ const routes = {
   addUser: {
     path: "/api/v1/users/add_user/",
     method: "POST",
+    TRes: Type<UserModel>(),
   },
 
   searchUser: {
@@ -251,6 +268,8 @@ const routes = {
 
   getAllSkills: {
     path: "/api/v1/skill/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<SkillObjectModel>>(),
   },
 
   // Facility Endpoints
@@ -579,6 +598,7 @@ const routes = {
   },
   getPatient: {
     path: "/api/v1/patient/{id}/",
+    TBody: Type<PatientModel>(),
     TRes: Type<PatientModel>(),
   },
   updatePatient: {
@@ -596,10 +616,13 @@ const routes = {
   getPatientNotes: {
     path: "/api/v1/patient/{patientId}/notes/",
     method: "GET",
+    TBody: Type<PatientNotesModel[]>(),
+    TRes: Type<PaginatedResponse<PatientNotesModel>>(),
   },
   addPatientNote: {
     path: "/api/v1/patient/{patientId}/notes/",
     method: "POST",
+    TRes: Type<PatientNotesModel>(),
   },
   sampleTestList: {
     path: "/api/v1/patient/{patientId}/test_sample/",
@@ -651,6 +674,8 @@ const routes = {
   // States
   statesList: {
     path: "/api/v1/state/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<StateModel>>(),
   },
 
   getState: {
@@ -661,9 +686,13 @@ const routes = {
 
   getDistrict: {
     path: "/api/v1/district/{id}/",
+    method: "GET",
+    TRes: Type<DistrictModel>(),
   },
   getDistrictByState: {
     path: "/api/v1/state/{id}/districts/",
+    method: "GET",
+    TRes: Type<DistrictModel[]>(),
   },
   getDistrictByName: {
     path: "/api/v1/district/",
@@ -775,11 +804,13 @@ const routes = {
   checkUsername: {
     path: "/api/v1/users/{username}/check_availability/",
     method: "GET",
+    TRes: Type<Record<string, never>>(),
   },
 
   getUserDetails: {
     path: "/api/v1/users/{username}/",
     method: "GET",
+    TRes: Type<UserModel>(),
   },
   updateUserDetails: {
     path: "/api/v1/users",
@@ -927,7 +958,7 @@ const routes = {
     TBody: Type<Partial<IResource>>(),
   },
   updateResource: {
-    path: "/api/v1/resource/{id}",
+    path: "/api/v1/resource/{id}/",
     method: "PUT",
     TRes: Type<IResource>(),
     TBody: Type<Partial<IResource>>(),
@@ -968,7 +999,7 @@ const routes = {
   // Assets endpoints
 
   listAssets: {
-    path: "/api/v1/asset",
+    path: "/api/v1/asset/",
     method: "GET",
     TRes: Type<PaginatedResponse<AssetData>>(),
   },
@@ -1029,7 +1060,7 @@ const routes = {
     method: "GET",
   },
   updateAssetService: {
-    path: "/api/v1/asset/{asset_external_id}/service_records/{external_id}",
+    path: "/api/v1/asset/{asset_external_id}/service_records/{external_id}/",
     method: "PUT",
     TRes: Type<AssetService>(),
     TBody: Type<AssetServiceUpdate>(),

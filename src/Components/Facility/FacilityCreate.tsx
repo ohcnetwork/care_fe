@@ -1,7 +1,14 @@
 import * as Notification from "../../Utils/Notifications.js";
 
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
-import { CapacityModal, DoctorModal } from "./models";
+import {
+  CapacityModal,
+  DistrictModel,
+  DoctorModal,
+  LocalBodyModel,
+  StateModel,
+  WardModel,
+} from "./models";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave.js";
 import {
   FACILITY_FEATURE_TYPES,
@@ -30,6 +37,7 @@ import {
   getPincodeDetails,
   includesIgnoreCase,
   parsePhoneNumber,
+  compareBy,
 } from "../../Utils/utils";
 import {
   phonePreg,
@@ -65,15 +73,6 @@ const Loading = lazy(() => import("../Common/Loading"));
 
 interface FacilityProps {
   facilityId?: string;
-}
-
-interface StateObj {
-  id: number;
-  name: string;
-}
-
-interface WardObj extends StateObj {
-  number: number;
 }
 
 type FacilityForm = {
@@ -162,10 +161,10 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
   const [isWardLoading, setIsWardLoading] = useState(false);
-  const [states, setStates] = useState<StateObj[]>([]);
-  const [districts, setDistricts] = useState<StateObj[]>([]);
-  const [localBodies, setLocalBodies] = useState<StateObj[]>([]);
-  const [ward, setWard] = useState<WardObj[]>([]);
+  const [states, setStates] = useState<StateModel[]>([]);
+  const [districts, setDistricts] = useState<DistrictModel[]>([]);
+  const [localBodies, setLocalBodies] = useState<LocalBodyModel[]>([]);
+  const [ward, setWard] = useState<WardModel[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [createdFacilityId, setCreatedFacilityId] = useState("");
   const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
@@ -367,7 +366,7 @@ export const FacilityCreate = (props: FacilityProps) => {
     if (!fetchedDistricts) return;
 
     const matchedDistrict = fetchedDistricts.find((district) => {
-      return includesIgnoreCase(district.name, pincodeDetails.district);
+      return includesIgnoreCase(district.name, pincodeDetails.districtname);
     });
     if (!matchedDistrict) return;
 
@@ -570,7 +569,10 @@ export const FacilityCreate = (props: FacilityProps) => {
     });
 
     capacityList = (
-      <div className="mt-4 grid w-full gap-7 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div
+        className="mt-4 grid w-full gap-7 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        id="total-bed-capacity"
+      >
         <BedTypeCard
           label={t("total_beds")}
           bedCapacityId={0}
@@ -699,7 +701,9 @@ export const FacilityCreate = (props: FacilityProps) => {
             <div className="justify-between md:flex md:pb-2">
               <div className="mb-2 text-xl font-bold">{t("doctors_list")}</div>
             </div>
-            <div className="mt-4">{doctorList}</div>
+            <div className="mt-4" id="total-doctor-capacity">
+              {doctorList}
+            </div>
           </div>
         </Page>
       );
@@ -850,14 +854,12 @@ export const FacilityCreate = (props: FacilityProps) => {
                     className={isWardLoading ? "animate-pulse" : ""}
                     disabled={isWardLoading}
                     placeholder="Choose Ward"
-                    options={ward
-                      .sort((a, b) => a.number - b.number)
-                      .map((e) => {
-                        return {
-                          id: e.id,
-                          name: e.number + ": " + e.name,
-                        };
-                      })}
+                    options={ward.sort(compareBy("number")).map((e) => {
+                      return {
+                        id: e.id,
+                        name: e.number + ": " + e.name,
+                      };
+                    })}
                     optionLabel={(o) => o.name}
                     optionValue={(o) => o.id}
                   />
