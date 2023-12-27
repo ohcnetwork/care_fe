@@ -361,28 +361,6 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                       </>
                     )}
                     <hr className="my-4 border border-gray-300" />
-                    <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
-                      {props.consultationData.encounter_date && (
-                        <div className="mb-4">
-                          <div className="text-sm font-semibold uppercase">
-                            Admission Date
-                          </div>
-                          {formatDateTime(
-                            props.consultationData?.encounter_date
-                          )}
-                        </div>
-                      )}
-                      {props.consultationData.icu_admission_date && (
-                        <div className="mb-4">
-                          <div className="text-sm font-semibold uppercase">
-                            ICU Admission Date
-                          </div>
-                          {formatDateTime(
-                            props.consultationData.icu_admission_date
-                          )}
-                        </div>
-                      )}
-                    </div>
                     <div className="text-sm font-semibold uppercase">
                       Consultation Update
                     </div>

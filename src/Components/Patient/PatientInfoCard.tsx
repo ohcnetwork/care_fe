@@ -314,7 +314,7 @@ export default function PatientInfoCard(props: {
                 );
               })}
             </div>
-            {!!consultation?.discharge_date && (
+            {consultation?.discharge_date ? (
               <div className="mt-3 flex gap-4 bg-cyan-300 px-3 py-1 text-sm font-medium">
                 <div>
                   <span>
@@ -336,6 +336,27 @@ export default function PatientInfoCard(props: {
                         Discharged on{" "}
                         {formatDateTime(consultation?.discharge_date)}
                       </span>
+                    )}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-3 flex gap-4 bg-cyan-300 px-3 py-1 text-sm font-medium">
+                <div>
+                  <span>
+                    {consultation?.encounter_date && (
+                      <div>
+                        Admission on{" "}
+                        {formatDateTime(consultation?.encounter_date)}
+                      </div>
+                    )}
+                    {consultation?.icu_admission_date && (
+                      <div>
+                        <div className="text-sm font-semibold uppercase">
+                          ICU Admission on
+                        </div>
+                        {formatDateTime(consultation?.icu_admission_date)}
+                      </div>
                     )}
                   </span>
                 </div>
