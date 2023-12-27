@@ -6,6 +6,8 @@ import { UserAssignedModel } from "../Users/models";
 import { SkillObjectModel } from "../Users/models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { relativeTime } from "../../Utils/utils";
+import useAuthUser from "../../Common/hooks/useAuthUser";
+import { triggerGoal } from "../../Integrations/Plausible";
 
 export default function DoctorVideoSlideover(props: {
   show: boolean;
@@ -106,6 +108,7 @@ function UserListItem(props: { user: UserAssignedModel }) {
   const user = props.user;
   const icon =
     user.user_type === "Doctor" ? "fa-user-doctor " : " fa-user-nurse";
+  const authUser = useAuthUser();
 
   return (
     <li>
@@ -155,6 +158,13 @@ function UserListItem(props: { user: UserAssignedModel }) {
                 {user.video_connect_link && (
                   <a
                     href={user.video_connect_link}
+                    onClick={() => {
+                      triggerGoal("Doctor Connect Click", {
+                        medium: "Video Call",
+                        userId: authUser?.id,
+                        targetUserType: user.user_type,
+                      });
+                    }}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -176,6 +186,13 @@ function UserListItem(props: { user: UserAssignedModel }) {
                         )}`
                       : "#"
                   }
+                  onClick={() => {
+                    triggerGoal("Doctor Connect Click", {
+                      medium: "WhatsApp",
+                      userId: authUser?.id,
+                      targetUserType: user.user_type,
+                    });
+                  }}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -190,6 +207,13 @@ function UserListItem(props: { user: UserAssignedModel }) {
                   href={
                     user.alt_phone_number ? `tel:${user.alt_phone_number}` : "#"
                   }
+                  onClick={() => {
+                    triggerGoal("Doctor Connect Click", {
+                      medium: "Phone Call",
+                      userId: authUser?.id,
+                      targetUserType: user.user_type,
+                    });
+                  }}
                 >
                   <div className="tooltip">
                     <span className="tooltip-text tooltip-left">
