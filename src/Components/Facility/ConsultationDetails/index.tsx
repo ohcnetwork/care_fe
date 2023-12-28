@@ -46,8 +46,6 @@ const symptomChoices = [...SYMPTOM_CHOICES];
 
 export interface ConsultationTabProps {
   consultationId: string;
-  facilityId: string;
-  patientId: string;
   consultationData: ConsultationModel;
   patientData: PatientModel;
 }
@@ -120,6 +118,11 @@ export const ConsultationDetails = (props: any) => {
               });
             data.symptoms_text = symptoms.join(", ");
           }
+          if (facilityId != data.facility || patientId != data.patient) {
+            navigate(
+              `/facility/${data.facility}/patient/${data.patient}/consultation/${data?.id}`
+            );
+          }
           setConsultationData(data);
           const assetRes = data?.current_bed?.bed_object?.id
             ? await dispatch(
@@ -153,6 +156,7 @@ export const ConsultationDetails = (props: any) => {
                 : "No",
               is_vaccinated: patientData.is_vaccinated ? "Yes" : "No",
             };
+
             setPatientData(data);
           }
 
@@ -184,8 +188,6 @@ export const ConsultationDetails = (props: any) => {
 
   const consultationTabProps: ConsultationTabProps = {
     consultationId,
-    facilityId,
-    patientId,
     consultationData,
     patientData,
   };
