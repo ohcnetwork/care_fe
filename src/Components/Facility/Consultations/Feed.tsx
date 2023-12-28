@@ -37,6 +37,7 @@ import { triggerGoal } from "../../../Integrations/Plausible.js";
 import useAuthUser from "../../../Common/hooks/useAuthUser.js";
 import Spinner from "../../Common/Spinner.js";
 import useQuery from "../../../Utils/request/useQuery.js";
+import { ResolvedMiddleware } from "../../Assets/AssetTypes.js";
 
 interface IFeedProps {
   facilityId: string;
@@ -53,7 +54,7 @@ interface cameraOccupier {
 
 const PATIENT_DEFAULT_PRESET = "Patient View".trim().toLowerCase();
 
-export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
+export const Feed: React.FC<IFeedProps> = ({ facilityId, consultationId }) => {
   const dispatch: any = useDispatch();
   const CAMERA_ACCESS_TIMEOUT = 10 * 60; //seconds
 
@@ -85,8 +86,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const [privacy, setPrivacy] = useState<boolean>(false);
   const [videoStartTime, setVideoStartTime] = useState<Date | null>(null);
   const [statusReported, setStatusReported] = useState(false);
-  const [facilityMiddlewareHostname, setFacilityMiddlewareHostname] =
-    useState("");
+  const [resolvedMiddleware, setResolvedMiddleware] =
+    useState<ResolvedMiddleware>();
   const authUser = useAuthUser();
 
   // Notification hook to get subscription info
@@ -213,7 +214,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
       const res = await dispatch(getPermittedFacility(facilityId));
 
       if (res?.status === 200 && res?.data) {
-        setFacilityMiddlewareHostname(res.data.middleware_address);
+        setResolvedMiddleware(res.data.middleware_address);
+        // setFacilityMiddlewareHostname(res.data.middleware_address);
         //   useQuery(routes.getPermittedFacility, {
         //     pathParams: { id: facilityId || "" },
         //     onResponse: ({ res, data }) => {
@@ -225,11 +227,11 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     fetchFacility();
   }, []);
 
-  const fallbackMiddleware =
-    cameraAsset.location_middleware || facilityMiddlewareHostname;
+  // const fallbackMiddleware =
+  //   cameraAsset.location_middleware || resolvedMiddleware;
 
-  const currentMiddleware =
-    cameraAsset.middleware_address || fallbackMiddleware;
+  // const currentMiddleware =
+  //   cameraAsset.middleware_address || fallbackMiddleware;
 
   useEffect(() => {
     if (cameraState) {
@@ -341,8 +343,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   );
 
   const url = !isIOS
-    ? `wss://${currentMiddleware}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`
-    : `https://${currentMiddleware}/stream/${cameraAsset?.accessKey}/channel/0/hls/live/index.m3u8?uuid=${cameraAsset?.accessKey}&channel=0`;
+    ? `wss://${resolvedMiddleware?.hostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`
+    : `https://${resolvedMiddleware?.hostname}/stream/${cameraAsset?.accessKey}/channel/0/hls/live/index.m3u8?uuid=${cameraAsset?.accessKey}&channel=0`;
 
   const {
     startStream,
@@ -353,7 +355,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     : // eslint-disable-next-line react-hooks/rules-of-hooks
       useMSEMediaPlayer({
         config: {
-          middlewareHostname: currentMiddleware,
+          middlewareHostname: resolvedMiddleware?.hostname ?? "",
           ...cameraAsset,
         },
         url,
@@ -450,7 +452,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
       });
       getBedPresets(cameraAsset);
     }
-  }, [cameraAsset, currentMiddleware]);
+  }, [cameraAsset, resolvedMiddleware?.hostname]);
 
   //lock and unlock asset on mount and unmount
   useEffect(() => {
