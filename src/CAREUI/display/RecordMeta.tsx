@@ -37,7 +37,7 @@ const RecordMeta = ({
   let child = (
     <div className="tooltip">
       <span className="underline">{relativeTime(time)}</span>
-      <span className="tooltip-text tooltip-bottom flex -translate-x-1/2 gap-1 text-xs font-medium tracking-wider">
+      <span className="tooltip-text tooltip-left flex gap-1 text-xs font-medium tracking-wider">
         {formatDateTime(time)}
         {user && !inlineUser && (
           <span className="flex items-center gap-1">

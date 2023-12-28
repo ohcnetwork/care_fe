@@ -54,19 +54,20 @@ export const FacilityHome = (props: any) => {
 
   useMessageListener((data) => console.log(data));
 
-  const { data: facilityData, loading: isLoading } = useQuery(
-    routes.getPermittedFacility,
-    {
-      pathParams: {
-        id: facilityId,
-      },
-      onResponse: ({ res }) => {
-        if (!res?.ok) {
-          navigate("/not-found");
-        }
-      },
-    }
-  );
+  const {
+    data: facilityData,
+    loading: isLoading,
+    refetch: facilityFetch,
+  } = useQuery(routes.getPermittedFacility, {
+    pathParams: {
+      id: facilityId,
+    },
+    onResponse: ({ res }) => {
+      if (!res?.ok) {
+        navigate("/not-found");
+      }
+    },
+  });
 
   const handleDeleteClose = () => {
     setOpenDeleteDialog(false);
@@ -139,10 +140,10 @@ export const FacilityHome = (props: any) => {
         onSave={() =>
           facilityData?.read_cover_image_url
             ? setImageKey(Date.now())
-            : window.location.reload()
+            : facilityFetch()
         }
         onClose={() => setEditCoverImage(false)}
-        onDelete={() => window.location.reload()}
+        onDelete={() => facilityFetch()}
         facility={facilityData ?? ({} as FacilityModel)}
       />
       {hasCoverImage ? (

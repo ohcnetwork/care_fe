@@ -141,7 +141,13 @@ export default function PatientInfoCard(props: {
           />
           <DischargeModal
             show={openDischargeDialog}
-            onClose={() => setOpenDischargeDialog(false)}
+            onClose={() => {
+              setOpenDischargeDialog(false);
+            }}
+            afterSubmit={() => {
+              setOpenDischargeDialog(false);
+              props.fetchPatientData?.({ aborted: false });
+            }}
             consultationData={consultation}
           />
         </>

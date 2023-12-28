@@ -41,10 +41,12 @@ import {
   IFacilityNotificationRequest,
   IFacilityNotificationResponse,
   IUserFacilityRequest,
+  LocalBodyModel,
   PatientStatsModel,
+  FacilityRequest,
+  StateModel,
   WardModel,
   LocationModel,
-  StateModel,
   PatientNotesModel,
   BedModel,
 } from "../Components/Facility/models";
@@ -287,12 +289,14 @@ const routes = {
   createFacility: {
     path: "/api/v1/facility/",
     method: "POST",
+    TRes: Type<FacilityModel>(),
+    TBody: Type<FacilityRequest>(),
   },
 
   getPermittedFacility: {
     path: "/api/v1/facility/{id}/",
     method: "GET",
-    TRes: Type<FacilityModel>(),
+    TRes: Type<FacilityRequest>(),
   },
 
   getAnyFacility: {
@@ -302,8 +306,10 @@ const routes = {
   },
 
   updateFacility: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/{id}/",
     method: "PUT",
+    TRes: Type<FacilityModel>(),
+    TBody: Type<FacilityRequest>(),
   },
 
   partialUpdateFacility: {
@@ -683,6 +689,7 @@ const routes = {
 
   getState: {
     path: "/api/v1/state/{id}/",
+    TRes: Type<StateModel>(),
   },
 
   // Districts
@@ -714,6 +721,7 @@ const routes = {
   // Local Body
   getLocalBody: {
     path: "/api/v1/local_body/{id}/",
+    TRes: Type<LocalBodyModel>(),
   },
   getAllLocalBody: {
     path: "/api/v1/local_body/",
