@@ -1,8 +1,8 @@
 export class PatientConsultationPage {
   selectConsultationStatus(status: string) {
-    cy.get("#consultation_status").scrollIntoView();
-    cy.get("#consultation_status").should("be.visible");
-    cy.get("#consultation_status")
+    cy.get("#route_to_facility").scrollIntoView();
+    cy.get("#route_to_facility").should("be.visible");
+    cy.get("#route_to_facility")
       .click()
       .then(() => {
         cy.get("[role='option']").contains(status).click();
@@ -60,7 +60,7 @@ export class PatientConsultationPage {
     cy.get("#principal-diagnosis-select [role='option']").first().click();
 
     cy.get("#consultation_notes").click().type(consulationNotes);
-    cy.get("#verified_by")
+    cy.get("#treating_physician")
       .click()
       .type(verificationBy)
       .then(() => {
@@ -103,7 +103,8 @@ export class PatientConsultationPage {
   }
 
   visitFilesPage() {
-    cy.get("a").contains("Files").click();
+    cy.get("#consultation_tab_nav").scrollIntoView();
+    cy.get("#consultation_tab_nav").contains("Files").click();
   }
 
   uploadFile() {
@@ -199,21 +200,25 @@ export class PatientConsultationPage {
   }
 
   visitDoctorNotesPage() {
+    cy.get("#patient_doctor_notes").scrollIntoView();
     cy.get("#patient_doctor_notes").click();
   }
 
   addDoctorsNotes(notes: string) {
-    cy.get("#doctor_notes_textarea").type(notes);
+    cy.get("#doctor_notes_textarea").scrollIntoView();
+    cy.get("#doctor_notes_textarea").click().type(notes);
   }
 
   postDoctorNotes() {
     cy.intercept("POST", "**/api/v1/patient/*/notes").as("postDoctorNotes");
-    cy.get("#submit").contains("Post Your Note").click();
+    cy.get("#add_doctor_note_button").click();
     cy.wait("@postDoctorNotes").its("response.statusCode").should("eq", 201);
   }
 
   clickDischargePatient() {
-    cy.get("#discharge_patient_from_care").click();
+    cy.get("#show-more").scrollIntoView();
+    cy.get("#show-more").click();
+    cy.contains("p", "Discharge from CARE").click();
   }
 
   selectDischargeReason(reason: string) {
@@ -247,6 +252,7 @@ export class PatientConsultationPage {
   }
 
   visitEditPrescriptionPage() {
+    cy.get("#consultation_tab_nav").scrollIntoView();
     cy.get("#consultation_tab_nav").contains("Medicines").click();
     cy.get("a[href='prescriptions']").first().click();
   }

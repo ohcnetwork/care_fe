@@ -94,6 +94,7 @@ export class ManageUserPage {
   }
 
   typeFacilitySearch(facilityName) {
+    cy.get("#search").click().clear();
     cy.get("#search").click().type(facilityName);
   }
 
@@ -102,6 +103,7 @@ export class ManageUserPage {
   }
 
   clickFacilityPatients() {
+    cy.get("#facility-patients").should("be.visible");
     cy.get("#facility-patients").click();
   }
 

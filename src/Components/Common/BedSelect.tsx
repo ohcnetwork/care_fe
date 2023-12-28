@@ -74,7 +74,7 @@ export const BedSelect = (props: BedSelectProps) => {
       optionLabel={(option: any) => {
         if (Object.keys(option).length === 0) return "";
         return (
-          `${option.name} ${option?.location_object?.name || t("unknown")}` ||
+          `${option.name}, ${option?.location_object?.name || t("unknown")}` ||
           option?.location_object?.name
         );
       }}

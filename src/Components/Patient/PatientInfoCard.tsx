@@ -10,11 +10,10 @@ import {
 import { ConsultationModel, PatientCategory } from "../Facility/models";
 import { Switch, Menu } from "@headlessui/react";
 
-import { Link } from "raviger";
+import { Link, navigate } from "raviger";
 import { useState } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import useConfig from "../../Common/hooks/useConfig";
-import { getDimensionOrDash } from "../../Common/utils";
 import dayjs from "../../Utils/dayjs";
 import { classNames, formatDate, formatDateTime } from "../../Utils/utils.js";
 import ABHAProfileModal from "../ABDM/ABHAProfileModal";
@@ -28,28 +27,38 @@ import request from "../../Utils/request/request.js";
 import routes from "../../Redux/api.js";
 import DropdownMenu from "../Common/components/Menu.js";
 import { triggerGoal } from "../../Integrations/Plausible.js";
-import useAuthUser from "../../Common/hooks/useAuthUser.js";
+
+import useAuthUser from "../../Common/hooks/useAuthUser";
+import { Mews } from "../Facility/Consultations/Mews.js";
+import DischargeSummaryModal from "../Facility/DischargeSummaryModal.js";
+import DischargeModal from "../Facility/DischargeModal.js";
+import { useTranslation } from "react-i18next";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
   consultation?: ConsultationModel;
   fetchPatientData?: (state: { aborted: boolean }) => void;
+  activeShiftingData: any;
   consultationId: string;
   showAbhaProfile?: boolean;
 }) {
   const authUser = useAuthUser();
-
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [showLinkABHANumber, setShowLinkABHANumber] = useState(false);
   const [showABHAProfile, setShowABHAProfile] = useState(
     !!props.showAbhaProfile
   );
+  const [openDischargeSummaryDialog, setOpenDischargeSummaryDialog] =
+    useState(false);
+  const [openDischargeDialog, setOpenDischargeDialog] = useState(false);
 
   const { enable_hcx, enable_abdm } = useConfig();
   const [showLinkCareContext, setShowLinkCareContext] = useState(false);
 
   const patient = props.patient;
   const consultation = props.consultation;
+  const activeShiftingData = props.activeShiftingData;
 
   const [medicoLegalCase, setMedicoLegalCase] = useState(
     consultation?.medico_legal_case ?? false
@@ -86,6 +95,19 @@ export default function PatientInfoCard(props: {
     }
   };
 
+  const hasActiveShiftingRequest = () => {
+    if (activeShiftingData.length > 0) {
+      return [
+        "PENDING",
+        "APPROVED",
+        "DESTINATION APPROVED",
+        "PATIENT TO BE PICKED UP",
+      ].includes(activeShiftingData[activeShiftingData.length - 1].status);
+    }
+
+    return false;
+  };
+
   return (
     <>
       <DialogModal
@@ -109,6 +131,28 @@ export default function PatientInfoCard(props: {
           <div>Invalid Patient Data</div>
         )}
       </DialogModal>
+
+      {consultation && (
+        <>
+          <DischargeSummaryModal
+            consultation={consultation}
+            show={openDischargeSummaryDialog}
+            onClose={() => setOpenDischargeSummaryDialog(false)}
+          />
+          <DischargeModal
+            show={openDischargeDialog}
+            onClose={() => {
+              setOpenDischargeDialog(false);
+            }}
+            afterSubmit={() => {
+              setOpenDischargeDialog(false);
+              props.fetchPatientData?.({ aborted: false });
+            }}
+            consultationData={consultation}
+          />
+        </>
+      )}
+
       <section className="flex flex-col items-center justify-between space-y-3 lg:flex-row lg:space-x-2 lg:space-y-0">
         <div className="flex w-full flex-col bg-white px-4 py-2 lg:w-7/12 lg:flex-row lg:p-6">
           {/* Can support for patient picture in the future */}
@@ -118,12 +162,7 @@ export default function PatientInfoCard(props: {
             >
               {consultation?.current_bed &&
               consultation?.discharge_date === null ? (
-                <div
-                  className="flex h-full flex-col items-center justify-center"
-                  title={`
-                ${consultation?.current_bed?.bed_object?.location_object?.name}\n${consultation?.current_bed?.bed_object.name}
-              `}
-                >
+                <div className="tooltip flex h-full flex-col items-center justify-center">
                   <p className="w-full truncate px-2 text-center text-sm text-gray-900">
                     {
                       consultation?.current_bed?.bed_object?.location_object
@@ -133,6 +172,15 @@ export default function PatientInfoCard(props: {
                   <p className="w-full truncate px-2 text-center text-base font-bold">
                     {consultation?.current_bed?.bed_object.name}
                   </p>
+                  <div className="tooltip-text tooltip-right flex -translate-x-1/3 translate-y-1/2 flex-col items-center justify-center text-sm ">
+                    <span>
+                      {
+                        consultation?.current_bed?.bed_object?.location_object
+                          ?.name
+                      }
+                    </span>
+                    <span>{consultation?.current_bed?.bed_object.name}</span>
+                  </div>
                 </div>
               ) : (
                 <div className="flex h-full items-center justify-center">
@@ -152,7 +200,10 @@ export default function PatientInfoCard(props: {
             </ButtonV2>
           </div>
           <div className="flex flex-col items-center gap-4 lg:items-start lg:gap-0 lg:pl-6">
-            <div className="mb-1 font-semibold sm:text-xl md:text-4xl">
+            <div
+              className="mb-1 font-semibold sm:text-xl md:text-4xl"
+              id="patient-name-consultation"
+            >
               {patient.name}
             </div>
             <div>
@@ -161,10 +212,10 @@ export default function PatientInfoCard(props: {
                 Number(consultation?.review_interval) > 0 && (
                   <div
                     className={
-                      "mb-2 inline-flex w-full items-center justify-center rounded-lg border border-gray-500 text-xs font-semibold leading-4 " +
+                      "mb-2 inline-flex w-full items-center justify-center rounded-lg border border-gray-500 p-1 text-xs font-semibold leading-4 " +
                       (dayjs().isBefore(patient.review_time)
-                        ? " bg-gray-100"
-                        : " bg-red-400 p-1 text-white")
+                        ? " bg-gray-100 "
+                        : " bg-red-400 text-white")
                     }
                   >
                     <i className="text-md fas fa-clock mr-2"></i>
@@ -247,17 +298,6 @@ export default function PatientInfoCard(props: {
             </div>
             <div className="flex flex-col items-center gap-2 text-sm sm:flex-row lg:mt-4">
               {[
-                ["Blood Group", patient.blood_group, patient.blood_group],
-                [
-                  "Weight",
-                  getDimensionOrDash(consultation?.weight, " kg"),
-                  true,
-                ],
-                [
-                  "Height",
-                  getDimensionOrDash(consultation?.height, "cm"),
-                  true,
-                ],
                 [
                   "Respiratory Support",
                   RESPIRATORY_SUPPORT.find(
@@ -290,13 +330,7 @@ export default function PatientInfoCard(props: {
                           suggestion.id === consultation?.suggestion
                       )?.text
                     }{" "}
-                    on{" "}
-                    {formatDate(
-                      ["A", "DC"].includes(consultation?.suggestion ?? "")
-                        ? consultation?.admission_date
-                        : consultation?.created_date
-                    )}
-                    ,
+                    on {formatDateTime(consultation.encounter_date)},
                     {consultation?.discharge_reason === "EXP" ? (
                       <span>
                         {" "}
@@ -305,7 +339,8 @@ export default function PatientInfoCard(props: {
                     ) : (
                       <span>
                         {" "}
-                        Discharged on {formatDate(consultation?.discharge_date)}
+                        Discharged on{" "}
+                        {formatDateTime(consultation?.discharge_date)}
                       </span>
                     )}
                   </span>
@@ -314,6 +349,11 @@ export default function PatientInfoCard(props: {
             )}
           </div>
         </div>
+        {consultation?.last_daily_round && (
+          <div className="flex w-full justify-center bg-white px-4 py-2 lg:w-5/12 lg:flex-row lg:justify-end lg:p-6">
+            <Mews dailyRound={consultation?.last_daily_round} />
+          </div>
+        )}
 
         <div className="flex w-full flex-col gap-2 px-4 py-1 lg:w-fit lg:p-6">
           {!!consultation?.discharge_date && (
@@ -323,7 +363,11 @@ export default function PatientInfoCard(props: {
               </div>
               <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
                 {!consultation?.discharge_reason ? (
-                  <span className="text-gray-800">UNKNOWN</span>
+                  <span className="text-gray-800">
+                    {consultation.suggestion === "OP"
+                      ? "OP file closed"
+                      : "UNKNOWN"}
+                  </span>
                 ) : consultation?.discharge_reason === "EXP" ? (
                   <span className="text-red-600">EXPIRED</span>
                 ) : (
@@ -406,6 +450,7 @@ export default function PatientInfoCard(props: {
               )
           )}
           <DropdownMenu
+            id="show-more"
             itemClassName="min-w-0 sm:min-w-[225px]"
             title={"Show More"}
             icon={<CareIcon icon="l-sliders-v-alt" />}
@@ -441,14 +486,14 @@ export default function PatientInfoCard(props: {
                   (action: any, i) =>
                     action[3] && (
                       <div key={i}>
-                        <a
+                        <Link
                           key={i}
                           className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
                           href={
                             consultation?.admitted &&
                             !consultation?.current_bed &&
                             i === 1
-                              ? undefined
+                              ? ""
                               : `${action[0]}`
                           }
                           onClick={() => {
@@ -473,7 +518,7 @@ export default function PatientInfoCard(props: {
                             className={`care-l-${action[2]} text-lg text-primary-500`}
                           />
                           <span>{action[1]}</span>
-                        </a>
+                        </Link>
                         {action?.[4]?.[0] && (
                           <>
                             <p className="mt-1 text-xs text-red-500">
@@ -544,6 +589,94 @@ export default function PatientInfoCard(props: {
                     )}
                   </Menu.Item>
                 ))}
+            </div>
+            <div>
+              {!consultation?.discharge_date && (
+                <Menu.Item>
+                  {({ close }) => (
+                    <>
+                      {hasActiveShiftingRequest() ? (
+                        <div
+                          className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
+                          onClick={() => {
+                            close();
+                            navigate(
+                              `/shifting/${
+                                activeShiftingData[
+                                  activeShiftingData.length - 1
+                                ].id
+                              }`
+                            );
+                          }}
+                        >
+                          <span className="flex w-full items-center justify-start gap-2">
+                            <CareIcon className="care-l-ambulance text-lg text-primary-500" />
+                            <p>Track Shifting</p>
+                          </span>
+                        </div>
+                      ) : (
+                        <div
+                          className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
+                          onClick={() => {
+                            close();
+                            navigate(
+                              `/facility/${patient.facility}/patient/${patient.id}/shift/new`
+                            );
+                          }}
+                        >
+                          <span className="flex w-full items-center justify-start gap-2">
+                            <CareIcon className="care-l-ambulance text-lg text-primary-500" />
+                            <p>Shift Patient</p>
+                          </span>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </Menu.Item>
+              )}
+              <Menu.Item>
+                {({ close }) => (
+                  <div
+                    className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
+                    onClick={() => {
+                      close();
+                      setOpenDischargeSummaryDialog(true);
+                    }}
+                  >
+                    <span className="flex w-full items-center justify-start gap-2">
+                      <CareIcon className="care-l-clipboard-notes text-lg text-primary-500" />
+                      <p>{t("discharge_summary")}</p>
+                    </span>
+                  </div>
+                )}
+              </Menu.Item>
+              <Menu.Item>
+                {({ close }) => (
+                  <div
+                    className={`dropdown-item-primary pointer-events-auto ${
+                      consultation?.discharge_date &&
+                      "text-gray-500 accent-gray-500 hover:bg-white"
+                    } m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out`}
+                    onClick={() => {
+                      if (!consultation?.discharge_date) {
+                        close();
+                        setOpenDischargeDialog(true);
+                      }
+                    }}
+                  >
+                    <span className="flex w-full items-center justify-start gap-2">
+                      <CareIcon
+                        className={`care-l-hospital text-lg ${
+                          consultation?.discharge_date
+                            ? "text-gray-500"
+                            : "text-primary-500"
+                        }`}
+                      />
+                      <p>{t("discharge_from_care")}</p>
+                    </span>
+                  </div>
+                )}
+              </Menu.Item>
             </div>
             <div className="px-4 py-2">
               <Switch.Group as="div" className="flex items-center">

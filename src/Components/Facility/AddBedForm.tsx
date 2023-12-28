@@ -18,6 +18,7 @@ import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import Page from "../Common/components/Page";
+
 const Loading = lazy(() => import("../Common/Loading"));
 
 interface BedFormProps {
@@ -73,6 +74,7 @@ export const AddBedForm = (props: BedFormProps) => {
       }
       setIsLoading(false);
     }
+
     fetchFacilityLocationAndBed();
   }, [dispatchAction, facilityId, locationId]);
 
@@ -125,7 +127,7 @@ export const AddBedForm = (props: BedFormProps) => {
       name,
       description,
       bed_type: bedType,
-      number_of_beds: numberOfBeds,
+      number_of_beds: bedId ? 1 : numberOfBeds,
     };
 
     if (!validateInputs(data)) return;
@@ -181,13 +183,14 @@ export const AddBedForm = (props: BedFormProps) => {
               name="name"
               type="text"
               label="Name"
-              id="name"
+              id="bed-name"
               required
               value={name}
               onChange={(e) => setName(e.value)}
               error={errors.name}
             />
             <TextAreaFormField
+              id="bed-description"
               rows={5}
               label="Description"
               name="description"
@@ -213,6 +216,7 @@ export const AddBedForm = (props: BedFormProps) => {
             {!bedId && (
               <>
                 <CheckBoxFormField
+                  id="multiplebed-checkbox"
                   label="Do you want to make multiple beds?"
                   onChange={() => {
                     if (multipleBeds) setNumberOfBeds(1);
@@ -221,6 +225,7 @@ export const AddBedForm = (props: BedFormProps) => {
                   name={"multipleBeds"}
                 />
                 <TextFormField
+                  id="numberofbed"
                   name="number_of_beds"
                   disabled={!multipleBeds}
                   label="Number of beds"
@@ -229,12 +234,21 @@ export const AddBedForm = (props: BedFormProps) => {
                   min={1}
                   max={100}
                   onChange={(e) => setNumberOfBeds(Number(e.value))}
+                  error={
+                    numberOfBeds > 100
+                      ? "Number of beds cannot be greater than 100"
+                      : undefined
+                  }
                 />
               </>
             )}
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-end">
               <Cancel onClick={handleCancel} />
-              <Submit onClick={handleSubmit} label={buttonText} />
+              <Submit
+                onClick={handleSubmit}
+                label={buttonText}
+                disabled={numberOfBeds > 100}
+              />
             </div>
           </form>
         </Card>

@@ -16,6 +16,7 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { InventoryItemsModel } from "./models";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
+
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm = {
@@ -122,6 +123,7 @@ export const AddInventoryForm = (props: any) => {
         setFacilityName("");
       }
     }
+
     fetchFacilityName();
   }, [dispatchAction, facilityId]);
 
@@ -144,7 +146,7 @@ export const AddInventoryForm = (props: any) => {
     if (unitName === "Dozen") {
       return Number(unitData.quantity) * 12;
     }
-    if (unitName === "Gram") {
+    if (unitName === "gram") {
       return Number(unitData.quantity) / 1000;
     }
     return Number(unitData.quantity);
@@ -236,6 +238,11 @@ export const AddInventoryForm = (props: any) => {
     };
     // if user has selected "Add stock" or "stockValidation" function is true
     if (data.is_incoming || stockValidation(data)) {
+      // if user has selected grams as unit then convert it to kg
+      if (data.unit === 5) {
+        data.quantity = data.quantity / 1000;
+        data.unit = 6;
+      }
       const res = await dispatchAction(postInventory(data, { facilityId }));
       setIsLoading(false);
 
@@ -327,7 +334,7 @@ export const AddInventoryForm = (props: any) => {
                 />
               </div>
             </div>
-            <div className="mt-4 flex flex-col justify-between gap-2 md:flex-row">
+            <div className="cui-form-button-group">
               <Cancel onClick={() => goBack()} />
               <Submit onClick={handleSubmit} label="Add/Update Inventory" />
             </div>

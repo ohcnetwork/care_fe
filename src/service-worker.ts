@@ -105,14 +105,14 @@ self.addEventListener("push", async function (event) {
   if (event.data) {
     const data = JSON.parse(event.data.text());
 
-    if (data?.type === "MESSAGE") {
+    if (["MESSAGE", "PUSH_MESSAGE"].includes(data?.type)) {
       self.clients.matchAll().then((clients) => {
         clients[0].postMessage(data);
       });
     } else {
       event.waitUntil(
-        self.registration.showNotification("Care - CoronaSafe Network", {
-          body: data.title,
+        self.registration.showNotification("Care - Open Health Care Network", {
+          body: data.message,
           tag: data.external_id,
         })
       );

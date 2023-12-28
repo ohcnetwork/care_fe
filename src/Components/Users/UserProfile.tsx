@@ -1,28 +1,23 @@
-import { useState, useCallback, useReducer, lazy, FormEvent } from "react";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+import { useState, useReducer, lazy, FormEvent } from "react";
 import { GENDER_TYPES } from "../../Common/constants";
-import { useDispatch } from "react-redux";
-import {
-  getUserDetails,
-  getUserListSkills,
-  partialUpdateUser,
-  updateUserPassword,
-} from "../../Redux/actions";
 import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
 import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
-import { classNames, handleSignOut, parsePhoneNumber } from "../../Utils/utils";
+import { classNames, parsePhoneNumber } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { SkillModel, SkillObjectModel } from "../Users/models";
+import { GenderType, SkillModel, UpdatePasswordForm } from "../Users/models";
 import UpdatableApp, { checkForUpdate } from "../Common/UpdatableApp";
 import dayjs from "../../Utils/dayjs";
-import useAuthUser from "../../Common/hooks/useAuthUser";
+import useAuthUser, { useAuthContext } from "../../Common/hooks/useAuthUser";
 import { PhoneNumberValidator } from "../Form/FieldValidators";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -30,10 +25,25 @@ type EditForm = {
   firstName: string;
   lastName: string;
   age: string;
+  gender: GenderType;
+  email: string;
+  phoneNumber: string;
+  altPhoneNumber: string;
+  user_type: string | undefined;
+  doctor_qualification: string | undefined;
+  doctor_experience_commenced_on: number | string | undefined;
+  doctor_medical_council_registration: string | undefined;
+  weekly_working_hours: string | undefined;
+};
+type ErrorForm = {
+  firstName: string;
+  lastName: string;
+  age: string;
   gender: string;
   email: string;
   phoneNumber: string;
   altPhoneNumber: string;
+  user_type: string | undefined;
   doctor_qualification: string | undefined;
   doctor_experience_commenced_on: number | string | undefined;
   doctor_medical_council_registration: string | undefined;
@@ -41,27 +51,28 @@ type EditForm = {
 };
 type State = {
   form: EditForm;
-  errors: EditForm;
+  errors: ErrorForm;
 };
 type Action =
   | { type: "set_form"; form: EditForm }
-  | { type: "set_error"; errors: EditForm };
+  | { type: "set_error"; errors: ErrorForm };
 
 const initForm: EditForm = {
   firstName: "",
   lastName: "",
   age: "",
-  gender: "",
+  gender: "Male",
   email: "",
   phoneNumber: "",
   altPhoneNumber: "",
+  user_type: "",
   doctor_qualification: undefined,
   doctor_experience_commenced_on: undefined,
   doctor_medical_council_registration: undefined,
   weekly_working_hours: undefined,
 };
 
-const initError: EditForm = Object.assign(
+const initError: ErrorForm = Object.assign(
   {},
   ...Object.keys(initForm).map((k) => ({ [k]: "" }))
 );
@@ -87,9 +98,10 @@ const editFormReducer = (state: State, action: Action) => {
     }
   }
 };
+
 export default function UserProfile() {
+  const { signOut } = useAuthContext();
   const [states, dispatch] = useReducer(editFormReducer, initialState);
-  const reduxDispatch: any = useDispatch();
   const [updateStatus, setUpdateStatus] = useState({
     isChecking: false,
     isUpdateAvailable: false,
@@ -119,57 +131,44 @@ export default function UserProfile() {
 
   const [showEdit, setShowEdit] = useState<boolean | false>(false);
 
-  const [isLoading, setIsLoading] = useState(false);
-  const dispatchAction: any = useDispatch();
-
-  const initialDetails: any = [{}];
-  const [details, setDetails] = useState(initialDetails);
-
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatchAction(getUserDetails(authUser.username));
-      const resSkills = await dispatchAction(
-        getUserListSkills({ username: authUser.username })
-      );
-      if (!status.aborted) {
-        if (res && res.data && resSkills) {
-          res.data.skills = resSkills.data.results.map(
-            (skill: SkillModel) => skill.skill_object
-          );
-          setDetails(res.data);
-          const formData: EditForm = {
-            firstName: res.data.first_name,
-            lastName: res.data.last_name,
-            age: res.data.age,
-            gender: res.data.gender,
-            email: res.data.email,
-            phoneNumber: res.data.phone_number,
-            altPhoneNumber: res.data.alt_phone_number,
-            doctor_qualification: res.data.doctor_qualification,
-            doctor_experience_commenced_on: dayjs().diff(
-              dayjs(res.data.doctor_experience_commenced_on),
-              "years"
-            ),
-            doctor_medical_council_registration:
-              res.data.doctor_medical_council_registration,
-            weekly_working_hours: res.data.weekly_working_hours,
-          };
-          dispatch({
-            type: "set_form",
-            form: formData,
-          });
-        }
-        setIsLoading(false);
-      }
+  const {
+    data: userData,
+    loading: isUserLoading,
+    refetch: refetchUserData,
+  } = useQuery(routes.getUserDetails, {
+    pathParams: { username: authUser.username },
+    onResponse: (result) => {
+      if (!result || !result.res || !result.data) return;
+      const formData: EditForm = {
+        firstName: result.data.first_name,
+        lastName: result.data.last_name,
+        age: result.data.age?.toString() || "",
+        gender: result.data.gender || "Male",
+        email: result.data.email,
+        phoneNumber: result.data.phone_number?.toString() || "",
+        altPhoneNumber: result.data.alt_phone_number?.toString() || "",
+        user_type: result.data.user_type,
+        doctor_qualification: result.data.doctor_qualification,
+        doctor_experience_commenced_on: dayjs().diff(
+          dayjs(result.data.doctor_experience_commenced_on),
+          "years"
+        ),
+        doctor_medical_council_registration:
+          result.data.doctor_medical_council_registration,
+        weekly_working_hours: result.data.weekly_working_hours,
+      };
+      dispatch({
+        type: "set_form",
+        form: formData,
+      });
     },
-    [dispatchAction, authUser.username]
-  );
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
+  });
+
+  const { data: skillsView, loading: isSkillsLoading } = useQuery(
+    routes.userListSkill,
+    {
+      pathParams: { username: authUser.username },
+    }
   );
 
   const validateForm = () => {
@@ -244,7 +243,7 @@ export default function UserProfile() {
         case "doctor_qualification":
         case "doctor_experience_commenced_on":
         case "doctor_medical_council_registration":
-          if (details.user_type === "Doctor" && !states.form[field]) {
+          if (states.form.user_type === "Doctor" && !states.form[field]) {
             errors[field] = "Field is required";
             invalidForm = true;
           }
@@ -298,13 +297,13 @@ export default function UserProfile() {
         phone_number: parsePhoneNumber(states.form.phoneNumber) ?? "",
         alt_phone_number: parsePhoneNumber(states.form.altPhoneNumber) ?? "",
         gender: states.form.gender,
-        age: states.form.age,
+        age: +states.form.age,
         doctor_qualification:
-          details.user_type === "Doctor"
+          states.form.user_type === "Doctor"
             ? states.form.doctor_qualification
             : undefined,
         doctor_experience_commenced_on:
-          details.user_type === "Doctor"
+          states.form.user_type === "Doctor"
             ? dayjs()
                 .subtract(
                   parseInt(
@@ -316,33 +315,26 @@ export default function UserProfile() {
                 .format("YYYY-MM-DD")
             : undefined,
         doctor_medical_council_registration:
-          details.user_type === "Doctor"
+          states.form.user_type === "Doctor"
             ? states.form.doctor_medical_council_registration
             : undefined,
         weekly_working_hours: states.form.weekly_working_hours,
       };
-      const res = await dispatchAction(
-        partialUpdateUser(authUser.username, data)
-      );
-      if (res && res.data) {
+      const { res } = await request(routes.partialUpdateUser, {
+        pathParams: { username: authUser.username },
+        body: data,
+      });
+      if (res?.ok) {
         Notification.Success({
           msg: "Details updated successfully",
         });
-        window.location.reload();
-        setDetails({
-          ...details,
-          first_name: states.form.firstName,
-          last_name: states.form.lastName,
-          age: states.form.age,
-          gender: states.form.gender,
-          email: states.form.email,
-          phone_number: states.form.phoneNumber,
-          alt_phone_number: states.form.altPhoneNumber,
-        });
+        await refetchUserData();
         setShowEdit(false);
       }
     }
   };
+
+  const isLoading = isUserLoading || isSkillsLoading;
 
   if (isLoading) {
     return <Loading />;
@@ -367,7 +359,7 @@ export default function UserProfile() {
     }
   };
 
-  const changePassword = (e: any) => {
+  const changePassword = async (e: any) => {
     e.preventDefault();
     //validating form
     if (
@@ -377,30 +369,28 @@ export default function UserProfile() {
         msg: "Passwords are different in the new and the confirmation column.",
       });
     } else {
-      setIsLoading(true);
-      const form = {
+      const form: UpdatePasswordForm = {
         old_password: changePasswordForm.old_password,
         username: authUser.username,
         new_password: changePasswordForm.new_password_1,
       };
-      reduxDispatch(updateUserPassword(form)).then((resp: any) => {
-        setIsLoading(false);
-        const res = resp && resp.data;
-        if (res.message === "Password updated successfully") {
-          Notification.Success({
-            msg: "Password changed!",
-          });
-        } else {
-          Notification.Error({
-            msg: "There was some error. Please try again in some time.",
-          });
-        }
-        setChangePasswordForm({
-          ...changePasswordForm,
-          new_password_1: "",
-          new_password_2: "",
-          old_password: "",
+      const { res, data } = await request(routes.updatePassword, {
+        body: form,
+      });
+      if (res?.ok && data?.message === "Password updated successfully") {
+        Notification.Success({
+          msg: "Password changed!",
         });
+      } else {
+        Notification.Error({
+          msg: "There was some error. Please try again in some time.",
+        });
+      }
+      setChangePasswordForm({
+        ...changePasswordForm,
+        new_password_1: "",
+        new_password_2: "",
+        old_password: "",
       });
     }
   };
@@ -424,7 +414,7 @@ export default function UserProfile() {
                 >
                   {showEdit ? "Cancel" : "Edit User Profile"}
                 </ButtonV2>
-                <ButtonV2 variant="danger" onClick={(_) => handleSignOut(true)}>
+                <ButtonV2 variant="danger" onClick={signOut}>
                   <CareIcon className="care-l-sign-out-alt" />
                   Sign out
                 </ButtonV2>
@@ -432,7 +422,7 @@ export default function UserProfile() {
             </div>
           </div>
           <div className="mt-5 lg:col-span-2 lg:mt-0">
-            {!showEdit && (
+            {!showEdit && !isLoading && (
               <div className="m-2 overflow-hidden rounded-lg bg-white px-4 py-5  shadow sm:rounded-lg sm:px-6">
                 <dl className="col-gap-4 row-gap-8 grid grid-cols-1 sm:grid-cols-2">
                   <div
@@ -443,7 +433,7 @@ export default function UserProfile() {
                       Username
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.username || "-"}
+                      {userData?.username || "-"}
                     </dd>
                   </div>
                   <div
@@ -454,7 +444,7 @@ export default function UserProfile() {
                       Contact No
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.phone_number || "-"}
+                      {userData?.phone_number || "-"}
                     </dd>
                   </div>
 
@@ -466,7 +456,7 @@ export default function UserProfile() {
                       Whatsapp No
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.alt_phone_number || "-"}
+                      {userData?.alt_phone_number || "-"}
                     </dd>
                   </div>
                   <div
@@ -477,7 +467,7 @@ export default function UserProfile() {
                       Email address
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.email || "-"}
+                      {userData?.email || "-"}
                     </dd>
                   </div>
                   <div
@@ -488,7 +478,7 @@ export default function UserProfile() {
                       First Name
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.first_name || "-"}
+                      {userData?.first_name || "-"}
                     </dd>
                   </div>
                   <div
@@ -499,7 +489,7 @@ export default function UserProfile() {
                       Last Name
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.last_name || "-"}
+                      {userData?.last_name || "-"}
                     </dd>
                   </div>
                   <div className="my-2  sm:col-span-1" id="age-profile-details">
@@ -507,7 +497,7 @@ export default function UserProfile() {
                       Age
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.age || "-"}
+                      {userData?.age || "-"}
                     </dd>
                   </div>
                   <div className="my-2  sm:col-span-1">
@@ -516,7 +506,7 @@ export default function UserProfile() {
                     </dt>
                     <dd className="badge badge-pill mt-1 bg-primary-500 text-sm text-white">
                       <i className="fa-solid fa-user-check mr-1"></i>{" "}
-                      {details.user_type || "-"}
+                      {userData?.user_type || "-"}
                     </dd>
                   </div>
                   <div
@@ -527,7 +517,7 @@ export default function UserProfile() {
                       Gender
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.gender || "-"}
+                      {userData?.gender || "-"}
                     </dd>
                   </div>
                   <div className="my-2  sm:col-span-1">
@@ -535,7 +525,7 @@ export default function UserProfile() {
                       Local Body
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.local_body_object?.name || "-"}
+                      {userData?.local_body_object?.name || "-"}
                     </dd>
                   </div>
                   <div className="my-2  sm:col-span-1">
@@ -543,7 +533,7 @@ export default function UserProfile() {
                       District
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.district_object?.name || "-"}
+                      {userData?.district_object?.name || "-"}
                     </dd>
                   </div>
                   <div className="my-2  sm:col-span-1">
@@ -551,7 +541,7 @@ export default function UserProfile() {
                       State
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.state_object?.name || "-"}
+                      {userData?.state_object?.name || "-"}
                     </dd>
                   </div>
                   <div className="my-2  sm:col-span-1">
@@ -563,11 +553,13 @@ export default function UserProfile() {
                         className="flex flex-wrap gap-2"
                         id="already-linked-skills"
                       >
-                        {details.skills && details.skills.length
-                          ? details.skills?.map((skill: SkillObjectModel) => {
+                        {skillsView?.results?.length
+                          ? skillsView.results?.map((skill: SkillModel) => {
                               return (
                                 <span className="flex items-center gap-2 rounded-full border-gray-300 bg-gray-200 px-3 text-xs text-gray-700">
-                                  <p className="py-1.5">{skill.name}</p>
+                                  <p className="py-1.5">
+                                    {skill.skill_object.name}
+                                  </p>
                                 </span>
                               );
                             })
@@ -583,7 +575,7 @@ export default function UserProfile() {
                       Average weekly working hours
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.weekly_working_hours ?? "-"}
+                      {userData?.weekly_working_hours || "-"}
                     </dd>
                   </div>
                 </dl>
@@ -649,7 +641,7 @@ export default function UserProfile() {
                           required
                           type="email"
                         />
-                        {details.user_type === "Doctor" && (
+                        {states.form.user_type === "Doctor" && (
                           <>
                             <TextFormField
                               {...fieldProps("doctor_qualification")}

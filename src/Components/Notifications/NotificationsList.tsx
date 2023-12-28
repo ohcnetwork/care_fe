@@ -62,6 +62,8 @@ const NotificationTile = ({
         return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/daily-rounds/${data.daily_round}`;
       case "INVESTIGATION_SESSION_CREATED":
         return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/investigation/${data.session}`;
+      case "PATIENT_NOTE_ADDED":
+        return `/facility/${data.facility}/patient/${data.patient}/notes`;
       case "MESSAGE":
         return "/notice_board/";
       default:
@@ -356,6 +358,7 @@ export default function NotificationsList({
     manageResults = (
       <>
         {data
+          .filter((notification: any) => notification.event != "PUSH_MESSAGE")
           .filter((notification: any) =>
             showUnread ? notification.read_at === null : true
           )

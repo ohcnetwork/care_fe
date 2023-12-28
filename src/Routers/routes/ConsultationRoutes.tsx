@@ -8,6 +8,7 @@ import { FileUpload } from "../../Components/Patient/FileUpload";
 import { make as CriticalCareRecording } from "../../Components/CriticalCareRecording/CriticalCareRecording.bs";
 import { ConsultationDetails } from "../../Components/Facility/ConsultationDetails";
 import TreatmentSummary from "../../Components/Facility/TreatmentSummary";
+import ConsultationDoctorNotes from "../../Components/Facility/ConsultationDoctorNotes";
 
 export default {
   "/facility/:facilityId/patient/:patientId/consultation": ({
@@ -120,6 +121,9 @@ export default {
       tab={"updates"}
     />
   ),
+  "/consultation/:consultationId": ({ consultationId }: any) => (
+    <ConsultationDetails consultationId={consultationId} tab={"updates"} />
+  ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/treatment-summary":
     ({ facilityId, patientId, consultationId }: any) => (
       <TreatmentSummary
@@ -127,6 +131,14 @@ export default {
         consultationId={consultationId}
         patientId={patientId}
         dailyRoundsListData={[]}
+      />
+    ),
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/notes":
+    ({ facilityId, patientId, consultationId }: any) => (
+      <ConsultationDoctorNotes
+        facilityId={facilityId}
+        patientId={patientId}
+        consultationId={consultationId}
       />
     ),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/:tab":
