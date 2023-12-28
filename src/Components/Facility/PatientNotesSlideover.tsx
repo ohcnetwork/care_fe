@@ -2,7 +2,7 @@ import { useState, useEffect, Dispatch, SetStateAction } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { classNames } from "../../Utils/utils";
+import { classNames, isAppleDevice } from "../../Utils/utils";
 import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { make as Link } from "../Common/components/Link.bs";
@@ -11,6 +11,7 @@ import PatientConsultationNotesList from "./PatientConsultationNotesList";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { PatientNoteStateType } from "./models";
+import useKeyboardShortcut from "use-keyboard-shortcut";
 
 interface PatientNotesProps {
   patientId: string;
@@ -23,6 +24,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   const [show, setShow] = useState(true);
   const [patientActive, setPatientActive] = useState(true);
   const [reload, setReload] = useState(false);
+  const [focused, setFocused] = useState(false);
 
   const initialData: PatientNoteStateType = {
     notes: [],
@@ -87,6 +89,18 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
     }
     fetchPatientName();
   }, [patientId]);
+
+  useKeyboardShortcut(
+    [isAppleDevice ? "Meta" : "Shift", "Enter"],
+    () => {
+      if (focused) {
+        onAddNote();
+      }
+    },
+    {
+      ignoreInputFields: false,
+    }
+  );
 
   const notesActionIcons = (
     <div className="flex gap-1">
@@ -165,6 +179,8 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
               errorClassName="hidden"
               placeholder="Type your Note"
               disabled={!patientActive}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
             />
             <ButtonV2
               id="add_doctor_note_button"
