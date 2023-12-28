@@ -103,6 +103,7 @@ export class ManageUserPage {
   }
 
   clickFacilityPatients() {
+    cy.get("#facility-patients").should("be.visible");
     cy.get("#facility-patients").click();
   }
 

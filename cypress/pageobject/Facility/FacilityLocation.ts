@@ -32,6 +32,10 @@ class FacilityLocation {
     cy.get("#location-type").contains(type);
   }
 
+  verifyNotification(message: string) {
+    cy.get(".pnotify-container").should("contain", message).and("be.visible");
+  }
+
   verifyLocationDescription(description: string) {
     cy.get("#view-location-description").contains(description);
   }
@@ -49,7 +53,7 @@ class FacilityLocation {
   }
 
   enterBedName(name: string) {
-    cy.get("#bed-name").clear().click().type(name);
+    cy.get("#bed-name").click().clear().click().type(name);
   }
 
   enterBedDescription(description: string) {

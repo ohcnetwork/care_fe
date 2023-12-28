@@ -98,6 +98,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       {facility.name}
                     </Link>
                     <ButtonV2
+                      id="view-cns-button"
                       href={`/facility/${facility.id}/cns`}
                       border
                       ghost
@@ -160,6 +161,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                 <div className="flex w-full flex-wrap justify-between gap-2 py-2">
                   <div className="flex flex-wrap gap-2">
                     <div
+                      id="occupany-badge"
                       className={`tooltip button-size-default ml-auto flex w-fit items-center justify-center rounded-md px-2 ${
                         facility.patient_count / facility.bed_count > 0.85
                           ? "button-danger-border bg-red-500"
