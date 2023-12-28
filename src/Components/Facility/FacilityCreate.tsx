@@ -252,8 +252,8 @@ export const FacilityCreate = (props: FacilityProps) => {
                 ? "+91" + data.phone_number
                 : data.phone_number
               : "",
-            latitude: data ? String(data.latitude) : "",
-            longitude: data ? String(data.longitude) : "",
+            latitude: data.latitude ? String(data.latitude) : "",
+            longitude: data.longitude ? String(data.longitude) : "",
             type_b_cylinders: data.type_b_cylinders,
             type_c_cylinders: data.type_c_cylinders,
             type_d_cylinders: data.type_d_cylinders,
