@@ -64,6 +64,7 @@ export const BedSelect = (props: BedSelectProps) => {
 
   return (
     <AutoCompleteAsync
+      id={"bed"}
       name={name}
       multiple={multiple}
       selected={selected}

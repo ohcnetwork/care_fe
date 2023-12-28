@@ -17,9 +17,8 @@ describe("Camera Boundary", () => {
     cy.get("input[name='bed']").type("Dummy Bed 4");
     cy.get("li[role='option']").contains("Dummy Bed 4").click();
     cy.wait(2000);
-    cy.intercept("**/api/v1/assetbed/**").as("addBoundary");
     cy.get("button[id='add-boundary-preset']").click();
-    cy.wait("@addBoundary");
+    cy.get("label[id='boundary-preset-name']").should("exist");
   });
 
   it("Update boundary", () => {
@@ -66,5 +65,9 @@ describe("Camera Boundary", () => {
     cy.get("button[id='delete-boundary-preset']").click();
     cy.get("button").contains("Delete").click();
     cy.wait("@deleteBoundary");
+  });
+
+  afterEach(() => {
+    cy.saveLocalStorage();
   });
 });

@@ -224,7 +224,7 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
 
       if (bed?.id) {
         const presetData = await axios.get(
-          `https://${facilityMiddlewareHostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
+          `https://${resolvedMiddleware?.hostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
         );
         const range = calcBoundary(presets);
         const meta = {
@@ -255,6 +255,7 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
         });
       }
     } catch (e) {
+      console.log(e);
       Notification.Error({
         msg: "Something went wrong..!",
       });
@@ -437,7 +438,7 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
         <>
           <Card className="mt-4" title="Live Feed">
             <LiveFeed
-              middlewareHostname={facilityMiddlewareHostname}
+              middlewareHostname={resolvedMiddleware}
               asset={getCameraConfig(asset)}
               addPreset={addPreset}
               setBed={setBed}
