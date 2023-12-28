@@ -96,6 +96,7 @@ export default function PatientFilter(props: any) {
     last_vaccinated_date_after: filter.last_vaccinated_date_after || null,
     last_consultation_is_telemedicine:
       filter.last_consultation_is_telemedicine || null,
+    consultation_filed: filter.consultation_filed || null,
     is_antenatal: filter.is_antenatal || null,
     ventilator_interface: filter.ventilator_interface || null,
   });
@@ -131,6 +132,7 @@ export default function PatientFilter(props: any) {
     last_consultation_discharge_date_after: "",
     last_consultation_admitted_to_list: [],
     last_consultation_current_bed__location: "",
+    consultation_filed: null,
     srf_id: "",
     number_of_doses: null,
     covin_id: "",
@@ -253,6 +255,7 @@ export default function PatientFilter(props: any) {
       last_vaccinated_date_before,
       last_vaccinated_date_after,
       last_consultation_is_telemedicine,
+      consultation_filed,
       is_antenatal,
       ventilator_interface,
     } = filterState;
@@ -315,6 +318,7 @@ export default function PatientFilter(props: any) {
       last_vaccinated_date_after: dateQueryString(last_vaccinated_date_after),
       last_consultation_is_telemedicine:
         last_consultation_is_telemedicine || "",
+      consultation_filed: consultation_filed || "",
       is_antenatal: is_antenatal || "",
       ventilator_interface: ventilator_interface || "",
     };
@@ -497,6 +501,23 @@ export default function PatientFilter(props: any) {
                 setFilterState({
                   ...filterState,
                   last_consultation_medico_legal_case: v,
+                })
+              }
+            />
+          </div>
+          <div className="w-full flex-none">
+            <FieldLabel className="text-sm">Consultation Status</FieldLabel>
+            <SelectMenuV2
+              placeholder="Show all"
+              options={["true", "false"]}
+              optionLabel={(o) =>
+                o === "true" ? "Consultation Filed" : "No Consultation Filed"
+              }
+              value={filterState.consultation_filed}
+              onChange={(v) =>
+                setFilterState({
+                  ...filterState,
+                  consultation_filed: v,
                 })
               }
             />

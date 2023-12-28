@@ -110,6 +110,7 @@ export const PatientManager = () => {
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
   const [facilityBadgeName, setFacilityBadge] = useState("");
+  const [consultationFiledBadgeName, setConsultationFiledBadge] = useState("");
   const [locationBadgeName, setLocationBadge] = useState("");
   const [phone_number, setPhoneNumber] = useState("");
   const [phoneNumberError, setPhoneNumberError] = useState("");
@@ -194,6 +195,7 @@ export const PatientManager = () => {
     date_of_result_after: qParams.date_of_result_after || undefined,
     last_consultation_medico_legal_case:
       qParams.last_consultation_medico_legal_case || undefined,
+    consultation_filed: qParams.consultation_filed || undefined,
     last_consultation_encounter_date_before:
       qParams.last_consultation_encounter_date_before || undefined,
     last_consultation_encounter_date_after:
@@ -386,9 +388,20 @@ export const PatientManager = () => {
     qParams.last_vaccinated_date_before,
     qParams.last_vaccinated_date_after,
     qParams.last_consultation_is_telemedicine,
+    qParams.consultation_filed,
     qParams.is_antenatal,
     qParams.ventilator_interface,
   ]);
+
+  useEffect(() => {
+    if (qParams.consultation_filed != null) {
+      setConsultationFiledBadge(
+        qParams.consultation_filed === "true" ? "Filed" : "Not Filed"
+      );
+    } else {
+      setConsultationFiledBadge("");
+    }
+  }, [qParams.consultation_filed]);
 
   const getTheCategoryFromId = () => {
     let category_name;
@@ -977,6 +990,11 @@ export const PatientManager = () => {
             badge(
               "Is Medico-Legal Case",
               "last_consultation_medico_legal_case"
+            ),
+            value(
+              "Consultation Status",
+              "consultation_filed",
+              consultationFiledBadgeName
             ),
             value("Facility", "facility", facilityBadgeName),
             value(
