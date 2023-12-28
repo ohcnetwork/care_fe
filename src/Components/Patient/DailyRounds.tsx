@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import { lazy, useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
+  CONSCIOUSNESS_LEVEL,
   PATIENT_CATEGORIES,
   REVIEW_AT_CHOICES,
   RHYTHM_CHOICES,
@@ -35,6 +36,7 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import PatientCategorySelect from "./PatientCategorySelect";
+import RadioFormField from "../Form/FormFields/RadioFormField";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm: any = {
@@ -59,6 +61,7 @@ const initForm: any = {
   rhythm: "0",
   rhythm_detail: "",
   ventilator_spo2: null,
+  consciousness_level: "Unknown",
   // bed: null,
 };
 
@@ -129,6 +132,7 @@ export const DailyRounds = (props: any) => {
     "ventilator_spo2",
     "rhythm",
     "rhythm_detail",
+    "consciousness_level",
   ];
 
   useEffect(() => {
@@ -312,6 +316,7 @@ export const DailyRounds = (props: any) => {
             rhythm: Number(state.form.rhythm) || 0,
             rhythm_detail: state.form.rhythm_detail,
             ventilator_spo2: state.form.ventilator_spo2,
+            consciousness_level: state.form.consciousness_level,
           };
         }
       } else {
@@ -637,9 +642,21 @@ export const DailyRounds = (props: any) => {
 
                 <TextAreaFormField
                   {...field("rhythm_detail")}
-                  className="md:col-span-2"
+                  className="md:col-span-1"
                   label="Rhythm Description"
-                  rows={5}
+                  rows={7}
+                />
+
+                <RadioFormField
+                  label="Level Of Consciousness"
+                  {...field("consciousness_level")}
+                  options={CONSCIOUSNESS_LEVEL.map((level) => ({
+                    label: level.text,
+                    value: level.id,
+                  }))}
+                  optionDisplay={(option) => option.label}
+                  optionValue={(option) => option.value}
+                  containerClassName="grid gap-1 grid-cols-1"
                 />
               </>
             )}

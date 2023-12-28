@@ -123,7 +123,6 @@ const CoverImageEditModal = ({
       );
       if (response.status === 200) {
         Success({ msg: "Cover image updated." });
-        window.location.reload();
       } else {
         Notification.Error({
           msg: "Something went wrong!",
@@ -148,7 +147,6 @@ const CoverImageEditModal = ({
     const res = await dispatch(deleteFacilityCoverImage(facility.id as any));
     if (res.statusCode === 204) {
       Success({ msg: "Cover image deleted" });
-      window.location.reload();
     }
 
     onDelete && onDelete();

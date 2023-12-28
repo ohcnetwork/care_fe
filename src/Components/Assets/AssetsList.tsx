@@ -69,7 +69,7 @@ const AssetsList = () => {
       qParams.warranty_amc_end_of_validity_after || "",
   };
 
-  const { loading } = useQuery(routes.listAssets, {
+  const { refetch: assetsFetch, loading } = useQuery(routes.listAssets, {
     query: params,
     onResponse: ({ res, data }) => {
       if (res?.status === 200 && data) {
@@ -436,6 +436,7 @@ const AssetsList = () => {
               return f;
             });
           }}
+          onUpdate={assetsFetch}
           facility={facility}
         />
       )}
