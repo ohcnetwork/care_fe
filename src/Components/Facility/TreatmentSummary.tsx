@@ -122,7 +122,7 @@ const TreatmentSummary = (props: any) => {
             <div className="text-right font-bold">{formatDate(date)}</div>
 
             <div className="mb-5 mt-2 border border-gray-800">
-              <div className="grid border-b-2 border-gray-800 print:grid-cols-2 sm:grid-cols-2 md:grid-cols-2">
+              <div className="grid border-b-2 border-gray-800 print:grid-cols-3 sm:grid-cols-2 print:md:grid-cols-3">
                 <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0 print:border-r-2 sm:border-b-0 sm:border-r-2">
                   <b>Name :</b> {patientData.name}
                 </div>
@@ -131,8 +131,8 @@ const TreatmentSummary = (props: any) => {
                 </div>
               </div>
 
-              <div className="grid border-b-2 border-gray-800 print:grid-cols-2 sm:grid-cols-2 md:grid-cols-2">
-                <div className="col-span-1 grid print:grid-cols-2 sm:grid-cols-2 md:grid-cols-2">
+              <div className="grid border-b-2 border-gray-800 print:grid-cols-3 sm:grid-cols-2 print:md:grid-cols-3">
+                <div className="col-span-1 grid print:grid-cols-2 sm:grid-cols-2 ">
                   <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0 print:border-r-2 sm:border-b-0 sm:border-r-2">
                     <b>Age :</b>{" "}
                     {formatAge(
@@ -156,7 +156,7 @@ const TreatmentSummary = (props: any) => {
                 </div>
               </div>
 
-              <div className="grid border-b-2 border-gray-800 print:grid-cols-2 sm:grid-cols-2 md:grid-cols-2">
+              <div className="grid border-b-2 border-gray-800 print:grid-cols-3 sm:grid-cols-2 print:md:grid-cols-3">
                 <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0 print:border-r-2 sm:border-b-0 sm:border-r-2">
                   <b>Gender : </b>
                   {GENDER_TYPES.find((i) => i.id === patientData.gender)?.text}
