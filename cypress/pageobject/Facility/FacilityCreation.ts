@@ -418,6 +418,7 @@ class FacilityPage {
   selectStateOnPincode(stateName) {
     this.getStateElement()
       .scrollIntoView()
+      .wait(2000)
       .should("be.visible")
       .then(($element) => {
         const text = $element.text();
@@ -431,6 +432,7 @@ class FacilityPage {
   selectDistrictOnPincode(districtName) {
     this.getDistrictElement()
       .scrollIntoView()
+      .wait(2000)
       .should("be.visible")
       .then(($element) => {
         const text = $element.text();
