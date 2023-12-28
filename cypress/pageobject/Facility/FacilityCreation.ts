@@ -299,6 +299,7 @@ class FacilityPage {
     cy.intercept("https://maps.googleapis.com/maps/api/mapsjs/*").as("mapApi");
     cy.wait("@mapApi").its("response.statusCode").should("eq", 200);
     cy.get("input#pac-input").type(location).type("{enter}");
+    cy.wait(2000);
     cy.get("div#map-close").click();
   }
 
@@ -418,6 +419,7 @@ class FacilityPage {
   selectStateOnPincode(stateName) {
     this.getStateElement()
       .scrollIntoView()
+      .wait(2000)
       .should("be.visible")
       .then(($element) => {
         const text = $element.text();
@@ -431,6 +433,7 @@ class FacilityPage {
   selectDistrictOnPincode(districtName) {
     this.getDistrictElement()
       .scrollIntoView()
+      .wait(2000)
       .should("be.visible")
       .then(($element) => {
         const text = $element.text();
