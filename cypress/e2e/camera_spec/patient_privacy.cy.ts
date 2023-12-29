@@ -10,10 +10,16 @@ describe("Patient Privacy", () => {
     cy.restoreLocalStorage();
     cy.awaitUrl("/patients");
     cy.intercept("**/api/v1/consultation/**").as("consultation");
-    cy.get("input[id='name']").type("Dummy Patient");
-    cy.contains("a", "Dummy Patient").contains("a", "Dummy Facility 1").click();
+    cy.get("input[id='name']").type("Dummy Patient 16");
+    cy.contains("a", "Dummy Patient 16").click();
     cy.wait("@consultation");
-    cy.get("a").contains("Camera Feed").click();
+    cy.get("button").contains("Assign Bed").click();
+    cy.get("input[name='bed']").type("Dummy Bed 6");
+    cy.get("li[role='option']").contains("Dummy Bed 6").click();
+    cy.wait(2000);
+    cy.get("button").contains("Move to bed").click();
+    cy.wait(2000);
+    cy.url().then((urlValue) => cy.awaitUrl(urlValue + "/feed"));
     cy.wait("@consultation");
   });
 
