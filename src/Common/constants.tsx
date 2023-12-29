@@ -307,7 +307,7 @@ export const CONSCIOUSNESS_LEVEL = [
   { id: "ALERT", text: "Alert" },
   { id: "AGITATED_OR_CONFUSED", text: "Agitated or Confused" },
   {
-    id: "Onset of Agitation and Confusion",
+    id: "ONSET_OF_AGITATION_AND_CONFUSION",
     text: "Onset of Agitation and Confusion",
   },
   { id: "UNKNOWN", text: "Unknown" },
