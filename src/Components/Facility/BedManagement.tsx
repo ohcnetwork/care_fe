@@ -182,24 +182,22 @@ export const BedManagement = (props: BedManagementProps) => {
     ));
   } else if (data?.results.length === 0) {
     BedList = (
-      <p className="flex w-full justify-center border-b border-gray-200 bg-white p-5 text-center text-2xl font-bold text-gray-500">
+      <p className="flex w-full justify-center bg-white p-5 text-center text-2xl font-bold text-gray-500">
         No beds available in this location
       </p>
     );
   }
 
-  if (data?.results.length) {
-    bed = (
-      <>
-        <div className="mt-5 flex grow flex-wrap bg-white p-4">{BedList}</div>
-        {data.count && (
-          <div className="mt-4 flex w-full justify-center">
-            <Pagination totalCount={data.count} />
-          </div>
-        )}
-      </>
-    );
-  }
+  bed = (
+    <>
+      <div className="mt-5 flex grow flex-wrap bg-white p-4">{BedList}</div>
+      {Boolean(data?.count && data.count > 0) && (
+        <div className="mt-4 flex w-full justify-center">
+          <Pagination totalCount={data?.count ?? 0} />
+        </div>
+      )}
+    </>
+  );
 
   if (loading) {
     return <Loading />;
