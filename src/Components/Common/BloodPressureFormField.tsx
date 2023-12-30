@@ -21,7 +21,7 @@ export default function BloodPressureFormField(props: Props) {
       name: field.name,
       value: {
         ...field.value,
-        [event.name]: event.value,
+        [event.name]: event.value ?? -1,
       },
     });
   };
@@ -35,9 +35,10 @@ export default function BloodPressureFormField(props: Props) {
     <FormField
       field={{
         ...field,
-        labelSuffix: map ? (
-          <span className="font-medium">MAP: {map.toFixed(1)}</span>
-        ) : undefined,
+        labelSuffix:
+          map && map !== -1 ? (
+            <span className="font-medium">MAP: {map.toFixed(1)}</span>
+          ) : undefined,
       }}
     >
       <div className="flex flex-row items-center">
