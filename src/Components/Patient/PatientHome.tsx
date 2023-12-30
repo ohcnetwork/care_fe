@@ -572,7 +572,7 @@ export const PatientHome = (props: any) => {
                     Date of Birth
                   </div>
                   <div className="mt-1 text-sm font-medium leading-5">
-                    {formatDateOfBirth(patientData?.date_of_birth)}
+                    {formatDate(patientData?.date_of_birth)}
                   </div>
                 </div>
                 <div className="sm:col-span-1">
