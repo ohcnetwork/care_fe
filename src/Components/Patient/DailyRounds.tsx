@@ -309,7 +309,11 @@ export const DailyRounds = (props: any) => {
                       meanArterialPressure(state.form.bp).toFixed(2)
                     ),
                   }
-                : undefined,
+                : {
+                    systolic: -1,
+                    diastolic: -1,
+                    mean: -1,
+                  },
             pulse: state.form.pulse,
             resp: state.form.resp,
             temperature: state.form.temperature,
