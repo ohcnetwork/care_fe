@@ -249,7 +249,10 @@ export const DailyRounds = (props: any) => {
           return;
         case "bp":
           if (
-            (state.form.bp.systolic !== -1 && state.form.bp.diastolic === -1) ||
+            (state.form.bp?.systolic &&
+              state.form.bp?.diastolic &&
+              state.form.bp.systolic !== -1 &&
+              state.form.bp.diastolic === -1) ||
             (state.form.bp.systolic === -1 && state.form.bp.diastolic !== -1)
           ) {
             errors.bp = "Please enter both systolic and diastolic values";
@@ -303,20 +306,27 @@ export const DailyRounds = (props: any) => {
             bp:
               state.form.bp?.systolic !== -1 && state.form.bp?.diastolic !== -1
                 ? {
-                    systolic: Number(state.form.bp.systolic),
-                    diastolic: Number(state.form.bp.diastolic),
-                    mean: parseFloat(
-                      meanArterialPressure(state.form.bp).toFixed(2)
-                    ),
+                    systolic: state.form.bp?.systolic
+                      ? Number(state.form.bp?.systolic)
+                      : -1,
+                    diastolic: state.form.bp?.diastolic
+                      ? Number(state.form.bp?.diastolic)
+                      : -1,
+                    mean:
+                      state.form.bp?.systolic && state.form.bp?.diastolic
+                        ? parseFloat(
+                            meanArterialPressure(state.form.bp).toFixed(2)
+                          )
+                        : -1,
                   }
                 : {
                     systolic: -1,
                     diastolic: -1,
                     mean: -1,
                   },
-            pulse: state.form.pulse,
-            resp: state.form.resp,
-            temperature: state.form.temperature,
+            pulse: state.form.pulse ?? null,
+            resp: state.form.resp ?? null,
+            temperature: state.form.temperature ?? null,
             rhythm: state.form.rhythm || 0,
             rhythm_detail: state.form.rhythm_detail,
             ventilator_spo2: state.form.ventilator_spo2 ?? null,
