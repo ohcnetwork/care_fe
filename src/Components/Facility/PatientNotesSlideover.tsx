@@ -36,7 +36,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   const { facilityId, patientId, consultationId, setShowPatientNotesPopup } =
     props;
 
-  const localStorageKey = `patientNotesNoteField_${patientId}`;
+  const localStorageKey = `patientNotesNoteField_${consultationId}`;
   const [noteField, setNoteField] = useState(
     localStorage.getItem(localStorageKey) || ""
   );
