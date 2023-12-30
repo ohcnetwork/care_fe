@@ -138,31 +138,34 @@ export const DailyRounds = (props: any) => {
   const fetchRoundDetails = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatchAction(
-        getConsultationDailyRoundsDetails({ consultationId, id })
-      );
+      let formData: any = initialData;
+      if (id) {
+        const res = await dispatchAction(
+          getConsultationDailyRoundsDetails({ consultationId, id })
+        );
 
-      let formData: any = {};
-
-      if (!status.aborted) {
-        if (res?.data) {
-          const data = {
-            ...res.data,
-            patient_category: res.data.patient_category
-              ? PATIENT_CATEGORIES.find(
-                  (i) => i.text === res.data.patient_category
-                )?.id ?? ""
-              : "",
-            rhythm:
-              (res.data.rhythm &&
-                RHYTHM_CHOICES.find((i) => i.text === res.data.rhythm)?.id) ||
-              "0",
-            admitted_to: res.data.admitted_to ? res.data.admitted_to : "Select",
-          };
-          formData = { ...formData, ...data };
+        if (!status.aborted) {
+          if (res?.data) {
+            const data = {
+              ...res.data,
+              patient_category: res.data.patient_category
+                ? PATIENT_CATEGORIES.find(
+                    (i) => i.text === res.data.patient_category
+                  )?.id ?? ""
+                : "",
+              rhythm:
+                (res.data.rhythm &&
+                  RHYTHM_CHOICES.find((i) => i.text === res.data.rhythm)?.id) ||
+                "0",
+              admitted_to: res.data.admitted_to
+                ? res.data.admitted_to
+                : "Select",
+            };
+            formData = { ...formData, ...data };
+          }
         }
-        setIsLoading(false);
       }
+      setIsLoading(false);
       if (patientId) {
         const res = await dispatchAction(getPatient({ id: patientId }));
         if (res.data) {
@@ -214,9 +217,7 @@ export const DailyRounds = (props: any) => {
   );
   useAbortableEffect(
     (status: statusType) => {
-      if (id) {
-        fetchRoundDetails(status);
-      }
+      fetchRoundDetails(status);
     },
     [dispatchAction, fetchRoundDetails]
   );
