@@ -62,6 +62,11 @@ const initForm: any = {
   rhythm_detail: "",
   ventilator_spo2: null,
   consciousness_level: "UNKNOWN",
+  bp: {
+    systolic: -1,
+    diastolic: -1,
+    mean: -1,
+  },
   // bed: null,
 };
 
@@ -242,6 +247,18 @@ export const DailyRounds = (props: any) => {
             invalidForm = true;
           }
           return;
+        case "bp":
+          if (
+            (state.form.bp?.systolic &&
+              state.form.bp?.diastolic &&
+              state.form.bp.systolic !== -1 &&
+              state.form.bp.diastolic === -1) ||
+            (state.form.bp.systolic === -1 && state.form.bp.diastolic !== -1)
+          ) {
+            errors.bp = "Please enter both systolic and diastolic values";
+            invalidForm = true;
+          }
+          return;
         default:
           return;
       }
@@ -287,21 +304,32 @@ export const DailyRounds = (props: any) => {
           data = {
             ...data,
             bp:
-              state.form.bp && state.form.bp.systolic && state.form.bp.diastolic
+              state.form.bp?.systolic !== -1 && state.form.bp?.diastolic !== -1
                 ? {
-                    systolic: Number(state.form.bp.systolic),
-                    diastolic: Number(state.form.bp.diastolic),
-                    mean: parseFloat(
-                      meanArterialPressure(state.form.bp).toFixed(2)
-                    ),
+                    systolic: state.form.bp?.systolic
+                      ? Number(state.form.bp?.systolic)
+                      : -1,
+                    diastolic: state.form.bp?.diastolic
+                      ? Number(state.form.bp?.diastolic)
+                      : -1,
+                    mean:
+                      state.form.bp?.systolic && state.form.bp?.diastolic
+                        ? parseFloat(
+                            meanArterialPressure(state.form.bp).toFixed(2)
+                          )
+                        : -1,
                   }
-                : undefined,
-            pulse: state.form.pulse,
-            resp: state.form.resp,
-            temperature: state.form.temperature,
+                : {
+                    systolic: -1,
+                    diastolic: -1,
+                    mean: -1,
+                  },
+            pulse: state.form.pulse ?? null,
+            resp: state.form.resp ?? null,
+            temperature: state.form.temperature ?? null,
             rhythm: state.form.rhythm || 0,
             rhythm_detail: state.form.rhythm_detail,
-            ventilator_spo2: state.form.ventilator_spo2,
+            ventilator_spo2: state.form.ventilator_spo2 ?? null,
             consciousness_level: state.form.consciousness_level,
           };
         }
