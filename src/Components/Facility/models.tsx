@@ -109,12 +109,12 @@ export interface ConsultationModel {
   discharge_notes?: string;
   examination_details?: string;
   history_of_present_illness?: string;
-  facility?: number;
+  facility: string;
   facility_name?: string;
   id: string;
   modified_date?: string;
   other_symptoms?: string;
-  patient?: string;
+  patient: string;
   treatment_plan?: string;
   referred_to?: FacilityModel["id"];
   referred_to_object?: FacilityModel;
