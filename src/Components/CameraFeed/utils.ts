@@ -17,9 +17,9 @@ export const calculateVideoDelay = (
   return playedDuration - video.currentTime;
 };
 
-export const getStreamUrl = (asset: AssetData, fallbackMiddleware?: string) => {
+export const getStreamUrl = (asset: AssetData) => {
   const config = getCameraConfig(asset);
-  const host = config.middleware_hostname || fallbackMiddleware;
+  const host = asset.resolved_middleware?.hostname;
   const uuid = config.accessKey;
 
   return isIOS
