@@ -363,7 +363,7 @@ export default function ShiftingBoard({
         "mr-2 h-full w-full flex-shrink-0 rounded-md bg-gray-200 pb-4 md:w-1/2 lg:w-1/3 xl:w-1/4",
         isOver && "cursor-move"
       )}
-      style={{ minHeight: `${containerHeight}px` }}
+      style={{ minHeight: `${containerHeight + 100}px` }}
     >
       <div className="sticky top-0 z-10 rounded bg-gray-200 pt-2">
         <div className="mx-2 flex items-center justify-between rounded bg-white p-4 shadow">
