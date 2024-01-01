@@ -14,7 +14,7 @@ import { formatFilter } from "./Commons";
 import { navigate } from "raviger";
 import useConfig from "../../Common/hooks/useConfig";
 import useFilters from "../../Common/hooks/useFilters";
-import { lazy, useState } from "react";
+import { lazy, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import withScrolling from "react-dnd-scrolling";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -56,9 +56,32 @@ export default function BoardView() {
   const [boardFilter, setBoardFilter] = useState(activeBoards);
   const [isLoading] = useState(false);
   const { t } = useTranslation();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerHeight, setContainerHeight] = useState<number>(0);
+
+  const handleScroll = (direction: "right" | "left") => {
+    const container = containerRef.current;
+
+    if (container) {
+      const scrollAmount = 360;
+      const currentScrollLeft = container.scrollLeft;
+
+      if (direction === "left") {
+        container.scrollTo({
+          left: currentScrollLeft - scrollAmount,
+          behavior: "smooth",
+        });
+      } else if (direction === "right") {
+        container.scrollTo({
+          left: currentScrollLeft + scrollAmount,
+          behavior: "smooth",
+        });
+      }
+    }
+  };
 
   return (
-    <div className="flex h-screen flex-col px-2 pb-2">
+    <div className="max-h[95vh] flex min-h-full max-w-[100vw] flex-col px-2 pb-2">
       <div className="flex w-full flex-col items-center justify-between lg:flex-row">
         <div className="w-1/3 lg:w-1/4">
           <PageTitle
@@ -107,20 +130,47 @@ export default function BoardView() {
         </div>
       </div>
       <BadgesList {...{ qParams, FilterBadges }} />
-      <ScrollingComponent className="mt-4 flex flex-1 items-start overflow-x-scroll px-4 pb-2">
-        <div className="mt-4 flex flex-1 items-start overflow-x-scroll px-2 pb-2">
+      <ScrollingComponent className="relative mt-4 flex max-h-[80vh] max-w-[100vw] flex-1 items-start px-4 pb-2">
+        <div className="mt-4 flex min-h-full w-full flex-1 items-start px-2 pb-2">
           {isLoading ? (
             <Loading />
           ) : (
-            boardFilter.map((board) => (
-              <ShiftingBoard
-                key={board.text}
-                filterProp={qParams}
-                board={board.text}
-                title={board.label}
-                formatFilter={formatFilter}
-              />
-            ))
+            <>
+              <div className="relative z-20 self-center">
+                <CareIcon
+                  icon="l-arrow-left"
+                  className={
+                    "absolute inset-y-0 left-0 z-10 h-10 w-10 cursor-pointer"
+                  }
+                  onClick={() => handleScroll("left")}
+                />
+              </div>
+              <div
+                className="flex max-h-[75vh] w-full grow flex-row overflow-y-auto overflow-x-hidden"
+                ref={containerRef}
+              >
+                {boardFilter.map((board) => (
+                  <ShiftingBoard
+                    key={board.text}
+                    filterProp={qParams}
+                    board={board.text}
+                    title={board.label}
+                    formatFilter={formatFilter}
+                    setContainerHeight={setContainerHeight}
+                    containerHeight={containerHeight}
+                  />
+                ))}
+              </div>
+              <div className="relative -left-12 z-20 self-center">
+                <CareIcon
+                  icon="l-arrow-right"
+                  className={
+                    "absolute inset-y-0 left-0 z-10 h-10 w-10 cursor-pointer"
+                  }
+                  onClick={() => handleScroll("right")}
+                />
+              </div>
+            </>
           )}
         </div>
       </ScrollingComponent>
