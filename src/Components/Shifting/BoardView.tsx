@@ -80,6 +80,22 @@ export default function BoardView() {
     }
   };
 
+  const renderArrowIcons = (direction: "right" | "left") => {
+    return (
+      <div
+        className={`relative z-20 self-center ${
+          direction === "right" ? "-left-12" : ""
+        }`}
+      >
+        <CareIcon
+          icon={`l-arrow-${direction}`}
+          className={"absolute inset-y-0 left-0 z-10 h-10 w-10 cursor-pointer"}
+          onClick={() => handleScroll(direction)}
+        />
+      </div>
+    );
+  };
+
   return (
     <div className="max-h[95vh] flex min-h-full max-w-[100vw] flex-col px-2 pb-2">
       <div className="flex w-full flex-col items-center justify-between lg:flex-row">
@@ -136,15 +152,7 @@ export default function BoardView() {
             <Loading />
           ) : (
             <>
-              <div className="relative z-20 self-center">
-                <CareIcon
-                  icon="l-arrow-left"
-                  className={
-                    "absolute inset-y-0 left-0 z-10 h-10 w-10 cursor-pointer"
-                  }
-                  onClick={() => handleScroll("left")}
-                />
-              </div>
+              {renderArrowIcons("left")}
               <div
                 className="flex max-h-[75vh] w-full grow flex-row overflow-y-auto overflow-x-hidden"
                 ref={containerRef}
@@ -161,15 +169,7 @@ export default function BoardView() {
                   />
                 ))}
               </div>
-              <div className="relative -left-12 z-20 self-center">
-                <CareIcon
-                  icon="l-arrow-right"
-                  className={
-                    "absolute inset-y-0 left-0 z-10 h-10 w-10 cursor-pointer"
-                  }
-                  onClick={() => handleScroll("right")}
-                />
-              </div>
+              {renderArrowIcons("right")}
             </>
           )}
         </div>
