@@ -1,6 +1,10 @@
 import { lazy, useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
-import { CURRENT_HEALTH_CHANGE, SYMPTOM_CHOICES } from "../../Common/constants";
+import {
+  CONSCIOUSNESS_LEVEL,
+  CURRENT_HEALTH_CHANGE,
+  SYMPTOM_CHOICES,
+} from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getConsultationDailyRoundsDetails } from "../../Redux/actions";
 import { DailyRoundsModel } from "./models";
@@ -154,14 +158,20 @@ export const DailyRoundListDetails = (props: any) => {
                 <span className="font-semibold leading-relaxed">
                   Systolic:{" "}
                 </span>
-                {dailyRoundListDetailsData.bp?.systolic ?? "-"}
+                {dailyRoundListDetailsData.bp?.systolic &&
+                dailyRoundListDetailsData.bp?.systolic !== -1
+                  ? dailyRoundListDetailsData.bp?.systolic
+                  : "-"}
               </div>
               <div className="flex">
                 {" "}
                 <span className="font-semibold leading-relaxed">
                   Diastolic:
                 </span>
-                {dailyRoundListDetailsData.bp?.diastolic ?? "-"}
+                {dailyRoundListDetailsData.bp?.diastolic &&
+                dailyRoundListDetailsData.bp?.diastolic !== -1
+                  ? dailyRoundListDetailsData.bp?.diastolic
+                  : "-"}
               </div>
             </div>
           </div>
@@ -182,6 +192,16 @@ export const DailyRoundListDetails = (props: any) => {
               Rhythm Description:{" "}
             </span>
             {dailyRoundListDetailsData.rhythm_detail ?? "-"}
+          </div>
+          <div className="md:col-span-2">
+            <span className="font-semibold leading-relaxed">
+              Level Of Consciousness:{" "}
+            </span>
+            {dailyRoundListDetailsData.consciousness_level
+              ? CONSCIOUSNESS_LEVEL.find(
+                  (i) => i.id === dailyRoundListDetailsData.consciousness_level
+                )?.text
+              : "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">

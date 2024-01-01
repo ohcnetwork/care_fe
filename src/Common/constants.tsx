@@ -300,6 +300,19 @@ export const DISCHARGE_REASONS = [
   { id: "LAMA", text: "LAMA" },
 ];
 
+export const CONSCIOUSNESS_LEVEL = [
+  { id: "UNRESPONSIVE", text: "Unresponsive" },
+  { id: "RESPONDS_TO_PAIN", text: "Responds to Pain" },
+  { id: "RESPONDS_TO_VOICE", text: "Responds to Voice" },
+  { id: "ALERT", text: "Alert" },
+  { id: "AGITATED_OR_CONFUSED", text: "Agitated or Confused" },
+  {
+    id: "ONSET_OF_AGITATION_AND_CONFUSION",
+    text: "Onset of Agitation and Confusion",
+  },
+  { id: "UNKNOWN", text: "Unknown" },
+];
+
 export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
   { id: 1, text: "CVP catheter " },
   { id: 2, text: "Arterial Line" },
