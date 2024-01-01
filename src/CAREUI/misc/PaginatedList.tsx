@@ -130,7 +130,7 @@ interface ItemsProps<TItem> {
 const Items = <TItem extends object>(props: ItemsProps<TItem>) => {
   const { loading, items } = useContextualized<TItem>();
 
-  if (loading) {
+  if (loading || items.length === 0) {
     return null;
   }
 
