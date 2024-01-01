@@ -354,7 +354,7 @@ export default function ShiftingBoard({
       const { height } = container.getBoundingClientRect();
       containerHeight < height && setContainerHeight(height);
     }
-  }, [containerHeight, data, setContainerHeight]);
+  }, [containerRef.current, data?.results.length]);
 
   return (
     <div
