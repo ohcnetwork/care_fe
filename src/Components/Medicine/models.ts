@@ -16,7 +16,16 @@ interface BasePrescription {
   medicine?: string;
   medicine_object?: MedibaseMedicine;
   medicine_old?: string;
-  route?: "ORAL" | "IV" | "IM" | "SC";
+  route?:
+    | "ORAL"
+    | "IV"
+    | "IM"
+    | "SC"
+    | "INHALATION"
+    | "NASOGASTRIC"
+    | "INTRATHECAL"
+    | "TRANSDERMAL"
+    | "RECTAL";
   dosage: DosageValue;
   notes?: string;
   meta?: object;

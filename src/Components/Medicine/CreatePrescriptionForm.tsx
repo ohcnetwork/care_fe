@@ -137,7 +137,17 @@ export default function CreatePrescriptionForm(props: {
   );
 }
 
-export const PRESCRIPTION_ROUTES = ["ORAL", "IV", "IM", "SC"];
+export const PRESCRIPTION_ROUTES = [
+  "ORAL",
+  "IV",
+  "IM",
+  "SC",
+  "INHALATION",
+  "NASOGASTRIC",
+  "INTRATHECAL",
+  "TRANSDERMAL",
+  "RECTAL",
+];
 export const PRESCRIPTION_FREQUENCIES = {
   STAT: {
     slots: 1,
