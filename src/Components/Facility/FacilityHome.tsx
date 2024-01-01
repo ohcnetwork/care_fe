@@ -1,6 +1,6 @@
 import * as Notification from "../../Utils/Notifications.js";
 
-import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import { FacilityModel } from "./models";
 import { FACILITY_FEATURE_TYPES, USER_TYPES } from "../../Common/constants";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
