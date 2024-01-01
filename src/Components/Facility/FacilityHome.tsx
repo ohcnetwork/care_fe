@@ -119,6 +119,7 @@ export const FacilityHome = (props: any) => {
       title={facilityData?.name || "Facility"}
       crumbsReplacements={{ [facilityId]: { name: facilityData?.name } }}
       focusOnLoad={true}
+      collapseSidebar
       backUrl="/facility"
     >
       <ConfirmDialog
@@ -215,8 +216,8 @@ export const FacilityHome = (props: any) => {
                 </div>
               </div>
               <div className="flex flex-1 items-center">
-                <div className="mb-6 grid  w-full grid-cols-1 gap-4 md:mb-0 lg:grid-cols-2">
-                  <div className="flex-col justify-between md:flex lg:flex-1 ">
+                <div className="mb-6 grid  w-full   gap-4 sm:grid-cols-2   md:mb-0  lg:grid-cols-2">
+                  <div className="grid flex-col justify-between md:flex lg:flex-1 ">
                     <div className="mb-10" id="address-details-view">
                       <h1 className="text-base font-semibold text-[#B9B9B9]">
                         Address
@@ -384,7 +385,7 @@ export const FacilityHome = (props: any) => {
                 </DropdownItem>
               </DropdownMenu>
             </div>
-            <div className="flex flex-col justify-end">
+            <div className="sm:grid sm:grid-cols-2 sm:gap-2 md:grid md:grid-cols-2 md:gap-2 lg:flex lg:flex-col lg:justify-end lg:gap-0 ">
               <ButtonV2
                 variant="primary"
                 ghost
