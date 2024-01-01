@@ -1262,3 +1262,8 @@ input[type="number"] {
     color: #2856ff;
     font-size: 1rem;
 }
+/* scroll bar for dateInputV2 styling */
+.thinScroll::-webkit-scrollbar{
+    width: 0px;
+}
+

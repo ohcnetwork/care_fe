@@ -12,6 +12,7 @@ type Props = FormFieldBaseProps<Date> & {
   position?: DatePickerPosition;
   disableFuture?: boolean;
   disablePast?: boolean;
+  isDateTime?: boolean;
 };
 
 /**
@@ -48,6 +49,7 @@ const DateFormField = (props: Props) => {
         min={props.min ?? (props.disablePast ? yesterday() : undefined)}
         position={props.position ?? "RIGHT"}
         placeholder={props.placeholder}
+        isDateTime={props.isDateTime}
       />
     </FormField>
   );
