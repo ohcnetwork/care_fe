@@ -41,11 +41,14 @@ import {
   IFacilityNotificationRequest,
   IFacilityNotificationResponse,
   IUserFacilityRequest,
+  LocalBodyModel,
   PatientStatsModel,
+  FacilityRequest,
+  StateModel,
   WardModel,
   LocationModel,
-  StateModel,
   PatientNotesModel,
+  BedModel,
 } from "../Components/Facility/models";
 import {
   IDeleteBedCapacity,
@@ -287,12 +290,14 @@ const routes = {
   createFacility: {
     path: "/api/v1/facility/",
     method: "POST",
+    TRes: Type<FacilityModel>(),
+    TBody: Type<FacilityRequest>(),
   },
 
   getPermittedFacility: {
     path: "/api/v1/facility/{id}/",
     method: "GET",
-    TRes: Type<FacilityModel>(),
+    TRes: Type<FacilityRequest>(),
   },
 
   getAnyFacility: {
@@ -302,8 +307,10 @@ const routes = {
   },
 
   updateFacility: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/{id}/",
     method: "PUT",
+    TRes: Type<FacilityModel>(),
+    TBody: Type<FacilityRequest>(),
   },
 
   partialUpdateFacility: {
@@ -394,6 +401,7 @@ const routes = {
   listFacilityBeds: {
     path: "/api/v1/bed/",
     method: "GET",
+    TRes: Type<PaginatedResponse<BedModel>>(),
   },
   createFacilityBed: {
     path: "/api/v1/bed/",
@@ -410,6 +418,7 @@ const routes = {
   deleteFacilityBed: {
     path: "/api/v1/bed/{external_id}/",
     method: "DELETE",
+    TRes: Type<Record<string, never>>(),
   },
 
   // Consultation beds
@@ -685,6 +694,7 @@ const routes = {
 
   getState: {
     path: "/api/v1/state/{id}/",
+    TRes: Type<StateModel>(),
   },
 
   // Districts
@@ -716,6 +726,7 @@ const routes = {
   // Local Body
   getLocalBody: {
     path: "/api/v1/local_body/{id}/",
+    TRes: Type<LocalBodyModel>(),
   },
   getAllLocalBody: {
     path: "/api/v1/local_body/",

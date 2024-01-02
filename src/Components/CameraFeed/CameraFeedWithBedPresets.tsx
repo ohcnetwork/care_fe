@@ -5,7 +5,6 @@ import AssetBedSelect from "./AssetBedSelect";
 
 interface Props {
   asset: AssetData;
-  fallbackMiddleware?: string;
 }
 
 export default function LocationFeedTile(props: Props) {
@@ -14,7 +13,6 @@ export default function LocationFeedTile(props: Props) {
   return (
     <CameraFeed
       asset={props.asset}
-      fallbackMiddleware={props.fallbackMiddleware as string}
       silent
       preset={preset?.meta.position}
       shortcutsDisabled
