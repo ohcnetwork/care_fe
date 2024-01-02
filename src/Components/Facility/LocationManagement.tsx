@@ -46,14 +46,14 @@ export default function LocationManagement({ facilityId }: Props) {
               Add New Location
             </ButtonV2>
           </div>
-          <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-gray-200 bg-white p-5 text-center text-2xl font-bold text-gray-500">
-            <span>No locations available</span>
-          </PaginatedList.WhenEmpty>
-
-          <PaginatedList.WhenLoading>
-            <Loading />
-          </PaginatedList.WhenLoading>
           <div className="w-full @container">
+            <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-gray-200 bg-white p-5 text-center text-2xl font-bold text-gray-500">
+              <span>No locations available</span>
+            </PaginatedList.WhenEmpty>
+
+            <PaginatedList.WhenLoading>
+              <Loading />
+            </PaginatedList.WhenLoading>
             <PaginatedList.Items<LocationModel> className="my-8 grid gap-3 @4xl:grid-cols-2 @6xl:grid-cols-3 @[100rem]:grid-cols-4 lg:mx-8">
               {(item) => <Location {...item} />}
             </PaginatedList.Items>
