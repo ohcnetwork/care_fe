@@ -79,24 +79,9 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
         <div className="text-md font-medium not-italic leading-[normal] text-[#453C52]">
           {label}
         </div>
-        {facilityId && (
-          <ButtonV2
-            variant="secondary"
-            ghost
-            onClick={() => {
-              setIsRefreshing(true);
-              handleUpdate();
-            }}
-            className="bg-opacity/10 flex aspect-square w-4 items-center justify-center rounded bg-primary-100 px-4 py-0 hover:bg-primary-200"
-          >
-            <CareIcon
-              icon="l-sync"
-              className={`h-5 w-5 text-primary-700 ${
-                isRefreshing ? "animate-reverse-spin" : ""
-              }`}
-            />
-          </ButtonV2>
-        )}
+        <span className="flex items-center justify-center rounded py-0 text-sm text-gray-500">
+          {usedPercent}%
+        </span>
       </header>
       <div className="mt-4 text-xl font-extrabold text-black">
         {used} / {total}
