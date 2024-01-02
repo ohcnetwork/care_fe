@@ -18,7 +18,6 @@ import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { navigate } from "raviger";
 import useConfig from "../../Common/hooks/useConfig";
 
 import useMergeState from "../../Common/hooks/useMergeState";
@@ -58,7 +57,7 @@ const getDate = (value: any) =>
 
 export default function ListFilter(props: any) {
   const { kasp_enabled, kasp_string, wartime_shifting } = useConfig();
-  const { filter, onChange, closeFilter } = props;
+  const { filter, onChange, closeFilter, removeFilters } = props;
 
   const { t } = useTranslation();
 
@@ -221,8 +220,7 @@ export default function ListFilter(props: any) {
       advancedFilter={props}
       onApply={applyFilter}
       onClear={() => {
-        navigate("/shifting");
-        setFilterState(clearFilterState);
+        removeFilters(Object.keys(clearFilterState));
         closeFilter();
       }}
     >
@@ -410,7 +408,6 @@ export default function ListFilter(props: any) {
         name="patient_phone_number"
         value={filterState.patient_phone_number}
         onChange={handleFormFieldChange}
-        errorClassName="hidden"
         types={["mobile", "landline"]}
       />
       <DateRangeFormField

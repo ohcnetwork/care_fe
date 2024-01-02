@@ -1,7 +1,8 @@
 import CareIcon from "../icons/CareIcon";
 import {
-  formatDateTime,
+  formatDate,
   formatName,
+  formatTime,
   isUserOnline,
   relativeTime,
 } from "../../Utils/utils";
@@ -11,6 +12,7 @@ interface Props {
   time?: string;
   prefix?: ReactNode;
   className?: string;
+  inlineClassName?: string;
   user?: {
     first_name: string;
     last_name: string;
@@ -23,14 +25,22 @@ interface Props {
  * A generic component to display relative time along with a tooltip and a user
  * if provided.
  */
-const RecordMeta = ({ time, user, prefix, className, inlineUser }: Props) => {
+const RecordMeta = ({
+  time,
+  user,
+  prefix,
+  className,
+  inlineClassName,
+  inlineUser,
+}: Props) => {
   const isOnline = user && isUserOnline(user);
 
   let child = (
     <div className="tooltip">
       <span className="underline">{relativeTime(time)}</span>
       <span className="tooltip-text tooltip-bottom flex -translate-x-1/2 gap-1 text-xs font-medium tracking-wider">
-        {formatDateTime(time)}
+        {formatTime(time)} <br />
+        {formatDate(time)}
         {user && !inlineUser && (
           <span className="flex items-center gap-1">
             by
@@ -47,11 +57,11 @@ const RecordMeta = ({ time, user, prefix, className, inlineUser }: Props) => {
 
   if (prefix || user) {
     child = (
-      <div className="flex items-center gap-1">
+      <div className={`flex items-center gap-1 ${inlineClassName}`}>
         {prefix}
         {child}
         {user && inlineUser && <span>by</span>}
-        {user && <CareIcon className="care-l-user" />}
+        {user && !inlineUser && <CareIcon className="care-l-user" />}
         {user && inlineUser && (
           <span className="font-medium">{formatName(user)}</span>
         )}

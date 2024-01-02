@@ -1,6 +1,6 @@
 import { useDispatch } from "react-redux";
 import useFullscreen from "../../Common/hooks/useFullscreen";
-import { Fragment, useContext, useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import {
   getPermittedFacility,
   listPatientAssetBeds,
@@ -15,7 +15,6 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import { LocationSelect } from "../Common/LocationSelect";
 import Pagination from "../Common/Pagination";
-import { SidebarShrinkContext } from "../Common/Sidebar/Sidebar";
 import { PatientAssetBed } from "../Assets/AssetTypes";
 import { Popover, Transition } from "@headlessui/react";
 import { FieldLabel } from "../Form/FormFields/FormField";
@@ -42,7 +41,6 @@ export default function CentralNursingStation({ facilityId }: Props) {
   const { t } = useTranslation();
   const dispatch = useDispatch<any>();
   const [isFullscreen, setFullscreen] = useFullscreen();
-  const sidebar = useContext(SidebarShrinkContext);
 
   const [facilityObject, setFacilityObject] = useState<FacilityModel>();
   const [data, setData] =
@@ -51,15 +49,6 @@ export default function CentralNursingStation({ facilityId }: Props) {
   const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
     limit: PER_PAGE_LIMIT,
   });
-
-  // To automatically collapse sidebar.
-  useEffect(() => {
-    sidebar.setShrinked(true);
-
-    return () => {
-      sidebar.setShrinked(sidebar.shrinked);
-    };
-  }, []);
 
   useEffect(() => {
     async function fetchFacilityOrObject() {
@@ -97,8 +86,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
       setTotalCount(res.data.count);
       setData(
         entries.map(({ patient, asset, bed }) => {
-          const middleware =
-            asset.meta?.middleware_hostname || facilityObj?.middleware_address;
+          const middleware = asset.resolved_middleware?.hostname;
           const local_ip_address = asset.meta?.local_ip_address;
 
           return {
@@ -135,6 +123,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
       backUrl={`/facility/${facilityId}/`}
       noImplicitPadding
       breadcrumbs={false}
+      collapseSidebar
       options={
         <div className="flex flex-row-reverse items-center gap-4 md:flex-row">
           <Popover className="relative">
@@ -264,8 +253,8 @@ export default function CentralNursingStation({ facilityId }: Props) {
         </div>
       ) : (
         <div className="mt-1 grid grid-cols-1 gap-1 lg:grid-cols-2 3xl:grid-cols-3">
-          {data.map((props) => (
-            <div className="overflow-hidden text-clip">
+          {data.map((props, i) => (
+            <div className="overflow-hidden text-clip" key={i}>
               <HL7PatientVitalsMonitor
                 patientCurrentBedAssignmentDate={
                   props.patientAssetBed?.patient?.last_consultation?.current_bed

@@ -45,6 +45,7 @@
   "clear": "Clear",
   "apply": "Apply",
   "filter_by": "Filter By",
+  "filter": "Filter",
   "ordering": "Ordering",
   "phone_number": "Phone Number",
   "emergency_contact_number": "Emergency Contact Number",
@@ -155,5 +156,8 @@
   "all_changes_have_been_saved": "All changes have been saved",
   "no_data_found": "No data found",
   "edit": "Edit",
-  "clear_selection": "Clear selection"
+  "clear_selection": "Clear selection",
+  "select_date": "Select date",
+  "DD/MM/YYYY": "DD/MM/YYYY",
+  "clear_all_filters": "Clear All Filters"
 }

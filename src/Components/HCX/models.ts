@@ -26,8 +26,8 @@ export interface HCXPolicyModel {
   patient_object?: PatientModel;
   subscriber_id: string;
   policy_id: string;
-  insurer_id: string;
-  insurer_name: string;
+  insurer_id?: string;
+  insurer_name?: string;
   status?: HCXPolicyStatus;
   priority?: "Immediate" | "Normal" | "Deferred";
   purpose?: "Auth Requirements" | "Benefits" | "Discovery" | "Validation";

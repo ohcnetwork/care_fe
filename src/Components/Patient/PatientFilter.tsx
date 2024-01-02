@@ -1,47 +1,46 @@
-import { useEffect, useCallback } from "react";
-import { FacilitySelect } from "../Common/FacilitySelect";
-import AutoCompleteAsync from "../Form/AutoCompleteAsync";
+import dayjs from "dayjs";
+import { useCallback, useEffect } from "react";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import {
-  GENDER_TYPES,
-  FACILITY_TYPES,
-  DISEASE_STATUS,
-  PATIENT_FILTER_CATEGORIES,
   ADMITTED_TO,
   DISCHARGE_REASONS,
+  DISEASE_STATUS,
+  FACILITY_TYPES,
+  GENDER_TYPES,
+  PATIENT_FILTER_CATEGORIES,
 } from "../../Common/constants";
+import useConfig from "../../Common/hooks/useConfig";
+import useMergeState from "../../Common/hooks/useMergeState";
 import {
   getAllLocalBody,
   getAnyFacility,
   getDistrict,
 } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
-import { navigate } from "raviger";
+import { dateQueryString } from "../../Utils/utils";
+import { DateRange } from "../Common/DateRangeInputV2";
+import { FacilitySelect } from "../Common/FacilitySelect";
+import { LocationSelect } from "../Common/LocationSelect";
+import AccordionV2 from "../Common/components/AccordionV2";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
-import SelectMenuV2 from "../Form/SelectMenuV2";
+import AutoCompleteAsync from "../Form/AutoCompleteAsync";
+import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
+import { FieldLabel } from "../Form/FormFields/FormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import {
   FieldChangeEvent,
   FieldChangeEventHandler,
 } from "../Form/FormFields/Utils";
-import { FieldLabel } from "../Form/FormFields/FormField";
 import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
-import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
-import { DateRange } from "../Common/DateRangeInputV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import useMergeState from "../../Common/hooks/useMergeState";
-import useConfig from "../../Common/hooks/useConfig";
-import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
-import AccordionV2 from "../Common/components/AccordionV2";
-import { dateQueryString } from "../../Utils/utils";
-import dayjs from "dayjs";
-import { LocationSelect } from "../Common/LocationSelect";
+import SelectMenuV2 from "../Form/SelectMenuV2";
 
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
 
 export default function PatientFilter(props: any) {
   const { kasp_enabled, kasp_string } = useConfig();
-  const { filter, onChange, closeFilter } = props;
+  const { filter, onChange, closeFilter, removeFilters } = props;
 
   const [filterState, setFilterState] = useMergeState({
     district: filter.district || "",
@@ -68,10 +67,10 @@ export default function PatientFilter(props: any) {
     date_declared_positive: filter.date_declared_positive || null,
     last_consultation_medico_legal_case:
       filter.last_consultation_medico_legal_case || null,
-    last_consultation_admission_date_before:
-      filter.last_consultation_admission_date_before || null,
-    last_consultation_admission_date_after:
-      filter.last_consultation_admission_date_after || null,
+    last_consultation_encounter_date_before:
+      filter.last_consultation_encounter_date_before || null,
+    last_consultation_encounter_date_after:
+      filter.last_consultation_encounter_date_after || null,
     last_consultation_discharge_date_before:
       filter.last_consultation_discharge_date_before || null,
     last_consultation_discharge_date_after:
@@ -126,8 +125,8 @@ export default function PatientFilter(props: any) {
     date_of_result: null,
     date_declared_positive: null,
     last_consultation_medico_legal_case: null,
-    last_consultation_admission_date_before: "",
-    last_consultation_admission_date_after: "",
+    last_consultation_encounter_date_before: "",
+    last_consultation_encounter_date_after: "",
     last_consultation_discharge_date_before: "",
     last_consultation_discharge_date_after: "",
     last_consultation_admitted_to_list: [],
@@ -237,8 +236,8 @@ export default function PatientFilter(props: any) {
       age_max,
       date_of_result,
       last_consultation_medico_legal_case,
-      last_consultation_admission_date_before,
-      last_consultation_admission_date_after,
+      last_consultation_encounter_date_before,
+      last_consultation_encounter_date_after,
       last_consultation_discharge_date_before,
       last_consultation_discharge_date_after,
       last_consultation_admitted_bed_type_list,
@@ -279,11 +278,11 @@ export default function PatientFilter(props: any) {
       date_of_result: dateQueryString(date_of_result),
       last_consultation_medico_legal_case:
         last_consultation_medico_legal_case || "",
-      last_consultation_admission_date_before: dateQueryString(
-        last_consultation_admission_date_before
+      last_consultation_encounter_date_before: dateQueryString(
+        last_consultation_encounter_date_before
       ),
-      last_consultation_admission_date_after: dateQueryString(
-        last_consultation_admission_date_after
+      last_consultation_encounter_date_after: dateQueryString(
+        last_consultation_encounter_date_after
       ),
       last_consultation_discharge_date_before: dateQueryString(
         last_consultation_discharge_date_before
@@ -337,8 +336,7 @@ export default function PatientFilter(props: any) {
       advancedFilter={props}
       onApply={applyFilter}
       onClear={() => {
-        navigate("/patients");
-        setFilterState(clearFilterState);
+        removeFilters(Object.keys(clearFilterState));
         closeFilter();
       }}
     >
@@ -539,13 +537,13 @@ export default function PatientFilter(props: any) {
           />
           <DateRangeFormField
             labelClassName="text-sm"
-            name="last_consultation_admission_date"
+            name="last_consultation_encounter_date"
             label="Admit Date"
             value={{
               start: getDate(
-                filterState.last_consultation_admission_date_after
+                filterState.last_consultation_encounter_date_after
               ),
-              end: getDate(filterState.last_consultation_admission_date_before),
+              end: getDate(filterState.last_consultation_encounter_date_before),
             }}
             onChange={handleDateRangeChange}
             errorClassName="hidden"
@@ -587,10 +585,10 @@ export default function PatientFilter(props: any) {
           </h1>
         }
         expanded={true}
-        className="w-full rounded-md"
+        className="rounded-md"
       >
-        <div className="grid w-full grid-cols-1 gap-4">
-          <div className="w-full flex-none">
+        <div className="space-y-4">
+          <div>
             <FieldLabel className="text-sm">Facility</FieldLabel>
             <FacilitySelect
               multiple={false}
@@ -600,24 +598,25 @@ export default function PatientFilter(props: any) {
               setSelected={(obj) => setFacility(obj, "facility")}
             />
           </div>
-          <div className="w-full flex-none">
-            <FieldLabel className="text-sm">Location</FieldLabel>
-            <LocationSelect
-              disabled={!filterState.facility}
-              name="facility"
-              selected={filterState.last_consultation_current_bed__location}
-              multiple={false}
-              errors=""
-              facilityId={filterState.facility}
-              setSelected={(selected) =>
-                setFilterState({
-                  ...filterState,
-                  last_consultation_current_bed__location: selected,
-                })
-              }
-            />
-          </div>
-          <div className="-mt-6 w-full flex-none">
+          {filterState.facility && (
+            <div>
+              <FieldLabel className="text-sm">Location</FieldLabel>
+              <LocationSelect
+                name="facility"
+                errorClassName="hidden"
+                selected={filterState.last_consultation_current_bed__location}
+                multiple={false}
+                facilityId={filterState.facility}
+                setSelected={(selected) =>
+                  setFilterState({
+                    ...filterState,
+                    last_consultation_current_bed__location: selected,
+                  })
+                }
+              />
+            </div>
+          )}
+          <div>
             <FieldLabel className="text-sm">Facility type</FieldLabel>
             <SelectMenuV2
               placeholder="Show all"
@@ -633,7 +632,7 @@ export default function PatientFilter(props: any) {
               )}
             />
           </div>
-          <div className="w-full flex-none">
+          <div>
             <FieldLabel className="text-sm">LSG Body</FieldLabel>
             <div className="">
               <AutoCompleteAsync
@@ -653,7 +652,7 @@ export default function PatientFilter(props: any) {
             </div>
           </div>
 
-          <div className="w-full flex-none">
+          <div>
             <FieldLabel className="text-sm">District</FieldLabel>
             <DistrictSelect
               multiple={false}
@@ -671,7 +670,7 @@ export default function PatientFilter(props: any) {
             COVID Details based
           </h1>
         }
-        expanded={true}
+        expanded={false}
         className="w-full rounded-md"
       >
         <div className="grid w-full grid-cols-1 gap-4">

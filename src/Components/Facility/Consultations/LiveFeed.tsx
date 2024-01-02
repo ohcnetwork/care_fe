@@ -177,6 +177,9 @@ const LiveFeed = (props: any) => {
   useEffect(() => {
     if (cameraAsset?.hostname) {
       fetchCameraPresets();
+      setTimeout(() => {
+        startStreamFeed();
+      }, 1000);
     }
   }, []);
 
@@ -191,6 +194,13 @@ const LiveFeed = (props: any) => {
       absoluteMove(bedPresets[0]?.position, {});
     }
   }, [page.offset, cameraAsset.id, refreshPresetsHash]);
+
+  const startStreamFeed = () => {
+    startStream({
+      onSuccess: () => setStreamStatus(StreamStatus.Playing),
+      onError: () => setStreamStatus(StreamStatus.Offline),
+    });
+  };
 
   const viewOptions = (page: number) => {
     return presets
@@ -207,11 +217,8 @@ const LiveFeed = (props: any) => {
     if (streamStatus !== StreamStatus.Playing) {
       setStreamStatus(StreamStatus.Loading);
       tId = setTimeout(() => {
-        startStream({
-          onSuccess: () => setStreamStatus(StreamStatus.Playing),
-          onError: () => setStreamStatus(StreamStatus.Offline),
-        });
-      }, 500);
+        startStreamFeed();
+      }, 5000);
     }
 
     return () => {
@@ -454,7 +461,7 @@ const LiveFeed = (props: any) => {
                   </button>
                 );
               })}
-              <div className="hideonmobilescreen pl-3">
+              <div className="hidden pl-3 md:block">
                 <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
               </div>
             </div>

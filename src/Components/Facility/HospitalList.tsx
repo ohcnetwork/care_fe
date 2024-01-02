@@ -3,14 +3,8 @@ import {
   downloadFacilityCapacity,
   downloadFacilityDoctors,
   downloadFacilityTriage,
-  getDistrict,
-  getLocalBody,
-  getPermittedFacilities,
-  getState,
 } from "../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { lazy, useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
+import { lazy } from "react";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CountBlock from "../../CAREUI/display/Count";
 import ExportMenu from "../Common/Export";
@@ -25,6 +19,8 @@ import { navigate } from "raviger";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -39,21 +35,14 @@ export const HospitalList = () => {
   } = useFilters({
     limit: 14,
   });
-  const dispatchAction: any = useDispatch();
-  const [data, setData] = useState<Array<FacilityModel>>([]);
   let manageFacilities: any = null;
-  const [isLoading, setIsLoading] = useState(false);
-  const [totalCount, setTotalCount] = useState(0);
-  const [stateName, setStateName] = useState("");
-  const [districtName, setDistrictName] = useState("");
-  const [localbodyName, setLocalbodyName] = useState("");
   const { user_type } = useAuthUser();
   const { t } = useTranslation();
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const params = {
+  const { data: permittedData, loading: isLoading } = useQuery(
+    routes.getPermittedFacilities,
+    {
+      query: {
         limit: resultsPerPage,
         page: qParams.page || 1,
         offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
@@ -63,92 +52,30 @@ export const HospitalList = () => {
         local_body: qParams.local_body,
         facility_type: qParams.facility_type,
         kasp_empanelled: qParams.kasp_empanelled,
-      };
-
-      const res = await dispatchAction(getPermittedFacilities(params));
-      if (!status.aborted) {
-        if (res && res.data) {
-          setData(res.data.results);
-          setTotalCount(res.data.count);
-        }
-        setIsLoading(false);
-      }
-    },
-    [
-      qParams.page,
-      qParams.search,
-      qParams.state,
-      qParams.district,
-      qParams.local_body,
-      qParams.facility_type,
-      qParams.kasp_empanelled,
-      dispatchAction,
-    ]
+      },
+    }
   );
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
+  const { data: stateData } = useQuery(routes.getState, {
+    pathParams: {
+      id: qParams.state,
     },
-    [fetchData]
-  );
+    prefetch: qParams.state !== undefined,
+  });
 
-  const fetchStateName = useCallback(
-    async (status: statusType) => {
-      const res =
-        Number(qParams.state) &&
-        (await dispatchAction(getState(qParams.state)));
-      if (!status.aborted) {
-        setStateName(res?.data?.name);
-      }
+  const { data: districtData } = useQuery(routes.getDistrict, {
+    pathParams: {
+      id: qParams.district,
     },
-    [dispatchAction, qParams.state]
-  );
+    prefetch: qParams.district !== undefined,
+  });
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchStateName(status);
+  const { data: localBodyData } = useQuery(routes.getLocalBody, {
+    pathParams: {
+      id: qParams.local_body,
     },
-    [fetchStateName]
-  );
-
-  const fetchDistrictName = useCallback(
-    async (status: statusType) => {
-      const res =
-        Number(qParams.district) &&
-        (await dispatchAction(getDistrict(qParams.district)));
-      if (!status.aborted) {
-        setDistrictName(res?.data?.name);
-      }
-    },
-    [dispatchAction, qParams.district]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchDistrictName(status);
-    },
-    [fetchDistrictName]
-  );
-
-  const fetchLocalbodyName = useCallback(
-    async (status: statusType) => {
-      const res =
-        Number(qParams.local_body) &&
-        (await dispatchAction(getLocalBody({ id: qParams.local_body })));
-      if (!status.aborted) {
-        setLocalbodyName(res?.data?.name);
-      }
-    },
-    [dispatchAction, qParams.local_body]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchLocalbodyName(status);
-    },
-    [fetchLocalbodyName]
-  );
+    prefetch: qParams.local_body !== undefined,
+  });
 
   const findFacilityTypeById = (id: number) => {
     const facility_type = FACILITY_TYPES.find((type) => type.id == id);
@@ -167,8 +94,8 @@ export const HospitalList = () => {
   };
 
   let facilityList: JSX.Element[] = [];
-  if (data && data.length) {
-    facilityList = data.map((facility: FacilityModel) => (
+  if (permittedData && permittedData.results.length) {
+    facilityList = permittedData.results.map((facility: FacilityModel) => (
       <FacilityCard
         key={facility.id!}
         facility={facility}
@@ -177,18 +104,18 @@ export const HospitalList = () => {
     ));
   }
 
-  if (isLoading || !data) {
+  if (isLoading || !permittedData) {
     manageFacilities = <Loading />;
-  } else if (data && data.length) {
+  } else if (permittedData.results && permittedData.results.length) {
     manageFacilities = (
       <>
         <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
           {facilityList}
         </div>
-        <Pagination totalCount={totalCount} />
+        <Pagination totalCount={permittedData.count} />
       </>
     );
-  } else if (data && data.length === 0) {
+  } else if (permittedData.results && permittedData.results.length === 0) {
     manageFacilities = hasFiltersApplied(qParams) ? (
       <div className="w-full rounded-lg bg-white p-3">
         <div className="mt-4 flex w-full  justify-center text-2xl font-bold text-gray-600">
@@ -246,7 +173,7 @@ export const HospitalList = () => {
       <div className="mt-4 gap-2 lg:flex">
         <CountBlock
           text="Total Facilities"
-          count={totalCount}
+          count={permittedData ? permittedData.count : 0}
           loading={isLoading}
           icon="l-hospital"
           className="flex-1"
@@ -266,9 +193,21 @@ export const HospitalList = () => {
       <FilterBadges
         badges={({ badge, value, kasp }) => [
           badge("Facility/District Name", "search"),
-          value("State", "state", stateName),
-          value("District", "district", districtName),
-          value("Local Body", "local_body", localbodyName),
+          value(
+            "State",
+            "state",
+            qParams.state && stateData ? stateData.name : ""
+          ),
+          value(
+            "District",
+            "district",
+            qParams.district && districtData ? districtData.name : ""
+          ),
+          value(
+            "Local Body",
+            "local_body",
+            qParams.local_body && localBodyData ? localBodyData.name : ""
+          ),
           value(
             "Facility type",
             "facility_type",
