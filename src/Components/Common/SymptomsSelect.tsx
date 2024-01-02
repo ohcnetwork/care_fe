@@ -1,11 +1,11 @@
+import CareIcon from "../../CAREUI/icons/CareIcon";
 import { SYMPTOM_CHOICES } from "../../Common/constants";
 import FormField from "../Form/FormFields/FormField";
 import {
-  FieldChangeEvent,
   FormFieldBaseProps,
   useFormFieldPropsResolver,
 } from "../Form/FormFields/Utils";
-import AutocompleteMultiSelectFormField from "../Form/FormFields/AutocompleteMultiselect";
+import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
 
 const ASYMPTOMATIC_ID = 1;
 
@@ -20,7 +20,7 @@ const ASYMPTOMATIC_ID = 1;
 export const SymptomsSelect = (props: FormFieldBaseProps<number[]>) => {
   const field = useFormFieldPropsResolver(props);
 
-  const updateSelection = ({ value }: FieldChangeEvent<number[]>) => {
+  const updateSelection = (value: number[]) => {
     // Skip the complexities if no initial value was present
     if (!props.value?.length) return field.handleChange(value);
 
@@ -44,41 +44,39 @@ export const SymptomsSelect = (props: FormFieldBaseProps<number[]>) => {
     field.handleChange(value);
   };
 
-  // TODO : uncomment this whenn `AutocompleteMultiSelectFormField` can accept
-  // `optionDescription` prop
-  // const getDescription = ({ id }: { id: number }) => {
-  //   const value = props.value || [];
-  //   if (!value.length) return;
+  const getDescription = ({ id }: { id: number }) => {
+    const value = props.value || [];
+    if (!value.length) return;
 
-  //   if (value.includes(ASYMPTOMATIC_ID) && id !== ASYMPTOMATIC_ID)
-  //     return (
-  //       <div className="items-center">
-  //         <CareIcon className="care-l-exclamation-triangle mr-2" />
-  //         <span>
-  //           also unselects <b className="font-medium">Asymptomatic</b>
-  //         </span>
-  //       </div>
-  //     );
+    if (value.includes(ASYMPTOMATIC_ID) && id !== ASYMPTOMATIC_ID)
+      return (
+        <div className="items-center">
+          <CareIcon className="care-l-exclamation-triangle mr-2" />
+          <span>
+            also unselects <b className="font-medium">Asymptomatic</b>
+          </span>
+        </div>
+      );
 
-  //   if (!value.includes(ASYMPTOMATIC_ID) && id === ASYMPTOMATIC_ID)
-  //     return (
-  //       <span>
-  //         <CareIcon className="care-l-exclamation-triangle mr-2" />
-  //         {`also unselects the other ${value.length} option(s)`}
-  //       </span>
-  //     );
-  // };
+    if (!value.includes(ASYMPTOMATIC_ID) && id === ASYMPTOMATIC_ID)
+      return (
+        <span>
+          <CareIcon className="care-l-exclamation-triangle mr-2" />
+          {`also unselects the other ${value.length} option(s)`}
+        </span>
+      );
+  };
 
   return (
     <FormField field={field}>
-      <AutocompleteMultiSelectFormField
+      <MultiSelectMenuV2
         id={field.id}
-        name={field.name}
         options={SYMPTOM_CHOICES}
         disabled={props.disabled}
         placeholder="Select symptoms"
         optionLabel={(option) => option.text}
         optionValue={(option) => option.id}
+        optionDescription={getDescription}
         value={props.value}
         onChange={updateSelection}
       />
