@@ -31,15 +31,16 @@ const NavItems = [
   { text: "Facilities", to: "/facility", icon: "care-l-hospital" },
   { text: "Patients", to: "/patients", icon: "care-l-user-injured" },
   { text: "Assets", to: "/assets", icon: "care-l-shopping-cart-alt" },
-  { text: "Sample Test", to: "/sample", icon: "care-l-medkit" },
   { text: "Shifting", to: "/shifting", icon: "care-l-ambulance" },
+  { text: "Users", to: "/users", icon: "care-l-users-alt" },
+  //   More items
+  { text: "Sample Test", to: "/sample", icon: "care-l-medkit" },
   { text: "Resource", to: "/resource", icon: "care-l-heart-medical" },
   {
     text: "External Results",
     to: "/external_results",
     icon: "care-l-clipboard-notes",
   },
-  { text: "Users", to: "/users", icon: "care-l-users-alt" },
   { text: "Notice Board", to: "/notice_board", icon: "care-l-meeting-board" },
 ];
 
@@ -58,11 +59,15 @@ const StatelessSidebar = ({
   const activeLinkRef = useRef<HTMLAnchorElement>(null);
   const [lastIndicatorPosition, setLastIndicatorPosition] = useState(0);
   const [isOverflowVisible, setOverflowVisisble] = useState(false);
+  const [moreItems, setMoreItems] = useState(false);
 
   useEffect(() => {
     if (!indicatorRef.current) return;
-    const index = NavItems.findIndex((item) => item.to === activeLink);
-    const navItemCount = NavItems.length + 2; // +2 for notification and dashboard
+    const index = NavItems.slice(0, moreItems ? NavItems.length : 5).findIndex(
+      (item) => item.to === activeLink
+    );
+    const navItemCount = (moreItems ? NavItems.length : 5) + 3; // +3 for notification, Dashboard and More
+
     if (index !== -1) {
       // Haha math go brrrrrrrrr
 
@@ -83,7 +88,7 @@ const StatelessSidebar = ({
     } else {
       indicatorRef.current.style.display = "none";
     }
-  }, [activeLink, lastIndicatorPosition]);
+  }, [activeLink, lastIndicatorPosition, moreItems]);
 
   const handleOverflow = (value: boolean) => {
     setOverflowVisisble(value);
@@ -99,7 +104,8 @@ const StatelessSidebar = ({
           : " overflow-y-auto overflow-x-hidden "
       }`}
     >
-      <div className="h-3" /> {/* flexible spacing */}
+      <div className="h-3" />
+      {/* flexible spacing */}
       <Link href="/">
         <img
           className={`${
@@ -108,7 +114,8 @@ const StatelessSidebar = ({
           src={shrinked ? LOGO_COLLAPSE : main_logo.light}
         />
       </Link>
-      <div className="h-3" /> {/* flexible spacing */}
+      <div className="h-3" />
+      {/* flexible spacing */}
       <div className="relative flex h-full flex-col">
         <div className="relative flex flex-1 flex-col md:flex-none">
           <div
@@ -119,7 +126,7 @@ const StatelessSidebar = ({
               activeLink ? "opacity-0 md:opacity-100" : "opacity-0"
             )}
           />
-          {NavItems.map((i) => {
+          {NavItems.slice(0, moreItems ? NavItems.length : 5).map((i) => {
             return (
               <Item
                 ref={i.to === activeLink ? activeLinkRef : undefined}
@@ -132,7 +139,18 @@ const StatelessSidebar = ({
               />
             );
           })}
-
+          <Item
+            text={moreItems ? "Close Tabs" : "Open Tabs"}
+            do={() => setMoreItems(!moreItems)}
+            icon={
+              moreItems ? (
+                <CareIcon className="care-l-top-arrow-to-top text-lg" />
+              ) : (
+                <CareIcon className="care-l-arrow-to-bottom text-lg" />
+              )
+            }
+            handleOverflow={handleOverflow}
+          />
           <NotificationItem
             shrinked={shrinked}
             handleOverflow={handleOverflow}
