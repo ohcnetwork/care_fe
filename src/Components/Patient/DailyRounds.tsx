@@ -1,7 +1,7 @@
 import { navigate } from "raviger";
 
 import dayjs from "dayjs";
-import { lazy, useCallback, useEffect, useState } from "react";
+import { lazy, useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
   CONSCIOUSNESS_LEVEL,
@@ -61,7 +61,12 @@ const initForm: any = {
   rhythm: "0",
   rhythm_detail: "",
   ventilator_spo2: null,
-  consciousness_level: "Unknown",
+  consciousness_level: "UNKNOWN",
+  bp: {
+    systolic: -1,
+    diastolic: -1,
+    mean: -1,
+  },
   // bed: null,
 };
 
@@ -135,8 +140,37 @@ export const DailyRounds = (props: any) => {
     "consciousness_level",
   ];
 
-  useEffect(() => {
-    (async () => {
+  const fetchRoundDetails = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      let formData: any = initialData;
+      if (id) {
+        const res = await dispatchAction(
+          getConsultationDailyRoundsDetails({ consultationId, id })
+        );
+
+        if (!status.aborted) {
+          if (res?.data) {
+            const data = {
+              ...res.data,
+              patient_category: res.data.patient_category
+                ? PATIENT_CATEGORIES.find(
+                    (i) => i.text === res.data.patient_category
+                  )?.id ?? ""
+                : "",
+              rhythm:
+                (res.data.rhythm &&
+                  RHYTHM_CHOICES.find((i) => i.text === res.data.rhythm)?.id) ||
+                "0",
+              admitted_to: res.data.admitted_to
+                ? res.data.admitted_to
+                : "Select",
+            };
+            formData = { ...formData, ...data };
+          }
+        }
+      }
+      setIsLoading(false);
       if (patientId) {
         const res = await dispatchAction(getPatient({ id: patientId }));
         if (res.data) {
@@ -154,71 +188,20 @@ export const DailyRounds = (props: any) => {
             ...initialData,
             action: getAction,
           });
-          dispatch({
-            type: "set_form",
-            form: {
-              ...state.form,
-              action: getAction,
-            },
-          });
+          formData = { ...formData, ...{ action: getAction } };
         }
       } else {
         setPatientName("");
         setFacilityName("");
       }
-    })();
-  }, [dispatchAction, patientId]);
-
-  const fetchRoundDetails = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatchAction(
-        getConsultationDailyRoundsDetails({ consultationId, id })
-      );
-
-      if (!status.aborted) {
-        if (res?.data) {
-          const data = {
-            ...res.data,
-            patient_category: res.data.patient_category
-              ? PATIENT_CATEGORIES.find(
-                  (i) => i.text === res.data.patient_category
-                )?.id ?? ""
-              : "",
-            rhythm:
-              (res.data.rhythm &&
-                RHYTHM_CHOICES.find((i) => i.text === res.data.rhythm)?.id) ||
-              "0",
-            admitted_to: res.data.admitted_to ? res.data.admitted_to : "Select",
-          };
-          dispatch({ type: "set_form", form: data });
-          setInitialData(data);
-        }
-        setIsLoading(false);
-      }
-    },
-    [consultationId, id, dispatchAction]
-  );
-  useAbortableEffect(
-    (status: statusType) => {
-      if (id) {
-        fetchRoundDetails(status);
-      }
-    },
-    [dispatchAction, fetchRoundDetails]
-  );
-
-  useEffect(() => {
-    (async () => {
       if (consultationId && !id) {
         const res = await dispatchAction(
           getDailyReport({ limit: 1, offset: 0 }, { consultationId })
         );
         setHasPreviousLog(res.data.count > 0);
-        dispatch({
-          type: "set_form",
-          form: {
-            ...state.form,
+        formData = {
+          ...formData,
+          ...{
             patient_category: res.data.patient_category
               ? PATIENT_CATEGORIES.find(
                   (i) => i.text === res.data.patient_category
@@ -229,12 +212,20 @@ export const DailyRounds = (props: any) => {
                 RHYTHM_CHOICES.find((i) => i.text === res.data.rhythm)?.id) ||
               "0",
             temperature: parseFloat(res.data.temperature),
-            // clone_last: res.data.count > 0 ? true : false,
           },
-        });
+        };
       }
-    })();
-  }, [dispatchAction, consultationId, id]);
+      dispatch({ type: "set_form", form: formData });
+      setInitialData(formData);
+    },
+    [consultationId, id, dispatchAction, patientId]
+  );
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchRoundDetails(status);
+    },
+    [dispatchAction, fetchRoundDetails]
+  );
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -253,6 +244,18 @@ export const DailyRounds = (props: any) => {
             !state.form[field]
           ) {
             errors[field] = "Please enter the other symptom details";
+            invalidForm = true;
+          }
+          return;
+        case "bp":
+          if (
+            (state.form.bp?.systolic &&
+              state.form.bp?.diastolic &&
+              state.form.bp.systolic !== -1 &&
+              state.form.bp.diastolic === -1) ||
+            (state.form.bp.systolic === -1 && state.form.bp.diastolic !== -1)
+          ) {
+            errors.bp = "Please enter both systolic and diastolic values";
             invalidForm = true;
           }
           return;
@@ -301,21 +304,32 @@ export const DailyRounds = (props: any) => {
           data = {
             ...data,
             bp:
-              state.form.bp && state.form.bp.systolic && state.form.bp.diastolic
+              state.form.bp?.systolic !== -1 && state.form.bp?.diastolic !== -1
                 ? {
-                    systolic: Number(state.form.bp.systolic),
-                    diastolic: Number(state.form.bp.diastolic),
-                    mean: parseFloat(
-                      meanArterialPressure(state.form.bp).toFixed(2)
-                    ),
+                    systolic: state.form.bp?.systolic
+                      ? Number(state.form.bp?.systolic)
+                      : -1,
+                    diastolic: state.form.bp?.diastolic
+                      ? Number(state.form.bp?.diastolic)
+                      : -1,
+                    mean:
+                      state.form.bp?.systolic && state.form.bp?.diastolic
+                        ? parseFloat(
+                            meanArterialPressure(state.form.bp).toFixed(2)
+                          )
+                        : -1,
                   }
-                : undefined,
-            pulse: state.form.pulse,
-            resp: Number(state.form.resp),
-            temperature: state.form.temperature,
-            rhythm: Number(state.form.rhythm) || 0,
+                : {
+                    systolic: -1,
+                    diastolic: -1,
+                    mean: -1,
+                  },
+            pulse: state.form.pulse ?? null,
+            resp: state.form.resp ?? null,
+            temperature: state.form.temperature ?? null,
+            rhythm: state.form.rhythm || 0,
             rhythm_detail: state.form.rhythm_detail,
-            ventilator_spo2: state.form.ventilator_spo2,
+            ventilator_spo2: state.form.ventilator_spo2 ?? null,
             consciousness_level: state.form.consciousness_level,
           };
         }
