@@ -338,6 +338,8 @@ const routes = {
   createFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/",
     method: "POST",
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<LocationModel>(),
   },
   getFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
@@ -347,6 +349,8 @@ const routes = {
   updateFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
     method: "PUT",
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<LocationModel>(),
   },
   partialUpdateFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",

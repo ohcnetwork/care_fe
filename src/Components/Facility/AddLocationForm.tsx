@@ -1,13 +1,10 @@
 import { navigate } from "raviger";
 import { SyntheticEvent, lazy, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import {
-  createFacilityAssetLocation,
-  getAnyFacility,
-  getFacilityAssetLocation,
-  updateFacilityAssetLocation,
-} from "../../Redux/actions";
+import { useTranslation } from "react-i18next";
+import routes from "../../Redux/api";
 import * as Notification from "../../Utils/Notifications.js";
+import request from "../../Utils/request/request";
+import useQuery from "../../Utils/request/useQuery";
 import { AssetLocationType } from "../Assets/AssetTypes";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
@@ -24,14 +21,13 @@ interface LocationFormProps {
 
 export const AddLocationForm = (props: LocationFormProps) => {
   const { facilityId, locationId } = props;
-  const dispatchAction: any = useDispatch();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [middlewareAddress, setMiddlewareAddress] = useState("");
   const [description, setDescription] = useState("");
-  const [facilityName, setFacilityName] = useState("");
-  const [locationName, setLocationName] = useState("");
-  const [locationType, setLocationType] = useState("");
+  const [locationType, setLocationType] = useState<AssetLocationType>(
+    AssetLocationType.OTHER
+  );
   const [errors, setErrors] = useState<{
     name: string;
     description: string;
@@ -46,28 +42,26 @@ export const AddLocationForm = (props: LocationFormProps) => {
   const headerText = !locationId ? "Add Location" : "Update Location";
   const buttonText = !locationId ? "Add Location" : "Update Location";
 
-  useEffect(() => {
-    async function fetchFacilityName() {
-      setIsLoading(true);
-      if (facilityId) {
-        const facility = await dispatchAction(getAnyFacility(facilityId));
-        setFacilityName(facility?.data?.name || "");
-      }
-      if (locationId) {
-        const res = await dispatchAction(
-          getFacilityAssetLocation(facilityId, locationId)
-        );
+  const { data: facility } = useQuery(routes.getAnyFacility, {
+    pathParams: { id: facilityId },
+  });
 
-        setName(res?.data?.name || "");
-        setLocationName(res?.data?.name || "");
-        setDescription(res?.data?.description || "");
-        setLocationType(res?.data?.location_type || "");
-        setMiddlewareAddress(res?.data?.middleware_address || "");
-      }
-      setIsLoading(false);
+  const { data: location, loading } = useQuery(
+    routes.getFacilityAssetLocation,
+    {
+      pathParams: {
+        facility_external_id: facilityId,
+        external_id: locationId || "",
+      },
     }
-    fetchFacilityName();
-  }, [dispatchAction, facilityId, locationId]);
+  );
+
+  useEffect(() => {
+    setName(location?.name || "");
+    setDescription(location?.description || "");
+    setMiddlewareAddress(location?.middleware_address || "");
+    setLocationType(location?.location_type || AssetLocationType.OTHER);
+  }, [location]);
 
   const validateForm = () => {
     let formValid = true;
@@ -109,22 +103,33 @@ export const AddLocationForm = (props: LocationFormProps) => {
       return;
     }
 
-    setIsLoading(true);
-    const data = {
+    const bodyData = {
       name,
       description,
       middleware_address: middlewareAddress,
       location_type: locationType,
     };
 
-    const res = await dispatchAction(
-      locationId
-        ? updateFacilityAssetLocation(data, facilityId, locationId)
-        : createFacilityAssetLocation(data, facilityId)
-    );
-    setIsLoading(false);
-    if (res) {
-      if (res.status === 201 || res.status === 200) {
+    let response: Response | undefined;
+
+    if (locationId) {
+      const { res } = await request(routes.updateFacilityAssetLocation, {
+        pathParams: {
+          facility_external_id: facilityId,
+          external_id: locationId,
+        },
+        body: bodyData,
+      });
+      response = res;
+    } else {
+      const { res } = await request(routes.createFacilityAssetLocation, {
+        pathParams: { facility_external_id: facilityId },
+        body: bodyData,
+      });
+      response = res;
+    }
+    if (response) {
+      if (response.status === 201 || response.status === 200) {
         const notificationMessage = locationId
           ? "Location updated successfully"
           : "Location created successfully";
@@ -136,18 +141,11 @@ export const AddLocationForm = (props: LocationFormProps) => {
         navigate(`/facility/${facilityId}/location`, {
           replace: true,
         });
-      } else if (res.status === 400) {
-        Object.keys(res.data).forEach((key) => {
-          setErrors((prevState) => ({
-            ...prevState,
-            [key]: res.data[key],
-          }));
-        });
       }
     }
   };
 
-  if (isLoading) {
+  if (loading) {
     return <Loading />;
   }
 
@@ -156,10 +154,10 @@ export const AddLocationForm = (props: LocationFormProps) => {
       title={headerText}
       backUrl={`/facility/${facilityId}/location`}
       crumbsReplacements={{
-        [facilityId]: { name: facilityName },
+        [facilityId]: { name: facility?.name },
         ...(locationId && {
           [locationId]: {
-            name: locationName,
+            name: location?.name,
             uri: `/facility/${facilityId}/location`,
           },
         }),
@@ -173,7 +171,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
                 <TextFormField
                   name="name"
                   type="text"
-                  label="Name"
+                  label={t("name")}
                   required
                   value={name}
                   onChange={(e) => setName(e.value)}
@@ -184,7 +182,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
                 <TextAreaFormField
                   rows={5}
                   name="description"
-                  label="Description"
+                  label={t("description")}
                   value={description}
                   onChange={(e) => setDescription(e.value)}
                   error={errors.description}
@@ -194,7 +192,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
                 <SelectFormField
                   id="location-type"
                   name="location_type"
-                  label="Location Type"
+                  label={t("location_type")}
                   options={[
                     { title: "ICU", value: AssetLocationType.ICU },
                     {
@@ -216,7 +214,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
                   id="location-middleware-address"
                   name="Location Middleware Address"
                   type="text"
-                  label="Location Middleware Address"
+                  label={t("location_middleware_address")}
                   value={middlewareAddress}
                   onChange={(e) => setMiddlewareAddress(e.value)}
                   error={errors.middlewareAddress}

@@ -2,5 +2,7 @@
   "location_management": "Location Management",
   "manage_beds": "Manage Beds",
   "add_new_location": "Add New Location",
-  "no_locations_available": "No Locations Available"
+  "no_locations_available": "No Locations Available",
+  "location_type": "Location Type",
+  "location_middleware_address": "Location Middleware Address"
 }
