@@ -24,10 +24,12 @@ export default function DoctorVideoSlideover(props: {
         const res = await dispatchAction(
           getFacilityUsers(facilityId, { limit: 50 })
         );
-        if (res && res.data) {
+        if (res?.data) {
           setDoctors(
             res.data.results
-              .filter((user: any) => user.alt_phone_number)
+              .filter(
+                (user: any) => user.alt_phone_number || user.video_connect_link
+              )
               .sort((a: any, b: any) => {
                 return Number(a.last_login) - Number(b.last_login);
               })
