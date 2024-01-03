@@ -65,6 +65,7 @@ export interface FacilityModel {
   district?: number;
   local_body?: number;
   ward?: number;
+  pincode?: string;
 }
 
 export interface CapacityModal {
@@ -108,12 +109,12 @@ export interface ConsultationModel {
   discharge_notes?: string;
   examination_details?: string;
   history_of_present_illness?: string;
-  facility?: number;
+  facility: string;
   facility_name?: string;
   id: string;
   modified_date?: string;
   other_symptoms?: string;
-  patient?: string;
+  patient: string;
   treatment_plan?: string;
   referred_to?: FacilityModel["id"];
   referred_to_object?: FacilityModel;
@@ -242,6 +243,13 @@ export interface CurrentBed {
   end_date: string;
   meta: Record<string, any>;
 }
+
+// Voluntarily made as `type` for it to achieve type-safety when used with
+// `useAsyncOptions<ICD11DiagnosisModel>`
+export type ICD11DiagnosisModel = {
+  id: string;
+  label: string;
+};
 
 export type ABGPlotsFields =
   | "ph"
@@ -449,13 +457,6 @@ export interface CreateBedBody {
   bed: string;
 }
 
-// Voluntarily made as `type` for it to achieve type-safety when used with
-// `useAsyncOptions<ICD11DiagnosisModel>`
-export type ICD11DiagnosisModel = {
-  id: string;
-  label: string;
-};
-
 // Patient Notes Model
 export interface BaseFacilityModel {
   id: string;
@@ -514,4 +515,12 @@ export type IFacilityNotificationResponse = {
 
 export type IUserFacilityRequest = {
   facility: string;
+};
+
+export type FacilityRequest = Omit<FacilityModel, "location"> & {
+  latitude?: string;
+  longitude?: string;
+  kasp_empanelled?: boolean;
+  patient_count?: string;
+  bed_count?: string;
 };
