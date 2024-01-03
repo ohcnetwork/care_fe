@@ -5,13 +5,14 @@ type Props<T> = FormFieldBaseProps<string> & {
   options: T[];
   optionDisplay: (option: T) => React.ReactNode;
   optionValue: (option: T) => string;
+  containerClassName?: string;
 };
 
 const RadioFormField = <T,>(props: Props<T>) => {
   const field = useFormFieldPropsResolver(props);
   return (
     <FormField field={field}>
-      <div className="flex gap-4 p-4">
+      <div className={props.containerClassName || "flex gap-4 p-4"}>
         {props.options.map((option, idx) => {
           const value = props.optionValue(option);
           const optionId = `${props.name}-${idx}`;

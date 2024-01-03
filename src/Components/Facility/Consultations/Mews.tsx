@@ -26,6 +26,7 @@ const getHeartRateScore = (value?: number) => {
 
 const getSystolicBPScore = (value?: number) => {
   if (typeof value !== "number") return;
+  if (value === -1) return;
 
   if (value <= 70) return 3;
   if (value <= 80) return 2;
