@@ -52,7 +52,7 @@ export const LocationSelect = (props: LocationSelectProps) => {
       disabled={props.disabled}
       value={props.selected as string}
       options={data?.results ?? []}
-      onChange={({ value }) => props.setSelected([value])}
+      onChange={({ value }) => props.setSelected(value)}
       onQuery={(search_text) => refetch({ query: { search_text } })}
       isLoading={loading}
       placeholder="Search by location name"
