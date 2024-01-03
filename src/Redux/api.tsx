@@ -27,6 +27,7 @@ import {
   AssetServiceUpdate,
   AssetTransaction,
   AssetUpdate,
+  PatientAssetBed,
 } from "../Components/Assets/AssetTypes";
 import {
   CapacityModal,
@@ -394,6 +395,7 @@ const routes = {
   listPatientAssetBeds: {
     path: "/api/v1/facility/{facility_external_id}/patient_asset_beds/",
     method: "GET",
+    TRes: Type<PaginatedResponse<PatientAssetBed>>(),
   },
 
   // Facility Beds

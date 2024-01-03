@@ -28,10 +28,6 @@ export const getAllSkills = (params: object) => {
   return fireRequest("getAllSkills", [], params);
 };
 
-export const getPermittedFacility = (id: number | string, key?: string) => {
-  return fireRequest("getPermittedFacility", [], {}, { id: id }, key);
-};
-
 export const getAnyFacility = (id: number | string, key?: string) => {
   return fireRequest("getAnyFacility", [], {}, { id: id }, key);
 };
@@ -108,11 +104,6 @@ export const deleteAssetBed = (asset_id: string) =>
       external_id: asset_id,
     }
   );
-
-export const listPatientAssetBeds = (
-  facility_external_id: string,
-  params: object
-) => fireRequest("listPatientAssetBeds", [], params, { facility_external_id });
 
 // Facility Beds
 export const listFacilityBeds = (params: object) =>
