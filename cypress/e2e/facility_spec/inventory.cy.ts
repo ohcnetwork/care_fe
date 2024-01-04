@@ -68,11 +68,11 @@ describe("Inventory Management Section", () => {
         cy.get("#set-minimum-quantity").click();
         facilityPage.fillInventoryMinimumDetails("PPE", "1");
         facilityPage.clickSetButton();
+        facilityPage.verifySuccessNotification(
+          "Minimum quantiy updated successfully"
+        );
       }
     });
-    cy.go(-1);
-    cy.wait(3000);
-    cy.get("#set-minimum-quantity").should("not.be.visible");
   });
 
   afterEach(() => {
