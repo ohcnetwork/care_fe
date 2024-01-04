@@ -20,10 +20,6 @@ export const getPermittedFacilities = (params: object) => {
   return fireRequest("getPermittedFacilities", [], params);
 };
 
-export const getPermittedFacility = (id: number | string, key?: string) => {
-  return fireRequest("getPermittedFacility", [], {}, { id: id }, key);
-};
-
 export const getAnyFacility = (id: number | string, key?: string) => {
   return fireRequest("getAnyFacility", [], {}, { id: id }, key);
 };
@@ -101,11 +97,6 @@ export const deleteAssetBed = (asset_id: string) =>
     }
   );
 
-export const listPatientAssetBeds = (
-  facility_external_id: string,
-  params: object
-) => fireRequest("listPatientAssetBeds", [], params, { facility_external_id });
-
 // Facility Beds
 export const listFacilityBeds = (params: object) =>
   fireRequest("listFacilityBeds", [], params, {});
@@ -168,15 +159,6 @@ export const downloadFacilityTriage = () => {
 };
 
 // Capacity/Triage/Doctor
-export const createCapacity = (
-  id: number | undefined,
-  params: object,
-  pathParam: object
-) => {
-  return id
-    ? fireRequest("updateCapacity", [id], params, pathParam)
-    : fireRequest("createCapacity", [], params, pathParam);
-};
 export const createDoctor = (
   id: number | undefined,
   params: object,
@@ -198,25 +180,11 @@ export const getTriageInfo = (pathParam: object) => {
 export const getTriageDetails = (pathParam: object) => {
   return fireRequest("getTriageDetails", [], {}, pathParam);
 };
-export const listCapacity = (params: object, pathParam: object) => {
-  return fireRequest("getCapacity", [], params, pathParam);
-};
 export const listDoctor = (params: object, pathParam: object) => {
   return fireRequest("listDoctor", [], params, pathParam);
 };
-export const getCapacity = (id: number, pathParam: object) => {
-  return fireRequest("getCapacity", [id], {}, pathParam);
-};
-
-export const getCapacityBed = (pathParam: object) => {
-  return fireRequest("getCapacityBed", [], {}, pathParam);
-};
-
 export const getDoctor = (pathParam: object) => {
   return fireRequest("getDoctor", [], {}, pathParam);
-};
-export const deleteCapacity = (pathParam: object) => {
-  return fireRequest("deleteCapacityBed", [], {}, pathParam);
 };
 
 //Patient
