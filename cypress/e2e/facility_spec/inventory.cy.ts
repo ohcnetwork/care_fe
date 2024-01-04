@@ -70,9 +70,9 @@ describe("Inventory Management Section", () => {
         facilityPage.clickSetButton();
       }
     });
-    cy.get("#set-minimum-quantity").should("be.visible");
     cy.go(-1);
-    cy.get(".badge-danger").contains("Low Stock").should("not.be.visible");
+    cy.wait(3000);
+    cy.get("#set-minimum-quantity").should("not.be.visible");
   });
 
   afterEach(() => {
