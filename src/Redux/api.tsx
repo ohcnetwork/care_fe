@@ -51,6 +51,7 @@ import {
   BedModel,
 } from "../Components/Facility/models";
 import {
+  IDeleteBedCapacity,
   IDeleteExternalResult,
   IExternalResult,
   IExternalResultCsv,
@@ -529,6 +530,7 @@ const routes = {
   createCapacity: {
     path: "/api/v1/facility/{facilityId}/capacity/",
     method: "POST",
+    TRes: Type<CapacityModal>(),
   },
 
   createDoctor: {
@@ -543,11 +545,13 @@ const routes = {
 
   getCapacityBed: {
     path: "/api/v1/facility/{facilityId}/capacity/{bed_id}/",
+    TRes: Type<CapacityModal>(),
   },
 
   deleteCapacityBed: {
     path: "/api/v1/facility/{facilityId}/capacity/{bed_id}/",
     method: "DELETE",
+    TRes: Type<IDeleteBedCapacity>(),
   },
 
   listDoctor: {
@@ -559,8 +563,9 @@ const routes = {
   },
 
   updateCapacity: {
-    path: "/api/v1/facility/{facilityId}/capacity",
+    path: "/api/v1/facility/{facilityId}/capacity/{bed_id}/",
     method: "PUT",
+    TRes: Type<CapacityModal>(),
   },
 
   updateDoctor: {
