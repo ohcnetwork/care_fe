@@ -6,7 +6,6 @@ import FacilityLocation from "../../pageobject/Facility/FacilityLocation";
 import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
 import FacilityHome from "../../pageobject/Facility/FacilityHome";
 
-
 describe("Location Management Section", () => {
   const assetPage = new AssetPage();
   const userCreationPage = new UserCreationPage();
