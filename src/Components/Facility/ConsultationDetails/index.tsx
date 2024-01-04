@@ -37,7 +37,6 @@ import { ConsultationDialysisTab } from "./ConsultationDialysisTab";
 import { ConsultationNeurologicalMonitoringTab } from "./ConsultationNeurologicalMonitoringTab";
 import { ConsultationNutritionTab } from "./ConsultationNutritionTab";
 import PatientNotesSlideover from "../PatientNotesSlideover";
-import LegacyDiagnosesList from "../../Diagnosis/LegacyDiagnosesList";
 import { AssetBedModel } from "../../Assets/AssetTypes";
 
 const Loading = lazy(() => import("../../Common/Loading"));
@@ -377,18 +376,24 @@ export const ConsultationDetails = (props: any) => {
 
             <div className="flex flex-col-reverse gap-2 px-4 lg:flex-row">
               <div className="flex h-full w-3/4 flex-col">
-                {/*consultationData.other_symptoms && (
-                  <div className="capitalize">
-                    <span className="font-semibold leading-relaxed">
-                      Other Symptoms:{" "}
-                    </span>
-                    {consultationData.other_symptoms}
-                  </div>
-                )*/}
-
-                <LegacyDiagnosesList
-                  diagnoses={consultationData.diagnoses || []}
-                />
+                {consultationData.diagnoses?.length
+                  ? (() => {
+                      const principal_diagnosis =
+                        consultationData.diagnoses.find(
+                          (diagnosis) => diagnosis.is_principal
+                        );
+                      return principal_diagnosis ? (
+                        <div className="mt-2">
+                          <div className="text-sm font-semibold">
+                            Principal Diagnosis
+                          </div>
+                          <div className="text-sm">
+                            {principal_diagnosis.diagnosis_object.label}
+                          </div>
+                        </div>
+                      ) : null;
+                    })()
+                  : null}
 
                 {(consultationData.treating_physician_object ||
                   consultationData.deprecated_verified_by) && (
