@@ -61,7 +61,7 @@ function UptimeInfo({
               <>
                 <span className="my-2 block font-bold">Status Updates</span>
                 <div className="grid grid-cols-1 gap-1 md:grid-cols-4">
-                  {incidents.toReversed().map((incident, index) => {
+                  {incidents.reverse().map((incident, index) => {
                     const prevIncident = incidents[index - 1];
                     let endTimestamp;
                     let ongoing = false;
@@ -171,7 +171,7 @@ export default function Uptime(props: { assetId: string }) {
   }>([]);
   const { data, loading } = useQuery(routes.listAssetAvailability, {
     query: { external_id: props.assetId },
-    onResponse: ({ data }) => setUptimeRecord(data?.results.toReversed() ?? []),
+    onResponse: ({ data }) => setUptimeRecord(data?.results.reverse() ?? []),
   });
   const availabilityData = data?.results ?? [];
   const graphElem = useRef<HTMLDivElement>(null);
