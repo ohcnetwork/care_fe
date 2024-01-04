@@ -1,7 +1,6 @@
 import { useState } from "react";
 import * as Notification from "../../../Utils/Notifications.js";
 import Page from "../../Common/components/Page";
-import TextFormField from "../../Form/FormFields/TextFormField";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { NonReadOnlyUsers } from "../../../Utils/AuthorizeFor";
@@ -13,6 +12,7 @@ import request from "../../../Utils/request/request.js";
 import useQuery from "../../../Utils/request/useQuery.js";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import { isAppleDevice } from "../../../Utils/utils.js";
+import TextAreaFormField from "../../Form/FormFields/TextAreaFormField.js";
 
 interface ConsultationDoctorNotesProps {
   patientId: string;
@@ -120,12 +120,11 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
         />
 
         <div className="relative mx-4 flex items-center">
-          <TextFormField
+          <TextAreaFormField
             name="note"
             value={noteField}
             onChange={(e) => setNoteField(e.value)}
             className="grow"
-            type="text"
             errorClassName="hidden"
             placeholder="Type your Note"
             disabled={!patientActive}

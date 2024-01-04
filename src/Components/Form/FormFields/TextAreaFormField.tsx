@@ -7,6 +7,8 @@ type TextAreaFormFieldProps = FormFieldBaseProps<string> & {
   rows?: number;
   // prefixIcon?: React.ReactNode;
   // suffixIcon?: React.ReactNode;
+  onFocus?: (event: React.FocusEvent<HTMLTextAreaElement>) => void;
+  onBlur?: (event: React.FocusEvent<HTMLTextAreaElement>) => void;
 };
 
 const TextAreaFormField = ({ rows = 3, ...props }: TextAreaFormFieldProps) => {
@@ -25,6 +27,8 @@ const TextAreaFormField = ({ rows = 3, ...props }: TextAreaFormFieldProps) => {
         className={`cui-input-base resize-none ${
           field.error && "border-danger-500"
         }`}
+        onFocus={props.onFocus}
+        onBlur={props.onBlur}
       />
     </FormField>
   );

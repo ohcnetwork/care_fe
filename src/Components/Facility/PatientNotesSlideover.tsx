@@ -3,7 +3,6 @@ import * as Notification from "../../Utils/Notifications.js";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames, isAppleDevice } from "../../Utils/utils";
-import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { make as Link } from "../Common/components/Link.bs";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
@@ -12,6 +11,7 @@ import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { PatientNoteStateType } from "./models";
 import useKeyboardShortcut from "use-keyboard-shortcut";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField.js";
 
 interface PatientNotesProps {
   patientId: string;
@@ -169,13 +169,12 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
             setReload={setReload}
           />
           <div className="relative mx-4 flex items-center">
-            <TextFormField
+            <TextAreaFormField
               id="doctor_notes_textarea"
               name="note"
               value={noteField}
               onChange={(e) => setNoteField(e.value)}
               className="grow"
-              type="text"
               errorClassName="hidden"
               placeholder="Type your Note"
               disabled={!patientActive}
