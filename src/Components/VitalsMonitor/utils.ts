@@ -1,3 +1,4 @@
+import { AssetClass, AssetData } from "../Assets/AssetTypes";
 import { ChannelOptions, VitalsWaveformBase } from "./types";
 
 /**
@@ -72,4 +73,20 @@ export const getVitalsCanvasSizeAndDuration = (
     },
     duration: DEFAULT_DURATION * (ratio / DEFAULT_RATIO),
   };
+};
+
+export const getVitalsMonitorSocketUrl = (asset: AssetData) => {
+  if (
+    asset.asset_class !== AssetClass.HL7MONITOR &&
+    asset.asset_class !== AssetClass.VENTILATOR
+  ) {
+    throw "getVitalsMonitorSocketUrl can be invoked only for HL7MONITOR or VENTILATOR assets";
+  }
+
+  const middleware = asset.resolved_middleware?.hostname;
+  const ipAddress = asset.meta?.local_ip_address;
+
+  if (middleware && ipAddress) {
+    return `wss://${middleware}/observations/${ipAddress}`;
+  }
 };
