@@ -652,7 +652,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             </div>
           </div>
         </div>
-        <div className="w-full pl-4 xl:w-1/3">
+        <div className="w-full pl-0 md:pl-4 xl:w-1/3">
           <DailyRoundsList consultation={props.consultationData} />
         </div>
       </div>
