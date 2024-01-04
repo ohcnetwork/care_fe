@@ -117,7 +117,7 @@ export default function InventoryLog(props: any) {
 
   let inventoryList: any = [];
   if (inventory?.length) {
-    inventoryList = inventory.map((inventoryItem: any) => (
+    inventoryList = inventory.map((inventoryItem: any, index) => (
       <tr key={inventoryItem.id} className="bg-white">
         <td className="border-b border-gray-200 p-5 text-sm hover:bg-gray-100">
           <div className="flex items-center">
@@ -148,7 +148,11 @@ export default function InventoryLog(props: any) {
         </td>
         <td>
           <div className="tooltip">
-            <div className="tooltip-left tooltip-text">
+            <div
+              className={`tooltip-text tooltip-left ${
+                index === inventory.length - 1 && "-mt-16"
+              } text-sm`}
+            >
               {inventoryItem.probable_accident ? (
                 <div className="text-justify text-sm leading-snug">
                   <b>Unmarks this transaction as accident</b>
@@ -156,7 +160,7 @@ export default function InventoryLog(props: any) {
                   This action will not affect the total stock.
                 </div>
               ) : (
-                <div className="text-justify text-sm leading-snug ">
+                <div className="h-24 w-80 whitespace-pre-wrap text-justify text-sm leading-snug">
                   <b>Marks this transaction as accident</b>
                   <br />
                   This action will not affect the total stock. To delete the
@@ -212,7 +216,7 @@ export default function InventoryLog(props: any) {
       <>
         <div className="-mx-4 overflow-x-auto p-4 sm:-mx-8 sm:px-8">
           <div className="inline-block min-w-full">
-            <table className="min-w-full overflow-hidden rounded-lg leading-normal shadow">
+            <table className="min-w-full rounded-lg leading-normal shadow md:overflow-hidden">
               <thead>
                 <tr>
                   <th className="border-b-2 border-gray-200 bg-primary-400 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
