@@ -38,6 +38,7 @@ import { ConsultationNeurologicalMonitoringTab } from "./ConsultationNeurologica
 import { ConsultationNutritionTab } from "./ConsultationNutritionTab";
 import PatientNotesSlideover from "../PatientNotesSlideover";
 import { AssetBedModel } from "../../Assets/AssetTypes";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
@@ -387,8 +388,14 @@ export const ConsultationDetails = (props: any) => {
                           <div className="text-sm font-semibold">
                             Principal Diagnosis
                           </div>
-                          <div className="text-sm">
-                            {principal_diagnosis.diagnosis_object.label}
+                          <div className="flex  gap-2 text-sm">
+                            {principal_diagnosis.diagnosis_object.label}{" "}
+                            <span className="flex items-start gap-0.5 rounded border border-primary-500 py-0.5 pl-1 pr-2 text-xs font-medium text-primary-500">
+                              <CareIcon icon="l-check" className="text-base" />
+                              <p className="capitalize">
+                                {principal_diagnosis.verification_status}
+                              </p>
+                            </span>
                           </div>
                         </div>
                       ) : null;
