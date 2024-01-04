@@ -59,14 +59,15 @@ const StatelessSidebar = ({
   const activeLinkRef = useRef<HTMLAnchorElement>(null);
   const [lastIndicatorPosition, setLastIndicatorPosition] = useState(0);
   const [isOverflowVisible, setOverflowVisisble] = useState(false);
-  const [moreItems, setMoreItems] = useState(false);
+  const [moreItemsShown, setMoreItemsShown] = useState(false);
 
   useEffect(() => {
     if (!indicatorRef.current) return;
-    const index = NavItems.slice(0, moreItems ? NavItems.length : 5).findIndex(
-      (item) => item.to === activeLink
-    );
-    const navItemCount = (moreItems ? NavItems.length : 5) + 3; // +3 for notification, Dashboard and More
+    const index = NavItems.slice(
+      0,
+      moreItemsShown ? NavItems.length : 5
+    ).findIndex((item) => item.to === activeLink);
+    const navItemCount = (moreItemsShown ? NavItems.length : 5) + 3; // +3 for notification, Dashboard and More
 
     if (index !== -1) {
       // Haha math go brrrrrrrrr
@@ -88,7 +89,7 @@ const StatelessSidebar = ({
     } else {
       indicatorRef.current.style.display = "none";
     }
-  }, [activeLink, lastIndicatorPosition, moreItems]);
+  }, [activeLink, lastIndicatorPosition, moreItemsShown]);
 
   const handleOverflow = (value: boolean) => {
     setOverflowVisisble(value);
@@ -126,7 +127,7 @@ const StatelessSidebar = ({
               activeLink ? "opacity-0 md:opacity-100" : "opacity-0"
             )}
           />
-          {NavItems.slice(0, moreItems ? NavItems.length : 5).map((i) => {
+          {NavItems.slice(0, moreItemsShown ? NavItems.length : 5).map((i) => {
             return (
               <Item
                 ref={i.to === activeLink ? activeLinkRef : undefined}
@@ -140,10 +141,10 @@ const StatelessSidebar = ({
             );
           })}
           <Item
-            text={moreItems ? "Close Tabs" : "Open Tabs"}
-            do={() => setMoreItems(!moreItems)}
+            text={moreItemsShown ? "Hide" : "Show more"}
+            do={() => setMoreItemsShown(!moreItemsShown)}
             icon={
-              moreItems ? (
+              moreItemsShown ? (
                 <CareIcon className="care-l-top-arrow-to-top text-lg" />
               ) : (
                 <CareIcon className="care-l-arrow-to-bottom text-lg" />
