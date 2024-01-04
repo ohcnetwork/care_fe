@@ -372,12 +372,22 @@ class FacilityPage {
     cy.get("[name='quantity']").type(quantity);
   }
 
+  fillInventoryMinimumDetails(name: string, quantity: string) {
+    cy.get("div#id").click();
+    cy.get("div#id ul li").contains(name).click();
+    cy.get("[name='quantity']").type(quantity);
+  }
+
   clickAddInventory() {
     cy.intercept("POST", "**/api/v1/facility/*/inventory/").as(
       "createInventory"
     );
     cy.get("button").contains("Add/Update Inventory").click();
     cy.wait("@createInventory").its("response.statusCode").should("eq", 201);
+  }
+
+  clickSetButton() {
+    cy.get("#submit").contains("Set").click();
   }
 
   fillResourceRequestDetails(
