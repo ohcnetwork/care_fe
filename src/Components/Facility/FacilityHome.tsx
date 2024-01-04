@@ -1,6 +1,6 @@
 import * as Notification from "../../Utils/Notifications.js";
 
-import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import { FacilityModel } from "./models";
 import { FACILITY_FEATURE_TYPES, USER_TYPES } from "../../Common/constants";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
@@ -98,6 +98,10 @@ export const FacilityHome = (props: any) => {
     !(authUser.user_type as string).includes("ReadOnly") &&
     USER_TYPES.findIndex((type) => type == authUser.user_type) >=
       StaffUserTypeIndex;
+
+  const hasPermissionToDeleteFacility =
+    authUser.user_type === "DistrictAdmin" ||
+    authUser.user_type === "StateAdmin";
 
   const editCoverImageTooltip = hasPermissionToEditCoverImage && (
     <div className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center bg-black text-sm text-gray-300 opacity-0 transition-[opacity] hover:opacity-60 md:h-[88px]">
@@ -373,16 +377,17 @@ export const FacilityHome = (props: any) => {
                 >
                   View Users
                 </DropdownItem>
-                <DropdownItem
-                  id="delete-facility"
-                  variant="danger"
-                  onClick={() => setOpenDeleteDialog(true)}
-                  className="flex items-center gap-3"
-                  icon={<CareIcon className="care-l-trash-alt text-lg" />}
-                  authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
-                >
-                  Delete Facility
-                </DropdownItem>
+                {hasPermissionToDeleteFacility && (
+                  <DropdownItem
+                    id="delete-facility"
+                    variant="danger"
+                    onClick={() => setOpenDeleteDialog(true)}
+                    className="flex items-center gap-3"
+                    icon={<CareIcon className="care-l-trash-alt text-lg" />}
+                  >
+                    Delete Facility
+                  </DropdownItem>
+                )}
               </DropdownMenu>
             </div>
             <div className="sm:grid sm:grid-cols-2 sm:gap-2 md:grid md:grid-cols-2 md:gap-2 lg:flex lg:flex-col lg:justify-end lg:gap-0 ">
