@@ -69,7 +69,7 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
 
                         <td className="px-3 py-4 text-center text-sm capitalize">
                           {new Date(
-                            consent.consent_artefacts?.[1]?.expiry ??
+                            consent.consent_artefacts?.[0]?.expiry ??
                               consent.expiry
                           ) < new Date()
                             ? "EXPIRED"
@@ -97,19 +97,19 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
 
                         <td className="px-3 py-4 text-center text-sm">
                           {formatDateTime(
-                            consent.consent_artefacts?.[1]?.from_time ??
+                            consent.consent_artefacts?.[0]?.from_time ??
                               consent.from_time
                           )}{" "}
                           <br />
                           {formatDateTime(
-                            consent.consent_artefacts?.[1]?.to_time ??
+                            consent.consent_artefacts?.[0]?.to_time ??
                               consent.to_time
                           )}
                         </td>
 
                         <td className="px-3 py-4 text-center text-sm">
                           {formatDateTime(
-                            consent.consent_artefacts?.[1]?.expiry ??
+                            consent.consent_artefacts?.[0]?.expiry ??
                               consent.expiry
                           )}
                         </td>
@@ -117,7 +117,7 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                         <td className="px-3 py-4 text-center text-sm">
                           <div className="flex flex-wrap items-center justify-center">
                             {(
-                              consent.consent_artefacts?.[1]?.hi_types ??
+                              consent.consent_artefacts?.[0]?.hi_types ??
                               consent.hi_types
                             )?.map((hiType) => (
                               <span className="mb-2 mr-2 rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
@@ -131,7 +131,7 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                           <div className="flex flex-col items-center justify-center gap-2">
                             {consent.status === "GRANTED" &&
                             new Date(
-                              consent.consent_artefacts?.[1]?.expiry ??
+                              consent.consent_artefacts?.[0]?.expiry ??
                                 consent.expiry
                             ) > new Date() ? (
                               <Link
