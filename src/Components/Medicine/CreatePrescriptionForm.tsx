@@ -147,7 +147,7 @@ export const PRESCRIPTION_ROUTES = [
   "INTRATHECAL",
   "TRANSDERMAL",
   "RECTAL",
-];
+] as const;
 export const PRESCRIPTION_FREQUENCIES = {
   STAT: {
     slots: 1,
