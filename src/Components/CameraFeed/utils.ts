@@ -1,5 +1,5 @@
 import { MutableRefObject } from "react";
-import { AssetData } from "../Assets/AssetTypes";
+import { AssetClass, AssetData } from "../Assets/AssetTypes";
 import { getCameraConfig } from "../../Utils/transformUtils";
 import { isIOS } from "../../Utils/utils";
 
@@ -18,6 +18,10 @@ export const calculateVideoDelay = (
 };
 
 export const getStreamUrl = (asset: AssetData) => {
+  if (asset.asset_class !== AssetClass.ONVIF) {
+    throw "getStreamUrl can be invoked only for ONVIF Assets";
+  }
+
   const config = getCameraConfig(asset);
   const host = asset.resolved_middleware?.hostname;
   const uuid = config.accessKey;

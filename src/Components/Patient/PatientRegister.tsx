@@ -544,6 +544,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         setFacilityName("");
       }
     }
+
     fetchFacilityName();
   }, [dispatchAction, facilityId]);
 
@@ -953,6 +954,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     } else {
       values.splice(values.indexOf(id), 1);
     }
+
+    if (id !== 1 && values.includes(1)) {
+      values.splice(values.indexOf(1), 1);
+    } else if (id === 1) {
+      values.length = 0;
+      values.push(1);
+    }
+
     field("medical_history").onChange({
       name: "medical_history",
       value: values,

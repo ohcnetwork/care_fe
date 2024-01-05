@@ -1,13 +1,7 @@
-import { useDispatch } from "react-redux";
 import useFullscreen from "../../Common/hooks/useFullscreen";
-import { Fragment, useEffect, useState } from "react";
-import {
-  getPermittedFacility,
-  listPatientAssetBeds,
-} from "../../Redux/actions";
+import { Fragment } from "react";
 import HL7PatientVitalsMonitor from "../VitalsMonitor/HL7PatientVitalsMonitor";
 import useFilters from "../../Common/hooks/useFilters";
-import { FacilityModel } from "./models";
 import Loading from "../Common/Loading";
 import Page from "../Common/components/Page";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -15,7 +9,6 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import { LocationSelect } from "../Common/LocationSelect";
 import Pagination from "../Common/Pagination";
-import { PatientAssetBed } from "../Assets/AssetTypes";
 import { Popover, Transition } from "@headlessui/react";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
@@ -23,6 +16,9 @@ import { useTranslation } from "react-i18next";
 import { SortOption } from "../Common/SortDropdown";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import useVitalsAspectRatioConfig from "../VitalsMonitor/useVitalsAspectRatioConfig";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import { getVitalsMonitorSocketUrl } from "../VitalsMonitor/utils";
 
 const PER_PAGE_LIMIT = 6;
 
@@ -39,72 +35,28 @@ interface Props {
 
 export default function CentralNursingStation({ facilityId }: Props) {
   const { t } = useTranslation();
-  const dispatch = useDispatch<any>();
   const [isFullscreen, setFullscreen] = useFullscreen();
-
-  const [facilityObject, setFacilityObject] = useState<FacilityModel>();
-  const [data, setData] =
-    useState<Parameters<typeof HL7PatientVitalsMonitor>[0][]>();
-  const [totalCount, setTotalCount] = useState(0);
   const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
     limit: PER_PAGE_LIMIT,
   });
+  const query = useQuery(routes.listPatientAssetBeds, {
+    pathParams: { facility_external_id: facilityId },
+    query: {
+      ...qParams,
+      page: qParams.page || 1,
+      limit: PER_PAGE_LIMIT,
+      offset: (qParams.page ? qParams.page - 1 : 0) * PER_PAGE_LIMIT,
+      asset_class: "HL7MONITOR",
+      ordering: qParams.ordering || "bed__name",
+      bed_is_occupied: qParams.bed_is_occupied ?? true,
+    },
+  });
 
-  useEffect(() => {
-    async function fetchFacilityOrObject() {
-      if (facilityObject) return facilityObject;
-      const res = await dispatch(getPermittedFacility(facilityId));
-      if (res.status !== 200) return;
-      setFacilityObject(res.data);
-      return res.data as FacilityModel;
-    }
-
-    async function fetchData() {
-      setData(undefined);
-
-      const filters = {
-        ...qParams,
-        page: qParams.page || 1,
-        limit: PER_PAGE_LIMIT,
-        offset: (qParams.page ? qParams.page - 1 : 0) * PER_PAGE_LIMIT,
-        asset_class: "HL7MONITOR",
-        ordering: qParams.ordering || "bed__name",
-        bed_is_occupied: qParams.bed_is_occupied ?? true,
-      };
-
-      const [facilityObj, res] = await Promise.all([
-        fetchFacilityOrObject(),
-        dispatch(listPatientAssetBeds(facilityId, filters)),
-      ]);
-
-      if (!facilityObj || res.status !== 200) {
-        return;
-      }
-
-      const entries = res.data.results as PatientAssetBed[];
-
-      setTotalCount(res.data.count);
-      setData(
-        entries.map(({ patient, asset, bed }) => {
-          const middleware = asset.resolved_middleware?.hostname;
-          const local_ip_address = asset.meta?.local_ip_address;
-
-          return {
-            patientAssetBed: { patient, asset, bed },
-            socketUrl: `wss://${middleware}/observations/${local_ip_address}`,
-          };
-        })
-      );
-    }
-    fetchData();
-  }, [
-    dispatch,
-    facilityId,
-    qParams.page,
-    qParams.location,
-    qParams.ordering,
-    qParams.bed_is_occupied,
-  ]);
+  const totalCount = query.data?.count ?? 0;
+  const data = query.data?.results.map((obj) => ({
+    patientAssetBed: obj,
+    socketUrl: getVitalsMonitorSocketUrl(obj.asset),
+  }));
 
   const { config, hash } = useVitalsAspectRatioConfig({
     default: 6 / 11,
