@@ -69,7 +69,7 @@
     "dayjs": "^1.11.9",
     "echarts": "^5.4.2",
     "echarts-for-react": "^3.0.2",
-    "eslint-mdx": "^2.2.0",
+    "eslint-mdx": "^2.3.2",
     "events": "^3.3.0",
     "i18next": "^23.2.7",
     "i18next-browser-languagedetector": "^7.1.0",
