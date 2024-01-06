@@ -140,8 +140,6 @@ export const DailyRounds = (props: any) => {
     "consciousness_level",
   ];
 
-  console.log(state.form.bp);
-
   const fetchRoundDetails = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
