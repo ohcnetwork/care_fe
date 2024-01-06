@@ -23,7 +23,7 @@ import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 import * as Notification from "../../Utils/Notifications";
 import { formatDateTime } from "../../Utils/utils";
 import BloodPressureFormField, {
-  BPValidator,
+  BloodPressureValidator,
 } from "../Common/BloodPressureFormField";
 import { SymptomsSelect } from "../Common/SymptomsSelect";
 import TemperatureFormField from "../Common/TemperatureFormField";
@@ -250,7 +250,7 @@ export const DailyRounds = (props: any) => {
           }
           return;
         case "bp": {
-          const error = BPValidator(state.form.bp);
+          const error = BloodPressureValidator(state.form.bp);
           if (error) {
             errors.bp = error;
             invalidForm = true;

@@ -110,7 +110,7 @@ export const meanArterialPressure = ({
   }
 };
 
-export const BPValidator: FieldValidator<BloodPressure> = (bp) => {
+export const BloodPressureValidator: FieldValidator<BloodPressure> = (bp) => {
   if (Object.values(bp).every((v) => v == null)) {
     return;
   }
