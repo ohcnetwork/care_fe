@@ -27,7 +27,6 @@ import {
   AssetServiceUpdate,
   AssetTransaction,
   AssetUpdate,
-  AssetUptimeRecord,
 } from "../Components/Assets/AssetTypes";
 import {
   CapacityModal,
@@ -1226,7 +1225,6 @@ const routes = {
   listAssetAvailability: {
     path: "/api/v1/asset_availability/",
     method: "GET",
-    TRes: Type<PaginatedResponse<AssetUptimeRecord>>(),
   },
   getAssetAvailability: {
     path: "/api/v1/asset_availability/{id}",

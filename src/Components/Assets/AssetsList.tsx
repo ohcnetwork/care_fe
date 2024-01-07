@@ -1,7 +1,7 @@
 import QrReader from "react-qr-reader";
 import * as Notification from "../../Utils/Notifications.js";
 import { listAssets } from "../../Redux/actions";
-import { assetClassProps, AssetData, AssetUptimeRecord } from "./AssetTypes";
+import { assetClassProps, AssetData } from "./AssetTypes";
 import { useState, useEffect, lazy } from "react";
 import { Link, navigate } from "raviger";
 import AssetFilter from "./AssetFilter";
@@ -50,9 +50,6 @@ const AssetsList = () => {
   const [importAssetModalOpen, setImportAssetModalOpen] = useState(false);
   const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
   const [showFacilityDialog, setShowFacilityDialog] = useState(false);
-  const [availabilityData, setAvailabilityData] = useState<AssetUptimeRecord[]>(
-    []
-  );
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
   });
@@ -130,20 +127,6 @@ const AssetsList = () => {
       console.log(err);
     }
   };
-
-  useEffect(() => {
-    const fetchAvailabilityData = async () => {
-      const assetAvailabilityData = await request(
-        routes.listAssetAvailability,
-        {}
-      );
-      if (assetAvailabilityData?.data) {
-        setAvailabilityData(assetAvailabilityData.data.results);
-      }
-    };
-
-    fetchAvailabilityData();
-  }, []);
 
   const checkValidAssetId = async (assetId: string) => {
     const { data: assetData } = await request(routes.getAsset, {
@@ -256,19 +239,9 @@ const AssetsList = () => {
                   <Chip variant="danger" startIcon="l-cog" text="Not Working" />
                 )}
                 {warrantyAmcValidityChip(asset.warranty_amc_end_of_validity)}
-                {availabilityData &&
-                  availabilityData.length > 0 &&
-                  availabilityData.map((data: any) => {
-                    if (data.asset.id === asset.id) {
-                      return (
-                        <Chip
-                          variant="danger"
-                          startIcon="l-cog"
-                          text={data.status.toString()}
-                        />
-                      );
-                    }
-                  })}
+                {asset?.down && (
+                  <Chip variant="danger" startIcon="l-ban" text={"Down"} />
+                )}{" "}
               </div>
             </div>
           </Link>
