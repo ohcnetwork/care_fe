@@ -1,10 +1,12 @@
 import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import LoginPage from "../../pageobject/Login/LoginPage";
+import FacilityHome from "../../pageobject/Facility/FacilityHome";
 
 describe("Inventory Management Section", () => {
   const facilityPage = new FacilityPage();
   const loginPage = new LoginPage();
+  const facilityHome = new FacilityHome();
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -33,17 +35,17 @@ describe("Inventory Management Section", () => {
     facilityPage.clickAddInventory();
     facilityPage.verifySuccessNotification("Inventory created successfully");
     // verify the new modification
-    cy.get("#PPE").contains("PPE").should("be.visible");
-    cy.get("#PPE").contains("5").should("be.visible");
+    facilityPage.verifyPpeQuantity("PPE");
+    facilityPage.verifyPpeQuantity("5");
     // delete the last Entry
-    cy.get("#PPE").click();
-    cy.get("#delete-last-entry").click();
+    facilityPage.clickPpeQuantity();
+    facilityPage.clickLastEntry();
     // verify the last entry deletion
-    cy.get("#row-0").contains("Added Stock").should("be.visible");
-    cy.get("#row-1").contains("Used Stock").should("be.visible");
+    facilityPage.verifyStockInRow("#row-0", "Added Stock");
+    facilityPage.verifyStockInRow("#row-1", "Used Stock");
     cy.wait(3000);
-    cy.go(-1);
-    cy.get("#PPE").contains("PPE").should("be.visible");
+    facilityHome.navigateBack();
+    facilityPage.verifyPpeQuantity("PPE");
   });
 
   it("Add New Inventory | Verify Backend and manual Minimum", () => {
@@ -53,19 +55,19 @@ describe("Inventory Management Section", () => {
     facilityPage.clickAddInventory();
     facilityPage.verifySuccessNotification("Inventory created successfully");
     // Verify Backend minimum badge
-    cy.get(".badge-danger").contains("Low Stock").should("exist");
+    facilityPage.verifyBadgeWithText(".badge-danger", "Low Stock");
     // modify with manual minimum badge
-    cy.get("#add-minimum-quantity").click();
+    facilityPage.clickAddMinimumQuanitity();
     cy.wait(3000);
     cy.get("body").then(($body) => {
       if ($body.find("#update-minimum-quantity").is(":visible")) {
         // If the 'update-minimum-quantity' element is visible, click it
-        cy.get("#update-minimum-quantity").first().click();
-        cy.get("#quantity").click().clear().click().type("5");
-        cy.get("#save-update-minimumquanitity").click();
+        facilityPage.clickUpdateMinimumQuantity();
+        facilityPage.setQuantity("5");
+        facilityPage.clickSaveUpdateMinimumQuantity();
       } else {
         // Otherwise, click the 'set-minimum-quantity' element
-        cy.get("#set-minimum-quantity").click();
+        facilityPage.clickSetMinimumQuantity();
         facilityPage.fillInventoryMinimumDetails("PPE", "1");
         facilityPage.clickSetButton();
         facilityPage.verifySuccessNotification(
@@ -74,7 +76,6 @@ describe("Inventory Management Section", () => {
       }
     });
   });
-
   afterEach(() => {
     cy.saveLocalStorage();
   });

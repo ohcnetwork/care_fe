@@ -453,6 +453,38 @@ class FacilityPage {
         }
       });
   }
+
+  verifyPpeQuantity(text: string) {
+    cy.get("#PPE").contains(text).should("be.visible");
+  }
+
+  clickPpeQuantity() {
+    cy.get("#PPE").click();
+  }
+
+  clickLastEntry() {
+    cy.get("#delete-last-entry").click();
+  }
+
+  verifyStockInRow(rowId: string, stockText: string) {
+    cy.get(rowId).contains(stockText).should("be.visible");
+  }
+
+  verifyBadgeWithText(badgeClass: string, text: string) {
+    cy.get(badgeClass).contains(text).should("exist");
+  }
+
+  clickAddMinimumQuanitity() {
+    cy.get("#add-minimum-quantity").click();
+  }
+
+  clickUpdateMinimumQuantity() {
+    cy.get("#update-minimum-quantity").first().click();
+  }
+
+  setQuantity(quantity: string) {
+    cy.get("#quantity").click().clear().click().type(quantity);
+  }
 }
 
 export default FacilityPage;
