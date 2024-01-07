@@ -13,6 +13,8 @@ import Chip from "../../../CAREUI/display/Chip";
 import { formatAge, formatDate, formatDateTime } from "../../../Utils/utils";
 import ReadMore from "../../Common/components/Readmore";
 import DailyRoundsList from "../Consultations/DailyRoundsList";
+import EventsList from "./Events/EventsList";
+import SwitchTabs from "../../Common/components/SwitchTabs";
 
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
 
@@ -22,6 +24,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
   const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
   const [monitorBedData, setMonitorBedData] = useState<AssetBedModel>();
   const [ventilatorBedData, setVentilatorBedData] = useState<AssetBedModel>();
+  const [showEvents, setShowEvents] = useState<boolean>(false);
 
   const vitals = useVitalsAspectRatioConfig({
     default: undefined,
@@ -355,7 +358,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         <span className="text-xs font-semibold leading-relaxed text-gray-800">
                           from{" "}
                           {formatDate(
-                            props.consultationData.last_daily_round.created_at
+                            props.consultationData.last_daily_round.created_date
                           )}
                         </span>
                       </>
@@ -673,7 +676,26 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
           </div>
         </div>
         <div className="w-full pl-4 xl:w-1/3">
-          <DailyRoundsList consultation={props.consultationData} />
+          <SwitchTabs
+            className="mt-3 w-full lg:w-full"
+            tab2={
+              <div className="flex items-center justify-center gap-1 text-sm">
+                Events
+                <span className="rounded-lg bg-warning-400 p-[1px] px-1 text-[10px] text-white">
+                  in beta
+                </span>
+              </div>
+            }
+            tab1="Daily Rounds"
+            onClickTab1={() => setShowEvents(false)}
+            onClickTab2={() => setShowEvents(true)}
+            isTab2Active={showEvents}
+          />
+          {showEvents ? (
+            <EventsList consultation={props.consultationData} />
+          ) : (
+            <DailyRoundsList consultation={props.consultationData} />
+          )}
         </div>
       </div>
     </div>

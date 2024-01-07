@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import LoadingLogUpdateCard from "./DailyRounds/LoadingCard";
 import routes from "../../../Redux/api";
 import PaginatedList from "../../../CAREUI/misc/PaginatedList";
-import PageTitle from "../../Common/PageTitle";
 import DailyRoundsFilter from "./DailyRoundsFilter";
 import { ConsultationModel } from "../models";
 import { useSlugs } from "../../../Common/hooks/useSlug";
@@ -29,12 +28,11 @@ export default function DailyRoundsList({ consultation }: Props) {
     >
       {({ refetch }) => (
         <>
-          <div className="flex flex-1 justify-between">
-            <PageTitle title="Update Log" hideBack breadcrumbs={false} />
+          <div className="m-1 flex flex-1 justify-end">
             <DailyRoundsFilter onApply={(query) => refetch({ query })} />
           </div>
 
-          <div className="-mt-2 flex w-full flex-col gap-4">
+          <div className="flex w-full flex-col gap-4">
             <div className="flex max-h-[85vh] flex-col gap-4 overflow-y-auto overflow-x-hidden px-3">
               <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-gray-200 bg-white p-5 text-center text-2xl font-bold text-gray-500">
                 <span className="flex justify-center rounded-lg bg-white p-3 text-gray-700  ">
