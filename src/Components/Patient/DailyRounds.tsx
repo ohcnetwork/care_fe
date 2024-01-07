@@ -23,7 +23,7 @@ import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 import * as Notification from "../../Utils/Notifications";
 import { formatDateTime } from "../../Utils/utils";
 import BloodPressureFormField, {
-  meanArterialPressure,
+  BloodPressureValidator,
 } from "../Common/BloodPressureFormField";
 import { SymptomsSelect } from "../Common/SymptomsSelect";
 import TemperatureFormField from "../Common/TemperatureFormField";
@@ -63,9 +63,9 @@ const initForm: any = {
   ventilator_spo2: null,
   consciousness_level: "UNKNOWN",
   bp: {
-    systolic: -1,
-    diastolic: -1,
-    mean: -1,
+    systolic: undefined,
+    diastolic: undefined,
+    mean: undefined,
   },
   // bed: null,
 };
@@ -247,18 +247,14 @@ export const DailyRounds = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "bp":
-          if (
-            (state.form.bp?.systolic &&
-              state.form.bp?.diastolic &&
-              state.form.bp.systolic !== -1 &&
-              state.form.bp.diastolic === -1) ||
-            (state.form.bp.systolic === -1 && state.form.bp.diastolic !== -1)
-          ) {
-            errors.bp = "Please enter both systolic and diastolic values";
+        case "bp": {
+          const error = BloodPressureValidator(state.form.bp);
+          if (error) {
+            errors.bp = error;
             invalidForm = true;
           }
           return;
+        }
         default:
           return;
       }
@@ -303,27 +299,7 @@ export const DailyRounds = (props: any) => {
         if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
           data = {
             ...data,
-            bp:
-              state.form.bp?.systolic !== -1 && state.form.bp?.diastolic !== -1
-                ? {
-                    systolic: state.form.bp?.systolic
-                      ? Number(state.form.bp?.systolic)
-                      : -1,
-                    diastolic: state.form.bp?.diastolic
-                      ? Number(state.form.bp?.diastolic)
-                      : -1,
-                    mean:
-                      state.form.bp?.systolic && state.form.bp?.diastolic
-                        ? parseFloat(
-                            meanArterialPressure(state.form.bp).toFixed(2)
-                          )
-                        : -1,
-                  }
-                : {
-                    systolic: -1,
-                    diastolic: -1,
-                    mean: -1,
-                  },
+            bp: state.form.bp ?? {},
             pulse: state.form.pulse ?? null,
             resp: state.form.resp ?? null,
             temperature: state.form.temperature ?? null,
