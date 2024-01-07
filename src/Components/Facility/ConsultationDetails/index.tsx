@@ -46,6 +46,8 @@ const symptomChoices = [...SYMPTOM_CHOICES];
 
 export interface ConsultationTabProps {
   consultationId: string;
+  facilityId: string;
+  patientId: string;
   consultationData: ConsultationModel;
   patientData: PatientModel;
 }
@@ -189,6 +191,8 @@ export const ConsultationDetails = (props: any) => {
   const consultationTabProps: ConsultationTabProps = {
     consultationId,
     consultationData,
+    patientId: consultationData.patient,
+    facilityId: consultationData.facility,
     patientData,
   };
 

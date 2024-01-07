@@ -84,7 +84,7 @@ export const FacilityBedCapacity = (props: any) => {
   return (
     <section id="facility-bed-capacity-details">
       <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
-        <div className="justify-between md:flex  md:border-b md:pb-2">
+        <div className="justify-between md:flex md:pb-2">
           <div className="mb-2 text-xl font-semibold">Bed Capacity</div>
           <ButtonV2
             className="w-full md:w-auto"

@@ -320,7 +320,7 @@ export default function PatientInfoCard(props: {
                 );
               })}
             </div>
-            {!!consultation?.discharge_date && (
+            {consultation?.discharge_date ? (
               <div className="mt-3 flex gap-4 bg-cyan-300 px-3 py-1 text-sm font-medium">
                 <div>
                   <span>
@@ -345,6 +345,23 @@ export default function PatientInfoCard(props: {
                     )}
                   </span>
                 </div>
+              </div>
+            ) : (
+              <div className="mt-3 flex gap-4 bg-cyan-300 px-3 py-1 text-sm font-medium">
+                <span className="flex">
+                  {consultation?.encounter_date && (
+                    <div>
+                      Admission on{" "}
+                      {formatDateTime(consultation?.encounter_date)}
+                    </div>
+                  )}
+                  {consultation?.icu_admission_date && (
+                    <div>
+                      , ICU Admission on{" "}
+                      {formatDateTime(consultation?.icu_admission_date)}
+                    </div>
+                  )}
+                </span>
               </div>
             )}
           </div>
@@ -490,6 +507,7 @@ export default function PatientInfoCard(props: {
                           key={i}
                           className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
                           href={
+                            action[1] !== "Treatment Summary" &&
                             consultation?.admitted &&
                             !consultation?.current_bed &&
                             i === 1
@@ -498,6 +516,7 @@ export default function PatientInfoCard(props: {
                           }
                           onClick={() => {
                             if (
+                              action[1] !== "Treatment Summary" &&
                               consultation?.admitted &&
                               !consultation?.current_bed &&
                               i === 1

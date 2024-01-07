@@ -37,7 +37,6 @@ const getSystolicBPScore = (value?: number) => {
 };
 
 const getTempRange = (value?: number) => {
-  console.log(value);
   if (typeof value !== "number") return;
 
   if (value < 95) return 2;

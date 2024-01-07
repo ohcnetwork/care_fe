@@ -23,7 +23,6 @@ interface PatientNotesProps {
 export default function PatientNotesSlideover(props: PatientNotesProps) {
   const [show, setShow] = useState(true);
   const [patientActive, setPatientActive] = useState(true);
-  const [noteField, setNoteField] = useState("");
   const [reload, setReload] = useState(false);
   const [focused, setFocused] = useState(false);
 
@@ -36,6 +35,11 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
 
   const { facilityId, patientId, consultationId, setShowPatientNotesPopup } =
     props;
+
+  const localStorageKey = `patientNotesNoteField_${consultationId}`;
+  const [noteField, setNoteField] = useState(
+    localStorage.getItem(localStorageKey) || ""
+  );
 
   const onAddNote = async () => {
     const payload = {
@@ -126,6 +130,10 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       </div>
     </div>
   );
+
+  useEffect(() => {
+    localStorage.setItem(localStorageKey, noteField);
+  }, [noteField, localStorageKey]);
 
   return (
     <div
