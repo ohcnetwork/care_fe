@@ -46,7 +46,7 @@ export default function EventsList({ consultation }: Props) {
                         .join(" ") + " Event"
                     }
                     event={{
-                      type: "created",
+                      type: item.change_type.replace(/_/g, " ").toLowerCase(),
                       timestamp: item.created_date?.toString() ?? "",
                       by: item.caused_by,
                       icon: getEventIcon(item.event_type.name),
