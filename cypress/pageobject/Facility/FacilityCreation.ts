@@ -485,6 +485,14 @@ class FacilityPage {
   setQuantity(quantity: string) {
     cy.get("#quantity").click().clear().click().type(quantity);
   }
+
+  clickSaveUpdateMinimumQuantity() {
+    cy.get("#save-update-minimumquanitity").click();
+  }
+
+  clickSetMinimumQuantity() {
+    cy.get("#set-minimum-quantity").click();
+  }
 }
 
 export default FacilityPage;
