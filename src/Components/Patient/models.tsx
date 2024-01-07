@@ -68,6 +68,9 @@ export interface PatientModel {
   medical_history_details?: string;
   is_active?: boolean;
   is_antenatal?: boolean;
+  last_menstruation_start_date?: string;
+  is_postpartum?: boolean;
+  date_of_delivery?: string;
   is_migrant_worker?: boolean;
   ward?: string;
   local_body_object?: { id: number; name: string };
