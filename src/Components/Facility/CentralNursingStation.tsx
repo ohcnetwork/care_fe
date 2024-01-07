@@ -1,5 +1,5 @@
 import useFullscreen from "../../Common/hooks/useFullscreen";
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 import HL7PatientVitalsMonitor from "../VitalsMonitor/HL7PatientVitalsMonitor";
 import useFilters from "../../Common/hooks/useFilters";
 import Loading from "../Common/Loading";
@@ -39,11 +39,6 @@ export default function CentralNursingStation({ facilityId }: Props) {
   const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
     limit: PER_PAGE_LIMIT,
   });
-  const [isBedOccupied, setIsBedOccupied] = useState<boolean>(
-    qParams.bed_is_occupied === undefined
-      ? true
-      : qParams.bed_is_occupied === "true"
-  );
   const query = useQuery(routes.listPatientAssetBeds, {
     pathParams: { facility_external_id: facilityId },
     query: {
@@ -155,11 +150,14 @@ export default function CentralNursingStation({ facilityId }: Props) {
                     />
                     <CheckBoxFormField
                       name="bed_is_occupied"
-                      label="Hide Monitors without Patient"
-                      value={isBedOccupied}
+                      label="Hide Monitors without Patients"
+                      value={
+                        qParams.bed_is_occupied === undefined
+                          ? true
+                          : qParams.bed_is_occupied === "true"
+                      }
                       onChange={({ name, value }) => {
                         updateQuery({ [name]: value });
-                        setIsBedOccupied(value);
                       }}
                       labelClassName="text-sm"
                       errorClassName="hidden"
