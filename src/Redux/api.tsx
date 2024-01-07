@@ -75,6 +75,7 @@ import {
 import { IComment, IResource } from "../Components/Resource/models";
 import { IShift } from "../Components/Shifting/models";
 import { HCXPolicyModel } from "../Components/HCX/models";
+import { EventGeneric } from "../Components/Facility/ConsultationDetails/Events/types";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -513,6 +514,13 @@ const routes = {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/",
     method: "GET",
     TRes: Type<PaginatedResponse<DailyRoundsModel>>(),
+  },
+
+  getEvents: {
+    path: "/events.json",
+    method: "GET",
+    noAuth: true,
+    TRes: Type<PaginatedResponse<EventGeneric>>(),
   },
 
   getDailyReport: {
