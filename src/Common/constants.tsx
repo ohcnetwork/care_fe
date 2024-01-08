@@ -298,7 +298,8 @@ export const SYMPTOM_CHOICES = [
   { id: 30, text: "JOINT PAIN" },
   { id: 31, text: "REDNESS OF EYES" },
   { id: 32, text: "ANOREXIA" },
-  { id: 33, text: "NEW LOSS OF TASTE/SMELL" },
+  { id: 33, text: "NEW LOSS OF TASTE" },
+  { id: 34, text: "NEW LOSS OF SMELL" },
   { id: 9, text: "OTHERS" },
 ];
 
