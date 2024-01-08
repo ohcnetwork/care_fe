@@ -48,7 +48,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
       offset: (qParams.page ? qParams.page - 1 : 0) * PER_PAGE_LIMIT,
       asset_class: "HL7MONITOR",
       ordering: qParams.ordering || "bed__name",
-      bed_is_occupied: qParams.bed_is_occupied ?? true,
+      bed_is_occupied: qParams.hide_monitors_without_patient ? true : false,
     },
   });
 
@@ -149,16 +149,12 @@ export default function CentralNursingStation({ facilityId }: Props) {
                       errorClassName="hidden"
                     />
                     <CheckBoxFormField
-                      name="bed_is_occupied"
+                      name="hide_monitors_without_patient"
                       label="Hide Monitors without Patient"
-                      value={
-                        qParams.bed_is_occupied === undefined
-                          ? true
-                          : qParams.bed_is_occupied === "true"
-                      }
-                      onChange={({ name, value }) => {
-                        updateQuery({ [name]: value });
-                      }}
+                      value={JSON.parse(
+                        qParams.hide_monitors_without_patient ?? true
+                      )}
+                      onChange={(e) => updateQuery({ [e.name]: e.value })}
                       labelClassName="text-sm"
                       errorClassName="hidden"
                     />
