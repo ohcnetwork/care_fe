@@ -73,7 +73,8 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                               consent.expiry
                           ) < new Date()
                             ? "EXPIRED"
-                            : consent.status}
+                            : consent.consent_artefacts?.[0]?.status ??
+                              consent.status}
                         </td>
 
                         <td className="px-3 py-4 text-center text-sm">
@@ -129,7 +130,8 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
 
                         <td className="sticky right-0 whitespace-nowrap bg-white py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <div className="flex flex-col items-center justify-center gap-2">
-                            {consent.status === "GRANTED" &&
+                            {(consent.consent_artefacts?.[0]?.status ??
+                              consent.status) === "GRANTED" &&
                             new Date(
                               consent.consent_artefacts?.[0]?.expiry ??
                                 consent.expiry
