@@ -353,6 +353,13 @@ const routes = {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
     method: "PATCH",
   },
+  deleteFacilityAssetLocation: {
+    path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
+    method: "DELETE",
+    TRes: Type<null | {
+      detail?: string;
+    }>(),
+  },
 
   // Asset bed
   listAssetBeds: {
