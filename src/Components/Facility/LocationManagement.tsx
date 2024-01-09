@@ -1,4 +1,4 @@
-import { lazy } from "react";
+import { lazy, useState } from "react";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -9,6 +9,7 @@ import { LocationModel } from "./models";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import request from "../../Utils/request/request";
 import * as Notification from "../../Utils/Notifications.js";
+import DialogModal from "../Common/Dialog";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -17,6 +18,20 @@ interface Props {
 }
 
 export default function LocationManagement({ facilityId }: Props) {
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+
+  const deleteAssetLocation = async () => {
+    const res: any = await request(routes.deleteFacilityAssetLocation, {
+      pathParams: {
+        facility_external_id: facilityId ?? "",
+        external_id: "id" ?? "",
+      },
+    });
+    if (res?.res?.status === 204) {
+      Notification.Success({ msg: `Location ${name} deleted succcessully` });
+    }
+  };
+
   return (
     <PaginatedList
       route={routes.listFacilityAssetLocation}
@@ -57,13 +72,51 @@ export default function LocationManagement({ facilityId }: Props) {
               <Loading />
             </PaginatedList.WhenLoading>
             <PaginatedList.Items<LocationModel> className="my-8 grid gap-3 @4xl:grid-cols-2 @6xl:grid-cols-3 @[100rem]:grid-cols-4 lg:mx-8">
-              {(item) => <Location {...item} facility={{ id: facilityId }} />}
+              {(item) => (
+                <Location
+                  setShowDeletePopup={setShowDeletePopup}
+                  {...item}
+                  facility={{ id: facilityId }}
+                />
+              )}
             </PaginatedList.Items>
           </div>
 
           <div className="flex w-full items-center justify-center">
             <PaginatedList.Paginator hideIfSinglePage />
           </div>
+
+          <DialogModal
+            title="Delete Location"
+            show={showDeletePopup}
+            onClose={() => setShowDeletePopup(false)}
+          >
+            <p>Are you sure you want to delete this location?</p>
+            <div className="mt-4 flex justify-end gap-x-2">
+              <ButtonV2
+                id="cancel-delete-location"
+                variant="secondary"
+                border
+                className="w-full"
+                onClick={() => setShowDeletePopup(false)}
+                authorizeFor={NonReadOnlyUsers}
+              >
+                <CareIcon className="care-l-pen text-lg" />
+                Cancel
+              </ButtonV2>
+              <ButtonV2
+                id="confirm-delete-location"
+                variant="secondary"
+                border
+                className="w-full"
+                onClick={deleteAssetLocation}
+                authorizeFor={NonReadOnlyUsers}
+              >
+                <CareIcon className="care-l-trash text-lg" />
+                Delete
+              </ButtonV2>
+            </div>
+          </DialogModal>
         </Page>
       )}
     </PaginatedList>
@@ -75,22 +128,22 @@ const Location = ({
   description,
   middleware_address,
   location_type,
-  facility,
+  // facility,
   created_date,
   modified_date,
   id,
-}: LocationModel) => {
-  const deleteAssetLocation = async () => {
-    const res: any = await request(routes.deleteFacilityAssetLocation, {
-      pathParams: {
-        facility_external_id: facility?.id ?? "",
-        external_id: id ?? "",
-      },
-    });
-    if (res?.res?.status === 204) {
-      Notification.Success({ msg: `Location ${name} deleted succcessully` });
-    }
-  };
+}: LocationModel & { setShowDeletePopup: (e: boolean) => void }) => {
+  // const deleteAssetLocation = async () => {
+  //   const res: any = await request(routes.deleteFacilityAssetLocation, {
+  //     pathParams: {
+  //       facility_external_id: facility?.id ?? "",
+  //       external_id: id ?? "",
+  //     },
+  //   });
+  //   if (res?.res?.status === 204) {
+  //     Notification.Success({ msg: `Location ${name} deleted succcessully` });
+  //   }
+  // };
 
   return (
     <div className="flex h-full w-full flex-col rounded border border-gray-300 bg-white p-6 shadow-sm transition-all duration-200 ease-in-out hover:border-primary-400">
@@ -160,7 +213,7 @@ const Location = ({
             variant="secondary"
             border
             className="w-full"
-            onClick={deleteAssetLocation}
+            onClick={() => setShowDeletePopup(true)}
             authorizeFor={NonReadOnlyUsers}
           >
             <CareIcon className="care-l-trash text-lg" />
