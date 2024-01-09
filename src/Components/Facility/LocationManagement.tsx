@@ -141,28 +141,32 @@ const Location = ({
         Manage Beds
       </ButtonV2>
       <div className="mt-2 flex w-full flex-col gap-2 md:flex-row">
-        <ButtonV2
-          id="edit-location-button"
-          variant="secondary"
-          border
-          className="md:w-full"
-          href={`location/${id}/update`}
-          authorizeFor={NonReadOnlyUsers}
-        >
-          <CareIcon className="care-l-pen text-lg" />
-          Edit
-        </ButtonV2>
-        <ButtonV2
-          id="delete-location-button"
-          variant="secondary"
-          border
-          className="md:w-full"
-          onClick={deleteAssetLocation}
-          authorizeFor={NonReadOnlyUsers}
-        >
-          <CareIcon className="care-l-trash text-lg" />
-          Delete
-        </ButtonV2>
+        <div className="w-full md:w-1/2">
+          <ButtonV2
+            id="edit-location-button"
+            variant="secondary"
+            border
+            className="w-full"
+            href={`location/${id}/update`}
+            authorizeFor={NonReadOnlyUsers}
+          >
+            <CareIcon className="care-l-pen text-lg" />
+            Edit
+          </ButtonV2>
+        </div>
+        <div className="w-full md:w-1/2">
+          <ButtonV2
+            id="delete-location-button"
+            variant="secondary"
+            border
+            className="w-full"
+            onClick={deleteAssetLocation}
+            authorizeFor={NonReadOnlyUsers}
+          >
+            <CareIcon className="care-l-trash text-lg" />
+            Delete
+          </ButtonV2>
+        </div>
       </div>
 
       <div className="mt-3 flex items-center justify-between gap-4 text-sm font-medium text-gray-700">
