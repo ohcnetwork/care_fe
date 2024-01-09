@@ -159,6 +159,23 @@ describe("Location Management Section", () => {
     assetPagination.navigateToPreviousPage();
   });
 
+  it("Delete location", () => {
+    cy.awaitUrl("/facility");
+    cy.get("a").contains("Dummy Facility 1").click();
+    cy.get("button[id=headlessui-menu-button-:r3:]").click();
+    cy.get("div[id=location-management]").click();
+
+    // create new location
+    cy.get("button[id=add-new-location]").click();
+    cy.get("input[id=name]").type("Test Location");
+    cy.get("button[id=headlessui-listbox-button-:r16:]").click();
+    cy.get("li[id=location-type-option-OTHER]").click();
+    cy.get("button[id=submit]").click();
+
+    // delete location
+    cy.get("button[id=delete-location-button]").click();
+  });
+
   afterEach(() => {
     cy.saveLocalStorage();
   });
