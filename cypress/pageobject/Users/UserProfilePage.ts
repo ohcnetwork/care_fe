@@ -16,7 +16,7 @@ export default class UserProfilePage {
   }
 
   typeAge(age: string) {
-    cy.get("#age").clear().type(age);
+    cy.get("#age").click().clear().type(age);
   }
 
   selectGender(gender: string) {
@@ -25,31 +25,32 @@ export default class UserProfilePage {
   }
 
   typeEmail(email: string) {
-    cy.get("#email").clear().type(email);
+    cy.get("#email").click().clear().type(email);
   }
 
   typePhone(phone: string) {
-    cy.get("#phoneNumber").clear().type(phone);
+    cy.get("#phoneNumber").click().clear().type(phone);
   }
 
   typeWhatsApp(phone: string) {
-    cy.get("#altPhoneNumber").clear().type(phone);
+    cy.get("#altPhoneNumber").click().clear().type(phone);
   }
 
   typeWorkingHours(workinghours: string) {
-    cy.get("#weekly_working_hours").clear().type(workinghours);
+    cy.get("#weekly_working_hours").click().clear().type(workinghours);
   }
 
   typeDoctorQualification = (doctorQualification: string) => {
-    cy.get("#doctor_qualification").clear().type(doctorQualification);
+    cy.get("#doctor_qualification").click().clear().type(doctorQualification);
   };
 
   typeDoctorYoE = (doctorYoE: string) => {
-    cy.get("#doctor_experience_commenced_on").clear().type(doctorYoE);
+    cy.get("#doctor_experience_commenced_on").click().clear().type(doctorYoE);
   };
 
   typeMedicalCouncilRegistration = (medicalCouncilRegistration: string) => {
     cy.get("#doctor_medical_council_registration")
+      .click()
       .clear()
       .type(medicalCouncilRegistration);
   };
