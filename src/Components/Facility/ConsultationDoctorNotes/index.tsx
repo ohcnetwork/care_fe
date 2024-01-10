@@ -30,6 +30,18 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
   const [patientName, setPatientName] = useState("");
   const [focused, setFocused] = useState(false);
 
+  const textArea = document.getElementById("doctor_consultation_notes");
+  textArea?.addEventListener("keydown", autosize);
+  function autosize() {
+    setTimeout(function () {
+      if (textArea == null) return;
+      textArea.style.cssText =
+        "min-height:36px; height: 36px; overflow-y: hidden; height:" +
+        textArea.scrollHeight +
+        "px";
+    }, 0);
+  }
+
   const initialData: PatientNoteStateType = {
     notes: [],
     cPage: 1,
@@ -121,6 +133,8 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
 
         <div className="relative mx-4 flex items-center">
           <TextAreaFormField
+            id="doctor_consultation_notes"
+            rows={1}
             name="note"
             value={noteField}
             onChange={(e) => setNoteField(e.value)}
