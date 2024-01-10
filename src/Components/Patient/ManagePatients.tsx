@@ -536,12 +536,9 @@ export const PatientManager = () => {
         ? PATIENT_CATEGORIES.find((c) => c.text === category)?.twClass
         : "patient-unknown";
 
-      return (
-        <Link
-          key={`usr_${patient.id}`}
-          data-cy="patient"
-          href={patientUrl}
-          className={`ring/0 hover:ring/100 group relative w-full cursor-pointer rounded-lg bg-white p-4 pl-5 text-black shadow transition-all duration-200 ease-in-out hover:pl-5 ${categoryClass}-ring overflow-hidden`}
+      const children = (
+        <div
+          className={`ring/0 hover:ring/100 group relative w-full rounded-lg bg-white p-4 pl-5 text-black shadow transition-all duration-200 ease-in-out hover:pl-5 ${categoryClass}-ring overflow-hidden`}
         >
           <div
             className={`absolute inset-y-0 left-0 flex h-full w-1 items-center rounded-l-lg transition-all duration-200 ease-in-out group-hover:w-5 ${categoryClass}`}
@@ -743,6 +740,19 @@ export const PatientManager = () => {
                 </div>
               )}
           </div>
+        </div>
+      );
+
+      if (
+        authUser.user_type === "Staff" ||
+        authUser.user_type === "StaffReadOnly"
+      ) {
+        return children;
+      }
+
+      return (
+        <Link key={`usr_${patient.id}`} data-cy="patient" href={patientUrl}>
+          {children}
         </Link>
       );
     });
