@@ -1,45 +1,23 @@
-import { useCallback, useState } from "react";
 import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import { FormFieldBaseProps } from "../Form/FormFields/Utils";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useDispatch } from "react-redux";
-import { getStates } from "../../Redux/actions";
+import { StateModel } from "../Facility/models";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 
-export type IState = {
-  id: number;
-  name: string;
-};
-
-type Props = FormFieldBaseProps<IState["id"]> & {
+type Props = FormFieldBaseProps<StateModel["id"]> & {
   placeholder?: string;
 };
 
 export default function StateAutocompleteFormField(props: Props) {
-  const dispatch = useDispatch<any>();
-  const [states, setStates] = useState<IState[]>();
-
-  const fetchStates = useCallback(
-    async (status: any) => {
-      setStates(undefined);
-      const res = await dispatch(getStates());
-      if (!status.aborted && res && res.data) {
-        setStates(res.data.results);
-      }
-    },
-    [dispatch]
-  );
-
-  useAbortableEffect((status: statusType) => {
-    fetchStates(status);
-  }, []);
+  const { data, loading } = useQuery(routes.statesList);
 
   return (
     <AutocompleteFormField
       {...props}
-      options={states ?? []}
+      options={data?.results ?? []}
       optionLabel={(option) => option.name}
       optionValue={(option) => option.id}
-      isLoading={states === undefined}
+      isLoading={loading}
     />
   );
 }

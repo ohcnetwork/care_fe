@@ -8,7 +8,7 @@ import {
   emergency_phone_number,
   phone_number,
 } from "../../pageobject/constants";
-const yearOfBirth = "2023";
+const yearOfBirth = "2001";
 
 const calculateAge = () => {
   const currentYear = new Date().getFullYear();

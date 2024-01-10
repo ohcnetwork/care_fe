@@ -126,6 +126,7 @@ export default function MinQuantityList(props: any) {
             {inventoryItem.item_object?.default_unit?.name}
           </p>
           <ButtonV2
+            id="update-minimum-quantity"
             variant="secondary"
             ghost
             border
@@ -219,6 +220,7 @@ export default function MinQuantityList(props: any) {
       <div className="container mx-auto px-4 sm:px-8">
         <div className="py-8">
           <ButtonV2
+            id="set-minimum-quantity"
             className="ml-2"
             href={`/facility/${facilityId}/inventory/min_quantity/set`}
             authorizeFor={NonReadOnlyUsers}
