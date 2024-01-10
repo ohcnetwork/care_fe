@@ -117,8 +117,8 @@ export default function InventoryLog(props: any) {
 
   let inventoryList: any = [];
   if (inventory?.length) {
-    inventoryList = inventory.map((inventoryItem: any) => (
-      <tr key={inventoryItem.id} className="bg-white">
+    inventoryList = inventory.map((inventoryItem: any, index) => (
+      <tr id={`row-${index}`} key={inventoryItem.id} className="bg-white">
         <td className="border-b border-gray-200 p-5 text-sm hover:bg-gray-100">
           <div className="flex items-center">
             <div className="ml-3">
@@ -270,6 +270,7 @@ export default function InventoryLog(props: any) {
                     as accident.
                   </div>
                   <ButtonV2
+                    id="delete-last-entry"
                     variant="danger"
                     onClick={(_) =>
                       removeLastInventoryLog(inventory[0].item_object.id)
