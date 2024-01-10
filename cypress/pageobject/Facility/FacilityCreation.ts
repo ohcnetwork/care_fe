@@ -299,6 +299,7 @@ class FacilityPage {
     cy.intercept("https://maps.googleapis.com/maps/api/mapsjs/*").as("mapApi");
     cy.wait("@mapApi").its("response.statusCode").should("eq", 200);
     cy.get("input#pac-input").type(location).type("{enter}");
+    cy.wait(2000);
     cy.get("div#map-close").click();
   }
 
@@ -337,6 +338,10 @@ class FacilityPage {
     cy.get("[data-testid='District']").should("contain", expectedText);
   }
 
+  verifyLocalBodyBadgeContent(expectedText: string) {
+    cy.get("[data-testid='Local Body']").should("contain", expectedText);
+  }
+
   verifyFacilityTypeBadgeContent(expectedText: string) {
     cy.get("[data-testid='Facility type']").should("contain", expectedText);
   }
@@ -367,12 +372,22 @@ class FacilityPage {
     cy.get("[name='quantity']").type(quantity);
   }
 
+  fillInventoryMinimumDetails(name: string, quantity: string) {
+    cy.get("div#id").click();
+    cy.get("div#id ul li").contains(name).click();
+    cy.get("[name='quantity']").type(quantity);
+  }
+
   clickAddInventory() {
     cy.intercept("POST", "**/api/v1/facility/*/inventory/").as(
       "createInventory"
     );
     cy.get("button").contains("Add/Update Inventory").click();
     cy.wait("@createInventory").its("response.statusCode").should("eq", 201);
+  }
+
+  clickSetButton() {
+    cy.get("#submit").contains("Set").click();
   }
 
   fillResourceRequestDetails(
@@ -414,6 +429,7 @@ class FacilityPage {
   selectStateOnPincode(stateName) {
     this.getStateElement()
       .scrollIntoView()
+      .wait(2000)
       .should("be.visible")
       .then(($element) => {
         const text = $element.text();
@@ -427,6 +443,7 @@ class FacilityPage {
   selectDistrictOnPincode(districtName) {
     this.getDistrictElement()
       .scrollIntoView()
+      .wait(2000)
       .should("be.visible")
       .then(($element) => {
         const text = $element.text();
@@ -435,6 +452,46 @@ class FacilityPage {
           cy.get("li[role=option]").contains(districtName).click();
         }
       });
+  }
+
+  verifyPpeQuantity(text: string) {
+    cy.get("#PPE").contains(text).should("be.visible");
+  }
+
+  clickPpeQuantity() {
+    cy.get("#PPE").click();
+  }
+
+  clickLastEntry() {
+    cy.get("#delete-last-entry").click();
+  }
+
+  verifyStockInRow(rowId: string, stockText: string) {
+    cy.get(rowId).contains(stockText).should("be.visible");
+  }
+
+  verifyBadgeWithText(badgeClass: string, text: string) {
+    cy.get(badgeClass).contains(text).should("exist");
+  }
+
+  clickAddMinimumQuanitity() {
+    cy.get("#add-minimum-quantity").click();
+  }
+
+  clickUpdateMinimumQuantity() {
+    cy.get("#update-minimum-quantity").first().click();
+  }
+
+  setQuantity(quantity: string) {
+    cy.get("#quantity").click().clear().click().type(quantity);
+  }
+
+  clickSaveUpdateMinimumQuantity() {
+    cy.get("#save-update-minimumquanitity").click();
+  }
+
+  clickSetMinimumQuantity() {
+    cy.get("#set-minimum-quantity").click();
   }
 }
 

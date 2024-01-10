@@ -50,10 +50,7 @@ const DischargeModal = ({
   show,
   onClose,
   consultationData,
-  afterSubmit = () => {
-    onClose();
-    window.location.reload();
-  },
+  afterSubmit,
   new_discharge_reason = null,
   discharge_notes = "",
   discharge_date = dayjs().format("YYYY-MM-DDTHH:mm"),
@@ -164,7 +161,7 @@ const DischargeModal = ({
         msg: "Patient Discharged Successfully",
       });
 
-      afterSubmit();
+      afterSubmit?.();
     }
   };
 

@@ -1216,9 +1216,9 @@ export const ConsultationForm = (props: any) => {
                           A: "Date & Time of Admission to the Facility",
                           DC: "Date & Time of Domiciliary Care commencement",
                           OP: "Date & Time of Out-patient visit",
-                          DD: "Date & Time of Encounter",
-                          HI: "Date & Time of Encounter",
-                          R: "Date & Time of Encounter",
+                          DD: "Date & Time of Consultation",
+                          HI: "Date & Time of Consultation",
+                          R: "Date & Time of Consultation",
                         }[state.form.suggestion]
                       }
                       type="datetime-local"
