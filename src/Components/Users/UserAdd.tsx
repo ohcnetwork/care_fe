@@ -241,6 +241,11 @@ export const UserAdd = (props: UserProps) => {
     : // Exception to allow Staff to Create Doctors
       defaultAllowedUserTypes;
 
+  // TODO: refactor lines 227 through 248 to be more readable. This is messy.
+  if (authUser.user_type === "Nurse" || authUser.user_type === "Staff") {
+    userTypes.push(USER_TYPE_OPTIONS[6]); // Temperorily allows creation of users with elevated permissions due to introduction of new roles.
+  }
+
   const headerText = !userId ? "Add User" : "Update User";
   const buttonText = !userId ? "Save User" : "Update Details";
   const showLocalbody = ![
