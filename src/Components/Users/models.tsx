@@ -28,6 +28,7 @@ export type UserModel = UserBareMinimum & {
   local_body?: number;
   district?: number;
   state?: number;
+  video_connect_link: string;
   phone_number?: string;
   alt_phone_number?: string;
   gender?: GenderType;
@@ -62,6 +63,7 @@ export interface UserAssignedModel extends UserBareMinimum {
   state?: number;
   phone_number?: string;
   alt_phone_number?: string;
+  video_connect_link: string;
   gender?: number;
   age?: number;
   is_superuser?: boolean;

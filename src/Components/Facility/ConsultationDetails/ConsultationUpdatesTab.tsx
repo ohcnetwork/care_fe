@@ -2,8 +2,8 @@ import { lazy, useEffect, useState } from "react";
 import { ConsultationTabProps } from "./index";
 import { AssetBedModel, AssetClass, AssetData } from "../../Assets/AssetTypes";
 import { useDispatch } from "react-redux";
-import { getPermittedFacility, listAssetBeds } from "../../../Redux/actions";
-import { BedModel, FacilityModel } from "../models";
+import { listAssetBeds } from "../../../Redux/actions";
+import { BedModel } from "../models";
 import HL7PatientVitalsMonitor from "../../VitalsMonitor/HL7PatientVitalsMonitor";
 import VentilatorPatientVitalsMonitor from "../../VitalsMonitor/VentilatorPatientVitalsMonitor";
 import useVitalsAspectRatioConfig from "../../VitalsMonitor/useVitalsAspectRatioConfig";
@@ -13,6 +13,7 @@ import Chip from "../../../CAREUI/display/Chip";
 import { formatAge, formatDate, formatDateTime } from "../../../Utils/utils";
 import ReadMore from "../../Common/components/Readmore";
 import DailyRoundsList from "../Consultations/DailyRoundsList";
+import { getVitalsMonitorSocketUrl } from "../../VitalsMonitor/utils";
 
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
 
@@ -40,32 +41,22 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
       return;
 
     const fetchData = async () => {
-      const [facilityRes, assetBedRes] = await Promise.all([
-        dispatch(getPermittedFacility(props.consultationData.facility as any)),
-        dispatch(
-          listAssetBeds({
-            facility: props.consultationData.facility as any,
-            bed: props.consultationData.current_bed?.bed_object.id,
-          })
-        ),
-      ]);
-
-      const { middleware_address } = facilityRes.data as FacilityModel;
+      const assetBedRes = await dispatch(
+        listAssetBeds({
+          facility: props.consultationData.facility as any,
+          bed: props.consultationData.current_bed?.bed_object.id,
+        })
+      );
       const assetBeds = assetBedRes?.data?.results as AssetBedModel[];
 
       const monitorBedData = assetBeds?.find(
         (i) => i.asset_object?.asset_class === AssetClass.HL7MONITOR
       );
+
       setMonitorBedData(monitorBedData);
-      const assetDataForMonitor = monitorBedData?.asset_object;
-      const hl7Meta = assetDataForMonitor?.meta;
-      const hl7Middleware =
-        hl7Meta?.middleware_hostname ||
-        assetDataForMonitor?.location_object?.middleware_address ||
-        middleware_address;
-      if (hl7Middleware && hl7Meta?.local_ip_address) {
+      if (monitorBedData?.asset_object) {
         setHL7SocketUrl(
-          `wss://${hl7Middleware}/observations/${hl7Meta.local_ip_address}`
+          getVitalsMonitorSocketUrl(monitorBedData?.asset_object)
         );
       }
 
@@ -73,6 +64,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
         props.consultationData?.current_bed?.assets_objects?.find(
           (i) => i.asset_class === AssetClass.VENTILATOR
         );
+
       let ventilatorBedData;
       if (consultationBedVentilator) {
         ventilatorBedData = {
@@ -84,24 +76,12 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
           (i) => i.asset_object.asset_class === AssetClass.VENTILATOR
         );
       }
-      setVentilatorBedData(ventilatorBedData);
-      const ventilatorMeta = ventilatorBedData?.asset_object?.meta;
-      const ventilatorMiddleware =
-        ventilatorMeta?.middleware_hostname ||
-        consultationBedVentilator?.location_object.middleware_address ||
-        middleware_address;
-      if (ventilatorMiddleware && ventilatorMeta?.local_ip_address) {
-        setVentilatorSocketUrl(
-          `wss://${ventilatorMiddleware}/observations/${ventilatorMeta?.local_ip_address}`
-        );
-      }
 
-      if (
-        !(hl7Middleware && hl7Meta?.local_ip_address) &&
-        !(ventilatorMiddleware && ventilatorMeta?.local_ip_address)
-      ) {
-        setHL7SocketUrl(undefined);
-        setVentilatorSocketUrl(undefined);
+      setVentilatorBedData(ventilatorBedData);
+      if (ventilatorBedData?.asset_object) {
+        setVentilatorSocketUrl(
+          getVitalsMonitorSocketUrl(ventilatorBedData?.asset_object)
+        );
       }
     };
 
@@ -672,7 +652,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             </div>
           </div>
         </div>
-        <div className="w-full pl-4 xl:w-1/3">
+        <div className="w-full pl-0 md:pl-4 xl:w-1/3">
           <DailyRoundsList consultation={props.consultationData} />
         </div>
       </div>
