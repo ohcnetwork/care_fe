@@ -19,7 +19,12 @@ import { ConsultationModel } from "../Facility/models";
 import { PatientModel, SampleTestModel } from "./models";
 import { SampleTestCard } from "./SampleTestCard";
 import Chip from "../../CAREUI/display/Chip";
-import { classNames, formatAge, formatDateTime } from "../../Utils/utils";
+import {
+  classNames,
+  formatAge,
+  formatDate,
+  formatDateTime,
+} from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
@@ -570,7 +575,7 @@ export const PatientHome = (props: any) => {
                     Date of Birth
                   </div>
                   <div className="mt-1 text-sm font-medium leading-5">
-                    {patientData?.date_of_birth}
+                    {formatDate(patientData?.date_of_birth)}
                   </div>
                 </div>
                 <div className="sm:col-span-1">
