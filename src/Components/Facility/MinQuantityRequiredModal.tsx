@@ -154,7 +154,12 @@ export const MinQuantityRequiredModal = (props: any) => {
             />
           </div>
           <div className="flex justify-end">
-            <ButtonV2 variant="primary" onClick={handleSubmit} className="mr-2">
+            <ButtonV2
+              variant="primary"
+              onClick={handleSubmit}
+              className="mr-2"
+              id="save-update-minimumquanitity"
+            >
               Update
             </ButtonV2>
             <ButtonV2 variant="secondary" onClick={handleClose}>
