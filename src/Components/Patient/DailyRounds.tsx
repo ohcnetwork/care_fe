@@ -23,7 +23,7 @@ import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 import * as Notification from "../../Utils/Notifications";
 import { formatDateTime } from "../../Utils/utils";
 import BloodPressureFormField, {
-  meanArterialPressure,
+  BloodPressureValidator,
 } from "../Common/BloodPressureFormField";
 import { SymptomsSelect } from "../Common/SymptomsSelect";
 import TemperatureFormField from "../Common/TemperatureFormField";
@@ -62,6 +62,11 @@ const initForm: any = {
   rhythm_detail: "",
   ventilator_spo2: null,
   consciousness_level: "UNKNOWN",
+  bp: {
+    systolic: undefined,
+    diastolic: undefined,
+    mean: undefined,
+  },
   // bed: null,
 };
 
@@ -242,6 +247,14 @@ export const DailyRounds = (props: any) => {
             invalidForm = true;
           }
           return;
+        case "bp": {
+          const error = BloodPressureValidator(state.form.bp);
+          if (error) {
+            errors.bp = error;
+            invalidForm = true;
+          }
+          return;
+        }
         default:
           return;
       }
@@ -286,22 +299,13 @@ export const DailyRounds = (props: any) => {
         if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
           data = {
             ...data,
-            bp:
-              state.form.bp && state.form.bp.systolic && state.form.bp.diastolic
-                ? {
-                    systolic: Number(state.form.bp.systolic),
-                    diastolic: Number(state.form.bp.diastolic),
-                    mean: parseFloat(
-                      meanArterialPressure(state.form.bp).toFixed(2)
-                    ),
-                  }
-                : undefined,
-            pulse: state.form.pulse,
-            resp: state.form.resp,
-            temperature: state.form.temperature,
+            bp: state.form.bp ?? {},
+            pulse: state.form.pulse ?? null,
+            resp: state.form.resp ?? null,
+            temperature: state.form.temperature ?? null,
             rhythm: state.form.rhythm || 0,
             rhythm_detail: state.form.rhythm_detail,
-            ventilator_spo2: state.form.ventilator_spo2,
+            ventilator_spo2: state.form.ventilator_spo2 ?? null,
             consciousness_level: state.form.consciousness_level,
           };
         }

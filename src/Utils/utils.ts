@@ -462,3 +462,12 @@ export const compareBy = <T extends object>(key: keyof T) => {
     return a[key] < b[key] ? -1 : a[key] > b[key] ? 1 : 0;
   };
 };
+
+export const isValidUrl = (url?: string) => {
+  try {
+    new URL(url ?? "");
+    return true;
+  } catch {
+    return false;
+  }
+};
