@@ -27,7 +27,9 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
 
   const updateQuery = (filter: FilterState) => {
     filter = hasPagination ? { page: 1, limit, ...filter } : filter;
-    setQueryParams(Object.assign({}, qParams, filter), { replace: true });
+    const query = Object.assign({}, qParams, filter);
+    setQueryParams(query, { replace: true });
+    updateFiltersCache(query);
   };
   const updatePage = (page: number) => {
     if (!hasPagination) return;
@@ -37,8 +39,6 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
     setQueryParams(removeFromQuery(qParams, params));
   };
   const removeFilter = (param: string) => removeFilters([param]);
-
-  useEffect(() => updateFiltersCache(qParams), [qParams]);
 
   useEffect(() => {
     const cache = getFiltersCache();
