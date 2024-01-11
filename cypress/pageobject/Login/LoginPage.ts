@@ -10,8 +10,22 @@ class LoginPage {
     cy.loginByApi("devdoctor", "Coronasafe@123");
   }
 
+  loginAsStaff(): void {
+    cy.loginByApi("staffdev", "Coronasafe@123");
+  }
+
+  loginManuallyAsStaff(): void {
+    cy.get("input[id='username']").type("staffdev");
+    cy.get("input[id='password']").type("Coronasafe@123");
+    cy.get("button").contains("Login").click();
+  }
+
   login(username: string, password: string): void {
     cy.loginByApi(username, password);
+  }
+
+  CheckIfLoggedIn(): void {
+    cy.get("p").contains("Sign Out").should("exist");
   }
 }
 
