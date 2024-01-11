@@ -209,8 +209,7 @@ export interface LocationModel {
   middleware_address?: string;
   location_type?: AssetLocationType;
   facility?: {
-    name?: string;
-    id?: string;
+    name: string;
   };
   created_date?: string;
   modified_date?: string;
