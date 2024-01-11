@@ -2,6 +2,7 @@ import * as Notification from "../../Utils/Notifications.js";
 
 import {
   BREATHLESSNESS_LEVEL,
+  DISCHARGE_REASONS,
   FACILITY_TYPES,
   PATIENT_CATEGORIES,
   SHIFTING_CHOICES_PEACETIME,
@@ -282,7 +283,9 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         show={showDischargeModal}
         onClose={() => setShowDischargeModal(false)}
         consultationData={consultationData}
-        discharge_reason="EXP"
+        new_discharge_reason={
+          DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
+        }
         afterSubmit={() => {
           handleSubmit(true);
         }}
