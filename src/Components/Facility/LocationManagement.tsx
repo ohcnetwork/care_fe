@@ -37,7 +37,7 @@ export default function LocationManagement({ facilityId }: Props) {
     });
     if (res?.res?.status === 204) {
       Notification.Success({
-        msg: `Location ${showDeletePopup.name} deleted succcessully`,
+        msg: `Location ${showDeletePopup.name} deleted successully`,
       });
       PaginatedList.Refresh;
     } else {

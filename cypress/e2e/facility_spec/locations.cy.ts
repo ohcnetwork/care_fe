@@ -161,19 +161,21 @@ describe("Location Management Section", () => {
 
   it("Delete location", () => {
     cy.awaitUrl("/facility");
-    cy.get("a").contains("Dummy Facility 1").click();
-    cy.get("button[id=headlessui-menu-button-:r3:]").click();
-    cy.get("div[id=location-management]").click();
+    cy.get("a").contains("Dummy Facility 2").click().wait(1000);
+    cy.get("button").contains("Manage Facility").click().wait(100);
+    cy.get("div[id=location-management]").click().wait(1000);
 
     // create new location
-    cy.get("button[id=add-new-location]").click();
+    cy.get("button[id=add-new-location]").click().wait(1000);
     cy.get("input[id=name]").type("Test Location");
-    cy.get("button[id=headlessui-listbox-button-:r16:]").click();
+    cy.get("div[id=location-type]").click();
     cy.get("li[id=location-type-option-OTHER]").click();
-    cy.get("button[id=submit]").click();
+    cy.get("button[id=submit]").click().wait(1000);
 
     // delete location
-    cy.get("button[id=delete-location-button]").click();
+    cy.get("button[id=delete-location-button]").click().wait(1000);
+    cy.get("button[id=submit]").click();
+    cy.contains("Location Test Location deleted successfully").should("exist");
   });
 
   afterEach(() => {
