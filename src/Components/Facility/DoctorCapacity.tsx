@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useReducer, useState } from "react";
-import { useDispatch } from "react-redux";
 import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { createDoctor, getDoctor, listDoctor } from "../../Redux/actions";
@@ -9,7 +8,7 @@ import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
 import SelectMenuV2 from "../Form/SelectMenuV2";
-import { DoctorModal, OptionsType } from "./models";
+import { DoctorModal } from "./models";
 
 interface DoctorCapacityProps extends DoctorModal {
   facilityId: string;
@@ -18,8 +17,6 @@ interface DoctorCapacityProps extends DoctorModal {
   className?: string;
   id?: number;
 }
-
-const initDoctorTypes: Array<OptionsType> = [...DOCTOR_SPECIALIZATION];
 
 const initForm: any = {
   area: "",
@@ -51,13 +48,11 @@ const doctorCapacityReducer = (state = initialState, action: any) => {
 };
 
 export const DoctorCapacity = (props: DoctorCapacityProps) => {
-  const dispatchAction: any = useDispatch();
   const { facilityId, handleClose, handleUpdate, className, id } = props;
   const [state, dispatch] = useReducer(doctorCapacityReducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
   const [isLastOptionType, setIsLastOptionType] = useState(false);
-  const [doctorTypes, setDoctorTypes] =
-    useState<Array<OptionsType>>(initDoctorTypes);
+  const [doctorTypes, setDoctorTypes] = useState([...DOCTOR_SPECIALIZATION]);
 
   const headerText = !id ? "Add Doctor Capacity" : "Edit Doctor Capacity";
   const buttonText = !id
@@ -78,17 +73,15 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
               return;
             }
             // disable existing doctor types
-            const updatedDoctorTypes = initDoctorTypes.map(
-              (type: OptionsType) => {
-                const isExisting = existingData.find(
-                  (i: DoctorModal) => i.area === type.id
-                );
-                return {
-                  ...type,
-                  disabled: !!isExisting,
-                };
-              }
-            );
+            const updatedDoctorTypes = DOCTOR_SPECIALIZATION.map((type) => {
+              const isExisting = existingData.find(
+                (i: DoctorModal) => i.area === type.id
+              );
+              return {
+                ...type,
+                disabled: !!isExisting,
+              };
+            });
             setDoctorTypes(updatedDoctorTypes);
           }
         }
@@ -118,7 +111,7 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
 
   useEffect(() => {
     const lastDoctorType =
-      doctorTypes.filter((i: OptionsType) => i.disabled).length ===
+      doctorTypes.filter((i) => i.disabled).length ===
       DOCTOR_SPECIALIZATION.length - 1;
     setIsLastOptionType(lastDoctorType);
   }, [doctorTypes]);
@@ -163,7 +156,7 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
       setIsLoading(false);
       if (res && res.data) {
         // disable last added bed type
-        const updatedDoctorTypes = doctorTypes.map((type: OptionsType) => {
+        const updatedDoctorTypes = doctorTypes.map((type) => {
           return {
             ...type,
             disabled: res.data.area !== type.id ? type.disabled : true,
