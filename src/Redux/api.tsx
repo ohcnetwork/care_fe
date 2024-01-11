@@ -26,7 +26,6 @@ import {
   AssetService,
   AssetServiceUpdate,
   AssetTransaction,
-  AssetUpdate,
   AssetUptimeRecord,
   PatientAssetBed,
 } from "../Components/Assets/AssetTypes";
@@ -330,6 +329,7 @@ const routes = {
   deleteFacilityCoverImage: {
     path: "/api/v1/facility/{id}/cover_image/",
     method: "DELETE",
+    TRes: Type<Record<string, never>>(),
   },
 
   getFacilityUsers: {
@@ -345,6 +345,8 @@ const routes = {
   createFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/",
     method: "POST",
+    TBody: Type<AssetLocationObject>(),
+    TRes: Type<AssetLocationObject>(),
   },
   getFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
@@ -354,6 +356,8 @@ const routes = {
   updateFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
     method: "PUT",
+    TBody: Type<AssetLocationObject>(),
+    TRes: Type<AssetLocationObject>(),
   },
   partialUpdateFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
@@ -581,20 +585,18 @@ const routes = {
     TRes: Type<CapacityModal>(),
   },
 
-  updateDoctor: {
-    path: "/api/v1/facility/{facilityId}/hospital_doctor",
-    method: "PUT",
-  },
-
   deleteDoctor: {
-    path: "/api/v1/facility/{facilityId}/hospital_doctor",
+    path: "/api/v1/facility/{facilityId}/hospital_doctor/{area}/",
     method: "DELETE",
+    TRes: Type<Record<string, never>>(),
   },
 
   //Triage
   createTriage: {
     path: "/api/v1/facility/{facilityId}/patient_stats/",
     method: "POST",
+    TBody: Type<PatientStatsModel>(),
+    TRes: Type<PatientStatsModel>(),
   },
   getTriage: {
     path: "/api/v1/facility/{facilityId}/patient_stats/",
@@ -603,6 +605,7 @@ const routes = {
 
   getTriageDetails: {
     path: "/api/v1/facility/{facilityId}/patient_stats/{id}/",
+    TRes: Type<PatientStatsModel>(),
   },
 
   // //Care Center
@@ -1037,9 +1040,11 @@ const routes = {
   createAsset: {
     path: "/api/v1/asset/",
     method: "POST",
+    TBody: Type<AssetData>(),
+    TRes: Type<AssetData>(),
   },
   getAssetUserLocation: {
-    path: "​/api/v1/asset​/get_default_user_location​/",
+    path: "/api/v1/asset/get_default_user_location/",
     method: "GET",
   },
   createAssetUserLocation: {
@@ -1054,17 +1059,19 @@ const routes = {
   deleteAsset: {
     path: "/api/v1/asset/{external_id}/",
     method: "DELETE",
-    TRes: Type<AssetData>(),
+    TRes: Type<Record<string, never>>(),
   },
   updateAsset: {
     path: "/api/v1/asset/{external_id}/",
     method: "PUT",
+    TBody: Type<AssetData>(),
+    TRes: Type<AssetData>(),
   },
   partialUpdateAsset: {
     path: "/api/v1/asset/{external_id}/",
     method: "PATCH",
     TRes: Type<AssetData>(),
-    TBody: Type<AssetUpdate>(),
+    TBody: Type<Partial<AssetData>>(),
   },
 
   // Asset transaction endpoints
