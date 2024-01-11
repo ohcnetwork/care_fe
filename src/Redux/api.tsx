@@ -553,6 +553,8 @@ const routes = {
   createDoctor: {
     path: "/api/v1/facility/{facilityId}/hospital_doctor/",
     method: "POST",
+    TRes: Type<DoctorModal>(),
+    TBody: Type<DoctorModal>(),
   },
 
   getCapacity: {
@@ -577,12 +579,19 @@ const routes = {
   },
   getDoctor: {
     path: "/api/v1/facility/{facilityId}/hospital_doctor/{id}/",
+    TRes: Type<DoctorModal>(),
   },
 
   updateCapacity: {
     path: "/api/v1/facility/{facilityId}/capacity/{bed_id}/",
     method: "PUT",
     TRes: Type<CapacityModal>(),
+  },
+
+  updateDoctor: {
+    path: "/api/v1/facility/{facilityId}/hospital_doctor/{id}/",
+    method: "PUT",
+    TRes: Type<DoctorModal>(),
   },
 
   deleteDoctor: {

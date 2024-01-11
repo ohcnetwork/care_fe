@@ -1,7 +1,5 @@
-import { useCallback, useEffect, useReducer, useState } from "react";
+import { useReducer, useState } from "react";
 import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { createDoctor, getDoctor, listDoctor } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import ButtonV2, { Cancel } from "../Common/components/ButtonV2";
 import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
@@ -9,6 +7,9 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import { DoctorModal } from "./models";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 
 interface DoctorCapacityProps extends DoctorModal {
   facilityId: string;
@@ -47,74 +48,46 @@ const doctorCapacityReducer = (state = initialState, action: any) => {
   }
 };
 
+const getAllowedDoctorTypes = (existing?: DoctorModal[]) => {
+  if (!existing) return [...DOCTOR_SPECIALIZATION];
+
+  return DOCTOR_SPECIALIZATION.map((specialization) => {
+    const disabled = existing.some((i) => i.area === specialization.id);
+    return { ...specialization, disabled };
+  });
+};
+
 export const DoctorCapacity = (props: DoctorCapacityProps) => {
   const { facilityId, handleClose, handleUpdate, className, id } = props;
   const [state, dispatch] = useReducer(doctorCapacityReducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
-  const [isLastOptionType, setIsLastOptionType] = useState(false);
-  const [doctorTypes, setDoctorTypes] = useState([...DOCTOR_SPECIALIZATION]);
+
+  const specializationsQuery = useQuery(routes.listDoctor, {
+    pathParams: { facilityId },
+  });
+
+  const { loading } = useQuery(routes.getDoctor, {
+    pathParams: { facilityId },
+    prefetch: !!id,
+    onResponse: ({ data }) => {
+      if (!data) return;
+      dispatch({
+        type: "set_form",
+        form: { area: data.area, count: data.count },
+      });
+    },
+  });
+
+  const doctorTypes = getAllowedDoctorTypes(specializationsQuery.data?.results);
+
+  const isLastOptionType =
+    doctorTypes.filter((i) => i.disabled).length ===
+    DOCTOR_SPECIALIZATION.length - 1;
 
   const headerText = !id ? "Add Doctor Capacity" : "Edit Doctor Capacity";
   const buttonText = !id
     ? `Save ${!isLastOptionType ? "& Add More" : "Doctor Capacity"}`
     : "Update Doctor Capacity";
-
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      if (!id) {
-        // Add Form functionality
-        const doctorRes = await dispatchAction(listDoctor({}, { facilityId }));
-        if (!status.aborted) {
-          if (doctorRes && doctorRes.data) {
-            const existingData = doctorRes.data.results;
-            //  if all options are diabled
-            if (existingData.length === DOCTOR_SPECIALIZATION.length) {
-              return;
-            }
-            // disable existing doctor types
-            const updatedDoctorTypes = DOCTOR_SPECIALIZATION.map((type) => {
-              const isExisting = existingData.find(
-                (i: DoctorModal) => i.area === type.id
-              );
-              return {
-                ...type,
-                disabled: !!isExisting,
-              };
-            });
-            setDoctorTypes(updatedDoctorTypes);
-          }
-        }
-      } else {
-        // Edit Form functionality
-        const res = await dispatchAction(
-          getDoctor({ facilityId: facilityId, id: id })
-        );
-        if (res && res.data) {
-          dispatch({
-            type: "set_form",
-            form: { area: res.data.area, count: res.data.count },
-          });
-        }
-      }
-      setIsLoading(false);
-    },
-    [dispatchAction, facilityId, id]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [dispatch, fetchData, id]
-  );
-
-  useEffect(() => {
-    const lastDoctorType =
-      doctorTypes.filter((i) => i.disabled).length ===
-      DOCTOR_SPECIALIZATION.length - 1;
-    setIsLastOptionType(lastDoctorType);
-  }, [doctorTypes]);
 
   const validateData = () => {
     const errors = { ...initForm };
@@ -152,28 +125,23 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
         area: Number(state.form.area),
         count: Number(state.form.count),
       };
-      const res = await dispatchAction(createDoctor(id, data, { facilityId }));
+      const { res } = await (id
+        ? request(routes.updateDoctor, {
+            pathParams: { facilityId, id: `${id}` },
+            body: data,
+          })
+        : request(routes.createDoctor, {
+            pathParams: { facilityId },
+            body: data,
+          }));
       setIsLoading(false);
-      if (res && res.data) {
-        // disable last added bed type
-        const updatedDoctorTypes = doctorTypes.map((type) => {
-          return {
-            ...type,
-            disabled: res.data.area !== type.id ? type.disabled : true,
-          };
-        });
-        setDoctorTypes(updatedDoctorTypes);
-        // reset form
+      if (res?.ok) {
+        specializationsQuery.refetch();
         dispatch({ type: "set_form", form: initForm });
-        // show success message
         if (!id) {
-          Notification.Success({
-            msg: "Doctor count added successfully",
-          });
+          Notification.Success({ msg: "Doctor count added successfully" });
         } else {
-          Notification.Success({
-            msg: "Doctor count updated successfully",
-          });
+          Notification.Success({ msg: "Doctor count updated successfully" });
         }
       }
       handleUpdate();
@@ -184,7 +152,7 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
 
   return (
     <div className={className}>
-      {isLoading ? (
+      {isLoading || loading || specializationsQuery.loading ? (
         <div className="flex items-center justify-center">
           <div role="status">
             <svg
