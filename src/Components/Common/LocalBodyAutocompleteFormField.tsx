@@ -12,7 +12,7 @@ type Props = FormFieldBaseProps<LocalBodyModel["id"]> & {
 export default function LocalBodyAutocompleteFormField(props: Props) {
   const { data, loading } = useQuery(routes.getLocalbodyByDistrict, {
     pathParams: { id: props.district! },
-    prefetch: props.district === 0 || !!props.district,
+    prefetch: !!props.district,
   });
 
   return (

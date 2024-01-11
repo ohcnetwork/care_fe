@@ -12,7 +12,7 @@ type Props = FormFieldBaseProps<DistrictModel["id"]> & {
 export default function DistrictAutocompleteFormField(props: Props) {
   const { data, loading } = useQuery(routes.getDistrictByState, {
     pathParams: { id: props.state! },
-    prefetch: props.state === 0 || !!props.state,
+    prefetch: !!props.state,
   });
 
   return (
