@@ -92,8 +92,6 @@ export const Login = (props: { forgot?: boolean }) => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-
-    setLoading(true);
     invalidateFiltersCache();
 
     const validated = validateData();
@@ -102,7 +100,6 @@ export const Login = (props: { forgot?: boolean }) => {
     const { res } = await signIn(validated);
 
     setCaptcha(res?.status === 429);
-    setLoading(false);
   };
 
   const validateForgetData = () => {
@@ -282,7 +279,13 @@ export const Login = (props: { forgot?: boolean }) => {
             <div className="mb-8 w-[300px] text-4xl font-black text-primary-600">
               {t("auth_login_title")}
             </div>
-            <form onSubmit={handleSubmit}>
+            <form
+              onSubmit={(e) => {
+                setLoading(true);
+                handleSubmit(e);
+                setLoading(false);
+              }}
+            >
               <div>
                 <LegendInput
                   name="username"
