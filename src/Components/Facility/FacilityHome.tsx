@@ -475,15 +475,21 @@ export const FacilityHome = (props: any) => {
 const LiveMonitoringButton = () => {
   const facilityId = useSlug("facility");
   const [location, setLocation] = useState<string>();
+  const authUser = useAuthUser();
+
+  const userRoles = ["StateAdmin", "DistrictAdmin", "Doctor"];
 
   return (
     <Popover className="relative">
-      <Popover.Button className="mt-2 w-full">
-        <ButtonV2 variant="primary" ghost border className="w-full">
-          <CareIcon icon="l-video" className="text-lg" />
-          <span>Live Monitoring</span>
-        </ButtonV2>
-      </Popover.Button>
+      {userRoles.includes(authUser.user_type) && (
+        <Popover.Button className="mt-2 w-full">
+          <ButtonV2 variant="primary" ghost border className="w-full">
+            <CareIcon icon="l-video" className="text-lg" />
+            <span>Live Monitoring</span>
+          </ButtonV2>
+        </Popover.Button>
+      )}
+
       <Transition
         as={Fragment}
         enter="transition ease-out duration-200"
