@@ -43,7 +43,7 @@ export type UserModel = UserBareMinimum & {
   doctor_qualification?: string;
   doctor_experience_commenced_on?: string;
   doctor_medical_council_registration?: string;
-  weekly_working_hours?: string;
+  weekly_working_hours?: string | null;
 };
 
 export interface SkillObjectModel {

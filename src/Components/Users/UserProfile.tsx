@@ -34,7 +34,7 @@ type EditForm = {
   doctor_qualification: string | undefined;
   doctor_experience_commenced_on: number | string | undefined;
   doctor_medical_council_registration: string | undefined;
-  weekly_working_hours: string | undefined;
+  weekly_working_hours: string | null;
 };
 type ErrorForm = {
   firstName: string;
@@ -253,13 +253,11 @@ export default function UserProfile() {
           }
           return;
         case "weekly_working_hours":
-          if (!states.form[field]) {
-            errors[field] = "This field is required";
-            invalidForm = true;
-          } else if (
-            Number(states.form[field]) < 0 ||
-            Number(states.form[field]) > 168 ||
-            !/^\d+$/.test(states.form[field] ?? "")
+          if (
+            states.form[field] &&
+            (Number(states.form[field]) < 0 ||
+              Number(states.form[field]) > 168 ||
+              !/^\d+$/.test(states.form[field] ?? ""))
           ) {
             errors[field] =
               "Average weekly working hours must be a number between 0 and 168";
@@ -331,7 +329,11 @@ export default function UserProfile() {
           states.form.user_type === "Doctor"
             ? states.form.doctor_medical_council_registration
             : undefined,
-        weekly_working_hours: states.form.weekly_working_hours,
+        weekly_working_hours:
+          states.form.weekly_working_hours &&
+          states.form.weekly_working_hours !== ""
+            ? states.form.weekly_working_hours
+            : null,
       };
       const { res } = await request(routes.partialUpdateUser, {
         pathParams: { username: authUser.username },
@@ -588,7 +590,7 @@ export default function UserProfile() {
                       Average weekly working hours
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {userData?.weekly_working_hours || "-"}
+                      {userData?.weekly_working_hours ?? "-"}
                     </dd>
                   </div>
                   <div
@@ -707,7 +709,6 @@ export default function UserProfile() {
                         )}
                         <TextFormField
                           {...fieldProps("weekly_working_hours")}
-                          required
                           label="Average weekly working hours"
                           className="col-span-6 sm:col-span-3"
                           type="number"
