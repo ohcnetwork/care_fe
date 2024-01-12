@@ -92,15 +92,14 @@ export const Login = (props: { forgot?: boolean }) => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-
     setLoading(true);
     invalidateFiltersCache();
-
     const validated = validateData();
-    if (!validated) return;
-
+    if (!validated) {
+      setLoading(false);
+      return;
+    }
     const { res } = await signIn(validated);
-
     setCaptcha(res?.status === 429);
     setLoading(false);
   };
