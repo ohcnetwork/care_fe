@@ -1,4 +1,4 @@
-import { QueryParam, setQueryParamsOptions, useQueryParams } from "raviger";
+import { useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import GenericFilterBadge from "../../CAREUI/display/FilterBadge";
@@ -8,6 +8,7 @@ import { classNames } from "../../Utils/utils";
 
 export type FilterState = Record<string, unknown>;
 export type FilterParamKeys = string | string[];
+
 interface FilterBadgeProps {
   name: string;
   value?: string;
@@ -18,24 +19,28 @@ interface FilterBadgeProps {
  * A custom hook wrapped around raviger's `useQueryParams` hook to ease handling
  * of pagination and filters.
  */
-export default function useFilters({ limit = 14 }: { limit?: number }) {
+export default function useFilters({
+  limit = 14,
+  cacheBlacklist = [],
+}: {
+  limit?: number;
+  cacheBlacklist?: string[];
+}) {
   const { t } = useTranslation();
   const { kasp_string } = useConfig();
   const hasPagination = limit > 0;
   const [showFilters, setShowFilters] = useState(false);
-  const [qParams, _setQueryParams] = useQueryParams();
-
-  const setQueryParams = (
-    query: QueryParam,
-    options?: setQueryParamsOptions
-  ) => {
-    _setQueryParams(query, options);
-    updateFiltersCache(query);
-  };
+  const [qParams, setQueryParams] = useQueryParams();
 
   const updateQuery = (filter: FilterState) => {
     filter = hasPagination ? { page: 1, limit, ...filter } : filter;
-    setQueryParams(Object.assign({}, qParams, filter), { replace: true });
+    const updatedQParams = { ...qParams };
+    for (const key of cacheBlacklist) {
+      delete updatedQParams[key];
+    }
+    setQueryParams(Object.assign({}, updatedQParams, filter), {
+      replace: true,
+    });
   };
   const updatePage = (page: number) => {
     if (!hasPagination) return;
@@ -45,6 +50,15 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
     setQueryParams(removeFromQuery(qParams, params));
   };
   const removeFilter = (param: string) => removeFilters([param]);
+
+  useEffect(() => {
+    const updatedQParams = { ...qParams };
+
+    for (const key of cacheBlacklist) {
+      delete updatedQParams[key];
+    }
+    updateFiltersCache(updatedQParams);
+  }, [qParams, cacheBlacklist]);
 
   useEffect(() => {
     const cache = getFiltersCache();

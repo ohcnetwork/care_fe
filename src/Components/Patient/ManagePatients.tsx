@@ -99,6 +99,12 @@ export const PatientManager = () => {
     resultsPerPage,
   } = useFilters({
     limit: 12,
+    cacheBlacklist: [
+      "name",
+      "patient_no",
+      "phone_number",
+      "emergency_phone_number",
+    ],
   });
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
