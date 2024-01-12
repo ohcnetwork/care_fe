@@ -299,9 +299,13 @@ export const ConsultationDetails = (props: any) => {
                 </button>
                 {patientData.last_consultation?.id &&
                   isCameraAttached &&
-                  ["DistrictAdmin", "StateAdmin", "Doctor"].includes(
-                    authUser.user_type
-                  ) && (
+                  [
+                    "DistrictAdmin",
+                    "StateAdmin",
+                    "Doctor",
+                    "Nurse",
+                    "NurseReadOnly",
+                  ].includes(authUser.user_type) && (
                     <Link
                       href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
                       className="btn btn-primary m-1 w-full hover:text-white"
@@ -452,9 +456,13 @@ export const ConsultationDetails = (props: any) => {
                       isCameraAttached === false || // No camera attached
                       consultationData?.discharge_date || // Discharged
                       !consultationData?.current_bed?.bed_object?.id || // Not admitted to bed
-                      !["DistrictAdmin", "StateAdmin", "Doctor"].includes(
-                        authUser.user_type
-                      ) // Not admin or doctor
+                      ![
+                        "DistrictAdmin",
+                        "StateAdmin",
+                        "Doctor",
+                        "Nurse",
+                        "NurseReadOnly",
+                      ].includes(authUser.user_type) // Not admin or doctor
                     )
                       return null; // Hide feed tab
                   }
