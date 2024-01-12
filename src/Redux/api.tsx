@@ -356,9 +356,7 @@ const routes = {
   deleteFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
     method: "DELETE",
-    TRes: Type<null | {
-      detail?: string;
-    }>(),
+    TRes: Type<Record<string, never>>(),
   },
 
   // Asset bed

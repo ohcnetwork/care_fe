@@ -18,7 +18,7 @@ interface Props {
 }
 
 interface LocationProps extends LocationModel {
-  setShowDeletePopup: any;
+  setShowDeletePopup: (e: { open: boolean; name: string; id: string }) => void;
 }
 
 export default function LocationManagement({ facilityId }: Props) {
@@ -29,19 +29,16 @@ export default function LocationManagement({ facilityId }: Props) {
   });
 
   const deleteAssetLocation = async () => {
-    const res: any = await request(routes.deleteFacilityAssetLocation, {
+    const { res } = await request(routes.deleteFacilityAssetLocation, {
       pathParams: {
         facility_external_id: facilityId,
         external_id: showDeletePopup.id,
       },
     });
-    if (res?.res?.status === 204) {
+    if (res?.ok) {
       Notification.Success({
         msg: `Location ${showDeletePopup.name} deleted successully`,
       });
-      PaginatedList.Refresh;
-    } else {
-      Notification.Error({ msg: "Something went wrong!" });
     }
     setShowDeletePopup({ ...showDeletePopup, open: false });
   };
@@ -193,7 +190,9 @@ const Location = ({
           variant="secondary"
           border
           className="w-full"
-          onClick={() => setShowDeletePopup({ open: true, name: name, id: id })}
+          onClick={() =>
+            setShowDeletePopup({ open: true, name: name ?? "", id: id ?? "" })
+          }
           authorizeFor={NonReadOnlyUsers}
         >
           <CareIcon className="care-l-trash text-lg" />
