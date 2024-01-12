@@ -14,8 +14,8 @@ class LoginPage {
     cy.loginByApi("staffdev", "Coronasafe@123");
   }
 
-  loginManuallyAsStaff(): void {
-    cy.get("input[id='username']").type("staffdev");
+  loginManuallyAsDistrictAdmin(): void {
+    cy.get("input[id='username']").type("devdistrictadmin");
     cy.get("input[id='password']").type("Coronasafe@123");
     cy.get("button").contains("Login").click();
   }
