@@ -77,7 +77,6 @@ describe("Facility Homepage Function", () => {
 
   it("Search a facility in homepage and pagination", () => {
     // pagination of the facility page
-    cy.clearAllFilters();
     assetPagination.navigateToNextPage();
     assetPagination.navigateToPreviousPage();
     // search for a facility

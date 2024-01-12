@@ -1,4 +1,4 @@
-import { useQueryParams } from "raviger";
+import { QueryParam, setQueryParamsOptions, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import GenericFilterBadge from "../../CAREUI/display/FilterBadge";
@@ -23,13 +23,19 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
   const { kasp_string } = useConfig();
   const hasPagination = limit > 0;
   const [showFilters, setShowFilters] = useState(false);
-  const [qParams, setQueryParams] = useQueryParams();
+  const [qParams, _setQueryParams] = useQueryParams();
+
+  const setQueryParams = (
+    query: QueryParam,
+    options?: setQueryParamsOptions
+  ) => {
+    _setQueryParams(query, options);
+    updateFiltersCache(query);
+  };
 
   const updateQuery = (filter: FilterState) => {
     filter = hasPagination ? { page: 1, limit, ...filter } : filter;
-    const query = Object.assign({}, qParams, filter);
-    setQueryParams(query, { replace: true });
-    updateFiltersCache(query);
+    setQueryParams(Object.assign({}, qParams, filter), { replace: true });
   };
   const updatePage = (page: number) => {
     if (!hasPagination) return;
