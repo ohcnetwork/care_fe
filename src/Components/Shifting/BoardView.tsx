@@ -82,17 +82,17 @@ export default function BoardView() {
 
   const renderArrowIcons = (direction: "right" | "left") => {
     return (
-      <div
-        className={`relative z-20 self-center ${
-          direction === "right" ? "-left-12" : ""
-        }`}
-      >
-        <CareIcon
-          icon={`l-arrow-${direction}`}
-          className={"absolute inset-y-0 left-0 z-10 h-10 w-10 cursor-pointer"}
-          onClick={() => handleScroll(direction)}
-        />
-      </div>
+      // <div
+      // className={`relative z-20 self-center ${
+      //   direction === "right" ? "-left-12" : ""
+      // }`}
+      // >
+      <CareIcon
+        icon={`l-arrow-${direction}`}
+        className={"h-10 w-10 cursor-pointer"}
+        onClick={() => handleScroll(direction)}
+      />
+      // </div>
     );
   };
 
@@ -146,15 +146,15 @@ export default function BoardView() {
         </div>
       </div>
       <BadgesList {...{ qParams, FilterBadges }} />
-      <ScrollingComponent className="relative mt-4 flex max-h-[80vh] max-w-[100vw] flex-1 items-start px-4 pb-2">
-        <div className="mt-4 flex min-h-full w-full flex-1 items-start px-2 pb-2">
+      <ScrollingComponent className="relative mt-4 flex max-h-[80vh] w-full items-start pb-2">
+        <div className="mt-4 flex min-h-full w-[80vw] items-start pb-2">
           {isLoading ? (
             <Loading />
           ) : (
-            <>
+            <div className="flex w-full items-center">
               {renderArrowIcons("left")}
               <div
-                className="flex max-h-[75vh] w-full grow flex-row overflow-y-auto overflow-x-hidden"
+                className="flex max-h-[75vh] w-full flex-row overflow-y-auto overflow-x-hidden"
                 ref={containerRef}
               >
                 {boardFilter.map((board) => (
@@ -170,7 +170,7 @@ export default function BoardView() {
                 ))}
               </div>
               {renderArrowIcons("right")}
-            </>
+            </div>
           )}
         </div>
       </ScrollingComponent>
