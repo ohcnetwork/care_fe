@@ -13,12 +13,7 @@ import {
 } from "../../../Common/hooks/useMSEplayer";
 import { PTZState, useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 import { useEffect, useRef, useState } from "react";
-import {
-  // getConsultation,
-  getPermittedFacility,
-  listAssetBeds,
-  // partialUpdateAssetBed,
-} from "../../../Redux/actions";
+import { listAssetBeds } from "../../../Redux/actions";
 // import { statusType, useAbortableEffect } from "../../../Common/utils";
 import ButtonV2 from "../../Common/components/ButtonV2.js";
 
@@ -211,12 +206,17 @@ export const Feed: React.FC<IFeedProps> = ({ facilityId, consultationId }) => {
 
   useEffect(() => {
     const fetchFacility = async () => {
-      const res = await dispatch(getPermittedFacility(facilityId));
+      const { data, res } = await request(routes.getPermittedFacility, {
+        pathParams: { id: facilityId },
+      });
 
-      if (res?.status === 200 && res?.data) {
-        setResolvedMiddleware(res.data.middleware_address);
+      if (res?.ok && data) {
+        setResolvedMiddleware({
+          hostname: data?.middleware_address ?? "",
+          source: "asset",
+        });
         // setFacilityMiddlewareHostname(res.data.middleware_address);
-        //   useQuery(routes.getPermittedFacility, {
+        //   useQuery(routes.getPermittedFacilities, {
         //     pathParams: { id: facilityId || "" },
         //     onResponse: ({ res, data }) => {
         //       if (res && res.status === 200 && data && data.middleware_address) {
