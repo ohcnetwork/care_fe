@@ -82,17 +82,11 @@ export default function BoardView() {
 
   const renderArrowIcons = (direction: "right" | "left") => {
     return (
-      // <div
-      // className={`relative z-20 self-center ${
-      //   direction === "right" ? "-left-12" : ""
-      // }`}
-      // >
       <CareIcon
         icon={`l-arrow-${direction}`}
         className={"h-10 w-10 cursor-pointer"}
         onClick={() => handleScroll(direction)}
       />
-      // </div>
     );
   };
 
