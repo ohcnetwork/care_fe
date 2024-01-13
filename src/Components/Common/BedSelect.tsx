@@ -1,9 +1,9 @@
 import { useCallback } from "react";
-import { useDispatch } from "react-redux";
-import { listFacilityBeds } from "../../Redux/actions";
 import { BedModel } from "../Facility/models";
 import AutoCompleteAsync from "../Form/AutoCompleteAsync";
 import { useTranslation } from "react-i18next";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 interface BedSelectProps {
   name: string;
@@ -34,13 +34,11 @@ export const BedSelect = (props: BedSelectProps) => {
     location,
     showNOptions = 20,
   } = props;
-
-  const dispatchAction: any = useDispatch();
   const { t } = useTranslation();
 
   const onBedSearch = useCallback(
     async (text: string) => {
-      const params = {
+      const query = {
         limit: 50,
         offset: 0,
         search_text: text,
@@ -49,17 +47,17 @@ export const BedSelect = (props: BedSelectProps) => {
         location,
       };
 
-      const res = await dispatchAction(listFacilityBeds(params));
-      if (res && res.data) {
-        let beds = res.data.results;
-        if (unoccupiedOnly) {
-          beds = beds.filter((bed: BedModel) => bed?.is_occupied === false);
-        }
+      const { data } = await request(routes.listFacilityBeds, { query });
 
-        return beds;
+      if (unoccupiedOnly) {
+        return data?.results?.filter(
+          (bed: BedModel) => bed?.is_occupied === false
+        );
       }
+
+      return data?.results;
     },
-    [dispatchAction, facility, location, searchAll, unoccupiedOnly]
+    [facility, location, searchAll, unoccupiedOnly]
   );
 
   return (

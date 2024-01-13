@@ -3,6 +3,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { BedModel, FacilityModel } from "./models";
 import {
   CONSULTATION_SUGGESTION,
+  DISCHARGE_REASONS,
   ConsultationSuggestionValue,
   PATIENT_CATEGORIES,
   REVIEW_AT_CHOICES,
@@ -121,7 +122,7 @@ type FormDetails = {
   weight: string;
   height: string;
   bed: BedModel | null;
-  discharge_reason: string;
+  new_discharge_reason: number | null;
   cause_of_death: string;
   death_datetime: string;
   death_confirmed_doctor: string;
@@ -171,7 +172,7 @@ const initForm: FormDetails = {
   weight: "",
   height: "",
   bed: null,
-  discharge_reason: "",
+  new_discharge_reason: null,
   cause_of_death: "",
   death_datetime: "",
   death_confirmed_doctor: "",
@@ -229,11 +230,16 @@ type ConsultationFormSection =
   | "Treatment Plan"
   | "Bed Status";
 
-export const ConsultationForm = (props: any) => {
+type Props = {
+  facilityId: string;
+  patientId: string;
+  id?: string;
+};
+
+export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   const { goBack } = useAppHistory();
   const { kasp_enabled, kasp_string } = useConfig();
   const dispatchAction: any = useDispatch();
-  const { facilityId, patientId, id } = props;
   const [state, dispatch] = useAutoSaveReducer<FormDetails>(
     consultationFormReducer,
     initialState
@@ -344,7 +350,7 @@ export const ConsultationForm = (props: any) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       if (!patientId) setIsLoading(true);
-      const res = await dispatchAction(getConsultation(id));
+      const res = await dispatchAction(getConsultation(id!));
       handleFormFieldChange({
         name: "InvestigationAdvice",
         value: !Array.isArray(res.data.investigation)
@@ -397,7 +403,7 @@ export const ConsultationForm = (props: any) => {
             weight: res.data.weight ? res.data.weight : "",
             height: res.data.height ? res.data.height : "",
             bed: res.data?.current_bed?.bed_object || null,
-            discharge_reason: res.data?.discharge_reason || "",
+            new_discharge_reason: res.data?.new_discharge_reason || null,
             cause_of_death: res.data?.discharge_notes || "",
             death_datetime: res.data?.death_datetime || "",
             death_confirmed_doctor: res.data?.death_confirmed_doctor || "",
@@ -648,7 +654,9 @@ export const ConsultationForm = (props: any) => {
     const dischargeResponse = await dispatchAction(
       dischargePatient(
         {
-          discharge_reason: "EXP",
+          new_discharge_reason: DISCHARGE_REASONS.find(
+            (i) => i.text === "Expired"
+          )?.id,
           discharge_notes: cause_of_death,
           death_datetime: death_datetime,
           death_confirmed_doctor: death_confirmed_doctor,
@@ -743,7 +751,7 @@ export const ConsultationForm = (props: any) => {
       };
 
       const res = await dispatchAction(
-        id ? updateConsultation(id, data) : createConsultation(data)
+        id ? updateConsultation(id!, data) : createConsultation(data)
       );
       setIsLoading(false);
       if (res?.data && res.status !== 400) {

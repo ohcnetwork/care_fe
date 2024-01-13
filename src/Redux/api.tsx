@@ -27,6 +27,8 @@ import {
   AssetServiceUpdate,
   AssetTransaction,
   AssetUpdate,
+  AssetUptimeRecord,
+  PatientAssetBed,
 } from "../Components/Assets/AssetTypes";
 import {
   CapacityModal,
@@ -51,6 +53,7 @@ import {
   BedModel,
 } from "../Components/Facility/models";
 import {
+  IDeleteBedCapacity,
   IDeleteExternalResult,
   IExternalResult,
   IExternalResultCsv,
@@ -75,6 +78,10 @@ import {
 import { IComment, IResource } from "../Components/Resource/models";
 import { IShift } from "../Components/Shifting/models";
 import { HCXPolicyModel } from "../Components/HCX/models";
+import {
+  InvestigationGroup,
+  InvestigationType,
+} from "../Components/Facility/Investigations";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -284,6 +291,7 @@ const routes = {
 
   getAllFacilities: {
     path: "/api/v1/getallfacilities",
+    TRes: Type<PaginatedResponse<FacilityModel>>(),
   },
 
   createFacility: {
@@ -394,6 +402,7 @@ const routes = {
   listPatientAssetBeds: {
     path: "/api/v1/facility/{facility_external_id}/patient_asset_beds/",
     method: "GET",
+    TRes: Type<PaginatedResponse<PatientAssetBed>>(),
   },
 
   // Facility Beds
@@ -405,14 +414,19 @@ const routes = {
   createFacilityBed: {
     path: "/api/v1/bed/",
     method: "POST",
+    TBody: Type<BedModel>(),
+    TRes: Type<BedModel>(),
   },
   getFacilityBed: {
     path: "/api/v1/bed/{external_id}/",
     method: "GET",
+    TRes: Type<BedModel>(),
   },
   updateFacilityBed: {
     path: "/api/v1/bed/{external_id}/",
     method: "PUT",
+    TBody: Type<BedModel>(),
+    TRes: Type<BedModel>(),
   },
   deleteFacilityBed: {
     path: "/api/v1/bed/{external_id}/",
@@ -533,6 +547,7 @@ const routes = {
   createCapacity: {
     path: "/api/v1/facility/{facilityId}/capacity/",
     method: "POST",
+    TRes: Type<CapacityModal>(),
   },
 
   createDoctor: {
@@ -547,11 +562,13 @@ const routes = {
 
   getCapacityBed: {
     path: "/api/v1/facility/{facilityId}/capacity/{bed_id}/",
+    TRes: Type<CapacityModal>(),
   },
 
   deleteCapacityBed: {
     path: "/api/v1/facility/{facilityId}/capacity/{bed_id}/",
     method: "DELETE",
+    TRes: Type<IDeleteBedCapacity>(),
   },
 
   listDoctor: {
@@ -563,8 +580,9 @@ const routes = {
   },
 
   updateCapacity: {
-    path: "/api/v1/facility/{facilityId}/capacity",
+    path: "/api/v1/facility/{facilityId}/capacity/{bed_id}/",
     method: "PUT",
+    TRes: Type<CapacityModal>(),
   },
 
   updateDoctor: {
@@ -930,10 +948,12 @@ const routes = {
   listInvestigations: {
     path: "/api/v1/investigation/",
     method: "GET",
+    TRes: Type<PaginatedResponse<InvestigationType>>(),
   },
   listInvestigationGroups: {
-    path: "/api/v1/investigation/group",
+    path: "/api/v1/investigation/group/",
     method: "GET",
+    TRes: Type<PaginatedResponse<InvestigationGroup>>(),
   },
   createInvestigation: {
     path: "/api/v1/consultation/{consultation_external_id}/investigation/",
@@ -1229,10 +1249,12 @@ const routes = {
   listAssetAvailability: {
     path: "/api/v1/asset_availability/",
     method: "GET",
+    TRes: Type<PaginatedResponse<AssetUptimeRecord>>(),
   },
   getAssetAvailability: {
     path: "/api/v1/asset_availability/{id}",
     method: "GET",
+    TRes: Type<AssetUptimeRecord>(),
   },
 
   // Prescription endpoints
