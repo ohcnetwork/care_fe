@@ -175,7 +175,9 @@ describe("Location Management Section", () => {
     // delete location
     cy.get("button[id=delete-location-button]").click().wait(1000);
     cy.get("button[id=submit]").click();
-    cy.contains("Location Test Location deleted successfully").should("exist");
+    facilityLocation.verifyNotification(
+      "Location Test Location deleted successfully"
+    );
   });
 
   afterEach(() => {

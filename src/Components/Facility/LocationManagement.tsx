@@ -37,7 +37,7 @@ export default function LocationManagement({ facilityId }: Props) {
     });
     if (res?.ok) {
       Notification.Success({
-        msg: `Location ${showDeletePopup.name} deleted successully`,
+        msg: `Location ${showDeletePopup.name} deleted successfully`,
       });
     }
     setShowDeletePopup({ ...showDeletePopup, open: false });
