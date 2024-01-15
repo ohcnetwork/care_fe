@@ -17,6 +17,17 @@ interface PrimaryParametersPlotProps {
   consultationId: string;
 }
 
+const sanitizeBPAttribute = (value: number | undefined) => {
+  // Temp. hack until the cleaning of daily rounds as a db migration is done.
+  // TODO: remove once migration is merged.
+
+  if (value == null || value < 0) {
+    return;
+  }
+
+  return value;
+};
+
 export const PrimaryParametersPlot = ({
   consultationId,
 }: PrimaryParametersPlotProps) => {
@@ -77,19 +88,19 @@ export const PrimaryParametersPlot = ({
     {
       name: "diastolic",
       data: Object.values(results)
-        .map((p: any) => p.bp && p.bp.diastolic)
+        .map((p: any) => p.bp && sanitizeBPAttribute(p.bp.diastolic))
         .reverse(),
     },
     {
       name: "systolic",
       data: Object.values(results)
-        .map((p: any) => p.bp && p.bp.systolic)
+        .map((p: any) => p.bp && sanitizeBPAttribute(p.bp.systolic))
         .reverse(),
     },
     {
       name: "mean",
       data: Object.values(results)
-        .map((p: any) => p.bp && p.bp.mean)
+        .map((p: any) => p.bp && sanitizeBPAttribute(p.bp.mean))
         .reverse(),
     },
   ];

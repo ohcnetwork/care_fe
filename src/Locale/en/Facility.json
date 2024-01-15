@@ -33,7 +33,6 @@
   "asset_location": "Asset Location",
   "asset_type": "Asset Type",
   "asset_class": "Asset Class",
-  "description": "Description",
   "details_about_the_equipment": "Details about the equipment",
   "working_status": "Working Status",
   "why_the_asset_is_not_working": "Why the asset is not working?",

@@ -1,7 +1,11 @@
 import { navigate } from "raviger";
 import { lazy, useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { GENDER_TYPES, SAMPLE_TEST_STATUS } from "../../Common/constants";
+import {
+  DISCHARGE_REASONS,
+  GENDER_TYPES,
+  SAMPLE_TEST_STATUS,
+} from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   getConsultationList,
@@ -19,7 +23,12 @@ import { ConsultationModel } from "../Facility/models";
 import { PatientModel, SampleTestModel } from "./models";
 import { SampleTestCard } from "./SampleTestCard";
 import Chip from "../../CAREUI/display/Chip";
-import { classNames, formatAge, formatDateTime } from "../../Utils/utils";
+import {
+  classNames,
+  formatAge,
+  formatDate,
+  formatDateTime,
+} from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
@@ -311,20 +320,18 @@ export const PatientHome = (props: any) => {
     patientData.medical_history.length
   ) {
     const medHis = patientData.medical_history;
-    patientMedHis = medHis.map((item: any, idx: number) => (
-      <div className="sm:col-span-1" key={`med_his_${idx}`}>
-        {item?.disease !== "NO" && (
-          <>
-            <div className="overflow-x-scroll text-sm font-semibold leading-5 text-zinc-400">
-              {item.disease}
-            </div>
-            <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
-              {item.details}
-            </div>
-          </>
-        )}
-      </div>
-    ));
+    patientMedHis = medHis
+      .filter((item) => item.disease !== "NO")
+      .map((item, idx) => (
+        <div className="sm:col-span-1" key={`med_his_${idx}`}>
+          <div className="break-words text-sm font-semibold leading-5 text-zinc-400">
+            {item.disease}
+          </div>
+          <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
+            {item.details}
+          </div>
+        </div>
+      ));
   }
 
   let consultationList, sampleList;
@@ -572,7 +579,7 @@ export const PatientHome = (props: any) => {
                     Date of Birth
                   </div>
                   <div className="mt-1 text-sm font-medium leading-5">
-                    {patientData?.date_of_birth}
+                    {formatDate(patientData?.date_of_birth)}
                   </div>
                 </div>
                 <div className="sm:col-span-1">
@@ -758,7 +765,8 @@ export const PatientHome = (props: any) => {
                 </div>
               </div>
               <div className="py-2">
-                {patientData.last_consultation?.discharge_reason === "EXP" && (
+                {patientData.last_consultation?.new_discharge_reason ===
+                  DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id && (
                   <div>
                     <ButtonV2
                       className="mt-6 w-full"

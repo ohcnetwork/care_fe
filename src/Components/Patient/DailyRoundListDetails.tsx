@@ -158,20 +158,14 @@ export const DailyRoundListDetails = (props: any) => {
                 <span className="font-semibold leading-relaxed">
                   Systolic:{" "}
                 </span>
-                {dailyRoundListDetailsData.bp?.systolic &&
-                dailyRoundListDetailsData.bp?.systolic !== -1
-                  ? dailyRoundListDetailsData.bp?.systolic
-                  : "-"}
+                {dailyRoundListDetailsData.bp?.systolic ?? "-"}
               </div>
               <div className="flex">
                 {" "}
                 <span className="font-semibold leading-relaxed">
                   Diastolic:
                 </span>
-                {dailyRoundListDetailsData.bp?.diastolic &&
-                dailyRoundListDetailsData.bp?.diastolic !== -1
-                  ? dailyRoundListDetailsData.bp?.diastolic
-                  : "-"}
+                {dailyRoundListDetailsData.bp?.diastolic ?? "-"}
               </div>
             </div>
           </div>
