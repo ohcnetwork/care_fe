@@ -321,6 +321,7 @@ class FacilityPage {
     cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");
     cy.get("[id='facility-details']").first().click();
     cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
+    cy.get("h1.text-3xl.font-bold", { timeout: 10000 }).should("be.visible");
   }
 
   verifyFacilityBadgeContent(expectedText: string) {

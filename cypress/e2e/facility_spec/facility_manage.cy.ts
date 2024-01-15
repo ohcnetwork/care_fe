@@ -1,10 +1,12 @@
 import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import FacilityManage from "../../pageobject/Facility/FacilityManage";
+import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 
 describe("Facility Manage Functions", () => {
   const loginPage = new LoginPage();
   const facilityManage = new FacilityManage();
+  const facilityPage = new FacilityPage();
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -16,10 +18,7 @@ describe("Facility Manage Functions", () => {
     cy.restoreLocalStorage();
     cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/");
-    cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");
-    cy.get("[id='facility-details']").first().click();
-    cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
-    cy.get("h1.text-3xl.font-bold", { timeout: 10000 }).should("be.visible");
+    facilityPage.visitAlreadyCreatedFacility();
   });
 
   it("Facility Cover Image button functionality", () => {
