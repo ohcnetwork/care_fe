@@ -51,6 +51,7 @@ import {
   LocationModel,
   PatientNotesModel,
   BedModel,
+  InventorySummaryResponse,
 } from "../Components/Facility/models";
 import {
   IDeleteBedCapacity,
@@ -797,8 +798,9 @@ const routes = {
     method: "PATCH",
   },
   getInventorySummary: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/{facility_external_id}/inventorysummary/",
     method: "GET",
+    TRes: Type<PaginatedResponse<InventorySummaryResponse>>(),
   },
   getItemName: {
     path: "/api/v1/items",
