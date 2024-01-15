@@ -1,7 +1,10 @@
 import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
 import LoginPage from "../../pageobject/Login/LoginPage";
+import FacilityManage from "../../pageobject/Facility/FacilityManage";
+
 describe("Facility Manage Functions", () => {
   const loginPage = new LoginPage();
+  const facilityManage = new FacilityManage();
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -21,13 +24,10 @@ describe("Facility Manage Functions", () => {
 
   it("Facility Cover Image button functionality", () => {
     // It's only button functionality because we can't access S3 bucket in local
-    cy.get("#facility-coverimage").click({ force: true });
-    cy.get("#upload-cover-image").should("be.visible");
-    cy.get("#upload-cover-image")
-      .selectFile("cypress/fixtures/facilitycoverimage.jpg", { force: true })
-      .wait(100);
-    cy.get("#save-cover-image").scrollIntoView();
-    cy.get("#save-cover-image").click();
+    facilityManage.clickCoverImage();
+    facilityManage.verifyUploadButtonVisible();
+    facilityManage.uploadCoverImage("facilitycoverimage.jpg");
+    facilityManage.clickSaveCoverImage();
   });
 
   afterEach(() => {
