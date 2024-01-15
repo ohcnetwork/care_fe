@@ -27,10 +27,6 @@ class ShiftingPage {
     return cy.get("#is-up-shift");
   }
 
-  diseaseStatusInput() {
-    return cy.get("#disease-status");
-  }
-
   isAntenatalInput() {
     return cy.get("#is-antenatal");
   }
@@ -129,9 +125,6 @@ class ShiftingPage {
 
     this.isUpShiftInput().click();
     cy.get("[role='option']").contains(is_up_shift).click();
-
-    this.diseaseStatusInput().click();
-    cy.get("[role='option']").contains(disease_status).click();
 
     this.isAntenatalInput().click();
     cy.get("[role='option']").contains(is_antenatal).click();
