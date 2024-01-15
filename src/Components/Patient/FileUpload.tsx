@@ -276,6 +276,7 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const handleClose = () => {
     setDownloadURL("");
+    setPreviewImage(null);
     setFileState({
       ...file_state,
       open: false,
@@ -1212,6 +1213,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   </ButtonV2>
                   <Submit
                     onClick={() => {
+                      setPreviewImage(null);
                       setModalOpenForCamera(false);
                     }}
                     className="m-2"
@@ -1272,6 +1274,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     <Submit
                       onClick={() => {
                         setModalOpenForCamera(false);
+                        setPreviewImage(null);
                       }}
                     >
                       {t("submit")}

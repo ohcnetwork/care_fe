@@ -27,6 +27,7 @@ import {
   AssetServiceUpdate,
   AssetTransaction,
   AssetUpdate,
+  AssetUptimeRecord,
   PatientAssetBed,
 } from "../Components/Assets/AssetTypes";
 import {
@@ -77,6 +78,10 @@ import {
 import { IComment, IResource } from "../Components/Resource/models";
 import { IShift } from "../Components/Shifting/models";
 import { HCXPolicyModel } from "../Components/HCX/models";
+import {
+  InvestigationGroup,
+  InvestigationType,
+} from "../Components/Facility/Investigations";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -286,6 +291,7 @@ const routes = {
 
   getAllFacilities: {
     path: "/api/v1/getallfacilities",
+    TRes: Type<PaginatedResponse<FacilityModel>>(),
   },
 
   createFacility: {
@@ -408,14 +414,19 @@ const routes = {
   createFacilityBed: {
     path: "/api/v1/bed/",
     method: "POST",
+    TBody: Type<BedModel>(),
+    TRes: Type<BedModel>(),
   },
   getFacilityBed: {
     path: "/api/v1/bed/{external_id}/",
     method: "GET",
+    TRes: Type<BedModel>(),
   },
   updateFacilityBed: {
     path: "/api/v1/bed/{external_id}/",
     method: "PUT",
+    TBody: Type<BedModel>(),
+    TRes: Type<BedModel>(),
   },
   deleteFacilityBed: {
     path: "/api/v1/bed/{external_id}/",
@@ -933,10 +944,12 @@ const routes = {
   listInvestigations: {
     path: "/api/v1/investigation/",
     method: "GET",
+    TRes: Type<PaginatedResponse<InvestigationType>>(),
   },
   listInvestigationGroups: {
-    path: "/api/v1/investigation/group",
+    path: "/api/v1/investigation/group/",
     method: "GET",
+    TRes: Type<PaginatedResponse<InvestigationGroup>>(),
   },
   createInvestigation: {
     path: "/api/v1/consultation/{consultation_external_id}/investigation/",
@@ -1232,10 +1245,12 @@ const routes = {
   listAssetAvailability: {
     path: "/api/v1/asset_availability/",
     method: "GET",
+    TRes: Type<PaginatedResponse<AssetUptimeRecord>>(),
   },
   getAssetAvailability: {
     path: "/api/v1/asset_availability/{id}",
     method: "GET",
+    TRes: Type<AssetUptimeRecord>(),
   },
 
   // Prescription endpoints
