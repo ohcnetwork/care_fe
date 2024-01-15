@@ -2,7 +2,6 @@ import * as Notification from "../../Utils/Notifications.js";
 
 import {
   BLOOD_GROUPS,
-  DISEASE_STATUS,
   GENDER_TYPES,
   MEDICAL_HISTORY_CHOICES,
   TEST_TYPE,
@@ -93,7 +92,6 @@ const medicalHistoryChoices = MEDICAL_HISTORY_CHOICES.reduce(
   []
 );
 const genderTypes = GENDER_TYPES;
-const diseaseStatus = [...DISEASE_STATUS];
 const bloodGroups = [...BLOOD_GROUPS];
 const testType = [...TEST_TYPE];
 const vaccines = ["Select", ...VACCINES];
@@ -105,7 +103,6 @@ const initForm: any = {
   phone_number: "+91",
   emergency_phone_number: "+91",
   blood_group: "",
-  disease_status: diseaseStatus[2],
   is_declared_positive: "false",
   date_declared_positive: new Date(),
   date_of_birth: null,
@@ -351,12 +348,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       field.onChange({
         name: "village",
         value: res.data.village ? res.data.village : state.form.village,
-      });
-      field.onChange({
-        name: "disease_status",
-        value: res.data.result
-          ? res.data.result.toUpperCase()
-          : state.form.disease_status,
       });
       field.onChange({
         name: "test_type",
@@ -667,16 +658,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               "Date should not be before the date of sample collection";
           }
           return;
-        case "disease_status":
-          if (form[field] === "POSITIVE") {
-            if (!form.date_of_test) {
-              errors["date_of_test"] = "Please fill the date of sample testing";
-            }
-            if (!form.date_of_result) {
-              errors["date_of_result"] = "Please fill the date of result";
-            }
-          }
-          return;
         case "medical_history":
           if (!form[field].length) {
             errors[field] = "Please fill the medical history";
@@ -742,7 +723,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       phone_number: parsePhoneNumber(formData.phone_number),
       emergency_phone_number: parsePhoneNumber(formData.emergency_phone_number),
       date_of_birth: dateQueryString(formData.date_of_birth),
-      disease_status: formData.disease_status,
       date_of_test: formData.date_of_test ? formData.date_of_test : undefined,
       date_of_result: formData.date_of_result
         ? formData.date_of_result
@@ -1698,20 +1678,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   </div>
                                 </div>
                               </CollapseV2>
-                              <div
-                                data-testid="disease-status"
-                                id="disease_status-div"
-                              >
-                                <SelectFormField
-                                  {...field("disease_status")}
-                                  id="disease_status"
-                                  label="COVID Disease Status"
-                                  options={diseaseStatus}
-                                  optionLabel={(o) => o}
-                                  optionValue={(o) => o}
-                                  required
-                                />
-                              </div>
                               <div id="test_type-div">
                                 <SelectFormField
                                   {...field("test_type")}
