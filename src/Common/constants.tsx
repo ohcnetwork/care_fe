@@ -28,6 +28,8 @@ export type UserRole =
   | "Volunteer"
   | "StaffReadOnly"
   | "Staff"
+  | "NurseReadOnly"
+  | "Nurse"
   | "Doctor"
   | "WardAdmin"
   | "LocalBodyAdmin"
@@ -47,6 +49,8 @@ export const USER_TYPE_OPTIONS: {
   { id: "Volunteer", role: "Volunteer", readOnly: false },
   { id: "StaffReadOnly", role: "Staff", readOnly: true },
   { id: "Staff", role: "Staff", readOnly: false },
+  { id: "NurseReadOnly", role: "Nurse", readOnly: true },
+  { id: "Nurse", role: "Nurse", readOnly: false },
   { id: "Doctor", role: "Doctor", readOnly: false },
   { id: "WardAdmin", role: "Ward Admin", readOnly: false },
   { id: "LocalBodyAdmin", role: "Local Body Admin", readOnly: false },
@@ -294,10 +298,23 @@ export const SYMPTOM_CHOICES = [
 ];
 
 export const DISCHARGE_REASONS = [
-  { id: "REC", text: "Recovered" },
-  { id: "EXP", text: "Expired" },
-  { id: "REF", text: "Referred" },
-  { id: "LAMA", text: "LAMA" },
+  { id: 1, text: "Recovered" },
+  { id: 2, text: "Referred" },
+  { id: 3, text: "Expired" },
+  { id: 4, text: "LAMA" },
+];
+
+export const CONSCIOUSNESS_LEVEL = [
+  { id: "UNRESPONSIVE", text: "Unresponsive" },
+  { id: "RESPONDS_TO_PAIN", text: "Responds to Pain" },
+  { id: "RESPONDS_TO_VOICE", text: "Responds to Voice" },
+  { id: "ALERT", text: "Alert" },
+  { id: "AGITATED_OR_CONFUSED", text: "Agitated or Confused" },
+  {
+    id: "ONSET_OF_AGITATION_AND_CONFUSION",
+    text: "Onset of Agitation and Confusion",
+  },
+  { id: "UNKNOWN", text: "Unknown" },
 ];
 
 export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
@@ -403,24 +420,6 @@ export const SAMPLE_FLOW_RULES = {
   ],
   RECEIVED_AND_FORWARED: ["RECEIVED_AT_LAB", "COMPLETED"],
   RECEIVED_AT_LAB: ["COMPLETED"],
-};
-
-export const ROLE_STATUS_MAP = {
-  Staff: ["SENT_TO_COLLECTON_CENTRE"],
-  DistrictAdmin: [
-    "APPROVED",
-    "DENIED",
-    "SENT_TO_COLLECTON_CENTRE",
-    "RECEIVED_AND_FORWARED",
-  ],
-  StateLabAdmin: [
-    "APPROVED",
-    "DENIED",
-    "SENT_TO_COLLECTON_CENTRE",
-    "RECEIVED_AND_FORWARED",
-    "RECEIVED_AT_LAB",
-    "COMPLETED",
-  ],
 };
 
 export const DISEASE_STATUS = [
@@ -1029,6 +1028,8 @@ export const USER_TYPES_MAP = {
   StaffReadOnly: "Staff",
   Staff: "Staff",
   Doctor: "Doctor",
+  Nurse: "Nurse",
+  NurseReadOnly: "Nurse",
   WardAdmin: "Ward Admin",
   LocalBodyAdmin: "Local Body Admin",
   DistrictLabAdmin: "District Lab Admin",
@@ -1038,7 +1039,7 @@ export const USER_TYPES_MAP = {
   StateReadOnlyAdmin: "State Admin",
   StateAdmin: "State Admin",
   RemoteSpecialist: "Remote Specialist",
-};
+} as const;
 
 export const AREACODES: Record<string, string[]> = {
   CA: [

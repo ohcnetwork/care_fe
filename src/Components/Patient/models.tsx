@@ -282,9 +282,9 @@ export interface DailyRoundsModel {
   rhythm?: string;
   rhythm_detail?: string;
   bp?: {
-    diastolic: number;
-    mean: number;
-    systolic: number;
+    diastolic?: number;
+    mean?: number;
+    systolic?: number;
   };
   pulse?: number;
   resp?: number;
@@ -297,7 +297,7 @@ export interface DailyRoundsModel {
   medication_given?: Array<any>;
   additional_symptoms_text?: string;
   current_health?: string;
-  id: string;
+  id?: string;
   other_symptoms?: string;
   admitted_to?: string;
   patient_category?: PatientCategory;
@@ -314,7 +314,7 @@ export interface DailyRoundsModel {
     | "AGITATED_OR_CONFUSED"
     | "ONSET_OF_AGITATION_AND_CONFUSION"
     | "UNKNOWN";
-  rounds_type: (typeof DailyRoundTypes)[number];
+  rounds_type?: (typeof DailyRoundTypes)[number];
   last_updated_by_telemedicine?: boolean;
   created_by_telemedicine?: boolean;
   created_by?: {

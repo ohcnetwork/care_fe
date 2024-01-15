@@ -14,7 +14,6 @@ import Fullscreen from "../../CAREUI/misc/Fullscreen";
 interface Props {
   children?: React.ReactNode;
   asset: AssetData;
-  fallbackMiddleware: string; // TODO: remove this in favour of `asset.resolved_middleware.hostname` once https://github.com/coronasafe/care/pull/1741 is merged
   preset?: PTZPayload;
   silent?: boolean;
   className?: string;
@@ -29,7 +28,7 @@ interface Props {
 
 export default function CameraFeed(props: Props) {
   const playerRef = useRef<HTMLVideoElement | ReactPlayer | null>(null);
-  const streamUrl = getStreamUrl(props.asset, props.fallbackMiddleware);
+  const streamUrl = getStreamUrl(props.asset);
 
   const player = usePlayer(streamUrl, playerRef);
   const operate = useOperateCamera(props.asset.id, props.silent);

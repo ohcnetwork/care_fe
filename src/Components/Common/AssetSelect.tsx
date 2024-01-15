@@ -1,7 +1,7 @@
 import { useCallback } from "react";
-import { useDispatch } from "react-redux";
-import { listAssets } from "../../Redux/actions";
 import AutoCompleteAsync from "../Form/AutoCompleteAsync";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 
 interface AssetSelectProps {
   name: string;
@@ -16,7 +16,6 @@ interface AssetSelectProps {
   asset_class?: string;
   showAll?: boolean;
   showNOptions?: number;
-  freeText?: boolean;
   selected: any;
   setSelected: (selected: any) => void;
 }
@@ -33,21 +32,13 @@ export const AssetSelect = (props: AssetSelectProps) => {
     is_permanent = null,
     showNOptions = 10,
     className = "",
-    freeText = false,
     errors = "",
     asset_class = "",
   } = props;
 
-  const dispatchAction: any = useDispatch();
-
   const AssetSearch = useCallback(
     async (text: string) => {
-      const params: Partial<AssetSelectProps> & {
-        limit: number;
-        offset: number;
-        search_text: string;
-        asset_class: string;
-      } = {
+      const query = {
         limit: 50,
         offset: 0,
         search_text: text,
@@ -56,17 +47,12 @@ export const AssetSelect = (props: AssetSelectProps) => {
         in_use_by_consultation,
         is_permanent,
         asset_class,
-      };
+      } as const;
 
-      const res = await dispatchAction(listAssets(params));
-      if (freeText)
-        res?.data?.results?.push({
-          id: -1,
-          name: text,
-        });
-      return res?.data?.results;
+      const { data } = await request(routes.listAssets, { query });
+      return data?.results;
     },
-    [dispatchAction]
+    [asset_class, facility, in_use_by_consultation, is_permanent, is_working]
   );
 
   return (
