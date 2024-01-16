@@ -123,7 +123,6 @@ export const FacilityHome = (props: any) => {
       title={facilityData?.name || "Facility"}
       crumbsReplacements={{ [facilityId]: { name: facilityData?.name } }}
       focusOnLoad={true}
-      collapseSidebar
       backUrl="/facility"
     >
       <ConfirmDialog
@@ -240,7 +239,7 @@ export const FacilityHome = (props: any) => {
                       </div>
                     </div>
                   </div>
-                  <div className="min-w-[300px] flex-col md:flex lg:flex-1">
+                  <div className="  flex-col md:flex lg:flex-1">
                     <div className="mb-10">
                       <h1 className="text-base font-semibold text-[#B9B9B9]">
                         Local Body
@@ -249,7 +248,7 @@ export const FacilityHome = (props: any) => {
                         {facilityData?.local_body_object?.name}
                       </p>
                     </div>
-                    <div className="flex flex-col gap-10 md:flex-row">
+                    <div className="flex flex-col flex-wrap gap-10 md:flex-row">
                       <div>
                         <h1 className="text-base font-semibold text-[#B9B9B9]">
                           Ward
