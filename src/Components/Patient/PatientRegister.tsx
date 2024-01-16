@@ -1378,7 +1378,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           >
                             <RadioFormField
                               {...field("is_postpartum")}
-                              label="Is post partum (<6 weeks)"
+                              label="Is postpartum? (<6 weeks)"
                               className="font-bold"
                               options={[
                                 { label: "Yes", value: "true" },
