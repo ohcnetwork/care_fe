@@ -1,6 +1,15 @@
 import { UserRole } from "../Common/constants";
+import React from "react";
+import useAuthUser from "../Common/hooks/useAuthUser";
+import Error404 from "../Components/ErrorPages/404";
 
 export type AuthorizedForCB = (userType: UserRole) => boolean;
+
+interface AuthorizeUserRouteProps {
+  userTypes: UserRole[];
+  children: React.ReactNode;
+}
+
 export type AuthorizedElementProps = {
   /**
    * Restrict access of this button to specific roles.
@@ -26,3 +35,16 @@ export const Anyone = () => true;
 export default function (userTypes: UserRole[]) {
   return (userType: UserRole) => userTypes.includes(userType);
 }
+
+export const AuthorizeUserRoute: React.FC<AuthorizeUserRouteProps> = ({
+  userTypes,
+  children,
+}) => {
+  const userData = useAuthUser();
+
+  if (userData && userTypes.includes(userData.user_type)) {
+    return <>{children}</>;
+  } else {
+    return <Error404 />;
+  }
+};
