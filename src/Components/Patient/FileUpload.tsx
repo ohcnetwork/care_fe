@@ -1021,6 +1021,7 @@ export const FileUpload = (props: FileUploadProps) => {
       name: filename,
       associating_id: getAssociatedId(),
       file_category: category,
+      mime_type: f?.type,
     };
     dispatch(createUpload(requestData))
       .then(uploadfile)
@@ -1105,6 +1106,7 @@ export const FileUpload = (props: FileUploadProps) => {
       name: filename,
       associating_id: getAssociatedId(),
       file_category: category,
+      mime_type: "audio/mpeg",
     };
     dispatch(createUpload(requestData))
       .then(uploadAudiofile)
@@ -1532,6 +1534,7 @@ export const FileUpload = (props: FileUploadProps) => {
                               title="changeFile"
                               onChange={onFileChange}
                               type="file"
+                              accept="image/jpeg,image/png,application/pdf"
                               hidden
                             />
                           </label>
