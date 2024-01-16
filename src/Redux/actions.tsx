@@ -112,35 +112,6 @@ export const createFacilityBed = (
     {}
   );
 
-export const getFacilityBed = (
-  facility_external_id: string,
-  location_id: string,
-  external_id: string
-) =>
-  fireRequest(
-    "getFacilityBed",
-    [],
-    { facility: facility_external_id, location: location_id },
-    { external_id }
-  );
-export const updateFacilityBed = (
-  params: object,
-  facility_external_id: string,
-  external_id: string,
-  location_id: string
-) =>
-  fireRequest(
-    "updateFacilityBed",
-    [],
-    { ...params, facility: facility_external_id, location: location_id },
-    {
-      external_id,
-    }
-  );
-export const deleteFacilityBed = (external_id: string) => {
-  return fireRequest("deleteFacilityBed", [], {}, { external_id });
-};
-
 // Download Actions
 export const downloadFacility = () => {
   return fireRequest("downloadFacility");

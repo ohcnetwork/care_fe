@@ -414,14 +414,19 @@ const routes = {
   createFacilityBed: {
     path: "/api/v1/bed/",
     method: "POST",
+    TBody: Type<BedModel>(),
+    TRes: Type<BedModel>(),
   },
   getFacilityBed: {
     path: "/api/v1/bed/{external_id}/",
     method: "GET",
+    TRes: Type<BedModel>(),
   },
   updateFacilityBed: {
     path: "/api/v1/bed/{external_id}/",
     method: "PUT",
+    TBody: Type<BedModel>(),
+    TRes: Type<BedModel>(),
   },
   deleteFacilityBed: {
     path: "/api/v1/bed/{external_id}/",
