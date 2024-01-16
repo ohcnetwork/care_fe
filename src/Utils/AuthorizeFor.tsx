@@ -40,9 +40,8 @@ export const AuthorizeUserRoute: React.FC<AuthorizeUserRouteProps> = ({
   userTypes,
   children,
 }) => {
-  const userData = useAuthUser();
-
-  if (userData && userTypes.includes(userData.user_type)) {
+  const authUser = useAuthUser();
+  if (userTypes.includes(authUser.user_type)) {
     return <>{children}</>;
   } else {
     return <Error404 />;
