@@ -26,7 +26,6 @@ const getHeartRateScore = (value?: number) => {
 
 const getSystolicBPScore = (value?: number) => {
   if (typeof value !== "number") return;
-  if (value === -1) return;
 
   if (value <= 70) return 3;
   if (value <= 80) return 2;
@@ -38,7 +37,6 @@ const getSystolicBPScore = (value?: number) => {
 };
 
 const getTempRange = (value?: number) => {
-  console.log(value);
   if (typeof value !== "number") return;
 
   if (value < 95) return 2;

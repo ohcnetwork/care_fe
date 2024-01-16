@@ -84,6 +84,7 @@
   "age": "Age",
   "is": "Is",
   "reason": "Reason",
+  "description": "Description",
   "name": "Name",
   "address": "Address",
   "phone": "Phone",

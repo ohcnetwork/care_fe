@@ -81,8 +81,8 @@ export default function PatientFilter(props: any) {
         : [],
     last_consultation_current_bed__location:
       filter.last_consultation_current_bed__location || "",
-    last_consultation_discharge_reason:
-      filter.last_consultation_discharge_reason || null,
+    last_consultation__new_discharge_reason:
+      filter.last_consultation__new_discharge_reason || null,
     srf_id: filter.srf_id || null,
     number_of_doses: filter.number_of_doses || null,
     covin_id: filter.covin_id || null,
@@ -241,7 +241,7 @@ export default function PatientFilter(props: any) {
       last_consultation_discharge_date_before,
       last_consultation_discharge_date_after,
       last_consultation_admitted_bed_type_list,
-      last_consultation_discharge_reason,
+      last_consultation__new_discharge_reason,
       last_consultation_current_bed__location,
       number_of_doses,
       covin_id,
@@ -298,8 +298,8 @@ export default function PatientFilter(props: any) {
       age_max: age_max || "",
       last_consultation_admitted_bed_type_list:
         last_consultation_admitted_bed_type_list || [],
-      last_consultation_discharge_reason:
-        last_consultation_discharge_reason || "",
+      last_consultation__new_discharge_reason:
+        last_consultation__new_discharge_reason || "",
       srf_id: srf_id || "",
       number_of_doses: number_of_doses || "",
       covin_id: covin_id || "",
@@ -424,16 +424,16 @@ export default function PatientFilter(props: any) {
           <div className="w-full flex-none" id="discharge-reason-select">
             <FieldLabel className="text-sm">Discharge Reason</FieldLabel>
             <SelectMenuV2
-              id="last_consultation_discharge_reason"
+              id="last_consultation__new_discharge_reason"
               placeholder="Select discharge reason"
               options={DISCHARGE_REASONS}
-              value={filterState.last_consultation_discharge_reason}
+              value={filterState.last_consultation__new_discharge_reason}
               optionValue={(o) => o.id}
               optionLabel={(o) => o.text}
               onChange={(o) =>
                 setFilterState({
                   ...filterState,
-                  last_consultation_discharge_reason: o,
+                  last_consultation__new_discharge_reason: o,
                 })
               }
             />
