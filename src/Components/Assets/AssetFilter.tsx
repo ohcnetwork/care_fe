@@ -20,7 +20,7 @@ const getDate = (value: any) =>
 
 function AssetFilter(props: any) {
   const { filter, onChange, closeFilter, removeFilters } = props;
-  const [facility, setFacility] = useState<FacilityModel>({ name: "" });
+  const [facility, setFacility] = useState<FacilityModel | null>(null);
   const [asset_type, setAssetType] = useState<string>(
     filter.asset_type ? filter.asset_type : ""
   );
@@ -51,7 +51,7 @@ function AssetFilter(props: any) {
     setLocationId(
       facility?.id === qParams.facility ? qParams.location ?? "" : ""
     );
-  }, [facility.id, qParams.facility, qParams.location]);
+  }, [facility?.id, qParams.facility, qParams.location]);
 
   const clearFilter = useCallback(() => {
     removeFilters([
@@ -81,8 +81,8 @@ function AssetFilter(props: any) {
     onChange(data);
   };
 
-  const handleFacilitySelect = (selected: FacilityModel) => {
-    setFacility(selected ? selected : facility);
+  const handleFacilitySelect = (selected: FacilityModel | null) => {
+    setFacility(selected);
     handleLocationSelect("");
   };
   const handleLocationSelect = (selectedId: string) => {
@@ -107,7 +107,7 @@ function AssetFilter(props: any) {
         <FacilitySelect
           name="Facilities"
           setSelected={(selected) =>
-            handleFacilitySelect(selected as FacilityModel)
+            handleFacilitySelect(selected as FacilityModel | null)
           }
           selected={facility}
           errors=""

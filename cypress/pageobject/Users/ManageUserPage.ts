@@ -149,6 +149,18 @@ export class ManageUserPage {
     cy.get("#doctor-connect-home-doctor").should("contain.text", realName);
     cy.get("#doctor-connect-remote-doctor").should("contain.text", realName);
   }
+
+  assertVideoConnectLink(docName: string, link: string) {
+    cy.get("ul#options")
+      .find("li")
+      .contains(docName)
+      .within(() => {
+        cy.get("a").should(($a) => {
+          const hrefs = $a.map((i, el) => Cypress.$(el).attr("href")).get();
+          expect(hrefs).to.include(link);
+        });
+      });
+  }
 }
 
 export default ManageUserPage;
