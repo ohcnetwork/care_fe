@@ -272,9 +272,6 @@ export const getItems = (params: object) => {
 export const postInventory = (params: object, pathParams: object) => {
   return fireRequest("createInventory", [], params, pathParams);
 };
-export const getInventoryLog = (params: object, pathParams: object) => {
-  return fireRequest("getInventoryLog", [params, "inventory"], pathParams);
-};
 export const setMinQuantity = (params: object, pathParams: object) => {
   return fireRequest("setMinQuantity", [], params, pathParams);
 };
@@ -302,13 +299,6 @@ export const getInventorySummary = (facilityId: number, params: object) => {
     [facilityId, "inventorysummary"],
     params
   );
-};
-export const flagInventoryItem = (params: object) => {
-  return fireRequest("flagInventoryItem", [], {}, params);
-};
-
-export const deleteLastInventoryLog = (params: object) => {
-  return fireRequest("deleteLastInventoryLog", [], {}, params);
 };
 
 export const generateDischargeSummary = (pathParams: object) => {

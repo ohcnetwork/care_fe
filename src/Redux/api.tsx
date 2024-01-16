@@ -52,6 +52,7 @@ import {
   PatientNotesModel,
   BedModel,
   InventorySummaryResponse,
+  InventoryLogResponse,
 } from "../Components/Facility/models";
 import {
   IDeleteBedCapacity,
@@ -783,7 +784,9 @@ const routes = {
     method: "POST",
   },
   getInventoryLog: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/{facilityId}/inventory/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<InventoryLogResponse>>(),
   },
   setMinQuantity: {
     path: "/api/v1/facility/{facilityId}/min_quantity/",
@@ -809,10 +812,12 @@ const routes = {
   flagInventoryItem: {
     path: "/api/v1/facility/{facility_external_id}/inventory/{external_id}/flag/",
     method: "PUT",
+    TRes: Type<PaginatedResponse<InventoryLogResponse>>(),
   },
   deleteLastInventoryLog: {
     path: "/api/v1/facility/{facility_external_id}/inventory/delete_last/?item={id}",
     method: "DELETE",
+    TRes: Type<Record<string, never>>(),
   },
   dischargeSummaryGenerate: {
     path: "/api/v1/consultation/{external_id}/generate_discharge_summary/",

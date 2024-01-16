@@ -554,3 +554,13 @@ export type InventorySummaryResponse = {
   is_low: boolean;
   item: number;
 };
+
+export type InventoryLogResponse = InventorySummaryResponse & {
+  external_id: string;
+  current_stock: number;
+  quantity_in_default_unit: number;
+  is_incoming: boolean;
+  probable_accident: boolean;
+  unit: number;
+  created_by: number;
+};
