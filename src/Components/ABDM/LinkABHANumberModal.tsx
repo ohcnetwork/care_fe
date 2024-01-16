@@ -159,11 +159,13 @@ const ScanABHAQRSection = ({
         value={qrValue}
         disabled={!!authMethods.length}
         onChange={(value) => {
-          if ([2, 7, 12].includes(value.length)) {
-            if (qrValue.length && qrValue[qrValue.length - 1] === "-") {
-              value.slice(value.length - 1);
-            } else {
-              value += "-";
+          if (value[0] && !isNaN(Number(value[0]))) {
+            if ([2, 7, 12].includes(value.length)) {
+              if (qrValue.length && qrValue[qrValue.length - 1] === "-") {
+                value.slice(value.length - 1);
+              } else {
+                value += "-";
+              }
             }
           }
           setQrValue(value);
