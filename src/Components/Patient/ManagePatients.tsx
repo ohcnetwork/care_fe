@@ -153,7 +153,8 @@ export const PatientManager = () => {
   };
 
   const tabValue =
-    qParams.last_consultation_discharge_reason || qParams.is_active === "False"
+    qParams.last_consultation__new_discharge_reason ||
+    qParams.is_active === "False"
       ? 1
       : 0;
 
@@ -163,7 +164,7 @@ export const PatientManager = () => {
     name: qParams.name || undefined,
     patient_no: qParams.patient_no || undefined,
     is_active:
-      !qParams.last_consultation_discharge_reason &&
+      !qParams.last_consultation__new_discharge_reason &&
       (qParams.is_active || "True"),
     disease_status: qParams.disease_status || undefined,
     phone_number: qParams.phone_number
@@ -204,8 +205,8 @@ export const PatientManager = () => {
       qParams.last_consultation_discharge_date_after || undefined,
     last_consultation_admitted_bed_type_list:
       qParams.last_consultation_admitted_bed_type_list || undefined,
-    last_consultation_discharge_reason:
-      qParams.last_consultation_discharge_reason || undefined,
+    last_consultation__new_discharge_reason:
+      qParams.last_consultation__new_discharge_reason || undefined,
     last_consultation_current_bed__location:
       qParams.last_consultation_current_bed__location || undefined,
     srf_id: qParams.srf_id || undefined,
@@ -352,7 +353,7 @@ export const PatientManager = () => {
     qParams.age_max,
     qParams.age_min,
     qParams.last_consultation_admitted_bed_type_list,
-    qParams.last_consultation_discharge_reason,
+    qParams.last_consultation__new_discharge_reason,
     qParams.last_consultation_current_bed__location,
     qParams.facility,
     qParams.facility_type,
@@ -536,12 +537,9 @@ export const PatientManager = () => {
         ? PATIENT_CATEGORIES.find((c) => c.text === category)?.twClass
         : "patient-unknown";
 
-      return (
-        <Link
-          key={`usr_${patient.id}`}
-          data-cy="patient"
-          href={patientUrl}
-          className={`ring/0 hover:ring/100 group relative w-full cursor-pointer rounded-lg bg-white p-4 pl-5 text-black shadow transition-all duration-200 ease-in-out hover:pl-5 ${categoryClass}-ring overflow-hidden`}
+      const children = (
+        <div
+          className={`ring/0 hover:ring/100 group relative w-full rounded-lg bg-white p-4 pl-5 text-black shadow transition-all duration-200 ease-in-out hover:pl-5 ${categoryClass}-ring overflow-hidden`}
         >
           <div
             className={`absolute inset-y-0 left-0 flex h-full w-1 items-center rounded-l-lg transition-all duration-200 ease-in-out group-hover:w-5 ${categoryClass}`}
@@ -743,6 +741,19 @@ export const PatientManager = () => {
                 </div>
               )}
           </div>
+        </div>
+      );
+
+      if (
+        authUser.user_type === "Staff" ||
+        authUser.user_type === "StaffReadOnly"
+      ) {
+        return children;
+      }
+
+      return (
+        <Link key={`usr_${patient.id}`} data-cy="patient" href={patientUrl}>
+          {children}
         </Link>
       );
     });
@@ -1022,10 +1033,10 @@ export const PatientManager = () => {
             },
             value(
               "Discharge Reason",
-              "last_consultation_discharge_reason",
+              "last_consultation__new_discharge_reason",
               parseOptionId(
                 DISCHARGE_REASONS,
-                qParams.last_consultation_discharge_reason
+                qParams.last_consultation__new_discharge_reason
               ) || ""
             ),
           ]}

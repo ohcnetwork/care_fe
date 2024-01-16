@@ -6,6 +6,10 @@ class LoginPage {
     cy.loginByApi("devdistrictadmin", "Coronasafe@123");
   }
 
+  loginAsDevDoctor(): void {
+    cy.loginByApi("devdoctor", "Coronasafe@123");
+  }
+
   login(username: string, password: string): void {
     cy.loginByApi(username, password);
   }
