@@ -477,11 +477,11 @@ const LiveMonitoringButton = () => {
   const [location, setLocation] = useState<string>();
   const authUser = useAuthUser();
 
-  const userRoles = ["StateAdmin", "DistrictAdmin", "Doctor"];
+  const permittedUserTypes = ["StateAdmin", "DistrictAdmin", "Doctor"];
 
   return (
     <Popover className="relative">
-      {userRoles.includes(authUser.user_type) && (
+      {permittedUserTypes.includes(authUser.user_type) && (
         <Popover.Button className="mt-2 w-full">
           <ButtonV2 variant="primary" ghost border className="w-full">
             <CareIcon icon="l-video" className="text-lg" />
