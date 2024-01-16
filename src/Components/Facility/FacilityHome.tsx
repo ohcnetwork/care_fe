@@ -389,7 +389,7 @@ export const FacilityHome = (props: any) => {
                 )}
               </DropdownMenu>
             </div>
-            <div className="flex flex-col justify-end">
+            <div className="sm:grid sm:grid-cols-2 sm:gap-2 md:grid md:grid-cols-2 md:gap-2 lg:flex lg:flex-col lg:justify-end lg:gap-0 ">
               <ButtonV2
                 variant="primary"
                 ghost
