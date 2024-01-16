@@ -423,8 +423,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             medical_history: [],
             is_antenatal: String(!!res.data.is_antenatal),
             last_menstruation_start_date: res.data.last_menstruation_start_date,
-            is_postpartum: String(!!res.data.is_postpartum),
             date_of_delivery: res.data.date_of_delivery,
+            is_postpartum: String(!!res.data.date_of_delivery),
             allergies: res.data.allergies ? res.data.allergies : "",
             pincode: res.data.pincode ? res.data.pincode : "",
             ongoing_medication: res.data.ongoing_medication
@@ -565,9 +565,17 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         case "name":
         case "gender":
         case "date_of_birth":
-        case "last_menstruation_start_date":
-        case "date_of_delivery":
           errors[field] = RequiredFieldValidator()(form[field]);
+          return;
+        case "last_menstruation_start_date":
+          if (form.is_antenatal === "true") {
+            errors[field] = RequiredFieldValidator()(form[field]);
+          }
+          return;
+        case "date_of_delivery":
+          if (form.is_postpartum === "true") {
+            errors[field] = RequiredFieldValidator()(form[field]);
+          }
           return;
         case "permanent_address":
           if (!form.sameAddress) {
@@ -781,7 +789,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       gender: Number(formData.gender),
       nationality: formData.nationality,
       is_antenatal: formData.is_antenatal,
-      is_postpartum: formData.is_postpartum,
       last_menstruation_start_date:
         formData.is_antenatal === "true"
           ? dateQueryString(formData.last_menstruation_start_date)
