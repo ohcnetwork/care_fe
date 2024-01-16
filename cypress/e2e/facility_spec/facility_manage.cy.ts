@@ -8,8 +8,16 @@ describe("Facility Manage Functions", () => {
   const loginPage = new LoginPage();
   const facilityManage = new FacilityManage();
   const facilityPage = new FacilityPage();
-  const hrf_id_1 = uuidv4();
-  const hrf_id_2 = uuidv4();
+  const facilityMiddlewareUpdateButton = "Update";
+  const facilityMiddleware = "dev-middleware.coronasafe.live";
+  const facilityUpdatedMiddleware = "updated.coronasafe.live";
+  const facilityMiddlewareSuccessfullNotification =
+    "Facility updated successfully";
+  const facilityHrfidUpdateButton = "Link Health Facility";
+  const facilityHrfidSuccessfullNotification =
+    "Health Facility config updated successfully";
+  const facilityHrfId = uuidv4();
+  const facilityUpdatedHrfId = uuidv4();
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -37,57 +45,57 @@ describe("Facility Manage Functions", () => {
     facilityManage.clickFacilityConfigureButton();
     facilityManage.verifyMiddlewareAddressVisible();
     // verify mandatory field error message
-    facilityManage.clickButtonWithText("Update");
+    facilityManage.clickButtonWithText(facilityMiddlewareUpdateButton);
     facilityManage.checkErrorMessageVisibility(
       "Middleware Address is required"
     );
     // add middleware and verify the notification
-    facilityManage.typeMiddlewareAddress("dev-middlreware.coronasafe.live");
-    facilityManage.clickButtonWithText("Update");
+    facilityManage.typeMiddlewareAddress(facilityMiddleware);
+    facilityManage.clickButtonWithText(facilityMiddlewareUpdateButton);
     facilityManage.verifySuccessMessageVisibilityAndContent(
-      "Facility updated successfully"
+      facilityMiddlewareSuccessfullNotification
     );
     // update the existing middleware
     facilityPage.clickManageFacilityDropdown();
     facilityManage.clickFacilityConfigureButton();
     facilityManage.verifyMiddlewareAddressVisible();
-    facilityManage.typeMiddlewareAddress("updated.coronasafe.live");
-    facilityManage.clickButtonWithText("Update");
+    facilityManage.typeMiddlewareAddress(facilityUpdatedMiddleware);
+    facilityManage.clickButtonWithText(facilityMiddlewareUpdateButton);
     facilityManage.verifySuccessMessageVisibilityAndContent(
-      "Facility updated successfully"
+      facilityMiddlewareSuccessfullNotification
     );
     // verify the updated middleware
     facilityPage.clickManageFacilityDropdown();
     facilityManage.clickFacilityConfigureButton();
-    facilityManage.verifyMiddlewareAddressValue("updated.coronasafe.live");
+    facilityManage.verifyMiddlewareAddressValue(facilityUpdatedMiddleware);
   });
 
   it("Configure Facility Health ID", () => {
     facilityPage.clickManageFacilityDropdown();
     facilityManage.clickFacilityConfigureButton();
     // verify mandatory field error message
-    facilityManage.clickButtonWithText("Link Health Facility");
+    facilityManage.clickButtonWithText(facilityHrfidUpdateButton);
     facilityManage.checkErrorMessageVisibility(
       "Health Facility Id is required"
     );
     // add facility health ID and verify notification
-    facilityManage.typeHrfId(hrf_id_1);
-    facilityManage.clickButtonWithText("Link Health Facility");
+    facilityManage.typeHrfId(facilityHrfId);
+    facilityManage.clickButtonWithText(facilityHrfidUpdateButton);
     facilityManage.verifySuccessMessageVisibilityAndContent(
-      "Health Facility config updated successfully"
+      facilityHrfidSuccessfullNotification
     );
     // update the existing middleware
     facilityPage.clickManageFacilityDropdown();
     facilityManage.clickFacilityConfigureButton();
-    facilityManage.typeHrfId(hrf_id_2);
-    facilityManage.clickButtonWithText("Link Health Facility");
+    facilityManage.typeHrfId(facilityUpdatedHrfId);
+    facilityManage.clickButtonWithText(facilityHrfidUpdateButton);
     facilityManage.verifySuccessMessageVisibilityAndContent(
-      "Health Facility config updated successfully"
+      facilityHrfidSuccessfullNotification
     );
     // verify its reflection
     facilityPage.clickManageFacilityDropdown();
     facilityManage.clickFacilityConfigureButton();
-    facilityManage.verifyHrfIdValue(hrf_id_2);
+    facilityManage.verifyHrfIdValue(facilityUpdatedHrfId);
   });
 
   afterEach(() => {
