@@ -37,6 +37,7 @@ export default function useFilters({
     options?: setQueryParamsOptions
   ) => {
     const updatedQParams = { ...query };
+
     for (const param of cacheBlacklist) {
       delete updatedQParams[param];
     }
