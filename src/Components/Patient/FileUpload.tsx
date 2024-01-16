@@ -1534,7 +1534,7 @@ export const FileUpload = (props: FileUploadProps) => {
                               title="changeFile"
                               onChange={onFileChange}
                               type="file"
-                              accept="image/jpeg,image/png,application/pdf"
+                              accept="image/*,video/*,audio/*,text/plain,text/csv,application/rtf,application/msword,application/vnd.oasis.opendocument.text,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/pdf"
                               hidden
                             />
                           </label>
