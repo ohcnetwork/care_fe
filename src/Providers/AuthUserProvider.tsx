@@ -58,7 +58,9 @@ export default function AuthUserProvider({ children, unauthorized }: Props) {
       await refetch();
       navigate(
         getRedirectOr(
-          noRedirect ? "/login" : `/login?redirect=${location.href}`
+          noRedirect
+            ? "/login"
+            : `/login?redirect=${encodeURIComponent(location.href)}`
         )
       );
     },
@@ -129,7 +131,7 @@ const getRedirectOr = (fallback: string) => {
   }
   if (url) {
     try {
-      const redirect = new URL(url);
+      const redirect = new URL(decodeURIComponent(url));
       if (window.location.origin === redirect.origin) {
         return redirect.href;
       }

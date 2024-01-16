@@ -1,13 +1,13 @@
 /// <reference types="cypress" />
 
-import { cy, describe, it, beforeEach } from "local-cypress";
+import { cy, describe, it, beforeEach, Cypress } from "local-cypress";
 import LoginPage from "../../pageobject/Login/LoginPage";
 
 describe("redirect", () => {
   const loginPage = new LoginPage();
 
   beforeEach(() => {
-    cy.log("Logging in the user devdistrictadmin:Coronasafe@123");
+    cy.log("Logging in the user devdistrictadmin");
   });
 
   it("Check if login redirects to the right url", () => {
@@ -18,7 +18,8 @@ describe("redirect", () => {
   });
 
   it("Check if the redirect param works", () => {
-    cy.awaitUrl("login?redirect=http://localhost:4000/resource/board", true);
+    const baseUrl = Cypress.config("baseUrl");
+    cy.awaitUrl(`login?redirect=${baseUrl}/resource/board`, true);
     loginPage.loginManuallyAsDistrictAdmin();
     loginPage.CheckIfLoggedIn();
     cy.url().should("include", "/resource/board");
