@@ -51,6 +51,7 @@ import {
   LocationModel,
   PatientNotesModel,
   BedModel,
+  InventorySummaryResponse,
 } from "../Components/Facility/models";
 import {
   IDeleteBedCapacity,
@@ -789,8 +790,9 @@ const routes = {
     method: "POST",
   },
   getMinQuantity: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/{facilityId}/min_quantity/",
     method: "GET",
+    TRes: Type<PaginatedResponse<InventorySummaryResponse>>(),
   },
   updateMinQuantity: {
     path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}",
