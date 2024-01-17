@@ -34,6 +34,7 @@ export const HospitalList = () => {
     resultsPerPage,
   } = useFilters({
     limit: 14,
+    cacheBlacklist: ["search"],
   });
   let manageFacilities: any = null;
   const { user_type } = useAuthUser();
