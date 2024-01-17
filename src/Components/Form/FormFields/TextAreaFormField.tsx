@@ -1,7 +1,7 @@
 import FormField from "./FormField";
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 
-type TextAreaFormFieldProps = FormFieldBaseProps<string> & {
+export type TextAreaFormFieldProps = FormFieldBaseProps<string> & {
   placeholder?: string;
   value?: string | number;
   rows?: number;

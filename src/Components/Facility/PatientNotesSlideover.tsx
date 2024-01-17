@@ -11,7 +11,7 @@ import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { PatientNoteStateType } from "./models";
 import useKeyboardShortcut from "use-keyboard-shortcut";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField.js";
+import AutoExpandingTextInputFormField from "../Form/FormFields/AutoExpandingTextInputFormField.js";
 
 interface PatientNotesProps {
   patientId: string;
@@ -25,18 +25,6 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   const [patientActive, setPatientActive] = useState(true);
   const [reload, setReload] = useState(false);
   const [focused, setFocused] = useState(false);
-
-  const textArea = document.getElementById("doctor_notes_textarea");
-  textArea?.addEventListener("keydown", autosize);
-  function autosize() {
-    setTimeout(function () {
-      if (textArea == null) return;
-      textArea.style.cssText =
-        "min-height:36px; height: 36px; overflow-y: hidden; height:" +
-        textArea.scrollHeight +
-        "px";
-    }, 0);
-  }
 
   const initialData: PatientNoteStateType = {
     notes: [],
@@ -181,7 +169,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
             setReload={setReload}
           />
           <div className="relative mx-4 flex items-center">
-            <TextAreaFormField
+            <AutoExpandingTextInputFormField
               id="doctor_notes_textarea"
               rows={1}
               name="note"

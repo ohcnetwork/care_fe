@@ -12,7 +12,7 @@ import request from "../../../Utils/request/request.js";
 import useQuery from "../../../Utils/request/useQuery.js";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import { isAppleDevice } from "../../../Utils/utils.js";
-import TextAreaFormField from "../../Form/FormFields/TextAreaFormField.js";
+import AutoExpandingTextInputFormField from "../../Form/FormFields/AutoExpandingTextInputFormField.js";
 
 interface ConsultationDoctorNotesProps {
   patientId: string;
@@ -29,18 +29,6 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const [focused, setFocused] = useState(false);
-
-  const textArea = document.getElementById("doctor_consultation_notes");
-  textArea?.addEventListener("keydown", autosize);
-  function autosize() {
-    setTimeout(function () {
-      if (textArea == null) return;
-      textArea.style.cssText =
-        "min-height:36px; height: 36px; overflow-y: hidden; height:" +
-        textArea.scrollHeight +
-        "px";
-    }, 0);
-  }
 
   const initialData: PatientNoteStateType = {
     notes: [],
@@ -132,7 +120,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
         />
 
         <div className="relative mx-4 flex items-center">
-          <TextAreaFormField
+          <AutoExpandingTextInputFormField
             id="doctor_consultation_notes"
             rows={1}
             name="note"
