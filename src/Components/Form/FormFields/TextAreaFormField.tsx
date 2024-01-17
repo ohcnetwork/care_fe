@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import FormField from "./FormField";
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 
@@ -11,27 +12,33 @@ export type TextAreaFormFieldProps = FormFieldBaseProps<string> & {
   onBlur?: (event: React.FocusEvent<HTMLTextAreaElement>) => void;
 };
 
-const TextAreaFormField = ({ rows = 3, ...props }: TextAreaFormFieldProps) => {
-  const field = useFormFieldPropsResolver(props as any);
-  return (
-    <FormField field={field}>
-      <textarea
-        id={field.id}
-        disabled={field.disabled}
-        name={field.name}
-        value={field.value}
-        required={field.required}
-        onChange={(e) => field.handleChange(e.target.value)}
-        placeholder={props.placeholder}
-        rows={rows}
-        className={`cui-input-base resize-none ${
-          field.error && "border-danger-500"
-        }`}
-        onFocus={props.onFocus}
-        onBlur={props.onBlur}
-      />
-    </FormField>
-  );
-};
+const TextAreaFormField = forwardRef(
+  (
+    { rows = 3, ...props }: TextAreaFormFieldProps,
+    ref?: React.Ref<HTMLTextAreaElement>
+  ) => {
+    const field = useFormFieldPropsResolver(props as any);
+    return (
+      <FormField field={field}>
+        <textarea
+          id={field.id}
+          ref={ref}
+          disabled={field.disabled}
+          name={field.name}
+          value={field.value}
+          required={field.required}
+          onChange={(e) => field.handleChange(e.target.value)}
+          placeholder={props.placeholder}
+          rows={rows}
+          className={`cui-input-base resize-none ${
+            field.error && "border-danger-500"
+          }`}
+          onFocus={props.onFocus}
+          onBlur={props.onBlur}
+        />
+      </FormField>
+    );
+  }
+);
 
 export default TextAreaFormField;
