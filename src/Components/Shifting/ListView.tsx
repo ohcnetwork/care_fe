@@ -36,7 +36,7 @@ export default function ListView() {
     FilterBadges,
     advancedFilter,
     resultsPerPage,
-  } = useFilters({});
+  } = useFilters({ cacheBlacklist: ["patient_name"] });
 
   const [modalFor, setModalFor] = useState({
     externalId: undefined,
