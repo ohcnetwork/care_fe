@@ -1068,7 +1068,7 @@ export const FileUpload = (props: FileUploadProps) => {
     axios
       .put(url, newFile, config)
       .then(() => {
-        setAudioUploadStarted(true);
+        setAudioUploadStarted(false);
         // setUploadSuccess(true);
         setAudioName("");
         setReload(!reload);
