@@ -167,11 +167,12 @@ const ScanABHAQRSection = ({
   return (
     <div>
       <QRScanner
-        label="Enter ABHA Number"
+        label="Enter ABHA Number / ABHA Address"
         value={qrValue}
         disabled={!!authMethods.length}
         onChange={(value) => {
           if (value[0] && !isNaN(Number(value[0]))) {
+            // 92-1234-1234-1234
             if ([2, 7, 12].includes(value.length)) {
               if (qrValue.length && qrValue[qrValue.length - 1] === "-") {
                 value.slice(value.length - 1);
