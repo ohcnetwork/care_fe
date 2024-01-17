@@ -122,6 +122,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
         <div className="relative mx-4 flex items-center">
           <AutoExpandingTextInputFormField
             id="doctor_consultation_notes"
+            maxHeight={160}
             rows={1}
             name="note"
             value={noteField}
