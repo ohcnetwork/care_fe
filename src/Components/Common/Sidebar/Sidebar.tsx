@@ -8,6 +8,7 @@ import useConfig from "../../../Common/hooks/useConfig";
 import SlideOver from "../../../CAREUI/interactive/SlideOver";
 import { classNames } from "../../../Utils/utils";
 import { Link } from "raviger";
+import useAuthUser from "../../../Common/hooks/useAuthUser";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 
@@ -27,28 +28,36 @@ type StatelessSidebarProps =
       onItemClick: (open: boolean) => void;
     };
 
-const NavItems = [
-  { text: "Facilities", to: "/facility", icon: "care-l-hospital" },
-  { text: "Patients", to: "/patients", icon: "care-l-user-injured" },
-  { text: "Assets", to: "/assets", icon: "care-l-shopping-cart-alt" },
-  { text: "Sample Test", to: "/sample", icon: "care-l-medkit" },
-  { text: "Shifting", to: "/shifting", icon: "care-l-ambulance" },
-  { text: "Resource", to: "/resource", icon: "care-l-heart-medical" },
-  {
-    text: "External Results",
-    to: "/external_results",
-    icon: "care-l-clipboard-notes",
-  },
-  { text: "Users", to: "/users", icon: "care-l-users-alt" },
-  { text: "Notice Board", to: "/notice_board", icon: "care-l-meeting-board" },
-];
-
 const StatelessSidebar = ({
   shrinkable = false,
   shrinked = false,
   setShrinked,
   onItemClick,
 }: StatelessSidebarProps) => {
+  const authUser = useAuthUser();
+
+  const NavItems = [
+    { text: "Facilities", to: "/facility", icon: "care-l-hospital" },
+    { text: "Patients", to: "/patients", icon: "care-l-user-injured" },
+    { text: "Assets", to: "/assets", icon: "care-l-shopping-cart-alt" },
+    { text: "Sample Test", to: "/sample", icon: "care-l-medkit" },
+    { text: "Shifting", to: "/shifting", icon: "care-l-ambulance" },
+    { text: "Resource", to: "/resource", icon: "care-l-heart-medical" },
+    ...(!["Nurse", "NurseReadOnly", "Staff", "StaffReadOnly"].includes(
+      authUser.user_type
+    )
+      ? [
+          {
+            text: "External Results",
+            to: "/external_results",
+            icon: "care-l-clipboard-notes",
+          },
+        ]
+      : []),
+    { text: "Users", to: "/users", icon: "care-l-users-alt" },
+    { text: "Notice Board", to: "/notice_board", icon: "care-l-meeting-board" },
+  ];
+
   const { main_logo } = useConfig();
   const activeLink = useActiveLink();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;

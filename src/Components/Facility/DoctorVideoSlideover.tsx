@@ -62,8 +62,8 @@ export default function DoctorVideoSlideover(props: {
           home: true,
         },
         {
-          title: "Staff",
-          user_type: "Staff",
+          title: "Nurse",
+          user_type: "Nurse",
           home: true,
         },
         {
