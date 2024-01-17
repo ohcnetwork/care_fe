@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from "react";
 import TextAreaFormField, { TextAreaFormFieldProps } from "./TextAreaFormField";
 
 type AutoExpandingTextInputFormFieldProps = TextAreaFormFieldProps & {
-  id: string;
   maxHeight?: number;
 };
 
