@@ -18,6 +18,8 @@ describe("Facility Manage Functions", () => {
     "Health Facility config updated successfully";
   const facilityHrfId = uuidv4();
   const facilityUpdatedHrfId = uuidv4();
+  const doctorCapacity = "5";
+  const doctorModifiedCapacity = "7";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -96,6 +98,32 @@ describe("Facility Manage Functions", () => {
     facilityPage.clickManageFacilityDropdown();
     facilityManage.clickFacilityConfigureButton();
     facilityManage.verifyHrfIdValue(facilityUpdatedHrfId);
+  });
+
+  it("Modify doctor capacity in Facility detail page", () => {
+    // Add a doctor capacity
+    facilityManage.clickFacilityAddDoctorTypeButton();
+    facilityPage.selectAreaOfSpecialization("General Medicine");
+    facilityPage.fillDoctorCount(doctorCapacity);
+    facilityPage.saveAndExitDoctorForm();
+    facilityManage.verifySuccessMessageVisibilityAndContent(
+      "Doctor count added successfully"
+    );
+    facilityManage.verifyTotalDoctorCapacity(doctorCapacity);
+    // edit a existing doctor
+    facilityManage.clickEditFacilityDoctorCapacity();
+    facilityPage.fillDoctorCount(doctorModifiedCapacity);
+    facilityPage.clickdoctorcapacityaddmore();
+    facilityManage.verifySuccessMessageVisibilityAndContent(
+      "Doctor count updated successfully"
+    );
+    facilityManage.verifyTotalDoctorCapacity(doctorModifiedCapacity);
+    // delete a bed
+    facilityManage.clickDeleteFacilityDoctorCapacity();
+    facilityManage.clickButtonWithText("Delete");
+    facilityManage.verifySuccessMessageVisibilityAndContent(
+      "Doctor specialization type deleted successfully"
+    );
   });
 
   afterEach(() => {
