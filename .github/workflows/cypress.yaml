@@ -37,13 +37,7 @@ jobs:
             sleep 10
           done
           echo "Migrations are applied"
-          cd ..
-
-      - name: Load dummy data into care backend 📂
-        run: |
-          cd care
-          docker compose exec backend bash -c "python manage.py load_dummy_data"
-          docker restart care-backend-1
+          make docker_config_file=docker-compose.pre-built.yaml load-dummy-data
           cd ..
 
       - name: Wait for care to be up ♻
