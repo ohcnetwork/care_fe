@@ -4,7 +4,6 @@ import { Fragment } from "react";
 import { SelectFormField } from "../../Form/FormFields/SelectFormField";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import FilterIcon from "../../../../public/images/icons/icons8-tick.svg";
 import dayjs from "dayjs";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -42,19 +41,23 @@ export default function DailyRoundsFilter(props: Props) {
     <div className="flex flex-row-reverse items-center gap-4 md:flex-row">
       <Popover className="relative ">
         <Popover.Button>
-          <ButtonV2 variant="secondary" className="mr-5 border">
-            <CareIcon className="care-l-filter" />
-
-            {filter == undefined ||
-            filter == null ||
-            countDefinedProperties(filter) == 0 ? (
-              t("filter")
-            ) : (
-              <div>
-                <img src={FilterIcon} alt="Filter Icon" />
-              </div>
-            )}
-          </ButtonV2>
+          {filter == undefined ||
+          filter == null ||
+          countDefinedProperties(filter) == 0 ? (
+            <>
+              <ButtonV2 variant="secondary" className="mr-5 border">
+                <CareIcon className="care-l-filter" />
+                {t("filter")}
+              </ButtonV2>
+            </>
+          ) : (
+            <>
+              <ButtonV2 variant="primary" className="mr-5 border">
+                <CareIcon className="care-l-filter" />
+                {t("filter")}
+              </ButtonV2>
+            </>
+          )}
         </Popover.Button>
         <Transition
           as={Fragment}
