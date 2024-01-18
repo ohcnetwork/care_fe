@@ -1,6 +1,10 @@
 import { relativeDate, formatDateTime, classNames } from "../../Utils/utils";
 import { USER_TYPES_MAP } from "../../Common/constants";
-import { PatientNoteStateType, PatientNotesModel } from "./models";
+import {
+  PatientNoteStateType,
+  PatientNotesEditModel,
+  PatientNotesModel,
+} from "./models";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useState } from "react";
@@ -9,6 +13,9 @@ import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import DialogModal from "../Common/Dialog";
 import { t } from "i18next";
+import dayjs from "dayjs";
+import Spinner from "../Common/Spinner";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
 const PatientNoteCard = ({
   state,
@@ -22,6 +29,17 @@ const PatientNoteCard = ({
   const [isEditing, setIsEditing] = useState(false);
   const [noteField, setNoteField] = useState(note.note);
   const [showEditHistory, setShowEditHistory] = useState(false);
+  const [editHistory, setEditHistory] = useState<PatientNotesEditModel[]>([]);
+  const authUser = useAuthUser();
+
+  const fetchEditHistory = async () => {
+    const { res, data } = await request(routes.getPatientNoteEditHistory, {
+      pathParams: { patientId: state.patientId, noteId: note.id },
+    });
+    if (res?.status === 200) {
+      setEditHistory(data?.results ?? []);
+    }
+  };
 
   const onUpdateNote = async () => {
     if (noteField === note.note) {
@@ -79,46 +97,55 @@ const PatientNoteCard = ({
                 Created {relativeDate(note.created_date, true)}
               </div>
             </div>
-            {note.edits.length > 1 && (
-              <div className="flex">
-                <div
-                  className="cursor-pointer text-xs text-gray-600"
-                  onClick={() => {
-                    setShowEditHistory(true);
-                  }}
-                >
-                  <div className="tooltip inline">
-                    <span className="tooltip-text tooltip-bottom">
-                      {formatDateTime(note.edits[0].edited_date)}
-                    </span>
-                    Edited {relativeDate(note.edits[0].edited_date, true)}
+            {
+              // If last edited date is same as created date, then it is not edited
+              !dayjs(note.last_edited_date).isSame(
+                note.created_date,
+                "second"
+              ) && (
+                <div className="flex">
+                  <div
+                    className="cursor-pointer text-xs text-gray-600"
+                    onClick={() => {
+                      fetchEditHistory();
+                      setShowEditHistory(true);
+                    }}
+                  >
+                    <div className="tooltip inline">
+                      <span className="tooltip-text tooltip-bottom">
+                        {formatDateTime(note.last_edited_date)}
+                      </span>
+                      Edited {relativeDate(note.last_edited_date, true)}
+                    </div>
+                    <CareIcon
+                      icon="l-history"
+                      className="ml-1 h-4 w-4 pt-[3px] text-primary-600"
+                    />
                   </div>
-                  <CareIcon
-                    icon="l-history"
-                    className="ml-1 h-4 w-4 pt-[3px] text-primary-600"
-                  />
                 </div>
-              </div>
-            )}
+              )
+            }
           </div>
 
-          <ButtonV2
-            className="text-gray-500"
-            ghost
-            onClick={() => {
-              if (!isEditing) setIsEditing(true);
-            }}
-          >
-            {isEditing ? (
-              <CareIcon
-                icon="l-check-circle"
-                className="h-5 w-5"
-                onClick={onUpdateNote}
-              />
-            ) : (
-              <CareIcon icon="l-pen" className="h-5 w-5" />
-            )}
-          </ButtonV2>
+          {note.created_by_object.id === authUser.id && (
+            <ButtonV2
+              className="text-gray-500"
+              ghost
+              onClick={() => {
+                if (!isEditing) setIsEditing(true);
+              }}
+            >
+              {isEditing ? (
+                <CareIcon
+                  icon="l-check-circle"
+                  className="h-5 w-5"
+                  onClick={onUpdateNote}
+                />
+              ) : (
+                <CareIcon icon="l-pen" className="h-5 w-5" />
+              )}
+            </ButtonV2>
+          )}
         </div>
         {
           <div className="mt-2">
@@ -149,8 +176,13 @@ const PatientNoteCard = ({
               </p>
             </div>
             <div className="h-96 overflow-scroll">
-              {note.edits.map((edit, index) => {
-                const isLast = index === note.edits.length - 1;
+              {editHistory.length === 0 && (
+                <div className="flex h-full items-center justify-center">
+                  <Spinner />
+                </div>
+              )}
+              {editHistory?.map((edit, index) => {
+                const isLast = index === editHistory.length - 1;
                 return (
                   <div
                     key={index}
@@ -163,14 +195,6 @@ const PatientNoteCard = ({
                         </p>
                         <p className="text-sm text-gray-900">
                           {formatDateTime(edit.edited_date)}
-                        </p>
-                      </div>
-                      <div className="grow">
-                        <p className="text-sm font-medium text-gray-500">
-                          {isLast ? "Created" : "Edited"} By
-                        </p>
-                        <p className="text-sm text-gray-900">
-                          {edit.edited_by.username}
                         </p>
                       </div>
                     </div>
