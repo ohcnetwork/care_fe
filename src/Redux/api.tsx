@@ -52,6 +52,7 @@ import {
   PatientNotesModel,
   BedModel,
   InventorySummaryResponse,
+  MinimumQuantityItemResponse,
 } from "../Components/Facility/models";
 import {
   IDeleteBedCapacity,
@@ -794,9 +795,15 @@ const routes = {
     method: "GET",
     TRes: Type<PaginatedResponse<InventorySummaryResponse>>(),
   },
+  getMinQuantityItem: {
+    path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}",
+    method: "GET",
+    TRes: Type<MinimumQuantityItemResponse>(),
+  },
   updateMinQuantity: {
     path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}",
     method: "PATCH",
+    TRes: Type<PaginatedResponse<MinimumQuantityItemResponse>>(),
   },
   getInventorySummary: {
     path: "/api/v1/facility",
