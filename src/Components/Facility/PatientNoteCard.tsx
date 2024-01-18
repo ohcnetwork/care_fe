@@ -21,10 +21,12 @@ const PatientNoteCard = ({
   state,
   note,
   setReload,
+  disableEdit,
 }: {
   state: PatientNoteStateType;
   note: PatientNotesModel;
   setReload: any;
+  disableEdit?: boolean;
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [noteField, setNoteField] = useState(note.note);
@@ -127,7 +129,7 @@ const PatientNoteCard = ({
             }
           </div>
 
-          {note.created_by_object.id === authUser.id && (
+          {!disableEdit && note.created_by_object.id === authUser.id && (
             <ButtonV2
               className="text-gray-500"
               ghost

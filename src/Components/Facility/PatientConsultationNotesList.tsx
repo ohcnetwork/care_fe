@@ -12,12 +12,13 @@ interface PatientNotesProps {
   setState: any;
   reload?: boolean;
   setReload?: any;
+  disableEdit?: boolean;
 }
 
 const pageSize = RESULTS_PER_PAGE_LIMIT;
 
 const PatientConsultationNotesList = (props: PatientNotesProps) => {
-  const { state, setState, reload, setReload } = props;
+  const { state, setState, reload, setReload, disableEdit } = props;
   const consultationId = useSlug("consultation") ?? "";
 
   const [isLoading, setIsLoading] = useState(true);
@@ -80,7 +81,12 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
   }
 
   return (
-    <DoctorNote state={state} handleNext={handleNext} setReload={setReload} />
+    <DoctorNote
+      state={state}
+      handleNext={handleNext}
+      setReload={setReload}
+      disableEdit={disableEdit}
+    />
   );
 };
 

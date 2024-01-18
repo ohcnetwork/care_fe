@@ -167,6 +167,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
             setState={setState}
             reload={reload}
             setReload={setReload}
+            disableEdit={!patientActive}
           />
           <div className="relative mx-4 flex items-center">
             <TextFormField
