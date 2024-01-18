@@ -275,12 +275,6 @@ export const postInventory = (params: object, pathParams: object) => {
 export const getInventoryLog = (params: object, pathParams: object) => {
   return fireRequest("getInventoryLog", [params, "inventory"], pathParams);
 };
-export const setMinQuantity = (params: object, pathParams: object) => {
-  return fireRequest("setMinQuantity", [], params, pathParams);
-};
-export const getMinQuantity = (facilityId: object, params: object) => {
-  return fireRequest("getMinQuantity", [facilityId, "min_quantity"], params);
-};
 
 export const getInventorySummary = (facilityId: number, params: object) => {
   return fireRequest(
