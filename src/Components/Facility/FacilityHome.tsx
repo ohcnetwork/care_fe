@@ -1,6 +1,6 @@
 import * as Notification from "../../Utils/Notifications.js";
 
-import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import { FacilityModel } from "./models";
 import { FACILITY_FEATURE_TYPES, USER_TYPES } from "../../Common/constants";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
@@ -54,19 +54,20 @@ export const FacilityHome = (props: any) => {
 
   useMessageListener((data) => console.log(data));
 
-  const { data: facilityData, loading: isLoading } = useQuery(
-    routes.getPermittedFacility,
-    {
-      pathParams: {
-        id: facilityId,
-      },
-      onResponse: ({ res }) => {
-        if (!res?.ok) {
-          navigate("/not-found");
-        }
-      },
-    }
-  );
+  const {
+    data: facilityData,
+    loading: isLoading,
+    refetch: facilityFetch,
+  } = useQuery(routes.getPermittedFacility, {
+    pathParams: {
+      id: facilityId,
+    },
+    onResponse: ({ res }) => {
+      if (!res?.ok) {
+        navigate("/not-found");
+      }
+    },
+  });
 
   const handleDeleteClose = () => {
     setOpenDeleteDialog(false);
@@ -98,8 +99,15 @@ export const FacilityHome = (props: any) => {
     USER_TYPES.findIndex((type) => type == authUser.user_type) >=
       StaffUserTypeIndex;
 
+  const hasPermissionToDeleteFacility =
+    authUser.user_type === "DistrictAdmin" ||
+    authUser.user_type === "StateAdmin";
+
   const editCoverImageTooltip = hasPermissionToEditCoverImage && (
-    <div className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center bg-black text-sm text-gray-300 opacity-0 transition-[opacity] hover:opacity-60 md:h-[88px]">
+    <div
+      id="facility-coverimage"
+      className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center bg-black text-sm text-gray-300 opacity-0 transition-[opacity] hover:opacity-60 md:h-[88px]"
+    >
       <i className="fa-solid fa-pen" />
       <span className="mt-2">{`${hasCoverImage ? "Edit" : "Upload"}`}</span>
     </div>
@@ -139,10 +147,10 @@ export const FacilityHome = (props: any) => {
         onSave={() =>
           facilityData?.read_cover_image_url
             ? setImageKey(Date.now())
-            : window.location.reload()
+            : facilityFetch()
         }
         onClose={() => setEditCoverImage(false)}
-        onDelete={() => window.location.reload()}
+        onDelete={() => facilityFetch()}
         facility={facilityData ?? ({} as FacilityModel)}
       />
       {hasCoverImage ? (
@@ -371,16 +379,17 @@ export const FacilityHome = (props: any) => {
                 >
                   View Users
                 </DropdownItem>
-                <DropdownItem
-                  id="delete-facility"
-                  variant="danger"
-                  onClick={() => setOpenDeleteDialog(true)}
-                  className="flex items-center gap-3"
-                  icon={<CareIcon className="care-l-trash-alt text-lg" />}
-                  authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
-                >
-                  Delete Facility
-                </DropdownItem>
+                {hasPermissionToDeleteFacility && (
+                  <DropdownItem
+                    id="delete-facility"
+                    variant="danger"
+                    onClick={() => setOpenDeleteDialog(true)}
+                    className="flex items-center gap-3"
+                    icon={<CareIcon className="care-l-trash-alt text-lg" />}
+                  >
+                    Delete Facility
+                  </DropdownItem>
+                )}
               </DropdownMenu>
             </div>
             <div className="flex flex-col justify-end">
@@ -469,15 +478,21 @@ export const FacilityHome = (props: any) => {
 const LiveMonitoringButton = () => {
   const facilityId = useSlug("facility");
   const [location, setLocation] = useState<string>();
+  const authUser = useAuthUser();
+
+  const permittedUserTypes = ["StateAdmin", "DistrictAdmin", "Doctor"];
 
   return (
     <Popover className="relative">
-      <Popover.Button className="mt-2 w-full">
-        <ButtonV2 variant="primary" ghost border className="w-full">
-          <CareIcon icon="l-video" className="text-lg" />
-          <span>Live Monitoring</span>
-        </ButtonV2>
-      </Popover.Button>
+      {permittedUserTypes.includes(authUser.user_type) && (
+        <Popover.Button className="mt-2 w-full">
+          <ButtonV2 variant="primary" ghost border className="w-full">
+            <CareIcon icon="l-video" className="text-lg" />
+            <span>Live Monitoring</span>
+          </ButtonV2>
+        </Popover.Button>
+      )}
+
       <Transition
         as={Fragment}
         enter="transition ease-out duration-200"

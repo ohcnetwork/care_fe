@@ -10,20 +10,17 @@ import PageTitle from "../../Common/PageTitle";
 import DailyRoundsFilter from "./DailyRoundsFilter";
 import { ConsultationModel } from "../models";
 import { useSlugs } from "../../../Common/hooks/useSlug";
+import { TimelineNode } from "../../../CAREUI/display/Timeline";
 
 interface Props {
   consultation: ConsultationModel;
 }
 
 export default function DailyRoundsList({ consultation }: Props) {
-  const [facilityId, patientId, consultationId] = useSlugs(
-    "facility",
-    "patient",
-    "consultation"
-  );
+  const [consultationId] = useSlugs("consultation");
   const { t } = useTranslation();
 
-  const consultationUrl = `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`;
+  const consultationUrl = `/facility/${consultation.facility}/patient/${consultation.patient}/consultation/${consultation.id}`;
 
   return (
     <PaginatedList
@@ -45,20 +42,34 @@ export default function DailyRoundsList({ consultation }: Props) {
                 </span>
               </PaginatedList.WhenEmpty>
               <PaginatedList.WhenLoading>
-                <>
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <LoadingLogUpdateCard key={i} />
-                  ))}
-                </>
+                <LoadingLogUpdateCard />
               </PaginatedList.WhenLoading>
               <PaginatedList.Items<DailyRoundsModel> className="flex grow flex-col gap-3">
                 {(item, items) => {
                   if (item.rounds_type === "AUTOMATED") {
                     return (
-                      <VirtualNursingAssistantLogUpdateCard
-                        round={item}
-                        previousRound={items[items.indexOf(item) + 1]}
-                      />
+                      <TimelineNode
+                        event={{
+                          type: "created",
+                          timestamp: item.taken_at?.toString() ?? "",
+                          by: {
+                            user_type: "",
+                            first_name: "Virtual",
+                            last_name: "Assistant",
+                            username: "",
+                            id: "",
+                            email: "",
+                            last_login: "",
+                          },
+                          icon: "l-robot",
+                        }}
+                        isLast={items.indexOf(item) == items.length - 1}
+                      >
+                        <VirtualNursingAssistantLogUpdateCard
+                          round={item}
+                          previousRound={items[items.indexOf(item) + 1]}
+                        />
+                      </TimelineNode>
                     );
                   }
 
@@ -69,12 +80,30 @@ export default function DailyRoundsList({ consultation }: Props) {
                     : `${consultationUrl}/daily_rounds/${item.id}`;
 
                   return (
-                    <DefaultLogUpdateCard
-                      round={item}
-                      consultationData={consultation}
-                      onViewDetails={() => navigate(itemUrl)}
-                      onUpdateLog={() => navigate(`${itemUrl}/update`)}
-                    />
+                    <TimelineNode
+                      event={{
+                        type: "created",
+                        timestamp: item.taken_at?.toString() ?? "",
+                        by: {
+                          user_type: item.created_by?.user_type ?? "",
+                          first_name: item.created_by?.first_name ?? "",
+                          last_name: item.created_by?.last_name ?? "",
+                          username: "",
+                          id: "",
+                          email: "",
+                          last_login: "",
+                        },
+                        icon: "l-user-nurse",
+                      }}
+                      isLast={items.indexOf(item) == items.length - 1}
+                    >
+                      <DefaultLogUpdateCard
+                        round={item}
+                        consultationData={consultation}
+                        onViewDetails={() => navigate(itemUrl)}
+                        onUpdateLog={() => navigate(`${itemUrl}/update`)}
+                      />
+                    </TimelineNode>
                   );
                 }}
               </PaginatedList.Items>

@@ -1,44 +1,41 @@
 import Card from "../../CAREUI/display/Card";
 
-import { useState, useEffect, lazy, SyntheticEvent } from "react";
-import { useDispatch } from "react-redux";
-import {
-  createFacilityBed,
-  getAnyFacility,
-  getFacilityAssetLocation,
-  getFacilityBed,
-  updateFacilityBed,
-} from "../../Redux/actions";
+import { useState, lazy, SyntheticEvent } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
-import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import Page from "../Common/components/Page";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import useAppHistory from "../../Common/hooks/useAppHistory";
+import request from "../../Utils/request/request";
+import { useTranslation } from "react-i18next";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
-interface BedFormProps {
+interface Props {
   facilityId: string;
   locationId: string;
   bedId?: string;
 }
 
-export const AddBedForm = (props: BedFormProps) => {
-  const { facilityId, locationId, bedId } = props;
-  const dispatchAction: any = useDispatch();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [name, setName] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
-  const [bedType, setBedType] = useState<string>("");
-  const [facilityName, setFacilityName] = useState("");
-  const [locationName, setLocationName] = useState("");
-  const [bedName, setBedName] = useState("");
+export const AddBedForm = ({ facilityId, locationId, bedId }: Props) => {
+  const { t } = useTranslation();
+  const { goBack } = useAppHistory();
+  const [state, setState] = useState({
+    name: "",
+    description: "",
+    bed_type: "",
+    facility: facilityId,
+    location: locationId,
+  });
+
   const [multipleBeds, setMultipleBeds] = useState(false);
-  const [numberOfBeds, setNumberOfBeds] = useState(1); //default = 1
+  const [numberOfBeds, setNumberOfBeds] = useState(1);
   const [errors, setErrors] = useState({
     name: "",
     description: "",
@@ -46,43 +43,32 @@ export const AddBedForm = (props: BedFormProps) => {
     numberOfBeds: "",
   });
 
-  const headerText = !bedId ? "Add Bed" : "Update Bed";
-  const buttonText = !bedId ? "Add Bed(s)" : "Update Bed";
+  const { data: location } = useQuery(routes.getFacilityAssetLocation, {
+    pathParams: {
+      facility_external_id: facilityId,
+      external_id: locationId,
+    },
+  });
 
-  useEffect(() => {
-    async function fetchFacilityLocationAndBed() {
-      setIsLoading(true);
-      if (facilityId) {
-        const res = await dispatchAction(getAnyFacility(facilityId));
-        setFacilityName(res?.data?.name || "");
-      }
-      if (facilityId && locationId) {
-        const res = await dispatchAction(
-          getFacilityAssetLocation(facilityId, locationId)
-        );
-        setLocationName(res?.data?.name || "");
-      }
-      if (facilityId && locationId && bedId) {
-        const res = await dispatchAction(
-          getFacilityBed(facilityId, locationId, bedId)
-        );
-        setName(res?.data?.name || "");
-        setBedName(res?.data?.name || "");
-        setDescription(res?.data?.description || "");
-        setBedType(res?.data?.bed_type || "");
-        setNumberOfBeds(res?.data?.number_of_beds || "");
-      }
-      setIsLoading(false);
-    }
-
-    fetchFacilityLocationAndBed();
-  }, [dispatchAction, facilityId, locationId]);
+  const { data, loading } = useQuery(routes.getFacilityBed, {
+    pathParams: { external_id: bedId ?? "" },
+    prefetch: !!bedId,
+    onResponse: ({ data }) => {
+      setState({
+        name: data?.name ?? "",
+        description: data?.description ?? "",
+        bed_type: data?.bed_type ?? "",
+        facility: facilityId,
+        location: locationId,
+      });
+    },
+  });
 
   const validateInputs = (data: {
     name: string;
     description: string;
     bed_type: string;
-    number_of_beds: number;
+    number_of_beds?: number;
   }) => {
     let isValid = true;
     if (!data.name) {
@@ -96,7 +82,7 @@ export const AddBedForm = (props: BedFormProps) => {
     if (multipleBeds === false) {
       setNumberOfBeds(1);
     }
-    if (data.number_of_beds < 1) {
+    if (data.number_of_beds !== undefined && data.number_of_beds < 1) {
       isValid = false;
       setErrors((prev) => ({
         ...prev,
@@ -115,63 +101,56 @@ export const AddBedForm = (props: BedFormProps) => {
     return isValid;
   };
 
-  const handleCancel = () =>
-    navigate(`/facility/${facilityId}/location/${locationId}/beds`, {
-      replace: true,
-    });
-
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
 
-    const data = {
-      name,
-      description,
-      bed_type: bedType,
-      number_of_beds: bedId ? 1 : numberOfBeds,
-    };
+    const data = bedId
+      ? { ...state }
+      : { ...state, number_of_beds: numberOfBeds };
 
     if (!validateInputs(data)) return;
 
-    setIsLoading(true);
+    const onSuccess = (msg: string) => {
+      Notification.Success({ msg });
+      goBack();
+    };
 
-    const res = await dispatchAction(
-      bedId
-        ? updateFacilityBed(data, facilityId, bedId, locationId)
-        : createFacilityBed(data, facilityId, locationId)
-    );
-    setIsLoading(false);
-    if (res && (res.status === 201 || res.status === 200)) {
-      const notificationMessage = bedId
-        ? "Bed updated successfully"
-        : "Bed(s) created successfully";
-
-      navigate(`/facility/${facilityId}/location/${locationId}/beds`, {
-        replace: true,
+    if (bedId) {
+      // Update
+      const { res } = await request(routes.updateFacilityBed, {
+        pathParams: { external_id: bedId },
+        body: { ...data, facility: facilityId, location: locationId },
       });
-      Notification.Success({
-        msg: notificationMessage,
+      res?.ok && onSuccess("Bed updated successfully");
+    } else {
+      // Create
+      const { res } = await request(routes.createFacilityBed, {
+        body: { ...data, facility: facilityId, location: locationId },
       });
+      res?.ok && onSuccess("Bed(s) created successfully");
     }
   };
 
-  if (isLoading) {
+  if (loading) {
     return <Loading />;
   }
+
+  const action = t(!bedId ? "add_beds" : "update_bed");
 
   return (
     <div className="mx-auto max-w-3xl px-2 pb-2">
       <Page
-        title={headerText}
+        title={action}
         backUrl={`/facility/${facilityId}/location/${locationId}/beds`}
         crumbsReplacements={{
-          [facilityId]: { name: facilityName },
+          [facilityId]: { name: location?.facility.name },
           [locationId]: {
-            name: locationName,
+            name: location?.name,
             uri: `/facility/${facilityId}/location`,
           },
           ...(bedId && {
             [bedId]: {
-              name: bedName,
+              name: data?.name,
               uri: `/facility/${facilityId}/location/${locationId}/beds`,
             },
           }),
@@ -182,19 +161,20 @@ export const AddBedForm = (props: BedFormProps) => {
             <TextFormField
               name="name"
               type="text"
-              label="Name"
-              id="name"
+              label={t("name")}
+              id="bed-name"
               required
-              value={name}
-              onChange={(e) => setName(e.value)}
+              value={state.name}
+              onChange={(e) => setState((p) => ({ ...p, [e.name]: e.value }))}
               error={errors.name}
             />
             <TextAreaFormField
+              id="bed-description"
               rows={5}
-              label="Description"
+              label={t("description")}
               name="description"
-              value={description}
-              onChange={(e) => setDescription(e.value)}
+              value={state.description}
+              onChange={(e) => setState((p) => ({ ...p, [e.name]: e.value }))}
               error={errors.description}
             />
 
@@ -202,30 +182,34 @@ export const AddBedForm = (props: BedFormProps) => {
               id="bed-type"
               className="w-full"
               name="bed_type"
-              label="Bed Type"
+              label={t("bed_type")}
               required
               options={LOCATION_BED_TYPES}
               optionLabel={(option) => option.name}
               optionValue={(option) => option.id}
-              value={bedType}
-              onChange={(e) => setBedType(e.value)}
+              value={state.bed_type}
+              onChange={(e) => setState((p) => ({ ...p, [e.name]: e.value }))}
               error={errors.bedType}
             />
 
             {!bedId && (
               <>
                 <CheckBoxFormField
-                  label="Do you want to make multiple beds?"
-                  onChange={() => {
-                    if (multipleBeds) setNumberOfBeds(1);
-                    setMultipleBeds(!multipleBeds);
+                  id="multiplebed-checkbox"
+                  label={t("make_multiple_beds_label")}
+                  onChange={({ value }) => {
+                    setMultipleBeds(value);
+                    if (value) {
+                      setNumberOfBeds(1);
+                    }
                   }}
                   name={"multipleBeds"}
                 />
                 <TextFormField
+                  id="numberofbed"
                   name="number_of_beds"
                   disabled={!multipleBeds}
-                  label="Number of beds"
+                  label={t("number_of_beds")}
                   type="number"
                   value={numberOfBeds.toString()}
                   min={1}
@@ -233,17 +217,17 @@ export const AddBedForm = (props: BedFormProps) => {
                   onChange={(e) => setNumberOfBeds(Number(e.value))}
                   error={
                     numberOfBeds > 100
-                      ? "Number of beds cannot be greater than 100"
+                      ? t("number_of_beds_out_of_range_error")
                       : undefined
                   }
                 />
               </>
             )}
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-end">
-              <Cancel onClick={handleCancel} />
+              <Cancel onClick={() => goBack()} />
               <Submit
                 onClick={handleSubmit}
-                label={buttonText}
+                label={action}
                 disabled={numberOfBeds > 100}
               />
             </div>

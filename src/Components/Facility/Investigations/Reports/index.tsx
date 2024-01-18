@@ -1,6 +1,6 @@
 import * as Notification from "../../../../Utils/Notifications";
 import _ from "lodash-es";
-import { Group, InvestigationType } from "..";
+import { InvestigationGroup, InvestigationType } from "..";
 import {
   getPatient,
   getPatientInvestigation,
@@ -22,7 +22,7 @@ import { useRef } from "react";
 
 const RESULT_PER_PAGE = 14;
 interface InitialState {
-  investigationGroups: Group[];
+  investigationGroups: InvestigationGroup[];
   selectedGroup: string[];
   investigations: InvestigationType[];
   selectedInvestigations: any[];

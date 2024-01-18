@@ -1,4 +1,5 @@
 import { PerformedByModel } from "../HCX/misc";
+import { PRESCRIPTION_ROUTES } from "./CreatePrescriptionForm";
 
 export const DOSAGE_UNITS = [
   "mg",
@@ -16,7 +17,7 @@ interface BasePrescription {
   medicine?: string;
   medicine_object?: MedibaseMedicine;
   medicine_old?: string;
-  route?: "ORAL" | "IV" | "IM" | "SC";
+  route?: (typeof PRESCRIPTION_ROUTES)[number];
   dosage_type?: "REGULAR" | "TITRATED" | "PRN";
   base_dosage?: DosageValue;
   target_dosage?: DosageValue;

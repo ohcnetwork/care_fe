@@ -71,6 +71,7 @@ export default function InventoryList(props: any) {
   if (inventory?.length) {
     inventoryList = inventory.map((inventoryItem: any) => (
       <tr
+        id={`${inventoryItem.item_object?.name.replaceAll(" ", "-")}`}
         key={inventoryItem.id}
         className={classNames(
           "cursor-pointer hover:bg-gray-200",
@@ -166,6 +167,7 @@ export default function InventoryList(props: any) {
               Manage Inventory
             </ButtonV2>
             <ButtonV2
+              id="add-minimum-quantity"
               className="w-full"
               href={`/facility/${facilityId}/inventory/min_quantity/list`}
             >

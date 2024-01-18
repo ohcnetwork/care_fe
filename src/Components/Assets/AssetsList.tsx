@@ -38,6 +38,7 @@ const AssetsList = () => {
     resultsPerPage,
   } = useFilters({
     limit: 18,
+    cacheBlacklist: ["search"],
   });
   const [assets, setAssets] = useState([{} as AssetData]);
   const [isLoading, setIsLoading] = useState(false);
@@ -69,7 +70,7 @@ const AssetsList = () => {
       qParams.warranty_amc_end_of_validity_after || "",
   };
 
-  const { loading } = useQuery(routes.listAssets, {
+  const { refetch: assetsFetch, loading } = useQuery(routes.listAssets, {
     query: params,
     onResponse: ({ res, data }) => {
       if (res?.status === 200 && data) {
@@ -436,6 +437,7 @@ const AssetsList = () => {
               return f;
             });
           }}
+          onUpdate={assetsFetch}
           facility={facility}
         />
       )}
