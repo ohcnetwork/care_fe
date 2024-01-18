@@ -17,12 +17,24 @@ class FacilityManage {
     cy.get("#facility-doctor-totalcapacity").contains(expectedCapacity);
   }
 
+  verifyFacilityBedCapacity(expectedCapacity) {
+    cy.get("#facility-bed-capacity-details").contains(expectedCapacity);
+  }
+
   clickEditFacilityDoctorCapacity() {
     cy.get("#edit-facility-doctorcapacity").click();
   }
 
+  clickEditFacilityBedCapacity() {
+    cy.get("#edit-facility-bedcapacity").click();
+  }
+
   clickDeleteFacilityDoctorCapacity() {
     cy.get("#delete-facility-doctorcapacity").click();
+  }
+
+  clickDeleteFacilityBedCapacity() {
+    cy.get("#delete-facility-bedcapacity").click();
   }
 
   clickSaveCoverImage() {
@@ -70,6 +82,11 @@ class FacilityManage {
   clickFacilityAddDoctorTypeButton() {
     cy.get("#facility-add-doctortype").scrollIntoView();
     cy.get("#facility-add-doctortype").click();
+  }
+
+  clickFacilityAddBedTypeButton() {
+    cy.get("#facility-add-bedtype").scrollIntoView();
+    cy.get("#facility-add-bedtype").click();
   }
 }
 export default FacilityManage;

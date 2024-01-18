@@ -20,6 +20,10 @@ describe("Facility Manage Functions", () => {
   const facilityUpdatedHrfId = uuidv4();
   const doctorCapacity = "5";
   const doctorModifiedCapacity = "7";
+  const totalCapacity = "100";
+  const currentOccupied = "80";
+  const totalUpdatedCapacity = "120";
+  const currentUpdatedOccupied = "100";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -123,6 +127,36 @@ describe("Facility Manage Functions", () => {
     facilityManage.clickButtonWithText("Delete");
     facilityManage.verifySuccessMessageVisibilityAndContent(
       "Doctor specialization type deleted successfully"
+    );
+  });
+
+  it("Modify bed capacity in Facility detail page", () => {
+    // add multiple new bed capacity
+    facilityManage.clickFacilityAddBedTypeButton();
+    facilityPage.selectBedType("Oxygen beds");
+    facilityPage.fillTotalCapacity(totalCapacity);
+    facilityPage.fillCurrentlyOccupied(currentOccupied);
+    facilityPage.saveAndExitBedCapacityForm();
+    facilityManage.verifySuccessMessageVisibilityAndContent(
+      "Bed capacity added successfully"
+    );
+    facilityManage.verifyFacilityBedCapacity(totalCapacity);
+    facilityManage.verifyFacilityBedCapacity(currentOccupied);
+    // edit a existing bed
+    facilityManage.clickEditFacilityBedCapacity();
+    facilityPage.fillTotalCapacity(totalUpdatedCapacity);
+    facilityPage.fillCurrentlyOccupied(currentUpdatedOccupied);
+    facilityPage.clickbedcapcityaddmore();
+    facilityManage.verifySuccessMessageVisibilityAndContent(
+      "Bed capacity updated successfully"
+    );
+    facilityManage.verifyFacilityBedCapacity(totalUpdatedCapacity);
+    facilityManage.verifyFacilityBedCapacity(currentUpdatedOccupied);
+    // delete a bed
+    facilityManage.clickDeleteFacilityBedCapacity();
+    facilityManage.clickButtonWithText("Delete");
+    facilityManage.verifySuccessMessageVisibilityAndContent(
+      "Bed type deleted successfully"
     );
   });
 
