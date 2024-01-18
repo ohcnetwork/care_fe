@@ -19,6 +19,7 @@ describe("Facility Manage Functions", () => {
   const facilityHrfId = uuidv4();
   const facilityUpdatedHrfId = uuidv4();
   const doctorCapacity = "5";
+  const doctorModifiedCapacity = "7";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -99,29 +100,27 @@ describe("Facility Manage Functions", () => {
     facilityManage.verifyHrfIdValue(facilityUpdatedHrfId);
   });
 
-  it("Modify Facility detail page doctor capacity ", () => {
+  it("Modify doctor capacity in Facility detail page", () => {
     // Add a doctor capacity
-    cy.get("#facility-add-doctortype").scrollIntoView();
-    cy.get("#facility-add-doctortype").click();
+    facilityManage.clickFacilityAddDoctorTypeButton();
     facilityPage.selectAreaOfSpecialization("General Medicine");
     facilityPage.fillDoctorCount(doctorCapacity);
-    facilityPage.clickdoctorcapacityaddmore();
     facilityPage.saveAndExitDoctorForm();
     facilityManage.verifySuccessMessageVisibilityAndContent(
       "Doctor count added successfully"
     );
-    cy.get("#facility-doctor-totalcapacity").contains(doctorCapacity);
+    facilityManage.verifyTotalDoctorCapacity(doctorCapacity);
     // edit a existing doctor
-    cy.get("#edit-facility-doctorcapacity").click();
-    facilityPage.fillDoctorCount("7");
+    facilityManage.clickEditFacilityDoctorCapacity();
+    facilityPage.fillDoctorCount(doctorModifiedCapacity);
     facilityPage.clickdoctorcapacityaddmore();
     facilityManage.verifySuccessMessageVisibilityAndContent(
       "Doctor count updated successfully"
     );
-    cy.get("#facility-doctor-totalcapacity").contains("7");
+    facilityManage.verifyTotalDoctorCapacity(doctorModifiedCapacity);
     // delete a bed
-    cy.get("#delete-facility-doctorcapacity").click();
-    cy.get("#submit").click();
+    facilityManage.clickDeleteFacilityDoctorCapacity();
+    facilityManage.clickButtonWithText("Delete");
     facilityManage.verifySuccessMessageVisibilityAndContent(
       "Doctor specialization type deleted successfully"
     );

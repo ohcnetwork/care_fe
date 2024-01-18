@@ -13,6 +13,18 @@ class FacilityManage {
       .wait(100); // Adjust the wait time as needed
   }
 
+  verifyTotalDoctorCapacity(expectedCapacity) {
+    cy.get("#facility-doctor-totalcapacity").contains(expectedCapacity);
+  }
+
+  clickEditFacilityDoctorCapacity() {
+    cy.get("#edit-facility-doctorcapacity").click();
+  }
+
+  clickDeleteFacilityDoctorCapacity() {
+    cy.get("#delete-facility-doctorcapacity").click();
+  }
+
   clickSaveCoverImage() {
     cy.get("#save-cover-image").scrollIntoView();
     cy.get("#save-cover-image").click();
@@ -53,6 +65,11 @@ class FacilityManage {
 
   verifyHrfIdValue(expectedValue) {
     cy.get("#hf_id").should("have.value", expectedValue);
+  }
+
+  clickFacilityAddDoctorTypeButton() {
+    cy.get("#facility-add-doctortype").scrollIntoView();
+    cy.get("#facility-add-doctortype").click();
   }
 }
 export default FacilityManage;
