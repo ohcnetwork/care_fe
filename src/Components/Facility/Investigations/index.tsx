@@ -22,7 +22,7 @@ const initialState = {
   form: {},
 };
 
-export interface Group {
+export interface InvestigationGroup {
   external_id: string;
   name: string;
 }
@@ -38,9 +38,9 @@ export interface InvestigationType {
   unit?: string;
   choices?: string;
   ideal_value?: string;
-  groups: Group[];
+  groups: InvestigationGroup[];
 }
-type SearchItem = Group | InvestigationType;
+type SearchItem = InvestigationGroup | InvestigationType;
 function isInvestigation(e: SearchItem): e is InvestigationType {
   return (e as InvestigationType).groups !== undefined;
 }
@@ -67,7 +67,7 @@ const listOfInvestigations = (
   );
 };
 
-const findGroup = (group_id: string, groups: Group[]) => {
+const findGroup = (group_id: string, groups: InvestigationGroup[]) => {
   return groups.find((g) => g.external_id === group_id);
 };
 
@@ -106,7 +106,9 @@ const Investigation = (props: {
   const [selectedGroup, setSelectedGroup] = useState<string[]>([]);
   const [state, setState] = useReducer(testFormReducer, initialState);
   const [investigations, setInvestigations] = useState<InvestigationType[]>([]);
-  const [investigationGroups, setInvestigationGroups] = useState<Group[]>([]);
+  const [investigationGroups, setInvestigationGroups] = useState<
+    InvestigationGroup[]
+  >([]);
   const [selectedInvestigations, setSelectedInvestigations] = useState<
     InvestigationType[]
   >([]);
