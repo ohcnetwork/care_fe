@@ -96,7 +96,7 @@ class FacilityPage {
   }
 
   fillDoctorCount(count: string) {
-    cy.get("input#count").click().type(count);
+    cy.get("input#count").click().clear().click().type(count);
   }
 
   fillOxygenCapacity(capacity: string) {
