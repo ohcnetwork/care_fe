@@ -1,0 +1,104 @@
+import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
+import LoginPage from "../../pageobject/Login/LoginPage";
+import FacilityManage from "../../pageobject/Facility/FacilityManage";
+import FacilityPage from "../../pageobject/Facility/FacilityCreation";
+import { v4 as uuidv4 } from "uuid";
+
+describe("Facility Manage Functions", () => {
+  const loginPage = new LoginPage();
+  const facilityManage = new FacilityManage();
+  const facilityPage = new FacilityPage();
+  const facilityMiddlewareUpdateButton = "Update";
+  const facilityMiddleware = "dev-middleware.coronasafe.live";
+  const facilityUpdatedMiddleware = "updated.coronasafe.live";
+  const facilityMiddlewareSuccessfullNotification =
+    "Facility updated successfully";
+  const facilityHrfidUpdateButton = "Link Health Facility";
+  const facilityHrfidSuccessfullNotification =
+    "Health Facility config updated successfully";
+  const facilityHrfId = uuidv4();
+  const facilityUpdatedHrfId = uuidv4();
+
+  before(() => {
+    loginPage.loginAsDisctrictAdmin();
+    cy.saveLocalStorage();
+  });
+
+  beforeEach(() => {
+    cy.viewport(1280, 720);
+    cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
+    cy.awaitUrl("/");
+    facilityPage.visitAlreadyCreatedFacility();
+  });
+
+  it("Facility Cover Image button functionality", () => {
+    // It's only button functionality because we can't access S3 bucket in local
+    facilityManage.clickCoverImage();
+    facilityManage.verifyUploadButtonVisible();
+    facilityManage.uploadCoverImage("facilitycoverimage.jpg");
+    facilityManage.clickSaveCoverImage();
+  });
+
+  it("Configure Facility Middleware", () => {
+    facilityPage.clickManageFacilityDropdown();
+    facilityManage.clickFacilityConfigureButton();
+    facilityManage.verifyMiddlewareAddressVisible();
+    // verify mandatory field error message
+    facilityManage.clickButtonWithText(facilityMiddlewareUpdateButton);
+    facilityManage.checkErrorMessageVisibility(
+      "Middleware Address is required"
+    );
+    // add middleware and verify the notification
+    facilityManage.typeMiddlewareAddress(facilityMiddleware);
+    facilityManage.clickButtonWithText(facilityMiddlewareUpdateButton);
+    facilityManage.verifySuccessMessageVisibilityAndContent(
+      facilityMiddlewareSuccessfullNotification
+    );
+    // update the existing middleware
+    facilityPage.clickManageFacilityDropdown();
+    facilityManage.clickFacilityConfigureButton();
+    facilityManage.verifyMiddlewareAddressVisible();
+    facilityManage.typeMiddlewareAddress(facilityUpdatedMiddleware);
+    facilityManage.clickButtonWithText(facilityMiddlewareUpdateButton);
+    facilityManage.verifySuccessMessageVisibilityAndContent(
+      facilityMiddlewareSuccessfullNotification
+    );
+    // verify the updated middleware
+    facilityPage.clickManageFacilityDropdown();
+    facilityManage.clickFacilityConfigureButton();
+    facilityManage.verifyMiddlewareAddressValue(facilityUpdatedMiddleware);
+  });
+
+  it("Configure Facility Health ID", () => {
+    facilityPage.clickManageFacilityDropdown();
+    facilityManage.clickFacilityConfigureButton();
+    // verify mandatory field error message
+    facilityManage.clickButtonWithText(facilityHrfidUpdateButton);
+    facilityManage.checkErrorMessageVisibility(
+      "Health Facility Id is required"
+    );
+    // add facility health ID and verify notification
+    facilityManage.typeHrfId(facilityHrfId);
+    facilityManage.clickButtonWithText(facilityHrfidUpdateButton);
+    facilityManage.verifySuccessMessageVisibilityAndContent(
+      facilityHrfidSuccessfullNotification
+    );
+    // update the existing middleware
+    facilityPage.clickManageFacilityDropdown();
+    facilityManage.clickFacilityConfigureButton();
+    facilityManage.typeHrfId(facilityUpdatedHrfId);
+    facilityManage.clickButtonWithText(facilityHrfidUpdateButton);
+    facilityManage.verifySuccessMessageVisibilityAndContent(
+      facilityHrfidSuccessfullNotification
+    );
+    // verify its reflection
+    facilityPage.clickManageFacilityDropdown();
+    facilityManage.clickFacilityConfigureButton();
+    facilityManage.verifyHrfIdValue(facilityUpdatedHrfId);
+  });
+
+  afterEach(() => {
+    cy.saveLocalStorage();
+  });
+});
