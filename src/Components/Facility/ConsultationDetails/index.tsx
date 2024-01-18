@@ -38,6 +38,7 @@ import { ConsultationNeurologicalMonitoringTab } from "./ConsultationNeurologica
 import { ConsultationNutritionTab } from "./ConsultationNutritionTab";
 import PatientNotesSlideover from "../PatientNotesSlideover";
 import LegacyDiagnosesList from "../../Diagnosis/LegacyDiagnosesList";
+import { AssetBedModel } from "../../Assets/AssetTypes";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
@@ -119,17 +120,25 @@ export const ConsultationDetails = (props: any) => {
               });
             data.symptoms_text = symptoms.join(", ");
           }
+          if (facilityId != data.facility || patientId != data.patient) {
+            navigate(
+              `/facility/${data.facility}/patient/${data.patient}/consultation/${data?.id}`
+            );
+          }
           setConsultationData(data);
-          const assetRes = await dispatch(
-            listAssetBeds({
-              bed: data?.current_bed?.bed_object?.id,
-            })
-          );
-          const isCameraAttachedRes = assetRes.data.results.some(
-            (asset: { asset_object: { asset_class: string } }) => {
-              return asset?.asset_object?.asset_class === "ONVIF";
-            }
-          );
+          const assetRes = data?.current_bed?.bed_object?.id
+            ? await dispatch(
+                listAssetBeds({
+                  bed: data?.current_bed?.bed_object?.id,
+                })
+              )
+            : null;
+          const isCameraAttachedRes =
+            assetRes != null
+              ? assetRes.data.results.some((asset: AssetBedModel) => {
+                  return asset?.asset_object?.asset_class === "ONVIF";
+                })
+              : false;
           setIsCameraAttached(isCameraAttachedRes);
           const id = res.data.patient;
           const patientRes = await dispatch(getPatient({ id }));
@@ -149,6 +158,7 @@ export const ConsultationDetails = (props: any) => {
                 : "No",
               is_vaccinated: patientData.is_vaccinated ? "Yes" : "No",
             };
+
             setPatientData(data);
           }
 
@@ -180,9 +190,9 @@ export const ConsultationDetails = (props: any) => {
 
   const consultationTabProps: ConsultationTabProps = {
     consultationId,
-    facilityId,
-    patientId,
     consultationData,
+    patientId: consultationData.patient,
+    facilityId: consultationData.facility,
     patientData,
   };
 

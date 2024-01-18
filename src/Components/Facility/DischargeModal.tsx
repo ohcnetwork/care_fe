@@ -26,7 +26,7 @@ import { FacilityModel } from "./models";
 import dayjs from "../../Utils/dayjs";
 
 interface PreDischargeFormInterface {
-  discharge_reason: string;
+  new_discharge_reason: number | null;
   discharge_notes: string;
   discharge_date?: string;
   death_datetime?: string;
@@ -40,7 +40,7 @@ interface IProps {
   onClose: () => void;
   consultationData: ConsultationModel;
   afterSubmit?: () => void;
-  discharge_reason?: string;
+  new_discharge_reason?: number | null;
   discharge_notes?: string;
   discharge_date?: string;
   death_datetime?: string;
@@ -50,11 +50,8 @@ const DischargeModal = ({
   show,
   onClose,
   consultationData,
-  afterSubmit = () => {
-    onClose();
-    window.location.reload();
-  },
-  discharge_reason = "",
+  afterSubmit,
+  new_discharge_reason = null,
   discharge_notes = "",
   discharge_date = dayjs().format("YYYY-MM-DDTHH:mm"),
   death_datetime = dayjs().format("YYYY-MM-DDTHH:mm"),
@@ -63,7 +60,7 @@ const DischargeModal = ({
   const dispatch: any = useDispatch();
   const [preDischargeForm, setPreDischargeForm] =
     useState<PreDischargeFormInterface>({
-      discharge_reason,
+      new_discharge_reason,
       discharge_notes,
       discharge_date,
       death_datetime,
@@ -113,17 +110,18 @@ const DischargeModal = ({
 
   const handlePatientDischarge = async (value: boolean) => {
     setIsSendingDischargeApi(true);
-    if (!preDischargeForm.discharge_reason) {
+    if (!preDischargeForm.new_discharge_reason) {
       setErrors({
         ...errors,
-        discharge_reason: "Please select a reason for discharge",
+        new_discharge_reason: "Please select a reason for discharge",
       });
       setIsSendingDischargeApi(false);
       return;
     }
 
     if (
-      preDischargeForm.discharge_reason == "EXP" &&
+      preDischargeForm.new_discharge_reason ==
+        DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id &&
       !preDischargeForm.discharge_notes.trim()
     ) {
       setErrors({
@@ -163,7 +161,7 @@ const DischargeModal = ({
         msg: "Patient Discharged Successfully",
       });
 
-      afterSubmit();
+      afterSubmit?.();
     }
   };
 
@@ -199,20 +197,21 @@ const DischargeModal = ({
           label="Reason"
           name="discharge_reason"
           id="discharge_reason"
-          value={preDischargeForm.discharge_reason}
-          disabled={!!discharge_reason}
+          value={preDischargeForm.new_discharge_reason}
+          disabled={!!new_discharge_reason}
           options={DISCHARGE_REASONS}
           optionValue={({ id }) => id}
           optionLabel={({ text }) => text}
           onChange={(e) =>
             setPreDischargeForm((prev) => ({
               ...prev,
-              discharge_reason: e.value,
+              new_discharge_reason: e.value,
             }))
           }
-          error={errors?.discharge_reason}
+          error={errors?.new_discharge_reason}
         />
-        {preDischargeForm.discharge_reason === "REF" && (
+        {preDischargeForm.new_discharge_reason ===
+          DISCHARGE_REASONS.find((i) => i.text == "Referred")?.id && (
           <>
             <FieldLabel>Referred to</FieldLabel>
             <FacilitySelect
@@ -230,12 +229,15 @@ const DischargeModal = ({
           </>
         )}
         <TextAreaFormField
-          required={preDischargeForm.discharge_reason == "EXP"}
+          required={
+            preDischargeForm.new_discharge_reason ==
+            DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
+          }
           label={
             {
-              EXP: "Cause of death",
-              REC: "Discharged Advice",
-            }[preDischargeForm.discharge_reason] ?? "Notes"
+              "3": "Cause of death",
+              "1": "Discharged Advice",
+            }[preDischargeForm.new_discharge_reason ?? 0] ?? "Notes"
           }
           name="discharge_notes"
           value={preDischargeForm.discharge_notes}
@@ -249,19 +251,22 @@ const DischargeModal = ({
         />
         <TextFormField
           name={
-            preDischargeForm.discharge_reason === "EXP"
+            preDischargeForm.new_discharge_reason ===
+            DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
               ? "death_datetime"
               : "discharge_date"
           }
           label={
-            preDischargeForm.discharge_reason === "EXP"
+            preDischargeForm.new_discharge_reason ===
+            DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
               ? "Date of Death"
               : "Date and Time of Discharge"
           }
           type="datetime-local"
           value={
             preDischargeForm[
-              preDischargeForm.discharge_reason === "EXP"
+              preDischargeForm.new_discharge_reason ===
+              DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
                 ? "death_datetime"
                 : "discharge_date"
             ]
@@ -280,13 +285,15 @@ const DischargeModal = ({
           )}
           max={dayjs().format("YYYY-MM-DDTHH:mm")}
           error={
-            preDischargeForm.discharge_reason === "EXP"
+            preDischargeForm.new_discharge_reason ===
+            DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
               ? errors?.death_datetime
               : errors?.discharge_date
           }
         />
 
-        {preDischargeForm.discharge_reason === "REC" && (
+        {preDischargeForm.new_discharge_reason ===
+          DISCHARGE_REASONS.find((i) => i.text == "Recovered")?.id && (
           <>
             <div className="mb-4">
               <FieldLabel>Discharge Prescription Medications</FieldLabel>
@@ -298,7 +305,8 @@ const DischargeModal = ({
             </div>
           </>
         )}
-        {preDischargeForm.discharge_reason === "EXP" && (
+        {preDischargeForm.new_discharge_reason ===
+          DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id && (
           <TextFormField
             name="death_confirmed_by"
             label="Confirmed By"

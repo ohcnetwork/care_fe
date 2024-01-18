@@ -2,7 +2,7 @@ import { useState, useEffect, Dispatch, SetStateAction } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { classNames } from "../../Utils/utils";
+import { classNames, isAppleDevice } from "../../Utils/utils";
 import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { make as Link } from "../Common/components/Link.bs";
@@ -11,6 +11,7 @@ import PatientConsultationNotesList from "./PatientConsultationNotesList";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { PatientNoteStateType } from "./models";
+import useKeyboardShortcut from "use-keyboard-shortcut";
 
 interface PatientNotesProps {
   patientId: string;
@@ -22,8 +23,8 @@ interface PatientNotesProps {
 export default function PatientNotesSlideover(props: PatientNotesProps) {
   const [show, setShow] = useState(true);
   const [patientActive, setPatientActive] = useState(true);
-  const [noteField, setNoteField] = useState("");
   const [reload, setReload] = useState(false);
+  const [focused, setFocused] = useState(false);
 
   const initialData: PatientNoteStateType = {
     notes: [],
@@ -36,6 +37,11 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
 
   const { facilityId, patientId, consultationId, setShowPatientNotesPopup } =
     props;
+
+  const localStorageKey = `patientNotesNoteField_${consultationId}`;
+  const [noteField, setNoteField] = useState(
+    localStorage.getItem(localStorageKey) || ""
+  );
 
   const onAddNote = async () => {
     const payload = {
@@ -86,6 +92,18 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
     fetchPatientName();
   }, [patientId]);
 
+  useKeyboardShortcut(
+    [isAppleDevice ? "Meta" : "Shift", "Enter"],
+    () => {
+      if (focused) {
+        onAddNote();
+      }
+    },
+    {
+      ignoreInputFields: false,
+    }
+  );
+
   const notesActionIcons = (
     <div className="flex gap-1">
       {show && (
@@ -114,6 +132,10 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       </div>
     </div>
   );
+
+  useEffect(() => {
+    localStorage.setItem(localStorageKey, noteField);
+  }, [noteField, localStorageKey]);
 
   return (
     <div
@@ -157,11 +179,8 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
               errorClassName="hidden"
               placeholder="Type your Note"
               disabled={!patientActive}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  onAddNote();
-                }
-              }}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
             />
             <ButtonV2
               id="add_doctor_note_button"

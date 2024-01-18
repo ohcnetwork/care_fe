@@ -11,6 +11,8 @@ import { PatientNoteStateType } from "../models.js";
 import routes from "../../../Redux/api.js";
 import request from "../../../Utils/request/request.js";
 import useQuery from "../../../Utils/request/useQuery.js";
+import useKeyboardShortcut from "use-keyboard-shortcut";
+import { isAppleDevice } from "../../../Utils/utils.js";
 
 interface ConsultationDoctorNotesProps {
   patientId: string;
@@ -26,6 +28,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
   const [reload, setReload] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
+  const [focused, setFocused] = useState(false);
 
   const initialData: PatientNoteStateType = {
     notes: [],
@@ -86,6 +89,18 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
     }
   });
 
+  useKeyboardShortcut(
+    [isAppleDevice ? "Meta" : "Shift", "Enter"],
+    () => {
+      if (focused) {
+        onAddNote();
+      }
+    },
+    {
+      ignoreInputFields: false,
+    }
+  );
+
   return (
     <Page
       title="Doctor Notes"
@@ -114,6 +129,8 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
             errorClassName="hidden"
             placeholder="Type your Note"
             disabled={!patientActive}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
           />
           <ButtonV2
             onClick={onAddNote}

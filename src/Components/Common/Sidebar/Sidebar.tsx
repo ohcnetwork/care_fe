@@ -8,6 +8,7 @@ import useConfig from "../../../Common/hooks/useConfig";
 import SlideOver from "../../../CAREUI/interactive/SlideOver";
 import { classNames } from "../../../Utils/utils";
 import { Link } from "raviger";
+import useAuthUser from "../../../Common/hooks/useAuthUser";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 
@@ -27,89 +28,72 @@ type StatelessSidebarProps =
       onItemClick: (open: boolean) => void;
     };
 
-const NavItems = [
-  { text: "Facilities", to: "/facility", icon: "care-l-hospital" },
-  { text: "Patients", to: "/patients", icon: "care-l-user-injured" },
-  { text: "Assets", to: "/assets", icon: "care-l-shopping-cart-alt" },
-  { text: "Sample Test", to: "/sample", icon: "care-l-medkit" },
-  { text: "Shifting", to: "/shifting", icon: "care-l-ambulance" },
-  { text: "Resource", to: "/resource", icon: "care-l-heart-medical" },
-  {
-    text: "External Results",
-    to: "/external_results",
-    icon: "care-l-clipboard-notes",
-  },
-  { text: "Users", to: "/users", icon: "care-l-users-alt" },
-  { text: "Notice Board", to: "/notice_board", icon: "care-l-meeting-board" },
-];
-
 const StatelessSidebar = ({
   shrinkable = false,
   shrinked = false,
   setShrinked,
   onItemClick,
 }: StatelessSidebarProps) => {
+  const authUser = useAuthUser();
+
+  const NavItems = [
+    { text: "Facilities", to: "/facility", icon: "care-l-hospital" },
+    { text: "Patients", to: "/patients", icon: "care-l-user-injured" },
+    { text: "Assets", to: "/assets", icon: "care-l-shopping-cart-alt" },
+    { text: "Sample Test", to: "/sample", icon: "care-l-medkit" },
+    { text: "Shifting", to: "/shifting", icon: "care-l-ambulance" },
+    { text: "Resource", to: "/resource", icon: "care-l-heart-medical" },
+    ...(!["Nurse", "NurseReadOnly", "Staff", "StaffReadOnly"].includes(
+      authUser.user_type
+    )
+      ? [
+          {
+            text: "External Results",
+            to: "/external_results",
+            icon: "care-l-clipboard-notes",
+          },
+        ]
+      : []),
+    { text: "Users", to: "/users", icon: "care-l-users-alt" },
+    { text: "Notice Board", to: "/notice_board", icon: "care-l-meeting-board" },
+  ];
+
   const { main_logo } = useConfig();
   const activeLink = useActiveLink();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
   const { dashboard_url } = useConfig();
 
   const indicatorRef = useRef<HTMLDivElement>(null);
+  const activeLinkRef = useRef<HTMLAnchorElement>(null);
   const [lastIndicatorPosition, setLastIndicatorPosition] = useState(0);
   const [isOverflowVisible, setOverflowVisisble] = useState(false);
 
   useEffect(() => {
     if (!indicatorRef.current) return;
     const index = NavItems.findIndex((item) => item.to === activeLink);
+    const navItemCount = NavItems.length + 2; // +2 for notification and dashboard
     if (index !== -1) {
       // Haha math go brrrrrrrrr
 
       const e = indicatorRef.current;
-
-      const itemHeight = 44;
-      const bottomItemOffset = 2;
-
-      const indexDifference = index - lastIndicatorPosition;
-      e.style.display = "block";
-
-      if (indexDifference > 0) {
-        e.style.top = lastIndicatorPosition * itemHeight + 16 + "px";
-        e.style.bottom = "auto";
+      const itemHeight = activeLinkRef.current?.clientHeight || 0;
+      if (lastIndicatorPosition > index) {
+        e.style.top = `${itemHeight * (index + 0.37)}px`;
+        setTimeout(() => {
+          e.style.bottom = `${itemHeight * (navItemCount - 0.63 - index)}px`;
+        }, 50);
       } else {
-        e.style.bottom =
-          itemHeight * (NavItems.length + bottomItemOffset) -
-          lastIndicatorPosition * itemHeight -
-          28 +
-          "px";
-        e.style.top = "auto";
+        e.style.bottom = `${itemHeight * (navItemCount - 0.63 - index)}px`;
+        setTimeout(() => {
+          e.style.top = `${itemHeight * (index + 0.37)}px`;
+        }, 50);
       }
-
-      const variableHeight = Math.min(
-        Math.abs(indexDifference) * itemHeight,
-        70
-      );
-
-      e.style.height = `${variableHeight}px`;
-      setTimeout(() => {
-        if (!e) return;
-        if (indexDifference > 0) {
-          e.style.top = index * itemHeight + 16 + "px";
-          e.style.bottom = "auto";
-        } else {
-          e.style.bottom =
-            itemHeight * (NavItems.length + bottomItemOffset) -
-            index * itemHeight -
-            28 +
-            "px";
-          e.style.top = "auto";
-        }
-        e.style.height = "0.75rem";
-        setLastIndicatorPosition(index);
-      }, 300);
+      setLastIndicatorPosition(index);
     } else {
       indicatorRef.current.style.display = "none";
     }
-  }, [activeLink]);
+  }, [activeLink, lastIndicatorPosition]);
+
   const handleOverflow = (value: boolean) => {
     setOverflowVisisble(value);
   };
@@ -147,6 +131,7 @@ const StatelessSidebar = ({
           {NavItems.map((i) => {
             return (
               <Item
+                ref={i.to === activeLink ? activeLinkRef : undefined}
                 key={i.text}
                 {...i}
                 icon={<CareIcon className={`${i.icon} h-5`} />}
