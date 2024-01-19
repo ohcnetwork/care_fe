@@ -1,5 +1,5 @@
 import { lazy, useState } from "react";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2, { Cancel } from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import Page from "../Common/components/Page";
@@ -10,6 +10,7 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import request from "../../Utils/request/request";
 import * as Notification from "../../Utils/Notifications.js";
 import ConfirmDialog from "../Common/ConfirmDialog";
+import DialogModal from "../Common/Dialog";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -22,14 +23,23 @@ interface LocationProps extends LocationModel {
 }
 
 export default function LocationManagement({ facilityId }: Props) {
+  const [showDeleteFailModal, setShowDeleteFailModal] = useState({
+    open: false,
+    id: "",
+    reason: "",
+  });
   const [showDeletePopup, setShowDeletePopup] = useState({
     open: false,
     name: "",
     id: "",
   });
 
+  const closeDeleteFailModal = () => {
+    setShowDeleteFailModal({ ...showDeleteFailModal, open: false });
+  };
+
   const deleteAssetLocation = async () => {
-    const { res } = await request(routes.deleteFacilityAssetLocation, {
+    const { res, error } = await request(routes.deleteFacilityAssetLocation, {
       pathParams: {
         facility_external_id: facilityId,
         external_id: showDeletePopup.id,
@@ -39,6 +49,21 @@ export default function LocationManagement({ facilityId }: Props) {
       Notification.Success({
         msg: `Location ${showDeletePopup.name} deleted successfully`,
       });
+    } else if (res?.status === 400 && error?.length) {
+      const errorMessage: string = (error as unknown as string[])[0];
+      if (errorMessage.includes("Asset")) {
+        setShowDeleteFailModal({
+          open: true,
+          id: showDeletePopup.id,
+          reason: "assets",
+        });
+      } else {
+        setShowDeleteFailModal({
+          open: true,
+          id: showDeletePopup.id,
+          reason: "beds",
+        });
+      }
     }
     setShowDeletePopup({ ...showDeletePopup, open: false });
   };
@@ -107,6 +132,65 @@ export default function LocationManagement({ facilityId }: Props) {
               refetch();
             }}
           />
+
+          <DialogModal
+            title={
+              <div className="flex items-center gap-2">
+                <CareIcon icon="l-exclamation-triangle" />
+                Delete Location
+              </div>
+            }
+            show={showDeleteFailModal.open}
+            onClose={() =>
+              setShowDeleteFailModal({ ...showDeleteFailModal, open: false })
+            }
+          >
+            <div>
+              {showDeleteFailModal.reason === "beds" ? (
+                <div>
+                  <div>
+                    There are Beds associated with this location that need to be
+                    deleted first before the location can be removed
+                  </div>
+                  <div className="mt-2 flex flex-col justify-end gap-2 md:flex-row">
+                    <Cancel
+                      onClick={() => {
+                        closeDeleteFailModal();
+                      }}
+                    />
+                    <ButtonV2
+                      href={`/facility/${facilityId}/location/${showDeleteFailModal.id}/beds`}
+                      authorizeFor={NonReadOnlyUsers}
+                      className="w-full"
+                    >
+                      Manage Beds
+                    </ButtonV2>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <div>
+                    There are Assets associated with this location that need to
+                    be deleted first before the location can be removed
+                  </div>
+                  <div className="mt-2 flex flex-col justify-end gap-2 md:flex-row">
+                    <Cancel
+                      onClick={() => {
+                        closeDeleteFailModal();
+                      }}
+                    />
+                    <ButtonV2
+                      href={`/assets?page=1&limit=18&facility=${facilityId}&asset_type=&asset_class=&status=&location=${showDeleteFailModal.id}&warranty_amc_end_of_validity_before=&warranty_amc_end_of_validity_after=`}
+                      authorizeFor={NonReadOnlyUsers}
+                      className="w-full"
+                    >
+                      Manage Assets
+                    </ButtonV2>
+                  </div>
+                </div>
+              )}
+            </div>
+          </DialogModal>
         </Page>
       )}
     </PaginatedList>
