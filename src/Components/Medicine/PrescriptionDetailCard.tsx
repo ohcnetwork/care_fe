@@ -97,7 +97,7 @@ export default function PrescriptionDetailCard({
           >
             {prescription.medicine_object?.name ?? prescription.medicine_old}
           </Detail>
-          <Detail className="col-span-10 sm:col-span-4" label={t("route")}>
+          <Detail className="col-span-10 break-all sm:col-span-4" label={t("route")}>
             {prescription.route &&
               t("PRESCRIPTION_ROUTE_" + prescription.route)}
           </Detail>

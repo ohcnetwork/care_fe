@@ -1,7 +1,7 @@
 import dayjs from "../../../Utils/dayjs";
 import { MedicineAdministrationRecord, Prescription } from "../models";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { classNames, formatDateTime, formatTime } from "../../../Utils/utils";
+import { classNames, formatDateTime } from "../../../Utils/utils";
 import DialogModal from "../../Common/Dialog";
 import PrescrpitionActivityTimeline from "../PrescrpitionTimeline";
 import { useState } from "react";
@@ -21,10 +21,10 @@ export default function AdministrationEventCell({
   refetch,
 }: Props) {
   const [showTimeline, setShowTimeline] = useState(false);
-  // Check if cell belongs to an administered prescription
+  // Check if cell belongs to an administered prescription (including start and excluding end)
   const administered = administrations
     .filter((administration) =>
-      dayjs(administration.administered_date).isBetween(start, end)
+      dayjs(administration.administered_date).isBetween(start, end, null, "[)")
     )
     .sort(
       (a, b) =>
@@ -46,9 +46,7 @@ export default function AdministrationEventCell({
           show={showTimeline}
         >
           <div className="mt-6 text-sm font-medium text-gray-700">
-            Administrations between{" "}
-            <span className="text-black">{formatTime(start, "HH:mm")}</span> and{" "}
-            <span className="text-black">{formatTime(end, "HH:mm")}</span> on{" "}
+            Administrations on{" "}
             <span className="text-black">
               {formatDateTime(start, "DD/MM/YYYY")}
             </span>
