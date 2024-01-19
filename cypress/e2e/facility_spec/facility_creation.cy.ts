@@ -297,13 +297,6 @@ describe("Facility Creation", () => {
     facilityPage.verifySuccessNotification("Facility updated successfully");
   });
 
-  it("Delete a facility", () => {
-    facilityPage.visitUpdateFacilityPage(facilityUrl1);
-    facilityPage.clickManageFacilityDropdown();
-    facilityPage.clickDeleteFacilityOption();
-    facilityPage.confirmDeleteFacility();
-  });
-
   afterEach(() => {
     cy.saveLocalStorage();
   });

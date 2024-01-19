@@ -394,6 +394,7 @@ export const FacilityHome = (props: any) => {
             </div>
             <div className="flex flex-col justify-end">
               <ButtonV2
+                id="facility-detailspage-cns"
                 variant="primary"
                 ghost
                 border
@@ -486,7 +487,13 @@ const LiveMonitoringButton = () => {
     <Popover className="relative">
       {permittedUserTypes.includes(authUser.user_type) && (
         <Popover.Button className="mt-2 w-full">
-          <ButtonV2 variant="primary" ghost border className="w-full">
+          <ButtonV2
+            variant="primary"
+            ghost
+            border
+            className="w-full"
+            id="facility-detailspage-livemonitoring"
+          >
             <CareIcon icon="l-video" className="text-lg" />
             <span>Live Monitoring</span>
           </ButtonV2>
@@ -524,6 +531,7 @@ const LiveMonitoringButton = () => {
                 </div>
               </div>
               <ButtonV2
+                id="live-monitoring-button"
                 disabled={!location}
                 className="w-full"
                 href={`/facility/${facilityId}/live-monitoring?location=${location}`}
