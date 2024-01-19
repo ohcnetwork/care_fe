@@ -948,7 +948,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             >
               <DraftSection
                 handleDraftSelect={(newState: any) => {
-                  console.log(newState);
                   dispatch({ type: "set_state", state: newState });
                 }}
                 formData={state.form}
