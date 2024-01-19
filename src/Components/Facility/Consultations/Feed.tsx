@@ -27,6 +27,7 @@ import { triggerGoal } from "../../../Integrations/Plausible.js";
 import useAuthUser from "../../../Common/hooks/useAuthUser.js";
 import Spinner from "../../Common/Spinner.js";
 import useQuery from "../../../Utils/request/useQuery.js";
+import { ResolvedMiddleware } from "../../Assets/AssetTypes.js";
 
 interface IFeedProps {
   facilityId: string;
@@ -35,7 +36,7 @@ interface IFeedProps {
 
 const PATIENT_DEFAULT_PRESET = "Patient View".trim().toLowerCase();
 
-export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
+export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   const dispatch: any = useDispatch();
 
   const videoWrapper = useRef<HTMLDivElement>(null);
@@ -55,24 +56,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const [isFullscreen, setFullscreen] = useFullscreen();
   const [videoStartTime, setVideoStartTime] = useState<Date | null>(null);
   const [statusReported, setStatusReported] = useState(false);
-  const [facilityMiddlewareHostname, setFacilityMiddlewareHostname] =
-    useState("");
+  const [resolvedMiddleware, setResolvedMiddleware] =
+    useState<ResolvedMiddleware>();
   const authUser = useAuthUser();
-
-  useQuery(routes.getPermittedFacility, {
-    pathParams: { id: facilityId || "" },
-    onResponse: ({ res, data }) => {
-      if (res && res.status === 200 && data && data.middleware_address) {
-        setFacilityMiddlewareHostname(data.middleware_address);
-      }
-    },
-  });
-
-  const fallbackMiddleware =
-    cameraAsset.location_middleware || facilityMiddlewareHostname;
-
-  const currentMiddleware =
-    cameraAsset.middleware_address || fallbackMiddleware;
 
   useEffect(() => {
     if (cameraState) {
@@ -136,6 +122,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
                   bedAssets.data.results[0].asset_object.location_object
                     ?.middleware_address,
               });
+              setResolvedMiddleware(
+                bedAssets.data.results[0].asset_object.resolved_middleware
+              );
               setCameraConfig(bedAssets.data.results[0].meta);
               setCameraState({
                 ...bedAssets.data.results[0].meta.position,
@@ -173,8 +162,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   );
 
   const url = !isIOS
-    ? `wss://${currentMiddleware}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`
-    : `https://${currentMiddleware}/stream/${cameraAsset?.accessKey}/channel/0/hls/live/index.m3u8?uuid=${cameraAsset?.accessKey}&channel=0`;
+    ? `wss://${resolvedMiddleware?.hostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`
+    : `https://${resolvedMiddleware?.hostname}/stream/${cameraAsset?.accessKey}/channel/0/hls/live/index.m3u8?uuid=${cameraAsset?.accessKey}&channel=0`;
 
   const {
     startStream,
@@ -185,7 +174,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     : // eslint-disable-next-line react-hooks/rules-of-hooks
       useMSEMediaPlayer({
         config: {
-          middlewareHostname: currentMiddleware,
+          middlewareHostname: resolvedMiddleware?.hostname ?? "",
           ...cameraAsset,
         },
         url,
@@ -254,7 +243,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
       });
       getBedPresets(cameraAsset);
     }
-  }, [cameraAsset, currentMiddleware]);
+  }, [cameraAsset, resolvedMiddleware?.hostname]);
 
   useEffect(() => {
     let tId: any;
@@ -577,7 +566,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
               );
             }
           )}
-          <div className="hideonmobilescreen pl-3">
+          <div className="hidden pl-3 md:block">
             <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
           </div>
         </div>

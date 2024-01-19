@@ -1,10 +1,10 @@
 import * as Notification from "../../Utils/Notifications.js";
 
-import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import { FacilityModel } from "./models";
 import { FACILITY_FEATURE_TYPES, USER_TYPES } from "../../Common/constants";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
-import { lazy, useState } from "react";
+import { Fragment, lazy, useState } from "react";
 
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -27,6 +27,10 @@ import useQuery from "../../Utils/request/useQuery.js";
 import { FacilityHomeTriage } from "./FacilityHomeTriage.js";
 import { FacilityDoctorList } from "./FacilityDoctorList.js";
 import { FacilityBedCapacity } from "./FacilityBedCapacity.js";
+import useSlug from "../../Common/hooks/useSlug.js";
+import { Popover, Transition } from "@headlessui/react";
+import { FieldLabel } from "../Form/FormFields/FormField.js";
+import { LocationSelect } from "../Common/LocationSelect.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -50,19 +54,20 @@ export const FacilityHome = (props: any) => {
 
   useMessageListener((data) => console.log(data));
 
-  const { data: facilityData, loading: isLoading } = useQuery(
-    routes.getPermittedFacility,
-    {
-      pathParams: {
-        id: facilityId,
-      },
-      onResponse: ({ res }) => {
-        if (!res?.ok) {
-          navigate("/not-found");
-        }
-      },
-    }
-  );
+  const {
+    data: facilityData,
+    loading: isLoading,
+    refetch: facilityFetch,
+  } = useQuery(routes.getPermittedFacility, {
+    pathParams: {
+      id: facilityId,
+    },
+    onResponse: ({ res }) => {
+      if (!res?.ok) {
+        navigate("/not-found");
+      }
+    },
+  });
 
   const handleDeleteClose = () => {
     setOpenDeleteDialog(false);
@@ -94,8 +99,15 @@ export const FacilityHome = (props: any) => {
     USER_TYPES.findIndex((type) => type == authUser.user_type) >=
       StaffUserTypeIndex;
 
+  const hasPermissionToDeleteFacility =
+    authUser.user_type === "DistrictAdmin" ||
+    authUser.user_type === "StateAdmin";
+
   const editCoverImageTooltip = hasPermissionToEditCoverImage && (
-    <div className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center bg-black text-sm text-gray-300 opacity-0 transition-[opacity] hover:opacity-60 md:h-[88px]">
+    <div
+      id="facility-coverimage"
+      className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center bg-black text-sm text-gray-300 opacity-0 transition-[opacity] hover:opacity-60 md:h-[88px]"
+    >
       <i className="fa-solid fa-pen" />
       <span className="mt-2">{`${hasCoverImage ? "Edit" : "Upload"}`}</span>
     </div>
@@ -135,10 +147,10 @@ export const FacilityHome = (props: any) => {
         onSave={() =>
           facilityData?.read_cover_image_url
             ? setImageKey(Date.now())
-            : window.location.reload()
+            : facilityFetch()
         }
         onClose={() => setEditCoverImage(false)}
-        onDelete={() => window.location.reload()}
+        onDelete={() => facilityFetch()}
         facility={facilityData ?? ({} as FacilityModel)}
       />
       {hasCoverImage ? (
@@ -265,7 +277,7 @@ export const FacilityHome = (props: any) => {
             </div>
             <div className="mt-10 flex items-center gap-3">
               <div>
-                {facilityData?.features?.some((feature: any) =>
+                {facilityData?.features?.some((feature) =>
                   FACILITY_FEATURE_TYPES.some((f) => f.id === feature)
                 ) && (
                   <h1 className="text-lg font-semibold">Available features</h1>
@@ -367,20 +379,22 @@ export const FacilityHome = (props: any) => {
                 >
                   View Users
                 </DropdownItem>
-                <DropdownItem
-                  id="delete-facility"
-                  variant="danger"
-                  onClick={() => setOpenDeleteDialog(true)}
-                  className="flex items-center gap-3"
-                  icon={<CareIcon className="care-l-trash-alt text-lg" />}
-                  authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
-                >
-                  Delete Facility
-                </DropdownItem>
+                {hasPermissionToDeleteFacility && (
+                  <DropdownItem
+                    id="delete-facility"
+                    variant="danger"
+                    onClick={() => setOpenDeleteDialog(true)}
+                    className="flex items-center gap-3"
+                    icon={<CareIcon className="care-l-trash-alt text-lg" />}
+                  >
+                    Delete Facility
+                  </DropdownItem>
+                )}
               </DropdownMenu>
             </div>
             <div className="flex flex-col justify-end">
               <ButtonV2
+                id="facility-detailspage-cns"
                 variant="primary"
                 ghost
                 border
@@ -390,16 +404,7 @@ export const FacilityHome = (props: any) => {
                 <CareIcon className="care-l-monitor-heart-rate text-lg" />
                 <span>Central Nursing Station</span>
               </ButtonV2>
-              <ButtonV2
-                variant="primary"
-                ghost
-                border
-                className="mt-2 flex w-full flex-row justify-center md:w-auto"
-                onClick={() => navigate(`/facility/${facilityId}/livefeed`)}
-              >
-                <CareIcon className="care-l-video text-lg" />
-                <span>Live Monitoring</span>
-              </ButtonV2>
+              <LiveMonitoringButton />
               <ButtonV2
                 variant="primary"
                 ghost
@@ -468,5 +473,75 @@ export const FacilityHome = (props: any) => {
         NonReadOnlyUsers={NonReadOnlyUsers}
       />
     </Page>
+  );
+};
+
+const LiveMonitoringButton = () => {
+  const facilityId = useSlug("facility");
+  const [location, setLocation] = useState<string>();
+  const authUser = useAuthUser();
+
+  const permittedUserTypes = ["StateAdmin", "DistrictAdmin", "Doctor"];
+
+  return (
+    <Popover className="relative">
+      {permittedUserTypes.includes(authUser.user_type) && (
+        <Popover.Button className="mt-2 w-full">
+          <ButtonV2
+            variant="primary"
+            ghost
+            border
+            className="w-full"
+            id="facility-detailspage-livemonitoring"
+          >
+            <CareIcon icon="l-video" className="text-lg" />
+            <span>Live Monitoring</span>
+          </ButtonV2>
+        </Popover.Button>
+      )}
+
+      <Transition
+        as={Fragment}
+        enter="transition ease-out duration-200"
+        enterFrom="opacity-0 translate-y-1"
+        enterTo="opacity-100 translate-y-0"
+        leave="transition ease-in duration-150"
+        leaveFrom="opacity-100 translate-y-0"
+        leaveTo="opacity-0 translate-y-1"
+      >
+        <Popover.Panel className="absolute z-30 mt-1 w-full px-4 sm:px-0 md:w-96 lg:max-w-3xl lg:translate-x-[-168px]">
+          <div className="rounded-lg shadow-lg ring-1 ring-gray-400">
+            <div className="relative flex flex-col gap-4 rounded-b-lg bg-white p-6">
+              <div>
+                <FieldLabel htmlFor="location" className="text-sm">
+                  Choose a location
+                </FieldLabel>
+                <div className="flex w-full items-center gap-2">
+                  <LocationSelect
+                    className="w-full"
+                    name="location"
+                    setSelected={(v) => setLocation(v as string | undefined)}
+                    selected={location ?? null}
+                    showAll={false}
+                    multiple={false}
+                    facilityId={facilityId}
+                    errors=""
+                    errorClassName="hidden"
+                  />
+                </div>
+              </div>
+              <ButtonV2
+                id="live-monitoring-button"
+                disabled={!location}
+                className="w-full"
+                href={`/facility/${facilityId}/live-monitoring?location=${location}`}
+              >
+                Open Live Monitoring
+              </ButtonV2>
+            </div>
+          </div>
+        </Popover.Panel>
+      </Transition>
+    </Popover>
   );
 };

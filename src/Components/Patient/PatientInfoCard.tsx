@@ -27,7 +27,9 @@ import request from "../../Utils/request/request.js";
 import routes from "../../Redux/api.js";
 import DropdownMenu from "../Common/components/Menu.js";
 import { triggerGoal } from "../../Integrations/Plausible.js";
-import useAuthUser from "../../Common/hooks/useAuthUser.js";
+
+import useAuthUser from "../../Common/hooks/useAuthUser";
+import { Mews } from "../Facility/Consultations/Mews.js";
 import DischargeSummaryModal from "../Facility/DischargeSummaryModal.js";
 import DischargeModal from "../Facility/DischargeModal.js";
 import { useTranslation } from "react-i18next";
@@ -139,7 +141,13 @@ export default function PatientInfoCard(props: {
           />
           <DischargeModal
             show={openDischargeDialog}
-            onClose={() => setOpenDischargeDialog(false)}
+            onClose={() => {
+              setOpenDischargeDialog(false);
+            }}
+            afterSubmit={() => {
+              setOpenDischargeDialog(false);
+              props.fetchPatientData?.({ aborted: false });
+            }}
             consultationData={consultation}
           />
         </>
@@ -154,12 +162,7 @@ export default function PatientInfoCard(props: {
             >
               {consultation?.current_bed &&
               consultation?.discharge_date === null ? (
-                <div
-                  className="flex h-full flex-col items-center justify-center"
-                  title={`
-                ${consultation?.current_bed?.bed_object?.location_object?.name}\n${consultation?.current_bed?.bed_object.name}
-              `}
-                >
+                <div className="tooltip flex h-full flex-col items-center justify-center">
                   <p className="w-full truncate px-2 text-center text-sm text-gray-900">
                     {
                       consultation?.current_bed?.bed_object?.location_object
@@ -169,6 +172,15 @@ export default function PatientInfoCard(props: {
                   <p className="w-full truncate px-2 text-center text-base font-bold">
                     {consultation?.current_bed?.bed_object.name}
                   </p>
+                  <div className="tooltip-text tooltip-right flex -translate-x-1/3 translate-y-1/2 flex-col items-center justify-center text-sm ">
+                    <span>
+                      {
+                        consultation?.current_bed?.bed_object?.location_object
+                          ?.name
+                      }
+                    </span>
+                    <span>{consultation?.current_bed?.bed_object.name}</span>
+                  </div>
                 </div>
               ) : (
                 <div className="flex h-full items-center justify-center">
@@ -188,7 +200,10 @@ export default function PatientInfoCard(props: {
             </ButtonV2>
           </div>
           <div className="flex flex-col items-center gap-4 lg:items-start lg:gap-0 lg:pl-6">
-            <div className="mb-1 font-semibold sm:text-xl md:text-4xl">
+            <div
+              className="mb-1 font-semibold sm:text-xl md:text-4xl"
+              id="patient-name-consultation"
+            >
               {patient.name}
             </div>
             <div>
@@ -305,7 +320,7 @@ export default function PatientInfoCard(props: {
                 );
               })}
             </div>
-            {!!consultation?.discharge_date && (
+            {consultation?.discharge_date ? (
               <div className="mt-3 flex gap-4 bg-cyan-300 px-3 py-1 text-sm font-medium">
                 <div>
                   <span>
@@ -315,14 +330,9 @@ export default function PatientInfoCard(props: {
                           suggestion.id === consultation?.suggestion
                       )?.text
                     }{" "}
-                    on{" "}
-                    {formatDateTime(
-                      ["A", "DC"].includes(consultation?.suggestion ?? "")
-                        ? consultation?.admission_date
-                        : consultation?.created_date
-                    )}
-                    ,
-                    {consultation?.discharge_reason === "EXP" ? (
+                    on {formatDateTime(consultation.encounter_date)},
+                    {consultation?.new_discharge_reason ===
+                    DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id ? (
                       <span>
                         {" "}
                         Expired on {formatDate(consultation?.death_datetime)}
@@ -337,9 +347,31 @@ export default function PatientInfoCard(props: {
                   </span>
                 </div>
               </div>
+            ) : (
+              <div className="mt-3 flex gap-4 bg-cyan-300 px-3 py-1 text-sm font-medium">
+                <span className="flex">
+                  {consultation?.encounter_date && (
+                    <div>
+                      Admission on{" "}
+                      {formatDateTime(consultation?.encounter_date)}
+                    </div>
+                  )}
+                  {consultation?.icu_admission_date && (
+                    <div>
+                      , ICU Admission on{" "}
+                      {formatDateTime(consultation?.icu_admission_date)}
+                    </div>
+                  )}
+                </span>
+              </div>
             )}
           </div>
         </div>
+        {consultation?.last_daily_round && (
+          <div className="flex w-full justify-center bg-white px-4 py-2 lg:w-5/12 lg:flex-row lg:justify-end lg:p-6">
+            <Mews dailyRound={consultation?.last_daily_round} />
+          </div>
+        )}
 
         <div className="flex w-full flex-col gap-2 px-4 py-1 lg:w-fit lg:p-6">
           {!!consultation?.discharge_date && (
@@ -348,17 +380,18 @@ export default function PatientInfoCard(props: {
                 Discharge Reason
               </div>
               <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
-                {!consultation?.discharge_reason ? (
+                {!consultation?.new_discharge_reason ? (
                   <span className="text-gray-800">
                     {consultation.suggestion === "OP"
                       ? "OP file closed"
                       : "UNKNOWN"}
                   </span>
-                ) : consultation?.discharge_reason === "EXP" ? (
+                ) : consultation?.new_discharge_reason ===
+                  DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id ? (
                   <span className="text-red-600">EXPIRED</span>
                 ) : (
                   DISCHARGE_REASONS.find(
-                    (reason) => reason.id === consultation?.discharge_reason
+                    (reason) => reason.id === consultation?.new_discharge_reason
                   )?.text
                 )}
               </div>
@@ -476,6 +509,7 @@ export default function PatientInfoCard(props: {
                           key={i}
                           className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
                           href={
+                            action[1] !== "Treatment Summary" &&
                             consultation?.admitted &&
                             !consultation?.current_bed &&
                             i === 1
@@ -484,6 +518,7 @@ export default function PatientInfoCard(props: {
                           }
                           onClick={() => {
                             if (
+                              action[1] !== "Treatment Summary" &&
                               consultation?.admitted &&
                               !consultation?.current_bed &&
                               i === 1

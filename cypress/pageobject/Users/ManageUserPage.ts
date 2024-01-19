@@ -94,6 +94,7 @@ export class ManageUserPage {
   }
 
   typeFacilitySearch(facilityName) {
+    cy.get("#search").click().clear();
     cy.get("#search").click().type(facilityName);
   }
 
@@ -102,6 +103,7 @@ export class ManageUserPage {
   }
 
   clickFacilityPatients() {
+    cy.get("#facility-patients").should("be.visible");
     cy.get("#facility-patients").click();
   }
 
@@ -146,6 +148,18 @@ export class ManageUserPage {
   assertDoctorConnectVisibility(realName) {
     cy.get("#doctor-connect-home-doctor").should("contain.text", realName);
     cy.get("#doctor-connect-remote-doctor").should("contain.text", realName);
+  }
+
+  assertVideoConnectLink(docName: string, link: string) {
+    cy.get("ul#options")
+      .find("li")
+      .contains(docName)
+      .within(() => {
+        cy.get("a").should(($a) => {
+          const hrefs = $a.map((i, el) => Cypress.$(el).attr("href")).get();
+          expect(hrefs).to.include(link);
+        });
+      });
   }
 }
 

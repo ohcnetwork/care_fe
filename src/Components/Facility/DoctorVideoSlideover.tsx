@@ -6,6 +6,8 @@ import { UserAssignedModel } from "../Users/models";
 import { SkillObjectModel } from "../Users/models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { relativeTime } from "../../Utils/utils";
+import useAuthUser from "../../Common/hooks/useAuthUser";
+import { triggerGoal } from "../../Integrations/Plausible";
 
 export default function DoctorVideoSlideover(props: {
   show: boolean;
@@ -22,10 +24,12 @@ export default function DoctorVideoSlideover(props: {
         const res = await dispatchAction(
           getFacilityUsers(facilityId, { limit: 50 })
         );
-        if (res && res.data) {
+        if (res?.data) {
           setDoctors(
             res.data.results
-              .filter((user: any) => user.alt_phone_number)
+              .filter(
+                (user: any) => user.alt_phone_number || user.video_connect_link
+              )
               .sort((a: any, b: any) => {
                 return Number(a.last_login) - Number(b.last_login);
               })
@@ -58,8 +62,8 @@ export default function DoctorVideoSlideover(props: {
           home: true,
         },
         {
-          title: "Staff",
-          user_type: "Staff",
+          title: "Nurse",
+          user_type: "Nurse",
           home: true,
         },
         {
@@ -106,6 +110,7 @@ function UserListItem(props: { user: UserAssignedModel }) {
   const user = props.user;
   const icon =
     user.user_type === "Doctor" ? "fa-user-doctor " : " fa-user-nurse";
+  const authUser = useAuthUser();
 
   return (
     <li>
@@ -152,6 +157,27 @@ function UserListItem(props: { user: UserAssignedModel }) {
                 {user.first_name} {user.last_name}
               </span>
               <div className="flex gap-2">
+                {user.video_connect_link && (
+                  <a
+                    href={user.video_connect_link}
+                    onClick={() => {
+                      triggerGoal("Doctor Connect Click", {
+                        medium: "Video Call",
+                        userId: authUser?.id,
+                        targetUserType: user.user_type,
+                      });
+                    }}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <div className="tooltip">
+                      <span className="tooltip-text tooltip-left">
+                        Connect on a Video Call
+                      </span>
+                      <CareIcon icon="l-video" className="h-5 w-5" />
+                    </div>
+                  </a>
+                )}
                 <a
                   href={
                     user.alt_phone_number
@@ -162,6 +188,13 @@ function UserListItem(props: { user: UserAssignedModel }) {
                         )}`
                       : "#"
                   }
+                  onClick={() => {
+                    triggerGoal("Doctor Connect Click", {
+                      medium: "WhatsApp",
+                      userId: authUser?.id,
+                      targetUserType: user.user_type,
+                    });
+                  }}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -176,6 +209,13 @@ function UserListItem(props: { user: UserAssignedModel }) {
                   href={
                     user.alt_phone_number ? `tel:${user.alt_phone_number}` : "#"
                   }
+                  onClick={() => {
+                    triggerGoal("Doctor Connect Click", {
+                      medium: "Phone Call",
+                      userId: authUser?.id,
+                      targetUserType: user.user_type,
+                    });
+                  }}
                 >
                   <div className="tooltip">
                     <span className="tooltip-text tooltip-left">

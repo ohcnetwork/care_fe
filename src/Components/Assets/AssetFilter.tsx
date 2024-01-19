@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { navigate, useQueryParams } from "raviger";
+import { useQueryParams } from "raviger";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
 import { LocationSelect } from "../Common/LocationSelect";
@@ -19,8 +19,8 @@ const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
 
 function AssetFilter(props: any) {
-  const { filter, onChange, closeFilter } = props;
-  const [facility, setFacility] = useState<FacilityModel>({ name: "" });
+  const { filter, onChange, closeFilter, removeFilters } = props;
+  const [facility, setFacility] = useState<FacilityModel | null>(null);
   const [asset_type, setAssetType] = useState<string>(
     filter.asset_type ? filter.asset_type : ""
   );
@@ -51,19 +51,19 @@ function AssetFilter(props: any) {
     setLocationId(
       facility?.id === qParams.facility ? qParams.location ?? "" : ""
     );
-  }, [facility.id, qParams.facility, qParams.location]);
+  }, [facility?.id, qParams.facility, qParams.location]);
 
   const clearFilter = useCallback(() => {
-    setFacility({ name: "" });
-    setAssetType("");
-    setAssetStatus("");
-    setAssetClass("");
-    setFacilityId("");
-    setLocationId("");
+    removeFilters([
+      "facility",
+      "asset_type",
+      "asset_class",
+      "status",
+      "location",
+      "warranty_amc_end_of_validity_before",
+      "warranty_amc_end_of_validity_after",
+    ]);
     closeFilter();
-    const searchQuery = qParams?.search && `?search=${qParams?.search}`;
-    if (searchQuery) navigate(`/assets${searchQuery}`);
-    else navigate("/assets");
   }, [qParams]);
 
   const applyFilter = () => {
@@ -81,8 +81,8 @@ function AssetFilter(props: any) {
     onChange(data);
   };
 
-  const handleFacilitySelect = (selected: FacilityModel) => {
-    setFacility(selected ? selected : facility);
+  const handleFacilitySelect = (selected: FacilityModel | null) => {
+    setFacility(selected);
     handleLocationSelect("");
   };
   const handleLocationSelect = (selectedId: string) => {
@@ -107,7 +107,7 @@ function AssetFilter(props: any) {
         <FacilitySelect
           name="Facilities"
           setSelected={(selected) =>
-            handleFacilitySelect(selected as FacilityModel)
+            handleFacilitySelect(selected as FacilityModel | null)
           }
           selected={facility}
           errors=""

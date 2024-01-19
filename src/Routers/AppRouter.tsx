@@ -10,9 +10,8 @@ import {
   SIDEBAR_SHRINK_PREFERENCE_KEY,
   SidebarShrinkContext,
 } from "../Components/Common/Sidebar/Sidebar";
-import { BLACKLISTED_PATHS, LocalStorageKeys } from "../Common/constants";
+import { BLACKLISTED_PATHS } from "../Common/constants";
 import useConfig from "../Common/hooks/useConfig";
-import { handleSignOut } from "../Utils/utils";
 import SessionExpired from "../Components/ErrorPages/SessionExpired";
 
 import UserRoutes from "./routes/UserRoutes";
@@ -26,13 +25,13 @@ import AssetRoutes from "./routes/AssetRoutes";
 import ResourceRoutes from "./routes/ResourceRoutes";
 import ExternalResultRoutes from "./routes/ExternalResultRoutes";
 import { DetailRoute } from "./types";
+import useAuthUser from "../Common/hooks/useAuthUser";
 
 const Routes = {
   "/": () => <Redirect to="/facility" />,
 
   ...AssetRoutes,
   ...ConsultationRoutes,
-  ...ExternalResultRoutes,
   ...FacilityRoutes,
   ...PatientRoutes,
   ...ResourceRoutes,
@@ -50,6 +49,7 @@ const Routes = {
 };
 
 export default function AppRouter() {
+  const authUser = useAuthUser();
   const { main_logo, enable_hcx } = useConfig();
 
   let routes = Routes;
@@ -58,23 +58,18 @@ export default function AppRouter() {
     routes = { ...routes, ...HCXRoutes };
   }
 
+  if (
+    !["Nurse", "NurseReadOnly", "Staff", "StaffReadOnly"].includes(
+      authUser.user_type
+    )
+  ) {
+    routes = { ...routes, ...ExternalResultRoutes };
+  }
+
   useRedirect("/user", "/users");
   const pages = useRoutes(routes) || <Error404 />;
   const path = usePath();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  useEffect(() => {
-    addEventListener("storage", (event: any) => {
-      if (
-        [LocalStorageKeys.accessToken, LocalStorageKeys.refreshToken].includes(
-          event.key
-        ) &&
-        !event.newValue
-      ) {
-        handleSignOut(true);
-      }
-    });
-  }, []);
 
   useEffect(() => {
     setSidebarOpen(false);

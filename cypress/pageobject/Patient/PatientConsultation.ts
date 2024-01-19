@@ -47,7 +47,7 @@ export class PatientConsultationPage {
     cy.get("#icd11-search input[role='combobox']")
       .scrollIntoView()
       .click()
-      .type("1A");
+      .type("1A00");
     cy.get("#icd11-search [role='option']")
       .contains("1A00 Cholera")
       .scrollIntoView()
@@ -103,7 +103,8 @@ export class PatientConsultationPage {
   }
 
   visitFilesPage() {
-    cy.get("a").contains("Files").click();
+    cy.get("#consultation_tab_nav").scrollIntoView();
+    cy.get("#consultation_tab_nav").contains("Files").click();
   }
 
   uploadFile() {
@@ -199,11 +200,13 @@ export class PatientConsultationPage {
   }
 
   visitDoctorNotesPage() {
+    cy.get("#patient_doctor_notes").scrollIntoView();
     cy.get("#patient_doctor_notes").click();
   }
 
   addDoctorsNotes(notes: string) {
-    cy.get("#doctor_notes_textarea").type(notes);
+    cy.get("#doctor_notes_textarea").scrollIntoView();
+    cy.get("#doctor_notes_textarea").click().type(notes);
   }
 
   postDoctorNotes() {
@@ -213,6 +216,7 @@ export class PatientConsultationPage {
   }
 
   clickDischargePatient() {
+    cy.get("#show-more").scrollIntoView();
     cy.get("#show-more").click();
     cy.contains("p", "Discharge from CARE").click();
   }
@@ -248,6 +252,7 @@ export class PatientConsultationPage {
   }
 
   visitEditPrescriptionPage() {
+    cy.get("#consultation_tab_nav").scrollIntoView();
     cy.get("#consultation_tab_nav").contains("Medicines").click();
     cy.get("a[href='prescriptions']").first().click();
   }

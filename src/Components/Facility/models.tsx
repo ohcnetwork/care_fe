@@ -1,12 +1,14 @@
-import { AssignedToObjectModel } from "../Patient/models";
+import { AssignedToObjectModel, DailyRoundsModel } from "../Patient/models";
 import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
-import { AssetData } from "../Assets/AssetTypes";
+import { AssetData, AssetLocationType } from "../Assets/AssetTypes";
 import { UserBareMinimum } from "../Users/models";
 import { RouteToFacility } from "../Common/RouteToFacilitySelect";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
+import { ConsultationSuggestionValue, UserRole } from "../../Common/constants";
 
 export interface LocalBodyModel {
+  id: number;
   name: string;
   body_type: number;
   localbody_code: string;
@@ -28,7 +30,8 @@ export interface WardModel {
   id: number;
   name: string;
   number: number;
-  local_body: number;
+  panchayath: string;
+  local_body_id: LocalBodyModel["id"];
 }
 
 export interface FacilityModel {
@@ -62,6 +65,7 @@ export interface FacilityModel {
   district?: number;
   local_body?: number;
   ward?: number;
+  pincode?: string;
 }
 
 export interface CapacityModal {
@@ -91,7 +95,7 @@ export type PatientCategory =
   | "Critical";
 
 export interface ConsultationModel {
-  admission_date?: string;
+  encounter_date: string;
   icu_admission_date?: string;
   admitted?: boolean;
   test_id?: string;
@@ -99,18 +103,18 @@ export interface ConsultationModel {
   category?: PatientCategory;
   created_date?: string;
   discharge_date?: string;
-  discharge_reason?: string;
+  new_discharge_reason?: number;
   discharge_prescription?: NormalPrescription;
   discharge_prn_prescription?: PRNPrescription;
   discharge_notes?: string;
   examination_details?: string;
   history_of_present_illness?: string;
-  facility?: number;
+  facility: string;
   facility_name?: string;
-  id?: string;
+  id: string;
   modified_date?: string;
   other_symptoms?: string;
-  patient?: string;
+  patient: string;
   treatment_plan?: string;
   referred_to?: FacilityModel["id"];
   referred_to_object?: FacilityModel;
@@ -121,7 +125,7 @@ export interface ConsultationModel {
   referred_by_external?: string;
   transferred_from_location?: LocationModel["id"];
   transferred_from_location_object?: LocationModel;
-  suggestion?: string;
+  suggestion?: ConsultationSuggestionValue;
   patient_no?: string;
   route_to_facility?: RouteToFacility;
   is_kasp?: boolean;
@@ -150,7 +154,7 @@ export interface ConsultationModel {
   ett_tt?: number;
   cuff_pressure?: number;
   lines?: any;
-  last_daily_round?: any;
+  last_daily_round?: DailyRoundsModel;
   current_bed?: CurrentBed;
   review_interval?: number;
   cause_of_death?: string;
@@ -199,20 +203,23 @@ export interface InventoryItemsModel {
 }
 
 export interface LocationModel {
-  id?: string;
-  name?: string;
+  id: string;
+  name: string;
   description?: string;
   middleware_address?: string;
+  location_type: AssetLocationType;
   facility?: {
     name: string;
   };
+  created_date?: string;
+  modified_date?: string;
 }
 
 export interface BedModel {
   id?: string;
   bed_type?: string;
-  description?: string;
   name?: string;
+  description?: string;
   facility?: string;
   location_object?: {
     name: string;
@@ -220,6 +227,8 @@ export interface BedModel {
   };
   location?: string;
   is_occupied?: boolean;
+  created_date?: string;
+  modified_date?: string;
 }
 
 export interface CurrentBed {
@@ -234,6 +243,13 @@ export interface CurrentBed {
   end_date: string;
   meta: Record<string, any>;
 }
+
+// Voluntarily made as `type` for it to achieve type-safety when used with
+// `useAsyncOptions<ICD11DiagnosisModel>`
+export type ICD11DiagnosisModel = {
+  id: string;
+  label: string;
+};
 
 export type ABGPlotsFields =
   | "ph"
@@ -441,13 +457,6 @@ export interface CreateBedBody {
   bed: string;
 }
 
-// Voluntarily made as `type` for it to achieve type-safety when used with
-// `useAsyncOptions<ICD11DiagnosisModel>`
-export type ICD11DiagnosisModel = {
-  id: string;
-  label: string;
-};
-
 // Patient Notes Model
 export interface BaseFacilityModel {
   id: string;
@@ -485,8 +494,14 @@ export interface PatientNotesModel {
   note: string;
   facility: BaseFacilityModel;
   created_by_object: BaseUserModel;
-  user_type?: string;
+  user_type?: UserRole | "RemoteSpecialist";
   created_date: string;
+}
+
+export interface PatientNoteStateType {
+  notes: PatientNotesModel[];
+  cPage: number;
+  totalPages: number;
 }
 
 export type IFacilityNotificationRequest = {
@@ -500,4 +515,12 @@ export type IFacilityNotificationResponse = {
 
 export type IUserFacilityRequest = {
   facility: string;
+};
+
+export type FacilityRequest = Omit<FacilityModel, "location"> & {
+  latitude?: string;
+  longitude?: string;
+  kasp_empanelled?: boolean;
+  patient_count?: string;
+  bed_count?: string;
 };

@@ -45,6 +45,7 @@
   "clear": "Clear",
   "apply": "Apply",
   "filter_by": "Filter By",
+  "filter": "Filter",
   "ordering": "Ordering",
   "phone_number": "Phone Number",
   "emergency_contact_number": "Emergency Contact Number",
@@ -83,6 +84,7 @@
   "age": "Age",
   "is": "Is",
   "reason": "Reason",
+  "description": "Description",
   "name": "Name",
   "address": "Address",
   "phone": "Phone",
@@ -157,5 +159,6 @@
   "edit": "Edit",
   "clear_selection": "Clear selection",
   "select_date": "Select date",
-  "DD/MM/YYYY": "DD/MM/YYYY"
+  "DD/MM/YYYY": "DD/MM/YYYY",
+  "clear_all_filters": "Clear All Filters"
 }

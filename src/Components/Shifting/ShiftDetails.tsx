@@ -22,6 +22,7 @@ import { useTranslation } from "react-i18next";
 import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
+import { ConsultationModel } from "../Facility/models.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -316,7 +317,7 @@ export default function ShiftDetails(props: { id: string }) {
 
   const printData = (data: any) => {
     const patientData = data.patient_object;
-    const consultation = data.patient.last_consultation;
+    const consultation = data.patient.last_consultation as ConsultationModel;
     const patientGender = GENDER_TYPES.find(
       (i) => i.id === patientData?.gender
     )?.text;
@@ -409,7 +410,7 @@ export default function ShiftDetails(props: { id: string }) {
                 {t("date_of_admission")}:{" "}
               </span>
               {formatDateTime(
-                consultation.admission_date || consultation.created_date
+                consultation.encounter_date || consultation.created_date
               ) || "-"}
             </div>
             <div>
@@ -806,13 +807,12 @@ export default function ShiftDetails(props: { id: string }) {
                     {t("created")}
                   </div>
                   <div className="mt-1 whitespace-pre text-sm leading-5 text-gray-900">
-                    <div className="text-sm">
-                      {data?.created_by_object?.first_name}
-                      {data?.created_by_object?.last_name}
-                    </div>
-                    <div className="text-xs">
-                      {data?.created_date && formatDateTime(data?.created_date)}
-                    </div>
+                    <RecordMeta
+                      time={data?.created_date}
+                      user={data?.created_by_object}
+                      inlineUser={true}
+                      inlineClassName={"flex-wrap justify-center"}
+                    />
                   </div>
                 </div>
                 <div className="mt-2 lg:mt-0">
@@ -820,14 +820,12 @@ export default function ShiftDetails(props: { id: string }) {
                     {t("last_edited")}
                   </div>
                   <div className="mt-1 whitespace-pre text-sm leading-5 text-gray-900">
-                    <div className="text-sm">
-                      {data?.last_edited_by_object?.first_name}{" "}
-                      {data?.last_edited_by_object?.last_name}
-                    </div>
-                    <div className="text-xs">
-                      {data?.modified_date &&
-                        formatDateTime(data?.modified_date)}
-                    </div>
+                    <RecordMeta
+                      time={data?.modified_date}
+                      user={data?.last_edited_by_object}
+                      inlineUser={true}
+                      inlineClassName={"flex-wrap justify-center"}
+                    />
                   </div>
                 </div>
               </div>

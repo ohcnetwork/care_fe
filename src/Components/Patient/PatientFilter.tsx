@@ -1,7 +1,5 @@
 import dayjs from "dayjs";
-import { navigate } from "raviger";
 import { useCallback, useEffect } from "react";
-import { useDispatch } from "react-redux";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import {
@@ -19,6 +17,7 @@ import {
   getAnyFacility,
   getDistrict,
 } from "../../Redux/actions";
+import { useDispatch } from "react-redux";
 import { dateQueryString } from "../../Utils/utils";
 import { DateRange } from "../Common/DateRangeInputV2";
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -41,7 +40,7 @@ const getDate = (value: any) =>
 
 export default function PatientFilter(props: any) {
   const { kasp_enabled, kasp_string } = useConfig();
-  const { filter, onChange, closeFilter } = props;
+  const { filter, onChange, closeFilter, removeFilters } = props;
 
   const [filterState, setFilterState] = useMergeState({
     district: filter.district || "",
@@ -68,10 +67,10 @@ export default function PatientFilter(props: any) {
     date_declared_positive: filter.date_declared_positive || null,
     last_consultation_medico_legal_case:
       filter.last_consultation_medico_legal_case || null,
-    last_consultation_admission_date_before:
-      filter.last_consultation_admission_date_before || null,
-    last_consultation_admission_date_after:
-      filter.last_consultation_admission_date_after || null,
+    last_consultation_encounter_date_before:
+      filter.last_consultation_encounter_date_before || null,
+    last_consultation_encounter_date_after:
+      filter.last_consultation_encounter_date_after || null,
     last_consultation_discharge_date_before:
       filter.last_consultation_discharge_date_before || null,
     last_consultation_discharge_date_after:
@@ -82,8 +81,8 @@ export default function PatientFilter(props: any) {
         : [],
     last_consultation_current_bed__location:
       filter.last_consultation_current_bed__location || "",
-    last_consultation_discharge_reason:
-      filter.last_consultation_discharge_reason || null,
+    last_consultation__new_discharge_reason:
+      filter.last_consultation__new_discharge_reason || null,
     srf_id: filter.srf_id || null,
     number_of_doses: filter.number_of_doses || null,
     covin_id: filter.covin_id || null,
@@ -126,8 +125,8 @@ export default function PatientFilter(props: any) {
     date_of_result: null,
     date_declared_positive: null,
     last_consultation_medico_legal_case: null,
-    last_consultation_admission_date_before: "",
-    last_consultation_admission_date_after: "",
+    last_consultation_encounter_date_before: "",
+    last_consultation_encounter_date_after: "",
     last_consultation_discharge_date_before: "",
     last_consultation_discharge_date_after: "",
     last_consultation_admitted_to_list: [],
@@ -237,12 +236,12 @@ export default function PatientFilter(props: any) {
       age_max,
       date_of_result,
       last_consultation_medico_legal_case,
-      last_consultation_admission_date_before,
-      last_consultation_admission_date_after,
+      last_consultation_encounter_date_before,
+      last_consultation_encounter_date_after,
       last_consultation_discharge_date_before,
       last_consultation_discharge_date_after,
       last_consultation_admitted_bed_type_list,
-      last_consultation_discharge_reason,
+      last_consultation__new_discharge_reason,
       last_consultation_current_bed__location,
       number_of_doses,
       covin_id,
@@ -279,11 +278,11 @@ export default function PatientFilter(props: any) {
       date_of_result: dateQueryString(date_of_result),
       last_consultation_medico_legal_case:
         last_consultation_medico_legal_case || "",
-      last_consultation_admission_date_before: dateQueryString(
-        last_consultation_admission_date_before
+      last_consultation_encounter_date_before: dateQueryString(
+        last_consultation_encounter_date_before
       ),
-      last_consultation_admission_date_after: dateQueryString(
-        last_consultation_admission_date_after
+      last_consultation_encounter_date_after: dateQueryString(
+        last_consultation_encounter_date_after
       ),
       last_consultation_discharge_date_before: dateQueryString(
         last_consultation_discharge_date_before
@@ -299,8 +298,8 @@ export default function PatientFilter(props: any) {
       age_max: age_max || "",
       last_consultation_admitted_bed_type_list:
         last_consultation_admitted_bed_type_list || [],
-      last_consultation_discharge_reason:
-        last_consultation_discharge_reason || "",
+      last_consultation__new_discharge_reason:
+        last_consultation__new_discharge_reason || "",
       srf_id: srf_id || "",
       number_of_doses: number_of_doses || "",
       covin_id: covin_id || "",
@@ -337,8 +336,7 @@ export default function PatientFilter(props: any) {
       advancedFilter={props}
       onApply={applyFilter}
       onClear={() => {
-        navigate("/patients");
-        setFilterState(clearFilterState);
+        removeFilters(Object.keys(clearFilterState));
         closeFilter();
       }}
     >
@@ -426,16 +424,16 @@ export default function PatientFilter(props: any) {
           <div className="w-full flex-none" id="discharge-reason-select">
             <FieldLabel className="text-sm">Discharge Reason</FieldLabel>
             <SelectMenuV2
-              id="last_consultation_discharge_reason"
+              id="last_consultation__new_discharge_reason"
               placeholder="Select discharge reason"
               options={DISCHARGE_REASONS}
-              value={filterState.last_consultation_discharge_reason}
+              value={filterState.last_consultation__new_discharge_reason}
               optionValue={(o) => o.id}
               optionLabel={(o) => o.text}
               onChange={(o) =>
                 setFilterState({
                   ...filterState,
-                  last_consultation_discharge_reason: o,
+                  last_consultation__new_discharge_reason: o,
                 })
               }
             />
@@ -539,13 +537,13 @@ export default function PatientFilter(props: any) {
           />
           <DateRangeFormField
             labelClassName="text-sm"
-            name="last_consultation_admission_date"
+            name="last_consultation_encounter_date"
             label="Admit Date"
             value={{
               start: getDate(
-                filterState.last_consultation_admission_date_after
+                filterState.last_consultation_encounter_date_after
               ),
-              end: getDate(filterState.last_consultation_admission_date_before),
+              end: getDate(filterState.last_consultation_encounter_date_before),
             }}
             onChange={handleDateRangeChange}
             errorClassName="hidden"

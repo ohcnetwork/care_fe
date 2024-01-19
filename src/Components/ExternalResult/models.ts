@@ -53,6 +53,9 @@ export interface ILocalBodies {
 export interface IDeleteExternalResult {
   detail: string;
 }
+export interface IDeleteBedCapacity {
+  detail: string;
+}
 
 export interface IPartialUpdateExternalResult {
   address: string;

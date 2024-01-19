@@ -75,11 +75,11 @@ class FacilityPage {
   }
 
   fillTotalCapacity(capacity: string) {
-    cy.get("input#total-capacity").click().type(capacity);
+    cy.get("input#total-capacity").click().clear().click().type(capacity);
   }
 
   fillCurrentlyOccupied(occupied: string) {
-    cy.get("input#currently-occupied").click().type(occupied);
+    cy.get("input#currently-occupied").click().clear().click().type(occupied);
   }
 
   saveAndExitBedCapacityForm() {
@@ -96,7 +96,7 @@ class FacilityPage {
   }
 
   fillDoctorCount(count: string) {
-    cy.get("input#count").click().type(count);
+    cy.get("input#count").click().clear().click().type(count);
   }
 
   fillOxygenCapacity(capacity: string) {
@@ -217,6 +217,53 @@ class FacilityPage {
     cy.get("#delete-facility").contains("Delete Facility").click();
   }
 
+  scrollToFacilityTriage() {
+    cy.get("#add-facility-triage").scrollIntoView();
+  }
+
+  fillTriageEntryFields(
+    visited,
+    homeQuarantine,
+    isolation,
+    referred,
+    confirmedPositive
+  ) {
+    cy.get("#num_patients_visited").clear().click().type(visited);
+    cy.get("#num_patients_home_quarantine")
+      .clear()
+      .click()
+      .type(homeQuarantine);
+    cy.get("#num_patients_isolation").clear().click().type(isolation);
+    cy.get("#num_patient_referred").clear().click().type(referred);
+    cy.get("#num_patient_confirmed_positive")
+      .clear()
+      .click()
+      .type(confirmedPositive);
+  }
+
+  fillEntryDate(date) {
+    cy.get("#entry_date").click();
+    cy.get("#date-input").click().type(date);
+  }
+
+  clickEditButton() {
+    cy.get("#edit-button").click();
+  }
+
+  clickButtonsMultipleTimes(selector) {
+    cy.get(selector).each(($button) => {
+      cy.wrap($button).click();
+    });
+  }
+
+  verifyTriageTableContains(value) {
+    cy.get("#triage-table").contains(value);
+  }
+
+  clickAddFacilityTriage() {
+    cy.get("#add-facility-triage").click();
+  }
+
   clickfacilityfeatureoption() {
     cy.get("#features").click();
   }
@@ -252,6 +299,7 @@ class FacilityPage {
     cy.intercept("https://maps.googleapis.com/maps/api/mapsjs/*").as("mapApi");
     cy.wait("@mapApi").its("response.statusCode").should("eq", 200);
     cy.get("input#pac-input").type(location).type("{enter}");
+    cy.wait(2000);
     cy.get("div#map-close").click();
   }
 
@@ -273,6 +321,7 @@ class FacilityPage {
     cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");
     cy.get("[id='facility-details']").first().click();
     cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
+    cy.get("h1.text-3xl.font-bold", { timeout: 10000 }).should("be.visible");
   }
 
   verifyFacilityBadgeContent(expectedText: string) {
@@ -288,6 +337,10 @@ class FacilityPage {
 
   verifyDistrictBadgeContent(expectedText: string) {
     cy.get("[data-testid='District']").should("contain", expectedText);
+  }
+
+  verifyLocalBodyBadgeContent(expectedText: string) {
+    cy.get("[data-testid='Local Body']").should("contain", expectedText);
   }
 
   verifyFacilityTypeBadgeContent(expectedText: string) {
@@ -320,12 +373,22 @@ class FacilityPage {
     cy.get("[name='quantity']").type(quantity);
   }
 
+  fillInventoryMinimumDetails(name: string, quantity: string) {
+    cy.get("div#id").click();
+    cy.get("div#id ul li").contains(name).click();
+    cy.get("[name='quantity']").type(quantity);
+  }
+
   clickAddInventory() {
     cy.intercept("POST", "**/api/v1/facility/*/inventory/").as(
       "createInventory"
     );
     cy.get("button").contains("Add/Update Inventory").click();
     cy.wait("@createInventory").its("response.statusCode").should("eq", 201);
+  }
+
+  clickSetButton() {
+    cy.get("#submit").contains("Set").click();
   }
 
   fillResourceRequestDetails(
@@ -354,6 +417,82 @@ class FacilityPage {
     cy.wait("@createResourceRequest")
       .its("response.statusCode")
       .should("eq", 201);
+  }
+
+  getStateElement() {
+    return cy.get("#state");
+  }
+
+  getDistrictElement() {
+    return cy.get("#district");
+  }
+
+  selectStateOnPincode(stateName) {
+    this.getStateElement()
+      .scrollIntoView()
+      .wait(2000)
+      .should("be.visible")
+      .then(($element) => {
+        const text = $element.text();
+        if (!text.includes(stateName)) {
+          this.getStateElement().click();
+          cy.get("li[role=option]").contains(stateName).click();
+        }
+      });
+  }
+
+  selectDistrictOnPincode(districtName) {
+    this.getDistrictElement()
+      .scrollIntoView()
+      .wait(2000)
+      .should("be.visible")
+      .then(($element) => {
+        const text = $element.text();
+        if (!text.includes(districtName)) {
+          this.getDistrictElement().click();
+          cy.get("li[role=option]").contains(districtName).click();
+        }
+      });
+  }
+
+  verifyPpeQuantity(text: string) {
+    cy.get("#PPE").contains(text).should("be.visible");
+  }
+
+  clickPpeQuantity() {
+    cy.get("#PPE").click();
+  }
+
+  clickLastEntry() {
+    cy.get("#delete-last-entry").click();
+  }
+
+  verifyStockInRow(rowId: string, stockText: string) {
+    cy.get(rowId).contains(stockText).should("be.visible");
+  }
+
+  verifyBadgeWithText(badgeClass: string, text: string) {
+    cy.get(badgeClass).contains(text).should("exist");
+  }
+
+  clickAddMinimumQuanitity() {
+    cy.get("#add-minimum-quantity").click();
+  }
+
+  clickUpdateMinimumQuantity() {
+    cy.get("#update-minimum-quantity").first().click();
+  }
+
+  setQuantity(quantity: string) {
+    cy.get("#quantity").click().clear().click().type(quantity);
+  }
+
+  clickSaveUpdateMinimumQuantity() {
+    cy.get("#save-update-minimumquanitity").click();
+  }
+
+  clickSetMinimumQuantity() {
+    cy.get("#set-minimum-quantity").click();
   }
 }
 
