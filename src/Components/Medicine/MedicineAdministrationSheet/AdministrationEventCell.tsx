@@ -21,10 +21,10 @@ export default function AdministrationEventCell({
   refetch,
 }: Props) {
   const [showTimeline, setShowTimeline] = useState(false);
-  // Check if cell belongs to an administered prescription
+  // Check if cell belongs to an administered prescription (including start and excluding end)
   const administered = administrations
     .filter((administration) =>
-      dayjs(administration.administered_date).isBetween(start, end)
+      dayjs(administration.administered_date).isBetween(start, end, null, "[)")
     )
     .sort(
       (a, b) =>
