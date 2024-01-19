@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { QueryRoute, RequestOptions, RequestResult } from "./types";
 import request from "./request";
-import { mergeRequestOptions } from "./utils";
+import { makeUrl, mergeRequestOptions } from "./utils";
+import { useQueryCache } from "./QueryCacheProvider";
 
 export interface QueryOptions<TData> extends RequestOptions<TData> {
   prefetch?: boolean;
@@ -15,6 +16,21 @@ export default function useQuery<TData>(
 ) {
   const [response, setResponse] = useState<RequestResult<TData>>();
   const [loading, setLoading] = useState(false);
+  const queryCache = useQueryCache();
+  const cacheKey = makeUrl(route.path, options?.query, options?.pathParams);
+
+  useEffect(() => {
+    if (!route.enableExperimentalCache) return;
+
+    const cachedResponse = queryCache.get(cacheKey);
+
+    if (cachedResponse !== undefined) {
+      console.info(`Cache HIT: "${cacheKey}"`);
+      setResponse(cachedResponse as RequestResult<TData>);
+    } else {
+      console.info(`Cache MISS: "${cacheKey}"`);
+    }
+  }, [cacheKey]);
 
   const controllerRef = useRef<AbortController>();
 
@@ -32,6 +48,10 @@ export default function useQuery<TData>(
 
       setLoading(true);
       const response = await request(route, resolvedOptions);
+      if (route.enableExperimentalCache && response.res) {
+        queryCache.set(response.res.url, response);
+        console.info(`Cache SET: "${cacheKey}"`);
+      }
       setResponse(response);
       setLoading(false);
       return response;
@@ -40,7 +60,7 @@ export default function useQuery<TData>(
   );
 
   useEffect(() => {
-    if (options?.prefetch ?? true) {
+    if (options?.prefetch ?? queryCache.get(cacheKey) === undefined) {
       runQuery();
     }
   }, [runQuery, options?.prefetch]);

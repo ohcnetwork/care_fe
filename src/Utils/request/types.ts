@@ -10,6 +10,7 @@ interface RouteBase<TData> {
 
 export interface QueryRoute<TData> extends RouteBase<TData> {
   method?: "GET";
+  enableExperimentalCache?: boolean;
 }
 
 export interface MutationRoute<TData, TBody> extends RouteBase<TData> {
