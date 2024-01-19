@@ -34,7 +34,7 @@ import {
 } from "../Form/FormFields/Utils";
 import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
 import SelectMenuV2 from "../Form/SelectMenuV2";
-import DiagnosesFilter from "./DiagnosesFilter";
+import DiagnosesFilter, { FILTER_BY_DIAGNOSES_KEYS } from "./DiagnosesFilter";
 
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
@@ -528,31 +528,14 @@ export default function PatientFilter(props: any) {
         expanded
         className="w-full"
       >
-        <DiagnosesFilter
-          name="diagnoses"
-          value={filterState.diagnoses}
-          onChange={handleFormFieldChange}
-        />
-        <DiagnosesFilter
-          name="diagnoses_confirmed"
-          value={filterState.diagnoses_confirmed}
-          onChange={handleFormFieldChange}
-        />
-        <DiagnosesFilter
-          name="diagnoses_provisional"
-          value={filterState.diagnoses_provisional}
-          onChange={handleFormFieldChange}
-        />
-        <DiagnosesFilter
-          name="diagnoses_unconfirmed"
-          value={filterState.diagnoses_unconfirmed}
-          onChange={handleFormFieldChange}
-        />
-        <DiagnosesFilter
-          name="diagnoses_differential"
-          value={filterState.diagnoses_differential}
-          onChange={handleFormFieldChange}
-        />
+        {FILTER_BY_DIAGNOSES_KEYS.map((name) => (
+          <DiagnosesFilter
+            key={name}
+            name={name}
+            value={filterState[name]}
+            onChange={handleFormFieldChange}
+          />
+        ))}
       </AccordionV2>
       <AccordionV2
         title={
