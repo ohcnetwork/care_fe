@@ -20,20 +20,17 @@ export default function InventoryLog(props: any) {
   const limit = 14;
   const item = inventoryId;
 
-  const { data: InventoryLog, refetch: InventoryFetch } = useQuery(
-    routes.getInventoryLog,
-    {
-      pathParams: {
-        facilityId: facilityId,
-      },
-      query: {
-        item,
-        limit,
-        offset,
-      },
-      prefetch: facilityId !== undefined || !!offset,
-    }
-  );
+  const { data, refetch } = useQuery(routes.getInventoryLog, {
+    pathParams: {
+      facilityId: facilityId,
+    },
+    query: {
+      item,
+      limit,
+      offset,
+    },
+    prefetch: facilityId !== undefined,
+  });
 
   const { data: facilityObject } = useQuery(routes.getAnyFacility, {
     pathParams: { id: facilityId },
@@ -44,13 +41,14 @@ export default function InventoryLog(props: any) {
     setSaving(true);
     await request(routes.flagInventoryItem, {
       pathParams: { facility_external_id: facilityId, external_id: id },
+      query: { item: id },
       onResponse: ({ res }) => {
         if (res?.ok) {
           Notification.Success({
             msg: "Updated Successfully",
           });
         }
-        InventoryFetch();
+        refetch();
       },
     });
     setSaving(false);
@@ -60,16 +58,12 @@ export default function InventoryLog(props: any) {
     setSaving(true);
     await request(routes.deleteLastInventoryLog, {
       pathParams: { facility_external_id: facilityId, id: id },
-      onResponse: ({ res, data }) => {
+      onResponse: ({ res }) => {
         if (res?.ok) {
           Notification.Success({
             msg: "Last entry deleted Successfully",
           });
-          InventoryFetch();
-        } else {
-          Notification.Error({
-            msg: "Error while deleting last entry: " + (data?.detail || ""),
-          });
+          refetch();
         }
       },
     });
@@ -83,8 +77,8 @@ export default function InventoryLog(props: any) {
   };
 
   let inventoryList: any = [];
-  if (InventoryLog?.results.length) {
-    inventoryList = InventoryLog.results.map((inventoryItem: any, index) => (
+  if (data?.results.length) {
+    inventoryList = data.results.map((inventoryItem: any, index) => (
       <tr id={`row-${index}`} key={inventoryItem.id} className="bg-white">
         <td className="border-b border-gray-200 p-5 text-sm hover:bg-gray-100">
           <div className="flex items-center">
@@ -162,7 +156,7 @@ export default function InventoryLog(props: any) {
         </td>
       </tr>
     ));
-  } else if (InventoryLog?.results && InventoryLog.results.length === 0) {
+  } else if (data?.results && data.results.length === 0) {
     inventoryList = (
       <tr className="bg-white">
         <td colSpan={3} className="border-b border-gray-200 p-5 text-center">
@@ -174,9 +168,9 @@ export default function InventoryLog(props: any) {
     );
   }
 
-  if (!InventoryLog?.results) {
+  if (!data?.results) {
     inventoryItem = <Loading />;
-  } else if (InventoryLog.results) {
+  } else if (data.results) {
     inventoryItem = (
       <>
         <div className="-mx-4 overflow-x-auto p-4 sm:-mx-8 sm:px-8">
@@ -202,12 +196,12 @@ export default function InventoryLog(props: any) {
             </table>
           </div>
         </div>
-        {InventoryLog.count > limit && (
+        {data.count > limit && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination
               cPage={currentPage}
               defaultPerPage={limit}
-              data={{ totalCount: InventoryLog ? InventoryLog.count : 0 }}
+              data={{ totalCount: data ? data.count : 0 }}
               onChange={handlePagination}
             />
           </div>
@@ -223,39 +217,36 @@ export default function InventoryLog(props: any) {
         className="mx-3 md:mx-8"
         crumbsReplacements={{
           [facilityId]: { name: facilityObject?.name },
-          [inventoryId]: { name: InventoryLog?.results[0].item_object.name },
+          [inventoryId]: { name: data?.results[0].item_object.name },
         }}
         backUrl={`/facility/${facilityId}/inventory`}
       >
         <div className="container mx-auto px-4 sm:px-8">
           <div className="py-8 ">
             <div className="flex justify-between">
-              <h4>Item: {InventoryLog?.results[0].item_object.name}</h4>
-              {InventoryLog?.results &&
-                InventoryLog.results[0].current_stock > 0 && (
-                  <div className="tooltip ">
-                    <div className="tooltip-text tooltip-left text-justify text-sm leading-snug">
-                      <b>Deletes the last transaction</b> by creating an
-                      equivalent undo transaction and marks both the
-                      transactions as accident.
-                    </div>
-                    <ButtonV2
-                      id="delete-last-entry"
-                      variant="danger"
-                      onClick={(_) =>
-                        removeLastInventoryLog(
-                          InventoryLog?.results[0].item_object.id
-                        )
-                      }
-                      disabled={saving}
-                    >
-                      <span>
-                        <CareIcon className="care-l-exclamation-circle pr-2 text-lg" />
-                        Delete Last Entry
-                      </span>
-                    </ButtonV2>
+              <h4>Item: {data?.results[0].item_object.name}</h4>
+              {data?.results && data.results[0].current_stock > 0 && (
+                <div className="tooltip ">
+                  <div className="tooltip-text tooltip-left text-justify text-sm leading-snug">
+                    <b>Deletes the last transaction</b> by creating an
+                    equivalent undo transaction and marks both the transactions
+                    as accident.
                   </div>
-                )}
+                  <ButtonV2
+                    id="delete-last-entry"
+                    variant="danger"
+                    onClick={(_) =>
+                      removeLastInventoryLog(data?.results[0].item_object.id)
+                    }
+                    disabled={saving}
+                  >
+                    <span>
+                      <CareIcon className="care-l-exclamation-circle pr-2 text-lg" />
+                      Delete Last Entry
+                    </span>
+                  </ButtonV2>
+                </div>
+              )}
             </div>
             {inventoryItem}
           </div>

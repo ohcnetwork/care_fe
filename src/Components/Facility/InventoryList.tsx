@@ -16,7 +16,7 @@ export default function InventoryList(props: any) {
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 14;
 
-  const { data: InventotyData } = useQuery(routes.getInventorySummary, {
+  const { data: inventoryData } = useQuery(routes.getInventorySummary, {
     pathParams: {
       facility_external_id: facilityId,
     },
@@ -39,8 +39,8 @@ export default function InventoryList(props: any) {
   };
 
   let inventoryList: any = [];
-  if (InventotyData?.results.length) {
-    inventoryList = InventotyData.results.map((inventoryItem: any) => (
+  if (inventoryData?.results.length) {
+    inventoryList = inventoryData.results.map((inventoryItem: any) => (
       <tr
         id={`${inventoryItem.item_object?.name.replaceAll(" ", "-")}`}
         key={inventoryItem.id}
@@ -72,7 +72,7 @@ export default function InventoryList(props: any) {
         </td>
       </tr>
     ));
-  } else if (InventotyData?.results && InventotyData.results.length === 0) {
+  } else if (inventoryData?.results && inventoryData.results.length === 0) {
     inventoryList = (
       <tr className="bg-white">
         <td colSpan={3} className="border-b border-gray-200 p-5 text-center">
@@ -84,9 +84,9 @@ export default function InventoryList(props: any) {
     );
   }
 
-  if (!InventotyData?.results) {
+  if (!inventoryData?.results) {
     inventoryItem = <Loading />;
-  } else if (InventotyData.results) {
+  } else if (inventoryData.results) {
     inventoryItem = (
       <>
         <div className="-mx-4 overflow-x-auto p-4 sm:-mx-8 sm:px-8">
@@ -106,12 +106,12 @@ export default function InventoryList(props: any) {
             </table>
           </div>
         </div>
-        {InventotyData?.count > limit && (
+        {inventoryData?.count > limit && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination
               cPage={currentPage}
               defaultPerPage={limit}
-              data={{ totalCount: InventotyData ? InventotyData.count : 0 }}
+              data={{ totalCount: inventoryData ? inventoryData.count : 0 }}
               onChange={handlePagination}
             />
           </div>
