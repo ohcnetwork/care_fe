@@ -51,6 +51,7 @@ import {
   LocationModel,
   PatientNotesModel,
   BedModel,
+  MinimumQuantityItemResponse,
   InventorySummaryResponse,
   InventoryLogResponse,
   InventoryItemsModel,
@@ -795,14 +796,22 @@ const routes = {
   setMinQuantity: {
     path: "/api/v1/facility/{facilityId}/min_quantity/",
     method: "POST",
+    TRes: Type<MinimumQuantityItemResponse>(),
   },
   getMinQuantity: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/{facilityId}/min_quantity/",
     method: "GET",
+    TRes: Type<PaginatedResponse<InventorySummaryResponse>>(),
+  },
+  getMinQuantityItem: {
+    path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}",
+    method: "GET",
+    TRes: Type<MinimumQuantityItemResponse>(),
   },
   updateMinQuantity: {
     path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}",
     method: "PATCH",
+    TRes: Type<PaginatedResponse<MinimumQuantityItemResponse>>(),
   },
   getInventorySummary: {
     path: "/api/v1/facility/{facility_external_id}/inventorysummary/",
