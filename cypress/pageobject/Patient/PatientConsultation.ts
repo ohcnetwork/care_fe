@@ -47,7 +47,7 @@ export class PatientConsultationPage {
     cy.get("#icd11-search input[role='combobox']")
       .scrollIntoView()
       .click()
-      .type("1A");
+      .type("1A00");
     cy.get("#icd11-search [role='option']")
       .contains("1A00 Cholera")
       .scrollIntoView()

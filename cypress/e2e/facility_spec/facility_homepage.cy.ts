@@ -18,11 +18,12 @@ describe("Facility Homepage Function", () => {
   const capacitiesAlias = "downloadCapacitiesCSV";
   const doctorsAlias = "downloadDoctorsCSV";
   const triagesAlias = "downloadTriagesCSV";
-  const facilityname = "Dummy Facility 1";
-  const statename = "Kerala";
+  const facilityName = "Dummy Facility 1";
+  const facilityLocaion = "Dummy Location";
+  const stateName = "Kerala";
   const district = "Ernakulam";
-  const localbody = "Aikaranad";
-  const facilitytype = "Private Hospital";
+  const localBody = "Aikaranad";
+  const facilityType = "Private Hospital";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -58,16 +59,16 @@ describe("Facility Homepage Function", () => {
 
   it("Verify the functionality of advance filter", () => {
     userPage.clickAdvancedFilters();
-    facilityPage.selectState(statename);
+    facilityPage.selectState(stateName);
     facilityPage.selectDistrict(district);
-    facilityPage.selectLocalBody(localbody);
-    facilityPage.clickUpdateFacilityType(facilitytype);
+    facilityPage.selectLocalBody(localBody);
+    facilityPage.clickUpdateFacilityType(facilityType);
     userPage.applyFilter();
-    facilityPage.verifyStateBadgeContent(statename);
+    facilityPage.verifyStateBadgeContent(stateName);
     facilityPage.verifyDistrictBadgeContent(district);
-    facilityPage.verifyLocalBodyBadgeContent(localbody);
-    facilityPage.verifyFacilityTypeBadgeContent(facilitytype);
-    manageUserPage.assertFacilityInCard(facilityname);
+    facilityPage.verifyLocalBodyBadgeContent(localBody);
+    facilityPage.verifyFacilityTypeBadgeContent(facilityType);
+    manageUserPage.assertFacilityInCard(facilityName);
     userPage.clearFilters();
     userPage.verifyDataTestIdNotVisible("State");
     userPage.verifyDataTestIdNotVisible("District");
@@ -80,10 +81,10 @@ describe("Facility Homepage Function", () => {
     assetPagination.navigateToNextPage();
     assetPagination.navigateToPreviousPage();
     // search for a facility
-    manageUserPage.typeFacilitySearch(facilityname);
-    facilityPage.verifyFacilityBadgeContent(facilityname);
-    manageUserPage.assertFacilityInCard(facilityname);
-    facilityHome.verifyURLContains(facilityname);
+    manageUserPage.typeFacilitySearch(facilityName);
+    facilityPage.verifyFacilityBadgeContent(facilityName);
+    manageUserPage.assertFacilityInCard(facilityName);
+    facilityHome.verifyURLContains(facilityName);
   });
 
   it("Verify Facility Export Functionality", () => {
@@ -111,6 +112,25 @@ describe("Facility Homepage Function", () => {
     facilityHome.clickMenuItem("Triages");
     facilityHome.verifyDownload(triagesAlias);
     facilityHome.clickSearchButton();
+  });
+
+  it("Verify Facility Detail page redirection to CNS and Live Minitoring  ", () => {
+    userPage.clickAdvancedFilters();
+    facilityPage.selectState(stateName);
+    facilityPage.selectDistrict(district);
+    facilityPage.selectLocalBody(localBody);
+    userPage.applyFilter();
+    // go to cns page in the facility details page
+    manageUserPage.assertFacilityInCard(facilityName);
+    facilityHome.clickViewFacilityDetails();
+    facilityHome.clickFacilityCnsButton();
+    facilityHome.verifyCnsUrl();
+    facilityHome.navigateBack();
+    // go to live monitoring page in the facility details page
+    facilityHome.clickFacilityLiveMonitorButton();
+    facilityHome.selectLocation(facilityLocaion);
+    facilityHome.clickLiveMonitorButton();
+    facilityHome.verifyLiveMonitorUrl();
   });
 
   afterEach(() => {

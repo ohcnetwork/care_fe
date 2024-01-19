@@ -26,6 +26,7 @@ import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import Page from "../Common/components/Page";
+
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function SampleViewAdmin() {
@@ -38,6 +39,7 @@ export default function SampleViewAdmin() {
     resultsPerPage,
   } = useFilters({
     limit: 10,
+    cacheBlacklist: ["patient_name", "district_name"],
   });
   const dispatch: any = useDispatch();
   const initialData: any[] = [];
@@ -58,6 +60,7 @@ export default function SampleViewAdmin() {
       const res = await dispatch(getAnyFacility(qParams.facility));
       setFacilityName(res?.data?.name);
     }
+
     fetchData();
   }, [dispatch, qParams.facility]);
 
