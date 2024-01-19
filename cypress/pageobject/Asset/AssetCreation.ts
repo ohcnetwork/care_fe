@@ -95,6 +95,10 @@ export class AssetPage {
     cy.verifyNotification(message);
   }
 
+  openAsset(name: string) {
+    cy.get("div").contains(name).click();
+  }
+
   openCreatedAsset() {
     cy.intercept("GET", "**/api/v1/asset/**").as("getAsset");
     cy.get("[data-testid=created-asset-list]").first().click();

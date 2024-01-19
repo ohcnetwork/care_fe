@@ -159,6 +159,7 @@ export default function LocationManagement({ facilityId }: Props) {
                       }}
                     />
                     <ButtonV2
+                      id="manage-beds"
                       href={`/facility/${facilityId}/location/${showDeleteFailModal.id}/beds`}
                       authorizeFor={NonReadOnlyUsers}
                       className="w-full"
@@ -180,6 +181,7 @@ export default function LocationManagement({ facilityId }: Props) {
                       }}
                     />
                     <ButtonV2
+                      id="manage-assets"
                       href={`/assets?page=1&limit=18&facility=${facilityId}&asset_type=&asset_class=&status=&location=${showDeleteFailModal.id}&warranty_amc_end_of_validity_before=&warranty_amc_end_of_validity_after=`}
                       authorizeFor={NonReadOnlyUsers}
                       className="w-full"

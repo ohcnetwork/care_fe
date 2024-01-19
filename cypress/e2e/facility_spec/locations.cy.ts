@@ -5,6 +5,7 @@ import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import FacilityLocation from "../../pageobject/Facility/FacilityLocation";
 import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
 import FacilityHome from "../../pageobject/Facility/FacilityHome";
+import { v4 as uuidv4 } from "uuid";
 
 describe("Location Management Section", () => {
   const assetPage = new AssetPage();
@@ -39,6 +40,9 @@ describe("Location Management Section", () => {
   const bedModifiedType = "Isolation";
   const numberOfBeds = 10;
   const numberOfModifiedBeds = 25;
+  const qr_id_1 = uuidv4();
+  const phone_number = "9999999999";
+  const serialNumber = Math.floor(Math.random() * 10 ** 10).toString();
 
   before(() => {
     cy.loginByApi("devdistrictadmin", "Coronasafe@123");
@@ -160,23 +164,93 @@ describe("Location Management Section", () => {
   });
 
   it("Delete location", () => {
-    cy.awaitUrl("/facility");
-    cy.get("a").contains("Dummy Facility 2").click().wait(1000);
-    cy.get("button").contains("Manage Facility").click().wait(100);
-    cy.get("div[id=location-management]").click().wait(1000);
-
-    // create new location
-    cy.get("button[id=add-new-location]").click().wait(1000);
-    cy.get("input[id=name]").type("Test Location");
-    cy.get("div[id=location-type]").click();
-    cy.get("li[id=location-type-option-OTHER]").click();
-    cy.get("button[id=submit]").click().wait(1000);
-
-    // delete location
-    cy.get("button[id=delete-location-button]").click().wait(1000);
-    cy.get("button[id=submit]").click();
+    facilityLocation.clickAddNewLocationButton();
+    facilityLocation.enterLocationName("Test Location");
+    facilityLocation.selectLocationType("OTHER");
+    assetPage.clickassetupdatebutton();
+    facilityLocation.deleteFirstLocation();
+    assetPage.clickassetupdatebutton();
     facilityLocation.verifyNotification(
       "Location Test Location deleted successfully"
+    );
+  });
+
+  it("Delete location with linked beds", () => {
+    facilityLocation.clickAddNewLocationButton();
+    facilityLocation.enterLocationName("Test Location with Beds");
+    facilityLocation.selectLocationType("OTHER");
+    assetPage.clickassetupdatebutton();
+    facilityLocation.clickManageBedButton();
+    facilityLocation.clickAddBedButton();
+    facilityLocation.enterBedName("Bed 1");
+    facilityLocation.selectBedType("Regular");
+    assetPage.clickassetupdatebutton();
+    facilityLocation.clickText("Test Location with Beds");
+    facilityLocation.deleteFirstLocation();
+    assetPage.clickassetupdatebutton();
+    facilityLocation.verifyNotification(
+      "Cannot delete a Location with associated Beds"
+    );
+
+    // delete bed
+    facilityLocation.clickManageBeds();
+    facilityLocation.deleteFirstBed();
+    assetPage.clickassetupdatebutton();
+
+    // delete location
+    facilityLocation.clickText("Test Location with Beds");
+    facilityLocation.deleteFirstLocation();
+    assetPage.clickassetupdatebutton();
+    facilityLocation.verifyNotification(
+      "Location Test Location with Beds deleted successfully"
+    );
+  });
+
+  it("Delete location with linked assets", () => {
+    facilityLocation.clickAddNewLocationButton();
+    facilityLocation.enterLocationName("Test Location with Assets");
+    facilityLocation.selectLocationType("OTHER");
+    assetPage.clickassetupdatebutton();
+    // create asset and link it to location
+    cy.awaitUrl("/assets");
+    assetPage.createAsset();
+    assetPage.selectFacility("Dummy Facility 1, Ernakulam");
+    assetPage.enterAssetDetails(
+      "Test Asset 1",
+      "Test Description",
+      "Working",
+      qr_id_1,
+      "Manufacturer's Name",
+      "2025-12-25",
+      "Customer Support's Name",
+      phone_number,
+      "email@support.com",
+      "Vendor's Name",
+      serialNumber,
+      "25122021",
+      "Test note for asset creation!"
+    );
+    assetPage.selectAssetType("Internal");
+    assetPage.selectLocation("Test Location with Assets");
+    assetPage.clickassetupdatebutton();
+    facilityLocation.loadLocationManagementPage();
+    facilityLocation.deleteFirstLocation();
+    assetPage.clickassetupdatebutton();
+    facilityLocation.verifyNotification(
+      "Cannot delete a Location with associated Assets"
+    );
+
+    // delete asset
+    facilityLocation.clickManageAssets();
+    assetPage.openAsset("Test Asset 1");
+    assetPage.deleteAsset();
+
+    // // delete location
+    facilityLocation.loadLocationManagementPage();
+    facilityLocation.deleteFirstLocation();
+    assetPage.clickassetupdatebutton();
+    facilityLocation.verifyNotification(
+      "Location Test Location with Assets deleted successfully"
     );
   });
 
