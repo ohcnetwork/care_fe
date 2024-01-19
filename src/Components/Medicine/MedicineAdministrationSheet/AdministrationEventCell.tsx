@@ -1,7 +1,7 @@
 import dayjs from "../../../Utils/dayjs";
 import { MedicineAdministrationRecord, Prescription } from "../models";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { classNames, formatDateTime, formatTime } from "../../../Utils/utils";
+import { classNames, formatDateTime } from "../../../Utils/utils";
 import DialogModal from "../../Common/Dialog";
 import PrescrpitionActivityTimeline from "../PrescrpitionTimeline";
 import { useState } from "react";
