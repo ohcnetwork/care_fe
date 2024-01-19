@@ -328,7 +328,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   useEffect(() => {
     dispatch({
       type: "set_form",
-      form: { ...state.form, admission_date: new Date() },
+      form: { ...state.form, encounter_date: new Date() },
     });
   }, []);
 
@@ -948,6 +948,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             >
               <DraftSection
                 handleDraftSelect={(newState: any) => {
+                  console.log(newState);
                   dispatch({ type: "set_state", state: newState });
                 }}
                 formData={state.form}
