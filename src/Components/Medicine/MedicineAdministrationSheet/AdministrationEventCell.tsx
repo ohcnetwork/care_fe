@@ -46,9 +46,7 @@ export default function AdministrationEventCell({
           show={showTimeline}
         >
           <div className="mt-6 text-sm font-medium text-gray-700">
-            Administrations between{" "}
-            <span className="text-black">{formatTime(start, "HH:mm")}</span> and{" "}
-            <span className="text-black">{formatTime(end, "HH:mm")}</span> on{" "}
+            Administrations on{" "}
             <span className="text-black">
               {formatDateTime(start, "DD/MM/YYYY")}
             </span>
