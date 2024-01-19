@@ -3,6 +3,10 @@ class FacilityLocation {
     cy.get("#add-new-location").click();
   }
 
+  clickFacilityLocationManagement() {
+    cy.get("[id=location-management]").click();
+  }
+
   clickEditLocationButton() {
     cy.get("#edit-location-button").click();
   }

@@ -34,6 +34,7 @@ export const HospitalList = () => {
     resultsPerPage,
   } = useFilters({
     limit: 14,
+    cacheBlacklist: ["search"],
   });
 
   useEffect(() => {

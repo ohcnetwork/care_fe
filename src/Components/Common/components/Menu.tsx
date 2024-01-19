@@ -18,6 +18,7 @@ interface DropdownMenuProps {
   disabled?: boolean | undefined;
   className?: string | undefined;
   itemClassName?: string | undefined;
+  containerClassName?: string | undefined;
 }
 
 export default function DropdownMenu({
@@ -26,7 +27,10 @@ export default function DropdownMenu({
   ...props
 }: DropdownMenuProps) {
   return (
-    <div id={props.id} className="text-right">
+    <div
+      id={props.id}
+      className={classNames("text-right", props.containerClassName)}
+    >
       <Menu as="div" className="relative inline-block w-full text-left">
         <Menu.Button
           disabled={props.disabled}
