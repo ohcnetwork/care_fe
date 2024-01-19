@@ -53,6 +53,7 @@ import {
   BedModel,
   InventorySummaryResponse,
   InventoryLogResponse,
+  InventoryItemsModel,
 } from "../Components/Facility/models";
 import {
   IDeleteBedCapacity,
@@ -778,10 +779,13 @@ const routes = {
   //inventory
   getItems: {
     path: "/api/v1/items/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<InventoryItemsModel>>(),
   },
   createInventory: {
     path: "/api/v1/facility/{facilityId}/inventory/",
     method: "POST",
+    TRes: Type<InventoryLogResponse>(),
   },
   getInventoryLog: {
     path: "/api/v1/facility/{facilityId}/inventory/",
