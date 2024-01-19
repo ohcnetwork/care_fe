@@ -10,10 +10,10 @@ import { debounce } from "lodash-es";
 
 export const FILTER_BY_DIAGNOSES_KEYS = [
   "diagnoses",
+  "diagnoses_confirmed",
   "diagnoses_unconfirmed",
   "diagnoses_provisional",
   "diagnoses_differential",
-  "diagnoses_confirmed",
 ] as const;
 
 export const DIAGNOSES_FILTER_LABELS = {
