@@ -87,13 +87,13 @@ export default function PrescriptionDetailCard({
             {prescription.medicine_object?.name ?? prescription.medicine_old}
           </Detail>
           <Detail
-            className="col-span-5 break-all md:col-span-3"
+            className="col-span-5 break-all md:col-span-2"
             label={t("route")}
           >
             {prescription.route &&
               t("PRESCRIPTION_ROUTE_" + prescription.route)}
           </Detail>
-          <Detail className="col-span-4 md:col-span-1" label={t("dosage")}>
+          <Detail className="col-span-4 md:col-span-2" label={t("dosage")}>
             {prescription.dosage}
           </Detail>
 
