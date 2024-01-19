@@ -37,11 +37,10 @@ export const HospitalList = () => {
   });
 
   useEffect(() => {
-    if (Object.keys(qParams).length === 0) return;
-    if (!qParams.state) {
+    if (!qParams.state && (qParams.district || qParams.local_body)) {
       advancedFilter.removeFilters(["district", "local_body"]);
     }
-    if (!qParams.district) {
+    if (!qParams.district && qParams.local_body) {
       advancedFilter.removeFilters(["local_body"]);
     }
   }, [advancedFilter, qParams]);
