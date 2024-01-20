@@ -2,8 +2,8 @@ import { lazy, useEffect, useState } from "react";
 import { ConsultationTabProps } from "./index";
 import { AssetBedModel, AssetClass, AssetData } from "../../Assets/AssetTypes";
 import { useDispatch } from "react-redux";
-import { getPermittedFacility, listAssetBeds } from "../../../Redux/actions";
-import { BedModel, FacilityModel } from "../models";
+import { listAssetBeds } from "../../../Redux/actions";
+import { BedModel } from "../models";
 import HL7PatientVitalsMonitor from "../../VitalsMonitor/HL7PatientVitalsMonitor";
 import VentilatorPatientVitalsMonitor from "../../VitalsMonitor/VentilatorPatientVitalsMonitor";
 import useVitalsAspectRatioConfig from "../../VitalsMonitor/useVitalsAspectRatioConfig";
@@ -12,13 +12,13 @@ import PrescriptionsTable from "../../Medicine/PrescriptionsTable";
 import Chip from "../../../CAREUI/display/Chip";
 import { formatAge, formatDate, formatDateTime } from "../../../Utils/utils";
 import ReadMore from "../../Common/components/Readmore";
-import { DailyRoundsList } from "../Consultations/DailyRoundsList";
+import DailyRoundsList from "../Consultations/DailyRoundsList";
+import { getVitalsMonitorSocketUrl } from "../../VitalsMonitor/utils";
 
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
 
 export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
   const dispatch: any = useDispatch();
-  const [showAutomatedRounds, setShowAutomatedRounds] = useState(true);
   const [hl7SocketUrl, setHL7SocketUrl] = useState<string>();
   const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
   const [monitorBedData, setMonitorBedData] = useState<AssetBedModel>();
@@ -41,29 +41,22 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
       return;
 
     const fetchData = async () => {
-      const [facilityRes, assetBedRes] = await Promise.all([
-        dispatch(getPermittedFacility(props.consultationData.facility as any)),
-        dispatch(
-          listAssetBeds({
-            facility: props.consultationData.facility as any,
-            bed: props.consultationData.current_bed?.bed_object.id,
-          })
-        ),
-      ]);
-
-      const { middleware_address } = facilityRes.data as FacilityModel;
+      const assetBedRes = await dispatch(
+        listAssetBeds({
+          facility: props.consultationData.facility as any,
+          bed: props.consultationData.current_bed?.bed_object.id,
+        })
+      );
       const assetBeds = assetBedRes?.data?.results as AssetBedModel[];
 
       const monitorBedData = assetBeds?.find(
         (i) => i.asset_object?.asset_class === AssetClass.HL7MONITOR
       );
+
       setMonitorBedData(monitorBedData);
-      const assetDataForMonitor = monitorBedData?.asset_object;
-      const hl7Meta = assetDataForMonitor?.meta;
-      const hl7Middleware = hl7Meta?.middleware_hostname || middleware_address;
-      if (hl7Middleware && hl7Meta?.local_ip_address) {
+      if (monitorBedData?.asset_object) {
         setHL7SocketUrl(
-          `wss://${hl7Middleware}/observations/${hl7Meta.local_ip_address}`
+          getVitalsMonitorSocketUrl(monitorBedData?.asset_object)
         );
       }
 
@@ -71,6 +64,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
         props.consultationData?.current_bed?.assets_objects?.find(
           (i) => i.asset_class === AssetClass.VENTILATOR
         );
+
       let ventilatorBedData;
       if (consultationBedVentilator) {
         ventilatorBedData = {
@@ -82,22 +76,12 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
           (i) => i.asset_object.asset_class === AssetClass.VENTILATOR
         );
       }
-      setVentilatorBedData(ventilatorBedData);
-      const ventilatorMeta = ventilatorBedData?.asset_object?.meta;
-      const ventilatorMiddleware =
-        ventilatorMeta?.middleware_hostname || middleware_address;
-      if (ventilatorMiddleware && ventilatorMeta?.local_ip_address) {
-        setVentilatorSocketUrl(
-          `wss://${ventilatorMiddleware}/observations/${ventilatorMeta?.local_ip_address}`
-        );
-      }
 
-      if (
-        !(hl7Middleware && hl7Meta?.local_ip_address) &&
-        !(ventilatorMiddleware && ventilatorMeta?.local_ip_address)
-      ) {
-        setHL7SocketUrl(undefined);
-        setVentilatorSocketUrl(undefined);
+      setVentilatorBedData(ventilatorBedData);
+      if (ventilatorBedData?.asset_object) {
+        setVentilatorSocketUrl(
+          getVitalsMonitorSocketUrl(ventilatorBedData?.asset_object)
+        );
       }
     };
 
@@ -113,6 +97,10 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             <div className="mx-auto flex w-full flex-col justify-between gap-1 rounded bg-[#020617] lg:w-auto lg:min-w-[1280px] lg:flex-row">
               <div className="min-h-[400px] flex-1">
                 <HL7PatientVitalsMonitor
+                  patientCurrentBedAssignmentDate={
+                    props.patientData?.last_consultation?.current_bed
+                      ?.start_date
+                  }
                   patientAssetBed={{
                     asset: monitorBedData?.asset_object as AssetData,
                     bed: monitorBedData?.bed_object as BedModel,
@@ -150,6 +138,10 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         <div className="min-h-[400px] flex-1">
                           <HL7PatientVitalsMonitor
                             key={`hl7-${hl7SocketUrl}-${vitals.hash}`}
+                            patientCurrentBedAssignmentDate={
+                              props.patientData?.last_consultation?.current_bed
+                                ?.start_date
+                            }
                             patientAssetBed={{
                               asset: monitorBedData?.asset_object as AssetData,
                               bed: monitorBedData?.bed_object as BedModel,
@@ -184,7 +176,8 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             {props.consultationData.discharge_date && (
               <div
                 className={`gap-4 overflow-hidden rounded-lg bg-white shadow ${
-                  props.consultationData.discharge_reason === "REC" &&
+                  props.consultationData.new_discharge_reason ===
+                    DISCHARGE_REASONS.find((i) => i.text == "Recovered")?.id &&
                   "lg:col-span-2"
                 }`}
               >
@@ -198,11 +191,13 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                       <span className="font-semibold">
                         {DISCHARGE_REASONS.find(
                           (d) =>
-                            d.id === props.consultationData.discharge_reason
+                            d.id === props.consultationData.new_discharge_reason
                         )?.text ?? "--"}
                       </span>
                     </div>
-                    {props.consultationData.discharge_reason === "REF" && (
+                    {props.consultationData.new_discharge_reason ===
+                      DISCHARGE_REASONS.find((i) => i.text == "Referred")
+                        ?.id && (
                       <div>
                         Referred Facility {" - "}
                         <span className="font-semibold">
@@ -212,7 +207,9 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         </span>
                       </div>
                     )}
-                    {props.consultationData.discharge_reason === "REC" && (
+                    {props.consultationData.new_discharge_reason ===
+                      DISCHARGE_REASONS.find((i) => i.text == "Recovered")
+                        ?.id && (
                       <div className="grid gap-4">
                         <div>
                           Discharge Date {" - "}
@@ -221,7 +218,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                               ? formatDate(
                                   props.consultationData.discharge_date
                                 )
-                              : "--/--/----"}
+                              : "--/--/---- --:-- --"}
                           </span>
                         </div>
                         <div>
@@ -232,7 +229,6 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         </div>
                         <div className="overflow-x-auto overflow-y-hidden">
                           <PrescriptionsTable
-                            consultation_id={props.consultationData.id ?? ""}
                             is_prn={false}
                             readonly
                             prescription_type="DISCHARGE"
@@ -241,7 +237,6 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         <hr className="my-2 border border-gray-300"></hr>
                         <div className="overflow-x-auto overflow-y-hidden">
                           <PrescriptionsTable
-                            consultation_id={props.consultationData.id ?? ""}
                             is_prn
                             readonly
                             prescription_type="DISCHARGE"
@@ -249,7 +244,9 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         </div>
                       </div>
                     )}
-                    {props.consultationData.discharge_reason === "EXP" && (
+                    {props.consultationData.new_discharge_reason ===
+                      DISCHARGE_REASONS.find((i) => i.text == "Expired")
+                        ?.id && (
                       <div className="grid gap-4">
                         <div>
                           Date of Death {" - "}
@@ -276,18 +273,18 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         </div>
                       </div>
                     )}
-                    {["REF", "LAMA"].includes(
-                      props.consultationData.discharge_reason ?? ""
+                    {[2, 4].includes(
+                      props.consultationData.new_discharge_reason ?? 0
                     ) && (
                       <div className="grid gap-4">
                         <div>
                           Discharge Date {" - "}
                           <span className="font-semibold">
                             {props.consultationData.discharge_date
-                              ? formatDate(
+                              ? formatDateTime(
                                   props.consultationData.discharge_date
                                 )
-                              : "--/--/----"}
+                              : "--/--/---- --:-- --"}
                           </span>
                         </div>
                         <div>
@@ -662,32 +659,8 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             </div>
           </div>
         </div>
-        <div className="w-full pl-4 xl:w-1/3">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-            <PageTitle title="Update Log" hideBack breadcrumbs={false} />
-            <div className="mb-[2rem] pl-[1.5rem] md:mb-[0.125rem]">
-              <input
-                className="relative float-left ml-[-1.5rem] mr-[6px] mt-[0.15rem] h-[1.125rem] w-[1.125rem] appearance-none rounded-[0.25rem] border-[0.125rem] border-solid border-[rgba(0,0,0,0.25)] bg-white outline-none before:pointer-events-none before:absolute before:h-[0.875rem] before:w-[0.875rem] before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:shadow-[0px_0px_0px_13px_transparent] before:content-[''] checked:border-primary checked:bg-primary checked:before:opacity-[0.16] checked:after:absolute checked:after:-mt-px checked:after:ml-[0.25rem] checked:after:block checked:after:h-[0.8125rem] checked:after:w-[0.375rem] checked:after:rotate-45 checked:after:border-[0.125rem] checked:after:border-l-0 checked:after:border-t-0 checked:after:border-solid checked:after:border-white checked:after:bg-transparent checked:after:content-[''] hover:cursor-pointer hover:before:opacity-[0.04] hover:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:shadow-none focus:transition-[border-color_0.2s] focus:before:scale-100 focus:before:opacity-[0.12] focus:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:before:transition-[box-shadow_0.2s,transform_0.2s] focus:after:absolute focus:after:z-[1] focus:after:block focus:after:h-[0.875rem] focus:after:w-[0.875rem] focus:after:rounded-[0.125rem] focus:after:bg-white focus:after:content-[''] checked:focus:border-primary checked:focus:bg-primary checked:focus:before:scale-100 checked:focus:before:shadow-[0px_0px_0px_13px_#3b71ca] checked:focus:before:transition-[box-shadow_0.2s,transform_0.2s] checked:focus:after:-mt-px checked:focus:after:ml-[0.25rem] checked:focus:after:h-[0.8125rem] checked:focus:after:w-[0.375rem] checked:focus:after:rotate-45 checked:focus:after:rounded-none checked:focus:after:border-[0.125rem] checked:focus:after:border-l-0 checked:focus:after:border-t-0 checked:focus:after:border-solid checked:focus:after:border-white checked:focus:after:bg-transparent"
-                type="checkbox"
-                id="automated-rounds-visible-checkbox"
-                checked={showAutomatedRounds}
-                onChange={() => setShowAutomatedRounds((s) => !s)}
-              />
-              <label
-                className="inline-block pl-[0.15rem] hover:cursor-pointer"
-                htmlFor="automated-rounds-visible-checkbox"
-              >
-                Show Automated Rounds
-              </label>
-            </div>
-          </div>
-          <DailyRoundsList
-            facilityId={props.facilityId}
-            patientId={props.patientId}
-            consultationId={props.consultationId}
-            consultationData={props.consultationData}
-            showAutomatedRounds={showAutomatedRounds}
-          />
+        <div className="w-full pl-0 md:pl-4 xl:w-1/3">
+          <DailyRoundsList consultation={props.consultationData} />
         </div>
       </div>
     </div>

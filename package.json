@@ -69,11 +69,12 @@
     "dayjs": "^1.11.9",
     "echarts": "^5.4.2",
     "echarts-for-react": "^3.0.2",
+    "eslint-mdx": "^2.2.0",
     "events": "^3.3.0",
     "hi-profiles": "^1.0.6",
     "i18next": "^23.2.7",
     "i18next-browser-languagedetector": "^7.1.0",
-    "lodash": "^4.17.21",
+    "lodash-es": "^4.17.21",
     "postcss-loader": "^7.3.3",
     "qrcode.react": "^3.1.0",
     "raviger": "^4.1.2",
@@ -86,8 +87,9 @@
     "react-dom": "18.2.0",
     "react-google-recaptcha": "^3.1.0",
     "react-i18next": "^13.0.1",
+    "react-infinite-scroll-component": "^6.1.0",
     "react-markdown": "^8.0.7",
-    "react-player": "^2.12.0",
+    "react-player": "^2.13.0",
     "react-qr-reader": "^2.2.1",
     "react-redux": "^8.1.1",
     "react-transition-group": "^4.4.5",
@@ -98,7 +100,7 @@
     "rehype-raw": "^6.1.1",
     "rescript-webapi": "^0.8.0",
     "use-keyboard-shortcut": "^1.1.6",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@storybook/addon-essentials": "^7.0.26",
@@ -114,7 +116,7 @@
     "@types/cypress": "^1.1.3",
     "@types/echarts": "^4.9.18",
     "@types/google.maps": "^3.53.4",
-    "@types/lodash": "^4.14.195",
+    "@types/lodash-es": "^4.17.9",
     "@types/lodash.get": "^4.4.7",
     "@types/node": "^20.4.0",
     "@types/prop-types": "*",
@@ -130,7 +132,7 @@
     "@typescript-eslint/parser": "^5.61.0",
     "@vitejs/plugin-react-swc": "^3.3.2",
     "autoprefixer": "^10.4.14",
-    "cypress": "^13.1.0",
+    "cypress": "^13.5.0",
     "cypress-localstorage-commands": "^2.2.3",
     "eslint": "^8.44.0",
     "eslint-config-prettier": "^8.8.0",
@@ -138,6 +140,7 @@
     "eslint-plugin-i18next": "^6.0.3",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-jsx-a11y": "^6.7.1",
+    "eslint-plugin-mdx": "^2.2.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-only-warn": "^1.1.0",
     "eslint-plugin-prettier": "^4.2.1",
@@ -181,21 +184,6 @@
       "prettier --write --ignore-unknown",
       "eslint --fix",
       "git update-index --again"
-    ]
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app"
-    ],
-    "overrides": [
-      {
-        "files": [
-          "**/*.stories.*"
-        ],
-        "rules": {
-          "import/no-anonymous-default-export": "off"
-        }
-      }
     ]
   },
   "engines": {

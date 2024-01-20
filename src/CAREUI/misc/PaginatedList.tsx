@@ -7,6 +7,7 @@ import ButtonV2, {
 import CareIcon from "../icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import Pagination from "../../Components/Common/Pagination";
+import Timeline from "../display/Timeline";
 
 const DEFAULT_PER_PAGE_LIMIT = 14;
 
@@ -24,16 +25,19 @@ function useContextualized<TItem>() {
   const ctx = useContext(context);
 
   if (ctx === null) {
-    throw new Error("PaginatedList must be used within a PaginatedList");
+    throw new Error("Component must be used within a PaginatedList");
   }
 
   return ctx as PaginatedListContext<TItem>;
 }
 
-interface Props<TItem> extends QueryOptions {
+interface Props<TItem> extends QueryOptions<PaginatedResponse<TItem>> {
   route: QueryRoute<PaginatedResponse<TItem>>;
   perPage?: number;
-  children: (ctx: PaginatedListContext<TItem>) => JSX.Element | JSX.Element[];
+  children: (
+    ctx: PaginatedListContext<TItem>,
+    query: ReturnType<typeof useQuery<PaginatedResponse<TItem>>>
+  ) => JSX.Element | JSX.Element[];
 }
 
 export default function PaginatedList<TItem extends object>({
@@ -42,11 +46,15 @@ export default function PaginatedList<TItem extends object>({
   perPage = DEFAULT_PER_PAGE_LIMIT,
   ...queryOptions
 }: Props<TItem>) {
+  const [currentPage, setPage] = useState(1);
   const query = useQuery(route, {
     ...queryOptions,
-    query: { ...queryOptions.query, limit: perPage },
+    query: {
+      ...queryOptions.query,
+      limit: perPage,
+      offset: (currentPage - 1) * perPage,
+    },
   });
-  const [currentPage, setPage] = useState(1);
 
   const items = query.data?.results ?? [];
 
@@ -55,7 +63,7 @@ export default function PaginatedList<TItem extends object>({
       value={{ ...query, items, perPage, currentPage, setPage }}
     >
       <context.Consumer>
-        {(ctx) => children(ctx as PaginatedListContext<TItem>)}
+        {(ctx) => children(ctx as PaginatedListContext<TItem>, query)}
       </context.Consumer>
     </context.Provider>
   );
@@ -114,7 +122,7 @@ PaginatedList.Refresh = Refresh;
 
 interface ItemsProps<TItem> {
   className?: string;
-  children: (item: TItem) => JSX.Element | JSX.Element[];
+  children: (item: TItem, items: TItem[]) => JSX.Element | JSX.Element[];
   shimmer?: JSX.Element;
   shimmerCount?: number;
 }
@@ -122,20 +130,26 @@ interface ItemsProps<TItem> {
 const Items = <TItem extends object>(props: ItemsProps<TItem>) => {
   const { loading, items } = useContextualized<TItem>();
 
+  if (loading || items.length === 0) {
+    return null;
+  }
+
   return (
-    <ul className={props.className}>
-      {loading && props.shimmer
-        ? Array.from({ length: props.shimmerCount ?? 8 }).map((_, i) => (
-            <li key={i} className="w-full">
-              {props.shimmer}
-            </li>
-          ))
-        : items.map((item, index) => (
-            <li key={index} className="w-full">
-              {props.children(item)}
-            </li>
-          ))}
-    </ul>
+    <Timeline className="rounded-lg bg-white p-2 shadow" name="log update">
+      <ul className={props.className}>
+        {loading && props.shimmer
+          ? Array.from({ length: props.shimmerCount ?? 8 }).map((_, i) => (
+              <li key={i} className="w-full">
+                {props.shimmer}
+              </li>
+            ))
+          : items.map((item, index, items) => (
+              <li key={index} className="w-full">
+                {props.children(item, items)}
+              </li>
+            ))}
+      </ul>
+    </Timeline>
   );
 };
 
@@ -146,8 +160,16 @@ interface PaginatorProps {
   hideIfSinglePage?: boolean;
 }
 
-const Paginator = ({ className, hideIfSinglePage }: PaginatorProps) => {
+const Paginator = <TItem extends object>({
+  className,
+  hideIfSinglePage,
+}: PaginatorProps) => {
   const { data, perPage, currentPage, setPage } = useContextualized<object>();
+  const { loading } = useContextualized<TItem>();
+
+  if (loading) {
+    return null;
+  }
 
   if (hideIfSinglePage && (data?.count ?? 0) <= perPage) {
     return null;

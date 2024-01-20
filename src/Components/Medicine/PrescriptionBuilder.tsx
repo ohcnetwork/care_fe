@@ -1,56 +1,49 @@
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NormalPrescription, Prescription, PRNPrescription } from "./models";
 import DialogModal from "../Common/Dialog";
 import CreatePrescriptionForm from "./CreatePrescriptionForm";
 import PrescriptionDetailCard from "./PrescriptionDetailCard";
-import { PrescriptionActions } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
 import DiscontinuePrescription from "./DiscontinuePrescription";
 import AdministerMedicine from "./AdministerMedicine";
 import { useTranslation } from "react-i18next";
+import useQuery from "../../Utils/request/useQuery";
+import MedicineRoutes from "./routes";
+import useSlug from "../../Common/hooks/useSlug";
 
 interface Props {
   prescription_type?: Prescription["prescription_type"];
-  actions: ReturnType<typeof PrescriptionActions>;
   is_prn?: boolean;
   disabled?: boolean;
 }
 
 export default function PrescriptionBuilder({
   prescription_type,
-  actions,
   is_prn = false,
   disabled,
 }: Props) {
   const { t } = useTranslation();
-  const dispatch = useDispatch<any>();
-
-  const [prescriptions, setPrescriptions] = useState<Prescription[]>();
+  const consultation = useSlug("consultation");
   const [showCreate, setShowCreate] = useState(false);
   const [showDiscontinueFor, setShowDiscontinueFor] = useState<Prescription>();
   const [showAdministerFor, setShowAdministerFor] = useState<Prescription>();
 
-  const fetchPrescriptions = useCallback(() => {
-    dispatch(actions.list({ is_prn, prescription_type })).then((res: any) =>
-      setPrescriptions(res.data.results)
-    );
-  }, [dispatch, is_prn]);
-
-  useEffect(() => {
-    fetchPrescriptions();
-  }, []);
+  const { data, refetch } = useQuery(MedicineRoutes.listPrescriptions, {
+    pathParams: { consultation },
+    query: { is_prn, prescription_type, limit: 100 },
+  });
 
   return (
     <div>
       {showDiscontinueFor && (
         <DiscontinuePrescription
           prescription={showDiscontinueFor}
-          actions={actions.prescription(showDiscontinueFor?.id ?? "")}
           onClose={(success) => {
             setShowDiscontinueFor(undefined);
-            if (success) fetchPrescriptions();
+            if (success) {
+              refetch();
+            }
           }}
           key={showDiscontinueFor.id}
         />
@@ -58,20 +51,20 @@ export default function PrescriptionBuilder({
       {showAdministerFor && (
         <AdministerMedicine
           prescription={showAdministerFor}
-          actions={actions.prescription(showAdministerFor?.id ?? "")}
           onClose={(success) => {
             setShowAdministerFor(undefined);
-            if (success) fetchPrescriptions();
+            if (success) {
+              refetch();
+            }
           }}
           key={showAdministerFor.id}
         />
       )}
       <div className="flex flex-col gap-3">
-        {prescriptions?.map((obj, index) => (
+        {data?.results.map((obj, index) => (
           <PrescriptionDetailCard
             key={index}
             prescription={obj}
-            actions={actions.prescription(obj?.id ?? "")}
             onDiscontinueClick={() => setShowDiscontinueFor(obj)}
             onAdministerClick={() => setShowAdministerFor(obj)}
             readonly={disabled}
@@ -114,10 +107,9 @@ export default function PrescriptionBuilder({
                 prescription_type,
               } as Prescription
             }
-            create={actions.create}
             onDone={() => {
               setShowCreate(false);
-              fetchPrescriptions();
+              refetch();
             }}
           />
         </DialogModal>

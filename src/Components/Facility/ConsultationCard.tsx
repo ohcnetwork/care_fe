@@ -63,14 +63,14 @@ export const ConsultationCard = (props: ConsultationProps) => {
             </div>
           </div>
         )}
-        {itemData.admitted && itemData.admission_date && (
+        {itemData.admitted && itemData.encounter_date && (
           <div className="sm:col-span-1">
             <div className="sm:col-span-1">
               <div className="text-sm font-semibold leading-5 text-zinc-400">
                 Admitted on
               </div>
               <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
-                {formatDateTime(itemData.admission_date)}
+                {formatDateTime(itemData.encounter_date)}
                 {itemData.is_readmission && (
                   <Chip
                     size="small"
@@ -112,25 +112,30 @@ export const ConsultationCard = (props: ConsultationProps) => {
       <div className="mt-8 flex flex-col">
         {
           <div className="flex flex-col items-center text-sm text-gray-700 md:flex-row">
-            Created:{" "}
-            <RelativeDateUserMention
-              tooltipPosition="right"
-              actionDate={itemData.created_date}
-              user={itemData.created_by}
-            />
+            Created :{" "}
+            <div className=" ml-1 text-black">
+              <RelativeDateUserMention
+                tooltipPosition="right"
+                actionDate={itemData.created_date}
+                user={itemData.created_by}
+              />
+            </div>
           </div>
         }
         <div className="flex flex-col items-center text-sm text-gray-700 md:flex-row">
-          Last Modified:{" "}
-          <RelativeDateUserMention
-            tooltipPosition="right"
-            actionDate={itemData.modified_date}
-            user={itemData.last_edited_by}
-          />
+          Last Modified :{" "}
+          <div className=" ml-1 text-black">
+            <RelativeDateUserMention
+              tooltipPosition="right"
+              actionDate={itemData.modified_date}
+              user={itemData.last_edited_by}
+            />
+          </div>
         </div>
       </div>
       <div className="mt-4 flex w-full flex-col justify-between gap-1 md:flex-row">
         <ButtonV2
+          id="view_consulation_updates"
           className="h-auto whitespace-pre-wrap border border-gray-500 bg-white text-black hover:bg-gray-300"
           onClick={() =>
             navigate(

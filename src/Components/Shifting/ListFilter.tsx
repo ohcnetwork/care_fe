@@ -4,12 +4,12 @@ import {
   SHIFTING_FILTER_ORDER,
 } from "../../Common/constants";
 import { DateRange } from "../Common/DateRangeInputV2";
-import { useEffect, useState } from "react";
+
 import {
   SHIFTING_CHOICES_PEACETIME,
   SHIFTING_CHOICES_WARTIME,
 } from "../../Common/constants";
-import { getAnyFacility, getUserList } from "../../Redux/actions";
+
 import CircularProgress from "../Common/components/CircularProgress";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
@@ -18,14 +18,15 @@ import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { navigate } from "raviger";
 import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
+
 import useMergeState from "../../Common/hooks/useMergeState";
 import { useTranslation } from "react-i18next";
 import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
 import { dateQueryString, parsePhoneNumber } from "../../Utils/utils";
 import dayjs from "dayjs";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 
 const clearFilterState = {
   origin_facility: "",
@@ -56,10 +57,8 @@ const getDate = (value: any) =>
 
 export default function ListFilter(props: any) {
   const { kasp_enabled, kasp_string, wartime_shifting } = useConfig();
-  const { filter, onChange, closeFilter } = props;
-  const [isOriginLoading, setOriginLoading] = useState(false);
-  const [isShiftingLoading, setShiftingLoading] = useState(false);
-  const [isAssignedLoading, setAssignedLoading] = useState(false);
+  const { filter, onChange, closeFilter, removeFilters } = props;
+
   const { t } = useTranslation();
 
   const shiftStatusOptions = (
@@ -86,76 +85,60 @@ export default function ListFilter(props: any) {
     assigned_user_ref: null,
     assigned_to: filter.assigned_to || "",
     disease_status: filter.disease_status || "",
+
     is_antenatal: filter.is_antenatal || "",
     breathlessness_level: filter.breathlessness_level || "",
   });
-  const dispatch: any = useDispatch();
 
-  useEffect(() => {
-    async function fetchData() {
-      if (filter.origin_facility) {
-        setOriginLoading(true);
-        const res = await dispatch(
-          getAnyFacility(filter.origin_facility, "origin_facility")
-        );
-        if (res && res.data) {
-          setFilterState({ origin_facility_ref: res.data });
-        }
-        setOriginLoading(false);
+  const { loading: isOriginLoading } = useQuery(routes.getAnyFacility, {
+    prefetch: filter.origin_facility ? true : false,
+    pathParams: { id: filter.origin_facility },
+    onResponse: ({ res, data }) => {
+      if (res && data) {
+        setFilterState({
+          origin_facility_ref: filter.origin_facility ? "" : data,
+        });
       }
-    }
-    fetchData();
-  }, [dispatch]);
+    },
+  });
 
-  useEffect(() => {
-    async function fetchData() {
-      if (filter.shifting_approving_facility) {
-        setShiftingLoading(true);
-        const res = await dispatch(
-          getAnyFacility(
-            filter.shifting_approving_facility,
-            "shifting_approving_facility"
-          )
-        );
-        if (res && res.data) {
-          setFilterState({ shifting_approving_facility_ref: res.data });
-        }
-        setShiftingLoading(false);
+  const { loading: isShiftingLoading } = useQuery(routes.getAnyFacility, {
+    prefetch: filter.shifting_approving_facility ? true : false,
+    pathParams: { id: filter.shifting_approving_facility },
+    onResponse: ({ res, data }) => {
+      if (res && data) {
+        setFilterState({
+          shifting_approving_facility_ref: filter.shifting_approving_facility
+            ? ""
+            : data,
+        });
       }
-    }
-    fetchData();
-  }, [dispatch]);
+    },
+  });
 
-  useEffect(() => {
-    async function fetchData() {
-      if (filter.assigned_facility) {
-        setAssignedLoading(true);
-        const res = await dispatch(
-          getAnyFacility(filter.assigned_facility, "assigned_facility")
-        );
-        if (res && res.data) {
-          setFilterState({ assigned_facility_ref: res.data });
-        }
-        setAssignedLoading(false);
+  const { loading: isAssignedLoading } = useQuery(routes.getAnyFacility, {
+    prefetch: filter.assigned_facility ? true : false,
+    pathParams: { id: filter.assigned_facility },
+    onResponse: ({ res, data }) => {
+      if (res && data) {
+        setFilterState({
+          assigned_facility_ref: filter.assigned_facility ? "" : data,
+        });
       }
-    }
-    fetchData();
-  }, [dispatch]);
+    },
+  });
 
-  useEffect(() => {
-    async function fetchData() {
-      if (filter.assigned_to) {
-        const res = await dispatch(getUserList({ id: filter.assigned_to }));
-        if (res && res.data && res.data.count) {
-          setFilterState({
-            ...filterState,
-            assigned_user_ref: res.data.results[0],
-          });
-        }
+  useQuery(routes.userList, {
+    query: { id: filter.assigned_to },
+    prefetch: filter.assigned_to ? true : false,
+    onResponse: ({ res, data }) => {
+      if (res?.ok && data?.count) {
+        setFilterState({
+          assigned_user_ref: filter.assigned_to ? "" : data.results[0],
+        });
       }
-    }
-    fetchData();
-  }, [dispatch]);
+    },
+  });
 
   const setFacility = (selected: any, name: string) => {
     const filterData: any = { ...filterState };
@@ -237,8 +220,7 @@ export default function ListFilter(props: any) {
       advancedFilter={props}
       onApply={applyFilter}
       onClear={() => {
-        navigate("/shifting");
-        setFilterState(clearFilterState);
+        removeFilters(Object.keys(clearFilterState));
         closeFilter();
       }}
     >
@@ -426,7 +408,6 @@ export default function ListFilter(props: any) {
         name="patient_phone_number"
         value={filterState.patient_phone_number}
         onChange={handleFormFieldChange}
-        errorClassName="hidden"
         types={["mobile", "landline"]}
       />
       <DateRangeFormField

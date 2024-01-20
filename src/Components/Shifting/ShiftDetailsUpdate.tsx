@@ -2,6 +2,7 @@ import * as Notification from "../../Utils/Notifications.js";
 
 import {
   BREATHLESSNESS_LEVEL,
+  DISCHARGE_REASONS,
   FACILITY_TYPES,
   PATIENT_CATEGORIES,
   SHIFTING_CHOICES_PEACETIME,
@@ -9,10 +10,9 @@ import {
   SHIFTING_VEHICLE_CHOICES,
 } from "../../Common/constants";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import { getShiftDetails, getUserList, updateShift } from "../../Redux/actions";
+
 import { navigate, useQueryParams } from "raviger";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { lazy, useCallback, useEffect, useReducer, useState } from "react";
+import { lazy, useReducer, useState } from "react";
 import { ConsultationModel } from "../Facility/models.js";
 import DischargeModal from "../Facility/DischargeModal.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -26,7 +26,7 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { parsePhoneNumber } from "../../Utils/utils.js";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
+
 import { useTranslation } from "react-i18next";
 import CircularProgress from "../Common/components/CircularProgress.js";
 import Card from "../../CAREUI/display/Card";
@@ -34,6 +34,10 @@ import RadioFormField from "../Form/FormFields/RadioFormField.js";
 import Page from "../Common/components/Page.js";
 import UserAutocompleteFormField from "../Common/UserAutocompleteFormField.js";
 import { UserModel } from "../Users/models.js";
+import useQuery from "../../Utils/request/useQuery.js";
+import routes from "../../Redux/api.js";
+import { IShift } from "./models.js";
+import request from "../../Utils/request/request.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -43,12 +47,14 @@ interface patientShiftProps {
 
 export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   const { goBack } = useAppHistory();
+
   const { kasp_full_string, kasp_enabled, wartime_shifting } = useConfig();
-  const dispatchAction: any = useDispatch();
+
   const [qParams, _] = useQueryParams();
+
   const [isLoading, setIsLoading] = useState(true);
   const [assignedUser, SetAssignedUser] = useState<UserModel>();
-  const [assignedUserLoading, setAssignedUserLoading] = useState(false);
+
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
     {} as ConsultationModel
   );
@@ -126,23 +132,13 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
 
   const [state, dispatch] = useReducer(shiftFormReducer, initialState);
 
-  useEffect(() => {
-    async function fetchData() {
-      if (state.form.assigned_to) {
-        setAssignedUserLoading(true);
-
-        const res = await dispatchAction(
-          getUserList({ id: state.form.assigned_to })
-        );
-
-        if (res && res.data && res.data.count)
-          SetAssignedUser(res.data.results[0]);
-
-        setAssignedUserLoading(false);
-      }
-    }
-    fetchData();
-  }, [dispatchAction, state.form.assigned_to]);
+  const { loading: assignedUserLoading } = useQuery(routes.userList, {
+    query: { id: state.form.assigned_to },
+    prefetch: state.form.assigned_to ? true : false,
+    onResponse: ({ res, data }) => {
+      if (res?.ok && data?.count) SetAssignedUser(data.results[0]);
+    },
+  });
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -196,8 +192,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
       }
 
       setIsLoading(true);
-
-      const data: any = {
+      const data: Partial<IShift> = {
         origin_facility: state.form.origin_facility_object?.id,
         shifting_approving_facility:
           state.form?.shifting_approving_facility_object?.id,
@@ -233,11 +228,13 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         data["status"] = state.form.status;
       }
 
-      const res = await dispatchAction(updateShift(props.id, data));
+      const { res, data: shiftData } = await request(routes.updateShift, {
+        pathParams: { id: props.id },
+        body: data,
+      });
       setIsLoading(false);
-
-      if (res && res.status == 200 && res.data) {
-        dispatch({ type: "set_form", form: res.data });
+      if (res?.ok && shiftData) {
+        dispatch({ type: "set_form", form: shiftData });
         Notification.Success({
           msg: t("shift_request_updated_successfully"),
         });
@@ -249,41 +246,29 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     }
   };
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatchAction(getShiftDetails({ id: props.id }));
-      if (!status.aborted) {
-        if (res && res.data) {
-          const d = res.data;
-          setConsultationData(d.patient.last_consultation);
-          if (d.assigned_facility_external)
-            d["assigned_facility_object"] = {
-              id: -1,
-              name: res.data.assigned_facility_external,
-            };
-          d["initial_status"] = res.data.status;
-          d["status"] = qParams.status || res.data.status;
-          const patient_category =
-            d.patient.last_consultation?.last_daily_round?.patient_category ??
-            d.patient.last_consultation?.category;
-          d["patient_category"] = PATIENT_CATEGORIES.find(
-            (c) => c.text === patient_category
-          )?.id;
-          dispatch({ type: "set_form", form: d });
-        }
+  useQuery(routes.getShiftDetails, {
+    pathParams: { id: props.id },
+    onResponse: ({ res, data }) => {
+      if (res?.ok && data) {
+        const d = data;
+        setConsultationData(d.patient.last_consultation as ConsultationModel);
+        if (d.assigned_facility_external)
+          d["assigned_facility_object"] = {
+            id: -1,
+            name: String(data.assigned_facility_external),
+          };
+        d["initial_status"] = data.status;
+        d["status"] = qParams.status || data.status;
+        const patient_category =
+          d.patient.last_consultation?.last_daily_round?.patient_category ??
+          d.patient.last_consultation?.category;
+        d["patient_category"] =
+          PATIENT_CATEGORIES.find((c) => c.text === patient_category)?.id ?? "";
+        dispatch({ type: "set_form", form: d });
         setIsLoading(false);
       }
     },
-    [props.id, dispatchAction, qParams.status]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
-  );
+  });
 
   const vehicleOptions = SHIFTING_VEHICLE_CHOICES.map((obj) => obj.text);
   const facilityOptions = FACILITY_TYPES.map((obj) => obj.text);
@@ -298,7 +283,9 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         show={showDischargeModal}
         onClose={() => setShowDischargeModal(false)}
         consultationData={consultationData}
-        discharge_reason="EXP"
+        new_discharge_reason={
+          DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
+        }
         afterSubmit={() => {
           handleSubmit(true);
         }}

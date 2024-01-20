@@ -1,7 +1,11 @@
 import { navigate } from "raviger";
 import { lazy, useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { GENDER_TYPES, SAMPLE_TEST_STATUS } from "../../Common/constants";
+import {
+  DISCHARGE_REASONS,
+  GENDER_TYPES,
+  SAMPLE_TEST_STATUS,
+} from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   getConsultationList,
@@ -19,7 +23,12 @@ import { ConsultationModel } from "../Facility/models";
 import { PatientModel, SampleTestModel } from "./models";
 import { SampleTestCard } from "./SampleTestCard";
 import Chip from "../../CAREUI/display/Chip";
-import { classNames, formatAge, formatDateTime } from "../../Utils/utils";
+import {
+  classNames,
+  formatAge,
+  formatDate,
+  formatDateTime,
+} from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
@@ -32,6 +41,9 @@ import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
 import dayjs from "../../Utils/dayjs";
 import { triggerGoal } from "../../Integrations/Plausible";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import { InsuranceDetialsCard } from "./InsuranceDetailsCard";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -90,6 +102,13 @@ export const PatientHome = (props: any) => {
       );
     });
   };
+
+  const { data: insuranceDetials } = useQuery(routes.listHCXPolicies, {
+    query: {
+      patient: id,
+      limit: 1,
+    },
+  });
 
   const handleAssignedVolunteer = () => {
     dispatch(
@@ -301,20 +320,18 @@ export const PatientHome = (props: any) => {
     patientData.medical_history.length
   ) {
     const medHis = patientData.medical_history;
-    patientMedHis = medHis.map((item: any, idx: number) => (
-      <div className="sm:col-span-1" key={`med_his_${idx}`}>
-        {item?.disease !== "NO" && (
-          <>
-            <div className="overflow-x-scroll text-sm font-semibold leading-5 text-zinc-400">
-              {item.disease}
-            </div>
-            <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
-              {item.details}
-            </div>
-          </>
-        )}
-      </div>
-    ));
+    patientMedHis = medHis
+      .filter((item) => item.disease !== "NO")
+      .map((item, idx) => (
+        <div className="sm:col-span-1" key={`med_his_${idx}`}>
+          <div className="break-words text-sm font-semibold leading-5 text-zinc-400">
+            {item.disease}
+          </div>
+          <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
+            {item.details}
+          </div>
+        </div>
+      ));
   }
 
   let consultationList, sampleList;
@@ -375,8 +392,9 @@ export const PatientHome = (props: any) => {
   };
 
   const isPatientEligibleForNewConsultation = (patientData: PatientModel) => {
-    return !patientData.last_consultation ||
-      patientData.last_consultation?.discharge_date
+    return patientData.is_active &&
+      (!patientData?.last_consultation ||
+        patientData?.last_consultation?.discharge_date)
       ? true
       : false;
   };
@@ -457,7 +475,7 @@ export const PatientHome = (props: any) => {
             </div>
             <div className="mt-4 flex items-center">
               <ButtonV2
-                className="w-full"
+                className="mb-2 w-full"
                 disabled={!patientData.is_active}
                 onClick={() =>
                   navigate(
@@ -561,7 +579,7 @@ export const PatientHome = (props: any) => {
                     Date of Birth
                   </div>
                   <div className="mt-1 text-sm font-medium leading-5">
-                    {patientData?.date_of_birth}
+                    {formatDate(patientData?.date_of_birth)}
                   </div>
                 </div>
                 <div className="sm:col-span-1">
@@ -717,7 +735,7 @@ export const PatientHome = (props: any) => {
                   </div>
                 </div>
                 <div className="mt-2 flex justify-between rounded-sm bg-white p-2 px-4 text-center shadow">
-                  <div className="w-1/2 border-r-2 pb-1">
+                  <div className="w-1/2 border-r-2 pb-1 pr-2">
                     <div className="text-sm font-normal leading-5 text-gray-500">
                       Created
                     </div>
@@ -730,7 +748,7 @@ export const PatientHome = (props: any) => {
                       </div>
                     </div>
                   </div>
-                  <div className="w-1/2 pb-1">
+                  <div className="w-1/2 pb-1 pl-2">
                     <div className="text-sm font-normal leading-5 text-gray-500">
                       Last Edited
                     </div>
@@ -747,7 +765,8 @@ export const PatientHome = (props: any) => {
                 </div>
               </div>
               <div className="py-2">
-                {patientData.last_consultation?.discharge_reason === "EXP" && (
+                {patientData.last_consultation?.new_discharge_reason ===
+                  DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id && (
                   <div>
                     <ButtonV2
                       className="mt-6 w-full"
@@ -975,7 +994,7 @@ export const PatientHome = (props: any) => {
         </section>
 
         <section
-          className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-2"
+          className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-3"
           data-testid="patient-details"
         >
           <div className="w-full">
@@ -1110,6 +1129,14 @@ export const PatientHome = (props: any) => {
               </div>
             </div>
           </div>
+
+          <InsuranceDetialsCard
+            data={insuranceDetials?.results[0]}
+            showViewAllDetails={
+              insuranceDetials?.count !== undefined &&
+              insuranceDetials?.count > 1
+            }
+          />
         </section>
         <section className="mt-4 space-y-2 md:flex">
           <div className="hidden lg:block">

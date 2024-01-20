@@ -1,9 +1,5 @@
-import {
-  completeTransfer,
-  downloadShiftRequests,
-  listShiftRequests,
-} from "../../Redux/actions";
-import { lazy, useEffect, useState } from "react";
+import { downloadShiftRequests } from "../../Redux/actions";
+import { lazy, useState } from "react";
 
 import BadgesList from "./BadgesList";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -15,19 +11,23 @@ import SearchInput from "../Form/SearchInput";
 import { formatAge, formatDateTime } from "../../Utils/utils";
 import { formatFilter } from "./Commons";
 import { navigate } from "raviger";
+
 import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
+
 import useFilters from "../../Common/hooks/useFilters";
+
 import { useTranslation } from "react-i18next";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import dayjs from "../../Utils/dayjs";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ListView() {
-  const dispatch: any = useDispatch();
   const { wartime_shifting } = useConfig();
   const {
     qParams,
@@ -36,10 +36,8 @@ export default function ListView() {
     FilterBadges,
     advancedFilter,
     resultsPerPage,
-  } = useFilters({});
-  const [data, setData] = useState<any[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+  } = useFilters({ cacheBlacklist: ["patient_name"] });
+
   const [modalFor, setModalFor] = useState({
     externalId: undefined,
     loading: false,
@@ -47,62 +45,26 @@ export default function ListView() {
   const authUser = useAuthUser();
   const { t } = useTranslation();
 
-  const handleTransferComplete = (shift: any) => {
+  const handleTransferComplete = async (shift: any) => {
     setModalFor({ ...modalFor, loading: true });
-    dispatch(completeTransfer({ externalId: modalFor })).then(() => {
-      navigate(
-        `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`
-      );
+    await request(routes.completeTransfer, {
+      pathParams: { externalId: shift.external_id },
     });
+    navigate(
+      `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`
+    );
   };
 
-  const refreshList = () => {
-    fetchData();
-  };
-
-  const fetchData = () => {
-    setIsLoading(true);
-    dispatch(
-      listShiftRequests(
-        formatFilter({
-          ...qParams,
-          offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
-        }),
-        "shift-list-call"
-      )
-    ).then((res: any) => {
-      if (res && res.data) {
-        setData(res.data.results);
-        setTotalCount(res.data.count);
-      }
-      setIsLoading(false);
-    });
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [
-    qParams.status,
-    qParams.facility,
-    qParams.origin_facility,
-    qParams.shifting_approving_facility,
-    qParams.assigned_facility,
-    qParams.emergency,
-    qParams.is_up_shift,
-    qParams.patient_name,
-    qParams.created_date_before,
-    qParams.created_date_after,
-    qParams.modified_date_before,
-    qParams.modified_date_after,
-    qParams.patient_phone_number,
-    qParams.ordering,
-    qParams.is_kasp,
-    qParams.assigned_to,
-    qParams.disease_status,
-    qParams.is_antenatal,
-    qParams.breathlessness_level,
-    qParams.page,
-  ]);
+  const {
+    data: shiftData,
+    loading,
+    refetch: fetchData,
+  } = useQuery(routes.listShiftRequests, {
+    query: formatFilter({
+      ...qParams,
+      offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
+    }),
+  });
 
   const showShiftingCardList = (data: any) => {
     if (data && !data.length) {
@@ -312,9 +274,7 @@ export default function ListView() {
           <div className="flex w-full flex-col gap-2 lg:w-fit lg:flex-row lg:gap-4">
             <ButtonV2
               className="py-[11px]"
-              onClick={() =>
-                navigate("/shifting/board-view", { query: qParams })
-              }
+              onClick={() => navigate("/shifting/board", { query: qParams })}
             >
               <CareIcon className="care-l-list-ul rotate-90" />
               {t("board_view")}
@@ -329,14 +289,14 @@ export default function ListView() {
     >
       <BadgesList {...{ qParams, FilterBadges }} />
       <div>
-        {isLoading ? (
+        {loading ? (
           <Loading />
         ) : (
           <div>
             <div className="-mb-4 mr-2 mt-4 flex justify-end">
               <button
                 className="text-xs hover:text-blue-800"
-                onClick={refreshList}
+                onClick={() => fetchData()}
               >
                 <i className="fa fa-refresh mr-1" aria-hidden="true"></i>
                 {t("refresh_list")}
@@ -344,10 +304,10 @@ export default function ListView() {
             </div>
 
             <div className="mb-5 grid gap-x-6 md:grid-cols-2">
-              {showShiftingCardList(data)}
+              {showShiftingCardList(shiftData?.results || [])}
             </div>
             <div>
-              <Pagination totalCount={totalCount} />
+              <Pagination totalCount={shiftData?.count || 0} />
             </div>
           </div>
         )}

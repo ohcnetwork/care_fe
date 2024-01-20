@@ -16,10 +16,6 @@ let make = (
         NeurologicalMonitoring.consciousnessLevel(neurologicalMonitoring),
       ),
     )}
-    {renderOptionalDescription(
-      "Consciousness Level Reaction Description",
-      NeurologicalMonitoring.consciousnessLevelDetails(neurologicalMonitoring),
-    )}
     <div className="flex md:flex-row flex-col mt-2">
       <div className="px-4 py-2 border bg-gray-100 m-1 rounded-lg shadow md:w-1/2 w-full">
         {title("Left Pupil")}

@@ -1,27 +1,27 @@
 import { useEffect, useMemo, useState } from "react";
-import { PrescriptionActions } from "../../Redux/actions";
 import PrescriptionDetailCard from "./PrescriptionDetailCard";
 import { MedicineAdministrationRecord, Prescription } from "./models";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { useDispatch } from "react-redux";
 import { Error, Success } from "../../Utils/Notifications";
-import { formatDateTime } from "../../Utils/utils";
+import { classNames, formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import dayjs from "../../Utils/dayjs";
 import TextFormField from "../Form/FormFields/TextFormField";
+import request from "../../Utils/request/request";
+import MedicineRoutes from "./routes";
+import useSlug from "../../Common/hooks/useSlug";
 
 interface Props {
   prescriptions: Prescription[];
-  action: ReturnType<typeof PrescriptionActions>["prescription"];
   onDone: () => void;
 }
 
 export default function MedicineAdministration(props: Props) {
   const { t } = useTranslation();
-  const dispatch = useDispatch<any>();
+  const consultation = useSlug("consultation");
   const [shouldAdminister, setShouldAdminister] = useState<boolean[]>([]);
   const [notes, setNotes] = useState<MedicineAdministrationRecord["notes"][]>(
     []
@@ -46,34 +46,35 @@ export default function MedicineAdministration(props: Props) {
     );
   }, [props.prescriptions]);
 
-  const handleSubmit = () => {
-    const records: MedicineAdministrationRecord[] = [];
-    prescriptions.forEach((prescription, i) => {
-      if (shouldAdminister[i]) {
-        records.push({
-          prescription,
-          notes: notes[i],
-          administered_date: isCustomTime[i] ? customTime[i] : undefined,
-        });
-      }
-    });
+  const handleSubmit = async () => {
+    const administrations = prescriptions
+      .map((prescription, i) => ({
+        prescription,
+        notes: notes[i],
+        administered_date: isCustomTime[i] ? customTime[i] : undefined,
+      }))
+      .filter((_, i) => shouldAdminister[i]);
 
-    Promise.all(
-      records.map(async ({ prescription, ...record }) => {
-        const res = await dispatch(
-          props.action(prescription?.id ?? "").administer(record)
-        );
-        if (res.status !== 201) {
-          Error({ msg: t("medicines_administered_error") });
-        }
-      })
-    ).then(() => {
-      Success({ msg: t("medicines_administered") });
-      props.onDone();
-    });
+    const ok = await Promise.all(
+      administrations.map(({ prescription, ...body }) =>
+        request(MedicineRoutes.administerPrescription, {
+          pathParams: { consultation, external_id: prescription.id },
+          body,
+        }).then(({ res }) => !!res?.ok)
+      )
+    );
+
+    if (!ok) {
+      Error({ msg: t("medicines_administered_error") });
+      return;
+    }
+
+    Success({ msg: t("medicines_administered") });
+    props.onDone();
   };
 
   const selectedCount = shouldAdminister.filter(Boolean).length;
+  const is_prn = prescriptions.some((obj) => obj.is_prn);
 
   return (
     <div className="flex flex-col gap-3">
@@ -82,10 +83,14 @@ export default function MedicineAdministration(props: Props) {
           key={obj.id}
           prescription={obj}
           readonly
-          actions={props.action(obj?.id ?? "")}
           selected={shouldAdminister[index]}
         >
-          <div className="mt-4 flex w-full max-w-[600px] flex-col gap-2 border-t-2 border-dashed border-gray-500 py-2 pt-4 md:ml-4 md:mt-0 md:border-l-2 md:border-t-0 md:pl-4 md:pt-0">
+          <div
+            className={classNames(
+              "mt-4 flex w-full flex-col gap-2 border-t-2 border-dashed border-gray-500 py-2 pt-4 md:ml-4 md:mt-0 md:border-l-2 md:border-t-0 md:pl-4 md:pt-0",
+              is_prn ? "max-w-sm" : "max-w-[600px]"
+            )}
+          >
             <CheckBoxFormField
               name="should_administer"
               label={t("select_for_administration")}
@@ -108,7 +113,12 @@ export default function MedicineAdministration(props: Props) {
                   : t("never")}
               </span>
             </div>
-            <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
+            <div
+              className={classNames(
+                "flex gap-4",
+                is_prn ? "flex-wrap" : "flex-col lg:flex-row lg:gap-6"
+              )}
+            >
               <TextAreaFormField
                 label={t("administration_notes")}
                 className="w-full"

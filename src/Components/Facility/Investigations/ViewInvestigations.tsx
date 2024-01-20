@@ -4,6 +4,7 @@ import ReportTable from "./Reports/ReportTable";
 import { formatDateTime } from "../../../Utils/utils";
 import { InvestigationSessionType } from "./investigationsTab";
 import { lazy } from "react";
+
 const Loading = lazy(() => import("../../Common/Loading"));
 
 export default function ViewInvestigations(props: {
@@ -26,7 +27,9 @@ export default function ViewInvestigations(props: {
   return (
     <div className="mx-auto max-w-7xl">
       {isLoading ? (
-        <Loading />
+        <div className="min-h-screen">
+          <Loading />
+        </div>
       ) : (
         <div className="mt-4 space-y-2 ">
           {investigations.length > 0 && (

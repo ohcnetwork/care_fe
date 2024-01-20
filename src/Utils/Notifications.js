@@ -1,6 +1,6 @@
 import { alert, Stack, defaultModules } from "@pnotify/core";
 import * as PNotifyMobile from "@pnotify/mobile";
-import _ from "lodash";
+import _ from "lodash-es";
 
 defaultModules.set(PNotifyMobile, {});
 

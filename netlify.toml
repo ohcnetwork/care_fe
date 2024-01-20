@@ -21,6 +21,6 @@ status = 200
 [[headers]]
   for = "/*"
   [headers.values]
-  cache-control = '''
-  max-age=0,
-  no-store'''
+    cache-control = "max-age=0, no-store"
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"

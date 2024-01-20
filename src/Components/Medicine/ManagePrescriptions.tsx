@@ -1,17 +1,11 @@
 import { useTranslation } from "react-i18next";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import useAppHistory from "../../Common/hooks/useAppHistory";
-import { PrescriptionActions } from "../../Redux/actions";
 import ButtonV2 from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
 import PrescriptionBuilder from "./PrescriptionBuilder";
 
-interface Props {
-  consultationId: string;
-}
-
-export default function ManagePrescriptions({ consultationId }: Props) {
-  const actions = PrescriptionActions(consultationId);
+export default function ManagePrescriptions() {
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
 
@@ -23,13 +17,13 @@ export default function ManagePrescriptions({ consultationId }: Props) {
             <h3 className="mb-4 text-lg font-semibold">
               {t("prescription_medications")}
             </h3>
-            <PrescriptionBuilder actions={actions} />
+            <PrescriptionBuilder />
           </div>
           <div>
             <h3 className="mb-4 mt-8 text-lg font-semibold">
               {t("prn_prescriptions")}
             </h3>
-            <PrescriptionBuilder actions={actions} is_prn />
+            <PrescriptionBuilder is_prn />
           </div>
         </div>
         <div className="flex w-full flex-col-reverse gap-3 md:flex-row md:items-center">

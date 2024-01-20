@@ -8,11 +8,9 @@ import ClaimDetailCard from "../HCX/ClaimDetailCard";
 import { ConsultationModel } from "./models";
 import CreateClaimCard from "../HCX/CreateClaimCard";
 import { DISCHARGE_REASONS } from "../../Common/constants";
-import DateFormField from "../Form/FormFields/DateFormField";
 import DialogModal from "../Common/Dialog";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
-import { HCXActions, PrescriptionActions } from "../../Redux/actions";
+import { HCXActions } from "../../Redux/actions";
 import { HCXClaimModel } from "../HCX/models";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
@@ -28,7 +26,7 @@ import { FacilityModel } from "./models";
 import dayjs from "../../Utils/dayjs";
 
 interface PreDischargeFormInterface {
-  discharge_reason: string;
+  new_discharge_reason: number | null;
   discharge_notes: string;
   discharge_date?: string;
   death_datetime?: string;
@@ -42,7 +40,7 @@ interface IProps {
   onClose: () => void;
   consultationData: ConsultationModel;
   afterSubmit?: () => void;
-  discharge_reason?: string;
+  new_discharge_reason?: number | null;
   discharge_notes?: string;
   discharge_date?: string;
   death_datetime?: string;
@@ -52,11 +50,8 @@ const DischargeModal = ({
   show,
   onClose,
   consultationData,
-  afterSubmit = () => {
-    onClose();
-    window.location.reload();
-  },
-  discharge_reason = "",
+  afterSubmit,
+  new_discharge_reason = null,
   discharge_notes = "",
   discharge_date = dayjs().format("YYYY-MM-DDTHH:mm"),
   death_datetime = dayjs().format("YYYY-MM-DDTHH:mm"),
@@ -65,7 +60,7 @@ const DischargeModal = ({
   const dispatch: any = useDispatch();
   const [preDischargeForm, setPreDischargeForm] =
     useState<PreDischargeFormInterface>({
-      discharge_reason,
+      new_discharge_reason,
       discharge_notes,
       discharge_date,
       death_datetime,
@@ -115,17 +110,18 @@ const DischargeModal = ({
 
   const handlePatientDischarge = async (value: boolean) => {
     setIsSendingDischargeApi(true);
-    if (!preDischargeForm.discharge_reason) {
+    if (!preDischargeForm.new_discharge_reason) {
       setErrors({
         ...errors,
-        discharge_reason: "Please select a reason for discharge",
+        new_discharge_reason: "Please select a reason for discharge",
       });
       setIsSendingDischargeApi(false);
       return;
     }
 
     if (
-      preDischargeForm.discharge_reason == "EXP" &&
+      preDischargeForm.new_discharge_reason ==
+        DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id &&
       !preDischargeForm.discharge_notes.trim()
     ) {
       setErrors({
@@ -161,29 +157,13 @@ const DischargeModal = ({
 
     setIsSendingDischargeApi(false);
     if (dischargeResponse?.status === 200) {
-      // TODO: check this later
-      //   const dischargeData = Object.assign({}, patientData);
-      //   dischargeData["discharge"] = value;
-      //   setPatientData(dischargeData);
-
       Notification.Success({
         msg: "Patient Discharged Successfully",
       });
 
-      afterSubmit();
+      afterSubmit?.();
     }
   };
-
-  const handleDateChange = (e: FieldChangeEvent<Date>) => {
-    setPreDischargeForm((form) => {
-      return {
-        ...form,
-        discharge_date: e.value.toString(),
-      };
-    });
-  };
-
-  const prescriptionActions = PrescriptionActions(consultationData.id ?? "");
 
   const handleFacilitySelect = (selected: FacilityModel) => {
     setFacility(selected);
@@ -217,20 +197,21 @@ const DischargeModal = ({
           label="Reason"
           name="discharge_reason"
           id="discharge_reason"
-          value={preDischargeForm.discharge_reason}
-          disabled={!!discharge_reason}
+          value={preDischargeForm.new_discharge_reason}
+          disabled={!!new_discharge_reason}
           options={DISCHARGE_REASONS}
           optionValue={({ id }) => id}
           optionLabel={({ text }) => text}
           onChange={(e) =>
             setPreDischargeForm((prev) => ({
               ...prev,
-              discharge_reason: e.value,
+              new_discharge_reason: e.value,
             }))
           }
-          error={errors?.discharge_reason}
+          error={errors?.new_discharge_reason}
         />
-        {preDischargeForm.discharge_reason === "REF" && (
+        {preDischargeForm.new_discharge_reason ===
+          DISCHARGE_REASONS.find((i) => i.text == "Referred")?.id && (
           <>
             <FieldLabel>Referred to</FieldLabel>
             <FacilitySelect
@@ -238,7 +219,7 @@ const DischargeModal = ({
               setSelected={(selected) =>
                 handleFacilitySelect(selected as FacilityModel)
               }
-              selected={facility}
+              selected={facility ?? null}
               showAll
               freeText
               multiple={false}
@@ -248,13 +229,15 @@ const DischargeModal = ({
           </>
         )}
         <TextAreaFormField
-          required={preDischargeForm.discharge_reason == "EXP"}
+          required={
+            preDischargeForm.new_discharge_reason ==
+            DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
+          }
           label={
-            preDischargeForm.discharge_reason == "EXP"
-              ? "Cause of death"
-              : preDischargeForm.discharge_reason === "REC"
-              ? "Discharged Advice"
-              : "Notes"
+            {
+              "3": "Cause of death",
+              "1": "Discharged Advice",
+            }[preDischargeForm.new_discharge_reason ?? 0] ?? "Notes"
           }
           name="discharge_notes"
           value={preDischargeForm.discharge_notes}
@@ -266,92 +249,79 @@ const DischargeModal = ({
           }
           error={errors?.discharge_notes}
         />
-        {preDischargeForm.discharge_reason === "REC" && (
-          <div>
-            <DateFormField
-              position="LEFT"
-              label="Discharge Date"
-              name="discharge_date"
-              value={dayjs(preDischargeForm?.discharge_date).toDate()}
-              min={dayjs(
-                consultationData?.admission_date ??
-                  consultationData?.created_date
-              ).toDate()}
-              disableFuture={true}
-              required
-              onChange={handleDateChange}
-            />
+        <TextFormField
+          name={
+            preDischargeForm.new_discharge_reason ===
+            DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
+              ? "death_datetime"
+              : "discharge_date"
+          }
+          label={
+            preDischargeForm.new_discharge_reason ===
+            DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
+              ? "Date of Death"
+              : "Date and Time of Discharge"
+          }
+          type="datetime-local"
+          value={
+            preDischargeForm[
+              preDischargeForm.new_discharge_reason ===
+              DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
+                ? "death_datetime"
+                : "discharge_date"
+            ]
+          }
+          onChange={(e) => {
+            const updates: Record<string, string | undefined> = {
+              discharge_date: undefined,
+              death_datetime: undefined,
+            };
+            updates[e.name] = e.value;
+            setPreDischargeForm((form) => ({ ...form, ...updates }));
+          }}
+          required
+          min={dayjs(consultationData?.encounter_date).format(
+            "YYYY-MM-DDTHH:mm"
+          )}
+          max={dayjs().format("YYYY-MM-DDTHH:mm")}
+          error={
+            preDischargeForm.new_discharge_reason ===
+            DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
+              ? errors?.death_datetime
+              : errors?.discharge_date
+          }
+        />
 
+        {preDischargeForm.new_discharge_reason ===
+          DISCHARGE_REASONS.find((i) => i.text == "Recovered")?.id && (
+          <>
             <div className="mb-4">
               <FieldLabel>Discharge Prescription Medications</FieldLabel>
-              <PrescriptionBuilder
-                actions={prescriptionActions}
-                prescription_type="DISCHARGE"
-              />
+              <PrescriptionBuilder prescription_type="DISCHARGE" />
             </div>
             <div className="mb-4">
               <FieldLabel>Discharge PRN Prescriptions</FieldLabel>
-              <PrescriptionBuilder
-                actions={prescriptionActions}
-                prescription_type="DISCHARGE"
-                is_prn
-              />
+              <PrescriptionBuilder prescription_type="DISCHARGE" is_prn />
             </div>
-          </div>
+          </>
         )}
-        {preDischargeForm.discharge_reason === "EXP" && (
-          <div>
-            <TextFormField
-              name="death_datetime"
-              label="Death Date and Time"
-              type="datetime-local"
-              value={preDischargeForm.death_datetime}
-              onChange={(e) => {
-                setPreDischargeForm((form) => {
-                  return {
-                    ...form,
-                    death_datetime: e.value,
-                  };
-                });
-              }}
-              required
-              min={dayjs(consultationData?.admission_date).format(
-                "YYYY-MM-DDTHH:mm"
-              )}
-              max={dayjs().format("YYYY-MM-DDTHH:mm")}
-            />
-            <TextFormField
-              name="death_confirmed_by"
-              label="Confirmed By"
-              value={preDischargeForm.death_confirmed_doctor ?? ""}
-              onChange={(e) => {
-                setPreDischargeForm((form) => {
-                  return {
-                    ...form,
-                    death_confirmed_doctor: e.value,
-                  };
-                });
-              }}
-              required
-              placeholder="Attending Doctor's Name and Designation"
-            />
-          </div>
-        )}
-        {["REF", "LAMA"].includes(preDischargeForm.discharge_reason) && (
-          <div>
-            <DateFormField
-              label="Date of Discharge"
-              name="discharge_date"
-              value={dayjs(preDischargeForm.discharge_date).toDate()}
-              min={dayjs(
-                consultationData?.admission_date ??
-                  consultationData?.created_date
-              ).toDate()}
-              disableFuture={true}
-              required
-              onChange={handleDateChange}
-            />
-          </div>
+        {preDischargeForm.new_discharge_reason ===
+          DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id && (
+          <TextFormField
+            name="death_confirmed_by"
+            label="Confirmed By"
+            value={preDischargeForm.death_confirmed_doctor ?? ""}
+            onChange={(e) => {
+              setPreDischargeForm((form) => {
+                return {
+                  ...form,
+                  death_confirmed_doctor: e.value,
+                };
+              });
+            }}
+            required
+            placeholder="Attending Doctor's Name and Designation"
+          />
         )}
       </div>
 

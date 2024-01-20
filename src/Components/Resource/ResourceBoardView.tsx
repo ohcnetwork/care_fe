@@ -32,7 +32,7 @@ export default function BoardView() {
   const { t } = useTranslation();
 
   const onListViewBtnClick = () => {
-    navigate("/resource/list-view", { query: qParams });
+    navigate("/resource/list", { query: qParams });
     localStorage.setItem("defaultResourceView", "list");
   };
 
@@ -59,11 +59,11 @@ export default function BoardView() {
         <div className="flex w-full flex-col items-center justify-between gap-2 pt-2 lg:flex-row lg:gap-4">
           <div></div>
           <SwitchTabs
-            Tab1="Active"
-            Tab2="Completed"
+            tab1="Active"
+            tab2="Completed"
             onClickTab1={() => setBoardFilter(ACTIVE)}
             onClickTab2={() => setBoardFilter(COMPLETED)}
-            activeTab={boardFilter !== ACTIVE}
+            isTab2Active={boardFilter !== ACTIVE}
           />
           <div className="flex w-full flex-col gap-2 lg:mr-4 lg:w-fit lg:flex-row lg:gap-4">
             <ButtonV2 className="py-[11px]" onClick={onListViewBtnClick}>

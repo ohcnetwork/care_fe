@@ -1,11 +1,5 @@
 import { useEffect, useState } from "react";
-import { AssetData } from "../AssetTypes";
-import { useDispatch } from "react-redux";
-import {
-  partialUpdateAsset,
-  createAssetBed,
-  getPermittedFacility,
-} from "../../../Redux/actions";
+import { AssetData, ResolvedMiddleware } from "../AssetTypes";
 import * as Notification from "../../../Utils/Notifications.js";
 import { BedModel } from "../../Facility/models";
 import axios from "axios";
@@ -18,6 +12,12 @@ import { Submit } from "../../Common/components/ButtonV2";
 import { SyntheticEvent } from "react";
 import useAuthUser from "../../../Common/hooks/useAuthUser";
 
+import request from "../../../Utils/request/request";
+import routes from "../../../Redux/api";
+import useQuery from "../../../Utils/request/useQuery";
+
+import CareIcon from "../../../CAREUI/icons/CareIcon";
+
 interface Props {
   assetId: string;
   facilityId: string;
@@ -29,8 +29,8 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
   const [isLoading, setIsLoading] = useState(true);
   const [assetType, setAssetType] = useState("");
   const [middlewareHostname, setMiddlewareHostname] = useState("");
-  const [facilityMiddlewareHostname, setFacilityMiddlewareHostname] =
-    useState("");
+  const [resolvedMiddleware, setResolvedMiddleware] =
+    useState<ResolvedMiddleware>();
   const [cameraAddress, setCameraAddress] = useState("");
   const [ipadrdress_error, setIpAddress_error] = useState("");
   const [username, setUsername] = useState("");
@@ -43,23 +43,15 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
   const [refreshPresetsHash, setRefreshPresetsHash] = useState(
     Number(new Date())
   );
-  const dispatch = useDispatch<any>();
+  const { data: facility, loading } = useQuery(routes.getPermittedFacility, {
+    pathParams: { id: facilityId },
+  });
   const authUser = useAuthUser();
-  useEffect(() => {
-    const fetchFacility = async () => {
-      const res = await dispatch(getPermittedFacility(facilityId));
-
-      if (res.status === 200 && res.data) {
-        setFacilityMiddlewareHostname(res.data.middleware_address);
-      }
-    };
-
-    if (facilityId) fetchFacility();
-  }, [dispatch, facilityId]);
 
   useEffect(() => {
     if (asset) {
       setAssetType(asset?.asset_class);
+      setResolvedMiddleware(asset?.resolved_middleware);
       const cameraConfig = getCameraConfig(asset);
       setMiddlewareHostname(cameraConfig.middleware_hostname);
       setCameraAddress(cameraConfig.hostname);
@@ -78,23 +70,24 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
       const data = {
         meta: {
           asset_type: "CAMERA",
-          middleware_hostname: middlewareHostname, // TODO: remove this infavour of facility.middleware_address
+          middleware_hostname: middlewareHostname,
           local_ip_address: cameraAddress,
           camera_access_key: `${username}:${password}:${streamUuid}`,
         },
       };
-      const res: any = await Promise.resolve(
-        dispatch(partialUpdateAsset(assetId, data))
-      );
+      const { res } = await request(routes.partialUpdateAsset, {
+        pathParams: { external_id: assetId },
+        body: data,
+      });
       if (res?.status === 200) {
         Notification.Success({ msg: "Asset Configured Successfully" });
         onUpdated?.();
       } else {
-        Notification.Error({ msg: "Something went wrong..!" });
+        Notification.Error({ msg: "Something went wrong!" });
       }
       setLoadingSetConfiguration(false);
     } else {
-      setIpAddress_error("Please Enter a Valid Camera address !!");
+      setIpAddress_error("IP address is invalid");
     }
   };
 
@@ -108,17 +101,16 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
     try {
       setLoadingAddPreset(true);
       const presetData = await axios.get(
-        `https://${facilityMiddlewareHostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
+        `https://${resolvedMiddleware?.hostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
       );
-      const res: any = await Promise.resolve(
-        dispatch(
-          createAssetBed(
-            { meta: { ...data, ...presetData.data } },
-            assetId,
-            bed?.id as string
-          )
-        )
-      );
+
+      const { res } = await request(routes.createAssetBed, {
+        body: {
+          meta: { ...data, ...presetData.data },
+          asset: assetId,
+          bed: bed?.id as string,
+        },
+      });
       if (res?.status === 201) {
         Notification.Success({
           msg: "Preset Added Successfully",
@@ -138,8 +130,7 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
     }
     setLoadingAddPreset(false);
   };
-
-  if (isLoading) return <Loading />;
+  if (isLoading || loading || !facility) return <Loading />;
 
   return (
     <div className="space-y-6">
@@ -148,8 +139,24 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
           <div className="grid grid-cols-1 gap-x-4 lg:grid-cols-2">
             <TextFormField
               name="middleware_hostname"
-              label="Hospital Middleware Hostname"
-              autoComplete="off"
+              label={
+                <div className="flex flex-row gap-1">
+                  <p>Middleware Hostname</p>
+                  {resolvedMiddleware?.source != "asset" && (
+                    <div className="tooltip">
+                      <CareIcon
+                        icon="l-info-circle"
+                        className="tooltip text-indigo-500 hover:text-indigo-600"
+                      />
+                      <span className="tooltip-text w-56 whitespace-normal">
+                        Middleware hostname sourced from asset{" "}
+                        {resolvedMiddleware?.source}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              }
+              placeholder={resolvedMiddleware?.hostname}
               value={middlewareHostname}
               onChange={({ value }) => setMiddlewareHostname(value)}
             />
@@ -207,7 +214,7 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
           addPreset={addPreset}
           isLoading={loadingAddPreset}
           refreshPresetsHash={refreshPresetsHash}
-          facilityMiddlewareHostname={facilityMiddlewareHostname}
+          facilityMiddlewareHostname={resolvedMiddleware?.hostname || ""}
         />
       ) : null}
     </div>

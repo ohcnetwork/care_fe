@@ -11,6 +11,7 @@ interface Props {
   text: string;
   tooltip?: string;
   className?: string;
+  id?: string;
 }
 
 export default function Chip({
@@ -21,6 +22,7 @@ export default function Chip({
 }: Props) {
   return (
     <span
+      id={props?.id}
       className={classNames(
         "inline-flex items-center gap-2 font-medium leading-4",
 

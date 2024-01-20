@@ -1,7 +1,6 @@
-import { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { dailyRoundsAnalyse } from "../../../Redux/actions";
+import { useEffect, useState } from "react";
+import routes from "../../../Redux/api";
+import request from "../../../Utils/request/request";
 import { LinePlot } from "./components/LinePlot";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
@@ -9,38 +8,28 @@ import { formatDateTime } from "../../../Utils/utils";
 
 export const DialysisPlots = (props: any) => {
   const { consultationId } = props;
-  const dispatch: any = useDispatch();
   const [results, setResults] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
-  const fetchDailyRounds = useCallback(
-    async (status: statusType) => {
-      const res = await dispatch(
-        dailyRoundsAnalyse(
-          {
-            page: currentPage,
-            fields: ["dialysis_fluid_balance", "dialysis_net_balance"],
-          },
-          { consultationId }
-        )
-      );
-      if (!status.aborted) {
-        if (res?.data) {
-          setTotalCount(res.data.count);
-          setResults(res.data.results);
-        }
+  useEffect(() => {
+    const fetchDailyRounds = async (currentPage: number) => {
+      const { res, data } = await request(routes.dailyRoundsAnalyse, {
+        body: {
+          page: currentPage,
+          fields: ["dialysis_fluid_balance", "dialysis_net_balance"],
+        },
+        pathParams: {
+          consultationId,
+        },
+      });
+      if (res?.ok && data) {
+        setTotalCount(data.count);
+        setResults(data.results);
       }
-    },
-    [consultationId, dispatch, currentPage]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchDailyRounds(status);
-    },
-    [consultationId, currentPage]
-  );
+    };
+    fetchDailyRounds(currentPage);
+  }, [currentPage, consultationId]);
 
   const handlePagination = (page: number, _limit: number) => {
     setCurrentPage(page);

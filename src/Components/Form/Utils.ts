@@ -1,7 +1,9 @@
 import { FieldError } from "./FieldValidators";
 
 export type FormDetails = { [key: string]: any };
-export type FormErrors<T = FormDetails> = Partial<Record<keyof T, FieldError>>;
+export type FormErrors<T = FormDetails> = Partial<
+  Record<keyof T | "$all", FieldError>
+>;
 export type FormState<T = FormDetails> = { form: T; errors: FormErrors<T> };
 export type FormAction<T = FormDetails> =
   | { type: "set_form"; form: T }

@@ -1,13 +1,14 @@
-import { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { dailyRoundsAnalyse } from "../../../Redux/actions";
+import { useEffect, useState } from "react";
+
+import routes from "../../../Redux/api";
+import request from "../../../Utils/request/request";
+
 import Pagination from "../../Common/Pagination";
 import {
-  PAGINATION_LIMIT,
   EYE_OPEN_SCALE,
-  VERBAL_RESPONSE_SCALE,
   MOTOR_RESPONSE_SCALE,
+  PAGINATION_LIMIT,
+  VERBAL_RESPONSE_SCALE,
 } from "../../../Common/constants";
 import { formatDateTime } from "../../../Utils/utils";
 
@@ -28,10 +29,7 @@ const DataTable = (props: any) => {
             Right
           </div>
         </div>
-        <div
-          style={{ direction: "rtl" }}
-          className="flex flex-row overflow-x-auto"
-        >
+        <div className="flex flex-row overflow-x-auto">
           {data.map((x: any, i: any) => {
             return (
               <div
@@ -90,7 +88,7 @@ const DataDescription = (props: any) => {
 
 export const NeurologicalTable = (props: any) => {
   const { consultationId } = props;
-  const dispatch: any = useDispatch();
+  // const dispatch: any = useDispatch();
   const [results, setResults] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -122,52 +120,47 @@ export const NeurologicalTable = (props: any) => {
     { id: 30, value: "None" },
   ];
 
-  const fetchDailyRounds = useCallback(
-    async (status: statusType) => {
-      const res = await dispatch(
-        dailyRoundsAnalyse(
-          {
-            page: currentPage,
-            fields: [
-              "consciousness_level",
-              "consciousness_level_detail",
-              "left_pupil_size",
-              "left_pupil_size_detail",
-              "right_pupil_size",
-              "right_pupil_size_detail",
-              "left_pupil_light_reaction",
-              "left_pupil_light_reaction_detail",
-              "right_pupil_light_reaction",
-              "right_pupil_light_reaction_detail",
-              "limb_response_upper_extremity_right",
-              "limb_response_upper_extremity_left",
-              "limb_response_lower_extremity_left",
-              "limb_response_lower_extremity_right",
-              "glasgow_eye_open",
-              "glasgow_verbal_response",
-              "glasgow_motor_response",
-              "glasgow_total_calculated",
-            ],
-          },
-          { consultationId }
-        )
-      );
-      if (!status.aborted) {
-        if (res && res.data && res.data.results) {
-          setResults(res.data.results);
-          setTotalCount(res.data.count);
-        }
-      }
-    },
-    [consultationId, dispatch, currentPage]
-  );
+  useEffect(() => {
+    const fetchDailyRounds = async (
+      currentPage: number,
+      consultationId: string
+    ) => {
+      const { res, data } = await request(routes.dailyRoundsAnalyse, {
+        body: {
+          page: currentPage,
+          fields: [
+            "consciousness_level",
+            "consciousness_level_detail",
+            "left_pupil_size",
+            "left_pupil_size_detail",
+            "right_pupil_size",
+            "right_pupil_size_detail",
+            "left_pupil_light_reaction",
+            "left_pupil_light_reaction_detail",
+            "right_pupil_light_reaction",
+            "right_pupil_light_reaction_detail",
+            "limb_response_upper_extremity_right",
+            "limb_response_upper_extremity_left",
+            "limb_response_lower_extremity_left",
+            "limb_response_lower_extremity_right",
+            "glasgow_eye_open",
+            "glasgow_verbal_response",
+            "glasgow_motor_response",
+            "glasgow_total_calculated",
+          ],
+        },
+        pathParams: {
+          consultationId,
+        },
+      });
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchDailyRounds(status);
-    },
-    [currentPage]
-  );
+      if (res && res.ok && data?.results) {
+        setResults(data.results);
+        setTotalCount(data.count);
+      }
+    };
+    fetchDailyRounds(currentPage, consultationId);
+  }, [currentPage, consultationId]);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handlePagination = (page: number, limit: number) => {
@@ -297,10 +290,7 @@ export const NeurologicalTable = (props: any) => {
       <div className="mb-6">
         <div className="text-xl font-semibold">Level Of Consciousness</div>
         <div className="w-max-content my-4 flex max-w-full flex-row divide-y divide-gray-200 overflow-hidden shadow sm:rounded-lg">
-          <div
-            style={{ direction: "rtl" }}
-            className="flex flex-row overflow-x-auto"
-          >
+          <div className="flex flex-row overflow-x-auto">
             {locData.map((x: any, i: any) => (
               <div
                 key={`loc_${i}`}
@@ -376,10 +366,7 @@ export const NeurologicalTable = (props: any) => {
                 Total
               </div>
             </div>
-            <div
-              style={{ direction: "rtl" }}
-              className="flex flex-row overflow-x-auto"
-            >
+            <div className="flex flex-row overflow-x-auto">
               {glasgowData.map((x: any, i: any) => {
                 return (
                   <div

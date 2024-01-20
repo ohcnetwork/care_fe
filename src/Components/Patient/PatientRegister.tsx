@@ -26,6 +26,8 @@ import {
   getPincodeDetails,
   includesIgnoreCase,
   parsePhoneNumber,
+  scrollTo,
+  compareBy,
 } from "../../Utils/utils";
 import { navigate, useQueryParams } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -61,13 +63,14 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TransferPatientDialog from "../Facility/TransferPatientDialog";
 import countryList from "../../Common/static/countries.json";
-import { debounce } from "lodash";
+import { debounce } from "lodash-es";
 
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { validatePincode } from "../../Common/validation";
 import { FormContextValue } from "../Form/FormContext.js";
+import useAuthUser from "../../Common/hooks/useAuthUser.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -177,12 +180,8 @@ const patientFormReducer = (state = initialState, action: any) => {
   }
 };
 
-const scrollTo = (id: string | boolean) => {
-  const element = document.querySelector(`#${id}`);
-  element?.scrollIntoView({ behavior: "smooth", block: "center" });
-};
-
 export const PatientRegister = (props: PatientRegisterProps) => {
+  const authUser = useAuthUser();
   const { goBack } = useAppHistory();
   const { gov_data_api_key, enable_hcx, enable_abdm } = useConfig();
   const dispatchAction: any = useDispatch();
@@ -547,6 +546,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         setFacilityName("");
       }
     }
+
     fetchFacilityName();
   }, [dispatchAction, facilityId]);
 
@@ -710,7 +710,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     if (!fetchedDistricts) return;
 
     const matchedDistrict = fetchedDistricts.find((district) => {
-      return includesIgnoreCase(district.name, pincodeDetails.district);
+      return includesIgnoreCase(district.name, pincodeDetails.districtname);
     });
     if (!matchedDistrict) return;
 
@@ -956,6 +956,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     } else {
       values.splice(values.indexOf(id), 1);
     }
+
+    if (id !== 1 && values.includes(1)) {
+      values.splice(values.indexOf(1), 1);
+    } else if (id === 1) {
+      values.length = 0;
+      values.push(1);
+    }
+
     field("medical_history").onChange({
       name: "medical_history",
       value: values,
@@ -1167,6 +1175,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       <div className="mb-2 overflow-visible rounded border border-gray-200 p-4">
                         <ButtonV2
                           className="flex items-center gap-2"
+                          disabled={
+                            authUser.user_type === "Nurse" ||
+                            authUser.user_type === "Staff"
+                          }
                           onClick={(_) => {
                             setShowImport({
                               show: true,
@@ -1511,7 +1523,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     {...field("ward")}
                                     label="Ward"
                                     options={ward
-                                      .sort((a, b) => a.number - b.number)
+                                      .sort(compareBy("number"))
                                       .map((e) => {
                                         return {
                                           id: e.id,

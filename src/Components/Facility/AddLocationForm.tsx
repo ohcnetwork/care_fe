@@ -12,6 +12,8 @@ import { Submit, Cancel } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import Page from "../Common/components/Page";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import { AssetLocationType } from "../Assets/AssetTypes";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -25,12 +27,16 @@ export const AddLocationForm = (props: LocationFormProps) => {
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [name, setName] = useState("");
+  const [middlewareAddress, setMiddlewareAddress] = useState("");
   const [description, setDescription] = useState("");
   const [facilityName, setFacilityName] = useState("");
   const [locationName, setLocationName] = useState("");
+  const [locationType, setLocationType] = useState("");
   const [errors, setErrors] = useState<any>({
     name: "",
     description: "",
+    middlewareAddress: "",
+    locationType: "",
   });
   const headerText = !locationId ? "Add Location" : "Update Location";
   const buttonText = !locationId ? "Add Location" : "Update Location";
@@ -51,6 +57,8 @@ export const AddLocationForm = (props: LocationFormProps) => {
         setName(res?.data?.name || "");
         setLocationName(res?.data?.name || "");
         setDescription(res?.data?.description || "");
+        setLocationType(res?.data?.location_type || "");
+        setMiddlewareAddress(res?.data?.middleware_address || "");
       }
       setIsLoading(false);
     }
@@ -62,10 +70,27 @@ export const AddLocationForm = (props: LocationFormProps) => {
     const error = {
       name: "",
       description: "",
+      middlewareAddress: "",
+      locationType: "",
     };
 
     if (name.trim().length === 0) {
       error.name = "Name is required";
+      formValid = false;
+    }
+
+    if (locationType.trim().length === 0) {
+      error.locationType = "Location Type is required";
+      formValid = false;
+    }
+
+    if (
+      middlewareAddress &&
+      middlewareAddress.match(
+        /^(?!https?:\/\/)[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*\.[a-zA-Z]{2,}$/
+      ) === null
+    ) {
+      error.middlewareAddress = "Invalid Middleware Address";
       formValid = false;
     }
 
@@ -83,6 +108,8 @@ export const AddLocationForm = (props: LocationFormProps) => {
     const data = {
       name,
       description,
+      middleware_address: middlewareAddress,
+      location_type: locationType,
     };
 
     const res = await dispatchAction(
@@ -155,6 +182,38 @@ export const AddLocationForm = (props: LocationFormProps) => {
                   value={description}
                   onChange={(e) => setDescription(e.value)}
                   error={errors.description}
+                />
+              </div>
+              <div>
+                <SelectFormField
+                  id="location-type"
+                  name="location_type"
+                  label="Location Type"
+                  options={[
+                    { title: "ICU", value: AssetLocationType.ICU },
+                    {
+                      title: "WARD",
+                      value: AssetLocationType.WARD,
+                    },
+                    { title: "OTHER", value: AssetLocationType.OTHER },
+                  ]}
+                  optionLabel={({ title }) => title}
+                  optionValue={({ value }) => value}
+                  value={locationType}
+                  required
+                  onChange={({ value }) => setLocationType(value)}
+                  error={errors.locationType}
+                />
+              </div>
+              <div>
+                <TextFormField
+                  id="location-middleware-address"
+                  name="Location Middleware Address"
+                  type="text"
+                  label="Location Middleware Address"
+                  value={middlewareAddress}
+                  onChange={(e) => setMiddlewareAddress(e.value)}
+                  error={errors.middlewareAddress}
                 />
               </div>
             </div>

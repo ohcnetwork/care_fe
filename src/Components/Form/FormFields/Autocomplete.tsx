@@ -160,32 +160,34 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
               onBlur={() => value && setQuery("")}
               autoComplete="off"
             />
-            <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-              <div className="absolute right-0 top-1 mr-2 flex h-full items-center gap-1 pb-2 text-lg text-gray-900">
-                <span>{value?.icon}</span>
+            {!props.disabled && (
+              <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+                <div className="absolute right-0 top-1 mr-2 flex h-full items-center gap-1 pb-2 text-lg text-gray-900">
+                  <span>{value?.icon}</span>
 
-                {value && !props.isLoading && !props.required && (
-                  <div className="tooltip" id="clear-button">
-                    <CareIcon
-                      className="care-l-times-circle h-4 w-4 text-gray-800 transition-colors duration-200 ease-in-out hover:text-gray-500"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        props.onChange(undefined);
-                      }}
-                    />
-                    <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-xs">
-                      {t("clear_selection")}
-                    </span>
-                  </div>
-                )}
+                  {value && !props.isLoading && !props.required && (
+                    <div className="tooltip" id="clear-button">
+                      <CareIcon
+                        className="care-l-times-circle h-4 w-4 text-gray-800 transition-colors duration-200 ease-in-out hover:text-gray-500"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          props.onChange(undefined);
+                        }}
+                      />
+                      <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-xs">
+                        {t("clear_selection")}
+                      </span>
+                    </div>
+                  )}
 
-                {props.isLoading ? (
-                  <CareIcon className="care-l-spinner animate-spin" />
-                ) : (
-                  <CareIcon className="care-l-angle-down" />
-                )}
-              </div>
-            </Combobox.Button>
+                  {props.isLoading ? (
+                    <CareIcon className="care-l-spinner animate-spin" />
+                  ) : (
+                    <CareIcon className="care-l-angle-down" />
+                  )}
+                </div>
+              </Combobox.Button>
+            )}
           </div>
 
           <DropdownTransition>

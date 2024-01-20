@@ -5,9 +5,9 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import DialogModal from "../Common/Dialog";
 import QRCode from "qrcode.react";
 import { formatDateTime } from "../../Utils/utils";
-import { getAbhaCard } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
 import { useRef } from "react";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 interface IProps {
   patientId?: string;
@@ -18,21 +18,24 @@ interface IProps {
 
 const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
   const printRef = useRef(null);
-  const dispatch = useDispatch<any>();
 
   const downloadAbhaCard = async (type: "pdf" | "png") => {
     if (!patientId) return;
-    const response = await dispatch(getAbhaCard(patientId, type));
+    const { res, data } = await request(routes.abha.getAbhaCard, {
+      body: {
+        patient: patientId,
+        type: type,
+      },
+    });
 
-    if (response.status === 200 && response.data) {
+    if (res?.status === 200 && data) {
       if (type === "png") {
         const downloadLink = document.createElement("a");
-        downloadLink.href =
-          "data:application/octet-stream;base64," + response.data;
+        downloadLink.href = "data:application/octet-stream;base64," + data;
         downloadLink.download = "abha.png";
         downloadLink.click();
       } else {
-        const htmlPopup = `<embed width=100% height=100%" type='application/pdf' src='data:application/pdf;base64,${response.data}'></embed>`;
+        const htmlPopup = `<embed width=100% height=100%" type='application/pdf' src='data:application/pdf;base64,${data}'></embed>`;
 
         const printWindow = window.open("", "PDF");
         printWindow?.document.write(htmlPopup);

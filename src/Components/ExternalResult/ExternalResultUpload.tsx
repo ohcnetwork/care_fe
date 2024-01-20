@@ -1,28 +1,48 @@
-import _ from "lodash";
+import _ from "lodash-es";
 import { navigate } from "raviger";
-import { lazy, useState } from "react";
+import { lazy, useEffect, useState } from "react";
 import CSVReader from "react-csv-reader";
-import { useDispatch } from "react-redux";
 import useConfig from "../../Common/hooks/useConfig";
-import { externalResultUploadCsv } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 const PageTitle = lazy(() => import("../Common/PageTitle"));
 import { useTranslation } from "react-i18next";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import { IExternalResult } from "./models";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 export default function ExternalResultUpload() {
   const { sample_format_external_result_import } = useConfig();
-  const dispatch: any = useDispatch();
   // for disabling save button once clicked
   const [loading, setLoading] = useState(false);
-  const [csvData, setCsvData] = useState(new Array<any>());
+  const [csvData, setCsvData] = useState(new Array<IExternalResult>());
   const [errors, setErrors] = useState<any>([]);
+  const [validationErrorCount, setValidationErrorCount] = useState(0);
+  const [user, setUser] = useState<any>({});
   const handleForce = (data: any) => {
     setCsvData(data);
+    setValidationErrorCount(
+      data.filter(
+        (result: IExternalResult) =>
+          result.district !== user.district_object.name
+      ).length
+    );
   };
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
+
+  const fetchUser = async () => {
+    const { data: userData } = await request(routes.currentUser, {
+      pathParams: {},
+    });
+    setUser(userData);
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
 
   const papaparseOptions = {
     header: true,
@@ -32,26 +52,46 @@ export default function ExternalResultUpload() {
       header.toLowerCase().replace(/\W/g, "_"),
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     setLoading(true);
     const valid = true;
-    if (csvData.length !== 0) {
-      const data = {
-        sample_tests: csvData,
-      };
 
+    if (csvData.length !== 0) {
       if (valid) {
         setErrors([]);
-        dispatch(externalResultUploadCsv(data)).then((resp: any) => {
-          if (resp && resp.status === 202) {
+
+        try {
+          const { res, data } = await request(routes.externalResultUploadCsv, {
+            body: {
+              sample_tests: validationErrorCount
+                ? csvData.filter(
+                    (data: IExternalResult) =>
+                      data.district === user.district_object.name
+                  )
+                : csvData,
+            },
+          });
+
+          if (res && res.status === 202) {
             setLoading(false);
             navigate("/external_results");
+            Notification.Success({
+              msg: "External Results imported successfully",
+            });
           } else {
-            setErrors(resp.data.map((err: any) => Object.entries(err)));
+            if (data) {
+              setErrors(data.map((err: any) => Object.entries(err)));
+            }
             setLoading(false);
           }
-        });
+        } catch (error) {
+          console.error("An error occurred:", error);
+          Notification.Error({
+            msg: "Something went wrong: " + error,
+          });
+          setLoading(false);
+        }
       } else {
         setLoading(false);
       }
@@ -103,6 +143,8 @@ export default function ExternalResultUpload() {
                 <a
                   className="focus:ring-blue mx-auto mt-4 max-w-xs items-center rounded-md border border-primary-500 bg-white px-3 py-2 text-sm font-medium leading-4 text-primary-700 transition duration-150 ease-in-out hover:text-primary-500 hover:shadow focus:border-primary-300 focus:outline-none active:bg-gray-50 active:text-primary-800"
                   href={sample_format_external_result_import}
+                  target="_blank"
+                  download
                 >
                   <i className="fa fa-download mr-1" aria-hidden="true"></i>{" "}
                   <span>{t("sample_format")}</span>
@@ -110,6 +152,9 @@ export default function ExternalResultUpload() {
               </div>
             </div>
           </div>
+          {csvData.length > 0 && (
+            <p className="flex justify-end p-2">Total: {csvData.length}</p>
+          )}
           <div className=" rounded bg-white shadow">
             {csvData.map((data: any, index: number) => {
               return (
@@ -117,7 +162,7 @@ export default function ExternalResultUpload() {
                   <div className="mr-2 p-2">{index + 1}</div>
                   <div className="mr-2 p-2 md:w-1/3">{data.name}</div>
 
-                  <div className="mr-2 p-2">
+                  <div className="mr-2 p-2 capitalize">
                     {errors && errors.length !== 0
                       ? errors.map((error: any) => {
                           return (
@@ -129,6 +174,14 @@ export default function ExternalResultUpload() {
                         })
                       : null}
                   </div>
+                  <div>
+                    {data.district !== user.district_object.name && (
+                      <p className="mt-2 flex items-center justify-center gap-1 text-red-500">
+                        <CareIcon icon="l-exclamation-triangle" /> Different
+                        districts
+                      </p>
+                    )}
+                  </div>
                 </div>
               );
             })}
@@ -138,8 +191,14 @@ export default function ExternalResultUpload() {
             <Cancel onClick={() => goBack()} />
             <Submit
               onClick={handleSubmit}
-              disabled={loading}
-              label={t("save")}
+              disabled={loading || csvData.length === validationErrorCount}
+              label={
+                validationErrorCount
+                  ? `Save Valid Records(${
+                      csvData.length - validationErrorCount
+                    })`
+                  : t("save")
+              }
               data-testid="submit-button"
             />
           </div>

@@ -1,55 +1,60 @@
-import { FieldError, RequiredFieldValidator } from "../Form/FieldValidators";
+import { RequiredFieldValidator } from "../Form/FieldValidators";
 import Form from "../Form/Form";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-import { MedicineAdministrationRecord, Prescription } from "./models";
-import { PrescriptionActions } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
+import {
+  DOSAGE_UNITS,
+  MedicineAdministrationRecord,
+  Prescription,
+} from "./models";
 import { useState } from "react";
 import NumericWithUnitsFormField from "../Form/FormFields/NumericWithUnitsFormField";
 import { useTranslation } from "react-i18next";
 import MedibaseAutocompleteFormField from "./MedibaseAutocompleteFormField";
 import dayjs from "../../Utils/dayjs";
+import { PrescriptionFormValidator } from "./validators";
+import MedicineRoutes from "./routes";
+import request from "../../Utils/request/request";
+import useSlug from "../../Common/hooks/useSlug";
+import { Success } from "../../Utils/Notifications";
 
 export default function CreatePrescriptionForm(props: {
   prescription: Prescription;
-  create: ReturnType<typeof PrescriptionActions>["create"];
   onDone: () => void;
 }) {
-  const dispatch = useDispatch<any>();
-  const [isCreating, setIsCreating] = useState(false);
   const { t } = useTranslation();
+  const consultation = useSlug("consultation");
+  const [isCreating, setIsCreating] = useState(false);
 
   return (
     <Form<Prescription>
       disabled={isCreating}
       defaults={props.prescription}
       onCancel={props.onDone}
-      onSubmit={async (obj) => {
-        obj["medicine"] = obj.medicine_object?.id;
-        delete obj.medicine_object;
+      onSubmit={async (body) => {
+        body["medicine"] = body.medicine_object?.id;
+        delete body.medicine_object;
 
         setIsCreating(true);
-        const res = await dispatch(props.create(obj));
+        const { res, error } = await request(
+          MedicineRoutes.createPrescription,
+          {
+            pathParams: { consultation },
+            body,
+          }
+        );
         setIsCreating(false);
-        if (res.status !== 201) {
-          return res.data;
-        } else {
-          props.onDone();
+
+        if (!res?.ok) {
+          return error;
         }
+
+        Success({ msg: t("Medicine prescribed") });
+        props.onDone();
       }}
       noPadding
-      validate={(form) => {
-        const errors: Partial<Record<keyof Prescription, FieldError>> = {};
-        errors.medicine_object = RequiredFieldValidator()(form.medicine_object);
-        errors.dosage = RequiredFieldValidator()(form.dosage);
-        if (form.is_prn)
-          errors.indicator = RequiredFieldValidator()(form.indicator);
-        if (!form.is_prn)
-          errors.frequency = RequiredFieldValidator()(form.frequency);
-        return errors;
-      }}
+      validate={PrescriptionFormValidator()}
       className="max-w-3xl"
     >
       {(field) => (
@@ -73,7 +78,7 @@ export default function CreatePrescriptionForm(props: {
               label={t("dosage")}
               {...field("dosage", RequiredFieldValidator())}
               required
-              units={["mg", "g", "ml", "drop(s)", "ampule(s)", "tsp"]}
+              units={DOSAGE_UNITS}
               min={0}
             />
           </div>
@@ -85,9 +90,10 @@ export default function CreatePrescriptionForm(props: {
                 {...field("indicator", RequiredFieldValidator())}
                 required
               />
-              <TextFormField
+              <NumericWithUnitsFormField
+                className="flex-1"
                 label={t("max_dosage_24_hrs")}
-                type="number"
+                units={DOSAGE_UNITS}
                 min={0}
                 {...field("max_dosage")}
               />
@@ -131,7 +137,17 @@ export default function CreatePrescriptionForm(props: {
   );
 }
 
-export const PRESCRIPTION_ROUTES = ["ORAL", "IV", "IM", "SC"];
+export const PRESCRIPTION_ROUTES = [
+  "ORAL",
+  "IV",
+  "IM",
+  "SC",
+  "INHALATION",
+  "NASOGASTRIC",
+  "INTRATHECAL",
+  "TRANSDERMAL",
+  "RECTAL",
+] as const;
 export const PRESCRIPTION_FREQUENCIES = {
   STAT: {
     slots: 1,

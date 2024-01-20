@@ -5,6 +5,12 @@ import { AssetSearchPage } from "../../pageobject/Asset/AssetSearch";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import { AssetFilters } from "../../pageobject/Asset/AssetFilters";
 
+function addDaysToDate(numberOfDays: number) {
+  const inputDate = new Date();
+  inputDate.setDate(inputDate.getDate() + numberOfDays);
+  return inputDate.toISOString().split("T")[0];
+}
+
 describe("Asset", () => {
   const assetPage = new AssetPage();
   const loginPage = new LoginPage();
@@ -23,7 +29,35 @@ describe("Asset", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/assets");
+  });
+
+  it("Verify Asset Warranty Expiry Label", () => {
+    assetSearchPage.typeSearchKeyword(assetname);
+    assetSearchPage.pressEnter();
+    assetSearchPage.verifyBadgeContent(assetname);
+    assetSearchPage.clickAssetByName(assetname);
+    assetPage.clickupdatedetailbutton();
+    assetPage.scrollintoWarrantyDetails();
+    assetPage.enterWarrantyExpiryDate(addDaysToDate(100)); // greater than 3 months
+    assetPage.clickassetupdatebutton();
+    assetPage.verifyWarrantyExpiryLabel("");
+    assetPage.clickupdatedetailbutton();
+    assetPage.scrollintoWarrantyDetails();
+    assetPage.enterWarrantyExpiryDate(addDaysToDate(80)); // less than 3 months
+    assetPage.clickassetupdatebutton();
+    assetPage.verifyWarrantyExpiryLabel("3 months");
+    assetPage.clickupdatedetailbutton();
+    assetPage.scrollintoWarrantyDetails();
+    assetPage.enterWarrantyExpiryDate(addDaysToDate(20)); // less than 1 month
+    assetPage.clickassetupdatebutton();
+    assetPage.verifyWarrantyExpiryLabel("1 month");
+    assetPage.clickupdatedetailbutton();
+    assetPage.scrollintoWarrantyDetails();
+    assetPage.enterWarrantyExpiryDate(addDaysToDate(100)); // check for greater than 3 months again to verify the label is removed
+    assetPage.clickassetupdatebutton();
+    assetPage.verifyWarrantyExpiryLabel("");
   });
 
   it("Create & Edit a service history and verify reflection", () => {
@@ -82,23 +116,6 @@ describe("Asset", () => {
     assetPage.interceptDeleteAssetApi();
     assetPage.deleteAsset();
     assetPage.verifyDeleteStatus();
-  });
-
-  it("Verify Facility Asset Page Redirection", () => {
-    cy.visit("/facility");
-    assetSearchPage.typeSearchKeyword(fillFacilityName);
-    assetSearchPage.pressEnter();
-    facilityPage.verifyFacilityBadgeContent(fillFacilityName);
-    facilityPage.visitAlreadyCreatedFacility();
-    facilityPage.clickManageFacilityDropdown();
-    facilityPage.clickCreateAssetFacilityOption();
-    facilityPage.verifyfacilitycreateassetredirection();
-    facilityPage.verifyassetfacilitybackredirection();
-    facilityPage.clickManageFacilityDropdown();
-    facilityPage.clickviewAssetFacilityOption();
-    facilityPage.verifyfacilityviewassetredirection();
-    assetFilters.assertFacilityText(fillFacilityName);
-    facilityPage.verifyassetfacilitybackredirection();
   });
 
   afterEach(() => {

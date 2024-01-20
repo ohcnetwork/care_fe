@@ -1,6 +1,6 @@
 import * as Notification from "../../../../Utils/Notifications";
-
-import { Group, InvestigationType } from "..";
+import _ from "lodash-es";
+import { InvestigationGroup, InvestigationType } from "..";
 import {
   getPatient,
   getPatientInvestigation,
@@ -17,13 +17,12 @@ import { InvestigationResponse } from "./types";
 import Loading from "../../../Common/Loading";
 import Page from "../../../Common/components/Page";
 import ReportTable from "./ReportTable";
-import _ from "lodash";
 import { useDispatch } from "react-redux";
 import { useRef } from "react";
 
 const RESULT_PER_PAGE = 14;
 interface InitialState {
-  investigationGroups: Group[];
+  investigationGroups: InvestigationGroup[];
   selectedGroup: string[];
   investigations: InvestigationType[];
   selectedInvestigations: any[];

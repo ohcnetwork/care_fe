@@ -9,18 +9,17 @@ interface Props {
   bounds: DateRange;
   perPage: number;
   slots?: number;
-  snapToLatest?: boolean;
-  reverse?: boolean;
+  defaultEnd?: boolean;
 }
 
 const useRangePagination = ({ bounds, perPage, ...props }: Props) => {
   const [currentRange, setCurrentRange] = useState(
-    getInitialBounds(bounds, perPage, props.snapToLatest)
+    getInitialBounds(bounds, perPage, props.defaultEnd)
   );
 
   useEffect(() => {
-    setCurrentRange(getInitialBounds(bounds, perPage, props.snapToLatest));
-  }, [bounds, perPage, props.snapToLatest]);
+    setCurrentRange(getInitialBounds(bounds, perPage, props.defaultEnd));
+  }, [bounds, perPage, props.defaultEnd]);
 
   const next = () => {
     const { end } = currentRange;
@@ -63,24 +62,17 @@ const useRangePagination = ({ bounds, perPage, ...props }: Props) => {
     }
 
     const slots: DateRange[] = [];
-    const { start, end } = currentRange;
+    const { start } = currentRange;
     const delta = perPage / props.slots;
 
     for (let i = 0; i < props.slots; i++) {
-      if (props.snapToLatest) {
-        slots.push({
-          start: new Date(end.valueOf() - delta * (i - 1)),
-          end: new Date(end.valueOf() - delta * i),
-        });
-      } else {
-        slots.push({
-          start: new Date(start.valueOf() + delta * i),
-          end: new Date(start.valueOf() + delta * (i + 1)),
-        });
-      }
+      slots.push({
+        start: new Date(start.valueOf() + delta * i),
+        end: new Date(start.valueOf() + delta * (i + 1)),
+      });
     }
 
-    return props.reverse ? slots.reverse() : slots;
+    return slots;
   }, [currentRange, props.slots, perPage]);
 
   return {
@@ -98,7 +90,7 @@ export default useRangePagination;
 const getInitialBounds = (
   bounds: DateRange,
   perPage: number,
-  snapToLatest?: boolean
+  defaultEnd?: boolean
 ) => {
   const deltaBounds = bounds.end.valueOf() - bounds.start.valueOf();
 
@@ -106,7 +98,7 @@ const getInitialBounds = (
     return bounds;
   }
 
-  if (snapToLatest) {
+  if (defaultEnd) {
     return {
       start: new Date(bounds.end.valueOf() - perPage),
       end: bounds.end,

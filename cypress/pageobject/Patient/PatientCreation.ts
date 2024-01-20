@@ -10,6 +10,16 @@ export class PatientPage {
     cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
   }
 
+  visitPatient(patientName) {
+    cy.get("#name").click().type(patientName);
+    cy.intercept("GET", "**/api/v1/consultation/**").as("getPatient");
+    cy.get("#patient-name-list").contains(patientName).click();
+    cy.wait("@getPatient").its("response.statusCode").should("eq", 200);
+    cy.get("#patient-name-consultation")
+      .should("be.visible")
+      .contains(patientName);
+  }
+
   selectFacility(facilityName: string) {
     cy.get("input[name='facilities']")
       .type(facilityName)
@@ -35,7 +45,6 @@ export class PatientPage {
     gender: string,
     address: string,
     pincode: string,
-    wardName: string,
     bloodGroup: string,
     dateOfBirth: string
   ) {
@@ -52,16 +61,6 @@ export class PatientPage {
     cy.get("[data-testid=current-address] textarea").type(address);
     cy.get("[data-testid=permanent-address] input").check();
     cy.get("#pincode").type(pincode);
-    cy.get("[data-testid=localbody] button")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").first().click();
-      });
-    cy.get("[data-testid=ward-respective-lsgi] button")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains(wardName).click();
-      });
     cy.get("[name=medical_history_check_1]").check();
     cy.get("[data-testid=blood-group] button")
       .click()

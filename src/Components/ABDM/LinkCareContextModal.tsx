@@ -5,9 +5,9 @@ import DateFormField from "../Form/FormFields/DateFormField";
 import DialogModal from "../Common/Dialog";
 import { PatientModel } from "../Patient/models";
 import TextFormField from "../Form/FormFields/TextFormField";
-import { linkCareContext } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
 import { useState } from "react";
+import routes from "../../Redux/api.js";
+import request from "../../Utils/request/request.js";
 
 interface IProps {
   consultationId: string;
@@ -24,8 +24,6 @@ const LinkCareContextModal = ({
 }: IProps) => {
   const [acceptedDisclaimer, setAcceptedDisclaimer] = useState(false);
   const [isLinkingCareContext, setIsLinkingCareContext] = useState(false);
-
-  const dispatch = useDispatch<any>();
 
   return (
     <DialogModal
@@ -83,15 +81,16 @@ const LinkCareContextModal = ({
         <ButtonV2
           onClick={async () => {
             setIsLinkingCareContext(true);
-            const res = await dispatch(
-              linkCareContext(consultationId, {
+            const { res } = await request(routes.abha.linkCareContext, {
+              body: {
+                consultation: consultationId,
                 name: patient?.abha_number_object?.name,
                 gender: patient?.abha_number_object?.gender,
                 dob: patient?.abha_number_object?.date_of_birth,
-              })
-            );
-
-            if (res.status === 202) {
+              },
+              reattempts: 0,
+            });
+            if (res?.status === 202) {
               Notification.Success({
                 msg: "Care Context sucessfully linked!",
               });

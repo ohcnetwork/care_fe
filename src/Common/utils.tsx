@@ -44,16 +44,6 @@ export const parseOptionId: (
   return textArray.join(", ");
 };
 
-export const getDimensionOrDash = (
-  value: number | string | null | undefined,
-  unit: string
-) => {
-  if (value === undefined || value === null || value === 0 || value === "0") {
-    return "-";
-  }
-  return value + unit;
-};
-
 export const deepEqual = (x: any, y: any): boolean => {
   if (x === y) return true;
 

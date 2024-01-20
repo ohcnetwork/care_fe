@@ -1,61 +1,41 @@
-import { useState, useCallback, lazy } from "react";
-
-import { useDispatch } from "react-redux";
+import { useState, lazy } from "react";
 import { classNames, formatDateTime } from "../../Utils/utils";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getResourceDetails, deleteResourceRecord } from "../../Redux/actions";
 import { navigate } from "raviger";
 import * as Notification from "../../Utils/Notifications.js";
 import CommentSection from "./CommentSection";
 import ButtonV2 from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
 import ConfirmDialog from "../Common/ConfirmDialog";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ResourceDetails(props: { id: string }) {
-  const dispatch: any = useDispatch();
-  const initialData: any = {};
-  const [data, setData] = useState(initialData);
-  const [isLoading, setIsLoading] = useState(true);
   const [isPrintMode, setIsPrintMode] = useState(false);
-
   const [openDeleteResourceDialog, setOpenDeleteResourceDialog] =
     useState(false);
-
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatch(getResourceDetails({ id: props.id }));
-      if (!status.aborted) {
-        if (res && res.data) {
-          setData(res.data);
-        } else {
-          navigate("/not-found");
-        }
-        setIsLoading(false);
+  const { data, loading } = useQuery(routes.getResourceDetails, {
+    pathParams: { id: props.id },
+    onResponse: ({ res, data }) => {
+      if (!res && !data) {
+        navigate("/not-found");
       }
     },
-    [props.id, dispatch]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
-  );
+  });
 
   const handleResourceDelete = async () => {
     setOpenDeleteResourceDialog(true);
-
-    const res = await dispatch(deleteResourceRecord(props.id));
+    const { res, data } = await request(routes.deleteResourceRecord, {
+      pathParams: { id: props.id },
+    });
     if (res?.status === 204) {
       Notification.Success({
         msg: "Resource record has been deleted successfully.",
       });
     } else {
       Notification.Error({
-        msg: "Error while deleting Resource: " + (res?.data?.detail || ""),
+        msg: "Error while deleting Resource: " + (data?.detail || ""),
       });
     }
 
@@ -223,7 +203,7 @@ export default function ResourceDetails(props: { id: string }) {
     );
   };
 
-  if (isLoading) {
+  if (loading || !data) {
     return <Loading />;
   }
 
@@ -231,7 +211,7 @@ export default function ResourceDetails(props: { id: string }) {
     <Page
       title={"Resource details"}
       crumbsReplacements={{ [props.id]: { name: data.title } }}
-      backUrl={"/resource/board-view"}
+      backUrl={"/resource/board"}
     >
       {isPrintMode ? (
         <div className="my-4">
@@ -273,7 +253,7 @@ export default function ResourceDetails(props: { id: string }) {
               <ButtonV2
                 data-testid="update-status"
                 className="mt-4 w-full sm:mt-2"
-                href={`/resource/${data.external_id}/update`}
+                href={`/resource/${data.id}/update`}
               >
                 Update Status/Details
               </ButtonV2>

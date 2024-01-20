@@ -2,12 +2,13 @@ import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import { UpdatePatientPage } from "../../pageobject/Patient/PatientUpdate";
+import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import { PatientConsultationPage } from "../../pageobject/Patient/PatientConsultation";
 import {
   emergency_phone_number,
   phone_number,
 } from "../../pageobject/constants";
-const yearOfBirth = "2023";
+const yearOfBirth = "2001";
 
 const calculateAge = () => {
   const currentYear = new Date().getFullYear();
@@ -19,6 +20,7 @@ describe("Patient Creation with consultation", () => {
   const patientPage = new PatientPage();
   const updatePatientPage = new UpdatePatientPage();
   const patientConsultationPage = new PatientConsultationPage();
+  const facilityPage = new FacilityPage();
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -27,6 +29,7 @@ describe("Patient Creation with consultation", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/patients");
   });
 
@@ -41,10 +44,13 @@ describe("Patient Creation with consultation", () => {
       "Male",
       "Test Patient Address",
       "682001",
-      "1: PAZHAMTHOTTAM",
       "O+",
       "01012001"
     );
+    facilityPage.selectStateOnPincode("Kerala");
+    facilityPage.selectDistrictOnPincode("Ernakulam");
+    facilityPage.selectLocalBody("Aluva");
+    facilityPage.selectWard("4");
     patientPage.clickCreatePatient();
 
     patientPage.verifyPatientIsCreated();
@@ -111,7 +117,9 @@ describe("Patient Creation with consultation", () => {
     updatePatientPage.visitConsultationPage();
     patientPage.verifyStatusCode();
     patientConsultationPage.fillIllnessHistory("history");
-    patientConsultationPage.selectConsultationStatus("Out-patient (walk in)");
+    patientConsultationPage.selectConsultationStatus(
+      "Outpatient/Emergency Room"
+    );
     patientConsultationPage.selectSymptoms("ASYMPTOMATIC");
 
     patientConsultationPage.enterConsultationDetails(
@@ -130,10 +138,22 @@ describe("Patient Creation with consultation", () => {
     patientConsultationPage.interceptMediaBase();
     patientConsultationPage.selectMedicinebox();
     patientConsultationPage.waitForMediabaseStatusCode();
-    patientConsultationPage.prescribeMedicine();
+    patientConsultationPage.prescribefirstMedicine();
     patientConsultationPage.enterDosage("3");
     patientConsultationPage.selectDosageFrequency("Twice daily");
     patientConsultationPage.submitPrescriptionAndReturn();
+  });
+
+  it("Edit created consultation to existing patient", () => {
+    updatePatientPage.visitUpdatedPatient();
+    patientConsultationPage.visitEditConsultationPage();
+    patientConsultationPage.fillIllnessHistory("editted");
+    patientConsultationPage.updateSymptoms("FEVER");
+    patientConsultationPage.setSymptomsDate("01082023");
+    patientConsultationPage.updateConsultation();
+    patientConsultationPage.verifySuccessNotification(
+      "Consultation updated successfully"
+    );
   });
 
   afterEach(() => {

@@ -31,7 +31,6 @@ let make = (
     None
   }, [state])
 
-
   let handleClickOutside = %raw(`
     function (event, ref, hideModal) {
       if (ref.current && !ref.current.contains(event.target)) {
@@ -56,18 +55,18 @@ let make = (
     }
   })
 
-let getStatus = (min, minText, max, maxText, val) => {
-  switch (val >= min, val <= max) {
-  | (true, true) => ("Normal", "#059669")
-  | (true, false) => (maxText, "#DC2626")
-  | _ => (minText, "#DC2626")
+  let getStatus = (min, minText, max, maxText, val) => {
+    switch (val >= min, val <= max) {
+    | (true, true) => ("Normal", "#059669")
+    | (true, false) => (maxText, "#DC2626")
+    | _ => (minText, "#DC2626")
+    }
   }
-}
 
   <div
     hidden={!show}
     onClick={e => handleClickOutside(e, modalRef, hideModal)}
-    className={previewMode && innerWidth > 720 ? "" : "fixed w-full inset-0 z-40 overflow-y-auto"}>
+    className="absolute w-full inset-0 z-40 overflow-y-auto">
     <div
       hidden={!show}
       className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
@@ -85,9 +84,7 @@ let getStatus = (min, minText, max, maxText, val) => {
             <div className="mt-3 text-center sm:mt-0 sm:text-left">
               <div className="flex gap-2 justify-center">
                 <span> {str("Region: ")} </span>
-                <span className="text-black">
-                  {str(Pain.regionToString(state.region))}
-                </span>
+                <span className="text-black"> {str(Pain.regionToString(state.region))} </span>
               </div>
               <div className="flex flex-col sm:flex-row justify-center mt-2">
                 <div className="w-full">
@@ -108,7 +105,11 @@ let getStatus = (min, minText, max, maxText, val) => {
                       }
                     }}
                     getLabel={getStatus(2.0, "Low", 4.0, "High")}
-                    hasError={ValidationUtils.isInputInRangeInt(0, 5, Belt.Float.toString(painScale)->Belt.Int.fromString)}
+                    hasError={ValidationUtils.isInputInRangeInt(
+                      0,
+                      5,
+                      Belt.Float.toString(painScale)->Belt.Int.fromString,
+                    )}
                   />
                   <div className="mt-2">
                     <label className="block font-medium text-black text-left mb-1">

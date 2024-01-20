@@ -1,8 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import * as Notification from "../../Utils/Notifications";
-import { animated, config, useSpring } from "@react-spring/web";
-import { useDispatch } from "react-redux";
-import { deleteCapacity } from "../../Redux/actions";
 import { BedCapacity } from "./BedCapacity";
 import DialogModal from "../Common/Dialog";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -10,7 +7,8 @@ import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import ConfirmDialog from "../Common/ConfirmDialog";
-import { useTranslation } from "react-i18next";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 
 interface BedTypeCardProps {
   facilityId?: string;
@@ -24,9 +22,6 @@ interface BedTypeCardProps {
   handleUpdate: () => void;
 }
 
-const CIRCLE_PATH =
-  "M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831";
-
 export const BedTypeCard: React.FC<BedTypeCardProps> = ({
   facilityId,
   bedCapacityId,
@@ -38,20 +33,19 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
   removeBedType,
   handleUpdate,
 }) => {
-  const { t } = useTranslation();
-  const dispatchAction: any = useDispatch();
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [open, setOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<number>(-1);
   const handleDeleteSubmit = async () => {
     if (room_type) {
-      const res = await dispatchAction(
-        deleteCapacity({
-          facilityId: facilityId,
-          bed_id: room_type,
-        })
-      );
-      if (res && res.status == 204) {
+      const { res } = await request(routes.deleteCapacityBed, {
+        pathParams: {
+          facilityId: facilityId ?? "",
+          bed_id: room_type.toString(),
+        },
+      });
+      if (res?.status == 204) {
         Notification.Success({
           msg: "Bed type deleted successfully",
         });
@@ -63,138 +57,90 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
     }
   };
 
-  const _p = total ? Math.round((used / total) * 100) : 0;
+  useEffect(() => {
+    if (isRefreshing) {
+      setTimeout(() => {
+        setIsRefreshing(false);
+      }, 500);
+    }
+  }, [isRefreshing]);
 
-  const { occupied, totalCount, progress, innerProgress } = useSpring({
-    from: { occupied: 0, totalCount: 0, progress: "0, 100", innerProgress: 0 },
-    to: {
-      occupied: used,
-      totalCount: total,
-      progress: `${Number.isNaN(_p) ? 0 : _p}, 100`,
-      innerProgress: Number.isNaN(_p) ? 0 : _p,
-    },
-    delay: 0,
-    config: config.slow,
-  });
+  const usedPercent = total ? Math.round((used / total) * 100) : 0;
 
   return (
     <div
       className={`${
         facilityId
           ? "border border-slate-200 bg-white"
-          : "border border-primary-500 bg-primary-100"
-      } flex h-full flex-col justify-between rounded-xl opacity-100 shadow-sm`}
-      style={{ padding: "clamp(0.75rem,5vw,1.5rem)" }}
+          : "border border-primary-300 bg-green-50"
+      } flex h-full flex-col justify-between rounded-xl p-4 opacity-100 shadow-sm`}
     >
-      <div className={"opacity-100"}>
-        <p
-          className={`${
-            facilityId ? "font-medium" : "font-bold"
-          } mb-2 text-center text-xl text-slate-900 md:mb-4`}
-        >
+      <header className="flex items-start justify-between">
+        <div className="text-md font-medium not-italic leading-[normal] text-[#453C52]">
           {label}
-        </p>
-
-        <div className="relative">
-          <div className={"opacity-100"}>
-            <div className="flex h-2/3 items-center justify-center">
-              <div className="relative m-2 flex w-4/5 content-center justify-center">
-                <svg viewBox="0 0 38 36" className="w-full">
-                  <path
-                    className={`${
-                      facilityId ? "text-slate-200" : "text-white"
-                    } stroke-current stroke-[3px]`}
-                    fill="none"
-                    d={CIRCLE_PATH}
-                  />
-                  <animated.path
-                    className="stroke-current stroke-[2px] text-primary-500"
-                    fill="none"
-                    strokeDasharray={progress}
-                    d={CIRCLE_PATH}
-                  />
-                </svg>
-                <div className="absolute inline-flex w-3/5 flex-col items-center justify-center self-center text-center text-sm xl:text-lg">
-                  <div className="space-x-1">
-                    <animated.span className="text-center text-3xl font-semibold text-slate-700">
-                      {innerProgress.to(
-                        (x: number) => `${Math.round(x) || 0}%`
-                      )}
-                    </animated.span>
-                  </div>
-                  {
-                    <div className="mt-2 text-center">
-                      <span
-                        className={"text-xl font-medium text-green-600"}
-                      ></span>
-                    </div>
-                  }
-                </div>
-              </div>
-            </div>
-            <div className="mt-4 flex h-1/3 flex-col items-center justify-center gap-4 text-center lg:flex-row">
-              <div className="overflow-x-auto">
-                <p className="text-lg font-medium text-slate-500 xl:text-xl">
-                  Used:
-                  <animated.span className="ml-2 text-lg font-semibold text-slate-700">
-                    {occupied.to((x: number) => Math.round(x))}
-                  </animated.span>
-                </p>
-              </div>
-              <div className="overflow-x-auto">
-                <p className="text-lg font-medium text-slate-500 xl:text-xl">
-                  Total:
-                  <animated.span className="ml-2 text-lg font-semibold text-slate-700">
-                    {totalCount.to((x: number) => Math.round(x))}
-                  </animated.span>
-                </p>
-              </div>
-            </div>
-            {facilityId && (
-              <div className="flex items-center justify-between gap-2 pt-6">
-                {lastUpdated && (
-                  <RecordMeta
-                    className="text-xs font-normal text-gray-600"
-                    prefix={t("updated")}
-                    time={lastUpdated}
-                  />
-                )}
-                <div className="relative flex justify-end gap-2">
-                  <ButtonV2
-                    onClick={() => {
-                      setSelectedId(room_type || 0);
-                      setOpen(true);
-                    }}
-                    authorizeFor={NonReadOnlyUsers}
-                    className="tooltip p-2"
-                    variant="secondary"
-                    ghost
-                  >
-                    <CareIcon className="care-l-edit-alt" />
-                    <span className="tooltip-text tooltip-bottom">Edit</span>
-                  </ButtonV2>
-                  <ButtonV2
-                    onClick={() => setOpenDeleteDialog(true)}
-                    authorizeFor={NonReadOnlyUsers}
-                    className="tooltip p-2"
-                    variant="danger"
-                    ghost
-                  >
-                    <CareIcon className="care-l-trash-alt" />
-                    <span className="tooltip-text tooltip-bottom">Delete</span>
-                  </ButtonV2>
-                </div>
-              </div>
-            )}
-          </div>
-          <p
-            className={
-              "pointer-events-none absolute left-1/2 top-1/4 my-8 w-full -translate-x-1/2 text-center text-xl font-bold text-slate-500 opacity-0"
-            }
-          >
-            No Data Available
-          </p>
         </div>
+        <span className="flex items-center justify-center rounded py-0 text-sm text-gray-500">
+          {usedPercent}%
+        </span>
+      </header>
+      <div className="mt-4 text-xl font-extrabold text-black">
+        {used} / {total}
+      </div>
+      <div className="mt-3 flex flex-col items-stretch justify-center rounded-md">
+        <div className="flex h-3 w-full rounded-md bg-gray-300">
+          <div
+            className="flex h-3 shrink-0 flex-col rounded-md bg-blue-600"
+            style={{ width: `${usedPercent}%` }}
+          ></div>
+        </div>
+
+        <div className="mt-3 text-sm tracking-normal text-zinc-700">
+          {" "}
+          Currently Occupied / Total Capacity{" "}
+        </div>
+        {facilityId ? (
+          <div className="mt-3 flex w-full flex-col items-start justify-between gap-5 sm:flex-row">
+            <div className="mt-4 text-xs italic text-gray-500">
+              {lastUpdated && (
+                <RecordMeta
+                  className="py-0 text-xs font-normal text-gray-600"
+                  prefix={"Last updated;"}
+                  time={lastUpdated}
+                />
+              )}
+            </div>
+            <div className="flex items-stretch justify-between gap-4 self-stretch">
+              <ButtonV2
+                id="edit-facility-bedcapacity"
+                onClick={() => {
+                  setSelectedId(room_type || 0);
+                  setOpen(true);
+                }}
+                authorizeFor={NonReadOnlyUsers}
+                className="tooltip bg-opacity/20 flex aspect-square h-7 w-7 flex-col items-center justify-center rounded bg-gray-300 px-4 py-0"
+                variant="secondary"
+                ghost
+              >
+                <CareIcon icon="l-edit-alt" className="h-5 w-5 text-black" />
+                <span className="tooltip-text tooltip-bottom">Edit</span>
+              </ButtonV2>
+
+              <ButtonV2
+                id="delete-facility-bedcapacity"
+                onClick={() => setOpenDeleteDialog(true)}
+                authorizeFor={NonReadOnlyUsers}
+                className=" tooltip bg-opacity/10 flex aspect-square h-7 w-7 flex-col items-center justify-center rounded bg-red-100 px-4 py-0 hover:bg-red-200"
+                variant="secondary"
+                ghost
+              >
+                <CareIcon icon="l-trash-alt" className="h-5 w-5 text-red-600" />
+                <span className="tooltip-text tooltip-bottom">Delete</span>
+              </ButtonV2>
+            </div>
+          </div>
+        ) : (
+          <div className="h-8"></div>
+        )}
       </div>
       <ConfirmDialog
         show={openDeleteDialog}

@@ -1,14 +1,15 @@
 import { LocalStorageKeys } from "../../Common/constants";
+import * as Notification from "../Notifications";
 import { QueryParams, RequestOptions } from "./types";
 
 export function makeUrl(
   path: string,
   query?: QueryParams,
-  pathParams?: Record<string, string>
+  pathParams?: Record<string, string | number>
 ) {
   if (pathParams) {
     path = Object.entries(pathParams).reduce(
-      (acc, [key, value]) => acc.replace(`{${key}}`, value),
+      (acc, [key, value]) => acc.replace(`{${key}}`, value.toString()),
       path
     );
   }
@@ -38,6 +39,9 @@ const ensurePathNotMissingReplacements = (path: string) => {
   const missingParams = path.match(/\{.*\}/g);
 
   if (missingParams) {
+    Notification.Error({
+      msg: `Missing path params: ${missingParams.join(", ")}`,
+    });
     throw new Error(`Missing path params: ${missingParams.join(", ")}`);
   }
 };
@@ -78,13 +82,16 @@ export function mergeRequestOptions<TData>(
     ...overrides,
 
     query: { ...options.query, ...overrides.query },
-    body: { ...options.body, ...overrides.body },
+    body: (options.body || overrides.body) && {
+      ...(options.body ?? {}),
+      ...(overrides.body ?? {}),
+    },
     pathParams: { ...options.pathParams, ...overrides.pathParams },
 
     onResponse: (res) => {
       options.onResponse?.(res);
       overrides.onResponse?.(res);
     },
-    silent: overrides.silent || options.silent,
+    silent: overrides.silent ?? options.silent,
   };
 }

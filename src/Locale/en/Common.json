@@ -45,6 +45,7 @@
   "clear": "Clear",
   "apply": "Apply",
   "filter_by": "Filter By",
+  "filter": "Filter",
   "ordering": "Ordering",
   "phone_number": "Phone Number",
   "emergency_contact_number": "Emergency Contact Number",
@@ -83,6 +84,7 @@
   "age": "Age",
   "is": "Is",
   "reason": "Reason",
+  "description": "Description",
   "name": "Name",
   "address": "Address",
   "phone": "Phone",
@@ -112,6 +114,7 @@
   "select": "Select",
   "lsg": "Lsg",
   "delete": "Delete",
+  "remove": "Remove",
   "max_size_for_image_uploaded_should_be": "Max size for image uploaded should be",
   "allowed_formats_are": "Allowed formats are",
   "recommended_aspect_ratio_for": "Recommended aspect ratio for",
@@ -127,10 +130,12 @@
   "submitting": "Submitting",
   "view_details": "View Details",
   "type_to_search": "Type to search",
-  "show_all": "Show All",
+  "show_all": "Show all",
+  "hide": "Hide",
   "select_skills": "Select and add some skills",
   "contact_your_admin_to_add_skills": "Contact your admin to add skills",
   "add": "Add",
+  "add_as": "Add as",
   "sort_by": "Sort By",
   "none": "None",
   "RESPIRATORY_SUPPORT_UNKNOWN": "None",
@@ -152,6 +157,8 @@
   "all_changes_have_been_saved": "All changes have been saved",
   "no_data_found": "No data found",
   "edit": "Edit",
-  "clear_selection": "Clear selection"
+  "clear_selection": "Clear selection",
+  "select_date": "Select date",
+  "DD/MM/YYYY": "DD/MM/YYYY",
+  "clear_all_filters": "Clear All Filters"
 }
-

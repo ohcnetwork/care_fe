@@ -2,7 +2,6 @@ import ButtonV2 from "../../Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { SelectFormField } from "../../Form/FormFields/SelectFormField";
 import TextFormField from "../../Form/FormFields/TextFormField";
-import _ from "lodash";
 import { classNames } from "../../../Utils/utils";
 import { useState } from "react";
 
@@ -18,7 +17,7 @@ const TestRow = ({ data, i, onChange, showForm, value, isChanged }: any) => {
       <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
         {data?.investigation_object?.name || "---"}
       </td>
-      <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-700">
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
         {showForm ? (
           data?.investigation_object?.investigation_type === "Choice" ? (
             <SelectFormField

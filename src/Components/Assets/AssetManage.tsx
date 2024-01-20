@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, ReactElement, lazy } from "react";
+import { useState, useEffect, ReactElement, lazy } from "react";
 import {
   AssetClass,
   assetClassProps,
@@ -6,14 +6,6 @@ import {
   AssetService,
   AssetTransaction,
 } from "./AssetTypes";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useDispatch } from "react-redux";
-import {
-  deleteAsset,
-  getAsset,
-  listAssetService,
-  listAssetTransaction,
-} from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 import QRCode from "qrcode.react";
@@ -34,7 +26,11 @@ import useAuthUser from "../../Common/hooks/useAuthUser";
 import dayjs from "dayjs";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
 import { AssetServiceEditModal } from "./AssetServiceEditModal";
+import { warrantyAmcValidityChip } from "./AssetsList";
 import Page from "../Common/components/Page";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
 
 interface AssetManageProps {
   assetId: string;
@@ -50,80 +46,60 @@ const checkAuthority = (type: string, cutoff: string) => {
 const AssetManage = (props: AssetManageProps) => {
   const { t } = useTranslation();
   const { assetId, facilityId } = props;
-  const [asset, setAsset] = useState<AssetData>();
   const [isPrintMode, setIsPrintMode] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
-  const [transactions, setTransactions] = useState<AssetTransaction[]>([]);
   const [transactionDetails, setTransactionDetails] = useState<
     ReactElement | ReactElement[]
   >();
-  const [services, setServices] = useState<AssetService[]>([]);
   const [servicesDetails, setServiceDetails] = useState<
     ReactElement | ReactElement[]
   >();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const dispatch = useDispatch<any>();
   const limit = 14;
   const authUser = useAuthUser();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [serviceEditData, setServiceEditData] = useState<
     AssetService & { open: boolean; viewOnly?: boolean }
   >();
+  const [transactionFilter, setTransactionFilter] = useState<any>({});
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const assetData = await dispatch(getAsset(assetId));
-      if (!status.aborted) {
-        setIsLoading(false);
-        if (assetData?.data) {
-          setAsset(assetData.data);
-
-          const transactionFilter = assetData.qr_code_id
-            ? { qr_code_id: assetData.qr_code_id }
-            : { external_id: assetId };
-
-          const [transactionsData, servicesData] = await Promise.all([
-            dispatch(
-              listAssetTransaction({
-                ...transactionFilter,
-                limit,
-                offset,
-              })
-            ),
-            dispatch(listAssetService({}, assetId)),
-          ]);
-
-          if (transactionsData?.data) {
-            setTransactions(transactionsData.data.results);
-            setTotalCount(transactionsData.data.count);
-          } else {
-            Notification.Error({
-              msg: "Error fetching transactions",
-            });
-          }
-          if (servicesData?.data) {
-            setServices(servicesData.data.results);
-          } else {
-            Notification.Error({
-              msg: "Error fetching service logs",
-            });
-          }
-        } else {
-          navigate("/not-found");
-        }
+  const { data: asset, loading } = useQuery(routes.getAsset, {
+    pathParams: {
+      external_id: assetId,
+    },
+    onResponse: ({ res, data }) => {
+      if (res?.status === 200 && data) {
+        setTransactionFilter(
+          data.qr_code_id
+            ? { qr_code_id: data.qr_code_id }
+            : { external_id: assetId }
+        );
       }
     },
-    [dispatch, assetId, offset]
-  );
+  });
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
+  const { data: transactions } = useQuery(routes.listAssetTransaction, {
+    prefetch: !!asset,
+    query: {
+      ...transactionFilter,
+      limit,
+      offset,
     },
-    [dispatch, fetchData]
+    onResponse: ({ res, data }) => {
+      if (res?.status === 200 && data) {
+        setTotalCount(data.count);
+      }
+    },
+  });
+
+  const { data: services, refetch: serviceRefetch } = useQuery(
+    routes.listAssetService,
+    {
+      pathParams: {
+        asset_external_id: assetId,
+      },
+    }
   );
 
   const handlePagination = (page: number, limit: number) => {
@@ -157,25 +133,25 @@ const AssetManage = (props: AssetManageProps) => {
   const populateTableRows = (txns: AssetTransaction[]) => {
     if (txns.length > 0) {
       setTransactionDetails(
-        transactions.map((transaction: AssetTransaction) => (
+        transactions?.results.map((transaction: AssetTransaction) => (
           <tr key={`transaction_id_${transaction.id}`}>
             <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
               <span className="font-medium text-gray-900">
                 {transaction.from_location.name}
               </span>
             </td>
-            <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
+            <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-gray-500">
               <span className="font-medium text-gray-900">
                 {transaction.to_location.name}
               </span>
             </td>
-            <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
+            <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-gray-500">
               <span className="font-medium text-gray-900">
                 {transaction.performed_by.first_name}{" "}
                 {transaction.performed_by.last_name}
               </span>
             </td>
-            <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
+            <td className="whitespace-nowrap px-6 py-4 text-right text-sm leading-5 text-gray-500">
               <span className="font-medium text-gray-900">
                 {formatDateTime(transaction.modified_date)}
               </span>
@@ -200,9 +176,9 @@ const AssetManage = (props: AssetManageProps) => {
   const populateServiceTableRows = (txns: AssetService[]) => {
     if (txns.length > 0) {
       setServiceDetails(
-        services.map((service: AssetService) => (
+        services?.results.map((service: AssetService) => (
           <tr key={`service_id_${service.id}`}>
-            <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-gray-500">
+            <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
               <span className="font-medium text-gray-900">
                 {dayjs(service.serviced_on).format("DD MMM YYYY")}
               </span>
@@ -229,7 +205,7 @@ const AssetManage = (props: AssetManageProps) => {
                 )}
               </span>
             </td>
-            <td className="gap-4 whitespace-nowrap px-6 py-4 text-left text-sm leading-5">
+            <td className="gap-4 whitespace-nowrap px-6 py-4 text-right text-sm leading-5">
               <ButtonV2
                 id="edit-service-history"
                 authorizeFor={NonReadOnlyUsers}
@@ -275,14 +251,14 @@ const AssetManage = (props: AssetManageProps) => {
   };
 
   useEffect(() => {
-    populateTableRows(transactions);
+    if (transactions) populateTableRows(transactions.results);
   }, [transactions]);
 
   useEffect(() => {
-    populateServiceTableRows(services);
+    if (services) populateServiceTableRows(services?.results);
   }, [services]);
 
-  if (isLoading) return <Loading />;
+  if (loading) return <Loading />;
   if (isPrintMode) return <PrintPreview />;
 
   const assetClassProp =
@@ -323,13 +299,17 @@ const AssetManage = (props: AssetManageProps) => {
 
   const handleDelete = async () => {
     if (asset) {
-      const response = await dispatch(deleteAsset(asset.id));
-      if (response && response.status === 204) {
-        Notification.Success({
-          msg: "Asset deleted successfully",
-        });
-        navigate("/assets");
-      }
+      await request(routes.deleteAsset, {
+        pathParams: {
+          external_id: asset.id,
+        },
+        onResponse: () => {
+          Notification.Success({
+            msg: "Asset deleted successfully",
+          });
+          navigate("/assets");
+        },
+      });
     }
   };
 
@@ -408,6 +388,9 @@ const AssetManage = (props: AssetManageProps) => {
                       startIcon="l-times"
                     />
                   )}
+                  {warrantyAmcValidityChip(
+                    asset?.warranty_amc_end_of_validity as string
+                  )}
                 </div>
               </div>
               <div className="mt-3 hidden text-gray-700 sm:block">
@@ -449,20 +432,24 @@ const AssetManage = (props: AssetManageProps) => {
                 <CareIcon className="care-l-pen mr-1 h-4" />
                 {t("update")}
               </ButtonV2>
-              {asset?.asset_class && (
-                <ButtonV2
-                  onClick={() =>
-                    navigate(
-                      `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}/configure`
-                    )
-                  }
-                  id="configure-asset"
-                  data-testid="asset-configure-button"
-                >
-                  <CareIcon className="care-l-setting h-4" />
-                  {t("configure")}
-                </ButtonV2>
-              )}
+              {asset?.asset_class &&
+                (asset?.asset_class !== "ONVIF" ||
+                  ["DistrictAdmin", "StateAdmin", "Doctor"].includes(
+                    authUser.user_type
+                  )) && (
+                  <ButtonV2
+                    onClick={() =>
+                      navigate(
+                        `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}/configure`
+                      )
+                    }
+                    id="configure-asset"
+                    data-testid="asset-configure-button"
+                  >
+                    <CareIcon className="care-l-setting h-4" />
+                    {t("configure")}
+                  </ButtonV2>
+                )}
               {checkAuthority(authUser.user_type, "DistrictAdmin") && (
                 <ButtonV2
                   authorizeFor={NonReadOnlyUsers}
@@ -525,7 +512,7 @@ const AssetManage = (props: AssetManageProps) => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead>
             <tr>
-              <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+              <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
                 Serviced on
               </th>
               <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
@@ -537,7 +524,7 @@ const AssetManage = (props: AssetManageProps) => {
               <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
                 Last Updated
               </th>
-              <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+              <th className="relative right-10 bg-gray-50 px-6 py-3 text-right text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
                 Edit
               </th>
             </tr>
@@ -558,13 +545,13 @@ const AssetManage = (props: AssetManageProps) => {
               <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
                 Moved from
               </th>
-              <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+              <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
                 Moved to
               </th>
-              <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+              <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
                 Moved By
               </th>
-              <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+              <th className="relative right-5 bg-gray-50 px-6 py-3 text-right text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
                 Moved On
               </th>
             </tr>
@@ -591,7 +578,7 @@ const AssetManage = (props: AssetManageProps) => {
           handleClose={() =>
             setServiceEditData({ ...serviceEditData, open: false })
           }
-          handleUpdate={() => fetchData({ aborted: false })}
+          handleUpdate={() => serviceRefetch()}
           show={serviceEditData.open}
           viewOnly={serviceEditData.viewOnly}
         />

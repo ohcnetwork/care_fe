@@ -18,6 +18,21 @@
     "plugin:i18next/recommended",
     "plugin:tailwindcss/recommended"
   ],
+  "overrides": [
+    {
+      "files": [
+        "**/*.mdx"
+      ],
+      "extends": [
+        "plugin:react/recommended",
+        "plugin:mdx/recommended"
+      ],
+      "rules": {
+        "react/jsx-no-target-blank": "off",
+        "i18next/no-literal-string": "off"
+      }
+    }    
+  ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaFeatures": {
@@ -72,7 +87,6 @@
     "*.res",
     "*.css",
     "*.csv",
-    "*.stories.mdx",
     "Dockerfile"
   ]
 }

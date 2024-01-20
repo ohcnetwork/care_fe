@@ -3,11 +3,12 @@ import useFilters from "../../Common/hooks/useFilters";
 import ButtonV2 from "../../Components/Common/components/ButtonV2";
 import CareIcon from "../icons/CareIcon";
 import SlideOver from "./SlideOver";
+import { ReactNode } from "react";
 
 type AdvancedFilter = ReturnType<typeof useFilters>["advancedFilter"];
 
 interface Props {
-  children: any;
+  children: ReactNode | ReactNode[];
   advancedFilter: AdvancedFilter;
   onClear?: () => void;
   onApply?: () => void;

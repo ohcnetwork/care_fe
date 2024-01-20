@@ -36,6 +36,7 @@ const LiveFeed = (props: any) => {
   const [streamStatus, setStreamStatus] = useState<StreamStatus>(
     StreamStatus.Offline
   );
+  const [videoStartTime, setVideoStartTime] = useState<Date | null>(null);
   const [bed, setBed] = useState<BedModel>({});
   const [preset, setNewPreset] = useState<string>("");
   const [loading, setLoading] = useState<string | undefined>();
@@ -99,6 +100,16 @@ const LiveFeed = (props: any) => {
           });
       },
     });
+
+  const calculateVideoLiveDelay = () => {
+    const video = liveFeedPlayerRef.current as HTMLVideoElement;
+    if (!video || !videoStartTime) return 0;
+
+    const timeDifference =
+      (new Date().getTime() - videoStartTime.getTime()) / 1000;
+
+    return timeDifference - video.currentTime;
+  };
 
   const getBedPresets = async (id: any) => {
     const bedAssets = await dispatch(
@@ -166,6 +177,9 @@ const LiveFeed = (props: any) => {
   useEffect(() => {
     if (cameraAsset?.hostname) {
       fetchCameraPresets();
+      setTimeout(() => {
+        startStreamFeed();
+      }, 1000);
     }
   }, []);
 
@@ -180,6 +194,13 @@ const LiveFeed = (props: any) => {
       absoluteMove(bedPresets[0]?.position, {});
     }
   }, [page.offset, cameraAsset.id, refreshPresetsHash]);
+
+  const startStreamFeed = () => {
+    startStream({
+      onSuccess: () => setStreamStatus(StreamStatus.Playing),
+      onError: () => setStreamStatus(StreamStatus.Offline),
+    });
+  };
 
   const viewOptions = (page: number) => {
     return presets
@@ -196,11 +217,8 @@ const LiveFeed = (props: any) => {
     if (streamStatus !== StreamStatus.Playing) {
       setStreamStatus(StreamStatus.Loading);
       tId = setTimeout(() => {
-        startStream({
-          onSuccess: () => setStreamStatus(StreamStatus.Playing),
-          onError: () => setStreamStatus(StreamStatus.Offline),
-        });
-      }, 500);
+        startStreamFeed();
+      }, 5000);
     }
 
     return () => {
@@ -223,6 +241,7 @@ const LiveFeed = (props: any) => {
     },
     reset: () => {
       setStreamStatus(StreamStatus.Loading);
+      setVideoStartTime(null);
       startStream({
         onSuccess: () => setStreamStatus(StreamStatus.Playing),
         onError: () => setStreamStatus(StreamStatus.Offline),
@@ -344,7 +363,24 @@ const LiveFeed = (props: any) => {
                 playsInline
                 className="z-10 h-full w-full"
                 ref={liveFeedPlayerRef}
+                onPlay={() => {
+                  setVideoStartTime(() => new Date());
+                }}
+                onWaiting={() => {
+                  const delay = calculateVideoLiveDelay();
+                  if (delay > 5) {
+                    setStreamStatus(StreamStatus.Loading);
+                  }
+                }}
               ></video>
+
+              {streamStatus === StreamStatus.Playing &&
+                calculateVideoLiveDelay() > 3 && (
+                  <div className="absolute left-8 top-12 z-10 flex items-center gap-2 rounded-3xl bg-red-400 px-3 py-1.5 text-xs font-semibold text-gray-100">
+                    <CareIcon className="care-l-wifi-slash h-4 w-4" />
+                    <span>Slow Network Detected</span>
+                  </div>
+                )}
 
               {loading && (
                 <div className="absolute bottom-0 right-0 rounded-tl bg-white/75 p-4">
@@ -425,7 +461,7 @@ const LiveFeed = (props: any) => {
                   </button>
                 );
               })}
-              <div className="hideonmobilescreen pl-3">
+              <div className="hidden pl-3 md:block">
                 <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
               </div>
             </div>

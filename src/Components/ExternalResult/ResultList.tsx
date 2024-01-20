@@ -1,12 +1,10 @@
 import ButtonV2 from "../Common/components/ButtonV2";
 import { navigate } from "raviger";
-import { lazy, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { lazy, useState } from "react";
 import { externalResultList } from "../../Redux/actions";
 import ListFilter from "./ListFilter";
 import FacilitiesSelectDialogue from "./FacilitiesSelectDialogue";
 import { FacilityModel } from "../Facility/models";
-import { parsePhoneNumber } from "../../Utils/utils";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -15,14 +13,16 @@ import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import CountBlock from "../../CAREUI/display/Count";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import Page from "../Common/components/Page";
+import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
+import { parsePhoneNumber } from "../../Utils/utils";
+import useAuthUser from "../../Common/hooks/useAuthUser";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ResultList() {
-  const dispatch: any = useDispatch();
-  const [data, setData] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [totalCount, setTotalCount] = useState(0);
+  const authUser = useAuthUser();
   const {
     qParams,
     updateQuery,
@@ -30,7 +30,10 @@ export default function ResultList() {
     FilterBadges,
     advancedFilter,
     resultsPerPage,
-  } = useFilters({ limit: 14 });
+  } = useFilters({
+    limit: 14,
+    cacheBlacklist: ["mobile_number", "name"],
+  });
   const [showDialog, setShowDialog] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
@@ -57,61 +60,31 @@ export default function ResultList() {
 
     setPhoneNumberError("Enter a valid number");
   };
+  const params = {
+    page: qParams.page || 1,
+    name: qParams.name || "",
+    mobile_number: qParams.mobile_number
+      ? parsePhoneNumber(qParams.mobile_number) ?? ""
+      : "",
+    wards: qParams.wards || undefined,
+    local_bodies: qParams.local_bodies || undefined,
+    created_date_before: qParams.created_date_before || undefined,
+    created_date_after: qParams.created_date_after || undefined,
+    result_date_before: qParams.result_date_before || undefined,
+    result_date_after: qParams.result_date_after || undefined,
+    sample_collection_date_after:
+      qParams.sample_collection_date_after || undefined,
+    sample_collection_date_before:
+      qParams.sample_collection_date_before || undefined,
+    offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
+    srf_id: qParams.srf_id || undefined,
+  };
+
+  const { data, loading } = useQuery(routes.externalResultList, {
+    query: params,
+  });
 
   let manageResults: any = null;
-  useEffect(() => {
-    setIsLoading(true);
-    const params = {
-      page: qParams.page || 1,
-      name: qParams.name || "",
-      mobile_number: qParams.mobile_number
-        ? parsePhoneNumber(qParams.mobile_number) ?? ""
-        : "",
-      wards: qParams.wards || undefined,
-      local_bodies: qParams.local_bodies || undefined,
-      created_date_before: qParams.created_date_before || undefined,
-      created_date_after: qParams.created_date_after || undefined,
-      result_date_before: qParams.result_date_before || undefined,
-      result_date_after: qParams.result_date_after || undefined,
-      sample_collection_date_after:
-        qParams.sample_collection_date_after || undefined,
-      sample_collection_date_before:
-        qParams.sample_collection_date_before || undefined,
-      offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
-      srf_id: qParams.srf_id || undefined,
-    };
-
-    dispatch(externalResultList(params, "externalResultList"))
-      .then((res: any) => {
-        if (res && res.data) {
-          setData(res.data.results);
-          setTotalCount(res.data.count);
-          setIsLoading(false);
-        }
-      })
-      .catch(() => {
-        setIsLoading(false);
-      });
-
-    if (!params.mobile_number) {
-      setPhoneNum("+91");
-    }
-  }, [
-    dispatch,
-    qParams.name,
-    qParams.page,
-    qParams.mobile_number,
-    qParams.wards,
-    qParams.created_date_before,
-    qParams.created_date_after,
-    qParams.result_date_before,
-    qParams.result_date_after,
-    qParams.sample_collection_date_after,
-    qParams.sample_collection_date_before,
-    qParams.local_bodies,
-    qParams.srf_id,
-    dataList,
-  ]);
 
   const removeLSGFilter = (paramKey: any, id: any) => {
     const updatedLsgList = dataList.lsgList.filter((x: any) => x.id !== id);
@@ -158,8 +131,8 @@ export default function ResultList() {
   };
 
   let resultList: any[] = [];
-  if (data && data.length) {
-    resultList = data.map((result: any) => {
+  if (data?.results.length) {
+    resultList = data.results.map((result: any) => {
       const resultUrl = `/external_results/${result.id}`;
       return (
         <tr key={`usr_${result.id}`} className="bg-white">
@@ -173,7 +146,7 @@ export default function ResultList() {
                 className="group inline-flex space-x-2 text-sm leading-5"
               >
                 <p className="text-gray-800 transition duration-150 ease-in-out group-hover:text-gray-900">
-                  {result.name} - {result.age} {result.age_in}
+                  {`${result.name}`} - {result.age} {result.age_in}
                 </p>
               </a>
             </div>
@@ -199,6 +172,10 @@ export default function ResultList() {
           <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
             <ButtonV2
               variant="primary"
+              disabled={
+                authUser.user_type === "Nurse" || authUser.user_type === "Staff"
+              }
+              authorizeFor={NonReadOnlyUsers}
               border
               ghost
               onClick={() => {
@@ -214,7 +191,7 @@ export default function ResultList() {
     });
   }
 
-  if (isLoading || !data) {
+  if (loading) {
     manageResults = (
       <tr className="bg-white">
         <td colSpan={5}>
@@ -222,9 +199,9 @@ export default function ResultList() {
         </td>
       </tr>
     );
-  } else if (data && data.length) {
+  } else if (data?.results.length) {
     manageResults = <>{resultList}</>;
-  } else if (data && data.length === 0) {
+  } else if (data?.results.length === 0) {
     manageResults = (
       <tr className="bg-white">
         <td colSpan={5}>
@@ -260,13 +237,18 @@ export default function ResultList() {
           <ExportMenu
             label="Import/Export"
             exportItems={[
-              {
-                label: "Import Results",
-                action: () => navigate("/external_results/upload"),
-                options: {
-                  icon: <CareIcon className="care-l-import" />,
-                },
-              },
+              ...(authUser.user_type !== "Nurse" &&
+              authUser.user_type !== "Staff"
+                ? [
+                    {
+                      label: "Import Results",
+                      action: () => navigate("/external_results/upload"),
+                      options: {
+                        icon: <CareIcon className="care-l-import" />,
+                      },
+                    },
+                  ]
+                : []),
               {
                 label: "Export Results",
                 action: () =>
@@ -286,8 +268,8 @@ export default function ResultList() {
         <div className="relative my-4 grid-cols-1 gap-5 px-2 sm:grid-cols-3 md:px-0 lg:grid">
           <CountBlock
             text="Total Results"
-            count={totalCount}
-            loading={isLoading}
+            count={data?.count || 0}
+            loading={loading}
             icon="l-clipboard-notes"
             className="flex-1"
           />
@@ -298,11 +280,11 @@ export default function ResultList() {
               value={qParams.name}
               placeholder="Search by name"
             />
-            <div className="my-2 text-sm font-medium">Search by number</div>
             <div className="w-full max-w-sm">
               <PhoneNumberFormField
+                label="Search by number"
                 name="mobile_number"
-                labelClassName="hidden"
+                labelClassName="my-2 text-sm font-medium"
                 value={phone_number}
                 onChange={(e) => setPhoneNum(e.value)}
                 error={phoneNumberError}
@@ -318,6 +300,13 @@ export default function ResultList() {
           </div>
         </div>
 
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          {qParams.local_bodies &&
+            dataList.lsgList.map((x) => lsgWardBadge("LSG", x, "local_bodies"))}
+          {qParams.wards &&
+            dataList.wardList.map((x) => lsgWardBadge("Ward", x, "wards"))}
+        </div>
+
         <FilterBadges
           badges={({ badge, phoneNumber, dateRange }) => [
             badge("Name", "name"),
@@ -328,10 +317,7 @@ export default function ResultList() {
             badge("SRF ID", "srf_id"),
           ]}
         />
-        <div className="mb-4 flex flex-wrap items-center gap-2">
-          {dataList.lsgList.map((x) => lsgWardBadge("LSG", x, "local_bodies"))}
-          {dataList.wardList.map((x) => lsgWardBadge("Ward", x, "wards"))}
-        </div>
+
         <div className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-t-lg">
           <table className="min-w-full divide-y divide-gray-200">
             <thead>
@@ -358,7 +344,7 @@ export default function ResultList() {
             </tbody>
           </table>
         </div>
-        <Pagination totalCount={totalCount} />
+        <Pagination totalCount={data?.count || 0} />
         <ListFilter
           {...advancedFilter}
           dataList={lsgWardData}

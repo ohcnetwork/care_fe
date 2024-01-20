@@ -1,12 +1,10 @@
 import { Popover } from "@headlessui/react";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { listAssetAvailability } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
-import * as Notification from "../../Utils/Notifications.js";
+import { useEffect, useRef, useState } from "react";
 import { AssetStatus, AssetUptimeRecord } from "../Assets/AssetTypes";
-import { reverse } from "lodash";
 import { classNames } from "../../Utils/utils";
 import dayjs from "../../Utils/dayjs";
+import useQuery from "../../Utils/request/useQuery.js";
+import routes from "../../Redux/api.js";
 
 const STATUS_COLORS = {
   Operational: "bg-green-500",
@@ -63,7 +61,7 @@ function UptimeInfo({
               <>
                 <span className="my-2 block font-bold">Status Updates</span>
                 <div className="grid grid-cols-1 gap-1 md:grid-cols-4">
-                  {reverse(incidents)?.map((incident, index) => {
+                  {incidents.reverse().map((incident, index) => {
                     const prevIncident = incidents[index - 1];
                     let endTimestamp;
                     let ongoing = false;
@@ -171,16 +169,16 @@ export default function Uptime(props: { assetId: string }) {
   const [summary, setSummary] = useState<{
     [key: number]: AssetUptimeRecord[];
   }>([]);
-  const [availabilityData, setAvailabilityData] = useState<AssetUptimeRecord[]>(
-    []
-  );
-  const [loading, setLoading] = useState(true);
+  const { data, loading } = useQuery(routes.listAssetAvailability, {
+    query: { external_id: props.assetId },
+    onResponse: ({ data }) => setUptimeRecord(data?.results.reverse() ?? []),
+  });
+  const availabilityData = data?.results ?? [];
   const graphElem = useRef<HTMLDivElement>(null);
   const [numDays, setNumDays] = useState(
     Math.floor((window.innerWidth - 1024) / 20)
   );
   const [hoveredDay, setHoveredDay] = useState(-1);
-  const dispatch = useDispatch<any>();
 
   const handleResize = () => {
     const containerWidth = graphElem.current?.clientWidth ?? window.innerWidth;
@@ -268,25 +266,6 @@ export default function Uptime(props: { assetId: string }) {
     return Math.round((upStatus / (days * 3)) * 100);
   }
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setLoading(false);
-
-    const availabilityData = await dispatch(
-      listAssetAvailability({
-        external_id: props.assetId,
-      })
-    );
-    if (availabilityData?.data) {
-      setAvailabilityData(availabilityData.data.results);
-      setUptimeRecord(reverse(availabilityData.data.results));
-    } else {
-      Notification.Error({
-        msg: "Error fetching availability history",
-      });
-    }
-  }, [dispatch, props.assetId]);
-
   useEffect(() => {
     setTimeout(() => {
       handleResize();
@@ -297,8 +276,7 @@ export default function Uptime(props: { assetId: string }) {
 
   useEffect(() => {
     handleResize();
-    fetchData();
-  }, [props.assetId, fetchData]);
+  }, []);
 
   const getStatusColor = (day: number) => {
     if (summary[day]) {

@@ -1,11 +1,12 @@
 import { useCallback } from "react";
-import { useDispatch } from "react-redux";
-import { getAllFacilities, getPermittedFacilities } from "../../Redux/actions";
 import AutoCompleteAsync from "../Form/AutoCompleteAsync";
 import { FacilityModel } from "../Facility/models";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 interface FacilitySelectProps {
   name: string;
+  exclude_user?: string;
   errors?: string | undefined;
   className?: string;
   searchAll?: boolean;
@@ -22,6 +23,7 @@ interface FacilitySelectProps {
 export const FacilitySelect = (props: FacilitySelectProps) => {
   const {
     name,
+    exclude_user,
     multiple,
     selected,
     setSelected,
@@ -35,30 +37,31 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
     errors = "",
   } = props;
 
-  const dispatchAction: any = useDispatch();
-
   const facilitySearch = useCallback(
     async (text: string) => {
-      const params = {
+      const query = {
         limit: 50,
         offset: 0,
         search_text: text,
         all: searchAll,
         facility_type: facilityType,
+        exclude_user: exclude_user,
         district,
       };
 
-      const res = await dispatchAction(
-        showAll ? getAllFacilities(params) : getPermittedFacilities(params)
+      const { data } = await request(
+        showAll ? routes.getAllFacilities : routes.getPermittedFacilities,
+        { query }
       );
+
       if (freeText)
-        res?.data?.results?.push({
+        data?.results?.push({
           id: -1,
           name: text,
         });
-      return res?.data?.results;
+      return data?.results;
     },
-    [dispatchAction, searchAll, showAll, facilityType, district]
+    [searchAll, showAll, facilityType, district, exclude_user, freeText]
   );
 
   return (

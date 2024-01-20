@@ -28,6 +28,8 @@ export type UserRole =
   | "Volunteer"
   | "StaffReadOnly"
   | "Staff"
+  | "NurseReadOnly"
+  | "Nurse"
   | "Doctor"
   | "WardAdmin"
   | "LocalBodyAdmin"
@@ -47,6 +49,8 @@ export const USER_TYPE_OPTIONS: {
   { id: "Volunteer", role: "Volunteer", readOnly: false },
   { id: "StaffReadOnly", role: "Staff", readOnly: true },
   { id: "Staff", role: "Staff", readOnly: false },
+  { id: "NurseReadOnly", role: "Nurse", readOnly: true },
+  { id: "Nurse", role: "Nurse", readOnly: false },
   { id: "Doctor", role: "Doctor", readOnly: false },
   { id: "WardAdmin", role: "Ward Admin", readOnly: false },
   { id: "LocalBodyAdmin", role: "Local Body Admin", readOnly: false },
@@ -213,10 +217,10 @@ export const getBedTypes = ({
     : [];
 
   return [
-    { id: 1, text: "Non-Covid Ordinary Beds" },
-    { id: 150, text: "Non-Covid Oxygen beds" },
-    { id: 10, text: "Non-Covid ICU (ICU without ventilator)" },
-    { id: 20, text: "Non-Covid Ventilator (ICU with ventilator)" },
+    { id: 1, text: "Ordinary Beds" },
+    { id: 150, text: "Oxygen beds" },
+    { id: 10, text: "ICU (ICU without ventilator)" },
+    { id: 20, text: "Ventilator (ICU with ventilator)" },
     { id: 30, text: "Covid Ordinary Beds" },
     { id: 120, text: "Covid Oxygen beds" },
     { id: 110, text: "Covid ICU (ICU without ventilator)" },
@@ -294,10 +298,23 @@ export const SYMPTOM_CHOICES = [
 ];
 
 export const DISCHARGE_REASONS = [
-  { id: "REC", text: "Recovered" },
-  { id: "EXP", text: "Expired" },
-  { id: "REF", text: "Referred" },
-  { id: "LAMA", text: "LAMA" },
+  { id: 1, text: "Recovered" },
+  { id: 2, text: "Referred" },
+  { id: 3, text: "Expired" },
+  { id: 4, text: "LAMA" },
+];
+
+export const CONSCIOUSNESS_LEVEL = [
+  { id: "UNRESPONSIVE", text: "Unresponsive" },
+  { id: "RESPONDS_TO_PAIN", text: "Responds to Pain" },
+  { id: "RESPONDS_TO_VOICE", text: "Responds to Voice" },
+  { id: "ALERT", text: "Alert" },
+  { id: "AGITATED_OR_CONFUSED", text: "Agitated or Confused" },
+  {
+    id: "ONSET_OF_AGITATION_AND_CONFUSION",
+    text: "Onset of Agitation and Confusion",
+  },
+  { id: "UNKNOWN", text: "Unknown" },
 ];
 
 export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
@@ -330,15 +347,10 @@ export const CONSULTATION_SUGGESTION = [
   { id: "OP", text: "OP Consultation" },
   { id: "DC", text: "Domiciliary Care" },
   { id: "DD", text: "Declare Death" },
-];
+] as const;
 
-export const CONSULTATION_STATUS = [
-  { id: "1", text: "Brought Dead" },
-  { id: "2", text: "Transferred from ward" },
-  { id: "3", text: "Transferred from ICU" },
-  { id: "4", text: "Referred from other hospital" },
-  { id: "5", text: "Out-patient (walk in)" },
-];
+export type ConsultationSuggestionValue =
+  (typeof CONSULTATION_SUGGESTION)[number]["id"];
 
 export const ADMITTED_TO = [
   { id: "1", text: "Isolation" },
@@ -408,24 +420,6 @@ export const SAMPLE_FLOW_RULES = {
   ],
   RECEIVED_AND_FORWARED: ["RECEIVED_AT_LAB", "COMPLETED"],
   RECEIVED_AT_LAB: ["COMPLETED"],
-};
-
-export const ROLE_STATUS_MAP = {
-  Staff: ["SENT_TO_COLLECTON_CENTRE"],
-  DistrictAdmin: [
-    "APPROVED",
-    "DENIED",
-    "SENT_TO_COLLECTON_CENTRE",
-    "RECEIVED_AND_FORWARED",
-  ],
-  StateLabAdmin: [
-    "APPROVED",
-    "DENIED",
-    "SENT_TO_COLLECTON_CENTRE",
-    "RECEIVED_AND_FORWARED",
-    "RECEIVED_AT_LAB",
-    "COMPLETED",
-  ],
 };
 
 export const DISEASE_STATUS = [
@@ -499,6 +493,7 @@ export const TELEMEDICINE_ACTIONS = [
   { id: 60, text: "COMPLETE", desc: "Complete" },
   { id: 70, text: "REVIEW", desc: "Review" },
   { id: 80, text: "NOT_REACHABLE", desc: "Not Reachable" },
+  { id: 90, text: "DISCHARGE_RECOMMENDED", desc: "Discharge Recommended" },
 ];
 
 export const FRONTLINE_WORKER = [
@@ -608,6 +603,11 @@ export const NOTIFICATION_EVENTS = [
     id: "SHIFTING_UPDATED",
     text: "Shifting Updated",
     icon: "fa-solid fa-truck-medical",
+  },
+  {
+    id: "PATIENT_NOTE_ADDED",
+    text: "Patient Note Added",
+    icon: "fa-solid fa-message",
   },
 ];
 
@@ -897,7 +897,7 @@ export const XLSXAssetImportSchema = {
   Class: {
     prop: "asset_class",
     type: String,
-    oneOf: ["HL7MONITOR", "ONVIF"],
+    oneOf: ["HL7MONITOR", "ONVIF", "VENTILATOR", ""],
   },
   Description: { prop: "description", type: String },
   "Working Status": {
@@ -909,7 +909,7 @@ export const XLSXAssetImportSchema = {
       } else if (status === "NOT WORKING") {
         return false;
       } else {
-        throw new Error("Invalid Working Status");
+        throw new Error("Invalid Working Status: " + status);
       }
     },
     required: true,
@@ -918,6 +918,7 @@ export const XLSXAssetImportSchema = {
     prop: "not_working_reason",
     type: String,
   },
+  "Serial Number": { prop: "serial_number", type: String },
   "QR Code ID": { prop: "qr_code_id", type: String },
   Manufacturer: { prop: "manufacturer", type: String },
   "Vendor Name": { prop: "vendor_name", type: String },
@@ -926,10 +927,11 @@ export const XLSXAssetImportSchema = {
     prop: "support_email",
     type: String,
     parse: (email: string) => {
+      if (!email) return null;
       const isValid = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
 
       if (!isValid) {
-        throw new Error("Invalid Support Email");
+        throw new Error("Invalid Support Email: " + email);
       }
 
       return email;
@@ -939,23 +941,38 @@ export const XLSXAssetImportSchema = {
     prop: "support_phone",
     type: String,
     parse: (phone: number | string) => {
-      phone = "+91" + String(phone);
-      if (!PhoneNumberValidator(["support"])(phone) === undefined) {
-        throw new Error("Invalid Support Phone Number");
+      phone = String(phone);
+      if (phone.length === 10 && !phone.startsWith("1800")) {
+        phone = "+91" + phone;
+      }
+      if (phone.startsWith("91") && phone.length === 12) {
+        phone = "+" + phone;
+      }
+      if (phone.startsWith("+911800")) {
+        phone = "1800" + phone.slice(6);
+      }
+      if (
+        PhoneNumberValidator(["mobile", "landline", "support"])(phone) !==
+        undefined
+      ) {
+        throw new Error("Invalid Support Phone Number: " + phone);
       }
 
       return phone ? phone : undefined;
     },
     required: true,
   },
-  "Warrenty End Date": {
+  "Warranty End Date": {
     prop: "warranty_amc_end_of_validity",
     type: String,
     parse: (date: string) => {
-      const parsed = new Date(date);
+      if (!date) return null;
+      const parts = date.split("-");
+      const reformattedDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+      const parsed = new Date(reformattedDateStr);
 
       if (String(parsed) === "Invalid Date") {
-        throw new Error("Invalid Warrenty End Date");
+        throw new Error("Invalid Warranty End Date:" + date);
       }
 
       return dateQueryString(parsed);
@@ -965,10 +982,13 @@ export const XLSXAssetImportSchema = {
     prop: "last_serviced_on",
     type: String,
     parse: (date: string) => {
-      const parsed = new Date(date);
+      if (!date) return null;
+      const parts = date.split("-");
+      const reformattedDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+      const parsed = new Date(reformattedDateStr);
 
       if (String(parsed) === "Invalid Date") {
-        throw new Error("Invalid Last Service Date");
+        throw new Error("Invalid Last Service Date:" + date);
       }
 
       return dateQueryString(parsed);
@@ -982,13 +1002,14 @@ export const XLSXAssetImportSchema = {
         prop: "local_ip_address",
         type: String,
         parse: (ip: string) => {
+          if (!ip) return null;
           const isValid =
             /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
               ip
             );
 
           if (!isValid) {
-            throw new Error("Invalid Config IP Address");
+            throw new Error("Invalid Config IP Address: " + ip);
           }
 
           return ip;
@@ -1003,7 +1024,6 @@ export const XLSXAssetImportSchema = {
 };
 
 // ABDM
-
 export const ABDM_CONSENT_PURPOSE = [
   { value: "CAREMGT", label: "Care Management" },
   { value: "BTG", label: "Break The Glass" },
@@ -1022,6 +1042,25 @@ export const ABDM_HI_TYPE = [
   { value: "HealthDocumentRecord", label: "Record Artifact" },
   { value: "WellnessRecord", label: "Wellness Record" },
 ];
+
+export const USER_TYPES_MAP = {
+  Pharmacist: "Pharmacist",
+  Volunteer: "Volunteer",
+  StaffReadOnly: "Staff",
+  Staff: "Staff",
+  Doctor: "Doctor",
+  Nurse: "Nurse",
+  NurseReadOnly: "Nurse",
+  WardAdmin: "Ward Admin",
+  LocalBodyAdmin: "Local Body Admin",
+  DistrictLabAdmin: "District Lab Admin",
+  DistrictReadOnlyAdmin: "District Admin",
+  DistrictAdmin: "District Admin",
+  StateLabAdmin: "State Lab Admin",
+  StateReadOnlyAdmin: "State Admin",
+  StateAdmin: "State Admin",
+  RemoteSpecialist: "Remote Specialist",
+} as const;
 
 export const AREACODES: Record<string, string[]> = {
   CA: [

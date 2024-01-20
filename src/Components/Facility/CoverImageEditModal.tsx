@@ -123,7 +123,6 @@ const CoverImageEditModal = ({
       );
       if (response.status === 200) {
         Success({ msg: "Cover image updated." });
-        window.location.reload();
       } else {
         Notification.Error({
           msg: "Something went wrong!",
@@ -148,7 +147,6 @@ const CoverImageEditModal = ({
     const res = await dispatch(deleteFacilityCoverImage(facility.id as any));
     if (res.statusCode === 204) {
       Success({ msg: "Cover image deleted" });
-      window.location.reload();
     }
 
     onDelete && onDelete();
@@ -250,7 +248,10 @@ const CoverImageEditModal = ({
 
             <div className="flex flex-col gap-2 pt-4 sm:flex-row">
               <div>
-                <label className="flex w-full cursor-pointer items-center justify-center gap-1 rounded-lg border border-primary-500 bg-white px-4 py-2 text-sm font-medium text-primary-500 transition-all hover:border-primary-400 hover:text-primary-400">
+                <label
+                  id="upload-cover-image"
+                  className="flex w-full cursor-pointer items-center justify-center gap-1 rounded-lg border border-primary-500 bg-white px-4 py-2 text-sm font-medium text-primary-500 transition-all hover:border-primary-400 hover:text-primary-400"
+                >
                   <CareIcon className="care-l-cloud-upload text-lg" />
                   {t("upload_an_image")}
                   <input
@@ -287,7 +288,11 @@ const CoverImageEditModal = ({
                   {t("delete")}
                 </ButtonV2>
               )}
-              <ButtonV2 onClick={handleUpload} disabled={isUploading}>
+              <ButtonV2
+                id="save-cover-image"
+                onClick={handleUpload}
+                disabled={isUploading}
+              >
                 {isUploading ? (
                   <CareIcon className="care-l-spinner animate-spin text-lg" />
                 ) : (
@@ -301,11 +306,10 @@ const CoverImageEditModal = ({
           </form>
         ) : (
           <div className="flex max-h-screen min-h-[24rem] flex-col overflow-auto">
-            <div className="flex flex-col bg-gray-300">
+            <div className="mb-1 mt-2 flex flex-col">
               <span className="text-xl font-medium">
                 {t("capture_cover_photo")}
               </span>
-              <span className="mt-1 text-gray-700">{facility.name}</span>
             </div>
             <div className="flex flex-1 items-center justify-center">
               {!previewImage ? (
@@ -326,10 +330,13 @@ const CoverImageEditModal = ({
               )}
             </div>
             {/* buttons for mobile screens */}
-            <div className="m-4 flex justify-evenly sm:hidden ">
+            <div className="m-4 flex flex-col justify-evenly sm:hidden ">
               <div>
                 {!previewImage ? (
-                  <ButtonV2 onClick={handleSwitchCamera} className="m-2">
+                  <ButtonV2
+                    onClick={handleSwitchCamera}
+                    className="my-2 w-full"
+                  >
                     {t("switch")}
                   </ButtonV2>
                 ) : (
@@ -344,7 +351,7 @@ const CoverImageEditModal = ({
                         onClick={() => {
                           captureImage();
                         }}
-                        className="m-2"
+                        className="my-2 w-full"
                       >
                         {t("capture")}
                       </ButtonV2>
@@ -352,17 +359,17 @@ const CoverImageEditModal = ({
                   </>
                 ) : (
                   <>
-                    <div className="flex space-x-2">
+                    <div className="flex flex-col">
                       <ButtonV2
                         onClick={() => {
                           setPreviewImage(null);
                         }}
-                        className="m-2"
+                        className="my-2 w-full"
                         disabled={isUploading}
                       >
                         {t("retake")}
                       </ButtonV2>
-                      <ButtonV2 onClick={handleUpload} className="m-2">
+                      <ButtonV2 onClick={handleUpload} className="my-2 w-full">
                         {isCaptureImgBeingUploaded && (
                           <CareIcon className="care-l-spinner animate-spin text-lg" />
                         )}
@@ -380,7 +387,7 @@ const CoverImageEditModal = ({
                     setIsCameraOpen(false);
                     webRef.current.stopCamera();
                   }}
-                  className="m-2"
+                  className="border-grey-200 my-2 w-full border-2"
                 >
                   {t("close")}
                 </ButtonV2>

@@ -1,36 +1,26 @@
 import { useState, useEffect, useCallback } from "react";
-import { useAbortableEffect, statusType } from "../../Common/utils";
-import { navigate, useQueryParams } from "raviger";
+import { useQueryParams } from "raviger";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
-import { useDispatch } from "react-redux";
-import {
-  getFacilityAssetLocation,
-  getPermittedFacility,
-} from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications.js";
 import { LocationSelect } from "../Common/LocationSelect";
-import { AssetClass, AssetLocationObject } from "./AssetTypes";
+import { AssetClass } from "./AssetTypes";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
+import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
+import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
+import dayjs from "dayjs";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import { DateRange } from "../Common/DateRangeInputV2";
+import { dateQueryString } from "../../Utils/utils";
 
-const initialLocation = {
-  id: "",
-  name: "",
-  description: "",
-  facility: {
-    id: "",
-    name: "",
-  },
-};
+const getDate = (value: any) =>
+  value && dayjs(value).isValid() && dayjs(value).toDate();
 
 function AssetFilter(props: any) {
-  const { filter, onChange, closeFilter } = props;
-  const dispatch: any = useDispatch();
-  const [facility, setFacility] = useState<FacilityModel>({ name: "" });
-  const [location, setLocation] =
-    useState<AssetLocationObject>(initialLocation);
+  const { filter, onChange, closeFilter, removeFilters } = props;
+  const [facility, setFacility] = useState<FacilityModel | null>(null);
   const [asset_type, setAssetType] = useState<string>(
     filter.asset_type ? filter.asset_type : ""
   );
@@ -38,90 +28,72 @@ function AssetFilter(props: any) {
   const [asset_class, setAssetClass] = useState<string>(
     filter.asset_class || ""
   );
-  const [facilityId, setFacilityId] = useState<number | "">(filter.facility);
+  const [facilityId, setFacilityId] = useState<string | "">(filter.facility);
   const [locationId, setLocationId] = useState<string | "">(filter.location);
+  const [warrantyExpiry, setWarrantyExpiry] = useState({
+    before: filter.warranty_amc_end_of_validity_before || null,
+    after: filter.warranty_amc_end_of_validity_after || null,
+  });
   const [qParams, _] = useQueryParams();
 
+  useQuery(routes.getPermittedFacility, {
+    pathParams: { id: facilityId },
+    onResponse: ({ res, data }) => {
+      if (res?.status === 200 && data) {
+        setFacility(data);
+      }
+    },
+    prefetch: !!facilityId,
+  });
+
   useEffect(() => {
-    setFacilityId(facility?.id ? facility?.id : "");
+    setFacilityId(facility?.id ? `${facility?.id}` : "");
     setLocationId(
       facility?.id === qParams.facility ? qParams.location ?? "" : ""
     );
-  }, [facility, location]);
+  }, [facility?.id, qParams.facility, qParams.location]);
 
   const clearFilter = useCallback(() => {
-    setLocation(initialLocation);
-    setFacility({ name: "" });
-    setAssetType("");
-    setAssetStatus("");
-    setAssetClass("");
-    setFacilityId("");
-    setLocationId("");
+    removeFilters([
+      "facility",
+      "asset_type",
+      "asset_class",
+      "status",
+      "location",
+      "warranty_amc_end_of_validity_before",
+      "warranty_amc_end_of_validity_after",
+    ]);
     closeFilter();
-    const searchQuery = qParams?.search && `?search=${qParams?.search}`;
-    if (searchQuery) navigate(`/assets${searchQuery}`);
-    else navigate("/assets");
   }, [qParams]);
 
-  const fetchFacility = useCallback(
-    async (status: statusType) => {
-      if (facilityId) {
-        const facilityData: any = await dispatch(
-          getPermittedFacility(facilityId)
-        );
-        if (!status.aborted) {
-          setFacility(facilityData?.data);
-        }
-      }
-    },
-    [filter.facility]
-  );
-
-  const fetchLocation = useCallback(
-    async (status: statusType) => {
-      if (locationId && facilityId) {
-        const [locationData]: any = await Promise.all([
-          dispatch(
-            getFacilityAssetLocation(String(facilityId), String(locationId))
-          ),
-        ]);
-        if (!status.aborted && locationData !== undefined) {
-          if (!locationData.data)
-            Notification.Error({
-              msg: "Something went wrong..!",
-            });
-          else {
-            setLocation(locationData.data);
-          }
-        }
-      } else {
-        setLocation(initialLocation);
-      }
-    },
-    [filter.location]
-  );
-
-  useAbortableEffect((status: statusType) => {
-    filter.facility && fetchFacility(status);
-    filter.location && fetchLocation(status);
-  }, []);
   const applyFilter = () => {
     const data = {
       facility: facilityId,
       asset_type: asset_type ?? "",
       asset_class: asset_class ?? "",
       status: asset_status ?? "",
-      location: locationId,
+      location: locationId ?? "",
+      warranty_amc_end_of_validity_before: dateQueryString(
+        warrantyExpiry.before
+      ),
+      warranty_amc_end_of_validity_after: dateQueryString(warrantyExpiry.after),
     };
     onChange(data);
   };
 
-  const handleFacilitySelect = (selected: FacilityModel) => {
-    setFacility(selected ? selected : facility);
+  const handleFacilitySelect = (selected: FacilityModel | null) => {
+    setFacility(selected);
     handleLocationSelect("");
   };
   const handleLocationSelect = (selectedId: string) => {
     setLocationId(selectedId);
+  };
+
+  const handleDateRangeChange = (event: FieldChangeEvent<DateRange>) => {
+    const state = { ...warrantyExpiry };
+    state.after = event.value.start?.toString();
+    state.before = event.value.end?.toString();
+    setWarrantyExpiry(state);
   };
 
   return (
@@ -135,7 +107,7 @@ function AssetFilter(props: any) {
         <FacilitySelect
           name="Facilities"
           setSelected={(selected) =>
-            handleFacilitySelect(selected as FacilityModel)
+            handleFacilitySelect(selected as FacilityModel | null)
           }
           selected={facility}
           errors=""
@@ -202,6 +174,17 @@ function AssetFilter(props: any) {
         optionValue={({ value }) => value}
         value={asset_class}
         onChange={({ value }) => setAssetClass(value)}
+      />
+
+      <DateRangeFormField
+        name="warranty_amc_end_of_validity"
+        label="Warranty/AMC End of Validity"
+        value={{
+          start: getDate(warrantyExpiry.after),
+          end: getDate(warrantyExpiry.before),
+        }}
+        onChange={handleDateRangeChange}
+        errorClassName="hidden"
       />
     </FiltersSlideover>
   );

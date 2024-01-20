@@ -6,6 +6,7 @@ import { mergeRequestOptions } from "./utils";
 export interface QueryOptions<TData> extends RequestOptions<TData> {
   prefetch?: boolean;
   refetchOnWindowFocus?: boolean;
+  key?: string;
 }
 
 export default function useQuery<TData>(
@@ -30,8 +31,10 @@ export default function useQuery<TData>(
           : options;
 
       setLoading(true);
-      setResponse(await request(route, resolvedOptions));
+      const response = await request(route, resolvedOptions);
+      setResponse(response);
       setLoading(false);
+      return response;
     },
     [route, JSON.stringify(options)]
   );

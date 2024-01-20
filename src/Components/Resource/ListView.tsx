@@ -1,11 +1,6 @@
-import { useState, useEffect, lazy } from "react";
-
+import { lazy } from "react";
 import { navigate } from "raviger";
-import { useDispatch } from "react-redux";
-import {
-  listResourceRequests,
-  downloadResourceRequests,
-} from "../../Redux/actions";
+import { downloadResourceRequests } from "../../Redux/actions";
 import ListFilter from "./ListFilter";
 import { formatFilter } from "./Commons";
 import BadgesList from "./BadgesList";
@@ -17,62 +12,27 @@ import { useTranslation } from "react-i18next";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import dayjs from "../../Utils/dayjs";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
 
 export default function ListView() {
-  const dispatch: any = useDispatch();
   const { qParams, Pagination, FilterBadges, advancedFilter, resultsPerPage } =
     useFilters({});
-  const [data, setData] = useState<any[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
   const { t } = useTranslation();
 
   const onBoardViewBtnClick = () =>
-    navigate("/resource/board-view", { query: qParams });
+    navigate("/resource/board", { query: qParams });
   const appliedFilters = formatFilter(qParams);
 
-  const refreshList = () => {
-    fetchData();
-  };
-
-  const fetchData = () => {
-    setIsLoading(true);
-    dispatch(
-      listResourceRequests(
-        formatFilter({
-          ...qParams,
-          offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
-        }),
-        "resource-list-call"
-      )
-    ).then((res: any) => {
-      if (res && res.data) {
-        setData(res.data.results);
-        setTotalCount(res.data.count);
-      }
-      setIsLoading(false);
-    });
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [
-    qParams.status,
-    qParams.facility,
-    qParams.origin_facility,
-    qParams.approving_facility,
-    qParams.assigned_facility,
-    qParams.emergency,
-    qParams.created_date_before,
-    qParams.created_date_after,
-    qParams.modified_date_before,
-    qParams.modified_date_after,
-    qParams.ordering,
-    qParams.page,
-  ]);
+  const { loading, data, refetch } = useQuery(routes.listResourceRequests, {
+    query: formatFilter({
+      ...qParams,
+      offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
+    }),
+  });
 
   const showResourceCardList = (data: any) => {
     if (data && !data.length) {
@@ -175,7 +135,7 @@ export default function ListView() {
             <div className="mt-2 flex">
               <button
                 data-testid="resource-details"
-                onClick={(_) => navigate(`/resource/${resource.external_id}`)}
+                onClick={(_) => navigate(`/resource/${resource.id}`)}
                 className="btn btn-default mr-2 w-full bg-white"
               >
                 <i className="fas fa-eye mr-2" /> All Details
@@ -218,14 +178,14 @@ export default function ListView() {
       <BadgesList {...{ appliedFilters, FilterBadges }} />
 
       <div className="px-1">
-        {isLoading ? (
+        {loading ? (
           <Loading />
         ) : (
           <div>
             <div className="-mb-4 mr-2 mt-4 flex justify-end">
               <button
                 className="text-xs hover:text-blue-800"
-                onClick={refreshList}
+                onClick={() => refetch()}
               >
                 <i className="fa fa-refresh mr-1" aria-hidden="true"></i>
                 Refresh List
@@ -233,9 +193,9 @@ export default function ListView() {
             </div>
 
             <div className="mb-5 flex flex-wrap md:-mx-4">
-              {showResourceCardList(data)}
+              {data?.results && showResourceCardList(data?.results)}
             </div>
-            <Pagination totalCount={totalCount} />
+            <Pagination totalCount={data?.count || 0} />
           </div>
         )}
       </div>

@@ -1,56 +1,45 @@
-import { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { dailyRoundsAnalyse } from "../../../Redux/actions";
+import { useEffect, useState } from "react";
 import { LinePlot } from "./components/LinePlot";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 import { formatDateTime } from "../../../Utils/utils";
+import routes from "../../../Redux/api";
+import request from "../../../Utils/request/request";
 
 export const ABGPlots = (props: any) => {
   const { consultationId } = props;
-  const dispatch: any = useDispatch();
   const [results, setResults] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
-  const fetchDailyRounds = useCallback(
-    async (status: statusType) => {
-      const res = await dispatch(
-        dailyRoundsAnalyse(
-          {
-            page: currentPage,
-            fields: [
-              "ph",
-              "pco2",
-              "po2",
-              "hco3",
-              "base_excess",
-              "lactate",
-              "sodium",
-              "potassium",
-              "ventilator_fi02",
-            ],
-          },
-          { consultationId }
-        )
-      );
-      if (!status.aborted) {
-        if (res?.data) {
-          setResults(res.data.results);
-          setTotalCount(res.data.count);
-        }
+  useEffect(() => {
+    const fetchDailyRounds = async (currentPage: number) => {
+      const { res, data } = await request(routes.dailyRoundsAnalyse, {
+        body: {
+          page: currentPage,
+          fields: [
+            "ph",
+            "pco2",
+            "po2",
+            "hco3",
+            "base_excess",
+            "lactate",
+            "sodium",
+            "potassium",
+            "ventilator_fi02",
+          ],
+        },
+        pathParams: {
+          consultationId,
+        },
+      });
+      if (res?.ok && data) {
+        setResults(data.results);
+        setTotalCount(data.count);
       }
-    },
-    [consultationId, dispatch, currentPage]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchDailyRounds(status);
-    },
-    [currentPage]
-  );
+    };
+    fetchDailyRounds(currentPage);
+  }, [currentPage, consultationId]);
 
   const handlePagination = (page: number, _limit: number) => {
     setCurrentPage(page);

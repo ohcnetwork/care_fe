@@ -6,7 +6,7 @@ import { SAMPLE_TEST_STATUS } from "../../Common/constants";
 import { patchSample } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import UpdateStatusDialog from "./UpdateStatusDialog";
-import _ from "lodash";
+import _ from "lodash-es";
 import { formatDateTime } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
@@ -101,10 +101,11 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             <div className="text-sm font-semibold leading-5 text-zinc-400">
               Sample Type{" "}
             </div>
-            <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
-              {itemData.sample_type !== "OTHER TYPE"
+            <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium capitalize leading-5">
+              {(itemData.sample_type !== "OTHER TYPE"
                 ? itemData.sample_type
-                : itemData.sample_type_other}
+                : itemData.sample_type_other
+              )?.toLowerCase()}
             </div>
           </div>
         </div>

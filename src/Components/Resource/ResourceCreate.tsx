@@ -1,8 +1,7 @@
-import { useReducer, useState, useEffect, lazy } from "react";
+import { useReducer, useState, lazy } from "react";
 
 import { FacilitySelect } from "../Common/FacilitySelect";
 import * as Notification from "../../Utils/Notifications.js";
-import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
 import {
   OptionsType,
@@ -11,8 +10,6 @@ import {
 } from "../../Common/constants";
 import { parsePhoneNumber } from "../../Utils/utils";
 import { phonePreg } from "../../Common/validation";
-
-import { createResource, getAnyFacility } from "../../Redux/actions";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
@@ -26,6 +23,9 @@ import { FieldLabel } from "../Form/FormFields/FormField";
 import Card from "../../CAREUI/display/Card";
 import Page from "../Common/components/Page";
 import { PhoneNumberValidator } from "../Form/FieldValidators";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -87,10 +87,7 @@ export default function ResourceCreate(props: resourceProps) {
   const { goBack } = useAppHistory();
   const { facilityId } = props;
   const { t } = useTranslation();
-
-  const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const [facilityName, setFacilityName] = useState("");
 
   const resourceFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
@@ -113,18 +110,10 @@ export default function ResourceCreate(props: resourceProps) {
 
   const [state, dispatch] = useReducer(resourceFormReducer, initialState);
 
-  useEffect(() => {
-    async function fetchFacilityName() {
-      if (facilityId) {
-        const res = await dispatchAction(getAnyFacility(facilityId));
-
-        setFacilityName(res?.data?.name || "");
-      } else {
-        setFacilityName("");
-      }
-    }
-    fetchFacilityName();
-  }, [dispatchAction, facilityId]);
+  const { data: facilityData } = useQuery(routes.getAnyFacility, {
+    prefetch: facilityId !== undefined,
+    pathParams: { id: String(facilityId) },
+  });
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -184,11 +173,11 @@ export default function ResourceCreate(props: resourceProps) {
     if (validForm) {
       setIsLoading(true);
 
-      const data = {
+      const resourceData = {
         status: "PENDING",
         category: state.form.category,
         sub_category: state.form.sub_category,
-        origin_facility: props.facilityId,
+        origin_facility: String(props.facilityId),
         approving_facility: (state.form.approving_facility || {}).id,
         assigned_facility: (state.form.assigned_facility || {}).id,
         emergency: state.form.emergency === "true",
@@ -202,16 +191,18 @@ export default function ResourceCreate(props: resourceProps) {
         requested_quantity: state.form.requested_quantity || 0,
       };
 
-      const res = await dispatchAction(createResource(data));
+      const { res, data } = await request(routes.createResource, {
+        body: resourceData,
+      });
       setIsLoading(false);
 
-      if (res && res.data && (res.status == 201 || res.status == 200)) {
+      if (res?.ok && data) {
         await dispatch({ type: "set_form", form: initForm });
         Notification.Success({
           msg: "Resource request created successfully",
         });
 
-        navigate(`/resource/${res.data.id}`);
+        navigate(`/resource/${data.id}`);
       }
     }
   };
@@ -224,7 +215,7 @@ export default function ResourceCreate(props: resourceProps) {
     <Page
       title={t("create_resource_request")}
       crumbsReplacements={{
-        [facilityId]: { name: facilityName },
+        [facilityId]: { name: facilityData?.name || "" },
         resource: { style: "pointer-events-none" },
       }}
       backUrl={`/facility/${facilityId}`}

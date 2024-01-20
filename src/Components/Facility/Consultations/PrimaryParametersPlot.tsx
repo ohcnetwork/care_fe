@@ -1,7 +1,6 @@
-import { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { dailyRoundsAnalyse } from "../../../Redux/actions";
+import { useEffect, useState } from "react";
+import routes from "../../../Redux/api";
+import request from "../../../Utils/request/request";
 import { LinePlot } from "./components/LinePlot";
 import { StackedLinePlot } from "./components/StackedLinePlot";
 import Pagination from "../../Common/Pagination";
@@ -18,53 +17,58 @@ interface PrimaryParametersPlotProps {
   consultationId: string;
 }
 
+const sanitizeBPAttribute = (value: number | undefined) => {
+  // Temp. hack until the cleaning of daily rounds as a db migration is done.
+  // TODO: remove once migration is merged.
+
+  if (value == null || value < 0) {
+    return;
+  }
+
+  return value;
+};
+
 export const PrimaryParametersPlot = ({
   consultationId,
 }: PrimaryParametersPlotProps) => {
-  const dispatch: any = useDispatch();
   const [results, setResults] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
-  const fetchDailyRounds = useCallback(
-    async (status: statusType) => {
-      const res = await dispatch(
-        dailyRoundsAnalyse(
-          {
-            page: currentPage,
-            fields: [
-              "bp",
-              "pulse",
-              "temperature",
-              "resp",
-              "blood_sugar_level",
-              "insulin_intake_frequency",
-              "insulin_intake_dose",
-              "ventilator_spo2",
-              "ventilator_fi02",
-              "rhythm",
-              "rhythm_detail",
-            ],
-          },
-          { consultationId }
-        )
-      );
-      if (!status.aborted) {
-        if (res && res.data) {
-          setResults(res.data.results);
-          setTotalCount(res.data.count);
-        }
+  useEffect(() => {
+    const fetchDailyRounds = async (
+      currentPage: number,
+      consultationId: string
+    ) => {
+      const { res, data } = await request(routes.dailyRoundsAnalyse, {
+        body: {
+          page: currentPage,
+          fields: [
+            "bp",
+            "pulse",
+            "temperature",
+            "resp",
+            "blood_sugar_level",
+            "insulin_intake_frequency",
+            "insulin_intake_dose",
+            "ventilator_spo2",
+            "ventilator_fi02",
+            "rhythm",
+            "rhythm_detail",
+          ],
+        },
+        pathParams: {
+          consultationId,
+        },
+      });
+      if (res && res.ok && data) {
+        setResults(data.results);
+        setTotalCount(data.count);
       }
-    },
-    [consultationId, dispatch, currentPage]
-  );
+    };
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchDailyRounds(status);
-    },
-    [consultationId, currentPage]
-  );
+    fetchDailyRounds(currentPage, consultationId);
+  }, [consultationId, currentPage]);
 
   const handlePagination = (page: number) => {
     setCurrentPage(page);
@@ -84,19 +88,19 @@ export const PrimaryParametersPlot = ({
     {
       name: "diastolic",
       data: Object.values(results)
-        .map((p: any) => p.bp && p.bp.diastolic)
+        .map((p: any) => p.bp && sanitizeBPAttribute(p.bp.diastolic))
         .reverse(),
     },
     {
       name: "systolic",
       data: Object.values(results)
-        .map((p: any) => p.bp && p.bp.systolic)
+        .map((p: any) => p.bp && sanitizeBPAttribute(p.bp.systolic))
         .reverse(),
     },
     {
       name: "mean",
       data: Object.values(results)
-        .map((p: any) => p.bp && p.bp.mean)
+        .map((p: any) => p.bp && sanitizeBPAttribute(p.bp.mean))
         .reverse(),
     },
   ];

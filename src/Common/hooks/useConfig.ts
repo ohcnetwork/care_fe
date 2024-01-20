@@ -68,6 +68,7 @@ export interface IConfig {
    * Env to toggle peacetime and wartime shifting
    */
   wartime_shifting: boolean;
+  jwt_token_refresh_interval?: number;
 }
 
 const useConfig = () => {

@@ -8,6 +8,11 @@ import { classNames } from "../../Utils/utils";
 import { IVitalsComponentProps, VitalsValueBase } from "./types";
 import { triggerGoal } from "../../Integrations/Plausible";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import dayjs from "dayjs";
+
+const minutesAgo = (timestamp: string) => {
+  return `${dayjs().diff(dayjs(timestamp), "minute")}m ago`;
+};
 
 export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
   const { connect, waveformCanvas, data, isOnline } = useHL7VitalsMonitor(
@@ -30,11 +35,15 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
     connect(props.socketUrl);
   }, [props.socketUrl]);
 
+  const bpWithinMaxPersistence = dayjs(data.bp?.["date-time"]).isAfter(
+    props.patientCurrentBedAssignmentDate
+  );
+
   return (
     <div className="flex flex-col gap-1 rounded bg-[#020617] p-2">
       {props.patientAssetBed && (
         <div className="flex items-center justify-between px-2 tracking-wide">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-2 md:flex-row">
             {patient ? (
               <Link
                 href={`/facility/${patient.last_consultation?.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}`}
@@ -55,7 +64,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
               </span>
             )}
           </div>
-          <div className="flex items-center gap-3 text-xs md:text-sm">
+          <div className="flex flex-col items-center gap-2 text-xs md:flex-row md:text-sm">
             {asset && (
               <Link
                 className="flex items-center gap-1 text-gray-500"
@@ -67,7 +76,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
             )}
             {bed && (
               <Link
-                className="flex items-center gap-2 text-gray-500"
+                className="flex flex-col items-center gap-2 text-gray-500 md:flex-row"
                 href={`/facility/${patient?.facility_object?.id}/location/${bed?.location_object?.id}/beds`}
               >
                 <span className="flex items-center gap-1">
@@ -97,24 +106,37 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
 
           {/* Blood Pressure */}
           <div className="flex flex-col p-1">
-            <div className="flex w-full gap-2 font-bold text-orange-500">
+            <div className="flex w-full justify-between gap-2 font-bold text-orange-500">
               <span className="text-sm">NIBP</span>
-              <span className="text-xs">{data.bp?.systolic.unit ?? "--"}</span>
+              <span className="text-xs">
+                {bpWithinMaxPersistence ? data.bp?.systolic.unit ?? "--" : "--"}
+              </span>
+              <span className="text-xs">
+                {data.bp?.["date-time"] && minutesAgo(data.bp?.["date-time"])}
+              </span>
             </div>
             <div className="flex w-full justify-center text-sm font-medium text-orange-500">
               Sys / Dia
             </div>
             <div className="flex w-full justify-center text-2xl font-black text-orange-300 md:text-4xl">
-              <span>{data.bp?.systolic.value ?? "--"}</span>
+              <span>
+                {bpWithinMaxPersistence
+                  ? data.bp?.systolic.value ?? "--"
+                  : "--"}
+              </span>
               <span>/</span>
-              <span>{data.bp?.diastolic.value ?? "--"}</span>
+              <span>
+                {bpWithinMaxPersistence
+                  ? data.bp?.diastolic.value ?? "--"
+                  : "--"}
+              </span>
             </div>
             <div className="flex items-end">
               <span className="flex-1 text-sm font-bold text-orange-500">
                 Mean
               </span>
               <span className="flex-1 text-xl font-bold text-gray-300">
-                {data.bp?.map.value ?? "--"}
+                {bpWithinMaxPersistence ? data.bp?.map.value ?? "--" : "--"}
               </span>
             </div>
           </div>
@@ -214,7 +236,7 @@ export const VitalsNonWaveformContent = ({
 }: {
   children: JSX.Element | JSX.Element[];
 }) => (
-  <div className="z-10 grid grid-cols-2 gap-x-8 gap-y-4 divide-blue-600 border-b border-blue-600 bg-[#020617] tracking-wider text-white md:absolute md:inset-y-0 md:right-0 md:grid-cols-1 md:gap-0 md:divide-y md:border-b-0 md:border-l">
+  <div className="z-[5] grid grid-cols-2 gap-x-8 gap-y-4 divide-blue-600 border-b border-blue-600 bg-[#020617] tracking-wider text-white md:absolute md:inset-y-0 md:right-0 md:grid-cols-1 md:gap-0 md:divide-y md:border-b-0 md:border-l">
     {children}
   </div>
 );

@@ -8,11 +8,12 @@ import useCanvas from "../../Common/hooks/useCanvas";
 import {
   ChannelOptions,
   IVitalsComponentProps,
+  VitalsDataBase,
   VitalsValueBase as VitalsValue,
 } from "./types";
 import { getChannel, getVitalsCanvasSizeAndDuration } from "./utils";
 
-interface VitalsBPValue {
+interface VitalsBPValue extends VitalsDataBase {
   systolic: VitalsValue;
   diastolic: VitalsValue;
   map: VitalsValue;

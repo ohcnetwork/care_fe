@@ -150,7 +150,7 @@ export class AssetPage {
 
   configureVitalAsset(hostName: string, localIp: string) {
     cy.get("[data-testid=asset-configure-button]").click();
-    cy.get("#middlewareHostname").type(hostName);
+    cy.get("#middleware_hostname").type(hostName);
     cy.get("#localipAddress").type(localIp);
   }
 
@@ -239,7 +239,7 @@ export class AssetPage {
   }
 
   selectjsonexportbutton() {
-    cy.intercept("GET", "**/api/v1/asset/?json=true**").as("getJsonexport");
+    cy.intercept("GET", "**/api/v1/asset/?**json=true**").as("getJsonexport");
     cy.get("#export-json-option").click();
     cy.wait("@getJsonexport").then(({ request, response }) => {
       expect(response.statusCode).to.eq(200);
@@ -248,7 +248,7 @@ export class AssetPage {
   }
 
   selectcsvexportbutton() {
-    cy.intercept("GET", "**/api/v1/asset/?csv=true**").as("getCsvexport");
+    cy.intercept("GET", "**/api/v1/asset/?**csv=true**").as("getCsvexport");
     cy.get("#export-csv-option").click();
     cy.wait("@getCsvexport").then(({ request, response }) => {
       expect(response.statusCode).to.eq(200);
@@ -285,14 +285,37 @@ export class AssetPage {
     cy.get("#notes").scrollIntoView();
   }
 
-  enterAssetNotes(text) {
+  enterAssetNotes(text: string) {
     cy.get("#notes").click().clear();
     cy.get("#notes").click().type(text);
   }
 
-  enterAssetservicedate(text) {
+  enterAssetservicedate(text: string) {
     cy.get("input[name='last_serviced_on']").click();
     cy.get("#date-input").click().type(text);
+  }
+
+  scrollintoWarrantyDetails() {
+    cy.get("#warranty-details").scrollIntoView();
+  }
+
+  enterWarrantyExpiryDate(text: string) {
+    cy.get("#WarrantyAMCExpiry").click();
+    cy.get("#WarrantyAMCExpiry").click().type(text);
+  }
+
+  verifyWarrantyExpiryLabel(duration: string) {
+    if (duration === "") {
+      cy.get("#warranty-amc-expired-red").should("not.exist");
+      cy.get("#warranty-amc-expiring-soon-orange").should("not.exist");
+      cy.get("#warranty-amc-expiring-soon-yellow").should("not.exist");
+    } else if (duration === "expired") {
+      cy.get("#warranty-amc-expired-red").should("be.visible");
+    } else if (duration === "1 month") {
+      cy.get("#warranty-amc-expiring-soon-orange").should("be.visible");
+    } else if (duration === "3 months") {
+      cy.get("#warranty-amc-expiring-soon-yellow").should("be.visible");
+    }
   }
 
   clickassetupdatebutton() {
