@@ -110,21 +110,21 @@ export default function BoardView() {
     const isIconEnable =
       direction === "left" ? isLeftScrollable : isRightScrollable;
     return (
-      <div
-        className={`relative z-20 self-center ${
-          direction === "right" ? "-left-12" : ""
-        }`}
-      >
-        <CareIcon
-          icon={`l-arrow-${direction}`}
-          className={`absolute inset-y-0 left-0 z-10 h-10 w-10 ${
-            isIconEnable
-              ? "cursor-pointer hover:opacity-100"
-              : "cursor-not-allowed opacity-50"
+      isIconEnable && (
+        <div
+          className={`relative z-20 self-center ${
+            direction === "right" ? "-left-12" : ""
           }`}
-          onClick={() => handleOnClick(direction)}
-        />
-      </div>
+        >
+          <CareIcon
+            icon={`l-arrow-${direction}`}
+            className={`absolute inset-y-0 left-0 z-10 h-10 w-10 ${
+              isIconEnable && "cursor-pointer hover:opacity-100"
+            }`}
+            onClick={() => handleOnClick(direction)}
+          />
+        </div>
+      )
     );
   };
 
