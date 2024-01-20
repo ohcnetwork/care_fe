@@ -39,7 +39,7 @@ export default function DailyRoundsFilter(props: Props) {
 
   return (
     <div className="flex flex-row-reverse items-center gap-4 md:flex-row">
-      <Popover className="relative ">
+      <Popover className="relative">
         <Popover.Button>
           <ButtonV2
             variant={isFilterApplied ? "primary" : "secondary"}
