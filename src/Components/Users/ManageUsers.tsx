@@ -44,7 +44,10 @@ export default function ManageUsers() {
     FilterBadges,
     advancedFilter,
     resultsPerPage,
-  } = useFilters({ limit: 18 });
+  } = useFilters({
+    limit: 18,
+    cacheBlacklist: ["username"],
+  });
   let manageUsers: any = null;
   const [expandSkillList, setExpandSkillList] = useState(false);
   const [expandFacilityList, setExpandFacilityList] = useState(false);
