@@ -33,31 +33,21 @@ export default function DailyRoundsFilter(props: Props) {
     errorClassName: "hidden",
   });
 
-  const countDefinedProperties = (obj) => {
-    return Object.values(obj).filter((val) => val !== undefined).length;
-  };
+  const isFilterApplied = Object.values(filter ?? {}).some(
+    (val) => val !== undefined
+  );
 
   return (
     <div className="flex flex-row-reverse items-center gap-4 md:flex-row">
       <Popover className="relative ">
         <Popover.Button>
-          {filter == undefined ||
-          filter == null ||
-          countDefinedProperties(filter) == 0 ? (
-            <>
-              <ButtonV2 variant="secondary" className="mr-5 border">
-                <CareIcon className="care-l-filter" />
-                {t("filter")}
-              </ButtonV2>
-            </>
-          ) : (
-            <>
-              <ButtonV2 variant="primary" className="mr-5 border">
-                <CareIcon className="care-l-filter" />
-                {t("filter")}
-              </ButtonV2>
-            </>
-          )}
+          <ButtonV2
+            variant={isFilterApplied ? "primary" : "secondary"}
+            className="mr-5 border"
+          >
+            <CareIcon className="care-l-filter" />
+            {t("filter")}
+          </ButtonV2>
         </Popover.Button>
         <Transition
           as={Fragment}
