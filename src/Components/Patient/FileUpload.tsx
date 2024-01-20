@@ -165,7 +165,6 @@ export const FileUpload = (props: FileUploadProps) => {
   const [fileUrl, setFileUrl] = useState("");
   const [audioName, setAudioName] = useState<string>("");
   const [audioFileError, setAudioFileError] = useState<string>("");
-  const [contentType, setcontentType] = useState<string>("");
   const [downloadURL, setDownloadURL] = useState<string>();
   const FACING_MODE_USER = "user";
   const FACING_MODE_ENVIRONMENT = { exact: "environment" };
@@ -248,7 +247,7 @@ export const FileUpload = (props: FileUploadProps) => {
     fetch(webRef.current.getScreenshot())
       .then((res) => res.blob())
       .then((blob) => {
-        const myFile = new File([blob], "image.png", {
+        const myFile = new File([blob], `image.${blob.type.split("/").pop()}`, {
           type: blob.type,
         });
         setFile(myFile);
@@ -919,7 +918,6 @@ export const FileUpload = (props: FileUploadProps) => {
     );
 
     const ext: string = fileName.split(".")[1];
-    setcontentType(header_content_type[ext]);
 
     if (ExtImage.includes(ext)) {
       const options = {
@@ -943,7 +941,7 @@ export const FileUpload = (props: FileUploadProps) => {
 
     const config = {
       headers: {
-        "Content-type": contentType,
+        "Content-type": file?.type,
         "Content-disposition": "inline",
       },
       onUploadProgress: (progressEvent: any) => {
@@ -1022,6 +1020,7 @@ export const FileUpload = (props: FileUploadProps) => {
       name: filename,
       associating_id: getAssociatedId(),
       file_category: category,
+      mime_type: f?.type,
     };
     dispatch(createUpload(requestData))
       .then(uploadfile)
@@ -1052,8 +1051,12 @@ export const FileUpload = (props: FileUploadProps) => {
     const internal_name = response.data.internal_name;
     const f = audioBlob;
     if (f === undefined) return;
-    const newFile = new File([f], `${internal_name}`, { type: "audio/mpeg" });
+    const newFile = new File([f], `${internal_name}`, { type: f.type });
     const config = {
+      headers: {
+        "Content-type": newFile?.type,
+        "Content-disposition": "inline",
+      },
       onUploadProgress: (progressEvent: any) => {
         const percentCompleted = Math.round(
           (progressEvent.loaded * 100) / progressEvent.total
@@ -1106,6 +1109,7 @@ export const FileUpload = (props: FileUploadProps) => {
       name: filename,
       associating_id: getAssociatedId(),
       file_category: category,
+      mime_type: audioBlob?.type,
     };
     dispatch(createUpload(requestData))
       .then(uploadAudiofile)
@@ -1535,6 +1539,7 @@ export const FileUpload = (props: FileUploadProps) => {
                               title="changeFile"
                               onChange={onFileChange}
                               type="file"
+                              accept="image/*,video/*,audio/*,text/plain,text/csv,application/rtf,application/msword,application/vnd.oasis.opendocument.text,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/pdf"
                               hidden
                             />
                           </label>

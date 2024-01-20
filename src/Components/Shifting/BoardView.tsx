@@ -29,6 +29,7 @@ const ScrollingComponent = withScrolling("div");
 export default function BoardView() {
   const { qParams, updateQuery, FilterBadges, advancedFilter } = useFilters({
     limit: -1,
+    cacheBlacklist: ["patient_name"],
   });
   const { wartime_shifting } = useConfig();
 
