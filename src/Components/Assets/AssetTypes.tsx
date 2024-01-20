@@ -99,7 +99,7 @@ export interface AssetData {
   manufacturer: string;
   warranty_amc_end_of_validity: string;
   resolved_middleware?: ResolvedMiddleware;
-  down: boolean;
+  latest_status: string;
   last_service: AssetService;
   meta?: {
     [key: string]: any;
