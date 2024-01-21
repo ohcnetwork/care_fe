@@ -27,7 +27,7 @@ import {
   AssetServiceUpdate,
   AssetTransaction,
   AssetUpdate,
-  AssetUptimeRecord,
+  AvailabilityRecord,
   PatientAssetBed,
 } from "../Components/Assets/AssetTypes";
 import {
@@ -1240,19 +1240,13 @@ const routes = {
     },
   },
 
-  // Asset Availability endpoints
+  // Availability endpoints
 
   listAssetAvailability: {
-    path: "/api/v1/asset_availability/",
+    path: "/api/v1/availability/",
     method: "GET",
-    TRes: Type<PaginatedResponse<AssetUptimeRecord>>(),
+    TRes: Type<PaginatedResponse<AvailabilityRecord>>(),
   },
-  getAssetAvailability: {
-    path: "/api/v1/asset_availability/{id}",
-    method: "GET",
-    TRes: Type<AssetUptimeRecord>(),
-  },
-
   // Prescription endpoints
 
   listPrescriptions: {

@@ -1,6 +1,6 @@
 import { Popover } from "@headlessui/react";
 import { useEffect, useRef, useState } from "react";
-import { AssetStatus, AssetUptimeRecord } from "../Assets/AssetTypes";
+import { AssetStatus, AvailabilityRecord } from "../Assets/AssetTypes";
 import { classNames } from "../../Utils/utils";
 import dayjs from "../../Utils/dayjs";
 import useQuery from "../../Utils/request/useQuery.js";
@@ -37,7 +37,7 @@ function UptimeInfo({
   records,
   date,
 }: {
-  records: AssetUptimeRecord[];
+  records: AvailabilityRecord[];
   date: string;
 }) {
   const incidents =
@@ -66,7 +66,7 @@ function UptimeInfo({
                     let endTimestamp;
                     let ongoing = false;
 
-                    if (prevIncident?.id) {
+                    if (prevIncident?.linked_id) {
                       endTimestamp = dayjs(prevIncident.timestamp);
                     } else if (dayjs(incident.timestamp).isSame(now, "day")) {
                       endTimestamp = dayjs();
@@ -141,7 +141,7 @@ function UptimeInfoPopover({
   date,
   numDays,
 }: {
-  records: AssetUptimeRecord[];
+  records: AvailabilityRecord[];
   day: number;
   date: string;
   numDays: number;
@@ -167,10 +167,10 @@ function UptimeInfoPopover({
 
 export default function Uptime(props: { assetId: string }) {
   const [summary, setSummary] = useState<{
-    [key: number]: AssetUptimeRecord[];
+    [key: number]: AvailabilityRecord[];
   }>([]);
   const { data, loading } = useQuery(routes.listAssetAvailability, {
-    query: { external_id: props.assetId },
+    query: { linked_id: props.assetId, linked_model: "asset" },
     onResponse: ({ data }) => setUptimeRecord(data?.results.reverse() ?? []),
   });
   const availabilityData = data?.results ?? [];
@@ -186,8 +186,8 @@ export default function Uptime(props: { assetId: string }) {
     setNumDays(Math.min(newNumDays, 100));
   };
 
-  const setUptimeRecord = (records: AssetUptimeRecord[]): void => {
-    const recordsByDayBefore: { [key: number]: AssetUptimeRecord[] } = {};
+  const setUptimeRecord = (records: AvailabilityRecord[]): void => {
+    const recordsByDayBefore: { [key: number]: AvailabilityRecord[] } = {};
 
     records.forEach((record) => {
       const timestamp = dayjs(record.timestamp).startOf("day");
@@ -207,10 +207,8 @@ export default function Uptime(props: { assetId: string }) {
         recordsByDayBefore[i] = [];
         if (statusToCarryOver) {
           recordsByDayBefore[i].push({
-            id: "",
-            asset: { id: "", name: "" },
-            created_date: "",
-            modified_date: "",
+            linked_id: "",
+            linked_model: "asset",
             status: statusToCarryOver,
             timestamp: dayjs()
               .subtract(i, "days")
@@ -225,10 +223,8 @@ export default function Uptime(props: { assetId: string }) {
           ).length === 0
         ) {
           recordsByDayBefore[i].unshift({
-            id: "",
-            asset: { id: "", name: "" },
-            created_date: "",
-            modified_date: "",
+            linked_id: "",
+            linked_model: "asset",
             status: statusToCarryOver,
             timestamp: dayjs()
               .subtract(i, "days")
@@ -284,7 +280,7 @@ export default function Uptime(props: { assetId: string }) {
       const statusColors: (typeof STATUS_COLORS)[keyof typeof STATUS_COLORS][] =
         [];
       let dayUptimeScore = 0;
-      const recordsInPeriodCache: { [key: number]: AssetUptimeRecord[] } = {};
+      const recordsInPeriodCache: { [key: number]: AvailabilityRecord[] } = {};
       for (let i = 0; i < 3; i++) {
         const start = i * 8;
         const end = (i + 1) * 8;
