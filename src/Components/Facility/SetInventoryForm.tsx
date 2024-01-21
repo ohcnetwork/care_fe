@@ -58,9 +58,7 @@ export const SetInventoryForm = (props: any) => {
       const existingItemIDs: number[] = [];
 
       if (data?.results) {
-        data.results.map((item: any) =>
-          existingItemIDs.push(item.item_object.id)
-        );
+        data.results.map((item) => existingItemIDs.push(item.item_object.id));
       }
 
       await request(routes.getItems, {
@@ -71,7 +69,7 @@ export const SetInventoryForm = (props: any) => {
         onResponse: ({ res, data }) => {
           if (res && data) {
             const filteredData = data.results.filter(
-              (item: any) => !existingItemIDs.includes(item.id)
+              (item) => !existingItemIDs.includes(item.id as number)
             );
             setData(filteredData);
             dispatch({
@@ -109,8 +107,8 @@ export const SetInventoryForm = (props: any) => {
         min_quantity: Number(state.form.quantity),
         item: Number(state.form.id),
       },
-      onResponse: ({ res, data }) => {
-        if (res && data && data.id) {
+      onResponse: ({ res }) => {
+        if (res?.ok) {
           Notification.Success({
             msg: "Minimum quantiy updated successfully",
           });

@@ -804,12 +804,12 @@ const routes = {
     TRes: Type<PaginatedResponse<InventorySummaryResponse>>(),
   },
   getMinQuantityItem: {
-    path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}",
+    path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}/",
     method: "GET",
     TRes: Type<MinimumQuantityItemResponse>(),
   },
   updateMinQuantity: {
-    path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}",
+    path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}/",
     method: "PATCH",
     TRes: Type<PaginatedResponse<MinimumQuantityItemResponse>>(),
   },
