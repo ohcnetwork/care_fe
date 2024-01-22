@@ -25,7 +25,7 @@ describe("Asset", () => {
 
   it("Verify asset creation fields throws error if empty", () => {
     assetPage.createAsset();
-    assetPage.selectFacility("Dummy Facility 1");
+    assetPage.selectFacility("Dummy Facility 40");
     assetPage.clickCreateAsset();
 
     assetPage.verifyEmptyAssetNameError();
@@ -39,7 +39,7 @@ describe("Asset", () => {
 
   it("Create an Asset", () => {
     assetPage.createAsset();
-    assetPage.selectFacility("Dummy Facility 1");
+    assetPage.selectFacility("Dummy Facility 40");
     assetPage.selectLocation("Camera Loc");
     assetPage.selectAssetType("Internal");
     assetPage.selectAssetClass("ONVIF Camera");
@@ -139,7 +139,7 @@ describe("Asset", () => {
 
   it("Add an vital monitor asset and configure it", () => {
     assetPage.createAsset();
-    assetPage.selectFacility("Dummy Facility 1");
+    assetPage.selectFacility("Dummy Facility 40");
     assetPage.selectLocation("Camera Loc");
     assetPage.selectAssetType("Internal");
     assetPage.selectAssetClass("HL7 Vitals Monitor");
