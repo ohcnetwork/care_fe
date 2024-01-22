@@ -15,7 +15,7 @@ describe("User Creation", () => {
   const userCreationPage = new UserCreationPage();
   const facilityPage = new FacilityPage();
   const assetSearchPage = new AssetSearchPage();
-  const fillFacilityName = "Dummy Facility 1";
+  const fillFacilityName = "Dummy Facility 40";
   const makeid = (length: number) => {
     let result = "";
     const characters = "abcdefghijklmnopqrstuvwxyz0123456789";
