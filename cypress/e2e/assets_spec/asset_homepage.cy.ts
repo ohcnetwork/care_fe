@@ -62,7 +62,7 @@ describe("Asset Tab", () => {
 
   it("Filter Asset", () => {
     assetFilters.filterAssets(
-      "Dummy Facility 1",
+      "Dummy Facility 40",
       "INTERNAL",
       "ACTIVE",
       "ONVIF Camera",
@@ -70,7 +70,7 @@ describe("Asset Tab", () => {
     );
     assetFilters.clickadvancefilter();
     assetFilters.clickslideoverbackbutton(); // to verify the back button doesn't clear applied filters
-    assetFilters.assertFacilityText("Dummy Facility 1");
+    assetFilters.assertFacilityText("Dummy Facility 40");
     assetFilters.assertAssetTypeText("INTERNAL");
     assetFilters.assertAssetClassText("ONVIF");
     assetFilters.assertStatusText("ACTIVE");
@@ -89,7 +89,7 @@ describe("Asset Tab", () => {
   it("Import new asset", () => {
     assetPage.selectassetimportbutton();
     assetPage.selectImportOption();
-    assetPage.selectImportFacility("Dummy Facility 1");
+    assetPage.selectImportFacility("Dummy Facility 40");
     assetPage.importAssetFile();
     assetPage.selectImportLocation("Camera Loc");
     assetPage.clickImportAsset();
