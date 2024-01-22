@@ -23,6 +23,7 @@ describe("Location Management Section", () => {
     "Please select a bed type",
   ];
   const locationName = "Test-location";
+  const locationNameTwo = "Test-location-2";
   const locationDescription = "Test Description";
   const locationType = "WARD";
   const locationMiddleware = "dev_middleware.coronasafe.live";
@@ -110,14 +111,14 @@ describe("Location Management Section", () => {
     assetPage.clickassetupdatebutton();
     userCreationPage.verifyErrorMessages(EXPECTED_LOCATION_ERROR_MESSAGES);
     // create a new location
-    facilityPage.fillFacilityName(locationName);
+    facilityPage.fillFacilityName(locationNameTwo);
     facilityLocation.fillDescription(locationDescription);
     facilityLocation.selectLocationType(locationType);
     facilityLocation.fillMiddlewareAddress(locationMiddleware);
     assetPage.clickassetupdatebutton();
     facilityLocation.clickNotification();
     // verify the reflection
-    facilityLocation.verifyLocationName(locationName);
+    facilityLocation.verifyLocationName(locationNameTwo);
     facilityLocation.verifyLocationType(locationType);
     facilityLocation.verifyLocationDescription(locationDescription);
     facilityLocation.verifyLocationMiddleware(locationMiddleware);
