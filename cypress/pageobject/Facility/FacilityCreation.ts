@@ -26,7 +26,7 @@ class FacilityPage {
   }
 
   fillFacilityName(name: string) {
-    cy.get("#name").clear().type(name);
+    cy.get("#name").click().clear().click().type(name);
   }
 
   fillPincode(pincode: string) {
@@ -75,11 +75,11 @@ class FacilityPage {
   }
 
   fillTotalCapacity(capacity: string) {
-    cy.get("input#total-capacity").click().type(capacity);
+    cy.get("input#total-capacity").click().clear().click().type(capacity);
   }
 
   fillCurrentlyOccupied(occupied: string) {
-    cy.get("input#currently-occupied").click().type(occupied);
+    cy.get("input#currently-occupied").click().clear().click().type(occupied);
   }
 
   saveAndExitBedCapacityForm() {
@@ -96,7 +96,7 @@ class FacilityPage {
   }
 
   fillDoctorCount(count: string) {
-    cy.get("input#count").click().type(count);
+    cy.get("input#count").click().clear().click().type(count);
   }
 
   fillOxygenCapacity(capacity: string) {

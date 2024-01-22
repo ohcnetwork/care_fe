@@ -46,7 +46,7 @@ export const FacilityDoctorList = (props: any) => {
               <div className="rounded-full bg-primary-500 p-4">
                 <DoctorIcon className="h-5 w-5 fill-current text-white" />
               </div>
-              <div>
+              <div id="facility-doctor-totalcapacity">
                 <div className="text-sm font-medium text-[#808080]">
                   Total Doctors
                 </div>
@@ -88,6 +88,7 @@ export const FacilityDoctorList = (props: any) => {
         <div className="justify-between md:flex md:pb-2">
           <div className="mb-2 text-xl font-bold">Doctors List</div>
           <ButtonV2
+            id="facility-add-doctortype"
             className="w-full md:w-auto"
             onClick={() => setDoctorCapacityModalOpen(true)}
             disabled={doctorList.length === DOCTOR_SPECIALIZATION.length}
@@ -97,7 +98,9 @@ export const FacilityDoctorList = (props: any) => {
             Add Doctor Types
           </ButtonV2>
         </div>
-        <div className="mt-4">{doctorList}</div>
+        <div className="mt-4" id="facility-totaldoctor-capacity">
+          {doctorList}
+        </div>
       </div>
 
       {doctorCapacityModalOpen && (
