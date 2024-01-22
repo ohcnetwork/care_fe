@@ -68,7 +68,11 @@ import {
   UserModel,
 } from "../Components/Users/models";
 import { Prescription } from "../Components/Medicine/models";
-import { DailyRoundsModel, PatientModel } from "../Components/Patient/models";
+import {
+  DailyRoundsModel,
+  PatientModel,
+  SampleTestModel,
+} from "../Components/Patient/models";
 import { PaginatedResponse } from "../Utils/request/types";
 import {
   NotificationData,
@@ -487,6 +491,8 @@ const routes = {
   },
   getConsultationList: {
     path: "/api/v1/consultation/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<ConsultationModel>>(),
   },
   createConsultation: {
     path: "/api/v1/consultation/",
@@ -635,6 +641,8 @@ const routes = {
   patchPatient: {
     path: "/api/v1/patient/{id}/",
     method: "PATCH",
+    TBody: Type<Partial<PatientModel>>(),
+    TRes: Type<PatientModel>(),
   },
   transferPatient: {
     path: "/api/v1/patient/{id}/transfer/",
@@ -653,6 +661,8 @@ const routes = {
   },
   sampleTestList: {
     path: "/api/v1/patient/{patientId}/test_sample/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<SampleTestModel>>(),
   },
   createSampleTest: {
     path: "/api/v1/patient/{patientId}/test_sample/",
@@ -771,6 +781,8 @@ const routes = {
   patchSample: {
     path: "/api/v1/test_sample/{id}/",
     method: "PATCH",
+    TBody: Type<SampleTestModel>(),
+    TRes: Type<PatientModel>(),
   },
 
   //inventory
