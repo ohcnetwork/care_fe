@@ -56,6 +56,10 @@ class FacilityLocation {
     cy.get("#add-new-bed").click();
   }
 
+  clickNotification() {
+    cy.get(".pnotify").click();
+  }
+
   enterBedName(name: string) {
     cy.get("#bed-name").click().clear().click().type(name);
   }

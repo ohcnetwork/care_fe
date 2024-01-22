@@ -35,7 +35,7 @@ describe("Patient Creation with consultation", () => {
 
   it("Create a new patient with no consultation", () => {
     patientPage.createPatient();
-    patientPage.selectFacility("dummy facility");
+    patientPage.selectFacility("dummy facility 40");
     patientPage.patientformvisibility();
     patientPage.enterPatientDetails(
       phone_number,

@@ -57,7 +57,20 @@ describe("Location Management Section", () => {
 
   it("Add a Bed to facility location along with duplication and deleting a bed", () => {
     // mandatory field verification in bed creation
-    facilityLocation.clickManageBedButton();
+    cy.get("body").then(($body) => {
+      if ($body.find("#manage-bed-button:visible").length) {
+        // If the '#manage-bed-button' is visible
+        facilityLocation.clickManageBedButton();
+      } else {
+        // If the '#manage-bed-button' is not visible
+        facilityLocation.clickAddNewLocationButton();
+        facilityPage.fillFacilityName(locationName);
+        facilityLocation.selectLocationType(locationType);
+        assetPage.clickassetupdatebutton();
+        facilityLocation.clickNotification();
+        facilityLocation.clickManageBedButton();
+      }
+    });
     facilityLocation.clickAddBedButton();
     assetPage.clickassetupdatebutton();
     userCreationPage.verifyErrorMessages(EXPECTED_BED_ERROR_MESSAGES);
@@ -102,6 +115,7 @@ describe("Location Management Section", () => {
     facilityLocation.selectLocationType(locationType);
     facilityLocation.fillMiddlewareAddress(locationMiddleware);
     assetPage.clickassetupdatebutton();
+    facilityLocation.clickNotification();
     // verify the reflection
     facilityLocation.verifyLocationName(locationName);
     facilityLocation.verifyLocationType(locationType);
@@ -130,6 +144,7 @@ describe("Location Management Section", () => {
     facilityLocation.selectBedType(bedType);
     facilityLocation.setMultipleBeds(numberOfBeds);
     assetPage.clickassetupdatebutton();
+    facilityLocation.clickNotification();
     // verify the bed creation
     facilityLocation.verifyBedBadge(bedType);
     facilityLocation.verifyBedBadge(bedStatus);
