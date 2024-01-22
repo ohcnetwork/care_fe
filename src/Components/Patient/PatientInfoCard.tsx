@@ -156,58 +156,83 @@ export default function PatientInfoCard(props: {
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         <div className="col-span-2 flex w-full flex-col bg-white px-4 pt-2 lg:flex-row xl:min-w-fit">
           {/* Can support for patient picture in the future */}
-          <div className="flex flex-col items-center">
-            <div
-              className={`w-24 min-w-[5rem] bg-gray-200 ${categoryClass}-profile h-full`}
-            >
-              {consultation?.current_bed &&
-              consultation?.discharge_date === null ? (
-                <div className="tooltip flex h-full flex-col items-center justify-center">
-                  <p className="w-full truncate px-2 text-center text-sm text-gray-900">
-                    {
-                      consultation?.current_bed?.bed_object?.location_object
-                        ?.name
-                    }
-                  </p>
-                  <p className="w-full truncate px-2 text-center text-base font-bold">
-                    {consultation?.current_bed?.bed_object.name}
-                  </p>
-                  <div className="tooltip-text tooltip-right flex -translate-x-1/3 translate-y-1/2 flex-col items-center justify-center text-sm ">
-                    <span>
+          <div className="flex justify-evenly lg:justify-normal">
+            <div className="flex flex-col items-start lg:items-center">
+              <div
+                className={`w-24 min-w-[5rem] bg-gray-200 ${categoryClass}-profile h-full`}
+              >
+                {consultation?.current_bed &&
+                consultation?.discharge_date === null ? (
+                  <div className="tooltip flex h-full flex-col items-center justify-center">
+                    <p className="w-full truncate px-2 text-center text-sm text-gray-900">
                       {
                         consultation?.current_bed?.bed_object?.location_object
                           ?.name
                       }
-                    </span>
-                    <span>{consultation?.current_bed?.bed_object.name}</span>
+                    </p>
+                    <p className="w-full truncate px-2 text-center text-base font-bold">
+                      {consultation?.current_bed?.bed_object.name}
+                    </p>
+                    <div className="tooltip-text tooltip-right flex -translate-x-1/3 translate-y-1/2 flex-col items-center justify-center text-sm ">
+                      <span>
+                        {
+                          consultation?.current_bed?.bed_object?.location_object
+                            ?.name
+                        }
+                      </span>
+                      <span>{consultation?.current_bed?.bed_object.name}</span>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="flex h-full items-center justify-center">
-                  <i className="fas fa-user-injured text-3xl text-gray-500"></i>
+                ) : (
+                  <div className="flex h-full items-center justify-center">
+                    <i className="fas fa-user-injured text-3xl text-gray-500"></i>
+                  </div>
+                )}
+              </div>
+              {category && (
+                <div
+                  className={`w-24 rounded-b py-1 text-center text-xs font-bold ${categoryClass}`}
+                >
+                  {category.toUpperCase()}
                 </div>
               )}
-            </div>
-            {category && (
-              <div
-                className={`w-24 rounded-b py-1 text-center text-xs font-bold ${categoryClass}`}
+              <ButtonV2
+                ghost
+                onClick={() => setOpen(true)}
+                className="mt-1 px-[10px] py-1"
               >
-                {category.toUpperCase()}
+                {bedDialogTitle}
+              </ButtonV2>
+            </div>
+            <div className="flex items-center justify-center">
+              <div
+                className="mb-2 flex flex-col justify-center text-xl font-semibold lg:hidden"
+                id="patient-name-consultation-mobile"
+              >
+                {patient.name}
+                <div className="ml-3 mr-2 mt-[6px] text-sm font-semibold text-gray-600">
+                  {patient.age} years • {patient.gender}
+                </div>
+                <div className="mr-3 flex flex-col items-center">
+                  <Link
+                    href={`/facility/${consultation?.facility}`}
+                    className="mt-2 items-center justify-center text-sm font-semibold text-black hover:text-primary-600 lg:hidden"
+                  >
+                    <i
+                      className="fas fa-hospital mr-1 text-primary-400"
+                      aria-hidden="true"
+                    ></i>
+                    {consultation?.facility_name}
+                  </Link>
+                </div>
               </div>
-            )}
-            <ButtonV2
-              ghost
-              onClick={() => setOpen(true)}
-              className="mt-1 px-[10px] py-1"
-            >
-              {bedDialogTitle}
-            </ButtonV2>
+            </div>
           </div>
           <div className="flex w-full flex-col items-center gap-4 space-y-2 lg:items-start lg:gap-0 lg:pl-2 xl:w-full">
             <div className="flex flex-col items-center gap-2 sm:flex-row">
               <Link
                 href={`/facility/${consultation?.facility}`}
-                className="font-semibold text-black hover:text-primary-600"
+                className="hidden font-semibold text-black hover:text-primary-600 lg:block"
               >
                 <i
                   className="fas fa-hospital mr-1 text-primary-400"
@@ -224,7 +249,7 @@ export default function PatientInfoCard(props: {
             </div>
             <div className="flex flex-col flex-wrap items-center justify-center lg:items-start lg:justify-normal">
               <div
-                className="mb-2 flex flex-row text-xl font-semibold"
+                className="mb-2 hidden flex-row text-xl font-semibold lg:flex"
                 id="patient-name-consultation"
               >
                 {patient.name}
@@ -233,7 +258,7 @@ export default function PatientInfoCard(props: {
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2 text-sm sm:flex-row">
-                <div className="flex flex-wrap items-center gap-2 text-sm text-gray-900 sm:flex-row sm:text-sm">
+                <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-gray-900 sm:flex-row sm:text-sm lg:justify-normal">
                   {consultation?.patient_no && (
                     <span className="flex capitalize">
                       <span className="items-stretch justify-center whitespace-nowrap rounded border border-green-400 bg-green-100 px-3 py-0.5 text-sm font-medium text-green-800">
