@@ -5,7 +5,7 @@ import { AssetData, AssetLocationType } from "../Assets/AssetTypes";
 import { UserBareMinimum } from "../Users/models";
 import { RouteToFacility } from "../Common/RouteToFacilitySelect";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
-import { ConsultationSuggestionValue } from "../../Common/constants";
+import { ConsultationSuggestionValue, UserRole } from "../../Common/constants";
 
 export interface LocalBodyModel {
   id: number;
@@ -103,7 +103,7 @@ export interface ConsultationModel {
   category?: PatientCategory;
   created_date?: string;
   discharge_date?: string;
-  discharge_reason?: string;
+  new_discharge_reason?: number;
   discharge_prescription?: NormalPrescription;
   discharge_prn_prescription?: PRNPrescription;
   discharge_notes?: string;
@@ -494,7 +494,7 @@ export interface PatientNotesModel {
   note: string;
   facility: BaseFacilityModel;
   created_by_object: BaseUserModel;
-  user_type?: string;
+  user_type?: UserRole | "RemoteSpecialist";
   created_date: string;
 }
 

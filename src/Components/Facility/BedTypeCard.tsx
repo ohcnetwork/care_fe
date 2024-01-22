@@ -111,6 +111,7 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
             </div>
             <div className="flex items-stretch justify-between gap-4 self-stretch">
               <ButtonV2
+                id="edit-facility-bedcapacity"
                 onClick={() => {
                   setSelectedId(room_type || 0);
                   setOpen(true);
@@ -125,6 +126,7 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
               </ButtonV2>
 
               <ButtonV2
+                id="delete-facility-bedcapacity"
                 onClick={() => setOpenDeleteDialog(true)}
                 authorizeFor={NonReadOnlyUsers}
                 className=" tooltip bg-opacity/10 flex aspect-square h-7 w-7 flex-col items-center justify-center rounded bg-red-100 px-4 py-0 hover:bg-red-200"
