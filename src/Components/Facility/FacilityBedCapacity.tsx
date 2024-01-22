@@ -87,6 +87,7 @@ export const FacilityBedCapacity = (props: any) => {
         <div className="justify-between md:flex md:pb-2">
           <div className="mb-2 text-xl font-semibold">Bed Capacity</div>
           <ButtonV2
+            id="facility-add-bedtype"
             className="w-full md:w-auto"
             onClick={() => setBedCapacityModalOpen(true)}
             authorizeFor={NonReadOnlyUsers}
