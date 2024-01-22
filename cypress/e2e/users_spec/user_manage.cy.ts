@@ -16,7 +16,7 @@ describe("Manage User", () => {
   const usernameforworkinghour = "devdistrictadmin";
   const usernamerealname = "Dummy Doctor";
   const facilitytolinkusername = "Dummy Shifting Center";
-  const facilitytolinkskill = "Dummy Facility 1";
+  const facilitytolinkskill = "Dummy Facility 40";
   const workinghour = "23";
   const linkedskill = "General Medicine";
 
