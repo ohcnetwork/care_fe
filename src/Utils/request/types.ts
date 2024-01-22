@@ -30,7 +30,7 @@ export interface RequestResult<TData> {
 export interface RequestOptions<TData = unknown, TBody = unknown> {
   query?: QueryParams;
   body?: TBody;
-  pathParams?: Record<string, string>;
+  pathParams?: Record<string, string | number>;
   onResponse?: (res: RequestResult<TData>) => void;
   silent?: boolean;
   reattempts?: number;

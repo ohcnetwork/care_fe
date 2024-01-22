@@ -38,6 +38,7 @@ const AssetsList = () => {
     resultsPerPage,
   } = useFilters({
     limit: 18,
+    cacheBlacklist: ["search"],
   });
   const [assets, setAssets] = useState([{} as AssetData]);
   const [isLoading, setIsLoading] = useState(false);

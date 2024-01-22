@@ -99,6 +99,13 @@ const initForm: UserForm = {
   doctor_medical_council_registration: undefined,
 };
 
+const STAFF_OR_NURSE_USER = [
+  "Staff",
+  "StaffReadOnly",
+  "Nurse",
+  "NurseReadOnly",
+];
+
 const initError = Object.assign(
   {},
   ...Object.keys(initForm).map((k) => ({ [k]: "" }))
@@ -234,15 +241,19 @@ export const UserAdd = (props: UserProps) => {
     : // Exception to allow Staff to Create Doctors
       defaultAllowedUserTypes;
 
+  // TODO: refactor lines 227 through 248 to be more readable. This is messy.
+  if (authUser.user_type === "Nurse" || authUser.user_type === "Staff") {
+    userTypes.push(USER_TYPE_OPTIONS[6]); // Temperorily allows creation of users with elevated permissions due to introduction of new roles.
+  }
+
   const headerText = !userId ? "Add User" : "Update User";
   const buttonText = !userId ? "Save User" : "Update Details";
-  const showLocalbody = !(
-    state.form.user_type === "Pharmacist" ||
-    state.form.user_type === "Volunteer" ||
-    state.form.user_type === "Doctor" ||
-    state.form.user_type === "Staff" ||
-    state.form.user_type === "StaffReadOnly"
-  );
+  const showLocalbody = ![
+    "Pharmacist",
+    "Volunteer",
+    "Doctor",
+    ...STAFF_OR_NURSE_USER,
+  ].includes(state.form.user_type);
 
   const { loading: isDistrictLoading } = useQuery(routes.getDistrictByState, {
     prefetch: !!(selectedStateId > 0),
@@ -332,10 +343,8 @@ export const UserAdd = (props: UserProps) => {
         case "facilities":
           if (
             state.form[field].length === 0 &&
-            (authUser.user_type === "Staff" ||
-              authUser.user_type === "StaffReadOnly") &&
-            (state.form["user_type"] === "Staff" ||
-              state.form["user_type"] === "StaffReadOnly")
+            STAFF_OR_NURSE_USER.includes(authUser.user_type) &&
+            STAFF_OR_NURSE_USER.includes(state.form.user_type)
           ) {
             errors[field] =
               "Please select atleast one of the facilities you are linked to";

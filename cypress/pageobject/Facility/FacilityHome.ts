@@ -31,8 +31,32 @@ class FacilityHome {
     cy.url().should("include", "/cns");
   }
 
+  verifyLiveMonitorUrl() {
+    cy.url().should("include", "/live-monitoring?location=");
+  }
+
   clickFacilityNotifyButton() {
     cy.get("#facility-notify").first().click();
+  }
+
+  clickLiveMonitorButton() {
+    cy.get("#live-monitoring-button").scrollIntoView();
+    cy.get("#live-monitoring-button").click();
+  }
+
+  clickFacilityLiveMonitorButton() {
+    cy.get("#facility-detailspage-livemonitoring").scrollIntoView();
+    cy.get("#facility-detailspage-livemonitoring").click();
+  }
+
+  clickFacilityCnsButton() {
+    cy.get("#facility-detailspage-cns").scrollIntoView();
+    cy.get("#facility-detailspage-cns").click();
+  }
+
+  selectLocation(location) {
+    cy.get("#location").click().type(location);
+    cy.get("li[role=option]").contains(location).click();
   }
 
   verifyFacilityDetailsUrl() {
