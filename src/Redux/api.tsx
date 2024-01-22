@@ -531,6 +531,8 @@ const routes = {
 
   getDailyReport: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/{id}/",
+    method: "GET",
+    TRes: Type<DailyRoundsModel>(),
   },
   dailyRoundsAnalyse: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/analyse/",
