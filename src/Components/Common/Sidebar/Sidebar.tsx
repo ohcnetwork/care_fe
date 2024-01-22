@@ -147,13 +147,15 @@ const StatelessSidebar = ({
             handleOverflow={handleOverflow}
             onClickCB={() => onItemClick && onItemClick(false)}
           />
-          <Item
-            text="Dashboard"
-            to={dashboard_url}
-            icon={<CareIcon className="care-l-dashboard text-lg" />}
-            external
-            handleOverflow={handleOverflow}
-          />
+          {dashboard_url && (
+            <Item
+              text="Dashboard"
+              to={dashboard_url}
+              icon={<CareIcon className="care-l-dashboard text-lg" />}
+              external
+              handleOverflow={handleOverflow}
+            />
+          )}
         </div>
         <div className="hidden md:block md:flex-1" />
 
