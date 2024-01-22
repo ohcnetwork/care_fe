@@ -537,6 +537,8 @@ const routes = {
 
   getDailyReport: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/{id}/",
+    method: "GET",
+    TRes: Type<DailyRoundsModel>(),
   },
   dailyRoundsAnalyse: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/analyse/",
@@ -624,6 +626,8 @@ const routes = {
   },
   patientList: {
     path: "/api/v1/patient/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<PatientModel>>(),
   },
   addPatient: {
     path: "/api/v1/patient/",
@@ -753,6 +757,8 @@ const routes = {
   },
   getAllLocalBody: {
     path: "/api/v1/local_body/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<LocalBodyModel>>(),
   },
   getLocalbodyByName: {
     path: "/api/v1/local_body/",

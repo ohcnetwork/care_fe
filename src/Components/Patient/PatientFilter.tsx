@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import {
@@ -12,11 +12,6 @@ import {
 } from "../../Common/constants";
 import useConfig from "../../Common/hooks/useConfig";
 import useMergeState from "../../Common/hooks/useMergeState";
-import {
-  getAllLocalBody,
-  getAnyFacility,
-  getDistrict,
-} from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { dateQueryString } from "../../Utils/utils";
 import { DateRange } from "../Common/DateRangeInputV2";
@@ -34,6 +29,9 @@ import {
 } from "../Form/FormFields/Utils";
 import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
 import SelectMenuV2 from "../Form/SelectMenuV2";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
@@ -145,35 +143,40 @@ export default function PatientFilter(props: any) {
     ventilator_interface: null,
   };
 
-  useEffect(() => {
-    async function fetchData() {
-      if (filter.facility) {
-        const { data: facilityData } = await dispatch(
-          getAnyFacility(filter.facility, "facility")
-        );
-        setFilterState({ facility_ref: facilityData });
-      }
+  useQuery(routes.getAnyFacility, {
+    pathParams: {
+      facilityId: filter.facility,
+    },
+    prefetch: !!filter.facility,
+    onResponse: ({ data }) => {
+      setFilterState({ facility_ref: data });
+    },
+  });
 
-      if (filter.district) {
-        const { data: districtData } = await dispatch(
-          getDistrict(filter.district, "district")
-        );
-        setFilterState({ district_ref: districtData });
-      }
+  useQuery(routes.getDistrict, {
+    pathParams: {
+      facilityId: filter.facility,
+    },
+    prefetch: !!filter.district,
+    onResponse: ({ data }) => {
+      setFilterState({ district_ref: data });
+    },
+  });
 
-      if (filter.lsgBody) {
-        const { data: lsgRes } = await dispatch(getAllLocalBody({}));
-        const lsgBodyData = lsgRes.results;
+  useQuery(routes.getAllLocalBody, {
+    pathParams: {
+      facilityId: filter.facility,
+    },
 
-        setFilterState({
-          lsgBody_ref: lsgBodyData.filter(
-            (obj: any) => obj.id.toString() === filter.lsgBody.toString()
-          )[0],
-        });
-      }
-    }
-    fetchData();
-  }, [dispatch]);
+    prefetch: !!filter.lsgBody,
+    onResponse: ({ data }) => {
+      setFilterState({
+        lsgBody_ref: data?.results.filter(
+          (obj: any) => obj.id.toString() === filter.lsgBody.toString()
+        )[0],
+      });
+    },
+  });
 
   const VACCINATED_FILTER = [
     { id: "0", text: "Unvaccinated" },
@@ -209,7 +212,11 @@ export default function PatientFilter(props: any) {
 
   const lsgSearch = useCallback(
     async (search: string) => {
-      const res = await dispatch(getAllLocalBody({ local_body_name: search }));
+      const res = await request(routes.getAllLocalBody, {
+        query: {
+          local_body_name: search,
+        },
+      });
       return res?.data?.results;
     },
     [dispatch]
