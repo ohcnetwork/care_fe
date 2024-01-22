@@ -126,7 +126,6 @@ export default function BoardView() {
     );
   };
 
-
   return (
     <div className="max-h[95vh] flex min-h-full max-w-[100vw] flex-col px-2 pb-2">
       <div className="flex w-full flex-col items-center justify-between lg:flex-row">
