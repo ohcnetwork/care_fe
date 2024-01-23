@@ -26,7 +26,7 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
   const handleDeleteSubmit = async () => {
     if (!props.area) return;
 
-    const { res } = await request(routes.deleteAsset, {
+    const { res } = await request(routes.deleteDoctor, {
       pathParams: { facilityId: props.facilityId, area: `${props.area}` },
     });
 

@@ -67,7 +67,7 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
   });
 
   const { loading } = useQuery(routes.getDoctor, {
-    pathParams: { facilityId },
+    pathParams: { facilityId, id: `${id}` },
     prefetch: !!id,
     onResponse: ({ data }) => {
       if (!data) return;
