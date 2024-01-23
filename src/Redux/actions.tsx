@@ -221,9 +221,6 @@ export const sampleReport = (id: string, sampleId: string) => {
 export const getTestList = (params: object) => {
   return fireRequest("getTestSampleList", [], params);
 };
-export const getTestSample = (id: string) => {
-  return fireRequest("getTestSample", [id], {});
-};
 export const patchSample = (params: object, pathParam: object) => {
   return fireRequest("patchSample", [], params, pathParam);
 };

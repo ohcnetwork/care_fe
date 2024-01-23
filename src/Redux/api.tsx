@@ -782,7 +782,9 @@ const routes = {
     path: "/api/v1/test_sample/",
   },
   getTestSample: {
-    path: "/api/v1/test_sample",
+    path: "/api/v1/test_sample/{id}",
+    method: "GET",
+    TRes: Type<SampleTestModel>(),
   },
   patchSample: {
     path: "/api/v1/test_sample/{id}/",
