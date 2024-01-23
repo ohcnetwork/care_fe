@@ -212,12 +212,12 @@ export default function PatientFilter(props: any) {
 
   const lsgSearch = useCallback(
     async (search: string) => {
-      const res = await request(routes.getAllLocalBody, {
+      const { data } = await request(routes.getAllLocalBody, {
         query: {
           local_body_name: search,
         },
       });
-      return res?.data?.results;
+      return data?.results;
     },
     [dispatch]
   );

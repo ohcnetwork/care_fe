@@ -282,7 +282,7 @@ export default function SampleViewAdmin() {
     manageSamples = (
       <>
         {sampleList}
-        <Pagination totalCount={sampeleData?.count || 0} />
+        <Pagination totalCount={sampeleData?.count} />
       </>
     );
   } else if (sampeleData && sampeleData.count === 0) {
