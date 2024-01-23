@@ -215,9 +215,6 @@ export const getAllLocalBody = (params: object) => {
 export const createSampleTest = (params: object, pathParam: object) => {
   return fireRequest("createSampleTest", [], params, pathParam);
 };
-export const sampleReport = (id: string, sampleId: string) => {
-  return fireRequest("sampleReport", [], {}, { id, sampleId });
-};
 export const getTestList = (params: object) => {
   return fireRequest("getTestSampleList", [], params);
 };

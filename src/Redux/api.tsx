@@ -71,6 +71,7 @@ import { Prescription } from "../Components/Medicine/models";
 import {
   DailyRoundsModel,
   PatientModel,
+  SampleReportModel,
   SampleTestModel,
 } from "../Components/Patient/models";
 import { PaginatedResponse } from "../Utils/request/types";
@@ -674,6 +675,8 @@ const routes = {
   },
   sampleReport: {
     path: "/api/v1/patient/{id}/test_sample/{sampleId}/icmr_sample",
+    method: "GET",
+    TRes: Type<SampleReportModel>(),
   },
 
   // External Results
