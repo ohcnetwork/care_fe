@@ -1,9 +1,7 @@
 import { navigate } from "raviger";
 import { useState } from "react";
 import { SampleTestModel } from "./models";
-import { useDispatch } from "react-redux";
 import { SAMPLE_TEST_STATUS } from "../../Common/constants";
-import { patchSample } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import UpdateStatusDialog from "./UpdateStatusDialog";
 import _ from "lodash-es";
@@ -11,6 +9,8 @@ import { formatDateTime } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 interface SampleDetailsProps {
   facilityId: number;
@@ -21,7 +21,6 @@ interface SampleDetailsProps {
 
 export const SampleTestCard = (props: SampleDetailsProps) => {
   const { itemData, handleApproval, facilityId, patientId } = props;
-  const dispatch: any = useDispatch();
 
   const [statusDialog, setStatusDialog] = useState<{
     show: boolean;
@@ -43,15 +42,21 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
       sampleData.date_of_result = new Date().toISOString();
     }
     const statusName = SAMPLE_TEST_STATUS.find((i) => i.id === status)?.desc;
-
-    const res = await dispatch(patchSample(sampleData, { id: sample.id }));
-    if (res && (res.status === 201 || res.status === 200)) {
-      window.location.reload();
-      Notification.Success({
-        msg: `Success - ${statusName}`,
-      });
-    }
-    dismissUpdateStatus();
+    await request(routes.patchSample, {
+      pathParams: {
+        id: sample.id || 0,
+      },
+      body: sampleData,
+      onResponse: ({ res }) => {
+        if (res?.ok) {
+          window.location.reload();
+          Notification.Success({
+            msg: `Success - ${statusName}`,
+          });
+        }
+        dismissUpdateStatus();
+      },
+    });
   };
 
   const showUpdateStatus = (sample: SampleTestModel) => {
