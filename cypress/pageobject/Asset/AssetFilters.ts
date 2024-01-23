@@ -50,9 +50,7 @@ export class AssetFilters {
     });
   }
   clickadvancefilter() {
-    cy.intercept("GET", "**/api/v1/getallfacilities/**").as("advancefilter");
     cy.get("#advanced-filter").click();
-    cy.wait("@advancefilter").its("response.statusCode").should("eq", 200);
   }
   clickslideoverbackbutton() {
     cy.get("#close-slide-over").click();

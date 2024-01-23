@@ -62,14 +62,14 @@ describe("Asset Tab", () => {
 
   it("Filter Asset", () => {
     assetFilters.filterAssets(
-      "Dummy Facility 1",
+      "Dummy Facility 40",
       "ACTIVE",
       "ONVIF Camera",
       "Camera Loc"
     );
     assetFilters.clickadvancefilter();
     assetFilters.clickslideoverbackbutton(); // to verify the back button doesn't clear applied filters
-    assetFilters.assertFacilityText("Dummy Facility 1");
+    assetFilters.assertFacilityText("Dummy Facility 40");
     assetFilters.assertAssetClassText("ONVIF");
     assetFilters.assertStatusText("ACTIVE");
     assetFilters.assertLocationText("Camera Loc");
@@ -87,7 +87,7 @@ describe("Asset Tab", () => {
   it("Import new asset", () => {
     assetPage.selectassetimportbutton();
     assetPage.selectImportOption();
-    assetPage.selectImportFacility("Dummy Facility 1");
+    assetPage.selectImportFacility("Dummy Facility 40");
     assetPage.importAssetFile();
     assetPage.selectImportLocation("Camera Loc");
     assetPage.clickImportAsset();
