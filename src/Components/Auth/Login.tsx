@@ -211,7 +211,7 @@ export const Login = (props: { forgot?: boolean }) => {
                 target="_blank"
               >
                 <img
-                  src="https://digitalpublicgoods.net/wp-content/themes/dpga/images/logo-w.svg"
+                  src="https://cdn.coronasafe.network/dpg-logo.svg"
                   className="h-12"
                   alt="Logo of Digital Public Goods Alliance"
                 />
