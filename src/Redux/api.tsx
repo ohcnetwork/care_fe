@@ -82,6 +82,7 @@ import {
   InvestigationGroup,
   InvestigationType,
 } from "../Components/Facility/Investigations";
+import { Investigation } from "../Components/Facility/Investigations/Reports/types";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -962,6 +963,7 @@ const routes = {
   getInvestigation: {
     path: "/api/v1/consultation/{consultation_external_id}/investigation/",
     method: "GET",
+    TRes: Type<PaginatedResponse<Investigation>>(),
   },
   getPatientInvestigation: {
     path: "/api/v1/patient/{patient_external_id}/investigation/",
