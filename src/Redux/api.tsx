@@ -636,7 +636,7 @@ const routes = {
   },
   getPatient: {
     path: "/api/v1/patient/{id}/",
-    TBody: Type<PatientModel>(),
+    method: "GET",
     TRes: Type<PatientModel>(),
   },
   updatePatient: {
@@ -672,6 +672,8 @@ const routes = {
   createSampleTest: {
     path: "/api/v1/patient/{patientId}/test_sample/",
     method: "POST",
+    TRes: Type<PatientModel>(),
+    TBody: Type<SampleTestModel>(),
   },
   sampleReport: {
     path: "/api/v1/patient/{id}/test_sample/{sampleId}/icmr_sample",
