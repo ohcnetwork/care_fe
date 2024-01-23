@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import useSlug from "../../../Common/hooks/useSlug";
 import useQuery from "../../../Utils/request/useQuery";
 import MedicineRoutes from "../routes";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { computeActivityBounds } from "./utils";
 import useBreakpoints from "../../../Common/hooks/useBreakpoints";
 import SubHeading from "../../../CAREUI/display/SubHeading";
@@ -13,7 +13,6 @@ import useRangePagination from "../../../Common/hooks/useRangePagination";
 import MedicineAdministrationTable from "./AdministrationTable";
 import Loading from "../../Common/Loading";
 import ScrollOverlay from "../../../CAREUI/interactive/ScrollOverlay";
-import { Prescription } from "../models";
 
 interface Props {
   readonly?: boolean;
@@ -29,7 +28,6 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
   const [showDiscontinued, setShowDiscontinued] = useState(false);
 
   const filters = { is_prn, prescription_type: "REGULAR", limit: 100 };
-  const [prescriptionList, setPrescriptionList] = useState<Prescription[]>([]);
 
   const { data, loading, refetch } = useQuery(
     MedicineRoutes.listPrescriptions,
@@ -51,15 +49,10 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
 
   const discontinuedCount = discontinuedPrescriptions.data?.count;
 
-  useEffect(() => {
-    if (!showDiscontinued) {
-      setPrescriptionList(data?.results ?? []);
-    } else {
-      const regularList = data?.results ?? [];
-      const discontinuedList = discontinuedPrescriptions.data?.results ?? [];
-      setPrescriptionList([...regularList, ...discontinuedList]);
-    }
-  }, [data, showDiscontinued]);
+  const prescriptionList = [
+    ...(data?.results ?? []),
+    ...(showDiscontinued ? discontinuedPrescriptions.data?.results ?? [] : []),
+  ];
 
   const { activityTimelineBounds, prescriptions } = useMemo(
     () => ({
