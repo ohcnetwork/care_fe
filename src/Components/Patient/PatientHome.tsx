@@ -221,8 +221,8 @@ export const PatientHome = (props: any) => {
       pathParams: {
         id: sample.id,
       },
-      onResponse: ({ res, data }) => {
-        if (res?.ok && data) {
+      onResponse: ({ res }) => {
+        if (res?.ok) {
           Notification.Success({
             msg: `Request ${statusName}`,
           });

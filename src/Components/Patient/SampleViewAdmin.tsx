@@ -1,6 +1,6 @@
 import SampleFilter from "./SampleFilters";
 import { navigate } from "raviger";
-import { useCallback, useState, useEffect, lazy } from "react";
+import { useCallback, useState, lazy } from "react";
 import { useDispatch } from "react-redux";
 import {
   SAMPLE_TEST_STATUS,
@@ -9,12 +9,7 @@ import {
   SAMPLE_TYPE_CHOICES,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  getTestList,
-  patchSample,
-  downloadSampleTests,
-  getAnyFacility,
-} from "../../Redux/actions";
+import { getTestList, downloadSampleTests } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import { SampleTestModel } from "./models";
 import UpdateStatusDialog from "./UpdateStatusDialog";
@@ -26,6 +21,9 @@ import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import Page from "../Common/components/Page";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -48,21 +46,17 @@ export default function SampleViewAdmin() {
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [fetchFlag, callFetchData] = useState(false);
-  const [facilityName, setFacilityName] = useState("");
   const [statusDialog, setStatusDialog] = useState<{
     show: boolean;
     sample: SampleTestModel;
   }>({ show: false, sample: {} });
 
-  useEffect(() => {
-    async function fetchData() {
-      if (!qParams.facility) return setFacilityName("");
-      const res = await dispatch(getAnyFacility(qParams.facility));
-      setFacilityName(res?.data?.name);
-    }
-
-    fetchData();
-  }, [dispatch, qParams.facility]);
+  const { data: facilityData } = useQuery(routes.getAnyFacility, {
+    pathParams: {
+      id: qParams.facility,
+    },
+    prefetch: !!qParams.facility,
+  });
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -121,14 +115,22 @@ export default function SampleViewAdmin() {
       sampleData.date_of_result = new Date().toISOString();
     }
     const statusName = SAMPLE_TEST_STATUS.find((i) => i.id === status)?.desc;
-    const res = await dispatch(patchSample(sampleData, { id: sample.id }));
-    if (res && (res.status === 201 || res.status === 200)) {
-      Notification.Success({
-        msg: `Success - ${statusName}`,
-      });
-      callFetchData(!fetchFlag);
-    }
-    dismissUpdateStatus();
+
+    await request(routes.patchSample, {
+      pathParams: {
+        id: sample.id || 0,
+      },
+      body: sampleData,
+      onResponse: ({ res }) => {
+        if (res?.ok) {
+          Notification.Success({
+            msg: `Success - ${statusName}`,
+          });
+          callFetchData(!fetchFlag);
+        }
+        dismissUpdateStatus();
+      },
+    });
   };
 
   const showUpdateStatus = (sample: SampleTestModel) => {
@@ -401,7 +403,7 @@ export default function SampleViewAdmin() {
                 (type) => type.id === qParams.sample_type
               )?.text || ""
             ),
-            value("Facility", "facility", facilityName),
+            value("Facility", "facility", facilityData?.name || ""),
           ]}
         />
       </div>
