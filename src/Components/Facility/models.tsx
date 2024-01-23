@@ -524,3 +524,10 @@ export type FacilityRequest = Omit<FacilityModel, "location"> & {
   patient_count?: string;
   bed_count?: string;
 };
+
+export type PatientTransferResponse = {
+  id: string;
+  patient: string;
+  date_of_birth: string;
+  facility_object: BaseFacilityModel;
+};

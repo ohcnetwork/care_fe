@@ -51,6 +51,7 @@ import {
   LocationModel,
   PatientNotesModel,
   BedModel,
+  PatientTransferResponse,
 } from "../Components/Facility/models";
 import {
   IDeleteBedCapacity,
@@ -640,6 +641,7 @@ const routes = {
   transferPatient: {
     path: "/api/v1/patient/{id}/transfer/",
     method: "POST",
+    TRes: Type<PatientTransferResponse>(),
   },
   getPatientNotes: {
     path: "/api/v1/patient/{patientId}/notes/",
