@@ -58,6 +58,7 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
         </div>
         <div className="flex justify-end gap-4 border-t border-[#D2D6DC] bg-[#FBF9FB] px-3 py-2">
           <ButtonV2
+            id="edit-facility-doctorcapacity"
             variant="secondary"
             ghost
             onClick={() => {
@@ -69,6 +70,7 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
             Edit
           </ButtonV2>
           <ButtonV2
+            id="delete-facility-doctorcapacity"
             variant="danger"
             ghost
             onClick={() => setOpenDeleteDialog(true)}

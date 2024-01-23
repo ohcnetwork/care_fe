@@ -1028,6 +1028,8 @@ export const USER_TYPES_MAP = {
   StaffReadOnly: "Staff",
   Staff: "Staff",
   Doctor: "Doctor",
+  Nurse: "Nurse",
+  NurseReadOnly: "Nurse",
   WardAdmin: "Ward Admin",
   LocalBodyAdmin: "Local Body Admin",
   DistrictLabAdmin: "District Lab Admin",
@@ -1037,7 +1039,7 @@ export const USER_TYPES_MAP = {
   StateReadOnlyAdmin: "State Admin",
   StateAdmin: "State Admin",
   RemoteSpecialist: "Remote Specialist",
-};
+} as const;
 
 export const AREACODES: Record<string, string[]> = {
   CA: [

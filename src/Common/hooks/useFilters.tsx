@@ -1,4 +1,4 @@
-import { useQueryParams } from "raviger";
+import { QueryParam, setQueryParamsOptions, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import GenericFilterBadge from "../../CAREUI/display/FilterBadge";
@@ -8,6 +8,7 @@ import { classNames } from "../../Utils/utils";
 
 export type FilterState = Record<string, unknown>;
 export type FilterParamKeys = string | string[];
+
 interface FilterBadgeProps {
   name: string;
   value?: string;
@@ -18,12 +19,32 @@ interface FilterBadgeProps {
  * A custom hook wrapped around raviger's `useQueryParams` hook to ease handling
  * of pagination and filters.
  */
-export default function useFilters({ limit = 14 }: { limit?: number }) {
+export default function useFilters({
+  limit = 14,
+  cacheBlacklist = [],
+}: {
+  limit?: number;
+  cacheBlacklist?: string[];
+}) {
   const { t } = useTranslation();
   const { kasp_string } = useConfig();
   const hasPagination = limit > 0;
   const [showFilters, setShowFilters] = useState(false);
-  const [qParams, setQueryParams] = useQueryParams();
+  const [qParams, _setQueryParams] = useQueryParams();
+
+  const setQueryParams = (
+    query: QueryParam,
+    options?: setQueryParamsOptions
+  ) => {
+    const updatedQParams = { ...query };
+
+    for (const param of cacheBlacklist) {
+      delete updatedQParams[param];
+    }
+
+    _setQueryParams(query, options);
+    updateFiltersCache(updatedQParams);
+  };
 
   const updateQuery = (filter: FilterState) => {
     filter = hasPagination ? { page: 1, limit, ...filter } : filter;
@@ -37,8 +58,6 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
     setQueryParams(removeFromQuery(qParams, params));
   };
   const removeFilter = (param: string) => removeFilters([param]);
-
-  useEffect(() => updateFiltersCache(qParams), [qParams]);
 
   useEffect(() => {
     const cache = getFiltersCache();
