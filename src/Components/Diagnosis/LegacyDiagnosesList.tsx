@@ -61,7 +61,7 @@ const DiagnosesOfStatus = ({ diagnoses }: Props) => {
       <ul className="text-sm">
         {queryset.map((diagnosis) => (
           <li key={diagnosis.id} className="flex items-center gap-2">
-            <span>{diagnosis.diagnosis_object.label}</span>
+            <span>{diagnosis.diagnosis_object?.label}</span>
             {diagnosis.is_principal && (
               <span className="flex items-start gap-0.5 rounded border border-primary-500 py-0.5 pl-1 pr-2 text-xs font-medium text-primary-500">
                 <CareIcon icon="l-check" className="text-base" />
