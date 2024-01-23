@@ -563,36 +563,6 @@ export type MinimumQuantityItemResponse = {
   item: number;
 };
 
-export type InventorySummaryResponse = {
-  id: string;
-  item_object: {
-    id: number;
-    default_unit: {
-      id: number;
-      name: string;
-    };
-    allowed_units: {
-      id: number;
-      name: string;
-    }[];
-    tags: {
-      id: number;
-      name: string;
-    }[];
-    name: string;
-    description: string;
-    min_quantity: number;
-  };
-  unit_object: {
-    id: number;
-    name: string;
-  };
-  created_date: string;
-  quantity: number;
-  is_low: boolean;
-  item: number;
-};
-
 export type InventoryLogResponse = InventorySummaryResponse & {
   external_id: string;
   current_stock: number;
