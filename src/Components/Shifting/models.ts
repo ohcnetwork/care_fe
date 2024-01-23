@@ -8,7 +8,7 @@ export interface IShift {
   emergency: boolean;
   status: string;
   origin_facility_object: FacilityModel;
-  origin_facility: string;
+  origin_facility: string | number;
   shifting_approving_facility: string;
   assigned_facility_external: string | null;
   assigned_facility: string | null;
@@ -39,6 +39,6 @@ export interface IShift {
   is_assigned_to_user: boolean;
   created_by: number;
   last_edited_by: number;
-  patient: string | PatientModel;
+  patient: string | PatientModel | number;
   initial_status?: string;
 }

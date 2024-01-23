@@ -7,8 +7,7 @@ import {
   SHIFTING_VEHICLE_CHOICES,
 } from "../../Common/constants";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import { createShift, getPatient } from "../../Redux/actions";
-import { lazy, useEffect, useReducer, useState } from "react";
+import { lazy, useReducer, useState } from "react";
 
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
@@ -22,13 +21,15 @@ import { parsePhoneNumber } from "../../Utils/utils.js";
 import { phonePreg } from "../../Common/validation";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page.js";
 import Card from "../../CAREUI/display/Card.js";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField.js";
 import { SelectFormField } from "../Form/FormFields/SelectFormField.js";
 import { PhoneNumberValidator } from "../Form/FieldValidators.js";
+import useQuery from "../../Utils/request/useQuery.js";
+import routes from "../../Redux/api.js";
+import request from "../../Utils/request/request.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -40,10 +41,7 @@ interface patientShiftProps {
 export const ShiftCreate = (props: patientShiftProps) => {
   const { goBack } = useAppHistory();
   const { facilityId, patientId } = props;
-  const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const [facilityName, setFacilityName] = useState("");
-  const [patientName, setPatientName] = useState("");
   const [patientCategory, setPatientCategory] = useState<any>();
   const { t } = useTranslation();
   const { wartime_shifting } = useConfig();
@@ -109,27 +107,22 @@ export const ShiftCreate = (props: patientShiftProps) => {
     errors: { ...initError },
   };
 
-  useEffect(() => {
-    async function fetchPatientName() {
-      if (patientId) {
-        const res = await dispatchAction(getPatient({ id: patientId }));
-        if (res.data) {
-          const patient_category =
-            res.data.last_consultation?.last_daily_round?.patient_category ??
-            res.data.last_consultation?.category;
-          setPatientCategory(
-            PATIENT_CATEGORIES.find((c) => c.text === patient_category)?.id
-          );
-          setPatientName(res.data.name);
-          setFacilityName(res.data.facility_object.name);
-        }
-      } else {
-        setPatientName("");
-        setFacilityName("");
+  const { data: patientData } = useQuery(routes.getPatient, {
+    pathParams: {
+      id: patientId,
+    },
+    prefetch: !!patientId,
+    onResponse: ({ data }) => {
+      if (data) {
+        const patient_category =
+          data.last_consultation?.last_daily_round?.patient_category ??
+          data.last_consultation?.category;
+        setPatientCategory(
+          PATIENT_CATEGORIES.find((c) => c.text === patient_category)?.id
+        );
       }
-    }
-    fetchPatientName();
-  }, [dispatchAction, patientId]);
+    },
+  });
 
   const shiftFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
@@ -242,17 +235,22 @@ export const ShiftCreate = (props: patientShiftProps) => {
         ambulance_number: state.form.ambulance_number,
       };
 
-      const res = await dispatchAction(createShift(data));
-      setIsLoading(false);
+      await request(routes.createShift, {
+        body: data,
 
-      if (res && res.data && (res.status == 201 || res.status == 200)) {
-        await dispatch({ type: "set_form", form: initForm });
-        Notification.Success({
-          msg: "Shift request created successfully",
-        });
+        onResponse: ({ res, data }) => {
+          setIsLoading(false);
 
-        navigate(`/shifting/${res.data.id}`);
-      }
+          if (res && data && (res.status == 201 || res.status == 200)) {
+            dispatch({ type: "set_form", form: initForm });
+            Notification.Success({
+              msg: "Shift request created successfully",
+            });
+
+            navigate(`/shifting/${data.id}`);
+          }
+        },
+      });
     }
   };
 
@@ -271,8 +269,8 @@ export const ShiftCreate = (props: patientShiftProps) => {
     <Page
       title={"Create Shift Request"}
       crumbsReplacements={{
-        [facilityId]: { name: facilityName },
-        [patientId]: { name: patientName },
+        [facilityId]: { name: patientData?.facility_object?.name || "" },
+        [patientId]: { name: patientData?.name || "" },
       }}
       backUrl={`/facility/${facilityId}/patient/${patientId}`}
     >

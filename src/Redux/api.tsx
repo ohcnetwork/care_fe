@@ -875,6 +875,8 @@ const routes = {
   createShift: {
     path: "/api/v1/shift/",
     method: "POST",
+    TBody: Type<Partial<IShift>>(),
+    TRes: Type<PatientModel>(),
   },
   updateShift: {
     path: "/api/v1/shift/{id}",

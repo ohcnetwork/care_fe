@@ -311,10 +311,6 @@ export const dischargePatient = (params: object, pathParams: object) => {
 };
 
 //Shift
-export const createShift = (params: object) => {
-  return fireRequest("createShift", [], params);
-};
-
 export const listShiftRequests = (params: object, key: string) => {
   return fireRequest("listShiftRequests", [], params, null, key);
 };
