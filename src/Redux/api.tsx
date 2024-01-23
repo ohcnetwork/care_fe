@@ -785,6 +785,8 @@ const routes = {
   // Sample Test
   getTestSampleList: {
     path: "/api/v1/test_sample/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<SampleTestModel>>(),
   },
   getTestSample: {
     path: "/api/v1/test_sample/{id}/",

@@ -1,15 +1,13 @@
 import SampleFilter from "./SampleFilters";
 import { navigate } from "raviger";
-import { useCallback, useState, lazy } from "react";
-import { useDispatch } from "react-redux";
+import { useState, lazy } from "react";
 import {
   SAMPLE_TEST_STATUS,
   SAMPLE_TEST_RESULT,
   SAMPLE_FLOW_RULES,
   SAMPLE_TYPE_CHOICES,
 } from "../../Common/constants";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getTestList, downloadSampleTests } from "../../Redux/actions";
+import { downloadSampleTests } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import { SampleTestModel } from "./models";
 import UpdateStatusDialog from "./UpdateStatusDialog";
@@ -39,12 +37,7 @@ export default function SampleViewAdmin() {
     limit: 10,
     cacheBlacklist: ["patient_name", "district_name"],
   });
-  const dispatch: any = useDispatch();
-  const initialData: any[] = [];
   let manageSamples: any = null;
-  const [sample, setSample] = useState<Array<SampleTestModel>>(initialData);
-  const [isLoading, setIsLoading] = useState(false);
-  const [totalCount, setTotalCount] = useState(0);
   const [fetchFlag, callFetchData] = useState(false);
   const [statusDialog, setStatusDialog] = useState<{
     show: boolean;
@@ -58,46 +51,20 @@ export default function SampleViewAdmin() {
     prefetch: !!qParams.facility,
   });
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatch(
-        getTestList({
-          limit: resultsPerPage,
-          offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
-          patient_name: qParams.patient_name || undefined,
-          district_name: qParams.district_name || undefined,
-          status: qParams.status || undefined,
-          result: qParams.result || undefined,
-          facility: qParams.facility || "",
-          sample_type: qParams.sample_type || undefined,
-        })
-      );
-      if (!status.aborted) {
-        if (res && res.data) {
-          setSample(res.data.results);
-          setTotalCount(res.data.count);
-        }
-        setIsLoading(false);
-      }
-    },
-    [
-      dispatch,
-      qParams.page,
-      qParams.patient_name,
-      qParams.district_name,
-      qParams.status,
-      qParams.result,
-      qParams.facility,
-      qParams.sample_type,
-    ]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData, fetchFlag]
+  const { loading: isLoading, data: sampeleData } = useQuery(
+    routes.getTestSampleList,
+    {
+      query: {
+        limit: resultsPerPage,
+        offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
+        patient_name: qParams.patient_name || undefined,
+        district_name: qParams.district_name || undefined,
+        status: qParams.status || undefined,
+        result: qParams.result || undefined,
+        facility: qParams.facility || "",
+        sample_type: qParams.sample_type || undefined,
+      },
+    }
   );
 
   const handleApproval = async (
@@ -165,8 +132,8 @@ export default function SampleViewAdmin() {
       .join("\n");
 
   let sampleList: any[] = [];
-  if (sample && sample.length) {
-    sampleList = sample.map((item) => {
+  if (sampeleData && sampeleData.count) {
+    sampleList = sampeleData.results.map((item) => {
       const status = String(item.status) as keyof typeof SAMPLE_FLOW_RULES;
       const statusText = SAMPLE_TEST_STATUS.find(
         (i) => i.text === status
@@ -305,20 +272,20 @@ export default function SampleViewAdmin() {
     });
   }
 
-  if (isLoading || !sample) {
+  if (isLoading || !sampeleData) {
     manageSamples = (
       <div className="flex w-full justify-center">
         <Loading />
       </div>
     );
-  } else if (sample && sample.length) {
+  } else if (sampeleData && sampeleData.count) {
     manageSamples = (
       <>
         {sampleList}
-        <Pagination totalCount={totalCount} />
+        <Pagination totalCount={sampeleData?.count || 0} />
       </>
     );
-  } else if (sample && sample.length === 0) {
+  } else if (sampeleData && sampeleData.count === 0) {
     manageSamples = (
       <div className="w-full rounded-lg bg-white p-3">
         <div className="mt-4 flex w-full  justify-center text-2xl font-bold text-gray-600">
@@ -353,7 +320,7 @@ export default function SampleViewAdmin() {
           <div className="w-full">
             <CountBlock
               text="Total Samples Taken"
-              count={totalCount}
+              count={sampeleData?.count || 0}
               loading={isLoading}
               icon="l-thermometer"
               className="flex-1"
