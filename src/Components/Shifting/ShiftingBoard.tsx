@@ -1,4 +1,11 @@
-import { useEffect, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { classNames, formatAge, formatDateTime } from "../../Utils/utils";
 import { downloadShiftRequests } from "../../Redux/actions";
 import { useDrag, useDrop } from "react-dnd";
@@ -23,6 +30,8 @@ interface boardProps {
   title?: string;
   filterProp: any;
   formatFilter: any;
+  setContainerHeight: Dispatch<SetStateAction<number>>;
+  containerHeight: number;
 }
 
 const reduceLoading = (action: string, current: any) => {
@@ -257,7 +266,10 @@ export default function ShiftingBoard({
   title,
   filterProp,
   formatFilter,
+  setContainerHeight,
+  containerHeight,
 }: boardProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [offset, setOffSet] = useState(0);
   const [isLoading, setIsLoading] = useState({ board: "BOARD", more: false });
   const [{ isOver }, drop] = useDrop(() => ({
@@ -336,13 +348,22 @@ export default function ShiftingBoard({
       ));
   };
 
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (container) {
+      const { height } = container.getBoundingClientRect();
+      containerHeight < height && setContainerHeight(height);
+    }
+  }, [containerRef.current, data?.results.length]);
+
   return (
     <div
       ref={drop}
       className={classNames(
-        "mr-2 h-full w-full flex-shrink-0 overflow-y-auto rounded-md bg-gray-200 pb-4 md:w-1/2 lg:w-1/3 xl:w-1/4",
+        "mr-2 h-full w-full flex-shrink-0 rounded-md bg-gray-200 pb-4 md:w-1/2 lg:w-1/3 xl:w-1/4",
         isOver && "cursor-move"
       )}
+      style={{ minHeight: `${containerHeight + 100}px` }}
     >
       <div className="sticky top-0 z-10 rounded bg-gray-200 pt-2">
         <div className="mx-2 flex items-center justify-between rounded bg-white p-4 shadow">
@@ -363,7 +384,7 @@ export default function ShiftingBoard({
           </span>
         </div>
       </div>
-      <div className="mt-2 flex flex-col pb-2 text-sm">
+      <div ref={containerRef} className="mt-2 flex flex-col pb-2 text-sm">
         {isLoading.board ? (
           <div className="m-1">
             <div className="mx-auto w-full max-w-sm rounded-md border border-gray-300 bg-white p-4 shadow">
