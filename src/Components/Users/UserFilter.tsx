@@ -29,16 +29,6 @@ export default function UserFilter(props: any) {
     district_ref: null,
   });
 
-  const clearFilterState = {
-    first_name: "",
-    last_name: "",
-    phone_number: undefined,
-    alt_phone_number: undefined,
-    user_type: "",
-    district_id: "",
-    district_ref: null,
-  };
-
   const setDistrict = (selected: any) => {
     const filterData: any = { ...filterState };
     filterData["district_ref"] = selected;
@@ -83,7 +73,7 @@ export default function UserFilter(props: any) {
       advancedFilter={props}
       onApply={applyFilter}
       onClear={() => {
-        removeFilters(Object.keys(clearFilterState));
+        removeFilters();
         closeFilter();
       }}
     >
