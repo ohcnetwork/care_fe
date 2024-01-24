@@ -185,7 +185,8 @@ export default function useFilters({
         {compiledBadges.map((props) => (
           <FilterBadge {...props} name={t(props.name)} key={props.name} />
         ))}
-        {activeFilters.length >= 1 && (
+        {children}
+        {(activeFilters.length >= 1 || children) && (
           <button
             id="clear-all-filters"
             className="rounded-full border border-gray-300 bg-white px-2 py-1 text-xs text-gray-600 hover:text-gray-800"
@@ -194,7 +195,6 @@ export default function useFilters({
             {t("clear_all_filters")}
           </button>
         )}
-        {children}
       </div>
     );
   };
