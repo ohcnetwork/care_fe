@@ -14,9 +14,12 @@ const AutoExpandingTextInputFormField = (
     const text = myref.current.textContent?.split("\n");
     const len = text?.length || 1;
     // 46 is height of the textarea when there is only 1 line
-    // height of 1 line is 18
-    // added 28 for padding (18+28 = 46)
-    const height = Math.min(len * 18, (props.maxHeight || 160) - 28) + 28;
+    // getting line height from window
+    const lineHeight =
+      window.getComputedStyle(myref.current).lineHeight.slice(0, -2) || "20";
+    // added 26 for padding (20+26 = 46)
+    const height =
+      Math.min(len * parseInt(lineHeight), (props.maxHeight || 160) - 26) + 26;
     // 160 is the max height of the textarea if not specified
     myref.current.style.cssText = "height:" + height + "px";
   });
