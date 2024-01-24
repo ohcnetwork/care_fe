@@ -54,7 +54,8 @@ export default function useFilters({
     if (!hasPagination) return;
     setQueryParams(Object.assign({}, qParams, { page }), { replace: true });
   };
-  const removeFilters = (params: string[]) => {
+  const removeFilters = (params?: string[]) => {
+    params ??= Object.keys(qParams);
     setQueryParams(removeFromQuery(qParams, params));
   };
   const removeFilter = (param: string) => removeFilters([param]);
@@ -188,10 +189,7 @@ export default function useFilters({
           <button
             id="clear-all-filters"
             className="rounded-full border border-gray-300 bg-white px-2 py-1 text-xs text-gray-600 hover:text-gray-800"
-            onClick={() => {
-              updateFiltersCache({});
-              removeFilters(Object.keys(qParams));
-            }}
+            onClick={() => removeFilters()}
           >
             {t("clear_all_filters")}
           </button>
