@@ -66,7 +66,8 @@ const CoverImageEditModal = ({
 
   const captureImage = () => {
     setPreviewImage(webRef.current.getScreenshot());
-    webRef.current.getCanvas().toBlob((blob: Blob) => {
+    const canvas = webRef.current.getCanvas();
+    canvas?.toBlob((blob: Blob) => {
       const myFile = new File([blob], "image.png", {
         type: blob.type,
       });
