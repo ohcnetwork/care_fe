@@ -30,6 +30,6 @@ status = 200
       style-src 'self' 'unsafe-inline';
       connect-src *;
       img-src 'self' blob: data: https://cdn.coronasafe.network https://egov-s3-facility-10bedicu.s3.amazonaws.com https://egov-s3-patient-data-10bedicu.s3.amazonaws.com;
-      media-src *;
+      media-src * blob: data:;
       object-src 'self' blob: https://egov-s3-facility-10bedicu.s3.amazonaws.com https://egov-s3-patient-data-10bedicu.s3.amazonaws.com;
       '''

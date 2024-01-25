@@ -102,10 +102,10 @@ export default defineConfig({
     headers: {
       "Content-Security-Policy": `default-src 'self';\
       script-src 'self' 'nonce-f51b9742' https://plausible.10bedicu.in;\
-      style-src 'self' 'nonce-7e14cf80';\
-      connect-src 'self' ws: wss: https://sentry.io https://plausible.10bedicu.in https://api.data.gov.in ${cdnUrls};\
+      style-src 'self' 'unsafe-inline';\
+      connect-src *;\
       img-src 'self' blob: data: https://cdn.coronasafe.network ${cdnUrls};\
-      media-src 'self' blob: data: https://cdn.coronasafe.network ${cdnUrls};\
+      media-src * blob: data:;\
       object-src 'self' blob: ${cdnUrls};`,
     },
     port: 4000,
