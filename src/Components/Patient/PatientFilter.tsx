@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import {
@@ -12,6 +12,11 @@ import {
 } from "../../Common/constants";
 import useConfig from "../../Common/hooks/useConfig";
 import useMergeState from "../../Common/hooks/useMergeState";
+import {
+  getAllLocalBody,
+  getAnyFacility,
+  getDistrict,
+} from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { dateQueryString } from "../../Utils/utils";
 import { DateRange } from "../Common/DateRangeInputV2";
@@ -29,13 +34,7 @@ import {
 } from "../Form/FormFields/Utils";
 import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
 import SelectMenuV2 from "../Form/SelectMenuV2";
-
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
-
 import DiagnosesFilter, { FILTER_BY_DIAGNOSES_KEYS } from "./DiagnosesFilter";
-
 
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
@@ -108,59 +107,6 @@ export default function PatientFilter(props: any) {
   });
   const dispatch: any = useDispatch();
 
-  const clearFilterState = {
-    district: "",
-    facility: "",
-    facility_type: "",
-    lsgBody: "",
-    facility_ref: null,
-    lsgBody_ref: null,
-    district_ref: null,
-    date_declared_positive_before: "",
-    date_declared_positive_after: "",
-    date_of_result_before: "",
-    date_of_result_after: "",
-    created_date_before: "",
-    created_date_after: "",
-    modified_date_before: "",
-    modified_date_after: "",
-    category: null,
-    gender: null,
-    disease_status: null,
-    age_min: "",
-    age_max: "",
-    date_of_result: null,
-    date_declared_positive: null,
-    last_consultation_medico_legal_case: null,
-    last_consultation_encounter_date_before: "",
-    last_consultation_encounter_date_after: "",
-    last_consultation_discharge_date_before: "",
-    last_consultation_discharge_date_after: "",
-    last_consultation_admitted_to_list: [],
-    last_consultation_current_bed__location: "",
-    srf_id: "",
-    number_of_doses: null,
-    covin_id: "",
-    is_kasp: null,
-    is_declared_positive: null,
-    last_consultation_symptoms_onset_date_before: "",
-    last_consultation_symptoms_onset_date_after: "",
-    last_vaccinated_date_before: "",
-    last_vaccinated_date_after: "",
-    last_consultation_is_telemedicine: null,
-    is_antenatal: null,
-    ventilator_interface: null,
-  };
-
-  useQuery(routes.getAnyFacility, {
-    pathParams: {
-      facilityId: filter.facility,
-    },
-    prefetch: !!filter.facility,
-    onResponse: ({ data }) => {
-      setFilterState({ facility_ref: data });
-    },
-
   useEffect(() => {
     async function fetchData() {
       if (filter.facility) {
@@ -170,31 +116,26 @@ export default function PatientFilter(props: any) {
         setFilterState({ facility_ref: facilityData });
       }
 
+      if (filter.district) {
+        const { data: districtData } = await dispatch(
+          getDistrict(filter.district, "district")
+        );
+        setFilterState({ district_ref: districtData });
+      }
 
-  useQuery(routes.getDistrict, {
-    pathParams: {
-      facilityId: filter.facility,
-    },
-    prefetch: !!filter.district,
-    onResponse: ({ data }) => {
-      setFilterState({ district_ref: data });
-    },
-  });
+      if (filter.lsgBody) {
+        const { data: lsgRes } = await dispatch(getAllLocalBody({}));
+        const lsgBodyData = lsgRes.results;
 
-  useQuery(routes.getAllLocalBody, {
-    pathParams: {
-      facilityId: filter.facility,
-    },
-
-    prefetch: !!filter.lsgBody,
-    onResponse: ({ data }) => {
-      setFilterState({
-        lsgBody_ref: data?.results.filter(
-          (obj: any) => obj.id.toString() === filter.lsgBody.toString()
-        )[0],
-      });
-    },
-  });
+        setFilterState({
+          lsgBody_ref: lsgBodyData.filter(
+            (obj: any) => obj.id.toString() === filter.lsgBody.toString()
+          )[0],
+        });
+      }
+    }
+    fetchData();
+  }, [dispatch]);
 
   const VACCINATED_FILTER = [
     { id: "0", text: "Unvaccinated" },
@@ -230,12 +171,8 @@ export default function PatientFilter(props: any) {
 
   const lsgSearch = useCallback(
     async (search: string) => {
-      const { data } = await request(routes.getAllLocalBody, {
-        query: {
-          local_body_name: search,
-        },
-      });
-      return data?.results;
+      const res = await dispatch(getAllLocalBody({ local_body_name: search }));
+      return res?.data?.results;
     },
     [dispatch]
   );
