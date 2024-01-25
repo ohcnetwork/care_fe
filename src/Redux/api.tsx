@@ -14,6 +14,7 @@ import {
   IHealthId,
   IinitiateAbdmAuthenticationTBody,
   ILinkABHANumber,
+  ILinkViaQRBody,
   IpartialUpdateHealthFacilityTBody,
   ISearchByHealthIdTBody,
   IVerifyAadhaarOtpTBody,
@@ -1217,7 +1218,7 @@ const routes = {
       path: "/api/v1/abdm/healthid/link_via_qr/",
       method: "POST",
       TRes: Type<ILinkABHANumber>(),
-      TBody: Type<ISearchByHealthIdTBody>(),
+      TBody: Type<ILinkViaQRBody>(),
     },
 
     linkCareContext: {
