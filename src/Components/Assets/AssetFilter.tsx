@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useQueryParams } from "raviger";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
@@ -50,17 +50,10 @@ function AssetFilter(props: any) {
     );
   }, [facility?.id, qParams.facility, qParams.location]);
 
-  const clearFilter = useCallback(() => {
-    removeFilters([
-      "facility",
-      "asset_class",
-      "status",
-      "location",
-      "warranty_amc_end_of_validity_before",
-      "warranty_amc_end_of_validity_after",
-    ]);
+  const clearFilter = () => {
+    removeFilters();
     closeFilter();
-  }, [qParams]);
+  };
 
   const applyFilter = () => {
     const data = {

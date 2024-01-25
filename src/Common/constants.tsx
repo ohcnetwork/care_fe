@@ -280,7 +280,6 @@ export const SYMPTOM_CHOICES = [
   { id: 6, text: "MYALGIA" },
   { id: 7, text: "ABDOMINAL DISCOMFORT" },
   { id: 8, text: "VOMITING" },
-  { id: 9, text: "OTHERS" },
   { id: 11, text: "SPUTUM" },
   { id: 12, text: "NAUSEA" },
   { id: 13, text: "CHEST PAIN" },
@@ -295,6 +294,17 @@ export const SYMPTOM_CHOICES = [
   { id: 22, text: "HEAD ACHE" },
   { id: 23, text: "BLEEDING" },
   { id: 24, text: "DIZZINESS" },
+  { id: 25, text: "CHILLS" },
+  { id: 26, text: "GENERAL WEAKNESS" },
+  { id: 27, text: "IRRITABILITY" },
+  { id: 28, text: "CONFUSION" },
+  { id: 29, text: "ABDOMINAL PAIN" },
+  { id: 30, text: "JOINT PAIN" },
+  { id: 31, text: "REDNESS OF EYES" },
+  { id: 32, text: "ANOREXIA" },
+  { id: 33, text: "NEW LOSS OF TASTE" },
+  { id: 34, text: "NEW LOSS OF SMELL" },
+  { id: 9, text: "OTHERS" },
 ];
 
 export const DISCHARGE_REASONS = [

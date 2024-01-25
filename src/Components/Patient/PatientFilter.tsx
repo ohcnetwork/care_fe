@@ -101,50 +101,6 @@ export default function PatientFilter(props: any) {
   });
   const dispatch: any = useDispatch();
 
-  const clearFilterState = {
-    district: "",
-    facility: "",
-    facility_type: "",
-    lsgBody: "",
-    facility_ref: null,
-    lsgBody_ref: null,
-    district_ref: null,
-    date_declared_positive_before: "",
-    date_declared_positive_after: "",
-    date_of_result_before: "",
-    date_of_result_after: "",
-    created_date_before: "",
-    created_date_after: "",
-    modified_date_before: "",
-    modified_date_after: "",
-    category: null,
-    gender: null,
-    disease_status: null,
-    age_min: "",
-    age_max: "",
-    date_of_result: null,
-    date_declared_positive: null,
-    last_consultation_medico_legal_case: null,
-    last_consultation_encounter_date_before: "",
-    last_consultation_encounter_date_after: "",
-    last_consultation_discharge_date_before: "",
-    last_consultation_discharge_date_after: "",
-    last_consultation_admitted_to_list: [],
-    last_consultation_current_bed__location: "",
-    srf_id: "",
-    number_of_doses: null,
-    covin_id: "",
-    is_kasp: null,
-    is_declared_positive: null,
-    last_consultation_symptoms_onset_date_before: "",
-    last_consultation_symptoms_onset_date_after: "",
-    last_vaccinated_date_before: "",
-    last_vaccinated_date_after: "",
-    last_consultation_is_telemedicine: null,
-    is_antenatal: null,
-    ventilator_interface: null,
-  };
-
   useEffect(() => {
     async function fetchData() {
       if (filter.facility) {
@@ -336,7 +292,7 @@ export default function PatientFilter(props: any) {
       advancedFilter={props}
       onApply={applyFilter}
       onClear={() => {
-        removeFilters(Object.keys(clearFilterState));
+        removeFilters();
         closeFilter();
       }}
     >
