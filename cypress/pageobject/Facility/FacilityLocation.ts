@@ -10,6 +10,14 @@ class FacilityLocation {
     cy.get("[id=location-management]").click();
   }
 
+  closeNotification() {
+    cy.get(".pnotify")
+      .should("exist")
+      .each(($div) => {
+        cy.wrap($div).click();
+      });
+  }
+
   clickAddNewLocationButton() {
     cy.get("#add-new-location").click();
   }

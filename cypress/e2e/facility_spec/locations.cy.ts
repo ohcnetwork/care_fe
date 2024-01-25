@@ -107,6 +107,7 @@ describe("Location Management Section", () => {
     facilityLocation.verifyBedNameBadge(bedModifiedName);
     facilityLocation.verifyBedBadge(bedModifiedType);
     facilityLocation.verifyBedBadge(bedStatus);
+    facilityLocation.closeNotification();
   });
 
   it("Adds Location to a facility and modify it", () => {
@@ -138,6 +139,7 @@ describe("Location Management Section", () => {
     facilityLocation.verifyLocationType(locationModifiedType);
     facilityLocation.verifyLocationDescription(locationModifiedDescription);
     facilityLocation.verifyLocationMiddleware(locationModifiedMiddleware);
+    facilityLocation.closeNotification();
   });
 
   it("Multiple Bed to a facility location and delete a bed", () => {
@@ -159,6 +161,7 @@ describe("Location Management Section", () => {
     facilityLocation.deleteBedRequest();
     assetPage.clickassetupdatebutton();
     facilityLocation.deleteBedRequest();
+    facilityLocation.closeNotification();
   });
 
   it("Add Multiple Bed to a facility location and verify pagination", () => {
@@ -173,6 +176,7 @@ describe("Location Management Section", () => {
     // pagination
     assetPagination.navigateToNextPage();
     assetPagination.navigateToPreviousPage();
+    facilityLocation.closeNotification();
   });
 
   it("Delete location", () => {
@@ -185,6 +189,7 @@ describe("Location Management Section", () => {
     facilityLocation.verifyNotification(
       "Location Test Location deleted successfully"
     );
+    facilityLocation.closeNotification();
   });
 
   it("Delete location with linked beds", () => {
@@ -203,11 +208,13 @@ describe("Location Management Section", () => {
     facilityLocation.verifyNotification(
       "Cannot delete a Location with associated Beds"
     );
+    facilityLocation.closeNotification();
 
     // delete bed
     facilityLocation.clickManageBeds();
     facilityLocation.deleteFirstBed();
     assetPage.clickassetupdatebutton();
+    facilityLocation.closeNotification();
 
     // delete location
     facilityLocation.clickText("Test Location with Beds");
@@ -216,6 +223,7 @@ describe("Location Management Section", () => {
     facilityLocation.verifyNotification(
       "Location Test Location with Beds deleted successfully"
     );
+    facilityLocation.closeNotification();
   });
 
   it("Delete location with linked assets", () => {
@@ -223,10 +231,11 @@ describe("Location Management Section", () => {
     facilityLocation.enterLocationName("Test Location with Assets");
     facilityLocation.selectLocationType("OTHER");
     assetPage.clickassetupdatebutton();
+    facilityLocation.closeNotification();
     // create asset and link it to location
     cy.awaitUrl("/assets");
     assetPage.createAsset();
-    assetPage.selectFacility("Dummy Facility 1, Ernakulam");
+    assetPage.selectFacility("Dummy Facility 40, Ernakulam");
     assetPage.enterAssetDetails(
       "Test Asset 1",
       "Test Description",
@@ -251,19 +260,22 @@ describe("Location Management Section", () => {
     facilityLocation.verifyNotification(
       "Cannot delete a Location with associated Assets"
     );
+    facilityLocation.closeNotification();
 
     // delete asset
     facilityLocation.clickManageAssets();
     assetPage.openAsset("Test Asset 1");
     assetPage.deleteAsset();
+    facilityLocation.closeNotification();
 
-    // // delete location
+    // delete location
     facilityLocation.loadLocationManagementPage();
     facilityLocation.deleteFirstLocation();
     assetPage.clickassetupdatebutton();
     facilityLocation.verifyNotification(
       "Location Test Location with Assets deleted successfully"
     );
+    facilityLocation.closeNotification();
   });
 
   afterEach(() => {
