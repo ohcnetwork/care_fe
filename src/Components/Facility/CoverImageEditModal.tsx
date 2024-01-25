@@ -54,7 +54,7 @@ const CoverImageEditModal = ({
   };
   const { width } = useWindowDimensions();
   const LaptopScreenBreakpoint = 640;
-  const isLaptopScreen = width >= LaptopScreenBreakpoint ? true : false;
+  const isLaptopScreen = width >= LaptopScreenBreakpoint;
   const { t } = useTranslation();
   const handleSwitchCamera = useCallback(() => {
     setFacingMode((prevState: any) =>
@@ -66,19 +66,18 @@ const CoverImageEditModal = ({
 
   const captureImage = () => {
     setPreviewImage(webRef.current.getScreenshot());
-    fetch(webRef.current.getScreenshot())
-      .then((res) => res.blob())
-      .then((blob) => {
-        const myFile = new File([blob], "image.png", {
-          type: blob.type,
-        });
-        setSelectedFile(myFile);
+    const canvas = webRef.current.getCanvas();
+    canvas?.toBlob((blob: Blob) => {
+      const myFile = new File([blob], "image.png", {
+        type: blob.type,
       });
+      setSelectedFile(myFile);
+    });
   };
   const closeModal = () => {
     setPreview(undefined);
     setSelectedFile(undefined);
-    onClose && onClose();
+    onClose?.();
   };
 
   useEffect(() => {

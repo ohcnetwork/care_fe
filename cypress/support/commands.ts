@@ -69,10 +69,8 @@ Cypress.Commands.add("loginByApi", (username, password) => {
 Cypress.Commands.add(
   "awaitUrl",
   (url: string, disableLoginVerification = false) => {
-    cy.intercept(/fontawesome/).as("fontawesome");
     cy.intercept(/currentuser/).as("currentuser");
     cy.visit(url);
-    cy.wait("@fontawesome");
     disableLoginVerification
       ? cy.wait("@currentuser")
       : cy.wait("@currentuser").its("response.statusCode").should("eq", 200);
