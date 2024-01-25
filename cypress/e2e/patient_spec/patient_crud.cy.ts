@@ -21,6 +21,22 @@ describe("Patient Creation with consultation", () => {
   const updatePatientPage = new UpdatePatientPage();
   const patientConsultationPage = new PatientConsultationPage();
   const facilityPage = new FacilityPage();
+  const age = calculateAge();
+  const patientDateOfBirth = "01012001";
+  const patientOneName = "Patient With No Consultation";
+  const patientOneUpdatedName = "Updated Patient 001";
+  const patientOneGender = "Male";
+  const patientOneUpdatedGender = "Female";
+  const patientOneAddress = "Test Patient Address";
+  const patientOnePincode = "682001";
+  const patientOneState = "Kerala";
+  const patientOneDistrict = "Ernakulam";
+  const patientOneLocalbody = "Aluva";
+  const patientOneWard = "4";
+  const patientOnePresentHealth = "Present Health Condition";
+  const patientOneOngoingMedication = "Ongoing Medication";
+  const patientOneAllergies = "Allergies";
+  const patientOneBloodGroup = "O+";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -33,83 +49,84 @@ describe("Patient Creation with consultation", () => {
     cy.awaitUrl("/patients");
   });
 
-  it("Create a new patient with no consultation", () => {
+  it("Create a new patient with all field in registration form and no consultation", () => {
+    // patient details with all the available fields except covid
     patientPage.createPatient();
-    patientPage.selectFacility("dummy facility 40");
+    patientPage.selectFacility("Dummy Facility 40");
     patientPage.patientformvisibility();
-    patientPage.enterPatientDetails(
-      phone_number,
-      emergency_phone_number,
-      "Test E2E User",
-      "Male",
-      "Test Patient Address",
-      "682001",
-      "O+",
-      "01012001"
-    );
-    facilityPage.selectStateOnPincode("Kerala");
-    facilityPage.selectDistrictOnPincode("Ernakulam");
-    facilityPage.selectLocalBody("Aluva");
-    facilityPage.selectWard("4");
+    // Patient Details page
+    patientPage.typePatientPhoneNumber(phone_number);
+    patientPage.typePatientEmergencyNumber(emergency_phone_number);
+    patientPage.typePatientDateOfBirth(patientDateOfBirth);
+    patientPage.typePatientName(patientOneName);
+    patientPage.selectPatientGender(patientOneGender);
+    patientPage.typePatientAddress(patientOneAddress);
+    facilityPage.fillPincode(patientOnePincode);
+    facilityPage.selectStateOnPincode(patientOneState);
+    facilityPage.selectDistrictOnPincode(patientOneDistrict);
+    facilityPage.selectLocalBody(patientOneLocalbody);
+    facilityPage.selectWard(patientOneWard);
+    // Patient Medical History
+    patientPage.typePatientPresentHealth(patientOnePresentHealth);
+    patientPage.typePatientOngoingMedication(patientOneOngoingMedication);
+    patientPage.typeMedicalHistory(2, "Diabetes");
+    patientPage.typeMedicalHistory(3, "Heart Disease");
+    patientPage.typeMedicalHistory(4, "HyperTension");
+    patientPage.typeMedicalHistory(5, "Kidney Diseases");
+    patientPage.typeMedicalHistory(6, "Lung Diseases/Asthma");
+    patientPage.typeMedicalHistory(7, "Cancer");
+    patientPage.typeMedicalHistory(8, "Other");
+    patientPage.typePatientAllergies(patientOneAllergies);
+    patientPage.selectPatientBloodGroup(patientOneBloodGroup);
     patientPage.clickCreatePatient();
-
     patientPage.verifyPatientIsCreated();
     patientPage.saveCreatedPatientUrl();
-  });
-
-  it("Patient Detail verification post registration", () => {
-    patientPage.interceptFacilities();
-    patientPage.visitCreatedPatient();
-    patientPage.verifyStatusCode();
-    const age = calculateAge();
-    patientPage.verifyPatientDetails(
+    // Verify the patient details
+    patientPage.clickCancelButton();
+    cy.wait(3000);
+    patientPage.verifyPatientDashboardDetails(
+      patientOneGender,
       age,
-      "Test E2E User",
+      patientOneName,
       phone_number,
       emergency_phone_number,
       yearOfBirth,
-      "O+"
+      patientOneBloodGroup
     );
+    patientPage.verifyPatientMedicalDetails(
+      patientOnePresentHealth,
+      patientOneOngoingMedication,
+      patientOneAllergies,
+      "Diabetes",
+      "Heart Disease",
+      "HyperTension",
+      "Kidney Diseases",
+      "Lung Diseases/Asthma",
+      "Cancer",
+      "Other"
+    );
+    // verify its presence in the patient detail page
+    cy.visit("/patients");
+    patientPage.typePatientNameList(patientOneName);
+    patientPage.verifyPatientNameList(patientOneName);
   });
 
-  it("Edit the patient details", () => {
+  it("Edit the patient details with no consultation and verify", () => {
     patientPage.interceptFacilities();
     patientPage.visitUpdatePatientUrl();
     patientPage.verifyStatusCode();
     patientPage.patientformvisibility();
-    updatePatientPage.enterPatientDetails(
-      "Test E2E User Edited",
-      "O+",
-      phone_number,
-      emergency_phone_number,
-      "Test Patient Address Edited",
-      "Severe Cough",
-      "Paracetamol",
-      "Dust",
-      ["2 months ago", "1 month ago"],
-      "SUB123",
-      "P123",
-      "GICOFINDIA",
-      "GICOFINDIA"
-    );
-    updatePatientPage.clickUpdatePatient();
+    // change the gender to female and input data to related changed field
+    patientPage.typePatientName(patientOneUpdatedName);
+    patientPage.selectPatientGender(patientOneUpdatedGender);
+    patientPage.clickPatientAntenatalStatusYes();
+    // Edit the patient consultation , select none medical history and multiple health ID
+    patientPage.clickNoneMedicialHistory();
+    patientPage.clickAddInsruanceDetails();
 
+    updatePatientPage.clickUpdatePatient();
     updatePatientPage.verifyPatientUpdated();
     updatePatientPage.saveUpdatedPatientUrl();
-  });
-
-  it("Patient Detail verification post edit", () => {
-    patientPage.interceptFacilities();
-    updatePatientPage.visitUpdatedPatient();
-    patientPage.verifyStatusCode();
-
-    updatePatientPage.verifyPatientDetails(
-      "Test E2E User Edited",
-      phone_number,
-      "Severe Cough",
-      "Paracetamol",
-      "Dust"
-    );
   });
 
   it("Create a New consultation to existing patient", () => {
