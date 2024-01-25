@@ -33,11 +33,18 @@ export default function DailyRoundsFilter(props: Props) {
     errorClassName: "hidden",
   });
 
+  const isFilterApplied = Object.values(filter ?? {}).some(
+    (val) => val !== undefined
+  );
+
   return (
     <div className="flex flex-row-reverse items-center gap-4 md:flex-row">
-      <Popover className="relative ">
+      <Popover className="relative">
         <Popover.Button>
-          <ButtonV2 variant="secondary" className="mr-5 border">
+          <ButtonV2
+            variant={isFilterApplied ? "primary" : "secondary"}
+            className="mr-5 border"
+          >
             <CareIcon className="care-l-filter" />
             {t("filter")}
           </ButtonV2>

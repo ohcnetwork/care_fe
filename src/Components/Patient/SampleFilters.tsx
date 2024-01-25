@@ -15,14 +15,6 @@ import { FieldLabel } from "../Form/FormFields/FormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 
-const clearFilterState = {
-  status: "",
-  result: "",
-  facility: "",
-  facility_ref: null,
-  sample_type: "",
-};
-
 export default function UserFilter(props: any) {
   const { filter, onChange, closeFilter, removeFilters } = props;
 
@@ -73,7 +65,7 @@ export default function UserFilter(props: any) {
       advancedFilter={props}
       onApply={applyFilter}
       onClear={() => {
-        removeFilters(Object.keys(clearFilterState));
+        removeFilters();
         closeFilter();
       }}
     >
