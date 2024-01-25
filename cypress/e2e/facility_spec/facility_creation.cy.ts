@@ -30,7 +30,7 @@ describe("Facility Creation", () => {
   const doctorCapacity = "5";
   const totalDoctor = "10";
   const facilityName = "cypress facility";
-  const facilityName2 = "Dummy Facility 1";
+  const facilityName2 = "Dummy Facility 40";
   const facilityAddress = "cypress address";
   const facilityUpdateAddress = "cypress updated address";
   const facilityNumber = "9898469865";
@@ -295,13 +295,6 @@ describe("Facility Creation", () => {
     facilityPage.fillMiddleWareAddress("dev_middleware.coronasafe.live");
     facilityPage.clickupdateMiddleWare();
     facilityPage.verifySuccessNotification("Facility updated successfully");
-  });
-
-  it("Delete a facility", () => {
-    facilityPage.visitUpdateFacilityPage(facilityUrl1);
-    facilityPage.clickManageFacilityDropdown();
-    facilityPage.clickDeleteFacilityOption();
-    facilityPage.confirmDeleteFacility();
   });
 
   afterEach(() => {

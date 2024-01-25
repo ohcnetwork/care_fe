@@ -104,7 +104,10 @@ export const FacilityHome = (props: any) => {
     authUser.user_type === "StateAdmin";
 
   const editCoverImageTooltip = hasPermissionToEditCoverImage && (
-    <div className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center bg-black text-sm text-gray-300 opacity-0 transition-[opacity] hover:opacity-60 md:h-[88px]">
+    <div
+      id="facility-coverimage"
+      className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center bg-black text-sm text-gray-300 opacity-0 transition-[opacity] hover:opacity-60 md:h-[88px]"
+    >
       <i className="fa-solid fa-pen" />
       <span className="mt-2">{`${hasCoverImage ? "Edit" : "Upload"}`}</span>
     </div>
@@ -391,6 +394,7 @@ export const FacilityHome = (props: any) => {
             </div>
             <div className="flex flex-col justify-end">
               <ButtonV2
+                id="facility-detailspage-cns"
                 variant="primary"
                 ghost
                 border
@@ -475,15 +479,27 @@ export const FacilityHome = (props: any) => {
 const LiveMonitoringButton = () => {
   const facilityId = useSlug("facility");
   const [location, setLocation] = useState<string>();
+  const authUser = useAuthUser();
+
+  const permittedUserTypes = ["StateAdmin", "DistrictAdmin", "Doctor"];
 
   return (
     <Popover className="relative">
-      <Popover.Button className="mt-2 w-full">
-        <ButtonV2 variant="primary" ghost border className="w-full">
-          <CareIcon icon="l-video" className="text-lg" />
-          <span>Live Monitoring</span>
-        </ButtonV2>
-      </Popover.Button>
+      {permittedUserTypes.includes(authUser.user_type) && (
+        <Popover.Button className="mt-2 w-full">
+          <ButtonV2
+            variant="primary"
+            ghost
+            border
+            className="w-full"
+            id="facility-detailspage-livemonitoring"
+          >
+            <CareIcon icon="l-video" className="text-lg" />
+            <span>Live Monitoring</span>
+          </ButtonV2>
+        </Popover.Button>
+      )}
+
       <Transition
         as={Fragment}
         enter="transition ease-out duration-200"
@@ -515,6 +531,7 @@ const LiveMonitoringButton = () => {
                 </div>
               </div>
               <ButtonV2
+                id="live-monitoring-button"
                 disabled={!location}
                 className="w-full"
                 href={`/facility/${facilityId}/live-monitoring?location=${location}`}

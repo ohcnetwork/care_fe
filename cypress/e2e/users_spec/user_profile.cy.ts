@@ -17,7 +17,7 @@ describe("Manage User Profile", () => {
   const doctorYoE = "10";
   const medicalCouncilRegistration = "1234567890";
 
-  const facilitySearch = "Dummy Facility 1";
+  const facilitySearch = "Dummy Facility 40";
 
   before(() => {
     loginPage.loginAsDevDoctor();

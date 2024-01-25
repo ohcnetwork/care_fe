@@ -18,6 +18,7 @@ import useQuery from "../../Utils/request/useQuery";
 import { parsePhoneNumber } from "../../Utils/utils";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ResultList() {
@@ -29,7 +30,10 @@ export default function ResultList() {
     FilterBadges,
     advancedFilter,
     resultsPerPage,
-  } = useFilters({ limit: 14 });
+  } = useFilters({
+    limit: 14,
+    cacheBlacklist: ["mobile_number", "name"],
+  });
   const [showDialog, setShowDialog] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
