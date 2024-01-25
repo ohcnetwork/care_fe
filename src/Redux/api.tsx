@@ -87,6 +87,7 @@ import {
   InvestigationGroup,
   InvestigationType,
 } from "../Components/Facility/Investigations";
+import { ICD11DiagnosisModel } from "../Components/Diagnosis/types";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -1004,6 +1005,12 @@ const routes = {
   // ICD11
   listICD11Diagnosis: {
     path: "/api/v1/icd/",
+    TRes: Type<ICD11DiagnosisModel[]>(),
+  },
+  getICD11Diagnosis: {
+    path: "/api/v1/icd/{id}/",
+    TRes: Type<ICD11DiagnosisModel>(),
+    enableExperimentalCache: true,
   },
   // Medibase
   listMedibaseMedicines: {

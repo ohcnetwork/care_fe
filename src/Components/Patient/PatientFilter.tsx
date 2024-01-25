@@ -29,9 +29,13 @@ import {
 } from "../Form/FormFields/Utils";
 import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
 import SelectMenuV2 from "../Form/SelectMenuV2";
+
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
+
+import DiagnosesFilter, { FILTER_BY_DIAGNOSES_KEYS } from "./DiagnosesFilter";
+
 
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
@@ -96,6 +100,11 @@ export default function PatientFilter(props: any) {
       filter.last_consultation_is_telemedicine || null,
     is_antenatal: filter.is_antenatal || null,
     ventilator_interface: filter.ventilator_interface || null,
+    diagnoses: filter.diagnoses || null,
+    diagnoses_confirmed: filter.diagnoses_confirmed || null,
+    diagnoses_provisional: filter.diagnoses_provisional || null,
+    diagnoses_unconfirmed: filter.diagnoses_unconfirmed || null,
+    diagnoses_differential: filter.diagnoses_differential || null,
   });
   const dispatch: any = useDispatch();
 
@@ -151,7 +160,16 @@ export default function PatientFilter(props: any) {
     onResponse: ({ data }) => {
       setFilterState({ facility_ref: data });
     },
-  });
+
+  useEffect(() => {
+    async function fetchData() {
+      if (filter.facility) {
+        const { data: facilityData } = await dispatch(
+          getAnyFacility(filter.facility, "facility")
+        );
+        setFilterState({ facility_ref: facilityData });
+      }
+
 
   useQuery(routes.getDistrict, {
     pathParams: {
@@ -262,6 +280,11 @@ export default function PatientFilter(props: any) {
       last_consultation_is_telemedicine,
       is_antenatal,
       ventilator_interface,
+      diagnoses,
+      diagnoses_confirmed,
+      diagnoses_provisional,
+      diagnoses_unconfirmed,
+      diagnoses_differential,
     } = filterState;
     const data = {
       district: district || "",
@@ -324,6 +347,11 @@ export default function PatientFilter(props: any) {
         last_consultation_is_telemedicine || "",
       is_antenatal: is_antenatal || "",
       ventilator_interface: ventilator_interface || "",
+      diagnoses: diagnoses || "",
+      diagnoses_confirmed: diagnoses_confirmed || "",
+      diagnoses_provisional: diagnoses_provisional || "",
+      diagnoses_unconfirmed: diagnoses_unconfirmed || "",
+      diagnoses_differential: diagnoses_differential || "",
     };
     onChange(data);
   };
@@ -343,7 +371,7 @@ export default function PatientFilter(props: any) {
       advancedFilter={props}
       onApply={applyFilter}
       onClear={() => {
-        removeFilters(Object.keys(clearFilterState));
+        removeFilters();
         closeFilter();
       }}
     >
@@ -509,6 +537,24 @@ export default function PatientFilter(props: any) {
             />
           </div>
         </div>
+      </AccordionV2>
+      <AccordionV2
+        title={
+          <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
+            ICD-11 Diagnoses based
+          </h1>
+        }
+        expanded
+        className="w-full"
+      >
+        {FILTER_BY_DIAGNOSES_KEYS.map((name) => (
+          <DiagnosesFilter
+            key={name}
+            name={name}
+            value={filterState[name]}
+            onChange={handleFormFieldChange}
+          />
+        ))}
       </AccordionV2>
       <AccordionV2
         title={

@@ -14,14 +14,6 @@ import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 
-const clearFilterState = {
-  status: "",
-  result: "",
-  facility: "",
-  facility_ref: null,
-  sample_type: "",
-};
-
 export default function UserFilter(props: any) {
   const { filter, onChange, closeFilter, removeFilters } = props;
 
@@ -63,7 +55,7 @@ export default function UserFilter(props: any) {
       advancedFilter={props}
       onApply={applyFilter}
       onClear={() => {
-        removeFilters(Object.keys(clearFilterState));
+        removeFilters();
         closeFilter();
       }}
     >
