@@ -700,7 +700,7 @@ export const PatientManager = () => {
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {patientList}
         </div>
-        <Pagination totalCount={data?.count || 0} />
+        <Pagination totalCount={data?.count} />
       </>
     );
   } else if (data && data.count === 0) {
