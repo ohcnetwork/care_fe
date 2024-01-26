@@ -26,10 +26,10 @@ status = 200
     X-Content-Type-Options = "nosniff"
     Content-Security-Policy = '''
       default-src 'self';
-      script-src 'self' 'nonce-f51b9742' https://plausible.10bedicu.in;
-      style-src 'self' 'nonce-7e14cf80';
-      connect-src 'self' https://sentry.io https://plausible.10bedicu.in https://egov-s3-facility-10bedicu.s3.amazonaws.com https://egov-s3-patient-data-10bedicu.s3.amazonaws.com;
+      script-src 'self' blob: 'nonce-f51b9742' https://plausible.10bedicu.in;
+      style-src 'self' 'unsafe-inline';
+      connect-src *;
       img-src 'self' blob: data: https://cdn.coronasafe.network https://egov-s3-facility-10bedicu.s3.amazonaws.com https://egov-s3-patient-data-10bedicu.s3.amazonaws.com;
-      media-src 'self' blob: data: https://cdn.coronasafe.network https://egov-s3-facility-10bedicu.s3.amazonaws.com https://egov-s3-patient-data-10bedicu.s3.amazonaws.com;
+      media-src * blob: data:;
       object-src 'self' blob: https://egov-s3-facility-10bedicu.s3.amazonaws.com https://egov-s3-patient-data-10bedicu.s3.amazonaws.com;
       '''
