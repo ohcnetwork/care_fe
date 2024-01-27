@@ -241,7 +241,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
         onResponse: ({ res, data }) => {
           setIsLoading(false);
 
-          if (res && data && (res.status == 201 || res.status == 200)) {
+          if (res?.ok && data) {
             dispatch({ type: "set_form", form: initForm });
             Notification.Success({
               msg: "Shift request created successfully",

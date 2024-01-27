@@ -101,7 +101,7 @@ export const PatientHome = (props: any) => {
           : null,
       },
     });
-    if ((res || {}).status === 200) {
+    if (res?.ok) {
       const dummyPatientData = Object.assign({}, patientData);
       dummyPatientData["assigned_to"] = assignedVolunteerObject;
       setPatientData(dummyPatientData);
@@ -298,7 +298,7 @@ export const PatientHome = (props: any) => {
         </div>
       </div>
     );
-  } else if (sampleListData?.count || 0 > 0) {
+  } else if (sampleListData?.count) {
     sampleList = (
       <div className="lg:gap-4">
         {sampleListData?.results.map((itemData, idx) => (
@@ -1441,17 +1441,16 @@ export const PatientHome = (props: any) => {
           Consultation History
         </h2>
         {consultationList}
-        {(!isConsultationLoading && consultationListData?.count) ||
-          (0 > limit && (
-            <div className="mt-4 flex w-full justify-center">
-              <Pagination
-                cPage={currentConsultationPage}
-                defaultPerPage={limit}
-                data={{ totalCount: consultationListData?.count || 0 }}
-                onChange={handleConsultationPagination}
-              />
-            </div>
-          ))}
+        {(!isConsultationLoading && consultationListData?.count) || (
+          <div className="mt-4 flex w-full justify-center">
+            <Pagination
+              cPage={currentConsultationPage}
+              defaultPerPage={limit}
+              data={{ totalCount: consultationListData?.count || 0 }}
+              onChange={handleConsultationPagination}
+            />
+          </div>
+        )}
       </div>
 
       <div>
@@ -1459,17 +1458,16 @@ export const PatientHome = (props: any) => {
           Sample Test History
         </h2>
         {sampleList}
-        {(!isSampleLoading && sampleListData?.count) ||
-          (0 > limit && (
-            <div className="mt-4 flex w-full justify-center">
-              <Pagination
-                cPage={currentSampleListPage}
-                defaultPerPage={limit}
-                data={{ totalCount: sampleListData?.count || 0 }}
-                onChange={handleSampleListPagination}
-              />
-            </div>
-          ))}
+        {(!isSampleLoading && sampleListData?.count) || (
+          <div className="mt-4 flex w-full justify-center">
+            <Pagination
+              cPage={currentSampleListPage}
+              defaultPerPage={limit}
+              data={{ totalCount: sampleListData?.count || 0 }}
+              onChange={handleSampleListPagination}
+            />
+          </div>
+        )}
       </div>
     </Page>
   );

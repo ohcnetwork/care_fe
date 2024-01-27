@@ -38,7 +38,6 @@ export default function SampleViewAdmin() {
     cacheBlacklist: ["patient_name", "district_name"],
   });
   let manageSamples: any = null;
-  const [fetchFlag, callFetchData] = useState(false);
   const [statusDialog, setStatusDialog] = useState<{
     show: boolean;
     sample: SampleTestModel;
@@ -61,7 +60,7 @@ export default function SampleViewAdmin() {
         district_name: qParams.district_name || undefined,
         status: qParams.status || undefined,
         result: qParams.result || undefined,
-        facility: qParams.facility || "",
+        facility: qParams.facility || undefined,
         sample_type: qParams.sample_type || undefined,
       },
     }
@@ -93,7 +92,6 @@ export default function SampleViewAdmin() {
           Notification.Success({
             msg: `Success - ${statusName}`,
           });
-          callFetchData(!fetchFlag);
         }
         dismissUpdateStatus();
       },
@@ -132,7 +130,7 @@ export default function SampleViewAdmin() {
       .join("\n");
 
   let sampleList: any[] = [];
-  if (sampeleData && sampeleData.count) {
+  if (sampeleData?.count) {
     sampleList = sampeleData.results.map((item) => {
       const status = String(item.status) as keyof typeof SAMPLE_FLOW_RULES;
       const statusText = SAMPLE_TEST_STATUS.find(
@@ -278,14 +276,14 @@ export default function SampleViewAdmin() {
         <Loading />
       </div>
     );
-  } else if (sampeleData && sampeleData.count) {
+  } else if (sampeleData?.count) {
     manageSamples = (
       <>
         {sampleList}
         <Pagination totalCount={sampeleData?.count} />
       </>
     );
-  } else if (sampeleData && sampeleData.count === 0) {
+  } else if (sampeleData?.count === 0) {
     manageSamples = (
       <div className="w-full rounded-lg bg-white p-3">
         <div className="mt-4 flex w-full  justify-center text-2xl font-bold text-gray-600">

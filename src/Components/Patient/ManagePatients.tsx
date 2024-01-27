@@ -444,7 +444,7 @@ export const PatientManager = () => {
   };
 
   let patientList: ReactNode[] = [];
-  if (data && data.count) {
+  if (data?.count) {
     patientList = data.results.map((patient: any) => {
       let patientUrl = "";
       if (

@@ -44,7 +44,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
     const statusName = SAMPLE_TEST_STATUS.find((i) => i.id === status)?.desc;
     await request(routes.patchSample, {
       pathParams: {
-        id: sample.id || 0,
+        id: sample.id!,
       },
       body: sampleData,
       onResponse: ({ res }) => {
