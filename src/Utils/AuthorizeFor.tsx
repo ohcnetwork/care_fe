@@ -1,4 +1,4 @@
-import { UserRole } from "../Common/constants";
+import { USER_TYPES, UserRole } from "../Common/constants";
 import React from "react";
 import useAuthUser from "../Common/hooks/useAuthUser";
 import Error404 from "../Components/ErrorPages/404";
@@ -26,6 +26,10 @@ export type AuthorizedElementProps = {
    */
   authorizeFor?: AuthorizedForCB | undefined;
 };
+
+export const NonReadOnlyUsersList = USER_TYPES.filter((userType) => {
+  return !userType.includes("ReadOnly");
+});
 
 export const NonReadOnlyUsers = (userType: UserRole) =>
   !userType.includes("ReadOnly");
