@@ -391,7 +391,7 @@ export const PatientManager = () => {
     pathParams: {
       id: qParams.facility,
     },
-    prefetch: qParams.facility,
+    prefetch: !!qParams.facility,
   });
   const { data: facilityAssetLocationData } = useQuery(
     routes.getFacilityAssetLocation,

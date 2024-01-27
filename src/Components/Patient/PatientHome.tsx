@@ -105,15 +105,16 @@ export const PatientHome = (props: any) => {
       const dummyPatientData = Object.assign({}, patientData);
       dummyPatientData["assigned_to"] = assignedVolunteerObject;
       setPatientData(dummyPatientData);
-      if (assignedVolunteerObject)
+      if (assignedVolunteerObject) {
         Notification.Success({
           msg: "Volunteer assigned successfully.",
         });
-      else
+      } else {
         Notification.Success({
           msg: "Volunteer unassigned successfully.",
         });
-      document.location.reload();
+        document.location.reload();
+      }
     }
     setOpenAssignVolunteerDialog(false);
     if (errors["assignedVolunteer"]) delete errors["assignedVolunteer"];
