@@ -238,7 +238,7 @@ const routes = {
   },
 
   updateUser: {
-    path: "/api/v1/users",
+    path: "/api/v1/users/",
     method: "PUT",
   },
 
@@ -266,7 +266,7 @@ const routes = {
   },
 
   getOnlineDoctors: {
-    path: "/api/v1/users/?user_type=Doctor&ordering=-last_login",
+    path: "/api/v1/users/?user_type=Doctor&ordering=-last_login/",
   },
 
   getUserPnconfig: {
@@ -593,12 +593,12 @@ const routes = {
   },
 
   updateDoctor: {
-    path: "/api/v1/facility/{facilityId}/hospital_doctor",
+    path: "/api/v1/facility/{facilityId}/hospital_doctor/",
     method: "PUT",
   },
 
   deleteDoctor: {
-    path: "/api/v1/facility/{facilityId}/hospital_doctor",
+    path: "/api/v1/facility/{facilityId}/hospital_doctor/",
     method: "DELETE",
   },
 
@@ -625,7 +625,7 @@ const routes = {
   // Patient
 
   searchPatient: {
-    path: "/api/v1/patient/search",
+    path: "/api/v1/patient/search/",
   },
   patientList: {
     path: "/api/v1/patient/",
@@ -678,7 +678,7 @@ const routes = {
     TBody: Type<SampleTestModel>(),
   },
   sampleReport: {
-    path: "/api/v1/patient/{id}/test_sample/{sampleId}/icmr_sample",
+    path: "/api/v1/patient/{id}/test_sample/{sampleId}/icmr_sample/",
     method: "GET",
     TRes: Type<SampleReportModel>(),
   },
@@ -822,15 +822,15 @@ const routes = {
     method: "GET",
   },
   updateMinQuantity: {
-    path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}",
+    path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}/",
     method: "PATCH",
   },
   getInventorySummary: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/",
     method: "GET",
   },
   getItemName: {
-    path: "/api/v1/items",
+    path: "/api/v1/items/",
     method: "GET",
   },
   flagInventoryItem: {
@@ -846,7 +846,7 @@ const routes = {
     method: "POST",
   },
   dischargeSummaryPreview: {
-    path: "/api/v1/consultation/{external_id}/preview_discharge_summary",
+    path: "/api/v1/consultation/{external_id}/preview_discharge_summary/",
     method: "GET",
   },
   dischargeSummaryEmail: {
@@ -883,13 +883,13 @@ const routes = {
     TRes: Type<PatientModel>(),
   },
   updateShift: {
-    path: "/api/v1/shift/{id}",
+    path: "/api/v1/shift/{id}/",
     method: "PUT",
     TBody: Type<IShift>(),
     TRes: Type<IShift>(),
   },
   deleteShiftRecord: {
-    path: "/api/v1/shift/{id}",
+    path: "/api/v1/shift/{id}/",
     method: "DELETE",
     TRes: Type<{ detail: string }>(),
   },
@@ -1032,7 +1032,7 @@ const routes = {
     TBody: Type<Partial<IResource>>(),
   },
   deleteResourceRecord: {
-    path: "/api/v1/resource/{id}",
+    path: "/api/v1/resource/{id}/",
     method: "DELETE",
     TRes: Type<{
       detail?: string;
