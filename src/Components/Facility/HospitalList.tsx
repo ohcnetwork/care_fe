@@ -4,7 +4,7 @@ import {
   downloadFacilityDoctors,
   downloadFacilityTriage,
 } from "../../Redux/actions";
-import { lazy } from "react";
+import { lazy, useEffect } from "react";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CountBlock from "../../CAREUI/display/Count";
 import ExportMenu from "../Common/Export";
@@ -34,7 +34,18 @@ export const HospitalList = () => {
     resultsPerPage,
   } = useFilters({
     limit: 14,
+    cacheBlacklist: ["search"],
   });
+
+  useEffect(() => {
+    if (!qParams.state && (qParams.district || qParams.local_body)) {
+      advancedFilter.removeFilters(["district", "local_body"]);
+    }
+    if (!qParams.district && qParams.local_body) {
+      advancedFilter.removeFilters(["local_body"]);
+    }
+  }, [advancedFilter, qParams]);
+
   let manageFacilities: any = null;
   const { user_type } = useAuthUser();
   const { t } = useTranslation();

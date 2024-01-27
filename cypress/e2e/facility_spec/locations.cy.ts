@@ -23,6 +23,7 @@ describe("Location Management Section", () => {
     "Please select a bed type",
   ];
   const locationName = "Test-location";
+  const locationNameTwo = "Test-location-2";
   const locationDescription = "Test Description";
   const locationType = "WARD";
   const locationMiddleware = "dev_middleware.coronasafe.live";
@@ -50,18 +51,27 @@ describe("Location Management Section", () => {
     cy.restoreLocalStorage();
     cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/");
-    cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");
-    cy.get("[id='facility-details']").first().click();
-    cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
-    cy.get("h1.text-3xl.font-bold", { timeout: 10000 }).should("be.visible");
-    cy.get("#manage-facility-dropdown button").should("be.visible");
-    cy.get("[id='manage-facility-dropdown']").scrollIntoView().click();
-    cy.get("[id=location-management]").click();
+    facilityPage.visitAlreadyCreatedFacility();
+    facilityPage.clickManageFacilityDropdown();
+    facilityLocation.clickFacilityLocationManagement();
   });
 
   it("Add a Bed to facility location along with duplication and deleting a bed", () => {
     // mandatory field verification in bed creation
-    facilityLocation.clickManageBedButton();
+    cy.get("body").then(($body) => {
+      if ($body.find("#manage-bed-button:visible").length) {
+        // If the '#manage-bed-button' is visible
+        facilityLocation.clickManageBedButton();
+      } else {
+        // If the '#manage-bed-button' is not visible
+        facilityLocation.clickAddNewLocationButton();
+        facilityPage.fillFacilityName(locationName);
+        facilityLocation.selectLocationType(locationType);
+        assetPage.clickassetupdatebutton();
+        facilityLocation.clickNotification();
+        facilityLocation.clickManageBedButton();
+      }
+    });
     facilityLocation.clickAddBedButton();
     assetPage.clickassetupdatebutton();
     userCreationPage.verifyErrorMessages(EXPECTED_BED_ERROR_MESSAGES);
@@ -101,13 +111,14 @@ describe("Location Management Section", () => {
     assetPage.clickassetupdatebutton();
     userCreationPage.verifyErrorMessages(EXPECTED_LOCATION_ERROR_MESSAGES);
     // create a new location
-    facilityPage.fillFacilityName(locationName);
+    facilityPage.fillFacilityName(locationNameTwo);
     facilityLocation.fillDescription(locationDescription);
     facilityLocation.selectLocationType(locationType);
     facilityLocation.fillMiddlewareAddress(locationMiddleware);
     assetPage.clickassetupdatebutton();
+    facilityLocation.clickNotification();
     // verify the reflection
-    facilityLocation.verifyLocationName(locationName);
+    facilityLocation.verifyLocationName(locationNameTwo);
     facilityLocation.verifyLocationType(locationType);
     facilityLocation.verifyLocationDescription(locationDescription);
     facilityLocation.verifyLocationMiddleware(locationMiddleware);
@@ -134,6 +145,7 @@ describe("Location Management Section", () => {
     facilityLocation.selectBedType(bedType);
     facilityLocation.setMultipleBeds(numberOfBeds);
     assetPage.clickassetupdatebutton();
+    facilityLocation.clickNotification();
     // verify the bed creation
     facilityLocation.verifyBedBadge(bedType);
     facilityLocation.verifyBedBadge(bedStatus);

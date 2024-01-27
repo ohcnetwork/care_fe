@@ -54,7 +54,7 @@ const CoverImageEditModal = ({
   };
   const { width } = useWindowDimensions();
   const LaptopScreenBreakpoint = 640;
-  const isLaptopScreen = width >= LaptopScreenBreakpoint ? true : false;
+  const isLaptopScreen = width >= LaptopScreenBreakpoint;
   const { t } = useTranslation();
   const handleSwitchCamera = useCallback(() => {
     setFacingMode((prevState: any) =>
@@ -66,19 +66,18 @@ const CoverImageEditModal = ({
 
   const captureImage = () => {
     setPreviewImage(webRef.current.getScreenshot());
-    fetch(webRef.current.getScreenshot())
-      .then((res) => res.blob())
-      .then((blob) => {
-        const myFile = new File([blob], "image.png", {
-          type: blob.type,
-        });
-        setSelectedFile(myFile);
+    const canvas = webRef.current.getCanvas();
+    canvas?.toBlob((blob: Blob) => {
+      const myFile = new File([blob], "image.png", {
+        type: blob.type,
       });
+      setSelectedFile(myFile);
+    });
   };
   const closeModal = () => {
     setPreview(undefined);
     setSelectedFile(undefined);
-    onClose && onClose();
+    onClose?.();
   };
 
   useEffect(() => {
@@ -248,7 +247,10 @@ const CoverImageEditModal = ({
 
             <div className="flex flex-col gap-2 pt-4 sm:flex-row">
               <div>
-                <label className="flex w-full cursor-pointer items-center justify-center gap-1 rounded-lg border border-primary-500 bg-white px-4 py-2 text-sm font-medium text-primary-500 transition-all hover:border-primary-400 hover:text-primary-400">
+                <label
+                  id="upload-cover-image"
+                  className="flex w-full cursor-pointer items-center justify-center gap-1 rounded-lg border border-primary-500 bg-white px-4 py-2 text-sm font-medium text-primary-500 transition-all hover:border-primary-400 hover:text-primary-400"
+                >
                   <CareIcon className="care-l-cloud-upload text-lg" />
                   {t("upload_an_image")}
                   <input
@@ -285,7 +287,11 @@ const CoverImageEditModal = ({
                   {t("delete")}
                 </ButtonV2>
               )}
-              <ButtonV2 onClick={handleUpload} disabled={isUploading}>
+              <ButtonV2
+                id="save-cover-image"
+                onClick={handleUpload}
+                disabled={isUploading}
+              >
                 {isUploading ? (
                   <CareIcon className="care-l-spinner animate-spin text-lg" />
                 ) : (
