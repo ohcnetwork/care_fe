@@ -43,10 +43,17 @@ interface Props {
 }
 
 type Step =
+  | "RestoreOptions"
   | "ScanExistingQR"
   | "AadhaarVerification"
   | "MobileVerification"
   | "HealthIDCreation";
+
+const initialState = {
+  currentStep: "AadhaarVerification",
+  transactionId: "",
+  state: {},
+};
 
 export default function LinkABHANumberModal({
   patientId,
@@ -54,8 +61,24 @@ export default function LinkABHANumberModal({
   onSuccess,
   ...props
 }: Props) {
-  const [currentStep, setCurrentStep] = useState<Step>("AadhaarVerification");
+  const [draftState, setDraftState] = useState<any>(initialState);
+  const [currentStep, setCurrentStep] = useState<Step>(
+    localStorage.getItem(`abha-link-${patientId}`) !== null
+      ? "RestoreOptions"
+      : "AadhaarVerification"
+  );
   const [transactionId, setTransactionId] = useState<string>("");
+
+  const handleDraftRestore = () => {
+    if (patientId && localStorage.getItem(`abha-link-${patientId}`) !== null) {
+      const state = JSON.parse(
+        localStorage.getItem(`abha-link-${patientId}`) || ""
+      );
+      setDraftState(state);
+      setCurrentStep(state.currentStep);
+      setTransactionId(state.transactionId);
+    }
+  };
 
   const title = (
     <div className="flex items-center gap-3">
@@ -68,12 +91,83 @@ export default function LinkABHANumberModal({
     </div>
   );
 
+  useEffect(() => {
+    if (draftState && patientId) {
+      if (
+        currentStep !== draftState.currentStep &&
+        Object.keys(draftState.state).length !== 0
+      ) {
+        const state = {
+          ...draftState,
+          currentStep: currentStep,
+          transactionId: transactionId,
+          state: {},
+        };
+        setDraftState(state);
+        if (currentStep !== "RestoreOptions") {
+          localStorage.setItem(`abha-link-${patientId}`, JSON.stringify(state));
+        }
+      }
+    }
+  }, [currentStep, transactionId]);
+
+  const setLocalStorageState = (key: string, value: any) => {
+    if (draftState && patientId) {
+      const state = {
+        ...draftState,
+        state: {
+          ...draftState.state,
+          [key]: value,
+        },
+      };
+      setDraftState(state);
+      localStorage.setItem(`abha-link-${patientId}`, JSON.stringify(state));
+    }
+  };
+
+  if (currentStep === "RestoreOptions") {
+    return (
+      // eslint-disable-next-line i18next/no-literal-string
+      <DialogModal className="max-w-lg" title={"Draft Available"} {...props}>
+        <div className="flex flex-col gap-4">
+          <p className="text-sm text-gray-800">
+            You have a pending ABHA linking request. Do you want to continue
+            with that?
+          </p>
+          <div className="flex items-center justify-center gap-2">
+            <ButtonV2
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                localStorage.removeItem(`abha-link-${patientId}`);
+                setCurrentStep("AadhaarVerification");
+              }}
+            >
+              No
+            </ButtonV2>
+            <ButtonV2
+              type="button"
+              variant="primary"
+              onClick={() => {
+                handleDraftRestore();
+              }}
+            >
+              Yes
+            </ButtonV2>
+          </div>
+        </div>
+      </DialogModal>
+    );
+  }
+
   return (
     <DialogModal className="max-w-lg" title={title} {...props}>
       <div className="p-4">
         {currentStep === "ScanExistingQR" && (
           <ScanABHAQRSection
             patientId={patientId}
+            draftState={draftState?.state}
+            setLocalStorageState={setLocalStorageState}
             onSuccess={onSuccess}
             closeModal={props.onClose}
           />
@@ -81,6 +175,8 @@ export default function LinkABHANumberModal({
 
         {currentStep === "AadhaarVerification" && (
           <VerifyAadhaarSection
+            setLocalStorageState={setLocalStorageState}
+            draftState={draftState?.state}
             onVerified={(transactionId) => {
               setTransactionId(transactionId);
               setCurrentStep("MobileVerification");
@@ -91,6 +187,8 @@ export default function LinkABHANumberModal({
         {currentStep === "MobileVerification" && transactionId && (
           <VerifyMobileSection
             transactionId={transactionId}
+            setLocalStorageState={setLocalStorageState}
+            draftState={draftState?.state}
             onVerified={(transactionId) => {
               setTransactionId(transactionId);
               setCurrentStep("HealthIDCreation");
@@ -102,6 +200,8 @@ export default function LinkABHANumberModal({
         {currentStep === "HealthIDCreation" && transactionId && (
           <CreateHealthIDSection
             transactionId={transactionId}
+            draftState={draftState?.state}
+            setLocalStorageState={setLocalStorageState}
             onCreateSuccess={(abha) => {
               props.onClose();
               onSuccess?.(abha);
@@ -136,24 +236,64 @@ export default function LinkABHANumberModal({
 
 interface ScanABHAQRSectionProps {
   patientId?: string;
+  draftState?: any;
+  setLocalStorageState: (key: string, value: any) => void;
   onSuccess?: (abha: any) => void;
   closeModal: () => void;
 }
 
 const ScanABHAQRSection = ({
   patientId,
+  draftState,
+  setLocalStorageState,
   onSuccess,
   closeModal,
 }: ScanABHAQRSectionProps) => {
-  const [qrValue, setQrValue] = useState("");
-  const [authMethods, setAuthMethods] = useState<string[]>([]);
-  const [selectedAuthMethod, setSelectedAuthMethod] = useState("");
-  const [txnId, setTxnId] = useState("");
-  const [otp, setOtp] = useState("");
-  const [acceptedDisclaimer, setAcceptedDisclaimer] = useState(false);
+  const [qrValue, setQrValue] = useState(draftState?.qrValue ?? "");
+  const [authMethods, setAuthMethods] = useState<string[]>(
+    draftState?.authMethods ?? []
+  );
+  const [selectedAuthMethod, setSelectedAuthMethod] = useState(
+    draftState?.selectedAuthMethod ?? ""
+  );
+  const [txnId, setTxnId] = useState(draftState?.authtxnId ?? "");
+  const [otp, setOtp] = useState(draftState?.otp ?? "");
+  const [acceptedDisclaimer, setAcceptedDisclaimer] = useState(
+    draftState?.acceptedDisclaimer ?? false
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   const supportedAuthMethods = ["MOBILE_OTP", "AADHAAR_OTP"];
+
+  const setStateByKey = (key: string, value: any) => {
+    switch (key) {
+      case "qrValue":
+        setQrValue(value);
+        break;
+      case "authMethods":
+        setAuthMethods(value);
+        break;
+      case "selectedAuthMethod":
+        setSelectedAuthMethod(value);
+        break;
+      case "authtxnId":
+        setTxnId(value);
+        break;
+      case "otp":
+        setOtp(value);
+        break;
+      case "acceptedDisclaimer":
+        setAcceptedDisclaimer(value);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const updateStateAndStorage = (key: string, value: any) => {
+    setLocalStorageState(key, value);
+    setStateByKey(key, value);
+  };
 
   if (isLoading) {
     return (
@@ -181,7 +321,7 @@ const ScanABHAQRSection = ({
               }
             }
           }
-          setQrValue(value);
+          updateStateAndStorage("qrValue", value);
         }}
         parse={async (value: string) => {
           if (!value) return;
@@ -206,6 +346,7 @@ const ScanABHAQRSection = ({
 
             if (res?.status === 200 || res?.status === 202) {
               Notify.Success({ msg: "Request sent successfully" });
+              localStorage.removeItem(`abha-link-${patientId}`);
               onSuccess?.({
                 ...data,
                 abha_profile: {
@@ -238,7 +379,7 @@ const ScanABHAQRSection = ({
               type="checkbox"
               checked={acceptedDisclaimer}
               onChange={(e) => {
-                setAcceptedDisclaimer(e.target.checked);
+                updateStateAndStorage("acceptedDisclaimer", e.target.checked);
               }}
               className="mr-2 rounded border-gray-700 shadow-sm ring-0 ring-offset-0"
             />
@@ -250,7 +391,7 @@ const ScanABHAQRSection = ({
       {txnId && (
         <OtpFormField
           name="otp"
-          onChange={(value) => setOtp(value as string)}
+          onChange={(value) => updateStateAndStorage("otp", value as string)}
           value={otp}
           label="Enter 6 digit OTP!"
           error=""
@@ -335,8 +476,8 @@ const ScanABHAQRSection = ({
                     );
 
                     if (res?.status === 200 && data?.txnId) {
-                      setSelectedAuthMethod(method);
-                      setTxnId(data.txnId);
+                      updateStateAndStorage("selectedAuthMethod", method);
+                      updateStateAndStorage("authtxnId", data.txnId);
                     }
                   }}
                 >
@@ -359,7 +500,8 @@ const ScanABHAQRSection = ({
                 );
 
                 if (res?.status === 200 && data?.authMethods) {
-                  setAuthMethods(
+                  updateStateAndStorage(
+                    "authMethods",
                     data.authMethods?.filter?.((method: string) =>
                       supportedAuthMethods.find(
                         (supported) => supported === method
@@ -380,21 +522,41 @@ const ScanABHAQRSection = ({
 
 interface VerifyAadhaarSectionProps {
   onVerified: (transactionId: string) => void;
+  draftState?: any;
+  setLocalStorageState: (key: string, value: any) => void;
 }
 
-const VerifyAadhaarSection = ({ onVerified }: VerifyAadhaarSectionProps) => {
-  const [aadhaarNumber, setAadhaarNumber] = useState("");
-  const [aadhaarNumberError, setAadhaarNumberError] = useState<string>();
+const VerifyAadhaarSection = ({
+  onVerified,
+  draftState,
+  setLocalStorageState,
+}: VerifyAadhaarSectionProps) => {
+  console.log(draftState);
+  const [aadhaarNumber, setAadhaarNumber] = useState(
+    draftState?.aadhaarNumber ?? ""
+  );
+  const [aadhaarNumberError, setAadhaarNumberError] = useState<string>(
+    draftState?.aadhaarNumberError ?? ""
+  );
 
-  const [otp, setOtp] = useState("");
-  const [otpError, setOtpError] = useState<string>();
+  const [otp, setOtp] = useState(draftState?.otp ?? "");
+  const [otpError, setOtpError] = useState<string>(draftState?.otpError ?? "");
 
-  const [txnId, setTxnId] = useState<string>();
+  const [txnId, setTxnId] = useState<string>(draftState?.txnId ?? "");
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
-  const [verified, setIsVerified] = useState(false);
-  const [acceptedDisclaimer1, setAcceptedDisclaimer1] = useState(false);
-  const [acceptedDisclaimer2, setAcceptedDisclaimer2] = useState(false);
+  const [verified, setIsVerified] = useState(draftState?.verified ?? false);
+  const [acceptedDisclaimer1, setAcceptedDisclaimer1] = useState(
+    draftState?.acceptedDisclaimer1 ?? false
+  );
+  const [acceptedDisclaimer2, setAcceptedDisclaimer2] = useState(
+    draftState?.acceptedDisclaimer2 ?? false
+  );
+
+  const updateStateAndStorage = (key: string, value: any) => {
+    setLocalStorageState(key, value);
+    setStateByKey(key, value);
+  };
 
   useEffect(() => {
     if (verified && txnId) {
@@ -406,14 +568,15 @@ const VerifyAadhaarSection = ({ onVerified }: VerifyAadhaarSectionProps) => {
 
   const validateAadhaar = () => {
     if (aadhaarNumber.length !== 12 && aadhaarNumber.length !== 16) {
-      setAadhaarNumberError(
+      updateStateAndStorage(
+        "aadhaarNumberError",
         "Should be a 12-digit aadhaar number or 16-digit virtual ID"
       );
       return false;
     }
 
     if (aadhaarNumber.includes(" ")) {
-      setAadhaarNumberError("Should not contain spaces");
+      updateStateAndStorage("aadhaarNumberError", "Should not contain spaces");
       return false;
     }
 
@@ -434,7 +597,7 @@ const VerifyAadhaarSection = ({ onVerified }: VerifyAadhaarSectionProps) => {
 
     if (res?.status === 200 && data) {
       const { txnId } = data;
-      setTxnId(txnId);
+      updateStateAndStorage("txnId", txnId);
       Notify.Success({
         msg: "OTP has been sent to the mobile number registered with the Aadhar number.",
       });
@@ -456,7 +619,7 @@ const VerifyAadhaarSection = ({ onVerified }: VerifyAadhaarSectionProps) => {
     setIsSendingOtp(false);
 
     if (res?.status === 200 && data?.txnId) {
-      setTxnId(data.txnId);
+      updateStateAndStorage("txnId", data.txnId);
       Notify.Success({
         msg: "OTP has been resent to the mobile number registered with the Aadhar number.",
       });
@@ -475,12 +638,12 @@ const VerifyAadhaarSection = ({ onVerified }: VerifyAadhaarSectionProps) => {
 
   const validateOtp = () => {
     if (otp.length !== 6) {
-      setOtpError("Must be a 6-digit code");
+      updateStateAndStorage("otpError", "Must be a 6-digit code");
       return false;
     }
 
     if (otp.includes(" ")) {
-      setOtpError("Should not contain spaces");
+      updateStateAndStorage("otpError", "Should not contain spaces");
       return false;
     }
     return true;
@@ -499,11 +662,42 @@ const VerifyAadhaarSection = ({ onVerified }: VerifyAadhaarSectionProps) => {
     setIsVerifyingOtp(false);
 
     if (res?.status === 200 && data?.txnId) {
-      setTxnId(data.txnId);
+      updateStateAndStorage("txnId", data.txnId);
       Notify.Success({ msg: "OTP verified" });
       setIsVerified(true);
     } else {
       Notify.Error({ msg: "OTP verification failed" });
+    }
+  };
+
+  const setStateByKey = (key: string, value: any) => {
+    switch (key) {
+      case "aadhaarNumber":
+        setAadhaarNumber(value);
+        break;
+      case "aadhaarNumberError":
+        setAadhaarNumberError(value);
+        break;
+      case "otp":
+        setOtp(value);
+        break;
+      case "otpError":
+        setOtpError(value);
+        break;
+      case "txnId":
+        setTxnId(value);
+        break;
+      case "verified":
+        setIsVerified(value);
+        break;
+      case "acceptedDisclaimer1":
+        setAcceptedDisclaimer1(value);
+        break;
+      case "acceptedDisclaimer2":
+        setAcceptedDisclaimer2(value);
+        break;
+      default:
+        break;
     }
   };
 
@@ -519,7 +713,9 @@ const VerifyAadhaarSection = ({ onVerified }: VerifyAadhaarSectionProps) => {
           placeholder="Enter 12-digit Aadhaar or 16-digit Virtual ID"
           disabled={!!(isSendingOtp || txnId)}
           value={aadhaarNumber}
-          onChange={({ value }) => setAadhaarNumber(value)}
+          onChange={({ value }) =>
+            updateStateAndStorage("aadhaarNumber", value)
+          }
           error={aadhaarNumberError}
         />
         <span
@@ -539,7 +735,7 @@ const VerifyAadhaarSection = ({ onVerified }: VerifyAadhaarSectionProps) => {
               type="checkbox"
               checked={acceptedDisclaimer1}
               onChange={(e) => {
-                setAcceptedDisclaimer1(e.target.checked);
+                updateStateAndStorage("acceptedDisclaimer1", e.target.checked);
               }}
               className="mr-2 rounded border-gray-700 shadow-sm ring-0 ring-offset-0"
             />
@@ -556,7 +752,7 @@ const VerifyAadhaarSection = ({ onVerified }: VerifyAadhaarSectionProps) => {
               type="checkbox"
               checked={acceptedDisclaimer2}
               onChange={(e) => {
-                setAcceptedDisclaimer2(e.target.checked);
+                updateStateAndStorage("acceptedDisclaimer2", e.target.checked);
               }}
               className="mr-2 rounded border-gray-700 shadow-sm ring-0 ring-offset-0"
             />
@@ -578,7 +774,7 @@ const VerifyAadhaarSection = ({ onVerified }: VerifyAadhaarSectionProps) => {
       {otpSent && (
         <OtpFormField
           name="otp"
-          onChange={(value) => setOtp(value as string)}
+          onChange={(value) => updateStateAndStorage("otp", value as string)}
           value={otp}
           label="Enter 6-digit OTP sent to the registered mobile"
           disabled={isVerifyingOtp}
@@ -618,26 +814,69 @@ const VerifyAadhaarSection = ({ onVerified }: VerifyAadhaarSectionProps) => {
 
 interface VerifyMobileSectionProps {
   transactionId: string;
+  draftState?: any;
+  setLocalStorageState: (key: string, value: any) => void;
   onVerified: (transactionId: string) => void;
   patientMobile?: string | undefined;
 }
 
 const VerifyMobileSection = ({
   transactionId,
+  draftState,
+  setLocalStorageState,
   onVerified,
   patientMobile,
 }: VerifyMobileSectionProps) => {
-  const [mobile, setMobile] = useState(() => patientMobile || "");
-  const [mobileError, setMobileError] = useState<string>();
+  const [mobile, setMobile] = useState(
+    () => (patientMobile || draftState?.mobile) ?? ""
+  );
+  const [mobileError, setMobileError] = useState<string>(
+    draftState?.mobileError ?? ""
+  );
 
-  const [otp, setOtp] = useState("");
-  const [otpError, setOtpError] = useState<string>();
+  const [otp, setOtp] = useState(draftState?.otp ?? "");
+  const [otpError, setOtpError] = useState<string>(draftState?.otpError ?? "");
 
   const [txnId, setTxnId] = useState<string>(() => transactionId);
-  const [otpDispatched, setOtpDispatched] = useState(false);
+  const [otpDispatched, setOtpDispatched] = useState(
+    draftState?.otpDispatched ?? false
+  );
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
-  const [verified, setIsVerified] = useState(false);
+  const [verified, setIsVerified] = useState(draftState?.verified ?? false);
+
+  const setStateByKey = (key: string, value: any) => {
+    switch (key) {
+      case "mobile":
+        setMobile(value);
+        break;
+      case "mobileError":
+        setMobileError(value);
+        break;
+      case "otp":
+        setOtp(value);
+        break;
+      case "otpError":
+        setOtpError(value);
+        break;
+      case "txnId":
+        setTxnId(value);
+        break;
+      case "otpDispatched":
+        setOtpDispatched(value);
+        break;
+      case "verified":
+        setIsVerified(value);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const updateStateAndStorage = (key: string, value: any) => {
+    setLocalStorageState(key, value);
+    setStateByKey(key, value);
+  };
 
   useEffect(() => {
     if (verified && txnId) {
@@ -647,12 +886,12 @@ const VerifyMobileSection = ({
 
   const validateMobile = () => {
     if (mobile.length !== 10) {
-      setMobileError("Should contain 10-digits");
+      updateStateAndStorage("mobileError", "Should contain 10-digits");
       return false;
     }
 
     if (mobile.includes(" ")) {
-      setMobileError("Should not contain spaces");
+      updateStateAndStorage("mobileError", "Should not contain spaces");
       return false;
     }
 
@@ -662,7 +901,7 @@ const VerifyMobileSection = ({
   const sendOtp = async () => {
     if (!validateMobile()) return;
 
-    setOtpDispatched(false);
+    updateStateAndStorage("otpDispatched", false);
     setIsSendingOtp(true);
     const { res, data } = await request(routes.abha.checkAndGenerateMobileOtp, {
       body: {
@@ -674,15 +913,15 @@ const VerifyMobileSection = ({
 
     if (res?.status === 200 && data) {
       const { txnId, mobileLinked } = data;
-      setTxnId(txnId);
+      updateStateAndStorage("txnId", txnId);
 
       if (mobileLinked) {
-        setIsVerified(true);
+        updateStateAndStorage("verified", true);
         Notify.Success({
           msg: "Mobile number verified.",
         });
       } else {
-        setOtpDispatched(true);
+        updateStateAndStorage("otpDispatched", true);
         Notify.Success({
           msg: "OTP has been sent to the mobile number.",
         });
@@ -694,12 +933,12 @@ const VerifyMobileSection = ({
 
   const validateOtp = () => {
     if (otp.length !== 6) {
-      setOtpError("Must be a 6-digit code");
+      updateStateAndStorage("otpError", "Must be a 6-digit code");
       return false;
     }
 
     if (otp.includes(" ")) {
-      setOtpError("Should not contain spaces");
+      updateStateAndStorage("otpError", "Should not contain spaces");
       return false;
     }
     return true;
@@ -718,9 +957,9 @@ const VerifyMobileSection = ({
     setIsVerifyingOtp(false);
 
     if (res?.status === 200 && data?.txnId) {
-      setTxnId(data.txnId);
+      updateStateAndStorage("txnId", data.txnId);
       Notify.Success({ msg: "OTP verified" });
-      setIsVerified(true);
+      updateStateAndStorage("verified", true);
     } else {
       Notify.Error({ msg: "OTP verification failed" });
     }
@@ -737,7 +976,7 @@ const VerifyMobileSection = ({
         placeholder="Enter patients mobile number"
         disabled={isSendingOtp}
         value={mobile}
-        onChange={({ value }) => setMobile(value)}
+        onChange={({ value }) => updateStateAndStorage("mobile", value)}
         error={mobileError}
       />
 
@@ -747,7 +986,7 @@ const VerifyMobileSection = ({
           label="Enter 6-digit OTP sent to the registered mobile"
           disabled={isVerifyingOtp}
           value={otp}
-          onChange={(value) => setOtp(value as string)}
+          onChange={(value) => updateStateAndStorage("otp", value as string)}
           error={otpError}
         />
       ) : (
@@ -786,18 +1025,42 @@ const VerifyMobileSection = ({
 
 interface CreateHealthIDSectionProps {
   transactionId: string;
+  draftState?: any;
+  setLocalStorageState: (key: string, value: any) => void;
   onCreateSuccess: (abha: any) => void;
   patientId?: string;
 }
 
 const CreateHealthIDSection = ({
   transactionId,
+  draftState,
+  setLocalStorageState,
   onCreateSuccess,
   patientId,
 }: CreateHealthIDSectionProps) => {
-  const [healthId, setHealthId] = useState("");
+  const [healthId, setHealthId] = useState(draftState?.healthId ?? "");
   const [isCreating, setIsCreating] = useState(false);
-  const [isHealthIdInputInFocus, setIsHealthIdInputInFocus] = useState(false);
+  const [isHealthIdInputInFocus, setIsHealthIdInputInFocus] = useState(
+    draftState?.isHealthIdInputInFocus ?? false
+  );
+
+  const setStateByKey = (key: string, value: any) => {
+    switch (key) {
+      case "healthId":
+        setHealthId(value);
+        break;
+      case "isHealthIdInputInFocus":
+        setIsHealthIdInputInFocus(value);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const updateStateAndStorage = (key: string, value: any) => {
+    setLocalStorageState(key, value);
+    setStateByKey(key, value);
+  };
 
   const handleCreateHealthId = async () => {
     setIsCreating(true);
@@ -810,6 +1073,7 @@ const CreateHealthIDSection = ({
     });
     if (res?.status === 200) {
       Notify.Success({ msg: "Abha Address created" });
+      localStorage.removeItem(`abha-link-${patientId}`);
       onCreateSuccess(data);
     } else {
       Notify.Error({ msg: JSON.stringify(data) });
@@ -826,10 +1090,10 @@ const CreateHealthIDSection = ({
         disabled={isCreating}
         value={healthId}
         onChange={({ value }) => {
-          setHealthId(value);
+          updateStateAndStorage("healthId", value);
         }}
-        onFocus={() => setIsHealthIdInputInFocus(true)}
-        onBlur={() => setIsHealthIdInputInFocus(false)}
+        onFocus={() => updateStateAndStorage("isHealthIdInputInFocus", true)}
+        onBlur={() => updateStateAndStorage("isHealthIdInputInFocus", false)}
       />
 
       <p className="-mt-4 text-sm text-warning-600">
