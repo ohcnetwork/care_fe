@@ -8,13 +8,6 @@ import DistrictAutocompleteFormField from "../../Common/DistrictAutocompleteForm
 import LocalBodyAutocompleteFormField from "../../Common/LocalBodyAutocompleteFormField";
 import { SelectFormField } from "../../Form/FormFields/SelectFormField";
 
-const clearFilterState = {
-  state: "",
-  district: "",
-  local_body: "",
-  facility_type: "",
-};
-
 function FacilityFilter(props: any) {
   const { t } = useTranslation();
   const { filter, onChange, closeFilter, removeFilters } = props;
@@ -65,7 +58,7 @@ function FacilityFilter(props: any) {
       advancedFilter={props}
       onApply={applyFilter}
       onClear={() => {
-        removeFilters(Object.keys(clearFilterState));
+        removeFilters();
         closeFilter();
       }}
     >

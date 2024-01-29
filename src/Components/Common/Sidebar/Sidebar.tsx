@@ -71,7 +71,7 @@ const StatelessSidebar = ({
   useEffect(() => {
     if (!indicatorRef.current) return;
     const index = NavItems.findIndex((item) => item.to === activeLink);
-    const navItemCount = NavItems.length + 2; // +2 for notification and dashboard
+    const navItemCount = NavItems.length + (dashboard_url ? 2 : 1); // +2 for notification and dashboard
     if (index !== -1) {
       // Haha math go brrrrrrrrr
 
@@ -147,13 +147,15 @@ const StatelessSidebar = ({
             handleOverflow={handleOverflow}
             onClickCB={() => onItemClick && onItemClick(false)}
           />
-          <Item
-            text="Dashboard"
-            to={dashboard_url}
-            icon={<CareIcon className="care-l-dashboard text-lg" />}
-            external
-            handleOverflow={handleOverflow}
-          />
+          {dashboard_url && (
+            <Item
+              text="Dashboard"
+              to={dashboard_url}
+              icon={<CareIcon className="care-l-dashboard text-lg" />}
+              external
+              handleOverflow={handleOverflow}
+            />
+          )}
         </div>
         <div className="hidden md:block md:flex-1" />
 
