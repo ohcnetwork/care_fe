@@ -229,7 +229,7 @@ export const PatientHome = (props: any) => {
       ));
   }
 
-  const isPatientInactive = (patientData: PatientModel, facilityId: number) => {
+  const isPatientInactive = (patientData: PatientModel, facilityId: string) => {
     return (
       !patientData.is_active ||
       !(patientData?.last_consultation?.facility === facilityId)

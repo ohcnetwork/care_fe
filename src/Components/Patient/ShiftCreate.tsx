@@ -34,8 +34,8 @@ import request from "../../Utils/request/request.js";
 const Loading = lazy(() => import("../Common/Loading"));
 
 interface patientShiftProps {
-  facilityId: number;
-  patientId: number;
+  facilityId: string;
+  patientId: string;
 }
 
 export const ShiftCreate = (props: patientShiftProps) => {
