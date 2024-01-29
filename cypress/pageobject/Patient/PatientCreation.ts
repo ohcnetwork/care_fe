@@ -57,11 +57,11 @@ export class PatientPage {
   }
 
   typePatientName(patientName: string) {
-    cy.get("[data-testid=name] input")
-      .click()
-      .clear()
-      .click()
-      .type(patientName);
+    cy.get("[data-testid=name] input").click().type(patientName);
+  }
+
+  clearPatientName() {
+    cy.get("[data-testid=name] input").scrollIntoView().clear();
   }
 
   typePatientNameList(patientName: string) {
@@ -97,7 +97,23 @@ export class PatientPage {
   }
 
   clickAddInsruanceDetails() {
-    cy.get("[data-testid=add-insurance-button] button").check();
+    cy.get("[data-testid=add-insurance-button]").click();
+  }
+
+  typeSubscriberId(memberid: string) {
+    cy.get("#subscriber_id").click().type(memberid);
+  }
+
+  typePolicyId(policyid: string) {
+    cy.get("#policy_id").click().type(policyid);
+  }
+
+  typeInsurerId(insurerid: string) {
+    cy.get("#insurer_id").click().type(insurerid);
+  }
+
+  typeInsurerName(insurername: string) {
+    cy.get("#insurer_name").click().type(insurername);
   }
 
   clickNoneMedicialHistory() {

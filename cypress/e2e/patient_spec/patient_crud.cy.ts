@@ -57,6 +57,20 @@ describe("Patient Creation with consultation", () => {
     // Patient Details page
     patientPage.typePatientPhoneNumber(phone_number);
     patientPage.typePatientEmergencyNumber(emergency_phone_number);
+    patientPage.clickAddInsruanceDetails();
+    patientPage.clickAddInsruanceDetails();
+    patientPage.typeSubscriberId("member id 01");
+    patientPage.typePolicyId("policy name 01");
+    patientPage.typeInsurerId("insurer id 01");
+    patientPage.typeInsurerName("insurer name 01");
+    patientPage.clickAddInsruanceDetails();
+    patientPage.typeSubscriberId("member id 02");
+    patientPage.typePolicyId("policy name 02");
+    patientPage.typeInsurerId("insurer id 02");
+    patientPage.typeInsurerName("insurer name 02");
+    updatePatientPage.clickUpdatePatient();
+    updatePatientPage.verifyPatientUpdated();
+    updatePatientPage.saveUpdatedPatientUrl();
     patientPage.typePatientDateOfBirth(patientDateOfBirth);
     patientPage.typePatientName(patientOneName);
     patientPage.selectPatientGender(patientOneGender);
@@ -117,13 +131,22 @@ describe("Patient Creation with consultation", () => {
     patientPage.verifyStatusCode();
     patientPage.patientformvisibility();
     // change the gender to female and input data to related changed field
+    patientPage.clearPatientName();
     patientPage.typePatientName(patientOneUpdatedName);
     patientPage.selectPatientGender(patientOneUpdatedGender);
     patientPage.clickPatientAntenatalStatusYes();
     // Edit the patient consultation , select none medical history and multiple health ID
     patientPage.clickNoneMedicialHistory();
     patientPage.clickAddInsruanceDetails();
-
+    patientPage.typeSubscriberId("member id 01");
+    patientPage.typePolicyId("policy name 01");
+    patientPage.typeInsurerId("insurer id 01");
+    patientPage.typeInsurerName("insurer name 01");
+    patientPage.clickAddInsruanceDetails();
+    patientPage.typeSubscriberId("member id 02");
+    patientPage.typePolicyId("policy name 02");
+    patientPage.typeInsurerId("insurer id 02");
+    patientPage.typeInsurerName("insurer name 02");
     updatePatientPage.clickUpdatePatient();
     updatePatientPage.verifyPatientUpdated();
     updatePatientPage.saveUpdatedPatientUrl();
