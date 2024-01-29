@@ -8,10 +8,9 @@ import {
 } from "../../Common/constants";
 
 import * as Notification from "../../Utils/Notifications";
-import Pagination from "../Common/Pagination";
 import { ConsultationCard } from "../Facility/ConsultationCard";
 import { ConsultationModel } from "../Facility/models";
-import { PatientModel } from "./models";
+import { PatientModel, SampleTestModel } from "./models";
 import { SampleTestCard } from "./SampleTestCard";
 import Chip from "../../CAREUI/display/Chip";
 import {
@@ -36,6 +35,7 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import { InsuranceDetialsCard } from "./InsuranceDetailsCard";
 import request from "../../Utils/request/request";
+import PaginatedList from "../../CAREUI/misc/PaginatedList";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -46,10 +46,6 @@ export const PatientHome = (props: any) => {
   const [patientData, setPatientData] = useState<PatientModel>({});
   const [assignedVolunteerObject, setAssignedVolunteerObject] =
     useState<any>(null);
-  const [currentConsultationPage, setCurrentConsultationPage] = useState(1);
-  const [consultationOffset, setConsultationOffset] = useState(0);
-  const [currentSampleListPage, setCurrentSampleListPage] = useState(1);
-  const [sampleListOffset, setSampleListOffset] = useState(0);
   const authUser = useAuthUser();
   const { t } = useTranslation();
   const [selectedStatus, setSelectedStatus] = useState<{
@@ -149,8 +145,6 @@ export const PatientHome = (props: any) => {
     setAssignedVolunteerObject(volunteer.value);
   };
 
-  const limit = 5;
-
   const { loading: isLoading } = useQuery(routes.getPatient, {
     pathParams: {
       id,
@@ -166,22 +160,6 @@ export const PatientHome = (props: any) => {
     },
   });
 
-  const { loading: isConsultationLoading, data: consultationListData } =
-    useQuery(routes.getConsultationList, {
-      query: { patient: id, limit, offset: consultationOffset },
-    });
-
-  const {
-    loading: isSampleLoading,
-    data: sampleListData,
-    refetch,
-  } = useQuery(routes.sampleTestList, {
-    pathParams: {
-      patientId: id,
-    },
-    query: { limit, offset: sampleListOffset },
-  });
-
   const { loading: isShiftDataLoaded, data: activeShiftingData } = useQuery(
     routes.listShiftRequests,
     {
@@ -191,18 +169,6 @@ export const PatientHome = (props: any) => {
       prefetch: isShiftClicked,
     }
   );
-
-  const handleConsultationPagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentConsultationPage(page);
-    setConsultationOffset(offset);
-  };
-
-  const handleSampleListPagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentSampleListPage(page);
-    setSampleListOffset(offset);
-  };
 
   const confirmApproval = (status: number, sample: any) => {
     setSelectedStatus({ status, sample });
@@ -261,59 +227,6 @@ export const PatientHome = (props: any) => {
           </div>
         </div>
       ));
-  }
-
-  let consultationList, sampleList;
-
-  if (isConsultationLoading) {
-    consultationList = <CircularProgress />;
-  } else if (consultationListData?.count === 0) {
-    consultationList = (
-      <div>
-        <hr />
-        <div className="flex items-center justify-center border-2 border-solid border-gray-200 p-4 text-xl font-bold text-gray-500">
-          No Data Found
-        </div>
-      </div>
-    );
-  } else if (consultationListData && consultationListData?.count > 0) {
-    consultationList = consultationListData?.results.map(
-      (itemData: ConsultationModel, idx) => (
-        <ConsultationCard
-          itemData={itemData}
-          key={idx}
-          isLastConsultation={itemData.id === patientData.last_consultation?.id}
-        />
-      )
-    );
-  }
-
-  if (isSampleLoading) {
-    sampleList = <CircularProgress />;
-  } else if (sampleListData?.count === 0) {
-    sampleList = (
-      <div>
-        <hr />
-        <div className="flex items-center justify-center border-2 border-solid border-gray-200 p-4 text-xl font-bold text-gray-500">
-          No Data Found
-        </div>
-      </div>
-    );
-  } else if (sampleListData?.count) {
-    sampleList = (
-      <div className="lg:gap-4">
-        {sampleListData?.results.map((itemData, idx) => (
-          <SampleTestCard
-            refetch={refetch}
-            itemData={itemData}
-            key={idx}
-            handleApproval={confirmApproval}
-            facilityId={facilityId}
-            patientId={id}
-          />
-        ))}
-      </div>
-    );
   }
 
   const isPatientInactive = (patientData: PatientModel, facilityId: number) => {
@@ -729,8 +642,7 @@ export const PatientHome = (props: any) => {
                   <ButtonV2
                     className="mt-4 w-full"
                     disabled={
-                      !consultationListData ||
-                      !consultationListData.count ||
+                      !patientData.last_consultation?.id ||
                       !patientData.is_active
                     }
                     onClick={() =>
@@ -1442,34 +1354,66 @@ export const PatientHome = (props: any) => {
         <h2 className="ml-0 mt-9 text-2xl font-semibold leading-tight">
           Consultation History
         </h2>
-        {consultationList}
-        {(!isConsultationLoading && consultationListData?.count) || (
-          <div className="mt-4 flex w-full justify-center">
-            <Pagination
-              cPage={currentConsultationPage}
-              defaultPerPage={limit}
-              data={{ totalCount: consultationListData?.count || 0 }}
-              onChange={handleConsultationPagination}
-            />
-          </div>
-        )}
+
+        <PaginatedList
+          route={routes.getConsultationList}
+          query={{ patient: id }}
+          perPage={5}
+        >
+          {(_) => (
+            <div>
+              <PaginatedList.WhenLoading>
+                <CircularProgress />
+              </PaginatedList.WhenLoading>
+              <PaginatedList.Items<ConsultationModel>>
+                {(item) => (
+                  <ConsultationCard
+                    itemData={item}
+                    isLastConsultation={
+                      item.id == patientData.last_consultation?.id
+                    }
+                  />
+                )}
+              </PaginatedList.Items>
+              <div className="flex w-full items-center justify-center">
+                <PaginatedList.Paginator hideIfSinglePage />
+              </div>
+            </div>
+          )}
+        </PaginatedList>
       </div>
 
       <div>
         <h2 className="my-4 ml-0 text-2xl font-semibold leading-tight">
           Sample Test History
         </h2>
-        {sampleList}
-        {(!isSampleLoading && sampleListData?.count) || (
-          <div className="mt-4 flex w-full justify-center">
-            <Pagination
-              cPage={currentSampleListPage}
-              defaultPerPage={limit}
-              data={{ totalCount: sampleListData?.count || 0 }}
-              onChange={handleSampleListPagination}
-            />
-          </div>
-        )}
+        <PaginatedList
+          route={routes.sampleTestList}
+          pathParams={{ patientId: id }}
+          perPage={5}
+        >
+          {(_, query) => (
+            <div>
+              <PaginatedList.WhenLoading>
+                <CircularProgress />
+              </PaginatedList.WhenLoading>
+              <PaginatedList.Items<SampleTestModel>>
+                {(item) => (
+                  <SampleTestCard
+                    refetch={query.refetch}
+                    itemData={item}
+                    handleApproval={confirmApproval}
+                    facilityId={facilityId}
+                    patientId={id}
+                  />
+                )}
+              </PaginatedList.Items>
+              <div className="flex w-full items-center justify-center">
+                <PaginatedList.Paginator hideIfSinglePage />
+              </div>
+            </div>
+          )}
+        </PaginatedList>
       </div>
     </Page>
   );
