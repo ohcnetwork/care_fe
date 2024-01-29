@@ -71,7 +71,7 @@ const StatelessSidebar = ({
   useEffect(() => {
     if (!indicatorRef.current) return;
     const index = NavItems.findIndex((item) => item.to === activeLink);
-    const navItemCount = NavItems.length + 2; // +2 for notification and dashboard
+    const navItemCount = NavItems.length + (dashboard_url ? 2 : 1); // +2 for notification and dashboard
     if (index !== -1) {
       // Haha math go brrrrrrrrr
 
@@ -147,13 +147,15 @@ const StatelessSidebar = ({
             handleOverflow={handleOverflow}
             onClickCB={() => onItemClick && onItemClick(false)}
           />
-          <Item
-            text="Dashboard"
-            to={dashboard_url}
-            icon={<CareIcon className="care-l-dashboard text-lg" />}
-            external
-            handleOverflow={handleOverflow}
-          />
+          {dashboard_url && (
+            <Item
+              text="Dashboard"
+              to={dashboard_url}
+              icon={<CareIcon className="care-l-dashboard text-lg" />}
+              external
+              handleOverflow={handleOverflow}
+            />
+          )}
         </div>
         <div className="hidden md:block md:flex-1" />
 
@@ -217,7 +219,7 @@ interface ToggleShrinkProps {
 
 const ToggleShrink = ({ shrinked, toggle }: ToggleShrinkProps) => (
   <div
-    className={`flex h-10 w-10 cursor-pointer items-center justify-center self-end rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100 ${
+    className={`flex size-10 cursor-pointer items-center justify-center self-end rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100 ${
       shrinked ? "mx-auto" : "mr-4"
     } transition-all duration-200 ease-in-out`}
     onClick={toggle}

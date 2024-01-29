@@ -54,7 +54,7 @@ const CoverImageEditModal = ({
   };
   const { width } = useWindowDimensions();
   const LaptopScreenBreakpoint = 640;
-  const isLaptopScreen = width >= LaptopScreenBreakpoint ? true : false;
+  const isLaptopScreen = width >= LaptopScreenBreakpoint;
   const { t } = useTranslation();
   const handleSwitchCamera = useCallback(() => {
     setFacingMode((prevState: any) =>
@@ -66,19 +66,18 @@ const CoverImageEditModal = ({
 
   const captureImage = () => {
     setPreviewImage(webRef.current.getScreenshot());
-    fetch(webRef.current.getScreenshot())
-      .then((res) => res.blob())
-      .then((blob) => {
-        const myFile = new File([blob], "image.png", {
-          type: blob.type,
-        });
-        setSelectedFile(myFile);
+    const canvas = webRef.current.getCanvas();
+    canvas?.toBlob((blob: Blob) => {
+      const myFile = new File([blob], "image.png", {
+        type: blob.type,
       });
+      setSelectedFile(myFile);
+    });
   };
   const closeModal = () => {
     setPreview(undefined);
     setSelectedFile(undefined);
-    onClose && onClose();
+    onClose?.();
   };
 
   useEffect(() => {
@@ -183,7 +182,7 @@ const CoverImageEditModal = ({
       description={facility.name}
       className="md:max-w-4xl"
     >
-      <div className="flex h-full w-full items-center justify-center overflow-y-auto">
+      <div className="flex size-full items-center justify-center overflow-y-auto">
         {!isCameraOpen ? (
           <form className="flex max-h-screen min-h-[24rem] w-full flex-col overflow-auto">
             {hasImage ? (
@@ -192,7 +191,7 @@ const CoverImageEditModal = ({
                   <img
                     src={imgSrc}
                     alt={facility.name}
-                    className="h-full w-full object-cover"
+                    className="size-full object-cover"
                   />
                 </div>
                 <p className="text-center font-medium text-gray-700">
@@ -217,7 +216,7 @@ const CoverImageEditModal = ({
                   fill="none"
                   viewBox="0 0 48 48"
                   aria-hidden="true"
-                  className={`h-12 w-12 stroke-[2px] ${
+                  className={`size-12 stroke-[2px] ${
                     dragProps.dragOver && "text-primary-500"
                   } ${
                     dragProps.fileDropError !== ""

@@ -244,14 +244,14 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const captureImage = () => {
     setPreviewImage(webRef.current.getScreenshot());
-    fetch(webRef.current.getScreenshot())
-      .then((res) => res.blob())
-      .then((blob) => {
-        const myFile = new File([blob], `image.${blob.type.split("/").pop()}`, {
-          type: blob.type,
-        });
-        setFile(myFile);
+    const canvas = webRef.current.getCanvas();
+    canvas?.toBlob((blob: Blob) => {
+      const extension = blob.type.split("/").pop();
+      const myFile = new File([blob], `image.${extension}`, {
+        type: blob.type,
       });
+      setFile(myFile);
+    });
   };
 
   const handlePagination = (page: number, limit: number) => {
@@ -804,7 +804,7 @@ export const FileUpload = (props: FileUploadProps) => {
                           viewBox="0 0 24 24"
                           strokeWidth={1.5}
                           stroke="currentColor"
-                          className="absolute bottom-1 right-1 h-6 w-6 text-red-600"
+                          className="absolute bottom-1 right-1 size-6 text-red-600"
                         >
                           <path
                             strokeLinecap="round"
@@ -823,7 +823,7 @@ export const FileUpload = (props: FileUploadProps) => {
                           viewBox="0 0 24 24"
                           strokeWidth={1.5}
                           stroke="currentColor"
-                          className="absolute bottom-1 right-1 h-6 w-6 text-red-600"
+                          className="absolute bottom-1 right-1 size-6 text-red-600"
                         >
                           <path
                             strokeLinecap="round"

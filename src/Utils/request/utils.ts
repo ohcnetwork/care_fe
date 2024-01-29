@@ -9,7 +9,7 @@ export function makeUrl(
 ) {
   if (pathParams) {
     path = Object.entries(pathParams).reduce(
-      (acc, [key, value]) => acc.replace(`{${key}}`, value.toString()),
+      (acc, [key, value]) => acc.replace(`{${key}}`, `${value}`),
       path
     );
   }

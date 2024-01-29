@@ -471,3 +471,17 @@ export const isValidUrl = (url?: string) => {
     return false;
   }
 };
+
+export const mergeQueryOptions = <T extends object>(
+  selected: T[],
+  queryOptions: T[],
+  compareBy: (obj: T) => T[keyof T]
+) => {
+  if (!selected.length) return queryOptions;
+  return [
+    ...selected,
+    ...queryOptions.filter(
+      (option) => !selected.find((s) => compareBy(s) === compareBy(option))
+    ),
+  ];
+};

@@ -13,7 +13,7 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { classNames } from "../../Utils/utils";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
-import { ABDMError } from "./models";
+import { ABDMError, ABHAQRContent } from "./models";
 
 export const validateRule = (
   condition: boolean,
@@ -188,9 +188,20 @@ const ScanABHAQRSection = ({
           setIsLoading(true);
 
           try {
-            const abha = JSON.parse(value);
+            const abha = JSON.parse(value) as ABHAQRContent;
+
             const { res, data } = await request(routes.abha.linkViaQR, {
-              body: { ...abha, patientId },
+              body: {
+                patientId,
+                hidn: abha?.hidn,
+                phr: abha?.hid,
+                name: abha?.name,
+                gender: abha?.gender,
+                dob: abha?.dob.replace(/\//g, "-"),
+                address: abha?.address,
+                "dist name": abha?.district_name,
+                "state name": abha?.["state name"],
+              },
             });
 
             if (res?.status === 200 || res?.status === 202) {
@@ -741,7 +752,7 @@ const VerifyMobileSection = ({
         />
       ) : (
         <p className="-mt-4 text-sm text-warning-600">
-          <CareIcon className="care-l-exclamation-triangle h-4 w-4" /> OTP is
+          <CareIcon className="care-l-exclamation-triangle size-4" /> OTP is
           generated if the above phone number is not linked with given Aadhaar
           number.
         </p>
@@ -822,7 +833,7 @@ const CreateHealthIDSection = ({
       />
 
       <p className="-mt-4 text-sm text-warning-600">
-        <CareIcon className="care-l-exclamation-triangle h-4 w-4" /> Existing
+        <CareIcon className="care-l-exclamation-triangle size-4" /> Existing
         ABHA Address is used if ABHA Number already exists.
       </p>
 
