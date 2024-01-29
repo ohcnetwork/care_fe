@@ -148,7 +148,7 @@ export class PatientConsultationPage {
   visitEditConsultationPage() {
     cy.get("#view_consulation_updates").click();
     cy.get("button").contains("Manage Patient").click();
-    cy.get("button").contains("Edit Consultation Details").click();
+    cy.get("span").contains("Edit Consultation Details").click();
   }
 
   setSymptomsDate(date: string) {
