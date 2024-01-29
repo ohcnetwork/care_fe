@@ -168,18 +168,19 @@ export const PatientHome = (props: any) => {
 
   const { loading: isConsultationLoading, data: consultationListData } =
     useQuery(routes.getConsultationList, {
-      pathParams: { patient: id, limit, offset: consultationOffset },
+      query: { patient: id, limit, offset: consultationOffset },
     });
 
-  const { loading: isSampleLoading, data: sampleListData } = useQuery(
-    routes.sampleTestList,
-    {
-      pathParams: {
-        patientId: id,
-      },
-      query: { limit, offset: sampleListOffset },
-    }
-  );
+  const {
+    loading: isSampleLoading,
+    data: sampleListData,
+    refetch,
+  } = useQuery(routes.sampleTestList, {
+    pathParams: {
+      patientId: id,
+    },
+    query: { limit, offset: sampleListOffset },
+  });
 
   const { loading: isShiftDataLoaded, data: activeShiftingData } = useQuery(
     routes.listShiftRequests,
@@ -303,6 +304,7 @@ export const PatientHome = (props: any) => {
       <div className="lg:gap-4">
         {sampleListData?.results.map((itemData, idx) => (
           <SampleTestCard
+            refetch={refetch}
             itemData={itemData}
             key={idx}
             handleApproval={confirmApproval}

@@ -16,11 +16,12 @@ interface SampleDetailsProps {
   facilityId: number;
   patientId: number;
   itemData: SampleTestModel;
+  refetch: () => void;
   handleApproval: (status: number, sample: SampleTestModel) => void;
 }
 
 export const SampleTestCard = (props: SampleDetailsProps) => {
-  const { itemData, handleApproval, facilityId, patientId } = props;
+  const { itemData, handleApproval, facilityId, patientId, refetch } = props;
 
   const [statusDialog, setStatusDialog] = useState<{
     show: boolean;
@@ -49,7 +50,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
       body: sampleData,
       onResponse: ({ res }) => {
         if (res?.ok) {
-          window.location.reload();
+          refetch();
           Notification.Success({
             msg: `Success - ${statusName}`,
           });
@@ -83,6 +84,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
           : "bg-white hover:border-primary-500"
       } mt-4 block cursor-pointer rounded-lg border bg-white p-4 text-black shadow`}
     >
+      <div>test card this</div>
       <div
         onClick={(_e) =>
           navigate(
