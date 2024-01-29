@@ -42,6 +42,12 @@ interface Props {
   onClose: () => void;
 }
 
+interface draftState {
+  currentStep: Step;
+  transactionId: string;
+  state: any;
+}
+
 type Step =
   | "RestoreOptions"
   | "ScanExistingQR"
@@ -49,7 +55,7 @@ type Step =
   | "MobileVerification"
   | "HealthIDCreation";
 
-const initialState = {
+const initialState: draftState = {
   currentStep: "AadhaarVerification",
   transactionId: "",
   state: {},
@@ -61,7 +67,7 @@ export default function LinkABHANumberModal({
   onSuccess,
   ...props
 }: Props) {
-  const [draftState, setDraftState] = useState<any>(initialState);
+  const [draftState, setDraftState] = useState<draftState>(initialState);
   const [currentStep, setCurrentStep] = useState<Step>(
     localStorage.getItem(`abha-link-${patientId}`) !== null
       ? "RestoreOptions"
