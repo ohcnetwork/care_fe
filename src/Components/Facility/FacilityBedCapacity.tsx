@@ -8,6 +8,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { BedCapacity } from "./BedCapacity";
 import BedTypeCard from "./BedTypeCard";
 import useConfig from "../../Common/hooks/useConfig";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 export const FacilityBedCapacity = (props: any) => {
   const [bedCapacityModalOpen, setBedCapacityModalOpen] = useState(false);
@@ -92,7 +93,7 @@ export const FacilityBedCapacity = (props: any) => {
             onClick={() => setBedCapacityModalOpen(true)}
             authorizeFor={NonReadOnlyUsers}
           >
-            <i className="fas fa-bed mr-2 text-white" />
+            <CareIcon icon="l-bed" className="mr-2 text-white" />
             Add More Bed Types
           </ButtonV2>
         </div>

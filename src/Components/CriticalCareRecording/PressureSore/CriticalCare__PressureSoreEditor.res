@@ -274,8 +274,9 @@ let renderBody = (state, send, title, partPaths, substr) => {
               {state.previewMode ? React.null :  <div>
               {switch selectedPart {
               | Some(p) =>
-                <i
-                  className="border-l-2 fas fa-times p-1"
+                <CareIcon
+                  icon="l-times"
+                  className="border-l-2 p-1"
                   onClick={state.previewMode
                     ? _ => getIntoView(PressureSore.regionToString(regionType), false)
                     : _ => send(RemoveFromSelectedParts(p))}

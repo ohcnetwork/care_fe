@@ -60,7 +60,10 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                 className="h-full w-full object-cover"
               />
             )) || (
-              <i className="fas fa-hospital block text-4xl text-gray-500" />
+              <CareIcon
+                icon="l-hospital"
+                className="block text-4xl text-gray-500"
+              />
             )}
           </Link>
           <div className="h-full w-full grow">
@@ -75,7 +78,10 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                   className="h-full max-h-32 w-full object-cover"
                 />
               )) || (
-                <i className="fas fa-hospital block p-10 text-4xl text-gray-500" />
+                <CareIcon
+                  icon="l-hospital"
+                  className="block p-10 text-4xl text-gray-500"
+                />
               )}
             </Link>
 

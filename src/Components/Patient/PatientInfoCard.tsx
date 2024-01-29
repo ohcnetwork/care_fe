@@ -184,7 +184,10 @@ export default function PatientInfoCard(props: {
                 </div>
               ) : (
                 <div className="flex h-full items-center justify-center">
-                  <i className="fas fa-user-injured text-3xl text-gray-500"></i>
+                  <CareIcon
+                    icon="l-user-injured"
+                    className="text-3xl text-gray-500"
+                  />
                 </div>
               )}
             </div>
@@ -218,7 +221,7 @@ export default function PatientInfoCard(props: {
                         : " bg-red-400 text-white")
                     }
                   >
-                    <i className="text-md fas fa-clock mr-2"></i>
+                    <CareIcon icon="l-clock" className="text-md mr-2" />
                     {(dayjs().isBefore(patient.review_time)
                       ? "Review before: "
                       : "Review Missed: ") +
@@ -231,10 +234,11 @@ export default function PatientInfoCard(props: {
                 href={`/facility/${consultation?.facility}`}
                 className="font-semibold text-black hover:text-primary-600"
               >
-                <i
-                  className="fas fa-hospital mr-1 text-primary-400"
+                <CareIcon
+                  icon="l-hospital"
+                  className="mr-1 text-primary-400"
                   aria-hidden="true"
-                ></i>
+                />
                 {consultation?.facility_name}
               </Link>
 

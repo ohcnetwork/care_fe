@@ -547,77 +547,83 @@ export const DESIGNATION_HEALTH_CARE_WORKER = [
   "OTHERS",
 ];
 
-export const NOTIFICATION_EVENTS = [
-  { id: "MESSAGE", text: "Notice", icon: "fa-regular fa-message" },
+type NotificationEvent = {
+  id: string;
+  text: string;
+  icon: IconName;
+};
+
+export const NOTIFICATION_EVENTS: NotificationEvent[] = [
+  { id: "MESSAGE", text: "Notice", icon: "l-comment-alt-message" },
   {
     id: "PATIENT_CREATED",
     text: "Patient Created",
-    icon: "fa-solid fa-user-plus",
+    icon: "l-user-plus",
   },
   {
     id: "PATIENT_UPDATED",
     text: "Patient Updated",
-    icon: "fa-solid fa-user-pen",
+    icon: "l-edit",
   },
   {
     id: "PATIENT_DELETED",
     text: "Patient Deleted",
-    icon: "fa-solid fa-user-minus",
+    icon: "l-user-minus",
   },
   {
     id: "PATIENT_CONSULTATION_CREATED",
     text: "Patient Consultation Created",
-    icon: "fa-solid fa-heart-circle-check",
+    icon: "l-heart",
   },
   {
     id: "PATIENT_CONSULTATION_UPDATED",
     text: "Patient Consultation Updated",
-    icon: "fa-solid fa-heart-circle-plus",
+    icon: "l-heart-medical",
   },
   {
     id: "PATIENT_CONSULTATION_DELETED",
     text: "Patient Consultation Deleted",
-    icon: "fa-solid fa-heart-circle-minus",
+    icon: "l-heartbeat",
   },
   {
     id: "INVESTIGATION_SESSION_CREATED",
     text: "Investigation Session Created",
-    icon: "fa-solid fa-magnifying-glass",
+    icon: "l-search",
   },
   {
     id: "INVESTIGATION_UPDATED",
     text: "Investigation Updated",
-    icon: "fa-solid fa-magnifying-glass-plus",
+    icon: "l-search-plus",
   },
   {
     id: "PATIENT_FILE_UPLOAD_CREATED",
     text: "Patient File Upload Created",
-    icon: "fa-solid fa-file-medical",
+    icon: "l-file-medical",
   },
   {
     id: "CONSULTATION_FILE_UPLOAD_CREATED",
     text: "Consultation File Upload Created",
-    icon: "fa-solid fa-file-waveform",
+    icon: "l-file-upload",
   },
   {
     id: "PATIENT_CONSULTATION_UPDATE_CREATED",
     text: "Patient Consultation Update Created",
-    icon: "fa-solid fa-file-circle-check",
+    icon: "l-heart",
   },
   {
     id: "PATIENT_CONSULTATION_UPDATE_UPDATED",
     text: "Patient Consultation Update Updated",
-    icon: "fa-solid fa-file-circle-plus",
+    icon: "l-heart-medical",
   },
   {
     id: "SHIFTING_UPDATED",
     text: "Shifting Updated",
-    icon: "fa-solid fa-truck-medical",
+    icon: "l-ambulance",
   },
   {
     id: "PATIENT_NOTE_ADDED",
     text: "Patient Note Added",
-    icon: "fa-solid fa-message",
+    icon: "l-notes",
   },
 ];
 

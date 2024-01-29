@@ -224,9 +224,10 @@ const ToggleShrink = ({ shrinked, toggle }: ToggleShrinkProps) => (
     } transition-all duration-200 ease-in-out`}
     onClick={toggle}
   >
-    <i
-      className={`fa-solid fa-chevron-up ${
-        shrinked ? "rotate-90 text-sm" : "-rotate-90 text-base"
+    <CareIcon
+      icon="l-angle-up"
+      className={`text-3xl ${
+        shrinked ? "rotate-90" : "-rotate-90"
       } transition-all delay-150 duration-300 ease-out`}
     />
   </div>

@@ -4,6 +4,7 @@ import CircularProgress from "./components/CircularProgress";
 import { useTranslation } from "react-i18next";
 import { StateInterface } from "../Patient/FileUpload";
 import { Dispatch, Fragment, ReactNode, SetStateAction } from "react";
+import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
 
 export const zoom_values = [
   "h-1/6 w-1/6 my-40",
@@ -121,25 +122,25 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                               {[
                                 [
                                   t("Zoom In"),
-                                  "magnifying-glass-plus",
+                                  "l-search-plus",
                                   handleZoomIn,
                                   file_state.zoom === zoom_values.length,
                                 ],
                                 [
                                   t("Zoom Out"),
-                                  "magnifying-glass-minus",
+                                  "l-search-minus",
                                   handleZoomOut,
                                   file_state.zoom === 1,
                                 ],
                                 [
                                   t("Rotate Left"),
-                                  "rotate-left",
+                                  "l-corner-up-left",
                                   () => handleRotate(-90),
                                   false,
                                 ],
                                 [
                                   t("Rotate Right"),
-                                  "rotate-right",
+                                  "l-corner-up-right",
                                   () => handleRotate(90),
                                   false,
                                 ],
@@ -150,7 +151,10 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                                   className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70"
                                   disabled={button[3] as boolean}
                                 >
-                                  <i className={`fas fa-${button[1]} mr-2`} />
+                                  <CareIcon
+                                    icon={button[1] as IconName}
+                                    className="mr-2"
+                                  />
                                   {button[0] as string}
                                 </button>
                               ))}
@@ -164,7 +168,10 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                               download={`${file_state.name}.${file_state.extension}`}
                               className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70"
                             >
-                              <i className="fas fa-download mr-2" />
+                              <CareIcon
+                                icon="l-download-alt"
+                                className="mr-2"
+                              />
                               Download
                             </a>
                           )}
@@ -172,7 +179,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                             onClick={onClose}
                             className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70"
                           >
-                            <i className="fas fa-times mr-2" />
+                            <CareIcon icon="l-times" className="mr-2" />
                             Close
                           </button>
                         </div>

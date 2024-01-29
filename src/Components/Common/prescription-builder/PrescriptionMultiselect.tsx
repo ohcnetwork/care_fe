@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { classNames } from "../../../Utils/utils";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 export function PrescriptionMultiDropdown(props: {
   options: string[];
@@ -51,7 +52,7 @@ export function PrescriptionMultiDropdown(props: {
                     );
                   }}
                 >
-                  <i className="fas fa-times" />
+                  <CareIcon icon="l-times" />
                 </button>
               </div>
             );

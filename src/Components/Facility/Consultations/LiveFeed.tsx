@@ -552,13 +552,13 @@ const LiveFeed = (props: any) => {
                             onClick={() => setToUpdate(preset)}
                             className="flex w-1/2 items-center justify-center gap-2 bg-green-200 py-1 text-sm text-green-800 hover:bg-green-800 hover:text-green-200 "
                           >
-                            <i className="fa-solid fa-pencil"></i>
+                            <CareIcon icon="l-pen" />
                           </button>
                           <button
                             onClick={() => setToDelete(preset)}
                             className="flex w-1/2 items-center justify-center gap-2 bg-red-200 py-1 text-sm text-red-800 hover:bg-red-800 hover:text-red-200 "
                           >
-                            <i className="fa-solid fa-trash-can"></i>
+                            <CareIcon icon="l-trash" />
                           </button>
                         </div>
                       </div>
@@ -576,7 +576,7 @@ const LiveFeed = (props: any) => {
                       setPresetsPage(presetsPage - 10);
                     }}
                   >
-                    <i className="fas fa-arrow-left"></i>
+                    <CareIcon icon="l-arrow-left" />
                   </button>
                   <button
                     className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
@@ -585,7 +585,7 @@ const LiveFeed = (props: any) => {
                       setPresetsPage(presetsPage + 10);
                     }}
                   >
-                    <i className="fas fa-arrow-right"></i>
+                    <CareIcon icon="l-arrow-right" />
                   </button>
                 </div>
               ) : (
@@ -597,7 +597,7 @@ const LiveFeed = (props: any) => {
                       handlePagination(page.offset - page.limit);
                     }}
                   >
-                    <i className="fas fa-arrow-left"></i>
+                    <CareIcon icon="l-arrow-left" />
                   </button>
                   <button
                     className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
@@ -606,7 +606,7 @@ const LiveFeed = (props: any) => {
                       handlePagination(page.offset + page.limit);
                     }}
                   >
-                    <i className="fas fa-arrow-right"></i>
+                    <CareIcon icon="l-arrow-right" />
                   </button>
                 </div>
               )}

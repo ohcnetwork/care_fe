@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { classNames } from "../../../Utils/utils";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 export function PrescriptionDropdown(props: {
   options: string[] | number[];
@@ -77,7 +78,7 @@ export function PrescriptionDropdown(props: {
                   <span className="tooltip-text tooltip-right">
                     {tips[option]}
                   </span>
-                  <i className="fa-solid fa-circle-info"></i>
+                  <CareIcon icon="l-info-circle" />
                 </button>
               )}
             </div>

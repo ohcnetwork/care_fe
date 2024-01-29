@@ -225,7 +225,7 @@ const Beds = (props: BedsProps) => {
           <div className="mt-4 flex flex-row justify-center">
             <div>
               <ButtonV2 variant="primary" type="submit">
-                <i className="fas fa-bed" />
+                <CareIcon className="l-bed" />
                 Move to bed
               </ButtonV2>
             </div>

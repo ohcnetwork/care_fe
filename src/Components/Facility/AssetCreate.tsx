@@ -4,6 +4,7 @@ import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import {
   LegacyRef,
+  MutableRefObject,
   RefObject,
   createRef,
   lazy,
@@ -18,7 +19,7 @@ import {
   updateAsset,
 } from "../../Redux/actions";
 
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
 import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import { LocationSelect } from "../Common/LocationSelect";
 import Page from "../Common/components/Page";
@@ -145,19 +146,25 @@ const AssetCreate = (props: AssetProps) => {
   const [warrantyDetailsVisible, warrantyDetailsRef] = useVisibility(-300);
   const [serviceDetailsVisible, serviceDetailsRef] = useVisibility(-300);
 
-  const sections = {
+  const sections: {
+    [key in AssetFormSection]: {
+      icon: IconName;
+      isVisible: boolean;
+      ref: MutableRefObject<HTMLElement | undefined>;
+    };
+  } = {
     "General Details": {
-      iconClass: "fa-solid fa-circle-info",
+      icon: "l-info-circle",
       isVisible: generalDetailsVisible,
       ref: generalDetailsRef,
     },
     "Warranty Details": {
-      iconClass: "fa-solid fa-barcode",
+      icon: "l-qrcode-scan",
       isVisible: warrantyDetailsVisible,
       ref: warrantyDetailsRef,
     },
     "Service Details": {
-      iconClass: "fas fa-tools",
+      icon: "l-wrench",
       isVisible: serviceDetailsVisible,
       ref: serviceDetailsRef,
     },
@@ -426,7 +433,7 @@ const AssetCreate = (props: AssetProps) => {
             className="btn-primary btn mt-5"
             onClick={() => navigate(`/facility/${facilityId}/location/add`)}
           >
-            <i className="fas fa-plus mr-2 text-white"></i>
+            <CareIcon icon="l-plus" className="mr-2 text-white" />
             {t("add_location")}
           </button>
         </section>
@@ -441,7 +448,7 @@ const AssetCreate = (props: AssetProps) => {
           onClick={() => setIsScannerActive(false)}
           className="btn btn-default mb-2"
         >
-          <i className="fas fa-times mr-2"></i>
+          <CareIcon icon="l-times" className="mr-2" />
           {t("close_scanner")}
         </button>
         <QrReader
@@ -471,7 +478,7 @@ const AssetCreate = (props: AssetProps) => {
         className="col-span-6 -ml-2 mb-6 flex flex-row items-center"
         ref={section.ref as LegacyRef<HTMLDivElement>}
       >
-        <i className={`${section.iconClass} mr-3 text-lg`} />
+        <CareIcon icon={section.icon} className="mr-3 text-lg" />
         <label className="text-lg font-bold text-gray-900">
           {sectionTitle}
         </label>
@@ -514,7 +521,7 @@ const AssetCreate = (props: AssetProps) => {
                     setCurrentSection(sectionTitle as AssetFormSection);
                   }}
                 >
-                  <i className={`${section.iconClass} text-sm`} />
+                  <CareIcon icon={section.icon} className="text-lg" />
                   <span>{sectionTitle}</span>
                 </button>
               );

@@ -1385,7 +1385,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             />
                             {showAutoFilledPincode && (
                               <div>
-                                <i className="fas fa-circle-check mr-2 text-sm text-green-500" />
+                                <CareIcon
+                                  icon="check-circle"
+                                  className="mr-2 text-sm text-green-500"
+                                />
                                 <span className="text-sm text-primary-500">
                                   State and District auto-filled from Pincode
                                 </span>

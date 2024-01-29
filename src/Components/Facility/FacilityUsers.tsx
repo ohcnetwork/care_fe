@@ -303,10 +303,11 @@ export default function FacilityUsers(props: any) {
                   {`${user.first_name} ${user.last_name}`}
 
                   {user.last_login && isUserOnline(user) ? (
-                    <i
-                      className="fas fa-circle ml-1 animate-pulse text-primary-500 opacity-75"
+                    <CareIcon
+                      icon="l-circle"
+                      className="ml-1 animate-pulse text-primary-500 opacity-75"
                       aria-label="Online"
-                    ></i>
+                    />
                   ) : null}
                   {showUserDelete(authUser, user) && (
                     <div

@@ -11,6 +11,7 @@ import { PatientModel } from "../Patient/models";
 
 import { GENDER_TYPES } from "../../Common/constants";
 import { formatAge, formatDate, formatDateTime } from "../../Utils/utils";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -102,13 +103,14 @@ const TreatmentSummary = (props: any) => {
               onClick={(_) => window.print()}
               className="btn btn-primary mr-2"
             >
-              <i className="fas fa-print mr-2"></i> Print Treatment Summary
+              <CareIcon icon="l-print" className="mr-2" /> Print Treatment
+              Summary
             </button>
             <button
               onClick={(_) => window.history.go(-1)}
               className="btn btn-default"
             >
-              <i className="fas fa-times mr-2"></i> Close
+              <CareIcon icon="l-times" className="mr-2" /> Close
             </button>
           </div>
 

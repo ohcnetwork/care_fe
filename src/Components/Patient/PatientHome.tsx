@@ -465,7 +465,7 @@ export const PatientHome = (props: any) => {
             <div className="mx-auto max-w-screen-xl rounded-lg bg-red-200 p-3 shadow sm:px-6 lg:px-8">
               <div className="text-center">
                 <p className="font-bold text-red-800">
-                  <i className="fas fa-exclamation-triangle mr-2" />
+                  <CareIcon icon="l-exclamation-triangle" className="mr-2" />
                   <span className="inline">
                     You have not created a consultation for the patient in{" "}
                     <strong>{patientData.facility_object?.name || "-"} </strong>
@@ -773,7 +773,7 @@ export const PatientHome = (props: any) => {
                       name="death_report"
                       onClick={() => navigate(`/death_report/${id}`)}
                     >
-                      <i className="fas fa-file-download mr-2" />
+                      <CareIcon icon="l-file-download" className="mr-2" />
                       Death Report
                     </ButtonV2>
                   </div>

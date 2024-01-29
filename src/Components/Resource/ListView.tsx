@@ -69,7 +69,7 @@ export default function ListView() {
                     title="Resource status"
                     className="flex items-center text-sm font-medium leading-5 text-gray-500"
                   >
-                    <i className="fas fa-truck mr-2" />
+                    <CareIcon icon="l-truck" className="mr-2" />
                     <dd className="text-sm font-bold leading-5 text-gray-900">
                       {resource.status}
                     </dd>
@@ -80,7 +80,7 @@ export default function ListView() {
                     title=" Origin facility"
                     className="flex items-center text-sm font-medium leading-5 text-gray-500"
                   >
-                    <i className="fas fa-plane-departure mr-2"></i>
+                    <CareIcon icon="l-plane-departure" className="mr-2" />
                     <dd className="text-sm font-bold leading-5 text-gray-900">
                       {(resource.origin_facility_object || {}).name}
                     </dd>
@@ -91,7 +91,7 @@ export default function ListView() {
                     title="Resource approving facility"
                     className="flex items-center text-sm font-medium leading-5 text-gray-500"
                   >
-                    <i className="fas fa-user-check mr-2"></i>
+                    <CareIcon icon="l-user-check" className="mr-2" />
                     <dd className="text-sm font-bold leading-5 text-gray-900">
                       {(resource.approving_facility_object || {}).name}
                     </dd>
@@ -102,7 +102,7 @@ export default function ListView() {
                     title=" Assigned facility"
                     className="flex items-center text-sm font-medium leading-5 text-gray-500"
                   >
-                    <i className="fas fa-plane-arrival mr-2"></i>
+                    <CareIcon icon="l-plane-arrival" className="m-2" />
 
                     <dd className="text-sm font-bold leading-5 text-gray-900">
                       {(resource.assigned_facility_object || {}).name ||
@@ -123,7 +123,7 @@ export default function ListView() {
                         : "rounded bg-red-400 p-1 text-white")
                     }
                   >
-                    <i className="fas fa-stopwatch mr-2"></i>
+                    <CareIcon icon="l-stopwatch" className="mr-2" />
                     <dd className="text-sm font-bold leading-5">
                       {formatDateTime(resource.modified_date) || "--"}
                     </dd>
@@ -138,7 +138,7 @@ export default function ListView() {
                 onClick={(_) => navigate(`/resource/${resource.id}`)}
                 className="btn btn-default mr-2 w-full bg-white"
               >
-                <i className="fas fa-eye mr-2" /> All Details
+                <CareIcon icon="l-eye" className="mr-2" /> All Details
               </button>
             </div>
           </div>

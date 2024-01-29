@@ -115,8 +115,9 @@ export default function ResultList() {
           className="inline-flex h-full items-center rounded-full border bg-white px-3 py-1 text-xs font-medium leading-4 text-gray-600"
         >
           {`${key}: ${value.name}`}
-          <i
-            className="fas fa-times ml-2 cursor-pointer rounded-full px-1 py-0.5 hover:bg-gray-500"
+          <CareIcon
+            icon="l-times"
+            className="ml-2 cursor-pointer rounded-full px-1 py-0.5 hover:bg-gray-500"
             onClick={() =>
               paramKey === "local_bodies"
                 ? removeLSGFilter(paramKey, value.id)
@@ -124,7 +125,7 @@ export default function ResultList() {
                 ? removeWardFilter(paramKey, value.id)
                 : null
             }
-          ></i>
+          />
         </span>
       )
     );

@@ -23,6 +23,7 @@ import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
 import { ConsultationModel } from "../Facility/models.js";
+import CareIcon from "../../CAREUI/icons/CareIcon.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -73,7 +74,7 @@ export default function ShiftDetails(props: { id: string }) {
             <span className="copied-to-cb">{t("copied_to_clipboard")}</span>
           ) : (
             <span className="copy-to-cb">
-              <i className="fas fa-clipboard"></i>
+              <CareIcon icon="l-clipboard" />
             </span>
           )}
         </CopyToClipboard>
@@ -519,13 +520,14 @@ export default function ShiftDetails(props: { id: string }) {
         <div className="my-4">
           <div className="my-4 flex justify-end gap-3">
             <ButtonV2 onClick={(_) => window.print()}>
-              <i className="fas fa-print mr-2"></i> {t("print_referral_letter")}
+              <CareIcon icon="l-print" className="mr-2" />{" "}
+              {t("print_referral_letter")}
             </ButtonV2>
             <ButtonV2
               onClick={(_) => setIsPrintMode(false)}
               variant="secondary"
             >
-              <i className="fas fa-times mr-2"></i> {t("close")}
+              <CareIcon icon="l-times" className="mr-2" /> {t("close")}
             </ButtonV2>
           </div>
           {printData(data)}
@@ -554,7 +556,8 @@ export default function ShiftDetails(props: { id: string }) {
               </ButtonV2>
 
               <ButtonV2 onClick={() => setIsPrintMode(true)}>
-                <i className="fas fa-file-alt mr-2"></i> {t("referral_letter")}
+                <CareIcon icon="l-file-alt" className="mr-2" />{" "}
+                {t("referral_letter")}
               </ButtonV2>
             </div>
           }

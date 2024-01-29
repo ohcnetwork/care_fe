@@ -198,12 +198,12 @@ export default function ManageUsers() {
                     {user.last_login && cur_online ? (
                       <span>
                         {" "}
-                        <i className="fa-solid fa-clock"></i> Currently Online
+                        <CareIcon icon="l-clock" /> Currently Online
                       </span>
                     ) : (
                       <>
                         <span>
-                          <i className="fa-solid fa-clock"></i> Last Online:{" "}
+                          <CareIcon icon="l-clock" /> Last Online:{" "}
                         </span>
                         <span
                           aria-label="Online"
@@ -228,10 +228,11 @@ export default function ManageUsers() {
                   {`${user.first_name} ${user.last_name}`}
 
                   {user.last_login && cur_online ? (
-                    <i
-                      className="fas fa-circle ml-1 animate-pulse text-primary-500 opacity-75"
+                    <CareIcon
+                      icon="l-circle"
+                      className="ml-1 animate-pulse text-primary-500 opacity-75"
                       aria-label="Online"
-                    ></i>
+                    />
                   ) : null}
                   {showUserDelete(authUser, user) && (
                     <div

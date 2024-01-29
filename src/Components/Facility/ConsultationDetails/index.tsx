@@ -39,6 +39,7 @@ import { ConsultationNutritionTab } from "./ConsultationNutritionTab";
 import PatientNotesSlideover from "../PatientNotesSlideover";
 import LegacyDiagnosesList from "../../Diagnosis/LegacyDiagnosesList";
 import { AssetBedModel } from "../../Assets/AssetTypes";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
@@ -399,7 +400,10 @@ export const ConsultationDetails = (props: any) => {
                     {consultationData.treating_physician_object
                       ? `${consultationData.treating_physician_object.first_name} ${consultationData.treating_physician_object.last_name}`
                       : consultationData.deprecated_verified_by}
-                    <i className="fas fa-check ml-2 fill-current text-lg text-green-500"></i>
+                    <CareIcon
+                      icon="l-check"
+                      className="ml-2 fill-current text-lg text-green-500"
+                    />
                   </div>
                 )}
               </div>
