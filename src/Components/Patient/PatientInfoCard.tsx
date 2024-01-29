@@ -521,7 +521,7 @@ export default function PatientInfoCard(props: {
                   >
                     <span className="flex w-full items-center justify-center gap-2 lg:justify-start">
                       <CareIcon className={`care-l-${action[2]} text-xl`} />
-                      <p className="mx-auto font-semibold">{action[1]}</p>
+                      <p className="font-semibold">{action[1]}</p>
                     </span>
                   </ButtonV2>
                   {action?.[4]?.[0] && (
