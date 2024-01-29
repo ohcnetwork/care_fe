@@ -207,7 +207,7 @@ export default function PatientInfoCard(props: {
             <div className="flex items-center justify-center">
               <div
                 className="mb-2 flex flex-col justify-center text-xl font-semibold lg:hidden"
-                id="patient-name-consultation-mobile"
+                id="patient-name-consultation"
               >
                 {patient.name}
                 <div className="ml-3 mr-2 mt-[6px] text-sm font-semibold text-gray-600">
@@ -324,6 +324,30 @@ export default function PatientInfoCard(props: {
                       Discharged from CARE
                     </p>
                   )}
+                  {[
+                    [
+                      "Respiratory Support",
+                      RESPIRATORY_SUPPORT.find(
+                        (resp) =>
+                          resp.text ===
+                          consultation?.last_daily_round?.ventilator_interface
+                      )?.id ?? "UNKNOWN",
+                      consultation?.last_daily_round?.ventilator_interface,
+                    ],
+                  ].map((stat, i) => {
+                    return stat[2] && stat[1] !== "NONE" ? (
+                      <div className="flex flex-col items-center gap-2 text-sm">
+                        <div
+                          key={"patient_stat_" + i}
+                          className="flex items-center justify-center rounded border border-gray-500 bg-gray-100 p-1 px-3 text-xs font-semibold leading-4"
+                        >
+                          {stat[0]} : {stat[1]}
+                        </div>
+                      </div>
+                    ) : (
+                      ""
+                    );
+                  })}
                   {consultation?.discharge_date ? (
                     <div className="flex gap-4 rounded border border-cyan-400 bg-cyan-100 px-2 py-1 text-xs font-medium">
                       <div>
@@ -413,30 +437,6 @@ export default function PatientInfoCard(props: {
                 )}
               </div>
             </div>
-            {[
-              [
-                "Respiratory Support",
-                RESPIRATORY_SUPPORT.find(
-                  (resp) =>
-                    resp.text ===
-                    consultation?.last_daily_round?.ventilator_interface
-                )?.id ?? "UNKNOWN",
-                consultation?.last_daily_round?.ventilator_interface,
-              ],
-            ].map((stat, i) => {
-              return stat[2] && stat[1] !== "NONE" ? (
-                <div className="flex flex-col items-center gap-2 text-sm sm:flex-row lg:mt-2">
-                  <div
-                    key={"patient_stat_" + i}
-                    className="rounded-lg border border-gray-500 bg-gray-200 px-2 py-1 text-xs"
-                  >
-                    <b>{stat[0]}</b> : {stat[1]}
-                  </div>
-                </div>
-              ) : (
-                ""
-              );
-            })}
           </div>
         </div>
         <div className="col-span-2 flex w-full flex-col items-center justify-center gap-2 px-4 py-1 lg:col-span-1 2xl:flex-row">
@@ -526,7 +526,7 @@ export default function PatientInfoCard(props: {
                   </ButtonV2>
                   {action?.[4]?.[0] && (
                     <>
-                      <p className="mt-1 text-xs text-red-500">
+                      <p className="mt-0.5 text-xs text-red-500">
                         {action[4][1]}
                       </p>
                     </>
@@ -539,7 +539,7 @@ export default function PatientInfoCard(props: {
             itemClassName="min-w-0 sm:min-w-[225px]"
             title={"Manage Patient"}
             icon={<CareIcon icon="l-setting" className="text-xl" />}
-            containerClassName="w-full lg:w-auto"
+            containerClassName="w-full lg:w-auto mt-2 2xl:mt-0"
           >
             <div>
               {[

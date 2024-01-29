@@ -147,6 +147,7 @@ export class PatientConsultationPage {
 
   visitEditConsultationPage() {
     cy.get("#view_consulation_updates").click();
+    cy.get("button").contains("Manage Patient").click();
     cy.get("button").contains("Edit Consultation Details").click();
   }
 
