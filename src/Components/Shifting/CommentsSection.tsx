@@ -54,7 +54,7 @@ const CommentSection = (props: CommentSectionProps) => {
           />
           <div className="flex w-full justify-end">
             <ButtonV2
-              className="mb-4 mt-2"
+              className="mt-4"
               onClick={async () => {
                 await onSubmitComment();
                 query.refetch();
