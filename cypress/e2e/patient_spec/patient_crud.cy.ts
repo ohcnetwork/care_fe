@@ -1,7 +1,6 @@
 import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
-import { UpdatePatientPage } from "../../pageobject/Patient/PatientUpdate";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import { PatientConsultationPage } from "../../pageobject/Patient/PatientConsultation";
 import {
@@ -18,13 +17,11 @@ const calculateAge = () => {
 describe("Patient Creation with consultation", () => {
   const loginPage = new LoginPage();
   const patientPage = new PatientPage();
-  const updatePatientPage = new UpdatePatientPage();
   const patientConsultationPage = new PatientConsultationPage();
   const facilityPage = new FacilityPage();
   const age = calculateAge();
   const patientDateOfBirth = "01012001";
   const patientOneName = "Patient With No Consultation";
-  const patientOneUpdatedName = "Updated Patient 001";
   const patientOneGender = "Male";
   const patientOneUpdatedGender = "Female";
   const patientOneAddress = "Test Patient Address";
@@ -37,6 +34,17 @@ describe("Patient Creation with consultation", () => {
   const patientOneOngoingMedication = "Ongoing Medication";
   const patientOneAllergies = "Allergies";
   const patientOneBloodGroup = "O+";
+  const patientOneUpdatedBloodGroup = "AB+";
+  const patientOneFirstInsuranceId = "insurance-details-0";
+  const patientOneFirstSubscriberId = "member id 01";
+  const patientOneFirstPolicyId = "policy name 01";
+  const patientOneFirstInsurerId = "insurer id 01";
+  const patientOneFirstInsurerName = "insurer name 01";
+  const patientOneSecondInsuranceId = "insurance-details-1";
+  const patientOneSecondSubscriberId = "member id 02";
+  const patientOneSecondPolicyId = "policy name 02";
+  const patientOneSecondInsurerId = "insurer id 02";
+  const patientOneSecondInsurerName = "insurer name 02";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -57,20 +65,6 @@ describe("Patient Creation with consultation", () => {
     // Patient Details page
     patientPage.typePatientPhoneNumber(phone_number);
     patientPage.typePatientEmergencyNumber(emergency_phone_number);
-    patientPage.clickAddInsruanceDetails();
-    patientPage.clickAddInsruanceDetails();
-    patientPage.typeSubscriberId("member id 01");
-    patientPage.typePolicyId("policy name 01");
-    patientPage.typeInsurerId("insurer id 01");
-    patientPage.typeInsurerName("insurer name 01");
-    patientPage.clickAddInsruanceDetails();
-    patientPage.typeSubscriberId("member id 02");
-    patientPage.typePolicyId("policy name 02");
-    patientPage.typeInsurerId("insurer id 02");
-    patientPage.typeInsurerName("insurer name 02");
-    updatePatientPage.clickUpdatePatient();
-    updatePatientPage.verifyPatientUpdated();
-    updatePatientPage.saveUpdatedPatientUrl();
     patientPage.typePatientDateOfBirth(patientDateOfBirth);
     patientPage.typePatientName(patientOneName);
     patientPage.selectPatientGender(patientOneGender);
@@ -94,10 +88,10 @@ describe("Patient Creation with consultation", () => {
     patientPage.selectPatientBloodGroup(patientOneBloodGroup);
     patientPage.clickCreatePatient();
     patientPage.verifyPatientIsCreated();
-    patientPage.saveCreatedPatientUrl();
     // Verify the patient details
     patientPage.clickCancelButton();
     cy.wait(3000);
+    patientPage.savePatientUrl();
     patientPage.verifyPatientDashboardDetails(
       patientOneGender,
       age,
@@ -131,30 +125,92 @@ describe("Patient Creation with consultation", () => {
     patientPage.verifyStatusCode();
     patientPage.patientformvisibility();
     // change the gender to female and input data to related changed field
-    patientPage.clearPatientName();
-    patientPage.typePatientName(patientOneUpdatedName);
+    cy.wait(3000);
     patientPage.selectPatientGender(patientOneUpdatedGender);
     patientPage.clickPatientAntenatalStatusYes();
+    patientPage.selectPatientBloodGroup(patientOneUpdatedBloodGroup);
     // Edit the patient consultation , select none medical history and multiple health ID
     patientPage.clickNoneMedicialHistory();
     patientPage.clickAddInsruanceDetails();
-    patientPage.typeSubscriberId("member id 01");
-    patientPage.typePolicyId("policy name 01");
-    patientPage.typeInsurerId("insurer id 01");
-    patientPage.typeInsurerName("insurer name 01");
+    patientPage.typeSubscriberId(
+      patientOneFirstInsuranceId,
+      patientOneFirstSubscriberId
+    );
+    patientPage.typePolicyId(
+      patientOneFirstInsuranceId,
+      patientOneFirstPolicyId
+    );
+    patientPage.typeInsurerId(
+      patientOneFirstInsuranceId,
+      patientOneFirstInsurerId
+    );
+    patientPage.typeInsurerName(
+      patientOneFirstInsuranceId,
+      patientOneFirstInsurerName
+    );
     patientPage.clickAddInsruanceDetails();
-    patientPage.typeSubscriberId("member id 02");
-    patientPage.typePolicyId("policy name 02");
-    patientPage.typeInsurerId("insurer id 02");
-    patientPage.typeInsurerName("insurer name 02");
-    updatePatientPage.clickUpdatePatient();
-    updatePatientPage.verifyPatientUpdated();
-    updatePatientPage.saveUpdatedPatientUrl();
+    patientPage.typeSubscriberId(
+      patientOneSecondInsuranceId,
+      patientOneSecondSubscriberId
+    );
+    patientPage.typePolicyId(
+      patientOneSecondInsuranceId,
+      patientOneSecondPolicyId
+    );
+    patientPage.typeInsurerId(
+      patientOneSecondInsuranceId,
+      patientOneSecondInsurerId
+    );
+    patientPage.typeInsurerName(
+      patientOneSecondInsuranceId,
+      patientOneSecondInsurerName
+    );
+    patientPage.clickUpdatePatient();
+    patientPage.verifyPatientUpdated();
+    patientPage.visitPatientUrl();
+    // Verify Female Gender change reflection, No Medical History and Insurance Details
+    cy.wait(5000);
+    patientPage.verifyPatientDashboardDetails(
+      patientOneUpdatedGender,
+      age,
+      patientOneName,
+      phone_number,
+      emergency_phone_number,
+      yearOfBirth,
+      patientOneUpdatedBloodGroup
+    );
+    // Verify No medical history
+    patientPage.verifyNoSymptosPresent("Diabetes");
+    // verify insurance details and dedicatd page
+    cy.get("[data-testid=patient-details]")
+      .contains(patientOneFirstSubscriberId)
+      .scrollIntoView();
+    cy.wait(2000);
+    patientPage.verifyPatientPolicyDetails(
+      patientOneFirstSubscriberId,
+      patientOneFirstPolicyId,
+      patientOneFirstInsurerId,
+      patientOneFirstInsurerName
+    );
+    patientPage.clickPatientInsuranceViewDetail();
+    cy.wait(3000);
+    patientPage.verifyPatientPolicyDetails(
+      patientOneFirstSubscriberId,
+      patientOneFirstPolicyId,
+      patientOneFirstInsurerId,
+      patientOneFirstInsurerName
+    );
+    patientPage.verifyPatientPolicyDetails(
+      patientOneSecondSubscriberId,
+      patientOneSecondPolicyId,
+      patientOneSecondInsurerId,
+      patientOneSecondInsurerName
+    );
   });
 
   it("Create a New consultation to existing patient", () => {
     patientPage.interceptFacilities();
-    updatePatientPage.visitConsultationPage();
+    patientPage.visitConsultationPage();
     patientPage.verifyStatusCode();
     patientConsultationPage.fillIllnessHistory("history");
     patientConsultationPage.selectConsultationStatus(
@@ -185,7 +241,7 @@ describe("Patient Creation with consultation", () => {
   });
 
   it("Edit created consultation to existing patient", () => {
-    updatePatientPage.visitUpdatedPatient();
+    patientPage.visitPatientUrl();
     patientConsultationPage.visitEditConsultationPage();
     patientConsultationPage.fillIllnessHistory("editted");
     patientConsultationPage.updateSymptoms("FEVER");

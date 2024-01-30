@@ -93,25 +93,24 @@ export default defineConfig({
     port: 4000,
     proxy: {
       "/api": {
-        target: process.env.CARE_API ?? "http://192.168.0.204:9000/",
+        target: process.env.CARE_API ?? "https://careapi.ohc.network",
         changeOrigin: true,
       },
     },
   },
   preview: {
     headers: {
-      "Content-Security-Policy": `default-src 'self';\
+      "Content-Security-Policy-Report-Only": `default-src 'self';\
       script-src 'self' blob: 'nonce-f51b9742' https://plausible.10bedicu.in;\
       style-src 'self' 'unsafe-inline';\
-      connect-src *;\
-      img-src 'self' blob: data: https://cdn.coronasafe.network ${cdnUrls};\
-      media-src * blob: data:;\
-      object-src 'self' blob: ${cdnUrls};`,
+      connect-src 'self' https://plausible.10bedicu.in;\
+      img-src 'self' https://cdn.coronasafe.network ${cdnUrls};\
+      object-src 'self' ${cdnUrls};`,
     },
     port: 4000,
     proxy: {
       "/api": {
-        target: process.env.CARE_API ?? "http://192.168.0.204:9000/",
+        target: process.env.CARE_API ?? "https://careapi.ohc.network",
         changeOrigin: true,
       },
     },

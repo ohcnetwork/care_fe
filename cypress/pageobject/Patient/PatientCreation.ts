@@ -60,10 +60,6 @@ export class PatientPage {
     cy.get("[data-testid=name] input").click().type(patientName);
   }
 
-  clearPatientName() {
-    cy.get("[data-testid=name] input").scrollIntoView().clear();
-  }
-
   typePatientNameList(patientName: string) {
     cy.get("#name").click().type(patientName);
   }
@@ -100,20 +96,28 @@ export class PatientPage {
     cy.get("[data-testid=add-insurance-button]").click();
   }
 
-  typeSubscriberId(memberid: string) {
-    cy.get("#subscriber_id").click().type(memberid);
+  typeSubscriberId(id: string, subscriberId: string) {
+    cy.get(`#${id}`).within(() => {
+      cy.get("#subscriber_id").clear().type(subscriberId);
+    });
   }
 
-  typePolicyId(policyid: string) {
-    cy.get("#policy_id").click().type(policyid);
+  typePolicyId(id: string, policyid: string) {
+    cy.get(`#${id}`).within(() => {
+      cy.get("#policy_id").click().type(policyid);
+    });
   }
 
-  typeInsurerId(insurerid: string) {
-    cy.get("#insurer_id").click().type(insurerid);
+  typeInsurerId(id: string, insurerid: string) {
+    cy.get(`#${id}`).within(() => {
+      cy.get("#insurer_id").click().type(insurerid);
+    });
   }
 
-  typeInsurerName(insurername: string) {
-    cy.get("#insurer_name").click().type(insurername);
+  typeInsurerName(id: string, insurername: string) {
+    cy.get(`#${id}`).within(() => {
+      cy.get("#insurer_name").click().type(insurername);
+    });
   }
 
   clickNoneMedicialHistory() {
@@ -157,16 +161,28 @@ export class PatientPage {
     cy.url().should("include", "/patient");
   }
 
-  saveCreatedPatientUrl() {
+  savePatientUrl() {
     cy.url().then((url) => {
-      cy.log(url);
-      patient_url = url.split("/").slice(0, -1).join("/");
-      cy.log(patient_url);
+      patient_url = url;
     });
   }
 
-  visitCreatedPatient() {
-    cy.awaitUrl(patient_url);
+  visitPatientUrl() {
+    cy.visit(patient_url);
+  }
+
+  visitConsultationPage() {
+    cy.visit(patient_url + "/consultation");
+  }
+
+  clickUpdatePatient() {
+    cy.intercept("PUT", "**/api/v1/patient/**").as("updatePatient");
+    cy.get("button").get("[data-testid=submit-button]").click();
+    cy.wait("@updatePatient").its("response.statusCode").should("eq", 200);
+  }
+
+  verifyPatientUpdated() {
+    cy.url().should("include", "/patient");
   }
 
   verifyPatientPhoneNumber(phoneNumber: string) {
@@ -240,8 +256,30 @@ export class PatientPage {
     });
   }
 
+  verifyPatientPolicyDetails(subscriberId, policyId, insurerId, insurerName) {
+    cy.get("[data-testid=patient-details]").then(($dashboard) => {
+      cy.url().should("include", "/facility/");
+      expect($dashboard).to.contain(subscriberId);
+      expect($dashboard).to.contain(policyId);
+      expect($dashboard).to.contain(insurerId);
+      expect($dashboard).to.contain(insurerName);
+    });
+  }
+
+  clickPatientInsuranceViewDetail() {
+    cy.get("#insurance-view-details").scrollIntoView();
+    cy.get("#insurance-view-details").click();
+  }
+
+  verifyNoSymptosPresent(patientSymptoms1: string) {
+    cy.get("[data-testid=patient-details]").should(
+      "not.contain",
+      patientSymptoms1
+    );
+  }
+
   visitUpdatePatientUrl() {
-    cy.awaitUrl(patient_url + "/update");
+    cy.visit(patient_url + "/update");
   }
 
   interceptFacilities() {
