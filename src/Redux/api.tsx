@@ -238,7 +238,7 @@ const routes = {
   },
 
   updateUser: {
-    path: "/api/v1/users/",
+    path: "/api/v1/users",
     method: "PUT",
   },
 
@@ -593,7 +593,7 @@ const routes = {
   },
 
   updateDoctor: {
-    path: "/api/v1/facility/{facilityId}/hospital_doctor/",
+    path: "/api/v1/facility/{facilityId}/hospital_doctor",
     method: "PUT",
   },
 
@@ -1032,7 +1032,7 @@ const routes = {
     TBody: Type<Partial<IResource>>(),
   },
   deleteResourceRecord: {
-    path: "/api/v1/resource/{id}/",
+    path: "/api/v1/resource/{id}",
     method: "DELETE",
     TRes: Type<{
       detail?: string;
