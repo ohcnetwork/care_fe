@@ -819,11 +819,10 @@ export const FileUpload = (props: FileUploadProps) => {
                           />
                         </svg>
 
-                        <i
-                          className={`${getIconClassName(
-                            item?.extension
-                          )} fa-3x m-3 text-gray-500`}
-                        ></i>
+                        <CareIcon
+                          icon={getIconClassName(item?.extension)}
+                          className="text-3xl text-gray-500"
+                        />
                       </div>
                     )}
                   </div>

@@ -187,7 +187,11 @@ export default function ListView() {
                 className="text-xs hover:text-blue-800"
                 onClick={() => refetch()}
               >
-                <i className="fa fa-refresh mr-1" aria-hidden="true"></i>
+                <CareIcon
+                  icon="l-refresh"
+                  className="mr-1"
+                  aria-hidden="true"
+                />
                 Refresh List
               </button>
             </div>

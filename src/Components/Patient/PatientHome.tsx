@@ -441,7 +441,7 @@ export const PatientHome = (props: any) => {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      <i className="fab fa-whatsapp" /> Video Call
+                      <CareIcon icon="l-whatsapp" /> Video Call
                     </a>
                   )}
                 </p>
@@ -566,7 +566,10 @@ export const PatientHome = (props: any) => {
                   </div>
                 </div>
                 <h3 className="text-base font-medium">
-                  <i className="fa-regular fa-hospital mr-2 text-emerald-900" />
+                  <CareIcon
+                    icon="l-hospital"
+                    className="mr-2 text-emerald-900"
+                  />
                   {patientData.facility_object?.name || "-"}
                 </h3>
                 <p className="mb-7 mt-4 text-sm font-medium text-zinc-500">
@@ -602,7 +605,7 @@ export const PatientHome = (props: any) => {
                         className="text-sm font-normal text-sky-600 hover:text-sky-300"
                         rel="noreferrer"
                       >
-                        <i className="fab fa-whatsapp " /> Chat on WhatsApp
+                        <CareIcon icon="l-whatsapp" /> Chat on WhatsApp
                       </a>
                     </div>
                   </div>
@@ -627,7 +630,7 @@ export const PatientHome = (props: any) => {
                         className="text-sm font-normal text-sky-600 hover:text-sky-300"
                         rel="noreferrer"
                       >
-                        <i className="fab fa-whatsapp" /> Chat on WhatsApp
+                        <CareIcon icon="l-whatsapp" /> Chat on WhatsApp
                       </a>
                     </div>
                   </div>
@@ -705,7 +708,7 @@ export const PatientHome = (props: any) => {
                           : " bg-red-600/5 p-1 text-sm font-normal text-red-600")
                       }
                     >
-                      <i className="text-md fa-regular fa-clock mr-2" />
+                      <CareIcon icon="l-clock" className="text-md mr-2" />
                       <p className="p-1">
                         {(dayjs().isBefore(patientData.review_time)
                           ? "Review before: "

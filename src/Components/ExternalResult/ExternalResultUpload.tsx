@@ -146,7 +146,11 @@ export default function ExternalResultUpload() {
                   target="_blank"
                   download
                 >
-                  <i className="fa fa-download mr-1" aria-hidden="true"></i>{" "}
+                  <CareIcon
+                    icon="l-download-alt"
+                    className="mr-1"
+                    aria-hidden="true"
+                  />{" "}
                   <span>{t("sample_format")}</span>
                 </a>
               </div>

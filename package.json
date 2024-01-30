@@ -51,7 +51,6 @@
   "dependencies": {
     "@date-io/date-fns": "^2.16.0",
     "@fontsource/inter": "^5.0.16",
-    "@fortawesome/fontawesome-free": "^6.5.1",
     "@glennsl/bs-json": "^5.0.4",
     "@googlemaps/react-wrapper": "^1.1.35",
     "@googlemaps/typescript-guards": "^2.0.3",

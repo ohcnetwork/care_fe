@@ -298,7 +298,11 @@ export default function ListView() {
                 className="text-xs hover:text-blue-800"
                 onClick={() => fetchData()}
               >
-                <i className="fa fa-refresh mr-1" aria-hidden="true"></i>
+                <CareIcon
+                  icon="l-refresh"
+                  className="mr-1"
+                  aria-hidden="true"
+                />
                 {t("refresh_list")}
               </button>
             </div>
