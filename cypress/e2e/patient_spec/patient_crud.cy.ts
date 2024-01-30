@@ -166,6 +166,7 @@ describe("Patient Creation with consultation", () => {
       patientOneSecondInsurerName
     );
     patientPage.clickUpdatePatient();
+    cy.wait(3000);
     patientPage.verifyPatientUpdated();
     patientPage.visitPatientUrl();
     // Verify Female Gender change reflection, No Medical History and Insurance Details
