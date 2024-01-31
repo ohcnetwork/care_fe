@@ -210,11 +210,7 @@ export const UserAdd = (props: UserProps) => {
 
   useEffect(() => {
     setUsernameExists(userExistsEnums.idle);
-    if (
-      usernameInput.length > 1 &&
-      !(state.form.username?.length < 2) &&
-      /[^.@+_-]/.test(state.form.username[state.form.username?.length - 1])
-    ) {
+    if (validateUsername(usernameInput)) {
       const timeout = setTimeout(() => {
         check_username(usernameInput);
       }, 500);
@@ -391,7 +387,7 @@ export const UserAdd = (props: UserProps) => {
             invalidForm = true;
           } else if (!validateUsername(state.form[field])) {
             errors[field] =
-              "Please enter letters, digits and @ . + - _ only and username should not end with @, ., +, - or _";
+              "Please enter a 4-16 characters long username with lowercase letters, digits and . _ - only and it should not start or end with . _ -";
             invalidForm = true;
           } else if (usernameExists !== userExistsEnums.available) {
             errors[field] = "This username already exists";
@@ -741,16 +737,26 @@ export const UserAdd = (props: UserProps) => {
                   </div>
                   <div>
                     {validateRule(
-                      state.form.username?.length >= 2,
-                      "Username should be atleast 2 characters long"
+                      usernameInput.length >= 4 && usernameInput.length <= 16,
+                      "Username should be 4-16 characters long"
                     )}
                   </div>
                   <div>
                     {validateRule(
-                      /[^.@+_-]/.test(
-                        state.form.username[state.form.username?.length - 1]
-                      ),
-                      "Username can't end with ^ . @ + _ -"
+                      /^[a-z0-9._-]*$/.test(usernameInput),
+                      "Username can only contain lowercase letters, numbers, and . _ -"
+                    )}
+                  </div>
+                  <div>
+                    {validateRule(
+                      /^[a-z0-9].*[a-z0-9]$/i.test(usernameInput),
+                      "Username must start and end with a letter or number"
+                    )}
+                  </div>
+                  <div>
+                    {validateRule(
+                      !/(?:[._-]{2,})/.test(usernameInput),
+                      "Username can't contain consecutive special characters . _ -"
                     )}
                   </div>
                 </div>
