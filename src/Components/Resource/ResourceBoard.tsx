@@ -124,7 +124,7 @@ const ResourceCard = ({ resource }: any) => {
                     title="Assigned to"
                     className="flex items-center text-sm font-medium leading-5 text-gray-500"
                   >
-                    <i icon="l-user" className="mr-2" />
+                    <CareIcon icon="l-user" className="mr-2" />
                     <dd className="text-sm font-bold leading-5 text-gray-900">
                       {resource.assigned_to_object.first_name}{" "}
                       {resource.assigned_to_object.last_name} -{" "}

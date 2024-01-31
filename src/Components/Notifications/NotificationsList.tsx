@@ -489,7 +489,7 @@ export default function NotificationsList({
             value={eventFilter}
             optionLabel={(o) => o.text}
             optionValue={(o) => o.id}
-            optionIcon={(o) => <i className={`${o.icon} `} />}
+            optionIcon={(o) => <CareIcon icon={o.icon} />}
             onChange={(v) => setEventFilter(v || "")}
           />
         </div>
