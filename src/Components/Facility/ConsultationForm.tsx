@@ -325,6 +325,13 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     fetchPatientName();
   }, [dispatchAction, patientId]);
 
+  useEffect(() => {
+    dispatch({
+      type: "set_form",
+      form: { ...state.form, encounter_date: new Date() },
+    });
+  }, []);
+
   const hasSymptoms =
     !!state.form.symptoms.length && !state.form.symptoms.includes(1);
   const isOtherSymptomsSelected = state.form.symptoms.includes(9);
