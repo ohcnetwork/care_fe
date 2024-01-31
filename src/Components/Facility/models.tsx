@@ -35,7 +35,7 @@ export interface WardModel {
 }
 
 export interface FacilityModel {
-  id?: number;
+  id?: string;
   name?: string;
   read_cover_image_url?: string;
   facility_type?: string;
@@ -165,13 +165,13 @@ export interface ConsultationModel {
 }
 
 export interface PatientStatsModel {
-  id?: number;
+  id?: string;
   entryDate?: string;
   num_patients_visited?: number;
   num_patients_home_quarantine?: number;
   num_patients_isolation?: number;
   num_patient_referred?: number;
-  entry_date?: number;
+  entry_date?: string;
   num_patient_confirmed_positive?: number;
 }
 
