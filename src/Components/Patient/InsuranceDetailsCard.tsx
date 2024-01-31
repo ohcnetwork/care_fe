@@ -54,6 +54,7 @@ export const InsuranceDetialsCard = (props: InsuranceDetails) => {
               <div className=" first-letter: sm:col-span-2  md:ml-auto md:mt-10 ">
                 <div className=" mt-1 whitespace-normal break-words text-sm font-medium leading-5">
                   <ButtonV2
+                    id="insurance-view-details"
                     onClick={() => {
                       navigate(
                         `/facility/${data.patient_object?.facility_object?.id}/patient/${data.patient_object?.id}/insurance`
