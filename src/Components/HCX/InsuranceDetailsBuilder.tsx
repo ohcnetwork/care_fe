@@ -55,23 +55,27 @@ export default function InsuranceDetailsBuilder(props: Props) {
 
   return (
     <FormField field={field}>
-      <div className="flex flex-col gap-3">
+      <ul className="flex flex-col gap-3">
         {props.value?.length === 0 && (
           <span className="py-16 text-center text-gray-500">
             No insurance details added
           </span>
         )}
         {props.value?.map((policy, index) => (
-          <InsuranceDetailEditCard
-            key={index}
-            policy={policy}
-            handleUpdate={handleUpdate(index)}
-            handleUpdates={handleUpdates(index)}
-            handleRemove={handleRemove(index)}
-            gridView={props.gridView}
-          />
+          <li
+            id={`insurance-details-${index}`}
+            key={`insurance-details-${index}`}
+          >
+            <InsuranceDetailEditCard
+              policy={policy}
+              handleUpdate={handleUpdate(index)}
+              handleUpdates={handleUpdates(index)}
+              handleRemove={handleRemove(index)}
+              gridView={props.gridView}
+            />
+          </li>
         ))}
-      </div>
+      </ul>
     </FormField>
   );
 }
