@@ -524,3 +524,51 @@ export type FacilityRequest = Omit<FacilityModel, "location"> & {
   patient_count?: string;
   bed_count?: string;
 };
+
+export type InventorySummaryResponse = {
+  id: string;
+  item_object: {
+    id: number;
+    default_unit: {
+      id: number;
+      name: string;
+    };
+    allowed_units: {
+      id: number;
+      name: string;
+    }[];
+    tags: {
+      id: number;
+      name: string;
+    }[];
+    name: string;
+    description: string;
+    min_quantity: number;
+  };
+  unit_object: {
+    id: number;
+    name: string;
+  };
+  created_date: string;
+  quantity: number;
+  is_low: boolean;
+  item: number;
+};
+
+export type MinimumQuantityItemResponse = {
+  id: string;
+  item_object: InventoryItemsModel;
+  created_date: string;
+  min_quantity: number;
+  item: number;
+};
+
+export type InventoryLogResponse = InventorySummaryResponse & {
+  external_id: string;
+  current_stock: number;
+  quantity_in_default_unit: number;
+  is_incoming: boolean;
+  probable_accident: boolean;
+  unit: number;
+  created_by: number;
+};

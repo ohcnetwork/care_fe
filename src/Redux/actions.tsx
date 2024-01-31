@@ -187,51 +187,6 @@ export const getConsultation = (id: string) => {
 export const updateConsultation = (id: string, params: object) => {
   return fireRequest("updateConsultation", [], params, { id: id });
 };
-//Inventory
-export const getItems = (params: object) => {
-  return fireRequest("getItems", [], params);
-};
-export const postInventory = (params: object, pathParams: object) => {
-  return fireRequest("createInventory", [], params, pathParams);
-};
-export const getInventoryLog = (params: object, pathParams: object) => {
-  return fireRequest("getInventoryLog", [params, "inventory"], pathParams);
-};
-export const setMinQuantity = (params: object, pathParams: object) => {
-  return fireRequest("setMinQuantity", [], params, pathParams);
-};
-export const getMinQuantity = (facilityId: object, params: object) => {
-  return fireRequest("getMinQuantity", [facilityId, "min_quantity"], params);
-};
-
-export const getMinQuantityOfItem = (
-  facilityId: object,
-  externalId: object
-) => {
-  return fireRequest("getMinQuantity", [
-    facilityId,
-    "min_quantity",
-    externalId,
-  ]);
-};
-
-export const updateMinQuantity = (pathParams: object, params: object) => {
-  return fireRequest("updateMinQuantity", [], pathParams, params);
-};
-export const getInventorySummary = (facilityId: number, params: object) => {
-  return fireRequest(
-    "getInventorySummary",
-    [facilityId, "inventorysummary"],
-    params
-  );
-};
-export const flagInventoryItem = (params: object) => {
-  return fireRequest("flagInventoryItem", [], {}, params);
-};
-
-export const deleteLastInventoryLog = (params: object) => {
-  return fireRequest("deleteLastInventoryLog", [], {}, params);
-};
 
 export const generateDischargeSummary = (pathParams: object) => {
   return fireRequest("dischargeSummaryGenerate", [], {}, pathParams);
