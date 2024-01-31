@@ -14,7 +14,6 @@ import { formatAge, formatDate, formatDateTime } from "../../../Utils/utils";
 import ReadMore from "../../Common/components/Readmore";
 import DailyRoundsList from "../Consultations/DailyRoundsList";
 import { getVitalsMonitorSocketUrl } from "../../VitalsMonitor/utils";
-import LegacyDiagnosesList from "../../Diagnosis/LegacyDiagnosesList";
 
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
 
@@ -343,7 +342,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         <span className="text-xs font-semibold leading-relaxed text-gray-800">
                           from{" "}
                           {formatDate(
-                            props.consultationData.last_daily_round.created_at
+                            props.consultationData.last_daily_round.taken_at
                           )}
                         </span>
                       </>
@@ -604,18 +603,6 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             </div>
           )}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="col-span-1 mt-4 overflow-hidden rounded-lg bg-white shadow">
-              <div className="px-4 py-5 sm:p-6">
-                <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                  Diagnoses
-                </h3>
-                <div className="mt-2">
-                  <LegacyDiagnosesList
-                    diagnoses={props.consultationData.diagnoses || []}
-                  />
-                </div>
-              </div>
-            </div>
             <div className="col-span-1 mt-4 overflow-hidden rounded-lg bg-white shadow">
               <div className="px-4 py-5 sm:p-6">
                 <h3 className="text-lg font-semibold leading-relaxed text-gray-900">

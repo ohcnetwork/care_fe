@@ -39,6 +39,8 @@ import PatientNotesSlideover from "../PatientNotesSlideover";
 import { AssetBedModel } from "../../Assets/AssetTypes";
 import PatientInfoCard from "../../Patient/PatientInfoCard";
 import RelativeDateUserMention from "../../Common/RelativeDateUserMention";
+import LegacyDiagnosesList from "../../Diagnosis/LegacyDiagnosesList";
+import AccordionV2 from "../../Common/components/AccordionV2";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
@@ -400,7 +402,24 @@ export const ConsultationDetails = (props: any) => {
             </div>
           </div>
         </div>
-
+        <div className="col-span-1 mt-2 overflow-hidden rounded-lg bg-white shadow">
+          <div className="px-4 py-2">
+            <AccordionV2
+              expanded={true}
+              title={
+                <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                  Diagnoses
+                </h3>
+              }
+            >
+              <div className="mt-2">
+                <LegacyDiagnosesList
+                  diagnoses={consultationData.diagnoses || []}
+                />
+              </div>
+            </AccordionV2>
+          </div>
+        </div>
         <div className="mt-4 w-full border-b-2 border-gray-200">
           <div className="overflow-x-auto sm:flex sm:items-baseline">
             <div className="mt-4 sm:mt-0">
