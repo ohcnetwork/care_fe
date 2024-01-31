@@ -9,7 +9,7 @@ export interface TimelineEvent<TType = string> {
   timestamp: string;
   by: PerformedByModel | undefined;
   icon: IconName;
-  notes?: string;
+  notes?: string | React.ReactNode;
   cancelled?: boolean;
 }
 

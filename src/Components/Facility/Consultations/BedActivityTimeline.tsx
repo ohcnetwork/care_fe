@@ -1,5 +1,6 @@
 import Timeline, { TimelineNode } from "../../../CAREUI/display/Timeline";
 import { classNames, formatDateTime } from "../../../Utils/utils";
+import { AssetData } from "../../Assets/AssetTypes";
 import { CurrentBed } from "../models";
 
 interface Props {
@@ -50,15 +51,13 @@ const BedAllocationNode = ({
           timestamp: bed.start_date,
           by: undefined,
           icon: bed.end_date === null ? "l-map-pin-alt" : "l-bed",
+          notes: bed.assets_objects?.length ? (
+            <BedTimelineAsset assets={bed.assets_objects} />
+          ) : (
+            ""
+          ),
         }}
         titleSuffix={<BedTitleSuffix bed={bed} isLastNode={isLastNode} />}
-        actions={
-          bed.end_date === null && (
-            <p className="mr-10 self-center rounded-full border border-yellow-600 bg-yellow-500 px-2 py-1 text-xs font-semibold text-white hover:bg-red-500">
-              IN USE
-            </p>
-          )
-        }
         isLast={isLastNode}
       />
     </>
@@ -68,14 +67,32 @@ const BedAllocationNode = ({
 const BedTitleSuffix = ({ bed }: { bed: CurrentBed; isLastNode?: boolean }) => {
   return (
     <div className="flex flex-col">
-      <p
-        className={classNames("font-semibold")}
-      >{`${bed.bed_object.name} (${bed.bed_object.bed_type}) | ${bed.bed_object.location_object?.name}`}</p>
-      <p className="mt-1 text-xs text-gray-500">
-        {`${formatDateTime(bed.start_date).split(";")[0]} | ${
-          formatDateTime(bed.start_date).split(";")[1]
-        }`}
+      <div className="flex gap-x-2">
+        <span>{formatDateTime(bed.start_date).split(";")[0]}</span>
+        <span className="text-gray-500">-</span>
+        <span>{formatDateTime(bed.start_date).split(";")[1]}</span>
+      </div>
+      <p>
+        {bed.end_date === null ? "Currently occupying" : "Transferred to"}{" "}
+        <span className="font-semibold">{`${bed.bed_object.name} (${bed.bed_object.bed_type}) in ${bed.bed_object.location_object?.name}`}</span>
       </p>
+    </div>
+  );
+};
+
+const BedTimelineAsset = ({ assets }: { assets: AssetData[] }) => {
+  return (
+    <div className="flex flex-col">
+      <p className="font-semibold">Linked Assets</p>
+      <div className="ml-5 flex flex-col">
+        {assets.map((asset) => {
+          return (
+            <li key={asset.id} className="list-disc">
+              {asset.name}
+            </li>
+          );
+        })}
+      </div>
     </div>
   );
 };

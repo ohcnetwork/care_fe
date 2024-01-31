@@ -23,7 +23,7 @@ import {
   AssetData,
 } from "../../Assets/AssetTypes.js";
 import Chip from "../../../CAREUI/display/Chip.js";
-import BedActivityTimeline from "./BedActivityTimeline.js";
+import BedActivityTimeline from "./BedActivityTimeline";
 
 interface BedsProps {
   facilityId: string;
