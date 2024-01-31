@@ -216,9 +216,13 @@ describe("Patient Creation with consultation", () => {
   });
 
   it("Patient Registration using External Result Import", () => {
+    // copy the patient external ID from external results
     patientPage.createPatient();
     patientPage.selectFacility("Dummy Shifting Center");
     patientPage.patientformvisibility();
+    // import the result and create a new patient
+
+    // verify the patient is successfully created
   });
 
   afterEach(() => {
