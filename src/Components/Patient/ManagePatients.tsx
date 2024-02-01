@@ -588,7 +588,7 @@ export const PatientManager = () => {
 
       const children = (
         <div
-          className={`ring/0 hover:ring/100 group relative size-full rounded-lg bg-white p-4 pl-5 text-black shadow transition-all duration-200 ease-in-out hover:pl-5 ${categoryClass}-ring overflow-hidden`}
+          className={`ring/0 hover:ring/100 group relative h-full w-full rounded-lg bg-white p-4 pl-5 text-black shadow transition-all duration-200 ease-in-out hover:pl-5 ${categoryClass}-ring overflow-hidden`}
         >
           <div
             className={`absolute inset-y-0 left-0 flex h-full w-1 items-center rounded-l-lg transition-all duration-200 ease-in-out group-hover:w-5 ${categoryClass}`}
@@ -742,9 +742,9 @@ export const PatientManager = () => {
                         startIcon="l-notes"
                         text="No Consultation Filed"
                       />
-                      <span className="absolute -right-1 -top-1 flex size-3 items-center justify-center">
-                        <span className="center absolute inline-flex size-4 animate-ping rounded-full bg-red-400"></span>
-                        <span className="relative inline-flex size-3 rounded-full bg-red-600"></span>
+                      <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center">
+                        <span className="center absolute inline-flex h-4 w-4 animate-ping rounded-full bg-red-400"></span>
+                        <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
                       </span>
                     </span>
                   )}
@@ -765,9 +765,9 @@ export const PatientManager = () => {
                           startIcon="l-exclamation-circle"
                           text="No update in 24 hours"
                         />
-                        <span className="absolute -right-1 -top-1 flex size-3 items-center justify-center">
-                          <span className="center absolute inline-flex size-4 animate-ping rounded-full bg-red-400"></span>
-                          <span className="relative inline-flex size-3 rounded-full bg-red-600"></span>
+                        <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center">
+                          <span className="center absolute inline-flex h-4 w-4 animate-ping rounded-full bg-red-400"></span>
+                          <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
                         </span>
                       </span>
                     )}
@@ -778,7 +778,7 @@ export const PatientManager = () => {
               ?.ventilator_interface &&
               patient.last_consultation?.last_daily_round
                 ?.ventilator_interface !== "UNKNOWN" && (
-                <div className="mb-auto flex size-8 shrink-0 items-center justify-center rounded-full border border-primary-600 bg-primary-100 text-xs font-semibold text-primary-600">
+                <div className="mb-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-primary-600 bg-primary-100 text-xs font-semibold text-primary-600">
                   {
                     RESPIRATORY_SUPPORT.find(
                       (resp) =>
