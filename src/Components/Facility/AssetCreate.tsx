@@ -1,6 +1,6 @@
 import * as Notification from "../../Utils/Notifications.js";
 
-import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
+import { AssetClass, AssetType } from "../Assets/AssetTypes";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import {
   LegacyRef,
@@ -11,12 +11,6 @@ import {
   useReducer,
   useState,
 } from "react";
-import {
-  createAsset,
-  getAsset,
-  listFacilityAssetLocation,
-  updateAsset,
-} from "../../Redux/actions";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
@@ -32,13 +26,15 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { navigate } from "raviger";
 import { parseQueryParams } from "../../Utils/primitives";
 import useAppHistory from "../../Common/hooks/useAppHistory";
-import { useDispatch } from "react-redux";
 import useVisibility from "../../Utils/useVisibility";
 import { validateEmailAddress } from "../../Common/validation";
 import { dateQueryString, parsePhoneNumber } from "../../Utils/utils.js";
 import dayjs from "../../Utils/dayjs";
 import DateFormField from "../Form/FormFields/DateFormField.js";
 import { t } from "i18next";
+import useQuery from "../../Utils/request/useQuery.js";
+import routes from "../../Redux/api.js";
+import request from "../../Utils/request/request.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -124,18 +120,12 @@ const AssetCreate = (props: AssetProps) => {
   const [support_email, setSupportEmail] = useState("");
   const [location, setLocation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [locations, setLocations] = useState<{ name: string; id: string }[]>(
-    []
-  );
-  const [asset, setAsset] = useState<AssetData>();
-  const [facilityName, setFacilityName] = useState("");
   const [qrCodeId, setQrCodeId] = useState("");
   const [manufacturer, setManufacturer] = useState("");
   const [warranty_amc_end_of_validity, setWarrantyAmcEndOfValidity] =
     useState<any>(null);
   const [last_serviced_on, setLastServicedOn] = useState<any>(null);
   const [notes, setNotes] = useState("");
-  const dispatchAction: any = useDispatch();
   const [isScannerActive, setIsScannerActive] = useState<boolean>(false);
 
   const [currentSection, setCurrentSection] =
@@ -173,32 +163,20 @@ const AssetCreate = (props: AssetProps) => {
     });
   }, [generalDetailsVisible, warrantyDetailsVisible, serviceDetailsVisible]);
 
-  useEffect(() => {
-    setIsLoading(true);
-    dispatchAction(
-      listFacilityAssetLocation({}, { facility_external_id: facilityId })
-    ).then(({ data }: any) => {
-      if (data.count > 0) {
-        setFacilityName(data.results[0].facility?.name);
-        setLocations(data.results);
-      }
-      setIsLoading(false);
-    });
+  const locationsQuery = useQuery(routes.listFacilityAssetLocation, {
+    pathParams: { facility_external_id: facilityId },
+    query: { limit: 1 },
+  });
 
-    if (assetId) {
-      setIsLoading(true);
-      dispatchAction(getAsset(assetId)).then(({ data }: any) => {
-        setAsset(data);
-        setIsLoading(false);
-      });
-    }
-  }, [assetId, dispatchAction, facilityId]);
+  const assetQuery = useQuery(routes.getAsset, {
+    pathParams: { external_id: assetId! },
+    prefetch: !!assetId,
+    onResponse: ({ data: asset }) => {
+      if (!asset) return;
 
-  useEffect(() => {
-    if (asset) {
       setName(asset.name);
       setDescription(asset.description);
-      setLocation(asset.location_object.id);
+      setLocation(asset.location_object.id!);
       setAssetType(asset.asset_type);
       setAssetClass(asset.asset_class);
       setIsWorking(String(asset.is_working));
@@ -215,8 +193,8 @@ const AssetCreate = (props: AssetProps) => {
       asset.last_service?.serviced_on &&
         setLastServicedOn(asset.last_service?.serviced_on);
       asset.last_service?.note && setNotes(asset.last_service?.note);
-    }
-  }, [asset]);
+    },
+  });
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -355,26 +333,25 @@ const AssetCreate = (props: AssetProps) => {
       }
 
       if (!assetId) {
-        const res = await dispatchAction(createAsset(data));
-        if (res && res.data && res.status === 201) {
-          Notification.Success({
-            msg: "Asset created successfully",
-          });
-          if (!addMore) {
-            goBack();
-          } else {
+        const { res } = await request(routes.createAsset, { body: data });
+        if (res?.ok) {
+          Notification.Success({ msg: "Asset created successfully" });
+          if (addMore) {
             resetFilters();
             const pageContainer = window.document.getElementById("pages");
             pageContainer?.scroll(0, 0);
+          } else {
+            goBack();
           }
         }
         setIsLoading(false);
       } else {
-        const res = await dispatchAction(updateAsset(assetId, data));
-        if (res && res.data && res.status === 200) {
-          Notification.Success({
-            msg: "Asset updated successfully",
-          });
+        const { res } = await request(routes.updateAsset, {
+          pathParams: { external_id: assetId },
+          body: data,
+        });
+        if (res?.ok) {
+          Notification.Success({ msg: "Asset updated successfully" });
           goBack();
         }
         setIsLoading(false);
@@ -400,14 +377,15 @@ const AssetCreate = (props: AssetProps) => {
     setIsScannerActive(false);
   };
 
-  if (isLoading) return <Loading />;
+  if (isLoading || locationsQuery.loading || assetQuery.loading) {
+    return <Loading />;
+  }
 
-  if (locations.length === 0) {
+  if (locationsQuery.data?.count === 0) {
     return (
       <Page
         title={assetId ? t("update_asset") : t("create_new_asset")}
         crumbsReplacements={{
-          [facilityId]: { name: facilityName },
           assets: { style: "text-gray-200 pointer-events-none" },
           [assetId || "????"]: { name },
         }}
@@ -415,7 +393,7 @@ const AssetCreate = (props: AssetProps) => {
       >
         <section className="text-center">
           <h1 className="flex flex-col items-center py-10 text-6xl">
-            <div className="flex h-40 w-40 items-center justify-center rounded-full bg-gray-200 p-5">
+            <div className="flex size-40 items-center justify-center rounded-full bg-gray-200 p-5">
               <CareIcon className="care-l-map-marker text-green-600" />
             </div>
           </h1>
@@ -486,7 +464,9 @@ const AssetCreate = (props: AssetProps) => {
         title={`${assetId ? t("update") : t("create")} Asset`}
         className="grow-0 pl-6"
         crumbsReplacements={{
-          [facilityId]: { name: facilityName },
+          [facilityId]: {
+            name: locationsQuery.data?.results[0].facility?.name,
+          },
           assets: { style: "text-gray-200 pointer-events-none" },
           [assetId || "????"]: { name },
         }}
@@ -520,7 +500,7 @@ const AssetCreate = (props: AssetProps) => {
               );
             })}
           </div>
-          <div className="flex h-full w-full overflow-auto xl:ml-72">
+          <div className="flex size-full overflow-auto xl:ml-72">
             <div className="w-full max-w-3xl 2xl:max-w-4xl">
               <form
                 onSubmit={(e) => handleSubmit(e, false)}

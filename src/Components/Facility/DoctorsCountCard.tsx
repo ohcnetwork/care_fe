@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { DoctorModal } from "./models";
 import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
-import { useDispatch } from "react-redux";
-import { deleteDoctor } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
 import { DoctorCapacity } from "./DoctorCapacity";
@@ -10,6 +8,8 @@ import DialogModal from "../Common/Dialog";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 interface DoctorsCountProps extends DoctorModal {
   facilityId: string;
@@ -19,28 +19,22 @@ interface DoctorsCountProps extends DoctorModal {
 
 const DoctorsCountCard = (props: DoctorsCountProps) => {
   const specialization = DOCTOR_SPECIALIZATION.find((i) => i.id === props.area);
-  const dispatchAction: any = useDispatch();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [open, setOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<number>(-1);
 
   const handleDeleteSubmit = async () => {
-    if (props.area) {
-      const res = await dispatchAction(
-        deleteDoctor(props.area, { facilityId: props.facilityId })
-      );
-      if (res?.status === 204) {
-        Notification.Success({
-          msg: "Doctor specialization type deleted successfully",
-        });
-        props.removeDoctor(props.id);
-      } else {
-        Notification.Error({
-          msg:
-            "Error while deleting Doctor specialization: " +
-            (res?.data?.detail || ""),
-        });
-      }
+    if (!props.area) return;
+
+    const { res } = await request(routes.deleteDoctor, {
+      pathParams: { facilityId: props.facilityId, area: `${props.area}` },
+    });
+
+    if (res?.ok) {
+      props.removeDoctor(props.id);
+      Notification.Success({
+        msg: "Doctor specialization type deleted successfully",
+      });
     }
   };
 
@@ -53,7 +47,7 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
       <div className="flex h-full flex-col rounded-sm border border-[#D2D6DC] shadow-sm">
         <div className="flex flex-1 items-center justify-start gap-3 px-4 py-6">
           <div className={`rounded-full p-4 ${specialization?.desc}`}>
-            <DoctorIcon className="h-5 w-5 fill-current text-white" />
+            <DoctorIcon className="size-5 fill-current text-white" />
           </div>
           <div>
             <div className="text-sm font-medium text-[#808080]">
