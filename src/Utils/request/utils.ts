@@ -39,10 +39,11 @@ const ensurePathNotMissingReplacements = (path: string) => {
   const missingParams = path.match(/\{.*\}/g);
 
   if (missingParams) {
-    Notification.Error({
-      msg: `Missing path params: ${missingParams.join(", ")}`,
-    });
-    throw new Error(`Missing path params: ${missingParams.join(", ")}`);
+    const msg = `Missing path params: ${missingParams.join(
+      ", "
+    )}. Path: ${path}`;
+    Notification.Error({ msg });
+    throw new Error(msg);
   }
 };
 
