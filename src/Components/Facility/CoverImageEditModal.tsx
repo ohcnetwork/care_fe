@@ -6,8 +6,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { useDispatch } from "react-redux";
-import { deleteFacilityCoverImage } from "../../Redux/actions";
 import { Success } from "../../Utils/Notifications";
 import useDragAndDrop from "../../Utils/useDragAndDrop";
 import { sleep } from "../../Utils/utils";
@@ -20,6 +18,8 @@ import * as Notification from "../../Utils/Notifications.js";
 import { useTranslation } from "react-i18next";
 import { LocalStorageKeys } from "../../Common/constants";
 import DialogModal from "../Common/Dialog";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 interface Props {
   open: boolean;
   onClose: (() => void) | undefined;
@@ -35,7 +35,6 @@ const CoverImageEditModal = ({
   onDelete,
   facility,
 }: Props) => {
-  const dispatch = useDispatch<any>();
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<any>();
   const [preview, setPreview] = useState<string>();
@@ -143,13 +142,14 @@ const CoverImageEditModal = ({
   };
 
   const handleDelete = async () => {
-    const res = await dispatch(deleteFacilityCoverImage(facility.id as any));
-    if (res.statusCode === 204) {
+    const { res } = await request(routes.deleteFacilityCoverImage, {
+      pathParams: { id: facility.id! },
+    });
+    if (res?.ok) {
       Success({ msg: "Cover image deleted" });
+      onDelete?.();
+      closeModal();
     }
-
-    onDelete && onDelete();
-    closeModal();
   };
 
   const hasImage = !!(preview || facility.read_cover_image_url);

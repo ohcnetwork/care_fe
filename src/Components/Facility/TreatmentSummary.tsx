@@ -11,6 +11,8 @@ import { PatientModel } from "../Patient/models";
 
 import { GENDER_TYPES } from "../../Common/constants";
 import { formatAge, formatDate, formatDateTime } from "../../Utils/utils";
+import useSlug from "../../Common/hooks/useSlug";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -25,6 +27,9 @@ const TreatmentSummary = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [investigations, setInvestigations] = useState<Array<any>>([]);
   const [dailyRounds, setDailyRounds] = useState<any>({});
+  const facilityId = useSlug("facility");
+  const { goBack } = useAppHistory();
+  const url = `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`;
 
   const fetchPatientData = useCallback(
     async (status: statusType) => {
@@ -104,10 +109,7 @@ const TreatmentSummary = (props: any) => {
             >
               <i className="fas fa-print mr-2"></i> Print Treatment Summary
             </button>
-            <button
-              onClick={(_) => window.history.go(-1)}
-              className="btn btn-default"
-            >
+            <button onClick={(_) => goBack(url)} className="btn btn-default">
               <i className="fas fa-times mr-2"></i> Close
             </button>
           </div>
