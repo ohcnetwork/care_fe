@@ -43,6 +43,14 @@ export interface AbhaObject {
   profile_photo: string;
 }
 
+export type Occupation =
+  | "STUDENT"
+  | "BUSSSINESS"
+  | "HEALTH_CARE_WORKER"
+  | "HEALTH_CARE_LAB_WORKER"
+  | "ANIMAL_HANDLER"
+  | "OTHERS";
+
 export interface PatientModel {
   test_id?: string;
   id?: string;
@@ -127,6 +135,11 @@ export interface PatientModel {
   created_by?: PerformedByModel;
   assigned_to?: { first_name?: string; username?: string; last_name?: string };
   assigned_to_object?: AssignedToObjectModel;
+  occupation?: Occupation;
+  meta_info?: {
+    id: number;
+    occupation: Occupation;
+  };
 
   // ABDM related
   abha_number?: string;

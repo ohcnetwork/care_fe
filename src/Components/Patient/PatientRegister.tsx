@@ -5,6 +5,7 @@ import {
   DISEASE_STATUS,
   GENDER_TYPES,
   MEDICAL_HISTORY_CHOICES,
+  OCCUPATION_TYPES,
   TEST_TYPE,
   VACCINES,
 } from "../../Common/constants";
@@ -28,6 +29,7 @@ import {
   parsePhoneNumber,
   scrollTo,
   compareBy,
+  parseOccupationFromExt,
 } from "../../Utils/utils";
 import { navigate, useQueryParams } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -93,6 +95,7 @@ const medicalHistoryChoices = MEDICAL_HISTORY_CHOICES.reduce(
   []
 );
 const genderTypes = GENDER_TYPES;
+const occupationTypes = OCCUPATION_TYPES;
 const diseaseStatus = [...DISEASE_STATUS];
 const bloodGroups = [...BLOOD_GROUPS];
 const testType = [...TEST_TYPE];
@@ -113,6 +116,7 @@ const initForm: any = {
   nationality: "India",
   passport_no: "",
   state: "",
+  occupation: null,
   district: "",
   local_body: "",
   ward: "",
@@ -309,6 +313,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         value: res.data.address ? res.data.address : state.form.address,
       });
       field.onChange({
+        name: "occupation",
+        value: res.data.meta_info?.occupation
+          ? res.data.meta_info.occupation
+          : state.form.occupation,
+      });
+      field.onChange({
         name: "permanent_address",
         value: res.data.permanent_address
           ? res.data.permanent_address
@@ -441,6 +451,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               .instituion_of_health_care_worker
               ? res.data.instituion_of_health_care_worker
               : "",
+            occupation: res.data.meta_info?.occupation
+              ? parseOccupationFromExt(res.data.meta_info.occupation)
+              : null,
 
             number_of_primary_contacts: res.data.number_of_primary_contacts
               ? res.data.number_of_primary_contacts
@@ -777,6 +790,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       name: formData.name,
       pincode: formData.pincode ? formData.pincode : undefined,
       gender: Number(formData.gender),
+      meta_info: formData.occupation
+        ? {
+            occupation: formData.occupation,
+          }
+        : null,
       nationality: formData.nationality,
       is_antenatal: formData.is_antenatal,
       passport_no:
@@ -1544,6 +1562,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   />
                                 )}
                               </div>
+                              <SelectFormField
+                                {...field("occupation")}
+                                label="Occupation"
+                                placeholder="Select Occupation"
+                                options={occupationTypes}
+                                optionLabel={(o: any) => o.text}
+                                optionValue={(o: any) => o.id}
+                              />
                             </>
                           ) : (
                             <div id="passport_no-div">
