@@ -343,17 +343,6 @@ export const GENDER_TYPES = [
   { id: 3, text: "Transgender", icon: "TRANS" },
 ];
 
-export const OCCUPATION_TYPES = [
-  { id: 1, text: "Student" },
-  {
-    id: 2,
-    text: "Businessman",
-  },
-  { id: 3, text: "Healthcare Worker" },
-  { id: 4, text: "Healthcare Lab Worker" },
-  { id: 5, text: "Animal Handler" },
-  { id: 6, text: "Others" },
-];
 export const SAMPLE_TEST_RESULT = [
   { id: 1, text: "POSITIVE" },
   { id: 2, text: "NEGATIVE" },
