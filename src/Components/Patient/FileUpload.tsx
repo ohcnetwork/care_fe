@@ -172,8 +172,8 @@ export const FileUpload = (props: FileUploadProps) => {
   const [previewImage, setPreviewImage] = useState(null);
   const [facingMode, setFacingMode] = useState<any>(FACING_MODE_USER);
   const videoConstraints = {
-    width: 1280,
-    height: 720,
+    width: { ideal: 4096 },
+    height: { ideal: 2160 },
     facingMode: "user",
   };
   const { width } = useWindowDimensions();
@@ -1164,10 +1164,10 @@ export const FileUpload = (props: FileUploadProps) => {
           {!previewImage ? (
             <div className="m-3">
               <Webcam
+                forceScreenshotSourceSize
+                screenshotQuality={1}
                 audio={false}
-                height={720}
                 screenshotFormat="image/jpeg"
-                width={1280}
                 ref={webRef}
                 videoConstraints={{ ...videoConstraints, facingMode }}
               />
