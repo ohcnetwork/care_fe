@@ -6,6 +6,7 @@ import {
   emergency_phone_number,
   phone_number,
 } from "../../pageobject/constants";
+import PatientTransfer from "../../pageobject/Patient/PatientTransfer";
 const yearOfBirth = "2001";
 
 const calculateAge = () => {
@@ -17,6 +18,7 @@ describe("Patient Creation with consultation", () => {
   const loginPage = new LoginPage();
   const patientPage = new PatientPage();
   const facilityPage = new FacilityPage();
+  const patientTransfer = new PatientTransfer();
   const age = calculateAge();
   const patientDateOfBirth = "01012001";
   const patientOneName = "Patient With No Consultation";
@@ -43,6 +45,9 @@ describe("Patient Creation with consultation", () => {
   const patientOneSecondPolicyId = "policy name 02";
   const patientOneSecondInsurerId = "insurer id 02";
   const patientOneSecondInsurerName = "insurer name 02";
+  const patientTransferPhoneNumber = "9849511866";
+  const patientTransferFacility = "Dummy Shifting Center";
+  const patientTransferName = "Dummy Patient 10";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -53,6 +58,16 @@ describe("Patient Creation with consultation", () => {
     cy.restoreLocalStorage();
     cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/patients");
+  });
+
+  it("Patient Registration using External Result Import", () => {
+    // copy the patient external ID from external results
+    patientPage.createPatient();
+    patientPage.selectFacility("Dummy Shifting Center");
+    patientPage.patientformvisibility();
+    // import the result and create a new patient
+
+    // verify the patient is successfully created
   });
 
   it("Create a new patient with all field in registration form and no consultation", () => {
@@ -210,19 +225,31 @@ describe("Patient Creation with consultation", () => {
   it("Patient Registration using the transfer with no consultation", () => {
     // transfer the patient and no consulation
     patientPage.createPatient();
-    patientPage.selectFacility("Dummy Shifting Center");
+    patientPage.selectFacility(patientTransferFacility);
     patientPage.patientformvisibility();
-    // cancel and go to patient detail page and verify transferred facility name
-  });
-
-  it("Patient Registration using External Result Import", () => {
-    // copy the patient external ID from external results
+    patientPage.typePatientPhoneNumber(patientTransferPhoneNumber);
+    patientTransfer.clickAdmitPatientRecordButton();
+    patientTransfer.clickTransferPopupContinueButton();
+    patientTransfer.clickTransferPatientNameList(patientTransferName);
+    patientTransfer.clickTransferPatientDob(patientDateOfBirth);
+    patientTransfer.clickTransferSubmitButton();
+    patientTransfer.verifyFacilitySuccessfullMessage();
+    patientTransfer.clickConsultationCancelButton();
+    cy.wait(3000);
+    // allow the transfer button of a patient
+    patientTransfer.clickAllowPatientTransferButton();
+    // Verify the patient error message for the same facility
+    cy.awaitUrl("/patients");
     patientPage.createPatient();
-    patientPage.selectFacility("Dummy Shifting Center");
+    patientPage.selectFacility(patientTransferFacility);
     patientPage.patientformvisibility();
-    // import the result and create a new patient
-
-    // verify the patient is successfully created
+    patientPage.typePatientPhoneNumber(patientTransferPhoneNumber);
+    patientTransfer.clickAdmitPatientRecordButton();
+    patientTransfer.clickTransferPopupContinueButton();
+    patientTransfer.clickTransferPatientNameList(patientTransferName);
+    patientTransfer.clickTransferPatientDob(patientDateOfBirth);
+    patientTransfer.clickTransferSubmitButton();
+    patientTransfer.verifyFacilityErrorMessage();
   });
 
   afterEach(() => {

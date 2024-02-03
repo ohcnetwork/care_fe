@@ -19,7 +19,7 @@ describe("Patient Creation with consultation", () => {
     cy.awaitUrl("/patients");
   });
 
-  it("Create a New consultation to existing patient", () => {
+  it("Create a patient with consultation in combination OP + Admission + All Fields", () => {
     patientPage.interceptFacilities();
     patientPage.visitConsultationPage();
     patientPage.verifyStatusCode();
