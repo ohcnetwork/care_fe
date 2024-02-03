@@ -100,13 +100,12 @@ export default defineConfig({
   },
   preview: {
     headers: {
-      "Content-Security-Policy": `default-src 'self';\
-      script-src 'self' 'nonce-f51b9742' https://plausible.10bedicu.in;\
-      style-src 'self' 'nonce-7e14cf80';\
-      connect-src 'self' ws: wss: https://sentry.io https://plausible.10bedicu.in ${cdnUrls};\
-      img-src 'self' blob: data: https://cdn.coronasafe.network ${cdnUrls};\
-      media-src 'self' blob: data: https://cdn.coronasafe.network ${cdnUrls};\
-      object-src 'self' blob: ${cdnUrls};`,
+      "Content-Security-Policy-Report-Only": `default-src 'self';\
+      script-src 'self' blob: 'nonce-f51b9742' https://plausible.10bedicu.in;\
+      style-src 'self' 'unsafe-inline';\
+      connect-src 'self' https://plausible.10bedicu.in;\
+      img-src 'self' https://cdn.coronasafe.network ${cdnUrls};\
+      object-src 'self' ${cdnUrls};`,
     },
     port: 4000,
     proxy: {

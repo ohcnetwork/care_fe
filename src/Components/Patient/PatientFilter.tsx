@@ -34,6 +34,7 @@ import {
 } from "../Form/FormFields/Utils";
 import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
 import SelectMenuV2 from "../Form/SelectMenuV2";
+import DiagnosesFilter, { FILTER_BY_DIAGNOSES_KEYS } from "./DiagnosesFilter";
 
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
@@ -98,52 +99,13 @@ export default function PatientFilter(props: any) {
       filter.last_consultation_is_telemedicine || null,
     is_antenatal: filter.is_antenatal || null,
     ventilator_interface: filter.ventilator_interface || null,
+    diagnoses: filter.diagnoses || null,
+    diagnoses_confirmed: filter.diagnoses_confirmed || null,
+    diagnoses_provisional: filter.diagnoses_provisional || null,
+    diagnoses_unconfirmed: filter.diagnoses_unconfirmed || null,
+    diagnoses_differential: filter.diagnoses_differential || null,
   });
   const dispatch: any = useDispatch();
-
-  const clearFilterState = {
-    district: "",
-    facility: "",
-    facility_type: "",
-    lsgBody: "",
-    facility_ref: null,
-    lsgBody_ref: null,
-    district_ref: null,
-    date_declared_positive_before: "",
-    date_declared_positive_after: "",
-    date_of_result_before: "",
-    date_of_result_after: "",
-    created_date_before: "",
-    created_date_after: "",
-    modified_date_before: "",
-    modified_date_after: "",
-    category: null,
-    gender: null,
-    disease_status: null,
-    age_min: "",
-    age_max: "",
-    date_of_result: null,
-    date_declared_positive: null,
-    last_consultation_medico_legal_case: null,
-    last_consultation_encounter_date_before: "",
-    last_consultation_encounter_date_after: "",
-    last_consultation_discharge_date_before: "",
-    last_consultation_discharge_date_after: "",
-    last_consultation_admitted_to_list: [],
-    last_consultation_current_bed__location: "",
-    srf_id: "",
-    number_of_doses: null,
-    covin_id: "",
-    is_kasp: null,
-    is_declared_positive: null,
-    last_consultation_symptoms_onset_date_before: "",
-    last_consultation_symptoms_onset_date_after: "",
-    last_vaccinated_date_before: "",
-    last_vaccinated_date_after: "",
-    last_consultation_is_telemedicine: null,
-    is_antenatal: null,
-    ventilator_interface: null,
-  };
 
   useEffect(() => {
     async function fetchData() {
@@ -255,6 +217,11 @@ export default function PatientFilter(props: any) {
       last_consultation_is_telemedicine,
       is_antenatal,
       ventilator_interface,
+      diagnoses,
+      diagnoses_confirmed,
+      diagnoses_provisional,
+      diagnoses_unconfirmed,
+      diagnoses_differential,
     } = filterState;
     const data = {
       district: district || "",
@@ -317,6 +284,11 @@ export default function PatientFilter(props: any) {
         last_consultation_is_telemedicine || "",
       is_antenatal: is_antenatal || "",
       ventilator_interface: ventilator_interface || "",
+      diagnoses: diagnoses || "",
+      diagnoses_confirmed: diagnoses_confirmed || "",
+      diagnoses_provisional: diagnoses_provisional || "",
+      diagnoses_unconfirmed: diagnoses_unconfirmed || "",
+      diagnoses_differential: diagnoses_differential || "",
     };
     onChange(data);
   };
@@ -336,7 +308,7 @@ export default function PatientFilter(props: any) {
       advancedFilter={props}
       onApply={applyFilter}
       onClear={() => {
-        removeFilters(Object.keys(clearFilterState));
+        removeFilters();
         closeFilter();
       }}
     >
@@ -502,6 +474,24 @@ export default function PatientFilter(props: any) {
             />
           </div>
         </div>
+      </AccordionV2>
+      <AccordionV2
+        title={
+          <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
+            ICD-11 Diagnoses based
+          </h1>
+        }
+        expanded
+        className="w-full"
+      >
+        {FILTER_BY_DIAGNOSES_KEYS.map((name) => (
+          <DiagnosesFilter
+            key={name}
+            name={name}
+            value={filterState[name]}
+            onChange={handleFormFieldChange}
+          />
+        ))}
       </AccordionV2>
       <AccordionV2
         title={

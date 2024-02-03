@@ -6,8 +6,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { useDispatch } from "react-redux";
-import { deleteFacilityCoverImage } from "../../Redux/actions";
 import { Success } from "../../Utils/Notifications";
 import useDragAndDrop from "../../Utils/useDragAndDrop";
 import { sleep } from "../../Utils/utils";
@@ -20,6 +18,8 @@ import * as Notification from "../../Utils/Notifications.js";
 import { useTranslation } from "react-i18next";
 import { LocalStorageKeys } from "../../Common/constants";
 import DialogModal from "../Common/Dialog";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 interface Props {
   open: boolean;
   onClose: (() => void) | undefined;
@@ -35,7 +35,6 @@ const CoverImageEditModal = ({
   onDelete,
   facility,
 }: Props) => {
-  const dispatch = useDispatch<any>();
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<any>();
   const [preview, setPreview] = useState<string>();
@@ -54,7 +53,7 @@ const CoverImageEditModal = ({
   };
   const { width } = useWindowDimensions();
   const LaptopScreenBreakpoint = 640;
-  const isLaptopScreen = width >= LaptopScreenBreakpoint ? true : false;
+  const isLaptopScreen = width >= LaptopScreenBreakpoint;
   const { t } = useTranslation();
   const handleSwitchCamera = useCallback(() => {
     setFacingMode((prevState: any) =>
@@ -66,19 +65,18 @@ const CoverImageEditModal = ({
 
   const captureImage = () => {
     setPreviewImage(webRef.current.getScreenshot());
-    fetch(webRef.current.getScreenshot())
-      .then((res) => res.blob())
-      .then((blob) => {
-        const myFile = new File([blob], "image.png", {
-          type: blob.type,
-        });
-        setSelectedFile(myFile);
+    const canvas = webRef.current.getCanvas();
+    canvas?.toBlob((blob: Blob) => {
+      const myFile = new File([blob], "image.png", {
+        type: blob.type,
       });
+      setSelectedFile(myFile);
+    });
   };
   const closeModal = () => {
     setPreview(undefined);
     setSelectedFile(undefined);
-    onClose && onClose();
+    onClose?.();
   };
 
   useEffect(() => {
@@ -144,13 +142,14 @@ const CoverImageEditModal = ({
   };
 
   const handleDelete = async () => {
-    const res = await dispatch(deleteFacilityCoverImage(facility.id as any));
-    if (res.statusCode === 204) {
+    const { res } = await request(routes.deleteFacilityCoverImage, {
+      pathParams: { id: facility.id! },
+    });
+    if (res?.ok) {
       Success({ msg: "Cover image deleted" });
+      onDelete?.();
+      closeModal();
     }
-
-    onDelete && onDelete();
-    closeModal();
   };
 
   const hasImage = !!(preview || facility.read_cover_image_url);
