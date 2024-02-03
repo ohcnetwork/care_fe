@@ -257,66 +257,62 @@ export const Feed: React.FC<IFeedProps> = ({ facilityId, consultationId }) => {
 
   const liveFeedPlayerRef = useRef<HTMLVideoElement | ReactPlayer | null>(null);
 
-  const { data: consultation, loading: getConsultationLoading } = useQuery(
-    routes.getConsultation,
-    {
-      pathParams: { id: consultationId },
-      onResponse: ({ res, data }) => {
-        if (res && res.status === 200 && data) {
-          const consultationBedId = data.current_bed?.bed_object?.id;
-          if (consultationBedId) {
-            async () => {
-              const { res: listAssetBedsRes, data: listAssetBedsData } =
-                await request(routes.listAssetBeds, {
-                  query: {
-                    bed: consultationBedId,
-                  },
-                });
-              setBed(consultationBedId);
-              const bedAssets: any = {
-                ...listAssetBedsRes,
-                data: {
-                  ...listAssetBedsData,
-                  results: listAssetBedsData?.results.filter((asset) => {
-                    return asset?.asset_object?.meta?.asset_type === "CAMERA";
-                  }),
-                },
-              };
+  const { loading: getConsultationLoading } = useQuery(routes.getConsultation, {
+    pathParams: { id: consultationId },
+    onResponse: async ({ res, data }) => {
+      if (res && res.status === 200 && data) {
+        const consultationBedId = data.current_bed?.bed_object?.id;
+        if (consultationBedId) {
+          const { res: listAssetBedsRes, data: listAssetBedsData } =
+            await request(routes.listAssetBeds, {
+              query: {
+                bed: consultationBedId,
+              },
+            });
+          setBed(consultationBedId);
 
-              if (bedAssets?.data?.results?.length) {
-                bedAssets.data.results = bedAssets.data.results.filter(
-                  (bedAsset: any) => bedAsset.meta.type !== "boundary"
-                );
-                if (bedAssets.data?.results?.length) {
-                  const { camera_access_key } =
-                    bedAssets.data.results[0].asset_object.meta;
-                  const config = camera_access_key.split(":");
-                  setCameraAsset({
-                    id: bedAssets.data.results[0].asset_object.id,
-                    accessKey: config[2] || "",
-                    middleware_address:
-                      bedAssets.data.results[0].asset_object?.meta
-                        ?.middleware_hostname,
-                    location_middleware:
-                      bedAssets.data.results[0].asset_object.location_object
-                        ?.middleware_address,
-                  });
-                  setCameraConfig(bedAssets.data.results[0].meta);
-                  setCameraState({
-                    ...bedAssets.data.results[0].meta.position,
-                    precision: 1,
-                  });
-                }
-              }
-              if (consultation?.current_bed?.privacy) {
-                setPrivacy(consultation?.current_bed?.privacy);
-              }
-            };
+          const bedAssets: any = {
+            ...listAssetBedsRes,
+            data: {
+              ...listAssetBedsData,
+              results: listAssetBedsData?.results.filter((asset) => {
+                return asset?.asset_object?.meta?.asset_type === "CAMERA";
+              }),
+            },
+          };
+
+          if (bedAssets?.data?.results?.length) {
+            bedAssets.data.results = bedAssets.data.results.filter(
+              (bedAsset: any) => bedAsset.meta.type !== "boundary"
+            );
+            if (bedAssets.data?.results?.length) {
+              const { camera_access_key } =
+                bedAssets.data.results[0].asset_object.meta;
+              const config = camera_access_key.split(":");
+              setCameraAsset({
+                id: bedAssets.data.results[0].asset_object.id,
+                accessKey: config[2] || "",
+                middleware_address:
+                  bedAssets.data.results[0].asset_object?.meta
+                    ?.middleware_hostname,
+                location_middleware:
+                  bedAssets.data.results[0].asset_object.location_object
+                    ?.middleware_address,
+              });
+              setCameraConfig(bedAssets.data.results[0].meta);
+              setCameraState({
+                ...bedAssets.data.results[0].meta.position,
+                precision: 1,
+              });
+            }
+          }
+          if (data?.current_bed?.privacy) {
+            setPrivacy(data?.current_bed?.privacy);
           }
         }
-      },
-    }
-  );
+      }
+    },
+  });
 
   // const [position, setPosition] = useState<any>();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -855,7 +851,7 @@ export const Feed: React.FC<IFeedProps> = ({ facilityId, consultationId }) => {
     );
   };
 
-  if (privacy) {
+  if (privacy && Object.keys(cameraOccupier).length !== 0) {
     return <PrivacyOnCard />;
   }
 
@@ -944,7 +940,11 @@ export const Feed: React.FC<IFeedProps> = ({ facilityId, consultationId }) => {
           {subscriptionInfo()}
         </div>
       </div>
-      <div className={`${borderAlert == null ? "" : borderAlert}-border-flash`}>
+      <div
+        className={`${
+          borderAlert == null ? "" : borderAlert
+        }-border-flash mt-2`}
+      >
         <div
           className="relative z-0 flex h-[calc(100vh-1.5rem-90px)] grow-0 items-center justify-center overflow-hidden rounded-xl bg-black"
           ref={videoWrapper}
