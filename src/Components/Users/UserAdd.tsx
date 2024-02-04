@@ -19,6 +19,7 @@ import {
   classNames,
   dateQueryString,
   parsePhoneNumber,
+  scrollTo,
 } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
@@ -503,6 +504,10 @@ export const UserAdd = (props: UserProps) => {
     });
     if (invalidForm) {
       dispatch({ type: "set_errors", errors });
+      const firstError = Object.keys(errors).find((e) => errors[e]);
+      if (firstError) {
+        scrollTo(firstError);
+      }
       return false;
     }
     dispatch({ type: "set_errors", errors });
