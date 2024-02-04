@@ -146,37 +146,45 @@ describe("Patient Creation with consultation", () => {
     // Edit the patient consultation , select none medical history and multiple health ID
     patientMedicalHistory.clickNoneMedicialHistory();
     patientInsurance.clickAddInsruanceDetails();
-    patientInsurance.typeSubscriberId(
+    patientInsurance.typePatientInsuranceDetail(
       patientOneFirstInsuranceId,
+      "subscriber_id",
       patientOneFirstSubscriberId
     );
-    patientInsurance.typePolicyId(
+    patientInsurance.typePatientInsuranceDetail(
       patientOneFirstInsuranceId,
+      "policy_id",
       patientOneFirstPolicyId
     );
-    patientInsurance.typeInsurerId(
+    patientInsurance.typePatientInsuranceDetail(
       patientOneFirstInsuranceId,
+      "insurer_id",
       patientOneFirstInsurerId
     );
-    patientInsurance.typeInsurerName(
+    patientInsurance.typePatientInsuranceDetail(
       patientOneFirstInsuranceId,
+      "insurer_name",
       patientOneFirstInsurerName
     );
     patientInsurance.clickAddInsruanceDetails();
-    patientInsurance.typeSubscriberId(
+    patientInsurance.typePatientInsuranceDetail(
       patientOneSecondInsuranceId,
+      "subscriber_id",
       patientOneSecondSubscriberId
     );
-    patientInsurance.typePolicyId(
+    patientInsurance.typePatientInsuranceDetail(
       patientOneSecondInsuranceId,
+      "policy_id",
       patientOneSecondPolicyId
     );
-    patientInsurance.typeInsurerId(
+    patientInsurance.typePatientInsuranceDetail(
       patientOneSecondInsuranceId,
+      "insurer_id",
       patientOneSecondInsurerId
     );
-    patientInsurance.typeInsurerName(
+    patientInsurance.typePatientInsuranceDetail(
       patientOneSecondInsuranceId,
+      "insurer_name",
       patientOneSecondInsurerName
     );
     patientPage.clickUpdatePatient();

@@ -1,25 +1,11 @@
 class PatientInsurance {
-  typeSubscriberId(id: string, subscriberId: string) {
-    cy.get(`#${id}`).within(() => {
-      cy.get("#subscriber_id").clear().type(subscriberId);
-    });
-  }
-
-  typePolicyId(id: string, policyid: string) {
-    cy.get(`#${id}`).within(() => {
-      cy.get("#policy_id").click().type(policyid);
-    });
-  }
-
-  typeInsurerId(id: string, insurerid: string) {
-    cy.get(`#${id}`).within(() => {
-      cy.get("#insurer_id").click().type(insurerid);
-    });
-  }
-
-  typeInsurerName(id: string, insurername: string) {
-    cy.get(`#${id}`).within(() => {
-      cy.get("#insurer_name").click().type(insurername);
+  typePatientInsuranceDetail(
+    containerId: string,
+    fieldId: string,
+    value: string
+  ) {
+    cy.get(`#${containerId}`).within(() => {
+      cy.get(`#${fieldId}`).click().type(value);
     });
   }
 
