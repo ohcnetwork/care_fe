@@ -357,8 +357,20 @@ export const UserAdd = (props: UserProps) => {
             invalidForm = true;
           }
           return;
-        case "doctor_qualification":
         case "doctor_experience_commenced_on":
+          if (state.form.user_type === "Doctor" && !state.form[field]) {
+            errors[field] = "Field is required";
+            invalidForm = true;
+          } else if (
+            state.form.user_type === "Doctor" &&
+            Number(state.form.doctor_experience_commenced_on) > 100
+          ) {
+            errors["doctor_experience_commenced_on"] =
+              "Doctor experience should be less than 100 years";
+            invalidForm = true;
+          }
+          return;
+        case "doctor_qualification":
         case "doctor_medical_council_registration":
           if (state.form.user_type === "Doctor" && !state.form[field]) {
             errors[field] = "Field is required";
