@@ -7,6 +7,8 @@ import {
   phone_number,
 } from "../../pageobject/constants";
 import PatientTransfer from "../../pageobject/Patient/PatientTransfer";
+import PatientExternal from "../../pageobject/Patient/PatientExternal";
+
 const yearOfBirth = "2001";
 
 const calculateAge = () => {
@@ -19,7 +21,9 @@ describe("Patient Creation with consultation", () => {
   const patientPage = new PatientPage();
   const facilityPage = new FacilityPage();
   const patientTransfer = new PatientTransfer();
+  const patientExternal = new PatientExternal();
   const age = calculateAge();
+  const patientFacility = "Dummy Facility 40";
   const patientDateOfBirth = "01012001";
   const patientOneName = "Patient With No Consultation";
   const patientOneGender = "Male";
@@ -48,6 +52,7 @@ describe("Patient Creation with consultation", () => {
   const patientTransferPhoneNumber = "9849511866";
   const patientTransferFacility = "Dummy Shifting Center";
   const patientTransferName = "Dummy Patient 10";
+  const patientExternalName = "Patient 20";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -60,20 +65,10 @@ describe("Patient Creation with consultation", () => {
     cy.awaitUrl("/patients");
   });
 
-  it("Patient Registration using External Result Import", () => {
-    // copy the patient external ID from external results
-    patientPage.createPatient();
-    patientPage.selectFacility("Dummy Shifting Center");
-    patientPage.patientformvisibility();
-    // import the result and create a new patient
-
-    // verify the patient is successfully created
-  });
-
   it("Create a new patient with all field in registration form and no consultation", () => {
     // patient details with all the available fields except covid
     patientPage.createPatient();
-    patientPage.selectFacility("Dummy Facility 40");
+    patientPage.selectFacility(patientFacility);
     patientPage.patientformvisibility();
     // Patient Details page
     patientPage.typePatientPhoneNumber(phone_number);
@@ -250,6 +245,31 @@ describe("Patient Creation with consultation", () => {
     patientTransfer.clickTransferPatientDob(patientDateOfBirth);
     patientTransfer.clickTransferSubmitButton();
     patientTransfer.verifyFacilityErrorMessage();
+  });
+
+  it("Patient Registration using External Result Import", () => {
+    // copy the patient external ID from external results
+    cy.awaitUrl("/external_results");
+    patientExternal.verifyExternalListPatientName(patientExternalName);
+    patientExternal.verifyExternalIdVisible();
+    // cypress have a limitation to work only asynchronously
+    // import the result and create a new patient
+    let extractedId = "";
+    cy.get("#patient-external-id")
+      .invoke("text")
+      .then((text) => {
+        extractedId = text.split("Care external results ID: ")[1];
+        cy.log(`Extracted Care external results ID: ${extractedId}`);
+        cy.awaitUrl("/patients");
+        patientPage.createPatient();
+        patientPage.selectFacility(patientFacility);
+        patientPage.patientformvisibility();
+        patientExternal.clickImportFromExternalResultsButton();
+        patientExternal.typeCareExternalResultId(extractedId);
+        patientExternal.clickImportPatientData();
+      });
+    // verify the patient is successfully created
+    patientExternal.verifyExternalPatientName(patientExternalName);
   });
 
   afterEach(() => {
