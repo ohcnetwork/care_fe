@@ -235,7 +235,7 @@ export default function ManageUsers() {
                   ) : null}
                   {showUserDelete(authUser, user) && (
                     <div
-                      className="w-8 cursor-pointer rounded-lg bg-red-50 text-xl text-red-600 hover:bg-red-50 hover:text-red-700"
+                      className="h-min w-8 cursor-pointer rounded-lg bg-red-50 text-xl text-red-600 hover:bg-red-50 hover:text-red-700"
                       onClick={() => handleDelete(user)}
                     >
                       <CareIcon icon="l-trash" className="ml-[5px]" />
@@ -398,7 +398,7 @@ export default function ManageUsers() {
                     <div className="flex-col md:flex-row">
                       <ButtonV2
                         id="avg-workinghour"
-                        className="flex w-full items-center md:w-full"
+                        className="flex w-full flex-wrap items-center md:w-full"
                         onClick={() => {
                           setExpandWorkingHours(true);
                           setSelectedUser(user.username);
