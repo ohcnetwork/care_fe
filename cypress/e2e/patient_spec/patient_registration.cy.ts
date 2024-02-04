@@ -8,6 +8,8 @@ import {
 } from "../../pageobject/constants";
 import PatientTransfer from "../../pageobject/Patient/PatientTransfer";
 import PatientExternal from "../../pageobject/Patient/PatientExternal";
+import PatientInsurance from "../../pageobject/Patient/PatientInsurance";
+import PatientMedicalHistory from "../../pageobject/Patient/PatientMedicalHistory";
 
 const yearOfBirth = "2001";
 
@@ -22,6 +24,8 @@ describe("Patient Creation with consultation", () => {
   const facilityPage = new FacilityPage();
   const patientTransfer = new PatientTransfer();
   const patientExternal = new PatientExternal();
+  const patientInsurance = new PatientInsurance();
+  const patientMedicalHistory = new PatientMedicalHistory();
   const age = calculateAge();
   const patientFacility = "Dummy Facility 40";
   const patientDateOfBirth = "01012001";
@@ -83,16 +87,18 @@ describe("Patient Creation with consultation", () => {
     facilityPage.selectLocalBody(patientOneLocalbody);
     facilityPage.selectWard(patientOneWard);
     // Patient Medical History
-    patientPage.typePatientPresentHealth(patientOnePresentHealth);
-    patientPage.typePatientOngoingMedication(patientOneOngoingMedication);
-    patientPage.typeMedicalHistory(2, "Diabetes");
-    patientPage.typeMedicalHistory(3, "Heart Disease");
-    patientPage.typeMedicalHistory(4, "HyperTension");
-    patientPage.typeMedicalHistory(5, "Kidney Diseases");
-    patientPage.typeMedicalHistory(6, "Lung Diseases/Asthma");
-    patientPage.typeMedicalHistory(7, "Cancer");
-    patientPage.typeMedicalHistory(8, "Other");
-    patientPage.typePatientAllergies(patientOneAllergies);
+    patientMedicalHistory.typePatientPresentHealth(patientOnePresentHealth);
+    patientMedicalHistory.typePatientOngoingMedication(
+      patientOneOngoingMedication
+    );
+    patientMedicalHistory.typeMedicalHistory(2, "Diabetes");
+    patientMedicalHistory.typeMedicalHistory(3, "Heart Disease");
+    patientMedicalHistory.typeMedicalHistory(4, "HyperTension");
+    patientMedicalHistory.typeMedicalHistory(5, "Kidney Diseases");
+    patientMedicalHistory.typeMedicalHistory(6, "Lung Diseases/Asthma");
+    patientMedicalHistory.typeMedicalHistory(7, "Cancer");
+    patientMedicalHistory.typeMedicalHistory(8, "Other");
+    patientMedicalHistory.typePatientAllergies(patientOneAllergies);
     patientPage.selectPatientBloodGroup(patientOneBloodGroup);
     patientPage.clickCreatePatient();
     patientPage.verifyPatientIsCreated();
@@ -109,7 +115,7 @@ describe("Patient Creation with consultation", () => {
       yearOfBirth,
       patientOneBloodGroup
     );
-    patientPage.verifyPatientMedicalDetails(
+    patientMedicalHistory.verifyPatientMedicalDetails(
       patientOnePresentHealth,
       patientOneOngoingMedication,
       patientOneAllergies,
@@ -138,38 +144,38 @@ describe("Patient Creation with consultation", () => {
     patientPage.clickPatientAntenatalStatusYes();
     patientPage.selectPatientBloodGroup(patientOneUpdatedBloodGroup);
     // Edit the patient consultation , select none medical history and multiple health ID
-    patientPage.clickNoneMedicialHistory();
-    patientPage.clickAddInsruanceDetails();
-    patientPage.typeSubscriberId(
+    patientMedicalHistory.clickNoneMedicialHistory();
+    patientInsurance.clickAddInsruanceDetails();
+    patientInsurance.typeSubscriberId(
       patientOneFirstInsuranceId,
       patientOneFirstSubscriberId
     );
-    patientPage.typePolicyId(
+    patientInsurance.typePolicyId(
       patientOneFirstInsuranceId,
       patientOneFirstPolicyId
     );
-    patientPage.typeInsurerId(
+    patientInsurance.typeInsurerId(
       patientOneFirstInsuranceId,
       patientOneFirstInsurerId
     );
-    patientPage.typeInsurerName(
+    patientInsurance.typeInsurerName(
       patientOneFirstInsuranceId,
       patientOneFirstInsurerName
     );
-    patientPage.clickAddInsruanceDetails();
-    patientPage.typeSubscriberId(
+    patientInsurance.clickAddInsruanceDetails();
+    patientInsurance.typeSubscriberId(
       patientOneSecondInsuranceId,
       patientOneSecondSubscriberId
     );
-    patientPage.typePolicyId(
+    patientInsurance.typePolicyId(
       patientOneSecondInsuranceId,
       patientOneSecondPolicyId
     );
-    patientPage.typeInsurerId(
+    patientInsurance.typeInsurerId(
       patientOneSecondInsuranceId,
       patientOneSecondInsurerId
     );
-    patientPage.typeInsurerName(
+    patientInsurance.typeInsurerName(
       patientOneSecondInsuranceId,
       patientOneSecondInsurerName
     );
@@ -189,27 +195,27 @@ describe("Patient Creation with consultation", () => {
       patientOneUpdatedBloodGroup
     );
     // Verify No medical history
-    patientPage.verifyNoSymptosPresent("Diabetes");
+    patientMedicalHistory.verifyNoSymptosPresent("Diabetes");
     // verify insurance details and dedicatd page
     cy.get("[data-testid=patient-details]")
       .contains(patientOneFirstSubscriberId)
       .scrollIntoView();
     cy.wait(2000);
-    patientPage.verifyPatientPolicyDetails(
+    patientInsurance.verifyPatientPolicyDetails(
       patientOneFirstSubscriberId,
       patientOneFirstPolicyId,
       patientOneFirstInsurerId,
       patientOneFirstInsurerName
     );
-    patientPage.clickPatientInsuranceViewDetail();
+    patientInsurance.clickPatientInsuranceViewDetail();
     cy.wait(3000);
-    patientPage.verifyPatientPolicyDetails(
+    patientInsurance.verifyPatientPolicyDetails(
       patientOneFirstSubscriberId,
       patientOneFirstPolicyId,
       patientOneFirstInsurerId,
       patientOneFirstInsurerName
     );
-    patientPage.verifyPatientPolicyDetails(
+    patientInsurance.verifyPatientPolicyDetails(
       patientOneSecondSubscriberId,
       patientOneSecondPolicyId,
       patientOneSecondInsurerId,

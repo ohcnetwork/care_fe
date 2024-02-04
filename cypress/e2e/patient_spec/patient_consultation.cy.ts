@@ -7,12 +7,14 @@ import {
   phone_number,
 } from "../../pageobject/constants";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
+import PatientMedicalHistory from "../../pageobject/Patient/PatientMedicalHistory";
 
 describe("Patient Creation with consultation", () => {
   const patientConsultationPage = new PatientConsultationPage();
   const loginPage = new LoginPage();
   const patientPage = new PatientPage();
   const facilityPage = new FacilityPage();
+  const patientMedicalHistory = new PatientMedicalHistory();
   const patientDateOfBirth = "01012001";
   const patientOneName = "Patient With Consultation";
   const patientOneGender = "Male";
@@ -50,7 +52,7 @@ describe("Patient Creation with consultation", () => {
     facilityPage.selectDistrictOnPincode(patientOneDistrict);
     facilityPage.selectLocalBody(patientOneLocalbody);
     facilityPage.selectWard(patientOneWard);
-    patientPage.clickNoneMedicialHistory();
+    patientMedicalHistory.clickNoneMedicialHistory();
     patientPage.selectPatientBloodGroup(patientOneBloodGroup);
     patientPage.clickCreatePatient();
     patientPage.verifyPatientIsCreated();
