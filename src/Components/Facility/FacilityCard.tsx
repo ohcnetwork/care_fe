@@ -70,13 +70,13 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                 <div className="flex gap-5">
                   <Link
                     href={`/facility/${facility.id}`}
-                    className="group relative z-0  hidden h-[150px] min-h-[150px] w-[150px] min-w-[150px] items-center justify-center self-stretch bg-gray-300 min-[425px]:flex"
+                    className="group relative z-0 hidden h-[150px] min-h-[150px] w-[150px] min-w-[150px] items-center justify-center self-stretch rounded-md bg-gray-300 min-[425px]:flex"
                   >
                     {(facility.read_cover_image_url && (
                       <img
                         src={facility.read_cover_image_url}
                         alt={facility.name}
-                        className="h-full w-full object-cover"
+                        className="h-full w-full rounded-md object-cover"
                       />
                     )) || (
                       <i className="fas fa-hospital block text-4xl text-gray-500" />
