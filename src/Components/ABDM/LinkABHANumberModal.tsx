@@ -13,7 +13,7 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { classNames } from "../../Utils/utils";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
-import { ABDMError, ABHAQRContent } from "./models";
+import { ABDMError } from "./models";
 
 export const validateRule = (
   condition: boolean,
@@ -188,20 +188,9 @@ const ScanABHAQRSection = ({
           setIsLoading(true);
 
           try {
-            const abha = JSON.parse(value) as ABHAQRContent;
-
+            const abha = JSON.parse(value);
             const { res, data } = await request(routes.abha.linkViaQR, {
-              body: {
-                patientId,
-                hidn: abha?.hidn,
-                phr: abha?.hid,
-                name: abha?.name,
-                gender: abha?.gender,
-                dob: abha?.dob.replace(/\//g, "-"),
-                address: abha?.address,
-                "dist name": abha?.district_name,
-                "state name": abha?.["state name"],
-              },
+              body: { ...abha, patientId },
             });
 
             if (res?.status === 200 || res?.status === 202) {

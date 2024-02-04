@@ -28,7 +28,7 @@ export default function useQuery<TData>(
       const resolvedOptions =
         options && overrides
           ? mergeRequestOptions(options, overrides)
-          : overrides ?? options;
+          : options;
 
       setLoading(true);
       const response = await request(route, resolvedOptions);

@@ -5,11 +5,11 @@ import { QueryParams, RequestOptions } from "./types";
 export function makeUrl(
   path: string,
   query?: QueryParams,
-  pathParams?: Record<string, string | number>
+  pathParams?: Record<string, string>
 ) {
   if (pathParams) {
     path = Object.entries(pathParams).reduce(
-      (acc, [key, value]) => acc.replace(`{${key}}`, `${value}`),
+      (acc, [key, value]) => acc.replace(`{${key}}`, value),
       path
     );
   }

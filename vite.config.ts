@@ -101,7 +101,7 @@ export default defineConfig({
   preview: {
     headers: {
       "Content-Security-Policy": `default-src 'self';\
-      script-src 'self' blob: 'nonce-f51b9742' https://plausible.10bedicu.in;\
+      script-src 'self' 'nonce-f51b9742' https://plausible.10bedicu.in;\
       style-src 'self' 'unsafe-inline';\
       connect-src *;\
       img-src 'self' blob: data: https://cdn.coronasafe.network ${cdnUrls};\

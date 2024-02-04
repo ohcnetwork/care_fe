@@ -107,29 +107,3 @@ export interface IcreateHealthFacilityTBody {
 export interface IpartialUpdateHealthFacilityTBody {
   hf_id: string;
 }
-
-export interface ILinkViaQRBody {
-  hidn: string;
-  phr: string;
-  name: string;
-  gender: "M" | "F" | "O";
-  dob: string;
-  address?: string;
-  "dist name"?: string;
-  "state name"?: string;
-  patientId?: string;
-}
-
-export interface ABHAQRContent {
-  address: string;
-  distlgd: string;
-  district_name: string;
-  dob: string;
-  gender: "M";
-  hid: string;
-  hidn: string;
-  mobile: string;
-  name: string;
-  "state name": string;
-  statelgd: string;
-}

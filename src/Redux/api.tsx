@@ -14,7 +14,6 @@ import {
   IHealthId,
   IinitiateAbdmAuthenticationTBody,
   ILinkABHANumber,
-  ILinkViaQRBody,
   IpartialUpdateHealthFacilityTBody,
   ISearchByHealthIdTBody,
   IVerifyAadhaarOtpTBody,
@@ -83,7 +82,6 @@ import {
   InvestigationGroup,
   InvestigationType,
 } from "../Components/Facility/Investigations";
-import { ICD11DiagnosisModel } from "../Components/Diagnosis/types";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -977,12 +975,6 @@ const routes = {
   // ICD11
   listICD11Diagnosis: {
     path: "/api/v1/icd/",
-    TRes: Type<ICD11DiagnosisModel[]>(),
-  },
-  getICD11Diagnosis: {
-    path: "/api/v1/icd/{id}/",
-    TRes: Type<ICD11DiagnosisModel>(),
-    enableExperimentalCache: true,
   },
   // Medibase
   listMedibaseMedicines: {
@@ -1189,7 +1181,7 @@ const routes = {
       path: "/api/v1/abdm/healthid/link_via_qr/",
       method: "POST",
       TRes: Type<ILinkABHANumber>(),
-      TBody: Type<ILinkViaQRBody>(),
+      TBody: Type<ISearchByHealthIdTBody>(),
     },
 
     linkCareContext: {
