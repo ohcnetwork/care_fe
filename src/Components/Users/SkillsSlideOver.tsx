@@ -125,7 +125,7 @@ export default ({ show, setShow, username }: IProps) => {
                   id="add-skill-button"
                   disabled={!authorizeForAddSkill}
                   onClick={() => addSkill(username, selectedSkill)}
-                  className="w-6rem"
+                  className="w-6rem mt-auto p-3 pt-3.5"
                 >
                   {t("add")}
                 </ButtonV2>
