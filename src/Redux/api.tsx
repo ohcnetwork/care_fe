@@ -26,7 +26,6 @@ import {
   AssetService,
   AssetServiceUpdate,
   AssetTransaction,
-  AssetUpdate,
   AssetUptimeRecord,
   PatientAssetBed,
 } from "../Components/Assets/AssetTypes";
@@ -51,6 +50,10 @@ import {
   LocationModel,
   PatientNotesModel,
   BedModel,
+  MinimumQuantityItemResponse,
+  InventorySummaryResponse,
+  InventoryLogResponse,
+  InventoryItemsModel,
 } from "../Components/Facility/models";
 import {
   IDeleteBedCapacity,
@@ -330,6 +333,7 @@ const routes = {
   deleteFacilityCoverImage: {
     path: "/api/v1/facility/{id}/cover_image/",
     method: "DELETE",
+    TRes: Type<Record<string, never>>(),
   },
 
   getFacilityUsers: {
@@ -345,6 +349,8 @@ const routes = {
   createFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/",
     method: "POST",
+    TBody: Type<AssetLocationObject>(),
+    TRes: Type<AssetLocationObject>(),
   },
   getFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
@@ -354,6 +360,8 @@ const routes = {
   updateFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
     method: "PUT",
+    TBody: Type<AssetLocationObject>(),
+    TRes: Type<AssetLocationObject>(),
   },
   partialUpdateFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
@@ -549,6 +557,8 @@ const routes = {
   createDoctor: {
     path: "/api/v1/facility/{facilityId}/hospital_doctor/",
     method: "POST",
+    TRes: Type<DoctorModal>(),
+    TBody: Type<DoctorModal>(),
   },
 
   getCapacity: {
@@ -573,6 +583,7 @@ const routes = {
   },
   getDoctor: {
     path: "/api/v1/facility/{facilityId}/hospital_doctor/{id}/",
+    TRes: Type<DoctorModal>(),
   },
 
   updateCapacity: {
@@ -582,19 +593,23 @@ const routes = {
   },
 
   updateDoctor: {
-    path: "/api/v1/facility/{facilityId}/hospital_doctor",
+    path: "/api/v1/facility/{facilityId}/hospital_doctor/{id}/",
     method: "PUT",
+    TRes: Type<DoctorModal>(),
   },
 
   deleteDoctor: {
-    path: "/api/v1/facility/{facilityId}/hospital_doctor",
+    path: "/api/v1/facility/{facilityId}/hospital_doctor/{area}/",
     method: "DELETE",
+    TRes: Type<Record<string, never>>(),
   },
 
   //Triage
   createTriage: {
     path: "/api/v1/facility/{facilityId}/patient_stats/",
     method: "POST",
+    TBody: Type<PatientStatsModel>(),
+    TRes: Type<PatientStatsModel>(),
   },
   getTriage: {
     path: "/api/v1/facility/{facilityId}/patient_stats/",
@@ -603,6 +618,7 @@ const routes = {
 
   getTriageDetails: {
     path: "/api/v1/facility/{facilityId}/patient_stats/{id}/",
+    TRes: Type<PatientStatsModel>(),
   },
 
   // //Care Center
@@ -776,29 +792,43 @@ const routes = {
   //inventory
   getItems: {
     path: "/api/v1/items/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<InventoryItemsModel>>(),
   },
   createInventory: {
     path: "/api/v1/facility/{facilityId}/inventory/",
     method: "POST",
+    TRes: Type<InventoryLogResponse>(),
   },
   getInventoryLog: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/{facilityId}/inventory/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<InventoryLogResponse>>(),
   },
   setMinQuantity: {
     path: "/api/v1/facility/{facilityId}/min_quantity/",
     method: "POST",
+    TRes: Type<MinimumQuantityItemResponse>(),
   },
   getMinQuantity: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/{facilityId}/min_quantity/",
     method: "GET",
+    TRes: Type<PaginatedResponse<InventorySummaryResponse>>(),
+  },
+  getMinQuantityItem: {
+    path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}/",
+    method: "GET",
+    TRes: Type<MinimumQuantityItemResponse>(),
   },
   updateMinQuantity: {
-    path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}",
+    path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}/",
     method: "PATCH",
+    TRes: Type<PaginatedResponse<MinimumQuantityItemResponse>>(),
   },
   getInventorySummary: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/{facility_external_id}/inventorysummary/",
     method: "GET",
+    TRes: Type<PaginatedResponse<InventorySummaryResponse>>(),
   },
   getItemName: {
     path: "/api/v1/items",
@@ -807,10 +837,12 @@ const routes = {
   flagInventoryItem: {
     path: "/api/v1/facility/{facility_external_id}/inventory/{external_id}/flag/",
     method: "PUT",
+    TRes: Type<PaginatedResponse<InventoryLogResponse>>(),
   },
   deleteLastInventoryLog: {
     path: "/api/v1/facility/{facility_external_id}/inventory/delete_last/?item={id}",
     method: "DELETE",
+    TRes: Type<Record<string, never>>(),
   },
   dischargeSummaryGenerate: {
     path: "/api/v1/consultation/{external_id}/generate_discharge_summary/",
@@ -1037,9 +1069,11 @@ const routes = {
   createAsset: {
     path: "/api/v1/asset/",
     method: "POST",
+    TBody: Type<AssetData>(),
+    TRes: Type<AssetData>(),
   },
   getAssetUserLocation: {
-    path: "​/api/v1/asset​/get_default_user_location​/",
+    path: "/api/v1/asset/get_default_user_location/",
     method: "GET",
   },
   createAssetUserLocation: {
@@ -1054,17 +1088,19 @@ const routes = {
   deleteAsset: {
     path: "/api/v1/asset/{external_id}/",
     method: "DELETE",
-    TRes: Type<AssetData>(),
+    TRes: Type<Record<string, never>>(),
   },
   updateAsset: {
     path: "/api/v1/asset/{external_id}/",
     method: "PUT",
+    TBody: Type<AssetData>(),
+    TRes: Type<AssetData>(),
   },
   partialUpdateAsset: {
     path: "/api/v1/asset/{external_id}/",
     method: "PATCH",
     TRes: Type<AssetData>(),
-    TBody: Type<AssetUpdate>(),
+    TBody: Type<Partial<AssetData>>(),
   },
 
   // Asset transaction endpoints
