@@ -366,8 +366,7 @@ export const UserAdd = (props: UserProps) => {
             state.form.user_type === "Doctor" &&
             Number(state.form.doctor_experience_commenced_on) > 100
           ) {
-            errors["doctor_experience_commenced_on"] =
-              "Doctor experience should be less than 100 years";
+            errors[field] = "Doctor experience should be less than 100 years";
             invalidForm = true;
           }
           return;
