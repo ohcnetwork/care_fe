@@ -12,6 +12,8 @@ import { PatientModel } from "../Patient/models";
 import { GENDER_TYPES } from "../../Common/constants";
 import { formatAge, formatDate, formatDateTime } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import useSlug from "../../Common/hooks/useSlug";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -26,6 +28,9 @@ const TreatmentSummary = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [investigations, setInvestigations] = useState<Array<any>>([]);
   const [dailyRounds, setDailyRounds] = useState<any>({});
+  const facilityId = useSlug("facility");
+  const { goBack } = useAppHistory();
+  const url = `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`;
 
   const fetchPatientData = useCallback(
     async (status: statusType) => {
@@ -106,10 +111,7 @@ const TreatmentSummary = (props: any) => {
               <CareIcon icon="l-print" className="mr-2" /> Print Treatment
               Summary
             </button>
-            <button
-              onClick={(_) => window.history.go(-1)}
-              className="btn btn-default"
-            >
+            <button onClick={(_) => goBack(url)} className="btn btn-default">
               <CareIcon icon="l-times" className="mr-2" /> Close
             </button>
           </div>

@@ -244,14 +244,14 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const captureImage = () => {
     setPreviewImage(webRef.current.getScreenshot());
-    fetch(webRef.current.getScreenshot())
-      .then((res) => res.blob())
-      .then((blob) => {
-        const myFile = new File([blob], `image.${blob.type.split("/").pop()}`, {
-          type: blob.type,
-        });
-        setFile(myFile);
+    const canvas = webRef.current.getCanvas();
+    canvas?.toBlob((blob: Blob) => {
+      const extension = blob.type.split("/").pop();
+      const myFile = new File([blob], `image.${extension}`, {
+        type: blob.type,
       });
+      setFile(myFile);
+    });
   };
 
   const handlePagination = (page: number, limit: number) => {

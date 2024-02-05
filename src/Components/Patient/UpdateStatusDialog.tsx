@@ -161,6 +161,7 @@ const UpdateStatusDialog = (props: Props) => {
       name: `${sample.patient_name} Sample Report`,
       associating_id: sample.id,
       file_category: category,
+      mime_type: contentType,
     };
     redux_dispatch(createUpload(requestData))
       .then(uploadfile)
