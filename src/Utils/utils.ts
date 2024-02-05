@@ -451,14 +451,6 @@ export const showUserDelete = (authUser: UserModel, targetUser: UserModel) => {
   return false;
 };
 
-export const invalidateFiltersCache = () => {
-  for (const key in localStorage) {
-    if (key.startsWith("filters--")) {
-      localStorage.removeItem(key);
-    }
-  }
-};
-
 export const compareBy = <T extends object>(key: keyof T) => {
   return (a: T, b: T) => {
     return a[key] < b[key] ? -1 : a[key] > b[key] ? 1 : 0;

@@ -439,7 +439,10 @@ export default function PatientInfoCard(props: {
             </div>
           </div>
         </div>
-        <div className="col-span-2 flex w-full flex-col items-center justify-center gap-2 px-4 py-1 lg:col-span-1 2xl:flex-row">
+        <div
+          className="col-span-2 flex w-full flex-col items-center justify-center gap-2 px-4 py-1 lg:col-span-1 2xl:flex-row"
+          id="consultation-buttons"
+        >
           {consultation?.last_daily_round && (
             <div className="col-span-1 flex w-full justify-center bg-white px-4 lg:flex-row">
               <Mews dailyRound={consultation?.last_daily_round} />
