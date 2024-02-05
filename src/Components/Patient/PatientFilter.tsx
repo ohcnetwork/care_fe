@@ -1,5 +1,4 @@
 import dayjs from "dayjs";
-import { useCallback } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import {
@@ -104,34 +103,21 @@ export default function PatientFilter(props: any) {
   });
 
   useQuery(routes.getAnyFacility, {
-    pathParams: {
-      id: filter.facility,
-    },
-    onResponse: ({ data }) => {
-      setFilterState({ facility_ref: data });
-    },
+    pathParams: { id: filter.facility },
     prefetch: !!filter.facility,
+    onResponse: ({ data }) => setFilterState({ facility_ref: data }),
   });
 
   useQuery(routes.getDistrict, {
+    pathParams: { id: filter.district },
     prefetch: !!filter.district,
-    onResponse: ({ data }) => {
-      setFilterState({ district_ref: data });
-    },
-    pathParams: {
-      id: filter.district,
-    },
+    onResponse: ({ data }) => setFilterState({ district_ref: data }),
   });
 
-  useQuery(routes.getAllLocalBody, {
+  useQuery(routes.getLocalBody, {
+    pathParams: { id: filter.lsgBody },
     prefetch: !!filter.lsgBody,
-    onResponse: ({ data }) => {
-      setFilterState({
-        lsgBody_ref: data?.results.filter(
-          (obj: any) => obj.id.toString() === filter.lsgBody.toString()
-        )[0],
-      });
-    },
+    onResponse: ({ data }) => setFilterState({ lsgBody_ref: data }),
   });
 
   const VACCINATED_FILTER = [
@@ -158,22 +144,19 @@ export default function PatientFilter(props: any) {
     { id: "false", text: "No" },
   ];
 
-  const setFacility = (selected: any, name: string) => {
-    const filterData: any = { ...filterState };
-    filterData[`${name}_ref`] = selected;
-    filterData[name] = (selected || {}).id;
-
-    setFilterState(filterData);
+  const setFilterWithRef = (name: string, selected?: any) => {
+    setFilterState({
+      [`${name}_ref`]: selected,
+      [name]: selected?.id,
+    });
   };
 
-  const lsgSearch = useCallback(async (search: string) => {
+  const lsgSearch = async (search: string) => {
     const { data } = await request(routes.getAllLocalBody, {
-      query: {
-        local_body_name: search,
-      },
+      query: { local_body_name: search },
     });
     return data?.results;
-  }, []);
+  };
 
   const applyFilter = () => {
     const {
@@ -583,7 +566,7 @@ export default function PatientFilter(props: any) {
               name="facility"
               showAll={false}
               selected={filterState.facility_ref}
-              setSelected={(obj) => setFacility(obj, "facility")}
+              setSelected={(obj) => setFilterWithRef("facility", obj)}
             />
           </div>
           {filterState.facility && (
@@ -627,13 +610,7 @@ export default function PatientFilter(props: any) {
                 name="lsg_body"
                 selected={filterState.lsgBody_ref}
                 fetchData={lsgSearch}
-                onChange={(selected) =>
-                  setFilterState({
-                    ...filterState,
-                    lsgBody_ref: selected,
-                    lsgBody: selected.id,
-                  })
-                }
+                onChange={(obj) => setFilterWithRef("lsgBody", obj)}
                 optionLabel={(option) => option.name}
                 compareBy="id"
               />
@@ -646,7 +623,7 @@ export default function PatientFilter(props: any) {
               multiple={false}
               name="district"
               selected={filterState.district_ref}
-              setSelected={(obj: any) => setFacility(obj, "district")}
+              setSelected={(obj) => setFilterWithRef("district", obj)}
               errors={""}
             />
           </div>
