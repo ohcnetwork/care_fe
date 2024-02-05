@@ -4,7 +4,7 @@ import {
   ConsultationDiagnosis,
 } from "./types";
 import { useTranslation } from "react-i18next";
-import { classNames, compareBy } from "../../Utils/utils";
+import { compareBy } from "../../Utils/utils";
 import { useState } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -51,14 +51,9 @@ export default function DiagnosesListAccordion(props: Props) {
         )}
       </div>
       <div
-        className={classNames("transition-all duration-500 ease-in-out")}
-        style={
-          isVisible
-            ? {
-                overflow: "visible",
-              }
-            : { height: "0px", overflow: "hidden" }
-        }
+        className={`transition-all duration-500 ease-in-out ${
+          isVisible ? "overflow-visible" : "h-0 overflow-hidden"
+        }`}
       >
         <h3 className="my-2 text-lg font-semibold leading-relaxed text-gray-900">
           Diagnoses
