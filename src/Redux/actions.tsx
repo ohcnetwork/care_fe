@@ -20,31 +20,9 @@ export const getFacilityUsers = (id: string, params?: object) => {
   );
 };
 
-export const getFacilityAssetLocation = (
-  facility_external_id: string,
-  external_id: string
-) =>
-  fireRequest(
-    "getFacilityAssetLocation",
-    [],
-    {},
-    { facility_external_id, external_id }
-  );
-
 // asset bed
 export const listAssetBeds = (params: object, altKey?: string) =>
   fireRequest("listAssetBeds", [], params, {}, altKey);
-export const createAssetBed = (
-  params: object,
-  asset_id: string,
-  bed_id: string
-) =>
-  fireRequest(
-    "createAssetBed",
-    [],
-    { ...params, asset: asset_id, bed: bed_id },
-    {}
-  );
 
 export const partialUpdateAssetBed = (params: object, asset_id: string) =>
   fireRequest(
@@ -113,9 +91,6 @@ export const getDistrictByState = (pathParam: object) => {
 export const getDistrictByName = (params: object) => {
   return fireRequest("getDistrictByName", [], params, null);
 };
-export const getDistrict = (id: number, key?: string) => {
-  return fireRequest("getDistrict", [], {}, { id: id }, key);
-};
 
 export const getLocalbodyByDistrict = (pathParam: object) => {
   return fireRequest("getLocalbodyByDistrict", [], {}, pathParam);
@@ -123,11 +98,6 @@ export const getLocalbodyByDistrict = (pathParam: object) => {
 
 export const getWardByLocalBody = (pathParam: object) => {
   return fireRequest("getWardByLocalBody", [], {}, pathParam);
-};
-
-// Local Body
-export const getLocalBody = (pathParam: object) => {
-  return fireRequest("getLocalBody", [], {}, pathParam);
 };
 
 // Sample Test
