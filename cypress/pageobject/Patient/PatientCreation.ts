@@ -72,18 +72,6 @@ export class PatientPage {
       .type(address);
   }
 
-  typePatientPresentHealth(presentHealth: string) {
-    cy.get("#present_health").click().type(presentHealth);
-  }
-
-  typePatientOngoingMedication(ongoingMedication: string) {
-    cy.get("#ongoing_medication").click().type(ongoingMedication);
-  }
-
-  typePatientAllergies(allergies: string) {
-    cy.get("#allergies").click().type(allergies);
-  }
-
   clickPermanentAddress() {
     cy.get("[data-testid=permanent-address] input").check();
   }
@@ -92,46 +80,8 @@ export class PatientPage {
     cy.get("#is_antenatal-0").click();
   }
 
-  clickAddInsruanceDetails() {
-    cy.get("[data-testid=add-insurance-button]").click();
-  }
-
-  typeSubscriberId(id: string, subscriberId: string) {
-    cy.get(`#${id}`).within(() => {
-      cy.get("#subscriber_id").clear().type(subscriberId);
-    });
-  }
-
-  typePolicyId(id: string, policyid: string) {
-    cy.get(`#${id}`).within(() => {
-      cy.get("#policy_id").click().type(policyid);
-    });
-  }
-
-  typeInsurerId(id: string, insurerid: string) {
-    cy.get(`#${id}`).within(() => {
-      cy.get("#insurer_id").click().type(insurerid);
-    });
-  }
-
-  typeInsurerName(id: string, insurername: string) {
-    cy.get(`#${id}`).within(() => {
-      cy.get("#insurer_name").click().type(insurername);
-    });
-  }
-
-  clickNoneMedicialHistory() {
-    cy.get("[name=medical_history_check_1]").scrollIntoView();
-    cy.get("[name=medical_history_check_1]").check();
-  }
-
   clickCancelButton() {
     cy.get("#cancel").click();
-  }
-
-  typeMedicalHistory(index, text) {
-    cy.get(`#medical_history_check_${index}`).click();
-    cy.get(`#medical_history_${index}`).click().type(text);
   }
 
   selectPatientGender(gender: string) {
@@ -227,55 +177,6 @@ export class PatientPage {
       expect($dashboard).to.contain(patientLocalbody);
       expect($dashboard).to.contain(patientWard);
     });
-  }
-
-  verifyPatientMedicalDetails(
-    patientPresentHealth,
-    patientOngoingMedication,
-    patientAllergies,
-    patientSymptoms1,
-    patientSymptoms2,
-    patientSymptoms3,
-    patientSymptoms4,
-    patientSymptoms5,
-    patientSymptoms6,
-    patientSymptoms7
-  ) {
-    cy.get("[data-testid=patient-details]").then(($dashboard) => {
-      cy.url().should("include", "/facility/");
-      expect($dashboard).to.contain(patientPresentHealth);
-      expect($dashboard).to.contain(patientOngoingMedication);
-      expect($dashboard).to.contain(patientAllergies);
-      expect($dashboard).to.contain(patientSymptoms1);
-      expect($dashboard).to.contain(patientSymptoms2);
-      expect($dashboard).to.contain(patientSymptoms3);
-      expect($dashboard).to.contain(patientSymptoms4);
-      expect($dashboard).to.contain(patientSymptoms5);
-      expect($dashboard).to.contain(patientSymptoms6);
-      expect($dashboard).to.contain(patientSymptoms7);
-    });
-  }
-
-  verifyPatientPolicyDetails(subscriberId, policyId, insurerId, insurerName) {
-    cy.get("[data-testid=patient-details]").then(($dashboard) => {
-      cy.url().should("include", "/facility/");
-      expect($dashboard).to.contain(subscriberId);
-      expect($dashboard).to.contain(policyId);
-      expect($dashboard).to.contain(insurerId);
-      expect($dashboard).to.contain(insurerName);
-    });
-  }
-
-  clickPatientInsuranceViewDetail() {
-    cy.get("#insurance-view-details").scrollIntoView();
-    cy.get("#insurance-view-details").click();
-  }
-
-  verifyNoSymptosPresent(patientSymptoms1: string) {
-    cy.get("[data-testid=patient-details]").should(
-      "not.contain",
-      patientSymptoms1
-    );
   }
 
   visitUpdatePatientUrl() {
