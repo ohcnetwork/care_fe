@@ -1,10 +1,6 @@
-import { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import {
-  getInvestigation,
-  getInvestigationSessions,
-} from "../../../Redux/actions";
+import { useState } from "react";
+import routes from "../../../Redux/api";
+import useQuery from "../../../Utils/request/useQuery";
 import { PatientModel } from "../../Patient/models";
 import ViewInvestigationSuggestions from "./InvestigationSuggestions";
 import { InvestigationResponse } from "./Reports/types";
@@ -23,8 +19,6 @@ export default function InvestigationTab(props: {
 }) {
   const { consultationId, patientId, facilityId, patientData } = props;
 
-  const [isLoading, setIsLoading] = useState(false);
-  const dispatchAction: any = useDispatch();
   const [investigations, setInvestigations] = useState<InvestigationResponse>(
     []
   );
@@ -32,54 +26,35 @@ export default function InvestigationTab(props: {
     InvestigationSessionType[]
   >([]);
 
-  const fetchInvestigations = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatchAction(getInvestigation({}, consultationId));
-      if (!status.aborted) {
-        if (res && res.data) {
-          setInvestigations(res.data.results);
-        }
-        setIsLoading(false);
+  const { loading: investigationLoading } = useQuery(routes.getInvestigation, {
+    pathParams: {
+      consultation_external_id: consultationId,
+    },
+    onResponse: (res) => {
+      if (res && res.data) {
+        setInvestigations(res.data.results);
       }
     },
-    [dispatchAction, consultationId]
-  );
+  });
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchInvestigations(status);
-    },
-    [fetchInvestigations]
-  );
-
-  const fetchInvestigationSessions = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatchAction(
-        getInvestigationSessions({}, consultationId)
-      );
-      if (!status.aborted) {
+  const { loading: investigationSessionLoading } = useQuery(
+    routes.getInvestigationSessions,
+    {
+      pathParams: {
+        consultation_external_id: consultationId,
+      },
+      onResponse: (res) => {
         if (res && res.data) {
-          setInvestigationSessions(res.data.reverse());
+          setInvestigationSessions(res.data);
         }
-        setIsLoading(false);
-      }
-    },
-    [dispatchAction, consultationId]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchInvestigationSessions(status);
-    },
-    [fetchInvestigationSessions]
+      },
+    }
   );
 
   return (
     <>
       <ViewInvestigations
-        isLoading={isLoading}
+        isLoading={investigationLoading || investigationSessionLoading}
         investigations={investigations}
         investigationSessions={investigationSessions}
         consultationId={consultationId}
