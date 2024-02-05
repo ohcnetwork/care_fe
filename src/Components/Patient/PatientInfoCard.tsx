@@ -373,7 +373,10 @@ export default function PatientInfoCard(props: {
           </div>
         )}
 
-        <div className="flex w-full flex-col gap-2 px-4 py-1 lg:w-fit lg:p-6">
+        <div
+          className="flex w-full flex-col gap-2 px-4 py-1 lg:w-fit lg:p-6"
+          id="consultation-buttons"
+        >
           {!!consultation?.discharge_date && (
             <div className="flex flex-col items-center justify-center">
               <div className="text-sm font-normal leading-5 text-gray-500">

@@ -1126,6 +1126,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   />
                 </div>
                 <button
+                  id="submit-importexternalresult-button"
                   className="btn btn-primary mr-4"
                   onClick={(e) => {
                     fetchExtResultData(e, showImport?.field?.("name"));
@@ -1174,6 +1175,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     <>
                       <div className="mb-2 overflow-visible rounded border border-gray-200 p-4">
                         <ButtonV2
+                          id="import-externalresult-button"
                           className="flex items-center gap-2"
                           disabled={
                             authUser.user_type === "Nurse" ||
