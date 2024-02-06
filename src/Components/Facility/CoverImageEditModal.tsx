@@ -47,8 +47,8 @@ const CoverImageEditModal = ({
   const FACING_MODE_ENVIRONMENT = { exact: "environment" };
   const [facingMode, setFacingMode] = useState<any>(FACING_MODE_USER);
   const videoConstraints = {
-    width: 1280,
-    height: 720,
+    width: { ideal: 4096 },
+    height: { ideal: 2160 },
     facingMode: "user",
   };
   const { width } = useWindowDimensions();
@@ -315,11 +315,11 @@ const CoverImageEditModal = ({
                 <>
                   <Webcam
                     audio={false}
-                    height={720}
                     screenshotFormat="image/jpeg"
-                    width={1280}
                     ref={webRef}
                     videoConstraints={{ ...videoConstraints, facingMode }}
+                    forceScreenshotSourceSize
+                    screenshotQuality={1}
                   />
                 </>
               ) : (
