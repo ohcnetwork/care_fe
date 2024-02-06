@@ -764,6 +764,8 @@ const routes = {
   },
   getAllLocalBody: {
     path: "/api/v1/local_body/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<LocalBodyModel>>(),
   },
   getLocalbodyByName: {
     path: "/api/v1/local_body/",
