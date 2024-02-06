@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import routes from "../../../Redux/api";
@@ -6,7 +5,6 @@ import dayjs from "../../../Utils/dayjs";
 import useQuery from "../../../Utils/request/useQuery";
 import Loading from "../../Common/Loading";
 import ButtonV2 from "../../Common/components/ButtonV2";
-import { InvestigationType } from "../../Common/prescription-builder/InvestigationBuilder";
 import { InvestigationResponse } from "./Reports/types";
 
 export default function ViewInvestigationSuggestions(props: {
@@ -21,18 +19,9 @@ export default function ViewInvestigationSuggestions(props: {
     investigations: previousInvestigations,
   } = props;
 
-  const [investigations, setInvestigations] = useState<
-    InvestigationType[] | null
-  >(null);
-
-  const { loading } = useQuery(routes.getConsultation, {
+  const { data: investigations, loading } = useQuery(routes.getConsultation, {
     pathParams: {
       id: consultationId,
-    },
-    onResponse: (res) => {
-      if (res && res.data) {
-        setInvestigations(res.data.investigation || []);
-      }
     },
   });
 
@@ -52,8 +41,8 @@ export default function ViewInvestigationSuggestions(props: {
           </tr>
         </thead>
         <tbody>
-          {Array.isArray(investigations) ? (
-            investigations.map((investigation, index) => {
+          {Array.isArray(investigations) && investigations.investigation ? (
+            investigations.investigation.map((investigation, index) => {
               let nextFurthestInvestigation: any = undefined;
 
               return (
@@ -210,7 +199,7 @@ export default function ViewInvestigationSuggestions(props: {
       </table>
       <div className="flex flex-col gap-4 md:hidden">
         {Array.isArray(investigations) ? (
-          investigations.map((investigation, index) => {
+          investigations.investigation?.map((investigation, index) => {
             let nextFurthestInvestigation: any = undefined;
 
             return (

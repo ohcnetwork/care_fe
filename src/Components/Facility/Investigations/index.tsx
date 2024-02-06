@@ -100,10 +100,6 @@ const Investigation = (props: {
 
   const [selectedGroup, setSelectedGroup] = useState<string[]>([]);
   const [state, setState] = useReducer(testFormReducer, initialState);
-  const [investigations, setInvestigations] = useState<InvestigationType[]>([]);
-  const [investigationGroups, setInvestigationGroups] = useState<
-    InvestigationGroup[]
-  >([]);
   const [selectedInvestigations, setSelectedInvestigations] = useState<
     InvestigationType[]
   >([]);
@@ -111,27 +107,13 @@ const Investigation = (props: {
   const [session, setSession] = useState("");
   const [selectedItems, selectItems] = useState<SearchItem[]>([]);
 
-  const { loading: listInvestigationDataLoading } = useQuery(
-    routes.listInvestigations,
-    {
-      onResponse: (res) => {
-        if (res.data) {
-          setInvestigations(res.data.results);
-        }
-      },
-    }
-  );
+  const { data: investigations, loading: listInvestigationDataLoading } =
+    useQuery(routes.listInvestigations, {});
 
-  const { loading: listInvestigationGroupDataLoading } = useQuery(
-    routes.listInvestigationGroups,
-    {
-      onResponse: (res) => {
-        if (res.data) {
-          setInvestigationGroups(res.data.results);
-        }
-      },
-    }
-  );
+  const {
+    data: investigationGroups,
+    loading: listInvestigationGroupDataLoading,
+  } = useQuery(routes.listInvestigationGroups, {});
 
   const { data: patientData, loading: patientLoading } = useQuery(
     routes.getPatient,
@@ -146,11 +128,15 @@ const Investigation = (props: {
   );
 
   useEffect(() => {
-    if (investigations.length > 0) {
+    if (
+      investigations?.results &&
+      investigationGroups?.results &&
+      investigations?.results.length > 0
+    ) {
       const prefilledGroups = preselectedInvestigations
         .filter((inv: any) => inv.isGroup)
         .map((inv: any) =>
-          investigationGroups.find((group) => group.name === inv.name)
+          investigationGroups.results.find((group) => group.name === inv.name)
         )
         .map((group: any) => {
           return {
@@ -162,7 +148,7 @@ const Investigation = (props: {
       const prefilledInvestigations = preselectedInvestigations
         .filter((inv: any) => !inv.isGroup)
         .map((inv: any) => {
-          const investigation = investigations.find(
+          const investigation = investigations.results.find(
             (investigation) => investigation.name === inv.name
           );
           // check if investigation contains all groups
@@ -194,7 +180,7 @@ const Investigation = (props: {
 
   const initialiseForm = () => {
     const investigationsArray = selectedGroup.map((group_id: string) => {
-      return listOfInvestigations(group_id, investigations);
+      return listOfInvestigations(group_id, investigations?.results || []);
     });
 
     const flatInvestigations = investigationsArray.flat();
@@ -282,7 +268,10 @@ const Investigation = (props: {
           className="mt-5"
           name="investigations"
           placeholder={t("search_investigation_placeholder")}
-          options={[...investigationGroups, ...investigations]}
+          options={[
+            ...(investigationGroups?.results || []),
+            ...(investigations?.results || []),
+          ]}
           value={selectedItems}
           optionLabel={(option) => option.name}
           optionValue={(option) => option}
@@ -314,8 +303,8 @@ const Investigation = (props: {
           );
           const filteredInvestigations = currentGroupsInvestigations.length
             ? currentGroupsInvestigations
-            : listOfInvestigations(group_id, investigations);
-          const group = findGroup(group_id, investigationGroups);
+            : listOfInvestigations(group_id, investigations?.results || []);
+          const group = findGroup(group_id, investigationGroups?.results || []);
           return (
             <Card>
               <TestTable

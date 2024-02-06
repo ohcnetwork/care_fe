@@ -161,5 +161,6 @@
   "select_date": "Select date",
   "DD/MM/YYYY": "DD/MM/YYYY",
   "clear_all_filters": "Clear All Filters",
-  "summary": "Summary"
+  "summary": "Summary",
+  "report": "Report"
 }
