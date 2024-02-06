@@ -2,11 +2,15 @@ import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
-import { PatientConsultationPage } from "../../pageobject/Patient/PatientConsultation";
 import {
   emergency_phone_number,
   phone_number,
 } from "../../pageobject/constants";
+import PatientTransfer from "../../pageobject/Patient/PatientTransfer";
+import PatientExternal from "../../pageobject/Patient/PatientExternal";
+import PatientInsurance from "../../pageobject/Patient/PatientInsurance";
+import PatientMedicalHistory from "../../pageobject/Patient/PatientMedicalHistory";
+
 const yearOfBirth = "2001";
 
 const calculateAge = () => {
@@ -17,9 +21,13 @@ const calculateAge = () => {
 describe("Patient Creation with consultation", () => {
   const loginPage = new LoginPage();
   const patientPage = new PatientPage();
-  const patientConsultationPage = new PatientConsultationPage();
   const facilityPage = new FacilityPage();
+  const patientTransfer = new PatientTransfer();
+  const patientExternal = new PatientExternal();
+  const patientInsurance = new PatientInsurance();
+  const patientMedicalHistory = new PatientMedicalHistory();
   const age = calculateAge();
+  const patientFacility = "Dummy Facility 40";
   const patientDateOfBirth = "01012001";
   const patientOneName = "Patient With No Consultation";
   const patientOneGender = "Male";
@@ -45,6 +53,10 @@ describe("Patient Creation with consultation", () => {
   const patientOneSecondPolicyId = "policy name 02";
   const patientOneSecondInsurerId = "insurer id 02";
   const patientOneSecondInsurerName = "insurer name 02";
+  const patientTransferPhoneNumber = "9849511866";
+  const patientTransferFacility = "Dummy Shifting Center";
+  const patientTransferName = "Dummy Patient 10";
+  const patientExternalName = "Patient 20";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -60,7 +72,7 @@ describe("Patient Creation with consultation", () => {
   it("Create a new patient with all field in registration form and no consultation", () => {
     // patient details with all the available fields except covid
     patientPage.createPatient();
-    patientPage.selectFacility("Dummy Facility 40");
+    patientPage.selectFacility(patientFacility);
     patientPage.patientformvisibility();
     // Patient Details page
     patientPage.typePatientPhoneNumber(phone_number);
@@ -75,16 +87,18 @@ describe("Patient Creation with consultation", () => {
     facilityPage.selectLocalBody(patientOneLocalbody);
     facilityPage.selectWard(patientOneWard);
     // Patient Medical History
-    patientPage.typePatientPresentHealth(patientOnePresentHealth);
-    patientPage.typePatientOngoingMedication(patientOneOngoingMedication);
-    patientPage.typeMedicalHistory(2, "Diabetes");
-    patientPage.typeMedicalHistory(3, "Heart Disease");
-    patientPage.typeMedicalHistory(4, "HyperTension");
-    patientPage.typeMedicalHistory(5, "Kidney Diseases");
-    patientPage.typeMedicalHistory(6, "Lung Diseases/Asthma");
-    patientPage.typeMedicalHistory(7, "Cancer");
-    patientPage.typeMedicalHistory(8, "Other");
-    patientPage.typePatientAllergies(patientOneAllergies);
+    patientMedicalHistory.typePatientPresentHealth(patientOnePresentHealth);
+    patientMedicalHistory.typePatientOngoingMedication(
+      patientOneOngoingMedication
+    );
+    patientMedicalHistory.typeMedicalHistory(2, "Diabetes");
+    patientMedicalHistory.typeMedicalHistory(3, "Heart Disease");
+    patientMedicalHistory.typeMedicalHistory(4, "HyperTension");
+    patientMedicalHistory.typeMedicalHistory(5, "Kidney Diseases");
+    patientMedicalHistory.typeMedicalHistory(6, "Lung Diseases/Asthma");
+    patientMedicalHistory.typeMedicalHistory(7, "Cancer");
+    patientMedicalHistory.typeMedicalHistory(8, "Other");
+    patientMedicalHistory.typePatientAllergies(patientOneAllergies);
     patientPage.selectPatientBloodGroup(patientOneBloodGroup);
     patientPage.clickCreatePatient();
     patientPage.verifyPatientIsCreated();
@@ -101,7 +115,7 @@ describe("Patient Creation with consultation", () => {
       yearOfBirth,
       patientOneBloodGroup
     );
-    patientPage.verifyPatientMedicalDetails(
+    patientMedicalHistory.verifyPatientMedicalDetails(
       patientOnePresentHealth,
       patientOneOngoingMedication,
       patientOneAllergies,
@@ -130,39 +144,47 @@ describe("Patient Creation with consultation", () => {
     patientPage.clickPatientAntenatalStatusYes();
     patientPage.selectPatientBloodGroup(patientOneUpdatedBloodGroup);
     // Edit the patient consultation , select none medical history and multiple health ID
-    patientPage.clickNoneMedicialHistory();
-    patientPage.clickAddInsruanceDetails();
-    patientPage.typeSubscriberId(
+    patientMedicalHistory.clickNoneMedicialHistory();
+    patientInsurance.clickAddInsruanceDetails();
+    patientInsurance.typePatientInsuranceDetail(
       patientOneFirstInsuranceId,
+      "subscriber_id",
       patientOneFirstSubscriberId
     );
-    patientPage.typePolicyId(
+    patientInsurance.typePatientInsuranceDetail(
       patientOneFirstInsuranceId,
+      "policy_id",
       patientOneFirstPolicyId
     );
-    patientPage.typeInsurerId(
+    patientInsurance.typePatientInsuranceDetail(
       patientOneFirstInsuranceId,
+      "insurer_id",
       patientOneFirstInsurerId
     );
-    patientPage.typeInsurerName(
+    patientInsurance.typePatientInsuranceDetail(
       patientOneFirstInsuranceId,
+      "insurer_name",
       patientOneFirstInsurerName
     );
-    patientPage.clickAddInsruanceDetails();
-    patientPage.typeSubscriberId(
+    patientInsurance.clickAddInsruanceDetails();
+    patientInsurance.typePatientInsuranceDetail(
       patientOneSecondInsuranceId,
+      "subscriber_id",
       patientOneSecondSubscriberId
     );
-    patientPage.typePolicyId(
+    patientInsurance.typePatientInsuranceDetail(
       patientOneSecondInsuranceId,
+      "policy_id",
       patientOneSecondPolicyId
     );
-    patientPage.typeInsurerId(
+    patientInsurance.typePatientInsuranceDetail(
       patientOneSecondInsuranceId,
+      "insurer_id",
       patientOneSecondInsurerId
     );
-    patientPage.typeInsurerName(
+    patientInsurance.typePatientInsuranceDetail(
       patientOneSecondInsuranceId,
+      "insurer_name",
       patientOneSecondInsurerName
     );
     patientPage.clickUpdatePatient();
@@ -181,27 +203,27 @@ describe("Patient Creation with consultation", () => {
       patientOneUpdatedBloodGroup
     );
     // Verify No medical history
-    patientPage.verifyNoSymptosPresent("Diabetes");
+    patientMedicalHistory.verifyNoSymptosPresent("Diabetes");
     // verify insurance details and dedicatd page
     cy.get("[data-testid=patient-details]")
       .contains(patientOneFirstSubscriberId)
       .scrollIntoView();
     cy.wait(2000);
-    patientPage.verifyPatientPolicyDetails(
+    patientInsurance.verifyPatientPolicyDetails(
       patientOneFirstSubscriberId,
       patientOneFirstPolicyId,
       patientOneFirstInsurerId,
       patientOneFirstInsurerName
     );
-    patientPage.clickPatientInsuranceViewDetail();
+    patientInsurance.clickPatientInsuranceViewDetail();
     cy.wait(3000);
-    patientPage.verifyPatientPolicyDetails(
+    patientInsurance.verifyPatientPolicyDetails(
       patientOneFirstSubscriberId,
       patientOneFirstPolicyId,
       patientOneFirstInsurerId,
       patientOneFirstInsurerName
     );
-    patientPage.verifyPatientPolicyDetails(
+    patientInsurance.verifyPatientPolicyDetails(
       patientOneSecondSubscriberId,
       patientOneSecondPolicyId,
       patientOneSecondInsurerId,
@@ -209,48 +231,59 @@ describe("Patient Creation with consultation", () => {
     );
   });
 
-  it("Create a New consultation to existing patient", () => {
-    patientPage.interceptFacilities();
-    patientPage.visitConsultationPage();
-    patientPage.verifyStatusCode();
-    patientConsultationPage.fillIllnessHistory("history");
-    patientConsultationPage.selectConsultationStatus(
-      "Outpatient/Emergency Room"
-    );
-    patientConsultationPage.selectSymptoms("ASYMPTOMATIC");
-
-    patientConsultationPage.enterConsultationDetails(
-      "Stable",
-      "Examination details and Clinical conditions",
-      "70",
-      "170",
-      "IP007",
-      "generalnote",
-      "Dev Doctor"
-    );
-    patientConsultationPage.submitConsultation();
-
-    // Below code for the prescription module only present while creating a new consultation
-    patientConsultationPage.clickAddPrescription();
-    patientConsultationPage.interceptMediaBase();
-    patientConsultationPage.selectMedicinebox();
-    patientConsultationPage.waitForMediabaseStatusCode();
-    patientConsultationPage.prescribefirstMedicine();
-    patientConsultationPage.enterDosage("3");
-    patientConsultationPage.selectDosageFrequency("Twice daily");
-    patientConsultationPage.submitPrescriptionAndReturn();
+  it("Patient Registration using the transfer with no consultation", () => {
+    // transfer the patient and no consulation
+    patientPage.createPatient();
+    patientPage.selectFacility(patientTransferFacility);
+    patientPage.patientformvisibility();
+    patientPage.typePatientPhoneNumber(patientTransferPhoneNumber);
+    patientTransfer.clickAdmitPatientRecordButton();
+    patientTransfer.clickTransferPopupContinueButton();
+    patientTransfer.clickTransferPatientNameList(patientTransferName);
+    patientTransfer.clickTransferPatientDob(patientDateOfBirth);
+    patientTransfer.clickTransferSubmitButton();
+    patientTransfer.verifyFacilitySuccessfullMessage();
+    patientTransfer.clickConsultationCancelButton();
+    cy.wait(3000);
+    // allow the transfer button of a patient
+    patientTransfer.clickAllowPatientTransferButton();
+    // Verify the patient error message for the same facility
+    cy.awaitUrl("/patients");
+    patientPage.createPatient();
+    patientPage.selectFacility(patientTransferFacility);
+    patientPage.patientformvisibility();
+    patientPage.typePatientPhoneNumber(patientTransferPhoneNumber);
+    patientTransfer.clickAdmitPatientRecordButton();
+    patientTransfer.clickTransferPopupContinueButton();
+    patientTransfer.clickTransferPatientNameList(patientTransferName);
+    patientTransfer.clickTransferPatientDob(patientDateOfBirth);
+    patientTransfer.clickTransferSubmitButton();
+    patientTransfer.verifyFacilityErrorMessage();
   });
 
-  it("Edit created consultation to existing patient", () => {
-    patientPage.visitPatientUrl();
-    patientConsultationPage.visitEditConsultationPage();
-    patientConsultationPage.fillIllnessHistory("editted");
-    patientConsultationPage.updateSymptoms("FEVER");
-    patientConsultationPage.setSymptomsDate("01082023");
-    patientConsultationPage.updateConsultation();
-    patientConsultationPage.verifySuccessNotification(
-      "Consultation updated successfully"
-    );
+  it("Patient Registration using External Result Import", () => {
+    // copy the patient external ID from external results
+    cy.awaitUrl("/external_results");
+    patientExternal.verifyExternalListPatientName(patientExternalName);
+    patientExternal.verifyExternalIdVisible();
+    // cypress have a limitation to work only asynchronously
+    // import the result and create a new patient
+    let extractedId = "";
+    cy.get("#patient-external-id")
+      .invoke("text")
+      .then((text) => {
+        extractedId = text.split("Care external results ID: ")[1];
+        cy.log(`Extracted Care external results ID: ${extractedId}`);
+        cy.awaitUrl("/patients");
+        patientPage.createPatient();
+        patientPage.selectFacility(patientFacility);
+        patientPage.patientformvisibility();
+        patientExternal.clickImportFromExternalResultsButton();
+        patientExternal.typeCareExternalResultId(extractedId);
+        patientExternal.clickImportPatientData();
+      });
+    // verify the patient is successfully created
+    patientExternal.verifyExternalPatientName(patientExternalName);
   });
 
   afterEach(() => {
