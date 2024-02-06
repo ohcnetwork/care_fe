@@ -795,6 +795,7 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div>
                   <ButtonV2
+                    id="patient-allow-transfer"
                     className="mt-4 w-full"
                     disabled={
                       !consultationListData ||
