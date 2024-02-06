@@ -22,5 +22,5 @@
     "sample_format_asset_import": "https://spreadsheets.google.com/feeds/download/spreadsheets/Export?key=11JaEhNHdyCHth4YQs_44YaRlP77Rrqe81VSEfg1glko&exportFormat=xlsx",
     "sample_format_external_result_import": "/External-Results-Template.csv",
     "enable_abdm": true,
-    "enable_hcx": true
+    "enable_hcx": false
 }
