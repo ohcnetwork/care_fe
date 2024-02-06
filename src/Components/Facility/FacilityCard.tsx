@@ -225,7 +225,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                     </DialogModal>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {userType !== "Staff" ? (
+                    {["DistrictAdmin", "StateAdmin"].includes(userType) && (
                       <ButtonV2
                         id="facility-notify"
                         ghost
@@ -236,8 +236,6 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                         <CareIcon className="care-l-megaphone text-lg" />
                         <span className="hidden md:block">Notify</span>
                       </ButtonV2>
-                    ) : (
-                      <></>
                     )}
                     <ButtonV2
                       href={`/facility/${facility.id}`}
