@@ -175,6 +175,7 @@ const TransferPatientDialog = (props: Props) => {
             <div>
               <DateFormField
                 required
+                id="dateofbirth-transferform"
                 name="date_of_birth"
                 label="Date of birth"
                 value={getDate(state.form.date_of_birth)}
@@ -191,6 +192,7 @@ const TransferPatientDialog = (props: Props) => {
       <div className="flex flex-col justify-between gap-2 pt-4 md:flex-row">
         <Cancel onClick={handleCancel} disabled={isLoading} />
         <Submit
+          id="submit-transferpatient"
           disabled={isLoading}
           onClick={handleSubmit}
           label="Transfer Suspect / Patient"

@@ -17,6 +17,10 @@ export class PatientConsultationPage {
       });
   }
 
+  verifyConsultationPatientName(patientName: string) {
+    cy.get("#patient-name-consultation").should("contain", patientName);
+  }
+
   fillIllnessHistory(history: string) {
     cy.wait(5000);
     cy.get("#history_of_present_illness").scrollIntoView();
@@ -145,9 +149,11 @@ export class PatientConsultationPage {
     cy.wait("@submitPrescription").its("response.statusCode").should("eq", 201);
   }
 
-  visitEditConsultationPage() {
-    cy.get("#view_consulation_updates").click();
-    cy.get("button").contains("Edit Consultation Details").click();
+  clickEditConsultationButton() {
+    cy.get("#consultation-buttons").scrollIntoView();
+    cy.get("#consultation-buttons")
+      .contains("Edit Consultation Details")
+      .click();
   }
 
   setSymptomsDate(date: string) {
