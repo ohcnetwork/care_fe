@@ -365,11 +365,6 @@ const AssetManage = (props: AssetManageProps) => {
                   {asset?.description}
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {asset?.asset_type === "INTERNAL" ? (
-                    <Chip text="Internal" startIcon="l-building" />
-                  ) : (
-                    <Chip text="External" startIcon="l-globe" />
-                  )}
                   {asset?.status === "ACTIVE" ? (
                     <Chip text="Active" startIcon="l-check" />
                   ) : (
