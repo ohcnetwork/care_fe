@@ -86,7 +86,6 @@ export const patchPatient = (params: object, pathParam: object) => {
   return fireRequest("patchPatient", [], params, pathParam);
 };
 
-
 export const getStates = () => {
   return fireRequest("statesList", []);
 };
