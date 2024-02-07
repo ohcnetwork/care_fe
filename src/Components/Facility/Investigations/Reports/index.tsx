@@ -421,6 +421,7 @@ const InvestigationReports = ({ id }: any) => {
                   investigationData={investigationTableData}
                   title="Report"
                   patientDetails={patientDetails}
+                  showFacilityName={true}
                 />
 
                 {!loadMoreDisabled && (

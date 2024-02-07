@@ -411,7 +411,7 @@ export default function PatientInfoCard(props: {
                             Principal Diagnosis:
                           </div>
                           <div className="flex gap-2 text-sm">
-                            {principal_diagnosis.diagnosis_object.label}{" "}
+                            {principal_diagnosis.diagnosis_object?.label ?? "-"}{" "}
                             <span className="flex items-center rounded border border-primary-500 pl-1 pr-2 text-xs font-medium text-primary-500">
                               <CareIcon icon="l-check" className="text-base" />
                               <p className="capitalize">

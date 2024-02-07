@@ -5,12 +5,17 @@ import { InvestigationResponse } from "./types";
 import { formatAge, formatDateTime } from "../../../../Utils/utils";
 import { FC } from "react";
 
-const ReportRow = ({ data, name, min, max }: any) => {
+const ReportRow = ({ data, name, min, max, facilityName }: any) => {
   return (
     <tr className="bg-white even:bg-gray-50">
       <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
         {name}
       </td>
+      {facilityName && (
+        <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
+          {facilityName}
+        </td>
+      )}
       {data.map((d: any) => {
         const color = getColorIndex({
           min: d?.min,
@@ -57,6 +62,7 @@ interface ReportTableProps {
     hospitalName: string;
   };
   investigationData: InvestigationResponse;
+  showFacilityName?: boolean;
   hidePrint?: boolean;
 }
 
@@ -64,6 +70,7 @@ const ReportTable: FC<ReportTableProps> = ({
   title,
   investigationData,
   patientDetails,
+  showFacilityName = false,
   hidePrint = false,
 }) => {
   const { data, sessions } = transformData(investigationData);
@@ -120,6 +127,14 @@ const ReportTable: FC<ReportTableProps> = ({
                 >
                   Name
                 </th>
+                {showFacilityName && (
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-800"
+                  >
+                    Facility
+                  </th>
+                )}
                 {sessions.map((session) => (
                   <th
                     scope="col"
@@ -153,6 +168,11 @@ const ReportTable: FC<ReportTableProps> = ({
                       min={t.investigation_object.min_value}
                       max={t.investigation_object.max_value}
                       name={t.investigation_object.name}
+                      facilityName={
+                        showFacilityName
+                          ? t.consultation_object.facility_name
+                          : null
+                      }
                     />
                   );
                 })

@@ -28,7 +28,7 @@ export const transformData = _.memoize((data: InvestigationResponse) => {
       }
     });
     const {
-      consultation,
+      consultation_object,
       group,
       group_object,
       id,
@@ -40,7 +40,7 @@ export const transformData = _.memoize((data: InvestigationResponse) => {
     } = value[0];
 
     return {
-      consultation,
+      consultation_object,
       group,
       group_object,
       id,

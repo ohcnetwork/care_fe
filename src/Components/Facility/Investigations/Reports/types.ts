@@ -1,8 +1,10 @@
 import { InvestigationValueType } from "..";
+import { ConsultationModel } from "../../models";
 
 export interface Investigation {
   id: string;
   group_object: any;
+  consultation_object: ConsultationModel;
   investigation_object: {
     external_id: string;
     name: string;
@@ -21,7 +23,6 @@ export interface Investigation {
   notes: any;
   investigation: number;
   group: any;
-  consultation: number;
   session: number;
 }
 
