@@ -101,9 +101,9 @@ export const formatTime = (date: DateLike, format = TIME_FORMAT) =>
 
 export const relativeDate = (date: DateLike, withoutSuffix = false) => {
   const obj = dayjs(date);
-  return `${obj.fromNow(withoutSuffix)} ${
-    withoutSuffix && "ago"
-  } at ${obj.format(TIME_FORMAT)}`;
+  return `${obj.fromNow(withoutSuffix)}${
+    withoutSuffix ? " ago " : ""
+  }at ${obj.format(TIME_FORMAT)}`;
 };
 
 export const formatName = (user: { first_name: string; last_name: string }) => {
