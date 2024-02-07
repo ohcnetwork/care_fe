@@ -1,5 +1,4 @@
 import dayjs from "dayjs";
-import { useCallback, useEffect } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import {
@@ -12,12 +11,6 @@ import {
 } from "../../Common/constants";
 import useConfig from "../../Common/hooks/useConfig";
 import useMergeState from "../../Common/hooks/useMergeState";
-import {
-  getAllLocalBody,
-  getAnyFacility,
-  getDistrict,
-} from "../../Redux/actions";
-import { useDispatch } from "react-redux";
 import { dateQueryString } from "../../Utils/utils";
 import { DateRange } from "../Common/DateRangeInputV2";
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -35,6 +28,9 @@ import {
 import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import DiagnosesFilter, { FILTER_BY_DIAGNOSES_KEYS } from "./DiagnosesFilter";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
@@ -105,37 +101,24 @@ export default function PatientFilter(props: any) {
     diagnoses_unconfirmed: filter.diagnoses_unconfirmed || null,
     diagnoses_differential: filter.diagnoses_differential || null,
   });
-  const dispatch: any = useDispatch();
 
-  useEffect(() => {
-    async function fetchData() {
-      if (filter.facility) {
-        const { data: facilityData } = await dispatch(
-          getAnyFacility(filter.facility, "facility")
-        );
-        setFilterState({ facility_ref: facilityData });
-      }
+  useQuery(routes.getAnyFacility, {
+    pathParams: { id: filter.facility },
+    prefetch: !!filter.facility,
+    onResponse: ({ data }) => setFilterState({ facility_ref: data }),
+  });
 
-      if (filter.district) {
-        const { data: districtData } = await dispatch(
-          getDistrict(filter.district, "district")
-        );
-        setFilterState({ district_ref: districtData });
-      }
+  useQuery(routes.getDistrict, {
+    pathParams: { id: filter.district },
+    prefetch: !!filter.district,
+    onResponse: ({ data }) => setFilterState({ district_ref: data }),
+  });
 
-      if (filter.lsgBody) {
-        const { data: lsgRes } = await dispatch(getAllLocalBody({}));
-        const lsgBodyData = lsgRes.results;
-
-        setFilterState({
-          lsgBody_ref: lsgBodyData.filter(
-            (obj: any) => obj.id.toString() === filter.lsgBody.toString()
-          )[0],
-        });
-      }
-    }
-    fetchData();
-  }, [dispatch]);
+  useQuery(routes.getLocalBody, {
+    pathParams: { id: filter.lsgBody },
+    prefetch: !!filter.lsgBody,
+    onResponse: ({ data }) => setFilterState({ lsgBody_ref: data }),
+  });
 
   const VACCINATED_FILTER = [
     { id: "0", text: "Unvaccinated" },
@@ -161,21 +144,19 @@ export default function PatientFilter(props: any) {
     { id: "false", text: "No" },
   ];
 
-  const setFacility = (selected: any, name: string) => {
-    const filterData: any = { ...filterState };
-    filterData[`${name}_ref`] = selected;
-    filterData[name] = (selected || {}).id;
-
-    setFilterState(filterData);
+  const setFilterWithRef = (name: string, selected?: any) => {
+    setFilterState({
+      [`${name}_ref`]: selected,
+      [name]: selected?.id,
+    });
   };
 
-  const lsgSearch = useCallback(
-    async (search: string) => {
-      const res = await dispatch(getAllLocalBody({ local_body_name: search }));
-      return res?.data?.results;
-    },
-    [dispatch]
-  );
+  const lsgSearch = async (search: string) => {
+    const { data } = await request(routes.getAllLocalBody, {
+      query: { local_body_name: search },
+    });
+    return data?.results;
+  };
 
   const applyFilter = () => {
     const {
@@ -585,7 +566,7 @@ export default function PatientFilter(props: any) {
               name="facility"
               showAll={false}
               selected={filterState.facility_ref}
-              setSelected={(obj) => setFacility(obj, "facility")}
+              setSelected={(obj) => setFilterWithRef("facility", obj)}
             />
           </div>
           {filterState.facility && (
@@ -629,13 +610,7 @@ export default function PatientFilter(props: any) {
                 name="lsg_body"
                 selected={filterState.lsgBody_ref}
                 fetchData={lsgSearch}
-                onChange={(selected) =>
-                  setFilterState({
-                    ...filterState,
-                    lsgBody_ref: selected,
-                    lsgBody: selected.id,
-                  })
-                }
+                onChange={(obj) => setFilterWithRef("lsgBody", obj)}
                 optionLabel={(option) => option.name}
                 compareBy="id"
               />
@@ -648,7 +623,7 @@ export default function PatientFilter(props: any) {
               multiple={false}
               name="district"
               selected={filterState.district_ref}
-              setSelected={(obj: any) => setFacility(obj, "district")}
+              setSelected={(obj) => setFilterWithRef("district", obj)}
               errors={""}
             />
           </div>
