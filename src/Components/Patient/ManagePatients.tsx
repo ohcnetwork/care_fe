@@ -918,14 +918,25 @@ export const PatientManager = () => {
               "Is Medico-Legal Case",
               "last_consultation_medico_legal_case"
             ),
-            value("Facility", "facility", facilityData?.name || ""),
+            value(
+              "Facility",
+              "facility",
+              qParams.facility ? facilityData?.name || "" : ""
+            ),
             value(
               "Location",
               "last_consultation_current_bed__location",
-              facilityAssetLocationData?.name || ""
+              qParams.last_consultation_current_bed__location
+                ? facilityAssetLocationData?.name ||
+                    qParams?.last_consultation_current_bed__locations
+                : ""
             ),
             badge("Facility Type", "facility_type"),
-            value("District", "district", districtData?.name || ""),
+            value(
+              "District",
+              "district",
+              qParams.district ? districtData?.name || "" : ""
+            ),
             ordering(),
             value("Category", "category", getTheCategoryFromId()),
             badge("Disease Status", "disease_status"),
@@ -949,7 +960,7 @@ export const PatientManager = () => {
             badge("SRF ID", "srf_id"),
             {
               name: "LSG Body",
-              value: LocalBodyData?.name || "",
+              value: qParams?.lsgBody ? LocalBodyData?.name || "" : "",
               paramKey: "lsgBody",
             },
             ...FILTER_BY_DIAGNOSES_KEYS.map((key) =>

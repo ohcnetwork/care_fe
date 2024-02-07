@@ -44,11 +44,8 @@ export default function DailyRoundsList({ consultation }: Props) {
               <PaginatedList.WhenLoading>
                 <LoadingLogUpdateCard />
               </PaginatedList.WhenLoading>
-              <Timeline
-                className="rounded-lg bg-white p-2 shadow"
-                name="log update"
-              >
-                <PaginatedList.Items<DailyRoundsModel> className="flex grow flex-col gap-3">
+              <Timeline name="log update">
+                <PaginatedList.Items<DailyRoundsModel> className="flex grow flex-col gap-3 rounded-lg bg-white p-2 shadow">
                   {(item, items) => {
                     if (item.rounds_type === "AUTOMATED") {
                       return (
