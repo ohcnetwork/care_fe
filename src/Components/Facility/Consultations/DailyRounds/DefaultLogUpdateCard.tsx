@@ -32,7 +32,7 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
         attributeKey="other_details"
         attributeValue={round.other_details}
       />
-      <div className="mt-2 flex w-full flex-col items-center gap-2 md:w-auto md:flex-row">
+      <div className="mt-2 flex w-full flex-col items-center gap-2 md:w-auto 2xl:flex-row">
         <ButtonV2
           variant="secondary"
           border
