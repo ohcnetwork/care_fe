@@ -5,6 +5,8 @@ import _ from "lodash";
 import { useTranslation } from "react-i18next";
 import routes from "../../../../Redux/api";
 import * as Notification from "../../../../Utils/Notifications";
+import request from "../../../../Utils/request/request";
+import { PaginatedResponse } from "../../../../Utils/request/types";
 import useQuery from "../../../../Utils/request/useQuery";
 import Loading from "../../../Common/Loading";
 import ButtonV2 from "../../../Common/components/ButtonV2";
@@ -13,7 +15,7 @@ import Page from "../../../Common/components/Page";
 import AutocompleteMultiSelectFormField from "../../../Form/FormFields/AutocompleteMultiselect";
 import { FieldChangeEvent } from "../../../Form/FormFields/Utils";
 import ReportTable from "./ReportTable";
-import { InvestigationResponse } from "./types";
+import { Investigation, InvestigationResponse } from "./types";
 
 const RESULT_PER_PAGE = 14;
 interface InitialState {
@@ -89,20 +91,11 @@ const InvestigationReports = ({ id }: any) => {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [sessionPage, setSessionPage] = useState(1);
-  const [group, setGroup] = useState("");
   const [isNextSessionDisabled, setIsNextSessionDisabled] = useState(false);
   const [state, dispatch] = useReducer(
     investigationReportsReducer,
     initialState
   );
-
-  const [query, setQuery] = useState<{
-    investigations: string | null;
-    session_page: number;
-  }>({
-    investigations: null,
-    session_page: 1,
-  });
 
   const {
     investigationGroups,
@@ -116,7 +109,18 @@ const InvestigationReports = ({ id }: any) => {
   console.log("state", state);
 
   const fetchInvestigationsData = useCallback(
-    (curPage = 1, curSessionPage = 1, refetch: () => void) => {
+    async (
+      onSuccess: (
+        data: PaginatedResponse<Investigation>,
+        pageNo: number
+      ) => void,
+      curPage = 1,
+      curSessionPage = 1
+    ) => {
+      dispatch({
+        type: "set_loading",
+        payload: { ...isLoading, investigationLoading: true },
+      });
       const pageStart = ((curPage || 1) - 1) * RESULT_PER_PAGE;
       const investigationsParams = (
         selectedInvestigations.length
@@ -132,46 +136,45 @@ const InvestigationReports = ({ id }: any) => {
         });
         dispatch({
           type: "set_loading",
-          payload: { ...isLoading, tableData: false },
+          payload: { ...isLoading, investigationLoading: false },
         });
         return;
       }
-      setQuery({
-        investigations: investigationsParams,
-        session_page: curSessionPage,
+      const data = await request(routes.getPatientInvestigation, {
+        pathParams: { patient_external_id: id },
+        query: {
+          investigations: investigationsParams,
+          session_page: curSessionPage,
+        },
       });
-      setPage(curPage + 1);
-      refetch();
+      dispatch({
+        type: "set_loading",
+        payload: { ...isLoading, investigationLoading: false },
+      });
+      if (data && data.data?.results) {
+        onSuccess(data.data, curPage);
+        setPage(curPage + 1);
+      }
     },
-    [investigations, isLoading, selectedInvestigations]
+    [id, investigations, isLoading, selectedInvestigations]
   );
 
-  const { refetch: refetchPatientInvestigation } = useQuery(
-    routes.getPatientInvestigation,
-    {
-      pathParams: { patient_external_id: id },
-      query: query,
-      onResponse: (res) => {
-        if (res && res.data) {
-          if (res.data.results.length === 0 && page <= totalPage) {
-            fetchInvestigationsData(
-              page + 1,
-              sessionPage,
-              refetchPatientInvestigation
-            );
-          } else {
-            dispatch({
-              type: "set_investigation_table_data",
-              payload: [...state.investigationTableData, ...res.data.results],
-            });
-          }
-        }
-      },
-    }
-  );
+  const fetchInvestigation = useCallback(async () => {
+    dispatch({
+      type: "set_loading",
+      payload: { ...isLoading, investigationLoading: true },
+    });
 
-  const transform = (data: InvestigationType[]) => {
-    return _.chain(data)
+    const data = await Promise.all(
+      selectedGroup.map((group) =>
+        request(routes.listInvestigations, {
+          query: { group: group },
+        })
+      )
+    );
+
+    const investigationList = _.chain(data)
+      .flatMap((i) => i?.data?.results)
       .compact()
       .flatten()
       .map((i) => ({
@@ -180,30 +183,13 @@ const InvestigationReports = ({ id }: any) => {
       }))
       .unionBy("external_id")
       .value();
-  };
 
-  const { refetch: refetchListInvestigations } = useQuery(
-    routes.listInvestigations,
-    {
-      query: { group: group },
-      onResponse: (res) => {
-        if (res && res.data) {
-          const data = transform(res.data.results);
-          dispatch({
-            type: "set_investigations",
-            payload: [...investigations, ...data],
-          });
-        }
-      },
-    }
-  );
-  const fetchInvestigation = useCallback(() => {
-    selectedGroup.map((group) => {
-      if (group === "") return;
-      setGroup(group);
-      refetchListInvestigations();
+    dispatch({ type: "set_investigations", payload: investigationList });
+    dispatch({
+      type: "set_loading",
+      payload: { ...isLoading, investigationLoading: false },
     });
-  }, [refetchListInvestigations, selectedGroup]);
+  }, [isLoading, selectedGroup]);
 
   useQuery(routes.listInvestigationGroups, {
     onResponse: (res) => {
@@ -232,38 +218,42 @@ const InvestigationReports = ({ id }: any) => {
   };
 
   const handleLoadMore = () => {
-    // const onSuccess = (data: any, pageNo: number) => {
-    //   if (data.results.length === 0 && pageNo + 1 <= totalPage) {
-    //     fetchInvestigationsData(onSuccess, pageNo + 1, sessionPage);
-    //   } else {
-    //     dispatch({
-    //       type: "set_investigation_table_data",
-    //       payload: [...state.investigationTableData, ...data.results],
-    //     });
-    //   }
-    // };
-    fetchInvestigationsData(page, sessionPage, refetchPatientInvestigation);
+    const onSuccess = (
+      data: PaginatedResponse<Investigation>,
+      pageNo: number
+    ) => {
+      if (data.results.length === 0 && pageNo + 1 <= totalPage) {
+        fetchInvestigationsData(onSuccess, pageNo + 1, sessionPage);
+      } else {
+        dispatch({
+          type: "set_investigation_table_data",
+          payload: [...state.investigationTableData, ...data.results],
+        });
+      }
+    };
+    fetchInvestigationsData(onSuccess, page, sessionPage);
   };
 
   const handleGenerateReports = useCallback(
     (curSessionPage = 1) => {
-      if (curSessionPage > 1 && !state.selectedInvestigations.results.length) {
-        setSessionPage(curSessionPage - 1);
-        setIsNextSessionDisabled(true);
-      } else {
-        setIsNextSessionDisabled(false);
-        if (!state.selectedInvestigations.results.length) {
-          handleLoadMore();
+      const onSuccess = (data: PaginatedResponse<Investigation>) => {
+        if (curSessionPage > 1 && !data.results.length) {
+          setSessionPage(curSessionPage - 1);
+          setIsNextSessionDisabled(true);
         } else {
-          dispatch({
-            type: "set_investigation_table_data",
-            payload: state.investigationTableData.results,
-          });
+          setIsNextSessionDisabled(false);
+          if (!data.results.length) {
+            handleLoadMore();
+          } else {
+            dispatch({
+              type: "set_investigation_table_data",
+              payload: data.results,
+            });
+          }
         }
-      }
-
-      document.getElementById("reports_section")?.scrollIntoView();
-      fetchInvestigationsData(1, curSessionPage, refetchPatientInvestigation);
+        document.getElementById("reports_section")?.scrollIntoView();
+      };
+      fetchInvestigationsData(onSuccess, 1, curSessionPage);
     },
     [fetchInvestigationsData]
   );
