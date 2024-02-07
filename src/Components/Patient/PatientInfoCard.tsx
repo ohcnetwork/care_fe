@@ -543,7 +543,8 @@ export default function PatientInfoCard(props: {
               itemClassName="min-w-0 sm:min-w-[225px]"
               title={"Manage Patient"}
               icon={<CareIcon icon="l-setting" className="text-xl" />}
-              containerClassName="w-full lg:w-auto mt-2 2xl:mt-0 flex justify-center lg:justify-center"
+              className="xl:justify-center"
+              containerClassName="w-full lg:w-auto mt-2 2xl:mt-0 flex justify-center"
             >
               <div>
                 {[
