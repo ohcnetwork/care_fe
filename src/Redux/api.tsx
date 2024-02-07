@@ -359,6 +359,11 @@ const routes = {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
     method: "PATCH",
   },
+  getFacilityAssetLocationAvailability: {
+    path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/availability/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<AvailabilityRecord>>(),
+  },
 
   // Asset bed
   listAssetBeds: {
@@ -1066,6 +1071,11 @@ const routes = {
     TRes: Type<AssetData>(),
     TBody: Type<AssetUpdate>(),
   },
+  listAssetAvailability: {
+    path: "/api/v1/asset/{external_id}/availability/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<AvailabilityRecord>>(),
+  },
 
   // Asset transaction endpoints
 
@@ -1240,13 +1250,6 @@ const routes = {
     },
   },
 
-  // Availability endpoints
-
-  listAssetAvailability: {
-    path: "/api/v1/availability/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<AvailabilityRecord>>(),
-  },
   // Prescription endpoints
 
   listPrescriptions: {

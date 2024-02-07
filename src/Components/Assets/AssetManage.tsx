@@ -503,7 +503,12 @@ const AssetManage = (props: AssetManageProps) => {
       </div>
       {asset?.id &&
         asset?.asset_class &&
-        asset?.asset_class != AssetClass.NONE && <Uptime assetId={asset?.id} />}
+        asset?.asset_class != AssetClass.NONE && (
+          <Uptime
+            route={routes.listAssetAvailability}
+            params={{ external_id: asset.id }}
+          />
+        )}
       <div className="mb-4 mt-8 text-xl font-semibold">Service History</div>
       <div
         className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-lg"

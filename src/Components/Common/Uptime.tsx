@@ -4,7 +4,7 @@ import { AssetStatus, AvailabilityRecord } from "../Assets/AssetTypes";
 import { classNames } from "../../Utils/utils";
 import dayjs from "../../Utils/dayjs";
 import useQuery from "../../Utils/request/useQuery.js";
-import routes from "../../Redux/api.js";
+import { PaginatedResponse, QueryRoute } from "../../Utils/request/types";
 
 const STATUS_COLORS = {
   Operational: "bg-green-500",
@@ -165,12 +165,17 @@ function UptimeInfoPopover({
   );
 }
 
-export default function Uptime(props: { assetId: string }) {
+export default function Uptime(
+  props: Readonly<{
+    route: QueryRoute<PaginatedResponse<AvailabilityRecord>>;
+    params?: Record<string, string | number>;
+  }>
+) {
   const [summary, setSummary] = useState<{
     [key: number]: AvailabilityRecord[];
   }>([]);
-  const { data, loading } = useQuery(routes.listAssetAvailability, {
-    query: { linked_id: props.assetId, linked_model: "asset" },
+  const { data, loading } = useQuery(props.route, {
+    pathParams: props.params,
     onResponse: ({ data }) => setUptimeRecord(data?.results.reverse() ?? []),
   });
   const availabilityData = data?.results ?? [];
@@ -208,7 +213,7 @@ export default function Uptime(props: { assetId: string }) {
         if (statusToCarryOver) {
           recordsByDayBefore[i].push({
             linked_id: "",
-            linked_model: "asset",
+            linked_model: "",
             status: statusToCarryOver,
             timestamp: dayjs()
               .subtract(i, "days")
@@ -224,7 +229,7 @@ export default function Uptime(props: { assetId: string }) {
         ) {
           recordsByDayBefore[i].unshift({
             linked_id: "",
-            linked_model: "asset",
+            linked_model: "",
             status: statusToCarryOver,
             timestamp: dayjs()
               .subtract(i, "days")
