@@ -151,6 +151,7 @@ export class PatientConsultationPage {
 
   clickEditConsultationButton() {
     cy.get("#consultation-buttons").scrollIntoView();
+    cy.get("button").contains("Manage Patient").click();
     cy.get("#consultation-buttons")
       .contains("Edit Consultation Details")
       .click();
