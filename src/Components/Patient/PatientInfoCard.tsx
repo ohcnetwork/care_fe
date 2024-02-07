@@ -6,29 +6,29 @@ import {
   PATIENT_CATEGORIES,
   RESPIRATORY_SUPPORT,
   TELEMEDICINE_ACTIONS,
-} from "../../Common/constants";
-import { ConsultationModel, PatientCategory } from "../Facility/models";
+} from "../../Common/constants.js";
+import { ConsultationModel, PatientCategory } from "../Facility/models.js";
 import { Switch, Menu } from "@headlessui/react";
 
 import { Link, navigate } from "raviger";
 import { useState } from "react";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import useConfig from "../../Common/hooks/useConfig";
-import dayjs from "../../Utils/dayjs";
+import CareIcon from "../../CAREUI/icons/CareIcon.js";
+import useConfig from "../../Common/hooks/useConfig.js";
+import dayjs from "../../Utils/dayjs.js";
 import { classNames, formatDate, formatDateTime } from "../../Utils/utils.js";
-import ABHAProfileModal from "../ABDM/ABHAProfileModal";
-import LinkABHANumberModal from "../ABDM/LinkABHANumberModal";
-import LinkCareContextModal from "../ABDM/LinkCareContextModal";
-import DialogModal from "../Common/Dialog";
-import ButtonV2 from "../Common/components/ButtonV2";
-import Beds from "../Facility/Consultations/Beds";
-import { PatientModel } from "./models";
+import ABHAProfileModal from "../ABDM/ABHAProfileModal.js";
+import LinkABHANumberModal from "../ABDM/LinkABHANumberModal.js";
+import LinkCareContextModal from "../ABDM/LinkCareContextModal.js";
+import DialogModal from "../Common/Dialog.js";
+import ButtonV2 from "../Common/components/ButtonV2.js";
+import Beds from "../Facility/Consultations/Beds.js";
+import { PatientModel } from "./models.js";
 import request from "../../Utils/request/request.js";
 import routes from "../../Redux/api.js";
 import DropdownMenu from "../Common/components/Menu.js";
 import { triggerGoal } from "../../Integrations/Plausible.js";
 
-import useAuthUser from "../../Common/hooks/useAuthUser";
+import useAuthUser from "../../Common/hooks/useAuthUser.js";
 import { Mews } from "../Facility/Consultations/Mews.js";
 import DischargeSummaryModal from "../Facility/DischargeSummaryModal.js";
 import DischargeModal from "../Facility/DischargeModal.js";
@@ -153,83 +153,86 @@ export default function PatientInfoCard(props: {
         </>
       )}
 
-      <section className="flex flex-col items-center justify-between space-y-3 lg:flex-row lg:space-x-2 lg:space-y-0">
-        <div className="flex w-full flex-col bg-white px-4 py-2 lg:w-7/12 lg:flex-row lg:p-6">
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        <div className="col-span-2 flex w-full flex-col bg-white px-4 pt-2 lg:flex-row xl:min-w-fit">
           {/* Can support for patient picture in the future */}
-          <div className="mt-2 flex flex-col items-center">
-            <div
-              className={`h-24 w-24 min-w-[5rem] bg-gray-200 ${categoryClass}-profile`}
-            >
-              {consultation?.current_bed &&
-              consultation?.discharge_date === null ? (
-                <div className="tooltip flex h-full flex-col items-center justify-center">
-                  <p className="w-full truncate px-2 text-center text-sm text-gray-900">
-                    {
-                      consultation?.current_bed?.bed_object?.location_object
-                        ?.name
-                    }
-                  </p>
-                  <p className="w-full truncate px-2 text-center text-base font-bold">
-                    {consultation?.current_bed?.bed_object.name}
-                  </p>
-                  <div className="tooltip-text tooltip-right flex -translate-x-1/3 translate-y-1/2 flex-col items-center justify-center text-sm ">
-                    <span>
+          <div className="flex justify-evenly lg:justify-normal">
+            <div className="flex flex-col items-start lg:items-center">
+              <div
+                className={`w-24 min-w-[5rem] bg-gray-200 ${categoryClass}-profile h-full`}
+              >
+                {consultation?.current_bed &&
+                consultation?.discharge_date === null ? (
+                  <div className="tooltip flex h-full flex-col items-center justify-center">
+                    <p className="w-full truncate px-2 text-center text-sm text-gray-900">
                       {
                         consultation?.current_bed?.bed_object?.location_object
                           ?.name
                       }
-                    </span>
-                    <span>{consultation?.current_bed?.bed_object.name}</span>
+                    </p>
+                    <p className="w-full truncate px-2 text-center text-base font-bold">
+                      {consultation?.current_bed?.bed_object.name}
+                    </p>
+                    <div className="tooltip-text tooltip-right flex -translate-x-1/3 translate-y-1/2 flex-col items-center justify-center text-sm ">
+                      <span>
+                        {
+                          consultation?.current_bed?.bed_object?.location_object
+                            ?.name
+                        }
+                      </span>
+                      <span>{consultation?.current_bed?.bed_object.name}</span>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="flex h-full items-center justify-center">
-                  <i className="fas fa-user-injured text-3xl text-gray-500"></i>
-                </div>
-              )}
-            </div>
-            {category && (
-              <div
-                className={`w-24 rounded-b px-2 pb-1 text-center text-xs font-bold ${categoryClass}`}
-              >
-                {category.toUpperCase()}
-              </div>
-            )}
-            <ButtonV2 ghost onClick={() => setOpen(true)} className="mt-1">
-              {bedDialogTitle}
-            </ButtonV2>
-          </div>
-          <div className="flex flex-col items-center gap-4 lg:items-start lg:gap-0 lg:pl-6">
-            <div
-              className="mb-1 font-semibold sm:text-xl md:text-4xl"
-              id="patient-name-consultation"
-            >
-              {patient.name}
-            </div>
-            <div>
-              {patient.review_time &&
-                !consultation?.discharge_date &&
-                Number(consultation?.review_interval) > 0 && (
-                  <div
-                    className={
-                      "mb-2 inline-flex w-full items-center justify-center rounded-lg border border-gray-500 p-1 text-xs font-semibold leading-4 " +
-                      (dayjs().isBefore(patient.review_time)
-                        ? " bg-gray-100 "
-                        : " bg-red-400 text-white")
-                    }
-                  >
-                    <i className="text-md fas fa-clock mr-2"></i>
-                    {(dayjs().isBefore(patient.review_time)
-                      ? "Review before: "
-                      : "Review Missed: ") +
-                      formatDateTime(patient.review_time)}
+                ) : (
+                  <div className="flex h-full items-center justify-center">
+                    <i className="fas fa-user-injured text-3xl text-gray-500"></i>
                   </div>
                 )}
+              </div>
+              {category && (
+                <div
+                  className={`w-24 rounded-b py-1 text-center text-xs font-bold ${categoryClass}`}
+                >
+                  {category.toUpperCase()}
+                </div>
+              )}
+              <ButtonV2
+                ghost
+                onClick={() => setOpen(true)}
+                className="mt-1 px-[10px] py-1"
+              >
+                {bedDialogTitle}
+              </ButtonV2>
             </div>
-            <div className="flex flex-col items-center gap-2 sm:flex-row lg:mb-2">
+            <div className="flex items-center justify-center">
+              <div
+                className="mb-2 flex flex-col justify-center text-xl font-semibold lg:hidden"
+                id="patient-name-consultation"
+              >
+                {patient.name}
+                <div className="ml-3 mr-2 mt-[6px] text-sm font-semibold text-gray-600">
+                  {patient.age} years • {patient.gender}
+                </div>
+                <div className="mr-3 flex flex-col items-center">
+                  <Link
+                    href={`/facility/${consultation?.facility}`}
+                    className="mt-2 items-center justify-center text-sm font-semibold text-black hover:text-primary-600 lg:hidden"
+                  >
+                    <i
+                      className="fas fa-hospital mr-1 text-primary-400"
+                      aria-hidden="true"
+                    ></i>
+                    {consultation?.facility_name}
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex w-full flex-col items-center gap-4 space-y-2 lg:items-start lg:gap-0 lg:pl-2 xl:w-full">
+            <div className="flex flex-col items-center gap-2 sm:flex-row">
               <Link
                 href={`/facility/${consultation?.facility}`}
-                className="font-semibold text-black hover:text-primary-600"
+                className="hidden font-semibold text-black hover:text-primary-600 lg:block"
               >
                 <i
                   className="fas fa-hospital mr-1 text-primary-400"
@@ -238,148 +241,219 @@ export default function PatientInfoCard(props: {
                 {consultation?.facility_name}
               </Link>
 
-              {consultation?.patient_no && (
-                <span className="pl-2 capitalize md:col-span-2">
-                  <span className="badge badge-pill badge-primary">
-                    {`${consultation?.suggestion === "A" ? "IP" : "OP"}: ${
-                      consultation?.patient_no
-                    }`}
-                  </span>
-                </span>
-              )}
               {medicoLegalCase && (
-                <span className="pl-2 capitalize md:col-span-2">
+                <span className="flex pl-2 capitalize md:col-span-2">
                   <span className="badge badge-pill badge-danger">MLC</span>
                 </span>
               )}
             </div>
-            {!!consultation?.discharge_date && (
-              <p className="my-1 inline-block rounded-lg bg-red-100 px-2 py-1 text-sm text-red-600">
-                Discharged from CARE
-              </p>
-            )}
-            <div className="flex flex-col items-center gap-2 text-sm sm:flex-row lg:mt-4">
-              <div className="flex flex-col items-center gap-2 text-sm text-gray-900 sm:flex-row sm:text-sm">
-                {patient.action && patient.action != 10 && (
-                  <div>
-                    <div className="inline-flex w-full items-center justify-start rounded-lg border border-gray-500 bg-blue-700 p-1 px-3 text-xs font-semibold leading-4">
-                      <span className="font-semibold text-white">
-                        {" "}
-                        {
-                          TELEMEDICINE_ACTIONS.find(
-                            (i) => i.id === patient.action
-                          )?.desc
-                        }
+            <div className="flex flex-col flex-wrap items-center justify-center lg:items-start lg:justify-normal">
+              <div
+                className="mb-2 hidden flex-row text-xl font-semibold lg:flex"
+                id="patient-name-consultation"
+              >
+                {patient.name}
+                <div className="ml-3 mr-2 mt-[6px] text-sm font-semibold text-gray-600">
+                  {patient.age} years • {patient.gender}
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 text-sm sm:flex-row">
+                <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-gray-900 sm:flex-row sm:text-sm lg:justify-normal">
+                  {consultation?.patient_no && (
+                    <span className="flex capitalize">
+                      <span className="items-stretch justify-center whitespace-nowrap rounded border border-green-400 bg-green-100 px-3 py-0.5 text-sm font-medium text-green-800">
+                        {`${consultation?.suggestion === "A" ? "IP" : "OP"}: ${
+                          consultation?.patient_no
+                        }`}
                       </span>
-                    </div>
-                  </div>
-                )}
-                <div>
-                  <div className="inline-flex w-full items-center justify-start rounded-lg border border-gray-500 bg-gray-200 p-1 px-3 text-xs font-semibold leading-4">
-                    <b>Age</b>: {patient.age} years
-                  </div>
-                </div>
-                <div>
-                  <div className="inline-flex w-full items-center justify-start rounded-lg border border-gray-500 bg-gray-200 p-1 px-3 text-xs font-semibold leading-4">
-                    <b>Gender</b>: {patient.gender}
-                  </div>
-                </div>
-                {consultation?.suggestion === "DC" && (
-                  <div>
+                    </span>
+                  )}
+                  {patient.action && patient.action != 10 && (
                     <div>
-                      <div className="inline-flex w-full items-center justify-start rounded-lg border border-gray-500 bg-gray-200 p-1 px-3 text-xs font-semibold leading-4">
-                        <span>Domiciliary Care</span>
-                        <CareIcon className="care-l-estate text-base text-gray-700" />
+                      <div className="inline-flex w-full items-center justify-start rounded border border-gray-500 bg-blue-100 p-1 px-3 text-xs font-semibold leading-4">
+                        <span className="font-semibold text-indigo-800">
+                          {" "}
+                          {
+                            TELEMEDICINE_ACTIONS.find(
+                              (i) => i.id === patient.action
+                            )?.desc
+                          }
+                        </span>
                       </div>
                     </div>
+                  )}
+                  <div>
+                    {patient.blood_group && (
+                      <div className="inline-flex w-full items-center justify-start rounded border border-gray-500 bg-gray-100 p-1 px-2 text-xs font-semibold leading-4">
+                        Blood Group: {patient.blood_group}
+                      </div>
+                    )}
+                  </div>
+                  {patient.review_time &&
+                    !consultation?.discharge_date &&
+                    Number(consultation?.review_interval) > 0 && (
+                      <div>
+                        <div
+                          className={
+                            "inline-flex w-full items-center justify-center rounded border border-gray-500 p-1 text-xs font-semibold leading-4 " +
+                            (dayjs().isBefore(patient.review_time)
+                              ? " bg-gray-100 "
+                              : " bg-red-400 text-white")
+                          }
+                        >
+                          <i className="text-md fas fa-clock mr-2"></i>
+                          {dayjs().isBefore(patient.review_time)
+                            ? "Review before: "
+                            : "Review Missed: "}
+                          {formatDateTime(patient.review_time)}
+                        </div>
+                      </div>
+                    )}
+                  {consultation?.suggestion === "DC" && (
+                    <div>
+                      <div>
+                        <div className="inline-flex w-full items-center justify-start rounded border border-gray-500 bg-gray-100 p-1 px-3 text-xs font-semibold leading-4">
+                          <CareIcon className="care-l-estate mr-1 text-base text-gray-700" />
+                          <span>Domiciliary Care</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {!!consultation?.discharge_date && (
+                    <p className="rounded border border-red-600 bg-red-100 px-2 py-[2px] text-sm text-red-600">
+                      Discharged from CARE
+                    </p>
+                  )}
+                  {[
+                    [
+                      "Respiratory Support",
+                      RESPIRATORY_SUPPORT.find(
+                        (resp) =>
+                          resp.text ===
+                          consultation?.last_daily_round?.ventilator_interface
+                      )?.id ?? "UNKNOWN",
+                      consultation?.last_daily_round?.ventilator_interface,
+                    ],
+                  ].map((stat, i) => {
+                    return stat[2] && stat[1] !== "NONE" ? (
+                      <div className="flex flex-col items-center gap-2 text-sm">
+                        <div
+                          key={"patient_stat_" + i}
+                          className="flex items-center justify-center rounded border border-gray-500 bg-gray-100 p-1 px-3 text-xs font-semibold leading-4"
+                        >
+                          {stat[0]} : {stat[1]}
+                        </div>
+                      </div>
+                    ) : (
+                      ""
+                    );
+                  })}
+                  {consultation?.discharge_date ? (
+                    <div className="flex gap-4 rounded border border-cyan-400 bg-cyan-100 px-2 py-1 text-xs font-medium">
+                      <div>
+                        <span>
+                          <b>
+                            {
+                              CONSULTATION_SUGGESTION.find(
+                                (suggestion) =>
+                                  suggestion.id === consultation?.suggestion
+                              )?.text
+                            }
+                          </b>{" "}
+                          on {formatDateTime(consultation.encounter_date)},
+                          {consultation?.new_discharge_reason === "EXP" ? (
+                            <span>
+                              {" "}
+                              <b>Expired on</b>{" "}
+                              {formatDate(consultation?.death_datetime)}
+                            </span>
+                          ) : (
+                            <span>
+                              {" "}
+                              <b>Discharged on</b>{" "}
+                              {formatDateTime(consultation?.discharge_date)}
+                            </span>
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center rounded border border-gray-500 bg-gray-100 p-1 px-3 text-xs font-semibold leading-4">
+                      <span className="flex">
+                        {consultation?.encounter_date && (
+                          <div>
+                            Admission on:{" "}
+                            {formatDateTime(consultation?.encounter_date)}
+                          </div>
+                        )}
+                        {consultation?.icu_admission_date && (
+                          <div>
+                            , ICU Admission on:{" "}
+                            {formatDateTime(consultation?.icu_admission_date)}
+                          </div>
+                        )}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center justify-center lg:items-start lg:justify-normal">
+              <div className="flex w-full flex-col">
+                {consultation?.diagnoses?.length
+                  ? (() => {
+                      const principal_diagnosis = consultation.diagnoses.find(
+                        (diagnosis) => diagnosis.is_principal
+                      );
+                      return principal_diagnosis ? (
+                        <div className="mt-1 flex flex-col sm:flex-row">
+                          <div className="mr-1 text-sm font-semibold">
+                            Principal Diagnosis:
+                          </div>
+                          <div className="flex gap-2 text-sm">
+                            {principal_diagnosis.diagnosis_object.label}{" "}
+                            <span className="flex items-center rounded border border-primary-500 pl-1 pr-2 text-xs font-medium text-primary-500">
+                              <CareIcon icon="l-check" className="text-base" />
+                              <p className="capitalize">
+                                {principal_diagnosis.verification_status}
+                              </p>
+                            </span>
+                          </div>
+                        </div>
+                      ) : null;
+                    })()
+                  : null}
+                {(consultation?.treating_physician_object ||
+                  consultation?.deprecated_verified_by) && (
+                  <div className="text-sm">
+                    <span className="font-semibold leading-relaxed">
+                      Treating Physician:{" "}
+                    </span>
+                    {consultation?.treating_physician_object
+                      ? `${consultation?.treating_physician_object.first_name} ${consultation?.treating_physician_object.last_name}`
+                      : consultation?.deprecated_verified_by}
+                    <i className="fas fa-check ml-2 fill-current text-sm text-green-500"></i>
                   </div>
                 )}
               </div>
             </div>
-            <div className="flex flex-col items-center gap-2 text-sm sm:flex-row lg:mt-4">
-              {[
-                [
-                  "Respiratory Support",
-                  RESPIRATORY_SUPPORT.find(
-                    (resp) =>
-                      resp.text ===
-                      consultation?.last_daily_round?.ventilator_interface
-                  )?.id ?? "UNKNOWN",
-                  consultation?.last_daily_round?.ventilator_interface,
-                ],
-              ].map((stat, i) => {
-                return stat[2] && stat[1] !== "NONE" ? (
-                  <div
-                    key={"patient_stat_" + i}
-                    className="rounded-lg border border-gray-500 bg-gray-200 px-2 py-1 text-xs"
-                  >
-                    <b>{stat[0]}</b> : {stat[1]}
-                  </div>
-                ) : (
-                  ""
-                );
-              })}
-            </div>
-            {consultation?.discharge_date ? (
-              <div className="mt-3 flex gap-4 bg-cyan-300 px-3 py-1 text-sm font-medium">
-                <div>
-                  <span>
-                    {
-                      CONSULTATION_SUGGESTION.find(
-                        (suggestion) =>
-                          suggestion.id === consultation?.suggestion
-                      )?.text
-                    }{" "}
-                    on {formatDateTime(consultation.encounter_date)},
-                    {consultation?.new_discharge_reason ===
-                    DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id ? (
-                      <span>
-                        {" "}
-                        Expired on {formatDate(consultation?.death_datetime)}
-                      </span>
-                    ) : (
-                      <span>
-                        {" "}
-                        Discharged on{" "}
-                        {formatDateTime(consultation?.discharge_date)}
-                      </span>
-                    )}
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <div className="mt-3 flex gap-4 bg-cyan-300 px-3 py-1 text-sm font-medium">
-                <span className="flex">
-                  {consultation?.encounter_date && (
-                    <div>
-                      Admission on{" "}
-                      {formatDateTime(consultation?.encounter_date)}
-                    </div>
-                  )}
-                  {consultation?.icu_admission_date && (
-                    <div>
-                      , ICU Admission on{" "}
-                      {formatDateTime(consultation?.icu_admission_date)}
-                    </div>
-                  )}
-                </span>
-              </div>
-            )}
           </div>
         </div>
-        {consultation?.last_daily_round && (
-          <div className="flex w-full justify-center bg-white px-4 py-2 lg:w-5/12 lg:flex-row lg:justify-end lg:p-6">
-            <Mews dailyRound={consultation?.last_daily_round} />
-          </div>
-        )}
-
-        <div className="flex w-full flex-col gap-2 px-4 py-1 lg:w-fit lg:p-6">
+        <div
+          className="col-span-2 flex w-full flex-col items-center justify-center gap-2 px-4 py-1 lg:col-span-1 2xl:flex-row"
+          id="consultation-buttons"
+        >
+          {consultation?.last_daily_round && (
+            <div className="col-span-1 flex w-full justify-center bg-white px-4 lg:flex-row">
+              <Mews dailyRound={consultation?.last_daily_round} />
+            </div>
+          )}
           {!!consultation?.discharge_date && (
-            <div className="flex flex-col items-center justify-center">
+            <div className="flex min-w-max flex-col items-center justify-center">
               <div className="text-sm font-normal leading-5 text-gray-500">
                 Discharge Reason
               </div>
-              <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
+              <div className="mt-[6px] text-xl font-semibold leading-5 text-gray-900">
                 {!consultation?.new_discharge_reason ? (
                   <span className="text-gray-800">
                     {consultation.suggestion === "OP"
@@ -398,14 +472,6 @@ export default function PatientInfoCard(props: {
             </div>
           )}
           {[
-            [
-              `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/update`,
-              "Edit Consultation Details",
-              "pen",
-              patient.is_active &&
-                consultation?.id &&
-                !consultation?.discharge_date,
-            ],
             [
               `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/daily-rounds`,
               "Log Update",
@@ -428,7 +494,10 @@ export default function PatientInfoCard(props: {
           ].map(
             (action: any, i) =>
               action[3] && (
-                <div className="relative" key={i}>
+                <div
+                  className="h-10 min-h-[40px] w-full min-w-[170px] lg:w-auto"
+                  key={i}
+                >
                   <ButtonV2
                     key={i}
                     variant={action?.[4]?.[0] ? "danger" : "primary"}
@@ -454,13 +523,13 @@ export default function PatientInfoCard(props: {
                     className="w-full"
                   >
                     <span className="flex w-full items-center justify-center gap-2 lg:justify-start">
-                      <CareIcon className={`care-l-${action[2]} text-lg`} />
+                      <CareIcon className={`care-l-${action[2]} text-xl`} />
                       <p className="font-semibold">{action[1]}</p>
                     </span>
                   </ButtonV2>
                   {action?.[4]?.[0] && (
                     <>
-                      <p className="mt-1 text-xs text-red-500">
+                      <p className="mt-0.5 text-xs text-red-500">
                         {action[4][1]}
                       </p>
                     </>
@@ -471,11 +540,20 @@ export default function PatientInfoCard(props: {
           <DropdownMenu
             id="show-more"
             itemClassName="min-w-0 sm:min-w-[225px]"
-            title={"Show More"}
-            icon={<CareIcon icon="l-sliders-v-alt" />}
+            title={"Manage Patient"}
+            icon={<CareIcon icon="l-setting" className="text-xl" />}
+            containerClassName="w-full lg:w-auto mt-2 2xl:mt-0"
           >
             <div>
               {[
+                [
+                  `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/update`,
+                  "Edit Consultation Details",
+                  "pen",
+                  patient.is_active &&
+                    consultation?.id &&
+                    !consultation?.discharge_date,
+                ],
                 [
                   `/patient/${patient.id}/investigation_reports`,
                   "Investigation Summary",
@@ -551,6 +629,7 @@ export default function PatientInfoCard(props: {
                     )
                 )}
             </div>
+
             <div>
               {enable_abdm &&
                 (patient.abha_number ? (
