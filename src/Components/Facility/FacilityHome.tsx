@@ -222,7 +222,7 @@ export const FacilityHome = (props: any) => {
                 </div>
               </div>
               <div className="flex flex-1 items-center">
-                <div className="mb-6 grid  w-full   gap-4 sm:grid-cols-2   md:mb-0  lg:grid-cols-2">
+                <div className="mb-6 grid w-full gap-4 sm:grid-cols-2 md:mb-0 lg:grid-cols-2">
                   <div className="flex-col justify-between md:flex lg:flex-1 ">
                     <div className="mb-10" id="address-details-view">
                       <h1 className="text-base font-semibold text-[#B9B9B9]">
