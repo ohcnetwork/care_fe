@@ -119,6 +119,7 @@ const DuplicatePatientDialog = (props: Props) => {
           label={`Cancel ${isNew ? "Registration" : "Update"}`}
         />
         <Submit
+          id="submit-continue-button"
           onClick={() => handleOk(action)}
           disabled={!action}
           label="Continue"
