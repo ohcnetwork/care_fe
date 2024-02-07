@@ -126,7 +126,11 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
         )}
       <div className="flex flex-col xl:flex-row">
         <div className="w-full xl:w-2/3">
-          <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
+          <PageTitle
+            title="Basic Information"
+            hideBack={true}
+            breadcrumbs={false}
+          />
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
             {!props.consultationData.discharge_date &&
               ((hl7SocketUrl && !ventilatorSocketUrl) ||
