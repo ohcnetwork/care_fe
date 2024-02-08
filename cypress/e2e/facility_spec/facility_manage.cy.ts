@@ -89,7 +89,8 @@ describe("Facility Manage Functions", () => {
     facilityManage.typeHrfId(facilityHrfId);
     facilityManage.clickButtonWithText(facilityHrfidUpdateButton);
     facilityManage.verifySuccessMessageVisibilityAndContent(
-      facilityHrfidSuccessfullNotification
+      facilityHrfidSuccessfullNotification,
+      true
     );
     // update the existing middleware
     facilityPage.clickManageFacilityDropdown();
@@ -97,7 +98,8 @@ describe("Facility Manage Functions", () => {
     facilityManage.typeHrfId(facilityUpdatedHrfId);
     facilityManage.clickButtonWithText(facilityHrfidUpdateButton);
     facilityManage.verifySuccessMessageVisibilityAndContent(
-      facilityHrfidSuccessfullNotification
+      facilityHrfidSuccessfullNotification,
+      true
     );
     // verify its reflection
     facilityPage.clickManageFacilityDropdown();
