@@ -1,6 +1,6 @@
 import _ from "lodash-es";
 import { navigate } from "raviger";
-import { lazy, useEffect, useState } from "react";
+import { lazy, useState } from "react";
 import CSVReader from "react-csv-reader";
 import useConfig from "../../Common/hooks/useConfig";
 import * as Notification from "../../Utils/Notifications.js";
@@ -12,6 +12,7 @@ import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { IExternalResult } from "./models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
 export default function ExternalResultUpload() {
   const { sample_format_external_result_import } = useConfig();
@@ -20,29 +21,17 @@ export default function ExternalResultUpload() {
   const [csvData, setCsvData] = useState(new Array<IExternalResult>());
   const [errors, setErrors] = useState<any>([]);
   const [validationErrorCount, setValidationErrorCount] = useState(0);
-  const [user, setUser] = useState<any>({});
-  const handleForce = (data: any) => {
+  const authUser = useAuthUser();
+  const handleForce = (data: IExternalResult[]) => {
     setCsvData(data);
     setValidationErrorCount(
       data.filter(
-        (result: IExternalResult) =>
-          result.district !== user.district_object.name
+        (result) => String(result.district) !== authUser.district_object?.name
       ).length
     );
   };
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
-
-  const fetchUser = async () => {
-    const { data: userData } = await request(routes.currentUser, {
-      pathParams: {},
-    });
-    setUser(userData);
-  };
-
-  useEffect(() => {
-    fetchUser();
-  }, []);
 
   const papaparseOptions = {
     header: true,
@@ -67,7 +56,7 @@ export default function ExternalResultUpload() {
               sample_tests: validationErrorCount
                 ? csvData.filter(
                     (data: IExternalResult) =>
-                      data.district === user.district_object.name
+                      String(data.district) !== authUser.district_object?.name
                   )
                 : csvData,
             },
@@ -156,7 +145,7 @@ export default function ExternalResultUpload() {
             <p className="flex justify-end p-2">Total: {csvData.length}</p>
           )}
           <div className=" rounded bg-white shadow">
-            {csvData.map((data: any, index: number) => {
+            {csvData.map((data, index: number) => {
               return (
                 <div key={data.name} className="flex border-b p-2">
                   <div className="mr-2 p-2">{index + 1}</div>
@@ -175,7 +164,8 @@ export default function ExternalResultUpload() {
                       : null}
                   </div>
                   <div>
-                    {data.district !== user.district_object.name && (
+                    {String(data.district) !==
+                      authUser.district_object?.name && (
                       <p className="mt-2 flex items-center justify-center gap-1 text-red-500">
                         <CareIcon icon="l-exclamation-triangle" /> Different
                         districts
