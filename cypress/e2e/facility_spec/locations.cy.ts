@@ -184,7 +184,7 @@ describe("Location Management Section", () => {
     facilityLocation.enterLocationName("Test Location");
     facilityLocation.selectLocationType("OTHER");
     assetPage.clickassetupdatebutton();
-    facilityLocation.deleteFirstLocation();
+    facilityLocation.deleteLocation("Test Location");
     assetPage.clickassetupdatebutton();
     facilityLocation.verifyNotification(
       "Location Test Location deleted successfully"
@@ -202,8 +202,8 @@ describe("Location Management Section", () => {
     facilityLocation.enterBedName("Bed 1");
     facilityLocation.selectBedType("Regular");
     assetPage.clickassetupdatebutton();
-    facilityLocation.clickText("Test Location with Beds");
-    facilityLocation.deleteFirstLocation();
+    facilityLocation.loadLocationManagementPage();
+    facilityLocation.deleteLocation("Test Location with Beds");
     assetPage.clickassetupdatebutton();
     facilityLocation.verifyNotification(
       "Cannot delete a Location with associated Beds"
@@ -217,8 +217,8 @@ describe("Location Management Section", () => {
     facilityLocation.closeNotification();
 
     // delete location
-    facilityLocation.clickText("Test Location with Beds");
-    facilityLocation.deleteFirstLocation();
+    facilityLocation.loadLocationManagementPage();
+    facilityLocation.deleteLocation("Test Location with Beds");
     assetPage.clickassetupdatebutton();
     facilityLocation.verifyNotification(
       "Location Test Location with Beds deleted successfully"
@@ -237,7 +237,7 @@ describe("Location Management Section", () => {
     assetPage.createAsset();
     assetPage.selectFacility("Dummy Facility 40, Ernakulam");
     assetPage.enterAssetDetails(
-      "Test Asset 1",
+      "Test Asset linked to Facility",
       "Test Description",
       "Working",
       qr_id_1,
@@ -255,7 +255,7 @@ describe("Location Management Section", () => {
     assetPage.selectLocation("Test Location with Assets");
     assetPage.clickassetupdatebutton();
     facilityLocation.loadLocationManagementPage();
-    facilityLocation.deleteFirstLocation();
+    facilityLocation.deleteLocation("Test Location with Assets");
     assetPage.clickassetupdatebutton();
     facilityLocation.verifyNotification(
       "Cannot delete a Location with associated Assets"
@@ -264,13 +264,13 @@ describe("Location Management Section", () => {
 
     // delete asset
     facilityLocation.clickManageAssets();
-    assetPage.openAsset("Test Asset 1");
+    assetPage.openCreatedAsset();
     assetPage.deleteAsset();
     facilityLocation.closeNotification();
 
     // delete location
     facilityLocation.loadLocationManagementPage();
-    facilityLocation.deleteFirstLocation();
+    facilityLocation.deleteLocation("Test Location with Assets");
     assetPage.clickassetupdatebutton();
     facilityLocation.verifyNotification(
       "Location Test Location with Assets deleted successfully"

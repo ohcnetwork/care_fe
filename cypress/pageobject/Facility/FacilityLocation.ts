@@ -136,8 +136,12 @@ class FacilityLocation {
     cy.get("#manage-assets").click();
   }
 
-  deleteFirstLocation() {
-    cy.get("button[id=delete-location-button]").first().click();
+  deleteLocation(name: string) {
+    cy.contains("div", name)
+      .should("exist")
+      .then(($div) => {
+        $div.parents("div").eq(2).find("button#delete-location-button").click();
+      });
   }
 
   deleteFirstBed() {
