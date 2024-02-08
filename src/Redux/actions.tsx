@@ -102,9 +102,7 @@ export const updatePatient = (params: object, pathParam: object) => {
 export const patchPatient = (params: object, pathParam: object) => {
   return fireRequest("patchPatient", [], params, pathParam);
 };
-export const transferPatient = (params: object, pathParam: object) => {
-  return fireRequest("transferPatient", [], params, pathParam);
-};
+
 export const getStates = () => {
   return fireRequest("statesList", []);
 };
@@ -131,9 +129,6 @@ export const getWardByLocalBody = (pathParam: object) => {
 // Local Body
 export const getLocalBody = (pathParam: object) => {
   return fireRequest("getLocalBody", [], {}, pathParam);
-};
-export const getAllLocalBody = (params: object) => {
-  return fireRequest("getAllLocalBody", [], params);
 };
 
 // Sample Test

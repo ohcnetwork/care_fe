@@ -16,7 +16,7 @@ interface FacilitySelectProps {
   showAll?: boolean;
   showNOptions?: number;
   freeText?: boolean;
-  selected: FacilityModel | FacilityModel[] | null;
+  selected?: FacilityModel | FacilityModel[] | null;
   setSelected: (selected: FacilityModel | FacilityModel[] | null) => void;
 }
 

@@ -19,6 +19,7 @@ import {
   classNames,
   dateQueryString,
   parsePhoneNumber,
+  scrollTo,
 } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
@@ -353,8 +354,19 @@ export const UserAdd = (props: UserProps) => {
             invalidForm = true;
           }
           return;
-        case "doctor_qualification":
         case "doctor_experience_commenced_on":
+          if (state.form.user_type === "Doctor" && !state.form[field]) {
+            errors[field] = "Field is required";
+            invalidForm = true;
+          } else if (
+            state.form.user_type === "Doctor" &&
+            Number(state.form.doctor_experience_commenced_on) > 100
+          ) {
+            errors[field] = "Doctor experience should be less than 100 years";
+            invalidForm = true;
+          }
+          return;
+        case "doctor_qualification":
         case "doctor_medical_council_registration":
           if (state.form.user_type === "Doctor" && !state.form[field]) {
             errors[field] = "Field is required";
@@ -487,6 +499,10 @@ export const UserAdd = (props: UserProps) => {
     });
     if (invalidForm) {
       dispatch({ type: "set_errors", errors });
+      const firstError = Object.keys(errors).find((e) => errors[e]);
+      if (firstError) {
+        scrollTo(firstError);
+      }
       return false;
     }
     dispatch({ type: "set_errors", errors });
