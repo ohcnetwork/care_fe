@@ -336,7 +336,7 @@ export const ConsultationDetails = (props: any) => {
           </div>
         </nav>
         <div className="mt-2 flex w-full flex-col md:flex-row">
-          <div className="size-full rounded-lg border bg-white text-black shadow">
+          <div className="h-full w-full rounded-lg border bg-white text-black shadow">
             <PatientInfoCard
               patient={patientData}
               consultation={consultationData}

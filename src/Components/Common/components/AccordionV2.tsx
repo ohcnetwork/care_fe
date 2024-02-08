@@ -42,7 +42,7 @@ export default function AccordionV2(props: {
               viewBox="0 0 24 24"
               strokeWidth={2}
               stroke="currentColor"
-              className="size-5"
+              className="h-5 w-5"
             >
               <path
                 strokeLinecap="round"

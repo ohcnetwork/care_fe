@@ -82,7 +82,7 @@ export default function MinQuantityList(props: any) {
                   viewBox="0 0 24 24"
                   strokeWidth={2}
                   stroke="currentColor"
-                  className="size-5"
+                  className="w-5 h-5"
                 >
                   <path
                     strokeLinecap="round"

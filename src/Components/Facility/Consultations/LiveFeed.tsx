@@ -394,7 +394,7 @@ const LiveFeed = (props: any) => {
                   autoPlay
                   muted
                   playsInline
-                  className="z-10 size-full"
+                  className="z-10 w-full h-full"
                   ref={liveFeedPlayerRef}
                   onPlay={() => {
                     setVideoStartTime(() => new Date());
@@ -411,7 +411,7 @@ const LiveFeed = (props: any) => {
               {streamStatus === StreamStatus.Playing &&
                 calculateVideoLiveDelay() > 3 && (
                   <div className="absolute left-8 top-12 z-10 flex items-center gap-2 rounded-3xl bg-red-400 px-3 py-1.5 text-xs font-semibold text-gray-100">
-                    <CareIcon className="care-l-wifi-slash size-4" />
+                    <CareIcon className="care-l-wifi-slash w-4 h-4" />
                     <span>Slow Network Detected</span>
                   </div>
                 )}
@@ -419,13 +419,13 @@ const LiveFeed = (props: any) => {
               {loading && (
                 <div className="absolute bottom-0 right-0 rounded-tl bg-white/75 p-4">
                   <div className="flex items-center gap-2">
-                    <div className="an size-4 animate-spin rounded-full border-2 border-b-0 border-primary-500" />
+                    <div className="an w-4 h-4 animate-spin rounded-full border-2 border-b-0 border-primary-500" />
                     <p className="text-base font-bold">{loading}</p>
                   </div>
                 </div>
               )}
               {/* { streamStatus > 0 && */}
-              <div className="absolute bottom-0 right-0 flex size-full items-center justify-center p-4">
+              <div className="absolute bottom-0 right-0 flex w-full h-full items-center justify-center p-4">
                 {streamStatus === StreamStatus.Offline && (
                   <div className="text-center">
                     <p className="font-bold text-black">

@@ -49,7 +49,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
     <div key={`usr_${facility.id}`} className="w-full">
       <div className="block h-full overflow-hidden rounded-lg bg-white shadow hover:border-primary-500">
         <div className="flex h-full">
-          <div className="size-full grow">
+          <div className="h-full w-full grow">
             <Link
               href={`/facility/${facility.id}`}
               className="group relative z-0 flex w-full min-w-[15%] items-center justify-center self-stretch bg-gray-300 min-[425px]:hidden"
@@ -58,7 +58,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                 <img
                   src={facility.read_cover_image_url}
                   alt={facility.name}
-                  className="size-full max-h-32 object-cover"
+                  className="h-full w-full max-h-32 object-cover"
                 />
               )) || (
                 <i className="fas fa-hospital block p-10 text-4xl text-gray-500" />
@@ -70,13 +70,13 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                 <div className="flex gap-5">
                   <Link
                     href={`/facility/${facility.id}`}
-                    className="group relative z-0 hidden size-[150px] min-h-[150px] min-w-[150px] items-center justify-center self-stretch rounded-md bg-gray-300 min-[425px]:flex"
+                    className="group relative z-0 hidden w-[150px] h-[150px] min-h-[150px] min-w-[150px] items-center justify-center self-stretch rounded-md bg-gray-300 min-[425px]:flex"
                   >
                     {(facility.read_cover_image_url && (
                       <img
                         src={facility.read_cover_image_url}
                         alt={facility.name}
-                        className="size-full rounded-md object-cover"
+                        className="w-full h-full rounded-md object-cover"
                       />
                     )) || (
                       <i className="fas fa-hospital block text-4xl text-gray-500" />

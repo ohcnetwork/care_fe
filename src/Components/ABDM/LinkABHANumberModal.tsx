@@ -752,7 +752,7 @@ const VerifyMobileSection = ({
         />
       ) : (
         <p className="-mt-4 text-sm text-warning-600">
-          <CareIcon className="care-l-exclamation-triangle size-4" /> OTP is
+          <CareIcon className="care-l-exclamation-triangle w-4 h-4" /> OTP is
           generated if the above phone number is not linked with given Aadhaar
           number.
         </p>
@@ -833,7 +833,7 @@ const CreateHealthIDSection = ({
       />
 
       <p className="-mt-4 text-sm text-warning-600">
-        <CareIcon className="care-l-exclamation-triangle size-4" /> Existing
+        <CareIcon className="care-l-exclamation-triangle h-4 w-4" /> Existing
         ABHA Address is used if ABHA Number already exists.
       </p>
 

@@ -804,7 +804,7 @@ export const FileUpload = (props: FileUploadProps) => {
                           viewBox="0 0 24 24"
                           strokeWidth={1.5}
                           stroke="currentColor"
-                          className="absolute bottom-1 right-1 size-6 text-red-600"
+                          className="absolute bottom-1 right-1 w-6 h-6 text-red-600"
                         >
                           <path
                             strokeLinecap="round"
@@ -823,7 +823,7 @@ export const FileUpload = (props: FileUploadProps) => {
                           viewBox="0 0 24 24"
                           strokeWidth={1.5}
                           stroke="currentColor"
-                          className="absolute bottom-1 right-1 size-6 text-red-600"
+                          className="absolute bottom-1 right-1 w-6 h-6 text-red-600"
                         >
                           <path
                             strokeLinecap="round"

@@ -73,7 +73,7 @@ export const Mews = ({ dailyRound }: { dailyRound: DailyRoundsModel }) => {
       return (
         <>
           <div className="tooltip flex flex-col items-center">
-            <div className="border-grey-400 flex size-7 items-center justify-center rounded-full border-2">
+            <div className="border-grey-400 flex w-h h-7 items-center justify-center rounded-full border-2">
               <span className="text-sm font-semibold">-</span>
             </div>
             <span className="mt-1 text-xs font-medium text-gray-700">MEWS</span>
@@ -91,7 +91,7 @@ export const Mews = ({ dailyRound }: { dailyRound: DailyRoundsModel }) => {
         <>
           <div className="tooltip flex flex-col items-center">
             <div
-              className={`flex size-7 items-center justify-center rounded-full border-2 ${getBorderColor(
+              className={`flex w-7 h-7 items-center justify-center rounded-full border-2 ${getBorderColor(
                 Number(data)
               )}`}
             >

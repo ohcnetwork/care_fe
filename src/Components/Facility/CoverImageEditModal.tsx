@@ -182,7 +182,7 @@ const CoverImageEditModal = ({
       description={facility.name}
       className="md:max-w-4xl"
     >
-      <div className="flex size-full items-center justify-center overflow-y-auto">
+      <div className="flex w-full h-full items-center justify-center overflow-y-auto">
         {!isCameraOpen ? (
           <form className="flex max-h-screen min-h-[24rem] w-full flex-col overflow-auto">
             {hasImage ? (
@@ -191,7 +191,7 @@ const CoverImageEditModal = ({
                   <img
                     src={imgSrc}
                     alt={facility.name}
-                    className="size-full object-cover"
+                    className="w-full h-full object-cover"
                   />
                 </div>
                 <p className="text-center font-medium text-gray-700">
@@ -216,7 +216,7 @@ const CoverImageEditModal = ({
                   fill="none"
                   viewBox="0 0 48 48"
                   aria-hidden="true"
-                  className={`size-12 stroke-[2px] ${
+                  className={`w-12 h-12 stroke-[2px] ${
                     dragProps.dragOver && "text-primary-500"
                   } ${
                     dragProps.fileDropError !== ""

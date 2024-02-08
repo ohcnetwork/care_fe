@@ -393,7 +393,7 @@ const AssetCreate = (props: AssetProps) => {
       >
         <section className="text-center">
           <h1 className="flex flex-col items-center py-10 text-6xl">
-            <div className="flex size-40 items-center justify-center rounded-full bg-gray-200 p-5">
+            <div className="flex h-40 w-40 items-center justify-center rounded-full bg-gray-200 p-5">
               <CareIcon className="care-l-map-marker text-green-600" />
             </div>
           </h1>
@@ -500,7 +500,7 @@ const AssetCreate = (props: AssetProps) => {
               );
             })}
           </div>
-          <div className="flex size-full overflow-auto xl:ml-72">
+          <div className="flex h-full w-full overflow-auto xl:ml-72">
             <div className="w-full max-w-3xl 2xl:max-w-4xl">
               <form
                 onSubmit={(e) => handleSubmit(e, false)}

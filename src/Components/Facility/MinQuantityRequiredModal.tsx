@@ -103,7 +103,7 @@ export const MinQuantityRequiredModal = (props: any) => {
           <div role="status">
             <svg
               aria-hidden="true"
-              className="mr-2 size-8 animate-spin fill-primary text-gray-200 dark:text-gray-600"
+              className="mr-2 w-8 h-8 animate-spin fill-primary text-gray-200 dark:text-gray-600"
               viewBox="0 0 100 101"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"

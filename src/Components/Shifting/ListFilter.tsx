@@ -218,7 +218,7 @@ export default function ListFilter(props: any) {
         <FieldLabel>{t("origin_facility")}</FieldLabel>
         <div className="">
           {isOriginLoading ? (
-            <CircularProgress className="size-5" />
+            <CircularProgress className="w-5 h-5" />
           ) : (
             <FacilitySelect
               multiple={false}
@@ -236,7 +236,7 @@ export default function ListFilter(props: any) {
           <FieldLabel>{t("shifting_approving_facility")}</FieldLabel>
           <div className="">
             {isShiftingLoading ? (
-              <CircularProgress className="size-5" />
+              <CircularProgress className="w-5 h-5" />
             ) : (
               <FacilitySelect
                 multiple={false}
@@ -256,7 +256,7 @@ export default function ListFilter(props: any) {
         <FieldLabel>{t("assigned_facility")}</FieldLabel>
         <div className="">
           {isAssignedLoading ? (
-            <CircularProgress className="size-5" />
+            <CircularProgress className="w-5 h-5" />
           ) : (
             <FacilitySelect
               multiple={false}
@@ -270,7 +270,7 @@ export default function ListFilter(props: any) {
       </div>
 
       {isAssignedLoading ? (
-        <CircularProgress className="size-5" />
+        <CircularProgress className="w-5 h-5" />
       ) : (
         <UserAutocompleteFormField
           label={t("assigned_to")}
