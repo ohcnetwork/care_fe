@@ -86,36 +86,6 @@ export const PatientHome = (props: any) => {
     },
   });
 
-  const handleAssignedVolunteer = async () => {
-    const { res } = await request(routes.patchPatient, {
-      pathParams: {
-        id: patientData.id as string,
-      },
-      body: {
-        assigned_to: assignedVolunteerObject
-          ? assignedVolunteerObject.id
-          : null,
-      },
-    });
-    if (res?.ok) {
-      const dummyPatientData = Object.assign({}, patientData);
-      dummyPatientData["assigned_to"] = assignedVolunteerObject;
-      setPatientData(dummyPatientData);
-      if (assignedVolunteerObject) {
-        Notification.Success({
-          msg: "Volunteer assigned successfully.",
-        });
-      } else {
-        Notification.Success({
-          msg: "Volunteer unassigned successfully.",
-        });
-        document.location.reload();
-      }
-    }
-    setOpenAssignVolunteerDialog(false);
-    if (errors["assignedVolunteer"]) delete errors["assignedVolunteer"];
-  };
-
   const handlePatientTransfer = async (value: boolean) => {
     const dummyPatientData = Object.assign({}, patientData);
     dummyPatientData["allow_transfer"] = value;
@@ -145,7 +115,7 @@ export const PatientHome = (props: any) => {
     setAssignedVolunteerObject(volunteer.value);
   };
 
-  const { loading: isLoading } = useQuery(routes.getPatient, {
+  const { loading: isLoading, refetch } = useQuery(routes.getPatient, {
     pathParams: {
       id,
     },
@@ -160,7 +130,37 @@ export const PatientHome = (props: any) => {
     },
   });
 
-  const { loading: isShiftDataLoaded, data: activeShiftingData } = useQuery(
+  const handleAssignedVolunteer = async () => {
+    const { res } = await request(routes.patchPatient, {
+      pathParams: {
+        id: patientData.id as string,
+      },
+      body: {
+        assigned_to: assignedVolunteerObject
+          ? assignedVolunteerObject.id
+          : null,
+      },
+    });
+    if (res?.ok) {
+      const dummyPatientData = Object.assign({}, patientData);
+      dummyPatientData["assigned_to"] = assignedVolunteerObject;
+      setPatientData(dummyPatientData);
+      if (assignedVolunteerObject) {
+        Notification.Success({
+          msg: "Volunteer assigned successfully.",
+        });
+      } else {
+        Notification.Success({
+          msg: "Volunteer unassigned successfully.",
+        });
+      }
+      refetch();
+    }
+    setOpenAssignVolunteerDialog(false);
+    if (errors["assignedVolunteer"]) delete errors["assignedVolunteer"];
+  };
+
+  const { loading: isShiftDataLoading, data: activeShiftingData } = useQuery(
     routes.listShiftRequests,
     {
       query: {
@@ -832,7 +832,7 @@ export const PatientHome = (props: any) => {
               ))
             ) : (
               <div className=" text-center text-gray-500">
-                {isShiftDataLoaded ? "No Shifting Records!" : "Loading..."}
+                {isShiftDataLoading ? "Loading..." : "No Shifting Records!"}
               </div>
             )}
           </div>
