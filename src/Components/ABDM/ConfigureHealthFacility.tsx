@@ -121,6 +121,7 @@ export const ConfigureHealthFacility = (props: any) => {
         Notification.Warn({
           msg: responseData?.detail || "Health ID registration failed",
         });
+        navigate(`/facility/${facilityId}`);
       } else {
         Notification.Error({
           msg: responseData?.detail || "Health Facility config update failed",

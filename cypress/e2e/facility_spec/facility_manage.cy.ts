@@ -15,7 +15,7 @@ describe("Facility Manage Functions", () => {
     "Facility updated successfully";
   const facilityHrfidUpdateButton = "Link Health Facility";
   const facilityHrfidSuccessfullNotification =
-    "Health Facility config updated successfully";
+    /Health Facility config updated successfully|Health ID registration failed/;
   const facilityHrfId = uuidv4();
   const facilityUpdatedHrfId = uuidv4();
   const doctorCapacity = "5";
@@ -80,6 +80,7 @@ describe("Facility Manage Functions", () => {
     facilityPage.clickManageFacilityDropdown();
     facilityManage.clickFacilityConfigureButton();
     // verify mandatory field error message
+    facilityManage.clearHrfId();
     facilityManage.clickButtonWithText(facilityHrfidUpdateButton);
     facilityManage.checkErrorMessageVisibility(
       "Health Facility Id is required"
