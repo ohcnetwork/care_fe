@@ -252,8 +252,10 @@ export const FacilityCreate = (props: FacilityProps) => {
                 ? "+91" + data.phone_number
                 : data.phone_number
               : "",
-            latitude: data.latitude ? String(data.latitude) : "",
-            longitude: data.longitude ? String(data.longitude) : "",
+            latitude: data.latitude ? parseFloat(data.latitude).toFixed(7) : "",
+            longitude: data.longitude
+              ? parseFloat(data.longitude).toFixed(7)
+              : "",
             type_b_cylinders: data.type_b_cylinders,
             type_c_cylinders: data.type_c_cylinders,
             type_d_cylinders: data.type_d_cylinders,
@@ -292,8 +294,8 @@ export const FacilityCreate = (props: FacilityProps) => {
         type: "set_form",
         form: {
           ...state.form,
-          latitude: location.lat().toString(),
-          longitude: location.lng().toString(),
+          latitude: location.lat().toFixed(7),
+          longitude: location.lng().toFixed(7),
         },
       });
     }

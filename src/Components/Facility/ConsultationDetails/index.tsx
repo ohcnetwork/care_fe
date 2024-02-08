@@ -15,7 +15,6 @@ import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { lazy, useCallback, useState } from "react";
 import DoctorVideoSlideover from "../DoctorVideoSlideover";
 import { make as Link } from "../../Common/components/Link.bs";
-import PatientInfoCard from "../../Patient/PatientInfoCard";
 import { PatientModel } from "../../Patient/models";
 import { formatDateTime, relativeTime } from "../../../Utils/utils";
 
@@ -38,8 +37,10 @@ import { ConsultationNeurologicalMonitoringTab } from "./ConsultationNeurologica
 import ABDMRecordsTab from "../../ABDM/ABDMRecordsTab";
 import { ConsultationNutritionTab } from "./ConsultationNutritionTab";
 import PatientNotesSlideover from "../PatientNotesSlideover";
-import LegacyDiagnosesList from "../../Diagnosis/LegacyDiagnosesList";
 import { AssetBedModel } from "../../Assets/AssetTypes";
+import PatientInfoCard from "../../Patient/PatientInfoCard";
+import RelativeDateUserMention from "../../Common/RelativeDateUserMention";
+import DiagnosesListAccordion from "../../Diagnosis/DiagnosesListAccordion";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
@@ -335,7 +336,7 @@ export const ConsultationDetails = (props: any) => {
           </div>
         </nav>
         <div className="mt-2 flex w-full flex-col md:flex-row">
-          <div className="h-full w-full rounded-lg border bg-white text-black shadow">
+          <div className="size-full rounded-lg border bg-white text-black shadow">
             <PatientInfoCard
               patient={patientData}
               consultation={consultationData}
@@ -345,7 +346,7 @@ export const ConsultationDetails = (props: any) => {
               showAbhaProfile={qParams["show-abha-profile"] === "true"}
             />
 
-            <div className="flex flex-col justify-between border-t px-4 pt-5 md:flex-row">
+            <div className="flex flex-col justify-between px-4 md:flex-row">
               {consultationData.admitted_to && (
                 <div className="mt-2 rounded-lg border bg-gray-100 p-2 md:mt-0">
                   <div className="border-b-2 py-1">
@@ -376,71 +377,39 @@ export const ConsultationDetails = (props: any) => {
                 </div>
               )}
             </div>
-
-            <div className="flex flex-col-reverse gap-2 px-4 lg:flex-row">
-              <div className="flex h-full w-3/4 flex-col">
-                {/*consultationData.other_symptoms && (
-                  <div className="capitalize">
-                    <span className="font-semibold leading-relaxed">
-                      Other Symptoms:{" "}
-                    </span>
-                    {consultationData.other_symptoms}
-                  </div>
-                )*/}
-
-                <LegacyDiagnosesList
-                  diagnoses={consultationData.diagnoses || []}
-                />
-
-                {(consultationData.treating_physician_object ||
-                  consultationData.deprecated_verified_by) && (
-                  <div className="mt-2 text-sm">
-                    <span className="font-semibold leading-relaxed">
-                      Treating Physician:{" "}
-                    </span>
-                    {consultationData.treating_physician_object
-                      ? `${consultationData.treating_physician_object.first_name} ${consultationData.treating_physician_object.last_name}`
-                      : consultationData.deprecated_verified_by}
-                    <i className="fas fa-check ml-2 fill-current text-lg text-green-500"></i>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="flex flex-col justify-between gap-2 p-4 md:flex-row">
+            <div className="flex flex-col justify-between gap-2 px-4 py-1 md:flex-row">
               <div className="font-base flex flex-col text-xs leading-relaxed text-gray-700">
-                <div>
-                  <span className="text-gray-900">Created: </span>
-                  {consultationData.created_date
-                    ? formatDateTime(consultationData.created_date)
-                    : "--:--"}{" "}
-                  |
+                <div className="flex">
+                  <span className="text-gray-900">Created: </span>&nbsp;
+                  <RelativeDateUserMention
+                    actionDate={consultationData.created_date}
+                    user={consultationData.created_by}
+                    tooltipPosition="right"
+                    withoutSuffix={true}
+                  />
                 </div>
-                {consultationData.created_by && (
-                  <div>
-                    {` ${consultationData.created_by.first_name} ${consultationData.created_by.last_name}  `}
-                    {`@${consultationData.created_by.username} (${consultationData.created_by.user_type})`}
-                  </div>
-                )}
               </div>
               <div className="font-base flex flex-col text-xs leading-relaxed text-gray-700 md:text-right">
-                <div>
-                  <span className="text-gray-900">Last Modified: </span>
-                  {consultationData.modified_date
-                    ? formatDateTime(consultationData.modified_date)
-                    : "--:--"}{" "}
-                  |
+                <div className="flex">
+                  <span className="text-gray-900">Last Modified: </span>&nbsp;
+                  <RelativeDateUserMention
+                    actionDate={consultationData.modified_date}
+                    user={consultationData.last_edited_by}
+                    tooltipPosition="left"
+                    withoutSuffix={true}
+                  />
                 </div>
-                {consultationData.last_edited_by && (
-                  <div>
-                    {` ${consultationData.last_edited_by.first_name} ${consultationData.last_edited_by.last_name}  `}
-                    {`@${consultationData.last_edited_by.username} (${consultationData.last_edited_by.user_type})`}
-                  </div>
-                )}
               </div>
             </div>
           </div>
         </div>
-
+        <div className="col-span-1 mt-2 overflow-hidden rounded-lg bg-white shadow">
+          <div className="px-4 py-2">
+            <DiagnosesListAccordion
+              diagnoses={consultationData.diagnoses ?? []}
+            />
+          </div>
+        </div>
         <div className="mt-4 w-full border-b-2 border-gray-200">
           <div className="overflow-x-auto sm:flex sm:items-baseline">
             <div className="mt-4 sm:mt-0">

@@ -126,7 +126,11 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
         )}
       <div className="flex flex-col xl:flex-row">
         <div className="w-full xl:w-2/3">
-          <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
+          <PageTitle
+            title="Basic Information"
+            hideBack={true}
+            breadcrumbs={false}
+          />
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
             {!props.consultationData.discharge_date &&
               ((hl7SocketUrl && !ventilatorSocketUrl) ||
@@ -342,7 +346,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         <span className="text-xs font-semibold leading-relaxed text-gray-800">
                           from{" "}
                           {formatDate(
-                            props.consultationData.last_daily_round.created_at
+                            props.consultationData.last_daily_round.taken_at
                           )}
                         </span>
                       </>
@@ -602,58 +606,59 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
               </div>
             </div>
           )}
-
-          <div className="mt-4 overflow-hidden rounded-lg bg-white shadow">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                Body Details
-              </h3>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div>
-                  Gender {" - "}
-                  <span className="font-semibold">
-                    {props.patientData.gender ?? "-"}
-                  </span>
-                </div>
-                <div>
-                  Age {" - "}
-                  <span className="font-semibold">
-                    {props.patientData.age !== undefined // 0 is a valid age, so we need to check for undefined
-                      ? formatAge(
-                          props.patientData.age,
-                          props.patientData.date_of_birth
-                        )
-                      : "-"}
-                  </span>
-                </div>
-                <div>
-                  Weight {" - "}
-                  <span className="font-semibold">
-                    {props.consultationData.weight ?? "-"} Kg
-                  </span>
-                </div>
-                <div>
-                  Height {" - "}
-                  <span className="font-semibold">
-                    {props.consultationData.height ?? "-"} cm
-                  </span>
-                </div>
-                <div>
-                  Body Surface Area {" - "}
-                  <span className="font-semibold">
-                    {Math.sqrt(
-                      (Number(props.consultationData.weight) *
-                        Number(props.consultationData.height)) /
-                        3600
-                    ).toFixed(2)}{" "}
-                    m<sup>2</sup>
-                  </span>
-                </div>
-                <div>
-                  Blood Group {" - "}
-                  <span className="font-semibold">
-                    {props.patientData.blood_group ?? "-"}
-                  </span>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="col-span-1 mt-4 overflow-hidden rounded-lg bg-white shadow">
+              <div className="px-4 py-5 sm:p-6">
+                <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                  Body Details
+                </h3>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    Gender {" - "}
+                    <span className="font-semibold">
+                      {props.patientData.gender ?? "-"}
+                    </span>
+                  </div>
+                  <div>
+                    Age {" - "}
+                    <span className="font-semibold">
+                      {props.patientData.age !== undefined // 0 is a valid age, so we need to check for undefined
+                        ? formatAge(
+                            props.patientData.age,
+                            props.patientData.date_of_birth
+                          )
+                        : "-"}
+                    </span>
+                  </div>
+                  <div>
+                    Weight {" - "}
+                    <span className="font-semibold">
+                      {props.consultationData.weight ?? "-"} Kg
+                    </span>
+                  </div>
+                  <div>
+                    Height {" - "}
+                    <span className="font-semibold">
+                      {props.consultationData.height ?? "-"} cm
+                    </span>
+                  </div>
+                  <div>
+                    Body Surface Area {" - "}
+                    <span className="font-semibold">
+                      {Math.sqrt(
+                        (Number(props.consultationData.weight) *
+                          Number(props.consultationData.height)) /
+                          3600
+                      ).toFixed(2)}{" "}
+                      m<sup>2</sup>
+                    </span>
+                  </div>
+                  <div>
+                    Blood Group {" - "}
+                    <span className="font-semibold">
+                      {props.patientData.blood_group ?? "-"}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

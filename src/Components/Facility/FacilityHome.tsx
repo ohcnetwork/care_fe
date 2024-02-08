@@ -106,7 +106,7 @@ export const FacilityHome = (props: any) => {
   const editCoverImageTooltip = hasPermissionToEditCoverImage && (
     <div
       id="facility-coverimage"
-      className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center bg-black text-sm text-gray-300 opacity-0 transition-[opacity] hover:opacity-60 md:h-[88px]"
+      className="absolute right-0 top-0 z-10 flex size-full flex-col items-center justify-center bg-black text-sm text-gray-300 opacity-0 transition-[opacity] hover:opacity-60 md:h-[88px]"
     >
       <i className="fa-solid fa-pen" />
       <span className="mt-2">{`${hasCoverImage ? "Edit" : "Upload"}`}</span>
@@ -117,7 +117,7 @@ export const FacilityHome = (props: any) => {
     <img
       src={`${facilityData?.read_cover_image_url}?imgKey=${imageKey}`}
       alt={facilityData?.name}
-      className="h-full w-full object-cover"
+      className="size-full object-cover"
     />
   );
 
@@ -188,7 +188,7 @@ export const FacilityHome = (props: any) => {
             <div className="flex flex-1 flex-col gap-10">
               <div className="flex items-center gap-4">
                 <div
-                  className={`group relative hidden h-[88px] w-[88px] text-clip rounded transition-all duration-200 ease-in-out md:flex ${
+                  className={`group relative hidden size-[88px] text-clip rounded transition-all duration-200 ease-in-out md:flex ${
                     hasPermissionToEditCoverImage && "cursor-pointer"
                   }`}
                   onClick={() =>
@@ -200,7 +200,7 @@ export const FacilityHome = (props: any) => {
                   ) : (
                     <div className="flex h-[88px] w-full items-center justify-center bg-gray-200 font-medium text-gray-700">
                       <svg
-                        className="h-8 w-8 fill-current text-gray-500"
+                        className="size-8 fill-current text-gray-500"
                         viewBox="0 0 40 32"
                         xmlns="http://www.w3.org/2000/svg"
                       >
@@ -222,7 +222,7 @@ export const FacilityHome = (props: any) => {
                 </div>
               </div>
               <div className="flex flex-1 items-center">
-                <div className="mb-6 grid  w-full grid-cols-1 gap-4 md:mb-0 lg:grid-cols-2">
+                <div className="mb-6 grid w-full gap-4 sm:grid-cols-2 md:mb-0 lg:grid-cols-2">
                   <div className="flex-col justify-between md:flex lg:flex-1 ">
                     <div className="mb-10" id="address-details-view">
                       <h1 className="text-base font-semibold text-[#B9B9B9]">
@@ -242,7 +242,7 @@ export const FacilityHome = (props: any) => {
                       </div>
                     </div>
                   </div>
-                  <div className="min-w-[300px] flex-col md:flex lg:flex-1">
+                  <div className="flex-col md:flex lg:flex-1">
                     <div className="mb-10">
                       <h1 className="text-base font-semibold text-[#B9B9B9]">
                         Local Body
@@ -251,7 +251,7 @@ export const FacilityHome = (props: any) => {
                         {facilityData?.local_body_object?.name}
                       </p>
                     </div>
-                    <div className="flex flex-col gap-10 md:flex-row">
+                    <div className="flex flex-col flex-wrap gap-10 md:flex-row">
                       <div>
                         <h1 className="text-base font-semibold text-[#B9B9B9]">
                           Ward
@@ -401,7 +401,7 @@ export const FacilityHome = (props: any) => {
                 )}
               </DropdownMenu>
             </div>
-            <div className="flex flex-col justify-end">
+            <div className="sm:grid sm:grid-cols-2 sm:gap-2 md:grid md:grid-cols-2 md:gap-2 lg:flex lg:flex-col lg:justify-end lg:gap-0 ">
               <ButtonV2
                 id="facility-detailspage-cns"
                 variant="primary"
