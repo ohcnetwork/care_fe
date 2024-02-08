@@ -50,21 +50,22 @@ export default function SampleViewAdmin() {
     prefetch: !!qParams.facility,
   });
 
-  const { loading: isLoading, data: sampeleData } = useQuery(
-    routes.getTestSampleList,
-    {
-      query: {
-        limit: resultsPerPage,
-        offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
-        patient_name: qParams.patient_name || undefined,
-        district_name: qParams.district_name || undefined,
-        status: qParams.status || undefined,
-        result: qParams.result || undefined,
-        facility: qParams.facility || undefined,
-        sample_type: qParams.sample_type || undefined,
-      },
-    }
-  );
+  const {
+    loading: isLoading,
+    data: sampeleData,
+    refetch,
+  } = useQuery(routes.getTestSampleList, {
+    query: {
+      limit: resultsPerPage,
+      offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
+      patient_name: qParams.patient_name || undefined,
+      district_name: qParams.district_name || undefined,
+      status: qParams.status || undefined,
+      result: qParams.result || undefined,
+      facility: qParams.facility || undefined,
+      sample_type: qParams.sample_type || undefined,
+    },
+  });
 
   const handleApproval = async (
     sample: SampleTestModel,
@@ -92,6 +93,7 @@ export default function SampleViewAdmin() {
           Notification.Success({
             msg: `Success - ${statusName}`,
           });
+          refetch();
         }
         dismissUpdateStatus();
       },
@@ -368,7 +370,11 @@ export default function SampleViewAdmin() {
                 (type) => type.id === qParams.sample_type
               )?.text || ""
             ),
-            value("Facility", "facility", facilityData?.name || ""),
+            value(
+              "Facility",
+              "facility",
+              qParams.facility ? facilityData?.name || "" : ""
+            ),
           ]}
         />
       </div>
