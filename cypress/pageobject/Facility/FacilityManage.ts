@@ -63,11 +63,11 @@ class FacilityManage {
     cy.get("#middleware_address").click().clear().click().type(address);
   }
 
-  clearHrfId() {
+  clearHfrId() {
     cy.get("#hf_id").click().clear();
   }
 
-  typeHrfId(address) {
+  typeHfrId(address) {
     cy.get("#hf_id").click().clear().click().type(address);
   }
 
@@ -79,7 +79,7 @@ class FacilityManage {
     cy.get("#middleware_address").should("have.value", expectedValue);
   }
 
-  verifyHrfIdValue(expectedValue) {
+  verifyHfrIdValue(expectedValue) {
     cy.get("#hf_id").should("have.value", expectedValue);
   }
 
