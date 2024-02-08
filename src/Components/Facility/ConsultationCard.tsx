@@ -163,6 +163,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
                 `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds`
               )
             }
+            disabled={itemData.discharge_date}
             authorizeFor={NonReadOnlyUsers}
           >
             Add Consultation Updates

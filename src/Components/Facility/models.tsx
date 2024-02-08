@@ -572,3 +572,10 @@ export type InventoryLogResponse = InventorySummaryResponse & {
   unit: number;
   created_by: number;
 };
+
+export type PatientTransferResponse = {
+  id: string;
+  patient: string;
+  date_of_birth: string;
+  facility_object: BaseFacilityModel;
+};

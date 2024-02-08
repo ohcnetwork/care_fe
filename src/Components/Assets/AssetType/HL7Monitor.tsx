@@ -69,6 +69,11 @@ const HL7Monitor = (props: HL7MonitorProps) => {
   };
 
   if (isLoading) return <Loading />;
+
+  const socketUrl = `wss://${
+    middlewareHostname || resolvedMiddleware?.hostname
+  }/observations/${localipAddress}`;
+
   return (
     <div className="mx-auto flex w-full xl:mt-8">
       <div className="mx-auto flex flex-col gap-4 xl:flex-row-reverse">
@@ -126,13 +131,12 @@ const HL7Monitor = (props: HL7MonitorProps) => {
         )}
 
         {assetType === "HL7MONITOR" && (
-          <HL7PatientVitalsMonitor
-            socketUrl={`wss://${resolvedMiddleware?.hostname}/observations/${localipAddress}`}
-          />
+          <HL7PatientVitalsMonitor key={socketUrl} socketUrl={socketUrl} />
         )}
         {assetType === "VENTILATOR" && (
           <VentilatorPatientVitalsMonitor
-            socketUrl={`wss://${resolvedMiddleware?.hostname}/observations/${localipAddress}`}
+            key={socketUrl}
+            socketUrl={socketUrl}
           />
         )}
       </div>
