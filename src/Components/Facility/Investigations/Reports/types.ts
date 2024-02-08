@@ -18,6 +18,8 @@ export interface Investigation {
   session_object: {
     session_external_id: string;
     session_created_date: string;
+    facility_name: string;
+    facility_id: string;
   };
   value: number | null;
   notes: any;
