@@ -401,13 +401,16 @@ export const ConsultationDetails = (props: any) => {
             </div>
           </div>
         </div>
-        <div className="col-span-1 mt-2 overflow-hidden rounded-lg bg-white shadow">
-          <div className="px-4 py-2">
-            <DiagnosesListAccordion
-              diagnoses={consultationData.diagnoses ?? []}
-            />
-          </div>
-        </div>
+        {consultationData.diagnoses &&
+          consultationData.diagnoses.length > 0 && (
+            <div className="col-span-1 mt-2 overflow-hidden rounded-lg bg-white shadow">
+              <div className="px-4 py-2">
+                <DiagnosesListAccordion
+                  diagnoses={consultationData.diagnoses ?? []}
+                />
+              </div>
+            </div>
+          )}
         <div className="mt-4 w-full border-b-2 border-gray-200">
           <div className="overflow-x-auto sm:flex sm:items-baseline">
             <div className="mt-4 sm:mt-0">
