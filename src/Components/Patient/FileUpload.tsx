@@ -653,6 +653,7 @@ export const FileUpload = (props: FileUploadProps) => {
                           authUser.user_type === "StateAdmin" ? (
                             <>
                               <ButtonV2
+                                id="edit-file-name"
                                 onClick={() => {
                                   setModalDetails({
                                     name: item.name,
@@ -675,6 +676,7 @@ export const FileUpload = (props: FileUploadProps) => {
                           authUser.user_type === "StateAdmin" ? (
                             <>
                               <ButtonV2
+                                id="archive-file"
                                 onClick={() => {
                                   setArchiveReason("");
                                   setModalDetails({
@@ -710,7 +712,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       ></i>
                     </div>
                     <div>
-                      <div>
+                      <div id="file-name">
                         <span className="font-semibold leading-relaxed">
                           File Name:{" "}
                         </span>{" "}
@@ -753,6 +755,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       <>
                         {" "}
                         <ButtonV2
+                          id="edit-file-name"
                           onClick={() => {
                             setModalDetails({ name: item.name, id: item.id });
                             setEditFileName(item?.name);
@@ -773,6 +776,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       authUser.user_type === "StateAdmin") ? (
                       <>
                         <ButtonV2
+                          id="archive-file"
                           onClick={() => {
                             setArchiveReason("");
                             setModalDetails({ name: item.name, id: item.id });
@@ -841,7 +845,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     )}
                   </div>
                   <div>
-                    <div>
+                    <div id="file-name">
                       <span className="font-semibold leading-relaxed">
                         File Name:{" "}
                       </span>{" "}
@@ -1492,6 +1496,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   {audioBlobExists && (
                     <div className="flex w-full items-center md:w-auto">
                       <ButtonV2
+                        id={"upload-audio-file"}
                         onClick={() => {
                           handleAudioUpload();
                         }}
