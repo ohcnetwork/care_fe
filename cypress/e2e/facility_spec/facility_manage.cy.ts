@@ -38,43 +38,43 @@ describe("Facility Manage Functions", () => {
     facilityPage.visitAlreadyCreatedFacility();
   });
 
-  // it("Facility Cover Image button functionality", () => {
-  //   // It's only button functionality because we can't access S3 bucket in local
-  //   facilityManage.clickCoverImage();
-  //   facilityManage.verifyUploadButtonVisible();
-  //   facilityManage.uploadCoverImage("facilitycoverimage.jpg");
-  //   facilityManage.clickSaveCoverImage();
-  // });
+  it("Facility Cover Image button functionality", () => {
+    // It's only button functionality because we can't access S3 bucket in local
+    facilityManage.clickCoverImage();
+    facilityManage.verifyUploadButtonVisible();
+    facilityManage.uploadCoverImage("facilitycoverimage.jpg");
+    facilityManage.clickSaveCoverImage();
+  });
 
-  // it("Configure Facility Middleware", () => {
-  //   facilityPage.clickManageFacilityDropdown();
-  //   facilityManage.clickFacilityConfigureButton();
-  //   facilityManage.verifyMiddlewareAddressVisible();
-  //   // verify mandatory field error message
-  //   facilityManage.clickButtonWithText(facilityMiddlewareUpdateButton);
-  //   facilityManage.checkErrorMessageVisibility(
-  //     "Middleware Address is required"
-  //   );
-  //   // add middleware and verify the notification
-  //   facilityManage.typeMiddlewareAddress(facilityMiddleware);
-  //   facilityManage.clickButtonWithText(facilityMiddlewareUpdateButton);
-  //   facilityManage.verifySuccessMessageVisibilityAndContent(
-  //     facilityMiddlewareSuccessfullNotification
-  //   );
-  //   // update the existing middleware
-  //   facilityPage.clickManageFacilityDropdown();
-  //   facilityManage.clickFacilityConfigureButton();
-  //   facilityManage.verifyMiddlewareAddressVisible();
-  //   facilityManage.typeMiddlewareAddress(facilityUpdatedMiddleware);
-  //   facilityManage.clickButtonWithText(facilityMiddlewareUpdateButton);
-  //   facilityManage.verifySuccessMessageVisibilityAndContent(
-  //     facilityMiddlewareSuccessfullNotification
-  //   );
-  //   // verify the updated middleware
-  //   facilityPage.clickManageFacilityDropdown();
-  //   facilityManage.clickFacilityConfigureButton();
-  //   facilityManage.verifyMiddlewareAddressValue(facilityUpdatedMiddleware);
-  // });
+  it("Configure Facility Middleware", () => {
+    facilityPage.clickManageFacilityDropdown();
+    facilityManage.clickFacilityConfigureButton();
+    facilityManage.verifyMiddlewareAddressVisible();
+    // verify mandatory field error message
+    facilityManage.clickButtonWithText(facilityMiddlewareUpdateButton);
+    facilityManage.checkErrorMessageVisibility(
+      "Middleware Address is required"
+    );
+    // add middleware and verify the notification
+    facilityManage.typeMiddlewareAddress(facilityMiddleware);
+    facilityManage.clickButtonWithText(facilityMiddlewareUpdateButton);
+    facilityManage.verifySuccessMessageVisibilityAndContent(
+      facilityMiddlewareSuccessfullNotification
+    );
+    // update the existing middleware
+    facilityPage.clickManageFacilityDropdown();
+    facilityManage.clickFacilityConfigureButton();
+    facilityManage.verifyMiddlewareAddressVisible();
+    facilityManage.typeMiddlewareAddress(facilityUpdatedMiddleware);
+    facilityManage.clickButtonWithText(facilityMiddlewareUpdateButton);
+    facilityManage.verifySuccessMessageVisibilityAndContent(
+      facilityMiddlewareSuccessfullNotification
+    );
+    // verify the updated middleware
+    facilityPage.clickManageFacilityDropdown();
+    facilityManage.clickFacilityConfigureButton();
+    facilityManage.verifyMiddlewareAddressValue(facilityUpdatedMiddleware);
+  });
 
   it("Configure Facility Health ID", () => {
     facilityPage.clickManageFacilityDropdown();
@@ -105,70 +105,70 @@ describe("Facility Manage Functions", () => {
     facilityManage.verifyHrfIdValue(facilityUpdatedHrfId);
   });
 
-  // it("Modify doctor capacity in Facility detail page", () => {
-  //   // Add a doctor capacity
-  //   facilityManage.clickFacilityAddDoctorTypeButton();
-  //   facilityPage.selectAreaOfSpecialization("General Medicine");
-  //   facilityPage.fillDoctorCount(doctorCapacity);
-  //   facilityPage.saveAndExitDoctorForm();
-  //   facilityManage.verifySuccessMessageVisibilityAndContent(
-  //     "Doctor count added successfully"
-  //   );
-  //   facilityManage.verifyTotalDoctorCapacity(doctorCapacity);
-  //   // edit a existing doctor
-  //   facilityManage.clickEditFacilityDoctorCapacity();
-  //   facilityPage.fillDoctorCount(doctorModifiedCapacity);
-  //   facilityPage.clickdoctorcapacityaddmore();
-  //   facilityManage.verifySuccessMessageVisibilityAndContent(
-  //     "Doctor count updated successfully"
-  //   );
-  //   facilityManage.verifyTotalDoctorCapacity(doctorModifiedCapacity);
-  //   // delete a bed
-  //   facilityManage.clickDeleteFacilityDoctorCapacity();
-  //   facilityManage.clickButtonWithText("Delete");
-  //   facilityManage.verifySuccessMessageVisibilityAndContent(
-  //     "Doctor specialization type deleted successfully"
-  //   );
-  // });
+  it("Modify doctor capacity in Facility detail page", () => {
+    // Add a doctor capacity
+    facilityManage.clickFacilityAddDoctorTypeButton();
+    facilityPage.selectAreaOfSpecialization("General Medicine");
+    facilityPage.fillDoctorCount(doctorCapacity);
+    facilityPage.saveAndExitDoctorForm();
+    facilityManage.verifySuccessMessageVisibilityAndContent(
+      "Doctor count added successfully"
+    );
+    facilityManage.verifyTotalDoctorCapacity(doctorCapacity);
+    // edit a existing doctor
+    facilityManage.clickEditFacilityDoctorCapacity();
+    facilityPage.fillDoctorCount(doctorModifiedCapacity);
+    facilityPage.clickdoctorcapacityaddmore();
+    facilityManage.verifySuccessMessageVisibilityAndContent(
+      "Doctor count updated successfully"
+    );
+    facilityManage.verifyTotalDoctorCapacity(doctorModifiedCapacity);
+    // delete a bed
+    facilityManage.clickDeleteFacilityDoctorCapacity();
+    facilityManage.clickButtonWithText("Delete");
+    facilityManage.verifySuccessMessageVisibilityAndContent(
+      "Doctor specialization type deleted successfully"
+    );
+  });
 
-  // it("Modify bed capacity in Facility detail page", () => {
-  //   // add multiple new bed capacity
-  //   facilityManage.clickFacilityAddBedTypeButton();
-  //   facilityPage.selectBedType("Oxygen beds");
-  //   facilityPage.fillTotalCapacity(totalCapacity);
-  //   facilityPage.fillCurrentlyOccupied(currentOccupied);
-  //   facilityPage.saveAndExitBedCapacityForm();
-  //   facilityManage.verifySuccessMessageVisibilityAndContent(
-  //     "Bed capacity added successfully"
-  //   );
-  //   facilityManage.verifyFacilityBedCapacity(totalCapacity);
-  //   facilityManage.verifyFacilityBedCapacity(currentOccupied);
-  //   // edit a existing bed
-  //   facilityManage.clickEditFacilityBedCapacity();
-  //   facilityPage.fillTotalCapacity(totalUpdatedCapacity);
-  //   facilityPage.fillCurrentlyOccupied(currentUpdatedOccupied);
-  //   facilityPage.clickbedcapcityaddmore();
-  //   facilityManage.verifySuccessMessageVisibilityAndContent(
-  //     "Bed capacity updated successfully"
-  //   );
-  //   facilityManage.verifyFacilityBedCapacity(totalUpdatedCapacity);
-  //   facilityManage.verifyFacilityBedCapacity(currentUpdatedOccupied);
-  //   // delete a bed
-  //   facilityManage.clickDeleteFacilityBedCapacity();
-  //   facilityManage.clickButtonWithText("Delete");
-  //   facilityManage.verifySuccessMessageVisibilityAndContent(
-  //     "Bed type deleted successfully"
-  //   );
-  // });
+  it("Modify bed capacity in Facility detail page", () => {
+    // add multiple new bed capacity
+    facilityManage.clickFacilityAddBedTypeButton();
+    facilityPage.selectBedType("Oxygen beds");
+    facilityPage.fillTotalCapacity(totalCapacity);
+    facilityPage.fillCurrentlyOccupied(currentOccupied);
+    facilityPage.saveAndExitBedCapacityForm();
+    facilityManage.verifySuccessMessageVisibilityAndContent(
+      "Bed capacity added successfully"
+    );
+    facilityManage.verifyFacilityBedCapacity(totalCapacity);
+    facilityManage.verifyFacilityBedCapacity(currentOccupied);
+    // edit a existing bed
+    facilityManage.clickEditFacilityBedCapacity();
+    facilityPage.fillTotalCapacity(totalUpdatedCapacity);
+    facilityPage.fillCurrentlyOccupied(currentUpdatedOccupied);
+    facilityPage.clickbedcapcityaddmore();
+    facilityManage.verifySuccessMessageVisibilityAndContent(
+      "Bed capacity updated successfully"
+    );
+    facilityManage.verifyFacilityBedCapacity(totalUpdatedCapacity);
+    facilityManage.verifyFacilityBedCapacity(currentUpdatedOccupied);
+    // delete a bed
+    facilityManage.clickDeleteFacilityBedCapacity();
+    facilityManage.clickButtonWithText("Delete");
+    facilityManage.verifySuccessMessageVisibilityAndContent(
+      "Bed type deleted successfully"
+    );
+  });
 
-  // it("Delete a existing facility and verify the error message", () => {
-  //   facilityPage.clickManageFacilityDropdown();
-  //   facilityPage.clickDeleteFacilityOption();
-  //   facilityPage.confirmDeleteFacility();
-  //   facilityManage.verifySuccessMessageVisibilityAndContent(
-  //     "You do not have permission to perform this action."
-  //   );
-  // });
+  it("Delete a existing facility and verify the error message", () => {
+    facilityPage.clickManageFacilityDropdown();
+    facilityPage.clickDeleteFacilityOption();
+    facilityPage.confirmDeleteFacility();
+    facilityManage.verifySuccessMessageVisibilityAndContent(
+      "You do not have permission to perform this action."
+    );
+  });
 
   afterEach(() => {
     cy.saveLocalStorage();
