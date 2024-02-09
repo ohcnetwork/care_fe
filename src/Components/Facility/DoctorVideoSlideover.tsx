@@ -8,6 +8,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { relativeTime } from "../../Utils/utils";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { triggerGoal } from "../../Integrations/Plausible";
+import Chip from "../../CAREUI/display/Chip";
 
 export default function DoctorVideoSlideover(props: {
   show: boolean;
@@ -55,6 +56,14 @@ export default function DoctorVideoSlideover(props: {
       <p className="-mt-3 pb-4 text-sm text-gray-600">
         Select a doctor to connect via video
       </p>
+      {/* 
+      Add a filter to show Doctors, Nurses, and TeleICU Hub separately
+       */}
+      <div className="flex items-center justify-center gap-2">
+        <Chip text="Doctors" size="medium" />
+        <Chip text="Nurse" size="medium" />
+        <Chip text="TeleICU Hub" size="medium" />
+      </div>
       {[
         {
           title: "Doctors",
@@ -156,6 +165,39 @@ function UserListItem(props: { user: UserAssignedModel }) {
               <span>
                 {user.first_name} {user.last_name}
               </span>
+              <Chip text={user.user_type} size="small" />
+            </p>
+            {!!user.skills.length && (
+              <div className="mt-1 text-sm leading-5 text-gray-900">
+                <div className="flex flex-wrap gap-2">
+                  {user.skills?.map((skill: SkillObjectModel) => (
+                    <span className="flex items-center gap-2 rounded-full border-gray-300 bg-gray-200 px-3 text-xs text-gray-900">
+                      <p className="py-1.5">{skill.name}</p>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            <p className="flex gap-2 text-sm text-gray-500">
+              <a
+                role="button"
+                href="#"
+                onClick={async () =>
+                  await navigator.clipboard.writeText(
+                    user?.alt_phone_number || ""
+                  )
+                }
+              >
+                <div className="tooltip">
+                  <span className="tooltip-text tooltip-top">
+                    Copy Phone number
+                  </span>
+                  <CareIcon className="care-l-clipboard h-5 w-5" />
+                </div>
+              </a>
+              <span>{user.alt_phone_number}</span>
+            </p>
+            <div className="flex justify-between gap-2 text-sm text-gray-500">
               <div className="flex gap-2">
                 {user.video_connect_link && (
                   <a
@@ -225,38 +267,8 @@ function UserListItem(props: { user: UserAssignedModel }) {
                   </div>
                 </a>
               </div>
-            </p>
-            {!!user.skills.length && (
-              <div className="mt-1 text-sm leading-5 text-gray-900">
-                <div className="flex flex-wrap gap-2">
-                  {user.skills?.map((skill: SkillObjectModel) => (
-                    <span className="flex items-center gap-2 rounded-full border-gray-300 bg-gray-200 px-3 text-xs text-gray-900">
-                      <p className="py-1.5">{skill.name}</p>
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-            <p className="flex gap-2 divide-gray-800 text-sm text-gray-500">
-              <a
-                role="button"
-                href="#"
-                onClick={async () =>
-                  await navigator.clipboard.writeText(
-                    user?.alt_phone_number || ""
-                  )
-                }
-              >
-                <div className="tooltip">
-                  <span className="tooltip-text tooltip-top">
-                    Copy Phone number
-                  </span>
-                  <CareIcon className="care-l-clipboard h-5 w-5" />
-                </div>
-              </a>
-              <span>{user.alt_phone_number}</span>
               {user.last_login && <span>{relativeTime(user.last_login)}</span>}
-            </p>
+            </div>
           </div>
         </a>
       </li>
