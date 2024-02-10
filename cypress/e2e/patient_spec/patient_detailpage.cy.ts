@@ -20,7 +20,7 @@ describe("Patient Details", () => {
   });
 
   it("Record an audio and save it", () => {
-    patientPage.visitPatient("Cypress Patient");
+    patientPage.visitPatient("Dummy Patient 3");
     patientFileUploadPage.visitPatientDetailsPage();
     patientFileUploadPage.recordAudio();
     patientFileUploadPage.clickUploadAudioFile();
@@ -30,7 +30,7 @@ describe("Patient Details", () => {
   });
 
   it("Upload a file", () => {
-    patientPage.visitPatient("Cypress Patient");
+    patientPage.visitPatient("Dummy Patient 4");
     patientFileUploadPage.visitPatientDetailsPage();
     patientFileUploadPage.uploadFile();
     patientFileUploadPage.clickUploadFile();
@@ -40,7 +40,7 @@ describe("Patient Details", () => {
   });
 
   it("Edit file name", () => {
-    patientPage.visitPatient("Cypress Patient");
+    patientPage.visitPatient("Dummy Patient 4");
     patientFileUploadPage.visitPatientDetailsPage();
     patientFileUploadPage.clickEditFileName(
       `Cypress File ${new Date().getTime().toString().slice(9)}`
@@ -52,7 +52,7 @@ describe("Patient Details", () => {
   });
 
   it("Archive file", () => {
-    patientPage.visitPatient("Cypress Patient");
+    patientPage.visitPatient("Dummy Patient 4");
     patientFileUploadPage.visitPatientDetailsPage();
     patientFileUploadPage.clickArchiveFile();
     patientFileUploadPage.clickSaveArchiveFile();
