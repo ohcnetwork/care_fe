@@ -1060,8 +1060,8 @@ const routes = {
     TBody: Type<{
       investigations: {
         investigation: string;
-        value: any;
-        notes: any;
+        value: number;
+        notes: string;
         session: string;
       }[];
     }>(),
@@ -1087,9 +1087,9 @@ const routes = {
     TRes: Type<Record<string, never>>(),
     TBody: Type<{
       investigations: {
-        external_id: any;
-        value: any;
-        notes: any;
+        external_id: string;
+        value: number;
+        notes: string;
       }[];
     }>(),
   },
