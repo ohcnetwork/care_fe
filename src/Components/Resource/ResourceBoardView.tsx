@@ -14,6 +14,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { useTranslation } from "react-i18next";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import SearchInput from "../Form/SearchInput";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -24,7 +25,10 @@ const COMPLETED = ["COMPLETED", "REJECTED"];
 const ACTIVE = resourceStatusOptions.filter((o) => !COMPLETED.includes(o));
 
 export default function BoardView() {
-  const { qParams, FilterBadges, advancedFilter } = useFilters({ limit: -1 });
+  const { qParams, FilterBadges, advancedFilter, updateQuery } = useFilters({
+    limit: -1,
+    cacheBlacklist: ["title"],
+  });
   const [boardFilter, setBoardFilter] = useState(ACTIVE);
   // eslint-disable-next-line
   const [isLoading, setIsLoading] = useState(false);
@@ -58,6 +62,12 @@ export default function BoardView() {
 
         <div className="flex w-full flex-col items-center justify-between gap-2 pt-2 lg:flex-row lg:gap-4">
           <div></div>
+          <SearchInput
+            name="title"
+            value={qParams.title}
+            onChange={(e) => updateQuery({ [e.name]: e.value })}
+            placeholder={t("search_resource")}
+          />
           <SwitchTabs
             tab1="Active"
             tab2="Completed"

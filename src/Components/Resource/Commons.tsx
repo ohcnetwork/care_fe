@@ -12,6 +12,7 @@ export const initialFilterData = {
   modified_date_after: null,
   offset: 0,
   ordering: null,
+  title: "",
 };
 
 export const formatFilter = (params: any) => {
@@ -35,5 +36,6 @@ export const formatFilter = (params: any) => {
     modified_date_before: filter.modified_date_before || undefined,
     modified_date_after: filter.modified_date_after || undefined,
     ordering: filter.ordering || undefined,
+    title: filter.title || undefined,
   };
 };
