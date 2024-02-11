@@ -131,7 +131,7 @@ export const PatientHome = (props: any) => {
   });
 
   const handleAssignedVolunteer = async () => {
-    const { res } = await request(routes.patchPatient, {
+    const { res, data } = await request(routes.patchPatient, {
       pathParams: {
         id: patientData.id as string,
       },
@@ -141,10 +141,8 @@ export const PatientHome = (props: any) => {
           : null,
       },
     });
-    if (res?.ok) {
-      const dummyPatientData = Object.assign({}, patientData);
-      dummyPatientData["assigned_to"] = assignedVolunteerObject;
-      setPatientData(dummyPatientData);
+    if (res?.ok && data) {
+      setPatientData(data);
       if (assignedVolunteerObject) {
         Notification.Success({
           msg: "Volunteer assigned successfully.",
