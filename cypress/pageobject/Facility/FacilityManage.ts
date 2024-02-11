@@ -63,19 +63,23 @@ class FacilityManage {
     cy.get("#middleware_address").click().clear().click().type(address);
   }
 
-  typeHrfId(address) {
+  clearHfrId() {
+    cy.get("#hf_id").click().clear();
+  }
+
+  typeHfrId(address) {
     cy.get("#hf_id").click().clear().click().type(address);
   }
 
   verifySuccessMessageVisibilityAndContent(text) {
-    cy.get(".pnotify-text").should("be.visible").and("contain", text);
+    cy.get(".pnotify-text").should("be.visible").contains(text);
   }
 
   verifyMiddlewareAddressValue(expectedValue) {
     cy.get("#middleware_address").should("have.value", expectedValue);
   }
 
-  verifyHrfIdValue(expectedValue) {
+  verifyHfrIdValue(expectedValue) {
     cy.get("#hf_id").should("have.value", expectedValue);
   }
 
