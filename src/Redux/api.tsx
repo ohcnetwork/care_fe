@@ -55,6 +55,7 @@ import {
   InventorySummaryResponse,
   InventoryLogResponse,
   InventoryItemsModel,
+  PatientTransferResponse,
 } from "../Components/Facility/models";
 import {
   IDeleteBedCapacity,
@@ -92,6 +93,7 @@ import {
   InvestigationGroup,
   InvestigationType,
 } from "../Components/Facility/Investigations";
+import { Investigation } from "../Components/Facility/Investigations/Reports/types";
 import { ICD11DiagnosisModel } from "../Components/Diagnosis/types";
 
 /**
@@ -663,6 +665,7 @@ const routes = {
   transferPatient: {
     path: "/api/v1/patient/{id}/transfer/",
     method: "POST",
+    TRes: Type<PatientTransferResponse>(),
   },
   getPatientNotes: {
     path: "/api/v1/patient/{patientId}/notes/",
@@ -1010,6 +1013,7 @@ const routes = {
   getInvestigation: {
     path: "/api/v1/consultation/{consultation_external_id}/investigation/",
     method: "GET",
+    TRes: Type<PaginatedResponse<Investigation>>(),
   },
   getPatientInvestigation: {
     path: "/api/v1/patient/{patient_external_id}/investigation/",
