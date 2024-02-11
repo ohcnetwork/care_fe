@@ -150,9 +150,9 @@ export const validateRule = (
   return (
     <div>
       {condition ? (
-        <CareIcon icon="l-check-circle" className="text-green-500" />
+        <CareIcon icon="l-check-circle" className="text-xl text-green-500" />
       ) : (
-        <CareIcon icon="l-times-circle" className="text-red-500" />
+        <CareIcon icon="l-times-circle" className="text-xl text-red-500" />
       )}{" "}
       <span
         className={classNames(condition ? "text-primary-500" : "text-red-500")}
@@ -594,7 +594,7 @@ export const UserAdd = (props: UserProps) => {
           className="inline-block rounded border border-gray-600 bg-gray-50 px-4 py-2 text-gray-600 transition hover:bg-gray-100"
           target="_blank"
         >
-          <CareIcon icon="l-info-circle" /> &nbsp;Need Help?
+          <CareIcon icon="l-info-circle" className="text-lg" /> &nbsp;Need Help?
         </Link>
       }
       backUrl="/users"
@@ -716,7 +716,11 @@ export const UserAdd = (props: UserProps) => {
                       <>
                         {usernameExists === userExistsEnums.checking ? (
                           <span>
-                            <CareIcon icon="l-record-audio" /> checking...
+                            <CareIcon
+                              icon="l-record-audio"
+                              className="text-xl"
+                            />{" "}
+                            checking...
                           </span>
                         ) : (
                           <>
@@ -724,7 +728,7 @@ export const UserAdd = (props: UserProps) => {
                               <div>
                                 <CareIcon
                                   icon="l-times-circle"
-                                  className="text-red-500"
+                                  className="text-xl text-red-500"
                                 />{" "}
                                 <span className="text-red-500">
                                   Username is not available
@@ -734,7 +738,7 @@ export const UserAdd = (props: UserProps) => {
                               <div>
                                 <CareIcon
                                   icon="l-check-circle"
-                                  className="text-green-500"
+                                  className="text-xl text-green-500"
                                 />{" "}
                                 <span className="text-primary-500">
                                   Username is available

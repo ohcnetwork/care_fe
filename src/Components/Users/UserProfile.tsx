@@ -520,7 +520,7 @@ export default function UserProfile() {
                       Access Level
                     </dt>
                     <dd className="badge badge-pill mt-1 bg-primary-500 text-sm text-white">
-                      <CareIcon icon="l-user-check" className="mr-1" />{" "}
+                      <CareIcon icon="l-user-check" className="mr-1 text-lg" />{" "}
                       {userData?.user_type || "-"}
                     </dd>
                   </div>

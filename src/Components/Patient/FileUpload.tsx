@@ -574,7 +574,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     <div>
                       <CareIcon
                         icon="l-music"
-                        className="m-3 text-3xl text-primary-500"
+                        className="m-3 text-6xl text-primary-500"
                       />
                     </div>
                     <div>
@@ -690,7 +690,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     <div>
                       <CareIcon
                         icon={getIconClassName(item?.extension)}
-                        className={"m-3 text-3xl text-primary-500"}
+                        className={"m-3 text-6xl text-primary-500"}
                       />
                     </div>
                     <div>
@@ -799,7 +799,7 @@ export const FileUpload = (props: FileUploadProps) => {
 
                         <CareIcon
                           icon="l-music"
-                          className="l-3xl m-3 text-gray-500"
+                          className="text-6xl text-gray-500"
                         />
                       </div>
                     ) : (
@@ -821,7 +821,7 @@ export const FileUpload = (props: FileUploadProps) => {
 
                         <CareIcon
                           icon={getIconClassName(item?.extension)}
-                          className="text-3xl text-gray-500"
+                          className="text-6xl text-gray-500"
                         />
                       </div>
                     )}
@@ -1562,7 +1562,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         setUploadFileName("");
                       }}
                     >
-                      <CareIcon icon="l-times" />
+                      <CareIcon icon="l-times" className="text-lg" />
                     </button>
                   </div>
                 )}

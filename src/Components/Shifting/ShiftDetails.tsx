@@ -74,7 +74,7 @@ export default function ShiftDetails(props: { id: string }) {
             <span className="copied-to-cb">{t("copied_to_clipboard")}</span>
           ) : (
             <span className="copy-to-cb">
-              <CareIcon icon="l-clipboard" />
+              <CareIcon icon="l-clipboard" className="text-2xl" />
             </span>
           )}
         </CopyToClipboard>
@@ -520,14 +520,15 @@ export default function ShiftDetails(props: { id: string }) {
         <div className="my-4">
           <div className="my-4 flex justify-end gap-3">
             <ButtonV2 onClick={(_) => window.print()}>
-              <CareIcon icon="l-print" className="mr-2" />{" "}
+              <CareIcon icon="l-print" className="mr-2 text-base" />{" "}
               {t("print_referral_letter")}
             </ButtonV2>
             <ButtonV2
               onClick={(_) => setIsPrintMode(false)}
               variant="secondary"
             >
-              <CareIcon icon="l-times" className="mr-2" /> {t("close")}
+              <CareIcon icon="l-times" className="mr-2 text-base" />{" "}
+              {t("close")}
             </ButtonV2>
           </div>
           {printData(data)}
@@ -556,7 +557,7 @@ export default function ShiftDetails(props: { id: string }) {
               </ButtonV2>
 
               <ButtonV2 onClick={() => setIsPrintMode(true)}>
-                <CareIcon icon="l-file-alt" className="mr-2" />{" "}
+                <CareIcon icon="l-file-alt" className="mr-2 text-base" />{" "}
                 {t("referral_letter")}
               </ButtonV2>
             </div>

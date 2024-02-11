@@ -117,7 +117,7 @@ export default function ResultList() {
           {`${key}: ${value.name}`}
           <CareIcon
             icon="l-times"
-            className="ml-2 cursor-pointer rounded-full px-1 py-0.5 hover:bg-gray-500"
+            className="ml-2 cursor-pointer rounded-full text-base hover:bg-gray-500"
             onClick={() =>
               paramKey === "local_bodies"
                 ? removeLSGFilter(paramKey, value.id)

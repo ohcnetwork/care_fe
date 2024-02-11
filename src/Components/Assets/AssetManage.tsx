@@ -115,14 +115,14 @@ const AssetManage = (props: AssetManageProps) => {
           onClick={(_) => window.print()}
           className="btn btn-primary mr-2"
         >
-          <CareIcon icon="l-print" className="mr-2" />
+          <CareIcon icon="l-print" className="mr-2 text-lg" />
           Print QR Code
         </button>
         <button
           onClick={(_) => setIsPrintMode(false)}
           className="btn btn-default"
         >
-          <CareIcon icon="l-times" className="mr-2" /> Close
+          <CareIcon icon="l-times" className="mr-2 text-lg" /> Close
         </button>
       </div>
       <h2 className="text-center">Print Preview</h2>

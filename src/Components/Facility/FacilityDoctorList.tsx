@@ -95,7 +95,7 @@ export const FacilityDoctorList = (props: any) => {
             disabled={doctorList.length === DOCTOR_SPECIALIZATION.length}
             authorizeFor={NonReadOnlyUsers}
           >
-            <CareIcon icon="l-user-md" className="mr-2 text-white" />
+            <CareIcon icon="l-user-md" className="mr-2 text-base text-white" />
             Add Doctor Types
           </ButtonV2>
         </div>

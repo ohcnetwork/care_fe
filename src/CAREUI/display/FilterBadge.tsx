@@ -22,7 +22,7 @@ const FilterBadge = ({ name, value, onRemove }: FilterBadgeProps) => {
       <CareIcon
         id="removeicon"
         icon="l-times"
-        className="ml-2 box-content cursor-pointer rounded-full px-1 py-0.5 hover:bg-gray-500"
+        className="ml-2 box-content cursor-pointer rounded-full text-base hover:bg-gray-500"
         onClick={onRemove}
       />
     </span>

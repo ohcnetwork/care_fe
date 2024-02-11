@@ -108,11 +108,11 @@ const TreatmentSummary = (props: any) => {
               onClick={(_) => window.print()}
               className="btn btn-primary mr-2"
             >
-              <CareIcon icon="l-print" className="mr-2" /> Print Treatment
-              Summary
+              <CareIcon icon="l-print" className="mr-2 text-lg" /> Print
+              Treatment Summary
             </button>
             <button onClick={(_) => goBack(url)} className="btn btn-default">
-              <CareIcon icon="l-times" className="mr-2" /> Close
+              <CareIcon icon="l-times" className="mr-2 text-lg" /> Close
             </button>
           </div>
 

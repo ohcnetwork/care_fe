@@ -159,7 +159,7 @@ const AssetsList = () => {
           onClick={() => setIsScannerActive(false)}
           className="btn btn-default mb-2"
         >
-          <CareIcon icon="l-times" className="mr-2" />
+          <CareIcon icon="l-times" className="mr-1 text-lg" />
           Close Scanner
         </button>
         <QrReader
@@ -344,7 +344,8 @@ const AssetsList = () => {
               className="w-full py-[11px]"
               onClick={() => setIsScannerActive(true)}
             >
-              <CareIcon icon="l-search" className="mr-1" /> Scan Asset QR
+              <CareIcon icon="l-search" className="mr-1 text-base" /> Scan Asset
+              QR
             </ButtonV2>
           </div>
           <div

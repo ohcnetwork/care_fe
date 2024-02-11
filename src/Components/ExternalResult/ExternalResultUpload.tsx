@@ -148,7 +148,7 @@ export default function ExternalResultUpload() {
                 >
                   <CareIcon
                     icon="l-download-alt"
-                    className="mr-1"
+                    className="mr-1 text-lg"
                     aria-hidden="true"
                   />{" "}
                   <span>{t("sample_format")}</span>

@@ -67,8 +67,8 @@ export default function PageTitle({
               }}
             >
               <CareIcon
-                icon="l-angle-double-left"
-                className="mr-1 rounded-md p-2 text-2xl hover:bg-gray-200"
+                icon="l-angle-left"
+                className="border-box mr-1 rounded-md text-5xl hover:bg-gray-200"
               />{" "}
             </button>
           )}

@@ -1386,7 +1386,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             {showAutoFilledPincode && (
                               <div>
                                 <CareIcon
-                                  icon="check-circle"
+                                  icon="l-check-circle"
                                   className="mr-2 text-sm text-green-500"
                                 />
                                 <span className="text-sm text-primary-500">

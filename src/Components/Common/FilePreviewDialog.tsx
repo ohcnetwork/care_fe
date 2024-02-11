@@ -153,7 +153,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                                 >
                                   <CareIcon
                                     icon={button[1] as IconName}
-                                    className="mr-2"
+                                    className="mr-2 text-lg"
                                   />
                                   {button[0] as string}
                                 </button>
@@ -170,7 +170,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                             >
                               <CareIcon
                                 icon="l-download-alt"
-                                className="mr-2"
+                                className="mr-2 text-lg"
                               />
                               Download
                             </a>
@@ -179,7 +179,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                             onClick={onClose}
                             className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70"
                           >
-                            <CareIcon icon="l-times" className="mr-2" />
+                            <CareIcon icon="l-times" className="mr-2 text-lg" />
                             Close
                           </button>
                         </div>

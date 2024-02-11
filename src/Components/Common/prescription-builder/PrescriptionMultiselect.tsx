@@ -52,7 +52,7 @@ export function PrescriptionMultiDropdown(props: {
                     );
                   }}
                 >
-                  <CareIcon icon="l-times" />
+                  <CareIcon icon="l-times" className="text-lg" />
                 </button>
               </div>
             );

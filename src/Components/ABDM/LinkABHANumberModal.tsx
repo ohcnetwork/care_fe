@@ -22,9 +22,9 @@ export const validateRule = (
   return (
     <div>
       {condition ? (
-        <CareIcon icon="l-check-circle" className="text-green-500" />
+        <CareIcon icon="l-check-circle" className="text-base text-green-500" />
       ) : (
-        <CareIcon icon="l-times-circle" className="text-red-500" />
+        <CareIcon icon="l-times-circle" className="text-base text-red-500" />
       )}{" "}
       <span
         className={classNames(condition ? "text-primary-500" : "text-red-500")}

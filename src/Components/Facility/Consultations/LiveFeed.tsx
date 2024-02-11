@@ -610,7 +610,7 @@ const LiveFeed = (props: any) => {
                       setPresetsPage(presetsPage - 10);
                     }}
                   >
-                    <CareIcon icon="l-arrow-left" />
+                    <CareIcon icon="l-arrow-left" className="text-2xl" />
                   </button>
                   <button
                     className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
@@ -619,7 +619,7 @@ const LiveFeed = (props: any) => {
                       setPresetsPage(presetsPage + 10);
                     }}
                   >
-                    <CareIcon icon="l-arrow-right" />
+                    <CareIcon icon="l-arrow-right" className="text-2xl" />
                   </button>
                 </div>
               ) : (
@@ -631,7 +631,7 @@ const LiveFeed = (props: any) => {
                       handlePagination(page.offset - page.limit);
                     }}
                   >
-                    <CareIcon icon="l-arrow-left" />
+                    <CareIcon icon="l-arrow-left" className="text-2xl" />
                   </button>
                   <button
                     className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
@@ -640,7 +640,7 @@ const LiveFeed = (props: any) => {
                       handlePagination(page.offset + page.limit);
                     }}
                   >
-                    <CareIcon icon="l-arrow-right" />
+                    <CareIcon icon="l-arrow-right" className="text-2xl" />
                   </button>
                 </div>
               )}

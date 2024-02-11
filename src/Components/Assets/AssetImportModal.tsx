@@ -322,7 +322,7 @@ const AssetImportModal = ({ open, onClose, facility, onUpdate }: Props) => {
               >
                 <CareIcon
                   icon="l-download-alt"
-                  className="mr-1"
+                  className="mr-1 text-lg"
                   aria-hidden="true"
                 />{" "}
                 <span>Sample Format</span>
@@ -333,7 +333,7 @@ const AssetImportModal = ({ open, onClose, facility, onUpdate }: Props) => {
           <div className="flex flex-col gap-2 sm:flex-row">
             <div>
               <label className="flex cursor-pointer items-center justify-center gap-1 rounded-lg border border-primary-500 bg-white px-4 py-2 text-sm font-medium text-primary-500 transition-all hover:border-primary-400 hover:text-primary-400">
-                <CareIcon icon="l-cloud-upload" className="mr-2" />
+                <CareIcon icon="l-cloud-upload" className="mr-2 text-lg" />
                 Upload a file
                 <input
                   data-testid="import-asset-file"
@@ -362,9 +362,9 @@ const AssetImportModal = ({ open, onClose, facility, onUpdate }: Props) => {
               data-testid="asset-import-btn"
             >
               {isImporting ? (
-                <CareIcon icon="l-spinner" className="animate-spin" />
+                <CareIcon icon="l-spinner" className="animate-spin text-lg" />
               ) : (
-                <CareIcon icon="l-file-import" />
+                <CareIcon icon="l-file-import" className="text-lg" />
               )}
               <span>{isImporting ? "Importing..." : "Import"}</span>
             </Submit>

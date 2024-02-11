@@ -96,7 +96,7 @@ export default function InventoryLog(props: any) {
             {inventoryItem.probable_accident && (
               <CareIcon
                 icon="l-exclamation-triangle"
-                className="pl-2 text-orange-500"
+                className="pl-2 text-lg text-orange-500"
               />
             )}
           </p>

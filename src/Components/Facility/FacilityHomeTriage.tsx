@@ -59,7 +59,10 @@ export const FacilityHomeTriage = (props: any) => {
             onClick={() => navigate(`/facility/${props.facilityId}/triage`)}
             authorizeFor={props.NonReadOnlyUsers}
           >
-            <CareIcon icon="l-book-medical" className="mr-2 text-white" />
+            <CareIcon
+              icon="l-book-medical"
+              className="mr-2 text-base text-white"
+            />
             Add Triage
           </ButtonV2>
         </div>

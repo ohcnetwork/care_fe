@@ -64,14 +64,14 @@ export default function ResultItem(props: any) {
               navigate(`/external_results/${resultItemData.id}/update`)
             }
           >
-            <CareIcon icon="l-pen" className="mr-2 text-white" />
+            <CareIcon icon="l-pen" className="mr-2 text-lg text-white" />
             {t("update_record")}
           </button>
           <button
             className="btn btn-danger w-full md:w-auto"
             onClick={() => setShowDeleteAlert(true)}
           >
-            <CareIcon icon="l-trash" className="mr-2 text-white" />
+            <CareIcon icon="l-trash" className="mr-2 text-lg text-white" />
             {t("delete_record")}
           </button>
         </div>

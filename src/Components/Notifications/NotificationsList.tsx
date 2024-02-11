@@ -483,7 +483,7 @@ export default function NotificationsList({
           </div>
 
           <SelectMenuV2
-            className="mb-2"
+            className="mb-2 text-xl"
             placeholder={t("filter_by_category")}
             options={NOTIFICATION_EVENTS}
             value={eventFilter}

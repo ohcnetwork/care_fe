@@ -282,7 +282,7 @@ let renderBody = (state, send, title, partPaths, substr) => {
               | Some(p) =>
                 <CareIcon
                   icon="l-times"
-                  className="border-l-2 p-1"
+                  className="border-l-2 text-xl"
                   onClick={state.previewMode
                     ? _ => getIntoView(Pain.regionToString(regionType), false)
                     : _ => send(RemoveFromSelectedParts(p))}

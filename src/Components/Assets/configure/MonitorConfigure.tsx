@@ -77,7 +77,7 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
           />
         </div>
         <Submit className="mt-6 w-full shrink-0">
-          <CareIcon icon="l-bed" />
+          <CareIcon icon="l-bed" className="text-lg" />
           {updateLink ? "Update Bed" : "Save Bed"}
         </Submit>
       </div>

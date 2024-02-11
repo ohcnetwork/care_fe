@@ -93,7 +93,7 @@ export const FacilityBedCapacity = (props: any) => {
             onClick={() => setBedCapacityModalOpen(true)}
             authorizeFor={NonReadOnlyUsers}
           >
-            <CareIcon icon="l-bed" className="mr-2 text-white" />
+            <CareIcon icon="l-bed" className="mr-2 text-lg text-white" />
             Add More Bed Types
           </ButtonV2>
         </div>

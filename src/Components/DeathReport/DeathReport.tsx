@@ -141,13 +141,14 @@ export default function PrintDeathReport(props: { id: string }) {
           onClick={(_) => window.print()}
           className="btn btn-primary mr-2"
         >
-          <CareIcon icon="l-print" className="mr-2" /> Print Death Report
+          <CareIcon icon="l-print" className="mr-2 text-lg" /> Print Death
+          Report
         </button>
         <button
           onClick={(_) => setIsPrintMode(false)}
           className="btn btn-default"
         >
-          <CareIcon icon="l-times" className="mr-2" /> Close
+          <CareIcon icon="l-times" className="mr-2 text-lg" /> Close
         </button>
       </div>
 

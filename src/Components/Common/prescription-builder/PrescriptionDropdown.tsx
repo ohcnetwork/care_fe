@@ -14,6 +14,7 @@ export function PrescriptionDropdown(props: {
   onFocus?: () => void;
   onBlur?: () => void;
 }) {
+  props.tips = [];
   const { options, tips, value, setValue } = props;
   const [open, setOpen] = useState(false);
 
@@ -78,7 +79,7 @@ export function PrescriptionDropdown(props: {
                   <span className="tooltip-text tooltip-right">
                     {tips[option]}
                   </span>
-                  <CareIcon icon="l-info-circle" />
+                  <CareIcon icon="l-info-circle" className="text-lg" />
                 </button>
               )}
             </div>

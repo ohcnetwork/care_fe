@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
+import { CareIcon } from "../Common/CareIcon.bs";
 
 const Loading = lazy(() => import("../Common/Loading"));
 

@@ -198,12 +198,14 @@ export default function ManageUsers() {
                     {user.last_login && cur_online ? (
                       <span>
                         {" "}
-                        <CareIcon icon="l-clock" /> Currently Online
+                        <CareIcon icon="l-clock" className="text-lg" />{" "}
+                        Currently Online
                       </span>
                     ) : (
                       <>
                         <span>
-                          <CareIcon icon="l-clock" /> Last Online:{" "}
+                          <CareIcon icon="l-clock" className="text-lg" /> Last
+                          Online:{" "}
                         </span>
                         <span
                           aria-label="Online"
@@ -230,7 +232,7 @@ export default function ManageUsers() {
                   {user.last_login && cur_online ? (
                     <CareIcon
                       icon="l-circle"
-                      className="ml-1 animate-pulse text-primary-500 opacity-75"
+                      className="ml-1 animate-pulse text-3xl text-primary-500 opacity-75"
                       aria-label="Online"
                     />
                   ) : null}
