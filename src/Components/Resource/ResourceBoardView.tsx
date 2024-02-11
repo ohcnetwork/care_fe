@@ -41,7 +41,7 @@ export default function BoardView() {
   };
 
   return (
-    <div className="flex h-screen flex-col px-2 pb-2">
+    <div className="max-h[95vh] flex min-h-full max-w-[100vw] flex-col px-2 pb-2">
       <div className="flex w-full flex-col items-center justify-between lg:flex-row">
         <div className="w-1/3 lg:w-1/4">
           <PageTitle
@@ -60,8 +60,7 @@ export default function BoardView() {
           />
         </div>
 
-        <div className="flex w-full flex-col items-center justify-between gap-2 pt-2 lg:flex-row lg:gap-4">
-          <div></div>
+        <div className="flex w-full flex-col items-center justify-between gap-2 pt-2 xl:flex-row">
           <SearchInput
             name="title"
             value={qParams.title}
