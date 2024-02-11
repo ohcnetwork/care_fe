@@ -319,7 +319,10 @@ export default function ResultList() {
           ]}
         />
 
-        <div className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-t-lg">
+        <div
+          className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-t-lg"
+          id="external-result-table"
+        >
           <table className="min-w-full divide-y divide-gray-200">
             <thead>
               <tr>

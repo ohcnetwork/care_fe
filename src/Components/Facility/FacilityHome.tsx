@@ -223,7 +223,7 @@ export const FacilityHome = (props: any) => {
                 </div>
               </div>
               <div className="flex flex-1 items-center">
-                <div className="mb-6 grid  w-full grid-cols-1 gap-4 md:mb-0 lg:grid-cols-2">
+                <div className="mb-6 grid w-full gap-4 sm:grid-cols-2 md:mb-0 lg:grid-cols-2">
                   <div className="flex-col justify-between md:flex lg:flex-1 ">
                     <div className="mb-10" id="address-details-view">
                       <h1 className="text-base font-semibold text-[#B9B9B9]">
@@ -243,7 +243,7 @@ export const FacilityHome = (props: any) => {
                       </div>
                     </div>
                   </div>
-                  <div className="min-w-[300px] flex-col md:flex lg:flex-1">
+                  <div className="flex-col md:flex lg:flex-1">
                     <div className="mb-10">
                       <h1 className="text-base font-semibold text-[#B9B9B9]">
                         Local Body
@@ -252,7 +252,7 @@ export const FacilityHome = (props: any) => {
                         {facilityData?.local_body_object?.name}
                       </p>
                     </div>
-                    <div className="flex flex-col gap-10 md:flex-row">
+                    <div className="flex flex-col flex-wrap gap-10 md:flex-row">
                       <div>
                         <h1 className="text-base font-semibold text-[#B9B9B9]">
                           Ward
@@ -393,7 +393,7 @@ export const FacilityHome = (props: any) => {
                 )}
               </DropdownMenu>
             </div>
-            <div className="flex flex-col justify-end">
+            <div className="sm:grid sm:grid-cols-2 sm:gap-2 md:grid md:grid-cols-2 md:gap-2 lg:flex lg:flex-col lg:justify-end lg:gap-0 ">
               <ButtonV2
                 id="facility-detailspage-cns"
                 variant="primary"

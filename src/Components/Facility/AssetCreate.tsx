@@ -426,7 +426,7 @@ const AssetCreate = (props: AssetProps) => {
           onClick={() => setIsScannerActive(false)}
           className="btn btn-default mb-2"
         >
-          <CareIcon icon="l-times" className="mr-2" />
+          <CareIcon icon="l-times" className="mr-2 text-lg" />
           {t("close_scanner")}
         </button>
         <QrReader

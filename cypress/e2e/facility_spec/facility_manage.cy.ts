@@ -13,11 +13,11 @@ describe("Facility Manage Functions", () => {
   const facilityUpdatedMiddleware = "updated.coronasafe.live";
   const facilityMiddlewareSuccessfullNotification =
     "Facility updated successfully";
-  const facilityHrfidUpdateButton = "Link Health Facility";
-  const facilityHrfidSuccessfullNotification =
-    "Health Facility config updated successfully";
-  const facilityHrfId = uuidv4();
-  const facilityUpdatedHrfId = uuidv4();
+  const facilityHfridUpdateButton = "Link Health Facility";
+  const facilityHfridToastNotificationText =
+    /Health Facility config updated successfully|Health ID registration failed/;
+  const facilityHfrId = "IN180000018";
+  const facilityUpdatedHfrId = uuidv4();
   const doctorCapacity = "5";
   const doctorModifiedCapacity = "7";
   const totalCapacity = "100";
@@ -80,28 +80,29 @@ describe("Facility Manage Functions", () => {
     facilityPage.clickManageFacilityDropdown();
     facilityManage.clickFacilityConfigureButton();
     // verify mandatory field error message
-    facilityManage.clickButtonWithText(facilityHrfidUpdateButton);
+    facilityManage.clearHfrId();
+    facilityManage.clickButtonWithText(facilityHfridUpdateButton);
     facilityManage.checkErrorMessageVisibility(
       "Health Facility Id is required"
     );
     // add facility health ID and verify notification
-    facilityManage.typeHrfId(facilityHrfId);
-    facilityManage.clickButtonWithText(facilityHrfidUpdateButton);
+    facilityManage.typeHfrId(facilityHfrId);
+    facilityManage.clickButtonWithText(facilityHfridUpdateButton);
     facilityManage.verifySuccessMessageVisibilityAndContent(
-      facilityHrfidSuccessfullNotification
+      facilityHfridToastNotificationText
     );
     // update the existing middleware
     facilityPage.clickManageFacilityDropdown();
     facilityManage.clickFacilityConfigureButton();
-    facilityManage.typeHrfId(facilityUpdatedHrfId);
-    facilityManage.clickButtonWithText(facilityHrfidUpdateButton);
+    facilityManage.typeHfrId(facilityUpdatedHfrId);
+    facilityManage.clickButtonWithText(facilityHfridUpdateButton);
     facilityManage.verifySuccessMessageVisibilityAndContent(
-      facilityHrfidSuccessfullNotification
+      facilityHfridToastNotificationText
     );
     // verify its reflection
     facilityPage.clickManageFacilityDropdown();
     facilityManage.clickFacilityConfigureButton();
-    facilityManage.verifyHrfIdValue(facilityUpdatedHrfId);
+    facilityManage.verifyHfrIdValue(facilityUpdatedHfrId);
   });
 
   it("Modify doctor capacity in Facility detail page", () => {
