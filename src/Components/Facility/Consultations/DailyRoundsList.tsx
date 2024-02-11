@@ -11,6 +11,8 @@ import DailyRoundsFilter from "./DailyRoundsFilter";
 import { ConsultationModel } from "../models";
 import { useSlugs } from "../../../Common/hooks/useSlug";
 import { TimelineNode } from "../../../CAREUI/display/Timeline";
+import { useState } from "react";
+import { QueryParams } from "../../../Utils/request/types";
 
 interface Props {
   consultation: ConsultationModel;
@@ -19,6 +21,7 @@ interface Props {
 export default function DailyRoundsList({ consultation }: Props) {
   const [consultationId] = useSlugs("consultation");
   const { t } = useTranslation();
+  const [query, setQuery] = useState<QueryParams>();
 
   const consultationUrl = `/facility/${consultation.facility}/patient/${consultation.patient}/consultation/${consultation.id}`;
 
@@ -26,12 +29,18 @@ export default function DailyRoundsList({ consultation }: Props) {
     <PaginatedList
       route={routes.getDailyReports}
       pathParams={{ consultationId }}
+      query={query}
     >
       {({ refetch }) => (
         <>
           <div className="flex flex-1 justify-between">
             <PageTitle title="Update Log" hideBack breadcrumbs={false} />
-            <DailyRoundsFilter onApply={(query) => refetch({ query })} />
+            <DailyRoundsFilter
+              onApply={(query) => {
+                setQuery(query);
+                refetch();
+              }}
+            />
           </div>
 
           <div className="-mt-2 flex w-full flex-col gap-4">
