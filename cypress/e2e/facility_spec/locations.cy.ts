@@ -236,6 +236,8 @@ describe("Location Management Section", () => {
     cy.awaitUrl("/assets");
     assetPage.createAsset();
     assetPage.selectFacility("Dummy Facility 40, Ernakulam");
+    assetPage.selectLocation("Test Location with Assets");
+    assetPage.selectAssetType("Internal");
     assetPage.enterAssetDetails(
       "Test Asset linked to Facility",
       "Test Description",
@@ -251,8 +253,6 @@ describe("Location Management Section", () => {
       "25122021",
       "Test note for asset creation!"
     );
-    assetPage.selectAssetType("Internal");
-    assetPage.selectLocation("Test Location with Assets");
     assetPage.clickassetupdatebutton();
     facilityLocation.loadLocationManagementPage();
     facilityLocation.deleteLocation("Test Location with Assets");
