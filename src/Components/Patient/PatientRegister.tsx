@@ -1021,13 +1021,57 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             label={id !== 1 ? title : "NONE"}
           />
         </div>
-        {id !== 1 && (field("medical_history").value ?? []).includes(id) && (
+        {id !== 1 &&
+          id !== 7 &&
+          id !== 13 &&
+          (field("medical_history").value ?? []).includes(id) && (
+            <div className="mx-4">
+              <TextAreaFormField
+                {...field(textField)}
+                placeholder="Details"
+                rows={2}
+              />
+            </div>
+          )}
+        {id === 7 && (field("medical_history").value ?? []).includes(id) && (
           <div className="mx-4">
-            <TextAreaFormField
-              {...field(textField)}
-              placeholder="Details"
-              rows={2}
-            />
+            <select>
+              <option value="type_of_cancer">Type of cancer</option>
+              <>
+                <option value="breast">Breast</option>
+                <option value="uterus">Uterus</option>
+                <option value="lung">Lung</option>
+                <option value="skin">Skin</option>
+                <option value="colorectal">Colorectal</option>
+                <option value="uterus">Leukaemia</option>
+                <option value="uterus">Bladder</option>
+                <option value="uterus">Prostate</option>
+                <option value="uterus">Melanoma</option>
+                <option value="uterus">Lymphoma</option>
+                <option value="uterus">Brain</option>
+                <option value="uterus">Liver</option>
+                <option value="uterus">Thyroid</option>
+                <option value="uterus">Others</option>
+              </>
+            </select>
+          </div>
+        )}
+        {id === 13 && (field("medical_history").value ?? []).includes(id) && (
+          <div className="mx-4">
+            <label>
+              <input type="radio" name="status" value="active" />
+              Active
+            </label>
+            <label>
+              <input type="radio" name="status" value="old" />
+              Old
+            </label>
+            <div>
+              <label>
+                Treated Duration:
+                <input type="text" name="duration" />
+              </label>
+            </div>
           </div>
         )}
       </div>

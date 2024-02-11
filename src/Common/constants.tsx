@@ -244,10 +244,16 @@ export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
   { id: 2, text: "Diabetes" },
   { id: 3, text: "Heart Disease" },
   { id: 4, text: "HyperTension" },
-  { id: 5, text: "Kidney Diseases" },
-  { id: 6, text: "Lung Diseases/Asthma" },
+  { id: 5, text: "Chronic Renal Disease" },
+  { id: 6, text: "Asthma" },
   { id: 7, text: "Cancer" },
-  { id: 8, text: "OTHER" },
+  { id: 8, text: "COPD" },
+  { id: 9, text: "Bronchitis" },
+  { id: 10, text: "Chronic neurological or neuromuscular disease" },
+  { id: 11, text: "Immunocompromised condition" },
+  { id: 12, text: "Liver Disease" },
+  { id: 13, text: "TB" },
+  { id: 14, text: "OTHER" },
 ];
 
 export const REVIEW_AT_CHOICES: Array<OptionsType> = [
