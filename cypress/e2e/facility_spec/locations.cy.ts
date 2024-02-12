@@ -236,6 +236,7 @@ describe("Location Management Section", () => {
     cy.awaitUrl("/assets");
     assetPage.createAsset();
     assetPage.selectFacility("Dummy Facility 40, Ernakulam");
+    cy.wait(5000);
     assetPage.selectLocation("Test Location with Assets");
     assetPage.selectAssetType("Internal");
     assetPage.enterAssetDetails(
