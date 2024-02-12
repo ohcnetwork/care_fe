@@ -480,72 +480,59 @@ export default function PatientInfoCard(props: {
             </div>
           )}
           <div className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row">
-            {[
-              [
-                `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/daily-rounds`,
-                "Log Update",
-                "plus",
-                patient.is_active &&
-                  consultation?.id &&
-                  !consultation?.discharge_date,
-                [
-                  !(consultation?.facility !== patient.facility) &&
+            {patient.is_active &&
+              consultation?.id &&
+              !consultation?.discharge_date && (
+                <div className="h-10 min-h-[40px] w-full min-w-[170px] lg:w-auto">
+                  <ButtonV2
+                    variant={
+                      !(consultation?.facility !== patient.facility) &&
+                      !(consultation?.discharge_date ?? !patient.is_active) &&
+                      dayjs(consultation?.modified_date).isBefore(
+                        dayjs().subtract(1, "day")
+                      )
+                        ? "danger"
+                        : "primary"
+                    }
+                    href={
+                      consultation?.admitted && !consultation?.current_bed
+                        ? undefined
+                        : `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/daily-rounds`
+                    }
+                    onClick={() => {
+                      if (
+                        consultation?.admitted &&
+                        !consultation?.current_bed
+                      ) {
+                        Notification.Error({
+                          msg: "Please assign a bed to the patient",
+                        });
+                        setOpen(true);
+                      }
+                    }}
+                    className="w-full"
+                  >
+                    <span className="flex w-full items-center justify-center gap-2">
+                      <CareIcon className="care-l-plus text-xl" />
+                      <p className="font-semibold">Log Update</p>
+                    </span>
+                  </ButtonV2>
+                  {!(consultation?.facility !== patient.facility) &&
                     !(consultation?.discharge_date ?? !patient.is_active) &&
                     dayjs(consultation?.modified_date).isBefore(
                       dayjs().subtract(1, "day")
-                    ),
-                  <div className="text-center">
-                    <CareIcon className="care-l-exclamation-triangle" /> No
-                    update filed in the last 24 hours
-                  </div>,
-                ],
-              ],
-            ].map(
-              (action: any, i) =>
-                action[3] && (
-                  <div
-                    className="h-10 min-h-[40px] w-full min-w-[170px] lg:w-auto"
-                    key={i}
-                  >
-                    <ButtonV2
-                      key={i}
-                      variant={action?.[4]?.[0] ? "danger" : "primary"}
-                      href={
-                        consultation?.admitted &&
-                        !consultation?.current_bed &&
-                        i === 1
-                          ? undefined
-                          : `${action[0]}`
-                      }
-                      onClick={() => {
-                        if (
-                          consultation?.admitted &&
-                          !consultation?.current_bed &&
-                          i === 1
-                        ) {
-                          Notification.Error({
-                            msg: "Please assign a bed to the patient",
-                          });
-                          setOpen(true);
-                        }
-                      }}
-                      className="w-full"
-                    >
-                      <span className="flex w-full items-center justify-center gap-2">
-                        <CareIcon className={`care-l-${action[2]} text-xl`} />
-                        <p className="font-semibold">{action[1]}</p>
-                      </span>
-                    </ButtonV2>
-                    {action?.[4]?.[0] && (
+                    ) && (
                       <>
                         <p className="mt-0.5 text-xs text-red-500">
-                          {action[4][1]}
+                          <div className="text-center">
+                            <CareIcon className="care-l-exclamation-triangle" />{" "}
+                            No update filed in the last 24 hours
+                          </div>
                         </p>
                       </>
                     )}
-                  </div>
-                )
-            )}
+                </div>
+              )}
             <DropdownMenu
               id="show-more"
               itemClassName="min-w-0 sm:min-w-[225px]"
