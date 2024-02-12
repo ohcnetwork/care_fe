@@ -31,14 +31,13 @@ export default function DailyRoundsList({ consultation }: Props) {
       pathParams={{ consultationId }}
       query={query}
     >
-      {({ refetch }) => (
+      {() => (
         <>
           <div className="flex flex-1 justify-between">
             <PageTitle title="Update Log" hideBack breadcrumbs={false} />
             <DailyRoundsFilter
               onApply={(query) => {
                 setQuery(query);
-                refetch();
               }}
             />
           </div>
