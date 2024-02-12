@@ -56,6 +56,7 @@ describe("Location Management Section", () => {
     cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/");
     facilityPage.visitAlreadyCreatedFacility();
+    cy.screenshot();
     facilityPage.clickManageFacilityDropdown();
     facilityLocation.clickFacilityLocationManagement();
   });
@@ -236,7 +237,7 @@ describe("Location Management Section", () => {
     // create asset and link it to location
     cy.awaitUrl("/assets");
     assetPage.createAsset();
-    assetPage.selectFacility("Dummy Facility 40, Ernakulam");
+    assetPage.selectFacility("Dummy Facility 40");
     assetPage.selectLocation("Test Location with linked Assets");
     assetPage.selectAssetType("Internal");
     assetPage.enterAssetDetails(
