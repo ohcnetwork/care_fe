@@ -3,21 +3,8 @@ import { MedibaseMedicine } from "../Components/Medicine/models";
 import { fireRequest } from "./fireRequest";
 
 // Facility
-export const createFacility = (params: object) => {
-  return fireRequest("createFacility", [], params);
-};
-export const updateFacility = (id: string, params: object) => {
-  return fireRequest("updateFacility", [id], params);
-};
-export const deleteFacilityCoverImage = (id: string) => {
-  return fireRequest("deleteFacilityCoverImage", [], {}, { id });
-};
 export const getUserList = (params: object, key?: string) => {
   return fireRequest("userList", [], params, null, key);
-};
-
-export const getPermittedFacilities = (params: object) => {
-  return fireRequest("getPermittedFacilities", [], params);
 };
 
 export const getAnyFacility = (id: number | string, key?: string) => {
@@ -33,15 +20,6 @@ export const getFacilityUsers = (id: string, params?: object) => {
   );
 };
 
-export const listFacilityAssetLocation = (params: object, pathParam: object) =>
-  fireRequest("listFacilityAssetLocation", [], params, pathParam);
-export const createFacilityAssetLocation = (
-  params: object,
-  facility_id: string
-) =>
-  fireRequest("createFacilityAssetLocation", [], params, {
-    facility_external_id: facility_id,
-  });
 export const getFacilityAssetLocation = (
   facility_external_id: string,
   external_id: string
@@ -52,15 +30,6 @@ export const getFacilityAssetLocation = (
     {},
     { facility_external_id, external_id }
   );
-export const updateFacilityAssetLocation = (
-  params: object,
-  facility_external_id: string,
-  external_id: string
-) =>
-  fireRequest("updateFacilityAssetLocation", [], params, {
-    facility_external_id,
-    external_id,
-  });
 
 // asset bed
 export const listAssetBeds = (params: object, altKey?: string) =>
@@ -97,21 +66,6 @@ export const deleteAssetBed = (asset_id: string) =>
     }
   );
 
-// Facility Beds
-export const listFacilityBeds = (params: object) =>
-  fireRequest("listFacilityBeds", [], params, {});
-export const createFacilityBed = (
-  params: object,
-  facility_id: string,
-  location_id: string
-) =>
-  fireRequest(
-    "createFacilityBed",
-    [],
-    { ...params, facility: facility_id, location: location_id },
-    {}
-  );
-
 // Download Actions
 export const downloadFacility = () => {
   return fireRequest("downloadFacility");
@@ -127,35 +81,6 @@ export const downloadFacilityDoctors = () => {
 
 export const downloadFacilityTriage = () => {
   return fireRequest("downloadFacilityTriage");
-};
-
-// Capacity/Triage/Doctor
-export const createDoctor = (
-  id: number | undefined,
-  params: object,
-  pathParam: object
-) => {
-  return id
-    ? fireRequest("updateDoctor", [id], params, pathParam)
-    : fireRequest("createDoctor", [], params, pathParam);
-};
-export const deleteDoctor = (id: number, pathParam: object) => {
-  return fireRequest("deleteDoctor", [id], {}, pathParam);
-};
-export const createTriageForm = (params: object, pathParam: object) => {
-  return fireRequest("createTriage", [], params, pathParam);
-};
-export const getTriageInfo = (pathParam: object) => {
-  return fireRequest("getTriage", [], {}, pathParam);
-};
-export const getTriageDetails = (pathParam: object) => {
-  return fireRequest("getTriageDetails", [], {}, pathParam);
-};
-export const listDoctor = (params: object, pathParam: object) => {
-  return fireRequest("listDoctor", [], params, pathParam);
-};
-export const getDoctor = (pathParam: object) => {
-  return fireRequest("getDoctor", [], {}, pathParam);
 };
 
 //Patient
@@ -177,14 +102,9 @@ export const updatePatient = (params: object, pathParam: object) => {
 export const patchPatient = (params: object, pathParam: object) => {
   return fireRequest("patchPatient", [], params, pathParam);
 };
-export const transferPatient = (params: object, pathParam: object) => {
-  return fireRequest("transferPatient", [], params, pathParam);
-};
+
 export const getStates = () => {
   return fireRequest("statesList", []);
-};
-export const getState = (id: number) => {
-  return fireRequest("getState", [], {}, { id: id });
 };
 
 // District/State/Local body/ward
@@ -209,9 +129,6 @@ export const getWardByLocalBody = (pathParam: object) => {
 // Local Body
 export const getLocalBody = (pathParam: object) => {
   return fireRequest("getLocalBody", [], {}, pathParam);
-};
-export const getAllLocalBody = (params: object) => {
-  return fireRequest("getAllLocalBody", [], params);
 };
 
 // Sample Test
@@ -264,51 +181,6 @@ export const getConsultation = (id: string) => {
 };
 export const updateConsultation = (id: string, params: object) => {
   return fireRequest("updateConsultation", [], params, { id: id });
-};
-//Inventory
-export const getItems = (params: object) => {
-  return fireRequest("getItems", [], params);
-};
-export const postInventory = (params: object, pathParams: object) => {
-  return fireRequest("createInventory", [], params, pathParams);
-};
-export const getInventoryLog = (params: object, pathParams: object) => {
-  return fireRequest("getInventoryLog", [params, "inventory"], pathParams);
-};
-export const setMinQuantity = (params: object, pathParams: object) => {
-  return fireRequest("setMinQuantity", [], params, pathParams);
-};
-export const getMinQuantity = (facilityId: object, params: object) => {
-  return fireRequest("getMinQuantity", [facilityId, "min_quantity"], params);
-};
-
-export const getMinQuantityOfItem = (
-  facilityId: object,
-  externalId: object
-) => {
-  return fireRequest("getMinQuantity", [
-    facilityId,
-    "min_quantity",
-    externalId,
-  ]);
-};
-
-export const updateMinQuantity = (pathParams: object, params: object) => {
-  return fireRequest("updateMinQuantity", [], pathParams, params);
-};
-export const getInventorySummary = (facilityId: number, params: object) => {
-  return fireRequest(
-    "getInventorySummary",
-    [facilityId, "inventorysummary"],
-    params
-  );
-};
-export const flagInventoryItem = (params: object) => {
-  return fireRequest("flagInventoryItem", [], {}, params);
-};
-
-export const deleteLastInventoryLog = (params: object) => {
-  return fireRequest("deleteLastInventoryLog", [], {}, params);
 };
 
 export const generateDischargeSummary = (pathParams: object) => {
@@ -460,12 +332,6 @@ export const downloadResourceRequests = (params: object) => {
 
 export const listAssets = (params: object) =>
   fireRequest("listAssets", [], params);
-export const createAsset = (params: object) =>
-  fireRequest("createAsset", [], params);
-export const getAsset = (id: string) =>
-  fireRequest("getAsset", [], {}, { external_id: id });
-export const updateAsset = (id: string, params: object) =>
-  fireRequest("updateAsset", [], params, { external_id: id });
 export const operateAsset = (id: string, params: object) =>
   fireRequest("operateAsset", [], params, { external_id: id });
 

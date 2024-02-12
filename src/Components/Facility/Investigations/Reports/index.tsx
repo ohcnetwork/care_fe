@@ -95,7 +95,6 @@ const InvestigationReports = ({ id }: any) => {
   const [page, setPage] = useState(1);
   const [sessionPage, setSessionPage] = useState(1);
   const [isNextSessionDisabled, setIsNextSessionDisabled] = useState(false);
-  const [isLoadMoreDisabled, setIsLoadMoreDisabled] = useState(false);
   const [patientDetails, setPatientDetails] = useState<{
     name: string;
     age: number;
@@ -136,6 +135,17 @@ const InvestigationReports = ({ id }: any) => {
         .slice(pageStart, pageStart + RESULT_PER_PAGE)
         .join(",");
 
+      if (investigationsParams.length === 0) {
+        Notification.Error({
+          msg: "No more reports to load",
+        });
+        dispatch({
+          type: "set_loading",
+          payload: { ...isLoading, tableData: false },
+        });
+        return;
+      }
+
       dispatchAction(
         getPatientInvestigation(
           {
@@ -145,15 +155,13 @@ const InvestigationReports = ({ id }: any) => {
           id
         )
       ).then((res: any) => {
+        dispatch({
+          type: "set_loading",
+          payload: { ...isLoading, tableData: false },
+        });
         if (res?.data?.results) {
           onSuccess(res.data, curPage);
           setPage(curPage + 1);
-          if (res.data.results.length !== 0 || curPage >= totalPage) {
-            dispatch({
-              type: "set_loading",
-              payload: { ...isLoading, tableData: false },
-            });
-          }
         }
       });
     },
@@ -249,7 +257,7 @@ const InvestigationReports = ({ id }: any) => {
   }, []);
 
   // eslint-disable-next-line
-  const handleLoadMore = (e: any) => {
+  const handleLoadMore = () => {
     const onSuccess = (data: any, pageNo: number) => {
       if (data.results.length === 0 && pageNo + 1 <= totalPage) {
         fetchInvestigationsData(onSuccess, pageNo + 1, sessionPage);
@@ -270,20 +278,16 @@ const InvestigationReports = ({ id }: any) => {
         if (curSessionPage > 1 && !data.results.length) {
           setSessionPage(curSessionPage - 1);
           setIsNextSessionDisabled(true);
-          setIsLoadMoreDisabled(true);
         } else {
           setIsNextSessionDisabled(false);
-          setIsLoadMoreDisabled(false);
-
           if (!data.results.length) {
-            Notification.Error({
-              msg: "No Investigation data available!",
+            handleLoadMore();
+          } else {
+            dispatch({
+              type: "set_investigation_table_data",
+              payload: data.results,
             });
           }
-          dispatch({
-            type: "set_investigation_table_data",
-            payload: data.results,
-          });
         }
 
         document.getElementById("reports_section")?.scrollIntoView();
@@ -304,8 +308,7 @@ const InvestigationReports = ({ id }: any) => {
     handleGenerateReports(count);
   };
 
-  const loadMoreDisabled =
-    page - 1 >= totalPage || isLoading.tableData || isLoadMoreDisabled;
+  const loadMoreDisabled = page - 1 >= totalPage || isLoading.tableData;
   const getTestDisabled =
     !selectedGroup.length ||
     isLoading.tableData ||
@@ -391,6 +394,11 @@ const InvestigationReports = ({ id }: any) => {
               </ButtonV2>
             </>
           )}
+          {isLoading.tableData && (
+            <div className="flex w-full justify-center">
+              <CircularProgress className="text-primary-500" />
+            </div>
+          )}
           <section id="reports_section">
             {!!investigationTableData.length && (
               <>
@@ -414,10 +422,6 @@ const InvestigationReports = ({ id }: any) => {
                   title="Report"
                   patientDetails={patientDetails}
                 />
-
-                {!!isLoading.tableData && (
-                  <CircularProgress className="text-primary-500" />
-                )}
 
                 {!loadMoreDisabled && (
                   <ButtonV2

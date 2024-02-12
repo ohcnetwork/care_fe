@@ -1,11 +1,4 @@
-import { useState, useEffect, lazy, SyntheticEvent } from "react";
-import { useDispatch } from "react-redux";
-import {
-  createFacilityAssetLocation,
-  getAnyFacility,
-  getFacilityAssetLocation,
-  updateFacilityAssetLocation,
-} from "../../Redux/actions";
+import { useState, lazy, SyntheticEvent } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
 import { Submit, Cancel } from "../Common/components/ButtonV2";
@@ -14,17 +7,18 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import Page from "../Common/components/Page";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { AssetLocationType } from "../Assets/AssetTypes";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
-interface LocationFormProps {
+interface Props {
   facilityId: string;
   locationId?: string;
 }
 
-export const AddLocationForm = (props: LocationFormProps) => {
-  const { facilityId, locationId } = props;
-  const dispatchAction: any = useDispatch();
+export const AddLocationForm = ({ facilityId, locationId }: Props) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [name, setName] = useState("");
   const [middlewareAddress, setMiddlewareAddress] = useState("");
@@ -41,29 +35,30 @@ export const AddLocationForm = (props: LocationFormProps) => {
   const headerText = !locationId ? "Add Location" : "Update Location";
   const buttonText = !locationId ? "Add Location" : "Update Location";
 
-  useEffect(() => {
-    async function fetchFacilityName() {
-      setIsLoading(true);
-      if (facilityId) {
-        const res = await dispatchAction(getAnyFacility(facilityId));
+  const facilityQuery = useQuery(routes.getAnyFacility, {
+    pathParams: { id: facilityId },
+    prefetch: !locationId,
+    onResponse: ({ data }) => {
+      data?.name && setFacilityName(data.name);
+    },
+  });
 
-        setFacilityName(res?.data?.name || "");
-      }
-      if (locationId) {
-        const res = await dispatchAction(
-          getFacilityAssetLocation(facilityId, locationId)
-        );
-
-        setName(res?.data?.name || "");
-        setLocationName(res?.data?.name || "");
-        setDescription(res?.data?.description || "");
-        setLocationType(res?.data?.location_type || "");
-        setMiddlewareAddress(res?.data?.middleware_address || "");
-      }
-      setIsLoading(false);
-    }
-    fetchFacilityName();
-  }, [dispatchAction, facilityId, locationId]);
+  const locationQuery = useQuery(routes.getFacilityAssetLocation, {
+    pathParams: {
+      facility_external_id: facilityId,
+      external_id: locationId!,
+    },
+    prefetch: !!locationId,
+    onResponse: ({ data }) => {
+      if (!data) return;
+      setFacilityName(data.facility?.name ?? "");
+      setName(data.name);
+      setLocationName(data.name);
+      setDescription(data.description);
+      setLocationType(data.location_type);
+      setMiddlewareAddress(data.middleware_address ?? "");
+    },
+  });
 
   const validateForm = () => {
     let formValid = true;
@@ -109,39 +104,40 @@ export const AddLocationForm = (props: LocationFormProps) => {
       name,
       description,
       middleware_address: middlewareAddress,
-      location_type: locationType,
+      location_type: locationType as AssetLocationType,
     };
 
-    const res = await dispatchAction(
-      locationId
-        ? updateFacilityAssetLocation(data, facilityId, locationId)
-        : createFacilityAssetLocation(data, facilityId)
-    );
-    setIsLoading(false);
-    if (res) {
-      if (res.status === 201 || res.status === 200) {
-        const notificationMessage = locationId
-          ? "Location updated successfully"
-          : "Location created successfully";
+    const { res, error } = await (locationId
+      ? request(routes.updateFacilityAssetLocation, {
+          body: data,
+          pathParams: {
+            facility_external_id: facilityId,
+            external_id: locationId,
+          },
+        })
+      : request(routes.createFacilityAssetLocation, {
+          body: data,
+          pathParams: { facility_external_id: facilityId },
+        }));
 
-        navigate(`/facility/${facilityId}/location`, {
-          replace: true,
-        });
-        Notification.Success({
-          msg: notificationMessage,
-        });
-      } else if (res.status === 400) {
-        Object.keys(res.data).forEach((key) => {
-          setErrors((prevState: any) => ({
-            ...prevState,
-            [key]: res.data[key],
-          }));
-        });
-      }
+    setIsLoading(false);
+
+    if (res?.ok) {
+      navigate(`/facility/${facilityId}/location`, { replace: true });
+      Notification.Success({
+        msg: locationId
+          ? "Location updated successfully"
+          : "Location created successfully",
+      });
+      return;
+    }
+
+    if (error) {
+      setErrors(error);
     }
   };
 
-  if (isLoading) {
+  if (isLoading || locationQuery.loading || facilityQuery.loading) {
     return <Loading />;
   }
 

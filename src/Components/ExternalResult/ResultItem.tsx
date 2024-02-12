@@ -77,13 +77,18 @@ export default function ResultItem(props: any) {
         <div className="mt-4 overflow-hidden bg-white shadow sm:rounded-lg">
           <div className="border-b border-gray-200 px-4 py-5 sm:px-6">
             <h3 className="text-lg font-medium leading-6 text-gray-900">
-              {resultItemData.name} - {resultItemData.age}{" "}
-              {resultItemData.age_in} | {resultItemData.result}
+              <span id="external-patient-name">{resultItemData.name}</span> -{" "}
+              <span>{resultItemData.age}</span>{" "}
+              <span>{resultItemData.age_in}</span> |{" "}
+              <span>{resultItemData.result}</span>
             </h3>
             <p className="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
               {t("srf_id")}: {resultItemData.srf_id}
             </p>
-            <p className="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
+            <p
+              className="mt-1 max-w-2xl text-sm leading-5 text-gray-500"
+              id="patient-external-id"
+            >
               {t("care_external_results_id")}: {resultItemData.id}
             </p>
             {resultItemData.patient_created ? (
