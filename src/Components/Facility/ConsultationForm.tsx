@@ -507,6 +507,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             invalidForm = true;
           }
           if (
+            min_encounter_date &&
             dayjs(state.form.encounter_date).isBefore(dayjs(min_encounter_date))
           ) {
             errors[
