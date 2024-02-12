@@ -228,15 +228,16 @@ describe("Location Management Section", () => {
 
   it("Delete location with linked assets", () => {
     facilityLocation.clickAddNewLocationButton();
-    facilityLocation.enterLocationName("Test Location with Linked Assets");
+    facilityLocation.enterLocationName("Test Location with Assets");
     facilityLocation.selectLocationType("OTHER");
     assetPage.clickassetupdatebutton();
+    facilityLocation.verifyNotification("Location created successfully");
     facilityLocation.closeNotification();
     // create asset and link it to location
     cy.awaitUrl("/assets");
     assetPage.createAsset();
     assetPage.selectFacility("Dummy Facility 40, Ernakulam");
-    assetPage.selectLocation("Test Location with Linked Assets");
+    assetPage.selectLocation("Test Location with Assets");
     assetPage.selectAssetType("Internal");
     assetPage.enterAssetDetails(
       "Test Asset linked to Facility",
@@ -255,7 +256,7 @@ describe("Location Management Section", () => {
     );
     assetPage.clickassetupdatebutton();
     facilityLocation.loadLocationManagementPage();
-    facilityLocation.deleteLocation("Test Location with Linked Assets");
+    facilityLocation.deleteLocation("Test Location with Assets");
     assetPage.clickassetupdatebutton();
     facilityLocation.verifyNotification(
       "Cannot delete a Location with associated Assets"
@@ -270,10 +271,10 @@ describe("Location Management Section", () => {
 
     // delete location
     facilityLocation.loadLocationManagementPage();
-    facilityLocation.deleteLocation("Test Location with Linked Assets");
+    facilityLocation.deleteLocation("Test Location with Assets");
     assetPage.clickassetupdatebutton();
     facilityLocation.verifyNotification(
-      "Location Test Location with Linked Assets deleted successfully"
+      "Location Test Location with Assets deleted successfully"
     );
     facilityLocation.closeNotification();
   });
