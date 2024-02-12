@@ -25,7 +25,7 @@ describe("User Creation", () => {
     }
     return result;
   };
-  const username = makeid(14);
+  const username = makeid(8);
   const alreadylinkedusersviews = [
     "devdoctor",
     "devstaff2",
