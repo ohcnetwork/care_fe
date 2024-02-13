@@ -27,7 +27,6 @@ import {
   AssetService,
   AssetServiceUpdate,
   AssetTransaction,
-  AssetUpdate,
   AvailabilityRecord,
   PatientAssetBed,
 } from "../Components/Assets/AssetTypes";
