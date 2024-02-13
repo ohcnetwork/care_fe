@@ -152,17 +152,9 @@ const PatientNoteCard = ({
                   value={noteField}
                   onChange={(e) => setNoteField(e.target.value)}
                 ></textarea>
-                <div className="mt-2 grid w-full grid-cols-6 gap-2">
+                <div className="mt-2 flex justify-end gap-2">
                   <ButtonV2
-                    className="col-span-5 py-1"
-                    onClick={onUpdateNote}
-                    id="update-note-button"
-                  >
-                    <CareIcon icon="l-check" className="h-5 w-5 text-white" />
-                    Update Note
-                  </ButtonV2>
-                  <ButtonV2
-                    className="col-span-1 py-1"
+                    className="py-1"
                     variant="secondary"
                     border
                     onClick={() => {
@@ -172,6 +164,15 @@ const PatientNoteCard = ({
                     id="cancel-update-note-button"
                   >
                     <CareIcon icon="l-times-circle" className="h-5 w-5" />
+                    Cancel
+                  </ButtonV2>
+                  <ButtonV2
+                    className="py-1"
+                    onClick={onUpdateNote}
+                    id="update-note-button"
+                  >
+                    <CareIcon icon="l-check" className="h-5 w-5 text-white" />
+                    Update Note
                   </ButtonV2>
                 </div>
               </div>
