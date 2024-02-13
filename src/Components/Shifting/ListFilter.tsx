@@ -28,30 +28,6 @@ import dayjs from "dayjs";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 
-const clearFilterState = {
-  origin_facility: "",
-  origin_facility_ref: "",
-  shifting_approving_facility: "",
-  shifting_approving_facility_ref: "",
-  assigned_facility: "",
-  assigned_facility_ref: "",
-  emergency: "",
-  is_up_shift: "",
-  created_date_before: "",
-  created_date_after: "",
-  modified_date_before: "",
-  modified_date_after: "",
-  patient_phone_number: "",
-  ordering: "",
-  is_kasp: "",
-  status: "",
-  assigned_user_ref: "",
-  assigned_to: "",
-  disease_status: "",
-  is_antenatal: "",
-  breathlessness_level: "",
-};
-
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
 
@@ -220,7 +196,7 @@ export default function ListFilter(props: any) {
       advancedFilter={props}
       onApply={applyFilter}
       onClear={() => {
-        removeFilters(Object.keys(clearFilterState));
+        removeFilters();
         closeFilter();
       }}
     >

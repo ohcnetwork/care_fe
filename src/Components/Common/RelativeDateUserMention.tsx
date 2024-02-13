@@ -6,6 +6,7 @@ function RelativeDateUserMention(props: {
   actionDate?: string;
   user?: PerformedByModel;
   tooltipPosition?: "top" | "bottom" | "left" | "right";
+  withoutSuffix?: boolean;
 }) {
   return (
     <div className="flex flex-row flex-wrap items-center justify-center ">
@@ -15,7 +16,9 @@ function RelativeDateUserMention(props: {
         >
           {props.actionDate ? formatDateTime(props.actionDate) : "--:--"}
         </span>
-        {props.actionDate ? relativeDate(props.actionDate) : "--:--"}
+        {props.actionDate
+          ? relativeDate(props.actionDate, props.withoutSuffix ?? false)
+          : "--:--"}
       </div>
       {props.user && (
         <div className="tooltip">

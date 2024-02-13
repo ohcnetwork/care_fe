@@ -44,7 +44,10 @@ export default function ManageUsers() {
     FilterBadges,
     advancedFilter,
     resultsPerPage,
-  } = useFilters({ limit: 18 });
+  } = useFilters({
+    limit: 18,
+    cacheBlacklist: ["username"],
+  });
   let manageUsers: any = null;
   const [expandSkillList, setExpandSkillList] = useState(false);
   const [expandFacilityList, setExpandFacilityList] = useState(false);
@@ -218,7 +221,10 @@ export default function ManageUsers() {
                     )}
                   </div>
                 </div>
-                <div id="name" className="mt-2 text-2xl font-bold capitalize">
+                <div
+                  id="name"
+                  className="mt-2 flex gap-3 text-2xl font-bold capitalize"
+                >
                   {`${user.first_name} ${user.last_name}`}
 
                   {user.last_login && cur_online ? (
@@ -228,15 +234,12 @@ export default function ManageUsers() {
                     ></i>
                   ) : null}
                   {showUserDelete(authUser, user) && (
-                    <ButtonV2
-                      variant="danger"
-                      ghost
-                      border
-                      className="float-right"
+                    <div
+                      className="w-8 cursor-pointer rounded-lg bg-red-50 text-xl text-red-600 hover:bg-red-50 hover:text-red-700"
                       onClick={() => handleDelete(user)}
                     >
-                      Delete
-                    </ButtonV2>
+                      <CareIcon icon="l-trash" className="ml-[5px]" />
+                    </div>
                   )}
                 </div>
 
@@ -712,7 +715,7 @@ function UserFacilities(props: { user: any }) {
           )}
 
           {/* Linked Facilities section */}
-          {userFacilities?.length && (
+          {!!userFacilities?.length && (
             <div className="mt-2" id="linked-facility-list">
               <div className="mb-2 ml-2 text-lg font-bold">
                 Linked Facilities

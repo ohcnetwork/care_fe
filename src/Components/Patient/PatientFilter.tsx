@@ -1,5 +1,4 @@
 import dayjs from "dayjs";
-import { useCallback, useEffect } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import {
@@ -12,12 +11,6 @@ import {
 } from "../../Common/constants";
 import useConfig from "../../Common/hooks/useConfig";
 import useMergeState from "../../Common/hooks/useMergeState";
-import {
-  getAllLocalBody,
-  getAnyFacility,
-  getDistrict,
-} from "../../Redux/actions";
-import { useDispatch } from "react-redux";
 import { dateQueryString } from "../../Utils/utils";
 import { DateRange } from "../Common/DateRangeInputV2";
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -34,6 +27,10 @@ import {
 } from "../Form/FormFields/Utils";
 import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
 import SelectMenuV2 from "../Form/SelectMenuV2";
+import DiagnosesFilter, { FILTER_BY_DIAGNOSES_KEYS } from "./DiagnosesFilter";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
@@ -81,8 +78,8 @@ export default function PatientFilter(props: any) {
         : [],
     last_consultation_current_bed__location:
       filter.last_consultation_current_bed__location || "",
-    last_consultation_discharge_reason:
-      filter.last_consultation_discharge_reason || null,
+    last_consultation__new_discharge_reason:
+      filter.last_consultation__new_discharge_reason || null,
     srf_id: filter.srf_id || null,
     number_of_doses: filter.number_of_doses || null,
     covin_id: filter.covin_id || null,
@@ -98,82 +95,30 @@ export default function PatientFilter(props: any) {
       filter.last_consultation_is_telemedicine || null,
     is_antenatal: filter.is_antenatal || null,
     ventilator_interface: filter.ventilator_interface || null,
+    diagnoses: filter.diagnoses || null,
+    diagnoses_confirmed: filter.diagnoses_confirmed || null,
+    diagnoses_provisional: filter.diagnoses_provisional || null,
+    diagnoses_unconfirmed: filter.diagnoses_unconfirmed || null,
+    diagnoses_differential: filter.diagnoses_differential || null,
   });
-  const dispatch: any = useDispatch();
 
-  const clearFilterState = {
-    district: "",
-    facility: "",
-    facility_type: "",
-    lsgBody: "",
-    facility_ref: null,
-    lsgBody_ref: null,
-    district_ref: null,
-    date_declared_positive_before: "",
-    date_declared_positive_after: "",
-    date_of_result_before: "",
-    date_of_result_after: "",
-    created_date_before: "",
-    created_date_after: "",
-    modified_date_before: "",
-    modified_date_after: "",
-    category: null,
-    gender: null,
-    disease_status: null,
-    age_min: "",
-    age_max: "",
-    date_of_result: null,
-    date_declared_positive: null,
-    last_consultation_medico_legal_case: null,
-    last_consultation_encounter_date_before: "",
-    last_consultation_encounter_date_after: "",
-    last_consultation_discharge_date_before: "",
-    last_consultation_discharge_date_after: "",
-    last_consultation_admitted_to_list: [],
-    last_consultation_current_bed__location: "",
-    srf_id: "",
-    number_of_doses: null,
-    covin_id: "",
-    is_kasp: null,
-    is_declared_positive: null,
-    last_consultation_symptoms_onset_date_before: "",
-    last_consultation_symptoms_onset_date_after: "",
-    last_vaccinated_date_before: "",
-    last_vaccinated_date_after: "",
-    last_consultation_is_telemedicine: null,
-    is_antenatal: null,
-    ventilator_interface: null,
-  };
+  useQuery(routes.getAnyFacility, {
+    pathParams: { id: filter.facility },
+    prefetch: !!filter.facility,
+    onResponse: ({ data }) => setFilterState({ facility_ref: data }),
+  });
 
-  useEffect(() => {
-    async function fetchData() {
-      if (filter.facility) {
-        const { data: facilityData } = await dispatch(
-          getAnyFacility(filter.facility, "facility")
-        );
-        setFilterState({ facility_ref: facilityData });
-      }
+  useQuery(routes.getDistrict, {
+    pathParams: { id: filter.district },
+    prefetch: !!filter.district,
+    onResponse: ({ data }) => setFilterState({ district_ref: data }),
+  });
 
-      if (filter.district) {
-        const { data: districtData } = await dispatch(
-          getDistrict(filter.district, "district")
-        );
-        setFilterState({ district_ref: districtData });
-      }
-
-      if (filter.lsgBody) {
-        const { data: lsgRes } = await dispatch(getAllLocalBody({}));
-        const lsgBodyData = lsgRes.results;
-
-        setFilterState({
-          lsgBody_ref: lsgBodyData.filter(
-            (obj: any) => obj.id.toString() === filter.lsgBody.toString()
-          )[0],
-        });
-      }
-    }
-    fetchData();
-  }, [dispatch]);
+  useQuery(routes.getLocalBody, {
+    pathParams: { id: filter.lsgBody },
+    prefetch: !!filter.lsgBody,
+    onResponse: ({ data }) => setFilterState({ lsgBody_ref: data }),
+  });
 
   const VACCINATED_FILTER = [
     { id: "0", text: "Unvaccinated" },
@@ -199,21 +144,19 @@ export default function PatientFilter(props: any) {
     { id: "false", text: "No" },
   ];
 
-  const setFacility = (selected: any, name: string) => {
-    const filterData: any = { ...filterState };
-    filterData[`${name}_ref`] = selected;
-    filterData[name] = (selected || {}).id;
-
-    setFilterState(filterData);
+  const setFilterWithRef = (name: string, selected?: any) => {
+    setFilterState({
+      [`${name}_ref`]: selected,
+      [name]: selected?.id,
+    });
   };
 
-  const lsgSearch = useCallback(
-    async (search: string) => {
-      const res = await dispatch(getAllLocalBody({ local_body_name: search }));
-      return res?.data?.results;
-    },
-    [dispatch]
-  );
+  const lsgSearch = async (search: string) => {
+    const { data } = await request(routes.getAllLocalBody, {
+      query: { local_body_name: search },
+    });
+    return data?.results;
+  };
 
   const applyFilter = () => {
     const {
@@ -241,7 +184,7 @@ export default function PatientFilter(props: any) {
       last_consultation_discharge_date_before,
       last_consultation_discharge_date_after,
       last_consultation_admitted_bed_type_list,
-      last_consultation_discharge_reason,
+      last_consultation__new_discharge_reason,
       last_consultation_current_bed__location,
       number_of_doses,
       covin_id,
@@ -255,6 +198,11 @@ export default function PatientFilter(props: any) {
       last_consultation_is_telemedicine,
       is_antenatal,
       ventilator_interface,
+      diagnoses,
+      diagnoses_confirmed,
+      diagnoses_provisional,
+      diagnoses_unconfirmed,
+      diagnoses_differential,
     } = filterState;
     const data = {
       district: district || "",
@@ -298,8 +246,8 @@ export default function PatientFilter(props: any) {
       age_max: age_max || "",
       last_consultation_admitted_bed_type_list:
         last_consultation_admitted_bed_type_list || [],
-      last_consultation_discharge_reason:
-        last_consultation_discharge_reason || "",
+      last_consultation__new_discharge_reason:
+        last_consultation__new_discharge_reason || "",
       srf_id: srf_id || "",
       number_of_doses: number_of_doses || "",
       covin_id: covin_id || "",
@@ -317,6 +265,11 @@ export default function PatientFilter(props: any) {
         last_consultation_is_telemedicine || "",
       is_antenatal: is_antenatal || "",
       ventilator_interface: ventilator_interface || "",
+      diagnoses: diagnoses || "",
+      diagnoses_confirmed: diagnoses_confirmed || "",
+      diagnoses_provisional: diagnoses_provisional || "",
+      diagnoses_unconfirmed: diagnoses_unconfirmed || "",
+      diagnoses_differential: diagnoses_differential || "",
     };
     onChange(data);
   };
@@ -336,7 +289,7 @@ export default function PatientFilter(props: any) {
       advancedFilter={props}
       onApply={applyFilter}
       onClear={() => {
-        removeFilters(Object.keys(clearFilterState));
+        removeFilters();
         closeFilter();
       }}
     >
@@ -424,16 +377,16 @@ export default function PatientFilter(props: any) {
           <div className="w-full flex-none" id="discharge-reason-select">
             <FieldLabel className="text-sm">Discharge Reason</FieldLabel>
             <SelectMenuV2
-              id="last_consultation_discharge_reason"
+              id="last_consultation__new_discharge_reason"
               placeholder="Select discharge reason"
               options={DISCHARGE_REASONS}
-              value={filterState.last_consultation_discharge_reason}
+              value={filterState.last_consultation__new_discharge_reason}
               optionValue={(o) => o.id}
               optionLabel={(o) => o.text}
               onChange={(o) =>
                 setFilterState({
                   ...filterState,
-                  last_consultation_discharge_reason: o,
+                  last_consultation__new_discharge_reason: o,
                 })
               }
             />
@@ -502,6 +455,24 @@ export default function PatientFilter(props: any) {
             />
           </div>
         </div>
+      </AccordionV2>
+      <AccordionV2
+        title={
+          <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
+            ICD-11 Diagnoses based
+          </h1>
+        }
+        expanded
+        className="w-full"
+      >
+        {FILTER_BY_DIAGNOSES_KEYS.map((name) => (
+          <DiagnosesFilter
+            key={name}
+            name={name}
+            value={filterState[name]}
+            onChange={handleFormFieldChange}
+          />
+        ))}
       </AccordionV2>
       <AccordionV2
         title={
@@ -595,7 +566,7 @@ export default function PatientFilter(props: any) {
               name="facility"
               showAll={false}
               selected={filterState.facility_ref}
-              setSelected={(obj) => setFacility(obj, "facility")}
+              setSelected={(obj) => setFilterWithRef("facility", obj)}
             />
           </div>
           {filterState.facility && (
@@ -639,13 +610,7 @@ export default function PatientFilter(props: any) {
                 name="lsg_body"
                 selected={filterState.lsgBody_ref}
                 fetchData={lsgSearch}
-                onChange={(selected) =>
-                  setFilterState({
-                    ...filterState,
-                    lsgBody_ref: selected,
-                    lsgBody: selected.id,
-                  })
-                }
+                onChange={(obj) => setFilterWithRef("lsgBody", obj)}
                 optionLabel={(option) => option.name}
                 compareBy="id"
               />
@@ -658,7 +623,7 @@ export default function PatientFilter(props: any) {
               multiple={false}
               name="district"
               selected={filterState.district_ref}
-              setSelected={(obj: any) => setFacility(obj, "district")}
+              setSelected={(obj) => setFilterWithRef("district", obj)}
               errors={""}
             />
           </div>

@@ -56,7 +56,7 @@ Authenticate to staging API with any of the following credentials
 
 - username: staffdev
   password: Coronasafe@123
-  role: Staff
+  role: Nurse
 
 - username: doctordev
   password: Coronasafe@123

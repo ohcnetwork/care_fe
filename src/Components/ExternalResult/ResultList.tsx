@@ -16,9 +16,13 @@ import Page from "../Common/components/Page";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import { parsePhoneNumber } from "../../Utils/utils";
+import useAuthUser from "../../Common/hooks/useAuthUser";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ResultList() {
+  const authUser = useAuthUser();
   const {
     qParams,
     updateQuery,
@@ -26,7 +30,10 @@ export default function ResultList() {
     FilterBadges,
     advancedFilter,
     resultsPerPage,
-  } = useFilters({ limit: 14 });
+  } = useFilters({
+    limit: 14,
+    cacheBlacklist: ["mobile_number", "name"],
+  });
   const [showDialog, setShowDialog] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
@@ -165,6 +172,10 @@ export default function ResultList() {
           <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
             <ButtonV2
               variant="primary"
+              disabled={
+                authUser.user_type === "Nurse" || authUser.user_type === "Staff"
+              }
+              authorizeFor={NonReadOnlyUsers}
               border
               ghost
               onClick={() => {
@@ -226,13 +237,18 @@ export default function ResultList() {
           <ExportMenu
             label="Import/Export"
             exportItems={[
-              {
-                label: "Import Results",
-                action: () => navigate("/external_results/upload"),
-                options: {
-                  icon: <CareIcon className="care-l-import" />,
-                },
-              },
+              ...(authUser.user_type !== "Nurse" &&
+              authUser.user_type !== "Staff"
+                ? [
+                    {
+                      label: "Import Results",
+                      action: () => navigate("/external_results/upload"),
+                      options: {
+                        icon: <CareIcon className="care-l-import" />,
+                      },
+                    },
+                  ]
+                : []),
               {
                 label: "Export Results",
                 action: () =>
@@ -302,7 +318,10 @@ export default function ResultList() {
           ]}
         />
 
-        <div className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-t-lg">
+        <div
+          className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-t-lg"
+          id="external-result-table"
+        >
           <table className="min-w-full divide-y divide-gray-200">
             <thead>
               <tr>

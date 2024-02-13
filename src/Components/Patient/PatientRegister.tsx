@@ -70,6 +70,7 @@ import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { validatePincode } from "../../Common/validation";
 import { FormContextValue } from "../Form/FormContext.js";
+import useAuthUser from "../../Common/hooks/useAuthUser.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -180,6 +181,7 @@ const patientFormReducer = (state = initialState, action: any) => {
 };
 
 export const PatientRegister = (props: PatientRegisterProps) => {
+  const authUser = useAuthUser();
   const { goBack } = useAppHistory();
   const { gov_data_api_key, enable_hcx, enable_abdm } = useConfig();
   const dispatchAction: any = useDispatch();
@@ -1124,6 +1126,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   />
                 </div>
                 <button
+                  id="submit-importexternalresult-button"
                   className="btn btn-primary mr-4"
                   onClick={(e) => {
                     fetchExtResultData(e, showImport?.field?.("name"));
@@ -1172,7 +1175,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     <>
                       <div className="mb-2 overflow-visible rounded border border-gray-200 p-4">
                         <ButtonV2
+                          id="import-externalresult-button"
                           className="flex items-center gap-2"
+                          disabled={
+                            authUser.user_type === "Nurse" ||
+                            authUser.user_type === "Staff"
+                          }
                           onClick={(_) => {
                             setShowImport({
                               show: true,

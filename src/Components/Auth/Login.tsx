@@ -11,8 +11,8 @@ import useConfig from "../../Common/hooks/useConfig";
 import CircularProgress from "../Common/components/CircularProgress";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
-import { invalidateFiltersCache } from "../../Utils/utils";
 import { useAuthContext } from "../../Common/hooks/useAuthUser";
+import FiltersCache from "../../Utils/FiltersCache";
 
 export const Login = (props: { forgot?: boolean }) => {
   const { signIn } = useAuthContext();
@@ -92,15 +92,14 @@ export const Login = (props: { forgot?: boolean }) => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-
     setLoading(true);
-    invalidateFiltersCache();
-
+    FiltersCache.invaldiateAll();
     const validated = validateData();
-    if (!validated) return;
-
+    if (!validated) {
+      setLoading(false);
+      return;
+    }
     const { res } = await signIn(validated);
-
     setCaptcha(res?.status === 429);
     setLoading(false);
   };
@@ -212,7 +211,7 @@ export const Login = (props: { forgot?: boolean }) => {
                 target="_blank"
               >
                 <img
-                  src="https://digitalpublicgoods.net/wp-content/themes/dpga/images/logo-w.svg"
+                  src="https://cdn.coronasafe.network/dpg-logo.svg"
                   className="h-12"
                   alt="Logo of Digital Public Goods Alliance"
                 />

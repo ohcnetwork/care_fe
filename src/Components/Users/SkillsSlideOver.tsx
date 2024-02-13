@@ -115,12 +115,10 @@ export default ({ show, setShow, username }: IProps) => {
                   multiple={false}
                   name="skill"
                   disabled={!authorizeForAddSkill}
-                  showAll={true}
                   showNOptions={Infinity}
                   selected={selectedSkill}
                   setSelected={setSelectedSkill}
                   errors=""
-                  username={username}
                   userSkills={skills?.results || []}
                 />
                 <ButtonV2
