@@ -401,7 +401,7 @@ export const ConsultationDetails = (props: any) => {
             </div>
           </div>
         </div>
-        {consultationData.diagnoses?.length && (
+        {!!consultationData.diagnoses?.length && (
           <div className="col-span-1 mt-2 overflow-hidden rounded-lg bg-white shadow">
             <div className="px-4 py-2">
               <DiagnosesListAccordion
