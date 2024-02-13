@@ -928,7 +928,7 @@ export const PatientManager = () => {
               "last_consultation_current_bed__location",
               qParams.last_consultation_current_bed__location
                 ? facilityAssetLocationData?.name ||
-                    qParams?.last_consultation_current_bed__locations
+                    qParams.last_consultation_current_bed__locations
                 : ""
             ),
             badge("Facility Type", "facility_type"),
@@ -960,7 +960,7 @@ export const PatientManager = () => {
             badge("SRF ID", "srf_id"),
             {
               name: "LSG Body",
-              value: qParams?.lsgBody ? LocalBodyData?.name || "" : "",
+              value: qParams.lsgBody ? LocalBodyData?.name || "" : "",
               paramKey: "lsgBody",
             },
             ...FILTER_BY_DIAGNOSES_KEYS.map((key) =>
