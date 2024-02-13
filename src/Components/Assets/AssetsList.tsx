@@ -241,6 +241,13 @@ const AssetsList = () => {
                   <Chip variant="danger" startIcon="l-cog" text="Not Working" />
                 )}
                 {warrantyAmcValidityChip(asset.warranty_amc_end_of_validity)}
+                {asset?.latest_status === "Down" && (
+                  <Chip
+                    variant="danger"
+                    startIcon="l-link-broken"
+                    text={asset?.latest_status}
+                  />
+                )}{" "}
               </div>
             </div>
           </Link>
