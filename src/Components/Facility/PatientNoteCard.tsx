@@ -129,35 +129,52 @@ const PatientNoteCard = ({
             }
           </div>
 
-          {!disableEdit && note.created_by_object.id === authUser.id && (
-            <ButtonV2
-              className="text-gray-500"
-              ghost
-              onClick={() => {
-                if (!isEditing) setIsEditing(true);
-              }}
-            >
-              {isEditing ? (
-                <CareIcon
-                  icon="l-check-circle"
-                  className="h-5 w-5"
-                  onClick={onUpdateNote}
-                />
-              ) : (
+          {!disableEdit &&
+            note.created_by_object.id === authUser.id &&
+            !isEditing && (
+              <ButtonV2
+                ghost
+                onClick={() => {
+                  setIsEditing(true);
+                }}
+              >
                 <CareIcon icon="l-pen" className="h-5 w-5" />
-              )}
-            </ButtonV2>
-          )}
+              </ButtonV2>
+            )}
         </div>
         {
           <div className="mt-2">
             {isEditing ? (
-              <textarea
-                rows={2}
-                className="h-20 w-full resize-none rounded-lg border border-gray-300 p-2"
-                value={noteField}
-                onChange={(e) => setNoteField(e.target.value)}
-              ></textarea>
+              <div className="flex flex-col">
+                <textarea
+                  rows={2}
+                  className="h-20 w-full resize-none rounded-lg border border-gray-300 p-2"
+                  value={noteField}
+                  onChange={(e) => setNoteField(e.target.value)}
+                ></textarea>
+                <div className="mt-2 grid w-full grid-cols-6 gap-2">
+                  <ButtonV2
+                    className="col-span-5 py-1"
+                    onClick={onUpdateNote}
+                    id="update-note-button"
+                  >
+                    <CareIcon icon="l-check" className="h-5 w-5 text-white" />
+                    Update Note
+                  </ButtonV2>
+                  <ButtonV2
+                    className="col-span-1 py-1"
+                    variant="secondary"
+                    border
+                    onClick={() => {
+                      setIsEditing(false);
+                      setNoteField(note.note);
+                    }}
+                    id="cancel-update-note-button"
+                  >
+                    <CareIcon icon="l-times-circle" className="h-5 w-5" />
+                  </ButtonV2>
+                </div>
+              </div>
             ) : (
               <div className="text-sm text-gray-700">{noteField}</div>
             )}
