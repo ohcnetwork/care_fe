@@ -20,7 +20,7 @@ export default function EventsList({ consultation }: Props) {
   console.log("consultation", consultation, consultationId);
 
   return (
-    <PaginatedList route={routes.getEvents}>
+    <PaginatedList route={routes.getEvents} pathParams={{ consultationId }}>
       {() => (
         <>
           <div className="mt-4 flex w-full flex-col gap-4">

@@ -543,9 +543,8 @@ const routes = {
   },
 
   getEvents: {
-    path: "/events.json",
+    path: "/api/v1/consultation/{consultationId}/events/",
     method: "GET",
-    noAuth: true,
     TRes: Type<PaginatedResponse<EventGeneric>>(),
   },
 
