@@ -51,6 +51,13 @@ import { triggerGoal } from "../../Integrations/Plausible.js";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
+import {
+  DIAGNOSES_FILTER_LABELS,
+  DiagnosesFilterKey,
+  FILTER_BY_DIAGNOSES_KEYS,
+} from "./DiagnosesFilter.js";
+import { ICD11DiagnosisModel } from "../Diagnosis/types.js";
+import { getDiagnosesByIds } from "../Diagnosis/utils.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -110,6 +117,7 @@ export const PatientManager = () => {
     name: "",
   });
   const authUser = useAuthUser();
+  const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
   const [showDialog, setShowDialog] = useState(false);
   const [showDoctors, setShowDoctors] = useState(false);
   const [showDoctorConnect, setShowDoctorConnect] = useState(false);
@@ -231,7 +239,32 @@ export const PatientManager = () => {
       qParams.last_consultation_is_telemedicine || undefined,
     is_antenatal: qParams.is_antenatal || undefined,
     ventilator_interface: qParams.ventilator_interface || undefined,
+    diagnoses: qParams.diagnoses || undefined,
+    diagnoses_confirmed: qParams.diagnoses_confirmed || undefined,
+    diagnoses_provisional: qParams.diagnoses_provisional || undefined,
+    diagnoses_unconfirmed: qParams.diagnoses_unconfirmed || undefined,
+    diagnoses_differential: qParams.diagnoses_differential || undefined,
   };
+
+  useEffect(() => {
+    const ids: string[] = [];
+    FILTER_BY_DIAGNOSES_KEYS.forEach((key) => {
+      ids.push(...(qParams[key] ?? "").split(",").filter(Boolean));
+    });
+    const existing = diagnoses.filter(({ id }) => ids.includes(id));
+    const objIds = existing.map((o) => o.id);
+    const diagnosesToBeFetched = ids.filter((id) => !objIds.includes(id));
+    getDiagnosesByIds(diagnosesToBeFetched).then((data) => {
+      const retrieved = data.filter(Boolean) as ICD11DiagnosisModel[];
+      setDiagnoses([...existing, ...retrieved]);
+    });
+  }, [
+    qParams.diagnoses,
+    qParams.diagnoses_confirmed,
+    qParams.diagnoses_provisional,
+    qParams.diagnoses_unconfirmed,
+    qParams.diagnoses_differential,
+  ]);
 
   useEffect(() => {
     if (params.facility) {
@@ -395,6 +428,11 @@ export const PatientManager = () => {
     qParams.last_consultation_is_telemedicine,
     qParams.is_antenatal,
     qParams.ventilator_interface,
+    qParams.diagnoses,
+    qParams.diagnoses_confirmed,
+    qParams.diagnoses_provisional,
+    qParams.diagnoses_unconfirmed,
+    qParams.diagnoses_differential,
   ]);
 
   const getTheCategoryFromId = () => {
@@ -520,6 +558,11 @@ export const PatientManager = () => {
       });
   };
 
+  const getDiagnosisFilterValue = (key: DiagnosesFilterKey) => {
+    const ids: string[] = (qParams[key] ?? "").split(",");
+    return ids.map((id) => diagnoses.find((obj) => obj.id == id)?.label ?? id);
+  };
+
   let patientList: ReactNode[] = [];
   if (data && data.length) {
     patientList = data.map((patient: any) => {
@@ -545,7 +588,7 @@ export const PatientManager = () => {
 
       const children = (
         <div
-          className={`ring/0 hover:ring/100 group relative w-full rounded-lg bg-white p-4 pl-5 text-black shadow transition-all duration-200 ease-in-out hover:pl-5 ${categoryClass}-ring overflow-hidden`}
+          className={`ring/0 hover:ring/100 group relative h-full w-full rounded-lg bg-white p-4 pl-5 text-black shadow transition-all duration-200 ease-in-out hover:pl-5 ${categoryClass}-ring overflow-hidden`}
         >
           <div
             className={`absolute inset-y-0 left-0 flex h-full w-1 items-center rounded-l-lg transition-all duration-200 ease-in-out group-hover:w-5 ${categoryClass}`}
@@ -1025,6 +1068,13 @@ export const PatientManager = () => {
             ...range("Age", "age"),
             badge("SRF ID", "srf_id"),
             { name: "LSG Body", value: localbodyName, paramKey: "lsgBody" },
+            ...FILTER_BY_DIAGNOSES_KEYS.map((key) =>
+              value(
+                DIAGNOSES_FILTER_LABELS[key],
+                key,
+                getDiagnosisFilterValue(key).join(", ")
+              )
+            ),
             badge("Declared Status", "is_declared_positive"),
             ...dateRange("Result", "date_of_result"),
             ...dateRange("Declared positive", "date_declared_positive"),

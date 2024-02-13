@@ -263,6 +263,8 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   const [bedStatusVisible, bedStatusRef] = useVisibility(-300);
   const [disabledFields, setDisabledFields] = useState<string[]>([]);
 
+  const { min_encounter_date } = useConfig();
+
   const sections = {
     "Consultation Details": {
       iconClass: "care-l-medkit",
@@ -324,6 +326,13 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     }
     fetchPatientName();
   }, [dispatchAction, patientId]);
+
+  useEffect(() => {
+    dispatch({
+      type: "set_form",
+      form: { ...state.form, encounter_date: new Date() },
+    });
+  }, []);
 
   const hasSymptoms =
     !!state.form.symptoms.length && !state.form.symptoms.includes(1);
@@ -497,8 +506,13 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             errors[field] = "Field is required";
             invalidForm = true;
           }
-          if (dayjs(state.form.encounter_date).isBefore(dayjs("2000-01-01"))) {
-            errors[field] = "Admission date cannot be before 01/01/2000";
+          if (
+            min_encounter_date &&
+            dayjs(state.form.encounter_date).isBefore(dayjs(min_encounter_date))
+          ) {
+            errors[
+              field
+            ] = `Admission date cannot be before ${min_encounter_date}`;
             invalidForm = true;
           }
           return;
@@ -1231,6 +1245,11 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         "YYYY-MM-DDTHH:mm"
                       )}
                       max={dayjs().format("YYYY-MM-DDTHH:mm")}
+                      min={
+                        min_encounter_date
+                          ? dayjs(min_encounter_date).format("YYYY-MM-DDTHH:mm")
+                          : undefined
+                      }
                     />
                   </div>
 

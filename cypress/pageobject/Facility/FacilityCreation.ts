@@ -26,7 +26,7 @@ class FacilityPage {
   }
 
   fillFacilityName(name: string) {
-    cy.get("#name").clear().type(name);
+    cy.get("#name").click().clear().click().type(name);
   }
 
   fillPincode(pincode: string) {

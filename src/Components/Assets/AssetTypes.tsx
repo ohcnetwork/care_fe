@@ -9,14 +9,14 @@ export enum AssetLocationType {
 }
 
 export interface AssetLocationObject {
-  id: string;
+  id?: string;
   name: string;
   description: string;
   created_date?: string;
   modified_date?: string;
   location_type: AssetLocationType;
   middleware_address?: string;
-  facility: {
+  facility?: {
     id: string;
     name: string;
   };
@@ -99,13 +99,12 @@ export interface AssetData {
   manufacturer: string;
   warranty_amc_end_of_validity: string;
   resolved_middleware?: ResolvedMiddleware;
+  latest_status: string;
   last_service: AssetService;
   meta?: {
     [key: string]: any;
   };
 }
-
-export type AssetUpdate = Partial<AssetData>;
 
 export interface AssetsResponse {
   count: number;
