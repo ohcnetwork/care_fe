@@ -15,7 +15,6 @@ import Timeline, { TimelineNode } from "../../../CAREUI/display/Timeline";
 import { useState } from "react";
 import { QueryParams } from "../../../Utils/request/types";
 
-
 interface Props {
   consultation: ConsultationModel;
 }
