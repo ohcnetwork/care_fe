@@ -113,16 +113,11 @@ export interface AssetsResponse {
   results: AssetData[];
 }
 
-export interface AssetUptimeRecord {
-  id: string;
-  asset: {
-    id: string;
-    name: string;
-  };
+export interface AvailabilityRecord {
+  linked_id: string;
+  linked_model: string;
   status: string;
   timestamp: string;
-  created_date: string;
-  modified_date: string;
 }
 
 export interface AssetTransaction {
