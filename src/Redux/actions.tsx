@@ -20,31 +20,9 @@ export const getFacilityUsers = (id: string, params?: object) => {
   );
 };
 
-export const getFacilityAssetLocation = (
-  facility_external_id: string,
-  external_id: string
-) =>
-  fireRequest(
-    "getFacilityAssetLocation",
-    [],
-    {},
-    { facility_external_id, external_id }
-  );
-
 // asset bed
 export const listAssetBeds = (params: object, altKey?: string) =>
   fireRequest("listAssetBeds", [], params, {}, altKey);
-export const createAssetBed = (
-  params: object,
-  asset_id: string,
-  bed_id: string
-) =>
-  fireRequest(
-    "createAssetBed",
-    [],
-    { ...params, asset: asset_id, bed: bed_id },
-    {}
-  );
 
 export const partialUpdateAssetBed = (params: object, asset_id: string) =>
   fireRequest(
@@ -99,6 +77,11 @@ export const getPatient = (pathParam: object) => {
 export const updatePatient = (params: object, pathParam: object) => {
   return fireRequest("updatePatient", [], params, pathParam);
 };
+
+export const transferPatient = (params: object, pathParam: object) => {
+  return fireRequest("transferPatient", [], params, pathParam);
+};
+
 export const patchPatient = (params: object, pathParam: object) => {
   return fireRequest("patchPatient", [], params, pathParam);
 };
@@ -114,9 +97,6 @@ export const getDistrictByState = (pathParam: object) => {
 export const getDistrictByName = (params: object) => {
   return fireRequest("getDistrictByName", [], params, null);
 };
-export const getDistrict = (id: number, key?: string) => {
-  return fireRequest("getDistrict", [], {}, { id: id }, key);
-};
 
 export const getLocalbodyByDistrict = (pathParam: object) => {
   return fireRequest("getLocalbodyByDistrict", [], {}, pathParam);
@@ -126,30 +106,7 @@ export const getWardByLocalBody = (pathParam: object) => {
   return fireRequest("getWardByLocalBody", [], {}, pathParam);
 };
 
-// Local Body
-export const getLocalBody = (pathParam: object) => {
-  return fireRequest("getLocalBody", [], {}, pathParam);
-};
-
 // Sample Test
-export const getSampleTestList = (params: object, pathParam: object) => {
-  return fireRequest("sampleTestList", [], params, pathParam);
-};
-export const createSampleTest = (params: object, pathParam: object) => {
-  return fireRequest("createSampleTest", [], params, pathParam);
-};
-export const sampleReport = (id: string, sampleId: string) => {
-  return fireRequest("sampleReport", [], {}, { id, sampleId });
-};
-export const getTestList = (params: object) => {
-  return fireRequest("getTestSampleList", [], params);
-};
-export const getTestSample = (id: string) => {
-  return fireRequest("getTestSample", [id], {});
-};
-export const patchSample = (params: object, pathParam: object) => {
-  return fireRequest("patchSample", [], params, pathParam);
-};
 export const downloadSampleTests = (params: object) => {
   return fireRequest("getTestSampleList", [], { ...params, csv: 1 });
 };
@@ -172,9 +129,6 @@ export const getConsultationDailyRoundsDetails = (pathParam: object) => {
 // Consultation
 export const createConsultation = (params: object) => {
   return fireRequest("createConsultation", [], params);
-};
-export const getConsultationList = (params: object) => {
-  return fireRequest("getConsultationList", [], params);
 };
 export const getConsultation = (id: string) => {
   return fireRequest("getConsultation", [], {}, { id: id });
@@ -204,17 +158,10 @@ export const dischargePatient = (params: object, pathParams: object) => {
 };
 
 //Shift
-export const createShift = (params: object) => {
-  return fireRequest("createShift", [], params);
-};
-
 export const listShiftRequests = (params: object, key: string) => {
   return fireRequest("listShiftRequests", [], params, null, key);
 };
 
-export const completeTransfer = (pathParams: object) => {
-  return fireRequest("completeTransfer", [], {}, pathParams);
-};
 export const downloadShiftRequests = (params: object) => {
   return fireRequest("downloadShiftRequests", [], params);
 };
