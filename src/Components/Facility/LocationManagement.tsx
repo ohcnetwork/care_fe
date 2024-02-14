@@ -82,7 +82,8 @@ const Location = ({
       <div className="flex w-full items-center justify-between gap-2">
         <div className="flex items-center gap-3">
           <p
-            className="break-words text-xl font-medium"
+            style={{ wordBreak: "break-word" }}
+            className="text-xl font-medium"
             id="view-location-name"
           >
             {name}
