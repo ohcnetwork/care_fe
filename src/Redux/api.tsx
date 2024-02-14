@@ -27,7 +27,7 @@ import {
   AssetService,
   AssetServiceUpdate,
   AssetTransaction,
-  AssetUptimeRecord,
+  AvailabilityRecord,
   PatientAssetBed,
 } from "../Components/Assets/AssetTypes";
 import {
@@ -376,6 +376,11 @@ const routes = {
   partialUpdateFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
     method: "PATCH",
+  },
+  getFacilityAssetLocationAvailability: {
+    path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/availability/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<AvailabilityRecord>>(),
   },
 
   // Asset bed
@@ -1128,6 +1133,11 @@ const routes = {
     TRes: Type<AssetData>(),
     TBody: Type<Partial<AssetData>>(),
   },
+  listAssetAvailability: {
+    path: "/api/v1/asset/{external_id}/availability/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<AvailabilityRecord>>(),
+  },
 
   // Asset transaction endpoints
 
@@ -1300,19 +1310,6 @@ const routes = {
       TRes: Type<IHealthFacility>(),
       TBody: Type<IcreateHealthFacilityTBody>(),
     },
-  },
-
-  // Asset Availability endpoints
-
-  listAssetAvailability: {
-    path: "/api/v1/asset_availability/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<AssetUptimeRecord>>(),
-  },
-  getAssetAvailability: {
-    path: "/api/v1/asset_availability/{id}",
-    method: "GET",
-    TRes: Type<AssetUptimeRecord>(),
   },
 
   // Prescription endpoints

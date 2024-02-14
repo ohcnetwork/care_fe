@@ -21,9 +21,6 @@ const getDate = (value: any) =>
 function AssetFilter(props: any) {
   const { filter, onChange, closeFilter, removeFilters } = props;
   const [facility, setFacility] = useState<FacilityModel | null>(null);
-  const [asset_type, setAssetType] = useState<string>(
-    filter.asset_type ? filter.asset_type : ""
-  );
   const [asset_status, setAssetStatus] = useState<string>(filter.status || "");
   const [asset_class, setAssetClass] = useState<string>(
     filter.asset_class || ""
@@ -61,7 +58,6 @@ function AssetFilter(props: any) {
   const applyFilter = () => {
     const data = {
       facility: facilityId,
-      asset_type: asset_type ?? "",
       asset_class: asset_class ?? "",
       status: asset_status ?? "",
       location: locationId ?? "",
@@ -124,18 +120,6 @@ function AssetFilter(props: any) {
           />
         </div>
       )}
-
-      <SelectFormField
-        label="Asset Type"
-        errorClassName="hidden"
-        id="asset-type"
-        name="asset_type"
-        options={["EXTERNAL", "INTERNAL"]}
-        optionLabel={(o) => o}
-        optionValue={(o) => o}
-        value={asset_type}
-        onChange={({ value }) => setAssetType(value)}
-      />
 
       <SelectFormField
         id="asset-status"
