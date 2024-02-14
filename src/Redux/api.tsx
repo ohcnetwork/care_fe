@@ -74,7 +74,12 @@ import {
   UserModel,
 } from "../Components/Users/models";
 import { Prescription } from "../Components/Medicine/models";
-import { DailyRoundsModel, PatientModel } from "../Components/Patient/models";
+import {
+  DailyRoundsModel,
+  PatientModel,
+  SampleReportModel,
+  SampleTestModel,
+} from "../Components/Patient/models";
 import { PaginatedResponse } from "../Utils/request/types";
 import {
   NotificationData,
@@ -505,6 +510,8 @@ const routes = {
   },
   getConsultationList: {
     path: "/api/v1/consultation/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<ConsultationModel>>(),
   },
   createConsultation: {
     path: "/api/v1/consultation/",
@@ -549,6 +556,8 @@ const routes = {
 
   getDailyReport: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/{id}/",
+    method: "GET",
+    TRes: Type<DailyRoundsModel>(),
   },
   dailyRoundsAnalyse: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/analyse/",
@@ -644,6 +653,8 @@ const routes = {
   },
   patientList: {
     path: "/api/v1/patient/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<PatientModel>>(),
   },
   addPatient: {
     path: "/api/v1/patient/",
@@ -651,7 +662,7 @@ const routes = {
   },
   getPatient: {
     path: "/api/v1/patient/{id}/",
-    TBody: Type<PatientModel>(),
+    method: "GET",
     TRes: Type<PatientModel>(),
   },
   updatePatient: {
@@ -661,6 +672,8 @@ const routes = {
   patchPatient: {
     path: "/api/v1/patient/{id}/",
     method: "PATCH",
+    TBody: Type<Partial<PatientModel>>(),
+    TRes: Type<PatientModel>(),
   },
   transferPatient: {
     path: "/api/v1/patient/{id}/transfer/",
@@ -690,13 +703,19 @@ const routes = {
   },
   sampleTestList: {
     path: "/api/v1/patient/{patientId}/test_sample/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<SampleTestModel>>(),
   },
   createSampleTest: {
     path: "/api/v1/patient/{patientId}/test_sample/",
     method: "POST",
+    TRes: Type<PatientModel>(),
+    TBody: Type<SampleTestModel>(),
   },
   sampleReport: {
-    path: "/api/v1/patient/{id}/test_sample/{sampleId}/icmr_sample",
+    path: "/api/v1/patient/{id}/test_sample/{sampleId}/icmr_sample/",
+    method: "GET",
+    TRes: Type<SampleReportModel>(),
   },
 
   // External Results
@@ -803,13 +822,19 @@ const routes = {
   // Sample Test
   getTestSampleList: {
     path: "/api/v1/test_sample/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<SampleTestModel>>(),
   },
   getTestSample: {
-    path: "/api/v1/test_sample",
+    path: "/api/v1/test_sample/{id}/",
+    method: "GET",
+    TRes: Type<SampleTestModel>(),
   },
   patchSample: {
     path: "/api/v1/test_sample/{id}/",
     method: "PATCH",
+    TBody: Type<SampleTestModel>(),
+    TRes: Type<PatientModel>(),
   },
 
   //inventory
@@ -905,15 +930,17 @@ const routes = {
   createShift: {
     path: "/api/v1/shift/",
     method: "POST",
+    TBody: Type<Partial<IShift>>(),
+    TRes: Type<PatientModel>(),
   },
   updateShift: {
-    path: "/api/v1/shift/{id}",
+    path: "/api/v1/shift/{id}/",
     method: "PUT",
     TBody: Type<IShift>(),
     TRes: Type<IShift>(),
   },
   deleteShiftRecord: {
-    path: "/api/v1/shift/{id}",
+    path: "/api/v1/shift/{id}/",
     method: "DELETE",
     TRes: Type<{ detail: string }>(),
   },
