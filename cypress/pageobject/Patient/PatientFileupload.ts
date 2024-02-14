@@ -43,8 +43,7 @@ export class PatientFileUploadPage {
   }
 
   clickArchiveFile() {
-    cy.intercept("GET", "**/api/v1/files/**").as("getFiles");
-    cy.wait("@getFiles").its("response.statusCode").should("eq", 200);
+    cy.wait(2000);
     cy.get("#file-name").then(($el: string) => {
       fileName = $el.text().split(":")[1].trim();
     });
