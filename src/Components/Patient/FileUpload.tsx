@@ -1,6 +1,13 @@
 import axios from "axios";
 import CircularProgress from "../Common/components/CircularProgress";
-import { useCallback, useState, useRef, lazy, ChangeEvent } from "react";
+import {
+  useCallback,
+  useState,
+  useRef,
+  lazy,
+  ChangeEvent,
+  useEffect,
+} from "react";
 import { CreateFileResponse, FileUploadModel } from "./models";
 import * as Notification from "../../Utils/Notifications.js";
 import { VoiceRecorder } from "../../Utils/VoiceRecorder";
@@ -333,6 +340,10 @@ export const FileUpload = (props: FileUploadProps) => {
 
     setIsLoading(false);
   }, [id, offset]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   // Store all audio urls for each audio file
   const audio_urls = async (files: FileUploadModel[]) => {
