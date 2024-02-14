@@ -45,7 +45,6 @@ const AssetsList = () => {
   const [isScannerActive, setIsScannerActive] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [facility, setFacility] = useState<FacilityModel>();
-  const [asset_type, setAssetType] = useState<string>();
   const [status, setStatus] = useState<string>();
   const [asset_class, setAssetClass] = useState<string>();
   const [importAssetModalOpen, setImportAssetModalOpen] = useState(false);
@@ -60,7 +59,6 @@ const AssetsList = () => {
     offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
     search_text: qParams.search || "",
     facility: qParams.facility || "",
-    asset_type: qParams.asset_type || "",
     asset_class: qParams.asset_class || "",
     location: qParams.facility ? qParams.location || "" : "",
     status: qParams.status || "",
@@ -90,10 +88,6 @@ const AssetsList = () => {
     },
     prefetch: !!qParams.facility,
   });
-
-  useEffect(() => {
-    setAssetType(qParams.asset_type);
-  }, [qParams.asset_type]);
 
   useEffect(() => {
     setStatus(qParams.status);
@@ -389,7 +383,6 @@ const AssetsList = () => {
                 qParams.facility && facilityObject?.name
               ),
               badge("Name/Serial No./QR ID", "search"),
-              value("Asset Type", "asset_type", asset_type ?? ""),
               value("Asset Class", "asset_class", asset_class ?? ""),
               value("Status", "status", status?.replace(/_/g, " ") ?? ""),
               value(

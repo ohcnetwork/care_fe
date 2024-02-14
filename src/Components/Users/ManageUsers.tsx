@@ -674,7 +674,7 @@ function UserFacilities(props: { user: any }) {
         <ButtonV2
           id="link-facility"
           disabled={!facility}
-          className="mt-1"
+          className="mt-1 h-[45px] w-[74px] text-base"
           onClick={() => addFacility(username, facility)}
         >
           Add

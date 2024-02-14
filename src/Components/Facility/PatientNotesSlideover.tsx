@@ -3,7 +3,6 @@ import * as Notification from "../../Utils/Notifications.js";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames, isAppleDevice } from "../../Utils/utils";
-import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { make as Link } from "../Common/components/Link.bs";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
@@ -12,6 +11,7 @@ import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { PatientNoteStateType } from "./models";
 import useKeyboardShortcut from "use-keyboard-shortcut";
+import AutoExpandingTextInputFormField from "../Form/FormFields/AutoExpandingTextInputFormField.js";
 
 interface PatientNotesProps {
   patientId: string;
@@ -30,6 +30,8 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
     notes: [],
     cPage: 1,
     totalPages: 1,
+    patientId: props.patientId,
+    facilityId: props.facilityId,
   };
   const [state, setState] = useState(initialData);
 
@@ -163,19 +165,19 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
           <PatientConsultationNotesList
             state={state}
             setState={setState}
-            facilityId={facilityId}
-            patientId={patientId}
             reload={reload}
             setReload={setReload}
+            disableEdit={!patientActive}
           />
           <div className="relative mx-4 flex items-center">
-            <TextFormField
+            <AutoExpandingTextInputFormField
               id="doctor_notes_textarea"
+              maxHeight={160}
+              rows={1}
               name="note"
               value={noteField}
               onChange={(e) => setNoteField(e.value)}
               className="grow"
-              type="text"
               errorClassName="hidden"
               placeholder="Type your Note"
               disabled={!patientActive}
