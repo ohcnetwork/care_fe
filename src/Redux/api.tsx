@@ -50,6 +50,7 @@ import {
   WardModel,
   LocationModel,
   PatientNotesModel,
+  PatientNotesEditModel,
   BedModel,
   MinimumQuantityItemResponse,
   InventorySummaryResponse,
@@ -676,6 +677,16 @@ const routes = {
     path: "/api/v1/patient/{patientId}/notes/",
     method: "POST",
     TRes: Type<PatientNotesModel>(),
+  },
+  updatePatientNote: {
+    path: "/api/v1/patient/{patientId}/notes/{noteId}/",
+    method: "PUT",
+    TRes: Type<PatientNotesModel>(),
+  },
+  getPatientNoteEditHistory: {
+    path: "/api/v1/patient/{patientId}/notes/{noteId}/edits/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<PatientNotesEditModel>>(),
   },
   sampleTestList: {
     path: "/api/v1/patient/{patientId}/test_sample/",
