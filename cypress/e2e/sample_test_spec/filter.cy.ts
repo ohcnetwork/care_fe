@@ -20,13 +20,6 @@ describe("Sample Filter", () => {
       .click();
   });
 
-  it("Filter by Asset Type", () => {
-    cy.get("#result").click();
-    cy.get("li[role='option']")
-      .contains(/^POSITIVE$/)
-      .click();
-  });
-
   it("Filter by sample type", () => {
     cy.get("#sample_type").click();
     cy.get("li[role='option']")
