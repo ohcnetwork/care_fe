@@ -1,7 +1,6 @@
 import { useState } from "react";
 import * as Notification from "../../../Utils/Notifications.js";
 import Page from "../../Common/components/Page";
-import TextFormField from "../../Form/FormFields/TextFormField";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { NonReadOnlyUsers } from "../../../Utils/AuthorizeFor";
@@ -13,6 +12,7 @@ import request from "../../../Utils/request/request.js";
 import useQuery from "../../../Utils/request/useQuery.js";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import { isAppleDevice } from "../../../Utils/utils.js";
+import AutoExpandingTextInputFormField from "../../Form/FormFields/AutoExpandingTextInputFormField.js";
 
 interface ConsultationDoctorNotesProps {
   patientId: string;
@@ -34,6 +34,8 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
     notes: [],
     cPage: 1,
     totalPages: 1,
+    facilityId: facilityId,
+    patientId: patientId,
   };
   const [state, setState] = useState(initialData);
 
@@ -113,19 +115,19 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
         <PatientConsultationNotesList
           state={state}
           setState={setState}
-          patientId={patientId}
-          facilityId={facilityId}
           reload={reload}
           setReload={setReload}
         />
 
         <div className="relative mx-4 flex items-center">
-          <TextFormField
+          <AutoExpandingTextInputFormField
+            id="doctor_consultation_notes"
+            maxHeight={160}
+            rows={1}
             name="note"
             value={noteField}
             onChange={(e) => setNoteField(e.value)}
             className="grow"
-            type="text"
             errorClassName="hidden"
             placeholder="Type your Note"
             disabled={!patientActive}
