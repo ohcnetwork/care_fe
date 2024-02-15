@@ -2,30 +2,13 @@ import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import { PatientConsultationPage } from "../../pageobject/Patient/PatientConsultation";
-import {
-  emergency_phone_number,
-  phone_number,
-} from "../../pageobject/constants";
-import FacilityPage from "../../pageobject/Facility/FacilityCreation";
-import PatientMedicalHistory from "../../pageobject/Patient/PatientMedicalHistory";
+import PatientPredefined from "../../pageobject/Patient/PatientPredefined";
 
-describe("Patient Creation with consultation", () => {
+describe("Patient Consultation in multiple combination", () => {
   const patientConsultationPage = new PatientConsultationPage();
   const loginPage = new LoginPage();
   const patientPage = new PatientPage();
-  const facilityPage = new FacilityPage();
-  const patientMedicalHistory = new PatientMedicalHistory();
-  const patientDateOfBirth = "01012001";
-  const patientOneName = "Patient With Consultation";
-  const patientOneGender = "Male";
-  const patientOneAddress = "Test Patient Address";
-  const patientOnePincode = "682001";
-  const patientOneState = "Kerala";
-  const patientOneDistrict = "Ernakulam";
-  const patientOneLocalbody = "Aluva";
-  const patientOneWard = "4";
-  const patientOneBloodGroup = "O+";
-
+  const patientPredefined = new PatientPredefined();
   before(() => {
     loginPage.loginAsDisctrictAdmin();
     cy.saveLocalStorage();
@@ -37,23 +20,44 @@ describe("Patient Creation with consultation", () => {
     cy.awaitUrl("/patients");
   });
 
-  it("Create a patient with consultation", () => {
+  it("OP Patient with Refer to another hospital consultation", () => {
+    // Sore throat and fever symptoms
+    // Comfort Care category
+    // Four ICD-11 and one principal
+    // no investigation
+    // no review after and no action
+  });
+
+  it("Referred From another Facility Patient with OP consultation", () => {
+    // Vomiting and Nausea symptoms
+    // Stable category
+    // one ICD-11 and no principal
+    // no investigation
+    // no review after and no action
+  });
+
+  it("Internal Transfer within facility Patient with Domicilary Care", () => {
+    // Asymptomatic
+    // Abnormal category
+    // No ICD-11 error message then icd-11 add
+    // add investigation
+    // add review after and add action
+    // add telemedicine
+  });
+
+  it("OP Patient with Declare Death", () => {
+    // Asymptomatic
+    // CRITICAL category
+    // ICD-11 WITH PRINCIPAL
+    // NO investigation
+    // NO review after and NO action
+  });
+
+  it("OP Patient with admission consultation", () => {
     patientPage.createPatient();
     patientPage.selectFacility("Dummy Facility 40");
+    patientPredefined.createPatient();
     patientPage.patientformvisibility();
-    patientPage.typePatientPhoneNumber(phone_number);
-    patientPage.typePatientEmergencyNumber(emergency_phone_number);
-    patientPage.typePatientDateOfBirth(patientDateOfBirth);
-    patientPage.typePatientName(patientOneName);
-    patientPage.selectPatientGender(patientOneGender);
-    patientPage.typePatientAddress(patientOneAddress);
-    facilityPage.fillPincode(patientOnePincode);
-    facilityPage.selectStateOnPincode(patientOneState);
-    facilityPage.selectDistrictOnPincode(patientOneDistrict);
-    facilityPage.selectLocalBody(patientOneLocalbody);
-    facilityPage.selectWard(patientOneWard);
-    patientMedicalHistory.clickNoneMedicialHistory();
-    patientPage.selectPatientBloodGroup(patientOneBloodGroup);
     patientPage.clickCreatePatient();
     patientPage.verifyPatientIsCreated();
     patientConsultationPage.fillIllnessHistory("history");
@@ -82,7 +86,6 @@ describe("Patient Creation with consultation", () => {
     patientConsultationPage.enterDosage("3");
     patientConsultationPage.selectDosageFrequency("Twice daily");
     patientConsultationPage.submitPrescriptionAndReturn();
-    patientConsultationPage.verifyConsultationPatientName(patientOneName);
   });
 
   it("Edit created consultation to existing patient", () => {
