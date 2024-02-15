@@ -1,7 +1,6 @@
-import { FlowModel, SampleTestModel } from "./models";
+import { FlowModel } from "./models";
 import { GENDER_TYPES, TEST_TYPE_CHOICES } from "../../Common/constants";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { lazy, useCallback, useState } from "react";
+import { lazy } from "react";
 
 import ButtonV2 from "../Common/components/ButtonV2";
 import Card from "../../CAREUI/display/Card";
@@ -9,41 +8,29 @@ import { FileUpload } from "./FileUpload";
 import Page from "../Common/components/Page";
 import _ from "lodash-es";
 import { formatAge, formatDateTime } from "../../Utils/utils";
-import { getTestSample } from "../../Redux/actions";
 
 import { navigate } from "raviger";
-import { useDispatch } from "react-redux";
 import { DetailRoute } from "../../Routers/types";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
 export const SampleDetails = ({ id }: DetailRoute) => {
-  const dispatch: any = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
-  const [sampleDetails, setSampleDetails] = useState<SampleTestModel>({});
-
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatch(getTestSample(id));
-      if (!status.aborted) {
-        if (res && res.data) {
-          setSampleDetails(res.data);
-        } else {
+  const { loading: isLoading, data: sampleDetails } = useQuery(
+    routes.getTestSample,
+    {
+      pathParams: {
+        id,
+      },
+      onResponse: ({ res, data }) => {
+        if (!(res?.ok && data)) {
           navigate("/not-found");
         }
-        setIsLoading(false);
-      }
-    },
-    [dispatch, id]
+      },
+    }
   );
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [dispatch, fetchData, id]
-  );
   const yesOrNoBadge = (param: any) =>
     param ? (
       <span className="badge badge-pill badge-warning">Yes</span>
@@ -287,7 +274,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
       title="Sample Test Details"
       backUrl="/sample"
       options={
-        sampleDetails.patient && (
+        sampleDetails?.patient && (
           <div className="flex justify-end">
             <ButtonV2
               href={`/patient/${sampleDetails.patient}/test_sample/${id}/icmr_sample`}
@@ -304,37 +291,37 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             <span className="font-semibold capitalize leading-relaxed">
               Status:{" "}
             </span>
-            {sampleDetails.status}
+            {sampleDetails?.status}
           </div>
           <div>
             <span className="font-semibold capitalize leading-relaxed">
               Result:{" "}
             </span>
-            {sampleDetails.result}
+            {sampleDetails?.result}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Patient: </span>
-            {sampleDetails.patient_name}
+            {sampleDetails?.patient_name}
           </div>
-          {sampleDetails.facility_object && (
+          {sampleDetails?.facility_object && (
             <div>
               <span className="font-semibold leading-relaxed">Facility: </span>
-              {sampleDetails.facility_object.name}
+              {sampleDetails?.facility_object.name}
             </div>
           )}
           <div>
             <span className="font-semibold leading-relaxed">Tested on: </span>
-            {sampleDetails.date_of_result
+            {sampleDetails?.date_of_result
               ? formatDateTime(sampleDetails.date_of_result)
               : "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Result on: </span>
-            {sampleDetails.date_of_result
+            {sampleDetails?.date_of_result
               ? formatDateTime(sampleDetails.date_of_result)
               : "-"}
           </div>
-          {sampleDetails.fast_track && (
+          {sampleDetails?.fast_track && (
             <div className="md:col-span-2">
               <span className="font-semibold leading-relaxed">
                 Fast track testing reason:{" "}
@@ -342,7 +329,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               {sampleDetails.fast_track}
             </div>
           )}
-          {sampleDetails.doctor_name && (
+          {sampleDetails?.doctor_name && (
             <div className="capitalize md:col-span-2">
               <span className="font-semibold leading-relaxed">
                 Doctor&apos;s Name:{" "}
@@ -350,21 +337,21 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               {_.startCase(_.camelCase(sampleDetails.doctor_name))}
             </div>
           )}
-          {sampleDetails.diagnosis && (
+          {sampleDetails?.diagnosis && (
             <div className="md:col-span-2">
               <span className="font-semibold leading-relaxed">Diagnosis: </span>
               {sampleDetails.diagnosis}
             </div>
           )}
-          {sampleDetails.diff_diagnosis && (
+          {sampleDetails?.diff_diagnosis && (
             <div className="md:col-span-2">
               <span className="font-semibold leading-relaxed">
                 Differential diagnosis:{" "}
               </span>
-              {sampleDetails.diff_diagnosis}
+              {sampleDetails?.diff_diagnosis}
             </div>
           )}
-          {sampleDetails.etiology_identified && (
+          {sampleDetails?.etiology_identified && (
             <div className="md:col-span-2">
               <span className="font-semibold leading-relaxed">
                 Etiology identified:{" "}
@@ -376,15 +363,15 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             <span className="font-semibold leading-relaxed">
               Is Atypical presentation{" "}
             </span>
-            {yesOrNoBadge(sampleDetails.is_atypical_presentation)}
+            {yesOrNoBadge(sampleDetails?.is_atypical_presentation)}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">
               Is unusual course{" "}
             </span>
-            {yesOrNoBadge(sampleDetails.is_unusual_course)}
+            {yesOrNoBadge(sampleDetails?.is_unusual_course)}
           </div>
-          {sampleDetails.atypical_presentation && (
+          {sampleDetails?.atypical_presentation && (
             <div className="md:col-span-2">
               <span className="font-semibold leading-relaxed">
                 Atypical presentation details:{" "}
@@ -396,27 +383,27 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             <span className="font-semibold leading-relaxed">
               SARI - Severe Acute Respiratory illness{" "}
             </span>
-            {yesOrNoBadge(sampleDetails.has_sari)}
+            {yesOrNoBadge(sampleDetails?.has_sari)}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">
               ARI - Acute Respiratory illness{" "}
             </span>
-            {yesOrNoBadge(sampleDetails.has_ari)}
+            {yesOrNoBadge(sampleDetails?.has_ari)}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">
               Contact with confirmed carrier{" "}
             </span>
-            {yesOrNoBadge(sampleDetails.patient_has_confirmed_contact)}
+            {yesOrNoBadge(sampleDetails?.patient_has_confirmed_contact)}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">
               Contact with suspected carrier{" "}
             </span>
-            {yesOrNoBadge(sampleDetails.patient_has_suspected_contact)}
+            {yesOrNoBadge(sampleDetails?.patient_has_suspected_contact)}
           </div>
-          {sampleDetails.patient_travel_history &&
+          {sampleDetails?.patient_travel_history &&
             sampleDetails.patient_travel_history.length !== 0 && (
               <div className="md:col-span-2">
                 <span className="font-semibold leading-relaxed">
@@ -425,7 +412,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
                 {sampleDetails.patient_travel_history.join(", ")}
               </div>
             )}
-          {sampleDetails.sample_type && (
+          {sampleDetails?.sample_type && (
             <div className="md:col-span-2">
               <span className="font-semibold capitalize leading-relaxed">
                 Sample Type:{" "}
@@ -438,12 +425,12 @@ export const SampleDetails = ({ id }: DetailRoute) => {
 
       <div>
         <h4 className="mt-8">Details of patient</h4>
-        {showPatientCard(sampleDetails.patient_object)}
+        {showPatientCard(sampleDetails?.patient_object)}
       </div>
 
       <div>
         <h4 className="mt-8">Sample Test History</h4>
-        {sampleDetails.flow &&
+        {sampleDetails?.flow &&
           sampleDetails.flow.map((flow: FlowModel) => renderFlow(flow))}
       </div>
 

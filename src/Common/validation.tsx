@@ -43,7 +43,7 @@ export const validateName = (name: string) => {
 };
 
 export const validateUsername = (username: string) => {
-  const pattern = /^[\w.@+-]+[^.@+_-]$/;
+  const pattern = /^(?!.*[._-]{2})[a-z0-9](?:[a-z0-9._-]{2,14}[a-z0-9])$/s;
   return pattern.test(username);
 };
 

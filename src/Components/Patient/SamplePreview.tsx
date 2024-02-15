@@ -1,13 +1,11 @@
 import { classNames, formatDateTime } from "../../Utils/utils";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { lazy, useCallback, useState } from "react";
+
+import { lazy } from "react";
 
 import ButtonV2 from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
-import { SampleReportModel } from "./models";
-
-import { sampleReport } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -56,34 +54,19 @@ function SampleReportSection({ title, fields }: ISampleReportSectionProps) {
 }
 
 export default function SampleReport(props: ISamplePreviewProps) {
-  const dispatch: any = useDispatch();
   const { id, sampleId } = props;
-  const [isLoading, setIsLoading] = useState(false);
-  const [sampleData, setSampleData] = useState<SampleReportModel>({});
 
   let report: JSX.Element = <></>;
   let reportData: JSX.Element = <></>;
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res: any = await dispatch(sampleReport(id, sampleId));
-
-      if (!status.aborted) {
-        if (res && res.data) {
-          setSampleData(res.data);
-        }
-      }
-      setIsLoading(false);
-    },
-    [dispatch, id]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
+  const { loading: isLoading, data: sampleData } = useQuery(
+    routes.sampleReport,
+    {
+      pathParams: {
+        id,
+        sampleId,
+      },
+    }
   );
 
   if (sampleData) {
