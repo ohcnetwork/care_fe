@@ -202,7 +202,7 @@ describe("Location Management Section", () => {
     facilityLocation.enterBedName("Bed 1");
     facilityLocation.selectBedType("Regular");
     assetPage.clickassetupdatebutton();
-    facilityLocation.loadLocationManagementPage();
+    facilityLocation.loadLocationManagementPage("Dummy Shifting Center");
     facilityLocation.deleteLocation("Test Location with Beds");
     assetPage.clickassetupdatebutton();
     facilityLocation.verifyNotification(
@@ -217,7 +217,7 @@ describe("Location Management Section", () => {
     facilityLocation.closeNotification();
 
     // delete location
-    facilityLocation.loadLocationManagementPage();
+    facilityLocation.loadLocationManagementPage("Dummy Shifting Center");
     facilityLocation.deleteLocation("Test Location with Beds");
     assetPage.clickassetupdatebutton();
     facilityLocation.verifyNotification(
@@ -255,7 +255,7 @@ describe("Location Management Section", () => {
       "Test note for asset creation!"
     );
     assetPage.clickassetupdatebutton();
-    facilityLocation.loadLocationManagementPage();
+    facilityLocation.loadLocationManagementPage("Dummy Shifting Center");
     facilityLocation.deleteLocation("Test Location with linked Assets");
     assetPage.clickassetupdatebutton();
     facilityLocation.verifyNotification(
@@ -270,7 +270,7 @@ describe("Location Management Section", () => {
     facilityLocation.closeNotification();
 
     // delete location
-    facilityLocation.loadLocationManagementPage();
+    facilityLocation.loadLocationManagementPage("Dummy Shifting Center");
     facilityLocation.deleteLocation("Test Location with linked Assets");
     assetPage.clickassetupdatebutton();
     facilityLocation.verifyNotification(
