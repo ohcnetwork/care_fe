@@ -14,7 +14,7 @@ export interface TimelineEvent<TType = string> {
 }
 
 interface TimelineProps {
-  className: string;
+  className?: string;
   children: React.ReactNode | React.ReactNode[];
   name: string;
 }
