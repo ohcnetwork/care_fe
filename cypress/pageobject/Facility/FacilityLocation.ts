@@ -2,7 +2,7 @@ class FacilityLocation {
   loadLocationManagementPage(name: string) {
     cy.awaitUrl("/");
     cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");
-    cy.get("[id='facility-details']").contains(name).click();
+    cy.get("[id='facility-name-card']").contains(name).click();
     cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
     cy.get("h1.text-3xl.font-bold", { timeout: 10000 }).should("be.visible");
     cy.get("#manage-facility-dropdown button").should("be.visible");

@@ -55,9 +55,7 @@ describe("Location Management Section", () => {
     cy.restoreLocalStorage();
     cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/");
-    facilityPage.visitAlreadyCreatedFacility();
-    facilityPage.clickManageFacilityDropdown();
-    facilityLocation.clickFacilityLocationManagement();
+    facilityLocation.loadLocationManagementPage("Dummy Shifting Center");
   });
 
   it("Add a Bed to facility location along with duplication and deleting a bed", () => {
@@ -238,7 +236,6 @@ describe("Location Management Section", () => {
     assetPage.createAsset();
     assetPage.selectFacility("Dummy Shifting Center");
     assetPage.selectLocation("Test Location with linked Assets");
-    assetPage.selectAssetType("Internal");
     assetPage.enterAssetDetails(
       "Test Asset linked to Facility",
       "Test Description",
