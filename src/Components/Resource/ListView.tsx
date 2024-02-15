@@ -14,13 +14,21 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import dayjs from "../../Utils/dayjs";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
+import Page from "../Common/components/Page";
+import SearchInput from "../Form/SearchInput";
 
 const Loading = lazy(() => import("../Common/Loading"));
-const PageTitle = lazy(() => import("../Common/PageTitle"));
 
 export default function ListView() {
-  const { qParams, Pagination, FilterBadges, advancedFilter, resultsPerPage } =
-    useFilters({});
+  const {
+    qParams,
+    Pagination,
+    FilterBadges,
+    advancedFilter,
+    resultsPerPage,
+    updateQuery,
+  } = useFilters({ cacheBlacklist: ["title"] });
+
   const { t } = useTranslation();
 
   const onBoardViewBtnClick = () =>
@@ -148,33 +156,42 @@ export default function ListView() {
   };
 
   return (
-    <div className="flex h-screen flex-col px-2 pb-2">
-      <div className="px-4 md:flex md:items-center md:justify-between">
-        <PageTitle
-          title="Resource"
-          hideBack
-          componentRight={
-            <ExportButton
-              action={() =>
-                downloadResourceRequests({ ...appliedFilters, csv: 1 })
-              }
-              filenamePrefix="resource_requests"
-            />
-          }
-          breadcrumbs={false}
+    <Page
+      title="Resource"
+      hideBack
+      componentRight={
+        <ExportButton
+          action={() => downloadResourceRequests({ ...appliedFilters, csv: 1 })}
+          filenamePrefix="resource_requests"
         />
+      }
+      breadcrumbs={false}
+      options={
+        <>
+          <div className="md:px-4">
+            <SearchInput
+              name="title"
+              value={qParams.title}
+              onChange={(e) => updateQuery({ [e.name]: e.value })}
+              placeholder={t("search_resource")}
+            />
+          </div>
+          <div className="w-32">
+            {/* dummy div to align space as per board view */}
+          </div>
+          <div className="flex w-full flex-col gap-2 lg:w-fit lg:flex-row lg:gap-4">
+            <ButtonV2 className="py-[11px]" onClick={onBoardViewBtnClick}>
+              <CareIcon className="care-l-list-ul rotate-90" />
+              {t("board_view")}
+            </ButtonV2>
 
-        <div className="w-32" />
-        <div className="flex w-full flex-col gap-2 lg:w-fit lg:flex-row lg:gap-4">
-          <ButtonV2 className="py-[11px]" onClick={onBoardViewBtnClick}>
-            <CareIcon className="care-l-list-ul rotate-90" />
-            {t("board_view")}
-          </ButtonV2>
-
-          <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
-        </div>
-      </div>
-
+            <AdvancedFilterButton
+              onClick={() => advancedFilter.setShow(true)}
+            />
+          </div>
+        </>
+      }
+    >
       <BadgesList {...{ appliedFilters, FilterBadges }} />
 
       <div className="px-1">
@@ -188,14 +205,16 @@ export default function ListView() {
                 onClick={() => refetch()}
               >
                 <i className="fa fa-refresh mr-1" aria-hidden="true"></i>
-                Refresh List
+                {t("refresh_list")}
               </button>
             </div>
 
             <div className="mb-5 flex flex-wrap md:-mx-4">
               {data?.results && showResourceCardList(data?.results)}
             </div>
-            <Pagination totalCount={data?.count || 0} />
+            <div>
+              <Pagination totalCount={data?.count || 0} />
+            </div>
           </div>
         )}
       </div>
@@ -204,6 +223,6 @@ export default function ListView() {
         showResourceStatus={true}
         key={window.location.search}
       />
-    </div>
+    </Page>
   );
 }

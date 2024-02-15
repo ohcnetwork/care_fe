@@ -171,6 +171,7 @@ export default function ResourceBoard({
     setIsLoading((loading) => reduceLoading("BOARD", loading));
   }, [
     board,
+    filterProp.title,
     filterProp.facility,
     filterProp.origin_facility,
     filterProp.approving_facility,
@@ -231,7 +232,7 @@ export default function ResourceBoard({
     <div
       ref={drop}
       className={classNames(
-        "mr-2 h-full w-full shrink-0 overflow-y-auto rounded-md bg-gray-200 pb-4 @lg:w-1/2 @3xl:w-1/3 @7xl:w-1/4",
+        "e mr-2 h-full w-full  shrink-0 overflow-y-auto rounded-md bg-gray-200 pb-4 @lg:w-1/2 @3xl:w-1/3 @7xl:w-1/4",
         isOver && "cursor-move"
       )}
     >
