@@ -63,7 +63,6 @@ describe("Asset Tab", () => {
   it("Filter Asset", () => {
     assetFilters.filterAssets(
       "Dummy Facility 40",
-      "INTERNAL",
       "ACTIVE",
       "ONVIF Camera",
       "Camera Loc"
@@ -71,7 +70,6 @@ describe("Asset Tab", () => {
     assetFilters.clickadvancefilter();
     assetFilters.clickslideoverbackbutton(); // to verify the back button doesn't clear applied filters
     assetFilters.assertFacilityText("Dummy Facility 40");
-    assetFilters.assertAssetTypeText("INTERNAL");
     assetFilters.assertAssetClassText("ONVIF");
     assetFilters.assertStatusText("ACTIVE");
     assetFilters.assertLocationText("Camera Loc");
