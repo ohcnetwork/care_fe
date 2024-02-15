@@ -9,6 +9,14 @@ import { relativeTime } from "../../Utils/utils";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { triggerGoal } from "../../Integrations/Plausible";
 import Chip from "../../CAREUI/display/Chip";
+import Switch from "../../CAREUI/interactive/Switch";
+
+enum FilterTypes {
+  ALL = "All",
+  DOCTOR = "Doctor",
+  NURSE = "Nurse",
+  TELEICU = "TeleICU Hub",
+}
 
 const isHomeUser = (user: UserAssignedModel, facilityId: string) =>
   user.home_facility_object?.id === facilityId;
@@ -20,6 +28,7 @@ export default function DoctorVideoSlideover(props: {
 }) {
   const { show, facilityId, setShow } = props;
   const [doctors, setDoctors] = useState<UserAssignedModel[]>([]);
+  const [filter, setFilter] = useState<FilterTypes>(FilterTypes.ALL);
 
   const dispatchAction: any = useDispatch();
   useEffect(() => {
@@ -34,7 +43,16 @@ export default function DoctorVideoSlideover(props: {
               .filter(
                 (user: UserAssignedModel) =>
                   (user.alt_phone_number || user.video_connect_link) &&
-                  (user.user_type === "Doctor" || user.user_type === "Nurse")
+                  (user.user_type === "Doctor" || user.user_type === "Nurse") &&
+                  (filter === FilterTypes.ALL ||
+                    (filter === FilterTypes.DOCTOR &&
+                      isHomeUser(user, facilityId) &&
+                      user.user_type === "Doctor") ||
+                    (filter === FilterTypes.NURSE &&
+                      isHomeUser(user, facilityId) &&
+                      user.user_type === "Nurse") ||
+                    (filter === FilterTypes.TELEICU &&
+                      !isHomeUser(user, facilityId)))
               )
               .sort((a: UserAssignedModel, b: UserAssignedModel) => {
                 const aIsHomeUser = isHomeUser(a, facilityId);
@@ -54,7 +72,7 @@ export default function DoctorVideoSlideover(props: {
     if (show) {
       fetchUsers();
     }
-  }, [show, facilityId]);
+  }, [show, facilityId, filter]);
 
   return (
     <SlideOver
@@ -67,13 +85,18 @@ export default function DoctorVideoSlideover(props: {
       <p className="-mt-3 pb-4 text-sm text-gray-600">
         Select a doctor to connect via video
       </p>
-      <div className="flex items-center justify-center gap-2">
-        {/* 
-      TODO: Add a filter to show Doctors, Nurses, and TeleICU Hub separately
-       */}
-        <Chip text="Doctors" size="medium" />
-        <Chip text="Nurse" size="medium" />
-        <Chip text="TeleICU Hub" size="medium" />
+      <div className="flex justify-center">
+        <Switch
+          tabs={
+            Object.values(FilterTypes).reduce(
+              (acc, type) => ({ ...acc, [type]: type }),
+              {}
+            ) as Record<FilterTypes, string>
+          }
+          selected={filter}
+          onChange={(tab) => setFilter(tab)}
+          size="md"
+        />
       </div>
       {doctors.map((doctor, i) => (
         <div
