@@ -189,7 +189,7 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
               </div>
             </div>
           )}
-          <p className="flex gap-2 text-sm text-gray-500">
+          <p className="mt-1.5 flex gap-2 text-sm text-gray-500">
             <a
               role="button"
               href="#"
@@ -208,7 +208,7 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
             </a>
             <span>{user.alt_phone_number}</span>
           </p>
-          <div className="flex justify-between gap-2 text-sm text-gray-500">
+          <div className="mt-1.5 flex justify-between gap-2 text-sm text-gray-500">
             <div className="flex gap-2">
               {user.video_connect_link && (
                 <a
