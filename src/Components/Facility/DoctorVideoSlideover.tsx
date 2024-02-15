@@ -32,12 +32,18 @@ export default function DoctorVideoSlideover(props: {
           setDoctors(
             res.data.results
               .filter(
-                (user: any) =>
+                (user: UserAssignedModel) =>
                   (user.alt_phone_number || user.video_connect_link) &&
                   (user.user_type === "Doctor" || user.user_type === "Nurse")
               )
-              .sort((a: any, b: any) => {
-                return Number(a.last_login) - Number(b.last_login);
+              .sort((a: UserAssignedModel, b: UserAssignedModel) => {
+                const aIsHomeUser = isHomeUser(a, facilityId);
+                const bIsHomeUser = isHomeUser(b, facilityId);
+                return aIsHomeUser === bIsHomeUser
+                  ? 0
+                  : isHomeUser(a, facilityId)
+                  ? -1
+                  : 1;
               })
           );
         }
