@@ -51,7 +51,7 @@ describe("Patient Details", () => {
     );
   });
 
-  it("Archive file", () => {
+  it("Archive file and verify it", () => {
     patientPage.visitPatient("Dummy Patient 4");
     patientFileUploadPage.visitPatientDetailsPage();
     patientFileUploadPage.archiveFile();
@@ -62,7 +62,7 @@ describe("Patient Details", () => {
     patientFileUploadPage.verifyArchiveFile();
   });
 
-  it("Verify the uploaded file be edited by author", () => {
+  it("Verify the uploaded file can be edited by author", () => {
     loginPage.login("dummynurse1", "Coronasafe@123");
     patientPage.visitPatient("Dummy Patient 5");
     patientFileUploadPage.visitPatientDetailsPage();
@@ -78,14 +78,15 @@ describe("Patient Details", () => {
     );
   });
 
-  it("Verify the uploaded file be cannot edited by other users below district admin", () => {
+  it("Verify the uploaded file cannot be edited by other users below district admin", () => {
     loginPage.login("dummynurse2", "Coronasafe@123");
     patientPage.visitPatient("Dummy Patient 5");
     patientFileUploadPage.visitPatientDetailsPage();
+    cy.wait(2000);
     patientFileUploadPage.verifyFileEditOption(false);
   });
 
-  it("Verify the uploaded file be can edited by district admin and above", () => {
+  it("Verify the uploaded file can be edited by district admin and above", () => {
     loginPage.loginAsDisctrictAdmin();
     patientPage.visitPatient("Dummy Patient 5");
     patientFileUploadPage.visitPatientDetailsPage();
@@ -99,7 +100,7 @@ describe("Patient Details", () => {
     );
   });
 
-  it("Verify that file download is possible for author.", () => {
+  it("Verify that file download is possible for author", () => {
     loginPage.login("dummynurse1", "Coronasafe@123");
     patientPage.visitPatient("Dummy Patient 5");
     patientFileUploadPage.visitPatientDetailsPage();
@@ -107,7 +108,7 @@ describe("Patient Details", () => {
     patientFileUploadPage.downloadFile();
   });
 
-  it("Verify that file download is possible for users below district admin.", () => {
+  it("Verify that file download is possible for users below district admin", () => {
     loginPage.login("dummynurse2", "Coronasafe@123");
     patientPage.visitPatient("Dummy Patient 5");
     patientFileUploadPage.visitPatientDetailsPage();
@@ -115,7 +116,7 @@ describe("Patient Details", () => {
     patientFileUploadPage.downloadFile();
   });
 
-  it("Verify that file download is possible for district admin and above.", () => {
+  it("Verify that file download is possible for district admin and above", () => {
     loginPage.loginAsDisctrictAdmin();
     patientPage.visitPatient("Dummy Patient 5");
     patientFileUploadPage.visitPatientDetailsPage();
