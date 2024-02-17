@@ -1,3 +1,5 @@
+import { cy } from "local-cypress";
+
 let fileName = "";
 
 export class PatientFileUploadPage {
@@ -31,7 +33,7 @@ export class PatientFileUploadPage {
     cy.wait("@uploadFile").its("response.statusCode").should("eq", 201);
   }
 
-  clickEditFileName(newFileName: string) {
+  editFileName(newFileName: string) {
     cy.get("#edit-file-name").click().scrollIntoView();
     cy.get("#editFileName").clear().type(newFileName);
   }
@@ -42,7 +44,7 @@ export class PatientFileUploadPage {
     cy.wait("@saveFileName").its("response.statusCode").should("eq", 200);
   }
 
-  clickArchiveFile() {
+  archiveFile() {
     cy.wait(2000);
     cy.get("#file-name").then(($el: string) => {
       fileName = $el.text().split(":")[1].trim();
@@ -63,6 +65,20 @@ export class PatientFileUploadPage {
       const text = $el.text().split(":")[1].trim();
       cy.expect(text).to.eq(fileName);
     });
+  }
+
+  verifyFileEditOption(status: boolean) {
+    cy.get("#edit-file-name").should(status ? "be.visible" : "not.exist");
+  }
+
+  verifyFileDownloadOption(status: boolean) {
+    cy.get("#preview-file").should(status ? "be.visible" : "not.be.visible");
+  }
+
+  downloadFile() {
+    cy.intercept("GET", "**/api/v1/files/**").as("downloadFile");
+    cy.get("#preview-file").click();
+    cy.wait("@downloadFile").its("response.statusCode").should("eq", 200);
   }
 
   verifySuccessNotification(msg: string) {

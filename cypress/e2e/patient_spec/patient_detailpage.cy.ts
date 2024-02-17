@@ -42,7 +42,7 @@ describe("Patient Details", () => {
   it("Edit file name", () => {
     patientPage.visitPatient("Dummy Patient 4");
     patientFileUploadPage.visitPatientDetailsPage();
-    patientFileUploadPage.clickEditFileName(
+    patientFileUploadPage.editFileName(
       `Cypress File ${new Date().getTime().toString().slice(9)}`
     );
     patientFileUploadPage.clickSaveFileName();
@@ -54,7 +54,7 @@ describe("Patient Details", () => {
   it("Archive file", () => {
     patientPage.visitPatient("Dummy Patient 4");
     patientFileUploadPage.visitPatientDetailsPage();
-    patientFileUploadPage.clickArchiveFile();
+    patientFileUploadPage.archiveFile();
     patientFileUploadPage.clickSaveArchiveFile();
     patientFileUploadPage.verifySuccessNotification(
       "File archived successfully"
@@ -62,9 +62,66 @@ describe("Patient Details", () => {
     patientFileUploadPage.verifyArchiveFile();
   });
 
-  //TODO : Verify the uploaded file can only be modified by the author, district admin, and above users.
+  it("Verify the uploaded file be edited by author", () => {
+    loginPage.login("dummynurse1", "Coronasafe@123");
+    patientPage.visitPatient("Dummy Patient 5");
+    patientFileUploadPage.visitPatientDetailsPage();
+    patientFileUploadPage.uploadFile();
+    patientFileUploadPage.clickUploadFile();
+    patientFileUploadPage.verifyFileEditOption(true);
+    patientFileUploadPage.editFileName(
+      `Cypress File ${new Date().getTime().toString().slice(9)}`
+    );
+    patientFileUploadPage.clickSaveFileName();
+    patientFileUploadPage.verifySuccessNotification(
+      "File name changed successfully"
+    );
+  });
 
-  //TODO : Verify file download is possible for all users.
+  it("Verify the uploaded file be cannot edited by other users below district admin", () => {
+    loginPage.login("dummynurse2", "Coronasafe@123");
+    patientPage.visitPatient("Dummy Patient 5");
+    patientFileUploadPage.visitPatientDetailsPage();
+    patientFileUploadPage.verifyFileEditOption(false);
+  });
+
+  it("Verify the uploaded file be can edited by district admin and above", () => {
+    loginPage.loginAsDisctrictAdmin();
+    patientPage.visitPatient("Dummy Patient 5");
+    patientFileUploadPage.visitPatientDetailsPage();
+    patientFileUploadPage.verifyFileEditOption(true);
+    patientFileUploadPage.editFileName(
+      `Cypress File ${new Date().getTime().toString().slice(9)}`
+    );
+    patientFileUploadPage.clickSaveFileName();
+    patientFileUploadPage.verifySuccessNotification(
+      "File name changed successfully"
+    );
+  });
+
+  it("Verify that file download is possible for author.", () => {
+    loginPage.login("dummynurse1", "Coronasafe@123");
+    patientPage.visitPatient("Dummy Patient 5");
+    patientFileUploadPage.visitPatientDetailsPage();
+    patientFileUploadPage.verifyFileDownloadOption(true);
+    patientFileUploadPage.downloadFile();
+  });
+
+  it("Verify that file download is possible for users below district admin.", () => {
+    loginPage.login("dummynurse2", "Coronasafe@123");
+    patientPage.visitPatient("Dummy Patient 5");
+    patientFileUploadPage.visitPatientDetailsPage();
+    patientFileUploadPage.verifyFileDownloadOption(true);
+    patientFileUploadPage.downloadFile();
+  });
+
+  it("Verify that file download is possible for district admin and above.", () => {
+    loginPage.loginAsDisctrictAdmin();
+    patientPage.visitPatient("Dummy Patient 5");
+    patientFileUploadPage.visitPatientDetailsPage();
+    patientFileUploadPage.verifyFileDownloadOption(true);
+    patientFileUploadPage.downloadFile();
+  });
 
   afterEach(() => {
     cy.saveLocalStorage();

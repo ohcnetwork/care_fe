@@ -743,6 +743,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       onClick={() => {
                         loadFile(item.id);
                       }}
+                      id="preview-file"
                       className="m-1 w-full sm:w-auto"
                     >
                       {" "}
