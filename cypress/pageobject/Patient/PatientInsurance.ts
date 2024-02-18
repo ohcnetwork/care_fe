@@ -10,7 +10,7 @@ class PatientInsurance {
   }
 
   selectInsurer(insurer: string) {
-    cy.intercept("GET", "/api/v1/hcx/payors/", {
+    cy.intercept("GET", "**/api/v1/hcx/payors/**", {
       statusCode: 200,
       body: [
         {
