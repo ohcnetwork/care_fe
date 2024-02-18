@@ -9,71 +9,98 @@ export class PatientConsultationPage {
       });
   }
 
-  selectSymptoms(symptoms: string) {
+  selectSymptoms(symptoms) {
+    if (!Array.isArray(symptoms)) {
+      symptoms = [symptoms];
+    }
     cy.get("#symptoms")
       .click()
       .then(() => {
-        cy.get("[role='option']").contains(symptoms).click();
+        symptoms.forEach((symptom) => {
+          cy.get("[role='option']").contains(symptom).click();
+        });
+        cy.get("#symptoms").click();
       });
+  }
+
+  selectSymptomsDate(date: string) {
+    cy.get("#symptoms_onset_date").click();
+    cy.get("#date-input").click().type(date);
   }
 
   verifyConsultationPatientName(patientName: string) {
     cy.get("#patient-name-consultation").should("contain", patientName);
   }
 
-  fillIllnessHistory(history: string) {
-    cy.wait(5000);
-    cy.get("#history_of_present_illness").scrollIntoView();
-    cy.get("#history_of_present_illness").should("be.visible");
-    cy.get("#history_of_present_illness").click().type(history);
+  fillConsultationFieldById(elementId, text) {
+    const selector = `#${elementId}`;
+    cy.get(selector).scrollIntoView();
+    cy.get(selector).should("be.visible");
+    cy.get(selector).click().type(text);
   }
 
-  enterConsultationDetails(
-    category: string,
-    examinationDetails: string,
-    weight: string,
-    height: string,
-    ipNumber: string,
-    consulationNotes: string,
-    verificationBy: string
-  ) {
-    cy.get("#symptoms").click();
+  selectPatientCategory(category: string) {
     cy.get("#category")
       .click()
       .then(() => {
         cy.get("[role='option']").contains(category).click();
       });
-    cy.get("#examination_details").click().type(examinationDetails);
-    cy.get("#weight").click().type(height);
-    cy.get("#height").click().type(weight);
-    cy.get("#patient_no").type(ipNumber);
-    cy.intercept("GET", "**/icd/**").as("getIcdResults");
-    cy.get("#icd11-search input[role='combobox']")
-      .scrollIntoView()
+  }
+
+  selectPatientReferance(referance: string) {
+    cy.get("#referred_to")
       .click()
-      .type("1A00");
-    cy.get("#icd11-search [role='option']")
-      .contains("1A00 Cholera")
-      .scrollIntoView()
-      .click();
-    cy.get("#condition-verification-status-menu").click();
-    cy.get("#add-icd11-diagnosis-as-confirmed").click();
-    cy.wait("@getIcdResults").its("response.statusCode").should("eq", 200);
+      .type(referance)
+      .then(() => {
+        cy.get("[role='option']").contains(referance).click();
+      });
+  }
 
-    cy.get("#principal-diagnosis-select").click();
-    cy.get("#principal-diagnosis-select [role='option']").first().click();
+  selectPatientSuggestion(suggestion: string) {
+    cy.get("#suggestion")
+      .click()
+      .then(() => {
+        cy.get("[role='option']").contains(suggestion).click();
+      });
+  }
 
-    cy.get("#consultation_notes").click().type(consulationNotes);
+  selectPatientDiagnosis(icdCode, statusId) {
+    cy.get("#icd11-search")
+      .click()
+      .type(icdCode)
+      .then(() => {
+        cy.get("[role='option']").contains(icdCode).click();
+      });
+    cy.get("#diagnosis-list")
+      .contains("Add as")
+      .focus()
+      .click()
+      .then(() => {
+        cy.get(`#${statusId}`).click();
+      });
+    cy.get("#diagnosis-list").scrollIntoView();
+    cy.get("#diagnosis-list").contains(icdCode).should("be.visible");
+  }
+
+  selectPatientPrincipalDiagnosis(diagnosis: string) {
+    cy.get("#principal-diagnosis-select")
+      .click()
+      .then(() => {
+        cy.get("[role='option']").contains(diagnosis).click();
+      });
+  }
+
+  fillTreatingPhysican(doctor: string) {
     cy.get("#treating_physician")
       .click()
-      .type(verificationBy)
+      .type(doctor)
       .then(() => {
-        cy.get("[role='option']").contains("Dev Doctor").click();
+        cy.get("[role='option']").contains(doctor).click();
       });
   }
 
   submitConsultation() {
-    cy.get("#submit").click();
+    cy.get("#submit").contains("Create Consultation").click();
   }
 
   clickAddPrescription() {
@@ -157,47 +184,14 @@ export class PatientConsultationPage {
       .click();
   }
 
-  setSymptomsDate(date: string) {
-    cy.get("#symptoms_onset_date")
-      .click()
-      .then(() => {
-        cy.get("[placeholder='DD/MM/YYYY']").type(date);
-      });
-  }
-
   updateConsultation() {
     cy.intercept("PUT", "**/api/v1/consultation/**").as("updateConsultation");
     cy.get("#submit").contains("Update Consultation").click();
     cy.wait("@updateConsultation").its("response.statusCode").should("eq", 200);
   }
 
-  verifySuccessNotification(message: string) {
-    cy.verifyNotification(message);
-  }
-
-  updateSymptoms(symptoms: string) {
-    this.selectSymptoms(symptoms);
-    cy.get("#symptoms").click();
-  }
-
   visitShiftRequestPage() {
     cy.get("#create_shift_request").click();
-  }
-
-  enterPatientShiftDetails(
-    name: string,
-    phone_number: string,
-    facilityName: string,
-    reason: string
-  ) {
-    cy.get("#refering_facility_contact_name").type(name);
-    cy.get("#refering_facility_contact_number").type(phone_number);
-    cy.get("input[name='assigned_facility']")
-      .type(facilityName)
-      .then(() => {
-        cy.get("[role='option']").first().click();
-      });
-    cy.get("#reason").type(reason);
   }
 
   createShiftRequest() {

@@ -3,12 +3,17 @@ import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import { PatientConsultationPage } from "../../pageobject/Patient/PatientConsultation";
 import PatientPredefined from "../../pageobject/Patient/PatientPredefined";
+import ShiftCreation from "../../pageobject/Shift/ShiftCreation";
+import FacilityLocation from "../../pageobject/Facility/FacilityLocation";
 
 describe("Patient Consultation in multiple combination", () => {
   const patientConsultationPage = new PatientConsultationPage();
   const loginPage = new LoginPage();
   const patientPage = new PatientPage();
   const patientPredefined = new PatientPredefined();
+  const shiftCreation = new ShiftCreation();
+  const facilityLocation = new FacilityLocation();
+
   before(() => {
     loginPage.loginAsDisctrictAdmin();
     cy.saveLocalStorage();
@@ -21,11 +26,66 @@ describe("Patient Consultation in multiple combination", () => {
   });
 
   it("OP Patient with Refer to another hospital consultation", () => {
-    // Sore throat and fever symptoms
+    patientPage.createPatient();
+    patientPage.selectFacility("Dummy Facility 40");
+    patientPredefined.createPatient();
+    patientPage.patientformvisibility();
+    patientPage.clickCreatePatient();
+    patientPage.verifyPatientIsCreated();
+    // Route of Facility - Out Patient
+    patientConsultationPage.selectConsultationStatus(
+      "Outpatient/Emergency Room"
+    );
+    // Select the Symptoms - Sore throat and fever symptoms
+    patientConsultationPage.selectSymptoms(["FEVER", "SORE THROAT"]);
+    patientConsultationPage.selectSymptomsDate("01012024");
+    patientConsultationPage.fillConsultationFieldById(
+      "history_of_present_illness",
+      "Patient History"
+    );
+    patientConsultationPage.fillConsultationFieldById(
+      "examination_details",
+      "Patient Examination Details"
+    );
+    patientConsultationPage.fillConsultationFieldById("weight", "80");
+    patientConsultationPage.fillConsultationFieldById("height", "170");
     // Comfort Care category
-    // Four ICD-11 and one principal
-    // no investigation
+    patientConsultationPage.selectPatientCategory("Comfort Care");
+    // Decision after consultation - Referred to Facility
+    patientConsultationPage.selectPatientSuggestion(
+      "Refer to another Hospital"
+    );
+    patientConsultationPage.selectPatientReferance(
+      "Dummy Request Approving Center"
+    );
+    // Four ICD-11 and one principal diagnosis
+    patientConsultationPage.selectPatientDiagnosis(
+      "1A04",
+      "add-icd11-diagnosis-as-confirmed"
+    );
+    patientConsultationPage.selectPatientPrincipalDiagnosis("1A04");
+    // no investigation for the patient
+    patientConsultationPage.fillConsultationFieldById(
+      "treatment_plan",
+      "Patient Treatment Plan"
+    );
+    patientConsultationPage.fillConsultationFieldById(
+      "consultation_notes",
+      "Patient General Instructions"
+    );
+    patientConsultationPage.fillConsultationFieldById(
+      "special_instruction",
+      "Special Instructions"
+    );
+    patientConsultationPage.fillTreatingPhysican("Dev Doctor");
     // no review after and no action
+    patientConsultationPage.submitConsultation();
+    // Create a shifting request
+    shiftCreation.typeCurrentFacilityPerson("Current Facility Person");
+    shiftCreation.typeCurrentFacilityPhone("9999999999");
+    shiftCreation.typeShiftReason("reason for shift");
+    shiftCreation.submitShiftForm();
+    facilityLocation.verifyNotification("Shift request created successfully");
   });
 
   it("Referred From another Facility Patient with OP consultation", () => {
@@ -54,6 +114,7 @@ describe("Patient Consultation in multiple combination", () => {
   });
 
   it("OP Patient with admission consultation", () => {
+    // icd 11 - 4 diagnosis with one principal
     patientPage.createPatient();
     patientPage.selectFacility("Dummy Facility 40");
     patientPredefined.createPatient();
@@ -65,10 +126,12 @@ describe("Patient Consultation in multiple combination", () => {
       "Outpatient/Emergency Room"
     );
     patientConsultationPage.selectSymptoms("ASYMPTOMATIC");
+    patientConsultationPage.fillExaminationDetails(
+      "Patient Examination details"
+    );
 
     patientConsultationPage.enterConsultationDetails(
       "Stable",
-      "Examination details and Clinical conditions",
       "70",
       "170",
       "IP007",
