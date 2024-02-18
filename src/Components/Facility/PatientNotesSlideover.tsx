@@ -3,7 +3,6 @@ import * as Notification from "../../Utils/Notifications.js";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames, isAppleDevice } from "../../Utils/utils";
-import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { make as Link } from "../Common/components/Link.bs";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
@@ -12,6 +11,7 @@ import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { PatientNoteStateType } from "./models";
 import useKeyboardShortcut from "use-keyboard-shortcut";
+import AutoExpandingTextInputFormField from "../Form/FormFields/AutoExpandingTextInputFormField.js";
 
 interface PatientNotesProps {
   patientId: string;
@@ -30,6 +30,8 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
     notes: [],
     cPage: 1,
     totalPages: 1,
+    patientId: props.patientId,
+    facilityId: props.facilityId,
   };
   const [state, setState] = useState(initialData);
 
@@ -106,7 +108,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
     <div className="flex gap-1">
       {show && (
         <Link
-          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
+          className="flex size-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
           href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/notes`}
         >
           <CareIcon className="care-l-window-maximize text-lg transition-all delay-150 duration-300 ease-out" />
@@ -123,7 +125,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
         <CareIcon className="care-l-angle-up text-lg transition-all delay-150 duration-300 ease-out" />
       </div>
       <div
-        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
+        className="flex size-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
         onClick={() => setShowPatientNotesPopup(false)}
       >
         <CareIcon className="care-l-times text-lg transition-all delay-150 duration-300 ease-out" />
@@ -163,19 +165,19 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
           <PatientConsultationNotesList
             state={state}
             setState={setState}
-            facilityId={facilityId}
-            patientId={patientId}
             reload={reload}
             setReload={setReload}
+            disableEdit={!patientActive}
           />
           <div className="relative mx-4 flex items-center">
-            <TextFormField
+            <AutoExpandingTextInputFormField
               id="doctor_notes_textarea"
+              maxHeight={160}
+              rows={1}
               name="note"
               value={noteField}
               onChange={(e) => setNoteField(e.value)}
               className="grow"
-              type="text"
               errorClassName="hidden"
               placeholder="Type your Note"
               disabled={!patientActive}
