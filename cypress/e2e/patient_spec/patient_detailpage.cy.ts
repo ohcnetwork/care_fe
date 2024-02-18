@@ -42,6 +42,7 @@ describe("Patient Details", () => {
   it("Edit file name", () => {
     patientPage.visitPatient("Dummy Patient 4");
     patientFileUploadPage.visitPatientDetailsPage();
+    patientFileUploadPage.verifyFileEditOption(true);
     patientFileUploadPage.editFileName(
       `Cypress File ${new Date().getTime().toString().slice(9)}`
     );
@@ -68,6 +69,9 @@ describe("Patient Details", () => {
     patientFileUploadPage.visitPatientDetailsPage();
     patientFileUploadPage.uploadFile();
     patientFileUploadPage.clickUploadFile();
+    patientFileUploadPage.verifySuccessNotification(
+      "File Uploaded Successfully"
+    );
     patientFileUploadPage.verifyFileEditOption(true);
     patientFileUploadPage.editFileName(
       `Cypress File ${new Date().getTime().toString().slice(9)}`
@@ -82,7 +86,6 @@ describe("Patient Details", () => {
     loginPage.login("dummynurse2", "Coronasafe@123");
     patientPage.visitPatient("Dummy Patient 5");
     patientFileUploadPage.visitPatientDetailsPage();
-    cy.wait(2000);
     patientFileUploadPage.verifyFileEditOption(false);
   });
 

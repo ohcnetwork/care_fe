@@ -583,6 +583,7 @@ export const FileUpload = (props: FileUploadProps) => {
         <div
           className="mt-4 rounded-lg border bg-white p-4 shadow"
           key={item.id}
+          id="file-div"
         >
           {!item.is_archived ? (
             <>

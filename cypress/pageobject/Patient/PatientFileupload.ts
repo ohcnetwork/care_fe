@@ -68,7 +68,10 @@ export class PatientFileUploadPage {
   }
 
   verifyFileEditOption(status: boolean) {
-    cy.get("#edit-file-name").should(status ? "be.visible" : "not.exist");
+    cy.get("#file-div").should(
+      `${status ? "contain" : "not.exist"}`,
+      "EDIT FILE NAME"
+    );
   }
 
   verifyFileDownloadOption(status: boolean) {
