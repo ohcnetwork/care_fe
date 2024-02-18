@@ -1,21 +1,18 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
 import { SkillModel, SkillObjectModel } from "../Users/models";
 import { SkillSelect } from "../Common/SkillSelect";
-import {
-  addUserSkill,
-  getUserListSkills,
-  deleteUserSkill,
-} from "../../Redux/actions";
 import UnlinkSkillDialog from "./UnlinkSkillDialog";
 import * as Notification from "../../Utils/Notifications.js";
-import { useDispatch } from "react-redux";
 import ButtonV2 from "../Common/components/ButtonV2";
 import AuthorizeFor from "../../Utils/AuthorizeFor";
 import { useIsAuthorized } from "../../Common/hooks/useIsAuthorized";
 import { AddSkillsPlaceholder, SkillsArray } from "./SkillsSlideOverComponents";
 import { useTranslation } from "react-i18next";
 import CircularProgress from "../Common/components/CircularProgress";
+import useQuery from "../../Utils/request/useQuery";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 interface IProps {
   username: string;
@@ -26,32 +23,29 @@ interface IProps {
 export default ({ show, setShow, username }: IProps) => {
   /* added const {t} hook here and relevant text to Common.json to avoid eslint error  */
   const { t } = useTranslation();
-  const [skills, setSkills] = useState<SkillModel[]>([]);
   const [selectedSkill, setSelectedSkill] = useState<SkillObjectModel | null>(
     null
   );
   const [isLoading, setIsLoading] = useState(false);
   const [deleteSkill, setDeleteSkill] = useState<SkillModel | null>(null);
-  const dispatch: any = useDispatch();
 
-  const fetchSkills = useCallback(
-    async (username: string) => {
-      setIsLoading(true);
-      const res = await dispatch(getUserListSkills({ username }));
-      if (res && res.data) {
-        setSkills(res.data.results);
-      }
-      setIsLoading(false);
-    },
-    [dispatch]
-  );
+  const {
+    data: skills,
+    loading: skillsLoading,
+    refetch: refetchUserSkills,
+  } = useQuery(routes.userListSkill, {
+    pathParams: { username },
+  });
 
   const addSkill = useCallback(
     async (username: string, skill: SkillObjectModel | null) => {
       if (!skill) return;
       setIsLoading(true);
-      const res = await dispatch(addUserSkill(username, skill.id));
-      if (res?.status !== 201) {
+      const { res } = await request(routes.addUserSkill, {
+        pathParams: { username },
+        body: { skill: skill.id },
+      });
+      if (!res?.ok) {
         Notification.Error({
           msg: "Error while adding skill",
         });
@@ -62,31 +56,32 @@ export default ({ show, setShow, username }: IProps) => {
       }
       setSelectedSkill(null);
       setIsLoading(false);
-      fetchSkills(username);
+      await refetchUserSkills();
     },
-    [dispatch, fetchSkills]
+    [refetchUserSkills]
   );
 
   const removeSkill = useCallback(
     async (username: string, skillId: string) => {
-      await dispatch(deleteUserSkill(username, skillId));
+      const { res } = await request(routes.deleteUserSkill, {
+        pathParams: { username, id: skillId },
+      });
+      if (res?.status !== 204) {
+        Notification.Error({
+          msg: "Error while unlinking skill",
+        });
+      }
       setDeleteSkill(null);
-      fetchSkills(username);
+      await refetchUserSkills();
     },
-    [dispatch, fetchSkills]
+    [refetchUserSkills]
   );
-
-  useEffect(() => {
-    setIsLoading(true);
-    if (username) fetchSkills(username);
-    setIsLoading(false);
-  }, [username, fetchSkills]);
 
   const authorizeForAddSkill = useIsAuthorized(
     AuthorizeFor(["DistrictAdmin", "StateAdmin"])
   );
 
-  const hasSkills = useMemo(() => skills.length > 0, [skills]);
+  const hasSkills = skills?.results?.length || 0 > 0;
 
   return (
     <div className="col-span-4">
@@ -100,53 +95,57 @@ export default ({ show, setShow, username }: IProps) => {
       )}
       <SlideOverCustom
         open={show}
-        setOpen={setShow}
+        setOpen={(openState) => {
+          !deleteSkill && setShow(openState);
+        }}
         slideFrom="right"
         title="Skills"
         dialogClass="md:w-[400px]"
       >
         <div>
-          <div className="sm:col-start-2 col-span-full sm:col-span-3">
-            <div className="tooltip flex items-center gap-2">
-              <SkillSelect
-                multiple={false}
-                name="skill"
-                disabled={!authorizeForAddSkill}
-                showAll={true}
-                showNOptions={Infinity}
-                selected={selectedSkill}
-                setSelected={setSelectedSkill}
-                errors=""
-              />
-              <ButtonV2
-                disabled={!authorizeForAddSkill}
-                onClick={() => addSkill(username, selectedSkill)}
-                className="w-6rem"
+          <div className="col-span-full sm:col-span-3 sm:col-start-2">
+            {(!isLoading || !skillsLoading) && (
+              <div
+                className={`${
+                  !authorizeForAddSkill && "tooltip"
+                } flex items-center gap-2`}
               >
-                {/* Replace "Add" in button with CircularProgress */}
-                {isLoading ? (
-                  <CircularProgress className="h-5 w-5" />
-                ) : (
-                  t("add")
+                <SkillSelect
+                  id="select-skill"
+                  multiple={false}
+                  name="skill"
+                  disabled={!authorizeForAddSkill}
+                  showNOptions={Infinity}
+                  selected={selectedSkill}
+                  setSelected={setSelectedSkill}
+                  errors=""
+                  userSkills={skills?.results || []}
+                />
+                <ButtonV2
+                  id="add-skill-button"
+                  disabled={!authorizeForAddSkill}
+                  onClick={() => addSkill(username, selectedSkill)}
+                  className="mt-1 h-[45px] w-[74px] text-base"
+                >
+                  {t("add")}
+                </ButtonV2>
+                {!authorizeForAddSkill && (
+                  <span className="tooltip-text tooltip-bottom -translate-x-24 translate-y-2">
+                    {t("contact_your_admin_to_add_skills")}
+                  </span>
                 )}
-              </ButtonV2>
-              {!authorizeForAddSkill && (
-                <span className="tooltip-text tooltip-bottom -translate-x-24 translate-y-2">
-                  {t("contact_your_admin_to_add_skills")}
-                </span>
-              )}
-            </div>
-            {/* While loading skills, we display an additional circular progress to show we are fetching the information*/}
-            {isLoading ? (
+              </div>
+            )}
+            {isLoading || skillsLoading ? (
               <div className="mt-4 flex justify-center">
                 <CircularProgress />
               </div>
             ) : (
-              <div className="mb-2 mt-4">
+              <div className="mb-2 mt-4" id="added-user-skills">
                 {hasSkills ? (
                   <SkillsArray
-                    isLoading={isLoading}
-                    skills={skills}
+                    isLoading={isLoading || skillsLoading}
+                    skills={skills?.results || []}
                     authorizeForAddSkill={authorizeForAddSkill}
                     setDeleteSkill={setDeleteSkill}
                   />

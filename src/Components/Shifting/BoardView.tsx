@@ -10,11 +10,11 @@ import SearchInput from "../Form/SearchInput";
 import ShiftingBoard from "./ShiftingBoard";
 import { downloadShiftRequests } from "../../Redux/actions";
 import { formatFilter } from "./Commons";
-import loadable from "@loadable/component";
+
 import { navigate } from "raviger";
 import useConfig from "../../Common/hooks/useConfig";
 import useFilters from "../../Common/hooks/useFilters";
-import { useState } from "react";
+import { lazy, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import withScrolling from "react-dnd-scrolling";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -22,13 +22,14 @@ import SwitchTabs from "../Common/components/SwitchTabs";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+const Loading = lazy(() => import("../Common/Loading"));
+const PageTitle = lazy(() => import("../Common/PageTitle"));
 const ScrollingComponent = withScrolling("div");
 
 export default function BoardView() {
   const { qParams, updateQuery, FilterBadges, advancedFilter } = useFilters({
     limit: -1,
+    cacheBlacklist: ["patient_name"],
   });
   const { wartime_shifting } = useConfig();
 
@@ -56,10 +57,78 @@ export default function BoardView() {
   const [boardFilter, setBoardFilter] = useState(activeBoards);
   const [isLoading] = useState(false);
   const { t } = useTranslation();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerHeight, setContainerHeight] = useState<number>(0);
+  const [isLeftScrollable, setIsLeftScrollable] = useState<boolean>(false);
+  const [isRightScrollable, setIsRightScrollable] = useState<boolean>(false);
+
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+
+    if (!container) return;
+
+    const handleScroll = () => {
+      setIsLeftScrollable(container.scrollLeft > 0);
+      setIsRightScrollable(
+        container.scrollLeft + container.clientWidth <
+          container.scrollWidth - 10
+      );
+    };
+
+    container.addEventListener("scroll", handleScroll);
+
+    handleScroll();
+
+    return () => {
+      container.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  const handleOnClick = (direction: "right" | "left") => {
+    const container = containerRef.current;
+    if (direction === "left" ? !isLeftScrollable : !isRightScrollable) return;
+
+    if (container) {
+      const scrollAmount = 300;
+      const currentScrollLeft = container.scrollLeft;
+
+      if (direction === "left") {
+        container.scrollTo({
+          left: currentScrollLeft - scrollAmount,
+          behavior: "smooth",
+        });
+      } else if (direction === "right") {
+        container.scrollTo({
+          left: currentScrollLeft + scrollAmount,
+          behavior: "smooth",
+        });
+      }
+    }
+  };
+
+  const renderArrowIcons = (direction: "right" | "left") => {
+    const isIconEnable =
+      direction === "left" ? isLeftScrollable : isRightScrollable;
+    return (
+      isIconEnable && (
+        <div
+          className={`relative z-20 self-center ${
+            direction === "right" ? "-left-12" : ""
+          }`}
+        >
+          <CareIcon
+            icon={`l-arrow-${direction}`}
+            className="absolute inset-y-0 left-0 z-10 h-10 w-10 cursor-pointer hover:opacity-100"
+            onClick={() => handleOnClick(direction)}
+          />
+        </div>
+      )
+    );
+  };
 
   return (
-    <div className="flex flex-col h-screen px-2 pb-2">
-      <div className="w-full flex flex-col lg:flex-row items-center justify-between">
+    <div className="max-h[95vh] flex min-h-full max-w-[100vw] flex-col px-2 pb-2">
+      <div className="flex w-full flex-col items-center justify-between lg:flex-row">
         <div className="w-1/3 lg:w-1/4">
           <PageTitle
             title={t("shifting")}
@@ -76,7 +145,7 @@ export default function BoardView() {
             breadcrumbs={false}
           />
         </div>
-        <div className="w-full flex gap-2 pt-2 items-center flex-col xl:flex-row justify-between">
+        <div className="flex w-full flex-col items-center justify-between gap-2 pt-2 xl:flex-row">
           <SearchInput
             name="patient_name"
             value={qParams.patient_name}
@@ -85,19 +154,17 @@ export default function BoardView() {
           />
 
           <SwitchTabs
-            Tab1={t("active")}
-            Tab2={t("completed")}
+            tab1={t("active")}
+            tab2={t("completed")}
             onClickTab1={() => setBoardFilter(activeBoards)}
             onClickTab2={() => setBoardFilter(completedBoards)}
-            activeTab={boardFilter[0].text !== activeBoards[0].text}
+            isTab2Active={boardFilter[0].text !== activeBoards[0].text}
           />
 
-          <div className="flex flex-col lg:flex-row gap-2 lg:gap-4 w-full lg:w-fit lg:mr-4">
+          <div className="flex w-full flex-col gap-2 lg:mr-4 lg:w-fit lg:flex-row lg:gap-4">
             <ButtonV2
               className="py-[11px]"
-              onClick={() =>
-                navigate("/shifting/list-view", { query: qParams })
-              }
+              onClick={() => navigate("/shifting/list", { query: qParams })}
             >
               <CareIcon className="care-l-list-ul" />
               {t("list_view")}
@@ -109,20 +176,31 @@ export default function BoardView() {
         </div>
       </div>
       <BadgesList {...{ qParams, FilterBadges }} />
-      <ScrollingComponent className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll px-4">
-        <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll px-2">
+      <ScrollingComponent className="relative mt-4 flex max-h-[80vh] w-full items-start pb-2">
+        <div className="mt-4 flex min-h-full w-full flex-1 items-start pb-2">
           {isLoading ? (
             <Loading />
           ) : (
-            boardFilter.map((board) => (
-              <ShiftingBoard
-                key={board.text}
-                filterProp={qParams}
-                board={board.text}
-                title={board.label}
-                formatFilter={formatFilter}
-              />
-            ))
+            <>
+              {renderArrowIcons("left")}
+              <div
+                className="mx-11 flex max-h-[75vh] w-full flex-row overflow-y-auto overflow-x-hidden"
+                ref={containerRef}
+              >
+                {boardFilter.map((board) => (
+                  <ShiftingBoard
+                    key={board.text}
+                    filterProp={qParams}
+                    board={board.text}
+                    title={board.label}
+                    formatFilter={formatFilter}
+                    setContainerHeight={setContainerHeight}
+                    containerHeight={containerHeight}
+                  />
+                ))}
+              </div>
+              {renderArrowIcons("right")}
+            </>
           )}
         </div>
       </ScrollingComponent>

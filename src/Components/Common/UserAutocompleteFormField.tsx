@@ -7,10 +7,15 @@ import {
   useFormFieldPropsResolver,
 } from "../Form/FormFields/Utils";
 import { UserModel } from "../Users/models";
+import { isUserOnline } from "../../Utils/utils";
+import { UserRole } from "../../Common/constants";
 
 type Props = FormFieldBaseProps<UserModel> & {
   placeholder?: string;
   facilityId?: string;
+  homeFacility?: string;
+  userType?: UserRole;
+  showActiveStatus?: boolean;
 };
 
 export default function UserAutocompleteFormField(props: Props) {
@@ -20,27 +25,67 @@ export default function UserAutocompleteFormField(props: Props) {
     { queryResponseExtractor: (data) => data.results }
   );
 
+  let search_filter: {
+    limit: number;
+    offset: number;
+    home_facility?: string;
+    user_type?: string;
+    search_text?: string;
+  } = { limit: 5, offset: 0 };
+
+  if (props.showActiveStatus && props.userType) {
+    search_filter = { ...search_filter, user_type: props.userType };
+  }
+
+  if (props.homeFacility) {
+    search_filter = { ...search_filter, home_facility: props.homeFacility };
+  }
+
+  const getStatusIcon = (option: UserModel) => {
+    if (!props.showActiveStatus) return null;
+
+    return (
+      <div className="mr-6 mt-[2px]">
+        <svg
+          className={`h-3 w-3 ${
+            isUserOnline(option) ? "text-green-500" : "text-gray-400"
+          }`}
+          fill="currentColor"
+          viewBox="0 0 8 8"
+        >
+          <circle cx="4" cy="4" r="4" />
+        </svg>
+      </div>
+    );
+  };
+
   return (
     <FormField field={field}>
-      <Autocomplete
-        id={field.id}
-        disabled={field.disabled}
-        placeholder={props.placeholder}
-        value={field.value}
-        onChange={field.handleChange}
-        options={options(field.value && [field.value])}
-        optionLabel={getUserFullName}
-        optionDescription={(option) => `${option.user_type}`}
-        optionValue={(option) => option}
-        onQuery={(query) =>
-          fetchOptions(
-            props.facilityId
-              ? getFacilityUsers(props.facilityId)
-              : getUserList({ limit: 5, offset: 0, search_text: query })
-          )
-        }
-        isLoading={isLoading}
-      />
+      <div className="relative">
+        <Autocomplete
+          id={field.id}
+          disabled={field.disabled}
+          placeholder={props.placeholder}
+          value={field.value}
+          onChange={field.handleChange}
+          options={options(field.value && [field.value])}
+          optionLabel={getUserFullName}
+          optionIcon={getStatusIcon}
+          optionDescription={(option) => `${option.user_type}`}
+          optionValue={(option) => option}
+          onQuery={(query) =>
+            fetchOptions(
+              props.facilityId
+                ? getFacilityUsers(props.facilityId, {
+                    ...search_filter,
+                    search_text: query,
+                  })
+                : getUserList({ ...search_filter, search_text: query })
+            )
+          }
+          isLoading={isLoading}
+        />
+      </div>
     </FormField>
   );
 }

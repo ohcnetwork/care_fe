@@ -22,7 +22,7 @@ let loadData = (setState, consultationId, id) => {
 }
 
 @react.component
-export make = (~id, ~facilityId, ~patientId, ~consultationId, ~preview) => {
+let make = (~id, ~facilityId, ~patientId, ~consultationId, ~preview) => {
   let (state, setState) = React.useState(() => {loading: true, dailyRound: None})
   React.useEffect1(() => {
     loadData(setState, consultationId, id)

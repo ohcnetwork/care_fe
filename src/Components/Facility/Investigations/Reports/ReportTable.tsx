@@ -2,13 +2,13 @@ import { getColorIndex, rowColor, transformData } from "./utils";
 
 import ButtonV2 from "../../../Common/components/ButtonV2";
 import { InvestigationResponse } from "./types";
-import React from "react";
-import { formatDate } from "../../../../Utils/utils";
+import { formatAge, formatDateTime } from "../../../../Utils/utils";
+import { FC } from "react";
 
 const ReportRow = ({ data, name, min, max }: any) => {
   return (
     <tr className="bg-white even:bg-gray-50">
-      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+      <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
         {name}
       </td>
       {data.map((d: any) => {
@@ -29,7 +29,7 @@ const ReportRow = ({ data, name, min, max }: any) => {
                   }
                 : {}),
             }}
-            className={"text-center break-all"}
+            className={"break-all text-center"}
           >
             {d?.notes ||
               (d?.value &&
@@ -38,10 +38,10 @@ const ReportRow = ({ data, name, min, max }: any) => {
           </td>
         );
       })}
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
         {min}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
         {max}
       </td>
     </tr>
@@ -53,13 +53,14 @@ interface ReportTableProps {
   patientDetails?: {
     name: string;
     age: number;
+    date_of_birth: string;
     hospitalName: string;
   };
   investigationData: InvestigationResponse;
   hidePrint?: boolean;
 }
 
-const ReportTable: React.FC<ReportTableProps> = ({
+const ReportTable: FC<ReportTableProps> = ({
   title,
   investigationData,
   patientDetails,
@@ -70,45 +71,52 @@ const ReportTable: React.FC<ReportTableProps> = ({
   return (
     <>
       {!hidePrint && (
-        <div className="flex justify-end print:hidden m-2.5 pt-2.5">
+        <div className="m-2.5 flex justify-end pt-2.5 print:hidden">
           <ButtonV2 variant="primary" onClick={window.print}>
             Print Report
           </ButtonV2>
         </div>
       )}
 
-      <div className=" p-4 my-4" id="section-to-print">
-        {title && <h1 className="text-xl text-gray-800 font-bold">{title}</h1>}
+      <div className=" my-4 p-4" id="section-to-print">
+        {title && <h1 className="text-xl font-bold text-gray-800">{title}</h1>}
         <br />
         {patientDetails && (
           <div className="flex flex-col gap-1 p-1">
             <p>Name: {patientDetails.name}</p>
-            <p>Age: {patientDetails.age}</p>
+            <p>
+              Age:{" "}
+              {formatAge(
+                patientDetails.age,
+                patientDetails.date_of_birth,
+                true
+              )}
+            </p>
             <p>Hospital: {patientDetails.hospitalName}</p>
           </div>
         )}
         <br />
         <div className="my-4">
-          <span className="inline-block  bg-yellow-200 py-1 m-1 px-6 rounded-full text-yellow-900 font-medium">
+          <span className="m-1  inline-block rounded-full bg-yellow-200 px-6 py-1 font-medium text-yellow-900">
             Below Ideal
           </span>
 
-          <span className="inline-block  bg-primary-200 py-1 m-1 px-6 rounded-full text-primary-900 font-medium">
+          <span className="m-1  inline-block rounded-full bg-primary-200 px-6 py-1 font-medium text-primary-900">
             Ideal
           </span>
 
-          <span className="inline-block  bg-red-200 py-1 m-1 px-6 rounded-full text-red-900 font-medium">
+          <span className="m-1  inline-block rounded-full bg-red-200 px-6 py-1 font-medium text-red-900">
             Above Ideal
           </span>
         </div>
         <br />
-        <div className="shadow overflow-x-scroll border-b border-gray-200 sm:rounded-lg">
+        <div className="overflow-x-scroll border-b border-gray-200 shadow sm:rounded-lg">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-semibold text-gray-800 uppercase tracking-wider"
+                  className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-800"
                 >
                   Name
                 </th>
@@ -116,20 +124,28 @@ const ReportTable: React.FC<ReportTableProps> = ({
                   <th
                     scope="col"
                     key={session.session_external_id}
-                    className="px-6 py-3 text-center text-xs font-semibold text-[#F9FAFB] bg-[#4B5563]  uppercase tracking-wider"
+                    className="bg-[#4B5563] px-6 py-3 text-center text-xs  font-semibold tracking-wider text-[#F9FAFB]"
                   >
-                    {formatDate(session.session_created_date)}
+                    <div className="flex flex-col items-center justify-center gap-1">
+                      {formatDateTime(session.session_created_date)}
+                      <a
+                        className="max-w-fit font-semibold text-white hover:underline"
+                        href={`/facility/${session.facility_id}/`}
+                      >
+                        {session.facility_name}
+                      </a>
+                    </div>
                   </th>
                 ))}
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-semibold text-gray-800 uppercase tracking-wider"
+                  className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-800"
                 >
                   Min
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-semibold text-gray-800 uppercase tracking-wider"
+                  className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-800"
                 >
                   Max
                 </th>

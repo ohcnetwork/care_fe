@@ -3,8 +3,8 @@ import { fireRequestV2 } from "../../Redux/fireRequest";
 export const loadDailyRound = (
   consultationId: string,
   id: string,
-  successCB: any = () => {},
-  errorCB: any = () => {}
+  successCB: any = () => null,
+  errorCB: any = () => null
 ) => {
   fireRequestV2("getDailyReport", [], {}, successCB, errorCB, {
     consultationId,
@@ -16,8 +16,8 @@ export const updateDailyRound = (
   consultationId: string,
   id: string,
   params: object,
-  successCB: any = () => {},
-  errorCB: any = () => {}
+  successCB: any = () => null,
+  errorCB: any = () => null
 ) => {
   fireRequestV2("updateDailyRound", [], params, successCB, errorCB, {
     consultationId,

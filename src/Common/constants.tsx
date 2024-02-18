@@ -1,8 +1,9 @@
 import { IConfig } from "./hooks/useConfig";
 import { PatientCategory } from "../Components/Facility/models";
 import { SortOption } from "../Components/Common/SortDropdown";
-import moment from "moment";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { dateQueryString } from "../Utils/utils";
+import { IconName } from "../CAREUI/icons/CareIcon";
+import { PhoneNumberValidator } from "../Components/Form/FieldValidators";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 export const PAGINATION_LIMIT = 36;
@@ -27,6 +28,8 @@ export type UserRole =
   | "Volunteer"
   | "StaffReadOnly"
   | "Staff"
+  | "NurseReadOnly"
+  | "Nurse"
   | "Doctor"
   | "WardAdmin"
   | "LocalBodyAdmin"
@@ -46,6 +49,8 @@ export const USER_TYPE_OPTIONS: {
   { id: "Volunteer", role: "Volunteer", readOnly: false },
   { id: "StaffReadOnly", role: "Staff", readOnly: true },
   { id: "Staff", role: "Staff", readOnly: false },
+  { id: "NurseReadOnly", role: "Nurse", readOnly: true },
+  { id: "Nurse", role: "Nurse", readOnly: false },
   { id: "Doctor", role: "Doctor", readOnly: false },
   { id: "WardAdmin", role: "Ward Admin", readOnly: false },
   { id: "LocalBodyAdmin", role: "Local Body Admin", readOnly: false },
@@ -212,10 +217,10 @@ export const getBedTypes = ({
     : [];
 
   return [
-    { id: 1, text: "Non-Covid Ordinary Beds" },
-    { id: 150, text: "Non-Covid Oxygen beds" },
-    { id: 10, text: "Non-Covid ICU (ICU without ventilator)" },
-    { id: 20, text: "Non-Covid Ventilator (ICU with ventilator)" },
+    { id: 1, text: "Ordinary Beds" },
+    { id: 150, text: "Oxygen beds" },
+    { id: 10, text: "ICU (ICU without ventilator)" },
+    { id: 20, text: "Ventilator (ICU with ventilator)" },
     { id: 30, text: "Covid Ordinary Beds" },
     { id: 120, text: "Covid Oxygen beds" },
     { id: 110, text: "Covid ICU (ICU without ventilator)" },
@@ -275,7 +280,6 @@ export const SYMPTOM_CHOICES = [
   { id: 6, text: "MYALGIA" },
   { id: 7, text: "ABDOMINAL DISCOMFORT" },
   { id: 8, text: "VOMITING" },
-  { id: 9, text: "OTHERS" },
   { id: 11, text: "SPUTUM" },
   { id: 12, text: "NAUSEA" },
   { id: 13, text: "CHEST PAIN" },
@@ -290,13 +294,37 @@ export const SYMPTOM_CHOICES = [
   { id: 22, text: "HEAD ACHE" },
   { id: 23, text: "BLEEDING" },
   { id: 24, text: "DIZZINESS" },
+  { id: 25, text: "CHILLS" },
+  { id: 26, text: "GENERAL WEAKNESS" },
+  { id: 27, text: "IRRITABILITY" },
+  { id: 28, text: "CONFUSION" },
+  { id: 29, text: "ABDOMINAL PAIN" },
+  { id: 30, text: "JOINT PAIN" },
+  { id: 31, text: "REDNESS OF EYES" },
+  { id: 32, text: "ANOREXIA" },
+  { id: 33, text: "NEW LOSS OF TASTE" },
+  { id: 34, text: "NEW LOSS OF SMELL" },
+  { id: 9, text: "OTHERS" },
 ];
 
 export const DISCHARGE_REASONS = [
-  { id: "REC", text: "Recovered" },
-  { id: "EXP", text: "Expired" },
-  { id: "REF", text: "Referred" },
-  { id: "LAMA", text: "LAMA" },
+  { id: 1, text: "Recovered" },
+  { id: 2, text: "Referred" },
+  { id: 3, text: "Expired" },
+  { id: 4, text: "LAMA" },
+];
+
+export const CONSCIOUSNESS_LEVEL = [
+  { id: "UNRESPONSIVE", text: "Unresponsive" },
+  { id: "RESPONDS_TO_PAIN", text: "Responds to Pain" },
+  { id: "RESPONDS_TO_VOICE", text: "Responds to Voice" },
+  { id: "ALERT", text: "Alert" },
+  { id: "AGITATED_OR_CONFUSED", text: "Agitated or Confused" },
+  {
+    id: "ONSET_OF_AGITATION_AND_CONFUSION",
+    text: "Onset of Agitation and Confusion",
+  },
+  { id: "UNKNOWN", text: "Unknown" },
 ];
 
 export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
@@ -312,7 +340,7 @@ export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
 export const GENDER_TYPES = [
   { id: 1, text: "Male", icon: "M" },
   { id: 2, text: "Female", icon: "F" },
-  { id: 3, text: "Non-binary", icon: "NB" },
+  { id: 3, text: "Transgender", icon: "TRANS" },
 ];
 
 export const SAMPLE_TEST_RESULT = [
@@ -323,27 +351,23 @@ export const SAMPLE_TEST_RESULT = [
 ];
 
 export const CONSULTATION_SUGGESTION = [
-  { id: "HI", text: "Home Isolation" },
+  { id: "HI", text: "Home Isolation", deprecated: true }, // # Deprecated. Preserving option for backward compatibility (use only for readonly operations)
   { id: "A", text: "Admission" },
   { id: "R", text: "Refer to another Hospital" },
   { id: "OP", text: "OP Consultation" },
   { id: "DC", text: "Domiciliary Care" },
   { id: "DD", text: "Declare Death" },
-];
+] as const;
 
-export const CONSULTATION_STATUS = [
-  { id: "1", text: "Brought Dead" },
-  { id: "2", text: "Transferred from ward" },
-  { id: "3", text: "Transferred from ICU" },
-  { id: "4", text: "Referred from other hospital" },
-  { id: "5", text: "Out-patient (walk in)" },
-];
+export type ConsultationSuggestionValue =
+  (typeof CONSULTATION_SUGGESTION)[number]["id"];
 
 export const ADMITTED_TO = [
   { id: "1", text: "Isolation" },
   { id: "2", text: "ICU" },
   { id: "6", text: "Bed with oxygen support" },
   { id: "7", text: "Regular" },
+  { id: "None", text: "No bed assigned" },
 ];
 
 export const RESPIRATORY_SUPPORT = [
@@ -406,24 +430,6 @@ export const SAMPLE_FLOW_RULES = {
   ],
   RECEIVED_AND_FORWARED: ["RECEIVED_AT_LAB", "COMPLETED"],
   RECEIVED_AT_LAB: ["COMPLETED"],
-};
-
-export const ROLE_STATUS_MAP = {
-  Staff: ["SENT_TO_COLLECTON_CENTRE"],
-  DistrictAdmin: [
-    "APPROVED",
-    "DENIED",
-    "SENT_TO_COLLECTON_CENTRE",
-    "RECEIVED_AND_FORWARED",
-  ],
-  StateLabAdmin: [
-    "APPROVED",
-    "DENIED",
-    "SENT_TO_COLLECTON_CENTRE",
-    "RECEIVED_AND_FORWARED",
-    "RECEIVED_AT_LAB",
-    "COMPLETED",
-  ],
 };
 
 export const DISEASE_STATUS = [
@@ -497,6 +503,7 @@ export const TELEMEDICINE_ACTIONS = [
   { id: 60, text: "COMPLETE", desc: "Complete" },
   { id: 70, text: "REVIEW", desc: "Review" },
   { id: 80, text: "NOT_REACHABLE", desc: "Not Reachable" },
+  { id: 90, text: "DISCHARGE_RECOMMENDED", desc: "Discharge Recommended" },
 ];
 
 export const FRONTLINE_WORKER = [
@@ -607,6 +614,11 @@ export const NOTIFICATION_EVENTS = [
     text: "Shifting Updated",
     icon: "fa-solid fa-truck-medical",
   },
+  {
+    id: "PATIENT_NOTE_ADDED",
+    text: "Patient Note Added",
+    icon: "fa-solid fa-message",
+  },
 ];
 
 export const BREATHLESSNESS_LEVEL = [
@@ -661,22 +673,22 @@ export const NURSING_CARE_FIELDS: Array<OptionsType> = [
 export const EYE_OPEN_SCALE = [
   { value: 4, text: "Spontaneous" },
   { value: 3, text: "To Speech" },
-  { value: 2, text: "Pain" },
-  { value: 1, text: "None" },
+  { value: 2, text: "To Pain" },
+  { value: 1, text: "No Response" },
 ];
 
 export const VERBAL_RESPONSE_SCALE = [
-  { value: 5, text: "Oriented/Coos/Babbles" },
+  { value: 5, text: "Oriented to Time, Place and Person" },
   { value: 4, text: "Confused/Irritable" },
   { value: 3, text: "Inappropriate words/Cry to Pain" },
   { value: 2, text: "Incomprehensible words/Moans to pain" },
-  { value: 1, text: "None" },
+  { value: 1, text: "No Response" },
 ];
 
 export const MOTOR_RESPONSE_SCALE = [
-  { value: 6, text: "Obeying commands" },
-  { value: 5, text: "Moves to localised pain" },
-  { value: 4, text: "Flexion withdrawal from pain" },
+  { value: 6, text: "Obeying commands/Normal acrivity" },
+  { value: 5, text: "Moves to localized pain" },
+  { value: 4, text: "Flexion/Withdrawal from pain" },
   { value: 3, text: "Abnormal Flexion(decorticate)" },
   { value: 2, text: "Abnormal Extension(decerebrate)" },
   { value: 1, text: "No Response" },
@@ -828,36 +840,40 @@ export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
 ];
 
 // in future, if you find Unicon equivalents of all these icons, please replace them. Only use the same iconset throughout.
-export const FACILITY_FEATURE_TYPES = [
+export const FACILITY_FEATURE_TYPES: {
+  id: number;
+  name: string;
+  icon: IconName;
+}[] = [
   {
     id: 1,
     name: "CT Scan",
-    icon: "compact-disc",
+    icon: "l-compact-disc",
   },
   {
     id: 2,
     name: "Maternity Care",
-    icon: "person-breastfeeding",
+    icon: "l-baby-carriage",
   },
   {
     id: 3,
     name: "X-Ray",
-    icon: "x-ray",
+    icon: "l-clipboard-alt",
   },
   {
     id: 4,
     name: "Neonatal Care",
-    icon: "baby-carriage",
+    icon: "l-baby-carriage",
   },
   {
     id: 5,
     name: "Operation Theater",
-    icon: "syringe",
+    icon: "l-syringe",
   },
   {
     id: 6,
     name: "Blood Bank",
-    icon: "droplet",
+    icon: "l-medical-drip",
   },
 ];
 
@@ -890,7 +906,7 @@ export const XLSXAssetImportSchema = {
   Class: {
     prop: "asset_class",
     type: String,
-    oneOf: ["HL7MONITOR", "ONVIF"],
+    oneOf: ["HL7MONITOR", "ONVIF", "VENTILATOR", ""],
   },
   Description: { prop: "description", type: String },
   "Working Status": {
@@ -902,7 +918,7 @@ export const XLSXAssetImportSchema = {
       } else if (status === "NOT WORKING") {
         return false;
       } else {
-        throw new Error("Invalid Working Status");
+        throw new Error("Invalid Working Status: " + status);
       }
     },
     required: true,
@@ -911,6 +927,7 @@ export const XLSXAssetImportSchema = {
     prop: "not_working_reason",
     type: String,
   },
+  "Serial Number": { prop: "serial_number", type: String },
   "QR Code ID": { prop: "qr_code_id", type: String },
   Manufacturer: { prop: "manufacturer", type: String },
   "Vendor Name": { prop: "vendor_name", type: String },
@@ -919,10 +936,11 @@ export const XLSXAssetImportSchema = {
     prop: "support_email",
     type: String,
     parse: (email: string) => {
+      if (!email) return null;
       const isValid = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
 
       if (!isValid) {
-        throw new Error("Invalid Support Email");
+        throw new Error("Invalid Support Email: " + email);
       }
 
       return email;
@@ -932,40 +950,57 @@ export const XLSXAssetImportSchema = {
     prop: "support_phone",
     type: String,
     parse: (phone: number | string) => {
-      const parsed = parsePhoneNumberFromString(String(phone), "IN");
-
-      if (!parsed?.isValid()) {
-        throw new Error("Invalid Support Phone Number");
+      phone = String(phone);
+      if (phone.length === 10 && !phone.startsWith("1800")) {
+        phone = "+91" + phone;
+      }
+      if (phone.startsWith("91") && phone.length === 12) {
+        phone = "+" + phone;
+      }
+      if (phone.startsWith("+911800")) {
+        phone = "1800" + phone.slice(6);
+      }
+      if (
+        PhoneNumberValidator(["mobile", "landline", "support"])(phone) !==
+        undefined
+      ) {
+        throw new Error("Invalid Support Phone Number: " + phone);
       }
 
-      return parsed?.format("E.164");
+      return phone ? phone : undefined;
     },
     required: true,
   },
-  "Warrenty End Date": {
+  "Warranty End Date": {
     prop: "warranty_amc_end_of_validity",
     type: String,
     parse: (date: string) => {
-      const parsed = new Date(date);
+      if (!date) return null;
+      const parts = date.split("-");
+      const reformattedDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+      const parsed = new Date(reformattedDateStr);
 
       if (String(parsed) === "Invalid Date") {
-        throw new Error("Invalid Warrenty End Date");
+        throw new Error("Invalid Warranty End Date:" + date);
       }
 
-      return moment(parsed).format("YYYY-MM-DD");
+      return dateQueryString(parsed);
     },
   },
   "Last Service Date": {
     prop: "last_serviced_on",
     type: String,
     parse: (date: string) => {
-      const parsed = new Date(date);
+      if (!date) return null;
+      const parts = date.split("-");
+      const reformattedDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+      const parsed = new Date(reformattedDateStr);
 
       if (String(parsed) === "Invalid Date") {
-        throw new Error("Invalid Last Service Date");
+        throw new Error("Invalid Last Service Date:" + date);
       }
 
-      return moment(parsed).format("YYYY-MM-DD");
+      return dateQueryString(parsed);
     },
   },
   Notes: { prop: "notes", type: String },
@@ -976,22 +1011,165 @@ export const XLSXAssetImportSchema = {
         prop: "local_ip_address",
         type: String,
         parse: (ip: string) => {
+          if (!ip) return null;
           const isValid =
             /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
               ip
             );
 
           if (!isValid) {
-            throw new Error("Invalid Config IP Address");
+            throw new Error("Invalid Config IP Address: " + ip);
           }
 
           return ip;
         },
       },
-      "Config: Camera Access Key": {
+      "Config - Camera Access Key": {
         prop: "camera_access_key",
         type: String,
       },
     },
   },
 };
+
+export const USER_TYPES_MAP = {
+  Pharmacist: "Pharmacist",
+  Volunteer: "Volunteer",
+  StaffReadOnly: "Staff",
+  Staff: "Staff",
+  Doctor: "Doctor",
+  Nurse: "Nurse",
+  NurseReadOnly: "Nurse",
+  WardAdmin: "Ward Admin",
+  LocalBodyAdmin: "Local Body Admin",
+  DistrictLabAdmin: "District Lab Admin",
+  DistrictReadOnlyAdmin: "District Admin",
+  DistrictAdmin: "District Admin",
+  StateLabAdmin: "State Lab Admin",
+  StateReadOnlyAdmin: "State Admin",
+  StateAdmin: "State Admin",
+  RemoteSpecialist: "Remote Specialist",
+} as const;
+
+export const AREACODES: Record<string, string[]> = {
+  CA: [
+    "403",
+    "587",
+    "250",
+    "604",
+    "778",
+    "204",
+    "431",
+    "506",
+    "709",
+    "867",
+    "902",
+    "226",
+    "249",
+    "289",
+    "343",
+    "365",
+    "416",
+    "437",
+    "519",
+    "613",
+    "647",
+    "705",
+    "807",
+    "902",
+    "418",
+    "438",
+    "450",
+    "514",
+    "579",
+    "581",
+    "819",
+    "306",
+    "639",
+    "867",
+  ],
+  JM: ["658", "876"],
+  PR: ["787", "939"],
+  DO: ["809", "829"],
+  RE: ["262", "263", "692", "693"],
+  YT: ["269", "639"],
+  CC: ["89162"],
+  CX: ["89164"],
+  BQ: ["9"],
+  KZ: ["6", "7"],
+  SJ: ["79"],
+};
+
+export const IN_LANDLINE_AREA_CODES = [
+  "11",
+  "22",
+  "33",
+  "44",
+  "20",
+  "40",
+  "79",
+  "80",
+  "120",
+  "124",
+  "129",
+  "135",
+  "141",
+  "160",
+  "161",
+  "172",
+  "175",
+  "181",
+  "183",
+  "233",
+  "240",
+  "241",
+  "250",
+  "251",
+  "253",
+  "257",
+  "260",
+  "261",
+  "265",
+  "343",
+  "413",
+  "422",
+  "431",
+  "435",
+  "452",
+  "462",
+  "471",
+  "474",
+  "477",
+  "478",
+  "481",
+  "484",
+  "485",
+  "487",
+  "490",
+  "497",
+  "512",
+  "522",
+  "532",
+  "542",
+  "551",
+  "562",
+  "581",
+  "591",
+  "621",
+  "612",
+  "641",
+  "657",
+  "712",
+  "721",
+  "724",
+  "751",
+  "761",
+  "821",
+  "824",
+  "831",
+  "836",
+  "866",
+  "870",
+  "891",
+  "4822",
+];

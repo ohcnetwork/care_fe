@@ -1,44 +1,45 @@
-import { useState, useCallback } from "react";
-import { useDispatch } from "react-redux";
-import { getPatient } from "../../Redux/actions";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useEffect, useState } from "react";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { GENDER_TYPES } from "../../Common/constants";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import DateFormField from "../Form/FormFields/DateFormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import moment from "moment";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import Page from "../Common/components/Page";
 import Form from "../Form/Form";
 import { useTranslation } from "react-i18next";
 import { navigate } from "raviger";
+import dayjs from "dayjs";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 
 type DeathReport = {
-  name: string;
-  age: string;
-  gender: string;
-  address: string;
-  phone_number: string;
-  is_declared_positive: string;
-  date_declared_positive: Date | "";
-  test_type: string;
-  date_of_test: Date | "";
-  date_of_result: Date | "";
-  srf_id: string;
-  hospital_tested_in: string;
-  hospital_died_in: string;
-  date_of_admission: Date | "";
-  date_of_death: Date | "";
-  comorbidities: string;
-  history_clinical_course: string;
-  brought_dead: string;
-  home_or_cfltc: string;
-  is_vaccinated: string;
-  kottayam_confirmation_sent: string;
-  kottayam_sample_date: Date | "";
-  cause_of_death: string;
-  facility: string;
+  name?: string;
+  age?: string | number;
+  gender?: string;
+  address?: string;
+  phone_number?: string;
+  is_declared_positive?: string;
+  date_declared_positive: Date | string;
+  test_type?: string;
+  date_of_test?: Date | string;
+  date_of_result?: Date | string;
+  srf_id?: string;
+  hospital_tested_in?: string;
+  hospital_died_in?: string;
+  date_of_admission?: Date | string;
+  date_of_death?: Date | string;
+  comorbidities?: string;
+  history_clinical_course?: string;
+  brought_dead?: string;
+  home_or_cfltc?: string;
+  is_vaccinated?: string;
+  kottayam_confirmation_sent?: string;
+  kottayam_sample_date?: Date | string;
+  cause_of_death?: string;
+  facility?: string;
 };
 
 export default function PrintDeathReport(props: { id: string }) {
@@ -71,10 +72,8 @@ export default function PrintDeathReport(props: { id: string }) {
 
   const [patientData, setPatientData] = useState<DeathReport>(initialState);
   const [patientName, setPatientName] = useState("");
-  const [_isLoading, setIsLoading] = useState(true);
   const [isPrintMode, setIsPrintMode] = useState(false);
   const { id } = props;
-  const dispatch: any = useDispatch();
   const { t } = useTranslation();
 
   const getPatientGender = (patientData: any) =>
@@ -96,62 +95,43 @@ export default function PrintDeathReport(props: { id: string }) {
     }
   };
 
-  const fetchpatient = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const patientRes = await dispatch(getPatient({ id }));
-      if (!status.aborted) {
-        if (patientRes && patientRes.data) {
-          setPatientName(patientRes.data.name);
-          const patientGender = getPatientGender(patientRes.data);
-          const patientAddress = getPatientAddress(patientRes.data);
-          const patientComorbidities = getPatientComorbidities(patientRes.data);
-          const data = {
-            ...patientRes.data,
-            gender: patientGender,
-            address: patientAddress,
-            comorbidities: patientComorbidities,
-            is_declared_positive: patientRes.data.is_declared_positive
-              ? "Yes"
-              : "No",
-            is_vaccinated: patientData.is_vaccinated ? "Yes" : "No",
-            cause_of_death:
-              patientRes.data.last_consultation?.discharge_notes || "",
-            hospital_died_in: patientRes.data.last_consultation.facility_name,
-            date_declared_positive: patientRes.data.date_declared_positive
-              ? moment(patientRes.data.date_declared_positive).toDate()
-              : "",
-            date_of_admission: patientRes.data.last_consultation.admission_date
-              ? moment(
-                  patientRes.data.last_consultation.admission_date
-                ).toDate()
-              : "",
-            date_of_test: patientRes.data.date_of_test
-              ? moment(patientRes.data.date_of_test).toDate()
-              : "",
-            date_of_result: patientRes.data.date_of_result
-              ? moment(patientRes.data.date_of_result).toDate()
-              : "",
-            date_of_death: patientRes.data.last_consultation.death_datetime
-              ? moment(
-                  patientRes.data.last_consultation.death_datetime
-                ).toDate()
-              : "",
-          };
-          setPatientData(data);
-        }
-        setIsLoading(false);
+  const { loading: _isLoading } = useQuery(routes.getPatient, {
+    pathParams: { id },
+    onResponse(res) {
+      if (res.res?.ok && res) {
+        setPatientName(res.data?.name ?? "");
+        const patientGender = getPatientGender(res.data);
+        const patientAddress = getPatientAddress(res.data);
+        const patientComorbidities = getPatientComorbidities(res.data);
+        const data = {
+          ...res.data,
+          gender: patientGender,
+          address: patientAddress,
+          comorbidities: patientComorbidities,
+          is_declared_positive: res.data?.is_declared_positive ? "Yes" : "No",
+          is_vaccinated: res.data?.is_vaccinated ? "Yes" : "No",
+          cause_of_death: res.data?.last_consultation?.discharge_notes || "",
+          hospital_died_in: res.data?.last_consultation?.facility_name,
+          date_declared_positive: res.data?.date_declared_positive
+            ? dayjs(res.data?.date_declared_positive).toDate()
+            : "",
+          date_of_admission: res.data?.last_consultation?.encounter_date
+            ? dayjs(res.data?.last_consultation?.encounter_date).toDate()
+            : "",
+          date_of_test: res.data?.date_of_test
+            ? dayjs(res.data?.date_of_test).toDate()
+            : "",
+          date_of_result: res.data?.date_of_result
+            ? dayjs(res.data?.date_of_result).toDate()
+            : "",
+          date_of_death: res.data?.last_consultation?.death_datetime
+            ? dayjs(res.data?.last_consultation?.death_datetime).toDate()
+            : "",
+        };
+        setPatientData(data);
       }
     },
-    [dispatch, id]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchpatient(status);
-    },
-    [dispatch, fetchpatient]
-  );
+  });
 
   const previewData = () => (
     <div className="my-4">
@@ -172,11 +152,11 @@ export default function PrintDeathReport(props: { id: string }) {
 
       <div id="section-to-print" className="print bg-white">
         <div></div>
-        <div className="md:mx-20 p-4">
-          <div className="font-bold text-xl text-center mt-6 mb-6">
+        <div className="p-4 md:mx-20">
+          <div className="my-6 text-center text-xl font-bold">
             Covid-19 Death Reporting: Form 1
           </div>
-          <div className="grid gap-2 grid-cols-1">
+          <div className="grid grid-cols-1 gap-2">
             <div>
               <span className="font-semibold leading-relaxed">Name: </span>
               {patientData.name}
@@ -210,7 +190,7 @@ export default function PrintDeathReport(props: { id: string }) {
                 Date of declaring positive:{" "}
               </span>
               {patientData.date_declared_positive
-                ? formatDate(patientData.date_declared_positive)
+                ? formatDateTime(patientData.date_declared_positive)
                 : ""}
             </div>
             <div>
@@ -224,7 +204,7 @@ export default function PrintDeathReport(props: { id: string }) {
                 Date of sample collection for Covid testing:{" "}
               </span>
               {patientData.date_of_test
-                ? formatDate(patientData.date_of_test)
+                ? formatDateTime(patientData.date_of_test)
                 : ""}
             </div>
             <div>
@@ -232,7 +212,7 @@ export default function PrintDeathReport(props: { id: string }) {
                 Date of confirmation as Covid with SRF ID:{" "}
               </span>
               {patientData.date_of_result
-                ? formatDate(patientData.date_of_result)
+                ? formatDateTime(patientData.date_of_result)
                 : ""}{" "}
               ({"SRF ID: "}
               {patientData.srf_id || "-"})
@@ -255,7 +235,7 @@ export default function PrintDeathReport(props: { id: string }) {
                 Date of admission:{" "}
               </span>
               {patientData.date_of_admission
-                ? formatDate(patientData.date_of_admission)
+                ? formatDateTime(patientData.date_of_admission)
                 : ""}
             </div>
             <div>
@@ -263,7 +243,7 @@ export default function PrintDeathReport(props: { id: string }) {
                 Date of death:{" "}
               </span>
               {patientData.date_of_death
-                ? formatDate(patientData.date_of_death)
+                ? formatDateTime(patientData.date_of_death)
                 : ""}
             </div>
             <div>
@@ -308,7 +288,7 @@ export default function PrintDeathReport(props: { id: string }) {
                 Kottayam:{" "}
               </span>
               {patientData.kottayam_sample_date
-                ? formatDate(patientData.kottayam_sample_date)
+                ? formatDateTime(patientData.kottayam_sample_date)
                 : ""}
             </div>
             <div>
@@ -364,13 +344,13 @@ export default function PrintDeathReport(props: { id: string }) {
             onCancel={() =>
               navigate(`/facility/${patientData.facility}/patient/${id}`)
             }
-            className="px-4 md:px-6 py-5"
+            className="px-4 py-5 md:px-6"
             noPadding
           >
             {(field) => (
               <div>
-                <div className="grid grid-rows-13">
-                  <div className="md:grid md:grid-cols-1 md:mt-4 md:gap-10">
+                <div className="grid-rows-13 grid">
+                  <div className="md:mt-4 md:grid md:grid-cols-1 md:gap-10">
                     <div>
                       <TextFormField
                         {...field("name")}
@@ -379,7 +359,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       />
                     </div>
                   </div>
-                  <div className="md:grid md:grid-cols-2 md:mt-4 md:gap-10">
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
                     <div>
                       <TextFormField
                         {...field("age")}
@@ -402,11 +382,12 @@ export default function PrintDeathReport(props: { id: string }) {
                       rows={5}
                     />
                   </div>
-                  <div className="md:grid md:grid-cols-2 md:gap-10 md:mt-4">
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
                     <div>
                       <PhoneNumberFormField
                         {...field("phone_number")}
                         label={t("phone_number")}
+                        types={["mobile", "landline"]}
                       />
                     </div>
                     <div>
@@ -417,7 +398,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       />
                     </div>
                   </div>
-                  <div className="md:grid md:grid-cols-2 md:gap-10 md:mt-4">
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
                     <div>
                       <DateFormField
                         {...field("date_declared_positive")}
@@ -435,7 +416,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       />
                     </div>
                   </div>
-                  <div className="md:grid md:grid-cols-2 md:gap-10 md:mt-4">
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
                     <div>
                       <DateFormField
                         {...field("date_of_test")}
@@ -452,7 +433,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       />
                     </div>
                   </div>
-                  <div className="md:grid md:grid-cols-2 md:gap-10 md:mt-4">
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
                     <div>
                       <TextFormField
                         {...field("srf_id")}
@@ -468,7 +449,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       />
                     </div>
                   </div>
-                  <div className="md:grid md:grid-cols-2 md:gap-10 md:mt-4">
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
                     <div>
                       <TextFormField
                         {...field("hospital_tested_in")}
@@ -484,7 +465,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       />
                     </div>
                   </div>
-                  <div className="md:grid md:grid-cols-2 md:gap-10 md:mt-4">
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
                     <div>
                       <DateFormField
                         {...field("date_of_admission")}
@@ -502,7 +483,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       />
                     </div>
                   </div>
-                  <div className="md:grid md:grid-cols-2 md:gap-10 md:mt-4">
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
                     <div>
                       <TextFormField
                         {...field("comorbidities")}
@@ -518,7 +499,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       />
                     </div>
                   </div>
-                  <div className="md:grid md:grid-cols-2 md:gap-10 md:mt-4">
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
                     <div>
                       <TextFormField
                         {...field("brought_dead")}
@@ -534,7 +515,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       />
                     </div>
                   </div>
-                  <div className="md:grid md:grid-cols-2 md:gap-10 md:mt-4">
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
                     <div>
                       <TextFormField
                         {...field("kottayam_confirmation_sent")}
@@ -550,7 +531,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       />
                     </div>
                   </div>
-                  <div className="md:grid md:grid-cols-2 md:gap-10 md:mt-4">
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
                     <div>
                       <TextFormField
                         {...field("cause_of_death")}

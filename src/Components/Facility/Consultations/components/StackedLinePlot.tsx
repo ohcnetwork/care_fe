@@ -1,5 +1,32 @@
-import ReactECharts from "echarts-for-react";
+import ReactEchartsCore from "echarts-for-react/lib/core";
+import { BarChart, LineChart } from "echarts/charts";
+import {
+  DataZoomComponent,
+  GridComponent,
+  LegendComponent,
+  TitleComponent,
+  ToolboxComponent,
+  TooltipComponent,
+  VisualMapComponent,
+  VisualMapPiecewiseComponent,
+} from "echarts/components";
 
+import * as echarts from "echarts/core";
+import { CanvasRenderer } from "echarts/renderers";
+echarts.use([
+  BarChart,
+  LineChart,
+  CanvasRenderer,
+  DataZoomComponent,
+  GridComponent,
+  LegendComponent,
+  LegendComponent,
+  TitleComponent,
+  ToolboxComponent,
+  TooltipComponent,
+  VisualMapComponent,
+  VisualMapPiecewiseComponent,
+]);
 const COLORS = ["#B13F3C", "#2F8B35", "#44327A", "#B19D3C"];
 
 export const StackedLinePlot = (props: any) => {
@@ -81,5 +108,5 @@ export const StackedLinePlot = (props: any) => {
     },
     series: series,
   };
-  return <ReactECharts option={generalOptions} />;
+  return <ReactEchartsCore echarts={echarts} option={generalOptions} />;
 };

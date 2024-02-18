@@ -1,4 +1,4 @@
-export type t = {
+type t = {
   po2: option<int>,
   pco2: option<int>,
   pH: option<float>,

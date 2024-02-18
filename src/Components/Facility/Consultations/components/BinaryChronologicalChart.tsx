@@ -1,5 +1,5 @@
-import moment from "moment";
 import CareIcon from "../../../../CAREUI/icons/CareIcon";
+import { formatDateTime } from "../../../../Utils/utils";
 
 export default function BinaryChronologicalChart(props: {
   data: {
@@ -15,20 +15,20 @@ export default function BinaryChronologicalChart(props: {
 
   return (
     <div className="overflow-x-auto bg-white">
-      <h3 className="text-sm px-3 mb-2">{title}</h3>
-      <div className="flow-root m-2 overflow-y-scroll h-64">
+      <h3 className="mb-2 px-3 text-sm">{title}</h3>
+      <div className="m-2 flow-root h-64 overflow-y-scroll">
         <ul role="list" className="">
           {data.map((entry, i) => (
             <li key={i}>
               <div className="relative pb-8">
                 <span
-                  className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"
+                  className="absolute left-4 top-4 -ml-px h-full w-0.5 bg-gray-200"
                   aria-hidden="true"
                 />
                 <div className="relative flex space-x-3">
                   <div>
                     <span
-                      className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white ${
+                      className={`flex h-8 w-8 items-center justify-center rounded-full ring-8 ring-white ${
                         entry.value ? " text-green-500 " : " text-red-500 "
                       }`}
                     >
@@ -53,7 +53,7 @@ export default function BinaryChronologicalChart(props: {
                       </p>
                     </div>
                     <div className="whitespace-nowrap text-right text-sm text-gray-500">
-                      <p>{moment(entry.timestamp).format("lll")}</p>
+                      <p>{formatDateTime(entry.timestamp)}</p>
                     </div>
                   </div>
                 </div>

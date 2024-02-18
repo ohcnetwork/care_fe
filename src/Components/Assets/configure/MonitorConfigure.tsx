@@ -1,62 +1,50 @@
-import React, { Dispatch, useEffect } from "react";
+import { useState } from "react";
 import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../../Facility/models";
 import { AssetData } from "../AssetTypes";
-import {
-  createAssetBed,
-  listAssetBeds,
-  partialUpdateAssetBed,
-} from "../../../Redux/actions";
 import * as Notification from "../../../Utils/Notifications.js";
-import { useDispatch } from "react-redux";
 import { Submit } from "../../Common/components/ButtonV2";
 import { FieldLabel } from "../../Form/FormFields/FormField";
+import request from "../../../Utils/request/request";
+import routes from "../../../Redux/api";
+import useQuery from "../../../Utils/request/useQuery";
 
-const saveLink = (assetId: string, bedId: string, dispatch: Dispatch<any>) => {
-  dispatch(createAssetBed({}, assetId, bedId));
+const saveLink = async (assetId: string, bedId: string) => {
+  await request(routes.createAssetBed, {
+    body: {
+      asset: assetId,
+      bed: bedId,
+    },
+  });
   Notification.Success({ msg: "AssetBed Link created successfully" });
 };
-const update_Link = (
+const update_Link = async (
   assetbedId: string,
   assetId: string,
-  bed: BedModel,
-  assetBed: any,
-  dispatch: Dispatch<any>
+  bed: BedModel
 ) => {
-  dispatch(
-    partialUpdateAssetBed(
-      {
-        asset: assetId,
-        bed: bed.id,
-      },
-      assetbedId
-    )
-  );
+  await request(routes.partialUpdateAssetBed, {
+    pathParams: { external_id: assetbedId },
+    body: {
+      asset: assetId,
+      bed: bed.id ?? "",
+    },
+  });
   Notification.Success({ msg: "AssetBed Link updated successfully" });
 };
 
 export default function MonitorConfigure({ asset }: { asset: AssetData }) {
-  const [bed, setBed] = React.useState<BedModel>({});
-  const [updateLink, setUpdateLink] = React.useState<boolean>(false);
-  const [assetBed, setAssetBed] = React.useState<any>();
-  const dispatch: any = useDispatch();
-
-  const getAssetBeds = async (id: string) => {
-    const assetBeds = await dispatch(listAssetBeds({ asset: id }));
-    if (assetBeds.data?.results?.length > 0) {
-      setUpdateLink(true);
-      setAssetBed(assetBeds.data.results[0]);
-      setBed(assetBeds.data.results[0].bed_object);
-    } else {
-      setUpdateLink(false);
-    }
-  };
-
-  useEffect(() => {
-    if (asset.id) {
-      getAssetBeds(asset.id);
-    }
-  }, [asset]);
+  const [bed, setBed] = useState<BedModel>({});
+  const [updateLink, setUpdateLink] = useState<boolean>(false);
+  const { data: assetBed } = useQuery(routes.listAssetBeds, {
+    query: { asset: asset.id },
+    onResponse: ({ res, data }) => {
+      if (res?.status === 200 && data && data.results.length > 0) {
+        setBed(data.results[0].bed_object);
+        setUpdateLink(true);
+      }
+    },
+  });
 
   return (
     <form
@@ -64,14 +52,12 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
         e.preventDefault();
         if (updateLink) {
           update_Link(
-            assetBed?.id as string,
+            assetBed?.results[0].id as string,
             asset.id as string,
-            bed as BedModel,
-            assetBed,
-            dispatch
+            bed as BedModel
           );
         } else {
-          saveLink(asset.id as string, bed?.id as string, dispatch);
+          saveLink(asset.id as string, bed?.id as string);
         }
       }}
     >
@@ -89,7 +75,7 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
             className="w-full"
           />
         </div>
-        <Submit className="shrink-0 w-full mt-6">
+        <Submit className="mt-6 w-full shrink-0">
           <i className="fas fa-bed-pulse" />
           {updateLink ? "Update Bed" : "Save Bed"}
         </Submit>

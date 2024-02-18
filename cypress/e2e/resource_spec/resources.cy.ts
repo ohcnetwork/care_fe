@@ -1,46 +1,85 @@
 import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
+import LoginPage from "../../pageobject/Login/LoginPage";
+import ResourcePage from "../../pageobject/Resource/ResourcePage";
+import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 
 describe("Resource Page", () => {
+  let createdResource: string;
+  const loginPage = new LoginPage();
+  const resourcePage = new ResourcePage();
+  const facilityPage = new FacilityPage();
+  const phone_number = "9999999999";
+
   before(() => {
-    cy.loginByApi("devdistrictadmin", "Coronasafe@123");
+    loginPage.loginAsDisctrictAdmin();
     cy.saveLocalStorage();
   });
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/resource");
   });
 
-  it("checks if all download button works", () => {
-    cy.get("svg.care-svg-icon__baseline.care-l-export").each(($button) => {
-      cy.intercept(/\/api\/v1\/resource/).as("resource_download");
-      cy.wrap($button).click({ force: true });
-      cy.wait("@resource_download").then((interception) => {
-        expect(interception.response.statusCode).to.equal(200);
-      });
+  it("Checks if all download button works", () => {
+    resourcePage.verifyDownloadButtonWorks();
+  });
+
+  it("Switch between active/completed", () => {
+    resourcePage.spyResourceApi();
+    resourcePage.clickCompletedResources();
+    resourcePage.verifyCompletedResources();
+    resourcePage.spyResourceApi();
+    resourcePage.clickActiveResources();
+    resourcePage.verifyActiveResources();
+  });
+
+  it("Switch between list view and board view", () => {
+    resourcePage.clickListViewButton();
+    resourcePage.clickBoardViewButton();
+  });
+
+  it("Create a resource request", () => {
+    cy.visit("/facility");
+    cy.get("#search").click().type("dummy facility 40");
+    cy.intercept("GET", "**/api/v1/facility/**").as("loadFacilities");
+    cy.get("#facility-details").click();
+    cy.wait("@loadFacilities").its("response.statusCode").should("eq", 200);
+    facilityPage.clickManageFacilityDropdown();
+    facilityPage.clickResourceRequestOption();
+    facilityPage.fillResourceRequestDetails(
+      "Test User",
+      phone_number,
+      "Dummy",
+      "Test title",
+      "10",
+      "Test description"
+    );
+    facilityPage.clickSubmitRequestButton();
+    facilityPage.verifySuccessNotification(
+      "Resource request created successfully"
+    );
+    facilityPage.verifyresourcenewurl();
+    cy.url().then((url) => {
+      createdResource = url;
     });
   });
 
-  it("switch between active/completed", () => {
-    cy.intercept(/\/api\/v1\/resource/).as("resource");
-    cy.contains("Completed").click();
-    cy.wait("@resource").then((interception) => {
-      expect(interception.response.statusCode).to.equal(200);
-    });
-    cy.contains("Active").should("have.class", "text-primary-500");
-    cy.contains("Completed").should("have.class", "text-white");
-    cy.intercept(/\/api\/v1\/resource/).as("resource");
-    cy.contains("Active").click();
-    cy.wait("@resource").then((interception) => {
-      expect(interception.response.statusCode).to.equal(200);
-    });
-    cy.contains("Active").should("have.class", "text-white");
-    cy.contains("Completed").should("have.class", "text-primary-500");
+  it("Update the status of resource", () => {
+    cy.visit(createdResource);
+    resourcePage.clickUpdateStatus();
+    resourcePage.updateStatus("APPROVED");
+    resourcePage.clickSubmitButton();
+    resourcePage.verifySuccessNotification(
+      "Resource request updated successfully"
+    );
   });
 
-  it("switch between list view and board view", () => {
-    cy.contains("List View").click();
-    cy.contains("Board View").click();
+  it("Post comment for a resource", () => {
+    cy.visit(createdResource);
+    resourcePage.addCommentForResource("Test comment");
+    resourcePage.clickPostCommentButton();
+    resourcePage.verifySuccessNotification("Comment added successfully");
   });
 
   afterEach(() => {

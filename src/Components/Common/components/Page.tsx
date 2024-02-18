@@ -1,16 +1,33 @@
-import { RefObject } from "react";
+import { RefObject, useContext, useEffect } from "react";
 import PageTitle, { PageTitleProps } from "../PageTitle";
 import { classNames } from "../../../Utils/utils";
+import { SidebarShrinkContext } from "../Sidebar/Sidebar";
 
 interface PageProps extends PageTitleProps {
-  children: any;
-  options?: any;
+  children: React.ReactNode | React.ReactNode[];
+  options?: React.ReactNode | React.ReactNode[];
   className?: string;
   noImplicitPadding?: boolean;
   ref?: RefObject<HTMLDivElement>;
+  /**
+   * If true, the sidebar will be collapsed when mounted, and restored to original state when unmounted.
+   * @default false
+   **/
+  collapseSidebar?: boolean;
 }
 
 export default function Page(props: PageProps) {
+  const sidebar = useContext(SidebarShrinkContext);
+
+  useEffect(() => {
+    if (!props.collapseSidebar) return;
+
+    sidebar.setShrinked(true);
+    return () => {
+      sidebar.setShrinked(sidebar.shrinked);
+    };
+  }, [props.collapseSidebar]);
+
   let padding = "";
   if (!props.noImplicitPadding) {
     if (!props.hideBack || props.componentRight)
@@ -20,7 +37,7 @@ export default function Page(props: PageProps) {
 
   return (
     <div className={classNames(padding, props.className)} ref={props.ref}>
-      <div className="flex flex-col md:flex-row justify-between md:items-center md:gap-6 gap-2">
+      <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center md:gap-6">
         <PageTitle
           title={props.title}
           breadcrumbs={props.breadcrumbs}

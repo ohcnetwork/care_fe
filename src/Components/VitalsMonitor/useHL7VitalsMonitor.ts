@@ -5,32 +5,26 @@ import HL7DeviceClient, {
 } from "./HL7DeviceClient";
 import HL7VitalsRenderer from "./HL7VitalsRenderer";
 import useCanvas from "../../Common/hooks/useCanvas";
-import { ChannelOptions, VitalsValueBase as VitalsValue } from "./types";
-import { getChannel } from "./utils";
+import {
+  ChannelOptions,
+  IVitalsComponentProps,
+  VitalsDataBase,
+  VitalsValueBase as VitalsValue,
+} from "./types";
+import { getChannel, getVitalsCanvasSizeAndDuration } from "./utils";
 
-export const MONITOR_RATIO = {
-  w: 13,
-  h: 11,
-};
-const MONITOR_SCALE = 38;
-const MONITOR_WAVEFORMS_CANVAS_SIZE = {
-  width: MONITOR_RATIO.h * MONITOR_SCALE,
-  height: MONITOR_RATIO.h * MONITOR_SCALE,
-};
-// const MONITOR_SIZE = {
-//   width: MONITOR_RATIO.w * MONITOR_SCALE,
-//   height: MONITOR_RATIO.h * MONITOR_SCALE,
-// };
-
-interface VitalsBPValue {
+interface VitalsBPValue extends VitalsDataBase {
   systolic: VitalsValue;
   diastolic: VitalsValue;
   map: VitalsValue;
 }
 
-export default function useHL7VitalsMonitor() {
+export default function useHL7VitalsMonitor(
+  config?: IVitalsComponentProps["config"]
+) {
   const waveformForegroundCanvas = useCanvas();
   const waveformBackgroundCanvas = useCanvas();
+  const rendererConfig = config ?? getVitalsCanvasSizeAndDuration();
 
   // Non waveform data states.
   const [isOnline, setIsOnline] = useState<boolean>(false);
@@ -62,36 +56,38 @@ export default function useHL7VitalsMonitor() {
         if (
           !ecgOptionsRef.current ||
           !plethOptionsRef.current ||
-          !spo2OptionsRef.current
+          !spo2OptionsRef.current ||
+          !waveformForegroundCanvas.contextRef.current ||
+          !waveformBackgroundCanvas.contextRef.current
         )
           return;
 
         setIsOnline(true);
 
         renderer.current = new HL7VitalsRenderer({
-          foregroundRenderContext: waveformForegroundCanvas.contextRef.current!,
-          backgroundRenderContext: waveformBackgroundCanvas.contextRef.current!,
-          size: MONITOR_WAVEFORMS_CANVAS_SIZE,
+          foregroundRenderContext: waveformForegroundCanvas.contextRef.current,
+          backgroundRenderContext: waveformBackgroundCanvas.contextRef.current,
           animationInterval: 50,
           ecg: ecgOptionsRef.current,
           pleth: plethOptionsRef.current,
           spo2: spo2OptionsRef.current,
+          ...rendererConfig,
         });
 
         const _renderer = renderer.current;
-        device.current!.on("ecg-waveform", ingestTo(_renderer, "ecg"));
-        device.current!.on("pleth-waveform", ingestTo(_renderer, "pleth"));
-        device.current!.on("spo2-waveform", ingestTo(_renderer, "spo2"));
+        device.current?.on("ecg-waveform", ingestTo(_renderer, "ecg"));
+        device.current?.on("pleth-waveform", ingestTo(_renderer, "pleth"));
+        device.current?.on("spo2-waveform", ingestTo(_renderer, "spo2"));
 
         const hook = (set: (data: any) => void) => (d: HL7MonitorData) =>
           set(d);
-        device.current!.on("pulse-rate", hook(setPulseRate));
-        device.current!.on("heart-rate", hook(setHeartRate));
-        device.current!.on("SpO2", hook(setSpo2));
-        device.current!.on("respiratory-rate", hook(setRespiratoryRate));
-        device.current!.on("body-temperature1", hook(setTemperature1));
-        device.current!.on("body-temperature2", hook(setTemperature2));
-        device.current!.on("blood-pressure", hook(setBp));
+        device.current?.on("pulse-rate", hook(setPulseRate));
+        device.current?.on("heart-rate", hook(setHeartRate));
+        device.current?.on("SpO2", hook(setSpo2));
+        device.current?.on("respiratory-rate", hook(setRespiratoryRate));
+        device.current?.on("body-temperature1", hook(setTemperature1));
+        device.current?.on("body-temperature2", hook(setTemperature2));
+        device.current?.on("blood-pressure", hook(setBp));
       }
 
       device.current.once("ecg-waveform", (observation) => {
@@ -123,7 +119,7 @@ export default function useHL7VitalsMonitor() {
     waveformCanvas: {
       foreground: waveformForegroundCanvas,
       background: waveformBackgroundCanvas,
-      size: MONITOR_WAVEFORMS_CANVAS_SIZE,
+      size: rendererConfig.size,
     },
     data: {
       pulseRate,

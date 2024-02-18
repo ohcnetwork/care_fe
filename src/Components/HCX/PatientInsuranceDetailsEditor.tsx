@@ -81,7 +81,7 @@ export default function PatientInsuranceDetailsEditor({
   };
 
   return (
-    <div className="bg-white rounded flex flex-col gap-6 w-full p-4">
+    <div className="flex w-full flex-col gap-6 rounded bg-white p-4">
       <InsuranceDetailsBuilder
         name="insurance_details"
         value={insuranceDetails}
@@ -91,7 +91,7 @@ export default function PatientInsuranceDetailsEditor({
         disabled={isUpdating}
       />
 
-      <div className="flex flex-col md:flex-row gap-2">
+      <div className="flex flex-col gap-2 md:flex-row">
         <ButtonV2
           border
           type="button"

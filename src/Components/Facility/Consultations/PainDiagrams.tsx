@@ -1,13 +1,13 @@
-import { useCallback, useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { dailyRoundsAnalyse } from "../../../Redux/actions";
+import { useEffect, useState } from "react";
+import routes from "../../../Redux/api";
+import request from "../../../Utils/request/request";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import { make as CriticalCare__PainViewer } from "../../CriticalCareRecording/Pain/CriticalCare__PainViewer.bs";
-import { formatDate } from "../../../Utils/utils";
+import { formatDateTime } from "../../../Utils/utils";
 
 export const PainDiagrams = (props: any) => {
   const { consultationId } = props;
-  const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<any>({});
   const [selectedData, setData] = useState<any>({
@@ -15,47 +15,46 @@ export const PainDiagrams = (props: any) => {
     id: "",
   });
 
-  const fetchDailyRounds = useCallback(
-    async (status: statusType) => {
+  useEffect(() => {
+    const fetchDailyRounds = async (consultationId: string) => {
       setIsLoading(true);
-      const res = await dispatch(
-        dailyRoundsAnalyse(
-          {
+      const { res, data: dailyRound } = await request(
+        routes.dailyRoundsAnalyse,
+        {
+          body: {
             fields: ["pain_scale_enhanced"],
           },
-          { consultationId }
-        )
-      );
-      if (!status.aborted) {
-        if (res && res.data) {
-          const keys = Object.keys(res.data.results || {}).filter(
-            (key) => res.data.results[key].pain_scale_enhanced.length
-          );
-          const data: any = {};
-          keys.forEach((key) => (data[key] = res.data.results[key]));
-
-          setResults(data);
-          if (keys.length > 0) {
-            setSelectedDateData(data, keys[0]);
-          }
+          pathParams: {
+            consultationId,
+          },
         }
-        setIsLoading(false);
+      );
+      if (res && res.ok && dailyRound?.results) {
+        const keys = Object.keys(dailyRound.results || {}).filter(
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          (key) => dailyRound.results[key].pain_scale_enhanced.length
+        );
+        const data: any = {};
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        keys.forEach((key) => (data[key] = dailyRound.results[key]));
+
+        setResults(data);
+        if (keys.length > 0) {
+          setSelectedDateData(data, keys[0]);
+        }
       }
-    },
-    [consultationId, dispatch]
-  );
+      setIsLoading(false);
+    };
+
+    fetchDailyRounds(consultationId);
+  }, [consultationId]);
 
   useEffect(() => {
     if (Object.keys(results).length > 0)
       setSelectedDateData(results, Object.keys(results)[0]);
   }, [results]);
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchDailyRounds(status);
-    },
-    [consultationId]
-  );
 
   useEffect(() => {
     if (Object.keys(results).length > 0)
@@ -76,11 +75,11 @@ export const PainDiagrams = (props: any) => {
 
   const dropdown = (dates: Array<any>) => {
     return dates && dates.length > 0 ? (
-      <div className="flex mx-auto flex-wrap">
+      <div className="mx-auto flex flex-wrap">
         <div className="p-2">Choose Date and Time</div>
         <select
           title="date"
-          className="pl-3 pr-8 py-2 text-slate-600 relative bg-white rounded border-gray-200 shadow outline-none focus:outline-none  focus:ring-gray-300 focus:border-gray-300 focus:ring-1"
+          className="relative rounded border-gray-200 bg-white py-2 pl-3 pr-8 text-slate-600 shadow outline-none focus:border-gray-300  focus:outline-none focus:ring-1 focus:ring-gray-300"
           onChange={(e) => {
             setSelectedDateData(results, e.target.value);
           }}
@@ -88,7 +87,7 @@ export const PainDiagrams = (props: any) => {
           {dates.map((key) => {
             return (
               <option key={key} value={key}>
-                {formatDate(key)}
+                {formatDateTime(key)}
               </option>
             );
           })}
@@ -98,7 +97,7 @@ export const PainDiagrams = (props: any) => {
       <div>
         <select
           title="date"
-          className="border-2 border-gray-400 pl-3 pr-8 py-2"
+          className="border-2 border-gray-400 py-2 pl-3 pr-8"
           disabled={true}
         >
           <option>No Data Found</option>

@@ -9,7 +9,7 @@ type Props = FormFieldBaseProps<string> & {
   className?: string | undefined;
   min?: string | number;
   max?: string | number;
-  units: string[];
+  units: readonly string[];
 };
 
 export default function NumericWithUnitsFormField(props: Props) {
@@ -25,7 +25,7 @@ export default function NumericWithUnitsFormField(props: Props) {
           name={field.name}
           id={field.name}
           className={classNames(
-            "cui-input-base pr-24 md:pr-28 sm:leading-6",
+            "cui-input-base pr-24 sm:leading-6 md:pr-28",
             field.error && "border-danger-500",
             field.className
           )}
@@ -34,7 +34,10 @@ export default function NumericWithUnitsFormField(props: Props) {
           max={props.max}
           autoComplete={props.autoComplete}
           required={field.required}
-          onChange={(e) => field.handleChange(e.target.value + " " + unitValue)}
+          value={numValue}
+          onChange={(e) =>
+            field.handleChange(Number(e.target.value) + " " + unitValue)
+          }
         />
         <div className="absolute inset-y-0 right-0 flex items-center">
           <select

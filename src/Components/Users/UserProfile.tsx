@@ -1,65 +1,81 @@
-import loadable from "@loadable/component";
-import React, { useState, useCallback, useReducer } from "react";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+import { useState, useReducer, lazy, FormEvent } from "react";
 import { GENDER_TYPES } from "../../Common/constants";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  getUserDetails,
-  getUserListSkills,
-  partialUpdateUser,
-  updateUserPassword,
-} from "../../Redux/actions";
-import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
 import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
-import { classNames, handleSignOut } from "../../Utils/utils";
+import { classNames, isValidUrl, parsePhoneNumber } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import moment from "moment";
-import { SkillModel, SkillObjectModel } from "../Users/models";
+import { GenderType, SkillModel, UpdatePasswordForm } from "../Users/models";
 import UpdatableApp, { checkForUpdate } from "../Common/UpdatableApp";
+import dayjs from "../../Utils/dayjs";
+import useAuthUser, { useAuthContext } from "../../Common/hooks/useAuthUser";
+import { PhoneNumberValidator } from "../Form/FieldValidators";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 type EditForm = {
   firstName: string;
   lastName: string;
   age: string;
-  gender: string;
+  gender: GenderType;
   email: string;
+  video_connect_link: string | undefined;
   phoneNumber: string;
   altPhoneNumber: string;
+  user_type: string | undefined;
   doctor_qualification: string | undefined;
   doctor_experience_commenced_on: number | string | undefined;
   doctor_medical_council_registration: string | undefined;
+  weekly_working_hours: string | null;
+};
+type ErrorForm = {
+  firstName: string;
+  lastName: string;
+  age: string;
+  gender: string;
+  email: string;
+  video_connect_link: string | undefined;
+  phoneNumber: string;
+  altPhoneNumber: string;
+  user_type: string | undefined;
+  doctor_qualification: string | undefined;
+  doctor_experience_commenced_on: number | string | undefined;
+  doctor_medical_council_registration: string | undefined;
+  weekly_working_hours: string | undefined;
 };
 type State = {
   form: EditForm;
-  errors: EditForm;
+  errors: ErrorForm;
 };
 type Action =
   | { type: "set_form"; form: EditForm }
-  | { type: "set_error"; errors: EditForm };
+  | { type: "set_error"; errors: ErrorForm };
 
 const initForm: EditForm = {
   firstName: "",
   lastName: "",
   age: "",
-  gender: "",
+  gender: "Male",
+  video_connect_link: "",
   email: "",
   phoneNumber: "",
   altPhoneNumber: "",
+  user_type: "",
   doctor_qualification: undefined,
   doctor_experience_commenced_on: undefined,
   doctor_medical_council_registration: undefined,
+  weekly_working_hours: undefined,
 };
 
-const initError: EditForm = Object.assign(
+const initError: ErrorForm = Object.assign(
   {},
   ...Object.keys(initForm).map((k) => ({ [k]: "" }))
 );
@@ -85,17 +101,16 @@ const editFormReducer = (state: State, action: Action) => {
     }
   }
 };
+
 export default function UserProfile() {
+  const { signOut } = useAuthContext();
   const [states, dispatch] = useReducer(editFormReducer, initialState);
-  const reduxDispatch: any = useDispatch();
   const [updateStatus, setUpdateStatus] = useState({
     isChecking: false,
     isUpdateAvailable: false,
   });
 
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
-  const username = currentUser.data.username;
+  const authUser = useAuthUser();
 
   const [changePasswordForm, setChangePasswordForm] = useState<{
     username: string;
@@ -103,7 +118,7 @@ export default function UserProfile() {
     new_password_1: string;
     new_password_2: string;
   }>({
-    username: username,
+    username: authUser.username,
     old_password: "",
     new_password_1: "",
     new_password_2: "",
@@ -119,54 +134,45 @@ export default function UserProfile() {
 
   const [showEdit, setShowEdit] = useState<boolean | false>(false);
 
-  const [isLoading, setIsLoading] = useState(false);
-  const dispatchAction: any = useDispatch();
-
-  const initialDetails: any = [{}];
-  const [details, setDetails] = useState(initialDetails);
-
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatchAction(getUserDetails(username));
-      const resSkills = await dispatchAction(getUserListSkills({ username }));
-      if (!status.aborted) {
-        if (res && res.data && resSkills) {
-          res.data.skills = resSkills.data.results.map(
-            (skill: SkillModel) => skill.skill_object
-          );
-          setDetails(res.data);
-          const formData: EditForm = {
-            firstName: res.data.first_name,
-            lastName: res.data.last_name,
-            age: res.data.age,
-            gender: res.data.gender,
-            email: res.data.email,
-            phoneNumber: res.data.phone_number,
-            altPhoneNumber: res.data.alt_phone_number,
-            doctor_qualification: res.data.doctor_qualification,
-            doctor_experience_commenced_on: moment().diff(
-              moment(res.data.doctor_experience_commenced_on),
-              "years"
-            ),
-            doctor_medical_council_registration:
-              res.data.doctor_medical_council_registration,
-          };
-          dispatch({
-            type: "set_form",
-            form: formData,
-          });
-        }
-        setIsLoading(false);
-      }
+  const {
+    data: userData,
+    loading: isUserLoading,
+    refetch: refetchUserData,
+  } = useQuery(routes.getUserDetails, {
+    pathParams: { username: authUser.username },
+    onResponse: (result) => {
+      if (!result || !result.res || !result.data) return;
+      const formData: EditForm = {
+        firstName: result.data.first_name,
+        lastName: result.data.last_name,
+        age: result.data.age?.toString() || "",
+        gender: result.data.gender || "Male",
+        email: result.data.email,
+        video_connect_link: result.data.video_connect_link,
+        phoneNumber: result.data.phone_number?.toString() || "",
+        altPhoneNumber: result.data.alt_phone_number?.toString() || "",
+        user_type: result.data.user_type,
+        doctor_qualification: result.data.doctor_qualification,
+        doctor_experience_commenced_on: dayjs().diff(
+          dayjs(result.data.doctor_experience_commenced_on),
+          "years"
+        ),
+        doctor_medical_council_registration:
+          result.data.doctor_medical_council_registration,
+        weekly_working_hours: result.data.weekly_working_hours,
+      };
+      dispatch({
+        type: "set_form",
+        form: formData,
+      });
     },
-    [dispatchAction, username]
-  );
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
+  });
+
+  const { data: skillsView, loading: isSkillsLoading } = useQuery(
+    routes.userListSkill,
+    {
+      pathParams: { username: authUser.username },
+    }
   );
 
   const validateForm = () => {
@@ -196,15 +202,12 @@ export default function UserProfile() {
           return;
         case "phoneNumber":
           // eslint-disable-next-line no-case-declarations
-          const phoneNumber = parsePhoneNumberFromString(
-            states.form[field],
-            "IN"
-          );
+          const phoneNumber = parsePhoneNumber(states.form[field]);
 
           // eslint-disable-next-line no-case-declarations
           let is_valid = false;
           if (phoneNumber) {
-            is_valid = phoneNumber.isValid();
+            is_valid = PhoneNumberValidator()(phoneNumber) === undefined;
           }
 
           if (!states.form[field] || !is_valid) {
@@ -216,12 +219,10 @@ export default function UserProfile() {
           // eslint-disable-next-line no-case-declarations
           let alt_is_valid = false;
           if (states.form[field] && states.form[field] !== "+91") {
-            const altPhoneNumber = parsePhoneNumberFromString(
-              states.form[field],
-              "IN"
-            );
+            const altPhoneNumber = parsePhoneNumber(states.form[field]);
             if (altPhoneNumber) {
-              alt_is_valid = altPhoneNumber.isValid();
+              alt_is_valid =
+                PhoneNumberValidator(["mobile"])(altPhoneNumber) === undefined;
             }
           }
 
@@ -243,12 +244,43 @@ export default function UserProfile() {
             invalidForm = true;
           }
           return;
-        case "doctor_qualification":
         case "doctor_experience_commenced_on":
-        case "doctor_medical_council_registration":
-          if (details.user_type === "Doctor" && !states.form[field]) {
+          if (states.form.user_type === "Doctor" && !states.form[field]) {
             errors[field] = "Field is required";
             invalidForm = true;
+          } else if (
+            states.form.user_type === "Doctor" &&
+            Number(states.form.doctor_experience_commenced_on) > 100
+          ) {
+            errors[field] = "Doctor experience should be less than 100 years";
+            invalidForm = true;
+          }
+          return;
+        case "doctor_qualification":
+        case "doctor_medical_council_registration":
+          if (states.form.user_type === "Doctor" && !states.form[field]) {
+            errors[field] = "Field is required";
+            invalidForm = true;
+          }
+          return;
+        case "weekly_working_hours":
+          if (
+            states.form[field] &&
+            (Number(states.form[field]) < 0 ||
+              Number(states.form[field]) > 168 ||
+              !/^\d+$/.test(states.form[field] ?? ""))
+          ) {
+            errors[field] =
+              "Average weekly working hours must be a number between 0 and 168";
+            invalidForm = true;
+          }
+          return;
+        case "video_connect_link":
+          if (states.form[field]) {
+            if (isValidUrl(states.form[field]) === false) {
+              errors[field] = "Please enter a valid url";
+              invalidForm = true;
+            }
           }
           return;
       }
@@ -274,59 +306,61 @@ export default function UserProfile() {
     };
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const validForm = validateForm();
     if (validForm) {
       const data = {
-        username: username,
+        username: authUser.username,
         first_name: states.form.firstName,
         last_name: states.form.lastName,
         email: states.form.email,
-        phone_number: parsePhoneNumberFromString(
-          states.form.phoneNumber
-        )?.format("E.164"),
-        alt_phone_number:
-          parsePhoneNumberFromString(states.form.altPhoneNumber)?.format(
-            "E.164"
-          ) || "",
+        video_connect_link: states.form.video_connect_link,
+        phone_number: parsePhoneNumber(states.form.phoneNumber) ?? "",
+        alt_phone_number: parsePhoneNumber(states.form.altPhoneNumber) ?? "",
         gender: states.form.gender,
-        age: states.form.age,
+        age: +states.form.age,
         doctor_qualification:
-          details.user_type === "Doctor"
+          states.form.user_type === "Doctor"
             ? states.form.doctor_qualification
             : undefined,
         doctor_experience_commenced_on:
-          details.user_type === "Doctor"
-            ? moment()
-                .subtract(states.form.doctor_experience_commenced_on, "years")
+          states.form.user_type === "Doctor"
+            ? dayjs()
+                .subtract(
+                  parseInt(
+                    (states.form.doctor_experience_commenced_on as string) ??
+                      "0"
+                  ),
+                  "years"
+                )
                 .format("YYYY-MM-DD")
             : undefined,
         doctor_medical_council_registration:
-          details.user_type === "Doctor"
+          states.form.user_type === "Doctor"
             ? states.form.doctor_medical_council_registration
             : undefined,
+        weekly_working_hours:
+          states.form.weekly_working_hours &&
+          states.form.weekly_working_hours !== ""
+            ? states.form.weekly_working_hours
+            : null,
       };
-      const res = await dispatchAction(partialUpdateUser(username, data));
-      if (res && res.data) {
+      const { res } = await request(routes.partialUpdateUser, {
+        pathParams: { username: authUser.username },
+        body: data,
+      });
+      if (res?.ok) {
         Notification.Success({
           msg: "Details updated successfully",
         });
-        window.location.reload();
-        setDetails({
-          ...details,
-          first_name: states.form.firstName,
-          last_name: states.form.lastName,
-          age: states.form.age,
-          gender: states.form.gender,
-          email: states.form.email,
-          phone_number: states.form.phoneNumber,
-          alt_phone_number: states.form.altPhoneNumber,
-        });
+        await refetchUserData();
         setShowEdit(false);
       }
     }
   };
+
+  const isLoading = isUserLoading || isSkillsLoading;
 
   if (isLoading) {
     return <Loading />;
@@ -351,7 +385,7 @@ export default function UserProfile() {
     }
   };
 
-  const changePassword = (e: any) => {
+  const changePassword = async (e: any) => {
     e.preventDefault();
     //validating form
     if (
@@ -361,185 +395,245 @@ export default function UserProfile() {
         msg: "Passwords are different in the new and the confirmation column.",
       });
     } else {
-      setIsLoading(true);
-      const form = {
+      const form: UpdatePasswordForm = {
         old_password: changePasswordForm.old_password,
-        username: username,
+        username: authUser.username,
         new_password: changePasswordForm.new_password_1,
       };
-      reduxDispatch(updateUserPassword(form)).then((resp: any) => {
-        setIsLoading(false);
-        const res = resp && resp.data;
-        if (res.message === "Password updated successfully") {
-          Notification.Success({
-            msg: "Password changed!",
-          });
-        } else {
-          Notification.Error({
-            msg: "There was some error. Please try again in some time.",
-          });
-        }
-        setChangePasswordForm({
-          ...changePasswordForm,
-          new_password_1: "",
-          new_password_2: "",
-          old_password: "",
+      const { res, data } = await request(routes.updatePassword, {
+        body: form,
+      });
+      if (res?.ok && data?.message === "Password updated successfully") {
+        Notification.Success({
+          msg: "Password changed!",
         });
+      } else {
+        Notification.Error({
+          msg: "There was some error. Please try again in some time.",
+        });
+      }
+      setChangePasswordForm({
+        ...changePasswordForm,
+        new_password_1: "",
+        new_password_2: "",
+        old_password: "",
       });
     }
   };
   return (
     <div>
-      <div className="lg:p-20 p-10">
+      <div className="p-10 lg:p-16">
         <div className="lg:grid lg:grid-cols-3 lg:gap-6">
           <div className="lg:col-span-1">
             <div className="px-4 sm:px-0">
               <h3 className="text-lg font-medium leading-6 text-gray-900">
                 Personal Information
               </h3>
-              <p className="mt-1 text-sm leading-5 text-gray-600 mb-1">
+              <p className="my-1 text-sm leading-5 text-gray-600">
                 Local Body, District and State are Non Editable Settings.
               </p>
               <div className="flex flex-col gap-2">
-                <ButtonV2 onClick={(_) => setShowEdit(!showEdit)} type="button">
+                <ButtonV2
+                  onClick={(_) => setShowEdit(!showEdit)}
+                  type="button"
+                  id="edit-cancel-profile-button"
+                >
                   {showEdit ? "Cancel" : "Edit User Profile"}
                 </ButtonV2>
-                <ButtonV2 variant="danger" onClick={(_) => handleSignOut(true)}>
+                <ButtonV2 variant="danger" onClick={signOut}>
                   <CareIcon className="care-l-sign-out-alt" />
                   Sign out
                 </ButtonV2>
               </div>
             </div>
           </div>
-          <div className="mt-5 lg:mt-0 lg:col-span-2">
-            {!showEdit && (
-              <div className="px-4 py-5 sm:px-6 bg-white shadow overflow-hidden  sm:rounded-lg m-2 rounded-lg">
-                <dl className="grid grid-cols-1 col-gap-4 row-gap-8 sm:grid-cols-2">
-                  <div className="sm:col-span-1 my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+          <div className="mt-5 lg:col-span-2 lg:mt-0">
+            {!showEdit && !isLoading && (
+              <div className="m-2 overflow-hidden rounded-lg bg-white px-4 py-5  shadow sm:rounded-lg sm:px-6">
+                <dl className="col-gap-4 row-gap-8 grid grid-cols-1 sm:grid-cols-2">
+                  <div
+                    className="my-2 sm:col-span-1"
+                    id="username-profile-details"
+                  >
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Username
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.username || "-"}
+                      {userData?.username || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div
+                    className="my-2  sm:col-span-1"
+                    id="contactno-profile-details"
+                  >
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Contact No
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.phone_number || "-"}
+                      {userData?.phone_number || "-"}
                     </dd>
                   </div>
 
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div
+                    className="my-2  sm:col-span-1"
+                    id="whatsapp-profile-details"
+                  >
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Whatsapp No
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.alt_phone_number || "-"}
+                      {userData?.alt_phone_number || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div
+                    className="my-2  sm:col-span-1"
+                    id="emailid-profile-details"
+                  >
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Email address
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.email || "-"}
+                      {userData?.email || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div
+                    className="my-2  sm:col-span-1"
+                    id="firstname-profile-details"
+                  >
+                    <dt className="text-sm font-medium leading-5 text-black">
                       First Name
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.first_name || "-"}
+                      {userData?.first_name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div
+                    className="my-2  sm:col-span-1"
+                    id="lastname-profile-details"
+                  >
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Last Name
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.last_name || "-"}
+                      {userData?.last_name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1" id="age-profile-details">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Age
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.age || "-"}
+                      {userData?.age || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Access Level
                     </dt>
-                    <dd className="mt-1 badge badge-pill bg-primary-500 text-sm text-white">
+                    <dd className="badge badge-pill mt-1 bg-primary-500 text-sm text-white">
                       <i className="fa-solid fa-user-check mr-1"></i>{" "}
-                      {details.user_type || "-"}
+                      {userData?.user_type || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div
+                    className="my-2  sm:col-span-1"
+                    id="gender-profile-details"
+                  >
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Gender
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.gender || "-"}
+                      {userData?.gender || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Local Body
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.local_body_object?.name || "-"}
+                      {userData?.local_body_object?.name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       District
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.district_object?.name || "-"}
+                      {userData?.district_object?.name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       State
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {details.state_object?.name || "-"}
+                      {userData?.state_object?.name || "-"}
+                    </dd>
+                  </div>
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
+                      Skills
+                    </dt>
+                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                      <div
+                        className="flex flex-wrap gap-2"
+                        id="already-linked-skills"
+                      >
+                        {skillsView?.results?.length
+                          ? skillsView.results?.map((skill: SkillModel) => {
+                              return (
+                                <span className="flex items-center gap-2 rounded-full border-gray-300 bg-gray-200 px-3 text-xs text-gray-700">
+                                  <p className="py-1.5">
+                                    {skill.skill_object.name}
+                                  </p>
+                                </span>
+                              );
+                            })
+                          : "-"}
+                      </div>
+                    </dd>
+                  </div>
+                  <div
+                    className="my-2  sm:col-span-1"
+                    id="averageworkinghour-profile-details"
+                  >
+                    <dt className="text-sm font-medium leading-5 text-black">
+                      Average weekly working hours
+                    </dt>
+                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                      {userData?.weekly_working_hours ?? "-"}
+                    </dd>
+                  </div>
+                  <div
+                    className="my-2 sm:col-span-2"
+                    id="videoconnectlink-profile-details"
+                  >
+                    <dt className="text-sm font-medium leading-5 text-black">
+                      Video Connect Link
+                    </dt>
+                    <dd className="mt-1 break-words text-sm leading-5 text-gray-900">
+                      {userData?.video_connect_link ? (
+                        <a
+                          className="text-blue-500"
+                          href={userData?.video_connect_link}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {userData?.video_connect_link}
+                        </a>
+                      ) : (
+                        "-"
+                      )}
                     </dd>
                   </div>
                 </dl>
-                <div className="sm:col-span-1  my-2">
-                  <dt className="text-sm leading-5 font-medium text-black">
-                    Skills
-                  </dt>
-                  <dd className="mt-1 text-sm leading-5 text-gray-900">
-                    <div className="flex flex-wrap gap-2">
-                      {details.skills && details.skills.length
-                        ? details.skills?.map((skill: SkillObjectModel) => {
-                            return (
-                              <span className="flex gap-2 items-center bg-gray-200 border-gray-300 text-gray-700 rounded-full text-xs px-3">
-                                <p className="py-1.5">{skill.name}</p>
-                              </span>
-                            );
-                          })
-                        : "-"}
-                    </div>
-                  </dd>
-                </div>
               </div>
             )}
-
             {showEdit && (
               <div className="space-y-4">
                 <form action="#" method="POST">
                   <div className="shadow sm:rounded-md">
-                    <div className="px-4 pt-5 bg-white">
+                    <div className="bg-white px-4 pt-5">
                       <div className="grid grid-cols-6 gap-4">
                         <TextFormField
                           {...fieldProps("firstName")}
@@ -579,12 +673,14 @@ export default function UserProfile() {
                           className="col-span-6 sm:col-span-3"
                           required
                           placeholder="Phone Number"
+                          types={["mobile", "landline"]}
                         />
                         <PhoneNumberFormField
                           {...fieldProps("altPhoneNumber")}
                           label="Whatsapp Number"
                           className="col-span-6 sm:col-span-3"
                           placeholder="WhatsApp Number"
+                          types={["mobile"]}
                         />
                         <TextFormField
                           {...fieldProps("email")}
@@ -593,7 +689,7 @@ export default function UserProfile() {
                           required
                           type="email"
                         />
-                        {details.user_type === "Doctor" && (
+                        {states.form.user_type === "Doctor" && (
                           <>
                             <TextFormField
                               {...fieldProps("doctor_qualification")}
@@ -622,16 +718,30 @@ export default function UserProfile() {
                             />
                           </>
                         )}
+                        <TextFormField
+                          {...fieldProps("weekly_working_hours")}
+                          label="Average weekly working hours"
+                          className="col-span-6 sm:col-span-3"
+                          type="number"
+                          min={0}
+                          max={168}
+                        />
+                        <TextFormField
+                          {...fieldProps("video_connect_link")}
+                          label="Video Conference Link"
+                          className="col-span-6 sm:col-span-6"
+                          type="url"
+                        />
                       </div>
                     </div>
-                    <div className="px-4 sm:px-6 py-3 bg-gray-50 text-right">
+                    <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
                       <Submit onClick={handleSubmit} label="Update" />
                     </div>
                   </div>
                 </form>
                 <form action="#" method="POST">
-                  <div className="shadow overflow-hidden sm:rounded-md">
-                    <div className="px-4 pt-5 bg-white">
+                  <div className="overflow-hidden shadow sm:rounded-md">
+                    <div className="bg-white px-4 pt-5">
                       <div className="grid grid-cols-6 gap-4">
                         <TextFormField
                           name="old_password"
@@ -679,7 +789,7 @@ export default function UserProfile() {
                         />
                       </div>
                     </div>
-                    <div className="px-4 sm:px-6 py-3 bg-gray-50 text-right">
+                    <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
                       <Submit
                         onClick={changePassword}
                         label="Change Password"
@@ -692,7 +802,7 @@ export default function UserProfile() {
           </div>
         </div>
 
-        <div className="md:grid md:grid-cols-3 md:gap-6 mt-6 mb-8">
+        <div className="mb-8 mt-6 md:grid md:grid-cols-3 md:gap-6">
           <div className="md:col-span-1">
             <div className="px-4 sm:px-0">
               <h3 className="text-lg font-medium leading-6 text-gray-900">
@@ -703,11 +813,11 @@ export default function UserProfile() {
               </p>
             </div>
           </div>
-          <div className="mt-5 md:mt-0 md:col-span-2">
-            <LanguageSelector className="bg-white w-full" />
+          <div className="mt-5 md:col-span-2 md:mt-0">
+            <LanguageSelector className="w-full bg-white" />
           </div>
         </div>
-        <div className="md:grid md:grid-cols-3 md:gap-6 mt-6 mb-8">
+        <div className="mb-8 mt-6 md:grid md:grid-cols-3 md:gap-6">
           <div className="md:col-span-1">
             <div className="px-4 sm:px-0">
               <h3 className="text-lg font-medium leading-6 text-gray-900">
@@ -728,7 +838,7 @@ export default function UserProfile() {
               </ButtonV2>
             </UpdatableApp>
           )}
-          <div className="mt-5 md:mt-0 md:col-span-2">
+          <div className="mt-5 md:col-span-2 md:mt-0">
             {!updateStatus.isUpdateAvailable && (
               <ButtonV2
                 disabled={updateStatus.isChecking}

@@ -1,4 +1,4 @@
-import { classNames, formatCurrency, formatDate } from "../../Utils/utils";
+import { classNames, formatCurrency, formatDateTime } from "../../Utils/utils";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { HCXClaimModel } from "./models";
@@ -27,7 +27,7 @@ export default function ClaimCardInfo({ claim, setShowMessages }: IProps) {
           <p className="mt-2 text-sm text-gray-700">
             Created on{" "}
             <time dateTime="2022-08-01">
-              {formatDate(claim.created_date ?? "")}
+              {formatDateTime(claim.created_date ?? "")}
             </time>
             .
           </p>
@@ -37,15 +37,14 @@ export default function ClaimCardInfo({ claim, setShowMessages }: IProps) {
             onClick={() => setShowMessages(true)}
             className="care-l-comment-alt-message w-7 h-7 text-gray-600 cursor-pointer hover:text-gray-800"
           />
-
           {claim.use && (
-            <span className="font-bold text-sm p-1 px-2 rounded shadow bg-primary-100 text-primary-500">
+            <span className="rounded bg-primary-100 p-1 px-2 text-sm font-bold text-primary-500 shadow">
               {claim.use}
             </span>
           )}
           <span
             className={classNames(
-              "text-white font-bold text-sm p-1 px-2 rounded shadow",
+              "rounded p-1 px-2 text-sm font-bold text-white shadow",
               status === "Approved" && "bg-primary-400",
               status === "Rejected" && "bg-danger-400",
               status === "Pending" && "bg-yellow-400"
@@ -55,7 +54,7 @@ export default function ClaimCardInfo({ claim, setShowMessages }: IProps) {
           </span>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-4 mt-6">
+      <div className="mt-6 grid grid-cols-2 gap-4">
         <div className="text-center">
           <h2 className="text-lg font-bold text-gray-800">
             {claim.policy_object?.policy_id || "NA"}
@@ -161,7 +160,7 @@ export default function ClaimCardInfo({ claim, setShowMessages }: IProps) {
         </table>
       </div>
       {claim.error_text && (
-        <div className="text-red-500 text-sm text-center mt-4 font-bold">
+        <div className="mt-4 text-center text-sm font-bold text-red-500">
           {claim.error_text}
         </div>
       )}

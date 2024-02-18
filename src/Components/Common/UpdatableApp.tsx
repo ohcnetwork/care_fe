@@ -118,7 +118,7 @@ const UpdateAppPopup = ({ onUpdate }: UpdateAppPopupProps) => {
 
   return (
     <AlertTransition show={isShowing}>
-      <Popover className="bg-alert-600 text-white rounded-xl py-4 px-5 shadow-2xl shadow-alert-900">
+      <Popover className="rounded-xl bg-alert-600 px-5 py-4 text-white shadow-2xl shadow-alert-900">
         <div className="flex items-center gap-4">
           <CareIcon
             className={classNames(
@@ -128,7 +128,7 @@ const UpdateAppPopup = ({ onUpdate }: UpdateAppPopupProps) => {
           />
           <span className="mr-4 flex flex-col">
             <p className="font-semibold">Software Update</p>
-            <p className="font-medium text-sm">
+            <p className="text-sm font-medium">
               A new version of CARE is available
             </p>
           </span>
@@ -153,12 +153,12 @@ interface AppUpdatedAlertProps {
 const AppUpdatedAlert = ({ show }: AppUpdatedAlertProps) => {
   return (
     <AlertTransition show={show}>
-      <Popover className="bg-primary-500 text-white rounded-xl py-4 px-5 shadow-2xl shadow-primary-500">
+      <Popover className="rounded-xl bg-primary-500 px-5 py-4 text-white shadow-2xl shadow-primary-500">
         <div className="flex items-center gap-4">
           <CareIcon className="care-l-thumbs-up text-2xl" />
           <span className="mr-4 flex flex-col">
             <p className="font-semibold">Updated successfully</p>
-            <p className="font-medium text-sm">
+            <p className="text-sm font-medium">
               Now using the latest version of CARE
             </p>
           </span>
@@ -185,7 +185,7 @@ const AlertTransition = ({ show, children }: AlertTransitionProps) => {
       leaveFrom="opacity-100 scale-100"
       leaveTo="opacity-0 scale-95"
     >
-      <div className="z-50 fixed top-6 left-1/2 -translate-x-1/2">
+      <div className="fixed left-1/2 top-6 z-50 -translate-x-1/2">
         {children}
       </div>
     </Transition>

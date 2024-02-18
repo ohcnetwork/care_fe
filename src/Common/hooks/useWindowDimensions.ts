@@ -1,13 +1,19 @@
 import { useState, useEffect } from "react";
+
 const getWindowDimensions = () => {
-  const { innerWidth: width, innerHeight: height } = window;
   return {
-    width,
-    height,
+    width: window.innerWidth,
+    height: window.innerHeight,
   };
 };
 
-const useWindowDimensions = () => {
+/**
+ * A hook that returns the current window dimensions.
+ * @example
+ * const { height, width } = useWindowDimensions();
+ * @returns The current window dimensions.
+ */
+export default function useWindowDimensions() {
   const [windowDimensions, setWindowDimensions] = useState(
     getWindowDimensions()
   );
@@ -22,18 +28,4 @@ const useWindowDimensions = () => {
   }, []);
 
   return windowDimensions;
-};
-export default useWindowDimensions;
-
-//usage of this hook
-
-/* const Component = () => {
-    const { height, width } = useWindowDimensions();
-  
-    return (
-      <div>
-        width: {width} ~ height: {height}
-      </div>
-    );
-  }
-*/
+}

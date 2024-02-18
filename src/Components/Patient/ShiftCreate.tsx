@@ -7,8 +7,7 @@ import {
   SHIFTING_VEHICLE_CHOICES,
 } from "../../Common/constants";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import { createShift, getPatient } from "../../Redux/actions";
-import { useEffect, useReducer, useState } from "react";
+import { lazy, useReducer, useState } from "react";
 
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
@@ -17,33 +16,32 @@ import PatientCategorySelect from "./PatientCategorySelect";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-import loadable from "@loadable/component";
 import { navigate } from "raviger";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { parsePhoneNumber } from "../../Utils/utils.js";
 import { phonePreg } from "../../Common/validation";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page.js";
 import Card from "../../CAREUI/display/Card.js";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField.js";
 import { SelectFormField } from "../Form/FormFields/SelectFormField.js";
+import { PhoneNumberValidator } from "../Form/FieldValidators.js";
+import useQuery from "../../Utils/request/useQuery.js";
+import routes from "../../Redux/api.js";
+import request from "../../Utils/request/request.js";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 interface patientShiftProps {
-  facilityId: number;
-  patientId: number;
+  facilityId: string;
+  patientId: string;
 }
 
 export const ShiftCreate = (props: patientShiftProps) => {
   const { goBack } = useAppHistory();
   const { facilityId, patientId } = props;
-  const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const [facilityName, setFacilityName] = useState("");
-  const [patientName, setPatientName] = useState("");
   const [patientCategory, setPatientCategory] = useState<any>();
   const { t } = useTranslation();
   const { wartime_shifting } = useConfig();
@@ -57,13 +55,13 @@ export const ShiftCreate = (props: patientShiftProps) => {
     vehicle_preference: "",
     comments: "",
     refering_facility_contact_name: "",
-    refering_facility_contact_number: "+91",
+    refering_facility_contact_number: "",
     assigned_facility_type: null,
     preferred_vehicle_choice: null,
     breathlessness_level: null,
     patient_category: "",
     ambulance_driver_name: "",
-    ambulance_phone_number: undefined,
+    ambulance_phone_number: "",
     ambulance_number: "",
   };
 
@@ -109,27 +107,22 @@ export const ShiftCreate = (props: patientShiftProps) => {
     errors: { ...initError },
   };
 
-  useEffect(() => {
-    async function fetchPatientName() {
-      if (patientId) {
-        const res = await dispatchAction(getPatient({ id: patientId }));
-        if (res.data) {
-          const patient_category =
-            res.data.last_consultation?.last_daily_round?.patient_category ??
-            res.data.last_consultation?.category;
-          setPatientCategory(
-            PATIENT_CATEGORIES.find((c) => c.text === patient_category)?.id
-          );
-          setPatientName(res.data.name);
-          setFacilityName(res.data.facility_object.name);
-        }
-      } else {
-        setPatientName("");
-        setFacilityName("");
+  const { data: patientData } = useQuery(routes.getPatient, {
+    pathParams: {
+      id: patientId,
+    },
+    prefetch: !!patientId,
+    onResponse: ({ data }) => {
+      if (data) {
+        const patient_category =
+          data.last_consultation?.last_daily_round?.patient_category ??
+          data.last_consultation?.category;
+        setPatientCategory(
+          PATIENT_CATEGORIES.find((c) => c.text === patient_category)?.id
+        );
       }
-    }
-    fetchPatientName();
-  }, [dispatchAction, patientId]);
+    },
+  });
 
   const shiftFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
@@ -145,6 +138,11 @@ export const ShiftCreate = (props: patientShiftProps) => {
           errors: action.errors,
         };
       }
+      case "set_field":
+        return {
+          form: { ...state.form, [action.name]: action.value },
+          errors: { ...state.errors, [action.name]: action.error },
+        };
       default:
         return state;
     }
@@ -163,10 +161,10 @@ export const ShiftCreate = (props: patientShiftProps) => {
             errors[field] = requiredFields[field].errorText;
             isInvalidForm = true;
           } else if (
-            !parsePhoneNumberFromString(state.form[field])?.isPossible() ||
-            !phonePreg(
-              String(parsePhoneNumberFromString(state.form[field])?.number)
-            )
+            !PhoneNumberValidator()(
+              parsePhoneNumber(state.form[field]) ?? ""
+            ) === undefined ||
+            !phonePreg(String(parsePhoneNumber(state.form[field])))
           ) {
             errors[field] = requiredFields[field].invalidText;
             isInvalidForm = true;
@@ -188,8 +186,10 @@ export const ShiftCreate = (props: patientShiftProps) => {
 
   const handleFormFieldChange = (event: FieldChangeEvent<unknown>) => {
     dispatch({
-      type: "set_form",
-      form: { ...state.form, [event.name]: event.value },
+      type: "set_field",
+      name: event.name,
+      value: event.value,
+      error: "",
     });
   };
 
@@ -223,29 +223,34 @@ export const ShiftCreate = (props: patientShiftProps) => {
         preferred_vehicle_choice: state.form.preferred_vehicle_choice,
         refering_facility_contact_name:
           state.form.refering_facility_contact_name,
-        refering_facility_contact_number: parsePhoneNumberFromString(
+        refering_facility_contact_number: parsePhoneNumber(
           state.form.refering_facility_contact_number
-        )?.format("E.164"),
+        ),
         breathlessness_level: state.form.breathlessness_level,
         patient_category: patientCategory,
         ambulance_driver_name: state.form.ambulance_driver_name,
-        ambulance_phone_number: parsePhoneNumberFromString(
+        ambulance_phone_number: parsePhoneNumber(
           state.form.ambulance_phone_number
-        )?.format("E.164"),
+        ),
         ambulance_number: state.form.ambulance_number,
       };
 
-      const res = await dispatchAction(createShift(data));
-      setIsLoading(false);
+      await request(routes.createShift, {
+        body: data,
 
-      if (res && res.data && (res.status == 201 || res.status == 200)) {
-        await dispatch({ type: "set_form", form: initForm });
-        Notification.Success({
-          msg: "Shift request created successfully",
-        });
+        onResponse: ({ res, data }) => {
+          setIsLoading(false);
 
-        navigate(`/shifting/${res.data.id}`);
-      }
+          if (res?.ok && data) {
+            dispatch({ type: "set_form", form: initForm });
+            Notification.Success({
+              msg: "Shift request created successfully",
+            });
+
+            navigate(`/shifting/${data.id}`);
+          }
+        },
+      });
     }
   };
 
@@ -264,23 +269,23 @@ export const ShiftCreate = (props: patientShiftProps) => {
     <Page
       title={"Create Shift Request"}
       crumbsReplacements={{
-        [facilityId]: { name: facilityName },
-        [patientId]: { name: patientName },
+        [facilityId]: { name: patientData?.facility_object?.name || "" },
+        [patientId]: { name: patientData?.name || "" },
       }}
       backUrl={`/facility/${facilityId}/patient/${patientId}`}
     >
-      <Card className="mt-4 flex flex-col w-full max-w-3xl mx-auto px-8 md:px-16 py-5 md:py-11">
+      <Card className="mx-auto mt-4 flex w-full max-w-3xl flex-col px-8 py-5 md:px-16 md:py-11">
         <TextFormField
           {...field("refering_facility_contact_name")}
-          label="Contact person at the current facility"
+          label="Name of Contact person at the current facility"
           required
         />
 
         <PhoneNumberFormField
           {...field("refering_facility_contact_number")}
-          label="Contact person phone"
+          label="Contact person phone number"
           required
-          disableCountry
+          types={["mobile", "landline"]}
         />
 
         {wartime_shifting && (
@@ -330,7 +335,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
         />
 
         <PatientCategorySelect
-          required={false}
+          required={true}
           {...field("patient_category")}
           value={patientCategory}
           onChange={(e) => setPatientCategory(e.value)}
@@ -382,6 +387,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
         <PhoneNumberFormField
           {...field("ambulance_phone_number")}
           label="Ambulance Phone Number"
+          types={["mobile", "landline"]}
         />
 
         <TextFormField {...field("ambulance_number")} label="Ambulance No." />
@@ -391,7 +397,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
           placeholder="Type any extra comments here"
         />
 
-        <div className="mt-4 flex flex-col-reverse md:flex-row gap-2 justify-end">
+        <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">
           <Cancel onClick={() => goBack()} />
           <Submit onClick={handleSubmit} />
         </div>

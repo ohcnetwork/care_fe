@@ -1,18 +1,11 @@
 import { MutableRefObject, useEffect, useState } from "react";
-import {
-  addMonths,
-  addYears,
-  format,
-  getDay,
-  getDaysInMonth,
-  isEqual,
-  subMonths,
-  subYears,
-} from "date-fns";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { Popover } from "@headlessui/react";
 import { classNames } from "../../Utils/utils";
+import dayjs from "../../Utils/dayjs";
+import * as Notification from "../../Utils/Notifications.js";
+import { t } from "i18next";
 
 type DatePickerType = "date" | "month" | "year";
 export type DatePickerPosition = "LEFT" | "RIGHT" | "CENTER";
@@ -25,6 +18,7 @@ interface Props {
   value: Date | undefined;
   min?: Date;
   max?: Date;
+  outOfLimitsErrorMessage?: string;
   onChange: (date: Date) => void;
   position?: DatePickerPosition;
   disabled?: boolean;
@@ -43,6 +37,7 @@ const DateInputV2: React.FC<Props> = ({
   value,
   min,
   max,
+  outOfLimitsErrorMessage,
   onChange,
   position,
   disabled,
@@ -56,18 +51,27 @@ const DateInputV2: React.FC<Props> = ({
   const [datePickerHeaderDate, setDatePickerHeaderDate] = useState(new Date());
   const [type, setType] = useState<DatePickerType>("date");
   const [year, setYear] = useState(new Date());
+  const [displayValue, setDisplayValue] = useState<string>(
+    value ? dayjs(value).format("DDMMYYYY") : ""
+  );
 
   const decrement = () => {
     switch (type) {
       case "date":
-        setDatePickerHeaderDate((prev) => subMonths(prev, 1));
+        setDatePickerHeaderDate((prev) =>
+          dayjs(prev).subtract(1, "month").toDate()
+        );
         break;
       case "month":
-        setDatePickerHeaderDate((prev) => subYears(prev, 1));
+        setDatePickerHeaderDate((prev) =>
+          dayjs(prev).subtract(1, "year").toDate()
+        );
         break;
       case "year":
-        setDatePickerHeaderDate((prev) => subYears(prev, 1));
-        setYear((prev) => subYears(prev, 10));
+        setDatePickerHeaderDate((prev) =>
+          dayjs(prev).subtract(1, "year").toDate()
+        );
+        setYear((prev) => dayjs(prev).subtract(10, "year").toDate());
         break;
     }
   };
@@ -75,24 +79,24 @@ const DateInputV2: React.FC<Props> = ({
   const increment = () => {
     switch (type) {
       case "date":
-        setDatePickerHeaderDate((prev) => addMonths(prev, 1));
+        setDatePickerHeaderDate((prev) => dayjs(prev).add(1, "month").toDate());
         break;
       case "month":
-        setDatePickerHeaderDate((prev) => addYears(prev, 1));
+        setDatePickerHeaderDate((prev) => dayjs(prev).add(1, "year").toDate());
         break;
       case "year":
-        setDatePickerHeaderDate((prev) => addYears(prev, 1));
-        setYear((prev) => addYears(prev, 10));
+        setDatePickerHeaderDate((prev) => dayjs(prev).add(1, "year").toDate());
+        setYear((prev) => dayjs(prev).add(10, "year").toDate());
         break;
     }
   };
 
   const isSelectedDate = (date: number) => {
-    if (value)
-      return isEqual(
-        new Date(value.getFullYear(), value.getMonth(), date),
-        value
-      );
+    if (value) {
+      return dayjs(
+        new Date(value.getFullYear(), value.getMonth(), date)
+      ).isSame(dayjs(value));
+    }
   };
 
   type CloseFunction = (
@@ -100,21 +104,29 @@ const DateInputV2: React.FC<Props> = ({
   ) => void;
 
   const setDateValue = (date: number, close: CloseFunction) => () => {
-    isDateWithinConstraints(date) &&
-      onChange(
-        new Date(
-          datePickerHeaderDate.getFullYear(),
-          datePickerHeaderDate.getMonth(),
-          date
-        )
-      );
-    close();
+    isDateWithinConstraints(date)
+      ? (() => {
+          onChange(
+            new Date(
+              datePickerHeaderDate.getFullYear(),
+              datePickerHeaderDate.getMonth(),
+              date
+            )
+          );
+          close();
+          setIsOpen?.(false);
+        })()
+      : Notification.Error({
+          msg: outOfLimitsErrorMessage ?? "Cannot select date out of range",
+        });
   };
 
   const getDayCount = (date: Date) => {
-    const daysInMonth = getDaysInMonth(date);
+    const daysInMonth = dayjs(date).daysInMonth();
 
-    const dayOfWeek = getDay(new Date(date.getFullYear(), date.getMonth(), 1));
+    const dayOfWeek = dayjs(
+      new Date(date.getFullYear(), date.getMonth(), 1)
+    ).day();
     const blankDaysArray = [];
     for (let i = 1; i <= dayOfWeek; i++) {
       blankDaysArray.push(i);
@@ -207,18 +219,8 @@ const DateInputV2: React.FC<Props> = ({
       >
         <Popover className="relative">
           {({ open, close }) => (
-            <div
-              onBlur={() => {
-                setIsOpen && setIsOpen(false);
-              }}
-            >
-              <Popover.Button
-                disabled={disabled}
-                className="w-full"
-                onClick={() => {
-                  setIsOpen && setIsOpen(!isOpen);
-                }}
-              >
+            <div>
+              <Popover.Button disabled={disabled} className="w-full">
                 <input type="hidden" name="date" />
                 <input
                   id={id}
@@ -227,34 +229,55 @@ const DateInputV2: React.FC<Props> = ({
                   readOnly
                   disabled={disabled}
                   className={`cui-input-base cursor-pointer disabled:cursor-not-allowed ${className}`}
-                  placeholder={placeholder || "Select date"}
-                  value={value && format(value, "yyyy-MM-dd")}
+                  placeholder={placeholder ?? t("select_date")}
+                  value={value && dayjs(value).format("DD/MM/YYYY")}
                 />
-                <div className="absolute top-1/2 right-0 p-2 -translate-y-1/2">
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 p-2">
                   <CareIcon className="care-l-calendar-alt text-lg text-gray-600" />
                 </div>
               </Popover.Button>
 
               {(open || isOpen) && (
                 <Popover.Panel
-                  onBlur={() => {
-                    setIsOpen && setIsOpen(false);
-                  }}
                   static
                   className={classNames(
-                    "cui-dropdown-base divide-y-0 w-72 p-4 absolute mt-0.5",
+                    "cui-dropdown-base absolute mt-0.5 w-72 divide-y-0 p-4",
                     getPosition()
                   )}
                 >
-                  <div className="flex flex-col justify-between items-center w-full mb-4">
-                    <p className="text-sm font-medium text-gray-600">
-                      {placeholder}
-                    </p>
-                    <div className="flex">
+                  <div className="mb-4 flex w-full flex-col items-center justify-between">
+                    <input
+                      id="date-input"
+                      autoFocus
+                      className="cui-input-base bg-gray-50"
+                      value={
+                        displayValue.replace(
+                          /^(\d{2})(\d{0,2})(\d{0,4}).*/,
+                          (_, dd, mm, yyyy) =>
+                            [dd, mm, yyyy].filter(Boolean).join("/")
+                        ) || ""
+                      } // Display the value in DD/MM/YYYY format
+                      placeholder={t("DD/MM/YYYY")}
+                      onChange={(e) => {
+                        setDisplayValue(e.target.value.replaceAll("/", ""));
+                        const value = dayjs(e.target.value, "DD/MM/YYYY", true);
+                        if (value.isValid()) {
+                          onChange(value.toDate());
+                          close();
+                          setIsOpen?.(false);
+                        }
+                      }}
+                    />
+                    <div className="mt-4 flex">
                       <button
                         type="button"
-                        disabled={!isDateWithinConstraints()}
-                        className="transition ease-in-out duration-100 p-2 rounded inline-flex items-center justify-center aspect-square cursor-pointer hover:bg-gray-300"
+                        disabled={
+                          !isDateWithinConstraints(
+                            getLastDay(),
+                            datePickerHeaderDate.getMonth() - 1
+                          )
+                        }
+                        className="inline-flex aspect-square cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-gray-300"
                         onClick={decrement}
                       >
                         <CareIcon className="care-l-angle-left-b text-lg" />
@@ -264,19 +287,19 @@ const DateInputV2: React.FC<Props> = ({
                         {type === "date" && (
                           <div
                             onClick={showMonthPicker}
-                            className="py-1 px-3 font-medium text-black text-center cursor-pointer hover:bg-gray-300 rounded"
+                            className="cursor-pointer rounded px-3 py-1 text-center font-medium text-black hover:bg-gray-300"
                           >
-                            {format(datePickerHeaderDate, "MMMM")}
+                            {dayjs(datePickerHeaderDate).format("MMMM")}
                           </div>
                         )}
                         <div
                           onClick={showYearPicker}
-                          className="py-1 px-3 font-medium text-black cursor-pointer hover:bg-gray-300 rounded"
+                          className="cursor-pointer rounded px-3 py-1 font-medium text-black hover:bg-gray-300"
                         >
                           <p className="text-center">
                             {type == "year"
                               ? year.getFullYear()
-                              : format(datePickerHeaderDate, "yyyy")}
+                              : dayjs(datePickerHeaderDate).format("YYYY")}
                           </p>
                         </div>
                       </div>
@@ -287,7 +310,7 @@ const DateInputV2: React.FC<Props> = ({
                             new Date().getFullYear() === year.getFullYear()) ||
                           !isDateWithinConstraints(getLastDay())
                         }
-                        className="transition ease-in-out duration-100 p-2 rounded inline-flex items-center justify-center aspect-square cursor-pointer hover:bg-gray-300"
+                        className="inline-flex aspect-square cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-gray-300"
                         onClick={increment}
                       >
                         <CareIcon className="care-l-angle-right-b text-lg" />
@@ -296,14 +319,14 @@ const DateInputV2: React.FC<Props> = ({
                   </div>
                   {type === "date" && (
                     <>
-                      <div className="flex flex-wrap mb-3">
+                      <div className="mb-3 flex flex-wrap">
                         {DAYS.map((day, i) => (
                           <div
                             key={day}
                             id={`day-${i}`}
                             className="aspect-square w-[14.26%]"
                           >
-                            <div className="text-gray-800 font-medium text-center text-sm">
+                            <div className="text-center text-sm font-medium text-gray-800">
                               {day}
                             </div>
                           </div>
@@ -313,29 +336,44 @@ const DateInputV2: React.FC<Props> = ({
                         {blankDays.map((_, i) => (
                           <div
                             key={i}
-                            className="aspect-square w-[14.26%] text-center border p-1 border-transparent text-sm"
+                            className="aspect-square w-[14.26%] border border-transparent p-1 text-center text-sm"
                           />
                         ))}
-                        {dayCount.map((d, i) => (
-                          <div
-                            key={i}
-                            id={`date-${d}`}
-                            className="aspect-square w-[14.26%]"
-                          >
+                        {dayCount.map((d, i) => {
+                          const withinConstraints = isDateWithinConstraints(d);
+                          const selected = value && isSelectedDate(d);
+
+                          const baseClasses =
+                            "flex h-full items-center justify-center rounded text-center text-sm leading-loose transition duration-100 ease-in-out";
+                          let conditionalClasses = "";
+
+                          if (withinConstraints) {
+                            if (selected) {
+                              conditionalClasses =
+                                "bg-primary-500 font-bold text-white";
+                            } else {
+                              conditionalClasses =
+                                "hover:bg-gray-300 cursor-pointer";
+                            }
+                          } else {
+                            conditionalClasses =
+                              "!cursor-not-allowed !text-gray-400";
+                          }
+                          return (
                             <div
-                              onClick={setDateValue(d, close)}
-                              className={classNames(
-                                "cursor-pointer flex items-center justify-center text-center h-full text-sm rounded leading-loose transition ease-in-out duration-100 text-black",
-                                value && isSelectedDate(d)
-                                  ? "bg-primary-500 text-white font-bold"
-                                  : "hover:bg-gray-300",
-                                !isDateWithinConstraints(d) && "!text-gray-300"
-                              )}
+                              key={i}
+                              id={`date-${d}`}
+                              className="aspect-square w-[14.26%]"
                             >
-                              {d}
+                              <div
+                                onClick={setDateValue(d, close)}
+                                className={`${baseClasses} ${conditionalClasses}`}
+                              >
+                                {d}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </>
                   )}
@@ -348,21 +386,16 @@ const DateInputV2: React.FC<Props> = ({
                             key={i}
                             id={`month-${i}`}
                             className={classNames(
-                              "cursor-pointer w-1/4 font-semibold py-4 px-2 text-center text-sm rounded-lg",
+                              "w-1/4 cursor-pointer rounded-lg px-2 py-4 text-center text-sm font-semibold",
                               value && isSelectedMonth(i)
                                 ? "bg-primary-500 text-white"
                                 : "text-gray-700 hover:bg-gray-300"
                             )}
                             onClick={setMonthValue(i)}
                           >
-                            {format(
-                              new Date(
-                                datePickerHeaderDate.getFullYear(),
-                                i,
-                                datePickerHeaderDate.getDate()
-                              ),
-                              "MMM"
-                            )}
+                            {dayjs(
+                              new Date(datePickerHeaderDate.getFullYear(), i, 1)
+                            ).format("MMM")}
                           </div>
                         ))}
                     </div>
@@ -378,7 +411,7 @@ const DateInputV2: React.FC<Props> = ({
                               key={i}
                               id={`year-${i}`}
                               className={classNames(
-                                "cursor-pointer w-1/4 font-semibold py-4 px-2 text-center text-sm rounded-lg",
+                                "w-1/4 cursor-pointer rounded-lg px-2 py-4 text-center text-sm font-semibold",
                                 value && isSelectedYear(y)
                                   ? "bg-primary-500 text-white"
                                   : "text-gray-700 hover:bg-gray-300"

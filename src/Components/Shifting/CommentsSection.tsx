@@ -1,46 +1,22 @@
-import React, { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getShiftComments, addShiftComments } from "../../Redux/actions";
+import { useState } from "react";
 import CircularProgress from "../Common/components/CircularProgress";
 import * as Notification from "../../Utils/Notifications.js";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import ButtonV2 from "../Common/components/ButtonV2";
+import routes from "../../Redux/api";
+import { IComment } from "../Resource/models";
+import PaginatedList from "../../CAREUI/misc/PaginatedList";
+import request from "../../Utils/request/request";
 
 interface CommentSectionProps {
   id: string;
 }
 const CommentSection = (props: CommentSectionProps) => {
-  const dispatch: any = useDispatch();
-  const initialData: any = [];
-  const [comments, setComments] = useState(initialData);
   const [commentBox, setCommentBox] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
   const { t } = useTranslation();
 
-  const fetchData = useCallback(
-    async (status: statusType = { aborted: false }) => {
-      setIsLoading(true);
-      const res = await dispatch(getShiftComments(props.id));
-      if (!status.aborted) {
-        if (res && res.data) {
-          setComments(res.data?.results);
-        }
-        setIsLoading(false);
-      }
-    },
-    [props.id, dispatch]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
-  );
-
-  const onSubmitComment = () => {
+  const onSubmitComment = async () => {
     const payload = {
       comment: commentBox,
     };
@@ -50,63 +26,91 @@ const CommentSection = (props: CommentSectionProps) => {
       });
       return;
     }
-    dispatch(addShiftComments(props.id, payload)).then((_: any) => {
-      Notification.Success({ msg: t("comment_added_successfully") });
-      fetchData();
-      setCommentBox("");
+    const { res } = await request(routes.addShiftComments, {
+      pathParams: { id: props.id },
+      body: payload,
     });
+    if (res?.ok) {
+      Notification.Success({ msg: t("comment_added_successfully") });
+
+      setCommentBox("");
+    }
   };
 
   return (
-    <div className="w-full flex flex-col">
-      <textarea
-        rows={3}
-        value={commentBox}
-        minLength={3}
-        placeholder={t("type_your_comment")}
-        className="mt-4 border border-gray-500 rounded-lg p-4 focus:ring-primary-500"
-        onChange={(e) => setCommentBox(e.target.value)}
-      />
-      <div className="flex w-full justify-end">
-        <ButtonV2 onClick={onSubmitComment} className="mt-4">
-          {t("post_your_comment")}
-        </ButtonV2>
-      </div>
-      <div className=" w-full">
-        {isLoading ? (
-          <CircularProgress />
-        ) : (
-          comments.map((comment: any) => (
-            <div
-              key={comment.id}
-              className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300"
+    <PaginatedList
+      route={routes.getShiftComments}
+      pathParams={{ id: props.id }}
+    >
+      {(_, query) => (
+        <div className="flex w-full flex-col">
+          <textarea
+            rows={3}
+            value={commentBox}
+            minLength={3}
+            placeholder={t("type_your_comment")}
+            className="mt-4 rounded-lg border border-gray-500 p-4 focus:ring-primary-500"
+            onChange={(e) => setCommentBox(e.target.value)}
+          />
+          <div className="flex w-full justify-end">
+            <ButtonV2
+              className="mt-4"
+              onClick={async () => {
+                await onSubmitComment();
+                query.refetch();
+              }}
             >
-              <div className="flex  w-full ">
-                <p className="text-justify">{comment.comment}</p>
-              </div>
-              <div className="mt-3">
-                <span className="text-xs text-gray-500">
-                  {comment.modified_date
-                    ? formatDate(comment.modified_date)
-                    : "-"}
-                </span>
-              </div>
-              <div className=" flex mr-auto bg-gray-100 border items-center rounded-md py-1 pl-2 pr-3">
-                <div className="flex justify-center items-center w-8 h-8 rounded-full bg-primary-700 uppercase text-white p-1">
-                  {comment.created_by_object?.first_name?.charAt(0) ||
-                    t("unknown")}
-                </div>
-                <span className="text-gray-700 text-sm pl-2">
-                  {comment.created_by_object?.first_name || t("unknown")}{" "}
-                  {comment.created_by_object?.last_name}
-                </span>
-              </div>
+              {t("post_your_comment")}
+            </ButtonV2>
+          </div>
+          <div className="w-full">
+            <PaginatedList.WhenLoading>
+              <CircularProgress />
+            </PaginatedList.WhenLoading>
+            <PaginatedList.Items<IComment>>
+              {(item) => <Comment {...item} />}
+            </PaginatedList.Items>
+            <div className="flex w-full items-center justify-center">
+              <PaginatedList.Paginator hideIfSinglePage />
             </div>
-          ))
-        )}
-      </div>
-    </div>
+          </div>
+        </div>
+      )}
+    </PaginatedList>
   );
 };
 
 export default CommentSection;
+
+export const Comment = ({
+  id,
+  comment,
+  created_by_object,
+  modified_date,
+}: IComment) => {
+  const { t } = useTranslation();
+  return (
+    <div
+      key={id}
+      className="mt-4 flex w-full flex-col rounded-lg border border-gray-300 bg-white p-4 text-gray-800"
+    >
+      <div className="flex  w-full ">
+        <p className="text-justify">{comment}</p>
+      </div>
+      <div className="mt-3">
+        <span className="text-xs text-gray-500">
+          {modified_date ? formatDateTime(modified_date) : "-"}
+        </span>
+      </div>
+      <div className=" mr-auto flex items-center rounded-md border bg-gray-100 py-1 pl-2 pr-3">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-700 p-1 uppercase text-white">
+          {created_by_object?.first_name?.charAt(0) || t("unknown")}
+        </div>
+        <span className="pl-2 text-sm text-gray-700">
+          {created_by_object?.first_name || t("unknown")}{" "}
+          {created_by_object?.last_name}
+        </span>
+      </div>
+    </div>
+  );
+};

@@ -68,12 +68,12 @@ let reducer = (state, action) => {
   | SetConsciousnessLevel(consciousnessLevel) => {
       ...state,
       dirty: true,
-      consciousnessLevel: consciousnessLevel,
+      consciousnessLevel,
     }
   | SetConsciousnessLevelDetails(consciousnessLevelDetails) => {
       ...state,
       dirty: true,
-      consciousnessLevelDetails: consciousnessLevelDetails,
+      consciousnessLevelDetails,
     }
   | SetLeftPupilSize(leftPupilSize) => {
       ...state,
@@ -83,17 +83,17 @@ let reducer = (state, action) => {
   | SetLeftPupilSizeDetails(leftPupilSizeDetails) => {
       ...state,
       dirty: true,
-      leftPupilSizeDetails: leftPupilSizeDetails,
+      leftPupilSizeDetails,
     }
   | SetLeftPupilLightReaction(leftPupilLightReaction) => {
       ...state,
       dirty: true,
-      leftPupilLightReaction: leftPupilLightReaction,
+      leftPupilLightReaction,
     }
   | SetLeftPupilLightReactionDetails(leftPupilLightReactionDetails) => {
       ...state,
       dirty: true,
-      leftPupilLightReactionDetails: leftPupilLightReactionDetails,
+      leftPupilLightReactionDetails,
     }
   | SetRightPupilSize(rightPupilSize) => {
       ...state,
@@ -103,17 +103,17 @@ let reducer = (state, action) => {
   | SetRightPupilSizeDetails(rightPupilSizeDetails) => {
       ...state,
       dirty: true,
-      rightPupilSizeDetails: rightPupilSizeDetails,
+      rightPupilSizeDetails,
     }
   | SetRightPupilLightReaction(rightPupilLightReaction) => {
       ...state,
       dirty: true,
-      rightPupilLightReaction: rightPupilLightReaction,
+      rightPupilLightReaction,
     }
   | SetRightPupilLightReactionDetails(rightPupilLightReactionDetails) => {
       ...state,
       dirty: true,
-      rightPupilLightReactionDetails: rightPupilLightReactionDetails,
+      rightPupilLightReactionDetails,
     }
   | SetGlasgowEyeOpen(glasgowEyeOpen) => {...state, glasgowEyeOpen: Some(glasgowEyeOpen)}
   | SetGlasgowVerbalResponse(glasgowVerbalResponse) => {
@@ -129,22 +129,22 @@ let reducer = (state, action) => {
   | SetLimbResponseUpperExtremityRight(limbResponseUpperExtremityRight) => {
       ...state,
       dirty: true,
-      limbResponseUpperExtremityRight: limbResponseUpperExtremityRight,
+      limbResponseUpperExtremityRight,
     }
   | SetLimbResponseUpperExtremityLeft(limbResponseUpperExtremityLeft) => {
       ...state,
       dirty: true,
-      limbResponseUpperExtremityLeft: limbResponseUpperExtremityLeft,
+      limbResponseUpperExtremityLeft,
     }
   | SetLimbResponseLowerExtremityRight(limbResponseLowerExtremityRight) => {
       ...state,
       dirty: true,
-      limbResponseLowerExtremityRight: limbResponseLowerExtremityRight,
+      limbResponseLowerExtremityRight,
     }
   | SetLimbResponseLowerExtremityLeft(limbResponseLowerExtremityLeft) => {
       ...state,
       dirty: true,
-      limbResponseLowerExtremityLeft: limbResponseLowerExtremityLeft,
+      limbResponseLowerExtremityLeft,
     }
 
   | SetSaving => {...state, saving: true}
@@ -265,7 +265,7 @@ let renderConsciousnessLevel = (
 ) => {
   <div className="my-10">
     <div className=" text-2xl font-bold my-2"> {str("Level Of Consciousness")} </div>
-    <div className="flex md:flex-row flex-col md:space-y-0 space-y-2 space-x-0 md:space-x-4">
+    <div className="grid lg:grid-cols-2 grid-cols-1 lg:space-y-0 space-y-2 space-x-0">
       {Js.Array.map(consciousnessLevel => {
         <Radio
           key={label ++ NeurologicalMonitoring.consciousnessLevelToString(consciousnessLevel)}
@@ -274,17 +274,15 @@ let renderConsciousnessLevel = (
           checked={consciousnessLevel === input}
           onChange={_ => onInputChange(consciousnessLevel)}
         />
-      }, [Alert, Drowsy, Stuporous, Comatose, CannotBeAssessed])->React.array}
+      }, [
+        Unresponsive,
+        Alert,
+        RespondsToPain,
+        RespondsToVoice,
+        AgitatedOrConfused,
+        OnsetOfAgitationAndConfusion,
+      ])->React.array}
     </div>
-    {ReactUtils.nullUnless(
-      <CriticalCare__Description
-        name={`${name}_reaction_description`}
-        label={`${label} Reaction Description`}
-        text={inputDetails}
-        onChange={event => onInputDetailsChange(event)}
-      />,
-      input === NeurologicalMonitoring.CannotBeAssessed,
-    )}
   </div>
 }
 
@@ -485,7 +483,7 @@ let make = (~updateCB, ~neurologicalMonitoring, ~id, ~consultationId) => {
       <div className="my-10">
         <div className="text-3xl font-bold"> {str("Glasgow Coma Scale")} </div>
         <div className="mt-4">
-          <div className="font-bold mt-4"> {str("Eye Open")} </div>
+          <div className="font-bold mt-4"> {str("Eye Opening Response")} </div>
           <div>
             {Js.Array.mapi(
               (x, i) =>

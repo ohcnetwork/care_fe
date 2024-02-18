@@ -6,8 +6,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { useDispatch } from "react-redux";
-import { deleteFacilityCoverImage } from "../../Redux/actions";
 import { Success } from "../../Utils/Notifications";
 import useDragAndDrop from "../../Utils/useDragAndDrop";
 import { sleep } from "../../Utils/utils";
@@ -20,6 +18,8 @@ import * as Notification from "../../Utils/Notifications.js";
 import { useTranslation } from "react-i18next";
 import { LocalStorageKeys } from "../../Common/constants";
 import DialogModal from "../Common/Dialog";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 interface Props {
   open: boolean;
   onClose: (() => void) | undefined;
@@ -35,7 +35,6 @@ const CoverImageEditModal = ({
   onDelete,
   facility,
 }: Props) => {
-  const dispatch = useDispatch<any>();
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<any>();
   const [preview, setPreview] = useState<string>();
@@ -54,7 +53,7 @@ const CoverImageEditModal = ({
   };
   const { width } = useWindowDimensions();
   const LaptopScreenBreakpoint = 640;
-  const isLaptopScreen = width >= LaptopScreenBreakpoint ? true : false;
+  const isLaptopScreen = width >= LaptopScreenBreakpoint;
   const { t } = useTranslation();
   const handleSwitchCamera = useCallback(() => {
     setFacingMode((prevState: any) =>
@@ -66,19 +65,18 @@ const CoverImageEditModal = ({
 
   const captureImage = () => {
     setPreviewImage(webRef.current.getScreenshot());
-    fetch(webRef.current.getScreenshot())
-      .then((res) => res.blob())
-      .then((blob) => {
-        const myFile = new File([blob], "image.png", {
-          type: blob.type,
-        });
-        setSelectedFile(myFile);
+    const canvas = webRef.current.getCanvas();
+    canvas?.toBlob((blob: Blob) => {
+      const myFile = new File([blob], "image.png", {
+        type: blob.type,
       });
+      setSelectedFile(myFile);
+    });
   };
   const closeModal = () => {
     setPreview(undefined);
     setSelectedFile(undefined);
-    onClose && onClose();
+    onClose?.();
   };
 
   useEffect(() => {
@@ -123,7 +121,6 @@ const CoverImageEditModal = ({
       );
       if (response.status === 200) {
         Success({ msg: "Cover image updated." });
-        window.location.reload();
       } else {
         Notification.Error({
           msg: "Something went wrong!",
@@ -145,14 +142,14 @@ const CoverImageEditModal = ({
   };
 
   const handleDelete = async () => {
-    const res = await dispatch(deleteFacilityCoverImage(facility.id as any));
-    if (res.statusCode === 204) {
+    const { res } = await request(routes.deleteFacilityCoverImage, {
+      pathParams: { id: facility.id! },
+    });
+    if (res?.ok) {
       Success({ msg: "Cover image deleted" });
-      window.location.reload();
+      onDelete?.();
+      closeModal();
     }
-
-    onDelete && onDelete();
-    closeModal();
   };
 
   const hasImage = !!(preview || facility.read_cover_image_url);
@@ -185,19 +182,19 @@ const CoverImageEditModal = ({
       description={facility.name}
       className="md:max-w-4xl"
     >
-      <div className="h-full w-full flex items-center justify-center overflow-y-auto">
+      <div className="flex h-full w-full items-center justify-center overflow-y-auto">
         {!isCameraOpen ? (
-          <form className="w-full min-h-[24rem] max-h-screen overflow-auto flex flex-col">
+          <form className="flex max-h-screen min-h-[24rem] w-full flex-col overflow-auto">
             {hasImage ? (
               <>
-                <div className="flex-1 flex rounded-lg items-center justify-center">
+                <div className="flex flex-1 items-center justify-center rounded-lg">
                   <img
                     src={imgSrc}
                     alt={facility.name}
-                    className="w-full h-full object-cover"
+                    className="h-full w-full object-cover"
                   />
                 </div>
-                <p className="text-gray-700 font-medium text-center">
+                <p className="text-center font-medium text-gray-700">
                   {commonHint}
                 </p>
               </>
@@ -206,7 +203,7 @@ const CoverImageEditModal = ({
                 onDragOver={dragProps.onDragOver}
                 onDragLeave={dragProps.onDragLeave}
                 onDrop={onDrop}
-                className={`px-3 py-6 flex-1 flex flex-col mt-8 rounded-lg items-center justify-center border-[3px] border-dashed ${
+                className={`mt-8 flex flex-1 flex-col items-center justify-center rounded-lg border-[3px] border-dashed px-3 py-6 ${
                   dragProps.dragOver && "border-primary-500"
                 } ${
                   dragProps.fileDropError !== ""
@@ -219,7 +216,7 @@ const CoverImageEditModal = ({
                   fill="none"
                   viewBox="0 0 48 48"
                   aria-hidden="true"
-                  className={`w-12 h-12 stroke-[2px] ${
+                  className={`h-12 w-12 stroke-[2px] ${
                     dragProps.dragOver && "text-primary-500"
                   } ${
                     dragProps.fileDropError !== ""
@@ -242,15 +239,18 @@ const CoverImageEditModal = ({
                     ? dragProps.fileDropError
                     : `${t("drag_drop_image_to_upload")}`}
                 </p>
-                <p className="mt-4 text-gray-700 font-medium text-center">
+                <p className="mt-4 text-center font-medium text-gray-700">
                   {t("no_cover_photo_uploaded_for_this_facility")}. {commonHint}
                 </p>
               </div>
             )}
 
-            <div className="flex flex-col sm:flex-row pt-4 gap-2">
+            <div className="flex flex-col gap-2 pt-4 sm:flex-row">
               <div>
-                <label className="w-full rounded-lg bg-white py-2 px-4 text-primary-500 font-medium border border-primary-500 hover:text-primary-400 hover:border-primary-400 text-sm flex gap-1 items-center justify-center cursor-pointer transition-all">
+                <label
+                  id="upload-cover-image"
+                  className="flex w-full cursor-pointer items-center justify-center gap-1 rounded-lg border border-primary-500 bg-white px-4 py-2 text-sm font-medium text-primary-500 transition-all hover:border-primary-400 hover:text-primary-400"
+                >
                   <CareIcon className="care-l-cloud-upload text-lg" />
                   {t("upload_an_image")}
                   <input
@@ -287,9 +287,13 @@ const CoverImageEditModal = ({
                   {t("delete")}
                 </ButtonV2>
               )}
-              <ButtonV2 onClick={handleUpload} disabled={isUploading}>
+              <ButtonV2
+                id="save-cover-image"
+                onClick={handleUpload}
+                disabled={isUploading}
+              >
                 {isUploading ? (
-                  <CareIcon className="care-l-spinner text-lg animate-spin" />
+                  <CareIcon className="care-l-spinner animate-spin text-lg" />
                 ) : (
                   <CareIcon className="care-l-save text-lg" />
                 )}
@@ -300,14 +304,13 @@ const CoverImageEditModal = ({
             </div>
           </form>
         ) : (
-          <div className="min-h-[24rem] max-h-screen overflow-auto flex flex-col">
-            <div className="flex flex-col bg-gray-300">
+          <div className="flex max-h-screen min-h-[24rem] flex-col overflow-auto">
+            <div className="mb-1 mt-2 flex flex-col">
               <span className="text-xl font-medium">
                 {t("capture_cover_photo")}
               </span>
-              <span className="mt-1 text-gray-700">{facility.name}</span>
             </div>
-            <div className="flex-1 flex items-center justify-center">
+            <div className="flex flex-1 items-center justify-center">
               {!previewImage ? (
                 <>
                   <Webcam
@@ -326,10 +329,13 @@ const CoverImageEditModal = ({
               )}
             </div>
             {/* buttons for mobile screens */}
-            <div className="flex justify-evenly m-4 sm:hidden ">
+            <div className="m-4 flex flex-col justify-evenly sm:hidden ">
               <div>
                 {!previewImage ? (
-                  <ButtonV2 onClick={handleSwitchCamera} className="m-2">
+                  <ButtonV2
+                    onClick={handleSwitchCamera}
+                    className="my-2 w-full"
+                  >
                     {t("switch")}
                   </ButtonV2>
                 ) : (
@@ -344,7 +350,7 @@ const CoverImageEditModal = ({
                         onClick={() => {
                           captureImage();
                         }}
-                        className="m-2"
+                        className="my-2 w-full"
                       >
                         {t("capture")}
                       </ButtonV2>
@@ -352,19 +358,19 @@ const CoverImageEditModal = ({
                   </>
                 ) : (
                   <>
-                    <div className="flex space-x-2">
+                    <div className="flex flex-col">
                       <ButtonV2
                         onClick={() => {
                           setPreviewImage(null);
                         }}
-                        className="m-2"
+                        className="my-2 w-full"
                         disabled={isUploading}
                       >
                         {t("retake")}
                       </ButtonV2>
-                      <ButtonV2 onClick={handleUpload} className="m-2">
+                      <ButtonV2 onClick={handleUpload} className="my-2 w-full">
                         {isCaptureImgBeingUploaded && (
-                          <CareIcon className="care-l-spinner text-lg animate-spin" />
+                          <CareIcon className="care-l-spinner animate-spin text-lg" />
                         )}
                         {t("submit")}
                       </ButtonV2>
@@ -380,7 +386,7 @@ const CoverImageEditModal = ({
                     setIsCameraOpen(false);
                     webRef.current.stopCamera();
                   }}
-                  className="m-2"
+                  className="border-grey-200 my-2 w-full border-2"
                 >
                   {t("close")}
                 </ButtonV2>
@@ -388,14 +394,14 @@ const CoverImageEditModal = ({
             </div>
             {/* buttons for laptop screens */}
             <div className={`${isLaptopScreen ? " " : " hidden "}`}>
-              <div className="flex m-4 lg:hidden">
+              <div className="m-4 flex lg:hidden">
                 <ButtonV2 onClick={handleSwitchCamera}>
                   <CareIcon className="care-l-camera-change text-lg" />
                   {`${t("switch")} ${t("camera")}`}
                 </ButtonV2>
               </div>
 
-              <div className="flex justify-end  p-4 gap-2">
+              <div className="flex justify-end  gap-2 p-4">
                 <div>
                   {!previewImage ? (
                     <>
@@ -423,7 +429,7 @@ const CoverImageEditModal = ({
                         <Submit disabled={isUploading} onClick={handleUpload}>
                           {isCaptureImgBeingUploaded ? (
                             <>
-                              <CareIcon className="care-l-spinner text-lg animate-spin" />
+                              <CareIcon className="care-l-spinner animate-spin text-lg" />
                               {`${t("submitting")}...`}
                             </>
                           ) : (

@@ -9,7 +9,7 @@ export default function ContactLink(props: ContactLinkProps) {
     <div>
       <a
         href={props.tel ? `tel:${props.tel}` : `mailto:${props.mailto}`}
-        className=" tracking-wider text-base font-medium flex items-center gap-2 border-b border-blue-500 text-blue-500"
+        className=" flex items-center gap-2 border-b border-blue-500 text-base font-medium tracking-wider text-blue-500"
       >
         <CareIcon
           className={`care-l-${

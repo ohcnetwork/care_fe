@@ -1,17 +1,8 @@
 import ConfirmDialog from "../Common/ConfirmDialog";
 import Card from "../../CAREUI/display/Card";
-import loadable from "@loadable/component";
+
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import moment from "moment";
-import { useCallback, useReducer, useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  createTriageForm,
-  getTriageDetails,
-  getAnyFacility,
-  getTriageInfo,
-} from "../../Redux/actions";
+import { useReducer, useState, lazy } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { PatientStatsModel } from "./models";
@@ -19,12 +10,17 @@ import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import DateFormField from "../Form/FormFields/DateFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 import Page from "../Common/components/Page";
+import dayjs from "dayjs";
+import { dateQueryString, scrollTo } from "../../Utils/utils";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 
-interface triageFormProps extends PatientStatsModel {
-  facilityId: number;
-  id?: number;
+interface Props extends PatientStatsModel {
+  facilityId: string;
+  id?: string;
 }
 
 const initForm: any = {
@@ -60,99 +56,40 @@ const triageFormReducer = (state = initialState, action: any) => {
   }
 };
 
-export const TriageForm = (props: triageFormProps) => {
+export const TriageForm = ({ facilityId, id }: Props) => {
   const { goBack } = useAppHistory();
-  const dispatchTriageData: any = useDispatch();
-  const dispatchAction: any = useDispatch();
-  const { facilityId, id } = props;
   const [state, dispatch] = useReducer(triageFormReducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
-  const [facilityName, setFacilityName] = useState("");
-  const [patientStatsData, setPatientStatsData] = useState<
-    Array<PatientStatsModel>
-  >([]);
   const [openModalForExistingTriage, setOpenModalForExistingTriage] =
     useState<boolean>(false);
   const headerText = !id ? "Add Triage" : "Edit Triage";
   const buttonText = !id ? "Save Triage" : "Update Triage";
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      if (id) {
-        // Edit Form functionality
-        const res = await dispatchAction(
-          getTriageDetails({ facilityId: facilityId, id: id })
-        );
-        if (!status.aborted && res && res.data) {
-          dispatch({
-            type: "set_form",
-            form: {
-              entry_date: res.data.entry_date
-                ? moment(res.data.entry_date).toDate()
-                : null,
-              num_patients_visited: res.data.num_patients_visited,
-              num_patients_home_quarantine:
-                res.data.num_patients_home_quarantine,
-              num_patients_isolation: res.data.num_patients_isolation,
-              num_patient_referred: res.data.num_patient_referred,
-              num_patient_confirmed_positive:
-                res.data.num_patient_confirmed_positive,
-            },
-          });
-        }
-      }
-      setIsLoading(false);
+  const triageDetailsQuery = useQuery(routes.getTriageDetails, {
+    pathParams: { facilityId, id: id! },
+    prefetch: !!id,
+    onResponse: ({ data }) => {
+      if (!data) return;
+      dispatch({
+        type: "set_form",
+        form: {
+          ...data,
+          entry_date: data.entry_date ? dayjs(data.entry_date).toDate() : null,
+        },
+      });
     },
-    [dispatchAction, facilityId, id]
-  );
+  });
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [dispatch, fetchData, id]
-  );
+  const patientStatsQuery = useQuery(routes.getTriage, {
+    pathParams: { facilityId },
+  });
 
-  // this will fetch all triage data of the facility
-  const fetchTriageData = useCallback(
-    async (status: statusType) => {
-      const [triageRes] = await Promise.all([
-        dispatchTriageData(getTriageInfo({ facilityId })),
-      ]);
-      if (!status.aborted) {
-        if (
-          triageRes &&
-          triageRes.data &&
-          triageRes.data.results &&
-          triageRes.data.results.length
-        ) {
-          setPatientStatsData(triageRes.data.results);
-        }
-      }
-    },
-    [dispatchTriageData, facilityId]
-  );
+  const patientStatsData = patientStatsQuery.data?.results ?? [];
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchTriageData(status);
-    },
-    [dispatch, fetchTriageData]
-  );
-
-  useEffect(() => {
-    async function fetchFacilityName() {
-      if (facilityId) {
-        const res = await dispatchAction(getAnyFacility(facilityId));
-
-        setFacilityName(res?.data?.name || "");
-      } else {
-        setFacilityName("");
-      }
-    }
-    fetchFacilityName();
-  }, [dispatchAction, facilityId]);
+  const facilityQuery = useQuery(routes.getAnyFacility, {
+    pathParams: { id: facilityId },
+  });
+  const facilityName = facilityQuery.data?.name ?? "";
 
   const validateForm = () => {
     const errors = { ...initForm };
@@ -171,6 +108,10 @@ export const TriageForm = (props: triageFormProps) => {
     });
     if (invalidForm) {
       dispatch({ type: "set_error", errors });
+      const firstError = Object.keys(errors).find((e) => errors[e]);
+      if (firstError) {
+        scrollTo(firstError);
+      }
       return false;
     }
     dispatch({ type: "set_error", errors });
@@ -192,7 +133,7 @@ export const TriageForm = (props: triageFormProps) => {
     const validForm = validateForm();
     if (validForm) {
       const data = {
-        entry_date: `${moment(state.form.entry_date).format("YYYY-MM-DD")}`,
+        entry_date: dateQueryString(state.form.entry_date),
         num_patients_visited: Number(state.form.num_patients_visited),
         num_patients_home_quarantine: Number(
           state.form.num_patients_home_quarantine
@@ -211,20 +152,17 @@ export const TriageForm = (props: triageFormProps) => {
       ) {
         setOpenModalForExistingTriage(false);
         setIsLoading(true);
-        const res = await dispatchAction(
-          createTriageForm(data, { facilityId })
-        );
+        const { res } = await request(routes.createTriage, {
+          pathParams: { facilityId },
+          body: data,
+        });
         setIsLoading(false);
-        if (res && res.data) {
+        if (res?.ok) {
           dispatch({ type: "set_form", form: initForm });
           if (id) {
-            Notification.Success({
-              msg: "Triage updated successfully",
-            });
+            Notification.Success({ msg: "Triage updated successfully" });
           } else {
-            Notification.Success({
-              msg: "Triage created successfully",
-            });
+            Notification.Success({ msg: "Triage created successfully" });
           }
           goBack();
         }
@@ -241,7 +179,12 @@ export const TriageForm = (props: triageFormProps) => {
     });
   };
 
-  if (isLoading) {
+  if (
+    isLoading ||
+    facilityQuery.loading ||
+    triageDetailsQuery.loading ||
+    patientStatsQuery.loading
+  ) {
     return <Loading />;
   }
 
@@ -252,7 +195,7 @@ export const TriageForm = (props: triageFormProps) => {
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           [id || "????"]: {
-            name: moment(state.form.entry_date).format("YYYY-MM-DD"),
+            name: dateQueryString(state.form.entry_date),
           },
         }}
         backUrl={`/facility/${facilityId}`}
@@ -260,7 +203,7 @@ export const TriageForm = (props: triageFormProps) => {
         <ConfirmDialog
           title={
             <div className="flex gap-2">
-              <CareIcon className="care-l-exclamation-triangle text-red-500 text-xl" />
+              <CareIcon className="care-l-exclamation-triangle text-xl text-red-500" />
               <p>A Triage already exist on this date</p>
             </div>
           }
@@ -282,20 +225,20 @@ export const TriageForm = (props: triageFormProps) => {
                 handleSubmit();
               }}
             >
-              <div className="max-w-[250px] pb-4">
-                <DateFormField
-                  required
-                  name="entry_date"
-                  label="Entry Date"
-                  value={state.form.entry_date}
-                  disableFuture
-                  onChange={handleFormFieldChange}
-                  position="LEFT"
-                  placeholder="Entry Date"
-                  error={state.errors.entry_date}
-                />
-              </div>
-              <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
+              <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="pb-4">
+                  <DateFormField
+                    required
+                    name="entry_date"
+                    label="Entry Date"
+                    value={state.form.entry_date}
+                    disableFuture
+                    onChange={handleFormFieldChange}
+                    position="LEFT"
+                    placeholder="Entry Date"
+                    error={state.errors.entry_date}
+                  />
+                </div>
                 <div>
                   <TextFormField
                     name="num_patients_visited"
@@ -347,7 +290,7 @@ export const TriageForm = (props: triageFormProps) => {
                   />
                 </div>
               </div>
-              <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
+              <div className="mt-4 flex flex-col justify-end gap-2 md:flex-row">
                 <Cancel onClick={() => goBack()} />
                 <Submit label={buttonText} />
               </div>

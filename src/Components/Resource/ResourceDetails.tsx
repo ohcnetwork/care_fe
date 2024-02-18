@@ -1,62 +1,41 @@
-import React, { useState, useCallback } from "react";
-import loadable from "@loadable/component";
-import { useDispatch } from "react-redux";
-import { classNames } from "../../Utils/utils";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getResourceDetails, deleteResourceRecord } from "../../Redux/actions";
+import { useState, lazy } from "react";
+import { classNames, formatDateTime } from "../../Utils/utils";
 import { navigate } from "raviger";
 import * as Notification from "../../Utils/Notifications.js";
 import CommentSection from "./CommentSection";
-import { formatDate } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
 import ConfirmDialog from "../Common/ConfirmDialog";
-const Loading = loadable(() => import("../Common/Loading"));
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
+const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ResourceDetails(props: { id: string }) {
-  const dispatch: any = useDispatch();
-  const initialData: any = {};
-  const [data, setData] = useState(initialData);
-  const [isLoading, setIsLoading] = useState(true);
   const [isPrintMode, setIsPrintMode] = useState(false);
-
   const [openDeleteResourceDialog, setOpenDeleteResourceDialog] =
-    React.useState(false);
-
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatch(getResourceDetails({ id: props.id }));
-      if (!status.aborted) {
-        if (res && res.data) {
-          setData(res.data);
-        } else {
-          navigate("/not-found");
-        }
-        setIsLoading(false);
+    useState(false);
+  const { data, loading } = useQuery(routes.getResourceDetails, {
+    pathParams: { id: props.id },
+    onResponse: ({ res, data }) => {
+      if (!res && !data) {
+        navigate("/not-found");
       }
     },
-    [props.id, dispatch]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
-  );
+  });
 
   const handleResourceDelete = async () => {
     setOpenDeleteResourceDialog(true);
-
-    const res = await dispatch(deleteResourceRecord(props.id));
+    const { res, data } = await request(routes.deleteResourceRecord, {
+      pathParams: { id: props.id },
+    });
     if (res?.status === 204) {
       Notification.Success({
         msg: "Resource record has been deleted successfully.",
       });
     } else {
       Notification.Error({
-        msg: "Error while deleting Resource: " + (res?.data?.detail || ""),
+        msg: "Error while deleting Resource: " + (data?.detail || ""),
       });
     }
 
@@ -65,29 +44,29 @@ export default function ResourceDetails(props: { id: string }) {
 
   const showFacilityCard = (facilityData: any) => {
     return (
-      <div className="border rounded-lg bg-white shadow h-full text-black mt-2 p-4">
+      <div className="mt-2 h-full rounded-lg border bg-white p-4 text-black shadow">
         <div>
-          <span className="font-semibold leading-relaxed mr-1">Name: </span>
+          <span className="mr-1 font-semibold leading-relaxed">Name: </span>
           {facilityData?.name || "--"}
         </div>
         <div>
-          <span className="font-semibold leading-relaxed mr-1">
+          <span className="mr-1 font-semibold leading-relaxed">
             Facility type:{" "}
           </span>
           {facilityData?.facility_type?.name || "--"}
         </div>
         <div>
-          <span className="font-semibold leading-relaxed mr-1">District: </span>
+          <span className="mr-1 font-semibold leading-relaxed">District: </span>
           {facilityData?.district_object?.name || "--"}
         </div>
         <div>
-          <span className="font-semibold leading-relaxed mr-1">
+          <span className="mr-1 font-semibold leading-relaxed">
             Local body:{" "}
           </span>
           {facilityData?.local_body_object?.name || "--"}
         </div>
         <div>
-          <span className="font-semibold leading-relaxed mr-1">State: </span>
+          <span className="mr-1 font-semibold leading-relaxed">State: </span>
           {facilityData?.state_object?.name || "--"}
         </div>
       </div>
@@ -98,17 +77,17 @@ export default function ResourceDetails(props: { id: string }) {
     return (
       <div id="section-to-print" className="print bg-white">
         <div className="mx-20 p-4">
-          <div className="font-bold text-xl text-center mt-6">
+          <div className="mt-6 text-center text-xl font-bold">
             APPROVAL LETTER
           </div>
-          <div className="text-right mt-6">
+          <div className="mt-6 text-right">
             <span className="font-semibold leading-relaxed">
               {" "}
               Date and Time:{" "}
             </span>
-            {formatDate(data.created_date)}
+            {formatDateTime(data.created_date)}
           </div>
-          <div className="text-right mt-2">
+          <div className="mt-2 text-right">
             <span className="font-semibold leading-relaxed"> Unique Id: </span>
             {data.id}
           </div>
@@ -194,7 +173,7 @@ export default function ResourceDetails(props: { id: string }) {
               {data.assigned_facility_object.state_object?.name}
             </div>
           ) : null}
-          <div className="flex mt-10">
+          <div className="mt-10 flex">
             <div>
               <div className="font-semibold">APPROVED BY</div>
               <div className="mt-3">
@@ -224,7 +203,7 @@ export default function ResourceDetails(props: { id: string }) {
     );
   };
 
-  if (isLoading) {
+  if (loading || !data) {
     return <Loading />;
   }
 
@@ -232,7 +211,7 @@ export default function ResourceDetails(props: { id: string }) {
     <Page
       title={"Resource details"}
       crumbsReplacements={{ [props.id]: { name: data.title } }}
-      backUrl={"/resource/board-view"}
+      backUrl={"/resource/board"}
     >
       {isPrintMode ? (
         <div className="my-4">
@@ -247,16 +226,16 @@ export default function ResourceDetails(props: { id: string }) {
           {ApprovalLetter(data)}
         </div>
       ) : (
-        <div className="mx-3 md:mx-8 mb-10">
-          <div className="my-4 flex flex-col items-start md:flex-row md:justify-between md:items-center">
+        <div className="mx-3 mb-10 md:mx-8">
+          <div className="my-4 flex flex-col items-start md:flex-row md:items-center md:justify-between">
             <ButtonV2 onClick={(_) => setIsPrintMode(true)}>
               <i className="fas fa-file-alt mr-2"></i> Approval Letter
             </ButtonV2>
           </div>
           {data.assigned_to_object && (
-            <div className="relative rounded-lg shadow bg-primary-200">
-              <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
-                <div className="pr-16 sm:text-center sm:px-16">
+            <div className="relative rounded-lg bg-primary-200 shadow">
+              <div className="mx-auto max-w-screen-xl p-3 sm:px-6 lg:px-8">
+                <div className="pr-16 sm:px-16 sm:text-center">
                   <p className="font-bold text-primary-800">
                     <span className="inline">
                       Assigned to: {data.assigned_to_object.first_name}{" "}
@@ -268,21 +247,22 @@ export default function ResourceDetails(props: { id: string }) {
               </div>
             </div>
           )}
-          <div className="border rounded-lg bg-white shadow h-full text-black mt-4 p-4">
-            <div className="flex flex-col sm:flex-row sm:justify-between mb-4">
+          <div className="mt-4 h-full rounded-lg border bg-white p-4 text-black shadow">
+            <div className="mb-4 flex flex-col sm:flex-row sm:justify-between">
               <div className="text-xl font-semibold">{data.title || "--"}</div>
               <ButtonV2
-                className="w-full mt-4 sm:mt-2"
-                href={`/resource/${data.external_id}/update`}
+                data-testid="update-status"
+                className="mt-4 w-full sm:mt-2"
+                href={`/resource/${data.id}/update`}
               >
                 Update Status/Details
               </ButtonV2>
             </div>
 
-            <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
               <div>
                 <span className="font-semibold leading-relaxed">Status: </span>
-                <span className="badge badge-pill badge-primary py-1 px-2">
+                <span className="badge badge-pill badge-primary px-2 py-1">
                   {data.status}
                 </span>
               </div>
@@ -333,19 +313,19 @@ export default function ResourceDetails(props: { id: string }) {
                   {" "}
                   Is emergency:{" "}
                 </span>
-                <span className="badge badge-pill badge-danger py-1 px-2">
+                <span className="badge badge-pill badge-danger px-2 py-1">
                   {" "}
                   {data.emergency ? "yes" : "no"}
                 </span>
               </div>
 
-              <div className="md:row-span-2 md:col-span-2">
+              <div className="md:col-span-2 md:row-span-2">
                 <div className="font-semibold leading-relaxed">Reason: </div>
                 <div className="ml-2">{data.reason || "--"}</div>
               </div>
             </div>
 
-            <div className="flex justify-end mt-4">
+            <div className="mt-4 flex justify-end">
               <div>
                 <ButtonV2
                   className="w-full"
@@ -369,9 +349,9 @@ export default function ResourceDetails(props: { id: string }) {
           </div>
           <h4 className="mt-8">Audit Log</h4>
 
-          <div className="flex justify-between p-2 bg-white rounded-lg shadow text-center px-4 mt-2">
+          <div className="mt-2 flex justify-between rounded-lg bg-white p-2 px-4 text-center shadow">
             <div className="w-1/2 border-r-2 px-1">
-              <div className="text-sm leading-5 font-medium text-black">
+              <div className="text-sm font-medium leading-5 text-black">
                 Created
               </div>
               <div className="mt-1 text-sm leading-5 text-gray-900">
@@ -380,12 +360,12 @@ export default function ResourceDetails(props: { id: string }) {
                   {data?.created_by_object?.last_name}
                 </div>
                 <div className="text-xs">
-                  {data.created_date && formatDate(data.created_date)}
+                  {data.created_date && formatDateTime(data.created_date)}
                 </div>
               </div>
             </div>
             <div className="w-1/2 px-1">
-              <div className="text-sm leading-5 font-medium text-black">
+              <div className="text-sm font-medium leading-5 text-black">
                 Last Edited
               </div>
               <div className="mt-1 text-sm leading-5 text-gray-900">
@@ -394,14 +374,14 @@ export default function ResourceDetails(props: { id: string }) {
                   {data?.last_edited_by_object?.last_name}
                 </div>
                 <div className="text-xs">
-                  {data.modified_date && formatDate(data.modified_date)}
+                  {data.modified_date && formatDateTime(data.modified_date)}
                 </div>
               </div>
             </div>
           </div>
           <div
             className={classNames(
-              "grid grid-cols-1 mt-8 gap-x-6 gap-y-12",
+              "mt-8 grid grid-cols-1 gap-x-6 gap-y-12",
               data.assigned_facility_object
                 ? "lg:grid-cols-3"
                 : "lg:grid-cols-2"

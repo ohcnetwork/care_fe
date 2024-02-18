@@ -2,8 +2,9 @@ import DropdownMenu, {
   DropdownItem,
   DropdownItemProps,
 } from "../../Components/Common/components/Menu";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+
 import ButtonV2 from "../../Components/Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 import useExport from "../../Common/hooks/useExport";
 
 interface ExportItem {
@@ -39,15 +40,16 @@ export const ExportMenu = ({
   const { isExporting, exportFile } = useExport();
 
   return (
-    <div key="export-menu">
+    <div key="export-menu" id="export-button">
       <DropdownMenu
         disabled={isExporting || disabled}
         title={isExporting ? "Exporting..." : label}
-        icon={<CareIcon className="care-l-import" />}
-        className="bg-white hover:bg-primary-100 text-primary-500 enabled:border border-primary-500 tooltip"
+        icon={<CareIcon className="care-l-export" />}
+        className="tooltip border-primary-500 bg-white text-primary-500 hover:bg-primary-100 enabled:border"
       >
         {exportItems.map((item) => (
           <DropdownItem
+            key={item.label}
             onClick={() =>
               exportFile(item.action, item.filePrefix, item.type, item.parse)
             }
@@ -76,7 +78,7 @@ export const ExportButton = ({
         onClick={() =>
           exportFile(props.action, props.filenamePrefix, type, parse)
         }
-        className="mx-2 tooltip p-4 text-lg text-secondary-800 disabled:text-secondary-500 disabled:bg-transparent"
+        className="tooltip mx-2 p-4 text-lg text-secondary-800 disabled:bg-transparent disabled:text-secondary-500"
         variant="secondary"
         ghost
         circle

@@ -1,8 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { DoctorModal } from "./models";
 import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
-import { useDispatch } from "react-redux";
-import { deleteDoctor } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
 import { DoctorCapacity } from "./DoctorCapacity";
@@ -10,6 +8,8 @@ import DialogModal from "../Common/Dialog";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 interface DoctorsCountProps extends DoctorModal {
   facilityId: string;
@@ -19,28 +19,22 @@ interface DoctorsCountProps extends DoctorModal {
 
 const DoctorsCountCard = (props: DoctorsCountProps) => {
   const specialization = DOCTOR_SPECIALIZATION.find((i) => i.id === props.area);
-  const dispatchAction: any = useDispatch();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [open, setOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<number>(-1);
 
   const handleDeleteSubmit = async () => {
-    if (props.area) {
-      const res = await dispatchAction(
-        deleteDoctor(props.area, { facilityId: props.facilityId })
-      );
-      if (res?.status === 204) {
-        Notification.Success({
-          msg: "Doctor specialization type deleted successfully",
-        });
-        props.removeDoctor(props.id);
-      } else {
-        Notification.Error({
-          msg:
-            "Error while deleting Doctor specialization: " +
-            (res?.data?.detail || ""),
-        });
-      }
+    if (!props.area) return;
+
+    const { res } = await request(routes.deleteDoctor, {
+      pathParams: { facilityId: props.facilityId, area: `${props.area}` },
+    });
+
+    if (res?.ok) {
+      props.removeDoctor(props.id);
+      Notification.Success({
+        msg: "Doctor specialization type deleted successfully",
+      });
     }
   };
 
@@ -50,20 +44,21 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
 
   return (
     <div className="w-full">
-      <div className="shadow-sm rounded-sm h-full border border-[#D2D6DC] flex flex-col">
-        <div className="flex justify-start items-center gap-3 px-4 py-6 flex-1">
+      <div className="flex h-full flex-col rounded-sm border border-[#D2D6DC] shadow-sm">
+        <div className="flex flex-1 items-center justify-start gap-3 px-4 py-6">
           <div className={`rounded-full p-4 ${specialization?.desc}`}>
-            <DoctorIcon className="fill-current text-white w-5 h-5" />
+            <DoctorIcon className="h-5 w-5 fill-current text-white" />
           </div>
           <div>
-            <div className="font-medium text-sm text-[#808080]">
+            <div className="text-sm font-medium text-[#808080]">
               {specialization?.text} Doctors
             </div>
-            <h2 className="font-bold text-xl mt-2">{props.count}</h2>
+            <h2 className="mt-2 text-xl font-bold">{props.count}</h2>
           </div>
         </div>
-        <div className="bg-[#FBF9FB] py-2 px-3 flex justify-end gap-4 border-t border-[#D2D6DC]">
+        <div className="flex justify-end gap-4 border-t border-[#D2D6DC] bg-[#FBF9FB] px-3 py-2">
           <ButtonV2
+            id="edit-facility-doctorcapacity"
             variant="secondary"
             ghost
             onClick={() => {
@@ -75,6 +70,7 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
             Edit
           </ButtonV2>
           <ButtonV2
+            id="delete-facility-doctorcapacity"
             variant="danger"
             ghost
             onClick={() => setOpenDeleteDialog(true)}

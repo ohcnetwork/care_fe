@@ -17,11 +17,6 @@ interface Position {
   y: number;
 }
 
-/**
- * Duration of each row on the canvas in seconds.
- */
-const DURATION = 7;
-
 interface Options {
   /**
    * The size of the canvas rendering context.
@@ -53,6 +48,10 @@ interface Options {
    * Options for SPO2 channel.
    */
   spo2: ChannelOptions;
+  /**
+   * Duration of each row on the canvas in seconds.
+   */
+  duration: number;
 }
 
 /**
@@ -69,6 +68,7 @@ class HL7VitalsRenderer {
       pleth,
       spo2,
       size: { height: h, width: w },
+      duration,
     } = options;
 
     this.options = options;
@@ -77,7 +77,7 @@ class HL7VitalsRenderer {
         color: "#0ffc03",
         buffer: [],
         cursor: { x: 0, y: 0 },
-        deltaX: w / (DURATION * ecg.samplingRate),
+        deltaX: w / (duration * ecg.samplingRate),
         transform: lerp(ecg.lowLimit, ecg.highLimit, h * 0.25, 0),
         chunkSize: ecg.samplingRate * options.animationInterval * 1e-3,
         options: ecg,
@@ -88,7 +88,7 @@ class HL7VitalsRenderer {
         color: "#ffff24",
         buffer: [],
         cursor: { x: 0, y: 0 },
-        deltaX: w / (DURATION * pleth.samplingRate),
+        deltaX: w / (duration * pleth.samplingRate),
         transform: lerp(pleth.lowLimit, pleth.highLimit, h * 0.75, h * 0.5),
         chunkSize: pleth.samplingRate * options.animationInterval * 1e-3,
         options: pleth,
@@ -99,7 +99,7 @@ class HL7VitalsRenderer {
         color: "#03a9f4",
         buffer: [],
         cursor: { x: 0, y: 0 },
-        deltaX: w / (DURATION * spo2.samplingRate),
+        deltaX: w / (duration * spo2.samplingRate),
         transform: lerp(spo2.lowLimit, spo2.highLimit, h, h * 0.75),
         chunkSize: spo2.samplingRate * options.animationInterval * 1e-3,
         options: spo2,

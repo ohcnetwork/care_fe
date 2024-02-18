@@ -27,9 +27,9 @@ export default function Steps(props: { steps: Step[] }) {
                 }`}
               >
                 <span className="flex items-center px-6 py-4 text-sm font-medium">
-                  <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-green-600 group-hover:bg-green-800">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-600 group-hover:bg-green-800">
                     <CareIcon
-                      className="h-6 w-6 text-white care-l-check"
+                      className="care-l-check h-6 w-6 text-white"
                       aria-hidden="true"
                     />
                   </span>
@@ -48,7 +48,7 @@ export default function Steps(props: { steps: Step[] }) {
                 }`}
                 aria-current="step"
               >
-                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border-2 border-green-600">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-green-600">
                   <span className="text-green-600">{step.id}</span>
                 </span>
                 <span className="ml-4 text-sm font-medium text-green-600">
@@ -65,7 +65,7 @@ export default function Steps(props: { steps: Step[] }) {
                 }`}
               >
                 <span className="flex items-center px-6 py-4 text-sm font-medium">
-                  <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border-2 border-gray-300 group-hover:border-gray-400">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-gray-300 group-hover:border-gray-400">
                     <span className="text-gray-500 group-hover:text-gray-900">
                       {step.id}
                     </span>
@@ -80,7 +80,7 @@ export default function Steps(props: { steps: Step[] }) {
             {stepIdx !== props.steps.length - 1 ? (
               <>
                 <div
-                  className="absolute top-0 right-0 hidden h-full w-5 md:block"
+                  className="absolute right-0 top-0 hidden h-full w-5 md:block"
                   aria-hidden="true"
                 >
                   <svg

@@ -8,13 +8,13 @@
 // You can also remove this file if you'd prefer not to use a
 // service worker, and the Workbox build step will be skipped.
 
-import { clientsClaim } from "workbox-core";
 import { ExpirationPlugin } from "workbox-expiration";
+import { StaleWhileRevalidate } from "workbox-strategies";
+import { clientsClaim } from "workbox-core";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { precacheAndRoute } from "workbox-precaching";
 // import { createHandlerBoundToURL } from "workbox-precaching";
 import { registerRoute } from "workbox-routing";
-import { StaleWhileRevalidate } from "workbox-strategies";
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -105,14 +105,14 @@ self.addEventListener("push", async function (event) {
   if (event.data) {
     const data = JSON.parse(event.data.text());
 
-    if (data?.type === "MESSAGE") {
+    if (["PUSH_MESSAGE"].includes(data?.type)) {
       self.clients.matchAll().then((clients) => {
         clients[0].postMessage(data);
       });
     } else {
       event.waitUntil(
-        self.registration.showNotification("Care - CoronaSafe Network", {
-          body: data.title,
+        self.registration.showNotification("Care - Open Health Care Network", {
+          body: data.message,
           tag: data.external_id,
         })
       );

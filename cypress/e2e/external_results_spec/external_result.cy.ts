@@ -16,6 +16,7 @@ describe("Edit Profile Testing", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/external_results");
   });
 
@@ -51,7 +52,17 @@ describe("Edit Profile Testing", () => {
   });
 
   it("export", () => {
-    cy.intercept("/api/v1/external_result/?csv=true&").as("export");
+    cy.intercept("**", (req: Cypress.Request) => {
+      const url = new URL(req.url);
+      const params = new URLSearchParams(url.search);
+      if (
+        req.method === "GET" &&
+        url.pathname === "/api/v1/external_result/" &&
+        params.get("csv") === "true"
+      ) {
+        req.alias = "export";
+      }
+    });
     cy.contains("Import/Export").click().wait(100);
     cy.contains("Export Results").click();
     cy.wait("@export").then((interception) => {

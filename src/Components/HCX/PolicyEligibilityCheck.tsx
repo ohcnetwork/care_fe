@@ -39,7 +39,7 @@ export default function HCXPolicyEligibilityCheck({
       setEligibility(
         results.reduce?.((acc: any, policy: HCXPolicyModel) => {
           if (policy.outcome)
-            acc[policy.id!] =
+            acc[policy.id ?? ""] =
               !policy.error_text && policy.outcome === "Processing Complete";
           return acc;
         }, {})
@@ -88,7 +88,7 @@ export default function HCXPolicyEligibilityCheck({
 
   return (
     <div className={className}>
-      <div className="flex gap-2 items-center">
+      <div className="flex items-center gap-2">
         <SelectFormField
           required
           name="policy"
@@ -110,7 +110,7 @@ export default function HCXPolicyEligibilityCheck({
           }
           optionIcon={(option) =>
             eligibility[option.id!] !== undefined && (
-              <EligibilityChip eligible={!!eligibility[option.id!]} />
+              <EligibilityChip eligible={!!eligibility[option.id ?? ""]} />
             )
           }
           onChange={({ value }) => setPolicy(value)}
@@ -126,19 +126,19 @@ export default function HCXPolicyEligibilityCheck({
           optionDescription={(option) => (
             <div>
               <div className="flex flex-col">
-                <span className="flex gap-2 w-full">
+                <span className="flex w-full gap-2">
                   <span className="w-24">Member ID</span>
                   <span className="font-medium tracking-wide">
                     {option.subscriber_id}
                   </span>
                 </span>
-                <span className="flex gap-2 w-full">
+                <span className="flex w-full gap-2">
                   <span className="w-24">Insurer ID</span>
                   <span className="font-medium tracking-wide">
                     {option.insurer_id}
                   </span>
                 </span>
-                <span className="flex gap-2 w-full">
+                <span className="flex w-full gap-2">
                   <span className="w-24">Insurer Name</span>
                   <span className="font-medium tracking-wide">
                     {option.insurer_name}
@@ -146,7 +146,7 @@ export default function HCXPolicyEligibilityCheck({
                 </span>
               </div>
               {option.error_text && (
-                <span className="text-red-600 text-sm">
+                <span className="text-sm text-red-600">
                   {option.error_text}
                 </span>
               )}
@@ -154,13 +154,13 @@ export default function HCXPolicyEligibilityCheck({
           )}
         />
         <ButtonV2
-          className="py-3 whitespace-nowrap"
+          className="whitespace-nowrap py-3"
           onClick={checkEligibility}
           disabled={!policy || (policy && eligibility[policy]) || isChecking}
         >
           {isChecking ? (
             <>
-              <CareIcon className="care-l-spinner text-lg animate-spin" />
+              <CareIcon className="care-l-spinner animate-spin text-lg" />
               <span>Checking ...</span>
             </>
           ) : (
@@ -175,8 +175,8 @@ export default function HCXPolicyEligibilityCheck({
 const EligibilityChip = ({ eligible }: { eligible: boolean }) => {
   return (
     <div
-      className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full tracking-wider ${
-        eligible ? "text-primary-500 bg-primary-100" : "bg-red-500 text-white"
+      className={`flex items-center gap-1 rounded-full px-1.5 py-0.5 tracking-wider ${
+        eligible ? "bg-primary-100 text-primary-500" : "bg-red-500 text-white"
       }`}
     >
       <CareIcon

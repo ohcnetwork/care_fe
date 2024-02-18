@@ -1,10 +1,11 @@
 import { navigate } from "raviger";
 import { ConsultationModel } from "./models";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
 import useConfig from "../../Common/hooks/useConfig";
+import Chip from "../../CAREUI/display/Chip";
 
 interface ConsultationProps {
   itemData: ConsultationModel;
@@ -15,20 +16,20 @@ export const ConsultationCard = (props: ConsultationProps) => {
   const { itemData, isLastConsultation } = props;
   const { kasp_string } = useConfig();
   return (
-    <div className="block border rounded-lg bg-white shadow cursor-pointer hover:border-primary-500 text-black mt-4 p-4">
+    <div className="mt-4 block cursor-pointer rounded-lg border bg-white p-4 text-black shadow hover:border-primary-500">
       {itemData.is_kasp && (
-        <div className="ml-3 mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
+        <div className="ml-3 mt-2 inline-flex items-center rounded-md bg-yellow-100 px-2.5 py-0.5 text-sm font-medium leading-5 text-yellow-800">
           {kasp_string}
         </div>
       )}
 
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-4 ml-2 mt-2">
+      <div className="ml-2 mt-2 grid grid-cols-1 gap-4 md:grid-cols-4">
         <div className="sm:col-span-1">
           <div className="sm:col-span-1">
-            <div className="text-sm leading-5 font-semibold text-zinc-400">
+            <div className="text-sm font-semibold leading-5 text-zinc-400">
               Facility
             </div>
-            <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
+            <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
               {itemData.facility_name}{" "}
               {itemData.is_telemedicine && (
                 <span className="ml-2">(Telemedicine)</span>
@@ -39,10 +40,10 @@ export const ConsultationCard = (props: ConsultationProps) => {
         <div className="sm:col-span-1">
           <div className="capitalize">
             <div className="sm:col-span-1">
-              <div className="text-sm leading-5 font-semibold text-zinc-400">
+              <div className="text-sm font-semibold leading-5 text-zinc-400">
                 Suggestion{" "}
               </div>
-              <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
+              <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
                 {itemData.suggestion_text?.toLocaleLowerCase()}
               </div>
             </div>
@@ -51,25 +52,34 @@ export const ConsultationCard = (props: ConsultationProps) => {
         {itemData.kasp_enabled_date && (
           <div className="sm:col-span-1">
             <div className="sm:col-span-1">
-              <div className="text-sm leading-5 font-semibold text-zinc-400">
+              <div className="text-sm font-semibold leading-5 text-zinc-400">
                 {kasp_string} Enabled date{" "}
               </div>
-              <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
+              <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
                 {itemData.kasp_enabled_date
-                  ? formatDate(itemData.kasp_enabled_date)
+                  ? formatDateTime(itemData.kasp_enabled_date)
                   : "-"}
               </div>
             </div>
           </div>
         )}
-        {itemData.admitted && itemData.admission_date && (
+        {itemData.admitted && itemData.encounter_date && (
           <div className="sm:col-span-1">
             <div className="sm:col-span-1">
-              <div className="text-sm leading-5 font-semibold text-zinc-400">
+              <div className="text-sm font-semibold leading-5 text-zinc-400">
                 Admitted on
               </div>
-              <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
-                {formatDate(itemData.admission_date)}
+              <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
+                {formatDateTime(itemData.encounter_date)}
+                {itemData.is_readmission && (
+                  <Chip
+                    size="small"
+                    variant="custom"
+                    className="ml-4 border-blue-600 bg-blue-100 text-blue-600"
+                    startIcon="l-repeat"
+                    text="Readmission"
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -77,10 +87,10 @@ export const ConsultationCard = (props: ConsultationProps) => {
         {!itemData.admitted && (
           <div className="sm:col-span-1">
             <div className="sm:col-span-1">
-              <div className="text-sm leading-5 font-semibold text-zinc-400">
+              <div className="text-sm font-semibold leading-5 text-zinc-400">
                 Admitted{" "}
               </div>
-              <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
+              <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
                 No
               </div>
             </div>
@@ -89,39 +99,44 @@ export const ConsultationCard = (props: ConsultationProps) => {
         {itemData.discharge_date && (
           <div className="sm:col-span-1">
             <div className="sm:col-span-1">
-              <div className="text-sm leading-5 font-semibold text-zinc-400">
+              <div className="text-sm font-semibold leading-5 text-zinc-400">
                 Discharged on{" "}
               </div>
-              <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
-                {formatDate(itemData.discharge_date)}
+              <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
+                {formatDateTime(itemData.discharge_date)}
               </div>
             </div>
           </div>
         )}
       </div>
-      <div className="flex flex-col mt-8">
+      <div className="mt-8 flex flex-col">
         {
-          <div className="text-sm text-gray-700 items-center flex flex-col md:flex-row">
-            Created:{" "}
-            <RelativeDateUserMention
-              tooltipPosition="right"
-              actionDate={itemData.created_date}
-              user={itemData.created_by}
-            />
+          <div className="flex flex-col items-center text-sm text-gray-700 md:flex-row">
+            Created :{" "}
+            <div className=" ml-1 text-black">
+              <RelativeDateUserMention
+                tooltipPosition="right"
+                actionDate={itemData.created_date}
+                user={itemData.created_by}
+              />
+            </div>
           </div>
         }
-        <div className="text-sm text-gray-700 items-center flex flex-col md:flex-row">
-          Last Modified:{" "}
-          <RelativeDateUserMention
-            tooltipPosition="right"
-            actionDate={itemData.modified_date}
-            user={itemData.last_edited_by}
-          />
+        <div className="flex flex-col items-center text-sm text-gray-700 md:flex-row">
+          Last Modified :{" "}
+          <div className=" ml-1 text-black">
+            <RelativeDateUserMention
+              tooltipPosition="right"
+              actionDate={itemData.modified_date}
+              user={itemData.last_edited_by}
+            />
+          </div>
         </div>
       </div>
-      <div className="mt-4 flex flex-col gap-1 md:flex-row justify-between w-full">
+      <div className="mt-4 flex w-full flex-col justify-between gap-1 md:flex-row">
         <ButtonV2
-          className="bg-white hover:bg-gray-300 border border-gray-500 text-black"
+          id="view_consulation_updates"
+          className="h-auto whitespace-pre-wrap border border-gray-500 bg-white text-black hover:bg-gray-300"
           onClick={() =>
             navigate(
               `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}`
@@ -131,7 +146,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
           View Consultation / Consultation Updates
         </ButtonV2>
         <ButtonV2
-          className="bg-white hover:bg-gray-300 border border-gray-500 text-black"
+          className="h-auto whitespace-pre-wrap border border-gray-500 bg-white text-black hover:bg-gray-300"
           onClick={() =>
             navigate(
               `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/files/`
@@ -142,12 +157,13 @@ export const ConsultationCard = (props: ConsultationProps) => {
         </ButtonV2>
         {isLastConsultation && (
           <ButtonV2
-            className="bg-white hover:bg-gray-300 border border-gray-500 text-black"
+            className="h-auto whitespace-pre-wrap border border-gray-500 bg-white text-black hover:bg-gray-300"
             onClick={() =>
               navigate(
                 `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds`
               )
             }
+            disabled={itemData.discharge_date}
             authorizeFor={NonReadOnlyUsers}
           >
             Add Consultation Updates

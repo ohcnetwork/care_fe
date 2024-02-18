@@ -19,7 +19,6 @@ export default defineConfig({
           return null;
         },
       });
-
       return config;
     },
     baseUrl: "http://localhost:4000",

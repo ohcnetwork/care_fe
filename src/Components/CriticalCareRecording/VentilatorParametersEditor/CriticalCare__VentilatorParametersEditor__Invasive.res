@@ -157,7 +157,7 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
       <Radio
         id={"psv"}
         label={"C-PAP/ Pressure Support Ventilation (PSV)"}
-        checked={state.ventilator_mode == PSV}
+        checked={parentVentilatorMode == UNKNOWN}
         onChange={_ => {
           setParentVentilatorMode(_ => UNKNOWN)
           send(SetVentilatorMode(PSV))

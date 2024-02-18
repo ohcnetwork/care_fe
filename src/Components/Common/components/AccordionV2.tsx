@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { classNames } from "../../../Utils/utils";
+import { useRef, useState } from "react";
 
 export default function AccordionV2(props: {
   children: JSX.Element | JSX.Element[];
@@ -9,14 +8,14 @@ export default function AccordionV2(props: {
   expanded?: boolean;
 }) {
   const [toggle, setToggle] = useState(props.expanded as boolean);
-  const contentEl = React.useRef<HTMLDivElement>(null);
+  const contentEl = useRef<HTMLDivElement>(null);
 
   return (
     <div className={props.className}>
       <div className="flex justify-between">
         <button
           type="button"
-          className="w-full grid justify-start"
+          className="grid w-full justify-start"
           onClick={() => {
             setToggle((prev) => !prev);
           }}
@@ -27,7 +26,7 @@ export default function AccordionV2(props: {
           type="button"
           className={
             toggle
-              ? "transition-all rotate-180 duration-300 ease-in-out"
+              ? "rotate-180 transition-all duration-300 ease-in-out"
               : "transition"
           }
           onClick={() => {
@@ -43,7 +42,7 @@ export default function AccordionV2(props: {
               viewBox="0 0 24 24"
               strokeWidth={2}
               stroke="currentColor"
-              className="w-5 h-5"
+              className="h-5 w-5"
             >
               <path
                 strokeLinecap="round"
@@ -55,15 +54,10 @@ export default function AccordionV2(props: {
         </button>
       </div>
       <div
-        className={classNames("transition-all ease-in-out duration-500")}
+        className={`transition-all duration-500 ease-in-out ${
+          toggle ? "overflow-visible" : "h-0 overflow-hidden"
+        }`}
         ref={contentEl}
-        style={
-          toggle
-            ? {
-                overflow: "visible",
-              }
-            : { height: "0px", overflow: "hidden" }
-        }
       >
         {props.children}
       </div>

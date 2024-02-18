@@ -1,13 +1,10 @@
-import loadable from "@loadable/component";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { navigate } from "raviger";
-import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { lazy, useState } from "react";
 import { externalResultList } from "../../Redux/actions";
 import ListFilter from "./ListFilter";
 import FacilitiesSelectDialogue from "./FacilitiesSelectDialogue";
 import { FacilityModel } from "../Facility/models";
-import parsePhoneNumberFromString from "libphonenumber-js";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -16,14 +13,16 @@ import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import CountBlock from "../../CAREUI/display/Count";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import Page from "../Common/components/Page";
+import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
+import { parsePhoneNumber } from "../../Utils/utils";
+import useAuthUser from "../../Common/hooks/useAuthUser";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ResultList() {
-  const dispatch: any = useDispatch();
-  const [data, setData] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [totalCount, setTotalCount] = useState(0);
+  const authUser = useAuthUser();
   const {
     qParams,
     updateQuery,
@@ -31,7 +30,10 @@ export default function ResultList() {
     FilterBadges,
     advancedFilter,
     resultsPerPage,
-  } = useFilters({ limit: 14 });
+  } = useFilters({
+    limit: 14,
+    cacheBlacklist: ["mobile_number", "name"],
+  });
   const [showDialog, setShowDialog] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
@@ -39,56 +41,50 @@ export default function ResultList() {
   const [resultId, setResultId] = useState(-1);
   const [dataList, setDataList] = useState({ lsgList: [], wardList: [] });
 
-  let manageResults: any = null;
-  useEffect(() => {
-    setIsLoading(true);
-    const params = {
-      page: qParams.page || 1,
-      name: qParams.name || "",
-      mobile_number: qParams.mobile_number
-        ? parsePhoneNumberFromString(qParams.mobile_number)?.format("E.164")
-        : "",
-      wards: qParams.wards || undefined,
-      local_bodies: qParams.local_bodies || undefined,
-      created_date_before: qParams.created_date_before || undefined,
-      created_date_after: qParams.created_date_after || undefined,
-      result_date_before: qParams.result_date_before || undefined,
-      result_date_after: qParams.result_date_after || undefined,
-      sample_collection_date_after:
-        qParams.sample_collection_date_after || undefined,
-      sample_collection_date_before:
-        qParams.sample_collection_date_before || undefined,
-      offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
-      srf_id: qParams.srf_id || undefined,
-    };
+  const [phone_number, setPhoneNumber] = useState("");
+  const [phoneNumberError, setPhoneNumberError] = useState("");
 
-    dispatch(externalResultList(params, "externalResultList"))
-      .then((res: any) => {
-        if (res && res.data) {
-          setData(res.data.results);
-          setTotalCount(res.data.count);
-          setIsLoading(false);
-        }
-      })
-      .catch(() => {
-        setIsLoading(false);
-      });
-  }, [
-    dispatch,
-    qParams.name,
-    qParams.page,
-    qParams.mobile_number,
-    qParams.wards,
-    qParams.created_date_before,
-    qParams.created_date_after,
-    qParams.result_date_before,
-    qParams.result_date_after,
-    qParams.sample_collection_date_after,
-    qParams.sample_collection_date_before,
-    qParams.local_bodies,
-    qParams.srf_id,
-    dataList,
-  ]);
+  const setPhoneNum = (mobile_number: string) => {
+    setPhoneNumber(mobile_number);
+    if (mobile_number.length >= 13) {
+      setPhoneNumberError("");
+      updateQuery({ mobile_number });
+      return;
+    }
+
+    if (mobile_number === "+91" || mobile_number === "") {
+      setPhoneNumberError("");
+      updateQuery({ mobile_number: "" });
+      return;
+    }
+
+    setPhoneNumberError("Enter a valid number");
+  };
+  const params = {
+    page: qParams.page || 1,
+    name: qParams.name || "",
+    mobile_number: qParams.mobile_number
+      ? parsePhoneNumber(qParams.mobile_number) ?? ""
+      : "",
+    wards: qParams.wards || undefined,
+    local_bodies: qParams.local_bodies || undefined,
+    created_date_before: qParams.created_date_before || undefined,
+    created_date_after: qParams.created_date_after || undefined,
+    result_date_before: qParams.result_date_before || undefined,
+    result_date_after: qParams.result_date_after || undefined,
+    sample_collection_date_after:
+      qParams.sample_collection_date_after || undefined,
+    sample_collection_date_before:
+      qParams.sample_collection_date_before || undefined,
+    offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
+    srf_id: qParams.srf_id || undefined,
+  };
+
+  const { data, loading } = useQuery(routes.externalResultList, {
+    query: params,
+  });
+
+  let manageResults: any = null;
 
   const removeLSGFilter = (paramKey: any, id: any) => {
     const updatedLsgList = dataList.lsgList.filter((x: any) => x.id !== id);
@@ -116,11 +112,11 @@ export default function ResultList() {
       value && (
         <span
           key={`${key}-${value.id}`}
-          className="inline-flex h-full items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border"
+          className="inline-flex h-full items-center rounded-full border bg-white px-3 py-1 text-xs font-medium leading-4 text-gray-600"
         >
           {`${key}: ${value.name}`}
           <i
-            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
+            className="fas fa-times ml-2 cursor-pointer rounded-full px-1 py-0.5 hover:bg-gray-500"
             onClick={() =>
               paramKey === "local_bodies"
                 ? removeLSGFilter(paramKey, value.id)
@@ -135,47 +131,51 @@ export default function ResultList() {
   };
 
   let resultList: any[] = [];
-  if (data && data.length) {
-    resultList = data.map((result: any) => {
+  if (data?.results.length) {
+    resultList = data.results.map((result: any) => {
       const resultUrl = `/external_results/${result.id}`;
       return (
         <tr key={`usr_${result.id}`} className="bg-white">
           <td
             onClick={() => navigate(resultUrl)}
-            className="px-6 py-4 whitespace-nowrap text-md leading-5 text-gray-900"
+            className="text-md whitespace-nowrap px-6 py-4 leading-5 text-gray-900"
           >
             <div className="flex">
               <a
                 href="#"
                 className="group inline-flex space-x-2 text-sm leading-5"
               >
-                <p className="text-gray-800 group-hover:text-gray-900 transition ease-in-out duration-150">
-                  {result.name} - {result.age} {result.age_in}
+                <p className="text-gray-800 transition duration-150 ease-in-out group-hover:text-gray-900">
+                  {`${result.name}`} - {result.age} {result.age_in}
                 </p>
               </a>
             </div>
           </td>
-          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
-            <span className="text-gray-900 font-medium">
+          <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
+            <span className="font-medium text-gray-900">
               {result.test_type}
             </span>
           </td>
-          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium leading-4 bg-blue-100 text-blue-800 capitalize">
+          <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
+            <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium capitalize leading-4 text-blue-800">
               {result.result}
             </span>
             {result.patient_created ? (
-              <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium leading-4 bg-green-100 text-green-800 capitalize">
+              <span className="ml-2 inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium capitalize leading-4 text-green-800">
                 Patient Created
               </span>
             ) : null}
           </td>
-          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-800">
+          <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-800">
             {result.result_date || "-"}
           </td>
-          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
+          <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
             <ButtonV2
               variant="primary"
+              disabled={
+                authUser.user_type === "Nurse" || authUser.user_type === "Staff"
+              }
+              authorizeFor={NonReadOnlyUsers}
               border
               ghost
               onClick={() => {
@@ -191,7 +191,7 @@ export default function ResultList() {
     });
   }
 
-  if (isLoading || !data) {
+  if (loading) {
     manageResults = (
       <tr className="bg-white">
         <td colSpan={5}>
@@ -199,14 +199,14 @@ export default function ResultList() {
         </td>
       </tr>
     );
-  } else if (data && data.length) {
+  } else if (data?.results.length) {
     manageResults = <>{resultList}</>;
-  } else if (data && data.length === 0) {
+  } else if (data?.results.length === 0) {
     manageResults = (
       <tr className="bg-white">
         <td colSpan={5}>
-          <div className="w-full bg-white rounded-lg p-3">
-            <div className="text-2xl mt-4 text-gray-600  font-bold flex justify-center w-full">
+          <div className="w-full rounded-lg bg-white p-3">
+            <div className="mt-4 flex w-full  justify-center text-2xl font-bold text-gray-600">
               No Results Found
             </div>
           </div>
@@ -237,13 +237,18 @@ export default function ResultList() {
           <ExportMenu
             label="Import/Export"
             exportItems={[
-              {
-                label: "Import Results",
-                action: () => navigate("/external_results/upload"),
-                options: {
-                  icon: <CareIcon className="care-l-import" />,
-                },
-              },
+              ...(authUser.user_type !== "Nurse" &&
+              authUser.user_type !== "Staff"
+                ? [
+                    {
+                      label: "Import Results",
+                      action: () => navigate("/external_results/upload"),
+                      options: {
+                        icon: <CareIcon className="care-l-import" />,
+                      },
+                    },
+                  ]
+                : []),
               {
                 label: "Export Results",
                 action: () =>
@@ -260,12 +265,13 @@ export default function ResultList() {
           />
         }
       >
-        <div className="lg:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
+        <div className="relative my-4 grid-cols-1 gap-5 px-2 sm:grid-cols-3 md:px-0 lg:grid">
           <CountBlock
             text="Total Results"
-            count={totalCount}
-            loading={isLoading}
-            icon={"clipboard-notes"}
+            count={data?.count || 0}
+            loading={loading}
+            icon="l-clipboard-notes"
+            className="flex-1"
           />
           <div className="mt-2">
             <SearchInput
@@ -274,22 +280,31 @@ export default function ResultList() {
               value={qParams.name}
               placeholder="Search by name"
             />
-            <div className="text-sm font-medium my-2">Search by number</div>
             <div className="w-full max-w-sm">
               <PhoneNumberFormField
+                label="Search by number"
                 name="mobile_number"
-                labelClassName="hidden"
-                value={qParams.mobile_number || "+91"}
-                onChange={(event) => updateQuery({ [event.name]: event.value })}
+                labelClassName="my-2 text-sm font-medium"
+                value={phone_number}
+                onChange={(e) => setPhoneNum(e.value)}
+                error={phoneNumberError}
                 placeholder="Search by Phone Number"
+                types={["mobile", "landline"]}
               />
             </div>
           </div>
-          <div className="mt-4 lg:mt-0 ml-auto flex flex-col justify-evenly gap-4">
+          <div className="ml-auto mt-4 flex flex-col justify-evenly gap-4 lg:mt-0">
             <AdvancedFilterButton
               onClick={() => advancedFilter.setShow(true)}
             />
           </div>
+        </div>
+
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          {qParams.local_bodies &&
+            dataList.lsgList.map((x) => lsgWardBadge("LSG", x, "local_bodies"))}
+          {qParams.wards &&
+            dataList.wardList.map((x) => lsgWardBadge("Ward", x, "wards"))}
         </div>
 
         <FilterBadges
@@ -302,37 +317,37 @@ export default function ResultList() {
             badge("SRF ID", "srf_id"),
           ]}
         />
-        <div className="flex items-center flex-wrap gap-2 mb-4">
-          {dataList.lsgList.map((x) => lsgWardBadge("LSG", x, "local_bodies"))}
-          {dataList.wardList.map((x) => lsgWardBadge("Ward", x, "wards"))}
-        </div>
-        <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-t-lg">
+
+        <div
+          className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-t-lg"
+          id="external-result-table"
+        >
           <table className="min-w-full divide-y divide-gray-200">
             <thead>
               <tr>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
                   Name
                 </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
                   Test Type
                 </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wide">
+                <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wide text-gray-500">
                   Status
                 </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
                   Result Date
                 </th>
-                <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
                   Create Patient
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-200 bg-white">
               {manageResults}
             </tbody>
           </table>
         </div>
-        <Pagination totalCount={totalCount} />
+        <Pagination totalCount={data?.count || 0} />
         <ListFilter
           {...advancedFilter}
           dataList={lsgWardData}

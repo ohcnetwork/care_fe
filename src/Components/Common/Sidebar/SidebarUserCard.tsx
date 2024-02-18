@@ -1,31 +1,24 @@
-import { get } from "lodash";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
-import { useSelector } from "react-redux";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { handleSignOut } from "../../../Utils/utils";
+import { formatName } from "../../../Utils/utils";
+import useAuthUser, { useAuthContext } from "../../../Common/hooks/useAuthUser";
 
 const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
   const { t } = useTranslation();
-  const { currentUser } = useSelector((state) => state) as any;
-
-  const firstName = get(currentUser, "data.first_name", "");
-  const lastName = get(currentUser, "data.last_name", "");
-  const profileName = `${firstName} ${lastName}`.trim();
+  const user = useAuthUser();
+  const { signOut } = useAuthContext();
 
   return (
     <div
-      className={`flex my-2 ${
+      className={`my-2 flex ${
         shrinked ? "mx-auto flex-col" : "mx-5"
       } transition-all duration-200 ease-in-out`}
     >
       <Link href="/user/profile" className="flex-none py-3">
         <CareIcon className="care-l-user-circle text-3xl text-white" />
       </Link>
-      <div
-        className="cursor-pointer flex justify-center"
-        onClick={() => handleSignOut(true)}
-      >
+      <div className="flex cursor-pointer justify-center" onClick={signOut}>
         <CareIcon
           className={`care-l-sign-out-alt text-2xl text-gray-400 ${
             shrinked ? "visible" : "hidden"
@@ -35,19 +28,20 @@ const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
       <div
         className={`${
           shrinked ? "hidden" : "grow"
-        } pl-3 flex flex-col min-w-0 pb-2`}
+        } flex min-w-0 flex-col pb-2 pl-3`}
       >
         <div className="min-h-6 flex items-center">
           <Link
             href="/user/profile"
-            className="font-semibold text-white flex-nowrap overflow-hidden break-words"
+            className="flex-nowrap overflow-hidden break-words font-semibold text-white"
+            id="profilenamelink"
           >
-            {profileName}
+            {formatName(user)}
           </Link>
         </div>
         <div
-          className="min-h-6 flex items-center cursor-pointer"
-          onClick={() => handleSignOut(true)}
+          className="min-h-6 flex cursor-pointer items-center"
+          onClick={signOut}
         >
           <CareIcon
             className={`care-l-sign-out-alt ${

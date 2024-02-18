@@ -1,7 +1,7 @@
-import { useSelector } from "react-redux";
 import { AuthorizedForCB } from "../../Utils/AuthorizeFor";
+import useAuthUser from "./useAuthUser";
 
 export const useIsAuthorized = (authorizeFor: AuthorizedForCB) => {
-  const state: any = useSelector((state) => state);
-  return authorizeFor(state.currentUser.data?.user_type);
+  const authUser = useAuthUser();
+  return authorizeFor(authUser.user_type);
 };

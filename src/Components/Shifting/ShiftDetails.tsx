@@ -7,10 +7,7 @@ import {
   TEST_TYPE_CHOICES,
 } from "../../Common/constants";
 import { Link, navigate } from "raviger";
-import React, { useCallback, useState } from "react";
-import { deleteShiftRecord, getShiftDetails } from "../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-
+import { lazy, useState } from "react";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CommentSection from "./CommentsSection";
 import ConfirmDialog from "../Common/ConfirmDialog.js";
@@ -18,67 +15,47 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 import Page from "../Common/components/Page";
 import QRCode from "qrcode.react";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
-import { formatDate } from "../../Utils/utils";
-import loadable from "@loadable/component";
+import { formatAge, formatDateTime } from "../../Utils/utils";
 import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
-import { useTranslation } from "react-i18next";
 
-const Loading = loadable(() => import("../Common/Loading"));
+import { useTranslation } from "react-i18next";
+import useQuery from "../../Utils/request/useQuery.js";
+import routes from "../../Redux/api.js";
+import request from "../../Utils/request/request.js";
+import { ConsultationModel } from "../Facility/models.js";
+
+const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ShiftDetails(props: { id: string }) {
-  const {
-    static_header_logo,
-    kasp_full_string,
-    wartime_shifting,
-    kasp_enabled,
-  } = useConfig();
-  const dispatch: any = useDispatch();
-  const initialData: any = {};
-  const [data, setData] = useState(initialData);
-  const [isLoading, setIsLoading] = useState(true);
+  const { header_logo, kasp_full_string, wartime_shifting, kasp_enabled } =
+    useConfig();
+
   const [isPrintMode, setIsPrintMode] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
-  const [openDeleteShiftDialog, setOpenDeleteShiftDialog] =
-    React.useState(false);
+  const [openDeleteShiftDialog, setOpenDeleteShiftDialog] = useState(false);
   const { t } = useTranslation();
 
   const shiftStatusOptions = wartime_shifting
     ? SHIFTING_CHOICES_WARTIME
     : SHIFTING_CHOICES_PEACETIME;
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatch(getShiftDetails({ id: props.id }));
-      if (!status.aborted) {
-        if (res && res.data) {
-          setData(res.data);
-        }
-        setIsLoading(false);
-      }
-    },
-    [props.id, dispatch]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
-  );
+  const { data, loading } = useQuery(routes.getShiftDetails, {
+    pathParams: { id: props.id },
+  });
 
   const handleShiftDelete = async () => {
     setOpenDeleteShiftDialog(true);
 
-    const res = await dispatch(deleteShiftRecord(props.id));
+    const { res, data } = await request(routes.deleteShiftRecord, {
+      pathParams: { id: props.id },
+    });
     if (res?.status == 204) {
       Notification.Success({
         msg: t("shifting_deleted"),
       });
     } else {
       Notification.Error({
-        msg: t("error_deleting_shifting") + (res?.data?.detail || ""),
+        msg: t("error_deleting_shifting") + (data?.detail || ""),
       });
     }
 
@@ -116,7 +93,13 @@ export default function ShiftDetails(props: { id: string }) {
       "\n" +
       t("age") +
       ":" +
-      data?.patient_object?.age +
+      +(
+        formatAge(
+          data?.patient_object?.age,
+          data?.patient_object?.date_of_birth,
+          true
+        ) ?? "-"
+      ) +
       "\n" +
       t("origin_facility") +
       ":" +
@@ -153,8 +136,8 @@ export default function ShiftDetails(props: { id: string }) {
     )?.text;
 
     return (
-      <div className="border rounded-lg bg-white shadow h-full text-black mt-2 mr-3 md:mr-8 p-4">
-        <div className="mt-2 grid grid-cols-1 md:grid-cols-2 justify-between gap-4">
+      <div className="mr-3 mt-2 h-full rounded-lg border bg-white p-4 text-black shadow md:mr-8">
+        <div className="mt-2 grid grid-cols-1 justify-between gap-4 md:grid-cols-2">
           <div>
             <span className="font-semibold leading-relaxed">{t("name")}: </span>
             <Link href={`/patient/${patientData?.id}`}>
@@ -201,7 +184,7 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 {t("age")}:{" "}
               </span>
-              {patientData?.age}
+              {formatAge(patientData?.age, patientData?.date_of_birth, true)}
             </div>
           )}
           {patientData?.gender === 2 && patientData?.is_antenatal && (
@@ -297,33 +280,33 @@ export default function ShiftDetails(props: { id: string }) {
 
   const showFacilityCard = (facilityData: any) => {
     return (
-      <div className="border rounded-lg bg-white shadow h-full text-black mt-2 p-4">
+      <div className="mt-2 h-full rounded-lg border bg-white p-4 text-black shadow">
         <div>
-          <span className="font-semibold leading-relaxed mr-1">
+          <span className="mr-1 font-semibold leading-relaxed">
             {t("name")}:{" "}
           </span>
           {facilityData?.name || "--"}
         </div>
         <div>
-          <span className="font-semibold leading-relaxed mr-1">
+          <span className="mr-1 font-semibold leading-relaxed">
             {t("facility_type")}:{" "}
           </span>
           {facilityData?.facility_type?.name || "--"}
         </div>
         <div>
-          <span className="font-semibold leading-relaxed mr-1">
+          <span className="mr-1 font-semibold leading-relaxed">
             {t("district")}:{" "}
           </span>
           {facilityData?.district_object?.name || "--"}
         </div>
         <div>
-          <span className="font-semibold leading-relaxed mr-1">
+          <span className="mr-1 font-semibold leading-relaxed">
             {t("local_body")}:{" "}
           </span>
           {facilityData?.local_body_object?.name || "--"}
         </div>
         <div>
-          <span className="font-semibold leading-relaxed mr-1">
+          <span className="mr-1 font-semibold leading-relaxed">
             {t("state")}:{" "}
           </span>
           {facilityData?.state_object?.name || "--"}
@@ -334,7 +317,7 @@ export default function ShiftDetails(props: { id: string }) {
 
   const printData = (data: any) => {
     const patientData = data.patient_object;
-    const consultation = data.patient.last_consultation;
+    const consultation = data.patient.last_consultation as ConsultationModel;
     const patientGender = GENDER_TYPES.find(
       (i) => i.id === patientData?.gender
     )?.text;
@@ -344,10 +327,10 @@ export default function ShiftDetails(props: { id: string }) {
 
     return (
       <div id="section-to-print" className="print bg-white ">
-        <div>{data.is_kasp && <img alt="logo" src={static_header_logo} />}</div>
+        <div>{data.is_kasp && <img alt="logo" src={header_logo.dark} />}</div>
         <div className="mx-2">
           <div className="mt-6">
-            <span className="font-semibold leading-relaxed mt-4">
+            <span className="mt-4 font-semibold leading-relaxed">
               {t("name_of_hospital")}:{" "}
             </span>
             {data.is_kasp
@@ -355,17 +338,17 @@ export default function ShiftDetails(props: { id: string }) {
               : data.origin_facility_object?.name || "--"}
             {/*  Made static based on #757 */}
           </div>
-          <div className="font-bold text-xl text-center mt-6">
+          <div className="mt-6 text-center text-xl font-bold">
             {t("referral_letter")}
           </div>
-          <div className="text-left mt-4">
+          <div className="mt-4 text-left">
             <span className="font-semibold leading-relaxed">
               {" "}
               {t("date_and_time")}{" "}
             </span>
-            {formatDate(data.created_date) || "--"}
+            {formatDateTime(data.created_date) || "--"}
           </div>
-          <div className="text-left mt-2">
+          <div className="mt-2 text-left">
             <span className="font-semibold leading-relaxed">
               {" "}
               {t("unique_id")} :
@@ -386,7 +369,7 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 {t("age")}:{" "}
               </span>
-              {patientData?.age}
+              {formatAge(patientData.age, patientData.date_of_birth, true)}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
@@ -401,7 +384,7 @@ export default function ShiftDetails(props: { id: string }) {
               <span>{patientData?.phone_number || ""}</span>
             </div>
           </div>
-          <div className="text-left mt-2 flex">
+          <div className="mt-2 flex text-left">
             <span className="font-semibold leading-relaxed">
               {t("address")}:{" "}
             </span>
@@ -426,15 +409,15 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 {t("date_of_admission")}:{" "}
               </span>
-              {formatDate(
-                consultation.admission_date || consultation.created_date
+              {formatDateTime(
+                consultation.encounter_date || consultation.created_date
               ) || "-"}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
-                {t("op_ip_no")}:{" "}
+                {t("patient_no")}:{" "}
               </span>
-              {consultation.ip_no || "-"}
+              {consultation.patient_no || "-"}
             </div>
           </div>
           <div className="mt-2 flex justify-between">
@@ -443,7 +426,7 @@ export default function ShiftDetails(props: { id: string }) {
                 {t("date_of_positive_covid_19_swab")}:{" "}
               </span>
               {(patientData?.date_of_test &&
-                formatDate(patientData?.date_of_test)) ||
+                formatDateTime(patientData?.date_of_test)) ||
                 "-"}
             </div>
             <div>
@@ -454,19 +437,12 @@ export default function ShiftDetails(props: { id: string }) {
             </div>
           </div>
 
-          <div className="mt-2 flex justify-between">
+          {/* <div className="mt-2 flex justify-between">
             <div>
               <span className="font-semibold leading-relaxed">
                 {t("diagnosis")}:{" "}
               </span>
               {consultation.diagnosis || "-"}
-            </div>
-          </div>
-
-          {/* <div className="mt-2 flex justify-between">
-            <div>
-              <span className="font-semibold leading-relaxed">Comorbidities (if any): </span>
-              {consultation.diagnosis || '-'}
             </div>
           </div> */}
 
@@ -503,7 +479,7 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 {t("treatment_summary")}:{" "}
               </span>
-              {consultation.prescribed_medication || "-"}
+              {consultation.treatment_plan || "-"}
             </div>
           </div>
           <div className="mt-6 flex justify-between">
@@ -522,7 +498,7 @@ export default function ShiftDetails(props: { id: string }) {
               </span>
             </div>
           </div>
-          <div className="flex justify-center text-center mt-20">
+          <div className="mt-20 flex justify-center text-center">
             {t("auto_generated_for_care")}
           </div>
           <div className="font-xs font-gray-600 text-center font-mono">
@@ -533,7 +509,7 @@ export default function ShiftDetails(props: { id: string }) {
     );
   };
 
-  if (isLoading) {
+  if (loading) {
     return <Loading />;
   }
 
@@ -557,20 +533,22 @@ export default function ShiftDetails(props: { id: string }) {
       ) : (
         <Page
           title={t("shifting_details")}
-          backUrl="/shifting/board-view"
+          backUrl="/shifting/board"
           options={
             <div className="flex gap-2">
               <ButtonV2
                 tooltip={
-                  ["COMPLETED", "CANCELLED"].includes(data.status)
-                    ? `A shifting request, once ${data.status.toLowerCase()} cannot be updated`
+                  ["COMPLETED", "CANCELLED"].includes(data?.status || "")
+                    ? `A shifting request, once ${data?.status.toLowerCase()} cannot be updated`
                     : ""
                 }
                 tooltipClassName="tooltip-top -translate-x-28 -translate-y-1 text-xs"
                 disabled={
-                  data.status === "COMPLETED" || data.status === "CANCELLED"
+                  data?.status === "COMPLETED" || data?.status === "CANCELLED"
                 }
-                onClick={() => navigate(`/shifting/${data.external_id}/update`)}
+                onClick={() =>
+                  navigate(`/shifting/${data?.external_id}/update`)
+                }
               >
                 {t("update_status_details")}
               </ButtonV2>
@@ -581,13 +559,13 @@ export default function ShiftDetails(props: { id: string }) {
             </div>
           }
         >
-          {data.assigned_to_object && (
-            <div className="relative rounded-lg shadow bg-primary-200">
-              <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
-                <div className="pr-16 sm:text-center sm:px-16">
+          {data?.assigned_to_object && (
+            <div className="relative rounded-lg bg-primary-200 shadow">
+              <div className="mx-auto max-w-screen-xl p-3 sm:px-6 lg:px-8">
+                <div className="pr-16 sm:px-16 sm:text-center">
                   <p className="font-bold text-primary-800">
                     <span className="inline">
-                      {t("assigned_to")}: {data.assigned_to_object.first_name}{" "}
+                      {t("assigned_to")}: {data?.assigned_to_object.first_name}{" "}
                       {data.assigned_to_object.last_name} -{" "}
                       {data.assigned_to_object.user_type}
                     </span>
@@ -596,57 +574,57 @@ export default function ShiftDetails(props: { id: string }) {
               </div>
             </div>
           )}
-          <div className="border rounded-lg bg-white shadow h-full text-black mt-4 p-4">
-            <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
+          <div className="mt-4 h-full rounded-lg border bg-white p-4 text-black shadow">
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
               <div>
                 <span className="font-semibold leading-relaxed">
                   {t("patient_name")}:{" "}
                 </span>
-                <Link href={`/patient/${data.patient_object?.id}`}>
-                  {data.patient_object?.name}
+                <Link href={`/patient/${data?.patient_object?.id}`}>
+                  {data?.patient_object?.name}
                 </Link>
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">Status: </span>
-                <span className="badge badge-pill badge-primary py-1 px-2">
+                <span className="badge badge-pill badge-primary px-2 py-1">
                   {shiftStatusOptions.find(
-                    (option) => data.status === option.text
-                  )?.label || data.status}
+                    (option) => data?.status === option.text
+                  )?.label || data?.status}
                 </span>
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">
                   {t("origin_facility")}:{" "}
                 </span>
-                {data.origin_facility_object?.name || "--"}
+                {data?.origin_facility_object?.name || "--"}
               </div>
               {wartime_shifting && (
                 <div>
                   <span className="font-semibold leading-relaxed">
                     {t("shifting_approving_facility")}:{" "}
                   </span>
-                  {data.shifting_approving_facility_object?.name || "--"}
+                  {data?.shifting_approving_facility_object?.name || "--"}
                 </div>
               )}
               <div>
                 <span className="font-semibold leading-relaxed">
                   {t("assigned_facility")}:{" "}
                 </span>
-                {data.assigned_facility_external ||
-                  data.assigned_facility_object?.name ||
+                {data?.assigned_facility_external ||
+                  data?.assigned_facility_object?.name ||
                   "--"}
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">
                   {t("contact_person_at_the_facility")}:{" "}
                 </span>
-                {data.refering_facility_contact_name || "--"}
+                {data?.refering_facility_contact_name || "--"}
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">
                   {t("phone_number_at_current_facility")}:{" "}
                 </span>
-                {data.refering_facility_contact_number ? (
+                {data?.refering_facility_contact_number ? (
                   <a href={`tel:${data.refering_facility_contact_number}`}>
                     {data.refering_facility_contact_number}
                   </a>
@@ -659,29 +637,29 @@ export default function ShiftDetails(props: { id: string }) {
                   {" "}
                   {t("is_emergency")}:{" "}
                 </span>
-                <span className="badge badge-pill badge-danger py-1 px-2">
+                <span className="badge badge-pill badge-danger px-2 py-1">
                   {" "}
-                  {data.emergency ? t("yes") : t("no")}
+                  {data?.emergency ? t("yes") : t("no")}
                 </span>
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">
                   {t("is_up_shift")}:{" "}
                 </span>
-                <span className="badge badge-pill badge-warning py-1 px-2">
+                <span className="badge badge-pill badge-warning px-2 py-1">
                   {" "}
-                  {data.is_up_shift ? t("yes") : t("no")}
+                  {data?.is_up_shift ? t("yes") : t("no")}
                 </span>
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">
                   {t("patient_category")}:{" "}
                 </span>
-                <span className="badge badge-pill badge-warning py-1 px-2">
+                <span className="badge badge-pill badge-warning px-2 py-1">
                   {" "}
-                  {data.patient_object.last_consultation?.last_daily_round
+                  {data?.patient_object.last_consultation?.last_daily_round
                     ?.patient_category ??
-                    data.patient_object.last_consultation?.category}
+                    data?.patient_object.last_consultation?.category}
                 </span>
               </div>
               {kasp_enabled && (
@@ -689,9 +667,9 @@ export default function ShiftDetails(props: { id: string }) {
                   <span className="font-semibold leading-relaxed">
                     {kasp_full_string}:{" "}
                   </span>
-                  <span className="badge badge-pill badge-warning py-1 px-2">
+                  <span className="badge badge-pill badge-warning px-2 py-1">
                     {" "}
-                    {data.is_kasp ? t("yes") : t("no")}
+                    {data?.is_kasp ? t("yes") : t("no")}
                   </span>
                 </div>
               )}
@@ -701,71 +679,71 @@ export default function ShiftDetails(props: { id: string }) {
                     <span className="font-semibold leading-relaxed">
                       {kasp_full_string}:{" "}
                     </span>
-                    <span className="badge badge-pill badge-warning py-1 px-2">
+                    <span className="badge badge-pill badge-warning px-2 py-1">
                       {" "}
-                      {data.is_kasp ? t("yes") : t("no")}
+                      {data?.is_kasp ? t("yes") : t("no")}
                     </span>
                   </div>
                   <div>
                     <span className="font-semibold leading-relaxed">
                       {t("vehicle_preference")}:{" "}
                     </span>
-                    {data.vehicle_preference || data.preferred_vehicle_choice}
+                    {data?.vehicle_preference || data?.preferred_vehicle_choice}
                   </div>
                   <div>
                     <span className="font-semibold leading-relaxed">
                       {t("facility_preference")}:{" "}
                     </span>
-                    {data.assigned_facility_type || "--"}
+                    {data?.assigned_facility_type || "--"}
                   </div>
                   <div>
                     <span className="font-semibold leading-relaxed">
                       {t("severity_of_breathlessness")}:{" "}
                     </span>
-                    {data.breathlessness_level || "--"}
+                    {data?.breathlessness_level || "--"}
                   </div>{" "}
                 </>
               )}
 
-              <div className="md:row-span-2 md:col-span-2">
+              <div className="md:col-span-2 md:row-span-2">
                 <span className="font-semibold leading-relaxed">
                   {t("reason")}:{" "}
                 </span>
-                <span className="ml-2">{data.reason || "--"}</span>
+                <span className="ml-2">{data?.reason || "--"}</span>
               </div>
-              <div className="md:row-span-2 md:col-span-2">
+              <div className="md:col-span-2 md:row-span-2">
                 <span className="font-semibold leading-relaxed">
                   {t("ambulance_driver_name")}:{" "}
                 </span>
                 <span className="ml-2">
-                  {data.ambulance_driver_name || "--"}
+                  {data?.ambulance_driver_name || "--"}
                 </span>
               </div>
-              <div className="md:row-span-2 md:col-span-2">
+              <div className="md:col-span-2 md:row-span-2">
                 <span className="font-semibold leading-relaxed">
                   {t("ambulance_phone_number")}:{" "}
                 </span>
                 <span className="ml-2">
-                  {data.ambulance_phone_number ? (
-                    <a href={`tel:${data.ambulance_phone_number}`}>
-                      {data.ambulance_phone_number}
+                  {data?.ambulance_phone_number ? (
+                    <a href={`tel:${data?.ambulance_phone_number}`}>
+                      {data?.ambulance_phone_number}
                     </a>
                   ) : (
                     "--"
                   )}
                 </span>
               </div>
-              <div className="md:row-span-2 md:col-span-2">
+              <div className="md:col-span-2 md:row-span-2">
                 <span className="font-semibold leading-relaxed">
                   {t("ambulance_number")}:{" "}
                 </span>
-                <span className="ml-2">{data.ambulance_number || "--"}</span>
+                <span className="ml-2">{data?.ambulance_number || "--"}</span>
               </div>
-              <div className="md:row-span-2 md:col-span-2">
+              <div className="md:col-span-2 md:row-span-2">
                 <span className="font-semibold leading-relaxed">
                   {t("comments")}:{" "}
                 </span>
-                <span className="ml-2">{data.comments || "--"}</span>
+                <span className="ml-2">{data?.comments || "--"}</span>
               </div>
 
               <RecordMeta
@@ -774,7 +752,7 @@ export default function ShiftDetails(props: { id: string }) {
                     {t("created")}:
                   </span>
                 }
-                time={data.created_date}
+                time={data?.created_date}
               />
               <RecordMeta
                 prefix={
@@ -782,11 +760,11 @@ export default function ShiftDetails(props: { id: string }) {
                     {t("updated")}:
                   </span>
                 }
-                time={data.modified_date}
+                time={data?.modified_date}
               />
             </div>
 
-            <div className="flex justify-end mt-4">
+            <div className="mt-4 flex justify-end">
               <div>
                 <ButtonV2
                   variant="danger"
@@ -806,15 +784,15 @@ export default function ShiftDetails(props: { id: string }) {
             </div>
           </div>
 
-          <div className="md:grid grid-cols-5 gap-2">
+          <div className="grid-cols-5 gap-2 md:grid">
             <div className="col-span-3">
               <div>
                 <h4 className="mt-8">
                   {t("details_of_patient")} {showCopyToclipBoard(data)}
                 </h4>
-                {showPatientCard(data.patient_object)}
+                {showPatientCard(data?.patient_object)}
               </div>
-              <div className="mr-3 md:mr-8 mb-10">
+              <div className="mb-10 mr-3 md:mr-8">
                 <h4 className="mt-8">{t("comments")}</h4>
                 <CommentSection id={props.id} />
               </div>
@@ -823,45 +801,43 @@ export default function ShiftDetails(props: { id: string }) {
             <div className="col-span-2">
               <h4 className="mt-8">{t("audit_log")}</h4>
 
-              <div className="p-2 bg-white rounded-lg shadow text-center px-4 mt-2 grid lg:grid-cols-2">
-                <div className="lg:border-r-2 border-b-2 lg:border-b-0 pb-2 lg:pb-0">
-                  <div className="text-sm leading-5 font-medium text-gray-500">
+              <div className="mt-2 grid rounded-lg bg-white p-2 px-4 text-center shadow lg:grid-cols-2">
+                <div className="border-b-2 pb-2 lg:border-b-0 lg:border-r-2 lg:pb-0">
+                  <div className="text-sm font-medium leading-5 text-gray-500">
                     {t("created")}
                   </div>
-                  <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
-                    <div className="text-sm">
-                      {data?.created_by_object?.first_name}
-                      {data?.created_by_object?.last_name}
-                    </div>
-                    <div className="text-xs">
-                      {data.created_date && formatDate(data.created_date)}
-                    </div>
+                  <div className="mt-1 whitespace-pre text-sm leading-5 text-gray-900">
+                    <RecordMeta
+                      time={data?.created_date}
+                      user={data?.created_by_object}
+                      inlineUser={true}
+                      inlineClassName={"flex-wrap justify-center"}
+                    />
                   </div>
                 </div>
                 <div className="mt-2 lg:mt-0">
-                  <div className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="text-sm font-medium leading-5 text-gray-500">
                     {t("last_edited")}
                   </div>
-                  <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
-                    <div className="text-sm">
-                      {data?.last_edited_by_object?.first_name}{" "}
-                      {data?.last_edited_by_object?.last_name}
-                    </div>
-                    <div className="text-xs">
-                      {data.modified_date && formatDate(data.modified_date)}
-                    </div>
+                  <div className="mt-1 whitespace-pre text-sm leading-5 text-gray-900">
+                    <RecordMeta
+                      time={data?.modified_date}
+                      user={data?.last_edited_by_object}
+                      inlineUser={true}
+                      inlineClassName={"flex-wrap justify-center"}
+                    />
                   </div>
                 </div>
               </div>
               <div>
                 <h4 className="mt-8">{t("details_of_origin_facility")}</h4>
 
-                {showFacilityCard(data.origin_facility_object)}
+                {showFacilityCard(data?.origin_facility_object)}
               </div>
-              {!data.assigned_facility_external && (
+              {!data?.assigned_facility_external && (
                 <div>
                   <h4 className="mt-8">{t("details_of_assigned_facility")}</h4>
-                  {showFacilityCard(data.assigned_facility_object)}
+                  {showFacilityCard(data?.assigned_facility_object)}
                 </div>
               )}
               {wartime_shifting && (
@@ -869,7 +845,7 @@ export default function ShiftDetails(props: { id: string }) {
                   <h4 className="mt-8">
                     {t("details_of_shifting_approving_facility")}
                   </h4>
-                  {showFacilityCard(data.shifting_approving_facility_object)}
+                  {showFacilityCard(data?.shifting_approving_facility_object)}
                 </div>
               )}
             </div>

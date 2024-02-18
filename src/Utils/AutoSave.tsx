@@ -1,7 +1,7 @@
-import moment from "moment";
 import { useReducer, useEffect, useRef, useState, Dispatch } from "react";
 import ButtonV2 from "../Components/Common/components/ButtonV2";
 import { FormAction, FormReducer, FormState } from "../Components/Form/Utils";
+import { relativeTime } from "./utils";
 
 type Draft = {
   timestamp: number;
@@ -104,19 +104,36 @@ export function DraftSection(props: {
     };
   }, []);
 
+  // Remove drafts older than 24 hours
+  useEffect(() => {
+    const keys = Object.keys(localStorage);
+    const now = Date.now();
+    keys.forEach((key) => {
+      if (key.startsWith("form_draft_")) {
+        const savedDrafts = localStorage.getItem(key);
+        const drafts = savedDrafts ? JSON.parse(savedDrafts) : [];
+        const newDrafts = drafts.filter(
+          (draft: Draft) => now - draft.timestamp < 24 * 60 * 60 * 1000
+        );
+        localStorage.setItem(key, JSON.stringify(newDrafts));
+        if (newDrafts.length === 0) localStorage.removeItem(key);
+      }
+    });
+  }, []);
+
   return (
     <>
       {drafts && (
-        <div className="flex flex-wrap justify-end my-2">
+        <div className="my-2 flex flex-wrap justify-end">
           {drafts?.length > 0 && (
-            <div className="flex items-center mx-1">
+            <div className="mx-1 flex items-center">
               <p className="text-gray-500">
                 Last saved draft:{" "}
-                {moment(
+                {relativeTime(
                   draftStarted
                     ? drafts[0].timestamp
                     : drafts[drafts.length - 1].timestamp
-                ).fromNow()}
+                )}
               </p>
               <ButtonV2
                 type="button"

@@ -8,6 +8,7 @@ import useConfig from "../../../Common/hooks/useConfig";
 import SlideOver from "../../../CAREUI/interactive/SlideOver";
 import { classNames } from "../../../Utils/utils";
 import { Link } from "raviger";
+import useAuthUser from "../../../Common/hooks/useAuthUser";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 
@@ -27,96 +28,79 @@ type StatelessSidebarProps =
       onItemClick: (open: boolean) => void;
     };
 
-const NavItems = [
-  { text: "Facilities", to: "/facility", icon: "care-l-hospital" },
-  { text: "Patients", to: "/patients", icon: "care-l-user-injured" },
-  { text: "Assets", to: "/assets", icon: "care-l-shopping-cart-alt" },
-  { text: "Sample Test", to: "/sample", icon: "care-l-medkit" },
-  { text: "Shifting", to: "/shifting", icon: "care-l-ambulance" },
-  { text: "Resource", to: "/resource", icon: "care-l-heart-medical" },
-  {
-    text: "External Results",
-    to: "/external_results",
-    icon: "care-l-clipboard-notes",
-  },
-  { text: "Users", to: "/users", icon: "care-l-users-alt" },
-  { text: "Notice Board", to: "/notice_board", icon: "care-l-meeting-board" },
-];
-
 const StatelessSidebar = ({
   shrinkable = false,
   shrinked = false,
   setShrinked,
   onItemClick,
 }: StatelessSidebarProps) => {
-  const { static_light_logo } = useConfig();
+  const authUser = useAuthUser();
+
+  const NavItems = [
+    { text: "Facilities", to: "/facility", icon: "care-l-hospital" },
+    { text: "Patients", to: "/patients", icon: "care-l-user-injured" },
+    { text: "Assets", to: "/assets", icon: "care-l-shopping-cart-alt" },
+    { text: "Sample Test", to: "/sample", icon: "care-l-medkit" },
+    { text: "Shifting", to: "/shifting", icon: "care-l-ambulance" },
+    { text: "Resource", to: "/resource", icon: "care-l-heart-medical" },
+    ...(!["Nurse", "NurseReadOnly", "Staff", "StaffReadOnly"].includes(
+      authUser.user_type
+    )
+      ? [
+          {
+            text: "External Results",
+            to: "/external_results",
+            icon: "care-l-clipboard-notes",
+          },
+        ]
+      : []),
+    { text: "Users", to: "/users", icon: "care-l-users-alt" },
+    { text: "Notice Board", to: "/notice_board", icon: "care-l-meeting-board" },
+  ];
+
+  const { main_logo } = useConfig();
   const activeLink = useActiveLink();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
   const { dashboard_url } = useConfig();
 
   const indicatorRef = useRef<HTMLDivElement>(null);
+  const activeLinkRef = useRef<HTMLAnchorElement>(null);
   const [lastIndicatorPosition, setLastIndicatorPosition] = useState(0);
   const [isOverflowVisible, setOverflowVisisble] = useState(false);
 
   useEffect(() => {
     if (!indicatorRef.current) return;
     const index = NavItems.findIndex((item) => item.to === activeLink);
+    const navItemCount = NavItems.length + (dashboard_url ? 2 : 1); // +2 for notification and dashboard
     if (index !== -1) {
       // Haha math go brrrrrrrrr
 
       const e = indicatorRef.current;
-
-      const itemHeight = 44;
-      const bottomItemOffset = 2;
-
-      const indexDifference = index - lastIndicatorPosition;
-      e.style.display = "block";
-
-      if (indexDifference > 0) {
-        e.style.top = lastIndicatorPosition * itemHeight + 16 + "px";
-        e.style.bottom = "auto";
+      const itemHeight = activeLinkRef.current?.clientHeight || 0;
+      if (lastIndicatorPosition > index) {
+        e.style.top = `${itemHeight * (index + 0.37)}px`;
+        setTimeout(() => {
+          e.style.bottom = `${itemHeight * (navItemCount - 0.63 - index)}px`;
+        }, 50);
       } else {
-        e.style.bottom =
-          itemHeight * (NavItems.length + bottomItemOffset) -
-          lastIndicatorPosition * itemHeight -
-          28 +
-          "px";
-        e.style.top = "auto";
+        e.style.bottom = `${itemHeight * (navItemCount - 0.63 - index)}px`;
+        setTimeout(() => {
+          e.style.top = `${itemHeight * (index + 0.37)}px`;
+        }, 50);
       }
-
-      const variableHeight = Math.min(
-        Math.abs(indexDifference) * itemHeight,
-        70
-      );
-
-      e.style.height = `${variableHeight}px`;
-      setTimeout(() => {
-        if (!e) return;
-        if (indexDifference > 0) {
-          e.style.top = index * itemHeight + 16 + "px";
-          e.style.bottom = "auto";
-        } else {
-          e.style.bottom =
-            itemHeight * (NavItems.length + bottomItemOffset) -
-            index * itemHeight -
-            28 +
-            "px";
-          e.style.top = "auto";
-        }
-        e.style.height = "0.75rem";
-        setLastIndicatorPosition(index);
-      }, 300);
+      setLastIndicatorPosition(index);
     } else {
       indicatorRef.current.style.display = "none";
     }
-  }, [activeLink]);
+  }, [activeLink, lastIndicatorPosition]);
+
   const handleOverflow = (value: boolean) => {
     setOverflowVisisble(value);
   };
 
   return (
     <nav
-      className={`h-screen group flex flex-col bg-primary-800 py-3 md:py-5 ${
+      className={`group flex h-full flex-col bg-primary-800 py-3 md:py-5 ${
         shrinked ? "w-14" : "w-60"
       } transition-all duration-300 ease-in-out ${
         isOverflowVisible && shrinked
@@ -129,24 +113,25 @@ const StatelessSidebar = ({
         <img
           className={`${
             shrinked ? "mx-auto" : "ml-5"
-          } h-5 md:h-8 self-start transition mb-2 md:mb-5`}
-          src={shrinked ? LOGO_COLLAPSE : static_light_logo}
+          } mb-2 h-5 self-start transition md:mb-5 md:h-8`}
+          src={shrinked ? LOGO_COLLAPSE : main_logo.light}
         />
       </Link>
       <div className="h-3" /> {/* flexible spacing */}
-      <div className="flex flex-col relative h-full mb-4 md:mb-0">
-        <div className="flex flex-col relative flex-1 md:flex-none">
+      <div className="relative flex h-full flex-col">
+        <div className="relative flex flex-1 flex-col md:flex-none">
           <div
             ref={indicatorRef}
             // className="absolute left-2 w-1 hidden md:block bg-primary-400 rounded z-10 transition-all"
             className={classNames(
-              "block absolute left-2 w-1 bg-primary-400 rounded z-10 transition-all",
+              "absolute left-2 z-10 block w-1 rounded bg-primary-400 transition-all",
               activeLink ? "opacity-0 md:opacity-100" : "opacity-0"
             )}
           />
           {NavItems.map((i) => {
             return (
               <Item
+                ref={i.to === activeLink ? activeLinkRef : undefined}
                 key={i.text}
                 {...i}
                 icon={<CareIcon className={`${i.icon} h-5`} />}
@@ -162,13 +147,15 @@ const StatelessSidebar = ({
             handleOverflow={handleOverflow}
             onClickCB={() => onItemClick && onItemClick(false)}
           />
-          <Item
-            text="Dashboard"
-            to={dashboard_url}
-            icon={<CareIcon className="care-l-dashboard text-lg" />}
-            external
-            handleOverflow={handleOverflow}
-          />
+          {dashboard_url && (
+            <Item
+              text="Dashboard"
+              to={dashboard_url}
+              icon={<CareIcon className="care-l-dashboard text-lg" />}
+              external
+              handleOverflow={handleOverflow}
+            />
+          )}
         </div>
         <div className="hidden md:block md:flex-1" />
 
@@ -177,7 +164,7 @@ const StatelessSidebar = ({
             <div
               className={`${
                 shrinked ? "mx-auto" : "self-end"
-              } flex self-end h-12 translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out`}
+              } flex h-12 translate-y-4 self-end opacity-0 transition-all duration-200 ease-in-out group-hover:translate-y-0 group-hover:opacity-100`}
             >
               <ToggleShrink
                 shrinked={shrinked}
@@ -232,7 +219,7 @@ interface ToggleShrinkProps {
 
 const ToggleShrink = ({ shrinked, toggle }: ToggleShrinkProps) => (
   <div
-    className={`flex items-center justify-center w-10 h-10 self-end cursor-pointer rounded text-gray-100 text-opacity-70 hover:text-opacity-100 bg-primary-800 hover:bg-primary-700 ${
+    className={`flex h-10 w-10 cursor-pointer items-center justify-center self-end rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100 ${
       shrinked ? "mx-auto" : "mr-4"
     } transition-all duration-200 ease-in-out`}
     onClick={toggle}
@@ -240,7 +227,7 @@ const ToggleShrink = ({ shrinked, toggle }: ToggleShrinkProps) => (
     <i
       className={`fa-solid fa-chevron-up ${
         shrinked ? "rotate-90 text-sm" : "-rotate-90 text-base"
-      } transition-all duration-300 delay-150 ease-out`}
+      } transition-all delay-150 duration-300 ease-out`}
     />
   </div>
 );

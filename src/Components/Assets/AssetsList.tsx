@@ -1,17 +1,9 @@
-import { useDispatch } from "react-redux";
 import QrReader from "react-qr-reader";
-import { statusType, useAbortableEffect } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications.js";
-import {
-  getAnyFacility,
-  listAssets,
-  getFacilityAssetLocation,
-} from "../../Redux/actions";
+import { listAssets } from "../../Redux/actions";
 import { assetClassProps, AssetData } from "./AssetTypes";
-import { getAsset } from "../../Redux/actions";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect, lazy } from "react";
 import { Link, navigate } from "raviger";
-import loadable from "@loadable/component";
 import AssetFilter from "./AssetFilter";
 import { parseQueryParams } from "../../Utils/primitives";
 import Chip from "../../CAREUI/display/Chip";
@@ -29,8 +21,11 @@ import AssetImportModal from "./AssetImportModal";
 import Page from "../Common/components/Page";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import { useTranslation } from "react-i18next";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 const AssetsList = () => {
   const { t } = useTranslation();
@@ -43,74 +38,56 @@ const AssetsList = () => {
     resultsPerPage,
   } = useFilters({
     limit: 18,
+    cacheBlacklist: ["search"],
   });
   const [assets, setAssets] = useState([{} as AssetData]);
   const [isLoading, setIsLoading] = useState(false);
   const [isScannerActive, setIsScannerActive] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [facility, setFacility] = useState<FacilityModel>();
-  const [asset_type, setAssetType] = useState<string>();
   const [status, setStatus] = useState<string>();
-  const [facilityName, setFacilityName] = useState<string>();
   const [asset_class, setAssetClass] = useState<string>();
-  const [locationName, setLocationName] = useState<string>();
   const [importAssetModalOpen, setImportAssetModalOpen] = useState(false);
-  const dispatch: any = useDispatch();
   const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
   const [showFacilityDialog, setShowFacilityDialog] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
   });
+  const params = {
+    limit: resultsPerPage,
+    page: qParams.page,
+    offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
+    search_text: qParams.search || "",
+    facility: qParams.facility || "",
+    asset_class: qParams.asset_class || "",
+    location: qParams.facility ? qParams.location || "" : "",
+    status: qParams.status || "",
+    warranty_amc_end_of_validity_before:
+      qParams.warranty_amc_end_of_validity_before || "",
+    warranty_amc_end_of_validity_after:
+      qParams.warranty_amc_end_of_validity_after || "",
+  };
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const params = {
-        limit: resultsPerPage,
-        page: qParams.page,
-        offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
-        search_text: qParams.search || "",
-        facility: qParams.facility || "",
-        asset_type: qParams.asset_type || "",
-        asset_class: qParams.asset_class || "",
-        location: qParams.facility ? qParams.location || "" : "",
-        status: qParams.status || "",
-      };
-      const { data } = await dispatch(listAssets(params));
-      if (!status.aborted) {
-        setIsLoading(false);
-        if (!data)
-          Notification.Error({
-            msg: "Something went wrong..!",
-          });
-        else {
-          setAssets(data.results);
-          setTotalCount(data.count);
-          if (qParams.facility) {
-            const fetchFacility = await dispatch(
-              getAnyFacility(qParams.facility)
-            );
-            setSelectedFacility(fetchFacility.data as FacilityModel);
-          }
-        }
+  const { refetch: assetsFetch, loading } = useQuery(routes.listAssets, {
+    query: params,
+    onResponse: ({ res, data }) => {
+      if (res?.status === 200 && data) {
+        setAssets(data.results);
+        setTotalCount(data.count);
       }
     },
-    [
-      resultsPerPage,
-      qParams.page,
-      qParams.search,
-      qParams.facility,
-      qParams.asset_type,
-      qParams.asset_class,
-      qParams.location,
-      qParams.status,
-      dispatch,
-    ]
-  );
+  });
 
-  useEffect(() => {
-    setAssetType(qParams.asset_type);
-  }, [qParams.asset_type]);
+  const { data: facilityObject } = useQuery(routes.getAnyFacility, {
+    pathParams: { id: qParams.facility },
+    onResponse: ({ res, data }) => {
+      if (res?.status === 200 && data) {
+        setFacility(data);
+        setSelectedFacility(data);
+      }
+    },
+    prefetch: !!qParams.facility,
+  });
 
   useEffect(() => {
     setStatus(qParams.status);
@@ -120,56 +97,13 @@ const AssetsList = () => {
     setAssetClass(qParams.asset_class);
   }, [qParams.asset_class]);
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
+  const { data: locationObject } = useQuery(routes.getFacilityAssetLocation, {
+    pathParams: {
+      facility_external_id: String(qParams.facility),
+      external_id: String(qParams.location),
     },
-    [dispatch, fetchData]
-  );
-  useEffect(() => {
-    async function fetchFacilityName() {
-      if (!qParams.facility) return setFacilityName("");
-      const res = await dispatch(getAnyFacility(qParams.facility, "facility"));
-      setFacilityName(res?.data?.name);
-    }
-    fetchFacilityName();
-  }, [dispatch, qParams.facility]);
-
-  const fetchFacility = useCallback(
-    async (status: statusType) => {
-      if (!qParams.facility) return setFacility(undefined);
-      setIsLoading(true);
-      const res = await dispatch(getAnyFacility(qParams.facility));
-      if (!status.aborted) {
-        setFacility(res?.data);
-        setIsLoading(false);
-      }
-    },
-    [dispatch, qParams.facility]
-  );
-  const fetchLocationName = useCallback(
-    async (status: statusType) => {
-      if (!qParams.location || !qParams.facility)
-        return setLocationName(undefined);
-      setIsLoading(true);
-      const res = await dispatch(
-        getFacilityAssetLocation(qParams.facility, qParams.location)
-      );
-      if (!status.aborted) {
-        setLocationName(res?.data?.name);
-        setIsLoading(false);
-      }
-    },
-    [dispatch, qParams.facility, qParams.location]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchFacility(status);
-      fetchLocationName(status);
-    },
-    [fetchFacility, fetchLocationName]
-  );
+    prefetch: !!(qParams.facility && qParams.location),
+  });
 
   const getAssetIdFromQR = async (assetUrl: string) => {
     try {
@@ -179,8 +113,10 @@ const AssetsList = () => {
       // QR Maybe searchParams "asset" or "assetQR"
       const assetId = params.asset || params.assetQR;
       if (assetId) {
-        const { data } = await dispatch(listAssets({ qr_code_id: assetId }));
-        return data.results[0].id;
+        const { data } = await request(routes.listAssets, {
+          query: { qr_code_id: assetId },
+        });
+        return data?.results[0].id;
       }
     } catch (err) {
       console.log(err);
@@ -188,11 +124,13 @@ const AssetsList = () => {
   };
 
   const checkValidAssetId = async (assetId: string) => {
-    const assetData = await dispatch(getAsset(assetId));
+    const { data: assetData } = await request(routes.getAsset, {
+      pathParams: { id: assetId },
+    });
     try {
-      if (assetData.data) {
+      if (assetData) {
         navigate(
-          `/facility/${assetData.data.location_object.facility.id}/assets/${assetId}`
+          `/facility/${assetData.location_object.facility.id}/assets/${assetId}`
         );
       }
     } catch (err) {
@@ -210,7 +148,7 @@ const AssetsList = () => {
 
   if (isScannerActive)
     return (
-      <div className="md:w-1/2 w-full my-2 mx-auto flex flex-col justify-start items-end">
+      <div className="mx-auto my-2 flex w-full flex-col items-end justify-start md:w-1/2">
         <button
           onClick={() => setIsScannerActive(false)}
           className="btn btn-default mb-2"
@@ -232,25 +170,33 @@ const AssetsList = () => {
           }
           style={{ width: "100%" }}
         />
-        <h2 className="text-center text-lg self-center">Scan Asset QR!</h2>
+        <h2 className="self-center text-center text-lg">Scan Asset QR!</h2>
       </div>
     );
 
   let manageAssets = null;
-  if (assetsExist) {
+  if (loading) {
     manageAssets = (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:-mx-8 gap-2">
+      <div className="col-span-3 w-full py-8 text-center">
+        <Loading />
+      </div>
+    );
+  } else if (assetsExist) {
+    manageAssets = (
+      <div className="grid grid-cols-1 gap-2 md:-mx-8 md:grid-cols-2 lg:grid-cols-3">
         {assets.map((asset: AssetData) => (
           <Link
+            key={asset.id}
             href={`/facility/${asset?.location_object.facility.id}/assets/${asset.id}`}
-            className="text-inherit"
+            className="h-full text-inherit"
+            data-testid="created-asset-list"
           >
             <div
               key={asset.id}
-              className="w-full bg-white rounded-lg cursor-pointer border-1 shadow p-5 justify-center items-center border border-transparent hover:border-primary-500"
+              className="border-1 h-full w-full cursor-pointer items-center justify-center rounded-lg border border-transparent bg-white p-5 shadow hover:border-primary-500"
             >
               <div className="md:flex">
-                <p className="text-xl flex font-medium capitalize break-words">
+                <p className="flex break-words text-xl font-medium capitalize">
                   <span className="mr-2 text-primary-500">
                     <CareIcon
                       className={`care-l-${
@@ -262,26 +208,39 @@ const AssetsList = () => {
                       } text-2xl`}
                     />
                   </span>
-                  <p className="truncate w-48">{asset.name}</p>
+                  <p
+                    className="w-48 truncate"
+                    data-testid="created-asset-list-name"
+                  >
+                    {asset.name}
+                  </p>
                 </p>
               </div>
-              <p className="font-normal text-sm">
+              <p className="text-sm font-normal">
                 <span className="text-sm font-medium">
                   <CareIcon className="care-l-location-point mr-1 text-primary-500" />
                   {asset?.location_object?.name}
                 </span>
-                <span className="text-sm font-medium ml-2">
+                <span className="ml-2 text-sm font-medium">
                   <CareIcon className="care-l-hospital mr-1 text-primary-500" />
                   {asset?.location_object?.facility?.name}
                 </span>
               </p>
 
-              <div className="flex flex-wrap gap-2 mt-2">
+              <div className="mt-2 flex flex-wrap gap-2">
                 {asset.is_working ? (
-                  <Chip color="green" startIcon="cog" text="Working" />
+                  <Chip startIcon="l-cog" text="Working" />
                 ) : (
-                  <Chip color="red" startIcon="cog" text="Not Working" />
+                  <Chip variant="danger" startIcon="l-cog" text="Not Working" />
                 )}
+                {warrantyAmcValidityChip(asset.warranty_amc_end_of_validity)}
+                {asset?.latest_status === "Down" && (
+                  <Chip
+                    variant="danger"
+                    startIcon="l-link-broken"
+                    text={asset?.latest_status}
+                  />
+                )}{" "}
               </div>
             </div>
           </Link>
@@ -290,7 +249,7 @@ const AssetsList = () => {
     );
   } else {
     manageAssets = (
-      <div className="w-full bg-white rounded-lg p-2 text-center col-span-3 py-8 pt-4">
+      <div className="col-span-3 w-full rounded-lg bg-white p-2 py-8 pt-4 text-center">
         <p className="text-2xl font-bold text-gray-600">No Assets Found</p>
       </div>
     );
@@ -304,19 +263,21 @@ const AssetsList = () => {
       options={
         <>
           {authorizedForImportExport && (
-            <div className="tooltip">
+            <div className="tooltip" data-testid="import-asset-button">
               <ExportMenu
                 label={importAssetModalOpen ? "Importing..." : "Import/Export"}
                 exportItems={[
                   {
                     label: "Import Assets",
                     options: {
-                      icon: <CareIcon className="care-l-import" />,
+                      icon: (
+                        <CareIcon className="care-l-import import-assets-button" />
+                      ),
                       onClick: () => setImportAssetModalOpen(true),
                     },
                   },
                   {
-                    label: "Export Assets",
+                    label: "Export Assets (JSON)",
                     action: () =>
                       authorizedForImportExport &&
                       listAssets({
@@ -325,10 +286,28 @@ const AssetsList = () => {
                         limit: totalCount,
                       }),
                     type: "json",
-                    filePrefix: `assets_${facility?.name}`,
+                    filePrefix: `assets_${facility?.name ?? "all"}`,
                     options: {
                       icon: <CareIcon className="care-l-export" />,
                       disabled: totalCount === 0 || !authorizedForImportExport,
+                      id: "export-json-option",
+                    },
+                  },
+                  {
+                    label: "Export Assets (CSV)",
+                    action: () =>
+                      authorizedForImportExport &&
+                      listAssets({
+                        ...qParams,
+                        csv: true,
+                        limit: totalCount,
+                      }),
+                    type: "csv",
+                    filePrefix: `assets_${facility?.name ?? "all"}`,
+                    options: {
+                      icon: <CareIcon className="care-l-export" />,
+                      disabled: totalCount === 0 || !authorizedForImportExport,
+                      id: "export-csv-option",
                     },
                   },
                 ]}
@@ -338,12 +317,13 @@ const AssetsList = () => {
         </>
       }
     >
-      <div className="lg:flex mt-5 space-y-2 gap-3">
+      <div className="mt-5 gap-3 space-y-2 lg:flex">
         <CountBlock
           text="Total Assets"
           count={totalCount}
-          loading={isLoading}
-          icon={"monitor-heart-rate"}
+          loading={loading}
+          icon="l-monitor-heart-rate"
+          className="flex-1"
         />
         <div className="flex-1">
           <SearchInput
@@ -353,8 +333,8 @@ const AssetsList = () => {
             placeholder="Search by name/serial no./QR code ID"
           />
         </div>
-        <div className="flex flex-col lg:ml-2 justify-start items-start gap-2">
-          <div className="flex flex-col md:flex-row gap-2 w-full lg:w-auto">
+        <div className="flex flex-col items-start justify-start gap-2 lg:ml-2">
+          <div className="flex w-full flex-col gap-2 md:flex-row lg:w-auto">
             <div className="w-full">
               <AdvancedFilterButton
                 onClick={() => advancedFilter.setShow(true)}
@@ -368,12 +348,12 @@ const AssetsList = () => {
             </ButtonV2>
           </div>
           <div
-            className="flex flex-col md:flex-row w-full"
+            className="flex w-full flex-col md:flex-row"
             data-testid="create-asset-buttom"
           >
             <ButtonV2
               authorizeFor={NonReadOnlyUsers}
-              className="w-full inline-flex items-center justify-center"
+              className="inline-flex w-full items-center justify-center"
               onClick={() => {
                 if (qParams.facility) {
                   navigate(`/facility/${qParams.facility}/assets/new`);
@@ -395,12 +375,29 @@ const AssetsList = () => {
         <>
           <FilterBadges
             badges={({ badge, value }) => [
-              value("Facility", "facility", facilityName || ""),
+              value(
+                "Facility",
+                "facility",
+                qParams.facility && facilityObject?.name
+              ),
               badge("Name/Serial No./QR ID", "search"),
-              value("Asset Type", "asset_type", asset_type || ""),
-              value("Asset Class", "asset_class", asset_class || ""),
-              value("Status", "status", status?.replace(/_/g, " ") || ""),
-              value("Location", "location", locationName || ""),
+              value("Asset Class", "asset_class", asset_class ?? ""),
+              value("Status", "status", status?.replace(/_/g, " ") ?? ""),
+              value(
+                "Location",
+                "location",
+                qParams.location && locationObject?.name
+              ),
+              value(
+                "Warranty AMC End Of Validity Before",
+                "warranty_amc_end_of_validity_before",
+                qParams.warranty_amc_end_of_validity_before ?? ""
+              ),
+              value(
+                "Warranty AMC End Of Validity After",
+                "warranty_amc_end_of_validity_after",
+                qParams.warranty_amc_end_of_validity_after ?? ""
+              ),
             ]}
           />
           <div className="grow">
@@ -440,6 +437,7 @@ const AssetsList = () => {
               return f;
             });
           }}
+          onUpdate={assetsFetch}
           facility={facility}
         />
       )}
@@ -455,6 +453,49 @@ const AssetsList = () => {
       />
     </Page>
   );
+};
+
+export const warrantyAmcValidityChip = (
+  warranty_amc_end_of_validity: string
+) => {
+  if (warranty_amc_end_of_validity === "" || !warranty_amc_end_of_validity)
+    return;
+  const today = new Date();
+  const warrantyAmcEndDate = new Date(warranty_amc_end_of_validity);
+
+  const days = Math.ceil(
+    Math.abs(Number(warrantyAmcEndDate) - Number(today)) / (1000 * 60 * 60 * 24)
+  );
+
+  if (warrantyAmcEndDate < today) {
+    return (
+      <Chip
+        id="warranty-amc-expired-red"
+        variant="danger"
+        startIcon="l-times-circle"
+        text="AMC/Warranty Expired"
+      />
+    );
+  } else if (days <= 30) {
+    return (
+      <Chip
+        id="warranty-amc-expiring-soon-orange"
+        variant="custom"
+        className="border-orange-300 bg-orange-100 text-orange-900"
+        startIcon="l-exclamation-circle"
+        text="AMC/Warranty Expiring Soon"
+      />
+    );
+  } else if (days <= 90) {
+    return (
+      <Chip
+        id="warranty-amc-expiring-soon-yellow"
+        variant="warning"
+        startIcon="l-exclamation-triangle"
+        text="AMC/Warranty Expiring Soon"
+      />
+    );
+  }
 };
 
 export default AssetsList;

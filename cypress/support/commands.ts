@@ -69,10 +69,8 @@ Cypress.Commands.add("loginByApi", (username, password) => {
 Cypress.Commands.add(
   "awaitUrl",
   (url: string, disableLoginVerification = false) => {
-    cy.intercept(/fontawesome/).as("fontawesome");
     cy.intercept(/currentuser/).as("currentuser");
     cy.visit(url);
-    cy.wait("@fontawesome");
     disableLoginVerification
       ? cy.wait("@currentuser")
       : cy.wait("@currentuser").its("response.statusCode").should("eq", 200);
@@ -81,7 +79,7 @@ Cypress.Commands.add(
 
 Cypress.Commands.add("verifyNotification", (text) => {
   cy.get(".pnotify-container").should("exist").contains(text);
-  return cy.get(".pnotify-container").click({ force: true });
+  return cy.get(".pnotify-container").contains(text).click({ force: true });
 });
 
 Cypress.on("uncaught:exception", () => {
@@ -108,4 +106,8 @@ Cypress.Commands.add("getAttached", (selector) => {
       expect(Cypress.dom.isDetached($el)).to.be.false;
     })
     .then(() => cy.wrap($el));
+});
+
+Cypress.Commands.add("clearAllFilters", () => {
+  return cy.get("#clear-all-filters").click();
 });

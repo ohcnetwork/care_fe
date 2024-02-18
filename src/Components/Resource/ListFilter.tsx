@@ -1,12 +1,7 @@
-import React, { useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { RESOURCE_FILTER_ORDER } from "../../Common/constants";
-import moment from "moment";
-import { getAnyFacility } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
 import { RESOURCE_CHOICES } from "../../Common/constants";
 import useMergeState from "../../Common/hooks/useMergeState";
-import { navigate } from "raviger";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import CircularProgress from "../Common/components/CircularProgress";
@@ -14,31 +9,16 @@ import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { DateRange } from "../Common/DateRangeInputV2";
 import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
-
-const clearFilterState = {
-  origin_facility: "",
-  origin_facility_ref: "",
-  approving_facility: "",
-  approving_facility_ref: "",
-  assigned_facility: "",
-  assigned_facility_ref: "",
-  emergency: "",
-  created_date_before: "",
-  created_date_after: "",
-  modified_date_before: "",
-  modified_date_after: "",
-  ordering: "",
-  status: "",
-};
+import dayjs from "dayjs";
+import { dateQueryString } from "../../Utils/utils";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 
 const getDate = (value: any) =>
-  value && moment(value).isValid() && moment(value).toDate();
+  value && dayjs(value).isValid() && dayjs(value).toDate();
 
 export default function ListFilter(props: any) {
-  const { filter, onChange, closeFilter } = props;
-  const [isOriginLoading, setOriginLoading] = useState(false);
-  const [isResourceLoading, setResourceLoading] = useState(false);
-  const [isAssignedLoading, setAssignedLoading] = useState(false);
+  const { filter, onChange, closeFilter, removeFilters } = props;
   const [filterState, setFilterState] = useMergeState({
     origin_facility: filter.origin_facility || "",
     origin_facility_ref: null,
@@ -54,55 +34,42 @@ export default function ListFilter(props: any) {
     ordering: filter.ordering || null,
     status: filter.status || null,
   });
-  const dispatch: any = useDispatch();
 
-  useEffect(() => {
-    async function fetchData() {
-      if (filter.origin_facility) {
-        setOriginLoading(true);
-        const res = await dispatch(
-          getAnyFacility(filter.origin_facility, "origin_facility")
-        );
-        if (res && res.data) {
-          setFilterState({ origin_facility_ref: res.data });
-        }
-        setOriginLoading(false);
+  const { loading: orginFacilityLoading } = useQuery(routes.getAnyFacility, {
+    prefetch: filter.origin_facility !== undefined,
+    pathParams: { id: filter.origin_facility },
+    onResponse: ({ res, data }) => {
+      if (res && data) {
+        setFilterState({
+          origin_facility_ref: filter.origin_facility === "" ? "" : data,
+        });
       }
-    }
-    fetchData();
-  }, [dispatch]);
+    },
+  });
 
-  useEffect(() => {
-    async function fetchData() {
-      if (filter.approving_facility) {
-        setResourceLoading(true);
-        const res = await dispatch(
-          getAnyFacility(filter.approving_facility, "approving_facility")
-        );
-        if (res && res.data) {
-          setFilterState({ approving_facility_ref: res.data });
-        }
-        setResourceLoading(false);
+  const { loading: resourceFacilityLoading } = useQuery(routes.getAnyFacility, {
+    prefetch: filter.approving_facility !== undefined,
+    pathParams: { id: filter.approving_facility },
+    onResponse: ({ res, data }) => {
+      if (res && data) {
+        setFilterState({
+          approving_facility_ref: filter.approving_facility === "" ? "" : data,
+        });
       }
-    }
-    fetchData();
-  }, [dispatch]);
+    },
+  });
 
-  useEffect(() => {
-    async function fetchData() {
-      if (filter.assigned_facility) {
-        setAssignedLoading(true);
-        const res = await dispatch(
-          getAnyFacility(filter.assigned_facility, "assigned_facility")
-        );
-        if (res && res.data) {
-          setFilterState({ assigned_facility_ref: res.data });
-        }
-        setAssignedLoading(false);
+  const { loading: assignedFacilityLoading } = useQuery(routes.getAnyFacility, {
+    pathParams: { id: filter.assigned_facility },
+    prefetch: filter.assigned_facility !== undefined,
+    onResponse: ({ res, data }) => {
+      if (res && data) {
+        setFilterState({
+          assigned_facility_ref: filter.assigned_facility === "" ? "" : data,
+        });
       }
-    }
-    fetchData();
-  }, [dispatch]);
+    },
+  });
 
   const setFacility = (selected: any, name: string) => {
     setFilterState({
@@ -134,22 +101,10 @@ export default function ListFilter(props: any) {
       approving_facility: approving_facility || "",
       assigned_facility: assigned_facility || "",
       emergency: emergency || "",
-      created_date_before:
-        created_date_before && moment(created_date_before).isValid()
-          ? moment(created_date_before).format("YYYY-MM-DD")
-          : "",
-      created_date_after:
-        created_date_after && moment(created_date_after).isValid()
-          ? moment(created_date_after).format("YYYY-MM-DD")
-          : "",
-      modified_date_before:
-        modified_date_before && moment(modified_date_before).isValid()
-          ? moment(modified_date_before).format("YYYY-MM-DD")
-          : "",
-      modified_date_after:
-        modified_date_after && moment(modified_date_after).isValid()
-          ? moment(modified_date_after).format("YYYY-MM-DD")
-          : "",
+      created_date_before: dateQueryString(created_date_before),
+      created_date_after: dateQueryString(created_date_after),
+      modified_date_before: dateQueryString(modified_date_before),
+      modified_date_after: dateQueryString(modified_date_after),
       ordering: ordering || "",
       status: status || "",
     };
@@ -168,8 +123,7 @@ export default function ListFilter(props: any) {
       advancedFilter={props}
       onApply={applyFilter}
       onClear={() => {
-        navigate("/resource");
-        setFilterState(clearFilterState);
+        removeFilters();
         closeFilter();
       }}
     >
@@ -189,7 +143,7 @@ export default function ListFilter(props: any) {
 
       <div>
         <FieldLabel>Origin facility</FieldLabel>
-        {isOriginLoading ? (
+        {orginFacilityLoading && filter.origin_facility ? (
           <CircularProgress />
         ) : (
           <FacilitySelect
@@ -205,7 +159,7 @@ export default function ListFilter(props: any) {
 
       <div>
         <FieldLabel>Resource approving facility</FieldLabel>
-        {isResourceLoading ? (
+        {filter.approving_facility && resourceFacilityLoading ? (
           <CircularProgress />
         ) : (
           <FacilitySelect
@@ -221,7 +175,7 @@ export default function ListFilter(props: any) {
 
       <div>
         <FieldLabel>Assigned facility</FieldLabel>
-        {isAssignedLoading ? (
+        {filter.approving_facility && assignedFacilityLoading ? (
           <CircularProgress />
         ) : (
           <FacilitySelect

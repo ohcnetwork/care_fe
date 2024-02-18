@@ -1,8 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
-import { formatDate } from "../../Utils/utils";
-import { PrescriptionActions } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
+import { useState } from "react";
+import ResponsiveMedicineTable from "./ResponsiveMedicineTables";
+import { formatDateTime } from "../../Utils/utils";
 import { Prescription } from "./models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
@@ -14,11 +12,13 @@ import AdministerMedicine from "./AdministerMedicine";
 import DialogModal from "../Common/Dialog";
 import PrescriptionDetailCard from "./PrescriptionDetailCard";
 import { useTranslation } from "react-i18next";
+import useSlug from "../../Common/hooks/useSlug";
+import useQuery from "../../Utils/request/useQuery";
+import MedicineRoutes from "./routes";
 
 interface Props {
   is_prn?: boolean;
   prescription_type?: Prescription["prescription_type"];
-  consultation_id: string;
   onChange?: () => void;
   readonly?: boolean;
 }
@@ -26,35 +26,22 @@ interface Props {
 export default function PrescriptionsTable({
   is_prn = false,
   prescription_type = "REGULAR",
-  consultation_id,
   onChange,
   readonly,
 }: Props) {
-  const dispatch = useDispatch<any>();
+  const consultation = useSlug("consultation");
   const { t } = useTranslation();
-
-  const [prescriptions, setPrescriptions] = useState<Prescription[]>();
   const [showBulkAdminister, setShowBulkAdminister] = useState(false);
   const [showDiscontinueFor, setShowDiscontinueFor] = useState<Prescription>();
   const [showAdministerFor, setShowAdministerFor] = useState<Prescription>();
   const [detailedViewFor, setDetailedViewFor] = useState<Prescription>();
 
-  const { list, prescription } = useMemo(
-    () => PrescriptionActions(consultation_id),
-    [consultation_id]
-  );
+  const { data } = useQuery(MedicineRoutes.listPrescriptions, {
+    pathParams: { consultation },
+    query: { is_prn, prescription_type, limit: 100 },
+  });
 
-  const fetchPrescriptions = useCallback(() => {
-    dispatch(list({ is_prn, prescription_type })).then((res: any) =>
-      setPrescriptions(res.data.results)
-    );
-  }, [consultation_id]);
-
-  useEffect(() => {
-    fetchPrescriptions();
-  }, [consultation_id]);
-
-  const lastModified = prescriptions?.[0]?.modified_date;
+  const lastModified = data?.results[0]?.modified_date;
   const tkeys =
     prescription_type === "REGULAR"
       ? is_prn
@@ -66,7 +53,7 @@ export default function PrescriptionsTable({
 
   return (
     <div>
-      {prescriptions && (
+      {data?.results && (
         <SlideOver
           title={t("administer_medicines")}
           dialogClass="w-full max-w-sm sm:max-w-md md:max-w-[1200px]"
@@ -74,8 +61,7 @@ export default function PrescriptionsTable({
           setOpen={setShowBulkAdminister}
         >
           <MedicineAdministration
-            prescriptions={prescriptions}
-            action={prescription}
+            prescriptions={data?.results}
             onDone={() => {
               setShowBulkAdminister(false);
               onChange?.();
@@ -86,7 +72,6 @@ export default function PrescriptionsTable({
       {showDiscontinueFor && (
         <DiscontinuePrescription
           prescription={showDiscontinueFor}
-          actions={prescription(showDiscontinueFor.id!)}
           onClose={(success) => {
             setShowDiscontinueFor(undefined);
             if (success) onChange?.();
@@ -97,7 +82,6 @@ export default function PrescriptionsTable({
       {showAdministerFor && (
         <AdministerMedicine
           prescription={showAdministerFor}
-          actions={prescription(showAdministerFor.id!)}
           onClose={(success) => {
             setShowAdministerFor(undefined);
             if (success) onChange?.();
@@ -109,17 +93,16 @@ export default function PrescriptionsTable({
         <DialogModal
           onClose={() => setDetailedViewFor(undefined)}
           title={t("prescription_details")}
-          className="md:max-w-4xl w-full"
+          className="w-full md:max-w-4xl"
           show
         >
           <div className="mt-4 flex flex-col gap-4">
             <PrescriptionDetailCard
               prescription={detailedViewFor}
-              actions={prescription(detailedViewFor.id!)}
               key={detailedViewFor.id}
               readonly
             />
-            <div className="flex flex-col md:flex-row w-full gap-2 items-center justify-end">
+            <div className="flex w-full flex-col items-center justify-end gap-2 md:flex-row">
               <Cancel
                 onClick={() => setDetailedViewFor(undefined)}
                 label={t("close")}
@@ -149,20 +132,20 @@ export default function PrescriptionsTable({
           </div>
         </DialogModal>
       )}
-      <div className="flex flex-wrap items-center justify-between mb-2">
+      <div className="mb-2 flex flex-wrap items-center justify-between">
         <div className="flex items-center font-semibold leading-relaxed text-gray-900">
-          <span className="text-lg mr-3">
+          <span className="mr-3 text-lg">
             {is_prn ? "PRN Prescriptions" : "Prescriptions"}
           </span>
           <div className="text-gray-600">
             <CareIcon className="care-l-history-alt pr-2" />
             <span className="text-xs">
-              {lastModified && formatDate(lastModified)}
+              {lastModified && formatDateTime(lastModified)}
             </span>
           </div>
         </div>
         {prescription_type === "REGULAR" && (
-          <div className="flex w-full mt-2 md:mt-0 md:w-auto flex-col sm:flex-row gap-2 justify-end">
+          <div className="mt-2 flex w-full flex-col justify-end gap-2 sm:flex-row md:mt-0 md:w-auto">
             <ButtonV2
               disabled={readonly}
               variant="secondary"
@@ -191,15 +174,16 @@ export default function PrescriptionsTable({
         )}
       </div>
       <div className="flex flex-col">
-        <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-          <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
+        <div className="-my-2 overflow-x-auto py-2 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+          <div className="inline-block min-w-full overflow-hidden border-b border-gray-200 align-middle shadow sm:rounded-lg">
             <ResponsiveMedicineTable
               onClick={setDetailedViewFor}
               maxWidthColumn={0}
               theads={Object.keys(tkeys).map((_) => t(_))}
               list={
-                prescriptions?.map((obj) => ({
+                data?.results.map((obj) => ({
                   ...obj,
+                  medicine: obj.medicine_object?.name ?? obj.medicine_old,
                   route__pretty:
                     obj.route && t("PRESCRIPTION_ROUTE_" + obj.route),
                   frequency__pretty:
@@ -223,7 +207,7 @@ export default function PrescriptionsTable({
                   ? (med: Prescription) => {
                       if (med.prescription_type === "DISCHARGE") {
                         return (
-                          <div className="flex w-full gap-1 items-center justify-center font-medium text-gray-700">
+                          <div className="flex w-full items-center justify-center gap-1 font-medium text-gray-700">
                             <span className="text-sm">
                               {t("discharge_prescription")}
                             </span>
@@ -233,7 +217,7 @@ export default function PrescriptionsTable({
 
                       if (med.discontinued) {
                         return (
-                          <div className="flex w-full gap-1 items-center justify-center font-medium text-gray-700">
+                          <div className="flex w-full items-center justify-center gap-1 font-medium text-gray-700">
                             <CareIcon className="care-l-ban" />
                             <span className="text-sm">{t("discontinued")}</span>
                           </div>
@@ -276,8 +260,8 @@ export default function PrescriptionsTable({
                   : undefined
               }
             />
-            {prescriptions?.length === 0 && (
-              <div className="flex items-center justify-center text-gray-600 py-2 text-semibold">
+            {data?.results.length === 0 && (
+              <div className="text-semibold flex items-center justify-center py-2 text-gray-600">
                 {t("no_data_found")}
               </div>
             )}

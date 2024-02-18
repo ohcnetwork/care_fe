@@ -28,7 +28,7 @@ let handleOnClick = (href, confirm, onClick, event) => {
 }
 
 @react.component
-export make = (
+let make = (
   ~href,
   ~ariaLabel=?,
   ~className=?,

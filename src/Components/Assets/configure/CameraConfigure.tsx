@@ -1,4 +1,4 @@
-import React from "react";
+import { SyntheticEvent } from "react";
 import { AssetData } from "../AssetTypes";
 import LiveFeed from "../../Facility/Consultations/LiveFeed";
 import { BedSelect } from "../../Common/BedSelect";
@@ -10,7 +10,7 @@ import Card from "../../../CAREUI/display/Card";
 
 interface CameraConfigureProps {
   asset: AssetData;
-  addPreset(e: React.SyntheticEvent): void;
+  addPreset(e: SyntheticEvent): void;
   setBed(bed: BedModel): void;
   bed: BedModel;
   newPreset: string;
@@ -36,12 +36,12 @@ export default function CameraConfigure(props: CameraConfigureProps) {
     <div className="mb-5">
       <Card className="mt-4">
         <form onSubmit={addPreset} className="">
-          <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
+          <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <label id="asset-type">Bed</label>
               <BedSelect
                 name="bed"
-                className="overflow-y-scoll mt-2 z-50"
+                className="overflow-y-scoll z-50 mt-2"
                 setSelected={(selected) => setBed(selected as BedModel)}
                 selected={bed}
                 error=""
@@ -57,13 +57,13 @@ export default function CameraConfigure(props: CameraConfigureProps) {
                 id="location"
                 type="text"
                 value={newPreset}
-                className="mt-2"
+                className="mt-1"
                 onChange={(e) => setNewPreset(e.value)}
                 error=""
               />
             </div>
           </div>
-          <div className="flex justify-end mt-4">
+          <div className="mt-4 flex justify-end">
             <Submit disabled={isLoading} label="Add Preset" />
           </div>
         </form>

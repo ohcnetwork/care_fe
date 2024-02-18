@@ -1,14 +1,5 @@
-import { useCallback, useState, useReducer } from "react";
-import loadable from "@loadable/component";
+import { useCallback, useState, useReducer, lazy } from "react";
 import * as Notification from "../../Utils/Notifications.js";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  getLocalbodyByDistrict,
-  getWardByLocalBody,
-  externalResult,
-  partialUpdateExternalResult,
-} from "../../Redux/actions";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField.js";
 import CircularProgress from "../Common/components/CircularProgress.js";
 import { SelectFormField } from "../Form/FormFields/SelectFormField.js";
@@ -17,8 +8,12 @@ import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import Page from "../Common/components/Page.js";
+import useQuery from "../../Utils/request/useQuery.js";
+import routes from "../../Redux/api.js";
+import request from "../../Utils/request/request.js";
+import { compareBy } from "../../Utils/utils.js";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm = {
   address: "",
@@ -63,79 +58,70 @@ export default function UpdateResult(props: any) {
   const { id } = props;
   const { goBack } = useAppHistory();
 
-  const dispatchAction: any = useDispatch();
   const [state, dispatch] = useReducer(FormReducer, initialState);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
   const [isWardLoading, setIsWardLoading] = useState(false);
   const [localBody, setLocalBody] = useState(initialLocalbodies);
   const [ward, setWard] = useState(initialLocalbodies);
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatchAction(externalResult({ id: id }));
-      if (!status.aborted) {
-        if (res && res.data) {
-          const form = { ...state.form };
-          form["name"] = res.data.name;
-          form["age"] = res.data.age;
-          form["age_in"] = res.data.age_in;
-          form["srf_id"] = res.data.srf_id;
-          form["address"] = res.data.address;
-          form["district"] = res.data.district_object.name;
-          form["local_body"] = String(res.data.local_body);
-          form["ward"] = String(res.data.ward);
-          form["patient_created"] = String(res.data.patient_created);
+  const { loading } = useQuery(routes.externalResult, {
+    pathParams: { id },
+    onResponse: async ({ res, data }) => {
+      if (res && data) {
+        const form = { ...state.form };
+        form["name"] = data.name;
+        form["age"] = data.age;
+        form["age_in"] = data.age_in;
+        form["srf_id"] = data.srf_id;
+        form["address"] = data.address;
+        form["district"] = data.district_object.name;
+        form["local_body"] = String(data.local_body);
+        form["ward"] = String(data.ward);
+        form["patient_created"] = String(data.patient_created);
 
-          dispatch({ type: "set_form", form });
+        dispatch({ type: "set_form", form });
 
-          Promise.all([
-            fetchLocalBody(res.data.district),
-            fetchWards(res.data.local_body),
-          ]);
-        }
+        Promise.all([
+          fetchLocalBody(data.district),
+          fetchWards(data.local_body),
+        ]);
         setIsLoading(false);
       }
     },
-    [props.id, dispatchAction]
-  );
+  });
 
-  const fetchLocalBody = useCallback(
-    async (id: string) => {
-      if (Number(id) > 0) {
-        setIsLocalbodyLoading(true);
-        const localBodyList = await dispatchAction(
-          getLocalbodyByDistrict({ id })
-        );
+  const fetchLocalBody = async (id: number) => {
+    if (Number(id) > 0) {
+      setIsLocalbodyLoading(true);
+      const { res, data } = await request(routes.getLocalbodyByDistrict, {
+        pathParams: { id: String(id) },
+      });
+      if (res && data) {
         setIsLocalbodyLoading(false);
-        setLocalBody([...initialLocalbodies, ...localBodyList.data]);
-      } else {
-        setLocalBody(initialLocalbodies);
+        setLocalBody([...initialLocalbodies, ...data]);
       }
-    },
-    [dispatchAction]
-  );
+    } else {
+      setLocalBody(initialLocalbodies);
+    }
+  };
 
   const fetchWards = useCallback(
-    async (id: string) => {
+    async (id: number) => {
       if (Number(id) > 0) {
         setIsWardLoading(true);
-        const wardList = await dispatchAction(getWardByLocalBody({ id }));
+        const { res, data } = await request(routes.getWardByLocalBody, {
+          pathParams: { id: String(id) },
+        });
+        if (res && data) {
+          setWard([...initialWard, ...data.results]);
+        }
         setIsWardLoading(false);
-        setWard([...initialWard, ...wardList.data.results]);
       } else {
         setWard(initialLocalbodies);
       }
     },
-    [dispatchAction]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
+    [props.id]
   );
 
   const validateForm = () => {
@@ -195,15 +181,20 @@ export default function UpdateResult(props: any) {
     const validForm = validateForm();
     if (validForm) {
       setIsLoading(true);
-      const data = {
+      const rdata = {
         address: state.form.address ? state.form.address : undefined,
         local_body: state.form.local_body ? state.form.local_body : undefined,
         ward: state.form.ward,
         patient_created: state.form.patient_created === "true",
       };
-      const res = await dispatchAction(partialUpdateExternalResult(id, data));
+
+      const { res, data } = await request(routes.partialUpdateExternalResult, {
+        pathParams: { id },
+        body: rdata,
+      });
+
       setIsLoading(false);
-      if (res && res.data) {
+      if (res && data) {
         dispatch({ type: "set_form", form: initForm });
         Notification.Success({
           msg: "External Result updated successfully",
@@ -213,7 +204,7 @@ export default function UpdateResult(props: any) {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || loading) {
     return <Loading />;
   }
 
@@ -221,12 +212,12 @@ export default function UpdateResult(props: any) {
     <div>
       <Page
         title="Update External Result"
-        className="px-6 mb-2"
+        className="mb-2 px-6"
         backUrl={`/external_results/${id}`}
       >
         <div className="md:p-4">
-          <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
-            <h3 className="text-lg leading-6 font-medium text-gray-900">
+          <div className="border-b border-gray-200 px-4 py-5 sm:px-6">
+            <h3 className="text-lg font-medium leading-6 text-gray-900">
               {state.form.name} - {state.form.age} {state.form.age_in}
             </h3>
             <p className="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
@@ -237,7 +228,7 @@ export default function UpdateResult(props: any) {
             </p>
           </div>
           <form onSubmit={(e) => handleSubmit(e)}>
-            <div className="px-4 py-5 grid gap-4 grid-cols-1 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 px-4 py-5 md:grid-cols-2">
               <div data-testid="current-address">
                 <TextAreaFormField
                   rows={2}
@@ -262,10 +253,7 @@ export default function UpdateResult(props: any) {
                     options={localBody}
                     optionLabel={(localBody) => localBody.name}
                     optionValue={(localBody) => localBody.id}
-                    onChange={(e) => [
-                      handleChange(e),
-                      fetchWards(String(e.value)),
-                    ]}
+                    onChange={(e) => [handleChange(e), fetchWards(e.value)]}
                     error={state.errors.local_body}
                   />
                 )}
@@ -278,11 +266,9 @@ export default function UpdateResult(props: any) {
                     name="ward"
                     label="Ward/Division of respective LSGI"
                     required
-                    options={ward
-                      .sort((a, b) => a.number - b.number)
-                      .map((e) => {
-                        return { id: e.id, name: e.number + ": " + e.name };
-                      })}
+                    options={ward.sort(compareBy("number")).map((e) => {
+                      return { id: e.id, name: e.number + ": " + e.name };
+                    })}
                     value={state.form.ward}
                     optionLabel={(ward) => ward.name}
                     optionValue={(ward) => ward.id}
@@ -307,7 +293,7 @@ export default function UpdateResult(props: any) {
                 />
               </div>
             </div>
-            <div className="flex flex-col md:flex-row gap-2 justify-end mt-4">
+            <div className="mt-4 flex flex-col justify-end gap-2 md:flex-row">
               <Cancel onClick={() => goBack()} />
               <Submit onClick={handleSubmit} />
             </div>

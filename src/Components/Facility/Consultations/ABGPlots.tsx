@@ -1,66 +1,52 @@
-import { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { dailyRoundsAnalyse } from "../../../Redux/actions";
+import { useEffect, useState } from "react";
 import { LinePlot } from "./components/LinePlot";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
-import { formatDate } from "../../../Utils/utils";
+import { formatDateTime } from "../../../Utils/utils";
+import routes from "../../../Redux/api";
+import request from "../../../Utils/request/request";
 
 export const ABGPlots = (props: any) => {
-  const { facilityId, patientId, consultationId } = props;
-  const dispatch: any = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
+  const { consultationId } = props;
   const [results, setResults] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
-  const fetchDailyRounds = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatch(
-        dailyRoundsAnalyse(
-          {
-            page: currentPage,
-            fields: [
-              "ph",
-              "pco2",
-              "po2",
-              "hco3",
-              "base_excess",
-              "lactate",
-              "sodium",
-              "potassium",
-              "ventilator_fi02",
-            ],
-          },
-          { consultationId }
-        )
-      );
-      if (!status.aborted) {
-        if (res && res.data) {
-          setResults(res.data.results);
-          setTotalCount(res.data.count);
-        }
-        setIsLoading(false);
+  useEffect(() => {
+    const fetchDailyRounds = async (currentPage: number) => {
+      const { res, data } = await request(routes.dailyRoundsAnalyse, {
+        body: {
+          page: currentPage,
+          fields: [
+            "ph",
+            "pco2",
+            "po2",
+            "hco3",
+            "base_excess",
+            "lactate",
+            "sodium",
+            "potassium",
+            "ventilator_fi02",
+          ],
+        },
+        pathParams: {
+          consultationId,
+        },
+      });
+      if (res?.ok && data) {
+        setResults(data.results);
+        setTotalCount(data.count);
       }
-    },
-    [consultationId, dispatch, currentPage]
-  );
+    };
+    fetchDailyRounds(currentPage);
+  }, [currentPage, consultationId]);
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchDailyRounds(status);
-    },
-    [currentPage]
-  );
-
-  const handlePagination = (page: number, limit: number) => {
+  const handlePagination = (page: number, _limit: number) => {
     setCurrentPage(page);
   };
 
   const dates = Object.keys(results)
-    .map((p: string) => formatDate(p))
+    .map((p: string) => formatDateTime(p))
     .reverse();
 
   const yAxisData = (name: string) => {
@@ -71,8 +57,8 @@ export const ABGPlots = (props: any) => {
 
   return (
     <div>
-      <div className="grid grid-row-1 md:grid-cols-2 gap-4">
-        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+      <div className="grid-row-1 grid gap-4 md:grid-cols-2">
+        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
           <LinePlot
             title="PH"
             name="PH"
@@ -82,7 +68,7 @@ export const ABGPlots = (props: any) => {
             high={7.45}
           />
         </div>
-        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
           <LinePlot
             title="PCO2 (mm Hg)"
             name="PCO2"
@@ -92,7 +78,7 @@ export const ABGPlots = (props: any) => {
             high={45}
           />
         </div>
-        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
           <LinePlot
             title="PO2 (mm Hg)"
             name="PO2"
@@ -102,7 +88,7 @@ export const ABGPlots = (props: any) => {
             high={200}
           />
         </div>
-        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
           <LinePlot
             title="HCO3  (mmol/L)"
             name="HCO3"
@@ -112,7 +98,7 @@ export const ABGPlots = (props: any) => {
             high={26}
           />
         </div>
-        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
           <LinePlot
             title="Base Excess  (mmol/L)"
             name="Base Excess"
@@ -122,7 +108,7 @@ export const ABGPlots = (props: any) => {
             high={2}
           />
         </div>
-        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
           <LinePlot
             title="Lactate  (mmol/L)"
             name="Lactate"
@@ -133,7 +119,7 @@ export const ABGPlots = (props: any) => {
             high={2}
           />
         </div>
-        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
           <LinePlot
             title="Sodium  (mmol/L)"
             name="Sodium"
@@ -143,7 +129,7 @@ export const ABGPlots = (props: any) => {
             high={145}
           />
         </div>
-        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
           <LinePlot
             title="Potassium  (mmol/L)"
             name="Potassium"
@@ -153,7 +139,7 @@ export const ABGPlots = (props: any) => {
             high={5.5}
           />
         </div>
-        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
           <LinePlot
             title="FIO2(Ventilator)(%)"
             name="fio2"

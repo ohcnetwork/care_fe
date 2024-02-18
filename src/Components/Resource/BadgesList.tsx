@@ -1,63 +1,25 @@
-import { useState, useEffect } from "react";
-import { getAnyFacility } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
 import { SHIFTING_FILTER_ORDER } from "../../Common/constants";
+import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
+
+export function useFacilityQuery(facilityId: string | undefined) {
+  return useQuery(routes.getAnyFacility, {
+    pathParams: { id: facilityId as string },
+    prefetch: !!facilityId,
+  });
+}
 
 export default function BadgesList(props: any) {
   const { appliedFilters, FilterBadges } = props;
-  const [orginFacilityName, setOrginFacilityName] = useState("");
-  const [approvingFacilityName, setApprovingFacilityName] = useState("");
-  const [assignedFacilityName, setAssignedFacilityName] = useState("");
-  const dispatch: any = useDispatch();
-
-  useEffect(() => {
-    async function fetchData() {
-      if (!appliedFilters.origin_facility) return setOrginFacilityName("");
-      const res = await dispatch(
-        getAnyFacility(appliedFilters.origin_facility, "origin_facility_name")
-      );
-      setOrginFacilityName(res?.data?.name);
-    }
-    fetchData();
-  }, [dispatch, appliedFilters.origin_facility]);
-
-  useEffect(() => {
-    async function fetchData() {
-      if (!appliedFilters.approving_facility)
-        return setApprovingFacilityName("");
-      const res = await dispatch(
-        getAnyFacility(
-          appliedFilters.approving_facility,
-          "approving_facility_name"
-        )
-      );
-      setApprovingFacilityName(res?.data?.name);
-    }
-    fetchData();
-  }, [dispatch, appliedFilters.approving_facility]);
-
-  useEffect(() => {
-    async function fetchData() {
-      if (!appliedFilters.assigned_facility) return setAssignedFacilityName("");
-      const res = await dispatch(
-        getAnyFacility(
-          appliedFilters.assigned_facility,
-          "assigned_facility_name"
-        )
-      );
-      setAssignedFacilityName(res?.data?.name);
-    }
-    fetchData();
-  }, [dispatch, appliedFilters.assigned_facility]);
+  const originFacility = useFacilityQuery(appliedFilters.origin_facility);
+  const approvingFacility = useFacilityQuery(appliedFilters.approving_facility);
+  const assignedFacility = useFacilityQuery(appliedFilters.assigned_facility);
 
   const getDescShiftingFilterOrder = (ordering: any) => {
-    let desc = "";
-    SHIFTING_FILTER_ORDER.map((item: any) => {
-      if (item.text === ordering) {
-        desc = item.desc;
-      }
-    });
-    return desc;
+    const foundItem = SHIFTING_FILTER_ORDER.find(
+      (item) => item.text === ordering
+    );
+    return foundItem ? foundItem.desc : "";
   };
 
   return (
@@ -69,19 +31,32 @@ export default function BadgesList(props: any) {
           getDescShiftingFilterOrder(appliedFilters.ordering)
         ),
         badge("Status", "status"),
+        badge("Title", "title"),
         boolean("Emergency", "emergency", {
           trueValue: "yes",
           falseValue: "no",
         }),
         ...dateRange("Modified", "modified_date"),
         ...dateRange("Created", "created_date"),
-        value("Origin facility", "origin_facility", orginFacilityName),
+        value(
+          "Origin facility",
+          "origin_facility",
+          appliedFilters.origin_facility ? originFacility?.data?.name || "" : ""
+        ),
         value(
           "Approving facility",
           "approving_facility",
-          approvingFacilityName
+          appliedFilters.approving_facility
+            ? approvingFacility?.data?.name || ""
+            : ""
         ),
-        value("Assigned facility", "assigned_facility", assignedFacilityName),
+        value(
+          "Assigned facility",
+          "assigned_facility",
+          appliedFilters.assigned_facility
+            ? assignedFacility?.data?.name || ""
+            : ""
+        ),
       ]}
     />
   );

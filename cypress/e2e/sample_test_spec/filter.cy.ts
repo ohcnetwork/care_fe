@@ -8,6 +8,7 @@ describe("Sample Filter", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/sample");
     cy.contains("Advanced Filters").click();
   });
@@ -16,13 +17,6 @@ describe("Sample Filter", () => {
     cy.get("#status").click();
     cy.get("li[role='option']")
       .contains(/^APPROVED$/)
-      .click();
-  });
-
-  it("Filter by Asset Type", () => {
-    cy.get("#result").click();
-    cy.get("li[role='option']")
-      .contains(/^POSITIVE$/)
       .click();
   });
 

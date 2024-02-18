@@ -1,4 +1,3 @@
-import * as React from "react";
 import useRecorder from "./useRecorder";
 import { useEffect, useState } from "react";
 import ButtonV2 from "../Components/Common/components/ButtonV2";
@@ -37,13 +36,13 @@ export const VoiceRecorder = (props: any) => {
   }, [isRecording, reset, setResetRecording, resetRecording]);
 
   return (
-    <div>
+    <div className="w-full md:w-auto">
       <div>
         {isRecording ? (
           <>
-            <div className="space-x-2 flex">
+            <div className="flex space-x-2">
               <div className="bg-gray-100 p-2 text-primary-700">
-                <CareIcon className="care-l-record-audio animate-pulse mr-2" />
+                <CareIcon className="care-l-record-audio mr-2 animate-pulse" />
                 {t("recording") + "..."}
               </div>
               <ButtonV2
@@ -79,7 +78,7 @@ export const VoiceRecorder = (props: any) => {
       {audioURL && (
         <div className="my-4">
           <audio
-            className="max-h-full max-w-full m-auto object-contain"
+            className="m-auto max-h-full max-w-full object-contain"
             src={audioURL}
             controls
           />{" "}

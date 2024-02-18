@@ -1,105 +1,143 @@
-import loadable from "@loadable/component";
-import React, { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import {
-  createFacilityAssetLocation,
-  getAnyFacility,
-  getFacilityAssetLocation,
-  updateFacilityAssetLocation,
-} from "../../Redux/actions";
+import { useState, lazy, SyntheticEvent } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
 import { Submit, Cancel } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import Page from "../Common/components/Page";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import { AssetLocationType } from "../Assets/AssetTypes";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
-interface LocationFormProps {
+interface Props {
   facilityId: string;
   locationId?: string;
 }
 
-export const AddLocationForm = (props: LocationFormProps) => {
-  const { facilityId, locationId } = props;
-  const dispatchAction: any = useDispatch();
+export const AddLocationForm = ({ facilityId, locationId }: Props) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [name, setName] = useState("");
+  const [middlewareAddress, setMiddlewareAddress] = useState("");
   const [description, setDescription] = useState("");
   const [facilityName, setFacilityName] = useState("");
   const [locationName, setLocationName] = useState("");
+  const [locationType, setLocationType] = useState("");
   const [errors, setErrors] = useState<any>({
     name: "",
     description: "",
+    middlewareAddress: "",
+    locationType: "",
   });
   const headerText = !locationId ? "Add Location" : "Update Location";
   const buttonText = !locationId ? "Add Location" : "Update Location";
 
-  useEffect(() => {
-    async function fetchFacilityName() {
-      setIsLoading(true);
-      if (facilityId) {
-        const res = await dispatchAction(getAnyFacility(facilityId));
+  const facilityQuery = useQuery(routes.getAnyFacility, {
+    pathParams: { id: facilityId },
+    prefetch: !locationId,
+    onResponse: ({ data }) => {
+      data?.name && setFacilityName(data.name);
+    },
+  });
 
-        setFacilityName(res?.data?.name || "");
-      }
-      if (locationId) {
-        const res = await dispatchAction(
-          getFacilityAssetLocation(facilityId, locationId)
-        );
+  const locationQuery = useQuery(routes.getFacilityAssetLocation, {
+    pathParams: {
+      facility_external_id: facilityId,
+      external_id: locationId!,
+    },
+    prefetch: !!locationId,
+    onResponse: ({ data }) => {
+      if (!data) return;
+      setFacilityName(data.facility?.name ?? "");
+      setName(data.name);
+      setLocationName(data.name);
+      setDescription(data.description);
+      setLocationType(data.location_type);
+      setMiddlewareAddress(data.middleware_address ?? "");
+    },
+  });
 
-        setName(res?.data?.name || "");
-        setLocationName(res?.data?.name || "");
-        setDescription(res?.data?.description || "");
-      }
-      setIsLoading(false);
-    }
-    fetchFacilityName();
-  }, [dispatchAction, facilityId, locationId]);
-
-  const handleSubmit = async (e: React.SyntheticEvent) => {
-    setErrors({
+  const validateForm = () => {
+    let formValid = true;
+    const error = {
       name: "",
       description: "",
-    });
+      middlewareAddress: "",
+      locationType: "",
+    };
+
+    if (name.trim().length === 0) {
+      error.name = "Name is required";
+      formValid = false;
+    }
+
+    if (locationType.trim().length === 0) {
+      error.locationType = "Location Type is required";
+      formValid = false;
+    }
+
+    if (
+      middlewareAddress &&
+      middlewareAddress.match(
+        /^(?!https?:\/\/)[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*\.[a-zA-Z]{2,}$/
+      ) === null
+    ) {
+      error.middlewareAddress = "Invalid Middleware Address";
+      formValid = false;
+    }
+
+    setErrors(error);
+    return formValid;
+  };
+
+  const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
+    if (!validateForm()) {
+      return;
+    }
+
     setIsLoading(true);
     const data = {
       name,
       description,
+      middleware_address: middlewareAddress,
+      location_type: locationType as AssetLocationType,
     };
 
-    const res = await dispatchAction(
-      locationId
-        ? updateFacilityAssetLocation(data, facilityId, locationId)
-        : createFacilityAssetLocation(data, facilityId)
-    );
-    setIsLoading(false);
-    if (res) {
-      if (res.status === 201 || res.status === 200) {
-        const notificationMessage = locationId
-          ? "Location updated successfully"
-          : "Location created successfully";
+    const { res, error } = await (locationId
+      ? request(routes.updateFacilityAssetLocation, {
+          body: data,
+          pathParams: {
+            facility_external_id: facilityId,
+            external_id: locationId,
+          },
+        })
+      : request(routes.createFacilityAssetLocation, {
+          body: data,
+          pathParams: { facility_external_id: facilityId },
+        }));
 
-        navigate(`/facility/${facilityId}/location`, {
-          replace: true,
-        });
-        Notification.Success({
-          msg: notificationMessage,
-        });
-      } else if (res.status === 400) {
-        Object.keys(res.data).forEach((key) => {
-          setErrors((prevState: any) => ({
-            ...prevState,
-            [key]: res.data[key],
-          }));
-        });
-      }
+    setIsLoading(false);
+
+    if (res?.ok) {
+      navigate(`/facility/${facilityId}/location`, { replace: true });
+      Notification.Success({
+        msg: locationId
+          ? "Location updated successfully"
+          : "Location created successfully",
+      });
+      return;
+    }
+
+    if (error) {
+      setErrors(error);
     }
   };
 
-  if (isLoading) {
+  if (isLoading || locationQuery.loading || facilityQuery.loading) {
     return <Loading />;
   }
 
@@ -120,7 +158,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
       <div className="mt-10">
         <div className="cui-card">
           <form onSubmit={handleSubmit}>
-            <div className="mt-2 grid gap-4 grid-cols-1">
+            <div className="mt-2 grid grid-cols-1 gap-4">
               <div>
                 <TextFormField
                   name="name"
@@ -142,8 +180,40 @@ export const AddLocationForm = (props: LocationFormProps) => {
                   error={errors.description}
                 />
               </div>
+              <div>
+                <SelectFormField
+                  id="location-type"
+                  name="location_type"
+                  label="Location Type"
+                  options={[
+                    { title: "ICU", value: AssetLocationType.ICU },
+                    {
+                      title: "WARD",
+                      value: AssetLocationType.WARD,
+                    },
+                    { title: "OTHER", value: AssetLocationType.OTHER },
+                  ]}
+                  optionLabel={({ title }) => title}
+                  optionValue={({ value }) => value}
+                  value={locationType}
+                  required
+                  onChange={({ value }) => setLocationType(value)}
+                  error={errors.locationType}
+                />
+              </div>
+              <div>
+                <TextFormField
+                  id="location-middleware-address"
+                  name="Location Middleware Address"
+                  type="text"
+                  label="Location Middleware Address"
+                  value={middlewareAddress}
+                  onChange={(e) => setMiddlewareAddress(e.value)}
+                  error={errors.middlewareAddress}
+                />
+              </div>
             </div>
-            <div className="flex flex-col gap-3 sm:flex-row sm:justify-between mt-4">
+            <div className="cui-form-button-group mt-4">
               <Cancel
                 onClick={() =>
                   navigate(`/facility/${facilityId}/location`, {

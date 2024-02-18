@@ -1,30 +1,81 @@
 import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
+import FacilityPage from "../../pageobject/Facility/FacilityCreation";
+import LoginPage from "../../pageobject/Login/LoginPage";
+import FacilityHome from "../../pageobject/Facility/FacilityHome";
 
 describe("Inventory Management Section", () => {
+  const facilityPage = new FacilityPage();
+  const loginPage = new LoginPage();
+  const facilityHome = new FacilityHome();
+
   before(() => {
-    cy.loginByApi("devdistrictadmin", "Coronasafe@123");
+    loginPage.loginAsDisctrictAdmin();
     cy.saveLocalStorage();
   });
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/");
-    cy.get("[id='facility-details']").first().click();
-    cy.get("[id=manage-facility-dropdown]").should("exist").click();
-    cy.get("[id=inventory-management]").click();
+    cy.viewport(1280, 720);
+    facilityPage.visitAlreadyCreatedFacility();
+    facilityPage.clickManageFacilityDropdown();
+    facilityPage.clickInventoryManagementOption();
   });
 
-  it("Adds Inventory", () => {
-    cy.contains("Manage Inventory").click();
-    cy.get("div#id").click();
-    cy.get("div#id ul li").contains("Liquid Oxygen").click();
-    cy.get("div#isIncoming").click();
-    cy.get("div#isIncoming ul li").contains("Add Stock").click();
-    cy.get("[name='quantity']").type("120");
-    cy.get("button").contains("Add/Update Inventory").click();
-    cy.verifyNotification("Inventory created successfully");
+  it("Add New Inventory | Modify data and delete last entry ", () => {
+    // add a new item
+    facilityPage.clickManageInventory();
+    facilityPage.fillInventoryDetails("PPE", "Add Stock", "10");
+    facilityPage.clickAddInventory();
+    facilityPage.verifySuccessNotification("Inventory created successfully");
+    facilityPage.clickManageInventory();
+    // modify the new item
+    facilityPage.fillInventoryDetails("PPE", "Use Stock", "5");
+    facilityPage.clickAddInventory();
+    facilityPage.verifySuccessNotification("Inventory created successfully");
+    // verify the new modification
+    facilityPage.verifyPpeQuantity("PPE");
+    facilityPage.verifyPpeQuantity("5");
+    // delete the last Entry
+    facilityPage.clickPpeQuantity();
+    facilityPage.clickLastEntry();
+    // verify the last entry deletion
+    facilityPage.verifyStockInRow("#row-0", "Added Stock");
+    facilityPage.verifyStockInRow("#row-1", "Used Stock");
+    cy.wait(3000);
+    facilityHome.navigateBack();
+    facilityPage.verifyPpeQuantity("PPE");
   });
 
+  it("Add New Inventory | Verify Backend and manual Minimum", () => {
+    // Add Inventory
+    facilityPage.clickManageInventory();
+    facilityPage.fillInventoryDetails("PPE", "Add Stock", "5");
+    facilityPage.clickAddInventory();
+    facilityPage.verifySuccessNotification("Inventory created successfully");
+    // Verify Backend minimum badge
+    facilityPage.verifyBadgeWithText(".badge-danger", "Low Stock");
+    // modify with manual minimum badge
+    facilityPage.clickAddMinimumQuanitity();
+    cy.wait(3000);
+    cy.get("body").then(($body) => {
+      if ($body.find("#update-minimum-quantity").is(":visible")) {
+        // If the 'update-minimum-quantity' element is visible, click it
+        facilityPage.clickUpdateMinimumQuantity();
+        facilityPage.setQuantity("5");
+        facilityPage.clickSaveUpdateMinimumQuantity();
+      } else {
+        // Otherwise, click the 'set-minimum-quantity' element
+        facilityPage.clickSetMinimumQuantity();
+        facilityPage.fillInventoryMinimumDetails("PPE", "1");
+        facilityPage.clickSetButton();
+        facilityPage.verifySuccessNotification(
+          "Minimum quantiy updated successfully"
+        );
+      }
+    });
+  });
   afterEach(() => {
     cy.saveLocalStorage();
   });

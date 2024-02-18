@@ -1,16 +1,15 @@
-import moment from "moment";
-import React, { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { dailyRoundsAnalyse } from "../../../Redux/actions";
+import { useEffect, useState } from "react";
+import routes from "../../../Redux/api";
+import request from "../../../Utils/request/request";
 import { LinePlot } from "./components/LinePlot";
 import { StackedLinePlot } from "./components/StackedLinePlot";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
-import { formatDate } from "../../../Utils/utils";
+import { formatDateTime } from "../../../Utils/utils";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { PainDiagrams } from "./PainDiagrams";
 import PageTitle from "../../Common/PageTitle";
+import dayjs from "../../../Utils/dayjs";
 
 interface PrimaryParametersPlotProps {
   facilityId: string;
@@ -18,60 +17,65 @@ interface PrimaryParametersPlotProps {
   consultationId: string;
 }
 
+const sanitizeBPAttribute = (value: number | undefined) => {
+  // Temp. hack until the cleaning of daily rounds as a db migration is done.
+  // TODO: remove once migration is merged.
+
+  if (value == null || value < 0) {
+    return;
+  }
+
+  return value;
+};
+
 export const PrimaryParametersPlot = ({
   consultationId,
 }: PrimaryParametersPlotProps) => {
-  const dispatch: any = useDispatch();
   const [results, setResults] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
-  const fetchDailyRounds = useCallback(
-    async (status: statusType) => {
-      const res = await dispatch(
-        dailyRoundsAnalyse(
-          {
-            page: currentPage,
-            fields: [
-              "bp",
-              "pulse",
-              "temperature",
-              "resp",
-              "blood_sugar_level",
-              "insulin_intake_frequency",
-              "insulin_intake_dose",
-              "ventilator_spo2",
-              "ventilator_fi02",
-              "rhythm",
-              "rhythm_detail",
-            ],
-          },
-          { consultationId }
-        )
-      );
-      if (!status.aborted) {
-        if (res && res.data) {
-          setResults(res.data.results);
-          setTotalCount(res.data.count);
-        }
+  useEffect(() => {
+    const fetchDailyRounds = async (
+      currentPage: number,
+      consultationId: string
+    ) => {
+      const { res, data } = await request(routes.dailyRoundsAnalyse, {
+        body: {
+          page: currentPage,
+          fields: [
+            "bp",
+            "pulse",
+            "temperature",
+            "resp",
+            "blood_sugar_level",
+            "insulin_intake_frequency",
+            "insulin_intake_dose",
+            "ventilator_spo2",
+            "ventilator_fi02",
+            "rhythm",
+            "rhythm_detail",
+          ],
+        },
+        pathParams: {
+          consultationId,
+        },
+      });
+      if (res && res.ok && data) {
+        setResults(data.results);
+        setTotalCount(data.count);
       }
-    },
-    [consultationId, dispatch, currentPage]
-  );
+    };
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchDailyRounds(status);
-    },
-    [consultationId, currentPage]
-  );
+    fetchDailyRounds(currentPage, consultationId);
+  }, [consultationId, currentPage]);
 
   const handlePagination = (page: number) => {
     setCurrentPage(page);
   };
 
   const dates = Object.keys(results)
-    .map((p: string) => formatDate(p))
+    .map((p: string) => formatDateTime(p))
     .reverse();
 
   const yAxisData = (name: string) => {
@@ -84,19 +88,19 @@ export const PrimaryParametersPlot = ({
     {
       name: "diastolic",
       data: Object.values(results)
-        .map((p: any) => p.bp && p.bp.diastolic)
+        .map((p: any) => p.bp && sanitizeBPAttribute(p.bp.diastolic))
         .reverse(),
     },
     {
       name: "systolic",
       data: Object.values(results)
-        .map((p: any) => p.bp && p.bp.systolic)
+        .map((p: any) => p.bp && sanitizeBPAttribute(p.bp.systolic))
         .reverse(),
     },
     {
       name: "mean",
       data: Object.values(results)
-        .map((p: any) => p.bp && p.bp.mean)
+        .map((p: any) => p.bp && sanitizeBPAttribute(p.bp.mean))
         .reverse(),
     },
   ];
@@ -125,7 +129,7 @@ export const PrimaryParametersPlot = ({
   const rhythmValues: any = {};
   Object.entries(results).forEach((obj: any) => {
     if (obj[1].rhythm && obj[1].rhythm > 0) {
-      const key: string = moment(obj[0]).format("LL");
+      const key: string = dayjs(obj[0]).format("MMMM D, YYYY");
       const lst: Array<any> = Object.prototype.hasOwnProperty.call(
         rhythmValues,
         key
@@ -133,7 +137,7 @@ export const PrimaryParametersPlot = ({
         ? rhythmValues[key]
         : [];
       const value: any = {};
-      value["time"] = moment(obj[0]).format("LT");
+      value["time"] = dayjs(obj[0]).format("h:mm A");
       value["rhythm"] = obj[1].rhythm;
       value["rhythm_detail"] = obj[1].rhythm_detail;
       lst.push(value);
@@ -143,11 +147,11 @@ export const PrimaryParametersPlot = ({
 
   return (
     <div>
-      <div className="grid md:grid-cols-2 gap-4">
-        <div className="md:w-full overflow-x-auto m-2 pt-4 px-4 bg-white border rounded-lg shadow">
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="m-2 overflow-x-auto rounded-lg border bg-white px-4 pt-4 shadow md:w-full">
           <StackedLinePlot title="BP" xData={dates} yData={BPData} />
         </div>
-        <div className="md:w-full overflow-x-auto pt-4 m-2 px-4 bg-white border rounded-lg shadow">
+        <div className="m-2 overflow-x-auto rounded-lg border bg-white px-4 pt-4 shadow md:w-full">
           <LinePlot
             title="Pulse"
             name="Pulse"
@@ -157,7 +161,7 @@ export const PrimaryParametersPlot = ({
             high={100}
           />
         </div>
-        <div className="md:w-full overflow-x-auto pt-4 m-2 px-4 bg-white border rounded-lg shadow">
+        <div className="m-2 overflow-x-auto rounded-lg border bg-white px-4 pt-4 shadow md:w-full">
           <LinePlot
             title="Temperature (F)"
             name="Temperature"
@@ -165,7 +169,7 @@ export const PrimaryParametersPlot = ({
             yData={yAxisData("temperature")}
           />
         </div>
-        <div className="md:w-full overflow-x-auto pt-4 m-2 px-4 bg-white border rounded-lg shadow">
+        <div className="m-2 overflow-x-auto rounded-lg border bg-white px-4 pt-4 shadow md:w-full">
           <LinePlot
             title="Resp"
             name="Resp"
@@ -173,10 +177,10 @@ export const PrimaryParametersPlot = ({
             yData={yAxisData("resp")}
           />
         </div>
-        <div className="md:w-full overflow-x-auto pt-4 m-2 px-4 bg-white border rounded-lg shadow">
+        <div className="m-2 overflow-x-auto rounded-lg border bg-white px-4 pt-4 shadow md:w-full">
           <StackedLinePlot title="Insulin" xData={dates} yData={InsulinData} />
         </div>
-        <div className="md:w-full overflow-x-auto pt-4 m-2 px-4 bg-white border rounded-lg shadow">
+        <div className="m-2 overflow-x-auto rounded-lg border bg-white px-4 pt-4 shadow md:w-full">
           <LinePlot
             title="SPO2 (%)"
             name="spo2"
@@ -186,7 +190,7 @@ export const PrimaryParametersPlot = ({
             high={100}
           />
         </div>
-        <div className="md:w-full overflow-x-auto pt-4 m-2 px-4 bg-white border rounded-lg shadow">
+        <div className="m-2 overflow-x-auto rounded-lg border bg-white px-4 pt-4 shadow md:w-full">
           <LinePlot
             title="Ventilator FIO2 (%)"
             name="fio2"
@@ -196,14 +200,14 @@ export const PrimaryParametersPlot = ({
             high={60}
           />
         </div>
-        <div className="md:w-full overflow-x-auto pt-4 m-2 px-4 bg-white border rounded-lg shadow">
+        <div className="m-2 overflow-x-auto rounded-lg border bg-white px-4 pt-4 shadow md:w-full">
           <h3 className="text-sm">Rhythm</h3>
           {Object.keys(rhythmValues).length === 0 ? (
-            <div className="flex justify-center items-center h-64">
+            <div className="flex h-64 items-center justify-center">
               <p className="text-center">No Rhythm data available.</p>
             </div>
           ) : (
-            <div className="flow-root m-2 overflow-y-scroll h-64">
+            <div className="m-2 flow-root h-64 overflow-y-scroll">
               <ul role="list" className="-mb-8">
                 {Object.entries(rhythmValues).map((obj: any) =>
                   obj[1].map((rhythmDetails: any, rhythmIdx: number) => (
@@ -211,14 +215,14 @@ export const PrimaryParametersPlot = ({
                       <div className="relative pb-8">
                         {rhythmIdx !== obj[1].length ? (
                           <span
-                            className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"
+                            className="absolute left-4 top-4 -ml-px h-full w-0.5 bg-gray-200"
                             aria-hidden="true"
                           />
                         ) : null}
                         <div className="relative flex space-x-3">
                           <div>
                             <span
-                              className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white ${
+                              className={`flex h-8 w-8 items-center justify-center rounded-full ring-8 ring-white ${
                                 rhythmDetails.rhythm === 5
                                   ? " text-green-500 "
                                   : " text-red-500 "

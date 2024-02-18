@@ -1,5 +1,5 @@
 @react.component
-export make = (~painParameter, ~id, ~consultationId) => {
+let make = (~painParameter, ~id, ~consultationId) => {
   let painParameter = CriticalCare__Pain.makeFromJsx(painParameter)
   <CriticalCare__PainEditor
     previewMode={true}

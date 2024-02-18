@@ -104,8 +104,8 @@ export default function Waveform(props: {
   }, [rPointer]);
 
   return (
-    <div className="w-full relative">
-      <div className="text-gray-400 absolute top-0 left-5 text-xs">
+    <div className="relative w-full">
+      <div className="absolute left-5 top-0 text-xs text-gray-400">
         {props.title}
       </div>
       <LinePlot

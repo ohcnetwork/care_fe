@@ -3,8 +3,8 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import ReadMore from "../Common/components/Readmore";
 import ButtonV2 from "../Common/components/ButtonV2";
-import { PrescriptionActions } from "../../Redux/actions";
 import { useTranslation } from "react-i18next";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
 
 export default function PrescriptionDetailCard({
   prescription,
@@ -13,7 +13,6 @@ export default function PrescriptionDetailCard({
   prescription: Prescription;
   readonly?: boolean;
   children?: React.ReactNode;
-  actions: ReturnType<ReturnType<typeof PrescriptionActions>["prescription"]>;
   onDiscontinueClick?: () => void;
   onAdministerClick?: () => void;
   selected?: boolean;
@@ -22,17 +21,17 @@ export default function PrescriptionDetailCard({
   return (
     <div
       className={classNames(
-        "flex flex-col md:flex-row border-2 p-3 rounded transition-all duration-200 ease-in-out",
+        "flex flex-col rounded border-2 p-3 transition-all duration-200 ease-in-out md:flex-row",
         props.selected
           ? "border-primary-500"
-          : "border-gray-500 border-dashed border-spacing-2",
+          : "border-spacing-2 border-dashed border-gray-500",
         prescription.discontinued && "bg-gray-200 opacity-80"
       )}
     >
-      <div className="flex-1 flex flex-col gap-2">
+      <div className="flex flex-1 flex-col">
         <div>
           <div className="flex items-center justify-between">
-            <div className="flex gap-4 items-center">
+            <div className="flex items-center gap-4">
               <h3
                 className={classNames(
                   "text-lg font-bold transition-all duration-200 ease-in-out",
@@ -45,7 +44,7 @@ export default function PrescriptionDetailCard({
                 {` #${prescription.id?.slice(-5)}`}
               </h3>
               {prescription.discontinued && (
-                <span className="bg-gray-700 text-white font-semibold text-xs px-2 py-1 rounded-full uppercase">
+                <span className="rounded-full bg-gray-700 px-2 py-1 text-xs font-semibold uppercase text-white">
                   {t("discontinued")}
                 </span>
               )}
@@ -53,7 +52,7 @@ export default function PrescriptionDetailCard({
 
             {!props.readonly &&
               prescription.prescription_type !== "DISCHARGE" && (
-                <div className="flex flex-col-reverse sm:flex-row gap-2 items-end">
+                <div className="flex flex-col-reverse items-end gap-2 sm:flex-row">
                   <ButtonV2
                     disabled={prescription.discontinued}
                     onClick={props.onAdministerClick}
@@ -83,11 +82,14 @@ export default function PrescriptionDetailCard({
           </div>
         </div>
 
-        <div className="grid grid-cols-9 gap-2 items-center mt-2">
+        <div className="mt-4 grid grid-cols-9 items-center gap-2">
           <Detail className="col-span-9 md:col-span-5" label={t("medicine")}>
-            {prescription.medicine}
+            {prescription.medicine_object?.name ?? prescription.medicine_old}
           </Detail>
-          <Detail className="col-span-5 md:col-span-2" label={t("route")}>
+          <Detail
+            className="col-span-5 break-all md:col-span-2"
+            label={t("route")}
+          >
             {prescription.route &&
               t("PRESCRIPTION_ROUTE_" + prescription.route)}
           </Detail>
@@ -104,16 +106,17 @@ export default function PrescriptionDetailCard({
                 {prescription.indicator}
               </Detail>
               <Detail
-                className="col-span-4 md:col-span-2"
+                className="col-span-9 md:col-span-2"
                 label={t("max_dosage_24_hrs")}
               >
                 {prescription.max_dosage}
               </Detail>
               <Detail
-                className="col-span-5 md:col-span-2"
+                className="col-span-9 md:col-span-2"
                 label={t("min_time_bw_doses")}
               >
-                {prescription.max_dosage}
+                {prescription.min_hours_between_doses &&
+                  prescription.min_hours_between_doses + " hrs."}
               </Detail>
             </>
           ) : (
@@ -146,6 +149,23 @@ export default function PrescriptionDetailCard({
             </Detail>
           )}
         </div>
+
+        <div className="flex flex-col gap-1 text-xs text-gray-600 md:mt-3 md:flex-row md:items-center">
+          <span className="flex gap-1 font-medium">
+            Prescribed
+            <RecordMeta
+              time={prescription.created_date}
+              user={prescription.prescribed_by}
+              inlineUser
+            />
+          </span>
+          {prescription.discontinued && (
+            <span className="flex gap-1">
+              and was discontinued
+              <RecordMeta time={prescription.discontinued_date} />
+            </span>
+          )}
+        </div>
       </div>
 
       {props.children}
@@ -162,11 +182,13 @@ const Detail = (props: {
   return (
     <div className={classNames("flex flex-col gap-1", props.className)}>
       <label className="text-sm font-medium text-gray-600">{props.label}</label>
-      <div className="w-full cui-input-base">
+      <div className="cui-input-base w-full">
         {props.children ? (
           <span className="font-medium">{props.children}</span>
         ) : (
-          <span className="text-gray-500 italic">{t("not_specified")}</span>
+          <span className="whitespace-nowrap text-xs font-medium text-gray-500">
+            {t("not_specified")}
+          </span>
         )}
       </div>
     </div>

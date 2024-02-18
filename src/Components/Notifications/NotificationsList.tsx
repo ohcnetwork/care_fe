@@ -1,21 +1,11 @@
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import {
-  getNotifications,
-  markNotificationAsRead,
-  getUserPnconfig,
-  updateUserPnconfig,
-  getPublicKey,
-} from "../../Redux/actions";
-import { useSelector } from "react-redux";
 import Spinner from "../Common/Spinner";
 import { NOTIFICATION_EVENTS } from "../../Common/constants";
 import { Error } from "../../Utils/Notifications.js";
-import { classNames } from "../../Utils/utils";
+import { classNames, formatDateTime } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import * as Sentry from "@sentry/browser";
-import { formatDate } from "../../Utils/utils";
 import {
   ShrinkedSidebarItem,
   SidebarItem,
@@ -25,6 +15,9 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import { useTranslation } from "react-i18next";
 import CircularProgress from "../Common/components/CircularProgress";
+import useAuthUser from "../../Common/hooks/useAuthUser";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 const RESULT_LIMIT = 14;
 
@@ -39,14 +32,16 @@ const NotificationTile = ({
   onClickCB,
   setShowNotifications,
 }: NotificationTileProps) => {
-  const dispatch: any = useDispatch();
   const [result, setResult] = useState(notification);
   const [isMarkingAsRead, setIsMarkingAsRead] = useState(false);
   const { t } = useTranslation();
 
   const handleMarkAsRead = async () => {
     setIsMarkingAsRead(true);
-    await dispatch(markNotificationAsRead(result.id));
+    await request(routes.markNotificationAsRead, {
+      pathParams: { id: result.id },
+      body: { read_at: new Date() },
+    });
     setResult({ ...result, read_at: new Date() });
     setIsMarkingAsRead(false);
   };
@@ -67,6 +62,8 @@ const NotificationTile = ({
         return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/daily-rounds/${data.daily_round}`;
       case "INVESTIGATION_SESSION_CREATED":
         return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/investigation/${data.session}`;
+      case "PATIENT_NOTE_ADDED":
+        return `/facility/${data.facility}/patient/${data.patient}/notes`;
       case "MESSAGE":
         return "/notice_board/";
       default:
@@ -83,11 +80,11 @@ const NotificationTile = ({
       onClick={() => {
         handleMarkAsRead();
         navigate(resultUrl(result.event, result.caused_objects));
-        onClickCB && onClickCB();
+        onClickCB?.();
         setShowNotifications(false);
       }}
       className={classNames(
-        "relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-200 rounded md:rounded-lg cursor-pointer",
+        "relative cursor-pointer rounded px-4 py-5 transition duration-200 ease-in-out hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg lg:px-8",
         result.read_at && "text-gray-500"
       )}
     >
@@ -99,15 +96,15 @@ const NotificationTile = ({
           <i className={`${getNotificationIcon(result.event)} fa-2x `} />
         </div>
       </div>
-      <div className="text-sm py-1">{result.message}</div>
+      <div className="py-1 text-sm">{result.message}</div>
       <div className="flex flex-col justify-end gap-2">
-        <div className="text-xs text-right py-1 text-secondary-700">
-          {formatDate(result.created_date)}
+        <div className="py-1 text-right text-xs text-secondary-700">
+          {formatDateTime(result.created_date)}
         </div>
         <div className="flex justify-end gap-2">
           <ButtonV2
             className={classNames(
-              "font-semibold px-2 py-1 bg-white hover:bg-secondary-300",
+              "bg-white px-2 py-1 font-semibold hover:bg-secondary-300",
               result.read_at && "invisible"
             )}
             variant="secondary"
@@ -131,7 +128,7 @@ const NotificationTile = ({
           <ButtonV2
             border
             ghost
-            className="font-semibold px-2 py-1 bg-white hover:bg-secondary-300 flex-shrink-0"
+            className="shrink-0 bg-white px-2 py-1 font-semibold hover:bg-secondary-300"
           >
             <CareIcon className="care-l-envelope-open" />
             <span className="text-xs">{t("open")}</span>
@@ -153,10 +150,7 @@ export default function NotificationsList({
   onClickCB,
   handleOverflow,
 }: NotificationsListProps) {
-  const rootState: any = useSelector((rootState) => rootState);
-  const { currentUser } = rootState;
-  const username = currentUser.data.username;
-  const dispatch: any = useDispatch();
+  const { username } = useAuthUser();
   const [data, setData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [offset, setOffset] = useState(0);
@@ -168,6 +162,7 @@ export default function NotificationsList({
   const [isMarkingAllAsRead, setIsMarkingAllAsRead] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
+  const [showUnread, setShowUnread] = useState(false);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -182,12 +177,14 @@ export default function NotificationsList({
 
   const intialSubscriptionState = async () => {
     try {
-      const res = await dispatch(getUserPnconfig({ username: username }));
+      const res = await request(routes.getUserPnconfig, {
+        pathParams: { username: username },
+      });
       const reg = await navigator.serviceWorker.ready;
       const subscription = await reg.pushManager.getSubscription();
-      if (!subscription && !res?.data?.pf_endpoint) {
+      if (!subscription && !res.data?.pf_endpoint) {
         setIsSubscribed("NotSubscribed");
-      } else if (subscription?.endpoint === res?.data?.pf_endpoint) {
+      } else if (subscription?.endpoint === res.data?.pf_endpoint) {
         setIsSubscribed("SubscribedOnThisDevice");
       } else {
         setIsSubscribed("SubscribedOnAnotherDevice");
@@ -249,9 +246,11 @@ export default function NotificationsList({
                   pf_p256dh: "",
                   pf_auth: "",
                 };
-                await dispatch(
-                  updateUserPnconfig(data, { username: username })
-                );
+
+                await request(routes.updateUserPnconfig, {
+                  pathParams: { username: username },
+                  body: data,
+                });
 
                 setIsSubscribed("NotSubscribed");
                 setIsSubscribing(false);
@@ -273,8 +272,8 @@ export default function NotificationsList({
 
   async function subscribe() {
     setIsSubscribing(true);
-    const response = await dispatch(getPublicKey());
-    const public_key = response.data.public_key;
+    const response = await request(routes.getPublicKey);
+    const public_key = response.data?.public_key;
     const sw = await navigator.serviceWorker.ready;
     const push = await sw.pushManager.subscribe({
       userVisibleOnly: true,
@@ -299,11 +298,12 @@ export default function NotificationsList({
       pf_auth: auth,
     };
 
-    const res = await dispatch(
-      updateUserPnconfig(data, { username: username })
-    );
+    const { res } = await request(routes.updateUserPnconfig, {
+      pathParams: { username: username },
+      body: data,
+    });
 
-    if (res.status >= 200 && res.status <= 300) {
+    if (res?.ok) {
       setIsSubscribed("SubscribedOnThisDevice");
     }
     setIsSubscribing(false);
@@ -312,8 +312,11 @@ export default function NotificationsList({
   const handleMarkAllAsRead = async () => {
     setIsMarkingAllAsRead(true);
     await Promise.all(
-      data.map(async (notification) => {
-        return await dispatch(markNotificationAsRead(notification.id));
+      data.map((notification) => {
+        return request(routes.markNotificationAsRead, {
+          pathParams: { id: notification.id },
+          body: { read_at: new Date() },
+        });
       })
     );
     setReload(!reload);
@@ -322,10 +325,10 @@ export default function NotificationsList({
 
   useEffect(() => {
     setIsLoading(true);
-    dispatch(
-      getNotifications({ offset, event: eventFilter, medium_sent: "SYSTEM" })
-    )
-      .then((res: any) => {
+    request(routes.getNotifications, {
+      query: { offset, event: eventFilter, medium_set: "SYSTEM" },
+    })
+      .then((res) => {
         if (res && res.data) {
           setData(res.data.results);
           setUnreadCount(
@@ -343,7 +346,7 @@ export default function NotificationsList({
         setOffset((prev) => prev - RESULT_LIMIT);
       });
     intialSubscriptionState();
-  }, [dispatch, reload, open, offset, eventFilter, isSubscribed]);
+  }, [reload, open, offset, eventFilter, isSubscribed]);
 
   if (!offset && isLoading) {
     manageResults = (
@@ -351,42 +354,49 @@ export default function NotificationsList({
         <CircularProgress />
       </div>
     );
-  } else if (data && data.length) {
+  } else if (data?.length) {
     manageResults = (
       <>
-        {data.map((result: any) => (
-          <NotificationTile
-            key={result.id}
-            notification={result}
-            onClickCB={onClickCB}
-            setShowNotifications={setOpen}
-          />
-        ))}
+        {data
+          .filter((notification: any) => notification.event != "PUSH_MESSAGE")
+          .filter((notification: any) =>
+            showUnread ? notification.read_at === null : true
+          )
+          .map((result: any) => (
+            <NotificationTile
+              key={result.id}
+              notification={result}
+              onClickCB={onClickCB}
+              setShowNotifications={setOpen}
+            />
+          ))}
         {isLoading && (
           <div className="flex items-center justify-center">
             <CircularProgress />
           </div>
         )}
-        {totalCount > RESULT_LIMIT && offset < totalCount - RESULT_LIMIT && (
-          <div className="mt-4 flex w-full justify-center py-5 px-4 lg:px-8">
-            <ButtonV2
-              className="w-full"
-              disabled={isLoading}
-              variant="secondary"
-              shadow
-              border
-              onClick={() => setOffset((prev) => prev + RESULT_LIMIT)}
-            >
-              {isLoading ? t("loading") : t("load_more")}
-            </ButtonV2>
-          </div>
-        )}
+        {!showUnread &&
+          totalCount > RESULT_LIMIT &&
+          offset < totalCount - RESULT_LIMIT && (
+            <div className="mt-4 flex w-full justify-center px-4 py-5 lg:px-8">
+              <ButtonV2
+                className="w-full"
+                disabled={isLoading}
+                variant="secondary"
+                shadow
+                border
+                onClick={() => setOffset((prev) => prev + RESULT_LIMIT)}
+              >
+                {isLoading ? t("loading") : t("load_more")}
+              </ButtonV2>
+            </div>
+          )}
       </>
     );
   } else if (data && data.length === 0) {
     manageResults = (
-      <div className="px-4 pt-3 lg:px-8 flex justify-center">
-        <h5 className="text-gray-600 text-xl font-bold">
+      <div className="flex justify-center px-4 pt-3 lg:px-8">
+        <h5 className="text-xl font-bold text-gray-600">
           {t("no_results_found")}
         </h5>
       </div>
@@ -450,6 +460,21 @@ export default function NotificationsList({
                 }
               />
               <span className="text-xs">{t("mark_all_as_read")}</span>
+            </ButtonV2>
+            <ButtonV2
+              ghost
+              variant="secondary"
+              onClick={() => setShowUnread(!showUnread)}
+            >
+              <CareIcon
+                className={showUnread ? "care-l-filter-slash" : "care-l-filter"}
+              />
+
+              <span className="text-xs">
+                {showUnread
+                  ? t("show_all_notifications")
+                  : t("show_unread_notifications")}
+              </span>
             </ButtonV2>
           </div>
 

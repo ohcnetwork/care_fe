@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { listFacilityAssetLocation } from "../../Redux/actions";
 import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import AutocompleteMultiSelectFormField from "../Form/FormFields/AutocompleteMultiselect";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 interface LocationSelectProps {
   name: string;
+  disabled?: boolean;
   margin?: string;
-  errors: string;
+  errors?: string;
   className?: string;
   searchAll?: boolean;
   multiple?: boolean;
-  facilityId: number | string;
+  facilityId: string;
   showAll?: boolean;
   selected: string | string[] | null;
   setSelected: (selected: string | string[] | null) => void;
@@ -18,72 +18,48 @@ interface LocationSelectProps {
 }
 
 export const LocationSelect = (props: LocationSelectProps) => {
-  const {
-    name,
-    multiple,
-    selected,
-    setSelected,
-    errors,
-    className = "",
-    facilityId,
-  } = props;
-  const [locations, setLocations] = useState<{ name: string; id: string }[]>(
-    []
+  const { data, loading, refetch } = useQuery(
+    routes.listFacilityAssetLocation,
+    {
+      query: {
+        limit: 14,
+      },
+      pathParams: {
+        facility_external_id: props.facilityId,
+      },
+      prefetch: props.facilityId !== undefined,
+    }
   );
-  const [query, setQuery] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
-  const dispatchAction: any = useDispatch();
-
-  const handleValueChange = (current: string[]) => {
-    if (multiple) setSelected(current);
-    else setSelected(current ? current[0] : "");
-  };
-
-  useEffect(() => {
-    const params = {
-      limit: 14,
-      search_text: query,
-    };
-    setLoading(true);
-    dispatchAction(
-      listFacilityAssetLocation(params, { facility_external_id: facilityId })
-    ).then(({ data }: any) => {
-      setLocations(data.results);
-      setLoading(false);
-    });
-  }, [query, facilityId]);
 
   return props.multiple ? (
     <AutocompleteMultiSelectFormField
-      name={name}
-      value={selected as unknown as string[]}
-      options={locations}
-      onChange={({ value }) => handleValueChange(value as unknown as string[])}
-      onQuery={(query) => {
-        setQuery(query);
-      }}
+      name={props.name}
+      disabled={props.disabled}
+      value={props.selected as unknown as string[]}
+      options={data?.results ?? []}
+      onChange={({ value }) => props.setSelected(value)}
+      onQuery={(search_text) => refetch({ query: { search_text } })}
       placeholder="Search by location name"
       optionLabel={(option) => option.name}
       optionValue={(option) => option.id}
-      error={errors}
-      className={className}
+      error={props.errors}
+      className={props.className}
       errorClassName={props.errorClassName}
     />
   ) : (
     <AutocompleteFormField
-      name={name}
-      value={selected as string}
-      options={locations}
-      onChange={({ value }) => handleValueChange([value])}
-      onQuery={(query) => {
-        setQuery(query);
-      }}
+      name={props.name}
+      disabled={props.disabled}
+      value={props.selected as string}
+      options={data?.results ?? []}
+      onChange={({ value }) => props.setSelected(value)}
+      onQuery={(search_text) => refetch({ query: { search_text } })}
       isLoading={loading}
       placeholder="Search by location name"
       optionLabel={(option) => option.name}
       optionValue={(option) => option.id}
-      error={errors}
-      className={className}
+      error={props.errors}
+      className={props.className}
       errorClassName={props.errorClassName}
     />
   );

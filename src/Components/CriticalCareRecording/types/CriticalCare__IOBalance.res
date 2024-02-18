@@ -3,7 +3,7 @@ type item = {
   quantity: float,
 }
 
-export type t = {
+type t = {
   infusions: array<item>,
   ivFluid: array<item>,
   feed: array<item>,

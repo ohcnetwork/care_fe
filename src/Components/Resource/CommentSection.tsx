@@ -1,60 +1,18 @@
-import React, { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getResourceComments, addResourceComments } from "../../Redux/actions";
+import { useState } from "react";
 import * as Notification from "../../Utils/Notifications.js";
-import Pagination from "../Common/Pagination";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import CircularProgress from "../Common/components/CircularProgress";
 import ButtonV2 from "../Common/components/ButtonV2";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import routes from "../../Redux/api";
+import PaginatedList from "../../CAREUI/misc/PaginatedList";
+import { IComment } from "./models";
+import request from "../../Utils/request/request";
 
-interface CommentSectionProps {
-  id: string;
-}
-const CommentSection = (props: CommentSectionProps) => {
-  const dispatch: any = useDispatch();
-  const initialData: any = [];
-  const [comments, setComments] = useState(initialData);
+const CommentSection = (props: { id: string }) => {
   const [commentBox, setCommentBox] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-  const [offset, setOffset] = useState(0);
-  const limit = 8;
-
-  const handlePagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentPage(page);
-    setOffset(offset);
-  };
-
-  const fetchData = useCallback(
-    async (status: statusType = { aborted: false }) => {
-      setIsLoading(true);
-      const res = await dispatch(
-        getResourceComments(props.id, { limit, offset })
-      );
-      if (!status.aborted) {
-        if (res && res.data) {
-          setComments(res.data?.results);
-          setTotalCount(res.data.count);
-        }
-        setIsLoading(false);
-      }
-    },
-    [props.id, dispatch, offset]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
-  );
-
-  const onSubmitComment = () => {
+  const onSubmitComment = async () => {
     const payload = {
       comment: commentBox,
     };
@@ -64,66 +22,85 @@ const CommentSection = (props: CommentSectionProps) => {
       });
       return;
     }
-    dispatch(addResourceComments(props.id, payload)).then((_: any) => {
-      Notification.Success({ msg: "Comment added successfully" });
-      fetchData();
+    const { res } = await request(routes.addResourceComments, {
+      pathParams: { id: props.id },
+      body: payload,
     });
+    if (res?.ok) {
+      Notification.Success({ msg: "Comment added successfully" });
+    }
     setCommentBox("");
   };
-
   return (
-    <div className="w-full flex flex-col">
-      <TextAreaFormField
-        name="comment"
-        placeholder="Type your comment"
-        value={commentBox}
-        onChange={(e) => setCommentBox(e.value)}
-      />
-      <div className="flex w-full justify-end">
-        <ButtonV2 onClick={onSubmitComment}>Post Your Comment</ButtonV2>
-      </div>
-      <div className="w-full">
-        {isLoading ? (
-          <CircularProgress className="h-12 w-12" />
-        ) : (
-          comments.map((comment: any) => (
-            <div
-              key={comment.id}
-              className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300"
+    <PaginatedList
+      route={routes.getResourceComments}
+      pathParams={{ id: props.id }}
+    >
+      {(_, query) => (
+        <div className="flex w-full flex-col">
+          <TextAreaFormField
+            name="comment"
+            placeholder="Type your comment"
+            value={commentBox}
+            onChange={(e) => setCommentBox(e.value)}
+          />
+
+          <div className="flex w-full justify-end">
+            <ButtonV2
+              onClick={async () => {
+                await onSubmitComment();
+                query.refetch();
+              }}
             >
-              <div className="flex  w-full ">
-                <p className="text-justify">{comment.comment}</p>
-              </div>
-              <div className="mt-3">
-                <span className="text-xs text-gray-500">
-                  {formatDate(comment.modified_date) || "-"}
-                </span>
-              </div>
-              <div className=" flex mr-auto bg-gray-100 border items-center rounded-md py-1 pl-2 pr-3">
-                <div className="flex justify-center items-center w-8 h-8 rounded-full bg-primary-700 uppercase text-white p-1">
-                  {comment.created_by_object?.first_name?.charAt(0) || "U"}
-                </div>
-                <span className="text-gray-700 text-sm pl-2">
-                  {comment.created_by_object?.first_name || "Unknown"}{" "}
-                  {comment.created_by_object?.last_name}
-                </span>
+              Post Your Comment
+            </ButtonV2>
+          </div>
+          <div className="w-full">
+            <div>
+              <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-gray-200 bg-white p-5 text-center text-2xl font-bold text-gray-500">
+                <span>No comments available</span>
+              </PaginatedList.WhenEmpty>
+              <PaginatedList.WhenLoading>
+                <CircularProgress className="h-12 w-12" />
+              </PaginatedList.WhenLoading>
+              <PaginatedList.Items<IComment>>
+                {(item) => <Comment {...item} />}
+              </PaginatedList.Items>
+              <div className="flex w-full items-center justify-center">
+                <PaginatedList.Paginator hideIfSinglePage />
               </div>
             </div>
-          ))
-        )}
-      </div>
-      {totalCount > limit && (
-        <div className="mt-4 flex w-full justify-center">
-          <Pagination
-            cPage={currentPage}
-            defaultPerPage={limit}
-            data={{ totalCount }}
-            onChange={handlePagination}
-          />
+          </div>
         </div>
       )}
-    </div>
+    </PaginatedList>
   );
 };
 
 export default CommentSection;
+
+export const Comment = ({
+  comment,
+  created_by_object,
+  modified_date,
+}: IComment) => (
+  <div className="mt-4 flex w-full flex-col rounded-lg border border-gray-300 bg-white p-4 text-gray-800">
+    <div className="flex  w-full ">
+      <p className="text-justify">{comment}</p>
+    </div>
+    <div className="mt-3">
+      <span className="text-xs text-gray-500">
+        {formatDateTime(modified_date) || "-"}
+      </span>
+    </div>
+    <div className=" mr-auto flex items-center rounded-md border bg-gray-100 py-1 pl-2 pr-3">
+      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-700 p-1 uppercase text-white">
+        {created_by_object?.first_name?.charAt(0) || "U"}
+      </div>
+      <span className="pl-2 text-sm text-gray-700">
+        {created_by_object?.first_name || "Unknown"}{" "}
+        {created_by_object?.last_name}
+      </span>
+    </div>
+  </div>
+);

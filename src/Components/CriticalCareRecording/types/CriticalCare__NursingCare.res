@@ -19,7 +19,7 @@ type item = {
   description: string,
 }
 
-export type t = array<item>
+type t = array<item>
 
 let decodeProcedure = procedure => {
   switch procedure {

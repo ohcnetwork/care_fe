@@ -1,4 +1,3 @@
-import moment from "moment";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import SlideOver from "../../CAREUI/interactive/SlideOver";
@@ -6,6 +5,9 @@ import { getFacilityUsers } from "../../Redux/actions";
 import { UserAssignedModel } from "../Users/models";
 import { SkillObjectModel } from "../Users/models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { relativeTime } from "../../Utils/utils";
+import useAuthUser from "../../Common/hooks/useAuthUser";
+import { triggerGoal } from "../../Integrations/Plausible";
 
 export default function DoctorVideoSlideover(props: {
   show: boolean;
@@ -19,11 +21,15 @@ export default function DoctorVideoSlideover(props: {
   useEffect(() => {
     const fetchUsers = async () => {
       if (facilityId) {
-        const res = await dispatchAction(getFacilityUsers(facilityId));
-        if (res && res.data) {
+        const res = await dispatchAction(
+          getFacilityUsers(facilityId, { limit: 50 })
+        );
+        if (res?.data) {
           setDoctors(
             res.data.results
-              .filter((user: any) => user.alt_phone_number)
+              .filter(
+                (user: any) => user.alt_phone_number || user.video_connect_link
+              )
               .sort((a: any, b: any) => {
                 return Number(a.last_login) - Number(b.last_login);
               })
@@ -46,7 +52,7 @@ export default function DoctorVideoSlideover(props: {
       dialogClass="md:w-[400px]"
     >
       {/* Title and close button */}
-      <p className="text-gray-600 text-sm -mt-3 pb-4">
+      <p className="-mt-3 pb-4 text-sm text-gray-600">
         Select a doctor to connect via video
       </p>
       {[
@@ -56,8 +62,8 @@ export default function DoctorVideoSlideover(props: {
           home: true,
         },
         {
-          title: "Staff",
-          user_type: "Staff",
+          title: "Nurse",
+          user_type: "Nurse",
           home: true,
         },
         {
@@ -66,13 +72,19 @@ export default function DoctorVideoSlideover(props: {
           home: false,
         },
       ].map((type, i) => (
-        <div key={i} className="mb-4">
+        <div
+          key={i}
+          className="mb-4"
+          id={`doctor-connect-${
+            type.home ? "home" : "remote"
+          }-${type.user_type.toLowerCase()}`}
+        >
           <div>
             <span className="text-lg font-semibold">{type.title}</span>
           </div>
 
           <ul
-            className="max-h-96 scroll-py-3 overflow-y-auto list-none"
+            className="max-h-96 scroll-py-3 list-none overflow-y-auto py-3"
             id="options"
             role="listbox"
           >
@@ -98,16 +110,17 @@ function UserListItem(props: { user: UserAssignedModel }) {
   const user = props.user;
   const icon =
     user.user_type === "Doctor" ? "fa-user-doctor " : " fa-user-nurse";
+  const authUser = useAuthUser();
 
   return (
     <li>
       <li
         key={user.id}
         className={
-          "mt-2 group cursor-default select-none rounded-xl p-3 " +
+          "group mt-2 cursor-default select-none rounded-xl p-3 " +
           (user.alt_phone_number
             ? "cursor-pointer border border-gray-400 transition hover:border-green-500 hover:bg-green-50"
-            : "cursor-not-allowed pointer-events-none bg-gray-400 ")
+            : "pointer-events-none cursor-not-allowed bg-gray-400 ")
         }
         id="option-1"
         role="option"
@@ -144,6 +157,27 @@ function UserListItem(props: { user: UserAssignedModel }) {
                 {user.first_name} {user.last_name}
               </span>
               <div className="flex gap-2">
+                {user.video_connect_link && (
+                  <a
+                    href={user.video_connect_link}
+                    onClick={() => {
+                      triggerGoal("Doctor Connect Click", {
+                        medium: "Video Call",
+                        userId: authUser?.id,
+                        targetUserType: user.user_type,
+                      });
+                    }}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <div className="tooltip">
+                      <span className="tooltip-text tooltip-left">
+                        Connect on a Video Call
+                      </span>
+                      <CareIcon icon="l-video" className="h-5 w-5" />
+                    </div>
+                  </a>
+                )}
                 <a
                   href={
                     user.alt_phone_number
@@ -154,6 +188,13 @@ function UserListItem(props: { user: UserAssignedModel }) {
                         )}`
                       : "#"
                   }
+                  onClick={() => {
+                    triggerGoal("Doctor Connect Click", {
+                      medium: "WhatsApp",
+                      userId: authUser?.id,
+                      targetUserType: user.user_type,
+                    });
+                  }}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -161,19 +202,26 @@ function UserListItem(props: { user: UserAssignedModel }) {
                     <span className="tooltip-text tooltip-left">
                       Connect on WhatsApp
                     </span>
-                    <CareIcon className="care-l-whatsapp w-5 h-5" />
+                    <CareIcon className="care-l-whatsapp h-5 w-5" />
                   </div>
                 </a>
                 <a
                   href={
                     user.alt_phone_number ? `tel:${user.alt_phone_number}` : "#"
                   }
+                  onClick={() => {
+                    triggerGoal("Doctor Connect Click", {
+                      medium: "Phone Call",
+                      userId: authUser?.id,
+                      targetUserType: user.user_type,
+                    });
+                  }}
                 >
                   <div className="tooltip">
                     <span className="tooltip-text tooltip-left">
                       Connect on Phone
                     </span>
-                    <CareIcon className="care-l-phone-alt w-5 h-5" />
+                    <CareIcon className="care-l-phone-alt h-5 w-5" />
                   </div>
                 </a>
               </div>
@@ -182,14 +230,14 @@ function UserListItem(props: { user: UserAssignedModel }) {
               <div className="mt-1 text-sm leading-5 text-gray-900">
                 <div className="flex flex-wrap gap-2">
                   {user.skills?.map((skill: SkillObjectModel) => (
-                    <span className="flex gap-2 items-center bg-gray-200 border-gray-300 text-gray-900 rounded-full text-xs px-3">
+                    <span className="flex items-center gap-2 rounded-full border-gray-300 bg-gray-200 px-3 text-xs text-gray-900">
                       <p className="py-1.5">{skill.name}</p>
                     </span>
                   ))}
                 </div>
               </div>
             )}
-            <p className="text-sm text-gray-500 flex gap-2 divide-gray-800">
+            <p className="flex gap-2 divide-gray-800 text-sm text-gray-500">
               <a
                 role="button"
                 href="#"
@@ -203,13 +251,11 @@ function UserListItem(props: { user: UserAssignedModel }) {
                   <span className="tooltip-text tooltip-top">
                     Copy Phone number
                   </span>
-                  <CareIcon className="care-l-clipboard w-5 h-5" />
+                  <CareIcon className="care-l-clipboard h-5 w-5" />
                 </div>
               </a>
               <span>{user.alt_phone_number}</span>
-              {user.last_login && (
-                <span>{moment(user.last_login).fromNow()}</span>
-              )}
+              {user.last_login && <span>{relativeTime(user.last_login)}</span>}
             </p>
           </div>
         </a>

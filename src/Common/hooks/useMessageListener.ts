@@ -5,12 +5,12 @@ type onMessage = (data: any) => void;
 export const useMessageListener = (onMessage: onMessage) => {
   useEffect(() => {
     const handleMessage = (e: MessageEvent) => {
-      onMessage(e.data);
+      onMessage?.(e.data);
     };
-    navigator.serviceWorker.addEventListener("message", handleMessage);
+    navigator.serviceWorker?.addEventListener?.("message", handleMessage);
 
     return () => {
-      navigator.serviceWorker.removeEventListener("message", handleMessage);
+      navigator.serviceWorker?.removeEventListener?.("message", handleMessage);
     };
   });
 };

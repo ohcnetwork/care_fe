@@ -44,9 +44,9 @@ const DateFormField = (props: Props) => {
         }
         onChange={field.handleChange}
         disabled={field.disabled}
-        max={props.max || (props.disableFuture ? new Date() : undefined)}
-        min={props.min || (props.disablePast ? yesterday() : undefined)}
-        position={props.position || "RIGHT"}
+        max={props.max ?? (props.disableFuture ? new Date() : undefined)}
+        min={props.min ?? (props.disablePast ? yesterday() : undefined)}
+        position={props.position ?? "RIGHT"}
         placeholder={props.placeholder}
       />
     </FormField>

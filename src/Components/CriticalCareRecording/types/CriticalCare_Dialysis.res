@@ -1,4 +1,4 @@
-export type t = {
+type t = {
   fluid_balance: option<int>,
   net_balance: option<int>,
 }

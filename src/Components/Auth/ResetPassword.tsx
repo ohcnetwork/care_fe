@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import request from "../../Utils/request/request.js";
 import * as Notification from "../../Utils/Notifications.js";
-import { postResetPassword, checkResetToken } from "../../Redux/actions";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { LocalStorageKeys } from "../../Common/constants";
@@ -9,9 +8,9 @@ import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { validateRule } from "../Users/UserAdd";
 import { validatePassword } from "../../Common/validation.js";
+import routes from "../../Redux/api.js";
 
 export const ResetPassword = (props: any) => {
-  const dispatch: any = useDispatch();
   const initForm: any = {
     password: "",
     confirm: "",
@@ -65,36 +64,37 @@ export const ResetPassword = (props: any) => {
     return form;
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     const valid = validateData();
     if (valid) {
       valid.token = props.token;
-      dispatch(postResetPassword(valid)).then((resp: any) => {
-        const res = resp && resp.data;
-        if (res && res.status === "OK") {
-          localStorage.removeItem(LocalStorageKeys.accessToken);
-          Notification.Success({
-            msg: t("password_reset_success"),
-          });
-          navigate("/login");
-        } else if (res && res.data) {
-          setErrors(res.data);
-        } else {
-          Notification.Error({
-            msg: t("password_reset_failure"),
-          });
-        }
+      const { res, error } = await request(routes.resetPassword, {
+        body: { ...valid },
       });
+      if (res?.ok) {
+        localStorage.removeItem(LocalStorageKeys.accessToken);
+        Notification.Success({
+          msg: t("password_reset_success"),
+        });
+        navigate("/login");
+      } else if (res && error) {
+        setErrors(error);
+      }
     }
   };
 
   useEffect(() => {
-    if (props.token) {
-      dispatch(checkResetToken({ token: props.token })).then((resp: any) => {
-        const res = resp && resp.data;
-        if (!res || res.status !== "OK") navigate("/invalid-reset");
+    const checkResetToken = async () => {
+      const { res } = await request(routes.checkResetToken, {
+        body: { token: props.token },
       });
+      if (!res || !res.ok) {
+        navigate("/invalid-reset");
+      }
+    };
+    if (props.token) {
+      checkResetToken();
     } else {
       navigate("/invalid-reset");
     }
@@ -105,12 +105,12 @@ export const ResetPassword = (props: any) => {
       <div>
         <div>
           <form
-            className="max-w-xl bg-white shadow rounded-lg mx-auto"
+            className="mx-auto max-w-xl rounded-lg bg-white shadow"
             onSubmit={(e) => {
               handleSubmit(e);
             }}
           >
-            <div className="text-xl font-bold py-4 text-center">
+            <div className="py-4 text-center text-xl font-bold">
               {t("reset_password")}
             </div>
             <div className="px-4">
@@ -124,7 +124,7 @@ export const ResetPassword = (props: any) => {
                 onBlur={() => setPasswordInputInFocus(false)}
               />
               {passwordInputInFocus && (
-                <div className="pl-2 text-small text-gray-500 mb-2">
+                <div className="text-small mb-2 pl-2 text-gray-500">
                   {validateRule(
                     form.password?.length >= 8,
                     "Password should be atleast 8 characters long"
@@ -159,7 +159,7 @@ export const ResetPassword = (props: any) => {
                   "Confirm password should match the entered password"
                 )}
             </div>
-            <div className="sm:flex sm:justify-between grid p-4">
+            <div className="grid p-4 sm:flex sm:justify-between">
               <Cancel onClick={() => navigate("/login")} />
               <Submit onClick={(e) => handleSubmit(e)} label="reset" />
             </div>

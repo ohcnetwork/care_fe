@@ -1,16 +1,15 @@
-import React from "react";
 import useConfig from "../../Common/hooks/useConfig";
 import LanguageSelector from "./LanguageSelector";
 
 const TopBar = () => {
-  const { static_black_logo } = useConfig();
+  const { main_logo } = useConfig();
   return (
     <div className="bg-white shadow-md">
-      <div className="max-w-6xl mx-auto py-4 px-2 flex items-center justify-between">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-2 py-4">
         <div>
           <a href={"/"}>
             <img
-              src={static_black_logo}
+              src={main_logo.dark}
               style={{ height: "25px" }}
               alt="care logo"
             />

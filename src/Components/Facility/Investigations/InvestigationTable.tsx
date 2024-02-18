@@ -2,7 +2,6 @@ import ButtonV2 from "../../Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { SelectFormField } from "../../Form/FormFields/SelectFormField";
 import TextFormField from "../../Form/FormFields/TextFormField";
-import _ from "lodash";
 import { classNames } from "../../../Utils/utils";
 import { useState } from "react";
 
@@ -15,10 +14,10 @@ const TestRow = ({ data, i, onChange, showForm, value, isChanged }: any) => {
       )}
       x-description="Even row"
     >
-      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+      <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
         {data?.investigation_object?.name || "---"}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
         {showForm ? (
           data?.investigation_object?.investigation_type === "Choice" ? (
             <SelectFormField
@@ -46,16 +45,16 @@ const TestRow = ({ data, i, onChange, showForm, value, isChanged }: any) => {
           value || "---"
         )}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
         {data.investigation_object.unit || "---"}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
         {data.investigation_object.min_value || "---"}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
         {data.investigation_object.max_value || "---"}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
         {data.investigation_object.ideal_value || "---"}
       </td>
     </tr>
@@ -82,21 +81,21 @@ export const InvestigationTable = ({
   });
 
   return (
-    <div className="p-4 m-4">
-      <div className="flex flex-col sm:flex-row items-center justify-between mb">
-        {title && <div className="font-bold text-xl">{title}</div>}
-        <div className="py-2 flex sm:flex-row flex-col ">
+    <div className="m-4 p-4">
+      <div className="mb flex flex-col items-center justify-between sm:flex-row">
+        {title && <div className="text-xl font-bold">{title}</div>}
+        <div className="flex flex-col py-2 sm:flex-row ">
           <ButtonV2
             variant="primary"
             onClick={() => window.print()}
-            className="mr-2 my-2"
+            className="my-2 mr-2"
             disabled={showForm}
           >
             Print Report
           </ButtonV2>
           <ButtonV2
             variant="primary"
-            className="mr-2 my-2"
+            className="my-2 mr-2"
             onClick={() => {
               showForm && handleUpdateCancel();
               setShowForm((prev) => !prev);
@@ -109,7 +108,7 @@ export const InvestigationTable = ({
             <ButtonV2
               variant="primary"
               onClick={() => handleSave()}
-              className="mr-2 my-2"
+              className="my-2 mr-2"
             >
               Save
             </ButtonV2>
@@ -126,7 +125,7 @@ export const InvestigationTable = ({
       />
       <br />
       <div id="section-to-print">
-        <div className="shadow overflow-x-scroll border-b border-gray-200 sm:rounded-lg">
+        <div className="overflow-x-scroll border-b border-gray-200 shadow sm:rounded-lg">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -134,7 +133,7 @@ export const InvestigationTable = ({
                   (heading) => (
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-semibold text-gray-800 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-800"
                     >
                       {heading}
                     </th>

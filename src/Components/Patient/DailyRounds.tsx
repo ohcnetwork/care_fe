@@ -1,56 +1,58 @@
 import { navigate } from "raviger";
-import moment from "moment";
-import loadable from "@loadable/component";
-import { useCallback, useState, useEffect } from "react";
+
+import dayjs from "dayjs";
+import { lazy, useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
-  TELEMEDICINE_ACTIONS,
+  CONSCIOUSNESS_LEVEL,
+  PATIENT_CATEGORIES,
   REVIEW_AT_CHOICES,
   RHYTHM_CHOICES,
-  PATIENT_CATEGORIES,
+  TELEMEDICINE_ACTIONS,
 } from "../../Common/constants";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   createDailyReport,
   getConsultationDailyRoundsDetails,
   getDailyReport,
-  updateDailyReport,
   getPatient,
+  updateDailyReport,
 } from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications";
-import { formatDate } from "../../Utils/utils";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import useAppHistory from "../../Common/hooks/useAppHistory";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
-import Page from "../Common/components/Page";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import PatientCategorySelect from "./PatientCategorySelect";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import { SymptomsSelect } from "../Common/SymptomsSelect";
-import RangeAutocompleteFormField from "../Form/FormFields/RangeAutocompleteFormField";
+import * as Notification from "../../Utils/Notifications";
+import { formatDateTime } from "../../Utils/utils";
 import BloodPressureFormField, {
-  meanArterialPressure,
+  BloodPressureValidator,
 } from "../Common/BloodPressureFormField";
+import { SymptomsSelect } from "../Common/SymptomsSelect";
 import TemperatureFormField from "../Common/TemperatureFormField";
-const Loading = loadable(() => import("../Common/Loading"));
+import { Cancel, Submit } from "../Common/components/ButtonV2";
+import Page from "../Common/components/Page";
+import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+import RangeAutocompleteFormField from "../Form/FormFields/RangeAutocompleteFormField";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import PatientCategorySelect from "./PatientCategorySelect";
+import RadioFormField from "../Form/FormFields/RadioFormField";
+const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm: any = {
   additional_symptoms: [],
   other_symptoms: "",
   physical_examination_info: "",
   other_details: "",
-  patient_category: "Comfort",
+  patient_category: "",
   current_health: 0,
-  recommend_discharge: false,
-  action: null,
+  actions: null,
+  action: "",
   review_interval: 0,
   admitted_to: "",
   taken_at: null,
   rounds_type: "NORMAL",
-  clone_last: null,
+  clone_last: false,
   systolic: null,
   diastolic: null,
   pulse: null,
@@ -59,6 +61,12 @@ const initForm: any = {
   rhythm: "0",
   rhythm_detail: "",
   ventilator_spo2: null,
+  consciousness_level: "UNKNOWN",
+  bp: {
+    systolic: undefined,
+    diastolic: undefined,
+    mean: undefined,
+  },
   // bed: null,
 };
 
@@ -106,105 +114,130 @@ export const DailyRounds = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
+  const [consultationSuggestion, setConsultationSuggestion] = useState<any>("");
   const [prevReviewInterval, setPreviousReviewInterval] = useState(-1);
   const [prevAction, setPreviousAction] = useState("NO_ACTION");
   const [hasPreviousLog, setHasPreviousLog] = useState(false);
+  const [initialData, setInitialData] = useState<any>({
+    ...initForm,
+    action: "",
+  });
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id ? "Save" : "Continue";
 
-  useEffect(() => {
-    (async () => {
+  const formFields = [
+    "physical_examination_info",
+    "other_details",
+    "additional_symptoms",
+    "action",
+    "review_interval",
+    "bp",
+    "pulse",
+    "resp",
+    "ventilator_spo2",
+    "rhythm",
+    "rhythm_detail",
+    "consciousness_level",
+  ];
+
+  const fetchRoundDetails = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      let formData: any = initialData;
+      if (id) {
+        const res = await dispatchAction(
+          getConsultationDailyRoundsDetails({ consultationId, id })
+        );
+
+        if (!status.aborted) {
+          if (res?.data) {
+            const data = {
+              ...res.data,
+              patient_category: res.data.patient_category
+                ? PATIENT_CATEGORIES.find(
+                    (i) => i.text === res.data.patient_category
+                  )?.id ?? ""
+                : "",
+              rhythm:
+                (res.data.rhythm &&
+                  RHYTHM_CHOICES.find((i) => i.text === res.data.rhythm)?.id) ||
+                "0",
+              admitted_to: res.data.admitted_to
+                ? res.data.admitted_to
+                : "Select",
+            };
+            formData = { ...formData, ...data };
+          }
+        }
+      }
+      setIsLoading(false);
       if (patientId) {
         const res = await dispatchAction(getPatient({ id: patientId }));
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
+          setConsultationSuggestion(res.data.last_consultation?.suggestion);
           setPreviousReviewInterval(
             Number(res.data.last_consultation.review_interval)
           );
-          setPreviousAction(
+          const getAction =
             TELEMEDICINE_ACTIONS.find((action) => action.id === res.data.action)
-              ?.text || "NO_ACTION"
-          );
+              ?.text || "NO_ACTION";
+          setPreviousAction(getAction);
+          setInitialData({
+            ...initialData,
+            action: getAction,
+          });
+          formData = { ...formData, ...{ action: getAction } };
         }
       } else {
         setPatientName("");
         setFacilityName("");
       }
-    })();
-  }, [dispatchAction, patientId]);
-
-  const fetchRoundDetails = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatchAction(
-        getConsultationDailyRoundsDetails({ consultationId, id })
-      );
-
-      if (!status.aborted) {
-        if (res && res.data) {
-          const data = {
-            ...res.data,
-            patient_category: res.data.patient_category
-              ? PATIENT_CATEGORIES.find(
-                  (i) => i.text === res.data.patient_category
-                )?.id || "Comfort"
-              : "Comfort",
-            rhythm:
-              (res.data.rhythm &&
-                RHYTHM_CHOICES.find((i) => i.text === res.data.rhythm)?.id) ||
-              "0",
-            admitted_to: res.data.admitted_to ? res.data.admitted_to : "Select",
-          };
-          dispatch({ type: "set_form", form: data });
-        }
-        setIsLoading(false);
-      }
-    },
-    [consultationId, id, dispatchAction]
-  );
-  useAbortableEffect(
-    (status: statusType) => {
-      if (id) {
-        fetchRoundDetails(status);
-      }
-    },
-    [dispatchAction, fetchRoundDetails]
-  );
-
-  useEffect(() => {
-    (async () => {
       if (consultationId && !id) {
         const res = await dispatchAction(
           getDailyReport({ limit: 1, offset: 0 }, { consultationId })
         );
         setHasPreviousLog(res.data.count > 0);
-        dispatch({
-          type: "set_form",
-          form: {
-            ...state.form,
+        formData = {
+          ...formData,
+          ...{
             patient_category: res.data.patient_category
               ? PATIENT_CATEGORIES.find(
                   (i) => i.text === res.data.patient_category
-                )?.id || "Comfort"
-              : "Comfort",
+                )?.id ?? ""
+              : "",
             rhythm:
               (res.data.rhythm &&
                 RHYTHM_CHOICES.find((i) => i.text === res.data.rhythm)?.id) ||
               "0",
             temperature: parseFloat(res.data.temperature),
-            clone_last: res.data.count > 0 ? true : false,
           },
-        });
+        };
       }
-    })();
-  }, [dispatchAction, consultationId, id]);
+      dispatch({ type: "set_form", form: formData });
+      setInitialData(formData);
+    },
+    [consultationId, id, dispatchAction, patientId]
+  );
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchRoundDetails(status);
+    },
+    [dispatchAction, fetchRoundDetails]
+  );
 
   const validateForm = () => {
     const errors = { ...initError };
     let invalidForm = false;
     Object.keys(state.form).forEach((field) => {
       switch (field) {
+        case "patient_category":
+          if (!state.form[field]) {
+            errors[field] = "Please select a category";
+            invalidForm = true;
+          }
+          return;
         case "other_symptoms":
           if (
             state.form.additional_symptoms?.includes(9) &&
@@ -214,22 +247,14 @@ export const DailyRounds = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "clone_last":
-          if (state.form.clone_last === null) {
-            errors[field] = "Please choose a value";
+        case "bp": {
+          const error = BloodPressureValidator(state.form.bp);
+          if (error) {
+            errors.bp = error;
             invalidForm = true;
           }
           return;
-        case "resp":
-          if (
-            state.form.resp === null &&
-            state.form.rounds_type === "NORMAL" &&
-            state.form.clone_last !== true
-          ) {
-            errors[field] = "Please enter a respiratory rate";
-            invalidForm = true;
-          }
-          return;
+        }
         default:
           return;
       }
@@ -244,7 +269,7 @@ export const DailyRounds = (props: any) => {
     if (validForm) {
       setIsLoading(true);
       const baseData = {
-        clone_last: state.form.clone_last,
+        clone_last: state.form.clone_last ?? false,
         rounds_type: state.form.rounds_type,
         patient_category: state.form.patient_category,
         taken_at: state.form.taken_at
@@ -268,29 +293,20 @@ export const DailyRounds = (props: any) => {
           physical_examination_info: state.form.physical_examination_info,
           other_details: state.form.other_details,
           consultation: consultationId,
-          recommend_discharge: JSON.parse(state.form.recommend_discharge),
           action: prevAction,
           review_interval: Number(prevReviewInterval),
         };
-        if (state.form.rounds_type === "NORMAL") {
+        if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
           data = {
             ...data,
-            bp:
-              state.form.bp && state.form.bp.systolic && state.form.bp.diastolic
-                ? {
-                    systolic: Number(state.form.bp.systolic),
-                    diastolic: Number(state.form.bp.diastolic),
-                    mean: parseFloat(
-                      meanArterialPressure(state.form.bp).toFixed(2)
-                    ),
-                  }
-                : undefined,
-            pulse: state.form.pulse,
-            resp: Number(state.form.resp),
-            temperature: state.form.temperature,
-            rhythm: Number(state.form.rhythm) || 0,
+            bp: state.form.bp ?? {},
+            pulse: state.form.pulse ?? null,
+            resp: state.form.resp ?? null,
+            temperature: state.form.temperature ?? null,
+            rhythm: state.form.rhythm || 0,
             rhythm_detail: state.form.rhythm_detail,
-            ventilator_spo2: state.form.ventilator_spo2,
+            ventilator_spo2: state.form.ventilator_spo2 ?? null,
+            consciousness_level: state.form.consciousness_level,
           };
         }
       } else {
@@ -314,7 +330,7 @@ export const DailyRounds = (props: any) => {
           Notification.Success({
             msg: "Consultation Updates details updated successfully",
           });
-          if (state.form.rounds_type === "NORMAL") {
+          if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
             navigate(
               `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
             );
@@ -327,7 +343,7 @@ export const DailyRounds = (props: any) => {
           Notification.Success({
             msg: "Consultation Updates details created successfully",
           });
-          if (state.form.rounds_type === "NORMAL") {
+          if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
             if (data.clone_last) {
               navigate(
                 `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${res.data.external_id}/update`
@@ -377,7 +393,7 @@ export const DailyRounds = (props: any) => {
       state.form.review_interval || prevReviewInterval
     );
     if (nextReviewTime > 0)
-      return formatDate(moment().add(nextReviewTime, "minutes").toDate());
+      return formatDateTime(dayjs().add(nextReviewTime, "minutes").toDate());
     return "No Reviews Planned!";
   };
 
@@ -397,11 +413,11 @@ export const DailyRounds = (props: any) => {
           ? `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`
           : `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
       }
-      className="max-w-4xl mx-auto"
+      className="mx-auto max-w-4xl"
     >
       <form
         onSubmit={(e) => handleSubmit(e)}
-        className="bg-white rounded-lg shadow md:m-4 w-full max-w-4xl px-8 md:px-16 py-5 md:py-11"
+        className="w-full max-w-4xl rounded-lg bg-white px-8 py-5 shadow md:m-4 md:px-16 md:py-11"
       >
         <DraftSection
           handleDraftSelect={(newState) => {
@@ -409,7 +425,7 @@ export const DailyRounds = (props: any) => {
           }}
           formData={state.form}
         />
-        <div className="flex flex-col md:flex-row gap-6">
+        <div className="flex flex-col gap-6 md:flex-row">
           <div className="w-full md:w-1/3">
             <TextFormField
               {...field("taken_at")}
@@ -417,10 +433,10 @@ export const DailyRounds = (props: any) => {
               className="w-full"
               label="Measured at"
               type="datetime-local"
-              value={
-                state.form.taken_at ?? new Date().toISOString().slice(0, 16)
-              }
-              max={new Date().toISOString().slice(0, 16)}
+              value={dayjs(state.form.taken_at || undefined).format(
+                "YYYY-MM-DDTHH:mm"
+              )}
+              max={dayjs().format("YYYY-MM-DDTHH:mm")}
             />
           </div>
           <div className="w-full md:w-1/3">
@@ -430,8 +446,13 @@ export const DailyRounds = (props: any) => {
               className="w-full"
               label="Round Type"
               options={[
-                { id: "NORMAL", text: "Normal" },
-                { id: "VENTILATOR", text: "Critical Care" },
+                ...[
+                  { id: "NORMAL", text: "Normal" },
+                  { id: "VENTILATOR", text: "Critical Care" },
+                ],
+                ...(consultationSuggestion == "DC"
+                  ? [{ id: "TELEMEDICINE", text: "Telemedicine" }]
+                  : []),
               ]}
               optionLabel={(option) => option.text}
               optionValue={(option) => option.id}
@@ -453,8 +474,8 @@ export const DailyRounds = (props: any) => {
           />
         )}
 
-        {(state.form.clone_last === false || id) && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
+        {(!state.form.clone_last || id) && (
+          <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
             <TextAreaFormField
               {...field("physical_examination_info")}
               label="Physical Examination Info"
@@ -497,7 +518,6 @@ export const DailyRounds = (props: any) => {
 
             <SelectFormField
               {...field("review_interval")}
-              required
               label="Review After"
               labelSuffix={getExpectedReviewTime()}
               options={REVIEW_AT_CHOICES}
@@ -510,15 +530,9 @@ export const DailyRounds = (props: any) => {
               }}
             />
 
-            <CheckBoxFormField
-              {...field("recommend_discharge")}
-              className="md:col-span-2"
-              label="Discharge Recommended"
-            />
-
-            {state.form.rounds_type === "NORMAL" && (
+            {["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type) && (
               <>
-                <h3 className="md:col-span-2 mb-6">Vitals</h3>
+                <h3 className="mb-6 md:col-span-2">Vitals</h3>
 
                 <BloodPressureFormField
                   {...field("bp")}
@@ -560,8 +574,7 @@ export const DailyRounds = (props: any) => {
                   {...field("resp")}
                   label="Respiratory Rate"
                   unit="bpm"
-                  required
-                  start={10}
+                  start={0}
                   end={50}
                   step={1}
                   thresholds={[
@@ -611,7 +624,6 @@ export const DailyRounds = (props: any) => {
 
                 <SelectFormField
                   {...field("rhythm")}
-                  required
                   label="Rhythm"
                   options={RHYTHM_CHOICES}
                   optionLabel={(option) => option.desc}
@@ -620,18 +632,44 @@ export const DailyRounds = (props: any) => {
 
                 <TextAreaFormField
                   {...field("rhythm_detail")}
-                  className="md:col-span-2"
+                  className="md:col-span-1"
                   label="Rhythm Description"
-                  rows={5}
+                  rows={7}
+                />
+
+                <RadioFormField
+                  label="Level Of Consciousness"
+                  {...field("consciousness_level")}
+                  options={CONSCIOUSNESS_LEVEL.map((level) => ({
+                    label: level.text,
+                    value: level.id,
+                  }))}
+                  optionDisplay={(option) => option.label}
+                  optionValue={(option) => option.value}
+                  containerClassName="grid gap-1 grid-cols-1"
                 />
               </>
             )}
           </div>
         )}
 
-        <div className="mt-4 flex flex-col-reverse md:flex-row gap-2 justify-end">
+        <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">
           <Cancel onClick={() => goBack()} />
-          <Submit onClick={(e) => handleSubmit(e)} label={buttonText} />
+          <Submit
+            disabled={
+              buttonText === "Save" &&
+              state.form.clone_last !== null &&
+              !state.form.clone_last &&
+              formFields.every(
+                (field: string) => state.form[field] == initialData[field]
+              ) &&
+              (state.form.temperature == initialData.temperature ||
+                isNaN(state.form.temperature)) &&
+              state.form.rounds_type !== "VENTILATOR"
+            }
+            onClick={(e) => handleSubmit(e)}
+            label={buttonText}
+          />
         </div>
       </form>
     </Page>

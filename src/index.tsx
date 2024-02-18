@@ -9,7 +9,7 @@ import * as Sentry from "@sentry/browser";
 import "./style/index.css";
 import { registerSW } from "virtual:pwa-register";
 
-if (import.meta.env.PROD) {
+if ("serviceWorker" in navigator) {
   registerSW({ immediate: false });
 }
 

@@ -2,6 +2,7 @@ import * as Notification from "../../Utils/Notifications.js";
 
 import {
   BREATHLESSNESS_LEVEL,
+  DISCHARGE_REASONS,
   FACILITY_TYPES,
   PATIENT_CATEGORIES,
   SHIFTING_CHOICES_PEACETIME,
@@ -9,10 +10,9 @@ import {
   SHIFTING_VEHICLE_CHOICES,
 } from "../../Common/constants";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import { getShiftDetails, getUserList, updateShift } from "../../Redux/actions";
+
 import { navigate, useQueryParams } from "raviger";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useCallback, useEffect, useReducer, useState } from "react";
+import { lazy, useReducer, useState } from "react";
 import { ConsultationModel } from "../Facility/models.js";
 import DischargeModal from "../Facility/DischargeModal.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -23,11 +23,10 @@ import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField.js";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-import loadable from "@loadable/component";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { parsePhoneNumber } from "../../Utils/utils.js";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
+
 import { useTranslation } from "react-i18next";
 import CircularProgress from "../Common/components/CircularProgress.js";
 import Card from "../../CAREUI/display/Card";
@@ -35,8 +34,12 @@ import RadioFormField from "../Form/FormFields/RadioFormField.js";
 import Page from "../Common/components/Page.js";
 import UserAutocompleteFormField from "../Common/UserAutocompleteFormField.js";
 import { UserModel } from "../Users/models.js";
+import useQuery from "../../Utils/request/useQuery.js";
+import routes from "../../Redux/api.js";
+import { IShift } from "./models.js";
+import request from "../../Utils/request/request.js";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 interface patientShiftProps {
   id: string;
@@ -44,12 +47,14 @@ interface patientShiftProps {
 
 export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   const { goBack } = useAppHistory();
+
   const { kasp_full_string, kasp_enabled, wartime_shifting } = useConfig();
-  const dispatchAction: any = useDispatch();
+
   const [qParams, _] = useQueryParams();
+
   const [isLoading, setIsLoading] = useState(true);
   const [assignedUser, SetAssignedUser] = useState<UserModel>();
-  const [assignedUserLoading, setAssignedUserLoading] = useState(false);
+
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
     {} as ConsultationModel
   );
@@ -127,23 +132,13 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
 
   const [state, dispatch] = useReducer(shiftFormReducer, initialState);
 
-  useEffect(() => {
-    async function fetchData() {
-      if (state.form.assigned_to) {
-        setAssignedUserLoading(true);
-
-        const res = await dispatchAction(
-          getUserList({ id: state.form.assigned_to })
-        );
-
-        if (res && res.data && res.data.count)
-          SetAssignedUser(res.data.results[0]);
-
-        setAssignedUserLoading(false);
-      }
-    }
-    fetchData();
-  }, [dispatchAction, state.form.assigned_to]);
+  const { loading: assignedUserLoading } = useQuery(routes.userList, {
+    query: { id: state.form.assigned_to },
+    prefetch: state.form.assigned_to ? true : false,
+    onResponse: ({ res, data }) => {
+      if (res?.ok && data?.count) SetAssignedUser(data.results[0]);
+    },
+  });
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -197,8 +192,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
       }
 
       setIsLoading(true);
-
-      const data: any = {
+      const data: Partial<IShift> = {
         origin_facility: state.form.origin_facility_object?.id,
         shifting_approving_facility:
           state.form?.shifting_approving_facility_object?.id,
@@ -223,9 +217,10 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         breathlessness_level: state.form.breathlessness_level,
         patient_category: state.form.patient_category,
         ambulance_driver_name: state.form.ambulance_driver_name,
-        ambulance_phone_number: parsePhoneNumberFromString(
-          state.form.ambulance_phone_number
-        )?.format("E.164"),
+        ambulance_phone_number:
+          state.form.ambulance_phone_number === "+91"
+            ? ""
+            : parsePhoneNumber(state.form.ambulance_phone_number),
         ambulance_number: state.form.ambulance_number,
       };
 
@@ -233,11 +228,13 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         data["status"] = state.form.status;
       }
 
-      const res = await dispatchAction(updateShift(props.id, data));
+      const { res, data: shiftData } = await request(routes.updateShift, {
+        pathParams: { id: props.id },
+        body: data,
+      });
       setIsLoading(false);
-
-      if (res && res.status == 200 && res.data) {
-        dispatch({ type: "set_form", form: res.data });
+      if (res?.ok && shiftData) {
+        dispatch({ type: "set_form", form: shiftData });
         Notification.Success({
           msg: t("shift_request_updated_successfully"),
         });
@@ -249,41 +246,29 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     }
   };
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatchAction(getShiftDetails({ id: props.id }));
-      if (!status.aborted) {
-        if (res && res.data) {
-          const d = res.data;
-          setConsultationData(d.patient.last_consultation);
-          if (d.assigned_facility_external)
-            d["assigned_facility_object"] = {
-              id: -1,
-              name: res.data.assigned_facility_external,
-            };
-          d["initial_status"] = res.data.status;
-          d["status"] = qParams.status || res.data.status;
-          const patient_category =
-            d.patient.last_consultation?.last_daily_round?.patient_category ??
-            d.patient.last_consultation?.category;
-          d["patient_category"] = PATIENT_CATEGORIES.find(
-            (c) => c.text === patient_category
-          )?.id;
-          dispatch({ type: "set_form", form: d });
-        }
+  useQuery(routes.getShiftDetails, {
+    pathParams: { id: props.id },
+    onResponse: ({ res, data }) => {
+      if (res?.ok && data) {
+        const d = data;
+        setConsultationData(d.patient.last_consultation as ConsultationModel);
+        if (d.assigned_facility_external)
+          d["assigned_facility_object"] = {
+            id: -1,
+            name: String(data.assigned_facility_external),
+          };
+        d["initial_status"] = data.status;
+        d["status"] = qParams.status || data.status;
+        const patient_category =
+          d.patient.last_consultation?.last_daily_round?.patient_category ??
+          d.patient.last_consultation?.category;
+        d["patient_category"] =
+          PATIENT_CATEGORIES.find((c) => c.text === patient_category)?.id ?? "";
+        dispatch({ type: "set_form", form: d });
         setIsLoading(false);
       }
     },
-    [props.id, dispatchAction, qParams.status]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
-  );
+  });
 
   const vehicleOptions = SHIFTING_VEHICLE_CHOICES.map((obj) => obj.text);
   const facilityOptions = FACILITY_TYPES.map((obj) => obj.text);
@@ -298,13 +283,15 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         show={showDischargeModal}
         onClose={() => setShowDischargeModal(false)}
         consultationData={consultationData}
-        discharge_reason="EXP"
+        new_discharge_reason={
+          DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
+        }
         afterSubmit={() => {
           handleSubmit(true);
         }}
       />
-      <Card className="mt-4 w-full max-w-4xl mx-auto !p-6">
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+      <Card className="mx-auto mt-4 w-full max-w-4xl md:p-6 lg:p-8">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <SelectFormField
             name="status"
             label={t("status")}
@@ -319,7 +306,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             optionValue={(option) => option.text}
             optionSelectedLabel={(option) => option.text}
             onChange={handleFormFieldChange}
-            className="bg-white w-full md:leading-5 mt-2 md:col-span-1"
+            className="w-full bg-white md:col-span-1 md:leading-5"
           />
 
           {wartime_shifting &&
@@ -360,7 +347,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               multiple={false}
               freeText
               name="assigned_facility"
-              className="mt-4"
               selected={state.form.assigned_facility_object}
               setSelected={(obj) =>
                 setFacility(obj, "assigned_facility_object")
@@ -411,7 +397,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           />
 
           <PatientCategorySelect
-            required={false}
+            required={true}
             name="patient_category"
             value={state.form.patient_category}
             onChange={handleFormFieldChange}
@@ -429,7 +415,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 optionLabel={(option) => option}
                 optionValue={(option) => option}
                 onChange={handleFormFieldChange}
-                className="bg-white h-11 w-full mt-2 shadow-sm md:leading-5"
+                className="mt-2 h-11 w-full bg-white shadow-sm md:leading-5"
                 error={state.errors.preferred_vehicle_choice}
               />
               <SelectFormField
@@ -441,7 +427,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 optionLabel={(option) => option}
                 optionValue={(option) => option}
                 onChange={handleFormFieldChange}
-                className="bg-white h-11 w-full mt-2 shadow-sm md:leading-5 md:col-span-1"
+                className="mt-2 h-11 w-full bg-white shadow-sm md:col-span-1 md:leading-5"
                 error={state.errors.assigned_facility_type}
               />
               <SelectFormField
@@ -453,7 +439,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 optionLabel={(option) => option}
                 optionValue={(option) => option}
                 onChange={handleFormFieldChange}
-                className="bg-white h-11 w-full mt-2 shadow-sm md:leading-5 md:col-span-1"
+                className="mt-2 h-11 w-full bg-white shadow-sm md:col-span-1 md:leading-5"
               />
             </>
           )}
@@ -488,6 +474,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               handleFormFieldChange(event);
             }}
             error={state.errors.ambulance_phone_number}
+            types={["mobile", "landline"]}
           />
 
           <TextFormField
@@ -511,7 +498,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             error={state.errors.comments}
           />
 
-          <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">
+          <div className="mt-4 flex flex-col justify-between gap-2 md:col-span-2 md:flex-row">
             <Cancel onClick={() => goBack()} />
             <Submit onClick={() => handleSubmit()} />
           </div>

@@ -62,9 +62,9 @@ export default function Breadcrumbs(props: any) {
           </li>
           {!showFullPath && crumbs && crumbs.length > 2 && (
             <li>
-              <div className="flex items-center cursor-pointer">
+              <div className="flex cursor-pointer items-center">
                 <svg
-                  className="shrink-0 h-5 w-5 text-gray-400"
+                  className="h-5 w-5 shrink-0 text-gray-400"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="currentColor"
                   viewBox="0 0 20 20"
@@ -74,7 +74,7 @@ export default function Breadcrumbs(props: any) {
                 </svg>
                 <span
                   onClick={() => setShowFullPath(true)}
-                  className="inline-flex items-center px-2.5 py-1 ml-1 mt-0.5 rounded-full text-xs font-medium bg-gray-500 hover:bg-gray-700"
+                  className="ml-1 mt-0.5 inline-flex items-center rounded-full bg-gray-500 px-2.5 py-1 text-xs font-medium hover:bg-gray-700"
                 >
                   <svg
                     className="mx-0.25 h-1.5 w-1.5 text-white"
@@ -107,13 +107,13 @@ export default function Breadcrumbs(props: any) {
                 <li
                   key={crumb.name}
                   className={classNames(
-                    "text-sm font-medium text-gray-500 hover:text-gray-700 cursor-pointer",
+                    "cursor-pointer text-sm font-medium text-gray-500 hover:text-gray-700",
                     crumb.style
                   )}
                 >
                   <div className="flex items-center">
                     <svg
-                      className="shrink-0 h-5 w-5 text-gray-400"
+                      className="h-5 w-5 shrink-0 text-gray-400"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="currentColor"
                       viewBox="0 0 20 20"
@@ -131,7 +131,7 @@ export default function Breadcrumbs(props: any) {
                           <span>{crumb.name.slice(0, 13) + "..."}</span>
                         </div>
                       ) : (
-                        <div className="truncate w-20 md:w-full">
+                        <div className="w-20 truncate md:w-full">
                           <span>{crumb.name}</span>
                         </div>
                       )}

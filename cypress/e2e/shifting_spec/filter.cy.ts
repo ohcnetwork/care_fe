@@ -11,6 +11,7 @@ describe("Shifting section filter", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/shifting");
     shiftingPage.advancedFilterButton().click();
   });
@@ -19,7 +20,7 @@ describe("Shifting section filter", () => {
     shiftingPage.filterByFacility(
       "Dummy Shifting",
       "Dummy Shifting",
-      "District Admin"
+      "District"
     );
 
     shiftingPage.facilityAssignedBadge().should("exist");

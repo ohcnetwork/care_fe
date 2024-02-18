@@ -1,28 +1,24 @@
 import { navigate } from "raviger";
-import moment from "moment";
-import React, { useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { GENDER_TYPES, SAMPLE_TEST_STATUS } from "../../Common/constants";
-import loadable from "@loadable/component";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
+import { lazy, useEffect, useState } from "react";
+
 import {
-  getConsultationList,
-  listShiftRequests,
-  getPatient,
-  getSampleTestList,
-  patchSample,
-  patchPatient,
-  completeTransfer,
-} from "../../Redux/actions";
+  DISCHARGE_REASONS,
+  GENDER_TYPES,
+  SAMPLE_TEST_STATUS,
+} from "../../Common/constants";
+
 import * as Notification from "../../Utils/Notifications";
-import Pagination from "../Common/Pagination";
 import { ConsultationCard } from "../Facility/ConsultationCard";
 import { ConsultationModel } from "../Facility/models";
 import { PatientModel, SampleTestModel } from "./models";
 import { SampleTestCard } from "./SampleTestCard";
 import Chip from "../../CAREUI/display/Chip";
-import { classNames, formatDate } from "../../Utils/utils";
+import {
+  classNames,
+  formatAge,
+  formatDate,
+  formatDateTime,
+} from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
@@ -31,40 +27,26 @@ import { useTranslation } from "react-i18next";
 import CircularProgress from "../Common/components/CircularProgress";
 import Page from "../Common/components/Page";
 import ConfirmDialog from "../Common/ConfirmDialog";
-import { FieldErrorText } from "../Form/FormFields/FormField";
+import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
+import dayjs from "../../Utils/dayjs";
+import { triggerGoal } from "../../Integrations/Plausible";
+import useAuthUser from "../../Common/hooks/useAuthUser";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import { InsuranceDetialsCard } from "./InsuranceDetailsCard";
+import request from "../../Utils/request/request";
+import PaginatedList from "../../CAREUI/misc/PaginatedList";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 export const PatientHome = (props: any) => {
   const { facilityId, id } = props;
-  const dispatch: any = useDispatch();
   const [showShifts, setShowShifts] = useState(false);
   const [isShiftClicked, setIsShiftClicked] = useState(false);
-  const [isShiftDataLoaded, setIsShiftDataLoaded] = useState(false);
   const [patientData, setPatientData] = useState<PatientModel>({});
-  const [consultationListData, setConsultationListData] = useState<
-    Array<ConsultationModel>
-  >([]);
-  const [sampleListData, setSampleListData] = useState<Array<SampleTestModel>>(
-    []
-  );
-  const [activeShiftingData, setActiveShiftingData] = useState<Array<any>>([]);
   const [assignedVolunteerObject, setAssignedVolunteerObject] =
     useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [totalConsultationCount, setTotalConsultationCount] = useState(0);
-  const [currentConsultationPage, setCurrentConsultationPage] = useState(1);
-  const [consultationOffset, setConsultationOffset] = useState(0);
-  const [totalSampleListCount, setTotalSampleListCount] = useState(0);
-  const [currentSampleListPage, setCurrentSampleListPage] = useState(1);
-  const [sampleListOffset, setSampleListOffset] = useState(0);
-  const [isConsultationLoading, setIsConsultationLoading] = useState(false);
-  const [isSampleLoading, setIsSampleLoading] = useState(false);
-  const [sampleFlag, callSampleList] = useState(false);
-  const rootState: any = useSelector((rootState) => rootState);
-  const { currentUser } = rootState;
-  const userHomeFacilityId = currentUser.data.home_facility;
-  const userType = currentUser.data.user_type;
+  const authUser = useAuthUser();
   const { t } = useTranslation();
   const [selectedStatus, setSelectedStatus] = useState<{
     status: number;
@@ -76,7 +58,7 @@ export const PatientHome = (props: any) => {
     loading: false,
   });
   const [openAssignVolunteerDialog, setOpenAssignVolunteerDialog] =
-    React.useState(false);
+    useState(false);
 
   const initErr: any = {};
   const errors = initErr;
@@ -85,180 +67,106 @@ export const PatientHome = (props: any) => {
     setAssignedVolunteerObject(patientData.assigned_to_object);
   }, [patientData.assigned_to_object]);
 
-  const handleTransferComplete = (shift: any) => {
+  const handleTransferComplete = async (shift: any) => {
     setModalFor({ ...modalFor, loading: true });
-    dispatch(completeTransfer({ externalId: modalFor })).then(() => {
-      navigate(
-        `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`
-      );
+    await request(routes.completeTransfer, {
+      pathParams: {
+        id: modalFor.externalId ?? "",
+      },
     });
+    navigate(
+      `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`
+    );
   };
 
-  const handleAssignedVolunteer = () => {
-    dispatch(
-      patchPatient(
-        {
-          assigned_to: assignedVolunteerObject
-            ? assignedVolunteerObject.id
-            : null,
-        },
-        { id: patientData.id }
-      )
-    ).then((response: any) => {
-      if ((response || {}).status === 200) {
-        const dummyPatientData = Object.assign({}, patientData);
-        dummyPatientData["assigned_to"] = assignedVolunteerObject;
-        setPatientData(dummyPatientData);
-        if (assignedVolunteerObject)
-          Notification.Success({
-            msg: "Volunteer assigned successfully.",
-          });
-        else
-          Notification.Success({
-            msg: "Volunteer unassigned successfully.",
-          });
-        document.location.reload();
-      }
-    });
-    setOpenAssignVolunteerDialog(false);
-    if (errors["assignedVolunteer"]) delete errors["assignedVolunteer"];
-  };
+  const { data: insuranceDetials } = useQuery(routes.listHCXPolicies, {
+    query: {
+      patient: id,
+      limit: 1,
+    },
+  });
 
-  const handlePatientTransfer = (value: boolean) => {
+  const handlePatientTransfer = async (value: boolean) => {
     const dummyPatientData = Object.assign({}, patientData);
     dummyPatientData["allow_transfer"] = value;
 
-    dispatch(
-      patchPatient({ allow_transfer: value }, { id: patientData.id })
-    ).then((response: any) => {
-      if ((response || {}).status === 200) {
-        const dummyPatientData = Object.assign({}, patientData);
-        dummyPatientData["allow_transfer"] = value;
-        setPatientData(dummyPatientData);
+    await request(routes.patchPatient, {
+      pathParams: {
+        id: patientData.id as string,
+      },
 
-        Notification.Success({
-          msg: "Transfer status updated.",
-        });
-      }
+      body: { allow_transfer: value },
+
+      onResponse: ({ res }) => {
+        if ((res || {}).status === 200) {
+          const dummyPatientData = Object.assign({}, patientData);
+          dummyPatientData["allow_transfer"] = value;
+          setPatientData(dummyPatientData);
+
+          Notification.Success({
+            msg: "Transfer status updated.",
+          });
+        }
+      },
     });
   };
 
   const handleVolunteerSelect = (volunteer: any) => {
-    setAssignedVolunteerObject(volunteer);
+    setAssignedVolunteerObject(volunteer.value);
   };
 
-  const limit = 5;
-
-  const fetchpatient = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const patientRes = await dispatch(getPatient({ id }));
-      if (!status.aborted) {
-        if (patientRes && patientRes.data) {
-          setPatientData(patientRes.data);
-        }
-        setIsLoading(false);
+  const { loading: isLoading, refetch } = useQuery(routes.getPatient, {
+    pathParams: {
+      id,
+    },
+    onResponse: ({ res, data }) => {
+      if (res?.ok && data) {
+        setPatientData(data);
       }
+      triggerGoal("Patient Profile Viewed", {
+        facilityId: facilityId,
+        userId: authUser.id,
+      });
     },
-    [dispatch, id]
-  );
+  });
 
-  const fetchConsultation = useCallback(
-    async (status: statusType) => {
-      setIsConsultationLoading(true);
-      const consultationRes = await dispatch(
-        getConsultationList({ patient: id, limit, offset: consultationOffset })
-      );
-      if (!status.aborted) {
-        if (
-          consultationRes &&
-          consultationRes.data &&
-          consultationRes.data.results
-        ) {
-          setConsultationListData(consultationRes.data.results);
-          setTotalConsultationCount(consultationRes.data.count);
-        }
-        setIsConsultationLoading(false);
+  const handleAssignedVolunteer = async () => {
+    const { res, data } = await request(routes.patchPatient, {
+      pathParams: {
+        id: patientData.id as string,
+      },
+      body: {
+        assigned_to: assignedVolunteerObject
+          ? assignedVolunteerObject.id
+          : null,
+      },
+    });
+    if (res?.ok && data) {
+      setPatientData(data);
+      if (assignedVolunteerObject) {
+        Notification.Success({
+          msg: "Volunteer assigned successfully.",
+        });
+      } else {
+        Notification.Success({
+          msg: "Volunteer unassigned successfully.",
+        });
       }
-    },
-    [dispatch, id, consultationOffset]
-  );
-
-  const fetchSampleTest = useCallback(
-    async (status: statusType) => {
-      setIsSampleLoading(true);
-      const sampleRes = await dispatch(
-        getSampleTestList(
-          { limit, offset: sampleListOffset },
-          { patientId: id }
-        )
-      );
-      if (!status.aborted) {
-        if (sampleRes && sampleRes.data && sampleRes.data.results) {
-          setSampleListData(sampleRes.data.results);
-          setTotalSampleListCount(sampleRes.data.count);
-        }
-        setIsSampleLoading(false);
-      }
-    },
-    [dispatch, id, sampleListOffset]
-  );
-
-  const fetchActiveShiftingData = useCallback(
-    async (status: statusType) => {
-      const shiftingRes = isShiftClicked
-        ? await dispatch(listShiftRequests({ patient: id }, "shift-list-call"))
-        : activeShiftingData;
-      setIsShiftDataLoaded(isShiftClicked);
-      if (!status.aborted) {
-        if (shiftingRes && shiftingRes.data && shiftingRes.data.results) {
-          const activeShiftingRes: any[] = shiftingRes.data.results;
-          setActiveShiftingData(activeShiftingRes);
-        }
-      }
-    },
-    [dispatch, id, isShiftClicked]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchpatient(status);
-    },
-    [dispatch, fetchpatient]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchConsultation(status);
-    },
-    [dispatch, fetchConsultation]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchSampleTest(status);
-    },
-    [dispatch, fetchSampleTest, sampleFlag]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchActiveShiftingData(status);
-    },
-    [dispatch, fetchActiveShiftingData]
-  );
-
-  const handleConsultationPagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentConsultationPage(page);
-    setConsultationOffset(offset);
+      refetch();
+    }
+    setOpenAssignVolunteerDialog(false);
+    if (errors["assignedVolunteer"]) delete errors["assignedVolunteer"];
   };
 
-  const handleSampleListPagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentSampleListPage(page);
-    setSampleListOffset(offset);
-  };
+  const { loading: isShiftDataLoading, data: activeShiftingData } = useQuery(
+    routes.listShiftRequests,
+    {
+      query: {
+        patient: id,
+      },
+      prefetch: isShiftClicked,
+    }
+  );
 
   const confirmApproval = (status: number, sample: any) => {
     setSelectedStatus({ status, sample });
@@ -269,20 +177,25 @@ export const PatientHome = (props: any) => {
     const { status, sample } = selectedStatus;
     const sampleData = {
       id: sample.id,
-      status,
+      status: status.toString(),
       consultation: sample.consultation,
     };
     const statusName = SAMPLE_TEST_STATUS.find((i) => i.id === status)?.desc;
 
-    const res = await dispatch(patchSample(sampleData, { id: sample.id }));
-    if (res && (res.status === 201 || res.status === 200)) {
-      Notification.Success({
-        msg: `Request ${statusName}`,
-      });
-      callSampleList(!sampleFlag);
-    }
-
-    setShowAlertMessage(false);
+    await request(routes.patchSample, {
+      body: sampleData,
+      pathParams: {
+        id: sample.id,
+      },
+      onResponse: ({ res }) => {
+        if (res?.ok) {
+          Notification.Success({
+            msg: `Request ${statusName}`,
+          });
+        }
+        setShowAlertMessage(false);
+      },
+    });
   };
 
   if (isLoading) {
@@ -300,77 +213,33 @@ export const PatientHome = (props: any) => {
     patientData.medical_history.length
   ) {
     const medHis = patientData.medical_history;
-    patientMedHis = medHis.map((item: any, idx: number) => (
-      <div className="sm:col-span-1" key={`med_his_${idx}`}>
-        {item?.disease !== "NO" && (
-          <>
-            <div className="text-sm leading-5 font-semibold text-zinc-400 overflow-x-scroll">
-              {item.disease}
-            </div>
-            <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
-              {item.details}
-            </div>
-          </>
-        )}
-      </div>
-    ));
-  }
-
-  let consultationList, sampleList;
-
-  if (isConsultationLoading) {
-    consultationList = <CircularProgress />;
-  } else if (consultationListData.length === 0) {
-    consultationList = (
-      <div>
-        <hr />
-        <div className="p-4 text-xl text-gray-500 font-bold flex justify-center items-center border-2 border-solid border-gray-200">
-          No Data Found
+    patientMedHis = medHis
+      .filter((item) => item.disease !== "NO")
+      .map((item, idx) => (
+        <div className="sm:col-span-1" key={`med_his_${idx}`}>
+          <div className="break-words text-sm font-semibold leading-5 text-zinc-400">
+            {item.disease}
+          </div>
+          <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
+            {item.details}
+          </div>
         </div>
-      </div>
-    );
-  } else if (consultationListData.length > 0) {
-    consultationList = consultationListData.map((itemData, idx) => (
-      <ConsultationCard
-        itemData={itemData}
-        key={idx}
-        isLastConsultation={itemData.id === patientData.last_consultation?.id}
-      />
-    ));
+      ));
   }
 
-  if (isSampleLoading) {
-    sampleList = <CircularProgress />;
-  } else if (sampleListData.length === 0) {
-    sampleList = (
-      <div>
-        <hr />
-        <div className="p-4 text-xl text-gray-500 font-bold flex justify-center items-center border-2 border-solid border-gray-200">
-          No Data Found
-        </div>
-      </div>
-    );
-  } else if (sampleListData.length > 0) {
-    sampleList = (
-      <div className="lg:gap-4">
-        {sampleListData.map((itemData, idx) => (
-          <SampleTestCard
-            itemData={itemData}
-            key={idx}
-            handleApproval={confirmApproval}
-            facilityId={facilityId}
-            patientId={id}
-          />
-        ))}
-      </div>
-    );
-  }
-
-  const isPatientInactive = (patientData: PatientModel, facilityId: number) => {
+  const isPatientInactive = (patientData: PatientModel, facilityId: string) => {
     return (
       !patientData.is_active ||
       !(patientData?.last_consultation?.facility === facilityId)
     );
+  };
+
+  const isPatientEligibleForNewConsultation = (patientData: PatientModel) => {
+    return patientData.is_active &&
+      (!patientData?.last_consultation ||
+        patientData?.last_consultation?.discharge_date)
+      ? true
+      : false;
   };
 
   return (
@@ -393,10 +262,10 @@ export const PatientHome = (props: any) => {
 
       <div>
         <div className="relative mt-2">
-          <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-screen-xl p-3 sm:px-6 lg:px-8">
             <div className="md:flex">
               {patientData?.last_consultation?.assigned_to_object && (
-                <p className="font-bold text-green-800 rounded-lg shadow bg-green-200 p-3 mx-3 flex-1 text-center flex justify-center gap-2">
+                <p className="mx-3 flex flex-1 justify-center gap-2 rounded-lg bg-green-200 p-3 text-center font-bold text-green-800 shadow">
                   <span className="inline">
                     Assigned Doctor:
                     {
@@ -421,7 +290,7 @@ export const PatientHome = (props: any) => {
                 </p>
               )}
               {patientData.assigned_to_object && (
-                <p className="font-bold text-primary-800 rounded-lg shadow bg-primary-200 mx-2 p-3 flex-1 text-center">
+                <p className="mx-2 flex-1 rounded-lg bg-primary-200 p-3 text-center font-bold text-primary-800 shadow">
                   <span className="inline">
                     Assigned Volunteer:
                     {patientData.assigned_to_object.first_name}
@@ -436,7 +305,7 @@ export const PatientHome = (props: any) => {
           (patientData.is_active &&
             patientData?.last_consultation?.discharge_date)) && (
           <div className="relative mt-2">
-            <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8 rounded-lg shadow bg-red-200 ">
+            <div className="mx-auto max-w-screen-xl rounded-lg bg-red-200 p-3 shadow sm:px-6 lg:px-8">
               <div className="text-center">
                 <p className="font-bold text-red-800">
                   <i className="fas fa-exclamation-triangle mr-2" />
@@ -447,9 +316,9 @@ export const PatientHome = (props: any) => {
                 </p>
               </div>
             </div>
-            <div className="flex items-center mt-4">
+            <div className="mt-4 flex items-center">
               <ButtonV2
-                className="w-full"
+                className="mb-2 w-full"
                 disabled={!patientData.is_active}
                 onClick={() =>
                   navigate(
@@ -463,74 +332,77 @@ export const PatientHome = (props: any) => {
           </div>
         )}
         <section className="lg:flex" data-testid="patient-dashboard">
-          <div className="lg:w-2/3 mx-2">
-            <div className="bg-white rounded-lg shadow flex flex-col justify-between pt-11 pb-5 pl-9 h-full">
+          <div className="mx-2 lg:w-2/3">
+            <div className="flex h-full flex-col justify-between rounded-lg bg-white pb-5 pl-9 pt-11 shadow">
               <div>
-                <div className="flex flex-row">
-                  <h1 className="font-bold text-2xl pb-3 flex flex-row">
-                    {patientData.name} - {patientData.age}
+                <div className="flex flex-row gap-4">
+                  <h1 className="flex flex-row pb-3 text-2xl font-bold">
+                    {patientData.name} -{" "}
+                    {formatAge(
+                      patientData.age,
+                      patientData.date_of_birth,
+                      true
+                    )}
                   </h1>
-                  <div className="flex flex-wrap gap-2 ml-auto mr-9">
+                  <div className="ml-auto mr-9 flex flex-wrap gap-3">
                     {patientData.is_vaccinated ? (
                       <Chip
-                        color="blue"
-                        startIcon="syringe"
+                        variant="custom"
+                        className="bg-blue-100 text-blue-800"
+                        startIcon="l-syringe"
                         text="Vaccinated"
                       />
                     ) : (
                       <Chip
-                        color="yellow"
-                        startIcon="exclamation-triangle"
+                        variant="warning"
+                        startIcon="l-exclamation-triangle"
                         text="Not Vaccinated"
                       />
                     )}
                     {patientData.allow_transfer ? (
                       <Chip
-                        color="yellow"
-                        startIcon="unlock"
+                        variant="warning"
+                        startIcon="l-unlock"
                         text="Transfer Allowed"
                       />
                     ) : (
-                      <Chip
-                        color="primary"
-                        startIcon="lock"
-                        text="Transfer Blocked"
-                      />
+                      <Chip startIcon="l-lock" text="Transfer Blocked" />
                     )}
                     {patientData.gender === 2 &&
                       patientData.is_antenatal &&
                       patientData.is_active && (
                         <Chip
-                          color="blue"
-                          startIcon="baby-carriage"
+                          variant="custom"
+                          className="bg-pink-100 text-pink-800"
+                          startIcon="l-baby-carriage"
                           text="Antenatal"
                         />
                       )}
                     {patientData.contact_with_confirmed_carrier && (
                       <Chip
-                        color="red"
-                        startIcon="exclamation-triangle"
+                        variant="danger"
+                        startIcon="l-exclamation-triangle"
                         text="Contact with confirmed carrier"
                       />
                     )}
                     {patientData.contact_with_suspected_carrier && (
                       <Chip
-                        color="yellow"
-                        startIcon="exclamation-triangle"
+                        variant="warning"
+                        startIcon="l-exclamation-triangle"
                         text="Contact with suspected carrier"
                       />
                     )}
                     {patientData.past_travel && (
                       <Chip
-                        color="yellow"
-                        startIcon="exclamation-triangle"
+                        variant="warning"
+                        startIcon="l-exclamation-triangle"
                         text="Travel (within last 28 days)"
                       />
                     )}
                     {patientData.last_consultation?.is_telemedicine && (
                       <Chip
-                        color="purple"
-                        startIcon="phone"
+                        variant="alert"
+                        startIcon="l-phone"
                         text="Telemedicine"
                       />
                     )}
@@ -540,28 +412,28 @@ export const PatientHome = (props: any) => {
                   <i className="fa-regular fa-hospital mr-2 text-emerald-900" />
                   {patientData.facility_object?.name || "-"}
                 </h3>
-                <p className="text-sm text-zinc-500 mt-4 mb-7 font-medium">
+                <p className="mb-7 mt-4 text-sm font-medium text-zinc-500">
                   {patientGender} | {patientData.blood_group || "-"}
                 </p>
               </div>
-              <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:gap-y-8 md:grid-cols-2 lg:grid-cols-3 mt-2 mb-8 items-center">
+              <div className="mb-8 mt-2 grid grid-cols-1 items-center gap-x-4 gap-y-2 md:grid-cols-2 md:gap-y-8 lg:grid-cols-3">
                 <div className="sm:col-span-1">
-                  <div className="text-sm leading-5 font-semibold text-zinc-400">
+                  <div className="text-sm font-semibold leading-5 text-zinc-400">
                     Date of Birth
                   </div>
-                  <div className="mt-1 text-sm leading-5 font-medium">
-                    {patientData?.date_of_birth}
+                  <div className="mt-1 text-sm font-medium leading-5">
+                    {formatDate(patientData?.date_of_birth)}
                   </div>
                 </div>
                 <div className="sm:col-span-1">
-                  <div className="text-sm leading-5 font-semibold text-zinc-400">
+                  <div className="text-sm font-semibold leading-5 text-zinc-400">
                     Phone
                   </div>
                   <div className="mt-1 text-sm leading-5 ">
                     <div>
                       <a
                         href={`tel:${patientData.phone_number}`}
-                        className="font-medium text-sm text-black hover:text-gray-500"
+                        className="text-sm font-medium text-black hover:text-gray-500"
                       >
                         {patientData.phone_number || "-"}
                       </a>
@@ -570,7 +442,7 @@ export const PatientHome = (props: any) => {
                       <a
                         href={`https://wa.me/${patientData.phone_number}`}
                         target="_blank"
-                        className="text-sky-600 font-normal text-sm hover:text-sky-300"
+                        className="text-sm font-normal text-sky-600 hover:text-sky-300"
                         rel="noreferrer"
                       >
                         <i className="fab fa-whatsapp " /> Chat on WhatsApp
@@ -579,14 +451,14 @@ export const PatientHome = (props: any) => {
                   </div>
                 </div>
                 <div className="sm:col-span-1">
-                  <div className="text-sm leading-5 font-semibold text-zinc-400">
+                  <div className="text-sm font-semibold leading-5 text-zinc-400">
                     Emergency Contact
                   </div>
                   <div className="mt-1 text-sm leading-5 text-gray-900">
                     <div>
                       <a
                         href={`tel:${patientData.emergency_phone_number}`}
-                        className="font-medium text-sm text-black hover:text-gray-500"
+                        className="text-sm font-medium text-black hover:text-gray-500"
                       >
                         {patientData.emergency_phone_number || "-"}
                       </a>
@@ -595,7 +467,7 @@ export const PatientHome = (props: any) => {
                       <a
                         href={`https://wa.me/${patientData.emergency_phone_number}`}
                         target="_blank"
-                        className="text-sky-600 font-normal text-sm hover:text-sky-300"
+                        className="text-sm font-normal text-sky-600 hover:text-sky-300"
                         rel="noreferrer"
                       >
                         <i className="fab fa-whatsapp" /> Chat on WhatsApp
@@ -605,30 +477,30 @@ export const PatientHome = (props: any) => {
                 </div>
                 {patientData.date_of_return && (
                   <div className="sm:col-span-1">
-                    <div className="text-sm leading-5 font-semibold text-zinc-400">
+                    <div className="text-sm font-semibold leading-5 text-zinc-400">
                       Date of Return
                     </div>
-                    <div className="mt-1 text-sm leading-5 font-medium">
-                      {formatDate(patientData.date_of_return)}
+                    <div className="mt-1 text-sm font-medium leading-5">
+                      {formatDateTime(patientData.date_of_return)}
                     </div>
                   </div>
                 )}
                 {patientData.is_vaccinated && !!patientData.number_of_doses && (
                   <div className="sm:col-span-1">
-                    <div className="text-sm leading-5 font-semibold text-zinc-400">
+                    <div className="text-sm font-semibold leading-5 text-zinc-400">
                       Number of vaccine doses
                     </div>
-                    <div className="mt-1 text-sm leading-5 font-medium">
+                    <div className="mt-1 text-sm font-medium leading-5">
                       {patientData.number_of_doses}
                     </div>
                   </div>
                 )}
                 {patientData.is_vaccinated && patientData.vaccine_name && (
                   <div className="sm:col-span-1">
-                    <div className="text-sm leading-5 font-semibold text-zinc-400">
+                    <div className="text-sm font-semibold leading-5 text-zinc-400">
                       Vaccine name
                     </div>
-                    <div className="mt-1 text-sm leading-5 font-medium">
+                    <div className="mt-1 text-sm font-medium leading-5">
                       {patientData.vaccine_name}
                     </div>
                   </div>
@@ -636,21 +508,21 @@ export const PatientHome = (props: any) => {
                 {patientData.is_vaccinated &&
                   patientData.last_vaccinated_date && (
                     <div className="sm:col-span-1">
-                      <div className="text-sm leading-5 font-semibold text-zinc-400">
+                      <div className="text-sm font-semibold leading-5 text-zinc-400">
                         Last Vaccinated on
                       </div>
-                      <div className="mt-1 text-sm leading-5 font-medium">
-                        {formatDate(patientData.last_vaccinated_date)}
+                      <div className="mt-1 text-sm font-medium leading-5">
+                        {formatDateTime(patientData.last_vaccinated_date)}
                       </div>
                     </div>
                   )}
                 {patientData.countries_travelled &&
                   !!patientData.countries_travelled.length && (
                     <div className="sm:col-span-1">
-                      <div className="text-sm leading-5 font-semibold text-zinc-400">
+                      <div className="text-sm font-semibold leading-5 text-zinc-400">
                         Countries travelled
                       </div>
-                      <div className="mt-1 text-sm leading-5 font-medium">
+                      <div className="mt-1 text-sm font-medium leading-5">
                         {patientData.countries_travelled.join(", ")}
                       </div>
                     </div>
@@ -658,10 +530,10 @@ export const PatientHome = (props: any) => {
               </div>
             </div>
           </div>
-          <div className="lg:w-1/3 mx-2 h-full">
+          <div className="mx-2 h-full lg:w-1/3">
             <div
               id="actions"
-              className="space-y-2 flex-col justify-between flex h-full"
+              className="flex h-full flex-col justify-between space-y-2"
             >
               <div>
                 {patientData.review_time &&
@@ -670,25 +542,25 @@ export const PatientHome = (props: any) => {
                     0 && (
                     <div
                       className={
-                        "mt-6 lg:mt-0 mb-6 inline-flex items-center p-3 rounded-md text-xs leading-4 font-semibold w-full justify-center shadow-sm border " +
-                        (moment().isBefore(patientData.review_time)
+                        "mb-6 mt-6 inline-flex w-full items-center justify-center rounded-md border p-3 text-xs font-semibold leading-4 shadow-sm lg:mt-0 " +
+                        (dayjs().isBefore(patientData.review_time)
                           ? " bg-gray-100"
-                          : " p-1 bg-red-600/5 text-red-600 font-normal text-sm")
+                          : " bg-red-600/5 p-1 text-sm font-normal text-red-600")
                       }
                     >
-                      <i className="mr-2 text-md fa-regular fa-clock" />
+                      <i className="text-md fa-regular fa-clock mr-2" />
                       <p className="p-1">
-                        {(moment().isBefore(patientData.review_time)
+                        {(dayjs().isBefore(patientData.review_time)
                           ? "Review before: "
                           : "Review Missed: ") +
-                          formatDate(patientData.review_time)}
+                          formatDateTime(patientData.review_time)}
                       </p>
                     </div>
                   )}
-                <div className="p-2 bg-white rounded-sm shadow text-center mb-6">
+                <div className="mb-6 rounded-sm bg-white p-2 text-center shadow">
                   <div className="flex justify-between">
                     <div className="w-1/2 border-r-2">
-                      <div className="text-sm leading-5 font-normal text-gray-500">
+                      <div className="text-sm font-normal leading-5 text-gray-500">
                         COVID Status
                       </div>
                       <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
@@ -696,7 +568,7 @@ export const PatientHome = (props: any) => {
                       </div>
                     </div>
                     <div className="w-1/2">
-                      <div className="text-sm leading-5 font-normal text-gray-500">
+                      <div className="text-sm font-normal leading-5 text-gray-500">
                         Status
                       </div>
                       <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
@@ -705,13 +577,13 @@ export const PatientHome = (props: any) => {
                     </div>
                   </div>
                 </div>
-                <div className="flex justify-between p-2 bg-white rounded-sm shadow text-center px-4 mt-2">
-                  <div className="w-1/2 border-r-2 pb-1">
-                    <div className="text-sm leading-5 font-normal text-gray-500">
+                <div className="mt-2 flex justify-between rounded-sm bg-white p-2 px-4 text-center shadow">
+                  <div className="w-1/2 border-r-2 pb-1 pr-2">
+                    <div className="text-sm font-normal leading-5 text-gray-500">
                       Created
                     </div>
-                    <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-normal font-semibold">
-                      <div className="text-sm flex justify-center font-semibold">
+                    <div className="mt-1 whitespace-normal text-sm font-semibold leading-5 text-gray-900">
+                      <div className="flex justify-center text-sm font-semibold">
                         <RelativeDateUserMention
                           actionDate={patientData.created_date}
                           user={patientData.created_by}
@@ -719,12 +591,12 @@ export const PatientHome = (props: any) => {
                       </div>
                     </div>
                   </div>
-                  <div className="w-1/2 pb-1">
-                    <div className="text-sm leading-5 font-normal text-gray-500">
+                  <div className="w-1/2 pb-1 pl-2">
+                    <div className="text-sm font-normal leading-5 text-gray-500">
                       Last Edited
                     </div>
-                    <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-normal">
-                      <div className="text-sm flex justify-center font-semibold whitespace-normal">
+                    <div className="mt-1 whitespace-normal text-sm leading-5 text-gray-900">
+                      <div className="flex justify-center whitespace-normal text-sm font-semibold">
                         <RelativeDateUserMention
                           actionDate={patientData.modified_date}
                           user={patientData.last_edited}
@@ -736,10 +608,11 @@ export const PatientHome = (props: any) => {
                 </div>
               </div>
               <div className="py-2">
-                {patientData.last_consultation?.discharge_reason === "EXP" && (
+                {patientData.last_consultation?.new_discharge_reason ===
+                  DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id && (
                   <div>
                     <ButtonV2
-                      className="w-full mt-6"
+                      className="mt-6 w-full"
                       name="death_report"
                       onClick={() => navigate(`/death_report/${id}`)}
                     >
@@ -750,7 +623,7 @@ export const PatientHome = (props: any) => {
                 )}
                 <div>
                   <ButtonV2
-                    className="w-full mt-4"
+                    className="mt-4 w-full"
                     disabled={!patientData.is_active}
                     authorizeFor={NonReadOnlyUsers}
                     onClick={() =>
@@ -765,10 +638,10 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div>
                   <ButtonV2
-                    className="w-full mt-4"
+                    id="patient-allow-transfer"
+                    className="mt-4 w-full"
                     disabled={
-                      !consultationListData ||
-                      !consultationListData.length ||
+                      !patientData.last_consultation?.id ||
                       !patientData.is_active
                     }
                     onClick={() =>
@@ -786,9 +659,9 @@ export const PatientHome = (props: any) => {
             </div>
           </div>
         </section>
-        <section className=" bg-white rounded-lg shadow p-4 h-full space-y-2 text-gray-100 mt-7">
+        <section className=" mt-7 h-full space-y-2 rounded-lg bg-white p-4 text-gray-100 shadow">
           <div
-            className="flex justify-between border-b border-dashed cursor-pointer text-gray-900 font-semibold text-left text-lg pb-2"
+            className="flex cursor-pointer justify-between border-b border-dashed pb-2 text-left text-lg font-semibold text-gray-900"
             onClick={() => {
               setShowShifts(!showShifts);
               setIsShiftClicked(true);
@@ -804,29 +677,29 @@ export const PatientHome = (props: any) => {
           <div
             className={
               showShifts
-                ? activeShiftingData.length
+                ? activeShiftingData?.count || 0
                   ? "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
                   : ""
                 : "hidden"
             }
           >
-            {activeShiftingData.length ? (
-              activeShiftingData.map((shift: any) => (
+            {activeShiftingData?.count ? (
+              activeShiftingData.results.map((shift: any) => (
                 <div key={`shift_${shift.id}`} className="mx-2 ">
-                  <div className="overflow-hidden shadow rounded-lg bg-white h-full">
+                  <div className="h-full overflow-hidden rounded-lg bg-white shadow">
                     <div
                       className={
-                        "p-4 h-full flex flex-col justify-between " +
+                        "flex h-full flex-col justify-between p-4 " +
                         (shift.patient_object.disease_status === "POSITIVE"
                           ? "bg-red-600/5"
                           : "")
                       }
                     >
                       <div>
-                        <div className="flex justify-between mt-1">
+                        <div className="mt-1 flex justify-between">
                           <div>
                             {shift.emergency && (
-                              <span className="flex-shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
+                              <span className="inline-block shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium leading-4 text-red-800">
                                 Emergency
                               </span>
                             )}
@@ -836,10 +709,10 @@ export const PatientHome = (props: any) => {
                           <div className="sm:col-span-1">
                             <dt
                               title="Shifting status"
-                              className="text-sm leading-5 font-semibold text-zinc-400 flex items-center"
+                              className="flex items-center text-sm font-semibold leading-5 text-zinc-400"
                             >
                               <CareIcon className="care-l-truck mr-2 text-lg" />
-                              <dd className="font-bold text-sm leading-5 text-gray-900">
+                              <dd className="text-sm font-bold leading-5 text-gray-900">
                                 {shift.status}
                               </dd>
                             </dt>
@@ -847,10 +720,10 @@ export const PatientHome = (props: any) => {
                           <div className="sm:col-span-1">
                             <dt
                               title=" Origin facility"
-                              className="text-sm leading-5 font-semibold text-zinc-400 flex items-center"
+                              className="flex items-center text-sm font-semibold leading-5 text-zinc-400"
                             >
                               <CareIcon className="care-l-plane-fly mr-2 text-lg" />
-                              <dd className="font-bold text-sm leading-5 text-gray-900">
+                              <dd className="text-sm font-bold leading-5 text-gray-900">
                                 {(shift.origin_facility_object || {})?.name}
                               </dd>
                             </dt>
@@ -858,10 +731,10 @@ export const PatientHome = (props: any) => {
                           <div className="sm:col-span-1">
                             <dt
                               title="Shifting approving facility"
-                              className="text-sm leading-5 font-semibold text-zinc-400 flex items-center"
+                              className="flex items-center text-sm font-semibold leading-5 text-zinc-400"
                             >
                               <CareIcon className="care-l-user-check mr-2 text-lg" />
-                              <dd className="font-bold text-sm leading-5 text-gray-900">
+                              <dd className="text-sm font-bold leading-5 text-gray-900">
                                 {
                                   (
                                     shift.shifting_approving_facility_object ||
@@ -874,10 +747,10 @@ export const PatientHome = (props: any) => {
                           <div className="sm:col-span-1">
                             <dt
                               title=" Assigned facility"
-                              className="text-sm leading-5 font-semibold text-zinc-400 flex items-center"
+                              className="flex items-center text-sm font-semibold leading-5 text-zinc-400"
                             >
                               <CareIcon className="care-l-plane-arrival mr-2 text-lg" />
-                              <dd className="font-bold text-sm leading-5 text-gray-900">
+                              <dd className="text-sm font-bold leading-5 text-gray-900">
                                 {(shift.assigned_facility_object || {})?.name ||
                                   "Yet to be decided"}
                               </dd>
@@ -888,17 +761,17 @@ export const PatientHome = (props: any) => {
                             <dt
                               title="  Last Modified"
                               className={
-                                "text-sm leading-5 font-medium flex items-center " +
-                                (moment()
+                                "flex items-center text-sm font-medium leading-5 " +
+                                (dayjs()
                                   .subtract(2, "hours")
                                   .isBefore(shift.modified_date)
                                   ? "text-gray-900"
-                                  : "rounded p-1 text-red-600 font-normal")
+                                  : "rounded p-1 font-normal text-red-600")
                               }
                             >
                               <CareIcon className="care-l-stopwatch mr-2 text-lg" />
-                              <dd className="font-bold text-sm leading-5">
-                                {formatDate(shift.modified_date) || "--"}
+                              <dd className="text-sm font-bold leading-5">
+                                {formatDateTime(shift.modified_date) || "--"}
                               </dd>
                             </dt>
                           </div>
@@ -906,7 +779,7 @@ export const PatientHome = (props: any) => {
                       </div>
                       <div className="mt-2 flex">
                         <ButtonV2
-                          className="w-full mr-2 bg-white hover:bg-gray-100"
+                          className="mr-2 w-full bg-white hover:bg-gray-100"
                           variant="secondary"
                           onClick={() =>
                             navigate(`/shifting/${shift.external_id}`)
@@ -926,9 +799,10 @@ export const PatientHome = (props: any) => {
                                 !shift.patient_object.allow_transfer ||
                                 !(
                                   ["DistrictAdmin", "StateAdmin"].includes(
-                                    userType
+                                    authUser.user_type
                                   ) ||
-                                  userHomeFacilityId === shift.assigned_facility
+                                  authUser.home_facility_object?.id ===
+                                    shift.assigned_facility
                                 )
                               }
                               onClick={() => setModalFor(shift.external_id)}
@@ -956,51 +830,51 @@ export const PatientHome = (props: any) => {
               ))
             ) : (
               <div className=" text-center text-gray-500">
-                {isShiftDataLoaded ? "No Shifting Records!" : "Loading..."}
+                {isShiftDataLoading ? "Loading..." : "No Shifting Records!"}
               </div>
             )}
           </div>
         </section>
 
         <section
-          className="grid lg:grid-cols-2 grid-cols-1 mt-5 gap-6"
+          className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-3"
           data-testid="patient-details"
         >
           <div className="w-full">
-            <div className="bg-white rounded-lg shadow p-7 h-full space-y-2">
-              <div className="border-b border-dashed text-gray-900 font-bold text-xl pb-2">
+            <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
+              <div className="border-b border-dashed pb-2 text-xl font-bold text-gray-900">
                 Location
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                 <div className="sm:col-span-1">
-                  <div className="text-sm leading-5 font-semibold text-zinc-400">
+                  <div className="text-sm font-semibold leading-5 text-zinc-400">
                     Address
                   </div>
-                  <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words">
+                  <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
                     {patientData.address || "-"}
                   </div>
                 </div>
                 <div className="sm:col-span-1">
-                  <div className="text-sm leading-5 font-semibold text-zinc-400">
+                  <div className="text-sm font-semibold leading-5 text-zinc-400">
                     District
                   </div>
-                  <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words">
+                  <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
                     {patientData.district_object?.name || "-"}
                   </div>
                 </div>
                 <div className="sm:col-span-1">
-                  <div className="text-sm leading-5 font-semibold text-zinc-400">
+                  <div className="text-sm font-semibold leading-5 text-zinc-400">
                     Village
                   </div>
-                  <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words">
+                  <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
                     {patientData.village || "-"}
                   </div>
                 </div>
                 <div className="sm:col-span-1">
-                  <div className="text-sm leading-5 font-semibold text-zinc-400">
+                  <div className="text-sm font-semibold leading-5 text-zinc-400">
                     Ward
                   </div>
-                  <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words">
+                  <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
                     {(patientData.ward_object &&
                       patientData.ward_object.number +
                         ", " +
@@ -1009,19 +883,19 @@ export const PatientHome = (props: any) => {
                   </div>
                 </div>
                 <div className="sm:col-span-1">
-                  <div className="text-sm leading-5 font-semibold text-zinc-400">
+                  <div className="text-sm font-semibold leading-5 text-zinc-400">
                     State, Country - Pincode
                   </div>
-                  <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words">
+                  <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
                     {patientData?.state_object?.name},
                     {patientData.nationality || "-"} - {patientData.pincode}
                   </div>
                 </div>
                 <div className="sm:col-span-1">
-                  <div className="text-sm leading-5 font-semibold text-zinc-400">
+                  <div className="text-sm font-semibold leading-5 text-zinc-400">
                     Local Body
                   </div>
-                  <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words">
+                  <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
                     {patientData.local_body_object?.name || "-"}
                   </div>
                 </div>
@@ -1029,8 +903,8 @@ export const PatientHome = (props: any) => {
             </div>
           </div>
           <div className="w-full">
-            <div className="bg-white rounded-lg shadow p-7 h-full space-y-2">
-              <div className="border-b border-dashed text-gray-900 font-bold text-xl pb-2">
+            <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
+              <div className="border-b border-dashed pb-2 text-xl font-bold text-gray-900">
                 Medical
               </div>
               {!patientData.present_health &&
@@ -1040,47 +914,56 @@ export const PatientHome = (props: any) => {
                 !patientData.medical_history?.some(
                   (history) => history.disease !== "NO"
                 ) && (
-                  <div className="text-gray-500 w-full font-bold flex justify-center items-center text-xl">
+                  <div className="flex w-full items-center justify-center text-xl font-bold text-gray-500">
                     No Medical History Available
                   </div>
                 )}
-              <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:gap-y-8 sm:grid-cols-3 mt-2">
+              <div className="mt-2 grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-3 md:gap-y-8">
                 {patientData.present_health && (
                   <div className="sm:col-span-1">
-                    <div className="text-sm leading-5 font-semibold text-zinc-400">
+                    <div className="text-sm font-semibold leading-5 text-zinc-400">
                       Present Health
                     </div>
-                    <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
+                    <div
+                      data-testid="patient-present-health"
+                      className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5"
+                    >
                       {patientData.present_health}
                     </div>
                   </div>
                 )}
                 {patientData.ongoing_medication && (
                   <div className="sm:col-span-1">
-                    <div className="text-sm leading-5 font-semibold text-zinc-400">
+                    <div className="text-sm font-semibold leading-5 text-zinc-400">
                       Ongoing Medications
                     </div>
-                    <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
+                    <div
+                      data-testid="patient-ongoing-medication"
+                      className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5"
+                    >
                       {patientData.ongoing_medication}
                     </div>
                   </div>
                 )}
                 {patientData.allergies && (
                   <div className="sm:col-span-1">
-                    <div className="text-sm leading-5 font-semibold text-zinc-400">
+                    <div className="text-sm font-semibold leading-5 text-zinc-400">
                       Allergies
                     </div>
-                    <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
+                    <div
+                      data-testid="patient-allergies"
+                      className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5"
+                    >
                       {patientData.allergies}
                     </div>
                   </div>
                 )}
                 {patientData.gender === 2 && patientData.is_antenatal && (
                   <div className="sm:col-span-1">
-                    <div className="text-sm leading-5 font-semibold text-zinc-400">
+                    <div className="text-sm font-semibold leading-5 text-zinc-400">
                       Is pregnant
                     </div>
-                    <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words">
+                    <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
                       Yes
                     </div>
                   </div>
@@ -1089,30 +972,46 @@ export const PatientHome = (props: any) => {
               </div>
             </div>
           </div>
+
+          <InsuranceDetialsCard
+            data={insuranceDetials?.results[0]}
+            showViewAllDetails={
+              insuranceDetials?.count !== undefined &&
+              insuranceDetials?.count > 1
+            }
+          />
         </section>
-        <section className="md:flex mt-4 space-y-2">
+        <section className="mt-4 space-y-2 md:flex">
           <div className="hidden lg:block">
-            <div className="grid grid-cols-6 xl:grid-cols-7 mt-4 gap-5">
+            <div className="mt-4 grid grid-cols-6 gap-5 xl:grid-cols-7">
               <div
                 className={classNames(
                   "w-full rounded-lg border",
-                  patientData.is_active &&
-                    (!patientData?.last_consultation ||
-                      patientData?.last_consultation?.discharge_date)
-                    ? "hover:bg-primary-400 cursor-pointer border-green-700"
-                    : "hover:cursor-not-allowed text-gray-700 border-gray-700"
+                  isPatientEligibleForNewConsultation(patientData)
+                    ? "cursor-pointer border-green-700 hover:bg-primary-400"
+                    : "border-gray-700 text-gray-700 hover:cursor-not-allowed"
                 )}
                 onClick={() =>
-                  patientData.is_active &&
-                  (!patientData?.last_consultation ||
-                    patientData?.last_consultation?.discharge_date) &&
+                  isPatientEligibleForNewConsultation(patientData) &&
                   navigate(
                     `/facility/${patientData?.facility}/patient/${id}/consultation`
                   )
                 }
               >
-                <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
-                  <div className="text-center">
+                <div
+                  className={classNames(
+                    "h-full space-y-2 rounded-lg bg-white p-4 shadow",
+                    isPatientEligibleForNewConsultation(patientData) &&
+                      "hover:bg-gray-200"
+                  )}
+                >
+                  <div
+                    className={classNames(
+                      "text-center",
+                      isPatientEligibleForNewConsultation(patientData) &&
+                        "text-green-700"
+                    )}
+                  >
                     <span>
                       <CareIcon className="care-l-chat-bubble-user text-5xl" />
                     </span>
@@ -1129,8 +1028,8 @@ export const PatientHome = (props: any) => {
                 className="w-full"
                 onClick={() => navigate(`/patient/${id}/investigation_reports`)}
               >
-                <div className="bg-white rounded-lg shadow p-4 h-full space-y-2 border border-green-700 hover:bg-gray-200 hover:cursor-pointer">
-                  <div className="text-green-700 text-center">
+                <div className="h-full space-y-2 rounded-lg border border-green-700 bg-white p-4 shadow hover:cursor-pointer hover:bg-gray-200">
+                  <div className="text-center text-green-700">
                     <span>
                       <CareIcon className="care-l-file-search-alt text-5xl" />
                     </span>
@@ -1150,8 +1049,8 @@ export const PatientHome = (props: any) => {
                   )
                 }
               >
-                <div className="bg-white rounded-lg shadow p-4 h-full space-y-2 border border-green-700 hover:bg-gray-200 hover:cursor-pointer">
-                  <div className="text-green-700 text-center">
+                <div className="h-full space-y-2 rounded-lg border border-green-700 bg-white p-4 shadow hover:cursor-pointer hover:bg-gray-200">
+                  <div className="text-center text-green-700">
                     <span>
                       <CareIcon className="care-l-file-upload text-5xl" />
                     </span>
@@ -1172,10 +1071,10 @@ export const PatientHome = (props: any) => {
                 }}
               >
                 <div
-                  className={`bg-white rounded-lg shadow p-4 h-full space-y-2 border ${
+                  className={`h-full space-y-2 rounded-lg border bg-white p-4 shadow ${
                     isPatientInactive(patientData, facilityId)
-                      ? " hover:cursor-not-allowed border-gray-700"
-                      : " hover:bg-gray-200 hover:cursor-pointer border-green-700"
+                      ? " border-gray-700 hover:cursor-not-allowed"
+                      : " border-green-700 hover:cursor-pointer hover:bg-gray-200"
                   } `}
                 >
                   <div
@@ -1214,10 +1113,10 @@ export const PatientHome = (props: any) => {
               >
                 <div
                   className={classNames(
-                    "bg-white rounded-lg shadow p-4 h-full space-y-2 border",
+                    "h-full space-y-2 rounded-lg border bg-white p-4 shadow",
                     isPatientInactive(patientData, facilityId)
-                      ? " hover:cursor-not-allowed border-gray-700"
-                      : " hover:bg-gray-200 hover:cursor-pointer border-green-700"
+                      ? " border-gray-700 hover:cursor-not-allowed"
+                      : " border-green-700 hover:cursor-pointer hover:bg-gray-200"
                   )}
                 >
                   <div
@@ -1251,8 +1150,8 @@ export const PatientHome = (props: any) => {
                   )
                 }
               >
-                <div className="bg-white rounded-lg shadow p-4 h-full space-y-2 border border-green-700 hover:bg-gray-200 hover:cursor-pointer">
-                  <div className="text-green-700 text-center">
+                <div className="h-full space-y-2 rounded-lg border border-green-700 bg-white p-4 shadow hover:cursor-pointer hover:bg-gray-200">
+                  <div className="text-center text-green-700">
                     <span>
                       <CareIcon className="care-l-clipboard-notes text-5xl" />
                     </span>
@@ -1274,10 +1173,10 @@ export const PatientHome = (props: any) => {
               >
                 <div
                   className={classNames(
-                    "bg-white rounded-lg shadow p-4 h-full space-y-2 border",
+                    "h-full space-y-2 rounded-lg border bg-white p-4 shadow",
                     isPatientInactive(patientData, facilityId)
-                      ? "hover:cursor-not-allowed border-gray-700"
-                      : "hover:bg-gray-200 hover:cursor-pointer border-green-700"
+                      ? "border-gray-700 hover:cursor-not-allowed"
+                      : "border-green-700 hover:cursor-pointer hover:bg-gray-200"
                   )}
                 >
                   <div
@@ -1308,13 +1207,12 @@ export const PatientHome = (props: any) => {
               </div>
             </div>
           </div>
-          <div className="w-full mx-2 lg:hidden">
-            <div className="bg-white rounded-lg shadow p-4 h-full space-y-2">
-              <div className="border-b border-dashed text-gray-900 font-semibold text-left text-lg space-y-2">
+          <div className="mx-2 w-full lg:hidden">
+            <div className="h-full space-y-2 rounded-lg bg-white p-4 shadow">
+              <div className="space-y-2 border-b border-dashed text-left text-lg font-semibold text-gray-900">
                 <div>
                   <ButtonV2
                     className="w-full"
-                    align="start"
                     disabled={
                       !(
                         patientData.is_active &&
@@ -1328,40 +1226,43 @@ export const PatientHome = (props: any) => {
                       )
                     }
                   >
-                    <CareIcon className="care-l-chat-bubble-user text-5xl text-green-700 mr-2" />
-                    Add Consultation
+                    <span className="flex w-full items-center justify-start gap-2">
+                      <CareIcon className="care-l-chat-bubble-user text-xl" />
+                      Add Consultation
+                    </span>
                   </ButtonV2>
                 </div>
                 <div>
                   <ButtonV2
                     className="w-full"
-                    align="start"
                     onClick={() =>
                       navigate(`/patient/${id}/investigation_reports`)
                     }
                   >
-                    <CareIcon className="care-l-file-search-alt text-5xl mr-2" />
-                    Investigations Summary
+                    <span className="flex w-full items-center justify-start gap-2">
+                      <CareIcon className="care-l-file-search-alt text-xl" />
+                      Investigations Summary
+                    </span>
                   </ButtonV2>
                 </div>
                 <div>
                   <ButtonV2
                     className="w-full"
-                    align="start"
                     onClick={() =>
                       navigate(
                         `/facility/${patientData?.facility}/patient/${id}/files`
                       )
                     }
                   >
-                    <CareIcon className="care-l-file-upload text-5xl mr-2" />
-                    View/Upload Patient Files
+                    <span className="flex w-full items-center justify-start gap-2">
+                      <CareIcon className="care-l-file-upload text-xl" />
+                      View/Upload Patient Files
+                    </span>
                   </ButtonV2>
                 </div>
                 <div>
                   <ButtonV2
                     className="w-full"
-                    align="start"
                     disabled={isPatientInactive(patientData, facilityId)}
                     onClick={() =>
                       navigate(
@@ -1370,14 +1271,15 @@ export const PatientHome = (props: any) => {
                     }
                     authorizeFor={NonReadOnlyUsers}
                   >
-                    <CareIcon className="care-l-ambulance text-5xl mr-2" />
-                    SHIFT PATIENT
+                    <span className="flex w-full items-center justify-start gap-2">
+                      <CareIcon className="care-l-ambulance text-xl" />
+                      Shift Patient
+                    </span>
                   </ButtonV2>
                 </div>
                 <div>
                   <ButtonV2
                     className="w-full"
-                    align="start"
                     disabled={isPatientInactive(patientData, facilityId)}
                     onClick={() =>
                       navigate(
@@ -1386,34 +1288,38 @@ export const PatientHome = (props: any) => {
                     }
                     authorizeFor={NonReadOnlyUsers}
                   >
-                    <CareIcon className="care-l-medkit text-5xl mr-2" />
-                    Request Sample Test
+                    <span className="flex w-full items-center justify-start gap-2">
+                      <CareIcon className="care-l-medkit text-xl" />
+                      Request Sample Test
+                    </span>
                   </ButtonV2>
                 </div>
                 <div>
                   <ButtonV2
                     className="w-full"
-                    align="start"
                     onClick={() =>
                       navigate(
                         `/facility/${patientData?.facility}/patient/${id}/notes`
                       )
                     }
                   >
-                    <CareIcon className="care-l-clipboard-notes text-5xl mr-2" />
-                    View Patient Notes
+                    <span className="flex w-full items-center justify-start gap-2">
+                      <CareIcon className="care-l-clipboard-notes text-xl" />
+                      View Patient Notes
+                    </span>
                   </ButtonV2>
                 </div>
                 <div>
                   <ButtonV2
                     className="w-full"
-                    align="start"
                     onClick={() => setOpenAssignVolunteerDialog(true)}
                     disabled={false}
                     authorizeFor={NonReadOnlyUsers}
                   >
-                    <CareIcon className="care-l-users-alt mr-2 text-5xl" />
-                    Assign to a volunteer
+                    <span className="flex w-full items-center justify-start gap-2">
+                      <CareIcon className="care-l-users-alt text-xl" />
+                      Assign to a volunteer
+                    </span>
                   </ButtonV2>
                 </div>
               </div>
@@ -1423,19 +1329,20 @@ export const PatientHome = (props: any) => {
       </div>
 
       <ConfirmDialog
+        className="w-full justify-between"
         title={`Assign a volunteer to ${patientData.name}`}
         show={openAssignVolunteerDialog}
         onClose={() => setOpenAssignVolunteerDialog(false)}
         description={
-          <div>
-            <OnlineUsersSelect
-              userId={assignedVolunteerObject?.id || patientData.assigned_to}
-              selectedUser={assignedVolunteerObject}
-              onSelect={handleVolunteerSelect}
-              user_type={"Volunteer"}
-              outline={false}
+          <div className="mt-6">
+            <UserAutocompleteFormField
+              showActiveStatus
+              value={assignedVolunteerObject}
+              onChange={handleVolunteerSelect}
+              userType={"Volunteer"}
+              name={"assign_volunteer"}
+              error={errors.assignedVolunteer}
             />
-            <FieldErrorText error={errors.assignedVolunteer} />
           </div>
         }
         action="Assign"
@@ -1443,37 +1350,69 @@ export const PatientHome = (props: any) => {
       />
 
       <div>
-        <h2 className="font-semibold text-2xl leading-tight ml-0 mt-9">
+        <h2 className="ml-0 mt-9 text-2xl font-semibold leading-tight">
           Consultation History
         </h2>
-        {consultationList}
-        {!isConsultationLoading && totalConsultationCount > limit && (
-          <div className="mt-4 flex w-full justify-center">
-            <Pagination
-              cPage={currentConsultationPage}
-              defaultPerPage={limit}
-              data={{ totalCount: totalConsultationCount }}
-              onChange={handleConsultationPagination}
-            />
-          </div>
-        )}
+
+        <PaginatedList
+          route={routes.getConsultationList}
+          query={{ patient: id }}
+          perPage={5}
+        >
+          {(_) => (
+            <div>
+              <PaginatedList.WhenLoading>
+                <CircularProgress />
+              </PaginatedList.WhenLoading>
+              <PaginatedList.Items<ConsultationModel>>
+                {(item) => (
+                  <ConsultationCard
+                    itemData={item}
+                    isLastConsultation={
+                      item.id == patientData.last_consultation?.id
+                    }
+                  />
+                )}
+              </PaginatedList.Items>
+              <div className="flex w-full items-center justify-center">
+                <PaginatedList.Paginator hideIfSinglePage />
+              </div>
+            </div>
+          )}
+        </PaginatedList>
       </div>
 
       <div>
-        <h2 className="font-semibold text-2xl leading-tight ml-0 my-4">
+        <h2 className="my-4 ml-0 text-2xl font-semibold leading-tight">
           Sample Test History
         </h2>
-        {sampleList}
-        {!isSampleLoading && totalSampleListCount > limit && (
-          <div className="mt-4 flex w-full justify-center">
-            <Pagination
-              cPage={currentSampleListPage}
-              defaultPerPage={limit}
-              data={{ totalCount: totalSampleListCount }}
-              onChange={handleSampleListPagination}
-            />
-          </div>
-        )}
+        <PaginatedList
+          route={routes.sampleTestList}
+          pathParams={{ patientId: id }}
+          perPage={5}
+        >
+          {(_, query) => (
+            <div>
+              <PaginatedList.WhenLoading>
+                <CircularProgress />
+              </PaginatedList.WhenLoading>
+              <PaginatedList.Items<SampleTestModel>>
+                {(item) => (
+                  <SampleTestCard
+                    refetch={query.refetch}
+                    itemData={item}
+                    handleApproval={confirmApproval}
+                    facilityId={facilityId}
+                    patientId={id}
+                  />
+                )}
+              </PaginatedList.Items>
+              <div className="flex w-full items-center justify-center">
+                <PaginatedList.Paginator hideIfSinglePage />
+              </div>
+            </div>
+          )}
+        </PaginatedList>
       </div>
     </Page>
   );

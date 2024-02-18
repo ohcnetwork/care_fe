@@ -88,7 +88,7 @@ const Pagination = ({
   return (
     <div className={className}>
       {/* Mobile view */}
-      <div className="flex-1 flex justify-between sm:hidden">
+      <div className="flex flex-1 justify-between sm:hidden">
         <NavButton
           id="prev-page"
           tooltip="Previous"
@@ -106,7 +106,7 @@ const Pagination = ({
       </div>
 
       {/* Desktop view */}
-      <nav className="hidden sm:flex-1 sm:items-center sm:justify-between relative sm:inline-flex rounded-lg bg-white border border-secondary-300">
+      <nav className="relative hidden rounded-lg border border-secondary-300 bg-white sm:inline-flex sm:flex-1 sm:items-center sm:justify-between">
         <NavButton
           id="first-page"
           tooltip="Jump to first page"
@@ -172,7 +172,7 @@ const NavButton = (props: NavButtonProps) => {
       onClick={props.onClick}
       ghost={!props.selected}
       variant={props.selected === undefined ? "secondary" : "primary"}
-      className="rounded-none text-sm font-bold tooltip"
+      className="tooltip rounded-none text-sm font-bold"
     >
       {props.children}
       <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-xs font-normal">

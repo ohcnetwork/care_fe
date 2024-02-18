@@ -1,50 +1,48 @@
-import { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { dailyRoundsAnalyse } from "../../../Redux/actions";
+import { useEffect, useState } from "react";
+
+import routes from "../../../Redux/api";
+import request from "../../../Utils/request/request";
+
 import Pagination from "../../Common/Pagination";
 import {
-  PAGINATION_LIMIT,
   EYE_OPEN_SCALE,
-  VERBAL_RESPONSE_SCALE,
   MOTOR_RESPONSE_SCALE,
+  PAGINATION_LIMIT,
+  VERBAL_RESPONSE_SCALE,
 } from "../../../Common/constants";
-import { formatDate } from "../../../Utils/utils";
+import { formatDateTime } from "../../../Utils/utils";
 
 const DataTable = (props: any) => {
   const { title, data } = props;
   return (
     <div>
       <div className="text-xl font-semibold">{title}</div>
-      <div className="flex flex-row shadow overflow-hidden sm:rounded-lg divide-y divide-gray-200 mb-4 w-max-content max-w-full">
+      <div className="w-max-content mb-4 flex max-w-full flex-row divide-y divide-gray-200 overflow-hidden shadow sm:rounded-lg">
         <div className="flex flex-col justify-between">
-          <div className="px-2 py-6 bg-gray-50 text-center text-xs leading-4 font-medium text-gray-700 uppercase tracking-wider">
+          <div className="bg-gray-50 px-2 py-6 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-700">
             Time
           </div>
-          <div className="px-2 py-5 bg-gray-50 text-center text-xs leading-4 font-medium text-gray-700 uppercase tracking-wider">
+          <div className="bg-gray-50 px-2 py-5 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-700">
             Left
           </div>
-          <div className="px-2 py-5 bg-gray-50 text-center text-xs leading-4 font-medium text-gray-700 uppercase tracking-wider">
+          <div className="bg-gray-50 px-2 py-5 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-700">
             Right
           </div>
         </div>
-        <div
-          style={{ direction: "rtl" }}
-          className="flex flex-row overflow-x-auto"
-        >
+        <div className="flex flex-row overflow-x-auto">
           {data.map((x: any, i: any) => {
             return (
               <div
                 key={`${title}_${i}`}
                 className="flex flex-col divide-x divide-gray-200"
               >
-                <div className="px-2 py-3 bg-gray-50 text-center text-xs leading-4 font-medium text-gray-900 w-20">
+                <div className="w-20 bg-gray-50 px-2 py-3 text-center text-xs font-medium leading-4 text-gray-900">
                   {x.date}
                 </div>
-                <div className="px-2 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 text-gray-900">
+                <div className="whitespace-nowrap bg-white px-2 py-4 text-center text-sm leading-5 text-gray-900">
                   {x.left}
                 </div>
-                <div className="px-2 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 text-gray-900">
+                <div className="whitespace-nowrap bg-white px-2 py-4 text-center text-sm leading-5 text-gray-900">
                   {x.right}
                 </div>
               </div>
@@ -63,23 +61,23 @@ const DataDescription = (props: any) => {
   return (
     <div>
       <div className="text-xl font-semibold">{title}</div>
-      <div className="p-4 bg-white border rounded-lg shadow">
+      <div className="rounded-lg border bg-white p-4 shadow">
         {data.length ? (
           data.map((x: any, i: any) => (
             <div key={`${title}_${i}`} className="mb-2">
               <div className="text-sm font-bold text-gray-800">{`- ${x.date}`}</div>
-              <div className="text-gray-800 pl-2">
+              <div className="pl-2 text-gray-800">
                 <span className="font-semibold">Left: </span>
                 {x.left}
               </div>
-              <div className="text-gray-800 pl-2">
+              <div className="pl-2 text-gray-800">
                 <span className="font-semibold">Right: </span>
                 {x.right}
               </div>
             </div>
           ))
         ) : (
-          <div className="text-gray-700 font-semibold text-sm text-center">
+          <div className="text-center text-sm font-semibold text-gray-700">
             No Data Available!
           </div>
         )}
@@ -90,7 +88,7 @@ const DataDescription = (props: any) => {
 
 export const NeurologicalTable = (props: any) => {
   const { consultationId } = props;
-  const dispatch: any = useDispatch();
+  // const dispatch: any = useDispatch();
   const [results, setResults] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -122,52 +120,47 @@ export const NeurologicalTable = (props: any) => {
     { id: 30, value: "None" },
   ];
 
-  const fetchDailyRounds = useCallback(
-    async (status: statusType) => {
-      const res = await dispatch(
-        dailyRoundsAnalyse(
-          {
-            page: currentPage,
-            fields: [
-              "consciousness_level",
-              "consciousness_level_detail",
-              "left_pupil_size",
-              "left_pupil_size_detail",
-              "right_pupil_size",
-              "right_pupil_size_detail",
-              "left_pupil_light_reaction",
-              "left_pupil_light_reaction_detail",
-              "right_pupil_light_reaction",
-              "right_pupil_light_reaction_detail",
-              "limb_response_upper_extremity_right",
-              "limb_response_upper_extremity_left",
-              "limb_response_lower_extremity_left",
-              "limb_response_lower_extremity_right",
-              "glasgow_eye_open",
-              "glasgow_verbal_response",
-              "glasgow_motor_response",
-              "glasgow_total_calculated",
-            ],
-          },
-          { consultationId }
-        )
-      );
-      if (!status.aborted) {
-        if (res && res.data && res.data.results) {
-          setResults(res.data.results);
-          setTotalCount(res.data.count);
-        }
-      }
-    },
-    [consultationId, dispatch, currentPage]
-  );
+  useEffect(() => {
+    const fetchDailyRounds = async (
+      currentPage: number,
+      consultationId: string
+    ) => {
+      const { res, data } = await request(routes.dailyRoundsAnalyse, {
+        body: {
+          page: currentPage,
+          fields: [
+            "consciousness_level",
+            "consciousness_level_detail",
+            "left_pupil_size",
+            "left_pupil_size_detail",
+            "right_pupil_size",
+            "right_pupil_size_detail",
+            "left_pupil_light_reaction",
+            "left_pupil_light_reaction_detail",
+            "right_pupil_light_reaction",
+            "right_pupil_light_reaction_detail",
+            "limb_response_upper_extremity_right",
+            "limb_response_upper_extremity_left",
+            "limb_response_lower_extremity_left",
+            "limb_response_lower_extremity_right",
+            "glasgow_eye_open",
+            "glasgow_verbal_response",
+            "glasgow_motor_response",
+            "glasgow_total_calculated",
+          ],
+        },
+        pathParams: {
+          consultationId,
+        },
+      });
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchDailyRounds(status);
-    },
-    [currentPage]
-  );
+      if (res && res.ok && data?.results) {
+        setResults(data.results);
+        setTotalCount(data.count);
+      }
+    };
+    fetchDailyRounds(currentPage, consultationId);
+  }, [currentPage, consultationId]);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handlePagination = (page: number, limit: number) => {
@@ -187,7 +180,7 @@ export const NeurologicalTable = (props: any) => {
     const value: any = x[1];
     if (x[1].consciousness_level) {
       locData.push({
-        date: formatDate(x[0]),
+        date: formatDateTime(x[0]),
         loc:
           LOC_OPTIONS.find((item) => item.id === x[1].consciousness_level)
             ?.value || "--",
@@ -200,7 +193,7 @@ export const NeurologicalTable = (props: any) => {
       value.glasgow_motor_response
     ) {
       glasgowData.push({
-        date: formatDate(x[0]),
+        date: formatDateTime(x[0]),
         eye: value.glasgow_eye_open || "-",
         verbal: value.glasgow_verbal_response || "-",
         motor: value.glasgow_motor_response || "-",
@@ -210,14 +203,14 @@ export const NeurologicalTable = (props: any) => {
 
     if (x[1].consciousness_level_detail) {
       locDescription.push({
-        date: formatDate(x[0]),
+        date: formatDateTime(x[0]),
         loc: x[1].consciousness_level_detail,
       });
     }
 
     if (x[1].left_pupil_size || x[1].right_pupil_size) {
       sizeData.push({
-        date: formatDate(x[0]),
+        date: formatDateTime(x[0]),
         left: x[1].left_pupil_size || "-",
         right: x[1].right_pupil_size || "-",
       });
@@ -225,7 +218,7 @@ export const NeurologicalTable = (props: any) => {
 
     if (x[1].left_pupil_size_detail || x[1].right_pupil_size_detail) {
       sizeDescription.push({
-        date: formatDate(x[0]),
+        date: formatDateTime(x[0]),
         left: x[1].left_pupil_size_detail || "-",
         right: x[1].right_pupil_size_detail || "-",
       });
@@ -233,7 +226,7 @@ export const NeurologicalTable = (props: any) => {
 
     if (x[1].left_pupil_light_reaction || x[1].right_pupil_light_reaction) {
       reactionData.push({
-        date: formatDate(x[0]),
+        date: formatDateTime(x[0]),
         left:
           REACTION_OPTIONS.find(
             (item) => item.id === x[1].left_pupil_light_reaction
@@ -250,7 +243,7 @@ export const NeurologicalTable = (props: any) => {
       x[1].right_pupil_light_reaction_detail
     ) {
       reactionDescription.push({
-        date: formatDate(x[0]),
+        date: formatDateTime(x[0]),
         left: x[1].left_pupil_light_reaction_detail || "-",
         right: x[1].right_pupil_light_reaction_detail || "-",
       });
@@ -260,7 +253,7 @@ export const NeurologicalTable = (props: any) => {
       x[1].limb_response_upper_extremity_right
     ) {
       upperLimbData.push({
-        date: formatDate(x[0]),
+        date: formatDateTime(x[0]),
         left:
           LIMP_OPTIONS.find(
             (item) => item.id === x[1].limb_response_upper_extremity_left
@@ -277,7 +270,7 @@ export const NeurologicalTable = (props: any) => {
       x[1].limb_response_lower_extremity_right
     ) {
       lowerLimbData.push({
-        date: formatDate(x[0]),
+        date: formatDateTime(x[0]),
         left:
           LIMP_OPTIONS.find(
             (item) => item.id === x[1].limb_response_lower_extremity_left
@@ -296,20 +289,17 @@ export const NeurologicalTable = (props: any) => {
     <div className="mt-2">
       <div className="mb-6">
         <div className="text-xl font-semibold">Level Of Consciousness</div>
-        <div className="flex flex-row shadow overflow-hidden sm:rounded-lg divide-y divide-gray-200 my-4 w-max-content max-w-full">
-          <div
-            style={{ direction: "rtl" }}
-            className="flex flex-row overflow-x-auto"
-          >
+        <div className="w-max-content my-4 flex max-w-full flex-row divide-y divide-gray-200 overflow-hidden shadow sm:rounded-lg">
+          <div className="flex flex-row overflow-x-auto">
             {locData.map((x: any, i: any) => (
               <div
                 key={`loc_${i}`}
-                className="flex flex-col  min-w-max-content  divide-x divide-gray-200"
+                className="min-w-max-content flex  flex-col  divide-x divide-gray-200"
               >
-                <div className="px-2 border-r py-3 bg-gray-50 text-center text-xs leading-4 font-medium text-gray-700">
+                <div className="border-r bg-gray-50 px-2 py-3 text-center text-xs font-medium leading-4 text-gray-700">
                   {x.date}
                 </div>
-                <div className="px-6 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 text-gray-700">
+                <div className="whitespace-nowrap bg-white px-6 py-4 text-center text-sm leading-5 text-gray-700">
                   {x.loc}
                 </div>
               </div>
@@ -320,16 +310,16 @@ export const NeurologicalTable = (props: any) => {
           <div className="text-xl font-semibold">
             Level Of Consciousness Description
           </div>
-          <div className="p-4 bg-white border rounded-lg shadow">
+          <div className="rounded-lg border bg-white p-4 shadow">
             {locDescription.length ? (
               locDescription.map((x: any, i: any) => (
                 <div key={`loc_desc_${i}`} className="mb-2">
                   <div className="text-sm font-semibold">{`- ${x.date}`}</div>
-                  <div className="text-gray-800 pl-2">{x.loc}</div>
+                  <div className="pl-2 text-gray-800">{x.loc}</div>
                 </div>
               ))
             ) : (
-              <div className="text-gray-800 font-semibold text-sm text-center">
+              <div className="text-center text-sm font-semibold text-gray-800">
                 No Data Available!
               </div>
             )}
@@ -358,47 +348,44 @@ export const NeurologicalTable = (props: any) => {
       <div className="mt-4">
         <div className="text-xl font-semibold">Glasgow Coma Scale</div>
         <div className="mb-6 mt-2">
-          <div className="flex flex-row shadow overflow-hidden sm:rounded-lg divide-y divide-gray-200 mb-4 w-max-content max-w-full">
+          <div className="w-max-content mb-4 flex max-w-full flex-row divide-y divide-gray-200 overflow-hidden shadow sm:rounded-lg">
             <div className="flex flex-col ">
-              <div className="px-2 py-7 bg-gray-50 text-center text-sm leading-4 font-medium text-gray-700 uppercase tracking-wider">
+              <div className="bg-gray-50 px-2 py-7 text-center text-sm font-medium uppercase leading-4 tracking-wider text-gray-700">
                 Time
               </div>
-              <div className="px-2 py-4 bg-gray-50 text-center text-sm leading-5 font-medium text-gray-700 uppercase tracking-wider">
+              <div className="bg-gray-50 px-2 py-4 text-center text-sm font-medium uppercase leading-5 tracking-wider text-gray-700">
                 Eye
               </div>
-              <div className="px-2 py-4 bg-gray-50 text-center text-sm leading-5 font-medium text-gray-700 uppercase tracking-wider">
+              <div className="bg-gray-50 px-2 py-4 text-center text-sm font-medium uppercase leading-5 tracking-wider text-gray-700">
                 Verbal
               </div>
-              <div className="px-2 py-4 bg-gray-50 text-center text-sm leading-5 font-medium text-gray-700 uppercase tracking-wider">
+              <div className="bg-gray-50 px-2 py-4 text-center text-sm font-medium uppercase leading-5 tracking-wider text-gray-700">
                 Motor
               </div>
-              <div className="px-2 py-4 bg-gray-50 text-center text-sm leading-5 font-medium text-gray-700 uppercase tracking-wider">
+              <div className="bg-gray-50 px-2 py-4 text-center text-sm font-medium uppercase leading-5 tracking-wider text-gray-700">
                 Total
               </div>
             </div>
-            <div
-              style={{ direction: "rtl" }}
-              className="flex flex-row overflow-x-auto"
-            >
+            <div className="flex flex-row overflow-x-auto">
               {glasgowData.map((x: any, i: any) => {
                 return (
                   <div
                     key={`glascow_${i}`}
                     className="flex flex-col divide-x divide-gray-200"
                   >
-                    <div className="px-2 py-3 bg-gray-50 text-center text-xs leading-4 font-medium text-gray-800 w-20">
+                    <div className="w-20 bg-gray-50 px-2 py-3 text-center text-xs font-medium leading-4 text-gray-800">
                       {x.date}
                     </div>
-                    <div className="px-6 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 text-gray-800">
+                    <div className="whitespace-nowrap bg-white px-6 py-4 text-center text-sm leading-5 text-gray-800">
                       {x.eye}
                     </div>
-                    <div className="px-6 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 text-gray-800">
+                    <div className="whitespace-nowrap bg-white px-6 py-4 text-center text-sm leading-5 text-gray-800">
                       {x.verbal}
                     </div>
-                    <div className="px-6 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 text-gray-800">
+                    <div className="whitespace-nowrap bg-white px-6 py-4 text-center text-sm leading-5 text-gray-800">
                       {x.motor}
                     </div>
-                    <div className="px-6 py-4 bg-white text-center whitespace-nowrap text-sm leading-5 font-semibold text-gray-800 border-t-2 border-gray-500">
+                    <div className="whitespace-nowrap border-t-2 border-gray-500 bg-white px-6 py-4 text-center text-sm font-semibold leading-5 text-gray-800">
                       {x.total}
                     </div>
                   </div>
@@ -408,15 +395,17 @@ export const NeurologicalTable = (props: any) => {
           </div>
         </div>
         <div className="mb-6">
-          <div className="text-xl font-semibold my-2">Scale Description</div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="px-4 py-2 bg-white border rounded-lg shadow">
-              <div className="text-xl font-semibold mb-2">Eye Open</div>
+          <div className="my-2 text-xl font-semibold">Scale Description</div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="rounded-lg border bg-white px-4 py-2 shadow">
+              <div className="mb-2 text-xl font-semibold">
+                Eye Opening Response
+              </div>
               <div>
                 {EYE_OPEN_SCALE.map((x: any) => (
                   <div
                     key={`eye_${x.value}`}
-                    className="text-gray-800 pl-2 leading-relaxed"
+                    className="pl-2 leading-relaxed text-gray-800"
                   >
                     <span className="text-sm font-semibold">{x.value}</span> -{" "}
                     {x.text}
@@ -424,13 +413,13 @@ export const NeurologicalTable = (props: any) => {
                 ))}
               </div>
             </div>
-            <div className="px-4 py-2 bg-white border rounded-lg shadow">
-              <div className="text-xl font-semibold mb-2">Verbal Response</div>
+            <div className="rounded-lg border bg-white px-4 py-2 shadow">
+              <div className="mb-2 text-xl font-semibold">Verbal Response</div>
               <div>
                 {VERBAL_RESPONSE_SCALE.map((x: any) => (
                   <div
                     key={`verbal_${x.value}`}
-                    className="text-gray-800 pl-2 leading-relaxed"
+                    className="pl-2 leading-relaxed text-gray-800"
                   >
                     <span className="text-sm font-semibold">{x.value}</span> -{" "}
                     {x.text}
@@ -438,13 +427,13 @@ export const NeurologicalTable = (props: any) => {
                 ))}
               </div>
             </div>
-            <div className="px-4 py-2 bg-white border rounded-lg shadow">
-              <div className="text-xl font-semibold mb-2">Motor Response</div>
+            <div className="rounded-lg border bg-white px-4 py-2 shadow">
+              <div className="mb-2 text-xl font-semibold">Motor Response</div>
               <div>
                 {MOTOR_RESPONSE_SCALE.map((x: any) => (
                   <div
                     key={`motor_${x.value}`}
-                    className="text-gray-800 pl-2 leading-relaxed"
+                    className="pl-2 leading-relaxed text-gray-800"
                   >
                     <span className="text-sm font-semibold">{x.value}</span> -{" "}
                     {x.text}

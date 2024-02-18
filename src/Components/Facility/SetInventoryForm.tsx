@@ -1,8 +1,4 @@
-import { useCallback, useReducer, useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import loadable from "@loadable/component";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getItems, setMinQuantity, getAnyFacility } from "../../Redux/actions";
+import { useReducer, useState, useEffect } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { InventoryItemsModel } from "./models";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
@@ -12,7 +8,9 @@ import Card from "../../CAREUI/display/Card";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-const Loading = loadable(() => import("../Common/Loading"));
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 
 const initForm = {
   id: "",
@@ -45,51 +43,49 @@ export const SetInventoryForm = (props: any) => {
   const { goBack } = useAppHistory();
   const [state, dispatch] = useReducer(inventoryFormReducer, initialState);
   const { facilityId } = props;
-  const dispatchAction: any = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState<Array<InventoryItemsModel>>([]);
   const [currentUnit, setCurrentUnit] = useState<any>();
-  const [facilityName, setFacilityName] = useState("");
 
   const limit = 14;
   const offset = 0;
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatchAction(getItems({ limit, offset }));
-      if (!status.aborted) {
-        if (res && res.data) {
-          setData(res.data.results);
-          dispatch({
-            type: "set_form",
-            form: { ...state.form, id: res.data.results[0]?.id },
-          });
-        }
-        setIsLoading(false);
-      }
+  useQuery(routes.getMinQuantity, {
+    pathParams: {
+      facilityId,
     },
-    [dispatchAction]
-  );
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
-  );
+    prefetch: !!facilityId,
+    onResponse: async ({ data }) => {
+      const existingItemIDs: number[] = [];
 
-  useEffect(() => {
-    async function fetchFacilityName() {
-      if (facilityId) {
-        const res = await dispatchAction(getAnyFacility(facilityId));
-
-        setFacilityName(res?.data?.name || "");
-      } else {
-        setFacilityName("");
+      if (data?.results) {
+        data.results.map((item) => existingItemIDs.push(item.item_object.id));
       }
-    }
-    fetchFacilityName();
-  }, [dispatchAction, facilityId]);
+
+      await request(routes.getItems, {
+        query: {
+          limit,
+          offset,
+        },
+        onResponse: ({ res, data }) => {
+          if (res && data) {
+            const filteredData = data.results.filter(
+              (item) => !existingItemIDs.includes(item.id as number)
+            );
+            setData(filteredData);
+            dispatch({
+              type: "set_form",
+              form: { ...state.form, id: filteredData[0]?.id },
+            });
+          }
+        },
+      });
+    },
+  });
+
+  const { data: facilityObject } = useQuery(routes.getAnyFacility, {
+    pathParams: { id: facilityId },
+    prefetch: !!facilityId,
+  });
 
   useEffect(() => {
     // set the default units according to the item
@@ -105,35 +101,32 @@ export const SetInventoryForm = (props: any) => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    setIsLoading(true);
-    const data: any = {
-      min_quantity: Number(state.form.quantity),
-      item: Number(state.form.id),
-    };
-
-    const res = await dispatchAction(setMinQuantity(data, { facilityId }));
-    setIsLoading(false);
-    if (res && res.data) {
-      Notification.Success({
-        msg: "Minimum quantiy updated successfully",
-      });
-    }
-    goBack();
+    await request(routes.setMinQuantity, {
+      pathParams: { facilityId },
+      body: {
+        min_quantity: Number(state.form.quantity),
+        item: Number(state.form.id),
+      },
+      onResponse: ({ res }) => {
+        if (res?.ok) {
+          Notification.Success({
+            msg: "Minimum quantiy updated successfully",
+          });
+        }
+        goBack();
+      },
+    });
   };
 
   const handleChange = ({ name, value }: FieldChangeEvent<unknown>) => {
     dispatch({ type: "set_form", form: { ...state.form, [name]: value } });
   };
 
-  if (isLoading) {
-    return <Loading />;
-  }
-
   return (
     <Page
       title="Set Minimum Quantity"
       crumbsReplacements={{
-        [facilityId]: { name: facilityName },
+        [facilityId]: { name: facilityObject?.name },
         min_quantity: {
           name: "Min Quantity",
           uri: `/facility/${facilityId}/inventory/min_quantity/list`,
@@ -144,7 +137,7 @@ export const SetInventoryForm = (props: any) => {
       }}
       backUrl={`/facility/${facilityId}/inventory/min_quantity/list`}
     >
-      <Card className="mt-10 max-w-3xl mx-auto">
+      <Card className="mx-auto mt-10 max-w-3xl">
         <form onSubmit={(e) => handleSubmit(e)} className="mt-6 flex flex-col">
           <SelectFormField
             name="id"
@@ -177,7 +170,7 @@ export const SetInventoryForm = (props: any) => {
             />
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-end mt-4 gap-2">
+          <div className="mt-4 flex flex-col justify-end gap-2 sm:flex-row">
             <Cancel onClick={() => goBack()} />
             <Submit label="Set" />
           </div>

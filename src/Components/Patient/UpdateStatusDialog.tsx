@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useReducer } from "react";
+import { useEffect, useState, useReducer } from "react";
 import axios from "axios";
 import {
   SAMPLE_TEST_STATUS,
@@ -23,7 +23,6 @@ interface Props {
   sample: SampleTestModel;
   handleOk: (sample: SampleTestModel, status: number, result: number) => void;
   handleCancel: () => void;
-  userType: "Staff" | "DistrictAdmin" | "StateLabAdmin";
 }
 
 const statusChoices = [...SAMPLE_TEST_STATUS];
@@ -162,6 +161,7 @@ const UpdateStatusDialog = (props: Props) => {
       name: `${sample.patient_name} Sample Report`,
       associating_id: sample.id,
       file_category: category,
+      mime_type: contentType,
     };
     redux_dispatch(createUpload(requestData))
       .then(uploadfile)
@@ -213,10 +213,10 @@ const UpdateStatusDialog = (props: Props) => {
             {uploadStarted ? (
               <LinearProgressWithLabel value={uploadPercent} />
             ) : (
-              <div className="flex flex-wrap justify-between gap-2 mt-3 mb-4">
-                <label className="max-w-full font-medium h-min inline-flex whitespace-pre items-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1 button-size-default justify-center button-shape-square button-primary-default">
+              <div className="mb-4 mt-3 flex flex-wrap justify-between gap-2">
+                <label className="button-size-default button-shape-square button-primary-default inline-flex h-min max-w-full cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500">
                   <CareIcon className="care-l-file-upload-alt text-lg" />
-                  <span className="truncate max-w-full">
+                  <span className="max-w-full truncate">
                     {file ? file.name : t("choose_file")}
                   </span>
                   <input

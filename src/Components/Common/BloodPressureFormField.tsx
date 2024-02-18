@@ -1,3 +1,4 @@
+import { FieldValidator } from "../Form/FieldValidators";
 import FormField from "../Form/FormFields/FormField";
 import RangeAutocompleteFormField from "../Form/FormFields/RangeAutocompleteFormField";
 import {
@@ -5,31 +6,28 @@ import {
   FormFieldBaseProps,
   useFormFieldPropsResolver,
 } from "../Form/FormFields/Utils";
+import { DailyRoundsModel } from "../Patient/models";
 
-export interface BloodPressure {
-  systolic: number;
-  diastolic: number;
-}
+type BloodPressure = NonNullable<DailyRoundsModel["bp"]>;
 
-type Props = FormFieldBaseProps<Partial<BloodPressure>>;
+type Props = FormFieldBaseProps<BloodPressure>;
 
 export default function BloodPressureFormField(props: Props) {
   const field = useFormFieldPropsResolver(props as any);
 
   const handleChange = (event: FieldChangeEvent<number>) => {
-    field.onChange({
-      name: field.name,
-      value: {
-        ...field.value,
-        [event.name]: event.value,
-      },
-    });
+    const value: BloodPressure = {
+      ...field.value,
+      [event.name]: event.value,
+    };
+    value.mean = meanArterialPressure(value);
+    field.onChange({ name: field.name, value });
   };
 
   const map =
     !!props.value?.diastolic &&
     !!props.value.systolic &&
-    meanArterialPressure(props.value as BloodPressure);
+    meanArterialPressure(props.value);
 
   return (
     <FormField
@@ -52,12 +50,24 @@ export default function BloodPressureFormField(props: Props) {
           labelClassName="hidden"
           errorClassName="hidden"
           thresholds={[
-            { value: 0, label: "Low", className: "text-danger-500" },
-            { value: 100, label: "Normal", className: "text-primary-500" },
-            { value: 140, label: "High", className: "text-warning-500" },
+            {
+              value: 0,
+              label: "Low",
+              className: "hidden md:block text-danger-500",
+            },
+            {
+              value: 100,
+              label: "Normal",
+              className: "hidden md:block text-primary-500",
+            },
+            {
+              value: 140,
+              label: "High",
+              className: "hidden md:block text-warning-500",
+            },
           ]}
         />
-        <span className="text-lg font-medium text-gray-400 px-2">/</span>
+        <span className="px-2 text-lg font-medium text-gray-400">/</span>
         <RangeAutocompleteFormField
           name="diastolic"
           placeholder="Diastolic"
@@ -69,9 +79,21 @@ export default function BloodPressureFormField(props: Props) {
           labelClassName="hidden"
           errorClassName="hidden"
           thresholds={[
-            { value: 0, label: "Low", className: "text-danger-500" },
-            { value: 50, label: "Normal", className: "text-primary-500" },
-            { value: 90, label: "High", className: "text-warning-500" },
+            {
+              value: 0,
+              label: "Low",
+              className: "hidden md:block text-danger-500",
+            },
+            {
+              value: 50,
+              label: "Normal",
+              className: "hidden md:block text-primary-500",
+            },
+            {
+              value: 90,
+              label: "High",
+              className: "hidden md:block text-warning-500",
+            },
           ]}
         />
       </div>
@@ -83,5 +105,19 @@ export const meanArterialPressure = ({
   diastolic,
   systolic,
 }: BloodPressure) => {
-  return (2 * diastolic + systolic) / 3;
+  if (diastolic != null && systolic != null) {
+    return (2 * diastolic + systolic) / 3;
+  }
+};
+
+export const BloodPressureValidator: FieldValidator<BloodPressure> = (bp) => {
+  if (Object.values(bp).every((v) => v == null)) {
+    return;
+  }
+  if (bp.diastolic == null) {
+    return "Diastolic is missing. Either specify both or clear both.";
+  }
+  if (bp.systolic == null) {
+    return "Systolic is missing. Either specify both or clear both.";
+  }
 };

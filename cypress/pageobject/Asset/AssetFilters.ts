@@ -1,9 +1,9 @@
 export class AssetFilters {
   filterAssets(
     facilityName: string,
-    assetType: string,
     assetStatus: string,
-    assetClass: string
+    assetClass: string,
+    assetLocation: string
   ) {
     cy.contains("Advanced Filters").click();
     cy.get("input[name='Facilities']")
@@ -11,11 +11,6 @@ export class AssetFilters {
       .type(facilityName)
       .then(() => {
         cy.get("[role='option']").contains(facilityName).click();
-      });
-    cy.get("#asset-type")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains(assetType).click();
       });
     cy.get("#asset-status")
       .click()
@@ -27,6 +22,50 @@ export class AssetFilters {
       .then(() => {
         cy.get("[role='option']").contains(assetClass).click();
       });
+    cy.get("#Facilities-location")
+      .click()
+      .type(assetLocation)
+      .then(() => {
+        cy.get("[role='option']").contains(assetLocation).click();
+      });
     cy.contains("Apply").click();
+  }
+  clearFilters() {
+    cy.intercept("GET", "**/api/v1/asset/**").as("clearAssets");
+    cy.get("#clear-filter").click();
+    cy.wait("@clearAssets").its("response.statusCode").should("eq", 200);
+    cy.location("pathname").should("match", /\/assets$/);
+    cy.url().then((url) => {
+      const queryParams = new URL(url).searchParams;
+      let allEmpty = true;
+      const blacklistedKeys = ["page", "limit", "offset"];
+
+      queryParams.forEach((value, key) => {
+        if (value !== "" && !blacklistedKeys.includes(key)) {
+          allEmpty = false;
+        }
+      });
+
+      expect(allEmpty).to.be.true;
+    });
+  }
+  clickadvancefilter() {
+    cy.get("#advanced-filter").click();
+  }
+  clickslideoverbackbutton() {
+    cy.get("#close-slide-over").click();
+  }
+  // Assertions
+  assertFacilityText(text) {
+    cy.get("[data-testid=Facility]").should("contain", text);
+  }
+  assertAssetClassText(text) {
+    cy.get("[data-testid='Asset Class']").should("contain", text);
+  }
+  assertStatusText(text) {
+    cy.get("[data-testid=Status]").should("contain", text);
+  }
+  assertLocationText(text) {
+    cy.get("[data-testid=Location]").should("contain", text);
   }
 }

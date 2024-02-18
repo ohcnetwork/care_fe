@@ -1,56 +1,58 @@
 import { useCallback } from "react";
-import { useDispatch } from "react-redux";
-import { getAllSkills } from "../../Redux/actions";
 import AutoCompleteAsync from "../Form/AutoCompleteAsync";
-import { SkillObjectModel } from "../Users/models";
+import { SkillModel, SkillObjectModel } from "../Users/models";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 interface SkillSelectProps {
+  id?: string;
   name: string;
   errors?: string | undefined;
   className?: string;
   searchAll?: boolean;
   multiple?: boolean;
-  showAll?: boolean;
   showNOptions?: number;
   disabled?: boolean;
   selected: SkillObjectModel | SkillObjectModel[] | null;
   setSelected: (selected: SkillObjectModel) => void;
+  userSkills?: SkillModel[];
 }
 
 export const SkillSelect = (props: SkillSelectProps) => {
   const {
+    id,
     name,
     multiple,
     selected,
     setSelected,
     searchAll,
-    showAll = true,
     showNOptions = 10,
     disabled = false,
     className = "",
     errors = "",
+    userSkills,
   } = props;
-
-  const dispatchAction: any = useDispatch();
 
   const skillSearch = useCallback(
     async (text: string) => {
-      const params = {
+      const query = {
         limit: 50,
         offset: 0,
         search_text: text,
         all: searchAll,
       };
 
-      const res = await dispatchAction(getAllSkills(params));
-
-      return res?.data?.results;
+      const { data } = await request(routes.getAllSkills, { query });
+      return data?.results.filter(
+        (skill) => !userSkills?.some((userSkill) => userSkill.id === skill.id)
+      );
     },
-    [dispatchAction, searchAll, showAll]
+    [searchAll, userSkills]
   );
 
   return (
     <AutoCompleteAsync
+      id={id}
       name={name}
       multiple={multiple}
       selected={selected}

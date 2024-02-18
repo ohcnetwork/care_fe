@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 
-export default function useFullscreen(): [boolean, (value: boolean) => void] {
+export default function useFullscreen(): [
+  boolean,
+  (value: boolean, element?: HTMLElement) => void
+] {
   const [isFullscreen, _setIsFullscreen] = useState(
     !!document.fullscreenElement
   );
@@ -15,12 +18,25 @@ export default function useFullscreen(): [boolean, (value: boolean) => void] {
       document.removeEventListener("fullscreenchange", onFullscreenChange);
   }, []);
 
-  const setFullscreen = (value: boolean) => {
-    if (value) {
-      document.documentElement.requestFullscreen();
-    } else {
-      document.exitFullscreen();
-    }
+  function openFullscreen(elem: HTMLElement) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    if (elem.webkitEnterFullscreen) elem.webkitEnterFullscreen(); // Safari
+    else elem.requestFullscreen();
+  }
+
+  function exitFullscreen(elem: HTMLElement) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    if (elem.webkitExitFullscreen) elem.webkitExitFullscreen(); // Safari
+    else document.exitFullscreen();
+  }
+
+  const setFullscreen = (value: boolean, element?: HTMLElement) => {
+    const fullscreenElement = element ?? document.documentElement;
+
+    if (value) openFullscreen(fullscreenElement);
+    else exitFullscreen(fullscreenElement);
   };
 
   return [isFullscreen, setFullscreen];

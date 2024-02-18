@@ -1,7 +1,22 @@
+@import "@fontsource/inter/100.css";
+@import "@fontsource/inter/200.css";
+@import "@fontsource/inter/300.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+@import "@fontsource/inter/800.css";
+@import "@fontsource/inter/900.css";
+@import "@fortawesome/fontawesome-free/css/all.min.css";
+@import "@fortawesome/fontawesome-free/css/v4-shims.min.css";
+@import "@fortawesome/fontawesome-free/css/v4-font-face.min.css";
+@import "@fortawesome/fontawesome-free/css/v5-font-face.min.css";
+
 @import "@pnotify/core/dist/PNotify.css";
 @import "@pnotify/mobile/dist/PNotifyMobile.css";
 @import "@pnotify/core/dist/BrightTheme.css";
 @import "./CAREUI.css";
+
 @tailwind base;
 @tailwind components;
 
@@ -10,7 +25,7 @@ html {
 }
 
 body {
-    font-family: "Open Sans", sans-serif;
+    font-family: "Inter", sans-serif;
     color: #453c52;
     @apply font-sans text-gray-900 w-full h-full antialiased;
 }
@@ -400,23 +415,6 @@ button:disabled,
     }
 }
 
-.feed-aspect-ratio {
-    aspect-ratio: 16/9;
-}
-
-
-/* .player-wrapper {
-  width: auto;
-  height: auto;
-}
-.react-player {
-  aspect-ratio: 16/9;
-  position: relative;
-}
-
-.react-player > div {
-  position: absolute;
-} */
 
 @media print {
     body * {
@@ -482,116 +480,6 @@ button:disabled,
     100% {opacity: 0;}
 }
 
-.main-content {
-    margin-top: 64px;
-    border-bottom: solid 50px #f1f1f1;
-    background: #f1f1f1;
-    min-height: 100vh;
-}
-
-@media only screen and (min-width: 601px) {
-    .main-content {
-        margin-left: 240px;
-    }
-}
-
-.app-footer {
-    width: 100%;
-    background: #ffffff no-repeat;
-    background-size: 100% 100%;
-    min-height: 80px;
-    z-index: 1202;
-    display: flex;
-    flex-direction: row;
-    margin-top: auto;
-}
-
-@media (max-width: 768px) {
-    .app-footer {
-        flex-direction: column;
-    }
-}
-
-.appBar {
-    background-color: white !important;
-}
-
-.vertical-align {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.add-item-card {
-    background: #ffffff;
-    border: dashed 1px #333;
-    cursor: pointer;
-    min-height: 120px;
-    line-height: 120px;
-}
-
-.stats-cards .stats-card-item {
-    padding: 10px;
-    margin: 16px;
-}
-
-@media only screen and (max-width: 601px) {
-    .createBtn {
-        position: relative !important;
-        right: 20px;
-        top: 0px;
-    }
-}
-
-.cursor-pointer {
-    cursor: pointer;
-}
-
-.description-text {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    padding: 5px 0px;
-}
-
-.wrap-text {
-    white-space: pre-wrap;
-}
-
-.no-wrap-text {
-    white-space: nowrap;
-}
-
-.non-clickable {
-    cursor: not-allowed;
-}
-
-.pagination {
-    margin: auto;
-}
-
-.error-text {
-    font-size: 0.75rem;
-    line-height: 1rem; 
-    font-weight: 500; 
-    letter-spacing: 0.025em; 
-}
-
-.hometext {
-    margin: 10px 35px !important;
-}
-
-@media (max-width: 768px) {
-    .hometext {
-        margin: 10px 15px !important;
-    }
-}
-
-@media (min-width: 768px) {
-    .hometitle {
-        margin-top: 15px !important;
-    }
-}
-
 .badge {
     display: inline-block;
     padding: 0.25em 0.4em;
@@ -649,28 +537,6 @@ button:disabled,
     border-color: #28a745;
 }
 
-.react-tel-input .form-control+div:before {
-    content: "";
-}
-
-.react-tel-input {
-    margin-top: 8px;
-    margin-bottom: 4px;
-}
-
-.react-tel-input .form-control {
-    padding-top: 6px;
-    padding-bottom: 6px;
-    width: 100%;
-    border-radius: 4px;
-    height: 38px;
-}
-
-.react-tel-input .form-control:focus {
-    border-color: #28a745;
-    box-shadow: 0 0 0 1px #28a745;
-}
-
 .form-input {
     padding-top: 6px;
     padding-bottom: 6px;
@@ -682,15 +548,6 @@ button:disabled,
 .form-input:focus {
     border-color: #28a745 !important;
     box-shadow: 0 0 0 1px #28a745 !important;
-}
-
-@media (min-width:770px) {
-    .title-text {
-        position: absolute;
-        top: 0;
-        right: 0;
-        margin-top: -3rem;
-    }
 }
 
 .copied-to-cb {
@@ -720,12 +577,6 @@ button:disabled,
 
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 0, 0, 0.4);
-}
-
-@media (max-width:640px) {
-    .hideonmobilescreen {
-        display: none;
-    }
 }
 
 @media (min-width:1000px) {

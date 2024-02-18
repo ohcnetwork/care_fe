@@ -1,68 +1,70 @@
-import moment from "moment";
-import { FieldError, RequiredFieldValidator } from "../Form/FieldValidators";
+import { RequiredFieldValidator } from "../Form/FieldValidators";
 import Form from "../Form/Form";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-import { MedicineAdministrationRecord, Prescription } from "./models";
-import { PrescriptionActions } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
+import {
+  DOSAGE_UNITS,
+  MedicineAdministrationRecord,
+  Prescription,
+} from "./models";
 import { useState } from "react";
-import AutocompleteFormField from "../Form/FormFields/Autocomplete";
-import medicines_list from "../Common/prescription-builder/assets/medicines.json";
 import NumericWithUnitsFormField from "../Form/FormFields/NumericWithUnitsFormField";
 import { useTranslation } from "react-i18next";
-
-export const medicines = medicines_list;
+import MedibaseAutocompleteFormField from "./MedibaseAutocompleteFormField";
+import dayjs from "../../Utils/dayjs";
+import { PrescriptionFormValidator } from "./validators";
+import MedicineRoutes from "./routes";
+import request from "../../Utils/request/request";
+import useSlug from "../../Common/hooks/useSlug";
+import { Success } from "../../Utils/Notifications";
 
 export default function CreatePrescriptionForm(props: {
   prescription: Prescription;
-  create: ReturnType<typeof PrescriptionActions>["create"];
   onDone: () => void;
 }) {
-  const dispatch = useDispatch<any>();
-  const [isCreating, setIsCreating] = useState(false);
   const { t } = useTranslation();
+  const consultation = useSlug("consultation");
+  const [isCreating, setIsCreating] = useState(false);
 
   return (
     <Form<Prescription>
       disabled={isCreating}
       defaults={props.prescription}
       onCancel={props.onDone}
-      onSubmit={async (obj) => {
+      onSubmit={async (body) => {
+        body["medicine"] = body.medicine_object?.id;
+        delete body.medicine_object;
+
         setIsCreating(true);
-        const res = await dispatch(props.create(obj));
+        const { res, error } = await request(
+          MedicineRoutes.createPrescription,
+          {
+            pathParams: { consultation },
+            body,
+          }
+        );
         setIsCreating(false);
-        if (res.status !== 201) {
-          return res.data;
-        } else {
-          props.onDone();
+
+        if (!res?.ok) {
+          return error;
         }
+
+        Success({ msg: t("Medicine prescribed") });
+        props.onDone();
       }}
       noPadding
-      validate={(form) => {
-        const errors: Partial<Record<keyof Prescription, FieldError>> = {};
-        errors.medicine = RequiredFieldValidator()(form.medicine);
-        errors.dosage = RequiredFieldValidator()(form.dosage);
-        if (form.is_prn)
-          errors.indicator = RequiredFieldValidator()(form.indicator);
-        if (!form.is_prn)
-          errors.frequency = RequiredFieldValidator()(form.frequency);
-        return errors;
-      }}
+      validate={PrescriptionFormValidator()}
       className="max-w-3xl"
     >
       {(field) => (
         <>
-          <AutocompleteFormField
+          <MedibaseAutocompleteFormField
             label={t("medicine")}
-            {...field("medicine", RequiredFieldValidator())}
+            {...field("medicine_object", RequiredFieldValidator())}
             required
-            options={medicines}
-            optionLabel={(medicine) => medicine}
-            optionValue={(medicine) => medicine}
           />
-          <div className="flex gap-4 items-center">
+          <div className="flex items-center gap-4">
             <SelectFormField
               className="flex-1"
               label={t("route")}
@@ -76,7 +78,7 @@ export default function CreatePrescriptionForm(props: {
               label={t("dosage")}
               {...field("dosage", RequiredFieldValidator())}
               required
-              units={["mg", "g", "ml", "drop(s)", "ampule(s)", "tsp"]}
+              units={DOSAGE_UNITS}
               min={0}
             />
           </div>
@@ -88,9 +90,10 @@ export default function CreatePrescriptionForm(props: {
                 {...field("indicator", RequiredFieldValidator())}
                 required
               />
-              <TextFormField
+              <NumericWithUnitsFormField
+                className="flex-1"
                 label={t("max_dosage_24_hrs")}
-                type="number"
+                units={DOSAGE_UNITS}
                 min={0}
                 {...field("max_dosage")}
               />
@@ -104,7 +107,7 @@ export default function CreatePrescriptionForm(props: {
               />
             </>
           ) : (
-            <div className="flex gap-4 items-center">
+            <div className="flex items-center gap-4">
               <SelectFormField
                 position="above"
                 className="flex-1"
@@ -134,7 +137,17 @@ export default function CreatePrescriptionForm(props: {
   );
 }
 
-export const PRESCRIPTION_ROUTES = ["ORAL", "IV", "IM", "SC"];
+export const PRESCRIPTION_ROUTES = [
+  "ORAL",
+  "IV",
+  "IM",
+  "SC",
+  "INHALATION",
+  "NASOGASTRIC",
+  "INTRATHECAL",
+  "TRANSDERMAL",
+  "RECTAL",
+] as const;
 export const PRESCRIPTION_FREQUENCIES = {
   STAT: {
     slots: 1,
@@ -145,42 +158,42 @@ export const PRESCRIPTION_FREQUENCIES = {
     slots: 1,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
-        moment(administration.administered_date).isSame(moment(), "day")
+        dayjs(administration.administered_date).isSame(dayjs(), "day")
       ),
   },
   HS: {
     slots: 1,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
-        moment(administration.administered_date).isSame(moment(), "day")
+        dayjs(administration.administered_date).isSame(dayjs(), "day")
       ),
   },
   BD: {
     slots: 2,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
-        moment(administration.administered_date).isSame(moment(), "day")
+        dayjs(administration.administered_date).isSame(dayjs(), "day")
       ),
   },
   TID: {
     slots: 3,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
-        moment(administration.administered_date).isSame(moment(), "day")
+        dayjs(administration.administered_date).isSame(dayjs(), "day")
       ),
   },
   QID: {
     slots: 4,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
-        moment(administration.administered_date).isSame(moment(), "day")
+        dayjs(administration.administered_date).isSame(dayjs(), "day")
       ),
   },
   Q4H: {
     slots: 6,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
-        moment(administration.administered_date).isSame(moment(), "day")
+        dayjs(administration.administered_date).isSame(dayjs(), "day")
       ),
   },
   QOD: {
@@ -191,9 +204,9 @@ export const PRESCRIPTION_FREQUENCIES = {
         return [];
       }
       if (
-        moment(lastAdministration.administered_date).isSame(moment(), "day") ||
-        moment(lastAdministration.administered_date).isSame(
-          moment().subtract(1, "day"),
+        dayjs(lastAdministration.administered_date).isSame(dayjs(), "day") ||
+        dayjs(lastAdministration.administered_date).isSame(
+          dayjs().subtract(1, "day"),
           "day"
         )
       ) {
@@ -207,7 +220,7 @@ export const PRESCRIPTION_FREQUENCIES = {
     slots: 1,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
-        moment(administration.administered_date).isSame(moment(), "week")
+        dayjs(administration.administered_date).isSame(dayjs(), "week")
       ),
   },
 };

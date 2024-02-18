@@ -1,6 +1,6 @@
-export type roundsType = NormalRound | ICURound | VentilatorRound
+type roundsType = NormalRound | ICURound | VentilatorRound
 
-export type t = {
+type t = {
   createdAt: Js.Date.t,
   admittedTo: string,
   createdByTelemedicine: bool,

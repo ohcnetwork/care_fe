@@ -3,6 +3,14 @@ import { defineConfig } from "vite";
 import { promises as fs } from "fs";
 import react from "@vitejs/plugin-react-swc";
 
+const cdnUrls =
+  process.env.CARE_CDN_URL ??
+  [
+    "https://egov-s3-facility-10bedicu.s3.amazonaws.com",
+    "https://egov-s3-patient-data-10bedicu.s3.amazonaws.com",
+    "http://localhost:4566",
+  ].join(" ");
+
 export default defineConfig({
   envPrefix: "REACT_",
   plugins: [
@@ -11,7 +19,11 @@ export default defineConfig({
       strategies: "injectManifest",
       srcDir: "src",
       filename: "service-worker.ts",
-      injectRegister: null,
+      // injectRegister: null,
+      devOptions: {
+        enabled: true,
+        type: "module",
+      },
       injectManifest: {
         maximumFileSizeToCacheInBytes: 7000000,
       },
@@ -50,6 +62,7 @@ export default defineConfig({
   ],
   build: {
     outDir: "build",
+    assetsDir: "bundle",
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -80,16 +93,24 @@ export default defineConfig({
     port: 4000,
     proxy: {
       "/api": {
-        target: "https://careapi.ohc.network",
+        target: process.env.CARE_API ?? "https://careapi.ohc.network",
         changeOrigin: true,
       },
     },
   },
   preview: {
+    headers: {
+      "Content-Security-Policy-Report-Only": `default-src 'self';\
+      script-src 'self' blob: 'nonce-f51b9742' https://plausible.10bedicu.in;\
+      style-src 'self' 'unsafe-inline';\
+      connect-src 'self' https://plausible.10bedicu.in;\
+      img-src 'self' https://cdn.coronasafe.network ${cdnUrls};\
+      object-src 'self' ${cdnUrls};`,
+    },
     port: 4000,
     proxy: {
       "/api": {
-        target: "https://careapi.ohc.network",
+        target: process.env.CARE_API ?? "https://careapi.ohc.network",
         changeOrigin: true,
       },
     },

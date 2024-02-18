@@ -1,44 +1,42 @@
-import React, { useState } from "react";
-import { useDispatch } from "react-redux";
-import { getNotificationData } from "../../Redux/actions";
+import { DetailRoute } from "../../Routers/types";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import { NotificationData } from "./models";
 
-export default function ShowPushNotification({ external_id }: any) {
-  const [isLoading, setIsLoading] = useState(true);
-  const dispatch: any = useDispatch();
+export default function ShowPushNotification({ id }: DetailRoute) {
+  useQuery(routes.getNotificationData, {
+    pathParams: { id },
+    onResponse(res) {
+      if (res.data) {
+        window.location.href = resultUrl(res.data);
+      }
+    },
+  });
 
-  let resultUrl = async () => {
-    setIsLoading(true);
-    console.log("ID:", external_id.id);
-    const res = await dispatch(getNotificationData({ id: external_id.id }));
-    const data = res.data.caused_objects;
-    switch (res.data.event) {
+  const resultUrl = ({ caused_objects, event }: NotificationData) => {
+    switch (event) {
       case "PATIENT_CREATED":
-        return `/facility/${data.facility}/patient/${data.patient}`;
+        return `/facility/${caused_objects?.facility}/patient/${caused_objects?.patient}`;
       case "PATIENT_UPDATED":
-        return `/facility/${data.facility}/patient/${data.patient}`;
+        return `/facility/${caused_objects?.facility}/patient/${caused_objects?.patient}`;
       case "PATIENT_CONSULTATION_CREATED":
-        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}`;
+        return `/facility/${caused_objects?.facility}/patient/${caused_objects?.patient}/consultation/${caused_objects?.consultation}`;
       case "PATIENT_CONSULTATION_UPDATED":
-        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}`;
+        return `/facility/${caused_objects?.facility}/patient/${caused_objects?.patient}/consultation/${caused_objects?.consultation}`;
       case "PATIENT_CONSULTATION_UPDATE_CREATED":
-        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/daily-rounds/${data.daily_round}`;
+        return `/facility/${caused_objects?.facility}/patient/${caused_objects?.patient}/consultation/${caused_objects?.consultation}/daily-rounds/${caused_objects?.daily_round}`;
       case "PATIENT_CONSULTATION_UPDATE_UPDATED":
-        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/daily-rounds/${data.daily_round}`;
+        return `/facility/${caused_objects?.facility}/patient/${caused_objects?.patient}/consultation/${caused_objects?.consultation}/daily-rounds/${caused_objects?.daily_round}`;
       case "INVESTIGATION_SESSION_CREATED":
-        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/investigation/${data.session}`;
+        return `/facility/${caused_objects?.facility}/patient/${caused_objects?.patient}/consultation/${caused_objects?.consultation}/investigation/${caused_objects?.session}`;
+      case "PATIENT_NOTE_ADDED":
+        return `/facility/${caused_objects.facility}/patient/${caused_objects.patient}/notes`;
       case "MESSAGE":
-        return `/notice_board/`;
+        return "/notice_board/";
       default:
         return "#";
     }
   };
-
-  resultUrl()
-    .then((url) => {
-      setIsLoading(false);
-      window.location.href = url;
-    })
-    .catch((err) => console.log(err));
 
   return <></>;
 }

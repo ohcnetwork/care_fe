@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import AutocompleteFormField from "./Autocomplete";
 import { FormFieldBaseProps } from "./Utils";
-import { classNames } from "../../../Utils/utils";
+import { classNames, compareBy } from "../../../Utils/utils";
 import ButtonV2 from "../../Common/components/ButtonV2";
 
 interface Threshold {
@@ -23,8 +23,7 @@ type Props = FormFieldBaseProps<number> & {
 
 export default function RangeAutocompleteFormField(props: Props) {
   const options = useMemo(() => {
-    const sortedThresholds =
-      props.thresholds?.sort((a, b) => a.value - b.value) || [];
+    const sortedThresholds = props.thresholds?.sort(compareBy("value")) || [];
 
     const getThreshold = (value: number) => {
       const threshold = sortedThresholds.findLast(
@@ -52,7 +51,7 @@ export default function RangeAutocompleteFormField(props: Props) {
       optionIcon={({ threshold }) => (
         <div
           className={classNames(
-            "flex group-hover/option:text-white text-xs space-x-2",
+            "flex space-x-2 text-xs group-hover/option:text-white",
             threshold?.className
           )}
         >

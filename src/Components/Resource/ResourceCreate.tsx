@@ -1,18 +1,15 @@
-import { useReducer, useState, useEffect } from "react";
-import loadable from "@loadable/component";
+import { useReducer, useState, lazy } from "react";
+
 import { FacilitySelect } from "../Common/FacilitySelect";
 import * as Notification from "../../Utils/Notifications.js";
-import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
 import {
   OptionsType,
   RESOURCE_CATEGORY_CHOICES,
   RESOURCE_SUBCATEGORIES,
 } from "../../Common/constants";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { parsePhoneNumber } from "../../Utils/utils";
 import { phonePreg } from "../../Common/validation";
-
-import { createResource, getAnyFacility } from "../../Redux/actions";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
@@ -25,8 +22,12 @@ import RadioFormField from "../Form/FormFields/RadioFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import Card from "../../CAREUI/display/Card";
 import Page from "../Common/components/Page";
+import { PhoneNumberValidator } from "../Form/FieldValidators";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 interface resourceProps {
   facilityId: number;
@@ -41,7 +42,7 @@ const initForm: any = {
   title: "",
   reason: "",
   refering_facility_contact_name: "",
-  refering_facility_contact_number: "",
+  refering_facility_contact_number: "+91",
   required_quantity: null,
 };
 
@@ -86,10 +87,7 @@ export default function ResourceCreate(props: resourceProps) {
   const { goBack } = useAppHistory();
   const { facilityId } = props;
   const { t } = useTranslation();
-
-  const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const [facilityName, setFacilityName] = useState("");
 
   const resourceFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
@@ -112,18 +110,10 @@ export default function ResourceCreate(props: resourceProps) {
 
   const [state, dispatch] = useReducer(resourceFormReducer, initialState);
 
-  useEffect(() => {
-    async function fetchFacilityName() {
-      if (facilityId) {
-        const res = await dispatchAction(getAnyFacility(facilityId));
-
-        setFacilityName(res?.data?.name || "");
-      } else {
-        setFacilityName("");
-      }
-    }
-    fetchFacilityName();
-  }, [dispatchAction, facilityId]);
+  const { data: facilityData } = useQuery(routes.getAnyFacility, {
+    prefetch: facilityId !== undefined,
+    pathParams: { id: String(facilityId) },
+  });
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -131,13 +121,14 @@ export default function ResourceCreate(props: resourceProps) {
     Object.keys(requiredFields).forEach((field) => {
       switch (field) {
         case "refering_facility_contact_number": {
-          const phoneNumber = parsePhoneNumberFromString(state.form[field]);
+          const phoneNumber = parsePhoneNumber(state.form[field]);
           if (!state.form[field]) {
             errors[field] = requiredFields[field].errorText;
             isInvalidForm = true;
           } else if (
-            !phoneNumber?.isPossible() ||
-            !phonePreg(String(phoneNumber?.number))
+            !phoneNumber ||
+            !PhoneNumberValidator()(phoneNumber) === undefined ||
+            !phonePreg(String(phoneNumber))
           ) {
             errors[field] = requiredFields[field].invalidText;
             isInvalidForm = true;
@@ -182,11 +173,11 @@ export default function ResourceCreate(props: resourceProps) {
     if (validForm) {
       setIsLoading(true);
 
-      const data = {
+      const resourceData = {
         status: "PENDING",
         category: state.form.category,
         sub_category: state.form.sub_category,
-        origin_facility: props.facilityId,
+        origin_facility: String(props.facilityId),
         approving_facility: (state.form.approving_facility || {}).id,
         assigned_facility: (state.form.assigned_facility || {}).id,
         emergency: state.form.emergency === "true",
@@ -194,22 +185,24 @@ export default function ResourceCreate(props: resourceProps) {
         reason: state.form.reason,
         refering_facility_contact_name:
           state.form.refering_facility_contact_name,
-        refering_facility_contact_number: parsePhoneNumberFromString(
+        refering_facility_contact_number: parsePhoneNumber(
           state.form.refering_facility_contact_number
-        )?.format("E.164"),
+        ),
         requested_quantity: state.form.requested_quantity || 0,
       };
 
-      const res = await dispatchAction(createResource(data));
+      const { res, data } = await request(routes.createResource, {
+        body: resourceData,
+      });
       setIsLoading(false);
 
-      if (res && res.data && (res.status == 201 || res.status == 200)) {
+      if (res?.ok && data) {
         await dispatch({ type: "set_form", form: initForm });
         Notification.Success({
           msg: "Resource request created successfully",
         });
 
-        navigate(`/resource/${res.data.id}`);
+        navigate(`/resource/${data.id}`);
       }
     }
   };
@@ -222,12 +215,12 @@ export default function ResourceCreate(props: resourceProps) {
     <Page
       title={t("create_resource_request")}
       crumbsReplacements={{
-        [facilityId]: { name: facilityName },
+        [facilityId]: { name: facilityData?.name || "" },
         resource: { style: "pointer-events-none" },
       }}
       backUrl={`/facility/${facilityId}`}
     >
-      <Card className="mt-4 grid gap-4 grid-cols-1 md:grid-cols-2">
+      <Card className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
         <TextFormField
           required
           label={t("contact_person")}
@@ -240,10 +233,10 @@ export default function ResourceCreate(props: resourceProps) {
           label={t("contact_phone")}
           name="refering_facility_contact_number"
           required
-          disableCountry
           value={state.form.refering_facility_contact_number}
           onChange={handleFormFieldChange}
           error={state.errors.refering_facility_contact_number}
+          types={["mobile", "landline"]}
         />
 
         <div>
@@ -321,7 +314,7 @@ export default function ResourceCreate(props: resourceProps) {
           />
         </div>
 
-        <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-end mt-4">
+        <div className="mt-4 flex flex-col justify-end gap-2 md:col-span-2 md:flex-row">
           <Cancel onClick={() => goBack()} />
           <Submit onClick={handleSubmit} />
         </div>

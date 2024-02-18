@@ -27,7 +27,7 @@ const ConfirmDialog = ({
   return (
     <DialogModal {...props}>
       {children}
-      <div className="mt-6 flex justify-end gap-2 w-full flex-col md:flex-row">
+      <div className="mt-6 flex w-full flex-col justify-end gap-2 md:flex-row">
         <Cancel onClick={props.onClose} label={cancelLabel} />
         <Submit onClick={onConfirm} variant={variant} disabled={disabled}>
           {action}

@@ -1,13 +1,13 @@
-import React from "react";
+import { ReactNode } from "react";
 
 function UserDetails(props: {
-  children: React.ReactNode;
+  children: ReactNode;
   title: string;
   id?: string;
 }) {
   return (
     <div className="mt-2" id={props.id}>
-      <div className="text-gray-900 leading-relaxed font-light">
+      <div className="font-light leading-relaxed text-gray-900">
         {props.title}:
       </div>
       {props.children}

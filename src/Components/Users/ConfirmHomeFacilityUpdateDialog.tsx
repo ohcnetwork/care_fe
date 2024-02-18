@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import ConfirmDialog from "../Common/ConfirmDialog";
 
 interface ConfirmDialogProps {
@@ -34,7 +34,7 @@ const ConfirmHomeFacilityUpdateDialog = (props: ConfirmDialogProps) => {
       disabled={disable}
       variant="danger"
     >
-      <div className="flex text-gray-800 leading-relaxed">
+      <div className="flex leading-relaxed text-gray-800">
         <div>
           Are you sure you want to replace{" "}
           <strong>{previousFacilityName}</strong> with{" "}

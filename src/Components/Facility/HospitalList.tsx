@@ -1,31 +1,28 @@
-import { navigate } from "raviger";
-import { useCallback, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { FACILITY_TYPES } from "../../Common/constants";
 import {
-  getPermittedFacilities,
   downloadFacility,
   downloadFacilityCapacity,
   downloadFacilityDoctors,
   downloadFacilityTriage,
-  getState,
-  getDistrict,
-  getLocalBody,
 } from "../../Redux/actions";
-import loadable from "@loadable/component";
-import { FacilityModel } from "./models";
-import FacilityFilter from "./FacilityFilter";
-import { useTranslation } from "react-i18next";
-import SearchInput from "../Form/SearchInput";
-import useFilters from "../../Common/hooks/useFilters";
-import { FacilityCard } from "./FacilityCard";
-import ExportMenu from "../Common/Export";
-import CountBlock from "../../CAREUI/display/Count";
-import Page from "../Common/components/Page";
+import { lazy, useEffect } from "react";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import CountBlock from "../../CAREUI/display/Count";
+import ExportMenu from "../Common/Export";
+import { FACILITY_TYPES } from "../../Common/constants";
+import { FacilityCard } from "./FacilityCard";
+import FacilityFilter from "./FacilityFilter";
+import { FacilityModel } from "./models";
+import Page from "../Common/components/Page";
+import SearchInput from "../Form/SearchInput";
 
-const Loading = loadable(() => import("../Common/Loading"));
+import { navigate } from "raviger";
+import useFilters from "../../Common/hooks/useFilters";
+import { useTranslation } from "react-i18next";
+import useAuthUser from "../../Common/hooks/useAuthUser";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+
+const Loading = lazy(() => import("../Common/Loading"));
 
 export const HospitalList = () => {
   const {
@@ -37,24 +34,26 @@ export const HospitalList = () => {
     resultsPerPage,
   } = useFilters({
     limit: 14,
+    cacheBlacklist: ["search"],
   });
-  const dispatchAction: any = useDispatch();
-  const [data, setData] = useState<Array<FacilityModel>>([]);
+
+  useEffect(() => {
+    if (!qParams.state && (qParams.district || qParams.local_body)) {
+      advancedFilter.removeFilters(["district", "local_body"]);
+    }
+    if (!qParams.district && qParams.local_body) {
+      advancedFilter.removeFilters(["local_body"]);
+    }
+  }, [advancedFilter, qParams]);
+
   let manageFacilities: any = null;
-  const [isLoading, setIsLoading] = useState(false);
-  const [totalCount, setTotalCount] = useState(0);
-  const [stateName, setStateName] = useState("");
-  const [districtName, setDistrictName] = useState("");
-  const [localbodyName, setLocalbodyName] = useState("");
-  const rootState: any = useSelector((rootState) => rootState);
-  const { currentUser } = rootState;
-  const userType = currentUser.data.user_type;
+  const { user_type } = useAuthUser();
   const { t } = useTranslation();
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const params = {
+  const { data: permittedData, loading: isLoading } = useQuery(
+    routes.getPermittedFacilities,
+    {
+      query: {
         limit: resultsPerPage,
         page: qParams.page || 1,
         offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
@@ -64,92 +63,30 @@ export const HospitalList = () => {
         local_body: qParams.local_body,
         facility_type: qParams.facility_type,
         kasp_empanelled: qParams.kasp_empanelled,
-      };
-
-      const res = await dispatchAction(getPermittedFacilities(params));
-      if (!status.aborted) {
-        if (res && res.data) {
-          setData(res.data.results);
-          setTotalCount(res.data.count);
-        }
-        setIsLoading(false);
-      }
-    },
-    [
-      qParams.page,
-      qParams.search,
-      qParams.state,
-      qParams.district,
-      qParams.local_body,
-      qParams.facility_type,
-      qParams.kasp_empanelled,
-      dispatchAction,
-    ]
+      },
+    }
   );
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
+  const { data: stateData } = useQuery(routes.getState, {
+    pathParams: {
+      id: qParams.state,
     },
-    [fetchData]
-  );
+    prefetch: qParams.state !== undefined,
+  });
 
-  const fetchStateName = useCallback(
-    async (status: statusType) => {
-      const res =
-        Number(qParams.state) &&
-        (await dispatchAction(getState(qParams.state)));
-      if (!status.aborted) {
-        setStateName(res?.data?.name);
-      }
+  const { data: districtData } = useQuery(routes.getDistrict, {
+    pathParams: {
+      id: qParams.district,
     },
-    [dispatchAction, qParams.state]
-  );
+    prefetch: qParams.district !== undefined,
+  });
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchStateName(status);
+  const { data: localBodyData } = useQuery(routes.getLocalBody, {
+    pathParams: {
+      id: qParams.local_body,
     },
-    [fetchStateName]
-  );
-
-  const fetchDistrictName = useCallback(
-    async (status: statusType) => {
-      const res =
-        Number(qParams.district) &&
-        (await dispatchAction(getDistrict(qParams.district)));
-      if (!status.aborted) {
-        setDistrictName(res?.data?.name);
-      }
-    },
-    [dispatchAction, qParams.district]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchDistrictName(status);
-    },
-    [fetchDistrictName]
-  );
-
-  const fetchLocalbodyName = useCallback(
-    async (status: statusType) => {
-      const res =
-        Number(qParams.local_body) &&
-        (await dispatchAction(getLocalBody({ id: qParams.local_body })));
-      if (!status.aborted) {
-        setLocalbodyName(res?.data?.name);
-      }
-    },
-    [dispatchAction, qParams.local_body]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchLocalbodyName(status);
-    },
-    [fetchLocalbodyName]
-  );
+    prefetch: qParams.local_body !== undefined,
+  });
 
   const findFacilityTypeById = (id: number) => {
     const facility_type = FACILITY_TYPES.find((type) => type.id == id);
@@ -167,40 +104,44 @@ export const HospitalList = () => {
     );
   };
 
-  let facilityList: any[] = [];
-  if (data && data.length) {
-    facilityList = data.map((facility: any) => (
-      <FacilityCard facility={facility} userType={userType} />
+  let facilityList: JSX.Element[] = [];
+  if (permittedData && permittedData.results.length) {
+    facilityList = permittedData.results.map((facility: FacilityModel) => (
+      <FacilityCard
+        key={facility.id!}
+        facility={facility}
+        userType={user_type}
+      />
     ));
   }
 
-  if (isLoading || !data) {
+  if (isLoading || !permittedData) {
     manageFacilities = <Loading />;
-  } else if (data && data.length) {
+  } else if (permittedData.results && permittedData.results.length) {
     manageFacilities = (
       <>
-        <div className="grid lg:grid-cols-2 md:grid-cols-1 gap-4">
+        <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
           {facilityList}
         </div>
-        <Pagination totalCount={totalCount} />
+        <Pagination totalCount={permittedData.count} />
       </>
     );
-  } else if (data && data.length === 0) {
+  } else if (permittedData.results && permittedData.results.length === 0) {
     manageFacilities = hasFiltersApplied(qParams) ? (
-      <div className="w-full bg-white rounded-lg p-3">
-        <div className="text-2xl mt-4 text-gray-600  font-bold flex justify-center w-full">
+      <div className="w-full rounded-lg bg-white p-3">
+        <div className="mt-4 flex w-full  justify-center text-2xl font-bold text-gray-600">
           {t("no_facilities")}
         </div>
       </div>
     ) : (
       <div>
         <div
-          className="p-16 mt-4 bg-white shadow rounded-md border border-grey-500 whitespace-nowrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
+          className="border-grey-500 mt-4 cursor-pointer whitespace-nowrap rounded-md border bg-white p-16 text-center text-sm font-semibold shadow hover:bg-gray-300"
           onClick={() => navigate("/facility/create")}
         >
           <i className="fas fa-plus text-3xl"></i>
           <div className="mt-2 text-xl">{t("create_facility")}</div>
-          <div className="text-xs mt-1 text-red-700">
+          <div className="mt-1 text-xs text-red-700">
             {t("no_duplicate_facility")}
           </div>
         </div>
@@ -240,14 +181,15 @@ export const HospitalList = () => {
         />
       }
     >
-      <div className="lg:flex gap-2 mt-4">
+      <div className="mt-4 gap-2 lg:flex">
         <CountBlock
           text="Total Facilities"
-          count={totalCount}
+          count={permittedData ? permittedData.count : 0}
           loading={isLoading}
-          icon={"hospital"}
+          icon="l-hospital"
+          className="flex-1"
         />
-        <div className="flex my-4 gap-2 flex-col sm:flex-row justify-between flex-grow">
+        <div className="my-4 flex grow flex-col justify-between gap-2 sm:flex-row">
           <SearchInput
             name="search"
             value={qParams.search}
@@ -262,9 +204,21 @@ export const HospitalList = () => {
       <FilterBadges
         badges={({ badge, value, kasp }) => [
           badge("Facility/District Name", "search"),
-          value("State", "state", stateName),
-          value("District", "district", districtName),
-          value("Local Body", "local_body", localbodyName),
+          value(
+            "State",
+            "state",
+            qParams.state && stateData ? stateData.name : ""
+          ),
+          value(
+            "District",
+            "district",
+            qParams.district && districtData ? districtData.name : ""
+          ),
+          value(
+            "Local Body",
+            "local_body",
+            qParams.local_body && localBodyData ? localBodyData.name : ""
+          ),
           value(
             "Facility type",
             "facility_type",

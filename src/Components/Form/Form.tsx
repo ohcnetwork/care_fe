@@ -1,4 +1,4 @@
-import { isEmpty, omitBy } from "lodash";
+import { isEmpty, omitBy } from "lodash-es";
 import { useEffect, useMemo, useState } from "react";
 import { classNames } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
@@ -7,6 +7,7 @@ import { FormContextValue, createFormContext } from "./FormContext";
 import { FieldChangeEvent } from "./FormFields/Utils";
 import { FormDetails, FormErrors, FormState, formReducer } from "./Utils";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
+import * as Notification from "../../Utils/Notifications";
 
 type Props<T extends FormDetails> = {
   className?: string;
@@ -51,6 +52,10 @@ const Form = <T extends FormDetails>({
 
       if (Object.keys(errors).length) {
         dispatch({ type: "set_errors", errors });
+
+        if (errors.$all) {
+          Notification.Error({ msg: errors.$all });
+        }
         return;
       }
     }
@@ -71,8 +76,8 @@ const Form = <T extends FormDetails>({
     <form
       onSubmit={handleSubmit}
       className={classNames(
-        "bg-white rounded w-full mx-auto",
-        !props.noPadding && "px-8 md:px-16 py-5 md:py-11",
+        "mx-auto w-full rounded bg-white",
+        !props.noPadding && "px-8 py-5 md:px-16 md:py-11",
         props.className
       )}
       noValidate
@@ -109,7 +114,7 @@ const Form = <T extends FormDetails>({
             <div className="my-6">
               <Consumer>{props.children}</Consumer>
             </div>
-            <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end">
+            <div className="flex flex-col-reverse justify-end gap-3 sm:flex-row">
               <Cancel
                 onClick={props.onCancel}
                 label={props.cancelLabel ?? "Cancel"}

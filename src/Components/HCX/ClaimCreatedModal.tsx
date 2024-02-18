@@ -23,7 +23,7 @@ export default function ClaimCreatedModal({ claim, ...props }: Props) {
   const handleSubmit = async () => {
     setIsMakingClaim(true);
 
-    const res = await dispatch(HCXActions.makeClaim(claim.id!));
+    const res = await dispatch(HCXActions.makeClaim(claim.id ?? ""));
     if (res.data) {
       Notification.Success({ msg: `${use} requested` });
       props.onClose();

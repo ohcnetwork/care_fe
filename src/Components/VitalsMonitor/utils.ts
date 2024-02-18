@@ -1,3 +1,4 @@
+import { AssetClass, AssetData } from "../Assets/AssetTypes";
 import { ChannelOptions, VitalsWaveformBase } from "./types";
 
 /**
@@ -49,4 +50,43 @@ export const getChannel = (observation: VitalsWaveformBase): ChannelOptions => {
     lowLimit: observation["data-low-limit"] ?? 0,
     highLimit: observation["data-high-limit"] ?? 0,
   };
+};
+
+const DEFAULT_RATIO = 13 / 11;
+const DEFAULT_DURATION = 7;
+const DEFAULT_SCALE = 38 * 11;
+
+/**
+ * Returns the size of the canvas for the vitals monitor.
+ * @param aspectRatio The aspect ratio of the canvas. Defaults to 13:11.
+ * @param scale The scale of the canvas. Defaults to 38 * 11.
+ * @returns The computed size of the canvas.
+ */
+export const getVitalsCanvasSizeAndDuration = (
+  ratio = DEFAULT_RATIO,
+  scale = DEFAULT_SCALE
+) => {
+  return {
+    size: {
+      width: scale * ratio,
+      height: scale,
+    },
+    duration: DEFAULT_DURATION * (ratio / DEFAULT_RATIO),
+  };
+};
+
+export const getVitalsMonitorSocketUrl = (asset: AssetData) => {
+  if (
+    asset.asset_class !== AssetClass.HL7MONITOR &&
+    asset.asset_class !== AssetClass.VENTILATOR
+  ) {
+    throw "getVitalsMonitorSocketUrl can be invoked only for HL7MONITOR or VENTILATOR assets";
+  }
+
+  const middleware = asset.resolved_middleware?.hostname;
+  const ipAddress = asset.meta?.local_ip_address;
+
+  if (middleware && ipAddress) {
+    return `wss://${middleware}/observations/${ipAddress}`;
+  }
 };

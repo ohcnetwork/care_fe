@@ -1,9 +1,7 @@
 import { navigate } from "raviger";
-import loadable from "@loadable/component";
-import { useReducer, useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+
+import { useReducer, useState, lazy } from "react";
 import { SAMPLE_TYPE_CHOICES, ICMR_CATEGORY } from "../../Common/constants";
-import { createSampleTest, getPatient } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { SampleTestModel } from "./models";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
@@ -16,7 +14,10 @@ import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import Page from "../Common/components/Page";
 import { FacilitySelect } from "../Common/FacilitySelect";
-const Loading = loadable(() => import("../Common/Loading"));
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
+const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm: SampleTestModel = {
   isFastTrack: false,
@@ -68,30 +69,18 @@ const sampleTestFormReducer = (state = initialState, action: any) => {
 
 export const SampleTest = ({ facilityId, patientId }: any) => {
   const { goBack } = useAppHistory();
-  const dispatchAction: any = useDispatch();
   const [state, dispatch] = useReducer(sampleTestFormReducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
-  const [facilityName, setFacilityName] = useState("");
-  const [patientName, setPatientName] = useState("");
 
   const headerText = "Request Sample";
   const buttonText = "Confirm your request to send sample for testing";
 
-  useEffect(() => {
-    async function fetchPatientName() {
-      if (patientId) {
-        const res = await dispatchAction(getPatient({ id: patientId }));
-        if (res.data) {
-          setPatientName(res.data.name);
-          setFacilityName(res.data.facility_object.name);
-        }
-      } else {
-        setPatientName("");
-        setFacilityName("");
-      }
-    }
-    fetchPatientName();
-  }, [dispatchAction, patientId]);
+  const { data } = useQuery(routes.getPatient, {
+    pathParams: {
+      id: patientId,
+    },
+    prefetch: !!patientId,
+  });
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -170,15 +159,23 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
             ? state.form.sample_type_other
             : undefined,
       };
-      const res = await dispatchAction(createSampleTest(data, { patientId }));
-      setIsLoading(false);
-      if (res && res.data) {
-        dispatch({ type: "set_form", form: initForm });
-        Notification.Success({
-          msg: "Sample test created successfully",
-        });
-        navigate(`/facility/${facilityId}/patient/${patientId}`);
-      }
+
+      await request(routes.createSampleTest, {
+        pathParams: {
+          patientId,
+        },
+        body: data,
+        onResponse: ({ res, data }) => {
+          setIsLoading(false);
+          if (res?.ok && data) {
+            dispatch({ type: "set_form", form: initForm });
+            Notification.Success({
+              msg: "Sample test created successfully",
+            });
+            navigate(`/facility/${facilityId}/patient/${patientId}`);
+          }
+        },
+      });
     }
   };
 
@@ -201,14 +198,14 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
     <Page
       title={headerText}
       crumbsReplacements={{
-        [facilityId]: { name: facilityName },
-        [patientId]: { name: patientName },
+        [facilityId]: { name: data?.facility_object?.name || "" },
+        [patientId]: { name: data?.name || "" },
       }}
       backUrl={`/facility/${facilityId}/patient/${patientId}`}
     >
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded w-full mx-auto px-8 md:px-16 py-5 md:py-11 max-w-5xl"
+        className="mx-auto w-full max-w-5xl rounded bg-white px-8 py-5 md:px-16 md:py-11"
       >
         <SelectFormField
           {...field("sample_type", "Sample Test Type")}
@@ -231,7 +228,7 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
           optionLabel={(option) => option}
           optionValue={(option) => option}
         />
-        <div className="flex flex-col gap-1 mb-6">
+        <div className="mb-6 flex flex-col gap-1">
           <p className="font-medium">
             Refer below to know more about ICMR Categories
           </p>
@@ -256,7 +253,7 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
         </div>
 
         <TextFormField {...field("icmr_label", "ICMR Label")} required />
-        <div className="w-full flex-none mb-6">
+        <div className="mb-6 w-full flex-none">
           <FieldLabel>Testing Facility</FieldLabel>
           <FacilitySelect
             name="testing_facility"
@@ -315,7 +312,7 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
         <CheckBoxFormField
           {...field("is_unusual_course", "Is unusual course?")}
         />
-        <div className="flex flex-col lg:flex-row gap-2 justify-end mt-4">
+        <div className="mt-4 flex flex-col justify-end gap-2 lg:flex-row">
           <Cancel onClick={() => goBack()} />
           <Submit onClick={handleSubmit} label={buttonText} />
         </div>

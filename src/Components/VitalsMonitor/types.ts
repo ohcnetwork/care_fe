@@ -1,3 +1,6 @@
+import { PatientAssetBed } from "../Assets/AssetTypes";
+import { getVitalsCanvasSizeAndDuration } from "./utils";
+
 export interface VitalsDataBase {
   device_id: string;
   "date-time": string;
@@ -5,7 +8,7 @@ export interface VitalsDataBase {
   "patient-name": string;
 }
 
-export interface VitalsValueBase {
+export interface VitalsValueBase extends VitalsDataBase {
   value: number;
   unit: string;
   interpretation: string;
@@ -40,4 +43,11 @@ export interface ChannelOptions {
    * No. of data points expected to be received per second.
    */
   samplingRate: number;
+}
+
+export interface IVitalsComponentProps {
+  patientCurrentBedAssignmentDate?: string;
+  patientAssetBed?: PatientAssetBed;
+  socketUrl: string;
+  config?: ReturnType<typeof getVitalsCanvasSizeAndDuration>;
 }
