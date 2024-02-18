@@ -425,7 +425,7 @@ export default function PatientInfoCard(props: {
                   : null}
                 {(consultation?.treating_physician_object ||
                   consultation?.deprecated_verified_by) && (
-                  <div className="text-sm">
+                  <div className="text-sm" id="treating-physician">
                     <span className="font-semibold leading-relaxed">
                       Treating Physician:{" "}
                     </span>

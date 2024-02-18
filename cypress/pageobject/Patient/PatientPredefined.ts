@@ -17,7 +17,7 @@ class PatientPredefined {
     patientPage.typePatientPhoneNumber(phone_number);
     patientPage.typePatientEmergencyNumber(emergency_phone_number);
     patientPage.typePatientDateOfBirth("01012001");
-    patientPage.typePatientName("Patient With No Consultation");
+    patientPage.typePatientName("Patient With Predefined Data");
     patientPage.selectPatientGender("Male");
     patientPage.typePatientAddress("Test Patient Address");
     facilityPage.fillPincode("682001");

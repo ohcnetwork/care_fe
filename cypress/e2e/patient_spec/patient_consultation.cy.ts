@@ -25,6 +25,64 @@ describe("Patient Consultation in multiple combination", () => {
     cy.awaitUrl("/patients");
   });
 
+  it("Internal Transfer within facility Patient with Domicilary Care", () => {
+    // Asymptomatic
+    // Abnormal category
+    // No ICD-11 error message then icd-11 add
+    // add investigation
+    // add review after and add action
+    // add telemedicine
+  });
+
+  it("Referred From another Facility Patient with OP consultation", () => {
+    patientPage.createPatient();
+    patientPage.selectFacility("Dummy Facility 40");
+    patientPredefined.createPatient();
+    patientPage.patientformvisibility();
+    patientPage.clickCreatePatient();
+    patientPage.verifyPatientIsCreated();
+    // referred from another facility patient
+    patientConsultationPage.selectConsultationStatus(
+      "Referred from another facility"
+    );
+    // verify the free text in referring facility name
+    patientConsultationPage.typeReferringFacility("Life Care Hospital");
+    // Vomiting and Nausea symptoms
+    patientConsultationPage.selectSymptoms(["VOMITING", "SORE THROAT"]);
+    patientConsultationPage.selectSymptomsDate("01012024");
+    // Stable category
+    patientConsultationPage.selectPatientCategory("Stable");
+    // OP Consultation
+    patientConsultationPage.selectPatientSuggestion("OP Consultation");
+    // one ICD-11 and no principal
+    patientConsultationPage.selectPatientDiagnosis(
+      "1A04",
+      "add-icd11-diagnosis-as-confirmed"
+    );
+    // no investigation
+    patientConsultationPage.fillConsultationFieldById(
+      "consultation_notes",
+      "Patient General Instructions"
+    );
+    // no review after and no action
+    patientConsultationPage.fillTreatingPhysican("Dev Doctor");
+    patientConsultationPage.submitConsultation();
+    cy.get(".pnotify-pre-line").should(
+      "contain.text",
+      "Patient discharged successfully"
+    );
+    // verify the Discharge Reason, Diagnosis, treatment physican
+    patientConsultationPage.verifyTextInConsultation(
+      "#consultation-buttons",
+      "OP file closed"
+    );
+    patientConsultationPage.verifyTextInConsultation(
+      "#treating-physician",
+      "Dev Doctor"
+    );
+    patientConsultationPage.verifyTextInConsultation("#diagnoses-view", "1A04");
+  });
+
   it("OP Patient with Refer to another hospital consultation", () => {
     patientPage.createPatient();
     patientPage.selectFacility("Dummy Facility 40");
@@ -86,23 +144,6 @@ describe("Patient Consultation in multiple combination", () => {
     shiftCreation.typeShiftReason("reason for shift");
     shiftCreation.submitShiftForm();
     facilityLocation.verifyNotification("Shift request created successfully");
-  });
-
-  it("Referred From another Facility Patient with OP consultation", () => {
-    // Vomiting and Nausea symptoms
-    // Stable category
-    // one ICD-11 and no principal
-    // no investigation
-    // no review after and no action
-  });
-
-  it("Internal Transfer within facility Patient with Domicilary Care", () => {
-    // Asymptomatic
-    // Abnormal category
-    // No ICD-11 error message then icd-11 add
-    // add investigation
-    // add review after and add action
-    // add telemedicine
   });
 
   it("OP Patient with Declare Death", () => {

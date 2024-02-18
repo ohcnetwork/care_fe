@@ -90,12 +90,26 @@ export class PatientConsultationPage {
       });
   }
 
+  verifyTextInConsultation(selector, text) {
+    cy.get(selector).scrollIntoView();
+    cy.get(selector).contains(text).should("be.visible");
+  }
+
   fillTreatingPhysican(doctor: string) {
     cy.get("#treating_physician")
       .click()
       .type(doctor)
       .then(() => {
         cy.get("[role='option']").contains(doctor).click();
+      });
+  }
+
+  typeReferringFacility(referringFacility: string) {
+    cy.get("#referred_from_facility")
+      .click()
+      .type(referringFacility)
+      .then(() => {
+        cy.get("[role='option']").contains(referringFacility).click();
       });
   }
 
