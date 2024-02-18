@@ -139,7 +139,10 @@ const InsuranceDetailEditCard = ({
             name="insurer"
             label="Insurer"
             placeholder="Eg. GICOFINDIA"
-            value={seletedInsurer}
+            value={{
+              name: seletedInsurer?.name || "",
+              code: seletedInsurer?.code || "",
+            }}
             onChange={({ value }) =>
               handleUpdates({
                 insurer_id: value.code,

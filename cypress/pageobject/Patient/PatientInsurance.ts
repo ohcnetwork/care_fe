@@ -27,12 +27,13 @@ class PatientInsurance {
         },
       ],
     }).as("getInsurer");
-    cy.get("#insurer")
+    cy.get("[name='insurer']")
+      .last()
       .click()
       .type(insurer)
       .then(() => {
         cy.wait("@getInsurer");
-        cy.get("[role='option']").first().click();
+        cy.get("[role='option']").contains(insurer).click();
       });
   }
 
