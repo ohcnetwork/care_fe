@@ -159,7 +159,7 @@ describe("Patient Creation with consultation", () => {
     );
 
     if (enable_hcx) {
-      patientInsurance.selectInsurer();
+      patientInsurance.selectInsurer("test");
     } else {
       patientInsurance.typePatientInsuranceDetail(
         patientOneFirstInsuranceId,
@@ -186,7 +186,7 @@ describe("Patient Creation with consultation", () => {
     );
 
     if (enable_hcx) {
-      patientInsurance.selectInsurer();
+      patientInsurance.selectInsurer("test");
     } else {
       patientInsurance.typePatientInsuranceDetail(
         patientOneSecondInsuranceId,
