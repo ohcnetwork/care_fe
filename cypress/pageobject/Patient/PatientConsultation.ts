@@ -244,7 +244,7 @@ export class PatientConsultationPage {
     cy.intercept("POST", "**/api/v1/consultation/*/discharge_patient/").as(
       "dischargePatient"
     );
-    cy.get("#submit").contains("Confirm Discharge").click();
+    cy.get("#submit > span").contains("Confirm Discharge").click();
     cy.wait("@dischargePatient").its("response.statusCode").should("eq", 200);
   }
 

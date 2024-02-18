@@ -136,7 +136,7 @@ const InsuranceDetailEditCard = ({
         {enable_hcx ? (
           <InsurerAutocomplete
             required
-            name="insurer_"
+            name="insurer"
             label="Insurer"
             placeholder="Eg. GICOFINDIA"
             value={seletedInsurer}

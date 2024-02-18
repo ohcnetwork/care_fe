@@ -9,6 +9,15 @@ class PatientInsurance {
     });
   }
 
+  selectInsurer(insurer = "") {
+    cy.get("#insurer")
+      .click()
+      .type(insurer)
+      .then(() => {
+        cy.get("[role='option']").first().click();
+      });
+  }
+
   clickPatientInsuranceViewDetail() {
     cy.get("#insurance-view-details").scrollIntoView();
     cy.get("#insurance-view-details").click();
@@ -18,13 +27,21 @@ class PatientInsurance {
     cy.get("[data-testid=add-insurance-button]").click();
   }
 
-  verifyPatientPolicyDetails(subscriberId, policyId, insurerId, insurerName) {
+  verifyPatientPolicyDetails(
+    subscriberId,
+    policyId,
+    insurerId,
+    insurerName,
+    hcx_enabled
+  ) {
     cy.get("[data-testid=patient-details]").then(($dashboard) => {
       cy.url().should("include", "/facility/");
       expect($dashboard).to.contain(subscriberId);
       expect($dashboard).to.contain(policyId);
-      expect($dashboard).to.contain(insurerId);
-      expect($dashboard).to.contain(insurerName);
+      if (hcx_enabled) {
+        expect($dashboard).to.contain(insurerId);
+        expect($dashboard).to.contain(insurerName);
+      }
     });
   }
 }

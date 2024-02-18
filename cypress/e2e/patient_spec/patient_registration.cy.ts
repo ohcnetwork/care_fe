@@ -10,6 +10,7 @@ import PatientTransfer from "../../pageobject/Patient/PatientTransfer";
 import PatientExternal from "../../pageobject/Patient/PatientExternal";
 import PatientInsurance from "../../pageobject/Patient/PatientInsurance";
 import PatientMedicalHistory from "../../pageobject/Patient/PatientMedicalHistory";
+import { enable_hcx } from "../../../public/config.json";
 
 const yearOfBirth = "2001";
 
@@ -156,16 +157,22 @@ describe("Patient Creation with consultation", () => {
       "policy_id",
       patientOneFirstPolicyId
     );
-    patientInsurance.typePatientInsuranceDetail(
-      patientOneFirstInsuranceId,
-      "insurer_id",
-      patientOneFirstInsurerId
-    );
-    patientInsurance.typePatientInsuranceDetail(
-      patientOneFirstInsuranceId,
-      "insurer_name",
-      patientOneFirstInsurerName
-    );
+
+    if (enable_hcx) {
+      patientInsurance.selectInsurer();
+    } else {
+      patientInsurance.typePatientInsuranceDetail(
+        patientOneFirstInsuranceId,
+        "insurer_id",
+        patientOneFirstInsurerId
+      );
+      patientInsurance.typePatientInsuranceDetail(
+        patientOneFirstInsuranceId,
+        "insurer_name",
+        patientOneFirstInsurerName
+      );
+    }
+
     patientInsurance.clickAddInsruanceDetails();
     patientInsurance.typePatientInsuranceDetail(
       patientOneSecondInsuranceId,
@@ -177,16 +184,22 @@ describe("Patient Creation with consultation", () => {
       "policy_id",
       patientOneSecondPolicyId
     );
-    patientInsurance.typePatientInsuranceDetail(
-      patientOneSecondInsuranceId,
-      "insurer_id",
-      patientOneSecondInsurerId
-    );
-    patientInsurance.typePatientInsuranceDetail(
-      patientOneSecondInsuranceId,
-      "insurer_name",
-      patientOneSecondInsurerName
-    );
+
+    if (enable_hcx) {
+      patientInsurance.selectInsurer();
+    } else {
+      patientInsurance.typePatientInsuranceDetail(
+        patientOneSecondInsuranceId,
+        "insurer_id",
+        patientOneSecondInsurerId
+      );
+      patientInsurance.typePatientInsuranceDetail(
+        patientOneSecondInsuranceId,
+        "insurer_name",
+        patientOneSecondInsurerName
+      );
+    }
+
     patientPage.clickUpdatePatient();
     cy.wait(3000);
     patientPage.verifyPatientUpdated();
@@ -213,7 +226,8 @@ describe("Patient Creation with consultation", () => {
       patientOneFirstSubscriberId,
       patientOneFirstPolicyId,
       patientOneFirstInsurerId,
-      patientOneFirstInsurerName
+      patientOneFirstInsurerName,
+      enable_hcx
     );
     patientInsurance.clickPatientInsuranceViewDetail();
     cy.wait(3000);
@@ -221,13 +235,15 @@ describe("Patient Creation with consultation", () => {
       patientOneFirstSubscriberId,
       patientOneFirstPolicyId,
       patientOneFirstInsurerId,
-      patientOneFirstInsurerName
+      patientOneFirstInsurerName,
+      enable_hcx
     );
     patientInsurance.verifyPatientPolicyDetails(
       patientOneSecondSubscriberId,
       patientOneSecondPolicyId,
       patientOneSecondInsurerId,
-      patientOneSecondInsurerName
+      patientOneSecondInsurerName,
+      enable_hcx
     );
   });
 
