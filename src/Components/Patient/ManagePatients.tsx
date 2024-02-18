@@ -750,7 +750,7 @@ export const PatientManager = () => {
               </p>
             </ButtonV2>
           </div>
-          <div className="flex w-full flex-col justify-end gap-2 lg:w-fit lg:flex-row lg:gap-3">
+          <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
             <SwitchTabs
               tab1="Live"
               tab2="Discharged"
