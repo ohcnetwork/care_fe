@@ -9,11 +9,29 @@ class PatientInsurance {
     });
   }
 
-  selectInsurer(insurer = "") {
+  selectInsurer(insurer: string) {
+    cy.intercept("GET", "/api/v1/hcx/payors/", {
+      statusCode: 200,
+      body: [
+        {
+          name: "test payor 2",
+          code: "testpayor2.swasthmock@swasth-hcx-staging",
+        },
+        {
+          name: "Swasth",
+          code: "saurabh.swasthapp@swasth-hcx-staging",
+        },
+        {
+          name: "Alliance ",
+          code: "hcxdemo.yopmail@swasth-hcx-staging",
+        },
+      ],
+    }).as("getInsurer");
     cy.get("#insurer")
       .click()
       .type(insurer)
       .then(() => {
+        cy.wait("@getInsurer");
         cy.get("[role='option']").first().click();
       });
   }
