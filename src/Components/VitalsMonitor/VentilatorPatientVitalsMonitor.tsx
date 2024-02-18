@@ -7,6 +7,7 @@ import { IVitalsComponentProps, VitalsValueBase } from "./types";
 import { classNames } from "../../Utils/utils";
 import WaveformLabels from "./WaveformLabels";
 import { VitalsNonWaveformContent } from "./HL7PatientVitalsMonitor";
+import VitalsMonitorAssetPopover from "./VitalsMonitorAssetPopover";
 
 export default function VentilatorPatientVitalsMonitor(
   props: IVitalsComponentProps
@@ -45,19 +46,6 @@ export default function VentilatorPatientVitalsMonitor(
             )}
           </div>
           <div className="flex gap-3">
-            {asset && (
-              <div className="flex items-center gap-2 text-sm">
-                <Link
-                  className="flex gap-2 text-gray-500"
-                  href={`/facility/${patient?.facility_object?.id}/assets/${asset?.id}`}
-                >
-                  <span className="flex items-center gap-1">
-                    <CareIcon className="care-l-lungs text-base" />
-                    {asset.name}
-                  </span>
-                </Link>
-              </div>
-            )}
             {bed && (
               <div className="flex items-center gap-2 text-sm">
                 <Link
@@ -75,6 +63,21 @@ export default function VentilatorPatientVitalsMonitor(
                 </Link>
               </div>
             )}
+            {/* {asset && (
+              <div className="flex items-center gap-2 text-sm">
+                <Link
+                  className="flex gap-2 text-gray-500"
+                  href={`/facility/${patient?.facility_object?.id}/assets/${asset?.id}`}
+                >
+                  <span className="flex items-center gap-1">
+                    <CareIcon className="care-l-lungs text-base" />
+                    {asset.name}
+                  </span>
+                </Link>
+              </div>
+            )} */}
+            {/* (i) button for asset details */}
+            <VitalsMonitorAssetPopover asset={asset} />
           </div>
         </div>
       )}

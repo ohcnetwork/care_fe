@@ -9,6 +9,7 @@ import { IVitalsComponentProps, VitalsValueBase } from "./types";
 import { triggerGoal } from "../../Integrations/Plausible";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import dayjs from "dayjs";
+import VitalsMonitorAssetPopover from "./VitalsMonitorAssetPopover";
 
 const minutesAgo = (timestamp: string) => {
   return `${dayjs().diff(dayjs(timestamp), "minute")}m ago`;
@@ -65,7 +66,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
             )}
           </div>
           <div className="flex flex-col items-center gap-2 text-xs md:flex-row md:text-sm">
-            {asset && (
+            {/* {asset && (
               <Link
                 className="flex items-center gap-1 text-gray-500"
                 href={`/facility/${patient?.facility_object?.id}/assets/${asset?.id}`}
@@ -73,7 +74,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
                 <CareIcon className="care-l-monitor-heart-rate text-sm md:text-base" />
                 <span>{asset.name}</span>
               </Link>
-            )}
+            )} */}
             {bed && (
               <Link
                 className="flex flex-col items-center gap-2 text-gray-500 md:flex-row"
@@ -89,6 +90,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
                 </span>
               </Link>
             )}
+            <VitalsMonitorAssetPopover asset={asset} />
           </div>
         </div>
       )}
