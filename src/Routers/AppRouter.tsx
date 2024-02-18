@@ -55,7 +55,7 @@ export default function AppRouter() {
   let routes = Routes;
 
   if (enable_hcx) {
-    routes = { ...routes, ...HCXRoutes };
+    routes = { ...HCXRoutes, ...routes };
   }
 
   if (

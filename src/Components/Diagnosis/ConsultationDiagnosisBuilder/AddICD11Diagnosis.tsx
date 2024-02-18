@@ -22,7 +22,7 @@ export default function AddICD11Diagnosis(props: AddICD11DiagnosisProps) {
   const { t } = useTranslation();
   const [selected, setSelected] = useState<ICD11DiagnosisModel>();
   const [adding, setAdding] = useState(false);
-  const hasError = !!props.disallowed.find((d) => d.id === selected?.id);
+  const hasError = !!props.disallowed.find((d) => d?.id === selected?.id);
 
   const { fetchOptions, isLoading, options } =
     useAsyncOptions<ICD11DiagnosisModel>("id");
@@ -33,7 +33,7 @@ export default function AddICD11Diagnosis(props: AddICD11DiagnosisProps) {
     setAdding(true);
     const added = await props.onAdd({
       diagnosis_object: selected,
-      diagnosis: selected.id,
+      diagnosis: selected?.id,
       verification_status: status,
       is_principal: false,
     });
