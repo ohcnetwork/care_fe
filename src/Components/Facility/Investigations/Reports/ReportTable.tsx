@@ -124,9 +124,17 @@ const ReportTable: FC<ReportTableProps> = ({
                   <th
                     scope="col"
                     key={session.session_external_id}
-                    className="bg-[#4B5563] px-6 py-3 text-center text-xs font-semibold uppercase  tracking-wider text-[#F9FAFB]"
+                    className="bg-[#4B5563] px-6 py-3 text-center text-xs  font-semibold tracking-wider text-[#F9FAFB]"
                   >
-                    {formatDateTime(session.session_created_date)}
+                    <div className="flex flex-col items-center justify-center gap-1">
+                      {formatDateTime(session.session_created_date)}
+                      <a
+                        className="max-w-fit font-semibold text-white hover:underline"
+                        href={`/facility/${session.facility_id}/`}
+                      >
+                        {session.facility_name}
+                      </a>
+                    </div>
                   </th>
                 ))}
                 <th

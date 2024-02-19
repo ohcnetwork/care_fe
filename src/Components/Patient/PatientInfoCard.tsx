@@ -411,7 +411,7 @@ export default function PatientInfoCard(props: {
                             Principal Diagnosis:
                           </div>
                           <div className="flex gap-2 text-sm">
-                            {principal_diagnosis.diagnosis_object.label}{" "}
+                            {principal_diagnosis.diagnosis_object?.label ?? "-"}{" "}
                             <span className="flex items-center rounded border border-primary-500 pl-1 pr-2 text-xs font-medium text-primary-500">
                               <CareIcon icon="l-check" className="text-base" />
                               <p className="capitalize">
@@ -531,7 +531,7 @@ export default function PatientInfoCard(props: {
               title={"Manage Patient"}
               icon={<CareIcon icon="l-setting" className="text-xl" />}
               className="xl:justify-center"
-              containerClassName="w-full lg:w-auto mt-2 2xl:mt-0 flex justify-center"
+              containerClassName="w-full lg:w-auto mt-2 2xl:mt-0 flex justify-center z-20"
             >
               <div>
                 {[

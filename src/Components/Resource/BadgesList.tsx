@@ -31,6 +31,7 @@ export default function BadgesList(props: any) {
           getDescShiftingFilterOrder(appliedFilters.ordering)
         ),
         badge("Status", "status"),
+        badge("Title", "title"),
         boolean("Emergency", "emergency", {
           trueValue: "yes",
           falseValue: "no",

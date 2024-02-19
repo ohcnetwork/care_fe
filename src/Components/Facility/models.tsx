@@ -492,16 +492,28 @@ export interface BaseUserModel {
   last_login: string;
 }
 
+export interface PatientNotesEditModel {
+  id: string;
+  edited_by: BaseUserModel;
+  edited_date: string;
+  note: string;
+}
+
 export interface PatientNotesModel {
+  id: string;
   note: string;
   facility: BaseFacilityModel;
   created_by_object: BaseUserModel;
   user_type?: UserRole | "RemoteSpecialist";
   created_date: string;
+  last_edited_by?: BaseUserModel;
+  last_edited_date?: string;
 }
 
 export interface PatientNoteStateType {
   notes: PatientNotesModel[];
+  patientId: string;
+  facilityId: string;
   cPage: number;
   totalPages: number;
 }
