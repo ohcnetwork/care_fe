@@ -199,12 +199,12 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
                 )
               }
             >
-              <p className="tooltip">
+              <span className="tooltip">
                 <span className="tooltip-text tooltip-top">
                   Copy Phone number
                 </span>
                 <CareIcon className="care-l-clipboard h-5 w-5" />
-              </p>
+              </span>
             </a>
             <span>{user.alt_phone_number}</span>
           </p>
@@ -244,7 +244,7 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
                 onClick={() => {
                   triggerGoal("Doctor Connect Click", {
                     medium: "WhatsApp",
-                    userId: authUser?.id,
+                    userId: authUser.id,
                     targetUserType: user.user_type,
                   });
                 }}
@@ -265,7 +265,7 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
                 onClick={() => {
                   triggerGoal("Doctor Connect Click", {
                     medium: "Phone Call",
-                    userId: authUser?.id,
+                    userId: authUser.id,
                     targetUserType: user.user_type,
                   });
                 }}
