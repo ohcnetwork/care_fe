@@ -95,6 +95,7 @@ import {
 } from "../Components/Facility/Investigations";
 import { Investigation } from "../Components/Facility/Investigations/Reports/types";
 import { ICD11DiagnosisModel } from "../Components/Diagnosis/types";
+import { EventGeneric } from "../Components/Facility/ConsultationDetails/Events/types";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -552,6 +553,12 @@ const routes = {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/",
     method: "GET",
     TRes: Type<PaginatedResponse<DailyRoundsModel>>(),
+  },
+
+  getEvents: {
+    path: "/api/v1/consultation/{consultationId}/events/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<EventGeneric>>(),
   },
 
   getDailyReport: {
