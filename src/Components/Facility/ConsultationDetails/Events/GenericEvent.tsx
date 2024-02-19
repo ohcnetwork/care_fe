@@ -76,11 +76,11 @@ export default function GenericEvent({ event }: IProps) {
   return (
     <div className="flex w-full flex-col gap-4 rounded-lg border border-gray-400 p-4 @container">
       {Object.entries(event.value).map(([key, value]) => (
-        <div className="flex flex-col items-center gap-2 md:flex-row">
+        <div className="flex w-full flex-col items-center gap-2 md:flex-row">
           <span className="text-xs uppercase text-gray-700">
             {key.replace(/_/g, " ")}
           </span>
-          <span className="text-sm font-semibold text-gray-700">
+          <span className="break-all text-sm font-semibold text-gray-700">
             {formatValue(value, key)}
           </span>
         </div>
