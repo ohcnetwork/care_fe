@@ -28,6 +28,9 @@ export default function DoctorVideoSlideover(props: {
 }) {
   const { show, facilityId, setShow } = props;
   const [doctors, setDoctors] = useState<UserAssignedModel[]>([]);
+  const [filteredDoctors, setFilteredDoctors] = useState<UserAssignedModel[]>(
+    []
+  );
   const [filter, setFilter] = useState<FilterTypes>(FilterTypes.ALL);
 
   const dispatchAction: any = useDispatch();
@@ -38,32 +41,7 @@ export default function DoctorVideoSlideover(props: {
           getFacilityUsers(facilityId, { limit: 50 })
         );
         if (res?.data) {
-          setDoctors(
-            res.data.results
-              .filter(
-                (user: UserAssignedModel) =>
-                  (user.alt_phone_number || user.video_connect_link) &&
-                  (user.user_type === "Doctor" || user.user_type === "Nurse") &&
-                  (filter === FilterTypes.ALL ||
-                    (filter === FilterTypes.DOCTOR &&
-                      isHomeUser(user, facilityId) &&
-                      user.user_type === "Doctor") ||
-                    (filter === FilterTypes.NURSE &&
-                      isHomeUser(user, facilityId) &&
-                      user.user_type === "Nurse") ||
-                    (filter === FilterTypes.TELEICU &&
-                      !isHomeUser(user, facilityId)))
-              )
-              .sort((a: UserAssignedModel, b: UserAssignedModel) => {
-                const aIsHomeUser = isHomeUser(a, facilityId);
-                const bIsHomeUser = isHomeUser(b, facilityId);
-                return aIsHomeUser === bIsHomeUser
-                  ? 0
-                  : isHomeUser(a, facilityId)
-                  ? -1
-                  : 1;
-              })
-          );
+          setDoctors(res.data.results);
         }
       } else {
         setDoctors([]);
@@ -72,7 +50,35 @@ export default function DoctorVideoSlideover(props: {
     if (show) {
       fetchUsers();
     }
-  }, [show, facilityId, filter]);
+  }, [show, facilityId]);
+
+  useEffect(() => {
+    setFilteredDoctors(
+      doctors
+        .filter(
+          (user: UserAssignedModel) =>
+            (user.alt_phone_number || user.video_connect_link) &&
+            (user.user_type === "Doctor" || user.user_type === "Nurse") &&
+            (filter === FilterTypes.ALL ||
+              (filter === FilterTypes.DOCTOR &&
+                isHomeUser(user, facilityId) &&
+                user.user_type === "Doctor") ||
+              (filter === FilterTypes.NURSE &&
+                isHomeUser(user, facilityId) &&
+                user.user_type === "Nurse") ||
+              (filter === FilterTypes.TELEICU && !isHomeUser(user, facilityId)))
+        )
+        .sort((a: UserAssignedModel, b: UserAssignedModel) => {
+          const aIsHomeUser = isHomeUser(a, facilityId);
+          const bIsHomeUser = isHomeUser(b, facilityId);
+          return aIsHomeUser === bIsHomeUser
+            ? 0
+            : isHomeUser(a, facilityId)
+            ? -1
+            : 1;
+        })
+    );
+  }, [doctors, filter]);
 
   return (
     <SlideOver
@@ -98,7 +104,7 @@ export default function DoctorVideoSlideover(props: {
           size="md"
         />
       </div>
-      {doctors.map((doctor, i) => (
+      {filteredDoctors.map((doctor, i) => (
         <div
           key={i}
           className="mb-4"
