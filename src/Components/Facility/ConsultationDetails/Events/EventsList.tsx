@@ -17,7 +17,6 @@ export default function EventsList({ consultation }: Props) {
   const [consultationId] = useSlugs("consultation");
   const { t } = useTranslation();
 
-  console.log("consultation", consultation, consultationId);
 
   return (
     <PaginatedList route={routes.getEvents} pathParams={{ consultationId }}>
