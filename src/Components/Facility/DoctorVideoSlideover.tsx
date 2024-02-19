@@ -136,18 +136,18 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
       role="option"
       tabIndex={-1}
     >
-      <div
-        onClick={() => {
-          window.open(
-            user.alt_phone_number
-              ? `https://api.whatsapp.com/send/?phone=${encodeURIComponent(
-                  user.alt_phone_number
-                )}&text=${encodeURIComponent(
-                  `Hey ${user.first_name} ${user.last_name}, I have a query regarding a patient.\n\nPatient Link: ${window.location.href}`
-                )}`
-              : "#"
-          );
-        }}
+      <a
+        href={
+          user.alt_phone_number
+            ? `https://api.whatsapp.com/send/?phone=${encodeURIComponent(
+                user.alt_phone_number
+              )}&text=${encodeURIComponent(
+                `Hey ${user.first_name} ${user.last_name}, I have a query regarding a patient.\n\nPatient Link: ${window.location.href}`
+              )}`
+            : "#"
+        }
+        target="_blank"
+        rel="noopener noreferrer"
         className="flex"
       >
         <div className="flex flex-none items-center justify-center sm:h-6 sm:w-6 md:h-10 md:w-10">
@@ -281,7 +281,7 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
             {user.last_login && <span>{relativeTime(user.last_login)}</span>}
           </div>
         </div>
-      </div>
+      </a>
     </li>
   );
 }
