@@ -31,7 +31,7 @@ const VitalsMonitorAssetPopover = ({
           leaveTo="opacity-0 translate-y-1"
         >
           <Popover.Panel className="absolute z-50 mt-2 w-80 translate-x-[-300px] rounded-md bg-white md:w-96 md:-translate-x-full">
-            <div className="flex flex-col gap-2 p-5">
+            <div className="flex flex-col gap-4 p-5">
               <div className="flex gap-2 text-lg font-bold">
                 <CareIcon
                   className={`care-l-${
@@ -44,7 +44,7 @@ const VitalsMonitorAssetPopover = ({
                 />
                 <p>{asset?.name}</p>
               </div>
-              <div className="mt-2 flex flex-col gap-2">
+              <div className="flex flex-col gap-2">
                 <div className="flex flex-col gap-2">
                   <p>Middleware Hostname:</p>
                   <p className="break-words text-sm text-gray-600">
