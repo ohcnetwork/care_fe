@@ -50,4 +50,5 @@ export interface IVitalsComponentProps {
   patientAssetBed?: PatientAssetBed;
   socketUrl: string;
   config?: ReturnType<typeof getVitalsCanvasSizeAndDuration>;
+  hideHeader?: boolean;
 }

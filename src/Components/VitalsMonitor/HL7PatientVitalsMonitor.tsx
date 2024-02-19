@@ -40,7 +40,9 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
 
   return (
     <div className="flex flex-col gap-1 rounded bg-[#020617] p-2">
-      <VitalsMonitorHeader patientAssetBed={props.patientAssetBed} />
+      {props.hideHeader ? null : (
+        <VitalsMonitorHeader patientAssetBed={props.patientAssetBed} />
+      )}
       <div className="relative flex flex-col gap-2 md:flex-row md:justify-between">
         <VitalsNonWaveformContent>
           {/* Pulse Rate */}

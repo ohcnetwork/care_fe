@@ -19,7 +19,9 @@ export default function VentilatorPatientVitalsMonitor(
 
   return (
     <div className="flex flex-col gap-1 rounded bg-[#020617] p-2">
-      <VitalsMonitorHeader patientAssetBed={props.patientAssetBed} />
+      {props.hideHeader ? null : (
+        <VitalsMonitorHeader patientAssetBed={props.patientAssetBed} />
+      )}
       <div className="relative flex flex-col gap-2 divide-x-0 divide-y divide-blue-600 md:flex-row md:justify-between md:divide-x md:divide-y-0">
         <div>
           <div
