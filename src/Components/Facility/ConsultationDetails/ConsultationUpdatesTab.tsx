@@ -674,7 +674,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
               <div className="flex items-center justify-center gap-1 text-sm">
                 Events
                 <span className="rounded-lg bg-warning-400 p-[1px] px-1 text-[10px] text-white">
-                  in beta
+                  beta
                 </span>
               </div>
             }
