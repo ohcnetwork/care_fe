@@ -56,7 +56,7 @@ export default function LocationManagement({ facilityId }: Props) {
               <Loading />
             </PaginatedList.WhenLoading>
             <PaginatedList.Items<LocationModel> className="my-8 grid gap-3 @4xl:grid-cols-2 @6xl:grid-cols-3 @[100rem]:grid-cols-4 lg:mx-8">
-              {(item) => <Location {...item} />}
+              {(item) => <Location {...item} facilityId={facilityId} />}
             </PaginatedList.Items>
           </div>
 
@@ -77,7 +77,8 @@ const Location = ({
   created_date,
   modified_date,
   id,
-}: LocationModel) => (
+  facilityId,
+}: LocationModel & { facilityId: string }) => (
   <div className="flex h-full w-full flex-col rounded border border-gray-300 bg-white p-6 shadow-sm transition-all duration-200 ease-in-out hover:border-primary-400">
     <div className="flex-1">
       <div className="flex w-full items-center justify-between gap-2">
@@ -125,7 +126,7 @@ const Location = ({
       </p>
       <Uptime
         route={routes.listFacilityAssetLocationAvailability}
-        params={{ external_id: id, facility_external_id: "-" }}
+        params={{ external_id: id, facility_external_id: facilityId }}
         header={
           <p className="mt-3 text-sm font-semibold text-gray-700">
             Middleware Uptime
