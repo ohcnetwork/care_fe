@@ -3,7 +3,6 @@ import { AssetData, ResolvedMiddleware } from "../AssetTypes";
 import { useDispatch } from "react-redux";
 import {
   partialUpdateAssetBed,
-  createAssetBed,
   listAssetBeds,
   deleteAssetBed,
 } from "../../../Redux/actions";
