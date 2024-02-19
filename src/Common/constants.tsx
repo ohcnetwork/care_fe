@@ -560,11 +560,6 @@ export const NOTIFICATION_EVENTS = [
     icon: "fa-solid fa-user-pen",
   },
   {
-    id: "PATIENT_DELETED",
-    text: "Patient Deleted",
-    icon: "fa-solid fa-user-minus",
-  },
-  {
     id: "PATIENT_CONSULTATION_CREATED",
     text: "Patient Consultation Created",
     icon: "fa-solid fa-heart-circle-check",
@@ -573,11 +568,6 @@ export const NOTIFICATION_EVENTS = [
     id: "PATIENT_CONSULTATION_UPDATED",
     text: "Patient Consultation Updated",
     icon: "fa-solid fa-heart-circle-plus",
-  },
-  {
-    id: "PATIENT_CONSULTATION_DELETED",
-    text: "Patient Consultation Deleted",
-    icon: "fa-solid fa-heart-circle-minus",
   },
   {
     id: "INVESTIGATION_SESSION_CREATED",
