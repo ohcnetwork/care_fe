@@ -33,17 +33,15 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   const intialSubscriptionState = async () => {
     try {
       const res = await request(routes.getUserPnconfig, {
-        pathParams: { username: username },
+        pathParams: { username },
       });
       const reg = await navigator.serviceWorker.ready;
       const subscription = await reg.pushManager.getSubscription();
       if (!subscription && !res.data?.pf_endpoint) {
-        console.log("No subscription and no endpoint");
         Notification.Warn({
           msg: "Please subscribe to notifications to get live updates on doctor notes.",
         });
       } else if (subscription?.endpoint !== res.data?.pf_endpoint) {
-        console.log("Subscription and endpoint match");
         Notification.Warn({
           msg: "Please subscribe to notifications on this device to get live updates on doctor notes.",
         });
