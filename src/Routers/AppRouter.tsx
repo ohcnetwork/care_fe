@@ -50,7 +50,7 @@ const Routes = {
 
 export default function AppRouter() {
   const authUser = useAuthUser();
-  const { main_logo, enable_hcx } = useConfig();
+  const { main_logo, enable_hcx, state_logo } = useConfig();
 
   let routes = Routes;
 
@@ -129,16 +129,23 @@ export default function AppRouter() {
                 />
               </svg>
             </button>
-            <a
-              href="/"
-              className="flex h-full w-full items-center px-4 md:hidden"
-            >
+            <div className="ml-1 flex items-center gap-1">
+              {state_logo && (
+                <>
+                  <img
+                    src={state_logo?.dark}
+                    className="h-14 rounded-lg py-3"
+                    alt="state logo"
+                  />
+                  <div className="mx-4 h-8 w-[1px] rounded-full bg-gray-600" />
+                </>
+              )}
               <img
-                className="h-6 w-auto"
                 src={main_logo.dark}
+                className="h-8 w-auto"
                 alt="care logo"
               />
-            </a>
+            </div>
           </div>
 
           <main
