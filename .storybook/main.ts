@@ -8,19 +8,15 @@ const config: StorybookConfig = {
   ],
   framework: {
     name: "@storybook/react-vite",
-    options: {},
+    options: {
+      builder: {
+        viteConfigPath: "./.storybook/vite.config.ts",
+      },
+    },
   },
   docs: {
     autodocs: "tag",
   },
   staticDirs: ["../public"],
-  core: {
-    builder: {
-      name: "@storybook/builder-vite",
-      options: {
-        viteConfigPath: "./.storybook/vite.config.ts",
-      },
-    },
-  },
 };
 export default config;
