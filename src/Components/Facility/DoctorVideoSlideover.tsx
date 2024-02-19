@@ -39,24 +39,25 @@ export default function DoctorVideoSlideover(props: {
   });
 
   useEffect(() => {
+    const filterDoctors = (users: UserAssignedModel[]) => {
+      return users.filter(
+        (user: UserAssignedModel) =>
+          (user.alt_phone_number || user.video_connect_link) &&
+          (user.user_type === "Doctor" || user.user_type === "Nurse") &&
+          (filter === FilterTypes.ALL ||
+            (filter === FilterTypes.DOCTOR &&
+              isHomeUser(user, facilityId) &&
+              user.user_type === "Doctor") ||
+            (filter === FilterTypes.NURSE &&
+              isHomeUser(user, facilityId) &&
+              user.user_type === "Nurse") ||
+            (filter === FilterTypes.TELEICU && !isHomeUser(user, facilityId)))
+      );
+    };
     if (users?.results && !loading) {
       setFilteredDoctors(
-        users.results
-          .filter(
-            (user: UserAssignedModel) =>
-              (user.alt_phone_number || user.video_connect_link) &&
-              (user.user_type === "Doctor" || user.user_type === "Nurse") &&
-              (filter === FilterTypes.ALL ||
-                (filter === FilterTypes.DOCTOR &&
-                  isHomeUser(user, facilityId) &&
-                  user.user_type === "Doctor") ||
-                (filter === FilterTypes.NURSE &&
-                  isHomeUser(user, facilityId) &&
-                  user.user_type === "Nurse") ||
-                (filter === FilterTypes.TELEICU &&
-                  !isHomeUser(user, facilityId)))
-          )
-          .sort((a: UserAssignedModel, b: UserAssignedModel) => {
+        filterDoctors(users.results).sort(
+          (a: UserAssignedModel, b: UserAssignedModel) => {
             const aIsHomeUser = isHomeUser(a, facilityId);
             const bIsHomeUser = isHomeUser(b, facilityId);
             return aIsHomeUser === bIsHomeUser
@@ -64,7 +65,8 @@ export default function DoctorVideoSlideover(props: {
               : isHomeUser(a, facilityId)
               ? -1
               : 1;
-          })
+          }
+        )
       );
     }
   }, [facilityId, filter, loading, users?.results]);
