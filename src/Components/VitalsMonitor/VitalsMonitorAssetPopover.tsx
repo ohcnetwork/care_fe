@@ -1,5 +1,5 @@
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { AssetData } from "../Assets/AssetTypes";
+import { AssetData, assetClassProps } from "../Assets/AssetTypes";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -33,19 +33,27 @@ const VitalsMonitorAssetPopover = ({
           <Popover.Panel className="absolute z-50 mt-2 w-80 translate-x-[-300px] rounded-md bg-white md:w-96 md:-translate-x-full">
             <div className="flex flex-col gap-2 p-5">
               <div className="flex gap-2 text-lg font-bold">
-                <CareIcon className="care-l-lungs" />
+                <CareIcon
+                  className={`care-l-${
+                    (
+                      (asset?.asset_class &&
+                        assetClassProps[asset.asset_class]) ||
+                      assetClassProps.NONE
+                    ).icon
+                  } text-2xl`}
+                />
                 <p>{asset?.name}</p>
               </div>
               <div className="mt-2 flex flex-col gap-2">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-2">
                   <p>Middleware Hostname:</p>
-                  <p className="text-gray-500">
+                  <p className="break-words text-sm text-gray-600">
                     {asset?.resolved_middleware?.hostname}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-2">
                   <p>Local IP Address:</p>
-                  <p className="text-gray-500">
+                  <p className="break-words text-sm text-gray-600">
                     {asset?.meta?.local_ip_address}
                   </p>
                 </div>
