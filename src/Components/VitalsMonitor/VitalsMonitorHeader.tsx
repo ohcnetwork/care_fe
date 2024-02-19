@@ -11,7 +11,7 @@ interface VitalsMonitorHeaderProps {
 const VitalsMonitorHeader = ({ patientAssetBed }: VitalsMonitorHeaderProps) => {
   const { patient, bed, asset } = patientAssetBed ?? {};
   return (
-    <div className="flex items-center justify-between px-2 tracking-wide">
+    <div className="flex items-center justify-between tracking-wide">
       <div className="flex flex-col gap-2 md:flex-row md:items-center">
         {patient ? (
           <Link
@@ -39,11 +39,11 @@ const VitalsMonitorHeader = ({ patientAssetBed }: VitalsMonitorHeaderProps) => {
             className="flex flex-col items-end gap-2 text-gray-500 md:flex-row md:items-center"
             href={`/facility/${patient?.facility_object?.id}/location/${bed?.location_object?.id}/beds`}
           >
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1 hover:text-white">
               <CareIcon className="care-l-bed text-sm md:text-base" />
               <span>{bed.name}</span>
             </span>
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1 hover:text-white">
               <CareIcon className="care-l-location-point text-sm md:text-base" />
               <span>{bed.location_object?.name}</span>
             </span>
