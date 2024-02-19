@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
 import SlideOver from "../../CAREUI/interactive/SlideOver";
-import { getFacilityUsers } from "../../Redux/actions";
 import { UserAssignedModel } from "../Users/models";
 import { SkillObjectModel } from "../Users/models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -10,6 +8,8 @@ import useAuthUser from "../../Common/hooks/useAuthUser";
 import { triggerGoal } from "../../Integrations/Plausible";
 import Chip from "../../CAREUI/display/Chip";
 import Switch from "../../CAREUI/interactive/Switch";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 
 enum FilterTypes {
   ALL = "All",
@@ -27,58 +27,47 @@ export default function DoctorVideoSlideover(props: {
   setShow: (show: boolean) => void;
 }) {
   const { show, facilityId, setShow } = props;
-  const [doctors, setDoctors] = useState<UserAssignedModel[]>([]);
   const [filteredDoctors, setFilteredDoctors] = useState<UserAssignedModel[]>(
     []
   );
   const [filter, setFilter] = useState<FilterTypes>(FilterTypes.ALL);
 
-  const dispatchAction: any = useDispatch();
-  useEffect(() => {
-    const fetchUsers = async () => {
-      if (facilityId) {
-        const res = await dispatchAction(
-          getFacilityUsers(facilityId, { limit: 50 })
-        );
-        if (res?.data) {
-          setDoctors(res.data.results);
-        }
-      } else {
-        setDoctors([]);
-      }
-    };
-    if (show) {
-      fetchUsers();
-    }
-  }, [show, facilityId]);
+  const { data: users, loading } = useQuery(routes.getFacilityUsers, {
+    prefetch: show,
+    pathParams: { facility_id: facilityId },
+    query: { limit: 50 },
+  });
 
   useEffect(() => {
-    setFilteredDoctors(
-      doctors
-        .filter(
-          (user: UserAssignedModel) =>
-            (user.alt_phone_number || user.video_connect_link) &&
-            (user.user_type === "Doctor" || user.user_type === "Nurse") &&
-            (filter === FilterTypes.ALL ||
-              (filter === FilterTypes.DOCTOR &&
-                isHomeUser(user, facilityId) &&
-                user.user_type === "Doctor") ||
-              (filter === FilterTypes.NURSE &&
-                isHomeUser(user, facilityId) &&
-                user.user_type === "Nurse") ||
-              (filter === FilterTypes.TELEICU && !isHomeUser(user, facilityId)))
-        )
-        .sort((a: UserAssignedModel, b: UserAssignedModel) => {
-          const aIsHomeUser = isHomeUser(a, facilityId);
-          const bIsHomeUser = isHomeUser(b, facilityId);
-          return aIsHomeUser === bIsHomeUser
-            ? 0
-            : isHomeUser(a, facilityId)
-            ? -1
-            : 1;
-        })
-    );
-  }, [doctors, filter]);
+    if (users?.results && !loading) {
+      setFilteredDoctors(
+        users.results
+          .filter(
+            (user: UserAssignedModel) =>
+              (user.alt_phone_number || user.video_connect_link) &&
+              (user.user_type === "Doctor" || user.user_type === "Nurse") &&
+              (filter === FilterTypes.ALL ||
+                (filter === FilterTypes.DOCTOR &&
+                  isHomeUser(user, facilityId) &&
+                  user.user_type === "Doctor") ||
+                (filter === FilterTypes.NURSE &&
+                  isHomeUser(user, facilityId) &&
+                  user.user_type === "Nurse") ||
+                (filter === FilterTypes.TELEICU &&
+                  !isHomeUser(user, facilityId)))
+          )
+          .sort((a: UserAssignedModel, b: UserAssignedModel) => {
+            const aIsHomeUser = isHomeUser(a, facilityId);
+            const bIsHomeUser = isHomeUser(b, facilityId);
+            return aIsHomeUser === bIsHomeUser
+              ? 0
+              : isHomeUser(a, facilityId)
+              ? -1
+              : 1;
+          })
+      );
+    }
+  }, [facilityId, filter, loading, users?.results]);
 
   return (
     <SlideOver
