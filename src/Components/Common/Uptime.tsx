@@ -169,6 +169,8 @@ export default function Uptime(
   props: Readonly<{
     route: QueryRoute<PaginatedResponse<AvailabilityRecord>>;
     params?: Record<string, string | number>;
+    header?: React.ReactNode;
+    parentClassNames?: string;
   }>
 ) {
   const [summary, setSummary] = useState<{
@@ -361,10 +363,10 @@ export default function Uptime(
     );
   } else if (summary) {
     return (
-      <div className="mt-8 flex w-full flex-col bg-white p-4 shadow-sm sm:rounded-lg">
-        <div className="mx-2 w-full">
+      <div className={props.parentClassNames}>
+        <div className="w-full">
           <div className="grid grid-cols-1">
-            <div className="text-xl font-semibold">Availability History</div>
+            {props.header}
             <div>
               <div className="mt-2 overflow-x-clip px-5">
                 <div className="mb-1 mt-2 flex justify-center text-xs text-gray-700 opacity-70">

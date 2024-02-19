@@ -7,6 +7,7 @@ import routes from "../../Redux/api";
 import PaginatedList from "../../CAREUI/misc/PaginatedList";
 import { LocationModel } from "./models";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
+import Uptime from "../Common/Uptime";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -122,6 +123,15 @@ const Location = ({
       >
         {middleware_address || "-"}
       </p>
+      <Uptime
+        route={routes.listFacilityAssetLocationAvailability}
+        params={{ external_id: id, facility_external_id: "-" }}
+        header={
+          <p className="mt-3 text-sm font-semibold text-gray-700">
+            Middleware Uptime
+          </p>
+        }
+      />
     </div>
 
     <ButtonV2
