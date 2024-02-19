@@ -66,15 +66,6 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
             )}
           </div>
           <div className="flex flex-col items-end gap-2 text-xs md:flex-row md:items-center md:text-sm">
-            {/* {asset && (
-              <Link
-                className="flex items-center gap-1 text-gray-500"
-                href={`/facility/${patient?.facility_object?.id}/assets/${asset?.id}`}
-              >
-                <CareIcon className="care-l-monitor-heart-rate text-sm md:text-base" />
-                <span>{asset.name}</span>
-              </Link>
-            )} */}
             {bed && (
               <Link
                 className="flex flex-col items-end gap-2 text-gray-500 md:flex-row md:items-center"
