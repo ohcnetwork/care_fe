@@ -136,18 +136,18 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
       role="option"
       tabIndex={-1}
     >
-      <a
-        href={
-          user.alt_phone_number
-            ? `https://api.whatsapp.com/send/?phone=${encodeURIComponent(
-                user.alt_phone_number
-              )}&text=${encodeURIComponent(
-                `Hey ${user.first_name} ${user.last_name}, I have a query regarding a patient.\n\nPatient Link: ${window.location.href}`
-              )}`
-            : "#"
-        }
-        target="_blank"
-        rel="noopener noreferrer"
+      <div
+        onClick={() => {
+          window.open(
+            user.alt_phone_number
+              ? `https://api.whatsapp.com/send/?phone=${encodeURIComponent(
+                  user.alt_phone_number
+                )}&text=${encodeURIComponent(
+                  `Hey ${user.first_name} ${user.last_name}, I have a query regarding a patient.\n\nPatient Link: ${window.location.href}`
+                )}`
+              : "#"
+          );
+        }}
         className="flex"
       >
         <div className="flex flex-none items-center justify-center sm:h-6 sm:w-6 md:h-10 md:w-10">
@@ -179,7 +179,10 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
             <div className="mt-1 text-sm leading-5 text-gray-900">
               <div className="flex flex-wrap gap-2">
                 {user.skills?.map((skill: SkillObjectModel) => (
-                  <span className="flex items-center gap-2 rounded-full border-gray-300 bg-gray-200 px-3 text-xs text-gray-900">
+                  <span
+                    key={skill.id}
+                    className="flex items-center gap-2 rounded-full border-gray-300 bg-gray-200 px-3 text-xs text-gray-900"
+                  >
                     <p className="py-1.5">{skill.name}</p>
                   </span>
                 ))}
@@ -196,12 +199,12 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
                 )
               }
             >
-              <div className="tooltip">
+              <p className="tooltip">
                 <span className="tooltip-text tooltip-top">
                   Copy Phone number
                 </span>
                 <CareIcon className="care-l-clipboard h-5 w-5" />
-              </div>
+              </p>
             </a>
             <span>{user.alt_phone_number}</span>
           </p>
@@ -213,7 +216,7 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
                   onClick={() => {
                     triggerGoal("Doctor Connect Click", {
                       medium: "Video Call",
-                      userId: authUser?.id,
+                      userId: authUser.id,
                       targetUserType: user.user_type,
                     });
                   }}
@@ -278,7 +281,7 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
             {user.last_login && <span>{relativeTime(user.last_login)}</span>}
           </div>
         </div>
-      </a>
+      </div>
     </li>
   );
 }
