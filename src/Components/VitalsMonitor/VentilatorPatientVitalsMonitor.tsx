@@ -41,7 +41,11 @@ export default function VentilatorPatientVitalsMonitor(
             {patient && (
               <span className="text-sm font-bold text-gray-400">
                 {patient.age}y;{" "}
-                {GENDER_TYPES.find((g) => g.id === patient.gender)?.icon}
+                {
+                  GENDER_TYPES.find(
+                    (g) => g.text === patient.gender?.toString()
+                  )?.icon
+                }
               </span>
             )}
           </div>
