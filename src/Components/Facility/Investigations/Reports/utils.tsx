@@ -3,7 +3,13 @@ import { InvestigationResponse } from "./types";
 
 export const transformData = _.memoize((data: InvestigationResponse) => {
   const sessions = _.chain(data)
-    .map((value) => value.session_object)
+    .map((value) => {
+      return {
+        ...value.session_object,
+        facility_name: value.consultation_object?.facility_name,
+        facility_id: value.consultation_object?.facility,
+      };
+    })
     .uniqBy("session_external_id")
     .orderBy("session_created_date", "desc")
     .value();
@@ -28,7 +34,6 @@ export const transformData = _.memoize((data: InvestigationResponse) => {
       }
     });
     const {
-      consultation,
       group,
       group_object,
       id,
@@ -40,7 +45,6 @@ export const transformData = _.memoize((data: InvestigationResponse) => {
     } = value[0];
 
     return {
-      consultation,
       group,
       group_object,
       id,

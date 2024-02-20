@@ -244,8 +244,19 @@ export default function UserProfile() {
             invalidForm = true;
           }
           return;
-        case "doctor_qualification":
         case "doctor_experience_commenced_on":
+          if (states.form.user_type === "Doctor" && !states.form[field]) {
+            errors[field] = "Field is required";
+            invalidForm = true;
+          } else if (
+            states.form.user_type === "Doctor" &&
+            Number(states.form.doctor_experience_commenced_on) > 100
+          ) {
+            errors[field] = "Doctor experience should be less than 100 years";
+            invalidForm = true;
+          }
+          return;
+        case "doctor_qualification":
         case "doctor_medical_council_registration":
           if (states.form.user_type === "Doctor" && !states.form[field]) {
             errors[field] = "Field is required";

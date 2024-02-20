@@ -9,10 +9,10 @@ import { FieldLabel } from "../Form/FormFields/FormField";
 import { OptionsType } from "../../Common/constants";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { navigate } from "raviger";
-import { transferPatient } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
 import { dateQueryString } from "../../Utils/utils.js";
 import dayjs from "dayjs";
+import request from "../../Utils/request/request.js";
+import routes from "../../Redux/api.js";
 
 interface Props {
   patientList: Array<DupPatientModel>;
@@ -60,7 +60,6 @@ const patientFormReducer = (state = initialState, action: any) => {
 
 const TransferPatientDialog = (props: Props) => {
   const { patientList, handleOk, handleCancel, facilityId } = props;
-  const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [state, dispatch] = useReducer(patientFormReducer, initialState);
   const patientOptions: Array<OptionsType> = patientList.map((patient) => {
@@ -114,15 +113,17 @@ const TransferPatientDialog = (props: Props) => {
     const validForm = validateForm();
     if (validForm) {
       setIsLoading(true);
-      const data = {
-        date_of_birth: dateQueryString(state.form.date_of_birth),
-        facility: facilityId,
-      };
-      const res = await dispatchAction(
-        transferPatient(data, { id: state.form.patient })
-      );
+      const { res, data } = await request(routes.transferPatient, {
+        body: {
+          facility: facilityId,
+          date_of_birth: dateQueryString(state.form.date_of_birth),
+        },
+        pathParams: {
+          id: state.form.patient,
+        },
+      });
       setIsLoading(false);
-      if (res && res.data && res.status === 200) {
+      if (res?.ok && data) {
         dispatch({ type: "set_form", form: initForm });
         handleOk();
 
@@ -132,10 +133,10 @@ const TransferPatientDialog = (props: Props) => {
           msg: `Patient ${patientName} transferred successfully`,
         });
         const newFacilityId =
-          res.data && res.data.facility_object && res.data.facility_object.id;
+          data && data.facility_object && data.facility_object.id;
         if (newFacilityId) {
           navigate(
-            `/facility/${newFacilityId}/patient/${res.data.patient}/consultation`
+            `/facility/${newFacilityId}/patient/${data.patient}/consultation`
           );
         } else {
           navigate("/facility");

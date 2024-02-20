@@ -671,7 +671,7 @@ function UserFacilities(props: { user: any }) {
         <ButtonV2
           id="link-facility"
           disabled={!facility}
-          className="mt-1"
+          className="mt-1 h-[45px] w-[74px] text-base"
           onClick={() => addFacility(username, facility)}
         >
           Add
@@ -715,7 +715,7 @@ function UserFacilities(props: { user: any }) {
           )}
 
           {/* Linked Facilities section */}
-          {userFacilities?.length && (
+          {!!userFacilities?.length && (
             <div className="mt-2" id="linked-facility-list">
               <div className="mb-2 ml-2 text-lg font-bold">
                 Linked Facilities
