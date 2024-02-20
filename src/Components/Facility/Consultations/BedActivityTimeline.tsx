@@ -1,3 +1,4 @@
+import Chip from "../../../CAREUI/display/Chip";
 import Timeline, { TimelineNode } from "../../../CAREUI/display/Timeline";
 import { classNames, formatDateTime } from "../../../Utils/utils";
 import { AssetData } from "../../Assets/AssetTypes";
@@ -19,13 +20,14 @@ export default function BedActivityTimeline({
           "py-4 md:px-3",
           loading && "animate-pulse opacity-70"
         )}
-        name="bed"
+        name="bed-allocation"
       >
         {consultationBeds.map((bed, index) => {
           return (
             <BedAllocationNode
               key={`activity-${bed.id}`}
               bed={bed}
+              prevBed={index > 0 ? consultationBeds[index + 1] : undefined}
               isLastNode={index === consultationBeds.length - 1}
             />
           );
@@ -37,9 +39,11 @@ export default function BedActivityTimeline({
 
 const BedAllocationNode = ({
   bed,
+  prevBed,
   isLastNode,
 }: {
   bed: CurrentBed;
+  prevBed?: CurrentBed;
   isLastNode: boolean;
 }) => {
   return (
@@ -57,14 +61,23 @@ const BedAllocationNode = ({
             ""
           ),
         }}
-        titleSuffix={<BedTitleSuffix bed={bed} isLastNode={isLastNode} />}
+        titleSuffix={
+          <BedTitleSuffix bed={bed} isLastNode={isLastNode} prevBed={prevBed} />
+        }
         isLast={isLastNode}
       />
     </>
   );
 };
 
-const BedTitleSuffix = ({ bed }: { bed: CurrentBed; isLastNode?: boolean }) => {
+const BedTitleSuffix = ({
+  bed,
+  prevBed,
+}: {
+  bed: CurrentBed;
+  isLastNode?: boolean;
+  prevBed?: CurrentBed;
+}) => {
   return (
     <div className="flex flex-col">
       <div className="flex gap-x-2">
@@ -73,8 +86,20 @@ const BedTitleSuffix = ({ bed }: { bed: CurrentBed; isLastNode?: boolean }) => {
         <span>{formatDateTime(bed.start_date).split(";")[1]}</span>
       </div>
       <p>
-        {bed.end_date === null ? "Currently occupying" : "Transferred to"}{" "}
+        {bed.bed_object.id === prevBed?.bed_object.id
+          ? "Asset changed in" + " "
+          : "Transferred to" + " "}
         <span className="font-semibold">{`${bed.bed_object.name} (${bed.bed_object.bed_type}) in ${bed.bed_object.location_object?.name}`}</span>
+        {bed.end_date === null ? (
+          <Chip
+            text="In Use"
+            size="small"
+            variant="warning"
+            className="ml-5 rounded-xl"
+          />
+        ) : (
+          ""
+        )}
       </p>
     </div>
   );
