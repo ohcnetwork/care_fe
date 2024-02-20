@@ -5,14 +5,14 @@ import GenericFilterBadge from "../../CAREUI/display/FilterBadge";
 import PaginationComponent from "../../Components/Common/Pagination";
 import useConfig from "./useConfig";
 import { classNames } from "../../Utils/utils";
+import FiltersCache from "../../Utils/FiltersCache";
 
 export type FilterState = Record<string, unknown>;
-export type FilterParamKeys = string | string[];
 
 interface FilterBadgeProps {
   name: string;
   value?: string;
-  paramKey: FilterParamKeys;
+  paramKey: string | string[];
 }
 
 /**
@@ -32,18 +32,18 @@ export default function useFilters({
   const [showFilters, setShowFilters] = useState(false);
   const [qParams, _setQueryParams] = useQueryParams();
 
+  const updateCache = (query: QueryParam) => {
+    const blacklist = FILTERS_CACHE_BLACKLIST.concat(cacheBlacklist);
+    FiltersCache.set(query, blacklist);
+  };
+
   const setQueryParams = (
     query: QueryParam,
     options?: setQueryParamsOptions
   ) => {
-    const updatedQParams = { ...query };
-
-    for (const param of cacheBlacklist) {
-      delete updatedQParams[param];
-    }
-
+    query = FiltersCache.utils.clean(query);
     _setQueryParams(query, options);
-    updateFiltersCache(updatedQParams);
+    updateCache(query);
   };
 
   const updateQuery = (filter: FilterState) => {
@@ -54,21 +54,29 @@ export default function useFilters({
     if (!hasPagination) return;
     setQueryParams(Object.assign({}, qParams, { page }), { replace: true });
   };
-  const removeFilters = (params: string[]) => {
+  const removeFilters = (params?: string[]) => {
+    params ??= Object.keys(qParams);
     setQueryParams(removeFromQuery(qParams, params));
   };
   const removeFilter = (param: string) => removeFilters([param]);
 
   useEffect(() => {
-    const cache = getFiltersCache();
     const qParamKeys = Object.keys(qParams);
-    const canSkip = Object.keys(cache).every(
-      (key) => qParamKeys.includes(key) && qParams[key] === cache[key]
-    );
-    if (canSkip) return;
-    if (Object.keys(cache).length) {
-      setQueryParams(cache);
+
+    // If we navigate to a path that has query params set on mount,
+    // skip restoring the cache, instead update the cache with new filters.
+    if (qParamKeys.length) {
+      updateCache(qParams);
+      return;
     }
+
+    const cache = FiltersCache.get();
+    if (!cache) {
+      return;
+    }
+
+    // Restore cache
+    setQueryParams(cache);
   }, []);
 
   const FilterBadge = ({ name, value, paramKey }: FilterBadgeProps) => {
@@ -98,7 +106,7 @@ export default function useFilters({
   };
 
   const badgeUtils = {
-    badge(name: string, paramKey: FilterParamKeys) {
+    badge(name: string, paramKey: FilterBadgeProps["paramKey"]) {
       return { name, paramKey };
     },
     ordering(name = "Sort by", paramKey = "ordering") {
@@ -108,7 +116,7 @@ export default function useFilters({
         value: qParams[paramKey] && t("SortOptions." + qParams[paramKey]),
       };
     },
-    value(name: string, paramKey: FilterParamKeys, value: string) {
+    value(name: string, paramKey: FilterBadgeProps["paramKey"], value: string) {
       return { name, value, paramKey };
     },
     phoneNumber(name = "Phone Number", paramKey = "phone_number") {
@@ -184,19 +192,16 @@ export default function useFilters({
         {compiledBadges.map((props) => (
           <FilterBadge {...props} name={t(props.name)} key={props.name} />
         ))}
-        {activeFilters.length >= 1 && (
+        {children}
+        {(activeFilters.length >= 1 || children) && (
           <button
             id="clear-all-filters"
             className="rounded-full border border-gray-300 bg-white px-2 py-1 text-xs text-gray-600 hover:text-gray-800"
-            onClick={() => {
-              updateFiltersCache({});
-              removeFilters(Object.keys(qParams));
-            }}
+            onClick={() => removeFilters()}
           >
             {t("clear_all_filters")}
           </button>
         )}
-        {children}
       </div>
     );
   };
@@ -280,15 +285,3 @@ const removeFromQuery = (query: Record<string, unknown>, params: string[]) => {
 };
 
 const FILTERS_CACHE_BLACKLIST = ["page", "limit", "offset"];
-
-const getFiltersCacheKey = () => `filters--${window.location.pathname}`;
-const getFiltersCache = () => {
-  return JSON.parse(localStorage.getItem(getFiltersCacheKey()) || "{}");
-};
-const updateFiltersCache = (cache: Record<string, unknown>) => {
-  const result = { ...cache };
-  for (const param of FILTERS_CACHE_BLACKLIST) {
-    delete result[param];
-  }
-  localStorage.setItem(getFiltersCacheKey(), JSON.stringify(result));
-};

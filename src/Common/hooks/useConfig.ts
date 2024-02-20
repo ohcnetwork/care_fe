@@ -8,7 +8,7 @@ interface ILogo {
 }
 
 export interface IConfig {
-  dashboard_url: string;
+  dashboard_url?: string;
   github_url: string;
   coronasafe_url: string;
   site_url: string;
@@ -69,6 +69,11 @@ export interface IConfig {
    */
   wartime_shifting: boolean;
   jwt_token_refresh_interval?: number;
+
+  /*
+   * Minimum date for a possible consultation encounter.
+   */
+  min_encounter_date: string;
 }
 
 const useConfig = () => {

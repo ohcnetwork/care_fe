@@ -13,6 +13,8 @@ import Chip from "../../../CAREUI/display/Chip";
 import { formatAge, formatDate, formatDateTime } from "../../../Utils/utils";
 import ReadMore from "../../Common/components/Readmore";
 import DailyRoundsList from "../Consultations/DailyRoundsList";
+import EventsList from "./Events/EventsList";
+import SwitchTabs from "../../Common/components/SwitchTabs";
 import { getVitalsMonitorSocketUrl } from "../../VitalsMonitor/utils";
 
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
@@ -23,6 +25,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
   const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
   const [monitorBedData, setMonitorBedData] = useState<AssetBedModel>();
   const [ventilatorBedData, setVentilatorBedData] = useState<AssetBedModel>();
+  const [showEvents, setShowEvents] = useState<boolean>(false);
 
   const vitals = useVitalsAspectRatioConfig({
     default: undefined,
@@ -126,7 +129,11 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
         )}
       <div className="flex flex-col xl:flex-row">
         <div className="w-full xl:w-2/3">
-          <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
+          <PageTitle
+            title="Basic Information"
+            hideBack={true}
+            breadcrumbs={false}
+          />
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
             {!props.consultationData.discharge_date &&
               ((hl7SocketUrl && !ventilatorSocketUrl) ||
@@ -342,7 +349,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         <span className="text-xs font-semibold leading-relaxed text-gray-800">
                           from{" "}
                           {formatDate(
-                            props.consultationData.last_daily_round.created_at
+                            props.consultationData.last_daily_round.taken_at
                           )}
                         </span>
                       </>
@@ -602,65 +609,85 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
               </div>
             </div>
           )}
-
-          <div className="mt-4 overflow-hidden rounded-lg bg-white shadow">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                Body Details
-              </h3>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div>
-                  Gender {" - "}
-                  <span className="font-semibold">
-                    {props.patientData.gender ?? "-"}
-                  </span>
-                </div>
-                <div>
-                  Age {" - "}
-                  <span className="font-semibold">
-                    {props.patientData.age !== undefined // 0 is a valid age, so we need to check for undefined
-                      ? formatAge(
-                          props.patientData.age,
-                          props.patientData.date_of_birth
-                        )
-                      : "-"}
-                  </span>
-                </div>
-                <div>
-                  Weight {" - "}
-                  <span className="font-semibold">
-                    {props.consultationData.weight ?? "-"} Kg
-                  </span>
-                </div>
-                <div>
-                  Height {" - "}
-                  <span className="font-semibold">
-                    {props.consultationData.height ?? "-"} cm
-                  </span>
-                </div>
-                <div>
-                  Body Surface Area {" - "}
-                  <span className="font-semibold">
-                    {Math.sqrt(
-                      (Number(props.consultationData.weight) *
-                        Number(props.consultationData.height)) /
-                        3600
-                    ).toFixed(2)}{" "}
-                    m<sup>2</sup>
-                  </span>
-                </div>
-                <div>
-                  Blood Group {" - "}
-                  <span className="font-semibold">
-                    {props.patientData.blood_group ?? "-"}
-                  </span>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="col-span-1 mt-4 overflow-hidden rounded-lg bg-white shadow">
+              <div className="px-4 py-5 sm:p-6">
+                <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                  Body Details
+                </h3>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    Gender {" - "}
+                    <span className="font-semibold">
+                      {props.patientData.gender ?? "-"}
+                    </span>
+                  </div>
+                  <div>
+                    Age {" - "}
+                    <span className="font-semibold">
+                      {props.patientData.age !== undefined // 0 is a valid age, so we need to check for undefined
+                        ? formatAge(
+                            props.patientData.age,
+                            props.patientData.date_of_birth
+                          )
+                        : "-"}
+                    </span>
+                  </div>
+                  <div>
+                    Weight {" - "}
+                    <span className="font-semibold">
+                      {props.consultationData.weight ?? "-"} Kg
+                    </span>
+                  </div>
+                  <div>
+                    Height {" - "}
+                    <span className="font-semibold">
+                      {props.consultationData.height ?? "-"} cm
+                    </span>
+                  </div>
+                  <div>
+                    Body Surface Area {" - "}
+                    <span className="font-semibold">
+                      {Math.sqrt(
+                        (Number(props.consultationData.weight) *
+                          Number(props.consultationData.height)) /
+                          3600
+                      ).toFixed(2)}{" "}
+                      m<sup>2</sup>
+                    </span>
+                  </div>
+                  <div>
+                    Blood Group {" - "}
+                    <span className="font-semibold">
+                      {props.patientData.blood_group ?? "-"}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
         <div className="w-full pl-0 md:pl-4 xl:w-1/3">
-          <DailyRoundsList consultation={props.consultationData} />
+          <SwitchTabs
+            className="mt-3 w-full lg:w-full"
+            tab2={
+              <div className="flex items-center justify-center gap-1 text-sm">
+                Events
+                <span className="rounded-lg bg-warning-400 p-[1px] px-1 text-[10px] text-white">
+                  beta
+                </span>
+              </div>
+            }
+            tab1="Daily Rounds"
+            onClickTab1={() => setShowEvents(false)}
+            onClickTab2={() => setShowEvents(true)}
+            isTab2Active={showEvents}
+          />
+          {showEvents ? (
+            <EventsList consultation={props.consultationData} />
+          ) : (
+            <DailyRoundsList consultation={props.consultationData} />
+          )}
         </div>
       </div>
     </div>

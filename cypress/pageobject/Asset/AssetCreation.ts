@@ -24,14 +24,6 @@ export class AssetPage {
       });
   }
 
-  selectAssetType(assetType: string) {
-    cy.get("[data-testid=asset-type-input] button")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains(assetType).click();
-      });
-  }
-
   selectAssetClass(assetClass: string) {
     cy.get("[data-testid=asset-class-input] button")
       .click()
@@ -129,7 +121,7 @@ export class AssetPage {
     cy.get(
       "[data-testid=asset-last-serviced-on-input] input[type='text']"
     ).click();
-    cy.get("#date-input").click().type(lastServicedOn);
+    cy.get("#date-input").click().clear().type(lastServicedOn);
     cy.get("[data-testid=asset-notes-input] textarea").clear().type(notes);
   }
 
@@ -202,13 +194,6 @@ export class AssetPage {
     cy.get("[data-testid=asset-location-input] span").should(
       "contain",
       "Select a location"
-    );
-  }
-
-  verifyEmptyAssetTypeError() {
-    cy.get("[data-testid=asset-type-input] span").should(
-      "contain",
-      "Select an asset type"
     );
   }
 

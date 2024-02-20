@@ -35,7 +35,7 @@ export interface WardModel {
 }
 
 export interface FacilityModel {
-  id?: number;
+  id?: string;
   name?: string;
   read_cover_image_url?: string;
   facility_type?: string;
@@ -165,13 +165,13 @@ export interface ConsultationModel {
 }
 
 export interface PatientStatsModel {
-  id?: number;
+  id?: string;
   entryDate?: string;
   num_patients_visited?: number;
   num_patients_home_quarantine?: number;
   num_patients_isolation?: number;
   num_patient_referred?: number;
-  entry_date?: number;
+  entry_date?: string;
   num_patient_confirmed_positive?: number;
 }
 
@@ -490,16 +490,28 @@ export interface BaseUserModel {
   last_login: string;
 }
 
+export interface PatientNotesEditModel {
+  id: string;
+  edited_by: BaseUserModel;
+  edited_date: string;
+  note: string;
+}
+
 export interface PatientNotesModel {
+  id: string;
   note: string;
   facility: BaseFacilityModel;
   created_by_object: BaseUserModel;
   user_type?: UserRole | "RemoteSpecialist";
   created_date: string;
+  last_edited_by?: BaseUserModel;
+  last_edited_date?: string;
 }
 
 export interface PatientNoteStateType {
   notes: PatientNotesModel[];
+  patientId: string;
+  facilityId: string;
   cPage: number;
   totalPages: number;
 }
@@ -523,4 +535,59 @@ export type FacilityRequest = Omit<FacilityModel, "location"> & {
   kasp_empanelled?: boolean;
   patient_count?: string;
   bed_count?: string;
+};
+
+export type InventorySummaryResponse = {
+  id: string;
+  item_object: {
+    id: number;
+    default_unit: {
+      id: number;
+      name: string;
+    };
+    allowed_units: {
+      id: number;
+      name: string;
+    }[];
+    tags: {
+      id: number;
+      name: string;
+    }[];
+    name: string;
+    description: string;
+    min_quantity: number;
+  };
+  unit_object: {
+    id: number;
+    name: string;
+  };
+  created_date: string;
+  quantity: number;
+  is_low: boolean;
+  item: number;
+};
+
+export type MinimumQuantityItemResponse = {
+  id: string;
+  item_object: InventoryItemsModel;
+  created_date: string;
+  min_quantity: number;
+  item: number;
+};
+
+export type InventoryLogResponse = InventorySummaryResponse & {
+  external_id: string;
+  current_stock: number;
+  quantity_in_default_unit: number;
+  is_incoming: boolean;
+  probable_accident: boolean;
+  unit: number;
+  created_by: number;
+};
+
+export type PatientTransferResponse = {
+  id: string;
+  patient: string;
+  date_of_birth: string;
+  facility_object: BaseFacilityModel;
 };

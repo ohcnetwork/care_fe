@@ -74,7 +74,9 @@ const PatientNotesList = (props: PatientNotesProps) => {
     );
   }
 
-  return <DoctorNote state={state} handleNext={handleNext} />;
+  return (
+    <DoctorNote state={state} handleNext={handleNext} setReload={setReload} />
+  );
 };
 
 export default PatientNotesList;

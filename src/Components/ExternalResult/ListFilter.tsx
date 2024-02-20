@@ -13,16 +13,6 @@ import routes from "../../Redux/api";
 import Loading from "../Common/Loading";
 import { LocalBodyModel, WardModel } from "../Facility/models";
 
-const clearFilterState = {
-  created_date_before: "",
-  created_date_after: "",
-  result_date_before: "",
-  result_date_after: "",
-  sample_collection_date_before: "",
-  sample_collection_date_after: "",
-  srf_id: "",
-};
-
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
 
@@ -185,11 +175,7 @@ export default function ListFilter(props: any) {
       advancedFilter={props}
       onApply={applyFilter}
       onClear={() => {
-        removeFilters([
-          ...Object.keys(clearFilterState),
-          "wards",
-          "local_bodies",
-        ]);
+        removeFilters();
         closeFilter();
       }}
     >

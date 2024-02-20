@@ -1,6 +1,6 @@
 import * as Notification from "../../Utils/Notifications.js";
 
-import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
+import { AssetClass, AssetType } from "../Assets/AssetTypes";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import {
   LegacyRef,
@@ -11,12 +11,6 @@ import {
   useReducer,
   useState,
 } from "react";
-import {
-  createAsset,
-  getAsset,
-  listFacilityAssetLocation,
-  updateAsset,
-} from "../../Redux/actions";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
@@ -32,19 +26,20 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { navigate } from "raviger";
 import { parseQueryParams } from "../../Utils/primitives";
 import useAppHistory from "../../Common/hooks/useAppHistory";
-import { useDispatch } from "react-redux";
 import useVisibility from "../../Utils/useVisibility";
 import { validateEmailAddress } from "../../Common/validation";
 import { dateQueryString, parsePhoneNumber } from "../../Utils/utils.js";
 import dayjs from "../../Utils/dayjs";
 import DateFormField from "../Form/FormFields/DateFormField.js";
 import { t } from "i18next";
+import useQuery from "../../Utils/request/useQuery.js";
+import routes from "../../Redux/api.js";
+import request from "../../Utils/request/request.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
 const formErrorKeys = [
   "name",
-  "asset_type",
   "asset_class",
   "description",
   "is_working",
@@ -107,12 +102,10 @@ const AssetCreate = (props: AssetProps) => {
   const { goBack } = useAppHistory();
   const { facilityId, assetId } = props;
 
-  let assetTypeInitial: AssetType;
   let assetClassInitial: AssetClass;
 
   const [state, dispatch] = useReducer(asset_create_reducer, initialState);
   const [name, setName] = useState("");
-  const [asset_type, setAssetType] = useState<AssetType>();
   const [asset_class, setAssetClass] = useState<AssetClass>();
   const [not_working_reason, setNotWorkingReason] = useState("");
   const [description, setDescription] = useState("");
@@ -124,18 +117,12 @@ const AssetCreate = (props: AssetProps) => {
   const [support_email, setSupportEmail] = useState("");
   const [location, setLocation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [locations, setLocations] = useState<{ name: string; id: string }[]>(
-    []
-  );
-  const [asset, setAsset] = useState<AssetData>();
-  const [facilityName, setFacilityName] = useState("");
   const [qrCodeId, setQrCodeId] = useState("");
   const [manufacturer, setManufacturer] = useState("");
   const [warranty_amc_end_of_validity, setWarrantyAmcEndOfValidity] =
     useState<any>(null);
   const [last_serviced_on, setLastServicedOn] = useState<any>(null);
   const [notes, setNotes] = useState("");
-  const dispatchAction: any = useDispatch();
   const [isScannerActive, setIsScannerActive] = useState<boolean>(false);
 
   const [currentSection, setCurrentSection] =
@@ -173,33 +160,20 @@ const AssetCreate = (props: AssetProps) => {
     });
   }, [generalDetailsVisible, warrantyDetailsVisible, serviceDetailsVisible]);
 
-  useEffect(() => {
-    setIsLoading(true);
-    dispatchAction(
-      listFacilityAssetLocation({}, { facility_external_id: facilityId })
-    ).then(({ data }: any) => {
-      if (data.count > 0) {
-        setFacilityName(data.results[0].facility?.name);
-        setLocations(data.results);
-      }
-      setIsLoading(false);
-    });
+  const locationsQuery = useQuery(routes.listFacilityAssetLocation, {
+    pathParams: { facility_external_id: facilityId },
+    query: { limit: 1 },
+  });
 
-    if (assetId) {
-      setIsLoading(true);
-      dispatchAction(getAsset(assetId)).then(({ data }: any) => {
-        setAsset(data);
-        setIsLoading(false);
-      });
-    }
-  }, [assetId, dispatchAction, facilityId]);
+  const assetQuery = useQuery(routes.getAsset, {
+    pathParams: { external_id: assetId! },
+    prefetch: !!assetId,
+    onResponse: ({ data: asset }) => {
+      if (!asset) return;
 
-  useEffect(() => {
-    if (asset) {
       setName(asset.name);
       setDescription(asset.description);
-      setLocation(asset.location_object.id);
-      setAssetType(asset.asset_type);
+      setLocation(asset.location_object.id!);
       setAssetClass(asset.asset_class);
       setIsWorking(String(asset.is_working));
       setNotWorkingReason(asset.not_working_reason);
@@ -215,8 +189,8 @@ const AssetCreate = (props: AssetProps) => {
       asset.last_service?.serviced_on &&
         setLastServicedOn(asset.last_service?.serviced_on);
       asset.last_service?.note && setNotes(asset.last_service?.note);
-    }
-  }, [asset]);
+    },
+  });
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -238,12 +212,6 @@ const AssetCreate = (props: AssetProps) => {
         case "location":
           if (!location || location === "0" || location === "") {
             errors[field] = "Select a location";
-            invalidForm = true;
-          }
-          return;
-        case "asset_type":
-          if (!asset_type || asset_type == "NONE") {
-            errors[field] = "Select an asset type";
             invalidForm = true;
           }
           return;
@@ -304,7 +272,6 @@ const AssetCreate = (props: AssetProps) => {
     setName("");
     setDescription("");
     setLocation("");
-    setAssetType(assetTypeInitial);
     setAssetClass(assetClassInitial);
     setIsWorking(undefined);
     setNotWorkingReason("");
@@ -329,7 +296,7 @@ const AssetCreate = (props: AssetProps) => {
       setIsLoading(true);
       const data: any = {
         name: name,
-        asset_type: asset_type,
+        asset_type: AssetType.INTERNAL,
         asset_class: asset_class || "",
         description: description,
         is_working: is_working,
@@ -355,26 +322,25 @@ const AssetCreate = (props: AssetProps) => {
       }
 
       if (!assetId) {
-        const res = await dispatchAction(createAsset(data));
-        if (res && res.data && res.status === 201) {
-          Notification.Success({
-            msg: "Asset created successfully",
-          });
-          if (!addMore) {
-            goBack();
-          } else {
+        const { res } = await request(routes.createAsset, { body: data });
+        if (res?.ok) {
+          Notification.Success({ msg: "Asset created successfully" });
+          if (addMore) {
             resetFilters();
             const pageContainer = window.document.getElementById("pages");
             pageContainer?.scroll(0, 0);
+          } else {
+            goBack();
           }
         }
         setIsLoading(false);
       } else {
-        const res = await dispatchAction(updateAsset(assetId, data));
-        if (res && res.data && res.status === 200) {
-          Notification.Success({
-            msg: "Asset updated successfully",
-          });
+        const { res } = await request(routes.updateAsset, {
+          pathParams: { external_id: assetId },
+          body: data,
+        });
+        if (res?.ok) {
+          Notification.Success({ msg: "Asset updated successfully" });
           goBack();
         }
         setIsLoading(false);
@@ -400,14 +366,15 @@ const AssetCreate = (props: AssetProps) => {
     setIsScannerActive(false);
   };
 
-  if (isLoading) return <Loading />;
+  if (isLoading || locationsQuery.loading || assetQuery.loading) {
+    return <Loading />;
+  }
 
-  if (locations.length === 0) {
+  if (locationsQuery.data?.count === 0) {
     return (
       <Page
         title={assetId ? t("update_asset") : t("create_new_asset")}
         crumbsReplacements={{
-          [facilityId]: { name: facilityName },
           assets: { style: "text-gray-200 pointer-events-none" },
           [assetId || "????"]: { name },
         }}
@@ -486,7 +453,9 @@ const AssetCreate = (props: AssetProps) => {
         title={`${assetId ? t("update") : t("create")} Asset`}
         className="grow-0 pl-6"
         crumbsReplacements={{
-          [facilityId]: { name: facilityName },
+          [facilityId]: {
+            name: locationsQuery.data?.results[0].facility?.name,
+          },
           assets: { style: "text-gray-200 pointer-events-none" },
           [assetId || "????"]: { name },
         }}
@@ -567,68 +536,34 @@ const AssetCreate = (props: AssetProps) => {
                         errors={state.errors.location}
                       />
                     </div>
-                    {/* Asset Type */}
-                    <div className="col-span-6 flex flex-col gap-x-12 transition-all lg:flex-row xl:gap-x-16">
-                      <div
-                        ref={fieldRef["asset_type"]}
-                        className="flex-1"
-                        data-testid="asset-type-input"
-                      >
-                        <SelectFormField
-                          label={t("asset_type")}
-                          name="asset_type"
-                          required
-                          options={[
-                            {
-                              title: "Internal",
-                              description:
-                                "Asset is inside the facility premises.",
-                              value: AssetType.INTERNAL,
-                            },
-                            {
-                              title: "External",
-                              description:
-                                "Asset is outside the facility premises.",
-                              value: AssetType.EXTERNAL,
-                            },
-                          ]}
-                          value={asset_type}
-                          optionLabel={({ title }) => title}
-                          optionDescription={({ description }) => description}
-                          optionValue={({ value }) => value}
-                          onChange={({ value }) => setAssetType(value)}
-                          error={state.errors.asset_type}
-                        />
-                      </div>
 
-                      {/* Asset Class */}
-                      <div
-                        ref={fieldRef["asset_class"]}
-                        className="flex-1"
-                        data-testid="asset-class-input"
-                      >
-                        <SelectFormField
-                          disabled={!!(props.assetId && asset_class)}
-                          name="asset_class"
-                          label={t("asset_class")}
-                          value={asset_class}
-                          options={[
-                            { title: "ONVIF Camera", value: AssetClass.ONVIF },
-                            {
-                              title: "HL7 Vitals Monitor",
-                              value: AssetClass.HL7MONITOR,
-                            },
-                            {
-                              title: "Ventilator",
-                              value: AssetClass.VENTILATOR,
-                            },
-                          ]}
-                          optionLabel={({ title }) => title}
-                          optionValue={({ value }) => value}
-                          onChange={({ value }) => setAssetClass(value)}
-                          error={state.errors.asset_class}
-                        />
-                      </div>
+                    {/* Asset Class */}
+                    <div
+                      ref={fieldRef["asset_class"]}
+                      className="col-span-6"
+                      data-testid="asset-class-input"
+                    >
+                      <SelectFormField
+                        disabled={!!(props.assetId && asset_class)}
+                        name="asset_class"
+                        label={t("asset_class")}
+                        value={asset_class}
+                        options={[
+                          { title: "ONVIF Camera", value: AssetClass.ONVIF },
+                          {
+                            title: "HL7 Vitals Monitor",
+                            value: AssetClass.HL7MONITOR,
+                          },
+                          {
+                            title: "Ventilator",
+                            value: AssetClass.VENTILATOR,
+                          },
+                        ]}
+                        optionLabel={({ title }) => title}
+                        optionValue={({ value }) => value}
+                        onChange={({ value }) => setAssetClass(value)}
+                        error={state.errors.asset_class}
+                      />
                     </div>
                     {/* Description */}
                     <div

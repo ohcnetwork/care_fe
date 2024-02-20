@@ -37,7 +37,7 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
     MedicineRoutes.listPrescriptions,
     {
       pathParams: { consultation },
-      query: { ...filters, discontinued: showDiscontinued ? undefined : false },
+      query: { ...filters, discontinued: false },
     }
   );
 
@@ -45,7 +45,7 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
     pathParams: { consultation },
     query: {
       ...filters,
-      limit: showDiscontinued ? 100 : 1,
+      limit: 100,
       discontinued: true,
     },
     prefetch: !showDiscontinued,
@@ -53,16 +53,21 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
 
   const discontinuedCount = discontinuedPrescriptions.data?.count;
 
+  const prescriptionList = [
+    ...(data?.results ?? []),
+    ...(showDiscontinued ? discontinuedPrescriptions.data?.results ?? [] : []),
+  ];
+
   const { activityTimelineBounds, prescriptions } = useMemo(
     () => ({
-      prescriptions: data?.results?.sort(
+      prescriptions: prescriptionList.sort(
         (a, b) => +a.discontinued - +b.discontinued
       ),
-      activityTimelineBounds: data
-        ? computeActivityBounds(data.results)
+      activityTimelineBounds: prescriptionList
+        ? computeActivityBounds(prescriptionList)
         : undefined,
     }),
-    [data]
+    [prescriptionList]
   );
 
   const daysPerPage = useBreakpoints({ default: 1, "2xl": 2 });

@@ -15,7 +15,7 @@ describe("User Creation", () => {
   const userCreationPage = new UserCreationPage();
   const facilityPage = new FacilityPage();
   const assetSearchPage = new AssetSearchPage();
-  const fillFacilityName = "Dummy Facility 1";
+  const fillFacilityName = "Dummy Facility 40";
   const makeid = (length: number) => {
     let result = "";
     const characters = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -25,7 +25,7 @@ describe("User Creation", () => {
     }
     return result;
   };
-  const username = makeid(25);
+  const username = makeid(8);
   const alreadylinkedusersviews = [
     "devdoctor",
     "devstaff2",
