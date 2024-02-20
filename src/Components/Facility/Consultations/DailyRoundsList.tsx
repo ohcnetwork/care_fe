@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import LoadingLogUpdateCard from "./DailyRounds/LoadingCard";
 import routes from "../../../Redux/api";
 import PaginatedList from "../../../CAREUI/misc/PaginatedList";
-import PageTitle from "../../Common/PageTitle";
 import DailyRoundsFilter from "./DailyRoundsFilter";
 import { ConsultationModel } from "../models";
 import { useSlugs } from "../../../Common/hooks/useSlug";
@@ -34,8 +33,7 @@ export default function DailyRoundsList({ consultation }: Props) {
     >
       {() => (
         <>
-          <div className="flex flex-1 justify-between">
-            <PageTitle title="Update Log" hideBack breadcrumbs={false} />
+          <div className="m-1 flex flex-1 justify-end">
             <DailyRoundsFilter
               onApply={(query) => {
                 setQuery(query);
