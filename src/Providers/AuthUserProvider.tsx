@@ -42,7 +42,10 @@ export default function AuthUserProvider({ children, unauthorized }: Props) {
         localStorage.setItem(LocalStorageKeys.refreshToken, query.data.refresh);
 
         await refetch();
-        navigate(getRedirectOr("/"));
+
+        if (window.location.pathname === "/") {
+          navigate(getRedirectOr("/"));
+        }
       }
 
       return query;
