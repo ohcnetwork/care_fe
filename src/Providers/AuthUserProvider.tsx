@@ -43,7 +43,7 @@ export default function AuthUserProvider({ children, unauthorized }: Props) {
 
         await refetch();
 
-        if (window.location.pathname === "/") {
+        if (location.pathname === "/" || location.pathname === "/login") {
           navigate(getRedirectOr("/"));
         }
       }
