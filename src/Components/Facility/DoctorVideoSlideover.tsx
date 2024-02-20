@@ -62,7 +62,7 @@ export default function DoctorVideoSlideover(props: {
             const bIsHomeUser = isHomeUser(b, facilityId);
             return aIsHomeUser === bIsHomeUser
               ? 0
-              : isHomeUser(a, facilityId)
+              : aIsHomeUser
               ? -1
               : 1;
           }
