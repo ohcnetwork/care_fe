@@ -225,14 +225,13 @@ export default function ManageUsers() {
                 </div>
                 <div
                   id="name"
-                  className="mt-2 flex gap-3 text-2xl font-bold capitalize"
+                  className="mt-2 flex items-center gap-3 text-2xl font-bold capitalize"
                 >
                   {`${user.first_name} ${user.last_name}`}
 
                   {user.last_login && cur_online ? (
-                    <CareIcon
-                      icon="l-circle"
-                      className="ml-1 animate-pulse text-3xl text-primary-500 opacity-75"
+                    <div
+                      className="h-4 w-4 rounded-full bg-primary-500"
                       aria-label="Online"
                     />
                   ) : null}
