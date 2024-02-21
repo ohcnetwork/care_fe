@@ -108,7 +108,7 @@ export const FacilityHome = (props: any) => {
       id="facility-coverimage"
       className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center bg-black text-sm text-gray-300 opacity-0 transition-[opacity] hover:opacity-60 md:h-[88px]"
     >
-      <i className="fa-solid fa-pen" />
+      <CareIcon icon="l-pen" className="text-lg" />
       <span className="mt-2">{`${hasCoverImage ? "Edit" : "Upload"}`}</span>
     </div>
   );
@@ -171,10 +171,11 @@ export const FacilityHome = (props: any) => {
             hasPermissionToEditCoverImage && setEditCoverImage(true)
           }
         >
-          <i
-            className="fas fa-hospital block p-10 text-4xl text-gray-500"
+          <CareIcon
+            icon="l-hospital"
+            className="block p-10 text-4xl text-gray-500"
             aria-hidden="true"
-          ></i>
+          />
           {editCoverImageTooltip}
         </div>
       )}

@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -139,7 +140,7 @@ export const HospitalList = () => {
           className="border-grey-500 mt-4 cursor-pointer whitespace-nowrap rounded-md border bg-white p-16 text-center text-sm font-semibold shadow hover:bg-gray-300"
           onClick={() => navigate("/facility/create")}
         >
-          <i className="fas fa-plus text-3xl"></i>
+          <CareIcon icon="l-plus" className="text-3xl" />
           <div className="mt-2 text-xl">{t("create_facility")}</div>
           <div className="mt-1 text-xs text-red-700">
             {t("no_duplicate_facility")}

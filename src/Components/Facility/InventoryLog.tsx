@@ -94,7 +94,10 @@ export default function InventoryLog(props: any) {
             {inventoryItem.quantity_in_default_unit}{" "}
             {inventoryItem.item_object?.default_unit?.name}
             {inventoryItem.probable_accident && (
-              <i className="fas fa-exclamation-triangle pl-2 text-orange-500"></i>
+              <CareIcon
+                icon="l-exclamation-triangle"
+                className="pl-2 text-lg text-orange-500"
+              />
             )}
           </p>
         </td>
