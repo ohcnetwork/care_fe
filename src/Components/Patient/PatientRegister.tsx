@@ -349,12 +349,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           : state.form.phone_number,
       });
 
-      Promise.all([
-        setStateId(data.district_object.state),
-        setDistrictId(data.district),
-        setLocalBodyId(data.local_body),
-        duplicateCheck(data.mobile_number),
-      ]);
+      setStateId(data.district_object.state);
+      setDistrictId(data.district);
+      setLocalBodyId(data.local_body);
+      duplicateCheck(data.mobile_number);
       setShowImport({
         show: false,
         field: null,
@@ -1105,12 +1103,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 className="bg-transparent px-1 py-2 md:px-2"
                 onDraftRestore={(newState) => {
                   dispatch({ type: "set_state", state: newState });
-                  Promise.all([
-                    setStateId(newState.form.state ?? 0),
-                    setDistrictId(newState.form.district ?? 0),
-                    setLocalBodyId(newState.form.local_body ?? 0),
-                    duplicateCheck(newState.form.phone_number ?? ""),
-                  ]);
+                  setStateId(newState.form.state ?? 0);
+                  setDistrictId(newState.form.district ?? 0);
+                  setLocalBodyId(newState.form.local_body ?? 0);
+                  duplicateCheck(newState.form.phone_number ?? "");
                 }}
                 noPadding
               >
