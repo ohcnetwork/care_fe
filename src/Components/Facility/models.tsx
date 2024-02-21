@@ -164,6 +164,11 @@ export interface ConsultationModel {
   medico_legal_case?: boolean;
 }
 
+export interface PatientPrivacyModel {
+  status: string;
+  detail: string;
+}
+
 export interface PatientStatsModel {
   id?: string;
   entryDate?: string;

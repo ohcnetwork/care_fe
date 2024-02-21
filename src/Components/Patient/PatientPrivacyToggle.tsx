@@ -4,11 +4,10 @@ import { ConsultationModel } from "../Facility/models.js";
 import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { UserRole } from "../../Common/constants.js";
-import {
-  getConsultationBed,
-  togglePatientPrivacy,
-} from "../../Redux/actions.js";
+import { getConsultationBed } from "../../Redux/actions.js";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
+import request from "../../Utils/request/request.js";
+import routes from "../../Redux/api.js";
 interface PatientPrivacyToggleProps {
   consultationId: string;
   consultation?: ConsultationModel | null;
@@ -85,22 +84,58 @@ export default function PatientPrivacyToggle(props: PatientPrivacyToggleProps) {
     }
   }, [consultation]);
 
-  //function to toggle the privacy of the patient
-  const togglePrivacy = async () => {
+  //function to enable the privacy of the patient
+  const enablePrivacy = async () => {
     try {
       if (consultation?.current_bed?.id) {
-        const res = await dispatch(
-          togglePatientPrivacy(consultation?.current_bed?.id as string)
-        );
+        const { res, data } = await request(routes.enablePatientPrivacy, {
+          pathParams: {
+            external_id: consultation?.current_bed?.id as string,
+          },
+        });
+
         if (res && res.status === 200) {
           setPrivacy(!privacy);
           Notification.Success({
-            msg: "Privacy updated successfully",
+            msg: "Privacy enabled successfully",
           });
           if (fetchPatientData) fetchPatientData({ aborted: false });
         } else if (res && res.status === 403) {
           Notification.Error({
-            msg: res.data.detail,
+            msg: data?.detail,
+          });
+        } else {
+          Notification.Error({
+            msg: "Failed to update privacy",
+          });
+        }
+      }
+    } catch (e) {
+      Notification.Error({
+        msg: "Something went wrong..!",
+      });
+    }
+  };
+
+  //function to disable the privacy of the patient
+  const disablePrivacy = async () => {
+    try {
+      if (consultation?.current_bed?.id) {
+        const { res, data } = await request(routes.disablePatientPrivacy, {
+          pathParams: {
+            external_id: consultation?.current_bed?.id as string,
+          },
+        });
+
+        if (res && res.status === 200) {
+          setPrivacy(!privacy);
+          Notification.Success({
+            msg: "Privacy disabled successfully",
+          });
+          if (fetchPatientData) fetchPatientData({ aborted: false });
+        } else if (res && res.status === 403) {
+          Notification.Error({
+            msg: data?.detail,
           });
         } else {
           Notification.Error({
@@ -127,29 +162,22 @@ export default function PatientPrivacyToggle(props: PatientPrivacyToggleProps) {
           Privacy setting for camera feed visual
         </span>
       </div>
-      {!privacy ? (
-        <button
-          className=" tooltip items-center rounded-md bg-gray-300 p-1 text-red-500 hover:bg-red-500 hover:text-gray-200"
-          onClick={togglePrivacy}
-          id="privacy-toggle"
-        >
-          <CareIcon className="care-l-lock text-3xl" />
-          <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-sm">
-            Lock Privacy
-          </span>
-        </button>
-      ) : (
-        <button
-          className="tooltip items-center rounded-md bg-gray-300 p-1 text-black hover:bg-gray-500 hover:text-gray-200"
-          onClick={togglePrivacy}
-          id="privacy-toggle"
-        >
-          <CareIcon className="care-l-unlock text-3xl" />
-          <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-sm">
-            Unlock Privacy
-          </span>
-        </button>
-      )}
+      <button
+        className={`tooltip items-center rounded-md bg-gray-300 p-1 ${
+          privacy
+            ? "text-black hover:bg-gray-500"
+            : "text-red-500 hover:bg-red-500"
+        } hover:text-gray-200`}
+        onClick={privacy ? disablePrivacy : enablePrivacy}
+        id="privacy-toggle"
+      >
+        <CareIcon
+          className={`${privacy ? "care-l-unlock" : "care-l-lock"} text-3xl`}
+        />
+        <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-sm">
+          {privacy ? "Unlock" : "Lock"} Privacy
+        </span>
+      </button>
     </div>
   );
 }

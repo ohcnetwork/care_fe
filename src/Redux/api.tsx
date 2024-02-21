@@ -57,6 +57,7 @@ import {
   InventoryLogResponse,
   InventoryItemsModel,
   PatientTransferResponse,
+  PatientPrivacyModel,
 } from "../Components/Facility/models";
 import {
   IDeleteBedCapacity,
@@ -482,6 +483,18 @@ const routes = {
   togglePatientPrivacy: {
     path: "/api/v1/consultationbed/{external_id}/toggle_patient_privacy/",
     method: "PATCH",
+  },
+  enablePatientPrivacy: {
+    path: "/api/v1/consultationbed/{external_id}/patient_privacy/",
+    method: "POST",
+    TBody: Type<PatientPrivacyModel>(),
+    TRes: Type<PatientPrivacyModel>(),
+  },
+  disablePatientPrivacy: {
+    path: "/api/v1/consultationbed/{external_id}/patient_privacy/",
+    method: "DELETE",
+    TBody: Type<PatientPrivacyModel>(),
+    TRes: Type<PatientPrivacyModel>(),
   },
 
   // Download Api
