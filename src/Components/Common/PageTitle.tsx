@@ -3,6 +3,7 @@ import Breadcrumbs from "./Breadcrumbs";
 import PageHeadTitle from "./PageHeadTitle";
 import { classNames } from "../../Utils/utils";
 import useAppHistory from "../../Common/hooks/useAppHistory";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 export interface PageTitleProps {
   title: string;
@@ -65,9 +66,10 @@ export default function PageTitle({
                 goBack(backUrl);
               }}
             >
-              <i className="fas fa-chevron-left mr-1 rounded-md p-2 text-2xl hover:bg-gray-200">
-                {" "}
-              </i>
+              <CareIcon
+                icon="l-angle-left"
+                className="border-box mr-1 rounded-md text-5xl hover:bg-gray-200"
+              />{" "}
             </button>
           )}
           <h2 className="ml-0 text-2xl font-semibold leading-tight">{title}</h2>
