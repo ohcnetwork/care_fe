@@ -370,6 +370,7 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   const getIconClassName = (extensionName: string | undefined) => {
+    if (!extensionName) return "l-file-medical";
     // check for image files
     if (
       [
@@ -387,9 +388,9 @@ export const FileUpload = (props: FileUploadProps) => {
         ".pjp",
         ".svg",
         ".webp",
-      ].some((ext) => ext === extensionName)
+      ].includes(extensionName)
     ) {
-      return "fa-solid fa-file-image";
+      return "l-image";
     }
     // check for video files
     if (
@@ -409,34 +410,15 @@ export const FileUpload = (props: FileUploadProps) => {
         ".qt",
         ".flv",
         ".swf",
-      ].some((ext) => ext === extensionName)
+      ].includes(extensionName)
     ) {
-      return "fa-solid fa-file-video";
+      return "l-video";
     }
-    // check for compressed files
-    if (extensionName === ".zip" || extensionName === ".rar") {
-      return "fa-solid fa-file-zipper";
-    }
-    // check for misclaneous files whose icons are available freely in fontawesome
-    if (extensionName === ".pdf") {
-      return "fa-solid fa-file-pdf";
-    }
-    if (extensionName === ".docx") {
-      return "fa-solid fa-file-word";
-    }
-    if (extensionName === ".csv") {
-      return "fa-solid fa-file-csv";
-    }
-    if (extensionName === ".xlsx") {
-      return "fa-solid fa-file-excel";
-    }
-    if (extensionName === ".txt") {
-      return "fa-solid fa-file-lines";
-    }
+
     if (extensionName === ".pptx") {
-      return "fa-solid fa-file-powerpoint";
+      return "l-presentation-play";
     }
-    return "fa-solid fa-file-medical";
+    return "l-file-medical";
   };
 
   const loadFile = async (id: string) => {
@@ -554,7 +536,10 @@ export const FileUpload = (props: FileUploadProps) => {
                 <div className="flex flex-wrap justify-between space-y-2">
                   <div className="flex flex-wrap justify-between space-x-2">
                     <div>
-                      <i className="fa-solid fa-file-audio fa-3x m-3 text-primary-500"></i>
+                      <CareIcon
+                        icon="l-music"
+                        className="m-3 text-6xl text-primary-500"
+                      />
                     </div>
                     <div>
                       <div>
@@ -667,11 +652,10 @@ export const FileUpload = (props: FileUploadProps) => {
                 <div className="flex flex-wrap justify-between space-y-2">
                   <div className="flex flex-wrap justify-between space-x-2">
                     <div>
-                      <i
-                        className={`${getIconClassName(
-                          item?.extension
-                        )} fa-3x m-3 text-primary-500`}
-                      ></i>
+                      <CareIcon
+                        icon={getIconClassName(item?.extension)}
+                        className={"m-3 text-6xl text-primary-500"}
+                      />
                     </div>
                     <div>
                       <div>
@@ -777,7 +761,10 @@ export const FileUpload = (props: FileUploadProps) => {
                           />
                         </svg>
 
-                        <i className="fa-solid fa-file-audio fa-3x m-3 text-gray-500"></i>
+                        <CareIcon
+                          icon="l-music"
+                          className="text-6xl text-gray-500"
+                        />
                       </div>
                     ) : (
                       <div className="relative">
@@ -796,11 +783,10 @@ export const FileUpload = (props: FileUploadProps) => {
                           />
                         </svg>
 
-                        <i
-                          className={`${getIconClassName(
-                            item?.extension
-                          )} fa-3x m-3 text-gray-500`}
-                        ></i>
+                        <CareIcon
+                          icon={getIconClassName(item?.extension)}
+                          className="text-6xl text-gray-500"
+                        />
                       </div>
                     )}
                   </div>
@@ -1544,7 +1530,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         setUploadFileName("");
                       }}
                     >
-                      <i className="fas fa-times"></i>
+                      <CareIcon icon="l-times" className="text-lg" />
                     </button>
                   </div>
                 )}
