@@ -147,7 +147,7 @@ export interface SampleTestModel {
   is_unusual_course?: boolean;
   sample_type?: string;
   sample_type_other?: string;
-  id?: number;
+  id?: string;
   status?: string;
   result?: string;
   icmr_category?: string;
@@ -337,16 +337,36 @@ export interface FacilityNameModel {
 
 // File Upload Models
 
+type FileCategory = "UNSPECIFIED" | "XRAY" | "AUDIO" | "IDENTITY_PROOF";
+
+export interface CreateFileRequest {
+  file_type: string;
+  file_category: FileCategory;
+  name: string;
+  associating_id: string;
+  original_name: string;
+  mime_type: string;
+}
+
+export interface CreateFileResponse {
+  id: string;
+  file_type: string;
+  file_category: FileCategory;
+  signed_url: string;
+  internal_name: string;
+}
+
 export interface FileUploadModel {
   id?: string;
   name?: string;
   created_date?: string;
   upload_completed?: boolean;
-  uploaded_by?: { username?: string };
-  file_category?: string;
+  uploaded_by?: PerformedByModel;
+  file_category?: FileCategory;
+  read_signed_url?: string;
   is_archived?: boolean;
   archive_reason?: string;
   extension?: string;
-  archived_by?: { username?: string };
+  archived_by?: PerformedByModel;
   archived_datetime?: string;
 }

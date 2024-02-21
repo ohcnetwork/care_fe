@@ -4,7 +4,7 @@ import SlideOver from "../../CAREUI/interactive/SlideOver";
 import { getFacilityUsers } from "../../Redux/actions";
 import { UserAssignedModel } from "../Users/models";
 import { SkillObjectModel } from "../Users/models";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
 import { relativeTime } from "../../Utils/utils";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { triggerGoal } from "../../Integrations/Plausible";
@@ -108,8 +108,8 @@ export default function DoctorVideoSlideover(props: {
 
 function UserListItem(props: { user: UserAssignedModel }) {
   const user = props.user;
-  const icon =
-    user.user_type === "Doctor" ? "fa-user-doctor " : " fa-user-nurse";
+  const icon: IconName =
+    user.user_type === "Doctor" ? "l-user-md" : "l-user-nurse";
   const authUser = useAuthUser();
 
   return (
@@ -145,9 +145,9 @@ function UserListItem(props: { user: UserAssignedModel }) {
               // Show online icon based on last_login
               user.last_login &&
               Number(new Date()) - Number(new Date(user.last_login)) < 60000 ? (
-                <i className={`fa-solid text-xl text-green-600 ${icon}`}></i>
+                <CareIcon icon={icon} className="text-xl text-green-600" />
               ) : (
-                <i className={`fa-solid text-2xl text-gray-600 ${icon}`}></i>
+                <CareIcon icon={icon} className="text-2xl text-gray-600" />
               )
             }
           </div>
