@@ -198,12 +198,14 @@ export default function ManageUsers() {
                     {user.last_login && cur_online ? (
                       <span>
                         {" "}
-                        <i className="fa-solid fa-clock"></i> Currently Online
+                        <CareIcon icon="l-clock" className="text-lg" />{" "}
+                        Currently Online
                       </span>
                     ) : (
                       <>
                         <span>
-                          <i className="fa-solid fa-clock"></i> Last Online:{" "}
+                          <CareIcon icon="l-clock" className="text-lg" /> Last
+                          Online:{" "}
                         </span>
                         <span
                           aria-label="Online"
@@ -223,15 +225,15 @@ export default function ManageUsers() {
                 </div>
                 <div
                   id="name"
-                  className="mt-2 flex gap-3 text-2xl font-bold capitalize"
+                  className="mt-2 flex items-center gap-3 text-2xl font-bold capitalize"
                 >
                   {`${user.first_name} ${user.last_name}`}
 
                   {user.last_login && cur_online ? (
-                    <i
-                      className="fas fa-circle ml-1 animate-pulse text-primary-500 opacity-75"
+                    <div
+                      className="h-4 w-4 rounded-full bg-primary-500"
                       aria-label="Online"
-                    ></i>
+                    />
                   ) : null}
                   {showUserDelete(authUser, user) && (
                     <div
@@ -671,7 +673,7 @@ function UserFacilities(props: { user: any }) {
         <ButtonV2
           id="link-facility"
           disabled={!facility}
-          className="mt-1"
+          className="mt-1 h-[45px] w-[74px] text-base"
           onClick={() => addFacility(username, facility)}
         >
           Add

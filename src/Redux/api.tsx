@@ -27,7 +27,7 @@ import {
   AssetService,
   AssetServiceUpdate,
   AssetTransaction,
-  AssetUptimeRecord,
+  AvailabilityRecord,
   PatientAssetBed,
 } from "../Components/Assets/AssetTypes";
 import {
@@ -50,6 +50,7 @@ import {
   WardModel,
   LocationModel,
   PatientNotesModel,
+  PatientNotesEditModel,
   BedModel,
   MinimumQuantityItemResponse,
   InventorySummaryResponse,
@@ -73,7 +74,15 @@ import {
   UserModel,
 } from "../Components/Users/models";
 import { Prescription } from "../Components/Medicine/models";
-import { DailyRoundsModel, PatientModel } from "../Components/Patient/models";
+import {
+  CreateFileRequest,
+  CreateFileResponse,
+  DailyRoundsModel,
+  FileUploadModel,
+  PatientModel,
+  SampleReportModel,
+  SampleTestModel,
+} from "../Components/Patient/models";
 import { PaginatedResponse } from "../Utils/request/types";
 import {
   NotificationData,
@@ -89,6 +98,7 @@ import {
 } from "../Components/Facility/Investigations";
 import { Investigation } from "../Components/Facility/Investigations/Reports/types";
 import { ICD11DiagnosisModel } from "../Components/Diagnosis/types";
+import { EventGeneric } from "../Components/Facility/ConsultationDetails/Events/types";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -371,6 +381,11 @@ const routes = {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
     method: "PATCH",
   },
+  getFacilityAssetLocationAvailability: {
+    path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/availability/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<AvailabilityRecord>>(),
+  },
 
   // Asset bed
   listAssetBeds: {
@@ -499,6 +514,8 @@ const routes = {
   },
   getConsultationList: {
     path: "/api/v1/consultation/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<ConsultationModel>>(),
   },
   createConsultation: {
     path: "/api/v1/consultation/",
@@ -541,8 +558,16 @@ const routes = {
     TRes: Type<PaginatedResponse<DailyRoundsModel>>(),
   },
 
+  getEvents: {
+    path: "/api/v1/consultation/{consultationId}/events/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<EventGeneric>>(),
+  },
+
   getDailyReport: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/{id}/",
+    method: "GET",
+    TRes: Type<DailyRoundsModel>(),
   },
   dailyRoundsAnalyse: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/analyse/",
@@ -638,6 +663,8 @@ const routes = {
   },
   patientList: {
     path: "/api/v1/patient/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<PatientModel>>(),
   },
   addPatient: {
     path: "/api/v1/patient/",
@@ -645,7 +672,7 @@ const routes = {
   },
   getPatient: {
     path: "/api/v1/patient/{id}/",
-    TBody: Type<PatientModel>(),
+    method: "GET",
     TRes: Type<PatientModel>(),
   },
   updatePatient: {
@@ -655,6 +682,8 @@ const routes = {
   patchPatient: {
     path: "/api/v1/patient/{id}/",
     method: "PATCH",
+    TBody: Type<Partial<PatientModel>>(),
+    TRes: Type<PatientModel>(),
   },
   transferPatient: {
     path: "/api/v1/patient/{id}/transfer/",
@@ -672,15 +701,31 @@ const routes = {
     method: "POST",
     TRes: Type<PatientNotesModel>(),
   },
+  updatePatientNote: {
+    path: "/api/v1/patient/{patientId}/notes/{noteId}/",
+    method: "PUT",
+    TRes: Type<PatientNotesModel>(),
+  },
+  getPatientNoteEditHistory: {
+    path: "/api/v1/patient/{patientId}/notes/{noteId}/edits/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<PatientNotesEditModel>>(),
+  },
   sampleTestList: {
     path: "/api/v1/patient/{patientId}/test_sample/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<SampleTestModel>>(),
   },
   createSampleTest: {
     path: "/api/v1/patient/{patientId}/test_sample/",
     method: "POST",
+    TRes: Type<PatientModel>(),
+    TBody: Type<SampleTestModel>(),
   },
   sampleReport: {
-    path: "/api/v1/patient/{id}/test_sample/{sampleId}/icmr_sample",
+    path: "/api/v1/patient/{id}/test_sample/{sampleId}/icmr_sample/",
+    method: "GET",
+    TRes: Type<SampleReportModel>(),
   },
 
   // External Results
@@ -787,13 +832,19 @@ const routes = {
   // Sample Test
   getTestSampleList: {
     path: "/api/v1/test_sample/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<SampleTestModel>>(),
   },
   getTestSample: {
-    path: "/api/v1/test_sample",
+    path: "/api/v1/test_sample/{id}/",
+    method: "GET",
+    TRes: Type<SampleTestModel>(),
   },
   patchSample: {
     path: "/api/v1/test_sample/{id}/",
     method: "PATCH",
+    TBody: Type<SampleTestModel>(),
+    TRes: Type<PatientModel>(),
   },
 
   //inventory
@@ -894,15 +945,17 @@ const routes = {
   createShift: {
     path: "/api/v1/shift/",
     method: "POST",
+    TBody: Type<Partial<IShift>>(),
+    TRes: Type<PatientModel>(),
   },
   updateShift: {
-    path: "/api/v1/shift/{id}",
+    path: "/api/v1/shift/{id}/",
     method: "PUT",
     TBody: Type<IShift>(),
     TRes: Type<IShift>(),
   },
   deleteShiftRecord: {
-    path: "/api/v1/shift/{id}",
+    path: "/api/v1/shift/{id}/",
     method: "DELETE",
     TRes: Type<{ detail: string }>(),
   },
@@ -970,18 +1023,24 @@ const routes = {
   createUpload: {
     path: "/api/v1/files/",
     method: "POST",
+    TBody: Type<CreateFileRequest>(),
+    TRes: Type<CreateFileResponse>(),
   },
   viewUpload: {
     path: "/api/v1/files/",
     method: "GET",
+    TRes: Type<PaginatedResponse<FileUploadModel>>(),
   },
   retrieveUpload: {
-    path: "/api/v1/files/{fileId}/",
+    path: "/api/v1/files/{id}/",
     method: "GET",
+    TRes: Type<FileUploadModel>(),
   },
   editUpload: {
-    path: "/api/v1/files/{fileId}/?file_type={fileType}&associating_id={associatingId}",
+    path: "/api/v1/files/{id}/?file_type={fileType}&associating_id={associatingId}",
     method: "PATCH",
+    TBody: Type<Partial<FileUploadModel>>(),
+    TRes: Type<FileUploadModel>(),
   },
 
   // Investigation
@@ -1120,6 +1179,11 @@ const routes = {
     method: "PATCH",
     TRes: Type<AssetData>(),
     TBody: Type<Partial<AssetData>>(),
+  },
+  listAssetAvailability: {
+    path: "/api/v1/asset/{external_id}/availability/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<AvailabilityRecord>>(),
   },
 
   // Asset transaction endpoints
@@ -1293,19 +1357,6 @@ const routes = {
       TRes: Type<IHealthFacility>(),
       TBody: Type<IcreateHealthFacilityTBody>(),
     },
-  },
-
-  // Asset Availability endpoints
-
-  listAssetAvailability: {
-    path: "/api/v1/asset_availability/",
-    method: "GET",
-    TRes: Type<PaginatedResponse<AssetUptimeRecord>>(),
-  },
-  getAssetAvailability: {
-    path: "/api/v1/asset_availability/{id}",
-    method: "GET",
-    TRes: Type<AssetUptimeRecord>(),
   },
 
   // Prescription endpoints

@@ -115,13 +115,14 @@ const AssetManage = (props: AssetManageProps) => {
           onClick={(_) => window.print()}
           className="btn btn-primary mr-2"
         >
-          <i className="fas fa-print mr-2"></i> Print QR Code
+          <CareIcon icon="l-print" className="mr-2 text-lg" />
+          Print QR Code
         </button>
         <button
           onClick={(_) => setIsPrintMode(false)}
           className="btn btn-default"
         >
-          <i className="fas fa-times mr-2"></i> Close
+          <CareIcon icon="l-times" className="mr-2 text-lg" /> Close
         </button>
       </div>
       <h2 className="text-center">Print Preview</h2>
@@ -365,11 +366,6 @@ const AssetManage = (props: AssetManageProps) => {
                   {asset?.description}
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {asset?.asset_type === "INTERNAL" ? (
-                    <Chip text="Internal" startIcon="l-building" />
-                  ) : (
-                    <Chip text="External" startIcon="l-globe" />
-                  )}
                   {asset?.status === "ACTIVE" ? (
                     <Chip text="Active" startIcon="l-check" />
                   ) : (
@@ -503,7 +499,12 @@ const AssetManage = (props: AssetManageProps) => {
       </div>
       {asset?.id &&
         asset?.asset_class &&
-        asset?.asset_class != AssetClass.NONE && <Uptime assetId={asset?.id} />}
+        asset?.asset_class != AssetClass.NONE && (
+          <Uptime
+            route={routes.listAssetAvailability}
+            params={{ external_id: asset.id }}
+          />
+        )}
       <div className="mb-4 mt-8 text-xl font-semibold">Service History</div>
       <div
         className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-lg"

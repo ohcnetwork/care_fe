@@ -69,6 +69,11 @@ export interface IConfig {
    */
   wartime_shifting: boolean;
   jwt_token_refresh_interval?: number;
+
+  /*
+   * Minimum date for a possible consultation encounter.
+   */
+  min_encounter_date: string;
 }
 
 const useConfig = () => {
