@@ -33,7 +33,7 @@ export default function ViewInvestigationSuggestions(props: {
   };
 
   return (
-    <div className="mt-5">
+    <div className="mt-5" id="investigation-suggestions">
       <h3>Investigations Suggested</h3>
       <table className="mt-3 hidden w-full rounded-xl bg-white shadow md:table">
         <thead className="bg-gray-200 text-left">

@@ -154,7 +154,10 @@ export default function PatientInfoCard(props: {
       )}
 
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        <div className="col-span-2 flex w-full flex-col bg-white px-4 pt-2 lg:flex-row xl:min-w-fit">
+        <div
+          className="col-span-2 flex w-full flex-col bg-white px-4 pt-2 lg:flex-row xl:min-w-fit"
+          id="patient-infobadges"
+        >
           {/* Can support for patient picture in the future */}
           <div className="flex justify-evenly lg:justify-normal">
             <div className="flex flex-col items-start lg:items-center">

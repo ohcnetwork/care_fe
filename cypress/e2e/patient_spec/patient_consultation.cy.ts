@@ -4,7 +4,8 @@ import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import { PatientConsultationPage } from "../../pageobject/Patient/PatientConsultation";
 import PatientPredefined from "../../pageobject/Patient/PatientPredefined";
 import ShiftCreation from "../../pageobject/Shift/ShiftCreation";
-import FacilityLocation from "../../pageobject/Facility/FacilityLocation";
+import PatientInvestigation from "../../pageobject/Patient/PatientInvestigation";
+import PatientTreatmentPlan from "../../pageobject/Patient/PatientTreatmentPlan";
 
 describe("Patient Consultation in multiple combination", () => {
   const patientConsultationPage = new PatientConsultationPage();
@@ -12,7 +13,8 @@ describe("Patient Consultation in multiple combination", () => {
   const patientPage = new PatientPage();
   const patientPredefined = new PatientPredefined();
   const shiftCreation = new ShiftCreation();
-  const facilityLocation = new FacilityLocation();
+  const patientInvestigation = new PatientInvestigation();
+  const patientTreatmentPlan = new PatientTreatmentPlan();
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -26,12 +28,61 @@ describe("Patient Consultation in multiple combination", () => {
   });
 
   it("Internal Transfer within facility Patient with Domicilary Care", () => {
+    patientPage.createPatient();
+    patientPage.selectFacility("Dummy Facility 40");
+    patientPredefined.createPatient();
+    patientPage.patientformvisibility();
+    patientPage.clickCreatePatient();
+    patientPage.verifyPatientIsCreated();
+    // Internal Transfer within facility
+    patientConsultationPage.selectConsultationStatus(
+      "Internal Transfer within the facility"
+    );
+    patientConsultationPage.selectPatientWard("Dummy Location 1");
     // Asymptomatic
+    patientConsultationPage.selectSymptoms("ASYMPTOMATIC");
     // Abnormal category
-    // No ICD-11 error message then icd-11 add
+    patientConsultationPage.selectPatientCategory("Abnormal");
+    patientConsultationPage.selectPatientSuggestion("Domiciliary Care");
+    // one ICD-11 diagnosis
+    patientConsultationPage.selectPatientDiagnosis(
+      "1A04",
+      "add-icd11-diagnosis-as-confirmed"
+    );
+    patientConsultationPage.selectPatientIcuDate("2024-02-19T11:15");
     // add investigation
+    patientInvestigation.clickAddInvestigation();
+    patientInvestigation.selectInvestigation("Vitals (GROUP)");
+    patientInvestigation.clickInvestigationCheckbox();
+    patientInvestigation.selectInvestigationFrequency("6");
+    // Add advice and treating physican
+    patientTreatmentPlan.typePatientGeneralInstruction(
+      "Patient General Instructions"
+    );
+    patientTreatmentPlan.fillTreatingPhysican("Dev Doctor");
     // add review after and add action
+    patientTreatmentPlan.selectReviewAfter("15 mins");
+    patientTreatmentPlan.selectAction("Specialist Required");
     // add telemedicine
+    patientTreatmentPlan.clickTelemedicineCheckbox();
+    patientTreatmentPlan.assignTelemedicineDoctor("Dev Doctor");
+    cy.submitButton("Create Consultation");
+    cy.verifyNotification("Consultation created successfully");
+    // verify the data reflection -
+    patientConsultationPage.verifyTextInConsultation(
+      "#patient-infobadges",
+      "Specialist Required"
+    );
+    patientConsultationPage.verifyTextInConsultation(
+      "#patient-infobadges",
+      "Domiciliary Care"
+    );
+    patientConsultationPage.verifyTextInConsultation("#diagnoses-view", "1A04");
+    patientInvestigation.clickInvestigationTab();
+    patientConsultationPage.verifyTextInConsultation(
+      "#investigation-suggestions",
+      "Vitals"
+    );
   });
 
   it("Referred From another Facility Patient with OP consultation", () => {
@@ -60,17 +111,13 @@ describe("Patient Consultation in multiple combination", () => {
       "add-icd11-diagnosis-as-confirmed"
     );
     // no investigation
-    patientConsultationPage.fillConsultationFieldById(
-      "consultation_notes",
+    patientTreatmentPlan.typePatientGeneralInstruction(
       "Patient General Instructions"
     );
     // no review after and no action
-    patientConsultationPage.fillTreatingPhysican("Dev Doctor");
-    patientConsultationPage.submitConsultation();
-    cy.get(".pnotify-pre-line").should(
-      "contain.text",
-      "Patient discharged successfully"
-    );
+    patientTreatmentPlan.fillTreatingPhysican("Dev Doctor");
+    cy.submitButton("Create Consultation");
+    cy.verifyNotification("Patient discharged successfully");
     // verify the Discharge Reason, Diagnosis, treatment physican
     patientConsultationPage.verifyTextInConsultation(
       "#consultation-buttons",
@@ -97,16 +144,6 @@ describe("Patient Consultation in multiple combination", () => {
     // Select the Symptoms - Sore throat and fever symptoms
     patientConsultationPage.selectSymptoms(["FEVER", "SORE THROAT"]);
     patientConsultationPage.selectSymptomsDate("01012024");
-    patientConsultationPage.fillConsultationFieldById(
-      "history_of_present_illness",
-      "Patient History"
-    );
-    patientConsultationPage.fillConsultationFieldById(
-      "examination_details",
-      "Patient Examination Details"
-    );
-    patientConsultationPage.fillConsultationFieldById("weight", "80");
-    patientConsultationPage.fillConsultationFieldById("height", "170");
     // Comfort Care category
     patientConsultationPage.selectPatientCategory("Comfort Care");
     // Decision after consultation - Referred to Facility
@@ -123,27 +160,18 @@ describe("Patient Consultation in multiple combination", () => {
     );
     patientConsultationPage.selectPatientPrincipalDiagnosis("1A04");
     // no investigation for the patient
-    patientConsultationPage.fillConsultationFieldById(
-      "treatment_plan",
-      "Patient Treatment Plan"
-    );
-    patientConsultationPage.fillConsultationFieldById(
-      "consultation_notes",
+    patientTreatmentPlan.typePatientGeneralInstruction(
       "Patient General Instructions"
     );
-    patientConsultationPage.fillConsultationFieldById(
-      "special_instruction",
-      "Special Instructions"
-    );
-    patientConsultationPage.fillTreatingPhysican("Dev Doctor");
+    patientTreatmentPlan.fillTreatingPhysican("Dev Doctor");
     // no review after and no action
-    patientConsultationPage.submitConsultation();
+    cy.submitButton("Create Consultation");
     // Create a shifting request
     shiftCreation.typeCurrentFacilityPerson("Current Facility Person");
     shiftCreation.typeCurrentFacilityPhone("9999999999");
     shiftCreation.typeShiftReason("reason for shift");
-    shiftCreation.submitShiftForm();
-    facilityLocation.verifyNotification("Shift request created successfully");
+    cy.submitButton("Submit");
+    cy.verifyNotification("Shift request created successfully");
   });
 
   it("OP Patient with Declare Death", () => {

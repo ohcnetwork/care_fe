@@ -111,3 +111,57 @@ Cypress.Commands.add("getAttached", (selector) => {
 Cypress.Commands.add("clearAllFilters", () => {
   return cy.get("#clear-all-filters").click();
 });
+
+Cypress.Commands.add("submitButton", (buttonText = "Submit") => {
+  cy.get("button[type='submit']").contains(buttonText).click();
+});
+
+Cypress.Commands.add(
+  "searchAndSelectOption",
+  (element: string, referance: string) => {
+    cy.get(element)
+      .click()
+      .type(referance)
+      .then(() => {
+        cy.get("[role='option']").contains(referance).click();
+      });
+  }
+);
+
+Cypress.Commands.add(
+  "clickAndMultiSelectOption",
+  (selector: string, options: string | string[]) => {
+    const optionArray = Array.isArray(options) ? options : [options];
+    cy.get(selector)
+      .click()
+      .then(() => {
+        optionArray.forEach((options) => {
+          cy.get("[role='option']").contains(options).click();
+        });
+        cy.get(selector).click();
+      });
+  }
+);
+
+Cypress.Commands.add(
+  "clickAndSelectOption",
+  (element: string, reference: string) => {
+    cy.get(element)
+      .click()
+      .then(() => {
+        cy.get("[role='option']").contains(reference).click();
+      });
+  }
+);
+
+Cypress.Commands.add("clickAndTypeDate", (date: string, selector: string) => {
+  cy.get(selector).click();
+  cy.get("#date-input").click().type(date);
+});
+
+Cypress.Commands.add(
+  "verifyAndClickElement",
+  (element: string, reference: string) => {
+    cy.get(element).contains(reference).should("be.visible").click();
+  }
+);

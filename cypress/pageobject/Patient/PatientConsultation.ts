@@ -1,5 +1,6 @@
 export class PatientConsultationPage {
   selectConsultationStatus(status: string) {
+    cy.wait(5000);
     cy.get("#route_to_facility").scrollIntoView();
     cy.get("#route_to_facility").should("be.visible");
     cy.get("#route_to_facility")
@@ -10,67 +11,39 @@ export class PatientConsultationPage {
   }
 
   selectSymptoms(symptoms) {
-    if (!Array.isArray(symptoms)) {
-      symptoms = [symptoms];
-    }
-    cy.get("#symptoms")
-      .click()
-      .then(() => {
-        symptoms.forEach((symptom) => {
-          cy.get("[role='option']").contains(symptom).click();
-        });
-        cy.get("#symptoms").click();
-      });
+    cy.clickAndMultiSelectOption("#symptoms", symptoms);
   }
 
   selectSymptomsDate(date: string) {
-    cy.get("#symptoms_onset_date").click();
-    cy.get("#date-input").click().type(date);
+    cy.clickAndTypeDate("#symptoms_onset_date", date);
   }
 
   verifyConsultationPatientName(patientName: string) {
     cy.get("#patient-name-consultation").should("contain", patientName);
   }
 
-  fillConsultationFieldById(elementId, text) {
-    const selector = `#${elementId}`;
-    cy.get(selector).scrollIntoView();
-    cy.get(selector).should("be.visible");
-    cy.get(selector).click().type(text);
-  }
-
   selectPatientCategory(category: string) {
-    cy.get("#category")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains(category).click();
-      });
+    cy.clickAndSelectOption("#category", category);
   }
 
   selectPatientReferance(referance: string) {
-    cy.get("#referred_to")
-      .click()
-      .type(referance)
-      .then(() => {
-        cy.get("[role='option']").contains(referance).click();
-      });
+    cy.searchAndSelectOption("#referred_to", referance);
+  }
+
+  selectPatientWard(ward: string) {
+    cy.searchAndSelectOption("#transferred_from_location", ward);
   }
 
   selectPatientSuggestion(suggestion: string) {
-    cy.get("#suggestion")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains(suggestion).click();
-      });
+    cy.clickAndSelectOption("#suggestion", suggestion);
+  }
+
+  selectPatientIcuDate(icudate: string) {
+    cy.get("#icu_admission_date").click().type(icudate);
   }
 
   selectPatientDiagnosis(icdCode, statusId) {
-    cy.get("#icd11-search")
-      .click()
-      .type(icdCode)
-      .then(() => {
-        cy.get("[role='option']").contains(icdCode).click();
-      });
+    cy.searchAndSelectOption("#icd11-search", icdCode);
     cy.get("#diagnosis-list")
       .contains("Add as")
       .focus()
@@ -83,11 +56,7 @@ export class PatientConsultationPage {
   }
 
   selectPatientPrincipalDiagnosis(diagnosis: string) {
-    cy.get("#principal-diagnosis-select")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains(diagnosis).click();
-      });
+    cy.clickAndSelectOption("#principal-diagnosis-select", diagnosis);
   }
 
   verifyTextInConsultation(selector, text) {
@@ -95,26 +64,8 @@ export class PatientConsultationPage {
     cy.get(selector).contains(text).should("be.visible");
   }
 
-  fillTreatingPhysican(doctor: string) {
-    cy.get("#treating_physician")
-      .click()
-      .type(doctor)
-      .then(() => {
-        cy.get("[role='option']").contains(doctor).click();
-      });
-  }
-
   typeReferringFacility(referringFacility: string) {
-    cy.get("#referred_from_facility")
-      .click()
-      .type(referringFacility)
-      .then(() => {
-        cy.get("[role='option']").contains(referringFacility).click();
-      });
-  }
-
-  submitConsultation() {
-    cy.get("#submit").contains("Create Consultation").click();
+    cy.searchAndSelectOption("#referred_from_facility", referringFacility);
   }
 
   clickAddPrescription() {
