@@ -2,14 +2,13 @@ import { PatientAssetBed } from "../Assets/AssetTypes";
 import { Link } from "raviger";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { GENDER_TYPES } from "../../Common/constants";
-import VitalsMonitorAssetPopover from "./VitalsMonitorAssetPopover";
 
 interface VitalsMonitorHeaderProps {
   patientAssetBed?: PatientAssetBed;
 }
 
 const VitalsMonitorHeader = ({ patientAssetBed }: VitalsMonitorHeaderProps) => {
-  const { patient, bed, asset } = patientAssetBed ?? {};
+  const { patient, bed } = patientAssetBed ?? {};
   return (
     <div className="flex items-center justify-between tracking-wide">
       <div className="flex flex-col gap-2 md:flex-row md:items-center">
@@ -49,7 +48,6 @@ const VitalsMonitorHeader = ({ patientAssetBed }: VitalsMonitorHeaderProps) => {
             </span>
           </Link>
         )}
-        <VitalsMonitorAssetPopover asset={asset} />
       </div>
     </div>
   );

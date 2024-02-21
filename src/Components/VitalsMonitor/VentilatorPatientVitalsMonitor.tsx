@@ -6,6 +6,7 @@ import { classNames } from "../../Utils/utils";
 import WaveformLabels from "./WaveformLabels";
 import { VitalsNonWaveformContent } from "./HL7PatientVitalsMonitor";
 import VitalsMonitorHeader from "./VitalsMonitorHeader";
+import VitalsMonitorFooter from "./VitalsMonitorFooter";
 
 export default function VentilatorPatientVitalsMonitor(
   props: IVitalsComponentProps
@@ -82,6 +83,7 @@ export default function VentilatorPatientVitalsMonitor(
           />
         </VitalsNonWaveformContent>
       </div>
+      <VitalsMonitorFooter asset={props.patientAssetBed?.asset} />
     </div>
   );
 }

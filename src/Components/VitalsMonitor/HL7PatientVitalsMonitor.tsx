@@ -8,6 +8,7 @@ import { triggerGoal } from "../../Integrations/Plausible";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import dayjs from "dayjs";
 import VitalsMonitorHeader from "./VitalsMonitorHeader";
+import VitalsMonitorFooter from "./VitalsMonitorFooter";
 
 const minutesAgo = (timestamp: string) => {
   return `${dayjs().diff(dayjs(timestamp), "minute")}m ago`;
@@ -178,6 +179,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
           </div>
         </div>
       </div>
+      <VitalsMonitorFooter asset={asset} />
     </div>
   );
 }
