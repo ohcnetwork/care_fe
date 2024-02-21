@@ -1,4 +1,23 @@
 class FacilityLocation {
+  loadLocationManagementPage(name: string) {
+    cy.awaitUrl("/");
+    cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");
+    cy.get("[id='facility-name-card']").contains(name).click();
+    cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
+    cy.get("h1.text-3xl.font-bold", { timeout: 10000 }).should("be.visible");
+    cy.get("#manage-facility-dropdown button").should("be.visible");
+    cy.get("[id='manage-facility-dropdown']").scrollIntoView().click();
+    cy.get("[id=location-management]").click();
+  }
+
+  closeNotification() {
+    cy.get(".pnotify")
+      .should("exist")
+      .each(($div) => {
+        cy.wrap($div).click();
+      });
+  }
+
   clickAddNewLocationButton() {
     cy.get("#add-new-location").click();
   }
@@ -17,6 +36,14 @@ class FacilityLocation {
 
   fillDescription(description: string) {
     cy.get("#description").clear().click().type(description);
+  }
+
+  clickText(name: string) {
+    cy.get("div").contains(name).click();
+  }
+
+  enterLocationName(name: string) {
+    cy.get("input[id=name]").type(name);
   }
 
   selectLocationType(type: string) {
@@ -99,6 +126,22 @@ class FacilityLocation {
         .should("be.visible")
         .contains(expectedName);
     }
+  }
+
+  clickManageBeds() {
+    cy.get("#manage-beds").click();
+  }
+
+  clickManageAssets() {
+    cy.get("#manage-assets").click();
+  }
+
+  deleteLocation(name: string) {
+    cy.contains("div", name)
+      .should("exist")
+      .then(($div) => {
+        $div.parents("div").eq(2).find("button#delete-location-button").click();
+      });
   }
 
   deleteFirstBed() {
