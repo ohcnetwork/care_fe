@@ -9,6 +9,7 @@ import routes from "../../Redux/api";
 import { DoctorModal } from "./models";
 import DoctorsCountCard from "./DoctorsCountCard";
 import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 export const FacilityDoctorList = (props: any) => {
   const [doctorCapacityModalOpen, setDoctorCapacityModalOpen] = useState(false);
@@ -94,7 +95,7 @@ export const FacilityDoctorList = (props: any) => {
             disabled={doctorList.length === DOCTOR_SPECIALIZATION.length}
             authorizeFor={NonReadOnlyUsers}
           >
-            <i className="fas fa-user-md mr-2 text-white" />
+            <CareIcon icon="l-user-md" className="mr-2 text-base text-white" />
             Add Doctor Types
           </ButtonV2>
         </div>
