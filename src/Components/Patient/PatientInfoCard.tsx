@@ -539,7 +539,7 @@ export default function PatientInfoCard(props: {
               title={"Manage Patient"}
               icon={<CareIcon icon="l-setting" className="text-xl" />}
               className="xl:justify-center"
-              containerClassName="w-full lg:w-auto mt-2 2xl:mt-0 flex justify-center"
+              containerClassName="w-full lg:w-auto mt-2 2xl:mt-0 flex justify-center z-20"
             >
               <div>
                 {[
