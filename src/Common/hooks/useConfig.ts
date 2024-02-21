@@ -19,8 +19,7 @@ export interface IConfig {
    */
   main_logo: ILogo;
   /**
-   * If present, the image will be displayed on the login page
-   * and sidebar header before the main logo.
+   * If present, the image will be displayed on the login page before the main logo.
    */
   state_logo?: ILogo;
   /**

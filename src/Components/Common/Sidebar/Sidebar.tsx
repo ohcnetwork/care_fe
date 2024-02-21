@@ -58,7 +58,7 @@ const StatelessSidebar = ({
     { text: "Notice Board", to: "/notice_board", icon: "care-l-meeting-board" },
   ];
 
-  const { main_logo, state_logo } = useConfig();
+  const { main_logo } = useConfig();
   const activeLink = useActiveLink();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
   const { dashboard_url } = useConfig();
@@ -110,26 +110,12 @@ const StatelessSidebar = ({
     >
       <div className="h-3" /> {/* flexible spacing */}
       <Link href="/">
-        {shrinked ? (
-          <img
-            className="mx-auto mb-2 h-5 self-start transition md:mb-5 md:h-8"
-            src={LOGO_COLLAPSE}
-          />
-        ) : (
-          <div className="mb-2 ml-5 flex h-5 items-center gap-1 self-start transition md:mb-5 md:h-8">
-            {state_logo && (
-              <>
-                <img
-                  src={state_logo?.light}
-                  className="h-14 rounded-lg py-3"
-                  alt="state logo"
-                />
-                <div className="mx-4 h-8 w-[1px] rounded-full bg-gray-600" />
-              </>
-            )}
-            <img src={main_logo.light} className="h-8 w-auto" alt="care logo" />
-          </div>
-        )}
+        <img
+          className={`${
+            shrinked ? "mx-auto" : "ml-5"
+          } mb-2 h-5 self-start transition md:mb-5 md:h-8`}
+          src={shrinked ? LOGO_COLLAPSE : main_logo.light}
+        />
       </Link>
       <div className="h-3" /> {/* flexible spacing */}
       <div className="relative flex h-full flex-col">
@@ -238,9 +224,10 @@ const ToggleShrink = ({ shrinked, toggle }: ToggleShrinkProps) => (
     } transition-all duration-200 ease-in-out`}
     onClick={toggle}
   >
-    <i
-      className={`fa-solid fa-chevron-up ${
-        shrinked ? "rotate-90 text-sm" : "-rotate-90 text-base"
+    <CareIcon
+      icon="l-angle-up"
+      className={`text-3xl ${
+        shrinked ? "rotate-90" : "-rotate-90"
       } transition-all delay-150 duration-300 ease-out`}
     />
   </div>
