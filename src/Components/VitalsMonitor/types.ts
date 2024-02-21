@@ -51,4 +51,5 @@ export interface IVitalsComponentProps {
   socketUrl: string;
   config?: ReturnType<typeof getVitalsCanvasSizeAndDuration>;
   hideHeader?: boolean;
+  hideFooter?: boolean;
 }

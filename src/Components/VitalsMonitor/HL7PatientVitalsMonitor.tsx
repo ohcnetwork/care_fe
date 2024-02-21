@@ -179,7 +179,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
           </div>
         </div>
       </div>
-      <VitalsMonitorFooter asset={asset} />
+      {props.hideFooter ? null : <VitalsMonitorFooter asset={asset} />}
     </div>
   );
 }

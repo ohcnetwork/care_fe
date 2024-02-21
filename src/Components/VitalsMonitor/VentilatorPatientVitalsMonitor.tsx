@@ -83,7 +83,9 @@ export default function VentilatorPatientVitalsMonitor(
           />
         </VitalsNonWaveformContent>
       </div>
-      <VitalsMonitorFooter asset={props.patientAssetBed?.asset} />
+      {props.hideFooter ? null : (
+        <VitalsMonitorFooter asset={props.patientAssetBed?.asset} />
+      )}
     </div>
   );
 }
