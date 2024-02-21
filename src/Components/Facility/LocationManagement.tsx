@@ -79,16 +79,13 @@ const Location = ({
 }: LocationModel) => (
   <div className="flex h-full w-full flex-col rounded border border-gray-300 bg-white p-6 shadow-sm transition-all duration-200 ease-in-out hover:border-primary-400">
     <div className="flex-1">
-      <div className="flex w-full items-center justify-between gap-2">
-        <div className="flex items-center gap-3">
-          <p
-            className="break-words text-xl font-medium"
-            id="view-location-name"
-          >
+      <div className="flex w-full items-start justify-between gap-2">
+        <div className="flex items-start gap-3">
+          <p className="break-all text-xl font-medium" id="view-location-name">
             {name}
           </p>
           <div
-            className="h-fit rounded-full border-2 border-primary-500 bg-primary-100 px-3 py-[3px]"
+            className="mt-2 h-fit rounded-full border-2 border-primary-500 bg-primary-100 px-3 py-[3px]"
             id="location-type"
           >
             <p className="text-xs font-bold text-primary-500">
