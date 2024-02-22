@@ -40,9 +40,7 @@ describe("Patient", () => {
     patientConsultationPage.visitDoctorNotesPage();
     patientConsultationPage.addDoctorsNotes("Test Doctor Notes");
     patientConsultationPage.postDoctorNotes();
-    patientConsultationPage.verifySuccessNotification(
-      "Note added successfully"
-    );
+    cy.verifyNotification("Note added successfully");
   });
 
   it("Edit prescription for an already created patient", () => {

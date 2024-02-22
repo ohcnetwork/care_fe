@@ -15,6 +15,8 @@ describe("Patient Consultation in multiple combination", () => {
   const shiftCreation = new ShiftCreation();
   const patientInvestigation = new PatientInvestigation();
   const patientTreatmentPlan = new PatientTreatmentPlan();
+  const facilityName = "Dummy Facility 40";
+  const doctorName = "Dev Doctor";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -27,9 +29,45 @@ describe("Patient Consultation in multiple combination", () => {
     cy.awaitUrl("/patients");
   });
 
+  it("OP Patient with Declare Death", () => {
+    patientPage.createPatient();
+    patientPage.selectFacility(facilityName);
+    patientPredefined.createPatient();
+    patientPage.patientformvisibility();
+    patientPage.clickCreatePatient();
+    patientPage.verifyPatientIsCreated();
+    // OP Patient
+    patientConsultationPage.selectConsultationStatus(
+      "Outpatient/Emergency Room"
+    );
+    // Asymptomatic
+    patientConsultationPage.selectSymptoms("ASYMPTOMATIC");
+    // CRITICAL category
+    patientConsultationPage.selectPatientCategory("Critical");
+    patientConsultationPage.selectPatientSuggestion("Declare Death");
+    patientConsultationPage.typeCauseOfDeath("Cause of Death");
+    patientConsultationPage.typePatientDateTime("#death_datetime");
+    patientConsultationPage.typeDeathConfirmedBy(doctorName);
+    cy.submitButton("Create Consultation");
+    cy.verifyNotification(
+      "Create Diagnoses - Atleast one diagnosis is required"
+    );
+    patientConsultationPage.selectPatientDiagnosis(
+      "1A04",
+      "add-icd11-diagnosis-as-confirmed"
+    );
+    cy.submitButton("Create Consultation");
+    cy.verifyNotification("Consultation created successfully");
+    // verify the data
+    patientConsultationPage.verifyTextInConsultation(
+      "#consultation-buttons",
+      "EXPIRED"
+    );
+  });
+
   it("Internal Transfer within facility Patient with Domicilary Care", () => {
     patientPage.createPatient();
-    patientPage.selectFacility("Dummy Facility 40");
+    patientPage.selectFacility(facilityName);
     patientPredefined.createPatient();
     patientPage.patientformvisibility();
     patientPage.clickCreatePatient();
@@ -49,7 +87,7 @@ describe("Patient Consultation in multiple combination", () => {
       "1A04",
       "add-icd11-diagnosis-as-confirmed"
     );
-    patientConsultationPage.selectPatientIcuDate("2024-02-19T11:15");
+    patientConsultationPage.typePatientDateTime("#icu_admission_date");
     // add investigation
     patientInvestigation.clickAddInvestigation();
     patientInvestigation.selectInvestigation("Vitals (GROUP)");
@@ -59,13 +97,13 @@ describe("Patient Consultation in multiple combination", () => {
     patientTreatmentPlan.typePatientGeneralInstruction(
       "Patient General Instructions"
     );
-    patientTreatmentPlan.fillTreatingPhysican("Dev Doctor");
+    patientTreatmentPlan.fillTreatingPhysican(doctorName);
     // add review after and add action
     patientTreatmentPlan.selectReviewAfter("15 mins");
     patientTreatmentPlan.selectAction("Specialist Required");
     // add telemedicine
     patientTreatmentPlan.clickTelemedicineCheckbox();
-    patientTreatmentPlan.assignTelemedicineDoctor("Dev Doctor");
+    patientTreatmentPlan.assignTelemedicineDoctor(doctorName);
     cy.submitButton("Create Consultation");
     cy.verifyNotification("Consultation created successfully");
     // verify the data reflection -
@@ -87,7 +125,7 @@ describe("Patient Consultation in multiple combination", () => {
 
   it("Referred From another Facility Patient with OP consultation", () => {
     patientPage.createPatient();
-    patientPage.selectFacility("Dummy Facility 40");
+    patientPage.selectFacility(facilityName);
     patientPredefined.createPatient();
     patientPage.patientformvisibility();
     patientPage.clickCreatePatient();
@@ -115,7 +153,7 @@ describe("Patient Consultation in multiple combination", () => {
       "Patient General Instructions"
     );
     // no review after and no action
-    patientTreatmentPlan.fillTreatingPhysican("Dev Doctor");
+    patientTreatmentPlan.fillTreatingPhysican(doctorName);
     cy.submitButton("Create Consultation");
     cy.verifyNotification("Patient discharged successfully");
     // verify the Discharge Reason, Diagnosis, treatment physican
@@ -125,14 +163,14 @@ describe("Patient Consultation in multiple combination", () => {
     );
     patientConsultationPage.verifyTextInConsultation(
       "#treating-physician",
-      "Dev Doctor"
+      doctorName
     );
     patientConsultationPage.verifyTextInConsultation("#diagnoses-view", "1A04");
   });
 
   it("OP Patient with Refer to another hospital consultation", () => {
     patientPage.createPatient();
-    patientPage.selectFacility("Dummy Facility 40");
+    patientPage.selectFacility(facilityName);
     patientPredefined.createPatient();
     patientPage.patientformvisibility();
     patientPage.clickCreatePatient();
@@ -163,7 +201,7 @@ describe("Patient Consultation in multiple combination", () => {
     patientTreatmentPlan.typePatientGeneralInstruction(
       "Patient General Instructions"
     );
-    patientTreatmentPlan.fillTreatingPhysican("Dev Doctor");
+    patientTreatmentPlan.fillTreatingPhysican(doctorName);
     // no review after and no action
     cy.submitButton("Create Consultation");
     // Create a shifting request
@@ -174,18 +212,10 @@ describe("Patient Consultation in multiple combination", () => {
     cy.verifyNotification("Shift request created successfully");
   });
 
-  it("OP Patient with Declare Death", () => {
-    // Asymptomatic
-    // CRITICAL category
-    // ICD-11 WITH PRINCIPAL
-    // NO investigation
-    // NO review after and NO action
-  });
-
   it("OP Patient with admission consultation", () => {
     // icd 11 - 4 diagnosis with one principal
     patientPage.createPatient();
-    patientPage.selectFacility("Dummy Facility 40");
+    patientPage.selectFacility(facilityName);
     patientPredefined.createPatient();
     patientPage.patientformvisibility();
     patientPage.clickCreatePatient();
