@@ -24,6 +24,7 @@ import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import { PaginatedResponse } from "../../Utils/request/types";
 import { IShift } from "./models";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 interface boardProps {
   board: string;
@@ -107,7 +108,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                   title={t("phone_number")}
                   className="flex items-center text-sm font-medium leading-5 text-gray-500"
                 >
-                  <i className="fas fa-mobile mr-2" />
+                  <CareIcon icon="l-mobile-android" className="mr-2 text-xl" />
                   <dd className="break-normal text-sm font-bold leading-5 text-gray-900">
                     {shift.patient_object.phone_number || ""}
                   </dd>
@@ -118,7 +119,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                   title={t("origin_facility")}
                   className="flex items-center text-sm font-medium leading-5 text-gray-500"
                 >
-                  <i className="fas fa-plane-departure mr-2"></i>
+                  <CareIcon icon="l-plane-departure" className="mr-2 text-xl" />
                   <dd className="break-normal text-sm font-bold leading-5 text-gray-900">
                     {(shift.origin_facility_object || {}).name}
                   </dd>
@@ -130,7 +131,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                     title={t("shifting_approving_facility")}
                     className="flex items-center text-sm font-medium leading-5 text-gray-500"
                   >
-                    <i className="fas fa-user-check mr-2"></i>
+                    <CareIcon icon="l-user-check" className="mr-2 text-xl" />
                     <dd className="break-normal text-sm font-bold leading-5 text-gray-900">
                       {(shift.shifting_approving_facility_object || {}).name}
                     </dd>
@@ -142,7 +143,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                   title={t("assigned_facility")}
                   className="flex items-center text-sm font-medium leading-5 text-gray-500"
                 >
-                  <i className="fas fa-plane-arrival mr-2"></i>
+                  <CareIcon icon="l-plane-arrival" className="mr-2 text-xl" />
 
                   <dd className="break-normal text-sm font-bold leading-5 text-gray-900">
                     {shift.assigned_facility_external ||
@@ -162,7 +163,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                       : "rounded bg-red-400 p-1 text-white")
                   }
                 >
-                  <i className="fas fa-stopwatch mr-2"></i>
+                  <CareIcon icon="l-stopwatch" className="mr-2 text-xl" />
                   <dd className="break-normal text-sm font-bold leading-5">
                     {formatDateTime(shift.modified_date) || "--"}
                   </dd>
@@ -174,7 +175,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                   title={t("patient_address")}
                   className="flex items-center text-sm font-medium leading-5 text-gray-500"
                 >
-                  <i className="fas fa-home mr-2"></i>
+                  <CareIcon icon="l-home" className="mr-2 text-xl" />
                   <dd className="break-normal text-sm font-bold leading-5 text-gray-900">
                     {shift.patient_object.address || "--"}
                   </dd>
@@ -187,7 +188,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                     title={t("assigned_to")}
                     className="flex items-center text-sm font-medium leading-5 text-gray-500"
                   >
-                    <i className="fas fa-user mr-2"></i>
+                    <CareIcon icon="l-user" className="mr-2 text-xl" />
                     <dd className="break-normal text-sm font-bold leading-5 text-gray-900">
                       {shift.assigned_to_object.first_name}{" "}
                       {shift.assigned_to_object.last_name} -{" "}
@@ -202,7 +203,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                   title={t("patient_state")}
                   className="flex items-center text-sm font-medium leading-5 text-gray-500"
                 >
-                  <i className="fas fa-thumbtack mr-2"></i>
+                  <CareIcon icon="l-map-marker" className="mr-2 text-xl" />
                   <dd className="text-sm font-bold leading-5 text-gray-900">
                     {shift.patient_object.state_object.name || "--"}
                   </dd>
@@ -216,7 +217,8 @@ const ShiftCard = ({ shift, filter }: any) => {
               onClick={(_) => navigate(`/shifting/${shift.external_id}`)}
               className="btn btn-default mr-2 w-full bg-white"
             >
-              <i className="fas fa-eye mr-2" /> {t("all_details")}
+              <CareIcon icon="l-eye" className="mr-2 text-xl" />{" "}
+              {t("all_details")}
             </button>
           </div>
           {filter === "COMPLETED" && shift.assigned_facility && (

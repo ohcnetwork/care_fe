@@ -7,6 +7,7 @@ import ConfirmDialog from "../Common/ConfirmDialog";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
+import CareIcon from "../../CAREUI/icons/CareIcon.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -63,14 +64,14 @@ export default function ResultItem(props: any) {
               navigate(`/external_results/${resultItemData.id}/update`)
             }
           >
-            <i className="fas fa-pencil-alt mr-2 text-white"></i>
+            <CareIcon icon="l-pen" className="mr-2 text-lg text-white" />
             {t("update_record")}
           </button>
           <button
             className="btn btn-danger w-full md:w-auto"
             onClick={() => setShowDeleteAlert(true)}
           >
-            <i className="fas fa-trash mr-2 text-white"></i>
+            <CareIcon icon="l-trash" className="mr-2 text-lg text-white" />
             {t("delete_record")}
           </button>
         </div>

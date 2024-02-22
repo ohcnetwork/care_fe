@@ -142,31 +142,8 @@ export const externalResultList = (params: object, altKey: string) => {
   return fireRequest("externalResultList", [], params, null, altKey);
 };
 
-// FileUpload
-
-export const createUpload = (params: object) => {
-  return fireRequest("createUpload", [], params);
-};
-
-export const viewUpload = (params: object) => {
-  return fireRequest("viewUpload", [], params);
-};
-
-export const retrieveUpload = (params: object, fileId: string) => {
-  return fireRequest("retrieveUpload", [], params, { fileId: fileId });
-};
-
-export const editUpload = (
-  params: object,
-  fileId: string,
-  fileType: string,
-  associatingId: string
-) => {
-  return fireRequest("editUpload", [], params, {
-    fileId,
-    fileType,
-    associatingId,
-  });
+export const externalResult = (pathParam: object) => {
+  return fireRequest("externalResult", [], {}, pathParam);
 };
 
 // Investigation
