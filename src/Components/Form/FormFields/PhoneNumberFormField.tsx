@@ -80,6 +80,14 @@ export default function PhoneNumberFormField(props: Props) {
 
   useEffect(() => {
     if (field.value && field.value.length > 0) {
+      if (field.value.startsWith("1800")) {
+        setCountry({ flag: "📞", name: "Support", code: "1800" });
+        return;
+      }
+      if (field.value === "+") {
+        setCountry({ flag: "🌍", name: "Other", code: "+" });
+        return;
+      }
       setCountry(phoneCodes[getCountryCode(field.value)!]);
     }
   }, [setValue]);
