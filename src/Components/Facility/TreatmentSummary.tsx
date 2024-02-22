@@ -4,6 +4,7 @@ import useSlug from "../../Common/hooks/useSlug";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const TreatmentSummary = (props: any) => {
   const { consultationId, patientId } = props;
@@ -35,10 +36,10 @@ const TreatmentSummary = (props: any) => {
             onClick={(_) => window.print()}
             className="btn btn-primary mr-2"
           >
-            <i className="fas fa-print mr-2"></i> Print Treatment Summary
+            <CareIcon icon="l-print" className="mr-2" /> Print Treatment Summary
           </button>
           <button onClick={(_) => goBack(url)} className="btn btn-default">
-            <i className="fas fa-times mr-2"></i> Close
+            <CareIcon icon="l-times" className="mr-2" /> Close
           </button>
         </div>
 
