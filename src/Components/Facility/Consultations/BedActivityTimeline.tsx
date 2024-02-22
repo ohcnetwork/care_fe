@@ -93,9 +93,10 @@ const BedTitleSuffix = ({
         {bed.end_date === null ? (
           <Chip
             text="In Use"
+            startIcon="l-notes"
             size="small"
-            variant="warning"
-            className="ml-5 rounded-xl"
+            variant="primary"
+            className="ml-5"
           />
         ) : (
           ""
