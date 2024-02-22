@@ -7,10 +7,6 @@
 @import "@fontsource/inter/700.css";
 @import "@fontsource/inter/800.css";
 @import "@fontsource/inter/900.css";
-@import "@fortawesome/fontawesome-free/css/all.min.css";
-@import "@fortawesome/fontawesome-free/css/v4-shims.min.css";
-@import "@fortawesome/fontawesome-free/css/v4-font-face.min.css";
-@import "@fortawesome/fontawesome-free/css/v5-font-face.min.css";
 
 @import "@pnotify/core/dist/PNotify.css";
 @import "@pnotify/mobile/dist/PNotifyMobile.css";
