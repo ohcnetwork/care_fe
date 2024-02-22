@@ -12,6 +12,8 @@ import routes from "../../Redux/api";
 import { PatientNoteStateType } from "./models";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import AutoExpandingTextInputFormField from "../Form/FormFields/AutoExpandingTextInputFormField.js";
+import * as Sentry from "@sentry/browser";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
 interface PatientNotesProps {
   patientId: string;
@@ -25,6 +27,33 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   const [patientActive, setPatientActive] = useState(true);
   const [reload, setReload] = useState(false);
   const [focused, setFocused] = useState(false);
+
+  const { username } = useAuthUser();
+
+  const intialSubscriptionState = async () => {
+    try {
+      const res = await request(routes.getUserPnconfig, {
+        pathParams: { username },
+      });
+      const reg = await navigator.serviceWorker.ready;
+      const subscription = await reg.pushManager.getSubscription();
+      if (!subscription && !res.data?.pf_endpoint) {
+        Notification.Warn({
+          msg: "Please subscribe to notifications to get live updates on doctor notes.",
+        });
+      } else if (subscription?.endpoint !== res.data?.pf_endpoint) {
+        Notification.Warn({
+          msg: "Please subscribe to notifications on this device to get live updates on doctor notes.",
+        });
+      }
+    } catch (error) {
+      Sentry.captureException(error);
+    }
+  };
+
+  useEffect(() => {
+    intialSubscriptionState();
+  }, []);
 
   const initialData: PatientNoteStateType = {
     notes: [],
