@@ -17,7 +17,7 @@ import {
   compareBy,
 } from "../../Utils/utils";
 import { navigate, useQueryParams } from "raviger";
-import { lazy, useEffect, useReducer, useState } from "react";
+import { lazy, useCallback, useEffect, useReducer, useState } from "react";
 
 import AccordionV2 from "../Common/components/AccordionV2";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -60,6 +60,7 @@ import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
 import { RequestResult } from "../../Utils/request/types.js";
 import request from "../../Utils/request/request.js";
+import { statusType, useAbortableEffect } from "../../Common/utils.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -360,16 +361,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     }
   };
 
-  useQuery(routes.getPatient, {
-    pathParams: {
-      id: id!,
-    },
-    prefetch: !!id,
-    onResponse: ({ res, data }) => {
-      if (id) {
-        setIsLoading(true);
+  const fetchData = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      const { res, data } = await request(routes.getPatient, {
+        pathParams: { id: id ? id : 0 },
+      });
+      if (!status.aborted) {
         if (res?.ok && data) {
-          setPatientName(data.name ? data.name : "");
+          setPatientName(data.name || "");
           const formData = {
             ...data,
             health_id_number: data.abha_number_object?.abha_number || "",
@@ -443,11 +443,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               }
             }
           );
-          console.log("formData  ", formData);
-          dispatch({ type: "set_form", form: formData });
-          console.log("test1 ");
+          dispatch({
+            type: "set_form",
+            form: formData,
+          });
           setStateId(data.state);
-          console.log("test2 ");
           setDistrictId(data.district);
           setLocalBodyId(data.local_body);
         } else {
@@ -456,7 +456,17 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         setIsLoading(false);
       }
     },
-  });
+    [id]
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      if (id) {
+        fetchData(status);
+      }
+    },
+    [dispatch, fetchData]
+  );
 
   useQuery(routes.listHCXPolicies, {
     query: {
