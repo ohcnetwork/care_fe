@@ -35,10 +35,11 @@ let basicEditor = (~facilityId, ~patientId, ~consultationId, ~id) => {
     className={`rounded-lg border px-4 py-2 mt-4 mx-auto cursor-pointer flex justify-between items-center bg-green-100 border-green-500`}
     href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${id}/update`}>
     <div className="flex items-center">
-      <i className={"text-xl fas fa-user-nurse mr-4 text-green-500"} />
+      <CareIcon icon="l-user-nurse" className="text-xl mr-4 text-green-500" />
+      
       <div className={`font-semibold text-xl text-green-500`}> {str("Basic Editor")} </div>
     </div>
-    <div> <i className="text-3xl fas fa-check-circle text-green-500" /> </div>
+    <div> <CareIcon icon="l-check-circle" className="text-3xl text-green-500" /> </div>
   </Link>
 }
 let editorNameToString = editor => {
@@ -67,8 +68,9 @@ let editorToggle = (editorName, state, send) => {
         : "bg-green-100 border-green-500"}`}
     onClick={_ => showEditor(editorName, send)}>
     <div className="flex items-center">
-      <i
-        className={`text-xl fas fa-user-nurse mr-4 ${Belt.Option.isNone(editorUpdated)
+      <CareIcon
+        icon="l-user-nurse"
+        className={`text-xl mr-4 ${Belt.Option.isNone(editorUpdated)
             ? "text-gray-400"
             : "text-green-500"}`}
       />
@@ -81,8 +83,8 @@ let editorToggle = (editorName, state, send) => {
     </div>
     <div>
       {Belt.Option.isNone(editorUpdated)
-        ? <i className="text-3xl fas fa-check-circle text-gray-300" />
-        : <i className="text-3xl fas fa-check-circle text-green-500" />}
+        ? <CareIcon icon="l-check-circle" className="text-3xl text-gray-300" />
+        : <CareIcon icon="l-check-circle" className="text-3xl text-green-500" />}
     </div>
   </div>
 }
