@@ -185,7 +185,7 @@ const Beds = (props: BedsProps) => {
       )}
       {!discharged ? (
         <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-2 lg:grid-cols-3">
             <div>
               <FieldLabel id="asset-type">Bed</FieldLabel>
               <BedSelect
