@@ -5,7 +5,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
 import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
-import { classNames, parsePhoneNumber } from "../../Utils/utils";
+import { classNames, isValidUrl, parsePhoneNumber } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
@@ -27,13 +27,14 @@ type EditForm = {
   age: string;
   gender: GenderType;
   email: string;
+  video_connect_link: string | undefined;
   phoneNumber: string;
   altPhoneNumber: string;
   user_type: string | undefined;
   doctor_qualification: string | undefined;
   doctor_experience_commenced_on: number | string | undefined;
   doctor_medical_council_registration: string | undefined;
-  weekly_working_hours: string | undefined;
+  weekly_working_hours: string | null;
 };
 type ErrorForm = {
   firstName: string;
@@ -41,6 +42,7 @@ type ErrorForm = {
   age: string;
   gender: string;
   email: string;
+  video_connect_link: string | undefined;
   phoneNumber: string;
   altPhoneNumber: string;
   user_type: string | undefined;
@@ -62,6 +64,7 @@ const initForm: EditForm = {
   lastName: "",
   age: "",
   gender: "Male",
+  video_connect_link: "",
   email: "",
   phoneNumber: "",
   altPhoneNumber: "",
@@ -145,6 +148,7 @@ export default function UserProfile() {
         age: result.data.age?.toString() || "",
         gender: result.data.gender || "Male",
         email: result.data.email,
+        video_connect_link: result.data.video_connect_link,
         phoneNumber: result.data.phone_number?.toString() || "",
         altPhoneNumber: result.data.alt_phone_number?.toString() || "",
         user_type: result.data.user_type,
@@ -240,8 +244,19 @@ export default function UserProfile() {
             invalidForm = true;
           }
           return;
-        case "doctor_qualification":
         case "doctor_experience_commenced_on":
+          if (states.form.user_type === "Doctor" && !states.form[field]) {
+            errors[field] = "Field is required";
+            invalidForm = true;
+          } else if (
+            states.form.user_type === "Doctor" &&
+            Number(states.form.doctor_experience_commenced_on) > 100
+          ) {
+            errors[field] = "Doctor experience should be less than 100 years";
+            invalidForm = true;
+          }
+          return;
+        case "doctor_qualification":
         case "doctor_medical_council_registration":
           if (states.form.user_type === "Doctor" && !states.form[field]) {
             errors[field] = "Field is required";
@@ -249,17 +264,23 @@ export default function UserProfile() {
           }
           return;
         case "weekly_working_hours":
-          if (!states.form[field]) {
-            errors[field] = "This field is required";
-            invalidForm = true;
-          } else if (
-            Number(states.form[field]) < 0 ||
-            Number(states.form[field]) > 168 ||
-            !/^\d+$/.test(states.form[field] ?? "")
+          if (
+            states.form[field] &&
+            (Number(states.form[field]) < 0 ||
+              Number(states.form[field]) > 168 ||
+              !/^\d+$/.test(states.form[field] ?? ""))
           ) {
             errors[field] =
               "Average weekly working hours must be a number between 0 and 168";
             invalidForm = true;
+          }
+          return;
+        case "video_connect_link":
+          if (states.form[field]) {
+            if (isValidUrl(states.form[field]) === false) {
+              errors[field] = "Please enter a valid url";
+              invalidForm = true;
+            }
           }
           return;
       }
@@ -294,6 +315,7 @@ export default function UserProfile() {
         first_name: states.form.firstName,
         last_name: states.form.lastName,
         email: states.form.email,
+        video_connect_link: states.form.video_connect_link,
         phone_number: parsePhoneNumber(states.form.phoneNumber) ?? "",
         alt_phone_number: parsePhoneNumber(states.form.altPhoneNumber) ?? "",
         gender: states.form.gender,
@@ -318,7 +340,11 @@ export default function UserProfile() {
           states.form.user_type === "Doctor"
             ? states.form.doctor_medical_council_registration
             : undefined,
-        weekly_working_hours: states.form.weekly_working_hours,
+        weekly_working_hours:
+          states.form.weekly_working_hours &&
+          states.form.weekly_working_hours !== ""
+            ? states.form.weekly_working_hours
+            : null,
       };
       const { res } = await request(routes.partialUpdateUser, {
         pathParams: { username: authUser.username },
@@ -505,7 +531,7 @@ export default function UserProfile() {
                       Access Level
                     </dt>
                     <dd className="badge badge-pill mt-1 bg-primary-500 text-sm text-white">
-                      <i className="fa-solid fa-user-check mr-1"></i>{" "}
+                      <CareIcon icon="l-user-check" className="mr-1 text-lg" />{" "}
                       {userData?.user_type || "-"}
                     </dd>
                   </div>
@@ -575,7 +601,29 @@ export default function UserProfile() {
                       Average weekly working hours
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {userData?.weekly_working_hours || "-"}
+                      {userData?.weekly_working_hours ?? "-"}
+                    </dd>
+                  </div>
+                  <div
+                    className="my-2 sm:col-span-2"
+                    id="videoconnectlink-profile-details"
+                  >
+                    <dt className="text-sm font-medium leading-5 text-black">
+                      Video Connect Link
+                    </dt>
+                    <dd className="mt-1 break-words text-sm leading-5 text-gray-900">
+                      {userData?.video_connect_link ? (
+                        <a
+                          className="text-blue-500"
+                          href={userData?.video_connect_link}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {userData?.video_connect_link}
+                        </a>
+                      ) : (
+                        "-"
+                      )}
                     </dd>
                   </div>
                 </dl>
@@ -672,12 +720,17 @@ export default function UserProfile() {
                         )}
                         <TextFormField
                           {...fieldProps("weekly_working_hours")}
-                          required
                           label="Average weekly working hours"
                           className="col-span-6 sm:col-span-3"
                           type="number"
                           min={0}
                           max={168}
+                        />
+                        <TextFormField
+                          {...fieldProps("video_connect_link")}
+                          label="Video Conference Link"
+                          className="col-span-6 sm:col-span-6"
+                          type="url"
                         />
                       </div>
                     </div>

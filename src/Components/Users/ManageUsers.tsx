@@ -44,7 +44,10 @@ export default function ManageUsers() {
     FilterBadges,
     advancedFilter,
     resultsPerPage,
-  } = useFilters({ limit: 18 });
+  } = useFilters({
+    limit: 18,
+    cacheBlacklist: ["username"],
+  });
   let manageUsers: any = null;
   const [expandSkillList, setExpandSkillList] = useState(false);
   const [expandFacilityList, setExpandFacilityList] = useState(false);
@@ -195,12 +198,14 @@ export default function ManageUsers() {
                     {user.last_login && cur_online ? (
                       <span>
                         {" "}
-                        <i className="fa-solid fa-clock"></i> Currently Online
+                        <CareIcon icon="l-clock" className="text-lg" />{" "}
+                        Currently Online
                       </span>
                     ) : (
                       <>
                         <span>
-                          <i className="fa-solid fa-clock"></i> Last Online:{" "}
+                          <CareIcon icon="l-clock" className="text-lg" /> Last
+                          Online:{" "}
                         </span>
                         <span
                           aria-label="Online"
@@ -218,25 +223,25 @@ export default function ManageUsers() {
                     )}
                   </div>
                 </div>
-                <div id="name" className="mt-2 text-2xl font-bold capitalize">
+                <div
+                  id="name"
+                  className="mt-2 flex items-center gap-3 text-2xl font-bold capitalize"
+                >
                   {`${user.first_name} ${user.last_name}`}
 
                   {user.last_login && cur_online ? (
-                    <i
-                      className="fas fa-circle ml-1 animate-pulse text-primary-500 opacity-75"
+                    <div
+                      className="h-4 w-4 rounded-full bg-primary-500"
                       aria-label="Online"
-                    ></i>
+                    />
                   ) : null}
                   {showUserDelete(authUser, user) && (
-                    <ButtonV2
-                      variant="danger"
-                      ghost
-                      border
-                      className="float-right"
+                    <div
+                      className="w-8 cursor-pointer rounded-lg bg-red-50 text-xl text-red-600 hover:bg-red-50 hover:text-red-700"
                       onClick={() => handleDelete(user)}
                     >
-                      Delete
-                    </ButtonV2>
+                      <CareIcon icon="l-trash" className="ml-[5px]" />
+                    </div>
                   )}
                 </div>
 
@@ -668,7 +673,7 @@ function UserFacilities(props: { user: any }) {
         <ButtonV2
           id="link-facility"
           disabled={!facility}
-          className="mt-1"
+          className="mt-1 h-[45px] w-[74px] text-base"
           onClick={() => addFacility(username, facility)}
         >
           Add
@@ -712,7 +717,7 @@ function UserFacilities(props: { user: any }) {
           )}
 
           {/* Linked Facilities section */}
-          {userFacilities?.length && (
+          {!!userFacilities?.length && (
             <div className="mt-2" id="linked-facility-list">
               <div className="mb-2 ml-2 text-lg font-bold">
                 Linked Facilities

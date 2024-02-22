@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, LegacyRef } from "react";
 import { useDispatch } from "react-redux";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import {
@@ -23,10 +23,11 @@ import Page from "../../Common/components/Page";
 import ConfirmDialog from "../../Common/ConfirmDialog";
 import { FieldLabel } from "../../Form/FormFields/FormField";
 import useFullscreen from "../../../Common/hooks/useFullscreen";
+import ReactPlayer from "react-player";
+import { isIOS } from "../../../Utils/utils";
 
 const LiveFeed = (props: any) => {
-  const middlewareHostname =
-    props.middlewareHostname || "dev_middleware.coronasafe.live";
+  const middlewareHostname = props.middlewareHostname;
   const [presetsPage, setPresetsPage] = useState(0);
   const cameraAsset = props.asset;
   const [presets, setPresets] = useState<any>([]);
@@ -58,14 +59,16 @@ const LiveFeed = (props: any) => {
 
   const videoEl = liveFeedPlayerRef.current as HTMLVideoElement;
 
-  const url = `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`;
+  const streamUrl = isIOS
+    ? `https://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/hls/live/index.m3u8?uuid=${cameraAsset?.accessKey}&channel=0`
+    : `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`;
 
   const { startStream } = useMSEMediaPlayer({
     config: {
       middlewareHostname,
       ...cameraAsset,
     },
-    url,
+    url: streamUrl,
     videoEl,
   });
 
@@ -356,23 +359,54 @@ const LiveFeed = (props: any) => {
           <div className="flex-1">
             {/* ADD VIDEO PLAYER HERE */}
             <div className="relative mb-4 aspect-video w-full rounded bg-primary-100 lg:mb-0">
-              <video
-                id="mse-video"
-                autoPlay
-                muted
-                playsInline
-                className="z-10 h-full w-full"
-                ref={liveFeedPlayerRef}
-                onPlay={() => {
-                  setVideoStartTime(() => new Date());
-                }}
-                onWaiting={() => {
-                  const delay = calculateVideoLiveDelay();
-                  if (delay > 5) {
-                    setStreamStatus(StreamStatus.Loading);
-                  }
-                }}
-              ></video>
+              {isIOS ? (
+                <div className="absolute inset-0">
+                  <ReactPlayer
+                    url={streamUrl}
+                    ref={liveFeedPlayerRef.current as LegacyRef<ReactPlayer>}
+                    controls={false}
+                    playsinline
+                    playing
+                    muted
+                    width="100%"
+                    height="100%"
+                    onPlay={() => {
+                      setVideoStartTime(() => new Date());
+                      setStreamStatus(StreamStatus.Playing);
+                    }}
+                    onWaiting={() => {
+                      const delay = calculateVideoLiveDelay();
+                      if (delay > 5) {
+                        setStreamStatus(StreamStatus.Loading);
+                      }
+                    }}
+                    onError={(e, _, hlsInstance) => {
+                      if (e === "hlsError") {
+                        const recovered = hlsInstance.recoverMediaError();
+                        console.info(recovered);
+                      }
+                    }}
+                  />
+                </div>
+              ) : (
+                <video
+                  id="mse-video"
+                  autoPlay
+                  muted
+                  playsInline
+                  className="z-10 h-full w-full"
+                  ref={liveFeedPlayerRef}
+                  onPlay={() => {
+                    setVideoStartTime(() => new Date());
+                  }}
+                  onWaiting={() => {
+                    const delay = calculateVideoLiveDelay();
+                    if (delay > 5) {
+                      setStreamStatus(StreamStatus.Loading);
+                    }
+                  }}
+                ></video>
+              )}
 
               {streamStatus === StreamStatus.Playing &&
                 calculateVideoLiveDelay() > 3 && (
@@ -552,13 +586,13 @@ const LiveFeed = (props: any) => {
                             onClick={() => setToUpdate(preset)}
                             className="flex w-1/2 items-center justify-center gap-2 bg-green-200 py-1 text-sm text-green-800 hover:bg-green-800 hover:text-green-200 "
                           >
-                            <i className="fa-solid fa-pencil"></i>
+                            <CareIcon icon="l-pen" />
                           </button>
                           <button
                             onClick={() => setToDelete(preset)}
                             className="flex w-1/2 items-center justify-center gap-2 bg-red-200 py-1 text-sm text-red-800 hover:bg-red-800 hover:text-red-200 "
                           >
-                            <i className="fa-solid fa-trash-can"></i>
+                            <CareIcon icon="l-trash" />
                           </button>
                         </div>
                       </div>
@@ -576,7 +610,7 @@ const LiveFeed = (props: any) => {
                       setPresetsPage(presetsPage - 10);
                     }}
                   >
-                    <i className="fas fa-arrow-left"></i>
+                    <CareIcon icon="l-arrow-left" className="text-2xl" />
                   </button>
                   <button
                     className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
@@ -585,7 +619,7 @@ const LiveFeed = (props: any) => {
                       setPresetsPage(presetsPage + 10);
                     }}
                   >
-                    <i className="fas fa-arrow-right"></i>
+                    <CareIcon icon="l-arrow-right" className="text-2xl" />
                   </button>
                 </div>
               ) : (
@@ -597,7 +631,7 @@ const LiveFeed = (props: any) => {
                       handlePagination(page.offset - page.limit);
                     }}
                   >
-                    <i className="fas fa-arrow-left"></i>
+                    <CareIcon icon="l-arrow-left" className="text-2xl" />
                   </button>
                   <button
                     className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
@@ -606,7 +640,7 @@ const LiveFeed = (props: any) => {
                       handlePagination(page.offset + page.limit);
                     }}
                   >
-                    <i className="fas fa-arrow-right"></i>
+                    <CareIcon icon="l-arrow-right" className="text-2xl" />
                   </button>
                 </div>
               )}

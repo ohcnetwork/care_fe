@@ -5,10 +5,8 @@ import {
   SAMPLE_TEST_RESULT,
   SAMPLE_FLOW_RULES,
 } from "../../Common/constants";
-import { SampleTestModel } from "./models";
+import { CreateFileResponse, SampleTestModel } from "./models";
 import * as Notification from "../../Utils/Notifications.js";
-import { createUpload, editUpload } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
 import { header_content_type, LinearProgressWithLabel } from "./FileUpload";
 import { Submit } from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -18,6 +16,8 @@ import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import TextFormField from "../Form/FormFields/TextFormField";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { useTranslation } from "react-i18next";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 interface Props {
   sample: SampleTestModel;
@@ -62,7 +62,6 @@ const UpdateStatusDialog = (props: Props) => {
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadStarted, setUploadStarted] = useState<boolean>(false);
   const [uploadDone, setUploadDone] = useState<boolean>(false);
-  const redux_dispatch: any = useDispatch();
 
   const currentStatus = SAMPLE_TEST_STATUS.find(
     (i) => i.text === sample.status
@@ -97,9 +96,10 @@ const UpdateStatusDialog = (props: Props) => {
     dispatch({ type: "set_form", form });
   };
 
-  const uploadfile = (response: any) => {
-    const url = response.data.signed_url;
-    const internal_name = response.data.internal_name;
+  const uploadfile = (data: CreateFileResponse) => {
+    const url = data.signed_url;
+    const internal_name = data.internal_name;
+
     const f = file;
     if (f === undefined) return;
     const newFile = new File([f], `${internal_name}`);
@@ -116,29 +116,27 @@ const UpdateStatusDialog = (props: Props) => {
         setUploadPercent(percentCompleted);
       },
     };
+
     axios
       .put(url, newFile, config)
       .then(() => {
         setUploadStarted(false);
         setUploadDone(true);
-        redux_dispatch(
-          editUpload(
-            { upload_completed: true },
-            response.data.id,
-            "SAMPLE_MANAGEMENT",
-            sample.id?.toString() ?? ""
-          )
-        );
-        Notification.Success({
-          msg: "File Uploaded Successfully",
+        request(routes.editUpload, {
+          pathParams: {
+            id: data.id,
+            fileType: "SAMPLE_MANAGEMENT",
+            associatingId: sample.id?.toString() ?? "",
+          },
+          body: { upload_completed: true },
         });
+
+        Notification.Success({ msg: "File Uploaded Successfully" });
       })
-      .catch(() => {
-        setUploadStarted(false);
-      });
+      .catch(() => setUploadStarted(false));
   };
 
-  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>): any => {
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files == null) {
       throw new Error("Error finding e.target.files");
     }
@@ -155,18 +153,21 @@ const UpdateStatusDialog = (props: Props) => {
     const name = f.name;
     setUploadStarted(true);
     setUploadDone(false);
-    const requestData = {
-      original_name: name,
-      file_type: "SAMPLE_MANAGEMENT",
-      name: `${sample.patient_name} Sample Report`,
-      associating_id: sample.id,
-      file_category: category,
-    };
-    redux_dispatch(createUpload(requestData))
-      .then(uploadfile)
-      .catch(() => {
-        setUploadStarted(false);
-      });
+
+    const { data } = await request(routes.createUpload, {
+      body: {
+        original_name: name,
+        file_type: "SAMPLE_MANAGEMENT",
+        name: `${sample.patient_name} Sample Report`,
+        associating_id: sample.id,
+        file_category: category,
+        mime_type: contentType,
+      },
+    });
+
+    if (data) {
+      uploadfile(data);
+    }
   };
 
   return (

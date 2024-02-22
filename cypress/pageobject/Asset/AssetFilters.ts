@@ -1,7 +1,6 @@
 export class AssetFilters {
   filterAssets(
     facilityName: string,
-    assetType: string,
     assetStatus: string,
     assetClass: string,
     assetLocation: string
@@ -12,11 +11,6 @@ export class AssetFilters {
       .type(facilityName)
       .then(() => {
         cy.get("[role='option']").contains(facilityName).click();
-      });
-    cy.get("#asset-type")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains(assetType).click();
       });
     cy.get("#asset-status")
       .click()
@@ -56,9 +50,7 @@ export class AssetFilters {
     });
   }
   clickadvancefilter() {
-    cy.intercept("GET", "**/api/v1/getallfacilities/**").as("advancefilter");
     cy.get("#advanced-filter").click();
-    cy.wait("@advancefilter").its("response.statusCode").should("eq", 200);
   }
   clickslideoverbackbutton() {
     cy.get("#close-slide-over").click();
@@ -66,9 +58,6 @@ export class AssetFilters {
   // Assertions
   assertFacilityText(text) {
     cy.get("[data-testid=Facility]").should("contain", text);
-  }
-  assertAssetTypeText(text) {
-    cy.get("[data-testid='Asset Type']").should("contain", text);
   }
   assertAssetClassText(text) {
     cy.get("[data-testid='Asset Class']").should("contain", text);

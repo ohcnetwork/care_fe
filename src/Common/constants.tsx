@@ -28,6 +28,8 @@ export type UserRole =
   | "Volunteer"
   | "StaffReadOnly"
   | "Staff"
+  | "NurseReadOnly"
+  | "Nurse"
   | "Doctor"
   | "WardAdmin"
   | "LocalBodyAdmin"
@@ -47,6 +49,8 @@ export const USER_TYPE_OPTIONS: {
   { id: "Volunteer", role: "Volunteer", readOnly: false },
   { id: "StaffReadOnly", role: "Staff", readOnly: true },
   { id: "Staff", role: "Staff", readOnly: false },
+  { id: "NurseReadOnly", role: "Nurse", readOnly: true },
+  { id: "Nurse", role: "Nurse", readOnly: false },
   { id: "Doctor", role: "Doctor", readOnly: false },
   { id: "WardAdmin", role: "Ward Admin", readOnly: false },
   { id: "LocalBodyAdmin", role: "Local Body Admin", readOnly: false },
@@ -276,7 +280,6 @@ export const SYMPTOM_CHOICES = [
   { id: 6, text: "MYALGIA" },
   { id: 7, text: "ABDOMINAL DISCOMFORT" },
   { id: 8, text: "VOMITING" },
-  { id: 9, text: "OTHERS" },
   { id: 11, text: "SPUTUM" },
   { id: 12, text: "NAUSEA" },
   { id: 13, text: "CHEST PAIN" },
@@ -291,13 +294,24 @@ export const SYMPTOM_CHOICES = [
   { id: 22, text: "HEAD ACHE" },
   { id: 23, text: "BLEEDING" },
   { id: 24, text: "DIZZINESS" },
+  { id: 25, text: "CHILLS" },
+  { id: 26, text: "GENERAL WEAKNESS" },
+  { id: 27, text: "IRRITABILITY" },
+  { id: 28, text: "CONFUSION" },
+  { id: 29, text: "ABDOMINAL PAIN" },
+  { id: 30, text: "JOINT PAIN" },
+  { id: 31, text: "REDNESS OF EYES" },
+  { id: 32, text: "ANOREXIA" },
+  { id: 33, text: "NEW LOSS OF TASTE" },
+  { id: 34, text: "NEW LOSS OF SMELL" },
+  { id: 9, text: "OTHERS" },
 ];
 
 export const DISCHARGE_REASONS = [
-  { id: "REC", text: "Recovered" },
-  { id: "EXP", text: "Expired" },
-  { id: "REF", text: "Referred" },
-  { id: "LAMA", text: "LAMA" },
+  { id: 1, text: "Recovered" },
+  { id: 2, text: "Referred" },
+  { id: 3, text: "Expired" },
+  { id: 4, text: "LAMA" },
 ];
 
 export const CONSCIOUSNESS_LEVEL = [
@@ -418,24 +432,6 @@ export const SAMPLE_FLOW_RULES = {
   RECEIVED_AT_LAB: ["COMPLETED"],
 };
 
-export const ROLE_STATUS_MAP = {
-  Staff: ["SENT_TO_COLLECTON_CENTRE"],
-  DistrictAdmin: [
-    "APPROVED",
-    "DENIED",
-    "SENT_TO_COLLECTON_CENTRE",
-    "RECEIVED_AND_FORWARED",
-  ],
-  StateLabAdmin: [
-    "APPROVED",
-    "DENIED",
-    "SENT_TO_COLLECTON_CENTRE",
-    "RECEIVED_AND_FORWARED",
-    "RECEIVED_AT_LAB",
-    "COMPLETED",
-  ],
-};
-
 export const DISEASE_STATUS = [
   "POSITIVE",
   "SUSPECTED",
@@ -551,77 +547,83 @@ export const DESIGNATION_HEALTH_CARE_WORKER = [
   "OTHERS",
 ];
 
-export const NOTIFICATION_EVENTS = [
-  { id: "MESSAGE", text: "Notice", icon: "fa-regular fa-message" },
+type NotificationEvent = {
+  id: string;
+  text: string;
+  icon: IconName;
+};
+
+export const NOTIFICATION_EVENTS: NotificationEvent[] = [
+  { id: "MESSAGE", text: "Notice", icon: "l-comment-alt-message" },
   {
     id: "PATIENT_CREATED",
     text: "Patient Created",
-    icon: "fa-solid fa-user-plus",
+    icon: "l-user-plus",
   },
   {
     id: "PATIENT_UPDATED",
     text: "Patient Updated",
-    icon: "fa-solid fa-user-pen",
+    icon: "l-edit",
   },
   {
     id: "PATIENT_DELETED",
     text: "Patient Deleted",
-    icon: "fa-solid fa-user-minus",
+    icon: "l-user-minus",
   },
   {
     id: "PATIENT_CONSULTATION_CREATED",
     text: "Patient Consultation Created",
-    icon: "fa-solid fa-heart-circle-check",
+    icon: "l-heart",
   },
   {
     id: "PATIENT_CONSULTATION_UPDATED",
     text: "Patient Consultation Updated",
-    icon: "fa-solid fa-heart-circle-plus",
+    icon: "l-heart-medical",
   },
   {
     id: "PATIENT_CONSULTATION_DELETED",
     text: "Patient Consultation Deleted",
-    icon: "fa-solid fa-heart-circle-minus",
+    icon: "l-heartbeat",
   },
   {
     id: "INVESTIGATION_SESSION_CREATED",
     text: "Investigation Session Created",
-    icon: "fa-solid fa-magnifying-glass",
+    icon: "l-search",
   },
   {
     id: "INVESTIGATION_UPDATED",
     text: "Investigation Updated",
-    icon: "fa-solid fa-magnifying-glass-plus",
+    icon: "l-search-plus",
   },
   {
     id: "PATIENT_FILE_UPLOAD_CREATED",
     text: "Patient File Upload Created",
-    icon: "fa-solid fa-file-medical",
+    icon: "l-file-medical",
   },
   {
     id: "CONSULTATION_FILE_UPLOAD_CREATED",
     text: "Consultation File Upload Created",
-    icon: "fa-solid fa-file-waveform",
+    icon: "l-file-upload",
   },
   {
     id: "PATIENT_CONSULTATION_UPDATE_CREATED",
     text: "Patient Consultation Update Created",
-    icon: "fa-solid fa-file-circle-check",
+    icon: "l-heart",
   },
   {
     id: "PATIENT_CONSULTATION_UPDATE_UPDATED",
     text: "Patient Consultation Update Updated",
-    icon: "fa-solid fa-file-circle-plus",
+    icon: "l-heart-medical",
   },
   {
     id: "SHIFTING_UPDATED",
     text: "Shifting Updated",
-    icon: "fa-solid fa-truck-medical",
+    icon: "l-ambulance",
   },
   {
     id: "PATIENT_NOTE_ADDED",
     text: "Patient Note Added",
-    icon: "fa-solid fa-message",
+    icon: "l-notes",
   },
 ];
 
@@ -1042,6 +1044,8 @@ export const USER_TYPES_MAP = {
   StaffReadOnly: "Staff",
   Staff: "Staff",
   Doctor: "Doctor",
+  Nurse: "Nurse",
+  NurseReadOnly: "Nurse",
   WardAdmin: "Ward Admin",
   LocalBodyAdmin: "Local Body Admin",
   DistrictLabAdmin: "District Lab Admin",
@@ -1051,7 +1055,7 @@ export const USER_TYPES_MAP = {
   StateReadOnlyAdmin: "State Admin",
   StateAdmin: "State Admin",
   RemoteSpecialist: "Remote Specialist",
-};
+} as const;
 
 export const AREACODES: Record<string, string[]> = {
   CA: [

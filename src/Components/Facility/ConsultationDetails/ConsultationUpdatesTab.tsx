@@ -2,8 +2,8 @@ import { lazy, useEffect, useState } from "react";
 import { ConsultationTabProps } from "./index";
 import { AssetBedModel, AssetClass, AssetData } from "../../Assets/AssetTypes";
 import { useDispatch } from "react-redux";
-import { getPermittedFacility, listAssetBeds } from "../../../Redux/actions";
-import { BedModel, FacilityModel } from "../models";
+import { listAssetBeds } from "../../../Redux/actions";
+import { BedModel } from "../models";
 import HL7PatientVitalsMonitor from "../../VitalsMonitor/HL7PatientVitalsMonitor";
 import VentilatorPatientVitalsMonitor from "../../VitalsMonitor/VentilatorPatientVitalsMonitor";
 import useVitalsAspectRatioConfig from "../../VitalsMonitor/useVitalsAspectRatioConfig";
@@ -13,6 +13,9 @@ import Chip from "../../../CAREUI/display/Chip";
 import { formatAge, formatDate, formatDateTime } from "../../../Utils/utils";
 import ReadMore from "../../Common/components/Readmore";
 import DailyRoundsList from "../Consultations/DailyRoundsList";
+import EventsList from "./Events/EventsList";
+import SwitchTabs from "../../Common/components/SwitchTabs";
+import { getVitalsMonitorSocketUrl } from "../../VitalsMonitor/utils";
 
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
 
@@ -22,6 +25,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
   const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
   const [monitorBedData, setMonitorBedData] = useState<AssetBedModel>();
   const [ventilatorBedData, setVentilatorBedData] = useState<AssetBedModel>();
+  const [showEvents, setShowEvents] = useState<boolean>(false);
 
   const vitals = useVitalsAspectRatioConfig({
     default: undefined,
@@ -40,32 +44,22 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
       return;
 
     const fetchData = async () => {
-      const [facilityRes, assetBedRes] = await Promise.all([
-        dispatch(getPermittedFacility(props.consultationData.facility as any)),
-        dispatch(
-          listAssetBeds({
-            facility: props.consultationData.facility as any,
-            bed: props.consultationData.current_bed?.bed_object.id,
-          })
-        ),
-      ]);
-
-      const { middleware_address } = facilityRes.data as FacilityModel;
+      const assetBedRes = await dispatch(
+        listAssetBeds({
+          facility: props.consultationData.facility as any,
+          bed: props.consultationData.current_bed?.bed_object.id,
+        })
+      );
       const assetBeds = assetBedRes?.data?.results as AssetBedModel[];
 
       const monitorBedData = assetBeds?.find(
         (i) => i.asset_object?.asset_class === AssetClass.HL7MONITOR
       );
+
       setMonitorBedData(monitorBedData);
-      const assetDataForMonitor = monitorBedData?.asset_object;
-      const hl7Meta = assetDataForMonitor?.meta;
-      const hl7Middleware =
-        hl7Meta?.middleware_hostname ||
-        assetDataForMonitor?.location_object?.middleware_address ||
-        middleware_address;
-      if (hl7Middleware && hl7Meta?.local_ip_address) {
+      if (monitorBedData?.asset_object) {
         setHL7SocketUrl(
-          `wss://${hl7Middleware}/observations/${hl7Meta.local_ip_address}`
+          getVitalsMonitorSocketUrl(monitorBedData?.asset_object)
         );
       }
 
@@ -73,6 +67,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
         props.consultationData?.current_bed?.assets_objects?.find(
           (i) => i.asset_class === AssetClass.VENTILATOR
         );
+
       let ventilatorBedData;
       if (consultationBedVentilator) {
         ventilatorBedData = {
@@ -84,24 +79,12 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
           (i) => i.asset_object.asset_class === AssetClass.VENTILATOR
         );
       }
-      setVentilatorBedData(ventilatorBedData);
-      const ventilatorMeta = ventilatorBedData?.asset_object?.meta;
-      const ventilatorMiddleware =
-        ventilatorMeta?.middleware_hostname ||
-        consultationBedVentilator?.location_object.middleware_address ||
-        middleware_address;
-      if (ventilatorMiddleware && ventilatorMeta?.local_ip_address) {
-        setVentilatorSocketUrl(
-          `wss://${ventilatorMiddleware}/observations/${ventilatorMeta?.local_ip_address}`
-        );
-      }
 
-      if (
-        !(hl7Middleware && hl7Meta?.local_ip_address) &&
-        !(ventilatorMiddleware && ventilatorMeta?.local_ip_address)
-      ) {
-        setHL7SocketUrl(undefined);
-        setVentilatorSocketUrl(undefined);
+      setVentilatorBedData(ventilatorBedData);
+      if (ventilatorBedData?.asset_object) {
+        setVentilatorSocketUrl(
+          getVitalsMonitorSocketUrl(ventilatorBedData?.asset_object)
+        );
       }
     };
 
@@ -146,7 +129,11 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
         )}
       <div className="flex flex-col xl:flex-row">
         <div className="w-full xl:w-2/3">
-          <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
+          <PageTitle
+            title="Basic Information"
+            hideBack={true}
+            breadcrumbs={false}
+          />
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
             {!props.consultationData.discharge_date &&
               ((hl7SocketUrl && !ventilatorSocketUrl) ||
@@ -196,7 +183,8 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             {props.consultationData.discharge_date && (
               <div
                 className={`gap-4 overflow-hidden rounded-lg bg-white shadow ${
-                  props.consultationData.discharge_reason === "REC" &&
+                  props.consultationData.new_discharge_reason ===
+                    DISCHARGE_REASONS.find((i) => i.text == "Recovered")?.id &&
                   "lg:col-span-2"
                 }`}
               >
@@ -210,11 +198,13 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                       <span className="font-semibold">
                         {DISCHARGE_REASONS.find(
                           (d) =>
-                            d.id === props.consultationData.discharge_reason
+                            d.id === props.consultationData.new_discharge_reason
                         )?.text ?? "--"}
                       </span>
                     </div>
-                    {props.consultationData.discharge_reason === "REF" && (
+                    {props.consultationData.new_discharge_reason ===
+                      DISCHARGE_REASONS.find((i) => i.text == "Referred")
+                        ?.id && (
                       <div>
                         Referred Facility {" - "}
                         <span className="font-semibold">
@@ -224,7 +214,9 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         </span>
                       </div>
                     )}
-                    {props.consultationData.discharge_reason === "REC" && (
+                    {props.consultationData.new_discharge_reason ===
+                      DISCHARGE_REASONS.find((i) => i.text == "Recovered")
+                        ?.id && (
                       <div className="grid gap-4">
                         <div>
                           Discharge Date {" - "}
@@ -259,7 +251,9 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         </div>
                       </div>
                     )}
-                    {props.consultationData.discharge_reason === "EXP" && (
+                    {props.consultationData.new_discharge_reason ===
+                      DISCHARGE_REASONS.find((i) => i.text == "Expired")
+                        ?.id && (
                       <div className="grid gap-4">
                         <div>
                           Date of Death {" - "}
@@ -286,8 +280,8 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         </div>
                       </div>
                     )}
-                    {["REF", "LAMA"].includes(
-                      props.consultationData.discharge_reason ?? ""
+                    {[2, 4].includes(
+                      props.consultationData.new_discharge_reason ?? 0
                     ) && (
                       <div className="grid gap-4">
                         <div>
@@ -355,7 +349,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         <span className="text-xs font-semibold leading-relaxed text-gray-800">
                           from{" "}
                           {formatDate(
-                            props.consultationData.last_daily_round.created_at
+                            props.consultationData.last_daily_round.taken_at
                           )}
                         </span>
                       </>
@@ -615,65 +609,85 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
               </div>
             </div>
           )}
-
-          <div className="mt-4 overflow-hidden rounded-lg bg-white shadow">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                Body Details
-              </h3>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div>
-                  Gender {" - "}
-                  <span className="font-semibold">
-                    {props.patientData.gender ?? "-"}
-                  </span>
-                </div>
-                <div>
-                  Age {" - "}
-                  <span className="font-semibold">
-                    {props.patientData.age !== undefined // 0 is a valid age, so we need to check for undefined
-                      ? formatAge(
-                          props.patientData.age,
-                          props.patientData.date_of_birth
-                        )
-                      : "-"}
-                  </span>
-                </div>
-                <div>
-                  Weight {" - "}
-                  <span className="font-semibold">
-                    {props.consultationData.weight ?? "-"} Kg
-                  </span>
-                </div>
-                <div>
-                  Height {" - "}
-                  <span className="font-semibold">
-                    {props.consultationData.height ?? "-"} cm
-                  </span>
-                </div>
-                <div>
-                  Body Surface Area {" - "}
-                  <span className="font-semibold">
-                    {Math.sqrt(
-                      (Number(props.consultationData.weight) *
-                        Number(props.consultationData.height)) /
-                        3600
-                    ).toFixed(2)}{" "}
-                    m<sup>2</sup>
-                  </span>
-                </div>
-                <div>
-                  Blood Group {" - "}
-                  <span className="font-semibold">
-                    {props.patientData.blood_group ?? "-"}
-                  </span>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="col-span-1 mt-4 overflow-hidden rounded-lg bg-white shadow">
+              <div className="px-4 py-5 sm:p-6">
+                <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                  Body Details
+                </h3>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    Gender {" - "}
+                    <span className="font-semibold">
+                      {props.patientData.gender ?? "-"}
+                    </span>
+                  </div>
+                  <div>
+                    Age {" - "}
+                    <span className="font-semibold">
+                      {props.patientData.age !== undefined // 0 is a valid age, so we need to check for undefined
+                        ? formatAge(
+                            props.patientData.age,
+                            props.patientData.date_of_birth
+                          )
+                        : "-"}
+                    </span>
+                  </div>
+                  <div>
+                    Weight {" - "}
+                    <span className="font-semibold">
+                      {props.consultationData.weight ?? "-"} Kg
+                    </span>
+                  </div>
+                  <div>
+                    Height {" - "}
+                    <span className="font-semibold">
+                      {props.consultationData.height ?? "-"} cm
+                    </span>
+                  </div>
+                  <div>
+                    Body Surface Area {" - "}
+                    <span className="font-semibold">
+                      {Math.sqrt(
+                        (Number(props.consultationData.weight) *
+                          Number(props.consultationData.height)) /
+                          3600
+                      ).toFixed(2)}{" "}
+                      m<sup>2</sup>
+                    </span>
+                  </div>
+                  <div>
+                    Blood Group {" - "}
+                    <span className="font-semibold">
+                      {props.patientData.blood_group ?? "-"}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div className="w-full pl-4 xl:w-1/3">
-          <DailyRoundsList consultation={props.consultationData} />
+        <div className="w-full pl-0 md:pl-4 xl:w-1/3">
+          <SwitchTabs
+            className="mt-3 w-full lg:w-full"
+            tab2={
+              <div className="flex items-center justify-center gap-1 text-sm">
+                Events
+                <span className="rounded-lg bg-warning-400 p-[1px] px-1 text-[10px] text-white">
+                  beta
+                </span>
+              </div>
+            }
+            tab1="Daily Rounds"
+            onClickTab1={() => setShowEvents(false)}
+            onClickTab2={() => setShowEvents(true)}
+            isTab2Active={showEvents}
+          />
+          {showEvents ? (
+            <EventsList />
+          ) : (
+            <DailyRoundsList consultation={props.consultationData} />
+          )}
         </div>
       </div>
     </div>

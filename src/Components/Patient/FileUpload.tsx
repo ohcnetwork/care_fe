@@ -3,21 +3,12 @@ import CircularProgress from "../Common/components/CircularProgress";
 import {
   useCallback,
   useState,
-  useEffect,
   useRef,
   lazy,
   ChangeEvent,
+  useEffect,
 } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  viewUpload,
-  retrieveUpload,
-  createUpload,
-  getPatient,
-  editUpload,
-} from "../../Redux/actions";
-import { FileUploadModel } from "./models";
+import { CreateFileResponse, FileUploadModel } from "./models";
 import * as Notification from "../../Utils/Notifications.js";
 import { VoiceRecorder } from "../../Utils/VoiceRecorder";
 import Pagination from "../Common/Pagination";
@@ -39,6 +30,9 @@ import AuthorizedChild from "../../CAREUI/misc/AuthorizedChild";
 import Page from "../Common/components/Page";
 import FilePreviewDialog from "../Common/FilePreviewDialog";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -145,7 +139,6 @@ export const FileUpload = (props: FileUploadProps) => {
     claimId,
   } = props;
   const id = patientId;
-  const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedArchievedFiles, setuploadedArchievedFiles] = useState<
     Array<FileUploadModel>
@@ -157,7 +150,6 @@ export const FileUpload = (props: FileUploadProps) => {
     useState<Array<FileUploadModel>>([{}]);
   const [uploadStarted, setUploadStarted] = useState<boolean>(false);
   const [audiouploadStarted, setAudioUploadStarted] = useState<boolean>(false);
-  const [reload, setReload] = useState<boolean>(false);
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadFileName, setUploadFileName] = useState<string>("");
   const [uploadFileError, setUploadFileError] = useState<string>("");
@@ -165,7 +157,6 @@ export const FileUpload = (props: FileUploadProps) => {
   const [fileUrl, setFileUrl] = useState("");
   const [audioName, setAudioName] = useState<string>("");
   const [audioFileError, setAudioFileError] = useState<string>("");
-  const [contentType, setcontentType] = useState<string>("");
   const [downloadURL, setDownloadURL] = useState<string>();
   const FACING_MODE_USER = "user";
   const FACING_MODE_ENVIRONMENT = { exact: "environment" };
@@ -173,8 +164,8 @@ export const FileUpload = (props: FileUploadProps) => {
   const [previewImage, setPreviewImage] = useState(null);
   const [facingMode, setFacingMode] = useState<any>(FACING_MODE_USER);
   const videoConstraints = {
-    width: 1280,
-    height: 720,
+    width: { ideal: 4096 },
+    height: { ideal: 2160 },
     facingMode: "user",
   };
   const { width } = useWindowDimensions();
@@ -205,8 +196,6 @@ export const FileUpload = (props: FileUploadProps) => {
   const [totalDischargeSummaryFilesCount, setTotalDischargeSummaryFilesCount] =
     useState(0);
   const [offset, setOffset] = useState(0);
-  const [facilityName, setFacilityName] = useState("");
-  const [patientName, setPatientName] = useState("");
   const [modalOpenForEdit, setModalOpenForEdit] = useState(false);
   const [modalOpenForCamera, setModalOpenForCamera] = useState(false);
   const [modalOpenForArchive, setModalOpenForArchive] = useState(false);
@@ -220,39 +209,26 @@ export const FileUpload = (props: FileUploadProps) => {
   const [sortFileState, setSortFileState] = useState("UNARCHIVED");
   const authUser = useAuthUser();
   const limit = RESULTS_PER_PAGE_LIMIT;
-  const [isActive, setIsActive] = useState(true);
   const [tabs, setTabs] = useState([
     { name: "Unarchived Files", value: "UNARCHIVED" },
     { name: "Archived Files", value: "ARCHIVED" },
   ]);
-  useEffect(() => {
-    async function fetchPatientName() {
-      if (patientId) {
-        const res = await dispatch(getPatient({ id: patientId }));
-        if (res.data) {
-          setPatientName(res.data.name);
-          setFacilityName(res.data.facility_object.name);
-          setIsActive(res.data.is_active);
-        }
-      } else {
-        setPatientName("");
-        setFacilityName("");
-      }
-    }
 
-    fetchPatientName();
-  }, [dispatch, patientId]);
+  const { data: patient } = useQuery(routes.getPatient, {
+    pathParams: { id: patientId },
+    prefetch: !!patientId,
+  });
 
   const captureImage = () => {
     setPreviewImage(webRef.current.getScreenshot());
-    fetch(webRef.current.getScreenshot())
-      .then((res) => res.blob())
-      .then((blob) => {
-        const myFile = new File([blob], "image.png", {
-          type: blob.type,
-        });
-        setFile(myFile);
+    const canvas = webRef.current.getCanvas();
+    canvas?.toBlob((blob: Blob) => {
+      const extension = blob.type.split("/").pop();
+      const myFile = new File([blob], `image.${extension}`, {
+        type: blob.type,
       });
+      setFile(myFile);
+    });
   };
 
   const handlePagination = (page: number, limit: number) => {
@@ -276,6 +252,7 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const handleClose = () => {
     setDownloadURL("");
+    setPreviewImage(null);
     setFileState({
       ...file_state,
       open: false,
@@ -298,103 +275,92 @@ export const FileUpload = (props: FileUploadProps) => {
     }
   };
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const unarchivedFileData = {
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+
+    const unarchivedQuery = await request(routes.viewUpload, {
+      query: {
         file_type: type,
         associating_id: getAssociatedId(),
         is_archived: false,
         limit: limit,
         offset: offset,
-      };
-      let res = await dispatch(viewUpload(unarchivedFileData));
-      if (!status.aborted) {
-        if (res?.data) {
-          audio_urls(res.data.results);
-          setuploadedUnarchievedFiles(
-            res?.data?.results?.filter(
-              (file: FileUploadModel) =>
-                file.upload_completed || file.file_category === "AUDIO"
-            )
-          );
-          setTotalUnarchievedFilesCount(res.data.count);
-        }
-        setIsLoading(false);
-      }
-      const archivedFileData = {
+      },
+    });
+
+    if (unarchivedQuery.data) {
+      audio_urls(unarchivedQuery.data.results);
+      setuploadedUnarchievedFiles(
+        unarchivedQuery.data.results?.filter(
+          (file) => file.upload_completed || file.file_category === "AUDIO"
+        )
+      );
+      setTotalUnarchievedFilesCount(unarchivedQuery.data.count);
+    }
+
+    const archivedQuery = await request(routes.viewUpload, {
+      query: {
         file_type: type,
         associating_id: getAssociatedId(),
         is_archived: true,
         limit: limit,
         offset: offset,
-      };
-      res = await dispatch(viewUpload(archivedFileData));
-      if (!status.aborted) {
-        if (res?.data) {
-          setuploadedArchievedFiles(res.data.results);
-          setTotalArchievedFilesCount(res.data.count);
-        }
-        setIsLoading(false);
-      }
-      if (type === "CONSULTATION") {
-        const dischargeSummaryFileData = {
+      },
+    });
+
+    if (archivedQuery.data) {
+      setuploadedArchievedFiles(archivedQuery.data.results);
+      setTotalArchievedFilesCount(archivedQuery.data.count);
+    }
+
+    if (type === "CONSULTATION") {
+      const dischargeSummaryQuery = await request(routes.viewUpload, {
+        query: {
           file_type: "DISCHARGE_SUMMARY",
           associating_id: getAssociatedId(),
           is_archived: false,
           limit: limit,
           offset: offset,
-        };
-        res = await dispatch(viewUpload(dischargeSummaryFileData));
-        if (!status.aborted) {
-          if (res?.data) {
-            setuploadedDischargeSummaryFiles(res.data.results);
-            setTotalDischargeSummaryFilesCount(res.data.count);
-            if (res?.data?.results?.length > 0) {
-              setTabs([
-                ...tabs,
-                {
-                  name: "Discharge Summary",
-                  value: "DISCHARGE_SUMMARY",
-                },
-              ]);
-            }
-          }
+        },
+      });
+      if (dischargeSummaryQuery.data) {
+        setuploadedDischargeSummaryFiles(dischargeSummaryQuery.data.results);
+        setTotalDischargeSummaryFilesCount(dischargeSummaryQuery.data.count);
+        if (dischargeSummaryQuery.data?.results?.length) {
+          setTabs([
+            ...tabs,
+            {
+              name: "Discharge Summary",
+              value: "DISCHARGE_SUMMARY",
+            },
+          ]);
         }
-        setIsLoading(false);
       }
-    },
-    [dispatch, id, offset]
-  );
+    }
+
+    setIsLoading(false);
+  }, [id, offset]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   // Store all audio urls for each audio file
-  const audio_urls = (files: any) => {
-    let audio_files = files || [];
-    audio_files = audio_files.filter(
-      (x: FileUploadModel) => x.file_category === "AUDIO"
+  const audio_urls = async (files: FileUploadModel[]) => {
+    const audioFiles = files.filter((x) => x.file_category === "AUDIO");
+    const query = { file_type: type, associating_id: getAssociatedId() };
+    const urls = await Promise.all(
+      audioFiles.map(async (file) => {
+        const id = file.id as string;
+        const { data } = await request(routes.retrieveUpload, {
+          query,
+          pathParams: { id: id as string },
+        });
+        return [id, data?.read_signed_url];
+      })
     );
-
-    const getURL = async (audio_files: any) => {
-      const data = { file_type: type, associating_id: getAssociatedId() };
-      const all_urls: any = {};
-
-      for (const x of audio_files) {
-        if (x.id) {
-          const responseData = await dispatch(retrieveUpload(data, x.id));
-          all_urls[`${x.id}`] = responseData.data.read_signed_url;
-        }
-      }
-      seturl(all_urls);
-    };
-    getURL(audio_files);
+    seturl(Object.fromEntries(urls));
   };
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [dispatch, fetchData, id, reload]
-  );
 
   // Function to extract the extension of the file
   const getExtension = (url: string) => {
@@ -404,6 +370,7 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   const getIconClassName = (extensionName: string | undefined) => {
+    if (!extensionName) return "l-file-medical";
     // check for image files
     if (
       [
@@ -421,9 +388,9 @@ export const FileUpload = (props: FileUploadProps) => {
         ".pjp",
         ".svg",
         ".webp",
-      ].some((ext) => ext === extensionName)
+      ].includes(extensionName)
     ) {
-      return "fa-solid fa-file-image";
+      return "l-image";
     }
     // check for video files
     if (
@@ -443,58 +410,46 @@ export const FileUpload = (props: FileUploadProps) => {
         ".qt",
         ".flv",
         ".swf",
-      ].some((ext) => ext === extensionName)
+      ].includes(extensionName)
     ) {
-      return "fa-solid fa-file-video";
+      return "l-video";
     }
-    // check for compressed files
-    if (extensionName === ".zip" || extensionName === ".rar") {
-      return "fa-solid fa-file-zipper";
-    }
-    // check for misclaneous files whose icons are available freely in fontawesome
-    if (extensionName === ".pdf") {
-      return "fa-solid fa-file-pdf";
-    }
-    if (extensionName === ".docx") {
-      return "fa-solid fa-file-word";
-    }
-    if (extensionName === ".csv") {
-      return "fa-solid fa-file-csv";
-    }
-    if (extensionName === ".xlsx") {
-      return "fa-solid fa-file-excel";
-    }
-    if (extensionName === ".txt") {
-      return "fa-solid fa-file-lines";
-    }
+
     if (extensionName === ".pptx") {
-      return "fa-solid fa-file-powerpoint";
+      return "l-presentation-play";
     }
-    return "fa-solid fa-file-medical";
+    return "l-file-medical";
   };
 
-  const loadFile = async (id: any) => {
+  const loadFile = async (id: string) => {
     setFileUrl("");
     setFileState({ ...file_state, open: true });
-    const data = {
-      file_type: sortFileState === "DISCHARGE_SUMMARY" ? sortFileState : type,
-      associating_id: getAssociatedId(),
-    };
-    const responseData = await dispatch(retrieveUpload(data, id));
-    const file_extension = getExtension(responseData.data.read_signed_url);
-    if (file_extension === "pdf") {
-      window.open(responseData.data.read_signed_url, "_blank");
+    const { data } = await request(routes.retrieveUpload, {
+      query: {
+        file_type: sortFileState === "DISCHARGE_SUMMARY" ? sortFileState : type,
+        associating_id: getAssociatedId(),
+      },
+      pathParams: { id },
+    });
+
+    if (!data) return;
+
+    const signedUrl = data.read_signed_url as string;
+    const extension = getExtension(signedUrl);
+
+    if (extension === "pdf") {
+      window.open(signedUrl, "_blank");
       setFileState({ ...file_state, open: false });
     } else {
       setFileState({
         ...file_state,
         open: true,
-        name: responseData.data.name,
-        extension: file_extension,
-        isImage: ExtImage.includes(file_extension),
+        name: data.name as string,
+        extension,
+        isImage: ExtImage.includes(extension),
       });
-      downloadFileUrl(responseData.data.read_signed_url);
-      setFileUrl(responseData.data.read_signed_url);
+      downloadFileUrl(signedUrl);
+      setFileUrl(signedUrl);
     }
   };
 
@@ -518,63 +473,54 @@ export const FileUpload = (props: FileUploadProps) => {
     }
   };
 
-  const partialupdateFileName = async (id: any, name: string) => {
-    const data = {
-      file_type: sortFileState === "DISCHARGE_SUMMARY" ? sortFileState : type,
-      name: name,
-      associating_id: getAssociatedId(),
-    };
-    if (validateEditFileName(name)) {
-      const res = await dispatch(
-        editUpload({ name: data.name }, id, data.file_type, data.associating_id)
-      );
-      if (res && res.status === 200) {
-        fetchData(res.status);
-        Notification.Success({
-          msg: "File name changed successfully",
-        });
-        setbtnloader(false);
-        setModalOpenForEdit(false);
-      } else {
-        setbtnloader(false);
-      }
-    } else {
+  const partialupdateFileName = async (id: string, name: string) => {
+    if (!validateEditFileName(name)) {
       setbtnloader(false);
+      return;
     }
+
+    const fileType =
+      sortFileState === "DISCHARGE_SUMMARY" ? sortFileState : type;
+
+    const { res } = await request(routes.editUpload, {
+      body: { name },
+      pathParams: {
+        id,
+        fileType,
+        associatingId: getAssociatedId(),
+      },
+    });
+
+    if (res?.ok) {
+      fetchData();
+      Notification.Success({ msg: "File name changed successfully" });
+      setModalOpenForEdit(false);
+    }
+    setbtnloader(false);
   };
 
-  const archiveFile = async (id: any, archiveReason: string) => {
-    const data = {
-      file_type: type,
-      is_archived: true,
-      archive_reason: archiveReason,
-      associating_id: getAssociatedId(),
-    };
-    if (validateArchiveReason(archiveReason)) {
-      const res = await dispatch(
-        editUpload(
-          {
-            is_archived: data.is_archived,
-            archive_reason: data.archive_reason,
-          },
-          id,
-          data.file_type,
-          data.associating_id
-        )
-      );
-      if (res && res.status === 200) {
-        fetchData(res.status);
-        Notification.Success({
-          msg: "File archived successfully",
-        });
-        setbtnloader(false);
-        setModalOpenForArchive(false);
-      } else {
-        setbtnloader(false);
-      }
-    } else {
+  const archiveFile = async (id: string, archive_reason: string) => {
+    if (!validateArchiveReason(archiveReason)) {
       setbtnloader(false);
+      return;
     }
+
+    const { res } = await request(routes.editUpload, {
+      body: { is_archived: true, archive_reason },
+      pathParams: {
+        id,
+        fileType: type,
+        associatingId: getAssociatedId(),
+      },
+    });
+
+    if (res?.ok) {
+      fetchData();
+      Notification.Success({ msg: "File archived successfully" });
+      setModalOpenForArchive(false);
+    }
+
+    setbtnloader(false);
   };
 
   const renderFileUpload = (item: FileUploadModel) => {
@@ -590,7 +536,10 @@ export const FileUpload = (props: FileUploadProps) => {
                 <div className="flex flex-wrap justify-between space-y-2">
                   <div className="flex flex-wrap justify-between space-x-2">
                     <div>
-                      <i className="fa-solid fa-file-audio fa-3x m-3 text-primary-500"></i>
+                      <CareIcon
+                        icon="l-music"
+                        className="m-3 text-6xl text-primary-500"
+                      />
                     </div>
                     <div>
                       <div>
@@ -703,11 +652,10 @@ export const FileUpload = (props: FileUploadProps) => {
                 <div className="flex flex-wrap justify-between space-y-2">
                   <div className="flex flex-wrap justify-between space-x-2">
                     <div>
-                      <i
-                        className={`${getIconClassName(
-                          item?.extension
-                        )} fa-3x m-3 text-primary-500`}
-                      ></i>
+                      <CareIcon
+                        icon={getIconClassName(item?.extension)}
+                        className={"m-3 text-6xl text-primary-500"}
+                      />
                     </div>
                     <div>
                       <div>
@@ -739,7 +687,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   <div className="flex flex-wrap items-center">
                     <ButtonV2
                       onClick={() => {
-                        loadFile(item.id);
+                        loadFile(item.id!);
                       }}
                       className="m-1 w-full sm:w-auto"
                     >
@@ -813,7 +761,10 @@ export const FileUpload = (props: FileUploadProps) => {
                           />
                         </svg>
 
-                        <i className="fa-solid fa-file-audio fa-3x m-3 text-gray-500"></i>
+                        <CareIcon
+                          icon="l-music"
+                          className="text-6xl text-gray-500"
+                        />
                       </div>
                     ) : (
                       <div className="relative">
@@ -832,11 +783,10 @@ export const FileUpload = (props: FileUploadProps) => {
                           />
                         </svg>
 
-                        <i
-                          className={`${getIconClassName(
-                            item?.extension
-                          )} fa-3x m-3 text-gray-500`}
-                        ></i>
+                        <CareIcon
+                          icon={getIconClassName(item?.extension)}
+                          className="text-6xl text-gray-500"
+                        />
                       </div>
                     )}
                   </div>
@@ -918,7 +868,6 @@ export const FileUpload = (props: FileUploadProps) => {
     );
 
     const ext: string = fileName.split(".")[1];
-    setcontentType(header_content_type[ext]);
 
     if (ExtImage.includes(ext)) {
       const options = {
@@ -933,16 +882,16 @@ export const FileUpload = (props: FileUploadProps) => {
     setFile(f);
   };
 
-  const uploadfile = (response: any) => {
-    const url = response.data.signed_url;
-    const internal_name = response.data.internal_name;
+  const uploadfile = async (data: CreateFileResponse) => {
+    const url = data.signed_url;
+    const internal_name = data.internal_name;
     const f = file;
     if (!f) return;
     const newFile = new File([f], `${internal_name}`);
 
     const config = {
       headers: {
-        "Content-type": contentType,
+        "Content-type": file?.type,
         "Content-disposition": "inline",
       },
       onUploadProgress: (progressEvent: any) => {
@@ -952,6 +901,7 @@ export const FileUpload = (props: FileUploadProps) => {
         setUploadPercent(percentCompleted);
       },
     };
+
     return new Promise<void>((resolve, reject) => {
       axios
         .put(url, newFile, config)
@@ -960,13 +910,12 @@ export const FileUpload = (props: FileUploadProps) => {
           // setUploadSuccess(true);
           setFile(null);
           setUploadFileName("");
-          setReload(!reload);
-          fetchData({ aborted: false });
+          fetchData();
           Notification.Success({
             msg: "File Uploaded Successfully",
           });
           setUploadFileError("");
-          resolve(response);
+          resolve();
         })
         .catch((e) => {
           Notification.Error({
@@ -995,18 +944,18 @@ export const FileUpload = (props: FileUploadProps) => {
     }
     return true;
   };
-  const markUploadComplete = async (response: any) => {
-    return dispatch(
-      editUpload(
-        { upload_completed: true },
-        response.data.id,
-        type,
-        getAssociatedId()
-      )
-    );
+  const markUploadComplete = (data: CreateFileResponse) => {
+    return request(routes.editUpload, {
+      body: { upload_completed: true },
+      pathParams: {
+        id: data.id,
+        fileType: type,
+        associatingId: getAssociatedId(),
+      },
+    });
   };
 
-  const handleUpload = async (status: any) => {
+  const handleUpload = async () => {
     if (!validateFileUpload()) return;
     const f = file;
 
@@ -1014,23 +963,23 @@ export const FileUpload = (props: FileUploadProps) => {
     const filename = uploadFileName === "" && f ? f.name : uploadFileName;
     const name = f?.name;
     setUploadStarted(true);
-    // setUploadSuccess(false);
-    const requestData = {
-      original_name: name,
-      file_type: type,
-      name: filename,
-      associating_id: getAssociatedId(),
-      file_category: category,
-    };
-    dispatch(createUpload(requestData))
-      .then(uploadfile)
-      .then(markUploadComplete)
-      .catch(() => {
-        setUploadStarted(false);
-      })
-      .then(() => {
-        fetchData(status);
-      });
+
+    const { data } = await request(routes.createUpload, {
+      body: {
+        original_name: name,
+        file_type: type,
+        name: filename,
+        associating_id: getAssociatedId(),
+        file_category: category,
+        mime_type: f?.type,
+      },
+    });
+
+    if (data) {
+      await uploadfile(data);
+      await markUploadComplete(data);
+      await fetchData();
+    }
   };
 
   const createAudioBlob = (createdBlob: Blob) => {
@@ -1051,8 +1000,12 @@ export const FileUpload = (props: FileUploadProps) => {
     const internal_name = response.data.internal_name;
     const f = audioBlob;
     if (f === undefined) return;
-    const newFile = new File([f], `${internal_name}`, { type: "audio/mpeg" });
+    const newFile = new File([f], `${internal_name}`, { type: f.type });
     const config = {
+      headers: {
+        "Content-type": newFile?.type,
+        "Content-disposition": "inline",
+      },
       onUploadProgress: (progressEvent: any) => {
         const percentCompleted = Math.round(
           (progressEvent.loaded * 100) / progressEvent.total
@@ -1067,7 +1020,7 @@ export const FileUpload = (props: FileUploadProps) => {
         setAudioUploadStarted(false);
         // setUploadSuccess(true);
         setAudioName("");
-        setReload(!reload);
+        fetchData();
         Notification.Success({
           msg: "File Uploaded Successfully",
         });
@@ -1098,15 +1051,17 @@ export const FileUpload = (props: FileUploadProps) => {
     const filename =
       audioName.trim().length === 0 ? Date.now().toString() : audioName.trim();
     setAudioUploadStarted(true);
-    // setUploadSuccess(false);
-    const requestData = {
-      original_name: name,
-      file_type: type,
-      name: filename,
-      associating_id: getAssociatedId(),
-      file_category: category,
-    };
-    dispatch(createUpload(requestData))
+
+    request(routes.createUpload, {
+      body: {
+        original_name: name,
+        file_type: type,
+        name: filename,
+        associating_id: getAssociatedId(),
+        file_category: category,
+        mime_type: audioBlob?.type,
+      },
+    })
       .then(uploadAudiofile)
       .catch(() => {
         setAudioUploadStarted(false);
@@ -1159,10 +1114,10 @@ export const FileUpload = (props: FileUploadProps) => {
           {!previewImage ? (
             <div className="m-3">
               <Webcam
+                forceScreenshotSourceSize
+                screenshotQuality={1}
                 audio={false}
-                height={720}
                 screenshotFormat="image/jpeg"
-                width={1280}
                 ref={webRef}
                 videoConstraints={{ ...videoConstraints, facingMode }}
               />
@@ -1212,6 +1167,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   </ButtonV2>
                   <Submit
                     onClick={() => {
+                      setPreviewImage(null);
                       setModalOpenForCamera(false);
                     }}
                     className="m-2"
@@ -1272,6 +1228,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     <Submit
                       onClick={() => {
                         setModalOpenForCamera(false);
+                        setPreviewImage(null);
                       }}
                     >
                       {t("submit")}
@@ -1311,7 +1268,7 @@ export const FileUpload = (props: FileUploadProps) => {
           onSubmit={(event: any) => {
             event.preventDefault();
             setbtnloader(true);
-            partialupdateFileName(modalDetails?.id, editFileName);
+            partialupdateFileName(modalDetails!.id!, editFileName);
           }}
           className="flex w-full flex-col"
         >
@@ -1357,7 +1314,7 @@ export const FileUpload = (props: FileUploadProps) => {
           onSubmit={(event: any) => {
             event.preventDefault();
             setbtnloader(true);
-            archiveFile(modalDetails?.id, archiveReason);
+            archiveFile(modalDetails!.id!, archiveReason);
           }}
           className="mx-2 my-4 flex w-full flex-col"
         >
@@ -1426,8 +1383,8 @@ export const FileUpload = (props: FileUploadProps) => {
         hideBack={hideBack}
         breadcrumbs={false}
         crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          [patientId]: { name: patientName },
+          [facilityId]: { name: patient?.facility_object?.name },
+          [patientId]: { name: patient?.name },
         }}
         backUrl={
           type === "CONSULTATION"
@@ -1532,6 +1489,7 @@ export const FileUpload = (props: FileUploadProps) => {
                               title="changeFile"
                               onChange={onFileChange}
                               type="file"
+                              accept="image/*,video/*,audio/*,text/plain,text/csv,application/rtf,application/msword,application/vnd.oasis.opendocument.text,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/pdf"
                               hidden
                             />
                           </label>
@@ -1550,8 +1508,12 @@ export const FileUpload = (props: FileUploadProps) => {
                     <ButtonV2
                       id="upload_file_button"
                       authorizeFor={NonReadOnlyUsers}
-                      disabled={!file || !uploadFileName || !isActive}
-                      onClick={() => handleUpload({ status })}
+                      disabled={
+                        !file ||
+                        !uploadFileName ||
+                        (patient && !patient.is_active)
+                      }
+                      onClick={handleUpload}
                       className="w-full"
                     >
                       <CareIcon className="care-l-cloud-upload text-lg" />
@@ -1568,7 +1530,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         setUploadFileName("");
                       }}
                     >
-                      <i className="fas fa-times"></i>
+                      <CareIcon icon="l-times" className="text-lg" />
                     </button>
                   </div>
                 )}

@@ -3,7 +3,6 @@ import * as Notification from "../../Utils/Notifications.js";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames, isAppleDevice } from "../../Utils/utils";
-import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { make as Link } from "../Common/components/Link.bs";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
@@ -12,6 +11,9 @@ import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { PatientNoteStateType } from "./models";
 import useKeyboardShortcut from "use-keyboard-shortcut";
+import AutoExpandingTextInputFormField from "../Form/FormFields/AutoExpandingTextInputFormField.js";
+import * as Sentry from "@sentry/browser";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
 interface PatientNotesProps {
   patientId: string;
@@ -23,19 +25,52 @@ interface PatientNotesProps {
 export default function PatientNotesSlideover(props: PatientNotesProps) {
   const [show, setShow] = useState(true);
   const [patientActive, setPatientActive] = useState(true);
-  const [noteField, setNoteField] = useState("");
   const [reload, setReload] = useState(false);
   const [focused, setFocused] = useState(false);
+
+  const { username } = useAuthUser();
+
+  const intialSubscriptionState = async () => {
+    try {
+      const res = await request(routes.getUserPnconfig, {
+        pathParams: { username },
+      });
+      const reg = await navigator.serviceWorker.ready;
+      const subscription = await reg.pushManager.getSubscription();
+      if (!subscription && !res.data?.pf_endpoint) {
+        Notification.Warn({
+          msg: "Please subscribe to notifications to get live updates on doctor notes.",
+        });
+      } else if (subscription?.endpoint !== res.data?.pf_endpoint) {
+        Notification.Warn({
+          msg: "Please subscribe to notifications on this device to get live updates on doctor notes.",
+        });
+      }
+    } catch (error) {
+      Sentry.captureException(error);
+    }
+  };
+
+  useEffect(() => {
+    intialSubscriptionState();
+  }, []);
 
   const initialData: PatientNoteStateType = {
     notes: [],
     cPage: 1,
     totalPages: 1,
+    patientId: props.patientId,
+    facilityId: props.facilityId,
   };
   const [state, setState] = useState(initialData);
 
   const { facilityId, patientId, consultationId, setShowPatientNotesPopup } =
     props;
+
+  const localStorageKey = `patientNotesNoteField_${consultationId}`;
+  const [noteField, setNoteField] = useState(
+    localStorage.getItem(localStorageKey) || ""
+  );
 
   const onAddNote = async () => {
     const payload = {
@@ -127,6 +162,10 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
     </div>
   );
 
+  useEffect(() => {
+    localStorage.setItem(localStorageKey, noteField);
+  }, [noteField, localStorageKey]);
+
   return (
     <div
       className={classNames(
@@ -155,19 +194,19 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
           <PatientConsultationNotesList
             state={state}
             setState={setState}
-            facilityId={facilityId}
-            patientId={patientId}
             reload={reload}
             setReload={setReload}
+            disableEdit={!patientActive}
           />
           <div className="relative mx-4 flex items-center">
-            <TextFormField
+            <AutoExpandingTextInputFormField
               id="doctor_notes_textarea"
+              maxHeight={160}
+              rows={1}
               name="note"
               value={noteField}
               onChange={(e) => setNoteField(e.value)}
               className="grow"
-              type="text"
               errorClassName="hidden"
               placeholder="Type your Note"
               disabled={!patientActive}

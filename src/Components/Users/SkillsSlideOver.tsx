@@ -115,19 +115,17 @@ export default ({ show, setShow, username }: IProps) => {
                   multiple={false}
                   name="skill"
                   disabled={!authorizeForAddSkill}
-                  showAll={true}
                   showNOptions={Infinity}
                   selected={selectedSkill}
                   setSelected={setSelectedSkill}
                   errors=""
-                  username={username}
                   userSkills={skills?.results || []}
                 />
                 <ButtonV2
                   id="add-skill-button"
                   disabled={!authorizeForAddSkill}
                   onClick={() => addSkill(username, selectedSkill)}
-                  className="w-6rem"
+                  className="mt-1 h-[45px] w-[74px] text-base"
                 >
                   {t("add")}
                 </ButtonV2>

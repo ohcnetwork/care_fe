@@ -13,7 +13,7 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { classNames } from "../../Utils/utils";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
-import { ABDMError } from "./models";
+import { ABDMError, ABHAQRContent } from "./models";
 
 export const validateRule = (
   condition: boolean,
@@ -22,9 +22,9 @@ export const validateRule = (
   return (
     <div>
       {condition ? (
-        <i className="fas fa-circle-check text-green-500" />
+        <CareIcon icon="l-check-circle" className="text-base text-green-500" />
       ) : (
-        <i className="fas fa-circle-xmark text-red-500" />
+        <CareIcon icon="l-times-circle" className="text-base text-red-500" />
       )}{" "}
       <span
         className={classNames(condition ? "text-primary-500" : "text-red-500")}
@@ -55,7 +55,7 @@ export default function LinkABHANumberModal({
   ...props
 }: Props) {
   const [currentStep, setCurrentStep] = useState<Step>("AadhaarVerification");
-  const [transactionId, setTransactionId] = useState<string>("sds");
+  const [transactionId, setTransactionId] = useState<string>("");
 
   const title = (
     <div className="flex items-center gap-3">
@@ -73,9 +73,6 @@ export default function LinkABHANumberModal({
       <div className="p-4">
         {currentStep === "ScanExistingQR" && (
           <ScanABHAQRSection
-            onSignup={() => {
-              setCurrentStep("AadhaarVerification");
-            }}
             patientId={patientId}
             onSuccess={onSuccess}
             closeModal={props.onClose}
@@ -87,9 +84,6 @@ export default function LinkABHANumberModal({
             onVerified={(transactionId) => {
               setTransactionId(transactionId);
               setCurrentStep("MobileVerification");
-            }}
-            onSignin={() => {
-              setCurrentStep("ScanExistingQR");
             }}
           />
         )}
@@ -116,19 +110,37 @@ export default function LinkABHANumberModal({
           />
         )}
       </div>
+
+      <div>
+        {["AadhaarVerification", "MobileVerification", "HealthIDCreation"].find(
+          (step) => step === currentStep
+        ) ? (
+          <p
+            onClick={() => setCurrentStep("ScanExistingQR")}
+            className="cursor-pointer text-center text-sm text-blue-800"
+          >
+            Already have an ABHA number
+          </p>
+        ) : (
+          <p
+            onClick={() => setCurrentStep("AadhaarVerification")}
+            className="cursor-pointer text-center text-sm text-blue-800"
+          >
+            Don't have an ABHA Number
+          </p>
+        )}
+      </div>
     </DialogModal>
   );
 }
 
 interface ScanABHAQRSectionProps {
-  onSignup: () => void;
   patientId?: string;
   onSuccess?: (abha: any) => void;
   closeModal: () => void;
 }
 
 const ScanABHAQRSection = ({
-  onSignup,
   patientId,
   onSuccess,
   closeModal,
@@ -155,15 +167,18 @@ const ScanABHAQRSection = ({
   return (
     <div>
       <QRScanner
-        label="Enter ABHA Number"
+        label="Enter ABHA Number / ABHA Address"
         value={qrValue}
         disabled={!!authMethods.length}
         onChange={(value) => {
-          if ([2, 7, 12].includes(value.length)) {
-            if (qrValue.length && qrValue[qrValue.length - 1] === "-") {
-              value.slice(value.length - 1);
-            } else {
-              value += "-";
+          if (value[0] && !isNaN(Number(value[0]))) {
+            // 92-1234-1234-1234
+            if ([2, 7, 12].includes(value.length)) {
+              if (qrValue.length && qrValue[qrValue.length - 1] === "-") {
+                value.slice(value.length - 1);
+              } else {
+                value += "-";
+              }
             }
           }
           setQrValue(value);
@@ -173,9 +188,20 @@ const ScanABHAQRSection = ({
           setIsLoading(true);
 
           try {
-            const abha = JSON.parse(value);
+            const abha = JSON.parse(value) as ABHAQRContent;
+
             const { res, data } = await request(routes.abha.linkViaQR, {
-              body: { ...abha, patientId },
+              body: {
+                patientId,
+                hidn: abha?.hidn,
+                phr: abha?.hid,
+                name: abha?.name,
+                gender: abha?.gender,
+                dob: abha?.dob.replace(/\//g, "-"),
+                address: abha?.address,
+                "dist name": abha?.district_name,
+                "state name": abha?.["state name"],
+              },
             });
 
             if (res?.status === 200 || res?.status === 202) {
@@ -230,16 +256,11 @@ const ScanABHAQRSection = ({
           error=""
         />
       )}
-      <div className="mt-4 flex items-center justify-between gap-2">
-        <span
-          onClick={onSignup}
-          className="cursor-pointer text-sm text-blue-800"
-        >
-          Don't have an ABHA Number
-        </span>
+      <div className="mt-4 flex items-center justify-center gap-2">
         <>
           {txnId ? (
             <ButtonV2
+              className="w-full"
               disabled={otp.length !== 6}
               onClick={async () => {
                 let response = null;
@@ -299,9 +320,14 @@ const ScanABHAQRSection = ({
               Link
             </ButtonV2>
           ) : authMethods.length ? (
-            <Dropdown title="Verify via">
+            <Dropdown
+              itemClassName="!w-full md:!w-full"
+              containerClassName="w-full"
+              title="Verify via"
+            >
               {authMethods.map((method) => (
                 <DropdownItem
+                  key={method}
                   onClick={async () => {
                     const { res, data } = await request(
                       routes.abha.initiateAbdmAuthentication,
@@ -321,6 +347,7 @@ const ScanABHAQRSection = ({
           ) : (
             <ButtonV2
               disabled={!qrValue || !acceptedDisclaimer}
+              className="w-full"
               onClick={async () => {
                 const { res, data } = await request(
                   routes.abha.searchByHealthId,
@@ -353,13 +380,9 @@ const ScanABHAQRSection = ({
 
 interface VerifyAadhaarSectionProps {
   onVerified: (transactionId: string) => void;
-  onSignin: () => void;
 }
 
-const VerifyAadhaarSection = ({
-  onVerified,
-  onSignin,
-}: VerifyAadhaarSectionProps) => {
+const VerifyAadhaarSection = ({ onVerified }: VerifyAadhaarSectionProps) => {
   const [aadhaarNumber, setAadhaarNumber] = useState("");
   const [aadhaarNumberError, setAadhaarNumberError] = useState<string>();
 
@@ -563,15 +586,10 @@ const VerifyAadhaarSection = ({
         />
       )}
 
-      <div className="mt-4 flex items-center justify-between gap-2">
-        <span
-          onClick={onSignin}
-          className="cursor-pointer text-sm text-blue-800"
-        >
-          Already have an ABHA number
-        </span>
+      <div className="mt-4 flex items-center justify-center gap-2">
         <>
           <ButtonV2
+            className="w-full"
             disabled={
               isSendingOtp || !acceptedDisclaimer1 || !acceptedDisclaimer2
             }
@@ -583,7 +601,11 @@ const VerifyAadhaarSection = ({
           </ButtonV2>
 
           {otpSent && (
-            <ButtonV2 disabled={isVerifyingOtp} onClick={verifyOtp}>
+            <ButtonV2
+              className="w-full"
+              disabled={isVerifyingOtp}
+              onClick={verifyOtp}
+            >
               {(verified && "Verified") ||
                 (isVerifyingOtp ? "Verifying..." : "Verify")}
             </ButtonV2>
@@ -736,8 +758,9 @@ const VerifyMobileSection = ({
         </p>
       )}
 
-      <div className="mt-4 flex items-center justify-end gap-2">
+      <div className="mt-4 flex items-center justify-center gap-2">
         <ButtonV2
+          className="w-full"
           disabled={isSendingOtp}
           onClick={sendOtp}
           variant={otpDispatched ? "secondary" : "primary"}
@@ -747,7 +770,11 @@ const VerifyMobileSection = ({
         </ButtonV2>
 
         {otpDispatched && (
-          <ButtonV2 disabled={isVerifyingOtp} onClick={verifyOtp}>
+          <ButtonV2
+            className="w-full"
+            disabled={isVerifyingOtp}
+            onClick={verifyOtp}
+          >
             {(verified && "Verified") ||
               (isVerifyingOtp ? "Verifying..." : "Verify")}
           </ButtonV2>
@@ -831,8 +858,9 @@ const CreateHealthIDSection = ({
         </div>
       )}
 
-      <div className="mt-4 flex items-center justify-end gap-2">
+      <div className="mt-4 flex items-center justify-center gap-2">
         <ButtonV2
+          className="w-full"
           disabled={
             isCreating || !/^(?![\d.])[a-zA-Z0-9.]{4,}(?<!\.)$/.test(healthId)
           }

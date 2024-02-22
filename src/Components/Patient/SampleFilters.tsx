@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import {
   SAMPLE_TEST_STATUS,
   SAMPLE_TEST_RESULT,
@@ -6,22 +5,14 @@ import {
 } from "../../Common/constants";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
-import { getAnyFacility } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
 import useMergeState from "../../Common/hooks/useMergeState";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import CircularProgress from "../Common/components/CircularProgress";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
-
-const clearFilterState = {
-  status: "",
-  result: "",
-  facility: "",
-  facility_ref: null,
-  sample_type: "",
-};
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 
 export default function UserFilter(props: any) {
   const { filter, onChange, closeFilter, removeFilters } = props;
@@ -33,9 +24,6 @@ export default function UserFilter(props: any) {
     facility_ref: filter.facility_ref || null,
     sample_type: filter.sample_type || "",
   });
-
-  const [isFacilityLoading, setFacilityLoading] = useState(false);
-  const dispatch: any = useDispatch();
 
   const handleChange = ({ name, value }: FieldChangeEvent<unknown>) => {
     setFilterState({ ...filterState, [name]: value });
@@ -52,28 +40,22 @@ export default function UserFilter(props: any) {
     onChange(data);
   };
 
-  useEffect(() => {
-    async function fetchData() {
-      if (filter.facility) {
-        setFacilityLoading(true);
-        const { data: facilityData } = await dispatch(
-          getAnyFacility(filter.facility, "facility")
-        );
-        setFilterState({ ...filterState, facility_ref: facilityData });
-        setFacilityLoading(false);
-      }
-    }
-    fetchData();
-  }, [dispatch]);
-
-  console.log(filterState.sample_type);
+  const { loading: isFacilityLoading } = useQuery(routes.getAnyFacility, {
+    pathParams: {
+      id: filter.facility,
+    },
+    prefetch: !!filter.facility,
+    onResponse: ({ data }) => {
+      setFilterState({ ...filterState, facility_ref: data });
+    },
+  });
 
   return (
     <FiltersSlideover
       advancedFilter={props}
       onApply={applyFilter}
       onClear={() => {
-        removeFilters(Object.keys(clearFilterState));
+        removeFilters();
         closeFilter();
       }}
     >

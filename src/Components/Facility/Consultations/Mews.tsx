@@ -1,6 +1,5 @@
 import { DailyRoundsModel } from "../../Patient/models";
-import RecordMeta from "../../../CAREUI/display/RecordMeta";
-import { classNames } from "../../../Utils/utils";
+import { formatDateTime } from "../../../Utils/utils";
 
 const getRespScore = (value?: number) => {
   if (typeof value !== "number") return;
@@ -26,7 +25,6 @@ const getHeartRateScore = (value?: number) => {
 
 const getSystolicBPScore = (value?: number) => {
   if (typeof value !== "number") return;
-  if (value === -1) return;
 
   if (value <= 70) return 3;
   if (value <= 80) return 2;
@@ -38,7 +36,6 @@ const getSystolicBPScore = (value?: number) => {
 };
 
 const getTempRange = (value?: number) => {
-  console.log(value);
   if (typeof value !== "number") return;
 
   if (value < 95) return 2;
@@ -62,35 +59,45 @@ const getLOCRange = (value?: DailyRoundsModel["consciousness_level"]) => {
   }[value];
 };
 
+const getBorderColor = (score: number) => {
+  if (score === undefined) return "border-gray-700";
+  if (score <= 2) return "border-primary-500";
+  if (score <= 3) return "border-yellow-300";
+  if (score <= 5) return "border-warning-600";
+  return "border-danger-500";
+};
+
 export const Mews = ({ dailyRound }: { dailyRound: DailyRoundsModel }) => {
   const mewsCard = (isMissing: boolean, data: string[] | number) => {
     if (isMissing) {
       return (
         <>
-          <div className="tooltip mt-2 text-gray-800">
-            <p className="my-auto text-center text-2xl font-bold">N/A</p>
+          <div className="tooltip flex flex-col items-center">
+            <div className="border-grey-400 flex h-7 w-7 items-center justify-center rounded-full border-2">
+              <span className="text-sm font-semibold">-</span>
+            </div>
+            <span className="mt-1 text-xs font-medium text-gray-700">MEWS</span>
             <div className="tooltip-text tooltip-bottom w-48 -translate-x-1/2 translate-y-3 whitespace-pre-wrap text-xs font-medium lg:w-64">
               <span className="font-bold">{(data as string[]).join(", ")}</span>{" "}
               data is missing from the last log update.
+              <br /> Last Updated: {formatDateTime(dailyRound.modified_date)}
             </div>
           </div>
-          <div>
-            <RecordMeta
-              time={dailyRound.modified_date}
-              prefix={"Updated"}
-              className="mx-auto mt-2 w-10/12 text-xs font-medium leading-none text-gray-800"
-              inlineClassName="flex flex-wrap items-center justify-center"
-            />
-            <div className="mt-1 flex h-2 w-full flex-col items-center justify-center rounded-b-lg bg-gray-500"></div>
-          </div>
+          <div></div>
         </>
       );
     } else {
-      const value = Number(data);
       return (
         <>
-          <div className="tooltip mt-2">
-            <p className="my-auto text-center text-2xl font-bold">{data}</p>
+          <div className="tooltip flex flex-col items-center">
+            <div
+              className={`flex h-7 w-7 items-center justify-center rounded-full border-2 ${getBorderColor(
+                Number(data)
+              )}`}
+            >
+              <span className="text-sm font-semibold">{data}</span>
+            </div>
+            <span className="mt-1 text-xs font-medium text-gray-700">MEWS</span>
             <div className="tooltip-text tooltip-bottom w-48 -translate-x-1/2 translate-y-3 whitespace-pre-wrap text-xs font-medium lg:w-64">
               <p>
                 Resp. Rate: <span className="font-bold">{dailyRound.resp}</span>
@@ -115,25 +122,10 @@ export const Mews = ({ dailyRound }: { dailyRound: DailyRoundsModel }) => {
                     .toLowerCase()}
                 </span>
               </p>
+              Last Updated: {formatDateTime(dailyRound.modified_date)}
             </div>
           </div>
-          <div>
-            <RecordMeta
-              time={dailyRound.modified_date}
-              prefix={"Updated"}
-              className="mx-auto mt-2 w-10/12 text-xs font-medium leading-none text-gray-800"
-              inlineClassName="flex flex-wrap items-center justify-center"
-            />
-            <div
-              className={classNames(
-                "mt-1 flex h-2 w-full flex-col items-center justify-center rounded-b-lg",
-                value <= 2 && "bg-primary-500",
-                value <= 3 && "bg-yellow-300",
-                value <= 5 && "bg-warning-600",
-                value > 6 && "bg-danger-500"
-              )}
-            ></div>
-          </div>
+          <div></div>
         </>
       );
     }
@@ -151,8 +143,7 @@ export const Mews = ({ dailyRound }: { dailyRound: DailyRoundsModel }) => {
 
   if (Object.values(scores).some((value) => value === undefined)) {
     return (
-      <div className="flex h-fit flex-col justify-start rounded-lg border border-black">
-        <p className="pt-1 text-center font-bold text-gray-900">MEWS Score</p>
+      <div>
         {mewsCard(
           true,
           Object.entries(scores)
@@ -164,8 +155,7 @@ export const Mews = ({ dailyRound }: { dailyRound: DailyRoundsModel }) => {
   }
 
   return (
-    <div className="flex h-fit flex-col justify-start rounded-lg border border-black">
-      <p className="pt-1 text-center font-bold text-gray-900">MEWS Score</p>
+    <div>
       {mewsCard(
         false,
         Object.values(scores as Record<string, number>).reduce((p, v) => p + v)

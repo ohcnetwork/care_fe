@@ -1,6 +1,6 @@
 import * as Notification from "../../Utils/Notifications.js";
 
-import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import { FacilityModel } from "./models";
 import { FACILITY_FEATURE_TYPES, USER_TYPES } from "../../Common/constants";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
@@ -99,9 +99,16 @@ export const FacilityHome = (props: any) => {
     USER_TYPES.findIndex((type) => type == authUser.user_type) >=
       StaffUserTypeIndex;
 
+  const hasPermissionToDeleteFacility =
+    authUser.user_type === "DistrictAdmin" ||
+    authUser.user_type === "StateAdmin";
+
   const editCoverImageTooltip = hasPermissionToEditCoverImage && (
-    <div className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center bg-black text-sm text-gray-300 opacity-0 transition-[opacity] hover:opacity-60 md:h-[88px]">
-      <i className="fa-solid fa-pen" />
+    <div
+      id="facility-coverimage"
+      className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center bg-black text-sm text-gray-300 opacity-0 transition-[opacity] hover:opacity-60 md:h-[88px]"
+    >
+      <CareIcon icon="l-pen" className="text-lg" />
       <span className="mt-2">{`${hasCoverImage ? "Edit" : "Upload"}`}</span>
     </div>
   );
@@ -164,10 +171,11 @@ export const FacilityHome = (props: any) => {
             hasPermissionToEditCoverImage && setEditCoverImage(true)
           }
         >
-          <i
-            className="fas fa-hospital block p-10 text-4xl text-gray-500"
+          <CareIcon
+            icon="l-hospital"
+            className="block p-10 text-4xl text-gray-500"
             aria-hidden="true"
-          ></i>
+          />
           {editCoverImageTooltip}
         </div>
       )}
@@ -215,7 +223,7 @@ export const FacilityHome = (props: any) => {
                 </div>
               </div>
               <div className="flex flex-1 items-center">
-                <div className="mb-6 grid  w-full grid-cols-1 gap-4 md:mb-0 lg:grid-cols-2">
+                <div className="mb-6 grid w-full gap-4 sm:grid-cols-2 md:mb-0 lg:grid-cols-2">
                   <div className="flex-col justify-between md:flex lg:flex-1 ">
                     <div className="mb-10" id="address-details-view">
                       <h1 className="text-base font-semibold text-[#B9B9B9]">
@@ -235,7 +243,7 @@ export const FacilityHome = (props: any) => {
                       </div>
                     </div>
                   </div>
-                  <div className="min-w-[300px] flex-col md:flex lg:flex-1">
+                  <div className="flex-col md:flex lg:flex-1">
                     <div className="mb-10">
                       <h1 className="text-base font-semibold text-[#B9B9B9]">
                         Local Body
@@ -244,7 +252,7 @@ export const FacilityHome = (props: any) => {
                         {facilityData?.local_body_object?.name}
                       </p>
                     </div>
-                    <div className="flex flex-col gap-10 md:flex-row">
+                    <div className="flex flex-col flex-wrap gap-10 md:flex-row">
                       <div>
                         <h1 className="text-base font-semibold text-[#B9B9B9]">
                           Ward
@@ -372,20 +380,22 @@ export const FacilityHome = (props: any) => {
                 >
                   View Users
                 </DropdownItem>
-                <DropdownItem
-                  id="delete-facility"
-                  variant="danger"
-                  onClick={() => setOpenDeleteDialog(true)}
-                  className="flex items-center gap-3"
-                  icon={<CareIcon className="care-l-trash-alt text-lg" />}
-                  authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
-                >
-                  Delete Facility
-                </DropdownItem>
+                {hasPermissionToDeleteFacility && (
+                  <DropdownItem
+                    id="delete-facility"
+                    variant="danger"
+                    onClick={() => setOpenDeleteDialog(true)}
+                    className="flex items-center gap-3"
+                    icon={<CareIcon className="care-l-trash-alt text-lg" />}
+                  >
+                    Delete Facility
+                  </DropdownItem>
+                )}
               </DropdownMenu>
             </div>
-            <div className="flex flex-col justify-end">
+            <div className="sm:grid sm:grid-cols-2 sm:gap-2 md:grid md:grid-cols-2 md:gap-2 lg:flex lg:flex-col lg:justify-end lg:gap-0 ">
               <ButtonV2
+                id="facility-detailspage-cns"
                 variant="primary"
                 ghost
                 border
@@ -470,15 +480,27 @@ export const FacilityHome = (props: any) => {
 const LiveMonitoringButton = () => {
   const facilityId = useSlug("facility");
   const [location, setLocation] = useState<string>();
+  const authUser = useAuthUser();
+
+  const permittedUserTypes = ["StateAdmin", "DistrictAdmin", "Doctor"];
 
   return (
     <Popover className="relative">
-      <Popover.Button className="mt-2 w-full">
-        <ButtonV2 variant="primary" ghost border className="w-full">
-          <CareIcon icon="l-video" className="text-lg" />
-          <span>Live Monitoring</span>
-        </ButtonV2>
-      </Popover.Button>
+      {permittedUserTypes.includes(authUser.user_type) && (
+        <Popover.Button className="mt-2 w-full">
+          <ButtonV2
+            variant="primary"
+            ghost
+            border
+            className="w-full"
+            id="facility-detailspage-livemonitoring"
+          >
+            <CareIcon icon="l-video" className="text-lg" />
+            <span>Live Monitoring</span>
+          </ButtonV2>
+        </Popover.Button>
+      )}
+
       <Transition
         as={Fragment}
         enter="transition ease-out duration-200"
@@ -510,6 +532,7 @@ const LiveMonitoringButton = () => {
                 </div>
               </div>
               <ButtonV2
+                id="live-monitoring-button"
                 disabled={!location}
                 className="w-full"
                 href={`/facility/${facilityId}/live-monitoring?location=${location}`}

@@ -1,67 +1,41 @@
-import { useCallback, useState, useEffect, lazy } from "react";
-import { useDispatch } from "react-redux";
-
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getMinQuantity, getAnyFacility } from "../../Redux/actions";
+import { useState, lazy } from "react";
 import Pagination from "../Common/Pagination";
 import { MinQuantityRequiredModal } from "./MinQuantityRequiredModal";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import Page from "../Common/components/Page";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function MinQuantityList(props: any) {
   const { facilityId }: any = props;
-  const dispatchAction: any = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
-  const initialInventory: any[] = [];
   let inventoryItem: any = null;
-  const [inventory, setInventory] = useState(initialInventory);
   const [offset, setOffset] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-  const [facilityName, setFacilityName] = useState("");
   const [showMinQuantityRequiredModal, setShowMinQuantityRequiredModal] =
     useState(false);
   const [selectedItem, setSelectedItem] = useState({ id: 0, item_id: 0 });
   const limit = 14;
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatchAction(
-        getMinQuantity(facilityId, { limit, offset })
-      );
-      if (!status.aborted) {
-        if (res && res.data) {
-          setInventory(res.data.results);
-          setTotalCount(res.data.count);
-        }
-        setIsLoading(false);
-      }
-    },
-    [dispatchAction, offset, facilityId]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
-  );
-
-  useEffect(() => {
-    async function fetchFacilityName() {
-      if (facilityId) {
-        const res = await dispatchAction(getAnyFacility(facilityId));
-
-        setFacilityName(res?.data?.name || "");
-      } else {
-        setFacilityName("");
-      }
+  const { data: minimumQuantityData, refetch: minimumQuantityfetch } = useQuery(
+    routes.getMinQuantity,
+    {
+      pathParams: {
+        facilityId,
+      },
+      query: {
+        limit,
+        offset,
+      },
+      prefetch: !!facilityId,
     }
-    fetchFacilityName();
-  }, [dispatchAction, facilityId]);
+  );
+
+  const { data: facilityObject } = useQuery(routes.getAnyFacility, {
+    pathParams: { id: facilityId },
+    prefetch: !!facilityId,
+  });
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
@@ -70,8 +44,8 @@ export default function MinQuantityList(props: any) {
   };
 
   let inventoryList: any = [];
-  if (inventory?.length) {
-    inventoryList = inventory.map((inventoryItem: any) => (
+  if (minimumQuantityData?.results.length) {
+    inventoryList = minimumQuantityData.results.map((inventoryItem: any) => (
       <tr key={inventoryItem.id} className="bg-white">
         <td className="cursor-pointer border-b border-gray-200 p-5 hover:bg-gray-200 sm:cursor-default sm:text-sm sm:hover:bg-white">
           <div className="hidden flex-col sm:flex">
@@ -126,6 +100,7 @@ export default function MinQuantityList(props: any) {
             {inventoryItem.item_object?.default_unit?.name}
           </p>
           <ButtonV2
+            id="update-minimum-quantity"
             variant="secondary"
             ghost
             border
@@ -143,7 +118,7 @@ export default function MinQuantityList(props: any) {
         </td>
       </tr>
     ));
-  } else if (inventory && inventory.length === 0) {
+  } else if (minimumQuantityData && minimumQuantityData.results.length === 0) {
     inventoryList = (
       <tr className="bg-white">
         <td
@@ -158,9 +133,9 @@ export default function MinQuantityList(props: any) {
     );
   }
 
-  if (isLoading || !inventory) {
+  if (!minimumQuantityData) {
     inventoryItem = <Loading />;
-  } else if (inventory) {
+  } else if (minimumQuantityData) {
     inventoryItem = (
       <>
         <div className="-mx-4 p-4 sm:-mx-8 sm:px-8">
@@ -187,12 +162,12 @@ export default function MinQuantityList(props: any) {
           </div>
         </div>
 
-        {totalCount > limit && (
+        {minimumQuantityData.count > limit && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination
               cPage={currentPage}
               defaultPerPage={limit}
-              data={{ totalCount }}
+              data={{ totalCount: minimumQuantityData.count }}
               onChange={handlePagination}
             />
           </div>
@@ -205,7 +180,7 @@ export default function MinQuantityList(props: any) {
     <Page
       title="Minimum Quantity Required"
       crumbsReplacements={{
-        [facilityId]: { name: facilityName },
+        [facilityId]: { name: facilityObject?.name },
         min_quantity: {
           name: "Min Quantity",
           uri: `/facility/${facilityId}/inventory/min_quantity/list`,
@@ -219,6 +194,7 @@ export default function MinQuantityList(props: any) {
       <div className="container mx-auto px-4 sm:px-8">
         <div className="py-8">
           <ButtonV2
+            id="set-minimum-quantity"
             className="ml-2"
             href={`/facility/${facilityId}/inventory/min_quantity/set`}
             authorizeFor={NonReadOnlyUsers}
@@ -236,7 +212,7 @@ export default function MinQuantityList(props: any) {
           show={showMinQuantityRequiredModal}
           handleClose={() => setShowMinQuantityRequiredModal(false)}
           handleUpdate={() => {
-            fetchData({ aborted: false });
+            minimumQuantityfetch();
             setShowMinQuantityRequiredModal(false);
           }}
         />
