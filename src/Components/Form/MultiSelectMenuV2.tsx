@@ -69,7 +69,11 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
   const buttonRef = useRef(null);
 
   const handleSingleSelect = (o: any) => {
-    if (o.option?.isSingleSelect === true && buttonRef.current) {
+    if (
+      o.option?.isSingleSelect === true &&
+      !selectedOptions.includes(o) &&
+      buttonRef.current
+    ) {
       buttonRef.current.click();
     }
   };
