@@ -29,6 +29,8 @@ export default function ViewInvestigationSuggestions(props: {
     return <Loading />;
   }
 
+  console.log("Investigations: ", investigations);
+
   return (
     <div className="mt-5">
       <h3>{t("investigations_suggested")}</h3>
@@ -41,10 +43,10 @@ export default function ViewInvestigationSuggestions(props: {
           </tr>
         </thead>
         <tbody>
-          {Array.isArray(investigations) && investigations.investigation ? (
+          {investigations?.investigation &&
+          Array.isArray(investigations?.investigation) ? (
             investigations.investigation.map((investigation, index) => {
               let nextFurthestInvestigation: any = undefined;
-
               return (
                 <tr key={index} className="border-b border-b-gray-200">
                   <td className="p-4">
