@@ -7,6 +7,7 @@ import ShiftCreation from "../../pageobject/Shift/ShiftCreation";
 import PatientInvestigation from "../../pageobject/Patient/PatientInvestigation";
 import PatientTreatmentPlan from "../../pageobject/Patient/PatientTreatmentPlan";
 import PatientDeathReport from "../../pageobject/Patient/PatientDeathReport";
+import PatientPrescription from "../../pageobject/Patient/PatientPrescription";
 
 describe("Patient Consultation in multiple combination", () => {
   const patientConsultationPage = new PatientConsultationPage();
@@ -17,6 +18,7 @@ describe("Patient Consultation in multiple combination", () => {
   const patientInvestigation = new PatientInvestigation();
   const patientTreatmentPlan = new PatientTreatmentPlan();
   const patientDeathReport = new PatientDeathReport();
+  const patientPrescription = new PatientPrescription();
   const facilityName = "Dummy Facility 40";
   const doctorName = "Dev Doctor";
 
@@ -29,6 +31,32 @@ describe("Patient Consultation in multiple combination", () => {
     cy.restoreLocalStorage();
     cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/patients");
+  });
+
+  it("OP Patient with admission consultation", () => {
+    // icd 11 - 4 diagnosis with one principal
+    patientPage.createPatient();
+    patientPage.selectFacility(facilityName);
+    patientPredefined.createPatient();
+    patientPage.patientformvisibility();
+    patientPage.clickCreatePatient();
+    patientPage.verifyPatientIsCreated();
+    patientConsultationPage.selectConsultationStatus(
+      "Outpatient/Emergency Room"
+    );
+    patientConsultationPage.selectSymptoms("ASYMPTOMATIC");
+
+    cy.submitButton("Create Consultation");
+
+    // Below code for the prescription module only present while creating a new consultation
+    patientPrescription.clickAddPrescription();
+    patientPrescription.interceptMediaBase();
+    patientPrescription.selectMedicinebox();
+    patientPrescription.waitForMediabaseStatusCode();
+    patientPrescription.prescribefirstMedicine();
+    patientPrescription.enterDosage("3");
+    patientPrescription.selectDosageFrequency("Twice daily");
+    patientPrescription.submitPrescriptionAndReturn();
   });
 
   it("OP Patient with Declare Death", () => {
@@ -236,44 +264,6 @@ describe("Patient Consultation in multiple combination", () => {
     shiftCreation.typeShiftReason("reason for shift");
     cy.submitButton("Submit");
     cy.verifyNotification("Shift request created successfully");
-  });
-
-  it("OP Patient with admission consultation", () => {
-    // icd 11 - 4 diagnosis with one principal
-    patientPage.createPatient();
-    patientPage.selectFacility(facilityName);
-    patientPredefined.createPatient();
-    patientPage.patientformvisibility();
-    patientPage.clickCreatePatient();
-    patientPage.verifyPatientIsCreated();
-    patientConsultationPage.fillIllnessHistory("history");
-    patientConsultationPage.selectConsultationStatus(
-      "Outpatient/Emergency Room"
-    );
-    patientConsultationPage.selectSymptoms("ASYMPTOMATIC");
-    patientConsultationPage.fillExaminationDetails(
-      "Patient Examination details"
-    );
-
-    patientConsultationPage.enterConsultationDetails(
-      "Stable",
-      "70",
-      "170",
-      "IP007",
-      "generalnote",
-      "Dev Doctor"
-    );
-    patientConsultationPage.submitConsultation();
-
-    // Below code for the prescription module only present while creating a new consultation
-    patientConsultationPage.clickAddPrescription();
-    patientConsultationPage.interceptMediaBase();
-    patientConsultationPage.selectMedicinebox();
-    patientConsultationPage.waitForMediabaseStatusCode();
-    patientConsultationPage.prescribefirstMedicine();
-    patientConsultationPage.enterDosage("3");
-    patientConsultationPage.selectDosageFrequency("Twice daily");
-    patientConsultationPage.submitPrescriptionAndReturn();
   });
 
   it("Edit created consultation to existing patient", () => {
