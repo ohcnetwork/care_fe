@@ -8,7 +8,7 @@ interface DistrictSelectProps {
   errors: string;
   className?: string;
   multiple?: boolean;
-  selected: string;
+  selected?: string;
   setSelected: (selected: string) => void;
 }
 

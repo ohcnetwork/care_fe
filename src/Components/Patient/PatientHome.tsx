@@ -1,23 +1,13 @@
 import { navigate } from "raviger";
-import { lazy, useCallback, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { lazy, useEffect, useState } from "react";
+
 import {
   DISCHARGE_REASONS,
   GENDER_TYPES,
   SAMPLE_TEST_STATUS,
 } from "../../Common/constants";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  getConsultationList,
-  listShiftRequests,
-  getPatient,
-  getSampleTestList,
-  patchSample,
-  patchPatient,
-  completeTransfer,
-} from "../../Redux/actions";
+
 import * as Notification from "../../Utils/Notifications";
-import Pagination from "../Common/Pagination";
 import { ConsultationCard } from "../Facility/ConsultationCard";
 import { ConsultationModel } from "../Facility/models";
 import { PatientModel, SampleTestModel } from "./models";
@@ -44,35 +34,18 @@ import useAuthUser from "../../Common/hooks/useAuthUser";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import { InsuranceDetialsCard } from "./InsuranceDetailsCard";
+import request from "../../Utils/request/request";
+import PaginatedList from "../../CAREUI/misc/PaginatedList";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
 export const PatientHome = (props: any) => {
   const { facilityId, id } = props;
-  const dispatch: any = useDispatch();
   const [showShifts, setShowShifts] = useState(false);
   const [isShiftClicked, setIsShiftClicked] = useState(false);
-  const [isShiftDataLoaded, setIsShiftDataLoaded] = useState(false);
   const [patientData, setPatientData] = useState<PatientModel>({});
-  const [consultationListData, setConsultationListData] = useState<
-    Array<ConsultationModel>
-  >([]);
-  const [sampleListData, setSampleListData] = useState<Array<SampleTestModel>>(
-    []
-  );
-  const [activeShiftingData, setActiveShiftingData] = useState<Array<any>>([]);
   const [assignedVolunteerObject, setAssignedVolunteerObject] =
     useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [totalConsultationCount, setTotalConsultationCount] = useState(0);
-  const [currentConsultationPage, setCurrentConsultationPage] = useState(1);
-  const [consultationOffset, setConsultationOffset] = useState(0);
-  const [totalSampleListCount, setTotalSampleListCount] = useState(0);
-  const [currentSampleListPage, setCurrentSampleListPage] = useState(1);
-  const [sampleListOffset, setSampleListOffset] = useState(0);
-  const [isConsultationLoading, setIsConsultationLoading] = useState(false);
-  const [isSampleLoading, setIsSampleLoading] = useState(false);
-  const [sampleFlag, callSampleList] = useState(false);
   const authUser = useAuthUser();
   const { t } = useTranslation();
   const [selectedStatus, setSelectedStatus] = useState<{
@@ -94,13 +67,16 @@ export const PatientHome = (props: any) => {
     setAssignedVolunteerObject(patientData.assigned_to_object);
   }, [patientData.assigned_to_object]);
 
-  const handleTransferComplete = (shift: any) => {
+  const handleTransferComplete = async (shift: any) => {
     setModalFor({ ...modalFor, loading: true });
-    dispatch(completeTransfer({ externalId: modalFor })).then(() => {
-      navigate(
-        `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`
-      );
+    await request(routes.completeTransfer, {
+      pathParams: {
+        id: modalFor.externalId ?? "",
+      },
     });
+    navigate(
+      `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`
+    );
   };
 
   const { data: insuranceDetials } = useQuery(routes.listHCXPolicies, {
@@ -110,52 +86,28 @@ export const PatientHome = (props: any) => {
     },
   });
 
-  const handleAssignedVolunteer = () => {
-    dispatch(
-      patchPatient(
-        {
-          assigned_to: assignedVolunteerObject
-            ? assignedVolunteerObject.id
-            : null,
-        },
-        { id: patientData.id }
-      )
-    ).then((response: any) => {
-      if ((response || {}).status === 200) {
-        const dummyPatientData = Object.assign({}, patientData);
-        dummyPatientData["assigned_to"] = assignedVolunteerObject;
-        setPatientData(dummyPatientData);
-        if (assignedVolunteerObject)
-          Notification.Success({
-            msg: "Volunteer assigned successfully.",
-          });
-        else
-          Notification.Success({
-            msg: "Volunteer unassigned successfully.",
-          });
-        document.location.reload();
-      }
-    });
-    setOpenAssignVolunteerDialog(false);
-    if (errors["assignedVolunteer"]) delete errors["assignedVolunteer"];
-  };
-
-  const handlePatientTransfer = (value: boolean) => {
+  const handlePatientTransfer = async (value: boolean) => {
     const dummyPatientData = Object.assign({}, patientData);
     dummyPatientData["allow_transfer"] = value;
 
-    dispatch(
-      patchPatient({ allow_transfer: value }, { id: patientData.id })
-    ).then((response: any) => {
-      if ((response || {}).status === 200) {
-        const dummyPatientData = Object.assign({}, patientData);
-        dummyPatientData["allow_transfer"] = value;
-        setPatientData(dummyPatientData);
+    await request(routes.patchPatient, {
+      pathParams: {
+        id: patientData.id as string,
+      },
 
-        Notification.Success({
-          msg: "Transfer status updated.",
-        });
-      }
+      body: { allow_transfer: value },
+
+      onResponse: ({ res }) => {
+        if ((res || {}).status === 200) {
+          const dummyPatientData = Object.assign({}, patientData);
+          dummyPatientData["allow_transfer"] = value;
+          setPatientData(dummyPatientData);
+
+          Notification.Success({
+            msg: "Transfer status updated.",
+          });
+        }
+      },
     });
   };
 
@@ -163,122 +115,58 @@ export const PatientHome = (props: any) => {
     setAssignedVolunteerObject(volunteer.value);
   };
 
-  const limit = 5;
-
-  const fetchpatient = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const patientRes = await dispatch(getPatient({ id }));
-      if (!status.aborted) {
-        if (patientRes && patientRes.data) {
-          setPatientData(patientRes.data);
-        }
-        setIsLoading(false);
-      }
+  const { loading: isLoading, refetch } = useQuery(routes.getPatient, {
+    pathParams: {
+      id,
     },
-    [dispatch, id]
-  );
-
-  const fetchConsultation = useCallback(
-    async (status: statusType) => {
-      setIsConsultationLoading(true);
-      const consultationRes = await dispatch(
-        getConsultationList({ patient: id, limit, offset: consultationOffset })
-      );
-      if (!status.aborted) {
-        if (
-          consultationRes &&
-          consultationRes.data &&
-          consultationRes.data.results
-        ) {
-          setConsultationListData(consultationRes.data.results);
-          setTotalConsultationCount(consultationRes.data.count);
-        }
-        setIsConsultationLoading(false);
+    onResponse: ({ res, data }) => {
+      if (res?.ok && data) {
+        setPatientData(data);
       }
-    },
-    [dispatch, id, consultationOffset]
-  );
-
-  const fetchSampleTest = useCallback(
-    async (status: statusType) => {
-      setIsSampleLoading(true);
-      const sampleRes = await dispatch(
-        getSampleTestList(
-          { limit, offset: sampleListOffset },
-          { patientId: id }
-        )
-      );
-      if (!status.aborted) {
-        if (sampleRes && sampleRes.data && sampleRes.data.results) {
-          setSampleListData(sampleRes.data.results);
-          setTotalSampleListCount(sampleRes.data.count);
-        }
-        setIsSampleLoading(false);
-      }
-    },
-    [dispatch, id, sampleListOffset]
-  );
-
-  const fetchActiveShiftingData = useCallback(
-    async (status: statusType) => {
-      const shiftingRes = isShiftClicked
-        ? await dispatch(listShiftRequests({ patient: id }, "shift-list-call"))
-        : activeShiftingData;
-      setIsShiftDataLoaded(isShiftClicked);
-      if (!status.aborted) {
-        if (shiftingRes && shiftingRes.data && shiftingRes.data.results) {
-          const activeShiftingRes: any[] = shiftingRes.data.results;
-          setActiveShiftingData(activeShiftingRes);
-        }
-      }
-    },
-    [dispatch, id, isShiftClicked]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchpatient(status);
       triggerGoal("Patient Profile Viewed", {
         facilityId: facilityId,
         userId: authUser.id,
       });
     },
-    [dispatch, fetchpatient]
-  );
+  });
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchConsultation(status);
-    },
-    [dispatch, fetchConsultation]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchSampleTest(status);
-    },
-    [dispatch, fetchSampleTest, sampleFlag]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchActiveShiftingData(status);
-    },
-    [dispatch, fetchActiveShiftingData]
-  );
-
-  const handleConsultationPagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentConsultationPage(page);
-    setConsultationOffset(offset);
+  const handleAssignedVolunteer = async () => {
+    const { res, data } = await request(routes.patchPatient, {
+      pathParams: {
+        id: patientData.id as string,
+      },
+      body: {
+        assigned_to: assignedVolunteerObject
+          ? assignedVolunteerObject.id
+          : null,
+      },
+    });
+    if (res?.ok && data) {
+      setPatientData(data);
+      if (assignedVolunteerObject) {
+        Notification.Success({
+          msg: "Volunteer assigned successfully.",
+        });
+      } else {
+        Notification.Success({
+          msg: "Volunteer unassigned successfully.",
+        });
+      }
+      refetch();
+    }
+    setOpenAssignVolunteerDialog(false);
+    if (errors["assignedVolunteer"]) delete errors["assignedVolunteer"];
   };
 
-  const handleSampleListPagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentSampleListPage(page);
-    setSampleListOffset(offset);
-  };
+  const { loading: isShiftDataLoading, data: activeShiftingData } = useQuery(
+    routes.listShiftRequests,
+    {
+      query: {
+        patient: id,
+      },
+      prefetch: isShiftClicked,
+    }
+  );
 
   const confirmApproval = (status: number, sample: any) => {
     setSelectedStatus({ status, sample });
@@ -289,20 +177,25 @@ export const PatientHome = (props: any) => {
     const { status, sample } = selectedStatus;
     const sampleData = {
       id: sample.id,
-      status,
+      status: status.toString(),
       consultation: sample.consultation,
     };
     const statusName = SAMPLE_TEST_STATUS.find((i) => i.id === status)?.desc;
 
-    const res = await dispatch(patchSample(sampleData, { id: sample.id }));
-    if (res && (res.status === 201 || res.status === 200)) {
-      Notification.Success({
-        msg: `Request ${statusName}`,
-      });
-      callSampleList(!sampleFlag);
-    }
-
-    setShowAlertMessage(false);
+    await request(routes.patchSample, {
+      body: sampleData,
+      pathParams: {
+        id: sample.id,
+      },
+      onResponse: ({ res }) => {
+        if (res?.ok) {
+          Notification.Success({
+            msg: `Request ${statusName}`,
+          });
+        }
+        setShowAlertMessage(false);
+      },
+    });
   };
 
   if (isLoading) {
@@ -334,57 +227,7 @@ export const PatientHome = (props: any) => {
       ));
   }
 
-  let consultationList, sampleList;
-
-  if (isConsultationLoading) {
-    consultationList = <CircularProgress />;
-  } else if (consultationListData.length === 0) {
-    consultationList = (
-      <div>
-        <hr />
-        <div className="flex items-center justify-center border-2 border-solid border-gray-200 p-4 text-xl font-bold text-gray-500">
-          No Data Found
-        </div>
-      </div>
-    );
-  } else if (consultationListData.length > 0) {
-    consultationList = consultationListData.map((itemData, idx) => (
-      <ConsultationCard
-        itemData={itemData}
-        key={idx}
-        isLastConsultation={itemData.id === patientData.last_consultation?.id}
-      />
-    ));
-  }
-
-  if (isSampleLoading) {
-    sampleList = <CircularProgress />;
-  } else if (sampleListData.length === 0) {
-    sampleList = (
-      <div>
-        <hr />
-        <div className="flex items-center justify-center border-2 border-solid border-gray-200 p-4 text-xl font-bold text-gray-500">
-          No Data Found
-        </div>
-      </div>
-    );
-  } else if (sampleListData.length > 0) {
-    sampleList = (
-      <div className="lg:gap-4">
-        {sampleListData.map((itemData, idx) => (
-          <SampleTestCard
-            itemData={itemData}
-            key={idx}
-            handleApproval={confirmApproval}
-            facilityId={facilityId}
-            patientId={id}
-          />
-        ))}
-      </div>
-    );
-  }
-
-  const isPatientInactive = (patientData: PatientModel, facilityId: number) => {
+  const isPatientInactive = (patientData: PatientModel, facilityId: string) => {
     return (
       !patientData.is_active ||
       !(patientData?.last_consultation?.facility === facilityId)
@@ -441,7 +284,7 @@ export const PatientHome = (props: any) => {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      <i className="fab fa-whatsapp" /> Video Call
+                      <CareIcon icon="l-whatsapp" /> Video Call
                     </a>
                   )}
                 </p>
@@ -465,7 +308,7 @@ export const PatientHome = (props: any) => {
             <div className="mx-auto max-w-screen-xl rounded-lg bg-red-200 p-3 shadow sm:px-6 lg:px-8">
               <div className="text-center">
                 <p className="font-bold text-red-800">
-                  <i className="fas fa-exclamation-triangle mr-2" />
+                  <CareIcon icon="l-exclamation-triangle" className="mr-2" />
                   <span className="inline">
                     You have not created a consultation for the patient in{" "}
                     <strong>{patientData.facility_object?.name || "-"} </strong>
@@ -566,7 +409,10 @@ export const PatientHome = (props: any) => {
                   </div>
                 </div>
                 <h3 className="text-base font-medium">
-                  <i className="fa-regular fa-hospital mr-2 text-emerald-900" />
+                  <CareIcon
+                    icon="l-hospital"
+                    className="mr-2 text-emerald-900"
+                  />
                   {patientData.facility_object?.name || "-"}
                 </h3>
                 <p className="mb-7 mt-4 text-sm font-medium text-zinc-500">
@@ -602,7 +448,7 @@ export const PatientHome = (props: any) => {
                         className="text-sm font-normal text-sky-600 hover:text-sky-300"
                         rel="noreferrer"
                       >
-                        <i className="fab fa-whatsapp " /> Chat on WhatsApp
+                        <CareIcon icon="l-whatsapp" /> Chat on WhatsApp
                       </a>
                     </div>
                   </div>
@@ -627,7 +473,7 @@ export const PatientHome = (props: any) => {
                         className="text-sm font-normal text-sky-600 hover:text-sky-300"
                         rel="noreferrer"
                       >
-                        <i className="fab fa-whatsapp" /> Chat on WhatsApp
+                        <CareIcon icon="l-whatsapp" /> Chat on WhatsApp
                       </a>
                     </div>
                   </div>
@@ -705,7 +551,7 @@ export const PatientHome = (props: any) => {
                           : " bg-red-600/5 p-1 text-sm font-normal text-red-600")
                       }
                     >
-                      <i className="text-md fa-regular fa-clock mr-2" />
+                      <CareIcon icon="l-clock" className="text-md mr-2" />
                       <p className="p-1">
                         {(dayjs().isBefore(patientData.review_time)
                           ? "Review before: "
@@ -773,7 +619,7 @@ export const PatientHome = (props: any) => {
                       name="death_report"
                       onClick={() => navigate(`/death_report/${id}`)}
                     >
-                      <i className="fas fa-file-download mr-2" />
+                      <CareIcon icon="l-file-download" className="mr-2" />
                       Death Report
                     </ButtonV2>
                   </div>
@@ -795,10 +641,10 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div>
                   <ButtonV2
+                    id="patient-allow-transfer"
                     className="mt-4 w-full"
                     disabled={
-                      !consultationListData ||
-                      !consultationListData.length ||
+                      !patientData.last_consultation?.id ||
                       !patientData.is_active
                     }
                     onClick={() =>
@@ -834,14 +680,14 @@ export const PatientHome = (props: any) => {
           <div
             className={
               showShifts
-                ? activeShiftingData.length
+                ? activeShiftingData?.count || 0
                   ? "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
                   : ""
                 : "hidden"
             }
           >
-            {activeShiftingData.length ? (
-              activeShiftingData.map((shift: any) => (
+            {activeShiftingData?.count ? (
+              activeShiftingData.results.map((shift: any) => (
                 <div key={`shift_${shift.id}`} className="mx-2 ">
                   <div className="h-full overflow-hidden rounded-lg bg-white shadow">
                     <div
@@ -987,7 +833,7 @@ export const PatientHome = (props: any) => {
               ))
             ) : (
               <div className=" text-center text-gray-500">
-                {isShiftDataLoaded ? "No Shifting Records!" : "Loading..."}
+                {isShiftDataLoading ? "Loading..." : "No Shifting Records!"}
               </div>
             )}
           </div>
@@ -1510,34 +1356,66 @@ export const PatientHome = (props: any) => {
         <h2 className="ml-0 mt-9 text-2xl font-semibold leading-tight">
           Consultation History
         </h2>
-        {consultationList}
-        {!isConsultationLoading && totalConsultationCount > limit && (
-          <div className="mt-4 flex w-full justify-center">
-            <Pagination
-              cPage={currentConsultationPage}
-              defaultPerPage={limit}
-              data={{ totalCount: totalConsultationCount }}
-              onChange={handleConsultationPagination}
-            />
-          </div>
-        )}
+
+        <PaginatedList
+          route={routes.getConsultationList}
+          query={{ patient: id }}
+          perPage={5}
+        >
+          {(_) => (
+            <div>
+              <PaginatedList.WhenLoading>
+                <CircularProgress />
+              </PaginatedList.WhenLoading>
+              <PaginatedList.Items<ConsultationModel>>
+                {(item) => (
+                  <ConsultationCard
+                    itemData={item}
+                    isLastConsultation={
+                      item.id == patientData.last_consultation?.id
+                    }
+                  />
+                )}
+              </PaginatedList.Items>
+              <div className="flex w-full items-center justify-center">
+                <PaginatedList.Paginator hideIfSinglePage />
+              </div>
+            </div>
+          )}
+        </PaginatedList>
       </div>
 
       <div>
         <h2 className="my-4 ml-0 text-2xl font-semibold leading-tight">
           Sample Test History
         </h2>
-        {sampleList}
-        {!isSampleLoading && totalSampleListCount > limit && (
-          <div className="mt-4 flex w-full justify-center">
-            <Pagination
-              cPage={currentSampleListPage}
-              defaultPerPage={limit}
-              data={{ totalCount: totalSampleListCount }}
-              onChange={handleSampleListPagination}
-            />
-          </div>
-        )}
+        <PaginatedList
+          route={routes.sampleTestList}
+          pathParams={{ patientId: id }}
+          perPage={5}
+        >
+          {(_, query) => (
+            <div>
+              <PaginatedList.WhenLoading>
+                <CircularProgress />
+              </PaginatedList.WhenLoading>
+              <PaginatedList.Items<SampleTestModel>>
+                {(item) => (
+                  <SampleTestCard
+                    refetch={query.refetch}
+                    itemData={item}
+                    handleApproval={confirmApproval}
+                    facilityId={facilityId}
+                    patientId={id}
+                  />
+                )}
+              </PaginatedList.Items>
+              <div className="flex w-full items-center justify-center">
+                <PaginatedList.Paginator hideIfSinglePage />
+              </div>
+            </div>
+          )}
+        </PaginatedList>
       </div>
     </Page>
   );

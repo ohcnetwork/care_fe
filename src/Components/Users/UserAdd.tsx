@@ -19,6 +19,7 @@ import {
   classNames,
   dateQueryString,
   parsePhoneNumber,
+  scrollTo,
 } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
@@ -39,6 +40,7 @@ import { PhoneNumberValidator } from "../Form/FieldValidators";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import useQuery from "../../Utils/request/useQuery";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -149,9 +151,9 @@ export const validateRule = (
   return (
     <div>
       {condition ? (
-        <i className="fas fa-circle-check text-green-500" />
+        <CareIcon icon="l-check-circle" className="text-xl text-green-500" />
       ) : (
-        <i className="fas fa-circle-xmark text-red-500" />
+        <CareIcon icon="l-times-circle" className="text-xl text-red-500" />
       )}{" "}
       <span
         className={classNames(condition ? "text-primary-500" : "text-red-500")}
@@ -210,11 +212,7 @@ export const UserAdd = (props: UserProps) => {
 
   useEffect(() => {
     setUsernameExists(userExistsEnums.idle);
-    if (
-      usernameInput.length > 1 &&
-      !(state.form.username?.length < 2) &&
-      /[^.@+_-]/.test(state.form.username[state.form.username?.length - 1])
-    ) {
+    if (validateUsername(usernameInput)) {
       const timeout = setTimeout(() => {
         check_username(usernameInput);
       }, 500);
@@ -357,8 +355,19 @@ export const UserAdd = (props: UserProps) => {
             invalidForm = true;
           }
           return;
-        case "doctor_qualification":
         case "doctor_experience_commenced_on":
+          if (state.form.user_type === "Doctor" && !state.form[field]) {
+            errors[field] = "Field is required";
+            invalidForm = true;
+          } else if (
+            state.form.user_type === "Doctor" &&
+            Number(state.form.doctor_experience_commenced_on) > 100
+          ) {
+            errors[field] = "Doctor experience should be less than 100 years";
+            invalidForm = true;
+          }
+          return;
+        case "doctor_qualification":
         case "doctor_medical_council_registration":
           if (state.form.user_type === "Doctor" && !state.form[field]) {
             errors[field] = "Field is required";
@@ -391,7 +400,7 @@ export const UserAdd = (props: UserProps) => {
             invalidForm = true;
           } else if (!validateUsername(state.form[field])) {
             errors[field] =
-              "Please enter letters, digits and @ . + - _ only and username should not end with @, ., +, - or _";
+              "Please enter a 4-16 characters long username with lowercase letters, digits and . _ - only and it should not start or end with . _ -";
             invalidForm = true;
           } else if (usernameExists !== userExistsEnums.available) {
             errors[field] = "This username already exists";
@@ -491,6 +500,10 @@ export const UserAdd = (props: UserProps) => {
     });
     if (invalidForm) {
       dispatch({ type: "set_errors", errors });
+      const firstError = Object.keys(errors).find((e) => errors[e]);
+      if (firstError) {
+        scrollTo(firstError);
+      }
       return false;
     }
     dispatch({ type: "set_errors", errors });
@@ -593,7 +606,7 @@ export const UserAdd = (props: UserProps) => {
           className="inline-block rounded border border-gray-600 bg-gray-50 px-4 py-2 text-gray-600 transition hover:bg-gray-100"
           target="_blank"
         >
-          <i className="fas fa-info-circle" /> &nbsp;Need Help?
+          <CareIcon icon="l-info-circle" className="text-lg" /> &nbsp;Need Help?
         </Link>
       }
       backUrl="/users"
@@ -715,20 +728,30 @@ export const UserAdd = (props: UserProps) => {
                       <>
                         {usernameExists === userExistsEnums.checking ? (
                           <span>
-                            <i className="fas fa-circle-dot" /> checking...
+                            <CareIcon
+                              icon="l-record-audio"
+                              className="text-xl"
+                            />{" "}
+                            checking...
                           </span>
                         ) : (
                           <>
                             {usernameExists === userExistsEnums.exists ? (
                               <div>
-                                <i className="fas fa-circle-xmark text-red-500" />{" "}
+                                <CareIcon
+                                  icon="l-times-circle"
+                                  className="text-xl text-red-500"
+                                />{" "}
                                 <span className="text-red-500">
                                   Username is not available
                                 </span>
                               </div>
                             ) : (
                               <div>
-                                <i className="fas fa-circle-check text-green-500" />{" "}
+                                <CareIcon
+                                  icon="l-check-circle"
+                                  className="text-xl text-green-500"
+                                />{" "}
                                 <span className="text-primary-500">
                                   Username is available
                                 </span>
@@ -741,16 +764,26 @@ export const UserAdd = (props: UserProps) => {
                   </div>
                   <div>
                     {validateRule(
-                      state.form.username?.length >= 2,
-                      "Username should be atleast 2 characters long"
+                      usernameInput.length >= 4 && usernameInput.length <= 16,
+                      "Username should be 4-16 characters long"
                     )}
                   </div>
                   <div>
                     {validateRule(
-                      /[^.@+_-]/.test(
-                        state.form.username[state.form.username?.length - 1]
-                      ),
-                      "Username can't end with ^ . @ + _ -"
+                      /^[a-z0-9._-]*$/.test(usernameInput),
+                      "Username can only contain lowercase letters, numbers, and . _ -"
+                    )}
+                  </div>
+                  <div>
+                    {validateRule(
+                      /^[a-z0-9].*[a-z0-9]$/i.test(usernameInput),
+                      "Username must start and end with a letter or number"
+                    )}
+                  </div>
+                  <div>
+                    {validateRule(
+                      !/(?:[._-]{2,})/.test(usernameInput),
+                      "Username can't contain consecutive special characters . _ -"
                     )}
                   </div>
                 </div>

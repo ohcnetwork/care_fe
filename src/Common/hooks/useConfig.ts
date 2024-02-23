@@ -14,14 +14,23 @@ export interface IConfig {
   site_url: string;
   analytics_server_url: string;
 
-  header_logo: ILogo;
-  main_logo: ILogo;
-
   /**
-   * Logo and description for custom deployment. (This overrides the state logo)
+   * The main logo of the app displayed on login and sidebar header.
+   */
+  main_logo: ILogo;
+  /**
+   * If present, the image will be displayed on the login page before the main logo.
+   */
+  state_logo?: ILogo;
+  /**
+   * if present, this replaces the state logo on the login page only.
    */
   custom_logo?: ILogo;
+  /**
+   * if present, this replaces the main logo on the login page only.
+   */
   custom_logo_alt?: ILogo;
+
   custom_description?: string;
 
   /**
@@ -41,13 +50,15 @@ export interface IConfig {
    * SENTRY_ENVIRONMENT
    */
   sentry_environment: string;
+
+  /**
+   * The header banner is displayed on the top of
+   * the shift print form if the facility is kasp.
+   */
+  header_logo: ILogo;
   kasp_enabled: boolean;
   kasp_string: string;
   kasp_full_string: string;
-  /**
-   * If present, the image will be displayed in the login page.
-   */
-  state_logo?: ILogo;
   /**
    * URL of the sample format for asset import.
    */
@@ -69,6 +80,11 @@ export interface IConfig {
    */
   wartime_shifting: boolean;
   jwt_token_refresh_interval?: number;
+
+  /*
+   * Minimum date for a possible consultation encounter.
+   */
+  min_encounter_date: string;
 }
 
 const useConfig = () => {

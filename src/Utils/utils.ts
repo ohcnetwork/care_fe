@@ -99,9 +99,11 @@ export const formatDate = (date: DateLike, format = DATE_FORMAT) =>
 export const formatTime = (date: DateLike, format = TIME_FORMAT) =>
   formatDateTime(date, format);
 
-export const relativeDate = (date: DateLike) => {
+export const relativeDate = (date: DateLike, withoutSuffix = false) => {
   const obj = dayjs(date);
-  return `${obj.fromNow()} at ${obj.format(TIME_FORMAT)}`;
+  return `${obj.fromNow(withoutSuffix)}${
+    withoutSuffix ? " ago " : ""
+  } at ${obj.format(TIME_FORMAT)}`;
 };
 
 export const formatName = (user: { first_name: string; last_name: string }) => {
@@ -447,14 +449,6 @@ export const showUserDelete = (authUser: UserModel, targetUser: UserModel) => {
     return true;
 
   return false;
-};
-
-export const invalidateFiltersCache = () => {
-  for (const key in localStorage) {
-    if (key.startsWith("filters--")) {
-      localStorage.removeItem(key);
-    }
-  }
 };
 
 export const compareBy = <T extends object>(key: keyof T) => {

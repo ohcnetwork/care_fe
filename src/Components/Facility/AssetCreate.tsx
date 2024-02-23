@@ -4,6 +4,7 @@ import { AssetClass, AssetType } from "../Assets/AssetTypes";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import {
   LegacyRef,
+  MutableRefObject,
   RefObject,
   createRef,
   lazy,
@@ -12,7 +13,7 @@ import {
   useState,
 } from "react";
 
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
 import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import { LocationSelect } from "../Common/LocationSelect";
 import Page from "../Common/components/Page";
@@ -40,7 +41,6 @@ const Loading = lazy(() => import("../Common/Loading"));
 
 const formErrorKeys = [
   "name",
-  "asset_type",
   "asset_class",
   "description",
   "is_working",
@@ -103,12 +103,10 @@ const AssetCreate = (props: AssetProps) => {
   const { goBack } = useAppHistory();
   const { facilityId, assetId } = props;
 
-  let assetTypeInitial: AssetType;
   let assetClassInitial: AssetClass;
 
   const [state, dispatch] = useReducer(asset_create_reducer, initialState);
   const [name, setName] = useState("");
-  const [asset_type, setAssetType] = useState<AssetType>();
   const [asset_class, setAssetClass] = useState<AssetClass>();
   const [not_working_reason, setNotWorkingReason] = useState("");
   const [description, setDescription] = useState("");
@@ -135,19 +133,25 @@ const AssetCreate = (props: AssetProps) => {
   const [warrantyDetailsVisible, warrantyDetailsRef] = useVisibility(-300);
   const [serviceDetailsVisible, serviceDetailsRef] = useVisibility(-300);
 
-  const sections = {
+  const sections: {
+    [key in AssetFormSection]: {
+      icon: IconName;
+      isVisible: boolean;
+      ref: MutableRefObject<HTMLElement | undefined>;
+    };
+  } = {
     "General Details": {
-      iconClass: "fa-solid fa-circle-info",
+      icon: "l-info-circle",
       isVisible: generalDetailsVisible,
       ref: generalDetailsRef,
     },
     "Warranty Details": {
-      iconClass: "fa-solid fa-barcode",
+      icon: "l-qrcode-scan",
       isVisible: warrantyDetailsVisible,
       ref: warrantyDetailsRef,
     },
     "Service Details": {
-      iconClass: "fas fa-tools",
+      icon: "l-wrench",
       isVisible: serviceDetailsVisible,
       ref: serviceDetailsRef,
     },
@@ -177,7 +181,6 @@ const AssetCreate = (props: AssetProps) => {
       setName(asset.name);
       setDescription(asset.description);
       setLocation(asset.location_object.id!);
-      setAssetType(asset.asset_type);
       setAssetClass(asset.asset_class);
       setIsWorking(String(asset.is_working));
       setNotWorkingReason(asset.not_working_reason);
@@ -216,12 +219,6 @@ const AssetCreate = (props: AssetProps) => {
         case "location":
           if (!location || location === "0" || location === "") {
             errors[field] = "Select a location";
-            invalidForm = true;
-          }
-          return;
-        case "asset_type":
-          if (!asset_type || asset_type == "NONE") {
-            errors[field] = "Select an asset type";
             invalidForm = true;
           }
           return;
@@ -282,7 +279,6 @@ const AssetCreate = (props: AssetProps) => {
     setName("");
     setDescription("");
     setLocation("");
-    setAssetType(assetTypeInitial);
     setAssetClass(assetClassInitial);
     setIsWorking(undefined);
     setNotWorkingReason("");
@@ -307,7 +303,7 @@ const AssetCreate = (props: AssetProps) => {
       setIsLoading(true);
       const data: any = {
         name: name,
-        asset_type: asset_type,
+        asset_type: AssetType.INTERNAL,
         asset_class: asset_class || "",
         description: description,
         is_working: is_working,
@@ -404,7 +400,7 @@ const AssetCreate = (props: AssetProps) => {
             className="btn-primary btn mt-5"
             onClick={() => navigate(`/facility/${facilityId}/location/add`)}
           >
-            <i className="fas fa-plus mr-2 text-white"></i>
+            <CareIcon icon="l-plus" className="mr-2 text-white" />
             {t("add_location")}
           </button>
         </section>
@@ -419,7 +415,7 @@ const AssetCreate = (props: AssetProps) => {
           onClick={() => setIsScannerActive(false)}
           className="btn btn-default mb-2"
         >
-          <i className="fas fa-times mr-2"></i>
+          <CareIcon icon="l-times" className="mr-2 text-lg" />
           {t("close_scanner")}
         </button>
         <QrReader
@@ -449,7 +445,7 @@ const AssetCreate = (props: AssetProps) => {
         className="col-span-6 -ml-2 mb-6 flex flex-row items-center"
         ref={section.ref as LegacyRef<HTMLDivElement>}
       >
-        <i className={`${section.iconClass} mr-3 text-lg`} />
+        <CareIcon icon={section.icon} className="mr-3 text-lg" />
         <label className="text-lg font-bold text-gray-900">
           {sectionTitle}
         </label>
@@ -494,7 +490,7 @@ const AssetCreate = (props: AssetProps) => {
                     setCurrentSection(sectionTitle as AssetFormSection);
                   }}
                 >
-                  <i className={`${section.iconClass} text-sm`} />
+                  <CareIcon icon={section.icon} className="text-lg" />
                   <span>{sectionTitle}</span>
                 </button>
               );
@@ -547,68 +543,34 @@ const AssetCreate = (props: AssetProps) => {
                         errors={state.errors.location}
                       />
                     </div>
-                    {/* Asset Type */}
-                    <div className="col-span-6 flex flex-col gap-x-12 transition-all lg:flex-row xl:gap-x-16">
-                      <div
-                        ref={fieldRef["asset_type"]}
-                        className="flex-1"
-                        data-testid="asset-type-input"
-                      >
-                        <SelectFormField
-                          label={t("asset_type")}
-                          name="asset_type"
-                          required
-                          options={[
-                            {
-                              title: "Internal",
-                              description:
-                                "Asset is inside the facility premises.",
-                              value: AssetType.INTERNAL,
-                            },
-                            {
-                              title: "External",
-                              description:
-                                "Asset is outside the facility premises.",
-                              value: AssetType.EXTERNAL,
-                            },
-                          ]}
-                          value={asset_type}
-                          optionLabel={({ title }) => title}
-                          optionDescription={({ description }) => description}
-                          optionValue={({ value }) => value}
-                          onChange={({ value }) => setAssetType(value)}
-                          error={state.errors.asset_type}
-                        />
-                      </div>
 
-                      {/* Asset Class */}
-                      <div
-                        ref={fieldRef["asset_class"]}
-                        className="flex-1"
-                        data-testid="asset-class-input"
-                      >
-                        <SelectFormField
-                          disabled={!!(props.assetId && asset_class)}
-                          name="asset_class"
-                          label={t("asset_class")}
-                          value={asset_class}
-                          options={[
-                            { title: "ONVIF Camera", value: AssetClass.ONVIF },
-                            {
-                              title: "HL7 Vitals Monitor",
-                              value: AssetClass.HL7MONITOR,
-                            },
-                            {
-                              title: "Ventilator",
-                              value: AssetClass.VENTILATOR,
-                            },
-                          ]}
-                          optionLabel={({ title }) => title}
-                          optionValue={({ value }) => value}
-                          onChange={({ value }) => setAssetClass(value)}
-                          error={state.errors.asset_class}
-                        />
-                      </div>
+                    {/* Asset Class */}
+                    <div
+                      ref={fieldRef["asset_class"]}
+                      className="col-span-6"
+                      data-testid="asset-class-input"
+                    >
+                      <SelectFormField
+                        disabled={!!(props.assetId && asset_class)}
+                        name="asset_class"
+                        label={t("asset_class")}
+                        value={asset_class}
+                        options={[
+                          { title: "ONVIF Camera", value: AssetClass.ONVIF },
+                          {
+                            title: "HL7 Vitals Monitor",
+                            value: AssetClass.HL7MONITOR,
+                          },
+                          {
+                            title: "Ventilator",
+                            value: AssetClass.VENTILATOR,
+                          },
+                        ]}
+                        optionLabel={({ title }) => title}
+                        optionValue={({ value }) => value}
+                        onChange={({ value }) => setAssetClass(value)}
+                        error={state.errors.asset_class}
+                      />
                     </div>
                     {/* Description */}
                     <div

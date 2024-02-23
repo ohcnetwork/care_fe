@@ -127,7 +127,7 @@ export default function Breadcrumbs(props: any) {
                     >
                       {crumb.name.match(/^\w{8}-(\w{4}-){3}\w{12}$/) ? (
                         <div>
-                          <i className="fas fa-hashtag fa-lg mr-1" />
+                          <span className="mr-1 text-lg">#</span>
                           <span>{crumb.name.slice(0, 13) + "..."}</span>
                         </div>
                       ) : (
