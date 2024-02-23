@@ -27,12 +27,10 @@ export type AuthorizedElementProps = {
   authorizeFor?: AuthorizedForCB | undefined;
 };
 
-export const NonReadOnlyUsersList = USER_TYPES.filter((userType) => {
-  return !userType.includes("ReadOnly");
-});
-
 export const NonReadOnlyUsers = (userType: UserRole) =>
   !userType.includes("ReadOnly");
+
+export const NonReadOnlyUsersList = USER_TYPES.filter(NonReadOnlyUsers);
 
 export const Anyone = () => true;
 
