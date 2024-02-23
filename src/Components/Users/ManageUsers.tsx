@@ -255,7 +255,11 @@ export default function ManageUsers() {
                   {user.user_type && (
                     <div className="col-span-1">
                       <UserDetails id="role" title="Role">
-                        <div className="break-all font-semibold">
+                        <div
+                          className="overflow-hidden font-semibold"
+                          style={{ textOverflow: "ellipsis" }}
+                          title={user.user_type}
+                        >
                           {user.user_type}
                         </div>
                       </UserDetails>
@@ -264,7 +268,11 @@ export default function ManageUsers() {
                   {user.district_object && (
                     <div className="col-span-1">
                       <UserDetails id="district" title="District">
-                        <div className="font-semibold">
+                        <div
+                          className="overflow-hidden font-semibold"
+                          style={{ textOverflow: "ellipsis" }}
+                          title={user.district_object.name}
+                        >
                           {user.district_object.name}
                         </div>
                       </UserDetails>
@@ -336,7 +344,11 @@ export default function ManageUsers() {
                   {user.created_by && (
                     <div className="col-span-1">
                       <UserDetails id="created_by" title="Created by">
-                        <div className="break-all font-semibold">
+                        <div
+                          className="overflow-hidden font-semibold"
+                          style={{ textOverflow: "ellipsis" }}
+                          title={user.created_by}
+                        >
                           {user.created_by}
                         </div>
                       </UserDetails>
