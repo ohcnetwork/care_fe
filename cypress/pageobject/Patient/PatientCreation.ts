@@ -72,6 +72,11 @@ export class PatientPage {
       .type(address);
   }
 
+  typeLastMenstruationStartDate(date: string) {
+    cy.get("#last_menstruation_start_date").click();
+    cy.get("#date-input").click().type(date);
+  }
+
   clickPermanentAddress() {
     cy.get("[data-testid=permanent-address] input").check();
   }
