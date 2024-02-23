@@ -252,160 +252,161 @@ export const Login = (props: { forgot?: boolean }) => {
       </div>
 
       <div className="login-hero-form my-4 w-full md:mt-0 md:h-full md:w-1/2">
-        <div className="relative flex h-full items-center justify-center">
-          <div
-            className={
-              "w-full p-8 transition-all md:w-4/5 md:p-0 lg:w-[400px] " +
-              (forgotPassword
-                ? "invisible -translate-x-5 opacity-0"
-                : "visible -translate-x-0 opacity-100")
-            }
-          >
-            <div className="flex items-center gap-1">
+        <div className="relative h-full items-center justify-center md:flex">
+          <div className="p-8 md:w-4/5 md:p-0 lg:w-[400px]">
+            <div className="flex items-center gap-1 md:hidden">
               {(custom_logo || state_logo) && (
                 <>
                   <img
                     src={custom_logo?.dark ?? state_logo?.dark}
-                    className="h-14 rounded-lg py-3 md:hidden"
+                    className="h-14 rounded-lg py-3"
                     alt="state logo"
                   />
-                  <div className="mx-4 h-8 w-[1px] rounded-full bg-gray-600 md:hidden" />
+                  <div className="mx-4 h-8 w-[1px] rounded-full bg-gray-600" />
                 </>
               )}
               <img
                 src={custom_logo_alt?.dark ?? main_logo.dark}
-                className="h-8 w-auto md:hidden"
+                className="h-8 w-auto"
                 alt="care logo"
               />
-            </div>{" "}
-            <div className="mb-8 w-[300px] text-4xl font-black text-primary-600">
-              {t("auth_login_title")}
             </div>
-            <form onSubmit={handleSubmit}>
-              <div>
-                <LegendInput
-                  name="username"
-                  id="username"
-                  type="TEXT"
-                  legend={t("username")}
-                  value={form.username}
-                  onChange={handleChange}
-                  error={errors.username}
-                  outerClassName="mb-4"
-                  size="large"
-                  className="font-extrabold"
-                />
-                <LegendInput
-                  type="PASSWORD"
-                  name="password"
-                  id="password"
-                  legend={t("password")}
-                  value={form.password}
-                  onChange={handleChange}
-                  error={errors.password}
-                  size="large"
-                  className="font-extrabold"
-                />
-                <div className="justify-start">
-                  {isCaptchaEnabled && (
-                    <div className="grid px-8 py-4">
-                      <ReCaptcha
-                        sitekey={recaptcha_site_key}
-                        onChange={onCaptchaChange}
-                      />
-                      <span className="text-red-500">{errors.captcha}</span>
-                    </div>
-                  )}
 
-                  <div className="flex w-full items-center justify-between py-4">
-                    <button
-                      onClick={() => {
-                        setForgotPassword(true);
-                      }}
-                      type="button"
-                      className="text-sm text-primary-400 hover:text-primary-500"
-                    >
-                      {t("forget_password")}
-                    </button>
+            <div className="relative flex h-full w-full items-center">
+              <div
+                className={
+                  "w-full transition-all " +
+                  (!forgotPassword
+                    ? "visible -translate-x-0 opacity-100"
+                    : "invisible -translate-x-5 opacity-0")
+                }
+              >
+                <div className="mb-8 w-[300px] text-4xl font-black text-primary-600">
+                  {t("auth_login_title")}
+                </div>
+                <form onSubmit={handleSubmit}>
+                  <div>
+                    <LegendInput
+                      name="username"
+                      id="username"
+                      type="TEXT"
+                      legend={t("username")}
+                      value={form.username}
+                      onChange={handleChange}
+                      error={errors.username}
+                      outerClassName="mb-4"
+                      size="large"
+                      className="font-extrabold"
+                    />
+                    <LegendInput
+                      type="PASSWORD"
+                      name="password"
+                      id="password"
+                      legend={t("password")}
+                      value={form.password}
+                      onChange={handleChange}
+                      error={errors.password}
+                      size="large"
+                      className="font-extrabold"
+                    />
+                    <div className="justify-start">
+                      {isCaptchaEnabled && (
+                        <div className="grid px-8 py-4">
+                          <ReCaptcha
+                            sitekey={recaptcha_site_key}
+                            onChange={onCaptchaChange}
+                          />
+                          <span className="text-red-500">{errors.captcha}</span>
+                        </div>
+                      )}
+
+                      <div className="flex w-full items-center justify-between py-4">
+                        <button
+                          onClick={() => {
+                            setForgotPassword(true);
+                          }}
+                          type="button"
+                          className="text-sm text-primary-400 hover:text-primary-500"
+                        >
+                          {t("forget_password")}
+                        </button>
+                      </div>
+
+                      {loading ? (
+                        <div className="flex items-center justify-center">
+                          <CircularProgress className="text-primary-500" />
+                        </div>
+                      ) : (
+                        <button
+                          type="submit"
+                          className="inline-flex w-full cursor-pointer items-center justify-center rounded bg-primary-500 px-4 py-2 text-sm font-semibold text-white"
+                        >
+                          {t("login")}
+                        </button>
+                      )}
+                    </div>
                   </div>
+                </form>
+                <LanguageSelectorLogin />
+              </div>
 
-                  {loading ? (
-                    <div className="flex items-center justify-center">
-                      <CircularProgress className="text-primary-500" />
-                    </div>
-                  ) : (
-                    <button
-                      type="submit"
-                      className="inline-flex w-full cursor-pointer items-center justify-center rounded bg-primary-500 px-4 py-2 text-sm font-semibold text-white"
-                    >
-                      {t("login")}
-                    </button>
-                  )}
+              <div
+                className={
+                  "absolute w-full transition-all " +
+                  (forgotPassword
+                    ? "visible translate-x-0 opacity-100"
+                    : "invisible translate-x-5 opacity-0")
+                }
+              >
+                <button
+                  onClick={() => {
+                    setForgotPassword(false);
+                  }}
+                  type="button"
+                  className="mb-4 text-sm text-primary-400 hover:text-primary-500"
+                >
+                  <div className="flex justify-center">
+                    <CareIcon className="care-l-arrow-left text-lg" />
+                    <span>{t("back_to_login")}</span>
+                  </div>
+                </button>
+                <div className="mb-8 w-[300px] text-4xl font-black text-primary-600">
+                  {t("forget_password")}
                 </div>
+                <form onSubmit={handleForgetSubmit}>
+                  <div>
+                    {t("forget_password_instruction")}
+                    <LegendInput
+                      id="forgot_username"
+                      name="username"
+                      type="TEXT"
+                      legend={t("username")}
+                      value={form.username}
+                      onChange={handleChange}
+                      error={errors.username}
+                      outerClassName="my-4"
+                      size="large"
+                      className="font-extrabold"
+                    />
+                    <div className="justify-start">
+                      {loading ? (
+                        <div className="flex items-center justify-center">
+                          <CircularProgress className="text-primary-500" />
+                        </div>
+                      ) : (
+                        <button
+                          type="submit"
+                          className="inline-flex w-full cursor-pointer items-center justify-center rounded bg-primary-500 px-4 py-2 text-sm font-semibold text-white"
+                        >
+                          {t("send_reset_link")}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </form>
+                <LanguageSelectorLogin />
               </div>
-            </form>
-            <LanguageSelectorLogin />
-          </div>
-          <div
-            className={
-              "absolute w-full p-8 transition-all md:w-4/5 md:p-0 lg:w-[400px] " +
-              (!forgotPassword
-                ? "invisible translate-x-5 opacity-0"
-                : "visible translate-x-0 opacity-100")
-            }
-          >
-            <img
-              src={main_logo.dark}
-              className="mb-4 h-8 w-auto md:hidden"
-              alt="care logo"
-            />{" "}
-            <button
-              onClick={() => {
-                setForgotPassword(false);
-              }}
-              type="button"
-              className="mb-4 text-sm text-primary-400 hover:text-primary-500"
-            >
-              <div className="flex justify-center">
-                <CareIcon className="care-l-arrow-left text-lg" />
-                <span>{t("back_to_login")}</span>
-              </div>
-            </button>
-            <div className="mb-8 w-[300px] text-4xl font-black text-primary-600">
-              {t("forget_password")}
             </div>
-            <form onSubmit={handleForgetSubmit}>
-              <div>
-                {t("forget_password_instruction")}
-                <LegendInput
-                  id="forgot_username"
-                  name="username"
-                  type="TEXT"
-                  legend={t("username")}
-                  value={form.username}
-                  onChange={handleChange}
-                  error={errors.username}
-                  outerClassName="my-4"
-                  size="large"
-                  className="font-extrabold"
-                />
-                <div className="justify-start">
-                  {loading ? (
-                    <div className="flex items-center justify-center">
-                      <CircularProgress className="text-primary-500" />
-                    </div>
-                  ) : (
-                    <button
-                      type="submit"
-                      className="inline-flex w-full cursor-pointer items-center justify-center rounded bg-primary-500 px-4 py-2 text-sm font-semibold text-white"
-                    >
-                      {t("send_reset_link")}
-                    </button>
-                  )}
-                </div>
-              </div>
-            </form>
-            <LanguageSelectorLogin />
           </div>
         </div>
       </div>
