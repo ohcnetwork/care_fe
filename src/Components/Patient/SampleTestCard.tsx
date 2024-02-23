@@ -158,7 +158,8 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
         </div>
         <div className="flex flex-col gap-2">
           <div className="flex flex-col flex-nowrap items-center justify-end text-sm text-gray-700 md:flex-col md:items-start md:justify-start lg:flex-row lg:items-center">
-            Created:{" "}
+            <div className=" font-medium text-black">Created: </div>
+
             <RelativeDateUserMention
               actionDate={itemData.created_date}
               user={itemData.created_by}
@@ -166,7 +167,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             />
           </div>
           <div className="flex flex-col items-center justify-end text-sm text-gray-700 md:flex-col md:items-start lg:flex-row lg:items-center">
-            Last Modified:{" "}
+            <div className=" font-medium text-black">Last Modified: </div>
             <RelativeDateUserMention
               actionDate={itemData.modified_date}
               user={itemData.last_edited_by}
