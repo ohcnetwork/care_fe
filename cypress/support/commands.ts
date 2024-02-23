@@ -165,3 +165,9 @@ Cypress.Commands.add(
     cy.get(element).contains(reference).should("be.visible").click();
   }
 );
+
+Cypress.Commands.add("preventPrint", () => {
+  cy.window().then((win) => {
+    cy.stub(win, "print").as("verifyPrevent");
+  });
+});

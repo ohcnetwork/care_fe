@@ -6,6 +6,7 @@ import PatientPredefined from "../../pageobject/Patient/PatientPredefined";
 import ShiftCreation from "../../pageobject/Shift/ShiftCreation";
 import PatientInvestigation from "../../pageobject/Patient/PatientInvestigation";
 import PatientTreatmentPlan from "../../pageobject/Patient/PatientTreatmentPlan";
+import PatientDeathReport from "../../pageobject/Patient/PatientDeathReport";
 
 describe("Patient Consultation in multiple combination", () => {
   const patientConsultationPage = new PatientConsultationPage();
@@ -15,6 +16,7 @@ describe("Patient Consultation in multiple combination", () => {
   const shiftCreation = new ShiftCreation();
   const patientInvestigation = new PatientInvestigation();
   const patientTreatmentPlan = new PatientTreatmentPlan();
+  const patientDeathReport = new PatientDeathReport();
   const facilityName = "Dummy Facility 40";
   const doctorName = "Dev Doctor";
 
@@ -46,8 +48,15 @@ describe("Patient Consultation in multiple combination", () => {
     patientConsultationPage.selectPatientCategory("Critical");
     patientConsultationPage.selectPatientSuggestion("Declare Death");
     patientConsultationPage.typeCauseOfDeath("Cause of Death");
-    patientConsultationPage.typePatientDateTime("#death_datetime");
+    patientConsultationPage.typePatientConsultationDate(
+      "#death_datetime",
+      "2024-02-22T12:45"
+    );
     patientConsultationPage.typeDeathConfirmedBy(doctorName);
+    patientConsultationPage.typePatientConsultationDate(
+      "#encounter_date",
+      "2024-02-22T12:30"
+    );
     cy.submitButton("Create Consultation");
     cy.verifyNotification(
       "Create Diagnoses - Atleast one diagnosis is required"
@@ -58,11 +67,25 @@ describe("Patient Consultation in multiple combination", () => {
     );
     cy.submitButton("Create Consultation");
     cy.verifyNotification("Consultation created successfully");
-    // verify the data
+    // verify the data and death report
     patientConsultationPage.verifyTextInConsultation(
       "#consultation-buttons",
       "EXPIRED"
     );
+    patientConsultationPage.clickPatientDetails();
+    patientDeathReport.clickDeathReport();
+    patientDeathReport.verifyDeathReportAutofill(
+      "#name",
+      "Patient With Predefined Data"
+    );
+    patientDeathReport.verifyDeathReportAutofill(
+      "#cause_of_death",
+      "Cause of Death"
+    );
+    cy.submitButton("Preview");
+    cy.preventPrint();
+    patientDeathReport.clickPrintDeathReport();
+    cy.get("@verifyPrevent").should("be.called");
   });
 
   it("Internal Transfer within facility Patient with Domicilary Care", () => {
@@ -87,7 +110,10 @@ describe("Patient Consultation in multiple combination", () => {
       "1A04",
       "add-icd11-diagnosis-as-confirmed"
     );
-    patientConsultationPage.typePatientDateTime("#icu_admission_date");
+    patientConsultationPage.typePatientConsultationDate(
+      "#icu_admission_date",
+      "2024-02-23T12:30"
+    );
     // add investigation
     patientInvestigation.clickAddInvestigation();
     patientInvestigation.selectInvestigation("Vitals (GROUP)");

@@ -281,7 +281,10 @@ export const ConsultationDetails = (props: any) => {
             breadcrumbs={true}
             backUrl="/patients"
           />
-          <div className="flex w-full flex-col min-[1150px]:w-min min-[1150px]:flex-row min-[1150px]:items-center">
+          <div
+            className="flex w-full flex-col min-[1150px]:w-min min-[1150px]:flex-row min-[1150px]:items-center"
+            id="consultationpage-header"
+          >
             {!consultationData.discharge_date && (
               <>
                 <button

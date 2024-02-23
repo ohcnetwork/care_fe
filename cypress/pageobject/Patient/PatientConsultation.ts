@@ -46,21 +46,6 @@ export class PatientConsultationPage {
     cy.get("#death_confirmed_doctor").click().type(doctor);
   }
 
-  typePatientDateTime(selector: string) {
-    const currentDate = new Date();
-    const year = currentDate.getFullYear();
-    const month = (currentDate.getMonth() + 1).toString().padStart(2, "0"); // Months are zero-based
-    const day = currentDate.getDate().toString().padStart(2, "0");
-    const hours = currentDate.getHours().toString().padStart(2, "0");
-    const minutes = currentDate.getMinutes().toString().padStart(2, "0");
-
-    // Format the date and time
-    const formattedDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
-
-    // Type the formatted date and time into the field
-    cy.get(selector).click().type(formattedDateTime);
-  }
-
   selectPatientDiagnosis(icdCode, statusId) {
     cy.searchAndSelectOption("#icd11-search", icdCode);
     cy.get("#diagnosis-list")
@@ -70,6 +55,14 @@ export class PatientConsultationPage {
       .then(() => {
         cy.get(`#${statusId}`).click();
       });
+  }
+
+  typePatientConsultationDate(selector: string, date: string) {
+    cy.get(selector).clear().click().type(date);
+  }
+
+  clickPatientDetails() {
+    cy.get("#consultationpage-header").contains("Patient Details").click();
   }
 
   selectPatientPrincipalDiagnosis(diagnosis: string) {
