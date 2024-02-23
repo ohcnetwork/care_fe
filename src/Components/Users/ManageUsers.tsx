@@ -14,6 +14,7 @@ import { USER_TYPES } from "../../Common/constants";
 import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
 import UserDetails from "../Common/UserDetails";
+import UserDetailComponent from "../Common/UserDetailsComponet.js";
 import UserFilter from "./UserFilter";
 import {
   classNames,
@@ -253,30 +254,18 @@ export default function ManageUsers() {
                   } gap-2 md:grid md:grid-cols-2`}
                 >
                   {user.user_type && (
-                    <div className="col-span-1">
-                      <UserDetails id="role" title="Role">
-                        <div
-                          className="overflow-hidden font-semibold"
-                          style={{ textOverflow: "ellipsis" }}
-                          title={user.user_type}
-                        >
-                          {user.user_type}
-                        </div>
-                      </UserDetails>
-                    </div>
+                    <UserDetailComponent
+                      id="role"
+                      title="Role"
+                      value={user.user_type}
+                    />
                   )}
                   {user.district_object && (
-                    <div className="col-span-1">
-                      <UserDetails id="district" title="District">
-                        <div
-                          className="overflow-hidden font-semibold"
-                          style={{ textOverflow: "ellipsis" }}
-                          title={user.district_object.name}
-                        >
-                          {user.district_object.name}
-                        </div>
-                      </UserDetails>
-                    </div>
+                    <UserDetailComponent
+                      id="district"
+                      title="District"
+                      value={user.district_object.name}
+                    />
                   )}
                   {user.user_type === "Doctor" && (
                     <>
