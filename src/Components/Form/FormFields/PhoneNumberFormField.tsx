@@ -108,10 +108,10 @@ export default function PhoneNumberFormField(props: Props) {
     >
       <div className="relative rounded-md shadow-sm">
         <div
-          className="absolute inset-y-0 left-0 w-24 cursor-pointer p-0.5"
+          className="absolute inset-y-0 left-0 w-[4.5rem] cursor-pointer p-0.5"
           onClick={() => setIsOpen(!isOpen)}
         >
-          <span className="flex h-full items-center justify-center rounded-md bg-slate-100 ">
+          <span className="flex h-full items-center rounded-md bg-slate-100 pl-4 ">
             {country?.flag ?? "🇮🇳"}
           </span>
           {isOpen ? (
@@ -127,7 +127,7 @@ export default function PhoneNumberFormField(props: Props) {
           name={field.name}
           autoComplete={props.autoComplete ?? "tel"}
           className={classNames(
-            "cui-input-base h-full pl-28 tracking-widest sm:leading-6 ",
+            "cui-input-base h-full pl-20 tracking-widest sm:leading-6 ",
             field.error && "border-danger-500",
             field.className
           )}
