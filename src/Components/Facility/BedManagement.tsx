@@ -90,7 +90,7 @@ const BedRow = (props: BedRowProps) => {
       />
       <div
         key={id}
-        className="w-full items-center justify-between border-b py-4 lg:flex"
+        className="w-full border items-center justify-between mb-4 py-4 bg-white rounded-md gap-4 lg:flex lg:items-center transition-all duration-200 ease-in-out hover:border-primary-400"
       >
         <div className="mt-2 space-y-2 px-4 lg:w-3/4">
           <div className="flex flex-col sm:flex-row">
@@ -270,17 +270,22 @@ export const BedManagement = (props: BedManagementProps) => {
       backUrl={`/facility/${facilityId}/location/${locationId}`}
     >
       <div className="container mx-auto px-4 py-2 sm:px-8">
-        <div className="flex justify-end">
-          <ButtonV2
-            href={`/facility/${facilityId}/location/${locationId}/beds/add`}
-            authorizeFor={NonReadOnlyUsers}
-          >
-            <CareIcon className="care-l-plus text-lg" />
-            Add New Bed(s)
-          </ButtonV2>
+        <div className="w-full bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold">Bed Management</h1>
+            <ButtonV2
+              href={`/facility/${facilityId}/location/${locationId}/beds/add`}
+              authorizeFor={NonReadOnlyUsers}
+              variant="primary"
+              className="flex items-center space-x-2"
+            >
+              <CareIcon className="care-l-plus text-lg" />
+              <span>Add New Bed(s)</span>
+            </ButtonV2>
+          </div>
+          {bed}
         </div>
-        {bed}
       </div>
     </Page>
   );
-};
+}  
