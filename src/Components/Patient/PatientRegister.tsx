@@ -17,6 +17,7 @@ import {
   compareBy,
 } from "../../Utils/utils";
 import { navigate, useQueryParams } from "raviger";
+import { statusType, useAbortableEffect } from "../../Common/utils";
 import { lazy, useCallback, useEffect, useReducer, useState } from "react";
 
 import AccordionV2 from "../Common/components/AccordionV2";
@@ -27,7 +28,7 @@ import CollapseV2 from "../Common/components/CollapseV2";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import DateFormField from "../Form/FormFields/DateFormField";
 import DialogModal from "../Common/Dialog";
-import { DistrictModel, DupPatientModel } from "../Facility/models";
+import { DupPatientModel } from "../Facility/models";
 import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
 import {
   FieldError,
@@ -58,9 +59,7 @@ import { FormContextValue } from "../Form/FormContext.js";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
-import { RequestResult } from "../../Utils/request/types.js";
 import request from "../../Utils/request/request.js";
-import { statusType, useAbortableEffect } from "../../Common/utils.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -191,6 +190,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   });
   const [careExtId, setCareExtId] = useState("");
   const [formField, setFormField] = useState<any>();
+  const [isDistrictLoading, setIsDistrictLoading] = useState(false);
+  const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
+  const [isWardLoading, setIsWardLoading] = useState(false);
+  const [districts, setDistricts] = useState<any[]>([]);
+  const [localBody, setLocalBody] = useState<any[]>([]);
+  const [ward, setWard] = useState<any[]>([]);
   const [statusDialog, setStatusDialog] = useState<{
     show?: boolean;
     transfer?: boolean;
@@ -205,9 +210,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   );
   const [insuranceDetailsError, setInsuranceDetailsError] =
     useState<FieldError>();
-  const [stateId, setStateId] = useState<number>();
-  const [districtId, setDistrictId] = useState<number>();
-  const [localBodyId, setLocalBodyId] = useState<number>();
 
   useEffect(() => {
     if (extId && formField) {
@@ -219,36 +221,47 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const headerText = !id ? "Add Details of Patient" : "Update Patient Details";
   const buttonText = !id ? "Add Patient" : "Save Details";
 
-  const {
-    data: districtData,
-    refetch: districtFetch,
-    loading: isDistrictLoading,
-  } = useQuery(routes.getDistrictByState, {
-    pathParams: {
-      id: String(stateId),
-    },
-    prefetch: !!stateId,
-  });
-
-  const { data: localbodyData, loading: isLocalbodyLoading } = useQuery(
-    routes.getLocalbodyByDistrict,
-    {
-      pathParams: {
-        id: String(districtId),
-      },
-      prefetch: !!districtId,
+  const fetchDistricts = useCallback(async (id: number) => {
+    if (id > 0) {
+      setIsDistrictLoading(true);
+      const { res, data } = await request(routes.getDistrictByState, {
+        pathParams: { id },
+      });
+      if (res?.ok && data) {
+        setDistricts(data);
+      }
+      setIsDistrictLoading(false);
+      return data ? [...data] : [];
     }
-  );
+  }, []);
 
-  const { data: wardData, loading: isWardLoading } = useQuery(
-    routes.getWardByLocalBody,
-    {
-      pathParams: {
-        id: String(localBodyId),
-      },
-      prefetch: !!localBodyId,
+  const fetchLocalBody = useCallback(async (id: string) => {
+    if (Number(id) > 0) {
+      setIsLocalbodyLoading(true);
+      const { data } = await request(routes.getLocalbodyByDistrict, {
+        pathParams: { id },
+      });
+      setIsLocalbodyLoading(false);
+      setLocalBody(data || []);
+    } else {
+      setLocalBody([]);
     }
-  );
+  }, []);
+
+  const fetchWards = useCallback(async (id: string) => {
+    if (Number(id) > 0) {
+      setIsWardLoading(true);
+      const { data } = await request(routes.getWardByLocalBody, {
+        pathParams: { id },
+      });
+      setIsWardLoading(false);
+      if (data) {
+        setWard(data.results);
+      }
+    } else {
+      setWard([]);
+    }
+  }, []);
 
   const parseGenderFromExt = (gender: any, defaultValue: any) => {
     switch (gender.toLowerCase()) {
@@ -350,10 +363,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           : state.form.phone_number,
       });
 
-      setStateId(data.district_object.state);
-      setDistrictId(data.district);
-      setLocalBodyId(data.local_body);
-      duplicateCheck(data.mobile_number);
+      Promise.all([
+        fetchDistricts(data.district_object.state),
+        fetchLocalBody(String(data.district)),
+        fetchWards(String(data.local_body)), // Convert data.local_body to a string
+        duplicateCheck(data.mobile_number),
+      ]);
       setShowImport({
         show: false,
         field: null,
@@ -447,9 +462,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             type: "set_form",
             form: formData,
           });
-          setStateId(data.state);
-          setDistrictId(data.district);
-          setLocalBodyId(data.local_body);
+          Promise.all([
+            fetchDistricts(data.state ?? 0),
+            fetchLocalBody(data.district ? String(data.district) : ""),
+            fetchWards(data.local_body ? String(data.local_body) : ""), // Convert data.local_body to string
+          ]);
         } else {
           goBack();
         }
@@ -457,15 +474,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       }
     },
     [id]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      if (id) {
-        fetchData(status);
-      }
-    },
-    [dispatch, fetchData]
   );
 
   useQuery(routes.listHCXPolicies, {
@@ -484,6 +492,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
   const { data: stateData, loading: isStateLoading } = useQuery(
     routes.statesList
+  );
+
+  useAbortableEffect(
+    (status: statusType) => {
+      if (id) {
+        fetchData(status);
+      }
+    },
+    [dispatch, fetchData]
   );
 
   const { data: facilityObject } = useQuery(routes.getAnyFacility, {
@@ -647,10 +664,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     });
     if (!matchedState) return;
 
-    const newDistrictDataResult: RequestResult<DistrictModel[]> =
-      await districtFetch({ pathParams: { id: String(matchedState.id) } });
-    const fetchedDistricts: DistrictModel[] = newDistrictDataResult.data || [];
-
+    const fetchedDistricts = await fetchDistricts(matchedState.id);
     if (!fetchedDistricts) return;
 
     const matchedDistrict = fetchedDistricts.find((district) => {
@@ -659,9 +673,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     if (!matchedDistrict) return;
 
     setField({ name: "state", value: matchedState.id });
-    setField({ name: "district", value: matchedDistrict.id });
+    setField({ name: "district", value: matchedDistrict.id.toString() }); // Convert matchedDistrict.id to string
 
-    setDistrictId(matchedDistrict.id);
+    fetchLocalBody(matchedDistrict.id.toString()); // Convert matchedDistrict.id to string
     setShowAutoFilledPincode(true);
     setTimeout(() => {
       setShowAutoFilledPincode(false);
@@ -1113,10 +1127,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 className="bg-transparent px-1 py-2 md:px-2"
                 onDraftRestore={(newState) => {
                   dispatch({ type: "set_state", state: newState });
-                  setStateId(newState.form.state ?? 0);
-                  setDistrictId(newState.form.district ?? 0);
-                  setLocalBodyId(newState.form.local_body ?? 0);
-                  duplicateCheck(newState.form.phone_number ?? "");
+                  Promise.all([
+                    fetchDistricts(newState.form.state ?? 0),
+                    fetchLocalBody(newState.form.district?.toString() ?? ""),
+                    fetchWards(newState.form.local_body?.toString() ?? ""),
+                    duplicateCheck(newState.form.phone_number ?? ""),
+                  ]);
                 }}
                 noPadding
               >
@@ -1392,9 +1408,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                         name: "ward",
                                         value: undefined,
                                       });
-                                      setStateId(e.value);
-                                      setDistrictId(0);
-                                      setLocalBodyId(0);
+                                      fetchDistricts(e.value);
+                                      fetchLocalBody("0");
+                                      fetchWards("0");
                                     }}
                                   />
                                 )}
@@ -1416,7 +1432,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                         : "Select State First"
                                     }
                                     disabled={!field("state").value}
-                                    options={districtData ? districtData : []}
+                                    options={districts}
                                     optionLabel={(o: any) => o.name}
                                     optionValue={(o: any) => o.id}
                                     onChange={(e: any) => {
@@ -1429,8 +1445,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                         name: "ward",
                                         value: undefined,
                                       });
-                                      setDistrictId(e.value);
-                                      setLocalBodyId(0);
+                                      fetchLocalBody(String(e.value));
+                                      fetchWards("0");
                                     }}
                                   />
                                 )}
@@ -1452,7 +1468,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                         : "Select District First"
                                     }
                                     disabled={!field("district").value}
-                                    options={localbodyData ? localbodyData : []}
+                                    options={localBody}
                                     optionLabel={(o: any) => o.name}
                                     optionValue={(o: any) => o.id}
                                     onChange={(e: any) => {
@@ -1461,7 +1477,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                         name: "ward",
                                         value: undefined,
                                       });
-                                      setLocalBodyId(e.value);
+                                      fetchWards(String(e.value));
                                     }}
                                   />
                                 )}
@@ -1478,7 +1494,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   <SelectFormField
                                     {...field("ward")}
                                     label="Ward"
-                                    options={(wardData ? wardData.results : [])
+                                    options={ward
                                       .sort(compareBy("number"))
                                       .map((e) => {
                                         return {
