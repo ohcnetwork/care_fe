@@ -333,12 +333,13 @@ export default function ManageUsers() {
                   {user.created_by && (
                     <div className="col-span-1">
                       <UserDetails id="created_by" title="Created by">
-                        <div
-                          className="overflow-hidden font-semibold"
-                          style={{ textOverflow: "ellipsis" }}
-                          title={user.created_by}
-                        >
-                          {user.created_by}
+                        <div className="overflow-hidden">
+                          <div
+                            className="truncate font-semibold"
+                            title={user.created_by}
+                          >
+                            {user.created_by}
+                          </div>
                         </div>
                       </UserDetails>
                     </div>
