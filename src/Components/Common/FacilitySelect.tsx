@@ -55,11 +55,6 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
         district,
       };
 
-      const { data } = await request(
-        showAll ? routes.getAllFacilities : routes.getPermittedFacilities,
-        { query }
-      );
-
       if (
         homeFacility &&
         !showAllFacilityUsers.includes(authUser.user_type) &&
@@ -69,6 +64,11 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
         query["limit"] = 1;
       }
 
+      const { data } = await request(
+        showAll ? routes.getAllFacilities : routes.getPermittedFacilities,
+        { query }
+      );
+
       if (freeText)
         data?.results?.push({
           id: -1,
@@ -76,17 +76,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
         });
       return data?.results;
     },
-    [
-      searchAll,
-      showAll,
-      facilityType,
-      district,
-      exclude_user,
-      freeText,
-      authUser.home_facility_object?.name,
-      authUser.user_type,
-      homeFacility,
-    ]
+    [searchAll, showAll, facilityType, district, exclude_user, freeText]
   );
 
   return (
