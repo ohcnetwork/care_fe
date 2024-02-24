@@ -233,6 +233,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     }
   }, [careExtId, formField]);
 
+  useEffect(() => {
+    const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
+    if (
+      !showAllFacilityUsers.includes(authUser.user_type) &&
+      authUser.home_facility_object?.name
+    ) {
+      navigate("/facility");
+    }
+  }, []);
+
   const headerText = !id ? "Add Details of Patient" : "Update Patient Details";
   const buttonText = !id ? "Add Patient" : "Save Details";
 

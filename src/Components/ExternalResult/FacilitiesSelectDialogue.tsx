@@ -29,6 +29,7 @@ const FacilitiesSelectDialog = (props: Props) => {
         errors=""
         showAll={false}
         multiple={false}
+        homeFacility={true}
       />
       <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
         <Cancel onClick={handleCancel} />
