@@ -31,7 +31,7 @@ export default function useQuery<TData>(
           : overrides ?? options;
 
       setLoading(true);
-      const response = await request(route, resolvedOptions);
+      const response = await request(route, { ...resolvedOptions, controller });
       setResponse(response);
       setLoading(false);
       return response;
