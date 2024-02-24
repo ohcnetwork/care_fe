@@ -208,7 +208,7 @@ const lockAsset =
     const resp = await dispatch(
       operateAsset(config.id, {
         action: {
-          type: "lock_asset",
+          type: "lock_camera",
         },
       })
     );
@@ -242,7 +242,7 @@ const unlockAsset =
     const resp = await dispatch(
       operateAsset(config.id, {
         action: {
-          type: "unlock_asset",
+          type: "unlock_camera",
         },
       })
     );
