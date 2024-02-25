@@ -14,6 +14,7 @@ import { navigate } from "raviger";
 import dayjs from "dayjs";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 type DeathReport = {
   name?: string;
@@ -141,13 +142,14 @@ export default function PrintDeathReport(props: { id: string }) {
           onClick={(_) => window.print()}
           className="btn btn-primary mr-2"
         >
-          <i className="fas fa-print mr-2"></i> Print Death Report
+          <CareIcon icon="l-print" className="mr-2 text-lg" /> Print Death
+          Report
         </button>
         <button
           onClick={(_) => setIsPrintMode(false)}
           className="btn btn-default"
         >
-          <i className="fas fa-times mr-2"></i> Close
+          <CareIcon icon="l-times" className="mr-2 text-lg" /> Close
         </button>
       </div>
 

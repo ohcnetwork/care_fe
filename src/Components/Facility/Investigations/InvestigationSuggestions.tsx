@@ -128,7 +128,7 @@ export default function ViewInvestigationSuggestions(props: {
                             {type}
                             {investigationMissed && (
                               <div className="tooltip inline-block cursor-pointer text-red-400">
-                                <i className="fas fa-triangle-exclamation" />
+                                <CareIcon icon="l-exclamation-triangle" />
                                 <div className="tooltip-text">
                                   Investigation Missed!
                                 </div>
@@ -136,7 +136,7 @@ export default function ViewInvestigationSuggestions(props: {
                             )}
                             {investigated && !investigationMissed && (
                               <div className="tooltip inline-block cursor-pointer text-green-400">
-                                <i className="fas fa-check" />
+                                <CareIcon icon="l-check" />
                                 <div className="tooltip-text">
                                   Investigation Recorded
                                 </div>

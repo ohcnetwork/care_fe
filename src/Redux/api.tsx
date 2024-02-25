@@ -75,7 +75,10 @@ import {
 } from "../Components/Users/models";
 import { Prescription } from "../Components/Medicine/models";
 import {
+  CreateFileRequest,
+  CreateFileResponse,
   DailyRoundsModel,
+  FileUploadModel,
   PatientModel,
   SampleReportModel,
   SampleTestModel,
@@ -95,6 +98,7 @@ import {
 } from "../Components/Facility/Investigations";
 import { Investigation } from "../Components/Facility/Investigations/Reports/types";
 import { ICD11DiagnosisModel } from "../Components/Diagnosis/types";
+import { EventGeneric } from "../Components/Facility/ConsultationDetails/Events/types";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -377,6 +381,11 @@ const routes = {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
     method: "PATCH",
   },
+  deleteFacilityAssetLocation: {
+    path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
+    method: "DELETE",
+    TRes: Type<Record<string, never>>(),
+  },
   getFacilityAssetLocationAvailability: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/availability/",
     method: "GET",
@@ -552,6 +561,12 @@ const routes = {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/",
     method: "GET",
     TRes: Type<PaginatedResponse<DailyRoundsModel>>(),
+  },
+
+  getEvents: {
+    path: "/api/v1/consultation/{consultationId}/events/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<EventGeneric>>(),
   },
 
   getDailyReport: {
@@ -1008,18 +1023,24 @@ const routes = {
   createUpload: {
     path: "/api/v1/files/",
     method: "POST",
+    TBody: Type<CreateFileRequest>(),
+    TRes: Type<CreateFileResponse>(),
   },
   viewUpload: {
     path: "/api/v1/files/",
     method: "GET",
+    TRes: Type<PaginatedResponse<FileUploadModel>>(),
   },
   retrieveUpload: {
-    path: "/api/v1/files/{fileId}/",
+    path: "/api/v1/files/{id}/",
     method: "GET",
+    TRes: Type<FileUploadModel>(),
   },
   editUpload: {
-    path: "/api/v1/files/{fileId}/?file_type={fileType}&associating_id={associatingId}",
+    path: "/api/v1/files/{id}/?file_type={fileType}&associating_id={associatingId}",
     method: "PATCH",
+    TBody: Type<Partial<FileUploadModel>>(),
+    TRes: Type<FileUploadModel>(),
   },
 
   // Investigation
