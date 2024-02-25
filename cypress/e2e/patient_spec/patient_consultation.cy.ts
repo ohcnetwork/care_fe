@@ -294,9 +294,10 @@ describe("Patient Consultation in multiple combination", () => {
     patientConsultationPage.typeReferringFacility("Life Care Hospital");
     // Vomiting and Nausea symptoms
     patientConsultationPage.selectSymptoms(["VOMITING", "SORE THROAT"]);
-    patientConsultationPage.selectSymptomsDate("01012024");
     // Stable category
     patientConsultationPage.selectPatientCategory("Stable");
+    // Date of symptoms
+    patientConsultationPage.selectSymptomsDate("01012024");
     // OP Consultation
     patientConsultationPage.selectPatientSuggestion("OP Consultation");
     // one ICD-11 and no principal
@@ -335,9 +336,10 @@ describe("Patient Consultation in multiple combination", () => {
     );
     // Select the Symptoms - Sore throat and fever symptoms
     patientConsultationPage.selectSymptoms(["FEVER", "SORE THROAT"]);
-    patientConsultationPage.selectSymptomsDate("01012024");
     // Comfort Care category
     patientConsultationPage.selectPatientCategory("Comfort Care");
+    // Date of symptoms
+    patientConsultationPage.selectSymptomsDate("01012024");
     // Decision after consultation - Referred to Facility
     patientConsultationPage.selectPatientSuggestion(
       "Refer to another Hospital"

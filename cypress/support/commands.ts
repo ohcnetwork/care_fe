@@ -162,6 +162,7 @@ Cypress.Commands.add("clickAndTypeDate", (date: string, selector: string) => {
 Cypress.Commands.add(
   "verifyAndClickElement",
   (element: string, reference: string) => {
+    cy.get(element).scrollIntoView();
     cy.get(element).contains(reference).should("be.visible").click();
   }
 );
