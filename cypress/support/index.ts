@@ -33,6 +33,7 @@ declare global {
         reference: string
       ): Chainable<Element>;
       preventPrint(): Chainable<Window>;
+      closeNotification(): Chainable<Element>;
     }
   }
 }

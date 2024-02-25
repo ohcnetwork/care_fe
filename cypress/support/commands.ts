@@ -173,3 +173,11 @@ Cypress.Commands.add("preventPrint", () => {
     cy.stub(win, "print").as("verifyPrevent");
   });
 });
+
+Cypress.Commands.add("closeNotification", () => {
+  cy.get(".pnotify")
+    .should("exist")
+    .each(($div) => {
+      cy.wrap($div).click();
+    });
+});
