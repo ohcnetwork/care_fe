@@ -10,8 +10,8 @@ export class PatientConsultationPage {
     cy.clickAndMultiSelectOption("#symptoms", symptoms);
   }
 
-  selectSymptomsDate(date: string) {
-    cy.clickAndTypeDate("#symptoms_onset_date", date);
+  selectSymptomsDate(selector: string, date: string) {
+    cy.clickAndTypeDate(selector, date);
   }
 
   verifyConsultationPatientName(patientName: string) {

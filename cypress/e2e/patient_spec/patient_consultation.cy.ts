@@ -297,7 +297,10 @@ describe("Patient Consultation in multiple combination", () => {
     // Stable category
     patientConsultationPage.selectPatientCategory("Stable");
     // Date of symptoms
-    patientConsultationPage.selectSymptomsDate("01012024");
+    patientConsultationPage.selectSymptomsDate(
+      "#symptoms_onset_date",
+      "01012024"
+    );
     // OP Consultation
     patientConsultationPage.selectPatientSuggestion("OP Consultation");
     // one ICD-11 and no principal
@@ -339,7 +342,10 @@ describe("Patient Consultation in multiple combination", () => {
     // Comfort Care category
     patientConsultationPage.selectPatientCategory("Comfort Care");
     // Date of symptoms
-    patientConsultationPage.selectSymptomsDate("01012024");
+    patientConsultationPage.selectSymptomsDate(
+      "#symptoms_onset_date",
+      "01012024"
+    );
     // Decision after consultation - Referred to Facility
     patientConsultationPage.selectPatientSuggestion(
       "Refer to another Hospital"
