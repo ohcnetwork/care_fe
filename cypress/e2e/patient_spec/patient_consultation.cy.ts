@@ -50,7 +50,6 @@ describe("Patient Consultation in multiple combination", () => {
   });
 
   it("OP Patient with admission consultation", () => {
-    // icd 11 - 4 diagnosis with one principal
     patientPage.createPatient();
     patientPage.selectFacility(facilityName);
     patientPredefined.createPatient();
@@ -68,6 +67,7 @@ describe("Patient Consultation in multiple combination", () => {
     patientConsultationPage.typePatientWeight(patientWeight);
     patientConsultationPage.typePatientHeight(patientHeight);
     patientConsultationPage.selectPatientCategory("Stable");
+    // icd 11 - 4 diagnosis with one principal
     patientConsultationPage.selectPatientDiagnosis(
       diagnosis1,
       "add-icd11-diagnosis-as-unconfirmed"

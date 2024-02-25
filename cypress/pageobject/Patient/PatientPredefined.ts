@@ -4,8 +4,8 @@ import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import PatientMedicalHistory from "../../pageobject/Patient/PatientMedicalHistory";
 import {
-  emergency_phone_number,
-  phone_number,
+  generatePhoneNumber,
+  generateEmergencyPhoneNumber,
 } from "../../pageobject/constants";
 
 class PatientPredefined {
@@ -13,7 +13,8 @@ class PatientPredefined {
     const patientPage = new PatientPage();
     const facilityPage = new FacilityPage();
     const patientMedicalHistory = new PatientMedicalHistory();
-
+    const phone_number = generatePhoneNumber();
+    const emergency_phone_number = generateEmergencyPhoneNumber();
     patientPage.typePatientPhoneNumber(phone_number);
     patientPage.typePatientEmergencyNumber(emergency_phone_number);
     patientPage.typePatientDateOfBirth("01012001");
