@@ -76,7 +76,10 @@ import {
 } from "../Components/Users/models";
 import { Prescription } from "../Components/Medicine/models";
 import {
+  CreateFileRequest,
+  CreateFileResponse,
   DailyRoundsModel,
+  FileUploadModel,
   PatientModel,
   SampleReportModel,
   SampleTestModel,
@@ -378,6 +381,11 @@ const routes = {
   partialUpdateFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
     method: "PATCH",
+  },
+  deleteFacilityAssetLocation: {
+    path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
+    method: "DELETE",
+    TRes: Type<Record<string, never>>(),
   },
   getFacilityAssetLocationAvailability: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/availability/",
@@ -1032,18 +1040,24 @@ const routes = {
   createUpload: {
     path: "/api/v1/files/",
     method: "POST",
+    TBody: Type<CreateFileRequest>(),
+    TRes: Type<CreateFileResponse>(),
   },
   viewUpload: {
     path: "/api/v1/files/",
     method: "GET",
+    TRes: Type<PaginatedResponse<FileUploadModel>>(),
   },
   retrieveUpload: {
-    path: "/api/v1/files/{fileId}/",
+    path: "/api/v1/files/{id}/",
     method: "GET",
+    TRes: Type<FileUploadModel>(),
   },
   editUpload: {
-    path: "/api/v1/files/{fileId}/?file_type={fileType}&associating_id={associatingId}",
+    path: "/api/v1/files/{id}/?file_type={fileType}&associating_id={associatingId}",
     method: "PATCH",
+    TBody: Type<Partial<FileUploadModel>>(),
+    TRes: Type<FileUploadModel>(),
   },
 
   // Investigation

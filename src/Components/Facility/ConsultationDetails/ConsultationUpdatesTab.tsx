@@ -684,7 +684,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             isTab2Active={showEvents}
           />
           {showEvents ? (
-            <EventsList consultation={props.consultationData} />
+            <EventsList />
           ) : (
             <DailyRoundsList consultation={props.consultationData} />
           )}

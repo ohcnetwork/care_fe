@@ -3,8 +3,7 @@ import { useEffect, useState } from "react";
 import Spinner from "../Common/Spinner";
 import { NOTIFICATION_EVENTS } from "../../Common/constants";
 import { classNames, formatDateTime } from "../../Utils/utils";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-
+import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
 import {
   ShrinkedSidebarItem,
   SidebarItem,
@@ -72,8 +71,9 @@ const NotificationTile = ({
 
   const getNotificationTitle = (id: string) =>
     NOTIFICATION_EVENTS.find((notification) => notification.id === id)?.text;
-  const getNotificationIcon = (id: string) =>
-    NOTIFICATION_EVENTS.find((notification) => notification.id === id)?.icon;
+  const getNotificationIcon = (id: string): IconName =>
+    NOTIFICATION_EVENTS.find((notification) => notification.id === id)?.icon ||
+    "default";
   return (
     <div
       onClick={() => {
@@ -92,7 +92,10 @@ const NotificationTile = ({
           {getNotificationTitle(result.event)}
         </div>
         <div>
-          <i className={`${getNotificationIcon(result.event)} fa-2x `} />
+          <CareIcon
+            icon={getNotificationIcon(result.event)}
+            className="text-3xl"
+          />
         </div>
       </div>
       <div className="py-1 text-sm">{result.message}</div>
@@ -161,7 +164,7 @@ export default function NotificationsList({
   const [showUnread, setShowUnread] = useState(false);
   const { t } = useTranslation();
   const {
-    isSubscribed,
+    subscriptionStatus,
     isSubscribing,
     intialSubscriptionState,
     handleSubscribeClick,
@@ -177,7 +180,7 @@ export default function NotificationsList({
   }, [open]);
 
   const getButtonText = () => {
-    const status = isSubscribed;
+    const status = subscriptionStatus;
     if (status === "NotSubscribed") {
       return (
         <>
@@ -241,7 +244,7 @@ export default function NotificationsList({
         setOffset((prev) => prev - RESULT_LIMIT);
       });
     intialSubscriptionState();
-  }, [reload, open, offset, eventFilter, isSubscribed]);
+  }, [reload, open, offset, eventFilter, subscriptionStatus]);
 
   if (!offset && isLoading) {
     manageResults = (
@@ -374,13 +377,13 @@ export default function NotificationsList({
           </div>
 
           <SelectMenuV2
-            className="mb-2"
+            className="mb-2 text-xl"
             placeholder={t("filter_by_category")}
             options={NOTIFICATION_EVENTS}
             value={eventFilter}
             optionLabel={(o) => o.text}
             optionValue={(o) => o.id}
-            optionIcon={(o) => <i className={`${o.icon} `} />}
+            optionIcon={(o) => <CareIcon icon={o.icon} />}
             onChange={(v) => setEventFilter(v || "")}
           />
         </div>

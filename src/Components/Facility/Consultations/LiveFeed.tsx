@@ -859,7 +859,7 @@ const LiveFeed = (props: any) => {
                               setPresetsPage(presetsPage - 10);
                             }}
                           >
-                            <i className="fas fa-arrow-left"></i>
+                            <CareIcon icon="l-pen" />
                           </button>
                           <button
                             className="flex-1 p-2  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
@@ -868,7 +868,7 @@ const LiveFeed = (props: any) => {
                               setPresetsPage(presetsPage + 10);
                             }}
                           >
-                            <i className="fas fa-arrow-right"></i>
+                            <CareIcon icon="l-trash" />
                           </button>
                         </div>
                       ) : (
