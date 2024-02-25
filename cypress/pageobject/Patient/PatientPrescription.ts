@@ -9,18 +9,11 @@ export class PatientPrescription {
     cy.intercept("GET", "**/api/v1/medibase/**").as("getMediaBase");
   }
 
-  prescribefirstMedicine() {
-    cy.get("div#medicine_object input[placeholder='Select'][role='combobox']")
-      .click()
-      .type("dolo")
-      .type("{downarrow}{enter}");
-  }
-
-  prescribesecondMedicine() {
-    cy.get("div#medicine_object input[placeholder='Select'][role='combobox']")
-      .click()
-      .type("dolo")
-      .type("{downarrow}{downarrow}{enter}");
+  selectMedicine(medicine: string) {
+    cy.searchAndSelectOption(
+      "div#medicine_object input[placeholder='Select'][role='combobox']",
+      medicine
+    );
   }
 
   selectMedicinebox() {
@@ -38,20 +31,14 @@ export class PatientPrescription {
   }
 
   selectDosageFrequency(frequency: string) {
-    cy.get("#frequency")
-      .click()
-      .then(() => {
-        cy.get("div#frequency [role='option']").contains(frequency).click();
-      });
+    cy.clickAndSelectOption("#frequency", frequency);
   }
 
-  submitPrescriptionAndReturn() {
-    cy.intercept("POST", "**/api/v1/consultation/*/prescriptions/").as(
-      "submitPrescription"
+  clickReturnToDashboard() {
+    cy.verifyAndClickElement(
+      "[data-testid='return-to-patient-dashboard']",
+      "Return to Patient Dashboard"
     );
-    cy.get("button#submit").should("be.visible").click();
-    cy.get("[data-testid='return-to-patient-dashboard']").click();
-    cy.wait("@submitPrescription").its("response.statusCode").should("eq", 201);
   }
 
   discontinuePreviousPrescription() {
@@ -68,14 +55,6 @@ export class PatientPrescription {
     cy.get("#consultation_tab_nav").scrollIntoView();
     cy.get("#consultation_tab_nav").contains("Medicines").click();
     cy.get("a[href='prescriptions']").first().click();
-  }
-
-  submitPrescription() {
-    cy.intercept("POST", "**/api/v1/consultation/*/prescriptions/").as(
-      "submitPrescription"
-    );
-    cy.get("#submit").contains("Submit").click();
-    cy.wait("@submitPrescription").its("response.statusCode").should("eq", 201);
   }
 }
 export default PatientPrescription;

@@ -3,11 +3,7 @@ export class PatientConsultationPage {
     cy.wait(5000);
     cy.get("#route_to_facility").scrollIntoView();
     cy.get("#route_to_facility").should("be.visible");
-    cy.get("#route_to_facility")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains(status).click();
-      });
+    cy.clickAndSelectOption("#route_to_facility", status);
   }
 
   selectSymptoms(symptoms) {
@@ -62,7 +58,28 @@ export class PatientConsultationPage {
   }
 
   clickPatientDetails() {
-    cy.get("#consultationpage-header").contains("Patient Details").click();
+    cy.verifyAndClickElement("#consultationpage-header", "Patient Details");
+  }
+
+  typePatientIllnessHistory(history: string) {
+    cy.get("#history_of_present_illness").clear().click().type(history);
+  }
+
+  typePatientExaminationHistory(examination: string) {
+    cy.get("#examination_details").type(examination);
+  }
+
+  typePatientWeight(weight: string) {
+    cy.get("#weight").type(weight);
+  }
+
+  typePatientHeight(height: string) {
+    cy.get("#height").type(height);
+  }
+
+  typePatientNumber(number: string) {
+    cy.get("#patient_no").scrollIntoView();
+    cy.get("#patient_no").type(number);
   }
 
   selectPatientPrincipalDiagnosis(diagnosis: string) {
@@ -99,15 +116,10 @@ export class PatientConsultationPage {
   clickEditConsultationButton() {
     cy.get("#consultation-buttons").scrollIntoView();
     cy.get("button").contains("Manage Patient").click();
-    cy.get("#consultation-buttons")
-      .contains("Edit Consultation Details")
-      .click();
-  }
-
-  updateConsultation() {
-    cy.intercept("PUT", "**/api/v1/consultation/**").as("updateConsultation");
-    cy.get("#submit").contains("Update Consultation").click();
-    cy.wait("@updateConsultation").its("response.statusCode").should("eq", 200);
+    cy.verifyAndClickElement(
+      "#consultation-buttons",
+      "Edit Consultation Details"
+    );
   }
 
   visitShiftRequestPage() {

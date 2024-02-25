@@ -6,13 +6,13 @@ class PatientInvestigation {
 
   clickInvestigationTab() {
     cy.get("#consultation_tab_nav").scrollIntoView();
-    cy.get("#consultation_tab_nav").contains("Investigations").click();
+    cy.verifyAndClickElement("#consultation_tab_nav", "Investigations");
   }
 
   selectInvestigation(investigation: string) {
     cy.get("#search-patient-investigation").click();
-    cy.get("#investigation-group").contains(investigation).click();
-    cy.get("#investigation").contains("Investigation No. 1").click();
+    cy.verifyAndClickElement("#investigation-group", investigation);
+    cy.verifyAndClickElement("#investigation", "Investigation No. 1");
   }
 
   clickInvestigationCheckbox() {

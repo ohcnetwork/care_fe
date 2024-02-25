@@ -261,7 +261,10 @@ export default function PatientInfoCard(props: {
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2 text-sm sm:flex-row">
-                <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-gray-900 sm:flex-row sm:text-sm lg:justify-normal">
+                <div
+                  className="flex flex-wrap items-center justify-center gap-2 text-sm text-gray-900 sm:flex-row sm:text-sm lg:justify-normal"
+                  id="patient-consultationbadges"
+                >
                   {consultation?.patient_no && (
                     <span className="flex capitalize">
                       <span className="items-stretch justify-center whitespace-nowrap rounded border border-green-400 bg-green-100 px-3 py-0.5 text-sm font-medium text-green-800">
@@ -409,7 +412,10 @@ export default function PatientInfoCard(props: {
                         (diagnosis) => diagnosis.is_principal
                       );
                       return principal_diagnosis ? (
-                        <div className="mt-1 flex flex-col sm:flex-row">
+                        <div
+                          className="mt-1 flex flex-col sm:flex-row"
+                          id="principal-diagnosis"
+                        >
                           <div className="mr-1 text-sm font-semibold">
                             Principal Diagnosis:
                           </div>
