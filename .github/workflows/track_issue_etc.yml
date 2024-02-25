@@ -1,0 +1,167 @@
+name: Track Issue ETCs
+
+on:
+    schedule:
+        - cron: '0 0 * * *'
+    issues:
+        types: [assigned, reopened]
+    workflow_dispatch:
+
+permissions:
+    issues: write
+    contents: read 
+
+jobs:
+    handle_issues:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v2
+            
+            - name: Ask for ETC on assignment or reopening
+              if: github.event_name == 'issues' && (github.event.action == 'assigned' || github.event.action == 'reopened')
+              uses: actions/github-script@v7
+              with:
+                github-token: ${{ secrets.GITHUB_TOKEN }}
+                script: |
+                    async function parseForETC(comments) {
+                        const etcRegex = /ETC:\s*(\d{4}-\d{2}-\d{2})/;
+                    
+                        for (const comment of comments.reverse()) {
+                            const match = etcRegex.exec(comment.body);
+                            if (match) {
+                                return match[1];
+                            }
+                        }
+                    }
+
+                    function hasLabel(labelName) {
+                        return context.payload.issue.labels.some(
+                        (label) => label.name.toLowerCase() === labelName.toLowerCase()
+                        );
+                    }
+                    
+                    function defaultETC() {
+                        const now = new Date();
+                    
+                        switch (true) {
+                        case hasLabel("P0"):
+                            now.setDate(now.getDate() + 1);
+                            return now.toISOString().slice(0, 10);
+                        case hasLabel("P1"):
+                            now.setDate(now.getDate() + 2);
+                            return now.toISOString().slice(0, 10);
+                        case hasLabel("P2"):
+                            now.setDate(now.getDate() + 3);
+                            return now.toISOString().slice(0, 10);
+                        default:
+                            now.setDate(now.getDate() + 7);
+                            return now.toISOString().slice(0, 10);
+                        }
+                    }
+
+                    const { data: comments } = await github.rest.issues.listComments({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        issue_number: context.issue.number,
+                    });
+                
+                    const etc = await parseForETC(comments);
+
+                    const message = `
+                    Hello ${context.payload.issue.assignees.map((assignee) => `@${assignee.login}`).join(" ")}, The issue "${context.payload.issue.title}" has been assigned to you.
+                    
+                    The Estimated Time of Completion (ETC) for this issue is \`ETC: ${etc && new Date(etc) >= new Date() ? etc : defaultETC()}\`.
+                    
+                    If you need more time, please update the ETC accordingly in the format of \`ETC: YYYY-MM-DD\`. Thank you!
+                    `;
+                    github.rest.issues.createComment({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        issue_number: context.issue.number,
+                        body: message,
+                    });
+
+            - name: Handle ETC overdue warnings and unassignment
+              if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+              uses: actions/github-script@v7
+              with:
+                github-token: ${{ secrets.GITHUB_TOKEN }}
+                script: |
+                    function getDaysBetweenDates(date1, date2) {
+                        const oneDay = 24 * 60 * 60 * 1000;
+                        return Math.round(Math.abs((date1 - date2) / oneDay));
+                    }
+                    
+                    async function parseForETC(comments) {
+                        const etcRegex = /ETC:\s*(\d{4}-\d{2}-\d{2})/;
+                    
+                        for (const comment of comments.reverse()) {
+                            const match = etcRegex.exec(comment.body);
+                            if (match) {
+                                return match[1];
+                            }
+                        }
+                    }
+                    
+                    const { data: issues } = await github.rest.issues.listForRepo({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        state: "open",
+                    });
+                    
+                    for (const issue of issues) {
+                        const { data: comments } = await github.rest.issues.listComments({
+                            owner: context.repo.owner,
+                            repo: context.repo.repo,
+                            issue_number: issue.number,
+                        });
+                    
+                        const etc = await parseForETC(comments);
+                        if (!etc) {
+                            if (issue.assignees.length === 0) {
+                                return;
+                            }
+                        }
+                    
+                        const diff = getDaysBetweenDates(new Date(), new Date(etc));
+                        if (diff > 2) {
+                            await github.rest.issues.removeAssignees({
+                                owner: context.repo.owner,
+                                repo: context.repo.repo,
+                                issue_number: issue.number,
+                                assignees: issue.assignees.map((assignee) => assignee.login),
+                            });
+
+                            const message = `@coronasafe/care-frontend-maintainers The issue "${issue.title}" is overdue, all the assigness have been removed.`;
+                            await github.rest.issues.createComment({
+                                owner: context.repo.owner,
+                                repo: context.repo.repo,
+                                issue_number: issue.number,
+                                body: message,
+                            });
+                            return;
+                        }
+                    
+                        if (diff === 1) {
+                            if (issue.assignees.length === 0) {
+                                return;
+                            }
+                        
+                            const message = `
+                            Hello ${issue.assignees.map((assignee) => `@${assignee.login}`).join(" ")}, 
+                            
+                            The issue "${issue.title}" is overdue, please update the ETC in the following format \`ETC: YYYY-MM-DD\`, if ETC is not updated within 2 days, all the assigness will be removed. 
+                            
+                            Thanks.
+                            `.split("\n").map((line) => line.trim()).join("\n");
+                            await github.rest.issues.createComment({
+                                owner: context.repo.owner,
+                                repo: context.repo.repo,
+                                issue_number: issue.number,
+                                body: message,
+                            });
+                        }
+                    }
+
+                
