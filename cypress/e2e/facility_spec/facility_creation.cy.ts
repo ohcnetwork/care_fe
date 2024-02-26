@@ -136,15 +136,18 @@ describe("Facility Creation", () => {
     facilityPage.fillExpectedDTypeCylinderRequirement(oxygenExpected);
     facilityPage.selectLocation("Kochi, Kerala");
     facilityPage.submitForm();
+    cy.closeNotification();
     // create multiple bed capacity and verify card reflection
     facilityPage.selectBedType("Oxygen beds");
     facilityPage.fillTotalCapacity(bedCapacity);
     facilityPage.fillCurrentlyOccupied(bedOccupancy);
     facilityPage.clickbedcapcityaddmore();
+    cy.closeNotification();
     facilityPage.selectBedType("Ordinary Bed");
     facilityPage.fillTotalCapacity(bedCapacity);
     facilityPage.fillCurrentlyOccupied(bedOccupancy);
     facilityPage.clickbedcapcityaddmore();
+    cy.closeNotification();
     facilityPage.getTotalBedCapacity().contains(totalCapacity);
     facilityPage.getTotalBedCapacity().contains(totalOccupancy);
     facilityPage.clickcancelbutton();
@@ -152,9 +155,11 @@ describe("Facility Creation", () => {
     facilityPage.selectAreaOfSpecialization("General Medicine");
     facilityPage.fillDoctorCount(doctorCapacity);
     facilityPage.clickdoctorcapacityaddmore();
+    cy.closeNotification();
     facilityPage.selectAreaOfSpecialization("Pulmonology");
     facilityPage.fillDoctorCount(doctorCapacity);
     facilityPage.clickdoctorcapacityaddmore();
+    cy.closeNotification();
     facilityPage.getTotalDoctorCapacity().contains(doctorCapacity);
     facilityPage.clickcancelbutton();
     facilityPage.verifyfacilitynewurl();
