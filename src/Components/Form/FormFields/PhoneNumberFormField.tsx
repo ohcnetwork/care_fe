@@ -128,11 +128,11 @@ export default function PhoneNumberFormField(props: Props) {
 }
 
 const phoneNumberTypeIcons: Record<PhoneNumberType, string> = {
-  international_mobile: "globe",
-  indian_mobile: "mobile-android",
-  mobile: "mobile-android",
-  landline: "phone",
-  support: "headset",
+  international_mobile: "l-globe",
+  indian_mobile: "l-mobile-android",
+  mobile: "l-mobile-android",
+  landline: "l-phone",
+  support: "l-headset",
 };
 
 const PhoneNumberTypesHelp = ({ types }: { types: PhoneNumberType[] }) => (
@@ -141,7 +141,7 @@ const PhoneNumberTypesHelp = ({ types }: { types: PhoneNumberType[] }) => (
       <span key={type} className="tooltip mt-1">
         <CareIcon
           className={classNames(
-            `care-l-${phoneNumberTypeIcons[type]}`,
+            `care-${phoneNumberTypeIcons[type]}`,
             "text-lg text-gray-500"
           )}
         />

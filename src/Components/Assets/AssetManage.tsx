@@ -271,7 +271,7 @@ const AssetManage = (props: AssetManageProps) => {
       <div className="flex grow-0 flex-col md:w-[200px]">
         <div className="flex-start flex items-center">
           <div className="w-8">
-            <CareIcon className={`care-l-${item.icon} fill-gray-700 text-lg`} />
+            <CareIcon className={`care-${item.icon} fill-gray-700 text-lg`} />
           </div>
           <div className="break-words text-gray-700">{item.label}</div>
         </div>
@@ -357,7 +357,7 @@ const AssetManage = (props: AssetManageProps) => {
                   </span>
                   <div className="tooltip tooltip-bottom">
                     <CareIcon
-                      className={`care-l-${assetClassProp.icon} fill-gray-700 text-3xl`}
+                      className={`care-${assetClassProp.icon} fill-gray-700 text-3xl`}
                     />
                     <span className="tooltip-text">{assetClassProp.name}</span>
                   </div>
@@ -397,17 +397,17 @@ const AssetManage = (props: AssetManageProps) => {
               {[
                 {
                   label: asset?.location_object.facility.name,
-                  icon: "location-pin-alt",
+                  icon: "l-location-pin-alt",
                   content: asset?.location_object.name,
                 },
                 {
                   label: "Asset QR Code ID",
-                  icon: "qrcode-scan",
+                  icon: "l-qrcode-scan",
                   content: asset?.qr_code_id,
                 },
                 {
                   label: "Not working reason",
-                  icon: "exclamation-circle",
+                  icon: "l-exclamation-circle",
                   content: asset?.not_working_reason,
                   hide: asset?.is_working,
                 },
@@ -467,14 +467,14 @@ const AssetManage = (props: AssetManageProps) => {
                 {[
                   {
                     label: "Last serviced on",
-                    icon: "wrench",
+                    icon: "l-wrench",
                     content:
                       asset?.last_service?.serviced_on &&
                       formatDate(asset?.last_service?.serviced_on),
                   },
                   {
                     label: "Notes",
-                    icon: "notes",
+                    icon: "l-notes",
                     content: asset?.last_service?.note,
                   },
                 ].map(detailBlock)}

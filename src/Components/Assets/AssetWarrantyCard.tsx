@@ -72,8 +72,8 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
           </div>
           <div className="mt-3">
             {[
-              ["Phone", asset.support_phone, "phone"],
-              ["Email", asset.support_email, "envelope"],
+              ["Phone", asset.support_phone, "l-phone"],
+              ["Email", asset.support_email, "l-envelope"],
             ].map((item) => (
               <div className="flex items-center">
                 {item[1] && (
@@ -86,7 +86,7 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
                       className="border-b border-primary-300 text-primary-300 hover:text-primary-400"
                     >
                       <CareIcon
-                        className={classNames(`care-l-${item[2]}`, "mr-1")}
+                        className={classNames(`care-${item[2]}`, "mr-1")}
                       />
                       {item[1]}
                     </a>

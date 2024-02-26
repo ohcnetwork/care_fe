@@ -180,7 +180,7 @@ const EligibilityChip = ({ eligible }: { eligible: boolean }) => {
       }`}
     >
       <CareIcon
-        className={`care-l-${eligible ? "check" : "times"} text-base`}
+        className={`care-${eligible ? "l-check" : "l-times"} text-base`}
       />
       <span className="text-xs uppercase">
         {eligible ? "Eligible" : "Not Eligible"}

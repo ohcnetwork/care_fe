@@ -38,7 +38,7 @@ export const getFacilityFeatureIcon = (featureId: number) => {
   const feature = FACILITY_FEATURE_TYPES.find((f) => f.id === featureId);
   if (!feature?.icon) return null;
   return typeof feature.icon === "string" ? (
-    <CareIcon className={`care-l-${feature.icon} text-lg`} />
+    <CareIcon className={`care-${feature.icon} text-lg`} />
   ) : (
     feature.icon
   );

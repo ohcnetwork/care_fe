@@ -546,7 +546,7 @@ export default function PatientInfoCard(props: {
                   [
                     `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/update`,
                     "Edit Consultation Details",
-                    "pen",
+                    "l-pen",
                     patient.is_active &&
                       consultation?.id &&
                       !consultation?.discharge_date,
@@ -554,13 +554,13 @@ export default function PatientInfoCard(props: {
                   [
                     `/patient/${patient.id}/investigation_reports`,
                     "Investigation Summary",
-                    "align-alt",
+                    "l-align-alt",
                     true,
                   ],
                   [
                     `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/treatment-summary`,
                     "Treatment Summary",
-                    "file-medical",
+                    "l-file-medical",
                     consultation?.id,
                   ],
                 ]
@@ -570,7 +570,7 @@ export default function PatientInfoCard(props: {
                           [
                             `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/claims`,
                             "Claims",
-                            "copy-landscape",
+                            "l-copy-landscape",
                             consultation?.id,
                           ],
                         ]
@@ -611,7 +611,7 @@ export default function PatientInfoCard(props: {
                             }}
                           >
                             <CareIcon
-                              className={`care-l-${action[2]} text-lg text-primary-500`}
+                              className={`care-${action[2]} text-lg text-primary-500`}
                             />
                             <span>{action[1]}</span>
                           </Link>

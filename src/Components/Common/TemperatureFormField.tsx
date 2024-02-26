@@ -66,7 +66,8 @@ export default function TemperatureFormField(props: Props) {
           border
           onClick={() => setUnit(unit === "celsius" ? "fahrenheit" : "celsius")}
         >
-          <CareIcon className={classNames("text-sm", `care-l-${unit}`)} />
+          {/* icons: care-l-celsius, care-l-fahrenheit */}
+          <CareIcon className={classNames("text-sm", `care-${unit}`)} />
         </ButtonV2>
       }
     />

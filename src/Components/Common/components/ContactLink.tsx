@@ -12,8 +12,8 @@ export default function ContactLink(props: ContactLinkProps) {
         className=" flex items-center gap-2 border-b border-blue-500 text-base font-medium tracking-wider text-blue-500"
       >
         <CareIcon
-          className={`care-l-${
-            props.tel ? "outgoing-call" : "envelope-alt"
+          className={`care-${
+            props.tel ? "l-outgoing-call" : "l-envelope-alt"
           } h-5 fill-gray-700`}
         />
         {props.tel ? props.tel : props.mailto}

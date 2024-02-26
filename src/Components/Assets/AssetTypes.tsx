@@ -46,21 +46,21 @@ export const assetClassProps = {
   ONVIF: {
     name: "ONVIF Camera",
     description: "",
-    icon: "camera",
+    icon: "l-camera",
   },
   HL7MONITOR: {
     name: "HL7 Vitals Monitor",
     description: "",
-    icon: "monitor-heart-rate",
+    icon: "l-monitor-heart-rate",
   },
   VENTILATOR: {
     name: "Ventilator",
     description: "",
-    icon: "lungs",
+    icon: "l-lungs",
   },
   NONE: {
     name: "N/A",
-    icon: "box",
+    icon: "l-box",
   },
 };
 

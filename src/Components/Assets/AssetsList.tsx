@@ -200,7 +200,7 @@ const AssetsList = () => {
                 <p className="flex break-words text-xl font-medium capitalize">
                   <span className="mr-2 text-primary-500">
                     <CareIcon
-                      className={`care-l-${
+                      className={`care-${
                         (
                           (asset.asset_class &&
                             assetClassProps[asset.asset_class]) ||
