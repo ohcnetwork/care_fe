@@ -32,7 +32,7 @@ export default function ViewInvestigationSuggestions(props: {
   console.log("Investigations: ", investigations);
 
   return (
-    <div className="mt-5">
+    <div className="mt-5" id="investigation-suggestions">
       <h3>{t("investigations_suggested")}</h3>
       <table className="mt-3 hidden w-full rounded-xl bg-white shadow md:table">
         <thead className="bg-gray-200 text-left">

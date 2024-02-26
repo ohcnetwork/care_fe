@@ -84,7 +84,6 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
           : "bg-white hover:border-primary-500"
       } mt-4 block cursor-pointer rounded-lg border bg-white p-4 text-black shadow`}
     >
-      <div>test card this</div>
       <div
         onClick={(_e) =>
           navigate(

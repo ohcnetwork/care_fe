@@ -394,7 +394,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
 
             {props.consultationData.history_of_present_illness && (
               <div className="overflow-hidden rounded-lg bg-white shadow">
-                <div className="px-4 py-5 sm:p-6">
+                <div className="px-4 py-5 sm:p-6" id="history-presentillness">
                   <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
                     History of Present Illness
                   </h3>
@@ -410,7 +410,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
 
             {props.consultationData.examination_details && (
               <div className="overflow-hidden rounded-lg bg-white shadow">
-                <div className="px-4 py-5 sm:p-6">
+                <div className="px-4 py-5 sm:p-6" id="examination-details">
                   <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
                     Examination details and Clinical conditions:{" "}
                   </h3>
@@ -425,7 +425,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             )}
             {props.consultationData.treatment_plan && (
               <div className="overflow-hidden rounded-lg bg-white shadow">
-                <div className="px-4 py-5 sm:p-6">
+                <div className="px-4 py-5 sm:p-6" id="treatment-summary">
                   <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
                     Treatment Summary
                   </h3>
@@ -440,7 +440,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             )}
             {props.consultationData.consultation_notes && (
               <div className="overflow-hidden rounded-lg bg-white shadow">
-                <div className="px-4 py-5 sm:p-6">
+                <div className="px-4 py-5 sm:p-6" id="general-instructions">
                   <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
                     General Instructions
                   </h3>
@@ -457,7 +457,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             {(props.consultationData.operation ??
               props.consultationData.special_instruction) && (
               <div className="overflow-hidden rounded-lg bg-white shadow">
-                <div className="px-4 py-5 sm:p-6">
+                <div className="px-4 py-5 sm:p-6" id="consultation-notes">
                   <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
                     Notes
                   </h3>
@@ -489,7 +489,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
           {props.consultationData.procedure &&
             props.consultationData.procedure.length > 0 && (
               <div className="my-4 rounded-lg bg-white p-4 shadow">
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto" id="consultation-procedure">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead>
                       <tr>
@@ -633,13 +633,13 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         : "-"}
                     </span>
                   </div>
-                  <div>
+                  <div id="patient-weight">
                     Weight {" - "}
                     <span className="font-semibold">
                       {props.consultationData.weight ?? "-"} Kg
                     </span>
                   </div>
-                  <div>
+                  <div id="patient-height">
                     Height {" - "}
                     <span className="font-semibold">
                       {props.consultationData.height ?? "-"} cm
