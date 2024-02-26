@@ -72,7 +72,7 @@ export default function InventoryList(props: any) {
         </td>
         <td className="border-b border-gray-200 p-5 text-sm">
           <p className="whitespace-nowrap lowercase text-gray-900">
-            {inventoryItem?.item_object?.min_quantity}{" "}
+            {inventoryItem.item_object?.min_quantity}{" "}
             {inventoryItem.item_object?.default_unit?.name}
           </p>
         </td>
