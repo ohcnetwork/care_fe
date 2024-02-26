@@ -14,6 +14,26 @@ declare global {
       ): Chainable<Subject>;
       getAttached(selector: string): Chainable<Subject>;
       clearAllFilters(): Chainable<Subject>;
+      submitButton(buttonText?: string): Chainable<Element>;
+      searchAndSelectOption(
+        element: string,
+        referance: string
+      ): Chainable<Element>;
+      clickAndMultiSelectOption(
+        selector: string,
+        symptoms: string | string[]
+      ): Chainable<Element>;
+      clickAndTypeDate(date: string, selector: string): Chainable<Element>;
+      clickAndSelectOption(
+        element: string,
+        reference: string
+      ): Chainable<Element>;
+      verifyAndClickElement(
+        element: string,
+        reference: string
+      ): Chainable<Element>;
+      preventPrint(): Chainable<Window>;
+      closeNotification(): Chainable<Element>;
     }
   }
 }
