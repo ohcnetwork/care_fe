@@ -280,8 +280,9 @@ let renderBody = (state, send, title, partPaths, substr) => {
               </div>
               {switch selectedPart {
               | Some(p) =>
-                <i
-                  className="border-l-2 fas fa-times p-1"
+                <CareIcon
+                  icon="l-times"
+                  className="border-l-2 text-xl"
                   onClick={state.previewMode
                     ? _ => getIntoView(Pain.regionToString(regionType), false)
                     : _ => send(RemoveFromSelectedParts(p))}

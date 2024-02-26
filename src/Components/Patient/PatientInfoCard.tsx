@@ -154,7 +154,10 @@ export default function PatientInfoCard(props: {
       )}
 
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        <div className="col-span-2 flex w-full flex-col bg-white px-4 pt-2 lg:flex-row xl:min-w-fit">
+        <div
+          className="col-span-2 flex w-full flex-col bg-white px-4 pt-2 lg:flex-row xl:min-w-fit"
+          id="patient-infobadges"
+        >
           {/* Can support for patient picture in the future */}
           <div className="flex justify-evenly lg:justify-normal">
             <div className="flex flex-col items-start lg:items-center">
@@ -185,7 +188,10 @@ export default function PatientInfoCard(props: {
                   </div>
                 ) : (
                   <div className="flex h-full items-center justify-center">
-                    <i className="fas fa-user-injured text-3xl text-gray-500"></i>
+                    <CareIcon
+                      icon="l-user-injured"
+                      className="text-3xl text-gray-500"
+                    />
                   </div>
                 )}
               </div>
@@ -218,10 +224,11 @@ export default function PatientInfoCard(props: {
                     href={`/facility/${consultation?.facility}`}
                     className="mt-2 items-center justify-center text-sm font-semibold text-black hover:text-primary-600 lg:hidden"
                   >
-                    <i
-                      className="fas fa-hospital mr-1 text-primary-400"
+                    <CareIcon
+                      icon="l-hospital"
+                      className="mr-1 text-lg text-primary-400"
                       aria-hidden="true"
-                    ></i>
+                    />
                     {consultation?.facility_name}
                   </Link>
                 </div>
@@ -234,10 +241,11 @@ export default function PatientInfoCard(props: {
                 href={`/facility/${consultation?.facility}`}
                 className="hidden font-semibold text-black hover:text-primary-600 lg:block"
               >
-                <i
-                  className="fas fa-hospital mr-1 text-primary-400"
+                <CareIcon
+                  icon="l-hospital"
+                  className="mr-1 text-xl text-primary-400"
                   aria-hidden="true"
-                ></i>
+                />
                 {consultation?.facility_name}
               </Link>
 
@@ -258,7 +266,10 @@ export default function PatientInfoCard(props: {
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2 text-sm sm:flex-row">
-                <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-gray-900 sm:flex-row sm:text-sm lg:justify-normal">
+                <div
+                  className="flex flex-wrap items-center justify-center gap-2 text-sm text-gray-900 sm:flex-row sm:text-sm lg:justify-normal"
+                  id="patient-consultationbadges"
+                >
                   {consultation?.patient_no && (
                     <span className="flex capitalize">
                       <span className="items-stretch justify-center whitespace-nowrap rounded border border-green-400 bg-green-100 px-3 py-0.5 text-sm font-medium text-green-800">
@@ -301,7 +312,7 @@ export default function PatientInfoCard(props: {
                               : " bg-red-400 text-white")
                           }
                         >
-                          <i className="text-md fas fa-clock mr-2"></i>
+                          <CareIcon icon="l-clock" className="text-md mr-2" />
                           {dayjs().isBefore(patient.review_time)
                             ? "Review before: "
                             : "Review Missed: "}
@@ -406,7 +417,10 @@ export default function PatientInfoCard(props: {
                         (diagnosis) => diagnosis.is_principal
                       );
                       return principal_diagnosis ? (
-                        <div className="mt-1 flex flex-col sm:flex-row">
+                        <div
+                          className="mt-1 flex flex-col sm:flex-row"
+                          id="principal-diagnosis"
+                        >
                           <div className="mr-1 text-sm font-semibold">
                             Principal Diagnosis:
                           </div>
@@ -425,14 +439,17 @@ export default function PatientInfoCard(props: {
                   : null}
                 {(consultation?.treating_physician_object ||
                   consultation?.deprecated_verified_by) && (
-                  <div className="text-sm">
+                  <div className="text-sm" id="treating-physician">
                     <span className="font-semibold leading-relaxed">
                       Treating Physician:{" "}
                     </span>
                     {consultation?.treating_physician_object
                       ? `${consultation?.treating_physician_object.first_name} ${consultation?.treating_physician_object.last_name}`
                       : consultation?.deprecated_verified_by}
-                    <i className="fas fa-check ml-2 fill-current text-sm text-green-500"></i>
+                    <CareIcon
+                      icon="l-check"
+                      className="ml-2 fill-current text-xl text-green-500"
+                    />
                   </div>
                 )}
               </div>
@@ -531,7 +548,7 @@ export default function PatientInfoCard(props: {
               title={"Manage Patient"}
               icon={<CareIcon icon="l-setting" className="text-xl" />}
               className="xl:justify-center"
-              containerClassName="w-full lg:w-auto mt-2 2xl:mt-0 flex justify-center"
+              containerClassName="w-full lg:w-auto mt-2 2xl:mt-0 flex justify-center z-20"
             >
               <div>
                 {[
