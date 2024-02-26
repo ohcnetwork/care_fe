@@ -107,7 +107,7 @@ export default function ExternalResultUpload() {
                 <span className="flex justify-center">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="mb-2 size-12 text-gray-700"
+                    className="size-12 mb-2 text-gray-700"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -135,7 +135,11 @@ export default function ExternalResultUpload() {
                   target="_blank"
                   download
                 >
-                  <i className="fa fa-download mr-1" aria-hidden="true"></i>{" "}
+                  <CareIcon
+                    icon="l-download-alt"
+                    className="mr-1 text-lg"
+                    aria-hidden="true"
+                  />{" "}
                   <span>{t("sample_format")}</span>
                 </a>
               </div>

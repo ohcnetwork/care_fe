@@ -947,7 +947,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             );
           })}
         </div>
-        <div className="flex size-full overflow-auto xl:ml-72">
+        <div className="size-full flex overflow-auto xl:ml-72">
           <div className="w-full max-w-4xl">
             <form
               onSubmit={handleSubmit}
@@ -1312,7 +1312,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                     </p>
                   </div>
 
-                  <div ref={fieldRef["diagnoses"]}>
+                  <div ref={fieldRef["diagnoses"]} id="diagnosis-list">
                     {isUpdate ? (
                       <EditDiagnosesBuilder value={state.form.diagnoses} />
                     ) : (

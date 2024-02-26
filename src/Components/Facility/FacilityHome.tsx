@@ -106,9 +106,9 @@ export const FacilityHome = (props: any) => {
   const editCoverImageTooltip = hasPermissionToEditCoverImage && (
     <div
       id="facility-coverimage"
-      className="absolute right-0 top-0 z-10 flex w-full h-full flex-col items-center justify-center bg-black text-sm text-gray-300 opacity-0 transition-[opacity] hover:opacity-60 md:h-[88px]"
+      className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center bg-black text-sm text-gray-300 opacity-0 transition-[opacity] hover:opacity-60 md:h-[88px]"
     >
-      <i className="fa-solid fa-pen" />
+      <CareIcon icon="l-pen" className="text-lg" />
       <span className="mt-2">{`${hasCoverImage ? "Edit" : "Upload"}`}</span>
     </div>
   );
@@ -117,7 +117,7 @@ export const FacilityHome = (props: any) => {
     <img
       src={`${facilityData?.read_cover_image_url}?imgKey=${imageKey}`}
       alt={facilityData?.name}
-      className="w-full h-full object-cover"
+      className="h-full w-full object-cover"
     />
   );
 
@@ -171,10 +171,11 @@ export const FacilityHome = (props: any) => {
             hasPermissionToEditCoverImage && setEditCoverImage(true)
           }
         >
-          <i
-            className="fas fa-hospital block p-10 text-4xl text-gray-500"
+          <CareIcon
+            icon="l-hospital"
+            className="block p-10 text-4xl text-gray-500"
             aria-hidden="true"
-          ></i>
+          />
           {editCoverImageTooltip}
         </div>
       )}
@@ -188,7 +189,7 @@ export const FacilityHome = (props: any) => {
             <div className="flex flex-1 flex-col gap-10">
               <div className="flex items-center gap-4">
                 <div
-                  className={`group relative hidden w-[88px] h-[88px] text-clip rounded transition-all duration-200 ease-in-out md:flex ${
+                  className={`group relative hidden h-[88px] w-[88px] text-clip rounded transition-all duration-200 ease-in-out md:flex ${
                     hasPermissionToEditCoverImage && "cursor-pointer"
                   }`}
                   onClick={() =>
@@ -200,7 +201,7 @@ export const FacilityHome = (props: any) => {
                   ) : (
                     <div className="flex h-[88px] w-full items-center justify-center bg-gray-200 font-medium text-gray-700">
                       <svg
-                        className="w-8 h-8 fill-current text-gray-500"
+                        className="h-8 w-8 fill-current text-gray-500"
                         viewBox="0 0 40 32"
                         xmlns="http://www.w3.org/2000/svg"
                       >

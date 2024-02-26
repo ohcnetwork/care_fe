@@ -13,6 +13,8 @@ import Chip from "../../../CAREUI/display/Chip";
 import { formatAge, formatDate, formatDateTime } from "../../../Utils/utils";
 import ReadMore from "../../Common/components/Readmore";
 import DailyRoundsList from "../Consultations/DailyRoundsList";
+import EventsList from "./Events/EventsList";
+import SwitchTabs from "../../Common/components/SwitchTabs";
 import { getVitalsMonitorSocketUrl } from "../../VitalsMonitor/utils";
 
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
@@ -23,6 +25,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
   const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
   const [monitorBedData, setMonitorBedData] = useState<AssetBedModel>();
   const [ventilatorBedData, setVentilatorBedData] = useState<AssetBedModel>();
+  const [showEvents, setShowEvents] = useState<boolean>(false);
 
   const vitals = useVitalsAspectRatioConfig({
     default: undefined,
@@ -391,7 +394,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
 
             {props.consultationData.history_of_present_illness && (
               <div className="overflow-hidden rounded-lg bg-white shadow">
-                <div className="px-4 py-5 sm:p-6">
+                <div className="px-4 py-5 sm:p-6" id="history-presentillness">
                   <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
                     History of Present Illness
                   </h3>
@@ -407,7 +410,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
 
             {props.consultationData.examination_details && (
               <div className="overflow-hidden rounded-lg bg-white shadow">
-                <div className="px-4 py-5 sm:p-6">
+                <div className="px-4 py-5 sm:p-6" id="examination-details">
                   <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
                     Examination details and Clinical conditions:{" "}
                   </h3>
@@ -422,7 +425,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             )}
             {props.consultationData.treatment_plan && (
               <div className="overflow-hidden rounded-lg bg-white shadow">
-                <div className="px-4 py-5 sm:p-6">
+                <div className="px-4 py-5 sm:p-6" id="treatment-summary">
                   <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
                     Treatment Summary
                   </h3>
@@ -437,7 +440,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             )}
             {props.consultationData.consultation_notes && (
               <div className="overflow-hidden rounded-lg bg-white shadow">
-                <div className="px-4 py-5 sm:p-6">
+                <div className="px-4 py-5 sm:p-6" id="general-instructions">
                   <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
                     General Instructions
                   </h3>
@@ -454,7 +457,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             {(props.consultationData.operation ??
               props.consultationData.special_instruction) && (
               <div className="overflow-hidden rounded-lg bg-white shadow">
-                <div className="px-4 py-5 sm:p-6">
+                <div className="px-4 py-5 sm:p-6" id="consultation-notes">
                   <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
                     Notes
                   </h3>
@@ -486,7 +489,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
           {props.consultationData.procedure &&
             props.consultationData.procedure.length > 0 && (
               <div className="my-4 rounded-lg bg-white p-4 shadow">
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto" id="consultation-procedure">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead>
                       <tr>
@@ -630,13 +633,13 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         : "-"}
                     </span>
                   </div>
-                  <div>
+                  <div id="patient-weight">
                     Weight {" - "}
                     <span className="font-semibold">
                       {props.consultationData.weight ?? "-"} Kg
                     </span>
                   </div>
-                  <div>
+                  <div id="patient-height">
                     Height {" - "}
                     <span className="font-semibold">
                       {props.consultationData.height ?? "-"} cm
@@ -665,7 +668,26 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
           </div>
         </div>
         <div className="w-full pl-0 md:pl-4 xl:w-1/3">
-          <DailyRoundsList consultation={props.consultationData} />
+          <SwitchTabs
+            className="mt-3 w-full lg:w-full"
+            tab2={
+              <div className="flex items-center justify-center gap-1 text-sm">
+                Events
+                <span className="rounded-lg bg-warning-400 p-[1px] px-1 text-[10px] text-white">
+                  beta
+                </span>
+              </div>
+            }
+            tab1="Daily Rounds"
+            onClickTab1={() => setShowEvents(false)}
+            onClickTab2={() => setShowEvents(true)}
+            isTab2Active={showEvents}
+          />
+          {showEvents ? (
+            <EventsList />
+          ) : (
+            <DailyRoundsList consultation={props.consultationData} />
+          )}
         </div>
       </div>
     </div>

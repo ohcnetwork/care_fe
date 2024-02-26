@@ -58,10 +58,13 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                 <img
                   src={facility.read_cover_image_url}
                   alt={facility.name}
-                  className="h-full w-full max-h-32 object-cover"
+                  className="h-full max-h-32 w-full object-cover"
                 />
               )) || (
-                <i className="fas fa-hospital block p-10 text-4xl text-gray-500" />
+                <CareIcon
+                  icon="l-hospital"
+                  className="block text-7xl text-gray-500"
+                />
               )}
             </Link>
 
@@ -70,16 +73,19 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                 <div className="flex gap-5">
                   <Link
                     href={`/facility/${facility.id}`}
-                    className="group relative z-0 hidden w-[150px] h-[150px] min-h-[150px] min-w-[150px] items-center justify-center self-stretch rounded-md bg-gray-300 min-[425px]:flex"
+                    className="group relative z-0 hidden h-[150px] min-h-[150px] w-[150px] min-w-[150px] items-center justify-center self-stretch rounded-md bg-gray-300 min-[425px]:flex"
                   >
                     {(facility.read_cover_image_url && (
                       <img
                         src={facility.read_cover_image_url}
                         alt={facility.name}
-                        className="w-full h-full rounded-md object-cover"
+                        className="h-full w-full rounded-md object-cover"
                       />
                     )) || (
-                      <i className="fas fa-hospital block text-4xl text-gray-500" />
+                      <CareIcon
+                        icon="l-hospital"
+                        className="block text-5xl text-gray-500"
+                      />
                     )}
                   </Link>
                   <div className="flow-root grow">

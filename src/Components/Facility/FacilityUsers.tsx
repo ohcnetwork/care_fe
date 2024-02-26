@@ -301,13 +301,6 @@ export default function FacilityUsers(props: any) {
                   className="mt-2 flex gap-3 text-2xl font-bold capitalize"
                 >
                   {`${user.first_name} ${user.last_name}`}
-
-                  {user.last_login && isUserOnline(user) ? (
-                    <i
-                      className="fas fa-circle ml-1 animate-pulse text-primary-500 opacity-75"
-                      aria-label="Online"
-                    ></i>
-                  ) : null}
                   {showUserDelete(authUser, user) && (
                     <div
                       className="w-8 cursor-pointer rounded-lg bg-red-50 text-xl text-red-600 hover:bg-red-50 hover:text-red-700"

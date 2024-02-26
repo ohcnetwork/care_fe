@@ -12,6 +12,8 @@ import routes from "../../Redux/api";
 import { PatientNoteStateType } from "./models";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import AutoExpandingTextInputFormField from "../Form/FormFields/AutoExpandingTextInputFormField.js";
+import * as Sentry from "@sentry/browser";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
 interface PatientNotesProps {
   patientId: string;
@@ -25,6 +27,33 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   const [patientActive, setPatientActive] = useState(true);
   const [reload, setReload] = useState(false);
   const [focused, setFocused] = useState(false);
+
+  const { username } = useAuthUser();
+
+  const intialSubscriptionState = async () => {
+    try {
+      const res = await request(routes.getUserPnconfig, {
+        pathParams: { username },
+      });
+      const reg = await navigator.serviceWorker.ready;
+      const subscription = await reg.pushManager.getSubscription();
+      if (!subscription && !res.data?.pf_endpoint) {
+        Notification.Warn({
+          msg: "Please subscribe to notifications to get live updates on doctor notes.",
+        });
+      } else if (subscription?.endpoint !== res.data?.pf_endpoint) {
+        Notification.Warn({
+          msg: "Please subscribe to notifications on this device to get live updates on doctor notes.",
+        });
+      }
+    } catch (error) {
+      Sentry.captureException(error);
+    }
+  };
+
+  useEffect(() => {
+    intialSubscriptionState();
+  }, []);
 
   const initialData: PatientNoteStateType = {
     notes: [],
@@ -108,7 +137,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
     <div className="flex gap-1">
       {show && (
         <Link
-          className="flex size-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
+          className="size-8 flex cursor-pointer items-center justify-center rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
           href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/notes`}
         >
           <CareIcon className="care-l-window-maximize text-lg transition-all delay-150 duration-300 ease-out" />
@@ -125,7 +154,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
         <CareIcon className="care-l-angle-up text-lg transition-all delay-150 duration-300 ease-out" />
       </div>
       <div
-        className="flex size-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
+        className="size-8 flex cursor-pointer items-center justify-center rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
         onClick={() => setShowPatientNotesPopup(false)}
       >
         <CareIcon className="care-l-times text-lg transition-all delay-150 duration-300 ease-out" />
