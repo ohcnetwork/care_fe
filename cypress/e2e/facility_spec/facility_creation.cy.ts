@@ -187,6 +187,7 @@ describe("Facility Creation", () => {
     facilityPage.getFacilityTotalDoctorCapacity().scrollIntoView();
     facilityPage.getFacilityTotalDoctorCapacity().contains(totalDoctor);
     // verify the delete functionality
+    cy.get("#manage-facility-dropdown button").scrollIntoView();
     facilityPage.clickManageFacilityDropdown();
     facilityPage.clickDeleteFacilityOption();
     facilityPage.confirmDeleteFacility();
