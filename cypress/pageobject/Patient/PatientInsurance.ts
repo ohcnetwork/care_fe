@@ -57,7 +57,7 @@ class PatientInsurance {
       cy.url().should("include", "/facility/");
       expect($dashboard).to.contain(subscriberId);
       expect($dashboard).to.contain(policyId);
-      if (hcx_enabled) {
+      if (!hcx_enabled) {
         expect($dashboard).to.contain(insurerId);
         expect($dashboard).to.contain(insurerName);
       }
