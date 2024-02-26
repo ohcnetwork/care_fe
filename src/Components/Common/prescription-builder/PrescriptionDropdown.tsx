@@ -60,6 +60,7 @@ export function PrescriptionDropdown(props: {
           return (
             <div className="flex justify-between">
               <button
+                id="frequency-interval"
                 type="button"
                 key={i}
                 className="block w-full px-4 py-2 text-left text-sm leading-5 text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none"

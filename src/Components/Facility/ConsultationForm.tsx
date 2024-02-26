@@ -1312,7 +1312,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                     </p>
                   </div>
 
-                  <div ref={fieldRef["diagnoses"]}>
+                  <div ref={fieldRef["diagnoses"]} id="diagnosis-list">
                     {isUpdate ? (
                       <EditDiagnosesBuilder value={state.form.diagnoses} />
                     ) : (

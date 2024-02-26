@@ -1,109 +1,98 @@
 export class PatientConsultationPage {
   selectConsultationStatus(status: string) {
+    cy.wait(5000);
     cy.get("#route_to_facility").scrollIntoView();
     cy.get("#route_to_facility").should("be.visible");
-    cy.get("#route_to_facility")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains(status).click();
-      });
+    cy.clickAndSelectOption("#route_to_facility", status);
   }
 
-  selectSymptoms(symptoms: string) {
-    cy.get("#symptoms")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains(symptoms).click();
-      });
+  selectSymptoms(symptoms) {
+    cy.clickAndMultiSelectOption("#symptoms", symptoms);
+  }
+
+  selectSymptomsDate(selector: string, date: string) {
+    cy.clickAndTypeDate(selector, date);
   }
 
   verifyConsultationPatientName(patientName: string) {
     cy.get("#patient-name-consultation").should("contain", patientName);
   }
 
-  fillIllnessHistory(history: string) {
-    cy.wait(5000);
-    cy.get("#history_of_present_illness").scrollIntoView();
-    cy.get("#history_of_present_illness").should("be.visible");
-    cy.get("#history_of_present_illness").click().type(history);
+  selectPatientCategory(category: string) {
+    cy.clickAndSelectOption("#category", category);
   }
 
-  enterConsultationDetails(
-    category: string,
-    examinationDetails: string,
-    weight: string,
-    height: string,
-    ipNumber: string,
-    consulationNotes: string,
-    verificationBy: string
-  ) {
-    cy.get("#symptoms").click();
-    cy.get("#category")
+  selectPatientReferance(referance: string) {
+    cy.searchAndSelectOption("#referred_to", referance);
+  }
+
+  selectPatientWard(ward: string) {
+    cy.searchAndSelectOption("#transferred_from_location", ward);
+  }
+
+  selectPatientSuggestion(suggestion: string) {
+    cy.clickAndSelectOption("#suggestion", suggestion);
+  }
+
+  typeCauseOfDeath(cause: string) {
+    cy.get("#cause_of_death").click().type(cause);
+  }
+
+  typeDeathConfirmedBy(doctor: string) {
+    cy.get("#death_confirmed_doctor").click().type(doctor);
+  }
+
+  selectPatientDiagnosis(icdCode, statusId) {
+    cy.searchAndSelectOption("#icd11-search", icdCode);
+    cy.get("#diagnosis-list")
+      .contains("Add as")
+      .focus()
       .click()
       .then(() => {
-        cy.get("[role='option']").contains(category).click();
-      });
-    cy.get("#examination_details").click().type(examinationDetails);
-    cy.get("#weight").click().type(height);
-    cy.get("#height").click().type(weight);
-    cy.get("#patient_no").type(ipNumber);
-    cy.intercept("GET", "**/icd/**").as("getIcdResults");
-    cy.get("#icd11-search input[role='combobox']")
-      .scrollIntoView()
-      .click()
-      .type("1A00");
-    cy.get("#icd11-search [role='option']")
-      .contains("1A00 Cholera")
-      .scrollIntoView()
-      .click();
-    cy.get("#condition-verification-status-menu").click();
-    cy.get("#add-icd11-diagnosis-as-confirmed").click();
-    cy.wait("@getIcdResults").its("response.statusCode").should("eq", 200);
-
-    cy.get("#principal-diagnosis-select").click();
-    cy.get("#principal-diagnosis-select [role='option']").first().click();
-
-    cy.get("#consultation_notes").click().type(consulationNotes);
-    cy.get("#treating_physician")
-      .click()
-      .type(verificationBy)
-      .then(() => {
-        cy.get("[role='option']").contains("Dev Doctor").click();
+        cy.get(`#${statusId}`).click();
       });
   }
 
-  submitConsultation() {
-    cy.get("#submit").click();
+  typePatientConsultationDate(selector: string, date: string) {
+    cy.get(selector).clear().click().type(date);
   }
 
-  clickAddPrescription() {
-    cy.contains("button", "Add Prescription Medication")
-      .should("be.visible")
-      .click();
+  clickPatientDetails() {
+    cy.verifyAndClickElement("#consultationpage-header", "Patient Details");
   }
 
-  interceptMediaBase() {
-    cy.intercept("GET", "**/api/v1/medibase/**").as("getMediaBase");
+  typePatientIllnessHistory(history: string) {
+    cy.get("#history_of_present_illness").clear().click().type(history);
   }
 
-  prescribefirstMedicine() {
-    cy.get("div#medicine_object input[placeholder='Select'][role='combobox']")
-      .click()
-      .type("dolo")
-      .type("{downarrow}{enter}");
+  typePatientExaminationHistory(examination: string) {
+    cy.get("#examination_details").type(examination);
   }
 
-  prescribesecondMedicine() {
-    cy.get("div#medicine_object input[placeholder='Select'][role='combobox']")
-      .click()
-      .type("dolo")
-      .type("{downarrow}{downarrow}{enter}");
+  typePatientWeight(weight: string) {
+    cy.get("#weight").type(weight);
   }
 
-  selectMedicinebox() {
-    cy.get(
-      "div#medicine_object input[placeholder='Select'][role='combobox']"
-    ).click();
+  typePatientHeight(height: string) {
+    cy.get("#height").type(height);
+  }
+
+  typePatientNumber(number: string) {
+    cy.get("#patient_no").scrollIntoView();
+    cy.get("#patient_no").type(number);
+  }
+
+  selectPatientPrincipalDiagnosis(diagnosis: string) {
+    cy.clickAndSelectOption("#principal-diagnosis-select", diagnosis);
+  }
+
+  verifyTextInConsultation(selector, text) {
+    cy.get(selector).scrollIntoView();
+    cy.get(selector).contains(text).should("be.visible");
+  }
+
+  typeReferringFacility(referringFacility: string) {
+    cy.searchAndSelectOption("#referred_from_facility", referringFacility);
   }
 
   visitFilesPage() {
@@ -124,80 +113,17 @@ export class PatientConsultationPage {
     cy.wait("@uploadFile").its("response.statusCode").should("eq", 201);
   }
 
-  waitForMediabaseStatusCode() {
-    cy.wait("@getMediaBase").its("response.statusCode").should("eq", 200);
-  }
-
-  enterDosage(doseAmount: string) {
-    cy.get("#dosage").type(doseAmount, { force: true });
-  }
-
-  selectDosageFrequency(frequency: string) {
-    cy.get("#frequency")
-      .click()
-      .then(() => {
-        cy.get("div#frequency [role='option']").contains(frequency).click();
-      });
-  }
-
-  submitPrescriptionAndReturn() {
-    cy.intercept("POST", "**/api/v1/consultation/*/prescriptions/").as(
-      "submitPrescription"
-    );
-    cy.get("button#submit").should("be.visible").click();
-    cy.get("[data-testid='return-to-patient-dashboard']").click();
-    cy.wait("@submitPrescription").its("response.statusCode").should("eq", 201);
-  }
-
   clickEditConsultationButton() {
     cy.get("#consultation-buttons").scrollIntoView();
     cy.get("button").contains("Manage Patient").click();
-    cy.get("#consultation-buttons")
-      .contains("Edit Consultation Details")
-      .click();
-  }
-
-  setSymptomsDate(date: string) {
-    cy.get("#symptoms_onset_date")
-      .click()
-      .then(() => {
-        cy.get("[placeholder='DD/MM/YYYY']").type(date);
-      });
-  }
-
-  updateConsultation() {
-    cy.intercept("PUT", "**/api/v1/consultation/**").as("updateConsultation");
-    cy.get("#submit").contains("Update Consultation").click();
-    cy.wait("@updateConsultation").its("response.statusCode").should("eq", 200);
-  }
-
-  verifySuccessNotification(message: string) {
-    cy.verifyNotification(message);
-  }
-
-  updateSymptoms(symptoms: string) {
-    this.selectSymptoms(symptoms);
-    cy.get("#symptoms").click();
+    cy.verifyAndClickElement(
+      "#consultation-buttons",
+      "Edit Consultation Details"
+    );
   }
 
   visitShiftRequestPage() {
     cy.get("#create_shift_request").click();
-  }
-
-  enterPatientShiftDetails(
-    name: string,
-    phone_number: string,
-    facilityName: string,
-    reason: string
-  ) {
-    cy.get("#refering_facility_contact_name").type(name);
-    cy.get("#refering_facility_contact_number").type(phone_number);
-    cy.get("input[name='assigned_facility']")
-      .type(facilityName)
-      .then(() => {
-        cy.get("[role='option']").first().click();
-      });
-    cy.get("#reason").type(reason);
   }
 
   createShiftRequest() {
@@ -246,29 +172,5 @@ export class PatientConsultationPage {
     );
     cy.get("#submit").contains("Confirm Discharge").click();
     cy.wait("@dischargePatient").its("response.statusCode").should("eq", 200);
-  }
-
-  discontinuePreviousPrescription() {
-    cy.intercept(
-      "POST",
-      "**/api/v1/consultation/*/prescriptions/*/discontinue/"
-    ).as("deletePrescription");
-    cy.get("button").contains("Discontinue").click();
-    cy.get("#submit").contains("Discontinue").click();
-    cy.wait("@deletePrescription").its("response.statusCode").should("eq", 200);
-  }
-
-  visitEditPrescriptionPage() {
-    cy.get("#consultation_tab_nav").scrollIntoView();
-    cy.get("#consultation_tab_nav").contains("Medicines").click();
-    cy.get("a[href='prescriptions']").first().click();
-  }
-
-  submitPrescription() {
-    cy.intercept("POST", "**/api/v1/consultation/*/prescriptions/").as(
-      "submitPrescription"
-    );
-    cy.get("#submit").contains("Submit").click();
-    cy.wait("@submitPrescription").its("response.statusCode").should("eq", 201);
   }
 }
