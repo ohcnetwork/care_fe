@@ -548,10 +548,14 @@ const routes = {
   createDailyRounds: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/",
     method: "POST",
+    TBody: Type<DailyRoundsModel>(),
+    TRes: Type<DailyRoundsModel>(),
   },
   updateDailyReport: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/{id}/",
     method: "PUT",
+    TBody: Type<DailyRoundsModel>(),
+    TRes: Type<DailyRoundsModel>(),
   },
   updateDailyRound: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/{id}/",

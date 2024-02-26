@@ -47,7 +47,7 @@ export interface PatientModel {
   test_id?: string;
   id?: string;
   action?: number;
-  name?: string;
+  name: string;
   age?: number;
   allow_transfer?: boolean;
   discharge?: boolean;
@@ -59,7 +59,7 @@ export interface PatientModel {
   emergency_phone_number?: string;
   allergies?: string;
   medical_history?: Array<{ disease: string | number; details: string }>;
-  facility_object?: {
+  facility_object: {
     id: number;
     name: string;
     facility_type?: { id: number; name: string };
@@ -328,6 +328,7 @@ export interface DailyRoundsModel {
     user_type?: string;
   };
   bed?: string;
+  external_id?: string;
 }
 
 export interface FacilityNameModel {
