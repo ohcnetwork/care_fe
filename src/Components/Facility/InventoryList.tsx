@@ -107,7 +107,7 @@ export default function InventoryList(props: any) {
                     Stock
                   </th>
                   <th className="border-b-2 border-gray-200 bg-primary-400 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
-                    Minimum Quantity
+                    Minimum Quantity Required
                   </th>
                 </tr>
               </thead>
