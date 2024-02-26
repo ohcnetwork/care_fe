@@ -511,7 +511,10 @@ export const PatientManager = () => {
                 </div>
               ) : (
                 <div className="flex min-h-[5rem] items-center justify-center">
-                  <i className="fas fa-user-injured text-3xl text-gray-500"></i>
+                  <CareIcon
+                    icon="l-user-injured"
+                    className="text-3xl text-gray-500"
+                  />
                 </div>
               )}
             </div>

@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
 import { useSlugs } from "../../../../Common/hooks/useSlug";
-import { ConsultationModel } from "../../models";
 import PaginatedList from "../../../../CAREUI/misc/PaginatedList";
 import routes from "../../../../Redux/api";
 import { TimelineNode } from "../../../../CAREUI/display/Timeline";
@@ -9,14 +8,9 @@ import GenericEvent from "./GenericEvent";
 import { EventGeneric } from "./types";
 import { getEventIcon } from "./iconMap";
 
-interface Props {
-  consultation: ConsultationModel;
-}
-
-export default function EventsList({ consultation }: Props) {
+export default function EventsList() {
   const [consultationId] = useSlugs("consultation");
   const { t } = useTranslation();
-
 
   return (
     <PaginatedList route={routes.getEvents} pathParams={{ consultationId }}>

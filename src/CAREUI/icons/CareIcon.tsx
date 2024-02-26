@@ -9,6 +9,7 @@ export interface CareIconProps {
   icon?: IconName;
   className?: string | undefined;
   onClick?: React.MouseEventHandler<HTMLSpanElement> | undefined;
+  id?: string;
 }
 
 /**
@@ -19,14 +20,19 @@ export interface CareIconProps {
  *
  * @see [icon library](https://iconscout.com/unicons/)
  */
-export default function CareIcon({ icon, className, onClick }: CareIconProps) {
+export default function CareIcon({
+  id,
+  icon,
+  className,
+  onClick,
+}: CareIconProps) {
   const effectiveClassName = icon
     ? `care-${icon} ${className ?? ""}`
     : className;
 
   useEffect(() => transformIcons(), [effectiveClassName]);
   return (
-    <span onClick={onClick} key={effectiveClassName}>
+    <span id={id} onClick={onClick} key={effectiveClassName}>
       <i className={`care ${effectiveClassName}`} />
     </span>
   );

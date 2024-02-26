@@ -2,11 +2,13 @@ import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientConsultationPage } from "../../pageobject/Patient/PatientConsultation";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
+import PatientPrescription from "../../pageobject/Patient/PatientPrescription";
 
 describe("Patient", () => {
   const loginPage = new LoginPage();
   const patientPage = new PatientPage();
   const patientConsultationPage = new PatientConsultationPage();
+  const patientPrescription = new PatientPrescription();
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -40,22 +42,21 @@ describe("Patient", () => {
     patientConsultationPage.visitDoctorNotesPage();
     patientConsultationPage.addDoctorsNotes("Test Doctor Notes");
     patientConsultationPage.postDoctorNotes();
-    patientConsultationPage.verifySuccessNotification(
-      "Note added successfully"
-    );
+    cy.verifyNotification("Note added successfully");
   });
 
   it("Edit prescription for an already created patient", () => {
     patientPage.visitPatient("Dummy Patient 4");
-    patientConsultationPage.visitEditPrescriptionPage();
-    patientConsultationPage.clickAddPrescription();
-    patientConsultationPage.interceptMediaBase();
-    patientConsultationPage.selectMedicinebox();
-    patientConsultationPage.waitForMediabaseStatusCode();
-    patientConsultationPage.prescribesecondMedicine();
-    patientConsultationPage.enterDosage("4");
-    patientConsultationPage.selectDosageFrequency("Twice daily");
-    patientConsultationPage.submitPrescription();
+    patientPrescription.visitEditPrescriptionPage();
+    patientPrescription.clickAddPrescription();
+    patientPrescription.interceptMediaBase();
+    patientPrescription.selectMedicinebox();
+    patientPrescription.waitForMediabaseStatusCode();
+    patientPrescription.selectMedicine("DOLO");
+    patientPrescription.enterDosage("4");
+    patientPrescription.selectDosageFrequency("Twice daily");
+    cy.submitButton("Submit");
+    cy.verifyNotification("Medicine prescribed");
   });
 
   it("Upload consultations file ", () => {
