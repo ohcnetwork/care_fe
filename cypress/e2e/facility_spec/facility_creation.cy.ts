@@ -186,6 +186,11 @@ describe("Facility Creation", () => {
     facilityPage.getFacilityTotalBedCapacity().contains(totalOccupancy);
     facilityPage.getFacilityTotalDoctorCapacity().scrollIntoView();
     facilityPage.getFacilityTotalDoctorCapacity().contains(totalDoctor);
+    // verify the delete functionality
+    facilityPage.clickManageFacilityDropdown();
+    facilityPage.clickDeleteFacilityOption();
+    facilityPage.confirmDeleteFacility();
+    cy.verifyNotification("Facility deleted successfully");
   });
 
   it("Create a new facility with single bed and doctor capacity", () => {
