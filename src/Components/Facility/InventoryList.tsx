@@ -70,6 +70,12 @@ export default function InventoryList(props: any) {
             {inventoryItem.item_object?.default_unit?.name}
           </p>
         </td>
+        <td className="border-b border-gray-200 p-5 text-sm">
+          <p className="whitespace-nowrap lowercase text-gray-900">
+            {inventoryItem?.item_object?.min_quantity}{" "}
+            {inventoryItem.item_object?.default_unit?.name}
+          </p>
+        </td>
       </tr>
     ));
   } else if (inventoryData?.results && inventoryData.results.length === 0) {
@@ -99,6 +105,9 @@ export default function InventoryList(props: any) {
                   </th>
                   <th className="border-b-2 border-gray-200 bg-primary-400 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
                     Stock
+                  </th>
+                  <th className="border-b-2 border-gray-200 bg-primary-400 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
+                    Minimum Quantity
                   </th>
                 </tr>
               </thead>
