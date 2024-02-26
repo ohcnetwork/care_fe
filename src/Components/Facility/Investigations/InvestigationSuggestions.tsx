@@ -33,7 +33,7 @@ export default function ViewInvestigationSuggestions(props: {
   };
 
   return (
-    <div className="mt-5">
+    <div className="mt-5" id="investigation-suggestions">
       <h3>Investigations Suggested</h3>
       <table className="mt-3 hidden w-full rounded-xl bg-white shadow md:table">
         <thead className="bg-gray-200 text-left">
@@ -128,7 +128,7 @@ export default function ViewInvestigationSuggestions(props: {
                             {type}
                             {investigationMissed && (
                               <div className="tooltip inline-block cursor-pointer text-red-400">
-                                <i className="fas fa-triangle-exclamation" />
+                                <CareIcon icon="l-exclamation-triangle" />
                                 <div className="tooltip-text">
                                   Investigation Missed!
                                 </div>
@@ -136,7 +136,7 @@ export default function ViewInvestigationSuggestions(props: {
                             )}
                             {investigated && !investigationMissed && (
                               <div className="tooltip inline-block cursor-pointer text-green-400">
-                                <i className="fas fa-check" />
+                                <CareIcon icon="l-check" />
                                 <div className="tooltip-text">
                                   Investigation Recorded
                                 </div>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { classNames } from "../../../Utils/utils";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 export function PrescriptionMultiDropdown(props: {
   options: string[];
@@ -51,7 +52,7 @@ export function PrescriptionMultiDropdown(props: {
                     );
                   }}
                 >
-                  <i className="fas fa-times" />
+                  <CareIcon icon="l-times" className="text-lg" />
                 </button>
               </div>
             );
@@ -80,6 +81,7 @@ export function PrescriptionMultiDropdown(props: {
             return (
               <button
                 type="button"
+                id="investigation-group"
                 key={i}
                 className={classNames(
                   "block w-full px-4 py-2 text-left text-sm leading-5 text-gray-700 hover:text-gray-900 focus:text-gray-900 focus:outline-none",
