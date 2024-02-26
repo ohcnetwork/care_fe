@@ -256,6 +256,7 @@ const Location = ({
             Middleware Uptime
           </p>
         }
+        centerInfoPanel
       />
     </div>
 

@@ -171,6 +171,7 @@ export default function Uptime(
     params?: Record<string, string | number>;
     header?: React.ReactNode;
     parentClassNames?: string;
+    centerInfoPanel?: boolean;
   }>
 ) {
   const [summary, setSummary] = useState<{
@@ -192,6 +193,8 @@ export default function Uptime(
     const newNumDays = Math.floor(containerWidth / 20);
     setNumDays(Math.min(newNumDays, 100));
   };
+
+  const centerInfoPanel = props.centerInfoPanel ?? false;
 
   const setUptimeRecord = (records: AvailabilityRecord[]): void => {
     const recordsByDayBefore: { [key: number]: AvailabilityRecord[] } = {};
@@ -409,15 +412,13 @@ export default function Uptime(
                             }`}
                           ></div>
                         </span>
-                        {hoveredDay === index && (
-                          <>
-                            <UptimeInfoPopover
-                              records={summary[index]}
-                              day={index}
-                              date={formatDateBeforeDays[index]}
-                              numDays={numDays}
-                            />
-                          </>
+                        {hoveredDay === index && !centerInfoPanel && (
+                          <UptimeInfoPopover
+                            records={summary[index]}
+                            day={index}
+                            date={formatDateBeforeDays[index]}
+                            numDays={numDays}
+                          />
                         )}
                       </>
                     );
@@ -434,7 +435,7 @@ export default function Uptime(
               </div>
             </div>
             {hoveredDay !== -1 && (
-              <div className="relative sm:hidden">
+              <div className={`relative ${!centerInfoPanel && "sm:hidden"}`}>
                 <UptimeInfo
                   records={summary[hoveredDay]}
                   date={formatDateBeforeDays[hoveredDay]}
