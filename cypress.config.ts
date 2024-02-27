@@ -21,7 +21,9 @@ export default defineConfig({
         },
       });
 
-      cypressSplit(on, config);
+      if (process.env.CYPRESS_SPLIT_TESTS === "true") {
+        cypressSplit(on, config);
+      }
 
       return config;
     },
