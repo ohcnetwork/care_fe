@@ -11,17 +11,17 @@ let renderLine = (title, value) => {
 let renderIndicators = (title, value, isMin, isMax, minText, maxText) => {
   let indicator = if isMax {
     <span className="inline-block bg-red-200 rounded-full px-2 mx-3 my-1 text-xs py-1 text-red-800">
-      <i className="fas fa-exclamation-triangle mr-2" /> {str(maxText)}
+      <CareIcon icon="l-exclamation-triangle" className="mr-2" /> {str(maxText)}
     </span>
   } else if isMin {
     <span
       className="inline-block bg-yellow-200 rounded-full px-2 mx-3 my-1 text-xs py-1 text-yellow-800">
-      <i className="fas fa-exclamation-triangle mr-2" /> {str(minText)}
+      <CareIcon icon="l-exclamation-triangle" className="mr-2" /> {str(minText)}
     </span>
   } else {
     <span
       className="inline-block bg-green-200 rounded-full px-2 mx-3 my-1 text-xs py-1 text-green-800">
-      <i className="far fa-check-circle mr-2" /> {str("Normal")}
+      <CareIcon icon="l-check-circle" className="mr-2" /> {str("Normal")}
     </span>
   }
 
