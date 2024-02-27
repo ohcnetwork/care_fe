@@ -14,9 +14,6 @@ jobs:
     permissions: write-all
     if: github.repository == 'coronasafe/care_fe'
     runs-on: ubuntu-latest
-    container:
-      image: cypress/browsers:node-20.9.0-chrome-118.0.5993.88-1-ff-118.0.2-edge-118.0.2088.46-1
-      options: --user 1001
     strategy:
       fail-fast: false
       matrix:
@@ -55,6 +52,12 @@ jobs:
 
       - name: Build & Compile rescript files ⚙️
         run: "npm run build"
+
+      - name: Install Specific Chrome Version
+        run: |
+          sudo apt-get install -y wget
+          sudo wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt-get install ./google-chrome-stable_current_amd64.deb
 
       - name: Cypress run for Non-Forked PRs 🥬
         if: steps.pr_origin.outputs.is_forked == 'false'
