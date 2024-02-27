@@ -53,6 +53,11 @@ jobs:
       - name: Build & Compile rescript files ⚙️
         run: "npm run build"
 
+      - name: Install Chrome
+        uses: browser-actions/setup-chrome@latest
+        with:
+          chrome-version: 122
+
       - name: Cypress run for Non-Forked PRs 🥬
         if: steps.pr_origin.outputs.is_forked == 'false'
         uses: cypress-io/github-action@v5
