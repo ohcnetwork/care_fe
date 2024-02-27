@@ -81,6 +81,7 @@ export function PrescriptionMultiDropdown(props: {
             return (
               <button
                 type="button"
+                id="investigation-group"
                 key={i}
                 className={classNames(
                   "block w-full px-4 py-2 text-left text-sm leading-5 text-gray-700 hover:text-gray-900 focus:text-gray-900 focus:outline-none",
