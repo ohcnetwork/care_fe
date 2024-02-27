@@ -23,4 +23,4 @@
 
 ## Reporting a Vulnerability
 
-Please create a ticket at https://support.coronasafe.network
+Please create an issue at https://github.com/coronasafe/care_fe
