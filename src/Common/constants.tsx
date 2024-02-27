@@ -218,11 +218,16 @@ export const getBedTypes = ({
 
   return [
     { id: 1, text: "Ordinary Beds" },
-    { id: 150, text: "Oxygen supported bed" },
-    { id: 10, text: "ICU bed" },
-    { id: 20, text: "Isolation bed" },
+    { id: 150, text: "Oxygen beds" },
+    { id: 10, text: "ICU (ICU without ventilator)" },
+    { id: 20, text: "Ventilator (ICU with ventilator)" },
+    { id: 30, text: "Covid Ordinary Beds" },
+    { id: 120, text: "Covid Oxygen beds" },
+    { id: 110, text: "Covid ICU (ICU without ventilator)" },
+    { id: 100, text: "Covid Ventilators (ICU with ventilator)" },
     ...kaspBedTypes,
-    { id: 2, text: "Others" },
+    { id: 2, text: "Hostel" },
+    { id: 3, text: "Single Room with Attached Bathroom" },
   ];
 };
 
