@@ -37,6 +37,9 @@ describe("Facility Homepage Function", () => {
 
   it("Verify the Facility card button redirection", () => {
     // view cns button
+    manageUserPage.typeFacilitySearch(facilityName);
+    facilityPage.verifyFacilityBadgeContent(facilityName);
+    manageUserPage.assertFacilityInCard(facilityName);
     facilityHome.clickViewCnsButton();
     facilityHome.verifyCnsUrl();
     facilityHome.navigateBack();
@@ -121,6 +124,8 @@ describe("Facility Homepage Function", () => {
     facilityPage.selectLocalBody(localBody);
     userPage.applyFilter();
     // go to cns page in the facility details page
+    manageUserPage.typeFacilitySearch(facilityName);
+    facilityPage.verifyFacilityBadgeContent(facilityName);
     manageUserPage.assertFacilityInCard(facilityName);
     facilityHome.clickViewFacilityDetails();
     facilityHome.clickFacilityCnsButton();
