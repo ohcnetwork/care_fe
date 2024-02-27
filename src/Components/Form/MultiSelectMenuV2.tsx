@@ -88,7 +88,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                       </p>
 
                       {selectedOptions.length !== 0 && (
-                        <div className="flex flex-wrap gap-2 p-2">
+                        <div className="flex flex-wrap gap-2 ">
                           {selectedOptions.map((option) => (
                             <MultiSelectOptionChip
                               key={option.value}
@@ -164,7 +164,7 @@ interface MultiSelectOptionChipProps {
 export const MultiSelectOptionChip = (props: MultiSelectOptionChipProps) => {
   return (
     <span className="flex items-center gap-2 rounded-full border-gray-300 bg-gray-200 px-3 text-xs text-gray-700">
-      <p className="py-1.5">{props.label}</p>
+      <p className="py-1.8">{props.label}</p>
       {props.onRemove && (
         <p
           className="cursor-pointer rounded-full hover:bg-white"
