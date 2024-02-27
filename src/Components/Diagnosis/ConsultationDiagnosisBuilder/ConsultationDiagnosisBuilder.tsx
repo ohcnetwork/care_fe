@@ -22,25 +22,26 @@ export const CreateDiagnosesBuilder = (props: CreateDiagnosesProps) => {
   return (
     <div className={props.className}>
       <div className="flex w-full flex-col items-start rounded-lg border border-gray-400">
-        <div className="flex w-full flex-col gap-2 p-4">
+        <ul className="flex w-full flex-col gap-2 p-4">
           {props.value.map((diagnosis, index) => (
-            <ConsultationDiagnosisEntry
-              key={index}
-              value={diagnosis}
-              onChange={(action) => {
-                if (action.type === "remove") {
-                  props.onChange(props.value.toSpliced(index, 1));
-                }
+            <li key={index} id={`diagnosis-entry-${index}`}>
+              <ConsultationDiagnosisEntry
+                value={diagnosis}
+                onChange={(action) => {
+                  if (action.type === "remove") {
+                    props.onChange(props.value.toSpliced(index, 1));
+                  }
 
-                if (action.type === "edit") {
-                  const diagnoses = [...props.value];
-                  diagnoses[index] = action.value as CreateDiagnosis;
-                  props.onChange(diagnoses);
-                }
-              }}
-            />
+                  if (action.type === "edit") {
+                    const diagnoses = [...props.value];
+                    diagnoses[index] = action.value as CreateDiagnosis;
+                    props.onChange(diagnoses);
+                  }
+                }}
+              />
+            </li>
           ))}
-        </div>
+        </ul>
 
         {props.value.length === 0 && <NoDiagnosisAdded />}
 
@@ -85,24 +86,25 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
   return (
     <div className={props.className}>
       <div className="flex w-full flex-col items-start rounded-lg border border-gray-400">
-        <div className="flex w-full flex-col gap-2 p-4">
+        <ul className="flex w-full flex-col gap-2 p-4">
           {diagnoses.map((diagnosis, index) => (
-            <ConsultationDiagnosisEntry
-              key={index}
-              value={diagnosis}
-              consultationId={consultation}
-              onChange={(action) => {
-                setDiagnoses(
-                  diagnoses.map((diagnose, i) =>
-                    i === index
-                      ? (action.value as ConsultationDiagnosis)
-                      : diagnose
-                  )
-                );
-              }}
-            />
+            <li key={index} id={`diagnosis-entry-${index}`}>
+              <ConsultationDiagnosisEntry
+                value={diagnosis}
+                consultationId={consultation}
+                onChange={(action) => {
+                  setDiagnoses(
+                    diagnoses.map((diagnose, i) =>
+                      i === index
+                        ? (action.value as ConsultationDiagnosis)
+                        : diagnose
+                    )
+                  );
+                }}
+              />
+            </li>
           ))}
-        </div>
+        </ul>
 
         {diagnoses.length === 0 && <NoDiagnosisAdded />}
 

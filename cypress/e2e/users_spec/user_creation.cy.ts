@@ -5,8 +5,8 @@ import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import { UserPage } from "../../pageobject/Users/UserSearch";
 import { UserCreationPage } from "../../pageobject/Users/UserCreation";
 import {
-  emergency_phone_number,
-  phone_number,
+  generatePhoneNumber,
+  generateEmergencyPhoneNumber,
 } from "../../pageobject/constants";
 
 describe("User Creation", () => {
@@ -15,6 +15,8 @@ describe("User Creation", () => {
   const userCreationPage = new UserCreationPage();
   const facilityPage = new FacilityPage();
   const assetSearchPage = new AssetSearchPage();
+  const phone_number = generatePhoneNumber();
+  const emergency_phone_number = generateEmergencyPhoneNumber();
   const fillFacilityName = "Dummy Facility 40";
   const makeid = (length: number) => {
     let result = "";
