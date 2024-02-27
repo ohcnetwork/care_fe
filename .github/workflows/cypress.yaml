@@ -45,7 +45,7 @@ jobs:
       
       - name: Determine PR Origin
         id: pr_origin
-        run: echo "::set-output name=is_forked::$(if [ -z ${{github.event.pull_request.head.repo.full_name}} ]; then echo 'false'; else echo 'true'; fi)"
+        run: echo "::set-output name=is_forked::$( echo ${{ github.event.pull_request.head.repo.fork }})"
 
       - name: Install dependencies 📦
         run: npm install
