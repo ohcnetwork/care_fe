@@ -61,9 +61,6 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
     if (selectedOptions.length === 0) return placeholder;
     if (props.renderSelectedOptions)
       return props.renderSelectedOptions(selectedOptions.map((o) => o.option));
-    return (
-      <span className="text-gray-800">{`${selectedOptions.length} item(s) selected`}</span>
-    );
   };
 
   return (
@@ -89,17 +86,30 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                       <p className="ml-2.5 text-sm font-normal text-gray-600">
                         <Placeholder />
                       </p>
+
+                      {selectedOptions.length !== 0 && (
+                        <div className="flex flex-wrap gap-2 p-2">
+                          {selectedOptions.map((option) => (
+                            <MultiSelectOptionChip
+                              key={option.value}
+                              label={option.selectedLabel}
+                              onRemove={() => {
+                                const updatedOptions = selectedOptions.filter(
+                                  (selectedOption) =>
+                                    selectedOption.value !== option.value
+                                );
+                                props.onChange(
+                                  updatedOptions.map((o) => o.value) as any
+                                );
+                              }}
+                            />
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <CareIcon className="care-l-angle-down -mb-0.5 text-lg text-gray-900" />
                   </div>
                 </Listbox.Button>
-                {selectedOptions.length !== 0 && (
-                  <div className="flex flex-wrap gap-2 p-2">
-                    {selectedOptions.map((option) => (
-                      <MultiSelectOptionChip label={option.selectedLabel} />
-                    ))}
-                  </div>
-                )}
               </div>
               <DropdownTransition show={open}>
                 <Listbox.Options className="cui-dropdown-base absolute top-12">
