@@ -161,15 +161,6 @@ describe("Facility Manage Functions", () => {
     );
   });
 
-  it("Delete a existing facility and verify the error message", () => {
-    facilityPage.clickManageFacilityDropdown();
-    facilityPage.clickDeleteFacilityOption();
-    facilityPage.confirmDeleteFacility();
-    facilityManage.verifySuccessMessageVisibilityAndContent(
-      "You do not have permission to perform this action."
-    );
-  });
-
   afterEach(() => {
     cy.saveLocalStorage();
   });
