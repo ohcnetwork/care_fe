@@ -141,9 +141,6 @@ const user_create_reducer = (state = initialState, action: any) => {
   }
 };
 
-const getDate = (value: any) =>
-  value && dayjs(value).isValid() && dayjs(value).toDate();
-
 export const validateRule = (
   condition: boolean,
   content: JSX.Element | string
@@ -164,6 +161,9 @@ export const validateRule = (
   );
 };
 
+const getDate = (value: any) =>
+  value && dayjs(value).isValid() && dayjs(value).toDate();
+
 export const UserAdd = (props: UserProps) => {
   const { goBack } = useAppHistory();
   const { userId } = props;
@@ -183,7 +183,7 @@ export const UserAdd = (props: UserProps) => {
   const [passwordInputInFocus, setPasswordInputInFocus] = useState(false);
   const [confirmPasswordInputInFocus, setConfirmPasswordInputInFocus] =
     useState(false);
-  const [usernameInput, setUsernameInput] = useState("");
+  const [usernameInput, setUsernameInput] = useState<string | any>(null);
 
   const userExistsEnums = {
     idle: 0,
@@ -326,7 +326,7 @@ export const UserAdd = (props: UserProps) => {
 
   const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
     setSelectedFacility(selected as FacilityModel[]);
-    const form = { ...state.form };
+    const form: any = { ...state.form };
     form.facilities = selected
       ? (selected as FacilityModel[]).map((i) => i.id ?? -1)
       : [];
@@ -619,7 +619,7 @@ export const UserAdd = (props: UserProps) => {
             }}
             formData={state.form}
           />
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2">
             <div className="md:col-span-2">
               <FieldLabel>Facilities</FieldLabel>
               <FacilitySelect
@@ -724,59 +724,61 @@ export const UserAdd = (props: UserProps) => {
               {usernameInputInFocus && (
                 <div className="text-small pl-2 text-gray-500">
                   <div>
-                    {usernameExists !== userExistsEnums.idle && (
-                      <>
-                        {usernameExists === userExistsEnums.checking ? (
-                          <span>
-                            <CareIcon
-                              icon="l-record-audio"
-                              className="text-xl"
-                            />{" "}
-                            checking...
-                          </span>
-                        ) : (
-                          <>
-                            {usernameExists === userExistsEnums.exists ? (
-                              <div>
-                                <CareIcon
-                                  icon="l-times-circle"
-                                  className="text-xl text-red-500"
-                                />{" "}
-                                <span className="text-red-500">
-                                  Username is not available
-                                </span>
-                              </div>
-                            ) : (
-                              <div>
-                                <CareIcon
-                                  icon="l-check-circle"
-                                  className="text-xl text-green-500"
-                                />{" "}
-                                <span className="text-primary-500">
-                                  Username is available
-                                </span>
-                              </div>
-                            )}
-                          </>
-                        )}
-                      </>
-                    )}
+                    {usernameInput &&
+                      usernameExists !== userExistsEnums.idle && (
+                        <>
+                          {usernameExists === userExistsEnums.checking ? (
+                            <span>
+                              <CareIcon
+                                icon="l-record-audio"
+                                className="text-xl"
+                              />{" "}
+                              checking...
+                            </span>
+                          ) : (
+                            <>
+                              {usernameExists === userExistsEnums.exists ? (
+                                <div>
+                                  <CareIcon
+                                    icon="l-times-circle"
+                                    className="text-xl text-red-500"
+                                  />{" "}
+                                  <span className="text-red-500">
+                                    Username is not available
+                                  </span>
+                                </div>
+                              ) : (
+                                <div>
+                                  <CareIcon
+                                    icon="l-check-circle"
+                                    className="text-xl text-green-500"
+                                  />{" "}
+                                  <span className="text-primary-500">
+                                    Username is available
+                                  </span>
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </>
+                      )}
                   </div>
                   <div>
                     {validateRule(
-                      usernameInput.length >= 4 && usernameInput.length <= 16,
+                      usernameInput?.length >= 4 && usernameInput?.length <= 16,
                       "Username should be 4-16 characters long"
                     )}
                   </div>
                   <div>
                     {validateRule(
                       /^[a-z0-9._-]*$/.test(usernameInput),
-                      "Username can only contain lowercase letters, numbers, and . _ -"
+                      "Username can only contain lowercase letters, numbers, and . _ - "
                     )}
                   </div>
                   <div>
                     {validateRule(
-                      /^[a-z0-9].*[a-z0-9]$/i.test(usernameInput),
+                      usernameInput &&
+                        /^[a-zA-Z0-9].*[a-zA-Z0-9]$/.test(usernameInput),
                       "Username must start and end with a letter or number"
                     )}
                   </div>
@@ -930,7 +932,7 @@ export const UserAdd = (props: UserProps) => {
                 />
               ))}
           </div>
-          <div className="mt-4 flex flex-col justify-end gap-2 md:flex-row">
+          <div className="mt-4 flex flex-col  gap-2 sm:justify-end md:flex-row">
             <Cancel onClick={() => goBack()} />
             <Submit onClick={handleSubmit} label={buttonText} />
           </div>
