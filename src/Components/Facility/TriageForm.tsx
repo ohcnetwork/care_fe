@@ -102,6 +102,42 @@ export const TriageForm = ({ facilityId, id }: Props) => {
             invalidForm = true;
           }
           return;
+        case "num_patients_visited":
+          if (state.form[field] < 0) {
+            errors[field] =
+              "Number of patients visited must be greater than or equal to 0";
+            invalidForm = true;
+          }
+          return;
+        case "num_patients_home_quarantine":
+          if (state.form[field] < 0) {
+            errors[field] =
+              "Number of patients in Home Qurantine must be greater than or equal to 0";
+            invalidForm = true;
+          }
+          return;
+        case "num_patients_isolation":
+          if (state.form[field] < 0) {
+            errors[field] =
+              "Number of patients in Isolation must be greater than or equal to 0";
+            invalidForm = true;
+          }
+          return;
+        case "num_patient_referred":
+          if (state.form[field] < 0) {
+            errors[field] =
+              "Number of patients referred must be greater than or equal to 0";
+            invalidForm = true;
+          }
+          return;
+        case "num_patient_confirmed_positive":
+          if (state.form[field] < 0) {
+            errors[field] =
+              "Number of patients confirmed positive must be greater than or equal to 0";
+            invalidForm = true;
+          }
+          return;
+
         default:
           return;
       }
@@ -247,7 +283,6 @@ export const TriageForm = ({ facilityId, id }: Props) => {
                     value={state.form.num_patients_visited}
                     onChange={handleFormFieldChange}
                     error={state.errors.num_patients_visited}
-                    min={0}
                   />
                 </div>
                 <div>
@@ -258,7 +293,6 @@ export const TriageForm = ({ facilityId, id }: Props) => {
                     value={state.form.num_patients_home_quarantine}
                     onChange={handleFormFieldChange}
                     error={state.errors.num_patients_home_quarantine}
-                    min={0}
                   />
                 </div>
                 <div>
@@ -269,7 +303,6 @@ export const TriageForm = ({ facilityId, id }: Props) => {
                     value={state.form.num_patients_isolation}
                     onChange={handleFormFieldChange}
                     error={state.errors.num_patients_isolation}
-                    min={0}
                   />
                 </div>
                 <div>
@@ -280,7 +313,6 @@ export const TriageForm = ({ facilityId, id }: Props) => {
                     value={state.form.num_patient_referred}
                     onChange={handleFormFieldChange}
                     error={state.errors.num_patient_referred}
-                    min={0}
                   />
                 </div>
                 <div>
@@ -291,7 +323,6 @@ export const TriageForm = ({ facilityId, id }: Props) => {
                     value={state.form.num_patient_confirmed_positive}
                     onChange={handleFormFieldChange}
                     error={state.errors.num_patient_confirmed_positive}
-                    min={0}
                   />
                 </div>
               </div>

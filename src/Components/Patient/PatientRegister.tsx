@@ -643,6 +643,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             errors[field] = "Please select a blood group";
           }
           return;
+        case "number_of_primary_contacts":
+          if (form[field] < 0) {
+            errors[field] = "Number of primary contacts cannot be negative";
+          }
+          return;
+        case "number_of_secondary_contacts":
+          if (form[field] < 0) {
+            errors[field] = "Number of secondary contacts cannot be negative";
+          }
+          return;
 
         case "is_vaccinated":
           if (form.is_vaccinated === "true") {
