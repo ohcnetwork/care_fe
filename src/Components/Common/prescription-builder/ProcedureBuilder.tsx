@@ -67,6 +67,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                   Procedure
                   <span className="text-danger-500">{" *"}</span>
                   <input
+                    id="procedure-name"
                     type="text"
                     className="mt-1 block w-full rounded border border-gray-400 bg-gray-100 px-4 py-2 text-sm hover:bg-gray-200 focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-primary-500"
                     placeholder="Procedure"
@@ -135,6 +136,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                         Time<span className="text-danger-500">{" *"}</span>
                       </div>
                       <input
+                        id="procedure-time"
                         type="datetime-local"
                         className="block w-[calc(100%-5px)] rounded border border-gray-400 bg-gray-100 px-4 py-2 text-sm hover:bg-gray-200 focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-primary-500"
                         value={procedure.time || ""}

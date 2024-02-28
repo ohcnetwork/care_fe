@@ -57,6 +57,7 @@ import {
   InventoryLogResponse,
   InventoryItemsModel,
   PatientTransferResponse,
+  DupPatientModel,
 } from "../Components/Facility/models";
 import {
   IDeleteBedCapacity,
@@ -386,7 +387,7 @@ const routes = {
     method: "DELETE",
     TRes: Type<Record<string, never>>(),
   },
-  getFacilityAssetLocationAvailability: {
+  listFacilityAssetLocationAvailability: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/availability/",
     method: "GET",
     TRes: Type<PaginatedResponse<AvailabilityRecord>>(),
@@ -665,6 +666,7 @@ const routes = {
 
   searchPatient: {
     path: "/api/v1/patient/search",
+    TRes: Type<PaginatedResponse<DupPatientModel>>(),
   },
   patientList: {
     path: "/api/v1/patient/",
@@ -674,15 +676,18 @@ const routes = {
   addPatient: {
     path: "/api/v1/patient/",
     method: "POST",
+    TRes: Type<PatientModel>(),
   },
   getPatient: {
     path: "/api/v1/patient/{id}/",
     method: "GET",
+    TBody: Type<PatientModel>(),
     TRes: Type<PatientModel>(),
   },
   updatePatient: {
     path: "/api/v1/patient/{id}/",
     method: "PUT",
+    TRes: Type<PatientModel>(),
   },
   patchPatient: {
     path: "/api/v1/patient/{id}/",
@@ -1422,6 +1427,7 @@ const routes = {
   hcxCheckEligibility: {
     path: "/api/v1/hcx/check_eligibility/",
     method: "POST",
+    TRes: Type<HCXPolicyModel>(),
   },
 
   listHCXPolicies: {
@@ -1433,6 +1439,7 @@ const routes = {
   createHCXPolicy: {
     path: "/api/v1/hcx/policy/",
     method: "POST",
+    TRes: Type<HCXPolicyModel>(),
   },
 
   getHCXPolicy: {
@@ -1443,6 +1450,7 @@ const routes = {
   updateHCXPolicy: {
     path: "/api/v1/hcx/policy/{external_id}/",
     method: "PUT",
+    TRes: Type<HCXPolicyModel>(),
   },
 
   partialUpdateHCXPolicy: {
