@@ -386,7 +386,7 @@ const routes = {
     method: "DELETE",
     TRes: Type<Record<string, never>>(),
   },
-  getFacilityAssetLocationAvailability: {
+  listFacilityAssetLocationAvailability: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/availability/",
     method: "GET",
     TRes: Type<PaginatedResponse<AvailabilityRecord>>(),
