@@ -62,48 +62,19 @@ export const downloadFacilityTriage = () => {
 };
 
 //Patient
-export const searchPatient = (params: object) => {
-  return fireRequest("searchPatient", [], params);
-};
 export const getAllPatient = (params: object, altKey: string) => {
   return fireRequest("patientList", [], params, null, altKey);
-};
-export const createPatient = (params: object) => {
-  return fireRequest("addPatient", [], params);
 };
 export const getPatient = (pathParam: object) => {
   return fireRequest("getPatient", [], {}, pathParam);
 };
-export const updatePatient = (params: object, pathParam: object) => {
-  return fireRequest("updatePatient", [], params, pathParam);
-};
-
-export const transferPatient = (params: object, pathParam: object) => {
-  return fireRequest("transferPatient", [], params, pathParam);
-};
-
 export const patchPatient = (params: object, pathParam: object) => {
   return fireRequest("patchPatient", [], params, pathParam);
 };
 
-export const getStates = () => {
-  return fireRequest("statesList", []);
-};
-
 // District/State/Local body/ward
-export const getDistrictByState = (pathParam: object) => {
-  return fireRequest("getDistrictByState", [], {}, pathParam);
-};
 export const getDistrictByName = (params: object) => {
   return fireRequest("getDistrictByName", [], params, null);
-};
-
-export const getLocalbodyByDistrict = (pathParam: object) => {
-  return fireRequest("getLocalbodyByDistrict", [], {}, pathParam);
-};
-
-export const getWardByLocalBody = (pathParam: object) => {
-  return fireRequest("getWardByLocalBody", [], {}, pathParam);
 };
 
 // Sample Test
