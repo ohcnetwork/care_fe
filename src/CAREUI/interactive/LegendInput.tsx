@@ -1,7 +1,7 @@
 import CareIcon from "../icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import { RefObject, useRef, useState, useEffect } from "react";
-
+import { useTranslation } from "react-i18next";
 type InputProps = {
   id?: string;
   name: string;
@@ -19,7 +19,7 @@ type InputProps = {
   onKeyDown?: (e: any) => void;
   onKeyPress?: (e: any) => void;
   disabled?: boolean;
-  error?: boolean;
+  error?: string;
   className?: string;
   outerClassName?: string;
   size?: "small" | "medium" | "large";
@@ -30,6 +30,7 @@ export default function LegendInput(props: InputProps) {
   /**
    * Useful for small input forms. Should only be used in special cases.
    */
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const ref = props.ref || inputRef;
@@ -66,7 +67,6 @@ export default function LegendInput(props: InputProps) {
   useEffect(() => {
     ref.current && testAutoFill(ref.current);
   }, [ref.current]);
-
   return (
     <div className={props.outerClassName}>
       {props.label && (
@@ -149,8 +149,8 @@ export default function LegendInput(props: InputProps) {
           </button>
         )}
       </div>
-      {props.error && (
-        <div className="mt-1 text-xs text-red-500">{props.error}</div>
+      {!!props.error && (
+        <div className="mt-1 text-xs text-red-500">{t(props.error)}</div>
       )}
     </div>
   );
