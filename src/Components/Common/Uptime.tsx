@@ -169,6 +169,9 @@ export default function Uptime(
   props: Readonly<{
     route: QueryRoute<PaginatedResponse<AvailabilityRecord>>;
     params?: Record<string, string | number>;
+    header?: React.ReactNode;
+    parentClassNames?: string;
+    centerInfoPanel?: boolean;
   }>
 ) {
   const [summary, setSummary] = useState<{
@@ -190,6 +193,8 @@ export default function Uptime(
     const newNumDays = Math.floor(containerWidth / 20);
     setNumDays(Math.min(newNumDays, 100));
   };
+
+  const centerInfoPanel = props.centerInfoPanel ?? false;
 
   const setUptimeRecord = (records: AvailabilityRecord[]): void => {
     const recordsByDayBefore: { [key: number]: AvailabilityRecord[] } = {};
@@ -361,10 +366,10 @@ export default function Uptime(
     );
   } else if (summary) {
     return (
-      <div className="mt-8 flex w-full flex-col bg-white p-4 shadow-sm sm:rounded-lg">
-        <div className="mx-2 w-full">
+      <div className={props.parentClassNames}>
+        <div className="w-full">
           <div className="grid grid-cols-1">
-            <div className="text-xl font-semibold">Availability History</div>
+            {props.header}
             <div>
               <div className="mt-2 overflow-x-clip px-5">
                 <div className="mb-1 mt-2 flex justify-center text-xs text-gray-700 opacity-70">
@@ -407,15 +412,13 @@ export default function Uptime(
                             }`}
                           ></div>
                         </span>
-                        {hoveredDay === index && (
-                          <>
-                            <UptimeInfoPopover
-                              records={summary[index]}
-                              day={index}
-                              date={formatDateBeforeDays[index]}
-                              numDays={numDays}
-                            />
-                          </>
+                        {hoveredDay === index && !centerInfoPanel && (
+                          <UptimeInfoPopover
+                            records={summary[index]}
+                            day={index}
+                            date={formatDateBeforeDays[index]}
+                            numDays={numDays}
+                          />
                         )}
                       </>
                     );
@@ -432,7 +435,7 @@ export default function Uptime(
               </div>
             </div>
             {hoveredDay !== -1 && (
-              <div className="relative sm:hidden">
+              <div className={`relative ${!centerInfoPanel && "sm:hidden"}`}>
                 <UptimeInfo
                   records={summary[hoveredDay]}
                   date={formatDateBeforeDays[hoveredDay]}
