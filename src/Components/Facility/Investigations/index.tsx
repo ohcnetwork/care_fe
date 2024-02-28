@@ -1,20 +1,16 @@
-import { lazy, useEffect, useReducer, useState } from "react";
-import { TestTable } from "./Table";
-import { useDispatch } from "react-redux";
-import {
-  createInvestigation,
-  listInvestigationGroups,
-  listInvestigations,
-  getPatient,
-} from "../../../Redux/actions";
-import * as Notification from "../../../Utils/Notifications.js";
 import { navigate, useQueryParams } from "raviger";
+import { lazy, useEffect, useReducer, useState } from "react";
+import * as Notification from "../../../Utils/Notifications.js";
+import { TestTable } from "./Table";
 
 import { useTranslation } from "react-i18next";
+import Card from "../../../CAREUI/display/Card";
+import routes from "../../../Redux/api";
+import request from "../../../Utils/request/request";
+import useQuery from "../../../Utils/request/useQuery";
+import { Submit } from "../../Common/components/ButtonV2";
 import Page from "../../Common/components/Page";
 import AutocompleteMultiSelectFormField from "../../Form/FormFields/AutocompleteMultiselect";
-import { Submit } from "../../Common/components/ButtonV2";
-import Card from "../../../CAREUI/display/Card";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 
@@ -102,33 +98,45 @@ const Investigation = (props: {
     }
   );
 
-  const dispatch: any = useDispatch();
   const [selectedGroup, setSelectedGroup] = useState<string[]>([]);
   const [state, setState] = useReducer(testFormReducer, initialState);
-  const [investigations, setInvestigations] = useState<InvestigationType[]>([]);
-  const [investigationGroups, setInvestigationGroups] = useState<
-    InvestigationGroup[]
-  >([]);
   const [selectedInvestigations, setSelectedInvestigations] = useState<
     InvestigationType[]
   >([]);
-  const [isLoading, setIsLoading] = useState({
-    investigationLoading: false,
-    investigationGroupLoading: false,
-  });
   const [saving, setSaving] = useState(false);
   const [session, setSession] = useState("");
   const [selectedItems, selectItems] = useState<SearchItem[]>([]);
-  const [facilityName, setFacilityName] = useState("");
-  const [patientName, setPatientName] = useState("");
-  const searchOptions = [...investigationGroups, ...investigations];
+
+  const { data: investigations, loading: listInvestigationDataLoading } =
+    useQuery(routes.listInvestigations, {});
+
+  const {
+    data: investigationGroups,
+    loading: listInvestigationGroupDataLoading,
+  } = useQuery(routes.listInvestigationGroups, {});
+
+  const { data: patientData, loading: patientLoading } = useQuery(
+    routes.getPatient,
+    {
+      pathParams: { id: patientId },
+      onResponse: (res) => {
+        if (res.data) {
+          setSession(new Date().toString());
+        }
+      },
+    }
+  );
 
   useEffect(() => {
-    if (investigations.length > 0) {
+    if (
+      investigations?.results &&
+      investigationGroups?.results &&
+      investigations?.results.length > 0
+    ) {
       const prefilledGroups = preselectedInvestigations
         .filter((inv: any) => inv.isGroup)
         .map((inv: any) =>
-          investigationGroups.find((group) => group.name === inv.name)
+          investigationGroups.results.find((group) => group.name === inv.name)
         )
         .map((group: any) => {
           return {
@@ -140,7 +148,7 @@ const Investigation = (props: {
       const prefilledInvestigations = preselectedInvestigations
         .filter((inv: any) => !inv.isGroup)
         .map((inv: any) => {
-          const investigation = investigations.find(
+          const investigation = investigations.results.find(
             (investigation) => investigation.name === inv.name
           );
           // check if investigation contains all groups
@@ -170,51 +178,9 @@ const Investigation = (props: {
     }
   }, [investigations, investigationGroups]);
 
-  const fetchInvestigations = () => {
-    setIsLoading({ ...isLoading, investigationLoading: true });
-    dispatch(listInvestigations({})).then((res: any) => {
-      if (res && res.data) {
-        setInvestigations(res.data.results);
-      }
-      setIsLoading({ ...isLoading, investigationLoading: false });
-    });
-  };
-
-  const fetchInvestigationGroups = () => {
-    setIsLoading({ ...isLoading, investigationGroupLoading: true });
-    dispatch(listInvestigationGroups({})).then((res: any) => {
-      if (res && res.data) {
-        setInvestigationGroups(res.data.results);
-      }
-      setIsLoading({ ...isLoading, investigationGroupLoading: false });
-    });
-  };
-
-  useEffect(() => {
-    async function fetchPatientName() {
-      if (patientId) {
-        const res = await dispatch(getPatient({ id: patientId }));
-        if (res.data) {
-          setPatientName(res.data.name);
-          setFacilityName(res.data.facility_object.name);
-        }
-      } else {
-        setPatientName("");
-        setFacilityName("");
-      }
-    }
-    fetchPatientName();
-  }, [dispatch, patientId]);
-
-  useEffect(() => {
-    fetchInvestigationGroups();
-    fetchInvestigations();
-    setSession(new Date().toString());
-  }, [props.consultationId]);
-
   const initialiseForm = () => {
     const investigationsArray = selectedGroup.map((group_id: string) => {
-      return listOfInvestigations(group_id, investigations);
+      return listOfInvestigations(group_id, investigations?.results || []);
     });
 
     const flatInvestigations = investigationsArray.flat();
@@ -240,7 +206,6 @@ const Investigation = (props: {
     initialiseForm();
     if (!saving) {
       setSaving(true);
-
       const keys = Object.keys(state.form);
       const data = keys
         .map((k) => {
@@ -256,9 +221,12 @@ const Investigation = (props: {
         );
 
       if (data.length) {
-        const res = await dispatch(
-          createInvestigation({ investigations: data }, props.consultationId)
-        );
+        const { res } = await request(routes.createInvestigation, {
+          pathParams: { consultation_external_id: props.consultationId },
+          body: {
+            investigations: data,
+          },
+        });
         if (res && res.status === 204) {
           setSaving(false);
           Notification.Success({
@@ -279,7 +247,11 @@ const Investigation = (props: {
     }
   };
 
-  if (isLoading.investigationGroupLoading || isLoading.investigationLoading) {
+  if (
+    listInvestigationDataLoading ||
+    listInvestigationGroupDataLoading ||
+    patientLoading
+  ) {
     return <Loading />;
   }
 
@@ -287,16 +259,19 @@ const Investigation = (props: {
     <Page
       title={t("log_lab_results")}
       crumbsReplacements={{
-        [facilityId]: { name: facilityName },
-        [patientId]: { name: patientName },
+        [facilityId]: { name: patientData?.facility_object?.name },
+        [patientId]: { name: patientData?.name },
       }}
     >
       <div className="flex flex-col gap-2">
         <AutocompleteMultiSelectFormField
           className="mt-5"
           name="investigations"
-          placeholder="Search Investigations & Groups"
-          options={searchOptions}
+          placeholder={t("search_investigation_placeholder")}
+          options={[
+            ...(investigationGroups?.results || []),
+            ...(investigations?.results || []),
+          ]}
           value={selectedItems}
           optionLabel={(option) => option.name}
           optionValue={(option) => option}
@@ -328,8 +303,8 @@ const Investigation = (props: {
           );
           const filteredInvestigations = currentGroupsInvestigations.length
             ? currentGroupsInvestigations
-            : listOfInvestigations(group_id, investigations);
-          const group = findGroup(group_id, investigationGroups);
+            : listOfInvestigations(group_id, investigations?.results || []);
+          const group = findGroup(group_id, investigationGroups?.results || []);
           return (
             <Card>
               <TestTable
@@ -348,7 +323,7 @@ const Investigation = (props: {
             className="w-full md:w-auto"
             onClick={handleSubmit}
             disabled={saving || !selectedGroup.length}
-            label="Save Investigation"
+            label={t("save_investigation")}
           />
         </div>
       </div>
