@@ -14,6 +14,7 @@ import { USER_TYPES } from "../../Common/constants";
 import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
 import UserDetails from "../Common/UserDetails";
+import UserDetailComponent from "../Common/UserDetailsComponet.js";
 import UserFilter from "./UserFilter";
 import {
   classNames,
@@ -253,22 +254,18 @@ export default function ManageUsers() {
                   } gap-2 md:grid md:grid-cols-2`}
                 >
                   {user.user_type && (
-                    <div className="col-span-1">
-                      <UserDetails id="role" title="Role">
-                        <div className="break-all font-semibold">
-                          {user.user_type}
-                        </div>
-                      </UserDetails>
-                    </div>
+                    <UserDetailComponent
+                      id="role"
+                      title="Role"
+                      value={user.user_type}
+                    />
                   )}
                   {user.district_object && (
-                    <div className="col-span-1">
-                      <UserDetails id="district" title="District">
-                        <div className="font-semibold">
-                          {user.district_object.name}
-                        </div>
-                      </UserDetails>
-                    </div>
+                    <UserDetailComponent
+                      id="district"
+                      title="District"
+                      value={user.district_object.name}
+                    />
                   )}
                   {user.user_type === "Doctor" && (
                     <>
@@ -336,8 +333,13 @@ export default function ManageUsers() {
                   {user.created_by && (
                     <div className="col-span-1">
                       <UserDetails id="created_by" title="Created by">
-                        <div className="break-all font-semibold">
-                          {user.created_by}
+                        <div className="overflow-hidden">
+                          <div
+                            className="truncate font-semibold"
+                            title={user.created_by}
+                          >
+                            {user.created_by}
+                          </div>
                         </div>
                       </UserDetails>
                     </div>
