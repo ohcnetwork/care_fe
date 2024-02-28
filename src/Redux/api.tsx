@@ -31,35 +31,6 @@ import {
   PatientAssetBed,
 } from "../Components/Assets/AssetTypes";
 import {
-  CapacityModal,
-  ConsultationModel,
-  CreateBedBody,
-  CurrentBed,
-  DistrictModel,
-  DailyRoundsBody,
-  DailyRoundsRes,
-  DoctorModal,
-  FacilityModel,
-  IFacilityNotificationRequest,
-  IFacilityNotificationResponse,
-  IUserFacilityRequest,
-  LocalBodyModel,
-  PatientStatsModel,
-  FacilityRequest,
-  StateModel,
-  WardModel,
-  LocationModel,
-  PatientNotesModel,
-  PatientNotesEditModel,
-  BedModel,
-  MinimumQuantityItemResponse,
-  InventorySummaryResponse,
-  InventoryLogResponse,
-  InventoryItemsModel,
-  PatientTransferResponse,
-  DupPatientModel,
-} from "../Components/Facility/models";
-import {
   IDeleteBedCapacity,
   IDeleteExternalResult,
   IExternalResult,
@@ -69,37 +40,65 @@ import {
   IPartialUpdateExternalResult,
 } from "../Components/ExternalResult/models";
 import {
-  SkillModel,
-  SkillObjectModel,
-  UpdatePasswordForm,
-  UserModel,
-} from "../Components/Users/models";
+  BedModel,
+  CapacityModal,
+  ConsultationModel,
+  CreateBedBody,
+  CurrentBed,
+  DailyRoundsBody,
+  DailyRoundsRes,
+  DistrictModel,
+  DoctorModal,
+  DupPatientModel,
+  FacilityModel,
+  FacilityRequest,
+  IFacilityNotificationRequest,
+  IFacilityNotificationResponse,
+  InventoryItemsModel,
+  InventoryLogResponse,
+  InventorySummaryResponse,
+  IUserFacilityRequest,
+  LocalBodyModel,
+  LocationModel,
+  MinimumQuantityItemResponse,
+  PatientNotesEditModel,
+  PatientNotesModel,
+  PatientStatsModel,
+  PatientTransferResponse,
+  StateModel,
+  WardModel,
+} from "../Components/Facility/models";
 import { Prescription } from "../Components/Medicine/models";
 import {
-  CreateFileRequest,
-  CreateFileResponse,
+  NotificationData,
+  PNconfigData,
+} from "../Components/Notifications/models";
+import {
   DailyRoundsModel,
   FileUploadModel,
   PatientModel,
   SampleReportModel,
   SampleTestModel,
 } from "../Components/Patient/models";
-import { PaginatedResponse } from "../Utils/request/types";
 import {
-  NotificationData,
-  PNconfigData,
-} from "../Components/Notifications/models";
+  SkillModel,
+  SkillObjectModel,
+  UpdatePasswordForm,
+  UserModel,
+} from "../Components/Users/models";
+import { PaginatedResponse } from "../Utils/request/types";
 
-import { IComment, IResource } from "../Components/Resource/models";
-import { IShift } from "../Components/Shifting/models";
-import { HCXPolicyModel } from "../Components/HCX/models";
+import { ICD11DiagnosisModel } from "../Components/Diagnosis/types";
+import { EventGeneric } from "../Components/Facility/ConsultationDetails/Events/types";
 import {
   InvestigationGroup,
   InvestigationType,
 } from "../Components/Facility/Investigations";
+import { InvestigationSessionType } from "../Components/Facility/Investigations/investigationsTab";
 import { Investigation } from "../Components/Facility/Investigations/Reports/types";
-import { ICD11DiagnosisModel } from "../Components/Diagnosis/types";
-import { EventGeneric } from "../Components/Facility/ConsultationDetails/Events/types";
+import { HCXPolicyModel } from "../Components/HCX/models";
+import { IComment, IResource } from "../Components/Resource/models";
+import { IShift } from "../Components/Shifting/models";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -1062,10 +1061,20 @@ const routes = {
   createInvestigation: {
     path: "/api/v1/consultation/{consultation_external_id}/investigation/",
     method: "POST",
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<{
+      investigations: {
+        investigation: string;
+        value: number;
+        notes: string;
+        session: string;
+      }[];
+    }>(),
   },
   getInvestigationSessions: {
     path: "/api/v1/consultation/{consultation_external_id}/investigation/get_sessions/",
     method: "GET",
+    TRes: Type<InvestigationSessionType[]>(),
   },
   getInvestigation: {
     path: "/api/v1/consultation/{consultation_external_id}/investigation/",
@@ -1075,10 +1084,19 @@ const routes = {
   getPatientInvestigation: {
     path: "/api/v1/patient/{patient_external_id}/investigation/",
     method: "GET",
+    TRes: Type<PaginatedResponse<Investigation>>(),
   },
   editInvestigation: {
     path: "/api/v1/consultation/{consultation_external_id}/investigation/batchUpdate/",
     method: "PUT",
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<{
+      investigations: {
+        external_id: string;
+        value: number;
+        notes: string;
+      }[];
+    }>(),
   },
 
   // ICD11
