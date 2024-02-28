@@ -1,7 +1,5 @@
 import { useEffect } from "react";
 import useHL7VitalsMonitor from "./useHL7VitalsMonitor";
-import { Link } from "raviger";
-import { GENDER_TYPES } from "../../Common/constants";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import WaveformLabels from "./WaveformLabels";
 import { classNames } from "../../Utils/utils";
@@ -9,6 +7,8 @@ import { IVitalsComponentProps, VitalsValueBase } from "./types";
 import { triggerGoal } from "../../Integrations/Plausible";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import dayjs from "dayjs";
+import VitalsMonitorHeader from "./VitalsMonitorHeader";
+import VitalsMonitorFooter from "./VitalsMonitorFooter";
 
 const minutesAgo = (timestamp: string) => {
   return `${dayjs().diff(dayjs(timestamp), "minute")}m ago`;
@@ -18,7 +18,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
   const { connect, waveformCanvas, data, isOnline } = useHL7VitalsMonitor(
     props.config
   );
-  const { patient, bed, asset } = props.patientAssetBed ?? {};
+  const { bed, asset } = props.patientAssetBed ?? {};
   const authUser = useAuthUser();
 
   useEffect(() => {
@@ -41,56 +41,8 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
 
   return (
     <div className="flex flex-col gap-1 rounded bg-[#020617] p-2">
-      {props.patientAssetBed && (
-        <div className="flex items-center justify-between px-2 tracking-wide">
-          <div className="flex flex-col gap-2 md:flex-row">
-            {patient ? (
-              <Link
-                href={`/facility/${patient.last_consultation?.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}`}
-                className="font-bold uppercase text-white"
-              >
-                {patient?.name}
-              </Link>
-            ) : (
-              <span className="flex items-center gap-1 text-gray-500">
-                <CareIcon className="care-l-ban" />
-                No Patient
-              </span>
-            )}
-            {patient && (
-              <span className="text-xs font-bold text-gray-400 md:text-sm">
-                {patient.age}y;{" "}
-                {GENDER_TYPES.find((g) => g.id === patient.gender)?.icon}
-              </span>
-            )}
-          </div>
-          <div className="flex flex-col items-center gap-2 text-xs md:flex-row md:text-sm">
-            {asset && (
-              <Link
-                className="flex items-center gap-1 text-gray-500"
-                href={`/facility/${patient?.facility_object?.id}/assets/${asset?.id}`}
-              >
-                <CareIcon className="care-l-monitor-heart-rate text-sm md:text-base" />
-                <span>{asset.name}</span>
-              </Link>
-            )}
-            {bed && (
-              <Link
-                className="flex flex-col items-center gap-2 text-gray-500 md:flex-row"
-                href={`/facility/${patient?.facility_object?.id}/location/${bed?.location_object?.id}/beds`}
-              >
-                <span className="flex items-center gap-1">
-                  <CareIcon className="care-l-bed text-sm md:text-base" />
-                  <span>{bed.name}</span>
-                </span>
-                <span className="flex items-center gap-1">
-                  <CareIcon className="care-l-location-point text-sm md:text-base" />
-                  <span>{bed.location_object?.name}</span>
-                </span>
-              </Link>
-            )}
-          </div>
-        </div>
+      {props.hideHeader ? null : (
+        <VitalsMonitorHeader patientAssetBed={props.patientAssetBed} />
       )}
       <div className="relative flex flex-col gap-2 md:flex-row md:justify-between">
         <VitalsNonWaveformContent>
@@ -227,6 +179,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
           </div>
         </div>
       </div>
+      {props.hideFooter ? null : <VitalsMonitorFooter asset={asset} />}
     </div>
   );
 }
