@@ -6,12 +6,16 @@ import {
   DistrictModel,
   DoctorModal,
   FacilityRequest,
+  FacilityModel,
 } from "./models";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave.js";
+import { useMessageListener } from "../../Common/hooks/useMessageListener";
+
 import {
   FACILITY_FEATURE_TYPES,
   FACILITY_TYPES,
   getBedTypes,
+  USER_TYPES,
 } from "../../Common/constants";
 import {
   MultiSelectFormField,
@@ -38,6 +42,8 @@ import BedTypeCard from "./BedTypeCard";
 import Card from "../../CAREUI/display/Card.js";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { DoctorCapacity } from "./DoctorCapacity";
+
+
 import DoctorsCountCard from "./DoctorsCountCard";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { FormAction } from "../Form/Utils.js";
@@ -47,6 +53,9 @@ import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
+import CoverImageEditModal from "./CoverImageEditModal";
+import useAuthUser from "../../Common/hooks/useAuthUser.js";
+
 
 import { navigate } from "raviger";
 import useAppHistory from "../../Common/hooks/useAppHistory";
@@ -135,16 +144,17 @@ const facilityCreateReducer = (state = initialState, action: FormAction) => {
   }
 };
 
+
+
 export const FacilityCreate = (props: FacilityProps) => {
+  const { facilityId } = props;
   const { t } = useTranslation();
   const { gov_data_api_key, kasp_string, kasp_enabled } = useConfig();
-  const { facilityId } = props;
-
   const [state, dispatch] = useAutoSaveReducer<FacilityForm>(
     facilityCreateReducer,
     initialState
   );
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading1, setIsLoading1] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [createdFacilityId, setCreatedFacilityId] = useState("");
   const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
@@ -158,7 +168,55 @@ export const FacilityCreate = (props: FacilityProps) => {
   const { goBack } = useAppHistory();
   const headerText = !facilityId ? "Create Facility" : "Update Facility";
   const buttonText = !facilityId ? "Save Facility" : "Update Facility";
+  const [imageKey, setImageKey] = useState(Date.now());
+  const [editCoverImage, setEditCoverImage] = useState(false);
+  const authUser = useAuthUser();
+  useMessageListener((data) => console.log(data));
 
+  const {
+    data: facilityData,
+    loading: isLoading,
+    refetch: facilityFetch,
+  } = useQuery(routes.getPermittedFacility, {
+    pathParams: {
+      id: facilityId || "",
+    },
+    onResponse: ({ res }) => {
+      if (!res?.ok) {
+        navigate("/not-found");
+      }
+    },
+  });
+
+  const hasCoverImage = !!facilityData?.read_cover_image_url;
+
+  const StaffUserTypeIndex = USER_TYPES.findIndex((type) => type === "Staff");
+  const hasPermissionToEditCoverImage =
+    !(authUser.user_type as string).includes("ReadOnly") &&
+    USER_TYPES.findIndex((type) => type == authUser.user_type) >=
+    StaffUserTypeIndex;
+  // const hasPermissionToDeleteFacility =
+  //   authUser.user_type === "DistrictAdmin" ||
+  //   authUser.user_type === "StateAdmin";
+
+  const editCoverImageTooltip = hasPermissionToEditCoverImage && (
+    <div
+      id="facility-coverimage"
+      className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center bg-black text-sm text-gray-300 opacity-0 transition-[opacity] hover:opacity-60 md:h-[88px]"
+    >
+      <CareIcon icon="l-pen" className="text-lg" />
+      <span className="mt-2">{`${hasCoverImage ? "Edit" : "Upload"}`}</span>
+    </div>
+  );
+
+
+  const CoverImage = () => (
+    <img
+      src={`${facilityData?.read_cover_image_url}?imgKey=${imageKey}`}
+      alt={facilityData?.name}
+      className="h-full w-full object-cover"
+    />
+  );
   const {
     data: districtData,
     refetch: districtFetch,
@@ -201,8 +259,8 @@ export const FacilityCreate = (props: FacilityProps) => {
           currentStep === 2
             ? "current"
             : currentStep > 2
-            ? "complete"
-            : "upcoming",
+              ? "complete"
+              : "upcoming",
         disabled: createdFacilityId == "",
       },
       {
@@ -234,7 +292,7 @@ export const FacilityCreate = (props: FacilityProps) => {
     prefetch: !!facilityId,
     onResponse: ({ res, data }) => {
       if (facilityId) {
-        setIsLoading(true);
+        setIsLoading1(true);
         if (res?.ok && data) {
           const formData = {
             facility_type: data.facility_type ? data.facility_type : "",
@@ -272,7 +330,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         } else {
           navigate(`/facility/${facilityId}`);
         }
-        setIsLoading(false);
+        setIsLoading1(false);
       }
     },
   });
@@ -432,7 +490,7 @@ export const FacilityCreate = (props: FacilityProps) => {
     const validated = validateForm();
     console.log(state.form);
     if (validated) {
-      setIsLoading(true);
+      setIsLoading1(true);
       const data: FacilityRequest = {
         facility_type: state.form.facility_type,
         name: state.form.name,
@@ -476,14 +534,14 @@ export const FacilityCreate = (props: FacilityProps) => {
 
       const { res, data: requestData } = facilityId
         ? await request(routes.updateFacility, {
-            body: data,
-            pathParams: {
-              id: facilityId,
-            },
-          })
+          body: data,
+          pathParams: {
+            id: facilityId,
+          },
+        })
         : await request(routes.createFacility, {
-            body: data,
-          });
+          body: data,
+        });
 
       if (res?.ok && requestData) {
         const id = requestData.id;
@@ -501,7 +559,7 @@ export const FacilityCreate = (props: FacilityProps) => {
           navigate(`/facility/${facilityId}`);
         }
       }
-      setIsLoading(false);
+      setIsLoading1(false);
     }
   };
 
@@ -827,6 +885,63 @@ export const FacilityCreate = (props: FacilityProps) => {
                     required
                     types={["mobile", "landline"]}
                   />
+                  <p>Upload Cover Image</p>
+                  <CoverImageEditModal
+                    open={editCoverImage}
+                    onSave={() =>
+                      facilityData?.read_cover_image_url
+                        ? setImageKey(Date.now())
+                        : facilityFetch()
+                    }
+                    onClose={() => setEditCoverImage(false)}
+                    onDelete={() => facilityFetch()}
+                    facility={facilityData ?? ({} as FacilityModel)}
+                  />
+                  {hasCoverImage ? (
+                    <div
+                      className={
+                        "group relative h-48 w-full text-clip rounded-t bg-gray-200 opacity-100 transition-all duration-200 ease-in-out md:h-0 md:opacity-0"
+                      }
+                    >
+                      <CoverImage />
+                      {editCoverImageTooltip}
+                    </div>
+                  ) : (
+                    <div
+                      className={`group relative z-0 flex w-full shrink-0 items-center justify-center self-stretch bg-gray-300 md:hidden ${hasPermissionToEditCoverImage && "cursor-pointer"
+                        }`}
+                      onClick={() =>
+                        hasPermissionToEditCoverImage && setEditCoverImage(true)
+                      }
+                    >
+                      <CareIcon
+                        icon="l-hospital"
+                        className="block p-10 text-4xl text-gray-500"
+                        aria-hidden="true"
+                      />
+                      {editCoverImageTooltip}
+                    </div>
+                  )}
+                  {/* <div className="items-center justify-center">Upload Cover Image</div> */}
+                  <div
+                    className={`group relative hidden h-[88px] w-[88px] text-clip rounded transition-all duration-200 ease-in-out md:flex ${hasPermissionToEditCoverImage && "cursor-pointer"
+                      }`}
+                    onClick={() =>
+                      hasPermissionToEditCoverImage && setEditCoverImage(true)
+                    }
+                  >
+                      <div className="flex h-[88px] w-full items-center justify-center bg-gray-200 font-medium text-gray-700" >
+                        <svg
+                          className="h-8 w-8 fill-current text-gray-500"
+                          viewBox="0 0 40 32"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path d="M18.5 6C18.5 5.4475 18.95 5 19.5 5H20.5C21.05 5 21.5 5.4475 21.5 6V7.5H23C23.55 7.5 24 7.95 24 8.5V9.5C24 10.05 23.55 10.5 23 10.5H21.5V12C21.5 12.55 21.05 13 20.5 13H19.5C18.95 13 18.5 12.55 18.5 12V10.5H17C16.45 10.5 16 10.05 16 9.5V8.5C16 7.95 16.45 7.5 17 7.5H18.5V6ZM25.5 0C27.9875 0 30 2.015 30 4.5V5H35.5C37.9875 5 40 7.0125 40 9.5V27.5C40 29.9875 37.9875 32 35.5 32H4.49875C2.01188 32 0 29.9875 0 27.5V9.5C0 7.0125 2.015 5 4.5 5H10V4.5C10 2.015 12.0125 0 14.5 0H25.5ZM30 8V29H35.5C36.3312 29 37 28.3313 37 27.5V21H33.5C32.6688 21 32 20.3313 32 19.5C32 18.6688 32.6688 18 33.5 18H37V15H33.5C32.6688 15 32 14.3313 32 13.5C32 12.6688 32.6688 12 33.5 12H37V9.5C37 8.66875 36.3312 8 35.5 8H30ZM3 9.5V12H6.5C7.33125 12 8 12.6688 8 13.5C8 14.3313 7.33125 15 6.5 15H3V18H6.5C7.33125 18 8 18.6688 8 19.5C8 20.3313 7.33125 21 6.5 21H3V27.5C3 28.3313 3.67125 29 4.49875 29H10V8H4.5C3.67188 8 3 8.66875 3 9.5ZM13 29H17V25C17 23.3438 18.3438 22 20 22C21.6562 22 23 23.3438 23 25V29H27V4.5C27 3.67188 26.3312 3 25.5 3H14.5C13.6688 3 13 3.67188 13 4.5V29Z" />
+                        </svg>
+                      </div>
+                   
+                    {editCoverImageTooltip}
+                  </div>
                   <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 md:col-span-2 xl:grid-cols-4">
                     <TextFormField
                       {...field("oxygen_capacity")}

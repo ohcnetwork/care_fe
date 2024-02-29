@@ -60,6 +60,19 @@ class FacilityPage {
   fillPhoneNumber(phoneNumber: string) {
     cy.get("#phone_number").type(phoneNumber);
   }
+  clickCoverImage() {
+    cy.get("#facility-coverimage").click({ force: true });
+  }
+
+  verifyUploadButtonVisible() {
+    cy.get("#upload-cover-image").should("be.visible");
+  }
+
+  uploadCoverImage(fileName) {
+    cy.get("#upload-cover-image")
+      .selectFile(`cypress/fixtures/${fileName}`, { force: true })
+      .wait(100); // Adjust the wait time as needed
+  }
 
   submitForm() {
     cy.get("button#submit").click();
