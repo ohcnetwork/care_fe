@@ -89,7 +89,7 @@ type FacilityForm = {
 };
 
 const initForm: FacilityForm = {
-  facility_type: "Private Hospital",
+  facility_type: "Primary Health Centres",
   name: "",
   state: 0,
   district: 0,
