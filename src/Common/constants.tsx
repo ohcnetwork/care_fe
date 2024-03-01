@@ -690,18 +690,18 @@ export const MOTOR_RESPONSE_SCALE = [
   { value: 1, text: "No Response" },
 ];
 export const CONSULTATION_TABS: Array<OptionsType> = [
-  { id: 1, text: "UPDATES", desc: "Updates" },
+  { id: 1, text: "UPDATES", desc: "Overview" },
   { id: 13, text: "FEED", desc: "Feed" },
-  { id: 2, text: "SUMMARY", desc: "Summary" },
+  { id: 2, text: "SUMMARY", desc: "Vitals" },
+  { id: 6, text: "ABG", desc: "ABG" },
   { id: 3, text: "MEDICINES", desc: "Medicines" },
   { id: 4, text: "FILES", desc: "Files" },
   { id: 5, text: "INVESTIGATIONS", desc: "Investigations" },
-  { id: 6, text: "ABG", desc: "ABG" },
-  { id: 7, text: "NURSING", desc: "Nursing" },
-  { id: 8, text: "NEUROLOGICAL_MONITORING", desc: "Neurological Monitoring" },
-  { id: 9, text: "VENTILATOR", desc: "Respiratory Support" },
+  { id: 8, text: "NEUROLOGICAL_MONITORING", desc: "Neuro" },
+  { id: 9, text: "VENTILATOR", desc: "Ventilation" },
   { id: 10, text: "NUTRITION", desc: "Nutrition" },
   { id: 11, text: "PRESSURE_SORE", desc: "Pressure Sore" },
+  { id: 7, text: "NURSING", desc: "Nursing" },
   { id: 12, text: "DIALYSIS", desc: "Dialysis" },
 ];
 
@@ -1123,7 +1123,7 @@ export const IN_LANDLINE_AREA_CODES = [
   "251",
   "253",
   "257",
-  "260",
+  -"260",
   "261",
   "265",
   "343",
