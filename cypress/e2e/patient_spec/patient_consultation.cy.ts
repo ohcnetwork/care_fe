@@ -175,7 +175,7 @@ describe("Patient Consultation in multiple combination", () => {
       "Outpatient/Emergency Room"
     );
     // Asymptomatic
-    patientConsultationPage.selectSymptoms("ASYMPTOMATIC");
+    cy.clickAndSelectOption("#symptoms", "ASYMPTOMATIC");
     // CRITICAL category
     patientConsultationPage.selectPatientCategory("Critical");
     patientConsultationPage.selectPatientSuggestion("Declare Death");
@@ -233,7 +233,7 @@ describe("Patient Consultation in multiple combination", () => {
     );
     patientConsultationPage.selectPatientWard("Dummy Location 1");
     // Asymptomatic
-    patientConsultationPage.selectSymptoms("ASYMPTOMATIC");
+    cy.clickAndSelectOption("#symptoms", "ASYMPTOMATIC");
     // Abnormal category
     patientConsultationPage.selectPatientCategory("Abnormal");
     patientConsultationPage.selectPatientSuggestion("Domiciliary Care");
