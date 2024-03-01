@@ -566,11 +566,6 @@ export const NOTIFICATION_EVENTS: NotificationEvent[] = [
     icon: "l-edit",
   },
   {
-    id: "PATIENT_DELETED",
-    text: "Patient Deleted",
-    icon: "l-user-minus",
-  },
-  {
     id: "PATIENT_CONSULTATION_CREATED",
     text: "Patient Consultation Created",
     icon: "l-heart",
@@ -579,11 +574,6 @@ export const NOTIFICATION_EVENTS: NotificationEvent[] = [
     id: "PATIENT_CONSULTATION_UPDATED",
     text: "Patient Consultation Updated",
     icon: "l-heart-medical",
-  },
-  {
-    id: "PATIENT_CONSULTATION_DELETED",
-    text: "Patient Consultation Deleted",
-    icon: "l-heartbeat",
   },
   {
     id: "INVESTIGATION_SESSION_CREATED",
