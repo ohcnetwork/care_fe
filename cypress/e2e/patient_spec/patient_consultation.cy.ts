@@ -59,7 +59,7 @@ describe("Patient Consultation in multiple combination", () => {
     patientConsultationPage.selectConsultationStatus(
       "Outpatient/Emergency Room"
     );
-    patientConsultationPage.selectSymptoms("ASYMPTOMATIC");
+    cy.clickAndSelectOption("#symptoms", "ASYMPTOMATIC");
     patientConsultationPage.typePatientIllnessHistory(patientIllnessHistory);
     patientConsultationPage.typePatientExaminationHistory(
       patientExaminationHistory
