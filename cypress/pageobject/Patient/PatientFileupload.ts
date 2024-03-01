@@ -52,6 +52,9 @@ export class PatientFileUploadPage {
     cy.get("#archived-files").click();
     cy.get("button").contains("MORE DETAILS").click().scrollIntoView();
     cy.get("#archive-file-name").should("contain.text", fileName);
+    cy.get("#archive-file-reason").then(($reason) => {
+      expect($reason.text().split(":")[1]).to.contain("Cypress File Archive");
+    });
   }
 
   verifyFileEditOption(status: boolean) {

@@ -45,9 +45,7 @@ describe("Patient Details", () => {
       .getTime()
       .toString()
       .slice(9)}`;
-    cy.get("#consultation_audio_file")
-      .clear()
-      .type(`Cypress Audio ${fileName}`);
+    cy.get("#consultation_audio_file").clear().type(fileName);
     patientFileUploadPage.clickUploadAudioFile();
 
     // Verify the audio file is uploaded
@@ -73,16 +71,15 @@ describe("Patient Details", () => {
       .getTime()
       .toString()
       .slice(9)}`;
-    cy.get("#consultation_file").clear();
-    cy.get("#consultation_file").type(oldFileName);
+    cy.get("#consultation_file").clear().type(oldFileName);
     patientFileUploadPage.clickUploadFile();
 
     // Verify the file is uploaded
     cy.verifyNotification("File Uploaded Successfully");
     cy.get("#file-name").should("contain.text", oldFileName);
-    patientFileUploadPage.verifyFileEditOption(true);
 
     // Edit the file name
+    patientFileUploadPage.verifyFileEditOption(true);
     const newFileName = `Cypress File ${new Date()
       .getTime()
       .toString()

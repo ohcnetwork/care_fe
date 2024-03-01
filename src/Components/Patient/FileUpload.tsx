@@ -1373,7 +1373,7 @@ export const FileUpload = (props: FileUploadProps) => {
               <b id="archive-file-name">{modalDetails?.name}</b> file is
               archived.
             </div>
-            <div className="text-md text-center">
+            <div id="archive-file-reason" className="text-md text-center">
               <b>Reason:</b> {modalDetails?.reason}
             </div>
             <div className="text-md text-center">
