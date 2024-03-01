@@ -84,7 +84,6 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
           : "bg-white hover:border-primary-500"
       } mt-4 block cursor-pointer rounded-lg border bg-white p-4 text-black shadow`}
     >
-      <div>test card this</div>
       <div
         onClick={(_e) =>
           navigate(
@@ -139,7 +138,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
           </div>
         </div>
       </div>
-      <div className="m-2 mt-4 flex flex-col justify-between gap-4 md:flex-row">
+      <div className="m-2 mt-4 flex flex-col justify-between md:flex-row lg:gap-4">
         <div className="flex flex-col justify-between gap-4 md:flex-row">
           <div>
             <div className="mb-2 text-sm text-gray-700">
@@ -157,16 +156,17 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          <div className="flex flex-col items-center justify-end text-sm text-gray-700 md:flex-row">
-            Created:{" "}
+          <div className="flex flex-col flex-nowrap items-center justify-end text-sm text-gray-700 md:flex-col md:items-start md:justify-start lg:flex-row lg:items-center">
+            <div className=" font-medium text-black">Created: </div>
+
             <RelativeDateUserMention
               actionDate={itemData.created_date}
               user={itemData.created_by}
               tooltipPosition="left"
             />
           </div>
-          <div className="flex flex-col items-center justify-end text-sm text-gray-700 md:flex-row">
-            Last Modified:{" "}
+          <div className="flex flex-col items-center justify-end text-sm text-gray-700 md:flex-col md:items-start lg:flex-row lg:items-center">
+            <div className=" font-medium text-black">Last Modified: </div>
             <RelativeDateUserMention
               actionDate={itemData.modified_date}
               user={itemData.last_edited_by}

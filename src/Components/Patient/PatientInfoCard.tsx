@@ -154,7 +154,10 @@ export default function PatientInfoCard(props: {
       )}
 
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        <div className="col-span-2 flex w-full flex-col bg-white px-4 pt-2 lg:flex-row xl:min-w-fit">
+        <div
+          className="col-span-2 flex w-full flex-col bg-white px-4 pt-2 lg:flex-row xl:min-w-fit"
+          id="patient-infobadges"
+        >
           {/* Can support for patient picture in the future */}
           <div className="flex justify-evenly lg:justify-normal">
             <div className="flex flex-col items-start lg:items-center">
@@ -263,7 +266,10 @@ export default function PatientInfoCard(props: {
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2 text-sm sm:flex-row">
-                <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-gray-900 sm:flex-row sm:text-sm lg:justify-normal">
+                <div
+                  className="flex flex-wrap items-center justify-center gap-2 text-sm text-gray-900 sm:flex-row sm:text-sm lg:justify-normal"
+                  id="patient-consultationbadges"
+                >
                   {consultation?.patient_no && (
                     <span className="flex capitalize">
                       <span className="items-stretch justify-center whitespace-nowrap rounded border border-green-400 bg-green-100 px-3 py-0.5 text-sm font-medium text-green-800">
@@ -411,7 +417,10 @@ export default function PatientInfoCard(props: {
                         (diagnosis) => diagnosis.is_principal
                       );
                       return principal_diagnosis ? (
-                        <div className="mt-1 flex flex-col sm:flex-row">
+                        <div
+                          className="mt-1 flex flex-col sm:flex-row"
+                          id="principal-diagnosis"
+                        >
                           <div className="mr-1 text-sm font-semibold">
                             Principal Diagnosis:
                           </div>
@@ -430,7 +439,7 @@ export default function PatientInfoCard(props: {
                   : null}
                 {(consultation?.treating_physician_object ||
                   consultation?.deprecated_verified_by) && (
-                  <div className="text-sm">
+                  <div className="text-sm" id="treating-physician">
                     <span className="font-semibold leading-relaxed">
                       Treating Physician:{" "}
                     </span>

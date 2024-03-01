@@ -138,6 +138,7 @@ export default function PrintDeathReport(props: { id: string }) {
     <div className="my-4">
       <div className="my-4 flex justify-end ">
         <button
+          id="print-deathreport"
           onClick={(_) => window.print()}
           className="btn btn-primary mr-2"
         >
