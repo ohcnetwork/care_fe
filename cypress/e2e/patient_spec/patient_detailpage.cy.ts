@@ -62,6 +62,7 @@ describe("Patient Details", () => {
   it("User-level Based Permission for File Modification", () => {
     // Login as Nurse 1
     loginPage.login("dummynurse1", "Coronasafe@123");
+    cy.reload();
     patientPage.visitPatient("Dummy Patient 5");
     patientFileUploadPage.visitPatientDetailsPage();
 
