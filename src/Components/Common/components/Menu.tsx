@@ -52,7 +52,7 @@ export default function DropdownMenu({
         </Menu.Button>
         <DropdownTransition>
           <Menu.Items
-            className={`absolute right-0 z-10 mt-2 min-w-full origin-top-right rounded-lg bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none sm:min-w-[250px] md:w-max ${props.itemClassName}`}
+            className={`absolute right-[-8rem]  z-10 ml-[400px] mt-2 min-w-max origin-top-right rounded-lg bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none sm:right-0 sm:min-w-[250px] md:right-0 md:w-max ${props.itemClassName}`}
           >
             <>{props.children}</>
           </Menu.Items>
