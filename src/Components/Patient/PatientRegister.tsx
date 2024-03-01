@@ -9,19 +9,6 @@ import {
   VACCINES,
 } from "../../Common/constants";
 import {
-  HCXActions,
-  createPatient,
-  externalResult,
-  getAnyFacility,
-  getDistrictByState,
-  getLocalbodyByDistrict,
-  getPatient,
-  getStates,
-  getWardByLocalBody,
-  searchPatient,
-  updatePatient,
-} from "../../Redux/actions";
-import {
   dateQueryString,
   getPincodeDetails,
   includesIgnoreCase,
@@ -67,10 +54,12 @@ import { debounce } from "lodash-es";
 
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
 import { validatePincode } from "../../Common/validation";
 import { FormContextValue } from "../Form/FormContext.js";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
+import useQuery from "../../Utils/request/useQuery.js";
+import routes from "../../Redux/api.js";
+import request from "../../Utils/request/request.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -184,7 +173,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const authUser = useAuthUser();
   const { goBack } = useAppHistory();
   const { gov_data_api_key, enable_hcx, enable_abdm } = useConfig();
-  const dispatchAction: any = useDispatch();
   const { facilityId, id } = props;
   const [state, dispatch] = useReducer(patientFormReducer, initialState);
   const [showAlertMessage, setAlertMessage] = useState({
@@ -202,11 +190,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   });
   const [careExtId, setCareExtId] = useState("");
   const [formField, setFormField] = useState<any>();
-  const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
   const [isWardLoading, setIsWardLoading] = useState(false);
-  const [states, setStates] = useState<any[]>([]);
   const [districts, setDistricts] = useState<any[]>([]);
   const [localBody, setLocalBody] = useState<any[]>([]);
   const [ward, setWard] = useState<any[]>([]);
@@ -215,7 +201,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     transfer?: boolean;
     patientList: Array<DupPatientModel>;
   }>({ patientList: [] });
-  const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const [{ extId }, setQuery] = useQueryParams();
   const [showLinkAbhaNumberModal, setShowLinkAbhaNumberModal] = useState(false);
@@ -236,50 +221,47 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const headerText = !id ? "Add Details of Patient" : "Update Patient Details";
   const buttonText = !id ? "Add Patient" : "Save Details";
 
-  const fetchDistricts = useCallback(
-    async (id: number) => {
-      if (id > 0) {
-        setIsDistrictLoading(true);
-        const districtList = await dispatchAction(getDistrictByState({ id }));
-        if (districtList) {
-          setDistricts(districtList.data);
-        }
-        setIsDistrictLoading(false);
-        return districtList ? [...districtList.data] : [];
+  const fetchDistricts = useCallback(async (id: number) => {
+    if (id > 0) {
+      setIsDistrictLoading(true);
+      const { res, data } = await request(routes.getDistrictByState, {
+        pathParams: { id },
+      });
+      if (res?.ok && data) {
+        setDistricts(data);
       }
-    },
-    [dispatchAction]
-  );
+      setIsDistrictLoading(false);
+      return data ? [...data] : [];
+    }
+  }, []);
 
-  const fetchLocalBody = useCallback(
-    async (id: string) => {
-      if (Number(id) > 0) {
-        setIsLocalbodyLoading(true);
-        const localBodyList = await dispatchAction(
-          getLocalbodyByDistrict({ id })
-        );
-        setIsLocalbodyLoading(false);
-        setLocalBody(localBodyList.data);
-      } else {
-        setLocalBody([]);
-      }
-    },
-    [dispatchAction]
-  );
+  const fetchLocalBody = useCallback(async (id: string) => {
+    if (Number(id) > 0) {
+      setIsLocalbodyLoading(true);
+      const { data } = await request(routes.getLocalbodyByDistrict, {
+        pathParams: { id },
+      });
+      setIsLocalbodyLoading(false);
+      setLocalBody(data || []);
+    } else {
+      setLocalBody([]);
+    }
+  }, []);
 
-  const fetchWards = useCallback(
-    async (id: string) => {
-      if (Number(id) > 0) {
-        setIsWardLoading(true);
-        const wardList = await dispatchAction(getWardByLocalBody({ id }));
-        setIsWardLoading(false);
-        setWard(wardList.data.results);
-      } else {
-        setWard([]);
+  const fetchWards = useCallback(async (id: string) => {
+    if (Number(id) > 0) {
+      setIsWardLoading(true);
+      const { data } = await request(routes.getWardByLocalBody, {
+        pathParams: { id },
+      });
+      setIsWardLoading(false);
+      if (data) {
+        setWard(data.results);
       }
-    },
-    [dispatchAction]
-  );
+    } else {
+      setWard([]);
+    }
+  }, []);
 
   const parseGenderFromExt = (gender: any, defaultValue: any) => {
     switch (gender.toLowerCase()) {
@@ -297,97 +279,95 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const fetchExtResultData = async (e: any, field: any) => {
     if (e) e.preventDefault();
     if (!careExtId) return;
-    const res = await dispatchAction(externalResult({ id: careExtId }));
+    const { res, data } = await request(routes.externalResult, {
+      pathParams: { id: careExtId },
+    });
 
-    if (res?.data) {
+    if (res?.ok && data) {
       field.onChange({
         name: "name",
-        value: res.data.name ? res.data.name : state.form.name,
+        value: data.name ? data.name : state.form.name,
       });
       field.onChange({
         name: "address",
-        value: res.data.address ? res.data.address : state.form.address,
+        value: data.address ? data.address : state.form.address,
       });
       field.onChange({
         name: "permanent_address",
-        value: res.data.permanent_address
-          ? res.data.permanent_address
+        value: data.permanent_address
+          ? data.permanent_address
           : state.form.permanent_address,
       });
       field.onChange({
         name: "gender",
-        value: res.data.gender
-          ? parseGenderFromExt(res.data.gender, state.form.gender)
+        value: data.gender
+          ? parseGenderFromExt(data.gender, state.form.gender)
           : state.form.gender,
       });
       field.onChange({
         name: "test_id",
-        value: res.data.test_id ? res.data.test_id : state.form.test_id,
+        value: data.test_id ? data.test_id : state.form.test_id,
       });
       field.onChange({
         name: "srf_id",
-        value: res.data.srf_id ? res.data.srf_id : state.form.srf_id,
+        value: data.srf_id ? data.srf_id : state.form.srf_id,
       });
       field.onChange({
         name: "state",
-        value: res.data.district_object
-          ? res.data.district_object.state
+        value: data.district_object
+          ? data.district_object.state
           : state.form.state,
       });
       field.onChange({
         name: "district",
-        value: res.data.district ? res.data.district : state.form.district,
+        value: data.district ? data.district : state.form.district,
       });
       field.onChange({
         name: "local_body",
-        value: res.data.local_body
-          ? res.data.local_body
-          : state.form.local_body,
+        value: data.local_body ? data.local_body : state.form.local_body,
       });
       field.onChange({
         name: "ward",
-        value: res.data.ward ? res.data.ward : state.form.ward,
+        value: data.ward ? data.ward : state.form.ward,
       });
       field.onChange({
         name: "village",
-        value: res.data.village ? res.data.village : state.form.village,
+        value: data.village ? data.village : state.form.village,
       });
       field.onChange({
         name: "disease_status",
-        value: res.data.result
-          ? res.data.result.toUpperCase()
+        value: data.result
+          ? data.result.toUpperCase()
           : state.form.disease_status,
       });
       field.onChange({
         name: "test_type",
-        value: res.data.test_type
-          ? res.data.test_type.toUpperCase()
+        value: data.test_type
+          ? data.test_type.toUpperCase()
           : state.form.test_type,
       });
       field.onChange({
         name: "date_of_test",
-        value: res.data.sample_collection_date
-          ? res.data.sample_collection_date
+        value: data.sample_collection_date
+          ? data.sample_collection_date
           : state.form.date_of_test,
       });
       field.onChange({
         name: "date_of_result",
-        value: res.data.result_date
-          ? res.data.result_date
-          : state.form.date_of_result,
+        value: data.result_date ? data.result_date : state.form.date_of_result,
       });
       field.onChange({
         name: "phone_number",
-        value: res.data.mobile_number
-          ? "+91" + res.data.mobile_number
+        value: data.mobile_number
+          ? "+91" + data.mobile_number
           : state.form.phone_number,
       });
 
       Promise.all([
-        fetchDistricts(res.data.district_object.state),
-        fetchLocalBody(res.data.district),
-        fetchWards(res.data.local_body),
-        duplicateCheck(res.data.mobile_number),
+        fetchDistricts(data.district_object.state),
+        fetchLocalBody(String(data.district)),
+        fetchWards(String(data.local_body)), // Convert data.local_body to a string
+        duplicateCheck(data.mobile_number),
       ]);
       setShowImport({
         show: false,
@@ -399,93 +379,93 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatchAction(getPatient({ id }));
+      const { res, data } = await request(routes.getPatient, {
+        pathParams: { id: id ? id : 0 },
+      });
       if (!status.aborted) {
-        if (res?.data) {
-          setFacilityName(res.data.facility_object.name);
-          setPatientName(res.data.name);
-          console.log(res.data);
+        if (res?.ok && data) {
+          setPatientName(data.name || "");
           const formData = {
-            ...res.data,
-            health_id_number: res.data.abha_number_object?.abha_number || "",
-            health_id: res.data.abha_number_object?.health_id || "",
-            nationality: res.data.nationality ? res.data.nationality : "India",
-            gender: res.data.gender ? res.data.gender : "",
-            cluster_name: res.data.cluster_name ? res.data.cluster_name : "",
-            state: res.data.state ? res.data.state : "",
-            district: res.data.district ? res.data.district : "",
-            blood_group: res.data.blood_group
-              ? res.data.blood_group === "UNKNOWN"
+            ...data,
+            health_id_number: data.abha_number_object?.abha_number || "",
+            health_id: data.abha_number_object?.health_id || "",
+            nationality: data.nationality ? data.nationality : "India",
+            gender: data.gender ? data.gender : undefined,
+            cluster_name: data.cluster_name ? data.cluster_name : "",
+            state: data.state ? data.state : "",
+            district: data.district ? data.district : "",
+            blood_group: data.blood_group
+              ? data.blood_group === "UNKNOWN"
                 ? "UNK"
-                : res.data.blood_group
+                : data.blood_group
               : "",
-            local_body: res.data.local_body ? res.data.local_body : "",
-            ward: res.data.ward_object ? res.data.ward_object.id : undefined,
-            village: res.data.village ? res.data.village : "",
+            local_body: data.local_body ? data.local_body : "",
+            ward: data.ward_object ? data.ward_object.id : undefined,
+            village: data.village ? data.village : "",
             medical_history: [],
-            is_antenatal: String(!!res.data.is_antenatal),
-            allergies: res.data.allergies ? res.data.allergies : "",
-            pincode: res.data.pincode ? res.data.pincode : "",
-            ongoing_medication: res.data.ongoing_medication
-              ? res.data.ongoing_medication
+            is_antenatal: String(!!data.is_antenatal),
+            allergies: data.allergies ? data.allergies : "",
+            pincode: data.pincode ? data.pincode : "",
+            ongoing_medication: data.ongoing_medication
+              ? data.ongoing_medication
               : "",
 
-            is_declared_positive: res.data.is_declared_positive
-              ? String(res.data.is_declared_positive)
+            is_declared_positive: data.is_declared_positive
+              ? String(data.is_declared_positive)
               : "false",
-            designation_of_health_care_worker: res.data
-              .designation_of_health_care_worker
-              ? res.data.designation_of_health_care_worker
-              : "",
-            instituion_of_health_care_worker: res.data
-              .instituion_of_health_care_worker
-              ? res.data.instituion_of_health_care_worker
-              : "",
+            designation_of_health_care_worker:
+              data.designation_of_health_care_worker
+                ? data.designation_of_health_care_worker
+                : "",
+            instituion_of_health_care_worker:
+              data.instituion_of_health_care_worker
+                ? data.instituion_of_health_care_worker
+                : "",
 
-            number_of_primary_contacts: res.data.number_of_primary_contacts
-              ? res.data.number_of_primary_contacts
+            number_of_primary_contacts: data.number_of_primary_contacts
+              ? data.number_of_primary_contacts
               : "",
-            number_of_secondary_contacts: res.data.number_of_secondary_contacts
-              ? res.data.number_of_secondary_contacts
+            number_of_secondary_contacts: data.number_of_secondary_contacts
+              ? data.number_of_secondary_contacts
               : "",
-            contact_with_confirmed_carrier: res.data
-              .contact_with_confirmed_carrier
-              ? String(res.data.contact_with_confirmed_carrier)
+            contact_with_confirmed_carrier: data.contact_with_confirmed_carrier
+              ? String(data.contact_with_confirmed_carrier)
               : "false",
-            contact_with_suspected_carrier: res.data
-              .contact_with_suspected_carrier
-              ? String(res.data.contact_with_suspected_carrier)
+            contact_with_suspected_carrier: data.contact_with_suspected_carrier
+              ? String(data.contact_with_suspected_carrier)
               : "false",
-            is_vaccinated: String(res.data.is_vaccinated),
-            number_of_doses: res.data.number_of_doses
-              ? String(res.data.number_of_doses)
+            is_vaccinated: String(data.is_vaccinated),
+            number_of_doses: data.number_of_doses
+              ? String(data.number_of_doses)
               : "0",
-            vaccine_name: res.data.vaccine_name ? res.data.vaccine_name : null,
-            last_vaccinated_date: res.data.last_vaccinated_date
-              ? res.data.last_vaccinated_date
+            vaccine_name: data.vaccine_name ? data.vaccine_name : null,
+            last_vaccinated_date: data.last_vaccinated_date
+              ? data.last_vaccinated_date
               : null,
           };
-
-          formData.sameAddress =
-            res.data.address === res.data.permanent_address;
-          res.data.medical_history.forEach((i: any) => {
-            const medicalHistory = MEDICAL_HISTORY_CHOICES.find(
-              (j: any) =>
-                String(j.text).toLowerCase() === String(i.disease).toLowerCase()
-            );
-            if (medicalHistory) {
-              formData.medical_history.push(medicalHistory.id);
-              formData[`medical_history_${medicalHistory.id}`] = i.details;
+          formData.sameAddress = data.address === data.permanent_address;
+          (data.medical_history ? data.medical_history : []).forEach(
+            (i: any) => {
+              const medicalHistory = MEDICAL_HISTORY_CHOICES.find(
+                (j) =>
+                  String(j.text).toLowerCase() ===
+                  String(i.disease).toLowerCase()
+              );
+              if (medicalHistory) {
+                formData.medical_history.push(Number(medicalHistory.id));
+                formData[`medical_history_${String(medicalHistory.id)}`] =
+                  i.details;
+              }
             }
-          });
+          );
           dispatch({
             type: "set_form",
             form: formData,
           });
           Promise.all([
-            fetchDistricts(res.data.state),
-            fetchLocalBody(res.data.district),
-            fetchWards(res.data.local_body),
+            fetchDistricts(data.state ?? 0),
+            fetchLocalBody(data.district ? String(data.district) : ""),
+            fetchWards(data.local_body ? String(data.local_body) : ""), // Convert data.local_body to string
           ]);
         } else {
           goBack();
@@ -493,37 +473,25 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         setIsLoading(false);
       }
     },
-    [dispatchAction, fetchDistricts, fetchLocalBody, fetchWards, id]
+    [id]
   );
 
-  useEffect(() => {
-    const fetchPatientInsuranceDetails = async () => {
-      if (!id) {
-        setInsuranceDetails([]);
-        return;
-      }
-
-      const res = await dispatchAction(
-        HCXActions.policies.list({ patient: id })
-      );
-      if (res?.data) {
-        setInsuranceDetails(res.data.results);
-      }
-    };
-
-    fetchPatientInsuranceDetails();
-  }, [dispatchAction, id]);
-
-  const fetchStates = useCallback(
-    async (status: statusType) => {
-      setIsStateLoading(true);
-      const statesRes = await dispatchAction(getStates());
-      if (!status.aborted && statesRes.data.results) {
-        setStates(statesRes.data.results);
-      }
-      setIsStateLoading(false);
+  useQuery(routes.listHCXPolicies, {
+    query: {
+      patient: id,
     },
-    [dispatchAction]
+    prefetch: !!id,
+    onResponse: ({ data }) => {
+      if (data) {
+        setInsuranceDetails(data.results);
+      } else {
+        setInsuranceDetails([]);
+      }
+    },
+  });
+
+  const { data: stateData, loading: isStateLoading } = useQuery(
+    routes.statesList
   );
 
   useAbortableEffect(
@@ -531,24 +499,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       if (id) {
         fetchData(status);
       }
-      fetchStates(status);
     },
     [dispatch, fetchData]
   );
 
-  useEffect(() => {
-    async function fetchFacilityName() {
-      if (facilityId && !id) {
-        const res = await dispatchAction(getAnyFacility(facilityId));
-
-        setFacilityName(res?.data?.name || "");
-      } else {
-        setFacilityName("");
-      }
-    }
-
-    fetchFacilityName();
-  }, [dispatchAction, facilityId]);
+  const { data: facilityObject } = useQuery(routes.getAnyFacility, {
+    pathParams: { id: facilityId },
+    prefetch: !!facilityId,
+  });
 
   const validateForm = (form: any) => {
     const errors: Partial<Record<keyof any, FieldError>> = {};
@@ -701,7 +659,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     const pincodeDetails = await getPincodeDetails(e.value, gov_data_api_key);
     if (!pincodeDetails) return;
 
-    const matchedState = states?.find((state) => {
+    const matchedState = stateData?.results?.find((state) => {
       return includesIgnoreCase(state.name, pincodeDetails.statename);
     });
     if (!matchedState) return;
@@ -715,9 +673,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     if (!matchedDistrict) return;
 
     setField({ name: "state", value: matchedState.id });
-    setField({ name: "district", value: matchedDistrict.id });
+    setField({ name: "district", value: matchedDistrict.id.toString() }); // Convert matchedDistrict.id to string
 
-    fetchLocalBody(matchedDistrict.id);
+    fetchLocalBody(matchedDistrict.id.toString()); // Convert matchedDistrict.id to string
     setShowAutoFilledPincode(true);
     setTimeout(() => {
       setShowAutoFilledPincode(false);
@@ -834,37 +792,45 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       medical_history,
       is_active: true,
     };
-    const res = await dispatchAction(
-      id
-        ? updatePatient(data, { id })
-        : createPatient({ ...data, facility: facilityId })
-    );
-    if (res && res.data && res.status != 400) {
+    const { res, data: requestData } = id
+      ? await request(routes.updatePatient, {
+          pathParams: { id },
+          body: data,
+        })
+      : await request(routes.addPatient, {
+          body: { ...data, facility: facilityId },
+        });
+    if (res?.ok && requestData) {
       await Promise.all(
         insuranceDetails.map(async (obj) => {
           const policy = {
             ...obj,
-            patient: res.data.id,
+            patient: requestData.id,
             insurer_id: obj.insurer_id || undefined,
             insurer_name: obj.insurer_name || undefined,
           };
-          const policyRes = await (policy.id
-            ? dispatchAction(
-                HCXActions.policies.update(policy.id, policy as HCXPolicyModel)
-              )
-            : dispatchAction(
-                HCXActions.policies.create(policy as HCXPolicyModel)
-              ));
+          const { data: policyData } = policy.id
+            ? await request(routes.updateHCXPolicy, {
+                pathParams: { external_id: policy.id },
+                body: policy,
+              })
+            : await request(routes.createHCXPolicy, {
+                body: policy,
+              });
 
-          if (enable_hcx) {
-            const eligibilityCheckRes = await dispatchAction(
-              HCXActions.checkEligibility(policyRes.data.id)
-            );
-            if (eligibilityCheckRes.status === 200) {
-              Notification.Success({ msg: "Checking Policy Eligibility..." });
-            } else {
-              Notification.Error({ msg: "Something Went Wrong..." });
-            }
+          if (enable_hcx && policyData?.id) {
+            await request(routes.hcxCheckEligibility, {
+              body: { policy: policyData?.id },
+              onResponse: ({ res }) => {
+                if (res?.ok) {
+                  Notification.Success({
+                    msg: "Checking Policy Eligibility...",
+                  });
+                } else {
+                  Notification.Error({ msg: "Something Went Wrong..." });
+                }
+              },
+            });
           }
         })
       );
@@ -873,10 +839,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       if (!id) {
         setAlertMessage({
           show: true,
-          message: `Please note down patient name: ${formData.name} and patient ID: ${res.data.id}`,
+          message: `Please note down patient name: ${formData.name} and patient ID: ${requestData.id}`,
           title: "Patient Added Successfully",
         });
-        navigate(`/facility/${facilityId}/patient/${res.data.id}/consultation`);
+        navigate(
+          `/facility/${facilityId}/patient/${requestData.id}/consultation`
+        );
       } else {
         Notification.Success({
           msg: "Patient updated successfully",
@@ -970,33 +938,32 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     });
   };
 
-  const duplicateCheck = useCallback(
-    debounce(async (phoneNo: string) => {
-      if (
-        phoneNo &&
-        PhoneNumberValidator()(parsePhoneNumber(phoneNo) ?? "") === undefined
-      ) {
-        const query = {
-          phone_number: parsePhoneNumber(phoneNo),
-        };
-        const res = await dispatchAction(searchPatient(query));
-        if (res?.data?.results) {
-          const duplicateList = !id
-            ? res.data.results
-            : res.data.results.filter(
-                (item: DupPatientModel) => item.patient_id !== id
-              );
-          if (duplicateList.length) {
-            setStatusDialog({
-              show: true,
-              patientList: duplicateList,
-            });
-          }
+  const duplicateCheck = debounce(async (phoneNo: string) => {
+    if (
+      phoneNo &&
+      PhoneNumberValidator()(parsePhoneNumber(phoneNo) ?? "") === undefined
+    ) {
+      const query = {
+        phone_number: parsePhoneNumber(phoneNo),
+      };
+      const { res, data } = await request(routes.searchPatient, {
+        query,
+      });
+      if (res?.ok && data?.results) {
+        const duplicateList = !id
+          ? data.results
+          : data.results.filter(
+              (item: DupPatientModel) => item.patient_id !== id
+            );
+        if (duplicateList.length) {
+          setStatusDialog({
+            show: true,
+            patientList: duplicateList,
+          });
         }
       }
-    }, 300),
-    []
-  );
+    }
+  }, 300);
 
   const handleDialogClose = (action: string) => {
     if (action === "transfer") {
@@ -1080,7 +1047,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           }
         }}
         crumbsReplacements={{
-          [facilityId]: { name: facilityName },
+          [facilityId]: { name: facilityObject?.name },
           [id ?? "????"]: { name: patientName },
         }}
       />
@@ -1424,7 +1391,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     label="State"
                                     required
                                     placeholder="Choose State"
-                                    options={states}
+                                    options={stateData ? stateData.results : []}
                                     optionLabel={(o: any) => o.name}
                                     optionValue={(o: any) => o.id}
                                     onChange={(e: any) => {
