@@ -19,112 +19,102 @@ describe("Patient Details", () => {
     cy.awaitUrl("/patients");
   });
 
-  it("Record an audio and save it", () => {
+  it("Upload the file and download it", () => {
+    // Upload the file
     patientPage.visitPatient("Dummy Patient 3");
     patientFileUploadPage.visitPatientDetailsPage();
-    patientFileUploadPage.recordAudio();
-    patientFileUploadPage.clickUploadAudioFile();
-    patientFileUploadPage.verifySuccessNotification(
-      "File Uploaded Successfully"
-    );
-  });
-
-  it("Upload a file", () => {
-    patientPage.visitPatient("Dummy Patient 4");
-    patientFileUploadPage.visitPatientDetailsPage();
     patientFileUploadPage.uploadFile();
+    const fileName = `Cypress File ${new Date().getTime().toString().slice(9)}`;
+    cy.get("#consultation_file").clear().type(fileName);
     patientFileUploadPage.clickUploadFile();
-    patientFileUploadPage.verifySuccessNotification(
-      "File Uploaded Successfully"
-    );
+
+    // Verify the file is uploaded
+    cy.verifyNotification("File Uploaded Successfully");
+    cy.get("#file-name").should("contain.text", fileName);
+
+    // Download the file
+    patientFileUploadPage.downloadFile();
   });
 
-  it("Edit file name", () => {
+  it("Record an audio and archive it", () => {
+    // Record an audio
     patientPage.visitPatient("Dummy Patient 4");
     patientFileUploadPage.visitPatientDetailsPage();
-    patientFileUploadPage.verifyFileEditOption(true);
-    patientFileUploadPage.editFileName(
-      `Cypress File ${new Date().getTime().toString().slice(9)}`
-    );
-    patientFileUploadPage.clickSaveFileName();
-    patientFileUploadPage.verifySuccessNotification(
-      "File name changed successfully"
-    );
-  });
+    patientFileUploadPage.recordAudio();
+    const fileName = `Cypress Audio ${new Date()
+      .getTime()
+      .toString()
+      .slice(9)}`;
+    cy.get("#consultation_audio_file")
+      .clear()
+      .type(`Cypress Audio ${fileName}`);
+    patientFileUploadPage.clickUploadAudioFile();
 
-  it("Archive file and verify it", () => {
-    patientPage.visitPatient("Dummy Patient 4");
-    patientFileUploadPage.visitPatientDetailsPage();
+    // Verify the audio file is uploaded
+    cy.verifyNotification("File Uploaded Successfully");
+    cy.get("#audio-file-name").should("contain.text", fileName);
+
+    // Archive the audio file
     patientFileUploadPage.archiveFile();
     patientFileUploadPage.clickSaveArchiveFile();
-    patientFileUploadPage.verifySuccessNotification(
-      "File archived successfully"
-    );
-    patientFileUploadPage.verifyArchiveFile();
+    cy.verifyNotification("File archived successfully");
+    patientFileUploadPage.verifyArchiveFile(fileName);
   });
 
-  it("Verify the uploaded file can be edited by author", () => {
+  it("User-level Based Permission for File Modification", () => {
+    // Login as Nurse 1
     loginPage.login("dummynurse1", "Coronasafe@123");
     patientPage.visitPatient("Dummy Patient 5");
     patientFileUploadPage.visitPatientDetailsPage();
+
+    // Upload the file
     patientFileUploadPage.uploadFile();
+    const oldFileName = `Cypress File ${new Date()
+      .getTime()
+      .toString()
+      .slice(9)}`;
+    cy.get("#consultation_file").clear();
+    cy.get("#consultation_file").type(oldFileName);
     patientFileUploadPage.clickUploadFile();
-    patientFileUploadPage.verifySuccessNotification(
-      "File Uploaded Successfully"
-    );
-    patientFileUploadPage.verifyFileEditOption(true);
-    patientFileUploadPage.editFileName(
-      `Cypress File ${new Date().getTime().toString().slice(9)}`
-    );
-    patientFileUploadPage.clickSaveFileName();
-    patientFileUploadPage.verifySuccessNotification(
-      "File name changed successfully"
-    );
-  });
 
-  it("Verify the uploaded file cannot be edited by other users below district admin", () => {
+    // Verify the file is uploaded
+    cy.verifyNotification("File Uploaded Successfully");
+    cy.get("#file-name").should("contain.text", oldFileName);
+    patientFileUploadPage.verifyFileEditOption(true);
+
+    // Edit the file name
+    const newFileName = `Cypress File ${new Date()
+      .getTime()
+      .toString()
+      .slice(9)}`;
+    patientFileUploadPage.editFileName(newFileName);
+    patientFileUploadPage.clickSaveFileName();
+
+    // Verify the file name is changed
+    cy.verifyNotification("File name changed successfully");
+    cy.get("#file-name").should("contain.text", newFileName);
+
+    // Login as Nurse 2
     loginPage.login("dummynurse2", "Coronasafe@123");
-    patientPage.visitPatient("Dummy Patient 5");
-    patientFileUploadPage.visitPatientDetailsPage();
+    cy.reload();
+
+    // Verify the file edit option is not available
+    cy.get("#file-name").should("contain.text", newFileName);
     patientFileUploadPage.verifyFileEditOption(false);
-  });
 
-  it("Verify the uploaded file can be edited by district admin and above", () => {
+    // Login as District Admin
     loginPage.loginAsDisctrictAdmin();
-    patientPage.visitPatient("Dummy Patient 5");
-    patientFileUploadPage.visitPatientDetailsPage();
+    cy.reload();
+
+    // Verify the file edit option is available
+    cy.get("#file-name").should("contain.text", newFileName);
     patientFileUploadPage.verifyFileEditOption(true);
-    patientFileUploadPage.editFileName(
-      `Cypress File ${new Date().getTime().toString().slice(9)}`
-    );
+    patientFileUploadPage.editFileName(oldFileName);
     patientFileUploadPage.clickSaveFileName();
-    patientFileUploadPage.verifySuccessNotification(
-      "File name changed successfully"
-    );
-  });
 
-  it("Verify that file download is possible for author", () => {
-    loginPage.login("dummynurse1", "Coronasafe@123");
-    patientPage.visitPatient("Dummy Patient 5");
-    patientFileUploadPage.visitPatientDetailsPage();
-    patientFileUploadPage.verifyFileDownloadOption(true);
-    patientFileUploadPage.downloadFile();
-  });
-
-  it("Verify that file download is possible for users below district admin", () => {
-    loginPage.login("dummynurse2", "Coronasafe@123");
-    patientPage.visitPatient("Dummy Patient 5");
-    patientFileUploadPage.visitPatientDetailsPage();
-    patientFileUploadPage.verifyFileDownloadOption(true);
-    patientFileUploadPage.downloadFile();
-  });
-
-  it("Verify that file download is possible for district admin and above", () => {
-    loginPage.loginAsDisctrictAdmin();
-    patientPage.visitPatient("Dummy Patient 5");
-    patientFileUploadPage.visitPatientDetailsPage();
-    patientFileUploadPage.verifyFileDownloadOption(true);
-    patientFileUploadPage.downloadFile();
+    // Verify the file name is changed
+    cy.verifyNotification("File name changed successfully");
+    cy.get("#file-name").should("contain.text", oldFileName);
   });
 
   afterEach(() => {

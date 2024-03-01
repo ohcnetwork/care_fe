@@ -535,7 +535,10 @@ export const FileUpload = (props: FileUploadProps) => {
             <>
               {item.file_category === "AUDIO" ? (
                 <div className="flex flex-wrap justify-between space-y-2">
-                  <div className="flex flex-wrap justify-between space-x-2">
+                  <div
+                    id="audio-file-div"
+                    className="flex flex-wrap justify-between space-x-2"
+                  >
                     <div>
                       <CareIcon
                         icon="l-music"
@@ -543,7 +546,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       />
                     </div>
                     <div>
-                      <div>
+                      <div id="audio-file-name">
                         <span className="font-semibold leading-relaxed">
                           File Name:{" "}
                         </span>{" "}
@@ -591,6 +594,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       Object.keys(url).length > 0 && (
                         <div className="flex flex-wrap">
                           <a
+                            id="audio-download-file"
                             href={url[item.id]}
                             download={item.name}
                             className="Button button-size-default button-shape-square button-primary-default m-1 flex w-full justify-center gap-2 outline-offset-1 hover:text-white focus:bg-primary-500 sm:w-auto"
@@ -1366,7 +1370,8 @@ export const FileUpload = (props: FileUploadProps) => {
         <div className="flex flex-col">
           <div>
             <div className="text-md m-2 text-center">
-              <b>{modalDetails?.name}</b> file is archived.
+              <b id="archive-file-name">{modalDetails?.name}</b> file is
+              archived.
             </div>
             <div className="text-md text-center">
               <b>Reason:</b> {modalDetails?.reason}
