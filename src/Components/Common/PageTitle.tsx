@@ -3,11 +3,11 @@ import Breadcrumbs from "./Breadcrumbs";
 import PageHeadTitle from "./PageHeadTitle";
 import { classNames } from "../../Utils/utils";
 import useAppHistory from "../../Common/hooks/useAppHistory";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
 
 export interface PageTitleProps {
   title: string;
-  icon?: any;
+  icon?: IconName;
   hideBack?: boolean;
   backUrl?: string;
   className?: string;
