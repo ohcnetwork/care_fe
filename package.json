@@ -171,6 +171,7 @@
       "last 1 safari version"
     ]
   },
+  
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
       "prettier --write --ignore-unknown",

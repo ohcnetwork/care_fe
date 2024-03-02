@@ -127,6 +127,7 @@ export const FacilityHome = (props: any) => {
       crumbsReplacements={{ [facilityId]: { name: facilityData?.name } }}
       focusOnLoad={true}
       backUrl="/facility"
+      
     >
       <ConfirmDialog
         title={`Delete ${facilityData?.name}`}

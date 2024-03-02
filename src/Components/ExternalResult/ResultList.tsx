@@ -234,73 +234,68 @@ export default function ResultList() {
         title="External Results"
         hideBack
         breadcrumbs={false}
-        options={
-          <ExportMenu
-            label="Import/Export"
-            exportItems={[
-              ...(authUser.user_type !== "Nurse" &&
-              authUser.user_type !== "Staff"
-                ? [
-                    {
-                      label: "Import Results",
-                      action: () => navigate("/external_results/upload"),
-                      options: {
-                        icon: <CareIcon className="care-l-import" />,
-                      },
-                    },
-                  ]
-                : []),
-              {
-                label: "Export Results",
-                action: () =>
-                  externalResultList(
-                    { ...qParams, csv: true },
-                    "externalResultList"
-                  ),
-                filePrefix: "external_results",
-                options: {
-                  icon: <CareIcon className="care-l-export" />,
-                },
-              },
-            ]}
-          />
+        componentRight={
+          <span className="ml-2 flex items-center rounded-lg bg-primary-300 px-4  text-lg font-bold">
+            {data?.count || 0}
+          </span>
         }
-      >
-        <div className="relative my-4 grid-cols-1 gap-5 px-2 sm:grid-cols-3 md:px-0 lg:grid">
-          <CountBlock
-            text="Total Results"
-            count={data?.count || 0}
-            loading={loading}
-            icon="l-clipboard-notes"
-            className="flex-1"
-          />
-          <div className="mt-2">
-            <SearchInput
+        options={
+          <div className="flex w-full flex-col gap-2 items-center justify-between lg:flex-row lg:items-center">
+          <SearchInput
               name="name"
               onChange={(e) => updateQuery({ [e.name]: e.value })}
               value={qParams.name}
               placeholder="Search by name"
             />
-            <div className="w-full max-w-sm">
+        
+              <div className="lg:mt-4">
               <PhoneNumberFormField
-                label="Search by number"
                 name="mobile_number"
-                labelClassName="my-2 text-sm font-medium"
                 value={phone_number}
                 onChange={(e) => setPhoneNum(e.value)}
                 error={phoneNumberError}
                 placeholder="Search by Phone Number"
-                types={["mobile", "landline"]}
+                types={[]}
               />
-            </div>
-          </div>
-          <div className="ml-auto mt-4 flex flex-col justify-evenly gap-4 lg:mt-0">
-            <AdvancedFilterButton
-              onClick={() => advancedFilter.setShow(true)}
+              </div>
+         
+
+              <AdvancedFilterButton
+                onClick={() => advancedFilter.setShow(true)}
+              />
+           
+            <ExportMenu
+              label="Import/Export"
+              exportItems={[
+                ...(authUser.user_type !== "Nurse" &&
+                authUser.user_type !== "Staff"
+                  ? [
+                      {
+                        label: "Import Results",
+                        action: () => navigate("/external_results/upload"),
+                        options: {
+                          icon: <CareIcon className="care-l-import" />,
+                        },
+                      },
+                    ]
+                  : []),
+                {
+                  label: "Export Results",
+                  action: () =>
+                    externalResultList(
+                      { ...qParams, csv: true },
+                      "externalResultList"
+                    ),
+                  filePrefix: "external_results",
+                  options: {
+                    icon: <CareIcon className="care-l-export" />,
+                  },
+                },
+              ]}
             />
           </div>
-        </div>
-
+        }
+      >
         <div className="mb-4 flex flex-wrap items-center gap-2">
           {qParams.local_bodies &&
             dataList.lsgList.map((x) => lsgWardBadge("LSG", x, "local_bodies"))}

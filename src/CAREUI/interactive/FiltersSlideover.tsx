@@ -58,12 +58,12 @@ export const AdvancedFilterButton = ({ onClick }: { onClick: () => void }) => {
     <ButtonV2
       ghost
       border
-      className="w-full bg-white sm:w-auto"
+      className="w-full bg-primary-100 sm:w-auto"
       onClick={onClick}
       id="advanced-filter"
     >
       <CareIcon className="care-l-filter" />
-      <span className="py-0.5">{t("advanced_filters")}</span>
+      
     </ButtonV2>
   );
 };

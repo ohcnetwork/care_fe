@@ -728,27 +728,18 @@ export const PatientManager = () => {
       title={t("Patients")}
       hideBack={true}
       breadcrumbs={false}
+      componentRight={
+        <span className="ml-2 flex items-center rounded-lg bg-primary-300 px-4  text-lg font-bold">
+          {data?.count || 0}
+        </span>
+      }
       options={
         <div className="flex w-full flex-col items-center justify-between lg:flex-row">
-          <div className="mb-2 flex w-full flex-col items-center lg:mb-0 lg:w-fit lg:flex-row lg:gap-5">
-            <ButtonV2
-              id="add-patient-details"
-              onClick={() => {
-                if (qParams.facility)
-                  navigate(`/facility/${qParams.facility}/patient`);
-                else if (permittedFacilities?.results.length === 1)
-                  navigate(
-                    `/facility/${permittedFacilities?.results[0].id}/patient`
-                  );
-                else setShowDialog(true);
-              }}
-              className="w-full lg:w-fit"
-            >
-              <CareIcon className="care-l-plus text-lg" />
-              <p id="add-patient-div" className="lg:my-[2px]">
-                Add Patient Details
-              </p>
-            </ButtonV2>
+          <div className="w-full">
+            <SearchInput
+              placeholder="Enter patient name"
+              {...queryField("name")}
+            />
           </div>
           <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
             <SwitchTabs
@@ -798,7 +789,7 @@ export const PatientManager = () => {
                       });
                     }, 500);
                   }}
-                  className="mr-5 w-full lg:w-fit"
+                  className=" w-full lg:w-fit"
                 >
                   <CareIcon className="care-l-export" />
                   <span className="lg:my-[3px]">Export</span>
@@ -830,6 +821,26 @@ export const PatientManager = () => {
                 </span>
               )}
             </div>
+            <div className="mb-2 flex w-full flex-col items-center lg:mb-0 lg:w-fit lg:flex-row lg:gap-5">
+              <ButtonV2
+                id="add-patient-details"
+                onClick={() => {
+                  if (qParams.facility)
+                    navigate(`/facility/${qParams.facility}/patient`);
+                  else if (permittedFacilities?.results.length === 1)
+                    navigate(
+                      `/facility/${permittedFacilities?.results[0].id}/patient`
+                    );
+                  else setShowDialog(true);
+                }}
+                className="w-full lg:w-fit"
+              >
+                <CareIcon className="care-l-plus text-lg" />
+                <p id="add-patient-div" className="lg:my-[2px]">
+                  Add Patient Details
+                </p>
+              </ButtonV2>
+            </div>
           </div>
         </div>
       }
@@ -846,25 +857,9 @@ export const PatientManager = () => {
       />
 
       <div className="manualGrid my-4 mb-[-12px] mt-5 grid-cols-1 gap-3 px-2 sm:grid-cols-4 md:px-0">
-        <div className="mt-2 flex h-full flex-col gap-3 xl:flex-row">
-          <div className="flex-1">
-            <CountBlock
-              text="Total Patients"
-              count={data?.count || 0}
-              loading={isLoading}
-              icon="l-user-injured"
-              className="pb-12"
-            />
-          </div>
-        </div>
         <div className="col-span-3 w-full">
           <div className="col-span-2 mt-2">
             <div className="mt-1 md:flex md:gap-4">
-              <SearchInput
-                label="Search by Patient"
-                placeholder="Enter patient name"
-                {...queryField("name")}
-              />
               <SearchInput
                 label="Search by IP/OP Number"
                 placeholder="Enter IP/OP Number"

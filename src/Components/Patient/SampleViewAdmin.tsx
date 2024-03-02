@@ -301,33 +301,20 @@ export default function SampleViewAdmin() {
       hideBack={true}
       breadcrumbs={false}
       componentRight={
-        <ExportButton
-          action={() => downloadSampleTests({ ...qParams })}
-          parse={parseExportData}
-          filenamePrefix="samples"
-        />
+        <>
+          <span className="ml-2 flex items-center rounded-lg bg-primary-300 px-4  text-lg font-bold">
+            {sampeleData?.count || 0}
+          </span>
+          <ExportButton
+            action={() => downloadSampleTests({ ...qParams })}
+            parse={parseExportData}
+            filenamePrefix="samples"
+          />
+        </>
       }
-    >
-      {statusDialog.show && (
-        <UpdateStatusDialog
-          sample={statusDialog.sample}
-          handleOk={handleApproval}
-          handleCancel={dismissUpdateStatus}
-        />
-      )}
-      <div className="mt-5 gap-5 lg:grid lg:grid-cols-1">
-        <div className="flex flex-col justify-between gap-6 lg:flex-row">
-          <div className="w-full">
-            <CountBlock
-              text="Total Samples Taken"
-              count={sampeleData?.count || 0}
-              loading={isLoading}
-              icon="l-thermometer"
-              className="flex-1"
-            />
-          </div>
-
-          <div className="flex w-full flex-col gap-3">
+      options={
+        <div className="flex w-full flex-col items-center justify-between gap-2 lg:flex-row lg:items-center">
+          <div className="flex w-full flex-col gap-3  lg:flex-row">
             <SearchInput
               name="patient_name"
               value={qParams.patient_name}
@@ -342,10 +329,22 @@ export default function SampleViewAdmin() {
               secondary
             />
           </div>
-
+          <div className="flex flex-col justify-between gap-6 lg:flex-row">
           <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
           <SampleFilter {...advancedFilter} key={window.location.search} />
         </div>
+        </div>
+      }
+    >
+      {statusDialog.show && (
+        <UpdateStatusDialog
+          sample={statusDialog.sample}
+          handleOk={handleApproval}
+          handleCancel={dismissUpdateStatus}
+        />
+      )}
+      <div className=" gap-5 lg:grid lg:grid-cols-1">
+        
         <FilterBadges
           badges={({ badge, value }) => [
             badge("Patient Name", "patient_name"),

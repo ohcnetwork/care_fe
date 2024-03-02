@@ -155,51 +155,56 @@ export const HospitalList = () => {
       title={t("Facilities")}
       breadcrumbs={false}
       hideBack
-      options={
-        <ExportMenu
-          exportItems={[
-            {
-              label: "Facilities",
-              action: downloadFacility,
-              filePrefix: "facilities",
-            },
-            {
-              label: "Capacities",
-              action: downloadFacilityCapacity,
-              filePrefix: "capacities",
-            },
-            {
-              label: "Doctors",
-              action: downloadFacilityDoctors,
-              filePrefix: "doctors",
-            },
-            {
-              label: "Triages",
-              action: downloadFacilityTriage,
-              filePrefix: "triages",
-            },
-          ]}
-        />
+      componentRight={
+        <span className="ml-2 flex items-center rounded-lg bg-primary-300 px-4  text-lg font-bold">
+        {permittedData ? permittedData.count : 0}
+        </span>
       }
-    >
-      <div className="mt-4 gap-2 lg:flex">
-        <CountBlock
-          text="Total Facilities"
-          count={permittedData ? permittedData.count : 0}
-          loading={isLoading}
-          icon="l-hospital"
-          className="flex-1"
-        />
-        <div className="my-4 flex grow flex-col justify-between gap-2 sm:flex-row">
+      options={
+        <>
+           <div className="my-4  flex grow flex-col justify-between gap-2 sm:flex-row">
           <SearchInput
             name="search"
             value={qParams.search}
             onChange={(e) => updateQuery({ [e.name]: e.value })}
             placeholder={t("facility_search_placeholder")}
           />
-          <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
         </div>
-      </div>
+            <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
+              <AdvancedFilterButton
+                onClick={() => advancedFilter.setShow(true)}
+              />
+
+              <ExportMenu
+                exportItems={[
+                  {
+                    label: "Facilities",
+                    action: downloadFacility,
+                    filePrefix: "facilities",
+                  },
+                  {
+                    label: "Capacities",
+                    action: downloadFacilityCapacity,
+                    filePrefix: "capacities",
+                  },
+                  {
+                    label: "Doctors",
+                    action: downloadFacilityDoctors,
+                    filePrefix: "doctors",
+                  },
+                  {
+                    label: "Triages",
+                    action: downloadFacilityTriage,
+                    filePrefix: "triages",
+                  },
+                ]}
+              />
+            </div>
+          
+        </>
+      }
+    >
+    
 
       <FacilityFilter {...advancedFilter} key={window.location.search} />
       <FilterBadges
