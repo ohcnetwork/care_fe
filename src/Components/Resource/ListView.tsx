@@ -16,6 +16,7 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import Page from "../Common/components/Page";
 import SearchInput from "../Form/SearchInput";
+import CountBlock from "../../CAREUI/display/Count";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -168,6 +169,14 @@ export default function ListView() {
       breadcrumbs={false}
       options={
         <>
+          <CountBlock
+            title="User Management"
+            text="Total Users"
+            count={userListData?.count || 0}
+            loading={userListLoading || districtDataLoading}
+            icon="l-user-injured"
+            className="flex-1"
+          />
           <div className="md:px-4">
             <SearchInput
               name="title"

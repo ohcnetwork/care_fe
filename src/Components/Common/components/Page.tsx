@@ -32,12 +32,12 @@ export default function Page(props: PageProps) {
   if (!props.noImplicitPadding) {
     if (!props.hideBack || props.componentRight)
       padding = "md:px-6 px-3 py-3.5";
-    else padding = "px-6 py-5";
+    else padding = "px-6 py-3";
   }
 
   return (
     <div className={classNames(padding, props.className)} ref={props.ref}>
-      <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center md:gap-6">
+      <div className="flex flex-col gap-5 md:flex-row md:items-center md:gap-6">
         <PageTitle
           title={props.title}
           breadcrumbs={props.breadcrumbs}
@@ -49,6 +49,7 @@ export default function Page(props: PageProps) {
           focusOnLoad={props.focusOnLoad}
           onBackClick={props.onBackClick}
           isInsidePage={true}
+          icon={props.icon}
         />
         {props.options}
       </div>

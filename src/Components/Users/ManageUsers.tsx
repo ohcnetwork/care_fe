@@ -15,7 +15,7 @@ import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
 import UserDetails from "../Common/UserDetails";
 import UserDetailComponent from "../Common/UserDetailsComponet.js";
-import UserFilter from "./UserFilter";
+
 import {
   classNames,
   isUserOnline,
@@ -107,8 +107,8 @@ export default function ManageUsers() {
       className="w-full"
       onClick={() => navigate("/users/add")}
     >
-      <CareIcon icon="l-plus" className="text-lg" />
-      <p>Add New User</p>
+      <CareIcon icon="l-plus" className="my-[5px] text-lg" />
+      <p>Add New Users</p>
     </ButtonV2>
   );
 
@@ -440,7 +440,41 @@ export default function ManageUsers() {
   }
 
   return (
-    <Page title="User Management" hideBack={true} breadcrumbs={false}>
+    <Page
+      title="User Management"
+      icon="l-user-injured"
+      hideBack={true}
+      breadcrumbs={false}
+      options={
+        <>
+          <div className="mt-2 gap-3 lg:flex">
+            <CountBlock
+              text="Total Users"
+              count={userListData?.count || 0}
+              loading={userListLoading || districtDataLoading}
+              className="flex-1"
+            />
+            <div className="col-span-2  flex flex-col lg:flex-row  lg:px-3">
+              <div className="w-full">
+                <SearchInput
+                  id="search-by-username"
+                  name="username"
+                  onChange={(e) => updateQuery({ [e.name]: e.value })}
+                  value={qParams.username}
+                  placeholder="Search by username"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <AdvancedFilterButton
+                  onClick={() => advancedFilter.setShow(true)}
+                />
+                {userTypes.length > 0 && addUser}
+              </div>
+            </div>
+          </div>
+        </>
+      }
+    >
       {expandSkillList && (
         <SkillsSlideOver
           show={expandSkillList}
@@ -494,35 +528,6 @@ export default function ManageUsers() {
           </div>
         </div>
       </SlideOverCustom>
-
-      <div className="m-4 mt-5 grid grid-cols-1 sm:grid-cols-3 md:gap-5 md:px-2">
-        <CountBlock
-          text="Total Users"
-          count={userListData?.count || 0}
-          loading={userListLoading || districtDataLoading}
-          icon="l-user-injured"
-          className="flex-1"
-        />
-        <div className="col-span-2 my-2 flex flex-col justify-between space-y-3 lg:flex-row lg:space-x-4 lg:space-y-0 lg:px-3">
-          <div className="w-full">
-            <SearchInput
-              id="search-by-username"
-              name="username"
-              onChange={(e) => updateQuery({ [e.name]: e.value })}
-              value={qParams.username}
-              placeholder="Search by username"
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <AdvancedFilterButton
-              onClick={() => advancedFilter.setShow(true)}
-            />
-            {userTypes.length && addUser}
-          </div>
-
-          <UserFilter {...advancedFilter} key={window.location.search} />
-        </div>
-      </div>
 
       <div className="pb-2 pl-6">
         <FilterBadges

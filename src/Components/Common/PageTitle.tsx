@@ -7,6 +7,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 
 export interface PageTitleProps {
   title: string;
+  icon?: any;
   hideBack?: boolean;
   backUrl?: string;
   className?: string;
@@ -30,6 +31,7 @@ export interface PageTitleProps {
 
 export default function PageTitle({
   title,
+  icon,
   hideBack = false,
   backUrl,
   className = "",
@@ -59,6 +61,14 @@ export default function PageTitle({
       <PageHeadTitle title={title} />
       <div className={classNames("flex items-center", justifyContents)}>
         <div className="flex items-center">
+          {icon && ( // Check if icon prop is provided
+            <div className="flex items-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-100 text-xl">
+                <CareIcon icon={icon} className="text-primary-600" />
+              </div>
+            </div>
+          )}
+
           {!hideBack && (
             <button
               onClick={() => {
@@ -72,7 +82,7 @@ export default function PageTitle({
               />{" "}
             </button>
           )}
-          <h2 className="ml-0 text-2xl font-semibold leading-tight">{title}</h2>
+          <h2 className="ml-4 text-2xl font-semibold leading-tight">{title}</h2>
         </div>
         {componentRight}
       </div>

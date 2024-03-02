@@ -15,7 +15,6 @@ import { formatDateTime } from "../../Utils/utils";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import { ExportButton } from "../Common/Export";
-import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import Page from "../Common/components/Page";
@@ -299,7 +298,18 @@ export default function SampleViewAdmin() {
     <Page
       title="Sample Management System"
       hideBack={true}
+      icon="l-thermometer"
       breadcrumbs={false}
+      options={
+        <>
+          <div className="flex flex-col justify-between gap-6 lg:flex-row">
+            <AdvancedFilterButton
+              onClick={() => advancedFilter.setShow(true)}
+            />
+            <SampleFilter {...advancedFilter} key={window.location.search} />
+          </div>
+        </>
+      }
       componentRight={
         <ExportButton
           action={() => downloadSampleTests({ ...qParams })}
@@ -316,36 +326,22 @@ export default function SampleViewAdmin() {
         />
       )}
       <div className="mt-5 gap-5 lg:grid lg:grid-cols-1">
-        <div className="flex flex-col justify-between gap-6 lg:flex-row">
-          <div className="w-full">
-            <CountBlock
-              text="Total Samples Taken"
-              count={sampeleData?.count || 0}
-              loading={isLoading}
-              icon="l-thermometer"
-              className="flex-1"
-            />
-          </div>
-
-          <div className="flex w-full flex-col gap-3">
-            <SearchInput
-              name="patient_name"
-              value={qParams.patient_name}
-              onChange={(e) => updateQuery({ [e.name]: e.value })}
-              placeholder="Search patient"
-            />
-            <SearchInput
-              name="district_name"
-              value={qParams.district_name}
-              onChange={(e) => updateQuery({ [e.name]: e.value })}
-              placeholder="Search by district"
-              secondary
-            />
-          </div>
-
-          <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
-          <SampleFilter {...advancedFilter} key={window.location.search} />
+        <div className="flex w-full gap-3">
+          <SearchInput
+            name="patient_name"
+            value={qParams.patient_name}
+            onChange={(e) => updateQuery({ [e.name]: e.value })}
+            placeholder="Search patient"
+          />
+          <SearchInput
+            name="district_name"
+            value={qParams.district_name}
+            onChange={(e) => updateQuery({ [e.name]: e.value })}
+            placeholder="Search by district"
+            secondary
+          />
         </div>
+
         <FilterBadges
           badges={({ badge, value }) => [
             badge("Patient Name", "patient_name"),

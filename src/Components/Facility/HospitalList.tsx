@@ -154,53 +154,56 @@ export const HospitalList = () => {
     <Page
       title={t("Facilities")}
       breadcrumbs={false}
+      icon="l-hospital"
       hideBack
       options={
-        <ExportMenu
-          exportItems={[
-            {
-              label: "Facilities",
-              action: downloadFacility,
-              filePrefix: "facilities",
-            },
-            {
-              label: "Capacities",
-              action: downloadFacilityCapacity,
-              filePrefix: "capacities",
-            },
-            {
-              label: "Doctors",
-              action: downloadFacilityDoctors,
-              filePrefix: "doctors",
-            },
-            {
-              label: "Triages",
-              action: downloadFacilityTriage,
-              filePrefix: "triages",
-            },
-          ]}
-        />
+        <>
+          <div className="gap-2 lg:flex">
+            <CountBlock
+              text="Total Facilities"
+              count={permittedData ? permittedData.count : 0}
+              loading={isLoading}
+              className="flex-1"
+            />
+          </div>
+          <div className="my-4 flex grow flex-col gap-2 sm:flex-row">
+            <SearchInput
+              name="search"
+              value={qParams.search}
+              onChange={(e) => updateQuery({ [e.name]: e.value })}
+              placeholder={t("facility_search_placeholder")}
+            />
+            <AdvancedFilterButton
+              onClick={() => advancedFilter.setShow(true)}
+            />
+          </div>
+          <ExportMenu
+            exportItems={[
+              {
+                label: "Facilities",
+                action: downloadFacility,
+                filePrefix: "facilities",
+              },
+              {
+                label: "Capacities",
+                action: downloadFacilityCapacity,
+                filePrefix: "capacities",
+              },
+              {
+                label: "Doctors",
+                action: downloadFacilityDoctors,
+                filePrefix: "doctors",
+              },
+              {
+                label: "Triages",
+                action: downloadFacilityTriage,
+                filePrefix: "triages",
+              },
+            ]}
+          />
+        </>
       }
     >
-      <div className="mt-4 gap-2 lg:flex">
-        <CountBlock
-          text="Total Facilities"
-          count={permittedData ? permittedData.count : 0}
-          loading={isLoading}
-          icon="l-hospital"
-          className="flex-1"
-        />
-        <div className="my-4 flex grow flex-col justify-between gap-2 sm:flex-row">
-          <SearchInput
-            name="search"
-            value={qParams.search}
-            onChange={(e) => updateQuery({ [e.name]: e.value })}
-            placeholder={t("facility_search_placeholder")}
-          />
-          <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
-        </div>
-      </div>
-
       <FacilityFilter {...advancedFilter} key={window.location.search} />
       <FilterBadges
         badges={({ badge, value, kasp }) => [

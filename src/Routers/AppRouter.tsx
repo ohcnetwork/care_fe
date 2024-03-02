@@ -145,7 +145,7 @@ export default function AppRouter() {
             id="pages"
             className="flex-1 overflow-y-scroll pb-4 focus:outline-none md:py-0"
           >
-            <div className="max-w-8xl mx-auto p-3">{pages}</div>
+            <div className="max-w-8xl mx-auto ">{pages}</div>
           </main>
         </div>
       </div>

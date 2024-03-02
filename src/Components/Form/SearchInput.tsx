@@ -20,7 +20,7 @@ type SearchInputProps = TextFormFieldProps & {
 
 const SearchInput = ({
   debouncePeriod = 500,
-  className = "w-full md:max-w-sm",
+  className = "w-full md:w-96 lg:w-96 xl:w-[800px]",
   onChange,
   name = "search",
   ...props

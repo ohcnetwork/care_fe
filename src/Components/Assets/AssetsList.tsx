@@ -261,115 +261,124 @@ const AssetsList = () => {
       title="Assets"
       breadcrumbs={false}
       hideBack
+      icon="l-monitor-heart-rate"
       options={
         <>
-          {authorizedForImportExport && (
-            <div className="tooltip" data-testid="import-asset-button">
-              <ExportMenu
-                label={importAssetModalOpen ? "Importing..." : "Import/Export"}
-                exportItems={[
-                  {
-                    label: "Import Assets",
-                    options: {
-                      icon: (
-                        <CareIcon className="care-l-import import-assets-button" />
-                      ),
-                      onClick: () => setImportAssetModalOpen(true),
-                    },
-                  },
-                  {
-                    label: "Export Assets (JSON)",
-                    action: () =>
-                      authorizedForImportExport &&
-                      listAssets({
-                        ...qParams,
-                        json: true,
-                        limit: totalCount,
-                      }),
-                    type: "json",
-                    filePrefix: `assets_${facility?.name ?? "all"}`,
-                    options: {
-                      icon: <CareIcon className="care-l-export" />,
-                      disabled: totalCount === 0 || !authorizedForImportExport,
-                      id: "export-json-option",
-                    },
-                  },
-                  {
-                    label: "Export Assets (CSV)",
-                    action: () =>
-                      authorizedForImportExport &&
-                      listAssets({
-                        ...qParams,
-                        csv: true,
-                        limit: totalCount,
-                      }),
-                    type: "csv",
-                    filePrefix: `assets_${facility?.name ?? "all"}`,
-                    options: {
-                      icon: <CareIcon className="care-l-export" />,
-                      disabled: totalCount === 0 || !authorizedForImportExport,
-                      id: "export-csv-option",
-                    },
-                  },
-                ]}
+          <div className="mt-2 gap-3 lg:flex">
+            <CountBlock
+              // title="Assets"
+              text="Total Assets"
+              count={totalCount}
+              loading={loading}
+              // icon="l-monitor-heart-rate"
+              className="flex-1"
+            />
+            <div className="">
+              <SearchInput
+                name="search"
+                value={qParams.search}
+                onChange={(e) => updateQuery({ [e.name]: e.value })}
+                placeholder="Search by name/serial no./QR code ID"
               />
             </div>
-          )}
+            <div className="flex flex-col items-center justify-start gap-2 lg:ml-2">
+              <div className="flex w-full flex-col gap-2 md:flex-row lg:w-auto">
+                <div className="w-full ">
+                  <AdvancedFilterButton
+                    onClick={() => advancedFilter.setShow(true)}
+                  />
+                </div>
+                <ButtonV2
+                  className="w-full py-[12px]"
+                  onClick={() => setIsScannerActive(true)}
+                >
+                  <CareIcon icon="l-search" className="mr-1 text-base" /> Scan
+                  Asset QR
+                </ButtonV2>
+                <div
+                  className="flex w-full flex-col md:flex-row"
+                  data-testid="create-asset-buttom"
+                >
+                  <ButtonV2
+                    authorizeFor={NonReadOnlyUsers}
+                    className="inline-flex w-full items-center justify-center py-[12px]"
+                    onClick={() => {
+                      if (qParams.facility) {
+                        navigate(`/facility/${qParams.facility}/assets/new`);
+                      } else {
+                        setShowFacilityDialog(true);
+                      }
+                    }}
+                  >
+                    <CareIcon className="care-l-plus-circle text-lg" />
+                    <span>{t("create_asset")}</span>
+                  </ButtonV2>
+                </div>
+              </div>
+            </div>
+            {authorizedForImportExport && (
+              <div
+                className="tooltip p-[0.1rem]"
+                data-testid="import-asset-button"
+              >
+                <ExportMenu
+                  label={
+                    importAssetModalOpen ? "Importing..." : "Import/Export"
+                  }
+                  exportItems={[
+                    {
+                      label: "Import Assets",
+                      options: {
+                        icon: (
+                          <CareIcon className="care-l-import import-assets-button" />
+                        ),
+                        onClick: () => setImportAssetModalOpen(true),
+                      },
+                    },
+                    {
+                      label: "Export Assets (JSON)",
+                      action: () =>
+                        authorizedForImportExport &&
+                        listAssets({
+                          ...qParams,
+                          json: true,
+                          limit: totalCount,
+                        }),
+                      type: "json",
+                      filePrefix: `assets_${facility?.name ?? "all"}`,
+                      options: {
+                        icon: <CareIcon className="care-l-export" />,
+                        disabled:
+                          totalCount === 0 || !authorizedForImportExport,
+                        id: "export-json-option",
+                      },
+                    },
+                    {
+                      label: "Export Assets (CSV)",
+                      action: () =>
+                        authorizedForImportExport &&
+                        listAssets({
+                          ...qParams,
+                          csv: true,
+                          limit: totalCount,
+                        }),
+                      type: "csv",
+                      filePrefix: `assets_${facility?.name ?? "all"}`,
+                      options: {
+                        icon: <CareIcon className="care-l-export" />,
+                        disabled:
+                          totalCount === 0 || !authorizedForImportExport,
+                        id: "export-csv-option",
+                      },
+                    },
+                  ]}
+                />
+              </div>
+            )}
+          </div>
         </>
       }
     >
-      <div className="mt-5 gap-3 space-y-2 lg:flex">
-        <CountBlock
-          text="Total Assets"
-          count={totalCount}
-          loading={loading}
-          icon="l-monitor-heart-rate"
-          className="flex-1"
-        />
-        <div className="flex-1">
-          <SearchInput
-            name="search"
-            value={qParams.search}
-            onChange={(e) => updateQuery({ [e.name]: e.value })}
-            placeholder="Search by name/serial no./QR code ID"
-          />
-        </div>
-        <div className="flex flex-col items-start justify-start gap-2 lg:ml-2">
-          <div className="flex w-full flex-col gap-2 md:flex-row lg:w-auto">
-            <div className="w-full">
-              <AdvancedFilterButton
-                onClick={() => advancedFilter.setShow(true)}
-              />
-            </div>
-            <ButtonV2
-              className="w-full py-[11px]"
-              onClick={() => setIsScannerActive(true)}
-            >
-              <CareIcon icon="l-search" className="mr-1 text-base" /> Scan Asset
-              QR
-            </ButtonV2>
-          </div>
-          <div
-            className="flex w-full flex-col md:flex-row"
-            data-testid="create-asset-buttom"
-          >
-            <ButtonV2
-              authorizeFor={NonReadOnlyUsers}
-              className="inline-flex w-full items-center justify-center"
-              onClick={() => {
-                if (qParams.facility) {
-                  navigate(`/facility/${qParams.facility}/assets/new`);
-                } else {
-                  setShowFacilityDialog(true);
-                }
-              }}
-            >
-              <CareIcon className="care-l-plus-circle text-lg" />
-              <span>{t("create_asset")}</span>
-            </ButtonV2>
-          </div>
-        </div>
-      </div>
       <AssetFilter {...advancedFilter} key={window.location.search} />
       {isLoading ? (
         <Loading />
