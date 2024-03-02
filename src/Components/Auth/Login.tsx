@@ -277,10 +277,7 @@ export const Login = (props: { forgot?: boolean }) => {
             <div className="relative flex h-full w-full items-center">
               <div
                 className={
-                  "w-full transition-all " +
-                  (!forgotPassword
-                    ? "visible -translate-x-0 opacity-100"
-                    : "invisible -translate-x-5 opacity-0")
+                  "w-full transition-all " + (!forgotPassword ? "" : "hidden")
                 }
               >
                 <div className="mb-8 w-[300px] text-4xl font-black text-primary-600">
@@ -354,10 +351,7 @@ export const Login = (props: { forgot?: boolean }) => {
 
               <div
                 className={
-                  "absolute w-full transition-all " +
-                  (forgotPassword
-                    ? "visible translate-x-0 opacity-100"
-                    : "invisible translate-x-5 opacity-0")
+                  "w-full transition-all " + (forgotPassword ? "" : "hidden")
                 }
               >
                 <button
