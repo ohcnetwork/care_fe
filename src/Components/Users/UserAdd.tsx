@@ -41,6 +41,7 @@ import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import useQuery from "../../Utils/request/useQuery";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -266,6 +267,17 @@ export const UserAdd = (props: UserProps) => {
     },
   });
 
+  const { loading: isStateLoading } = useQuery(routes.statesList, {
+    onResponse: (result) => {
+      if (!result || !result.res || !result.data) return;
+      if (userIndex <= USER_TYPES.indexOf("StateAdmin")) {
+        setStates([authUser.state_object!]);
+      } else {
+        setStates(result.data.results);
+      }
+    },
+  });
+
   const { loading: isLocalbodyLoading } = useQuery(
     routes.getAllLocalBodyByDistrict,
     {
@@ -281,17 +293,6 @@ export const UserAdd = (props: UserProps) => {
       },
     }
   );
-
-  const { loading: isStateLoading } = useQuery(routes.statesList, {
-    onResponse: (result) => {
-      if (!result || !result.res || !result.data) return;
-      if (userIndex <= USER_TYPES.indexOf("StateAdmin")) {
-        setStates([authUser.state_object!]);
-      } else {
-        setStates(result.data.results);
-      }
-    },
-  });
 
   const handleDateChange = (e: FieldChangeEvent<Date>) => {
     if (dayjs(e.value).isValid()) {
@@ -583,10 +584,6 @@ export const UserAdd = (props: UserProps) => {
     }
   };
 
-  if (isLoading) {
-    return <Loading />;
-  }
-
   const field = (name: string) => {
     return {
       id: name,
@@ -597,14 +594,18 @@ export const UserAdd = (props: UserProps) => {
     };
   };
 
+  if (isLoading) {
+    return <Loading />;
+  }
+
   return (
     <Page
       title={headerText}
       options={
         <Link
-          href="https://school.coronasafe.network/targets/12953"
+          href="https://school.coronasafe.network/targets/12953 "
           className="inline-block rounded border border-gray-600 bg-gray-50 px-4 py-2 text-gray-600 transition hover:bg-gray-100"
-          target="_blank"
+          target="_blank "
         >
           <CareIcon icon="l-info-circle" className="text-lg" /> &nbsp;Need Help?
         </Link>
@@ -631,15 +632,26 @@ export const UserAdd = (props: UserProps) => {
                 showAll={false}
               />
             </div>
-            <SelectFormField
+
+            {/* <SelectFormField
               {...field("user_type")}
               required
               label="User Type"
               options={userTypes}
               optionLabel={(o) => o.role + (o.readOnly ? " (Read Only)" : "")}
               optionValue={(o) => o.id}
-            />
+            /> */}
 
+            <AutocompleteFormField
+              {...field("user_type")}
+              label="User Type"
+              placeholder="Search for a user type..."
+              // value={userTypes}
+              options={userTypes ?? []}
+              optionLabel={(o) => o.role + (o.readOnly ? " (Read Only)" : "")}
+              optionValue={(o) => o.id}
+              required
+            />
             {state.form.user_type === "Doctor" && (
               <>
                 <TextFormField
