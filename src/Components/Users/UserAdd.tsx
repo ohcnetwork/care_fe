@@ -327,7 +327,7 @@ export const UserAdd = (props: UserProps) => {
 
   const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
     setSelectedFacility(selected as FacilityModel[]);
-    const form = { ...state.form };
+    const form: any = { ...state.form };
     form.facilities = selected
       ? (selected as FacilityModel[]).map((i) => i.id ?? -1)
       : [];
