@@ -222,7 +222,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
     if (
       !showAllFacilityUsers.includes(authUser.user_type) &&
-      authUser.home_facility_object?.name
+      authUser.home_facility_object?.id !== facilityId
     ) {
       navigate("/facility");
     }

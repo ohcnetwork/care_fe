@@ -3,7 +3,6 @@ import AutoCompleteAsync from "../Form/AutoCompleteAsync";
 import { FacilityModel } from "../Facility/models";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
-import useAuthUser from "../../Common/hooks/useAuthUser";
 
 interface FacilitySelectProps {
   name: string;
@@ -17,7 +16,6 @@ interface FacilitySelectProps {
   showAll?: boolean;
   showNOptions?: number;
   freeText?: boolean;
-  homeFacility?: boolean;
   selected?: FacilityModel | FacilityModel[] | null;
   setSelected: (selected: FacilityModel | FacilityModel[] | null) => void;
 }
@@ -36,11 +34,8 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
     facilityType,
     district,
     freeText = false,
-    homeFacility = false,
     errors = "",
   } = props;
-  const authUser = useAuthUser();
-  const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
 
   const facilitySearch = useCallback(
     async (text: string) => {
@@ -49,20 +44,10 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
         offset: 0,
         search_text: text,
         all: searchAll,
-        name: "",
         facility_type: facilityType,
         exclude_user: exclude_user,
         district,
       };
-
-      if (
-        homeFacility &&
-        !showAllFacilityUsers.includes(authUser.user_type) &&
-        authUser.home_facility_object?.name
-      ) {
-        query["name"] = authUser.home_facility_object?.name;
-        query["limit"] = 1;
-      }
 
       const { data } = await request(
         showAll ? routes.getAllFacilities : routes.getPermittedFacilities,
