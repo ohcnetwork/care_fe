@@ -7,12 +7,9 @@ export class ManageUserPage {
     cy.get("#facilities").click();
   }
 
-  typeFacilityName(facilityName) {
-    cy.get("input[name='facility']").click().type(facilityName);
-  }
-
   selectFacilityFromDropdown(facilityName) {
-    cy.get("[role='option']").contains(facilityName).click();
+    cy.wait(2000);
+    cy.searchAndSelectOption("input[name='facility']", facilityName);
   }
 
   clickLinkFacility() {
@@ -36,7 +33,7 @@ export class ManageUserPage {
   }
 
   assertFacilityNotInDropdown(facilityName) {
-    this.typeFacilityName(facilityName);
+    cy.get("input[name='facility']").click().type(facilityName);
     cy.get("[role='option']").should("not.exist");
   }
 

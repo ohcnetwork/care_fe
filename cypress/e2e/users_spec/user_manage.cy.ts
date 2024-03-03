@@ -105,7 +105,6 @@ describe("Manage User", () => {
     manageUserPage.assertHomeFacility("No Home Facility");
     //  Link a new facility and ensure it is under linked facility - doctor username (1)
     manageUserPage.clickFacilitiesTab();
-    manageUserPage.typeFacilityName(facilitytolinkusername);
     manageUserPage.selectFacilityFromDropdown(facilitytolinkusername);
     manageUserPage.clickLinkFacility();
     manageUserPage.assertLinkedFacility(facilitytolinkusername);
@@ -117,7 +116,6 @@ describe("Manage User", () => {
     userPage.typeInSearchInput(usernametolinkfacilitydoc2);
     userPage.checkUsernameText(usernametolinkfacilitydoc2);
     manageUserPage.clickFacilitiesTab();
-    manageUserPage.typeFacilityName(facilitytolinkusername);
     manageUserPage.selectFacilityFromDropdown(facilitytolinkusername);
     manageUserPage.clickLinkFacility();
     manageUserPage.clickHomeFacilityIcon();
@@ -134,7 +132,6 @@ describe("Manage User", () => {
     userPage.typeInSearchInput(usernametolinkfacilitydoc3);
     userPage.checkUsernameText(usernametolinkfacilitydoc3);
     manageUserPage.clickFacilitiesTab();
-    manageUserPage.typeFacilityName(facilitytolinkusername);
     manageUserPage.selectFacilityFromDropdown(facilitytolinkusername);
     manageUserPage.clickLinkFacility();
     manageUserPage.clickUnlinkFacilityButton();
