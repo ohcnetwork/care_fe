@@ -15,7 +15,7 @@ describe("Manage User", () => {
   const userCreationPage = new UserCreationPage();
   const usernameforworkinghour = "devdistrictadmin";
   const usernamerealname = "Dummy Doctor";
-  const facilitytolinkusername = "Dummy Request Approving Center";
+  const facilitytolinkusername = "Dummy Shifting Center";
   const facilitytolinkskill = "Dummy Facility 40";
   const workinghour = "23";
   const linkedskill = "General Medicine";
@@ -38,7 +38,7 @@ describe("Manage User", () => {
     userPage.typeInSearchInput(usernameforworkinghour);
     userPage.checkUsernameText(usernameforworkinghour);
     manageUserPage.clicklinkedskillbutton();
-    manageUserPage.selectFacilityFromDropdown(linkedskill);
+    manageUserPage.selectSkillFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
     manageUserPage.clickCloseSlideOver();
     cy.wait(5000);
@@ -59,7 +59,7 @@ describe("Manage User", () => {
     userPage.typeInSearchInput(usernametolinkskill);
     userPage.checkUsernameText(usernametolinkskill);
     manageUserPage.clicklinkedskillbutton();
-    manageUserPage.selectFacilityFromDropdown(linkedskill);
+    manageUserPage.selectSkillFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
     manageUserPage.clickCloseSlideOver();
     cy.wait(5000); // temporary hack to fix the failure
@@ -67,7 +67,7 @@ describe("Manage User", () => {
     manageUserPage.assertSkillInAddedUserSkills(linkedskill);
     manageUserPage.clickUnlinkSkill();
     manageUserPage.clickSubmit();
-    manageUserPage.selectFacilityFromDropdown(linkedskill);
+    manageUserPage.selectSkillFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
     manageUserPage.clickCloseSlideOver();
     // verifying the doctor connect

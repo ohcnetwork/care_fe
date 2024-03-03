@@ -8,8 +8,11 @@ export class ManageUserPage {
   }
 
   selectFacilityFromDropdown(facilityName) {
-    cy.wait(2000);
     cy.searchAndSelectOption("input[name='facility']", facilityName);
+  }
+
+  selectSkillFromDropdown(skill) {
+    cy.searchAndSelectOption("input[name='skill']", skill);
   }
 
   clickLinkFacility() {
