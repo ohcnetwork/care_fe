@@ -126,10 +126,6 @@ export class ManageUserPage {
       .should("have.length", 1);
   }
 
-  typeSkill(skillName) {
-    cy.get("#select-skill").click().type(skillName);
-  }
-
   clickDoctorConnectButton() {
     cy.get("#doctor-connect-patient-button").click();
   }

@@ -38,7 +38,6 @@ describe("Manage User", () => {
     userPage.typeInSearchInput(usernameforworkinghour);
     userPage.checkUsernameText(usernameforworkinghour);
     manageUserPage.clicklinkedskillbutton();
-    manageUserPage.typeSkill(linkedskill);
     manageUserPage.selectFacilityFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
     manageUserPage.clickCloseSlideOver();
@@ -60,7 +59,6 @@ describe("Manage User", () => {
     userPage.typeInSearchInput(usernametolinkskill);
     userPage.checkUsernameText(usernametolinkskill);
     manageUserPage.clicklinkedskillbutton();
-    manageUserPage.typeSkill(linkedskill);
     manageUserPage.selectFacilityFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
     manageUserPage.clickCloseSlideOver();
@@ -69,7 +67,6 @@ describe("Manage User", () => {
     manageUserPage.assertSkillInAddedUserSkills(linkedskill);
     manageUserPage.clickUnlinkSkill();
     manageUserPage.clickSubmit();
-    manageUserPage.typeSkill(linkedskill);
     manageUserPage.selectFacilityFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
     manageUserPage.clickCloseSlideOver();
