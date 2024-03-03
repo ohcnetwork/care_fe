@@ -139,7 +139,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
           </div>
         </div>
       </div>
-      <div className="m-2 mt-4 flex flex-col justify-between md:flex-row lg:gap-4">
+      <div className="m-2 mt-4 flex flex-col justify-between gap-4 md:flex-row">
         <div className="flex flex-col justify-between gap-4 md:flex-row">
           <div>
             <div className="mb-2 text-sm text-gray-700">
@@ -157,7 +157,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          <div className="flex flex-col flex-nowrap items-center justify-end text-sm text-gray-700 md:flex-col md:items-start md:justify-start lg:flex-row lg:items-center">
+          <div className="flex flex-col items-center justify-end text-sm text-gray-700 md:flex-row">
             Created:{" "}
             <RelativeDateUserMention
               actionDate={itemData.created_date}
@@ -165,7 +165,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
               tooltipPosition="left"
             />
           </div>
-          <div className="flex flex-col items-center justify-end text-sm text-gray-700 md:flex-col md:items-start lg:flex-row lg:items-center">
+          <div className="flex flex-col items-center justify-end text-sm text-gray-700 md:flex-row">
             Last Modified:{" "}
             <RelativeDateUserMention
               actionDate={itemData.modified_date}
