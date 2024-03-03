@@ -127,8 +127,6 @@ export const ConsultationDetails = (props: any) => {
             );
           }
           setConsultationData(data);
-          console.log(consultationData);
-
           const assetRes = data?.current_bed?.bed_object?.id
             ? await dispatch(
                 listAssetBeds({
