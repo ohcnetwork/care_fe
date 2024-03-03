@@ -748,8 +748,7 @@ export const PatientManager = () => {
                   navigate(
                     `/facility/${authUser.home_facility_object?.id}/patient`
                   );
-                } 
-                else setShowDialog(true);
+                } else setShowDialog(true);
               }}
               className="w-full lg:w-fit"
             >
