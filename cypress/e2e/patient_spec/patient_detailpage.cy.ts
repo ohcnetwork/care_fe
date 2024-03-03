@@ -25,7 +25,8 @@ describe("Patient Details", () => {
     patientFileUploadPage.visitPatientDetailsPage();
     patientFileUploadPage.uploadFile();
     const fileName = `Cypress File ${new Date().getTime().toString().slice(9)}`;
-    cy.get("#consultation_file").clear().type(fileName);
+    cy.get("#consultation_file").clear();
+    cy.get("#consultation_file").type(fileName);
     patientFileUploadPage.clickUploadFile();
 
     // Verify the file is uploaded
@@ -63,6 +64,8 @@ describe("Patient Details", () => {
     // Login as Nurse 1
     loginPage.login("dummynurse1", "Coronasafe@123");
     cy.reload();
+
+    // Visit the patient details page
     patientPage.visitPatient("Dummy Patient 5");
     patientFileUploadPage.visitPatientDetailsPage();
 
@@ -72,7 +75,8 @@ describe("Patient Details", () => {
       .getTime()
       .toString()
       .slice(9)}`;
-    cy.get("#consultation_file").clear().type(oldFileName);
+    cy.get("#consultation_file").clear();
+    cy.get("#consultation_file").type(oldFileName);
     patientFileUploadPage.clickUploadFile();
 
     // Verify the file is uploaded
