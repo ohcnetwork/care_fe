@@ -382,7 +382,7 @@ export default function ManageUsers() {
                       }}
                     >
                       <CareIcon className="care-l-hospital text-lg" />
-                      <p>Linked Facilities</p>
+                      <p className="text-xs">Linked Facilities</p>
                     </ButtonV2>
                     <ButtonV2
                       id="skills"
@@ -393,7 +393,7 @@ export default function ManageUsers() {
                       }}
                     >
                       <CareIcon className="care-l-award text-xl" />
-                      <p>Linked Skills</p>
+                      <p className="text-xs">Linked Skills</p>
                     </ButtonV2>
                   </div>
                   {["DistrictAdmin", "StateAdmin"].includes(
@@ -402,7 +402,7 @@ export default function ManageUsers() {
                     <div className="flex-col md:flex-row">
                       <ButtonV2
                         id="avg-workinghour"
-                        className="flex w-full items-center md:w-full"
+                        className="flex w-full items-center sm:w-full sm:break-words"
                         onClick={() => {
                           setExpandWorkingHours(true);
                           setSelectedUser(user.username);
@@ -410,7 +410,9 @@ export default function ManageUsers() {
                         }}
                       >
                         <CareIcon className="care-l-clock text-xl" />
-                        <p>Set Average weekly working hours</p>
+                        <p className="text-xs">
+                          Set Average weekly working hours
+                        </p>
                       </ButtonV2>
                     </div>
                   )}
