@@ -1,6 +1,7 @@
 import { VitePWA } from "vite-plugin-pwa";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
+import 'dotenv/config';
 
 const cdnUrls =
   process.env.CARE_CDN_URL ??
