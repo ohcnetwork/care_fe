@@ -38,7 +38,7 @@ describe("Manage User", () => {
     userPage.typeInSearchInput(usernameforworkinghour);
     userPage.checkUsernameText(usernameforworkinghour);
     manageUserPage.clicklinkedskillbutton();
-    manageUserPage.selectFacilityFromDropdown(linkedskill);
+    manageUserPage.selectSkillFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
     manageUserPage.clickCloseSlideOver();
     cy.wait(5000);
@@ -59,7 +59,7 @@ describe("Manage User", () => {
     userPage.typeInSearchInput(usernametolinkskill);
     userPage.checkUsernameText(usernametolinkskill);
     manageUserPage.clicklinkedskillbutton();
-    manageUserPage.selectFacilityFromDropdown(linkedskill);
+    manageUserPage.selectSkillFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
     manageUserPage.clickCloseSlideOver();
     cy.wait(5000); // temporary hack to fix the failure
@@ -67,7 +67,7 @@ describe("Manage User", () => {
     manageUserPage.assertSkillInAddedUserSkills(linkedskill);
     manageUserPage.clickUnlinkSkill();
     manageUserPage.clickSubmit();
-    manageUserPage.selectFacilityFromDropdown(linkedskill);
+    manageUserPage.selectSkillFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
     manageUserPage.clickCloseSlideOver();
     // verifying the doctor connect
@@ -104,6 +104,8 @@ describe("Manage User", () => {
     manageUserPage.clickFacilitiesTab();
     manageUserPage.selectFacilityFromDropdown(facilitytolinkusername);
     manageUserPage.clickLinkFacility();
+    manageUserPage.clickCloseSlideOver();
+    manageUserPage.clickFacilitiesTab();
     manageUserPage.assertLinkedFacility(facilitytolinkusername);
     //  Verify in the already linked facility are not present in droplist
     manageUserPage.assertFacilityNotInDropdown(facilitytolinkusername);
