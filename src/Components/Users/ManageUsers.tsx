@@ -1,15 +1,15 @@
-import { lazy, useState } from "react";
 import * as Notification from "../../Utils/Notifications.js";
+import { lazy, useState } from "react";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ConfirmHomeFacilityUpdateDialog from "./ConfirmHomeFacilityUpdateDialog";
 import CountBlock from "../../CAREUI/display/Count";
-import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
+import { FacilitySelect } from "../Common/FacilitySelect";
 import SearchInput from "../Form/SearchInput";
-import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
 import SkillsSlideOver from "./SkillsSlideOver";
+import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
 import { USER_TYPES } from "../../Common/constants";
 import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
@@ -141,14 +141,6 @@ export default function ManageUsers() {
     await refetchUserList();
   };
 
-  const handleDelete = (user: any) => {
-    setUserData({
-      show: true,
-      username: user.username,
-      name: `${user.first_name} ${user.last_name} `,
-    });
-  };
-
   const handleSubmit = async () => {
     const { res, error } = await request(routes.deleteUser, {
       pathParams: { username: userData.username },
@@ -167,6 +159,14 @@ export default function ManageUsers() {
     await refetchUserList();
   };
 
+  const handleDelete = (user: any) => {
+    setUserData({
+      show: true,
+      username: user.username,
+      name: `${user.first_name} ${user.last_name}`,
+    });
+  };
+
   let userList: any[] = [];
 
   userListData?.results &&
@@ -177,7 +177,7 @@ export default function ManageUsers() {
         <div
           key={`usr_${user.id}`}
           id={`usr_${idx}`}
-          className="mt-6 w-full md:px-4 lg:w-1/2 xl:w-1/3"
+          className=" mt-6 w-full md:px-4 lg:w-1/2 xl:w-1/3"
         >
           <div className="relative block h-full overflow-visible rounded-lg bg-white shadow hover:border-primary-500">
             <div className="flex h-full flex-col justify-between @container">
@@ -248,8 +248,8 @@ export default function ManageUsers() {
                 <div
                   className={`flex ${
                     isExtremeSmallScreen
-                      ? "flex-wrap"
-                      : "flex-col justify-between md:flex-row"
+                      ? " flex-wrap "
+                      : " flex-col justify-between md:flex-row "
                   } gap-2 md:grid md:grid-cols-2`}
                 >
                   {user.user_type && (
@@ -328,7 +328,9 @@ export default function ManageUsers() {
                 )}
                 <div
                   className={`${
-                    isExtremeSmallScreen ? "flex flex-wrap" : "grid grid-cols-2"
+                    isExtremeSmallScreen
+                      ? "flex flex-wrap "
+                      : "grid grid-cols-2 "
                   }`}
                 >
                   {user.created_by && (
@@ -367,7 +369,7 @@ export default function ManageUsers() {
                 </div>
               </div>
               {user.username && (
-                <div className="mb-0 mt-auto flex w-full flex-col justify-between gap-2 p-2 md:p-4">
+                <div className="mb-0 mt-auto flex w-full flex-col justify-between gap-2 p-4">
                   <div className="flex flex-col gap-2 @sm:flex-row">
                     <ButtonV2
                       id="facilities"
@@ -575,7 +577,6 @@ function UserFacilities(props: { user: any }) {
     previousFacility: undefined,
     newFacility: undefined,
   });
-
   const hideReplaceHomeFacilityModal = () => {
     setReplaceHomeFacility({
       show: false,
@@ -584,7 +585,6 @@ function UserFacilities(props: { user: any }) {
       newFacility: undefined,
     });
   };
-
   const hideUnlinkFacilityModal = () => {
     setUnlinkFacilityData({
       show: false,
