@@ -15,7 +15,7 @@ describe("Manage User", () => {
   const userCreationPage = new UserCreationPage();
   const usernameforworkinghour = "devdistrictadmin";
   const usernamerealname = "Dummy Doctor";
-  const facilitytolinkusername = "Dummy Request Approving Center";
+  const facilitytolinkusername = "Dummy Shift";
   const facilitytolinkskill = "Dummy Facility 40";
   const workinghour = "23";
   const linkedskill = "General Medicine";
@@ -104,6 +104,7 @@ describe("Manage User", () => {
     manageUserPage.clickFacilitiesTab();
     manageUserPage.selectFacilityFromDropdown(facilitytolinkusername);
     manageUserPage.clickLinkFacility();
+    cy.wait(5000);
     manageUserPage.clickCloseSlideOver();
     manageUserPage.clickFacilitiesTab();
     manageUserPage.assertLinkedFacility(facilitytolinkusername);
