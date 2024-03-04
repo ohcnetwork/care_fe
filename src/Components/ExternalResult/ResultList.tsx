@@ -10,7 +10,6 @@ import useFilters from "../../Common/hooks/useFilters";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ExportMenu from "../Common/Export";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import CountBlock from "../../CAREUI/display/Count";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import Page from "../Common/components/Page";
 import routes from "../../Redux/api";
@@ -18,6 +17,7 @@ import useQuery from "../../Utils/request/useQuery";
 import { parsePhoneNumber } from "../../Utils/utils";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import { HeaderCountBlock } from "../../CAREUI/display/Count";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -235,9 +235,11 @@ export default function ResultList() {
         hideBack
         breadcrumbs={false}
         componentRight={
-          <span className="ml-2 flex items-center rounded-lg bg-primary-300 px-4  text-lg font-bold">
-            {data?.count || 0}
-          </span>
+          <HeaderCountBlock
+            count={data?.count || 0}
+            loading={loading}
+            className="ml-2"
+          />
         }
         options={
           <div className="flex w-full flex-col items-center justify-between gap-2 lg:flex-row lg:items-center">

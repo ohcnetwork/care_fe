@@ -8,8 +8,13 @@ interface Props {
   icon: IconName;
   className?: string;
 }
+interface HeaderCountProps {
+  count: number;
+  loading: boolean;
+  className?: string;
+}
 
-export default function CountBlock(props: Props) {
+export function CountBlock(props: Props) {
   return (
     <div
       className={classNames("rounded-lg bg-white p-4 shadow", props.className)}
@@ -30,6 +35,27 @@ export default function CountBlock(props: Props) {
             </dd>
           )}
         </div>
+      </dl>
+    </div>
+  );
+}
+
+export function HeaderCountBlock(props: HeaderCountProps) {
+  return (
+    <div
+      className={classNames(
+        "flex h-8 items-center rounded-lg bg-primary-300 px-4  text-lg font-bold ",
+        props.className
+      )}
+    >
+      <dl>
+        {props.loading ? (
+          <dd className="h-2 w-[5px] animate-pulse rounded-lg bg-black" />
+        ) : (
+          <dd id="count" className="text-md font-black ">
+            {props.count}
+          </dd>
+        )}
       </dl>
     </div>
   );

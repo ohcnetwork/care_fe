@@ -15,13 +15,13 @@ import { formatDateTime } from "../../Utils/utils";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import { ExportButton } from "../Common/Export";
-import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import Page from "../Common/components/Page";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
+import { HeaderCountBlock } from "../../CAREUI/display/Count";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -302,9 +302,11 @@ export default function SampleViewAdmin() {
       breadcrumbs={false}
       componentRight={
         <>
-          <span className="ml-2 flex items-center rounded-lg bg-primary-300 px-4  text-lg font-bold">
-            {sampeleData?.count || 0}
-          </span>
+          <HeaderCountBlock
+            count={sampeleData?.count || 0}
+            loading={isLoading}
+            className="ml-2"
+          />
           <ExportButton
             action={() => downloadSampleTests({ ...qParams })}
             parse={parseExportData}

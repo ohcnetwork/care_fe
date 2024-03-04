@@ -4,7 +4,6 @@ import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover"
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ConfirmHomeFacilityUpdateDialog from "./ConfirmHomeFacilityUpdateDialog";
-import CountBlock from "../../CAREUI/display/Count";
 import { FacilityModel } from "../Facility/models";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import SearchInput from "../Form/SearchInput";
@@ -33,6 +32,7 @@ import useAuthUser from "../../Common/hooks/useAuthUser.js";
 import routes from "../../Redux/api.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import request from "../../Utils/request/request.js";
+import { HeaderCountBlock } from "../../CAREUI/display/Count.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -445,9 +445,11 @@ export default function ManageUsers() {
       hideBack={true}
       breadcrumbs={false}
       componentRight={
-        <span className="ml-2 flex items-center rounded-lg bg-primary-300 px-4  text-lg font-bold">
-          {userListData?.count || 0}
-        </span>
+        <HeaderCountBlock
+          count={userListData?.count || 0}
+          loading={userListLoading || districtDataLoading}
+          className="ml-2"
+        />
       }
       options={
         <div className="flex w-full flex-col items-center justify-between lg:flex-row">

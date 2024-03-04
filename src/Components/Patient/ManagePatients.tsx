@@ -19,7 +19,6 @@ import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover"
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import Chip from "../../CAREUI/display/Chip";
-import CountBlock from "../../CAREUI/display/Count";
 import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
 import { ExportMenu } from "../Common/Export";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
@@ -47,6 +46,7 @@ import {
 } from "./DiagnosesFilter.js";
 import { ICD11DiagnosisModel } from "../Diagnosis/types.js";
 import { getDiagnosesByIds } from "../Diagnosis/utils.js";
+import { HeaderCountBlock } from "../../CAREUI/display/Count.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -729,9 +729,11 @@ export const PatientManager = () => {
       hideBack={true}
       breadcrumbs={false}
       componentRight={
-        <span className="ml-2 flex items-center rounded-lg bg-primary-300 px-4  text-lg font-bold">
-          {data?.count || 0}
-        </span>
+        <HeaderCountBlock
+          count={data?.count || 0}
+          loading={isLoading}
+          className="ml-2"
+        />
       }
       options={
         <div className="flex w-full flex-col items-center justify-between lg:flex-row">

@@ -1,5 +1,4 @@
 import { lazy, useState } from "react";
-import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import * as Notification from "../../Utils/Notifications.js";
@@ -22,6 +21,7 @@ import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import { UserModel } from "../Users/models";
+import { CountBlock } from "../../CAREUI/display/Count";
 
 const Loading = lazy(() => import("../Common/Loading"));
 

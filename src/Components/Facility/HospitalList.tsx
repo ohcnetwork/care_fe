@@ -6,7 +6,7 @@ import {
 } from "../../Redux/actions";
 import { lazy, useEffect } from "react";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import CountBlock from "../../CAREUI/display/Count";
+
 import ExportMenu from "../Common/Export";
 import { FACILITY_TYPES } from "../../Common/constants";
 import { FacilityCard } from "./FacilityCard";
@@ -22,6 +22,7 @@ import useAuthUser from "../../Common/hooks/useAuthUser";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { HeaderCountBlock } from "../../CAREUI/display/Count";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -156,9 +157,11 @@ export const HospitalList = () => {
       breadcrumbs={false}
       hideBack
       componentRight={
-        <span className="ml-2 flex items-center rounded-lg bg-primary-300 px-4  text-lg font-bold">
-          {permittedData ? permittedData.count : 0}
-        </span>
+        <HeaderCountBlock
+          count={permittedData ? permittedData.count : 0}
+          loading={isLoading}
+          className="ml-2"
+        />
       }
       options={
         <>

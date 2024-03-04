@@ -16,7 +16,7 @@ import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import ButtonV2 from "../Common/components/ButtonV2";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
 import ExportMenu from "../Common/Export";
-import CountBlock from "../../CAREUI/display/Count";
+import { HeaderCountBlock } from "../../CAREUI/display/Count";
 import AssetImportModal from "./AssetImportModal";
 import Page from "../Common/components/Page";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
@@ -265,9 +265,11 @@ const AssetsList = () => {
       breadcrumbs={false}
       hideBack
       componentRight={
-        <span className="ml-2 flex items-center rounded-lg bg-primary-300 px-4  text-lg font-bold">
-          {totalCount}
-        </span>
+        <HeaderCountBlock
+          count={totalCount}
+          loading={loading}
+          className="ml-2"
+        />
       }
       options={
         <div className="flex w-full flex-col items-center justify-between lg:flex-row">
