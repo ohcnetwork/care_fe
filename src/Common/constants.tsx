@@ -689,20 +689,20 @@ export const MOTOR_RESPONSE_SCALE = [
   { value: 2, text: "Abnormal Extension(decerebrate)" },
   { value: 1, text: "No Response" },
 ];
-export const CONSULTATION_TABS: Array<OptionsType> = [
-  { id: 1, text: "UPDATES", desc: "Overview" },
-  { id: 13, text: "FEED", desc: "Feed" },
-  { id: 2, text: "SUMMARY", desc: "Vitals" },
-  { id: 6, text: "ABG", desc: "ABG" },
-  { id: 3, text: "MEDICINES", desc: "Medicines" },
-  { id: 4, text: "FILES", desc: "Files" },
-  { id: 5, text: "INVESTIGATIONS", desc: "Investigations" },
-  { id: 8, text: "NEUROLOGICAL_MONITORING", desc: "Neuro" },
-  { id: 9, text: "VENTILATOR", desc: "Ventilation" },
-  { id: 10, text: "NUTRITION", desc: "Nutrition" },
-  { id: 11, text: "PRESSURE_SORE", desc: "Pressure Sore" },
-  { id: 7, text: "NURSING", desc: "Nursing" },
-  { id: 12, text: "DIALYSIS", desc: "Dialysis" },
+export const CONSULTATION_TABS = [
+  { text: "UPDATES", desc: "Overview" },
+  { text: "FEED", desc: "Feed" },
+  { text: "SUMMARY", desc: "Vitals" },
+  { text: "ABG", desc: "ABG" },
+  { text: "MEDICINES", desc: "Medicines" },
+  { text: "FILES", desc: "Files" },
+  { text: "INVESTIGATIONS", desc: "Investigations" },
+  { text: "NEUROLOGICAL_MONITORING", desc: "Neuro" },
+  { text: "VENTILATOR", desc: "Ventilation" },
+  { text: "NUTRITION", desc: "Nutrition" },
+  { text: "PRESSURE_SORE", desc: "Pressure Sore" },
+  { text: "NURSING", desc: "Nursing" },
+  { text: "DIALYSIS", desc: "Dialysis" },
 ];
 
 export const RHYTHM_CHOICES: Array<OptionsType> = [
