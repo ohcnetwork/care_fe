@@ -148,14 +148,14 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
       >
         <div className="flex flex-none items-center justify-center sm:h-6 sm:w-6 md:h-10 md:w-10">
           {
-              // Show online icon based on last_login
-              user.last_login &&
-              Number(new Date()) - Number(new Date(user.last_login)) < 60000 ? (
-                <CareIcon icon={icon} className="text-xl text-green-600" />
-              ) : (
-                <CareIcon icon={icon} className="text-2xl text-gray-600" />
-              )
-           }
+            // Show online icon based on last_login
+            user.last_login &&
+            Number(new Date()) - Number(new Date(user.last_login)) < 60000 ? (
+              <CareIcon icon={icon} className="text-xl text-green-600" />
+            ) : (
+              <CareIcon icon={icon} className="text-2xl text-gray-600" />
+            )
+          }
         </div>
         <div className="ml-4 flex-auto">
           <p className="flex justify-between gap-2 text-sm font-medium text-gray-700">
