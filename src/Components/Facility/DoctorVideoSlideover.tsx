@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import SlideOver from "../../CAREUI/interactive/SlideOver";
 import { UserAssignedModel } from "../Users/models";
 import { SkillObjectModel } from "../Users/models";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
 import { relativeTime } from "../../Utils/utils";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { triggerGoal } from "../../Integrations/Plausible";
@@ -115,8 +115,8 @@ export default function DoctorVideoSlideover(props: {
 function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
   const user = props.user;
   const facilityId = props.facilityId;
-  const icon =
-    user.user_type === "Doctor" ? "fa-user-doctor " : " fa-user-nurse";
+  const icon: IconName =
+    user.user_type === "Doctor" ? "l-user-md" : "l-user-nurse";
   const authUser = useAuthUser();
 
   return (
@@ -148,14 +148,14 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
       >
         <div className="flex flex-none items-center justify-center sm:h-6 sm:w-6 md:h-10 md:w-10">
           {
-            // Show online icon based on last_login
-            user.last_login &&
-            Number(new Date()) - Number(new Date(user.last_login)) < 60000 ? (
-              <i className={`fa-solid text-xl text-green-600 ${icon}`}></i>
-            ) : (
-              <i className={`fa-solid text-2xl text-gray-600 ${icon}`}></i>
-            )
-          }
+              // Show online icon based on last_login
+              user.last_login &&
+              Number(new Date()) - Number(new Date(user.last_login)) < 60000 ? (
+                <CareIcon icon={icon} className="text-xl text-green-600" />
+              ) : (
+                <CareIcon icon={icon} className="text-2xl text-gray-600" />
+              )
+           }
         </div>
         <div className="ml-4 flex-auto">
           <p className="flex justify-between gap-2 text-sm font-medium text-gray-700">

@@ -115,13 +115,14 @@ const AssetManage = (props: AssetManageProps) => {
           onClick={(_) => window.print()}
           className="btn btn-primary mr-2"
         >
-          <i className="fas fa-print mr-2"></i> Print QR Code
+          <CareIcon icon="l-print" className="mr-2 text-lg" />
+          Print QR Code
         </button>
         <button
           onClick={(_) => setIsPrintMode(false)}
           className="btn btn-default"
         >
-          <i className="fas fa-times mr-2"></i> Close
+          <CareIcon icon="l-times" className="mr-2 text-lg" /> Close
         </button>
       </div>
       <h2 className="text-center">Print Preview</h2>
@@ -502,6 +503,10 @@ const AssetManage = (props: AssetManageProps) => {
           <Uptime
             route={routes.listAssetAvailability}
             params={{ external_id: asset.id }}
+            header={
+              <div className="text-xl font-semibold">Availability History</div>
+            }
+            parentClassNames="mt-8 flex w-full flex-col bg-white p-4 shadow-sm sm:rounded-lg"
           />
         )}
       <div className="mb-4 mt-8 text-xl font-semibold">Service History</div>

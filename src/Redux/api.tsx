@@ -31,34 +31,6 @@ import {
   PatientAssetBed,
 } from "../Components/Assets/AssetTypes";
 import {
-  CapacityModal,
-  ConsultationModel,
-  CreateBedBody,
-  CurrentBed,
-  DistrictModel,
-  DailyRoundsBody,
-  DailyRoundsRes,
-  DoctorModal,
-  FacilityModel,
-  IFacilityNotificationRequest,
-  IFacilityNotificationResponse,
-  IUserFacilityRequest,
-  LocalBodyModel,
-  PatientStatsModel,
-  FacilityRequest,
-  StateModel,
-  WardModel,
-  LocationModel,
-  PatientNotesModel,
-  PatientNotesEditModel,
-  BedModel,
-  MinimumQuantityItemResponse,
-  InventorySummaryResponse,
-  InventoryLogResponse,
-  InventoryItemsModel,
-  PatientTransferResponse,
-} from "../Components/Facility/models";
-import {
   IDeleteBedCapacity,
   IDeleteExternalResult,
   IExternalResult,
@@ -68,35 +40,68 @@ import {
   IPartialUpdateExternalResult,
 } from "../Components/ExternalResult/models";
 import {
+  BedModel,
+  CapacityModal,
+  ConsultationModel,
+  CreateBedBody,
+  CurrentBed,
+  DailyRoundsBody,
+  DailyRoundsRes,
+  DistrictModel,
+  DoctorModal,
+  DupPatientModel,
+  FacilityModel,
+  FacilityRequest,
+  IFacilityNotificationRequest,
+  IFacilityNotificationResponse,
+  InventoryItemsModel,
+  InventoryLogResponse,
+  InventorySummaryResponse,
+  IUserFacilityRequest,
+  LocalBodyModel,
+  LocationModel,
+  MinimumQuantityItemResponse,
+  PatientNotesEditModel,
+  PatientNotesModel,
+  PatientStatsModel,
+  PatientTransferResponse,
+  StateModel,
+  WardModel,
+} from "../Components/Facility/models";
+import { Prescription } from "../Components/Medicine/models";
+import {
+  NotificationData,
+  PNconfigData,
+} from "../Components/Notifications/models";
+import {
+  CreateFileRequest,
+  CreateFileResponse,
+  DailyRoundsModel,
+  FileUploadModel,
+  PatientModel,
+  SampleReportModel,
+  SampleTestModel,
+} from "../Components/Patient/models";
+import {
   SkillModel,
   SkillObjectModel,
   UpdatePasswordForm,
   UserAssignedModel,
   UserModel,
 } from "../Components/Users/models";
-import { Prescription } from "../Components/Medicine/models";
-import {
-  DailyRoundsModel,
-  PatientModel,
-  SampleReportModel,
-  SampleTestModel,
-} from "../Components/Patient/models";
 import { PaginatedResponse } from "../Utils/request/types";
-import {
-  NotificationData,
-  PNconfigData,
-} from "../Components/Notifications/models";
 
-import { IComment, IResource } from "../Components/Resource/models";
-import { IShift } from "../Components/Shifting/models";
-import { HCXPolicyModel } from "../Components/HCX/models";
+import { ICD11DiagnosisModel } from "../Components/Diagnosis/types";
+import { EventGeneric } from "../Components/Facility/ConsultationDetails/Events/types";
 import {
   InvestigationGroup,
   InvestigationType,
 } from "../Components/Facility/Investigations";
+import { InvestigationSessionType } from "../Components/Facility/Investigations/investigationsTab";
 import { Investigation } from "../Components/Facility/Investigations/Reports/types";
-import { ICD11DiagnosisModel } from "../Components/Diagnosis/types";
-import { EventGeneric } from "../Components/Facility/ConsultationDetails/Events/types";
+import { HCXPolicyModel } from "../Components/HCX/models";
+import { IComment, IResource } from "../Components/Resource/models";
+import { IShift } from "../Components/Shifting/models";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -203,7 +208,7 @@ const routes = {
   userListFacility: {
     path: "/api/v1/users/{username}/get_facilities/",
     method: "GET",
-    TRes: Type<FacilityModel[]>(),
+    TRes: Type<PaginatedResponse<FacilityModel>>(),
   },
 
   addUserFacility: {
@@ -379,7 +384,12 @@ const routes = {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
     method: "PATCH",
   },
-  getFacilityAssetLocationAvailability: {
+  deleteFacilityAssetLocation: {
+    path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
+    method: "DELETE",
+    TRes: Type<Record<string, never>>(),
+  },
+  listFacilityAssetLocationAvailability: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/availability/",
     method: "GET",
     TRes: Type<PaginatedResponse<AvailabilityRecord>>(),
@@ -658,6 +668,7 @@ const routes = {
 
   searchPatient: {
     path: "/api/v1/patient/search",
+    TRes: Type<PaginatedResponse<DupPatientModel>>(),
   },
   patientList: {
     path: "/api/v1/patient/",
@@ -667,15 +678,18 @@ const routes = {
   addPatient: {
     path: "/api/v1/patient/",
     method: "POST",
+    TRes: Type<PatientModel>(),
   },
   getPatient: {
     path: "/api/v1/patient/{id}/",
     method: "GET",
+    TBody: Type<PatientModel>(),
     TRes: Type<PatientModel>(),
   },
   updatePatient: {
     path: "/api/v1/patient/{id}/",
     method: "PUT",
+    TRes: Type<PatientModel>(),
   },
   patchPatient: {
     path: "/api/v1/patient/{id}/",
@@ -1016,18 +1030,24 @@ const routes = {
   createUpload: {
     path: "/api/v1/files/",
     method: "POST",
+    TBody: Type<CreateFileRequest>(),
+    TRes: Type<CreateFileResponse>(),
   },
   viewUpload: {
     path: "/api/v1/files/",
     method: "GET",
+    TRes: Type<PaginatedResponse<FileUploadModel>>(),
   },
   retrieveUpload: {
-    path: "/api/v1/files/{fileId}/",
+    path: "/api/v1/files/{id}/",
     method: "GET",
+    TRes: Type<FileUploadModel>(),
   },
   editUpload: {
-    path: "/api/v1/files/{fileId}/?file_type={fileType}&associating_id={associatingId}",
+    path: "/api/v1/files/{id}/?file_type={fileType}&associating_id={associatingId}",
     method: "PATCH",
+    TBody: Type<Partial<FileUploadModel>>(),
+    TRes: Type<FileUploadModel>(),
   },
 
   // Investigation
@@ -1044,10 +1064,20 @@ const routes = {
   createInvestigation: {
     path: "/api/v1/consultation/{consultation_external_id}/investigation/",
     method: "POST",
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<{
+      investigations: {
+        investigation: string;
+        value: number;
+        notes: string;
+        session: string;
+      }[];
+    }>(),
   },
   getInvestigationSessions: {
     path: "/api/v1/consultation/{consultation_external_id}/investigation/get_sessions/",
     method: "GET",
+    TRes: Type<InvestigationSessionType[]>(),
   },
   getInvestigation: {
     path: "/api/v1/consultation/{consultation_external_id}/investigation/",
@@ -1057,10 +1087,19 @@ const routes = {
   getPatientInvestigation: {
     path: "/api/v1/patient/{patient_external_id}/investigation/",
     method: "GET",
+    TRes: Type<PaginatedResponse<Investigation>>(),
   },
   editInvestigation: {
     path: "/api/v1/consultation/{consultation_external_id}/investigation/batchUpdate/",
     method: "PUT",
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<{
+      investigations: {
+        external_id: string;
+        value: number;
+        notes: string;
+      }[];
+    }>(),
   },
 
   // ICD11
@@ -1404,6 +1443,7 @@ const routes = {
   hcxCheckEligibility: {
     path: "/api/v1/hcx/check_eligibility/",
     method: "POST",
+    TRes: Type<HCXPolicyModel>(),
   },
 
   listHCXPolicies: {
@@ -1415,6 +1455,7 @@ const routes = {
   createHCXPolicy: {
     path: "/api/v1/hcx/policy/",
     method: "POST",
+    TRes: Type<HCXPolicyModel>(),
   },
 
   getHCXPolicy: {
@@ -1425,6 +1466,7 @@ const routes = {
   updateHCXPolicy: {
     path: "/api/v1/hcx/policy/{external_id}/",
     method: "PUT",
+    TRes: Type<HCXPolicyModel>(),
   },
 
   partialUpdateHCXPolicy: {
