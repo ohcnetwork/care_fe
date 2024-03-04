@@ -22,6 +22,7 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import { HeaderCountBlock } from "../../CAREUI/display/Count";
+import Header from "../Common/components/Header";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -315,14 +316,16 @@ export default function SampleViewAdmin() {
         </>
       }
       options={
-        <div className="flex w-full flex-col items-center justify-between gap-2 lg:flex-row lg:items-center">
-          <div className="flex w-full flex-col gap-3  lg:flex-row">
+        <Header
+          searchBox={
             <SearchInput
               name="patient_name"
               value={qParams.patient_name}
               onChange={(e) => updateQuery({ [e.name]: e.value })}
               placeholder="Search patient"
             />
+          }
+          secondarySearchBox={
             <SearchInput
               name="district_name"
               value={qParams.district_name}
@@ -330,14 +333,16 @@ export default function SampleViewAdmin() {
               placeholder="Search by district"
               secondary
             />
-          </div>
-          <div className="flex flex-col justify-between gap-6 lg:flex-row">
-            <AdvancedFilterButton
-              onClick={() => advancedFilter.setShow(true)}
-            />
-            <SampleFilter {...advancedFilter} key={window.location.search} />
-          </div>
-        </div>
+          }
+          advancedFilter={
+            <div className="flex flex-col justify-between gap-6 lg:flex-row">
+              <AdvancedFilterButton
+                onClick={() => advancedFilter.setShow(true)}
+              />
+              <SampleFilter {...advancedFilter} key={window.location.search} />
+            </div>
+          }
+        />
       }
     >
       {statusDialog.show && (

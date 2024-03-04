@@ -47,6 +47,7 @@ import {
 import { ICD11DiagnosisModel } from "../Diagnosis/types.js";
 import { getDiagnosesByIds } from "../Diagnosis/utils.js";
 import { HeaderCountBlock } from "../../CAREUI/display/Count.js";
+import Header from "../Common/components/Header.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -736,14 +737,19 @@ export const PatientManager = () => {
         />
       }
       options={
-        <div className="flex w-full flex-col items-center justify-between lg:flex-row">
-          <div className="w-full">
+        <Header
+          searchBox={
             <SearchInput
               placeholder="Enter patient name"
               {...queryField("name")}
             />
-          </div>
-          <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
+          }
+          advancedFilter={
+            <AdvancedFilterButton
+              onClick={() => advancedFilter.setShow(true)}
+            />
+          }
+          switchTabs={
             <SwitchTabs
               tab1="Live"
               tab2="Discharged"
@@ -751,7 +757,9 @@ export const PatientManager = () => {
               onClickTab2={() => updateQuery({ is_active: "False" })}
               isTab2Active={tabValue ? true : false}
             />
-            {showDoctorConnect && (
+          }
+          externalButton={
+            <div className="tooltip">
               <ButtonV2
                 id="doctor-connect-patient-button"
                 onClick={() => {
@@ -764,18 +772,20 @@ export const PatientManager = () => {
                 }}
               >
                 <CareIcon className="care-l-phone text-lg" />
-                <p className="lg:my-[2px]">Doctor Connect</p>
               </ButtonV2>
-            )}
-
-            <AdvancedFilterButton
-              onClick={() => advancedFilter.setShow(true)}
-            />
+              <span className="tooltip-text tooltip-bottom -translate-x-1/2">
+                Doctor Connect
+              </span>
+            </div>
+          }
+          sortDropDown={
             <SortDropdownMenu
               options={PATIENT_SORT_OPTIONS}
               selected={qParams.ordering}
               onSelect={updateQuery}
             />
+          }
+          exportButton={
             <div className="tooltip">
               {!isExportAllowed ? (
                 <ButtonV2
@@ -823,28 +833,28 @@ export const PatientManager = () => {
                 </span>
               )}
             </div>
-            <div className="mb-2 flex w-full flex-col items-center lg:mb-0 lg:w-fit lg:flex-row lg:gap-5">
-              <ButtonV2
-                id="add-patient-details"
-                onClick={() => {
-                  if (qParams.facility)
-                    navigate(`/facility/${qParams.facility}/patient`);
-                  else if (permittedFacilities?.results.length === 1)
-                    navigate(
-                      `/facility/${permittedFacilities?.results[0].id}/patient`
-                    );
-                  else setShowDialog(true);
-                }}
-                className="w-full lg:w-fit"
-              >
-                <CareIcon className="care-l-plus text-lg" />
-                <p id="add-patient-div" className="lg:my-[2px]">
-                  Add Patient Details
-                </p>
-              </ButtonV2>
-            </div>
-          </div>
-        </div>
+          }
+          addComponentDetails={
+            <ButtonV2
+              id="add-patient-details"
+              onClick={() => {
+                if (qParams.facility)
+                  navigate(`/facility/${qParams.facility}/patient`);
+                else if (permittedFacilities?.results.length === 1)
+                  navigate(
+                    `/facility/${permittedFacilities?.results[0].id}/patient`
+                  );
+                else setShowDialog(true);
+              }}
+              className="w-full lg:w-fit"
+            >
+              <CareIcon className="care-l-plus text-lg" />
+              <p id="add-patient-div" className="lg:my-[2px]">
+                Add Patient Details
+              </p>
+            </ButtonV2>
+          }
+        />
       }
     >
       <FacilitiesSelectDialogue
@@ -857,7 +867,6 @@ export const PatientManager = () => {
           setSelectedFacility({ name: "" });
         }}
       />
-
       <div className="manualGrid my-4 mb-[-12px] mt-5 grid-cols-1 gap-3 px-2 sm:grid-cols-4 md:px-0">
         <div className="col-span-3 w-full">
           <div className="col-span-2 mt-2">

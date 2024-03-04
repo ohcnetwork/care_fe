@@ -33,6 +33,7 @@ import routes from "../../Redux/api.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import request from "../../Utils/request/request.js";
 import { HeaderCountBlock } from "../../CAREUI/display/Count.js";
+import Header from "../Common/components/Header.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -452,29 +453,28 @@ export default function ManageUsers() {
         />
       }
       options={
-        <div className="flex w-full flex-col items-center justify-between lg:flex-row">
-          <div className="col-span-2 my-2 flex flex-col justify-between space-y-3 lg:flex-row lg:space-x-4 lg:space-y-0 lg:px-3">
-            <div className="w-full">
-              <SearchInput
-                id="search-by-username"
-                name="username"
-                onChange={(e) => updateQuery({ [e.name]: e.value })}
-                value={qParams.username}
-                placeholder="Search by username"
-              />
-            </div>
-
-            <UserFilter {...advancedFilter} key={window.location.search} />
-          </div>
-
-          <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
-            <AdvancedFilterButton
-              onClick={() => advancedFilter.setShow(true)}
+        <Header
+          searchBox={
+            <SearchInput
+              id="search-by-username"
+              name="username"
+              onChange={(e) => updateQuery({ [e.name]: e.value })}
+              value={qParams.username}
+              placeholder="Search by username"
             />
-
-            <div>{userTypes.length && addUser}</div>
-          </div>
-        </div>
+          }
+          advancedFilter={
+            <UserFilter {...advancedFilter} key={window.location.search} />
+          }
+          addComponentDetails={
+            <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
+              <AdvancedFilterButton
+                onClick={() => advancedFilter.setShow(true)}
+              />
+              <div>{userTypes.length && addUser}</div>
+            </div>
+          }
+        />
       }
     >
       {expandSkillList && (
@@ -530,7 +530,6 @@ export default function ManageUsers() {
           </div>
         </div>
       </SlideOverCustom>
-
       <div className="pb-2 pl-6">
         <FilterBadges
           badges={({ badge, value, phoneNumber }) => [
@@ -548,7 +547,6 @@ export default function ManageUsers() {
           ]}
         />
       </div>
-
       <div className="px-3 md:px-6">
         <div>{manageUsers}</div>
       </div>

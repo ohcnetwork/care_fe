@@ -23,6 +23,7 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { HeaderCountBlock } from "../../CAREUI/display/Count";
+import Header from "../Common/components/Header";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -164,20 +165,21 @@ export const HospitalList = () => {
         />
       }
       options={
-        <>
-          <div className="my-4  flex grow flex-col justify-between gap-2 sm:flex-row">
+        <Header
+          searchBox={
             <SearchInput
               name="search"
               value={qParams.search}
               onChange={(e) => updateQuery({ [e.name]: e.value })}
               placeholder={t("facility_search_placeholder")}
             />
-          </div>
-          <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
+          }
+          advancedFilter={
             <AdvancedFilterButton
               onClick={() => advancedFilter.setShow(true)}
             />
-
+          }
+          exportButton={
             <ExportMenu
               exportItems={[
                 {
@@ -202,8 +204,8 @@ export const HospitalList = () => {
                 },
               ]}
             />
-          </div>
-        </>
+          }
+        />
       }
     >
       <FacilityFilter {...advancedFilter} key={window.location.search} />

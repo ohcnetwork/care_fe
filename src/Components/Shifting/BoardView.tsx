@@ -10,7 +10,6 @@ import SearchInput from "../Form/SearchInput";
 import ShiftingBoard from "./ShiftingBoard";
 import { downloadShiftRequests } from "../../Redux/actions";
 import { formatFilter } from "./Commons";
-
 import { navigate } from "raviger";
 import useConfig from "../../Common/hooks/useConfig";
 import useFilters from "../../Common/hooks/useFilters";
@@ -21,9 +20,10 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import SwitchTabs from "../Common/components/SwitchTabs";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import Header from "../Common/components/Header";
+import Page from "../Common/components/Page";
 
 const Loading = lazy(() => import("../Common/Loading"));
-const PageTitle = lazy(() => import("../Common/PageTitle"));
 const ScrollingComponent = withScrolling("div");
 
 export default function BoardView() {
@@ -127,54 +127,54 @@ export default function BoardView() {
   };
 
   return (
-    <div className="max-h[95vh] flex min-h-full max-w-[100vw] flex-col px-2 pb-2">
-      <div className="flex w-full flex-col items-center justify-between lg:flex-row">
-        <div className="w-1/3 lg:w-1/4">
-          <PageTitle
-            title={t("shifting")}
-            className="mx-3 md:mx-5"
-            hideBack
-            componentRight={
-              <ExportButton
-                action={() =>
-                  downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
-                }
-                filenamePrefix="shift_requests"
-              />
-            }
-            breadcrumbs={false}
-          />
-        </div>
-        <div className="flex w-full flex-col items-center justify-between gap-2 pt-2 xl:flex-row">
-          <SearchInput
-            name="patient_name"
-            value={qParams.patient_name}
-            onChange={(e) => updateQuery({ [e.name]: e.value })}
-            placeholder={t("search_patient")}
-          />
-
-          <SwitchTabs
-            tab1={t("active")}
-            tab2={t("completed")}
-            onClickTab1={() => setBoardFilter(activeBoards)}
-            onClickTab2={() => setBoardFilter(completedBoards)}
-            isTab2Active={boardFilter[0].text !== activeBoards[0].text}
-          />
-
-          <div className="flex w-full flex-col gap-2 lg:mr-4 lg:w-fit lg:flex-row lg:gap-4">
-            <ButtonV2
-              className="py-[11px]"
-              onClick={() => navigate("/shifting/list", { query: qParams })}
-            >
-              <CareIcon className="care-l-list-ul" />
-              {t("list_view")}
-            </ButtonV2>
-            <AdvancedFilterButton
-              onClick={() => advancedFilter.setShow(true)}
+    <Page
+      title={t("Shifting")}
+      hideBack={true}
+      breadcrumbs={false}
+      componentRight={
+        <ExportButton
+          action={() =>
+            downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
+          }
+          filenamePrefix="shift_requests"
+        />
+      }
+      options={
+        <Header
+          searchBox={
+            <SearchInput
+              name="patient_name"
+              value={qParams.patient_name}
+              onChange={(e) => updateQuery({ [e.name]: e.value })}
+              placeholder={t("search_patient")}
             />
-          </div>
-        </div>
-      </div>
+          }
+          advancedFilter={
+            <div className="flex w-full flex-col gap-2 lg:mr-4 lg:w-fit lg:flex-row lg:gap-4">
+              <ButtonV2
+                className="py-[11px]"
+                onClick={() => navigate("/shifting/list", { query: qParams })}
+              >
+                <CareIcon className="care-l-list-ul" />
+                {t("list_view")}
+              </ButtonV2>
+              <AdvancedFilterButton
+                onClick={() => advancedFilter.setShow(true)}
+              />
+            </div>
+          }
+          switchTabs={
+            <SwitchTabs
+              tab1={t("active")}
+              tab2={t("completed")}
+              onClickTab1={() => setBoardFilter(activeBoards)}
+              onClickTab2={() => setBoardFilter(completedBoards)}
+              isTab2Active={boardFilter[0].text !== activeBoards[0].text}
+            />
+          }
+        />
+      }
+    >
       <BadgesList {...{ qParams, FilterBadges }} />
       <ScrollingComponent className="relative mt-4 flex max-h-[80vh] w-full items-start pb-2">
         <div className="mt-4 flex min-h-full w-full flex-1 items-start pb-2">
@@ -205,6 +205,6 @@ export default function BoardView() {
         </div>
       </ScrollingComponent>
       <ListFilter {...advancedFilter} key={window.location.search} />
-    </div>
+    </Page>
   );
 }

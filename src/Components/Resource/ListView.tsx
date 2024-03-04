@@ -16,6 +16,7 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import Page from "../Common/components/Page";
 import SearchInput from "../Form/SearchInput";
+import Header from "../Common/components/Header";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -167,29 +168,28 @@ export default function ListView() {
       }
       breadcrumbs={false}
       options={
-        <>
-          <div className="md:px-4">
+        <Header
+          searchBox={
             <SearchInput
               name="title"
               value={qParams.title}
               onChange={(e) => updateQuery({ [e.name]: e.value })}
               placeholder={t("search_resource")}
             />
-          </div>
-          <div className="w-32">
-            {/* dummy div to align space as per board view */}
-          </div>
-          <div className="flex w-full flex-col gap-2 lg:w-fit lg:flex-row lg:gap-4">
-            <ButtonV2 className="py-[11px]" onClick={onBoardViewBtnClick}>
-              <CareIcon className="care-l-list-ul rotate-90" />
-              {t("board_view")}
-            </ButtonV2>
+          }
+          advancedFilter={
+            <div className="flex w-full flex-col gap-2 lg:w-fit lg:flex-row lg:gap-4">
+              <ButtonV2 className="py-[11px]" onClick={onBoardViewBtnClick}>
+                <CareIcon className="care-l-list-ul rotate-90" />
+                {t("board_view")}
+              </ButtonV2>
 
-            <AdvancedFilterButton
-              onClick={() => advancedFilter.setShow(true)}
-            />
-          </div>
-        </>
+              <AdvancedFilterButton
+                onClick={() => advancedFilter.setShow(true)}
+              />
+            </div>
+          }
+        />
       }
     >
       <BadgesList {...{ appliedFilters, FilterBadges }} />

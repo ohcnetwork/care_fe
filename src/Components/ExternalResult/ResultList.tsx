@@ -18,6 +18,7 @@ import { parsePhoneNumber } from "../../Utils/utils";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import { HeaderCountBlock } from "../../CAREUI/display/Count";
+import Header from "../Common/components/Header";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -242,68 +243,74 @@ export default function ResultList() {
           />
         }
         options={
-          <div className="flex w-full flex-col items-center justify-between gap-2 lg:flex-row lg:items-center">
-            <SearchInput
-              name="name"
-              onChange={(e) => updateQuery({ [e.name]: e.value })}
-              value={qParams.name}
-              placeholder="Search by name"
-            />
-
-            <div className="lg:mt-4">
-              <PhoneNumberFormField
-                name="mobile_number"
-                value={phone_number}
-                onChange={(e) => setPhoneNum(e.value)}
-                error={phoneNumberError}
-                placeholder="Search by Phone Number"
-                types={[]}
+          <Header
+            searchBox={
+              <SearchInput
+                name="name"
+                onChange={(e) => updateQuery({ [e.name]: e.value })}
+                value={qParams.name}
+                placeholder="Search by name"
               />
-            </div>
-
-            <AdvancedFilterButton
-              onClick={() => advancedFilter.setShow(true)}
-            />
-
-            <ExportMenu
-              label="Import/Export"
-              exportItems={[
-                ...(authUser.user_type !== "Nurse" &&
-                authUser.user_type !== "Staff"
-                  ? [
-                      {
-                        label: "Import Results",
-                        action: () => navigate("/external_results/upload"),
-                        options: {
-                          icon: <CareIcon className="care-l-import" />,
+            }
+            secondarySearchBox={
+              <div className="lg:mt-4">
+                <PhoneNumberFormField
+                  name="mobile_number"
+                  value={phone_number}
+                  onChange={(e) => setPhoneNum(e.value)}
+                  error={phoneNumberError}
+                  placeholder="Search by Phone Number"
+                  types={[]}
+                />
+              </div>
+            }
+            advancedFilter={
+              <AdvancedFilterButton
+                onClick={() => advancedFilter.setShow(true)}
+              />
+            }
+            exportButton={
+              <ExportMenu
+                label="Import/Export"
+                exportItems={[
+                  ...(authUser.user_type !== "Nurse" &&
+                  authUser.user_type !== "Staff"
+                    ? [
+                        {
+                          label: "Import Results",
+                          action: () => navigate("/external_results/upload"),
+                          options: {
+                            icon: <CareIcon className="care-l-import" />,
+                          },
                         },
-                      },
-                    ]
-                  : []),
-                {
-                  label: "Export Results",
-                  action: () =>
-                    externalResultList(
-                      { ...qParams, csv: true },
-                      "externalResultList"
-                    ),
-                  filePrefix: "external_results",
-                  options: {
-                    icon: <CareIcon className="care-l-export" />,
+                      ]
+                    : []),
+                  {
+                    label: "Export Results",
+                    action: () =>
+                      externalResultList(
+                        { ...qParams, csv: true },
+                        "externalResultList"
+                      ),
+                    filePrefix: "external_results",
+                    options: {
+                      icon: <CareIcon className="care-l-export" />,
+                    },
                   },
-                },
-              ]}
-            />
-          </div>
+                ]}
+              />
+            }
+          />
         }
       >
+        {" "}
+        <div className="flex w-full flex-col items-center justify-between gap-2 lg:flex-row lg:items-center"></div>
         <div className="mb-4 flex flex-wrap items-center gap-2">
           {qParams.local_bodies &&
             dataList.lsgList.map((x) => lsgWardBadge("LSG", x, "local_bodies"))}
           {qParams.wards &&
             dataList.wardList.map((x) => lsgWardBadge("Ward", x, "wards"))}
         </div>
-
         <FilterBadges
           badges={({ badge, phoneNumber, dateRange }) => [
             badge("Name", "name"),
@@ -314,7 +321,6 @@ export default function ResultList() {
             badge("SRF ID", "srf_id"),
           ]}
         />
-
         <div
           className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-t-lg"
           id="external-result-table"

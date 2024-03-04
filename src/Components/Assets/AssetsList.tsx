@@ -24,6 +24,7 @@ import { useTranslation } from "react-i18next";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
+import Header from "../Common/components/Header.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -269,87 +270,91 @@ const AssetsList = () => {
         />
       }
       options={
-        <div className="flex w-full flex-col items-center justify-between lg:flex-row">
-          <div className="mb-2 flex w-full flex-col items-center lg:mb-0 lg:w-fit lg:flex-row lg:gap-5"></div>
-
-          <SearchInput
-            name="search"
-            value={qParams.search}
-            onChange={(e) => updateQuery({ [e.name]: e.value })}
-            placeholder="Search by name/serial no./QR code ID"
-          />
-          <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
-            <div className="flex flex-col items-start justify-start gap-2 lg:ml-2">
-              <div className="flex w-full flex-col gap-2 md:flex-row lg:w-auto">
-                <ButtonV2
-                  className="w-full py-[11px]"
-                  onClick={() => setIsScannerActive(true)}
-                >
-                  <CareIcon icon="l-search" className="mr-1 text-base" /> Scan
-                  Asset QR
-                </ButtonV2>
-              </div>
-            </div>
+        <Header
+          searchBox={
+            <SearchInput
+              name="search"
+              value={qParams.search}
+              onChange={(e) => updateQuery({ [e.name]: e.value })}
+              placeholder="Search by name/serial no./QR code ID"
+            />
+          }
+          qrScan={
+            <ButtonV2
+              className="w-full py-[11px]"
+              onClick={() => setIsScannerActive(true)}
+            >
+              <CareIcon icon="l-search" className="mr-1 text-base" /> Scan Asset
+              QR
+            </ButtonV2>
+          }
+          advancedFilter={
             <AdvancedFilterButton
               onClick={() => advancedFilter.setShow(true)}
             />
-
-            {authorizedForImportExport && (
-              <div className="tooltip" data-testid="import-asset-button">
-                <ExportMenu
-                  label={
-                    importAssetModalOpen ? "Importing..." : "Import/Export"
-                  }
-                  exportItems={[
-                    {
-                      label: "Import Assets",
-                      options: {
-                        icon: (
-                          <CareIcon className="care-l-import import-assets-button" />
-                        ),
-                        onClick: () => setImportAssetModalOpen(true),
+          }
+          exportButton={
+            <>
+              {" "}
+              {authorizedForImportExport && (
+                <div className="tooltip" data-testid="import-asset-button">
+                  <ExportMenu
+                    label={
+                      importAssetModalOpen ? "Importing..." : "Import/Export"
+                    }
+                    exportItems={[
+                      {
+                        label: "Import Assets",
+                        options: {
+                          icon: (
+                            <CareIcon className="care-l-import import-assets-button" />
+                          ),
+                          onClick: () => setImportAssetModalOpen(true),
+                        },
                       },
-                    },
-                    {
-                      label: "Export Assets (JSON)",
-                      action: () =>
-                        authorizedForImportExport &&
-                        listAssets({
-                          ...qParams,
-                          json: true,
-                          limit: totalCount,
-                        }),
-                      type: "json",
-                      filePrefix: `assets_${facility?.name ?? "all"}`,
-                      options: {
-                        icon: <CareIcon className="care-l-export" />,
-                        disabled:
-                          totalCount === 0 || !authorizedForImportExport,
-                        id: "export-json-option",
+                      {
+                        label: "Export Assets (JSON)",
+                        action: () =>
+                          authorizedForImportExport &&
+                          listAssets({
+                            ...qParams,
+                            json: true,
+                            limit: totalCount,
+                          }),
+                        type: "json",
+                        filePrefix: `assets_${facility?.name ?? "all"}`,
+                        options: {
+                          icon: <CareIcon className="care-l-export" />,
+                          disabled:
+                            totalCount === 0 || !authorizedForImportExport,
+                          id: "export-json-option",
+                        },
                       },
-                    },
-                    {
-                      label: "Export Assets (CSV)",
-                      action: () =>
-                        authorizedForImportExport &&
-                        listAssets({
-                          ...qParams,
-                          csv: true,
-                          limit: totalCount,
-                        }),
-                      type: "csv",
-                      filePrefix: `assets_${facility?.name ?? "all"}`,
-                      options: {
-                        icon: <CareIcon className="care-l-export" />,
-                        disabled:
-                          totalCount === 0 || !authorizedForImportExport,
-                        id: "export-csv-option",
+                      {
+                        label: "Export Assets (CSV)",
+                        action: () =>
+                          authorizedForImportExport &&
+                          listAssets({
+                            ...qParams,
+                            csv: true,
+                            limit: totalCount,
+                          }),
+                        type: "csv",
+                        filePrefix: `assets_${facility?.name ?? "all"}`,
+                        options: {
+                          icon: <CareIcon className="care-l-export" />,
+                          disabled:
+                            totalCount === 0 || !authorizedForImportExport,
+                          id: "export-csv-option",
+                        },
                       },
-                    },
-                  ]}
-                />
-              </div>
-            )}
+                    ]}
+                  />
+                </div>
+              )}
+            </>
+          }
+          addComponentDetails={
             <div
               className="flex w-full flex-col md:flex-row"
               data-testid="create-asset-buttom"
@@ -369,8 +374,8 @@ const AssetsList = () => {
                 <span className="lg:my-[2px]">{t("create_asset")}</span>
               </ButtonV2>
             </div>
-          </div>
-        </div>
+          }
+        />
       }
     >
       <AssetFilter {...advancedFilter} key={window.location.search} />
