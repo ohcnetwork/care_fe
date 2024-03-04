@@ -1,19 +1,18 @@
 import { useEffect } from "react";
-import { Link } from "raviger";
-import { GENDER_TYPES } from "../../Common/constants";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import useVentilatorVitalsMonitor from "./useVentilatorVitalsMonitor";
 import { IVitalsComponentProps, VitalsValueBase } from "./types";
 import { classNames } from "../../Utils/utils";
 import WaveformLabels from "./WaveformLabels";
 import { VitalsNonWaveformContent } from "./HL7PatientVitalsMonitor";
+import VitalsMonitorHeader from "./VitalsMonitorHeader";
+import VitalsMonitorFooter from "./VitalsMonitorFooter";
 
 export default function VentilatorPatientVitalsMonitor(
   props: IVitalsComponentProps
 ) {
   const { connect, waveformCanvas, data, isOnline } =
     useVentilatorVitalsMonitor(props.config);
-  const { patient, bed, asset } = props.patientAssetBed ?? {};
 
   useEffect(() => {
     connect(props.socketUrl);
@@ -21,62 +20,8 @@ export default function VentilatorPatientVitalsMonitor(
 
   return (
     <div className="flex flex-col gap-1 rounded bg-[#020617] p-2">
-      {props.patientAssetBed && (
-        <div className="flex items-center justify-between px-2 tracking-wide">
-          <div className="flex items-center gap-2">
-            {patient ? (
-              <Link
-                href={`/facility/${patient.last_consultation?.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}`}
-                className="font-bold uppercase text-white"
-              >
-                {patient?.name}
-              </Link>
-            ) : (
-              <span className="flex items-center gap-1 text-gray-500">
-                <CareIcon className="care-l-ban" />
-                No Patient
-              </span>
-            )}
-            {patient && (
-              <span className="text-sm font-bold text-gray-400">
-                {patient.age}y;{" "}
-                {GENDER_TYPES.find((g) => g.id === patient.gender)?.icon}
-              </span>
-            )}
-          </div>
-          <div className="flex gap-3">
-            {asset && (
-              <div className="flex items-center gap-2 text-sm">
-                <Link
-                  className="flex gap-2 text-gray-500"
-                  href={`/facility/${patient?.facility_object?.id}/assets/${asset?.id}`}
-                >
-                  <span className="flex items-center gap-1">
-                    <CareIcon className="care-l-lungs text-base" />
-                    {asset.name}
-                  </span>
-                </Link>
-              </div>
-            )}
-            {bed && (
-              <div className="flex items-center gap-2 text-sm">
-                <Link
-                  className="flex gap-2 text-gray-500"
-                  href={`/facility/${patient?.facility_object?.id}/location/${bed?.location_object?.id}/beds`}
-                >
-                  <span className="flex items-center gap-1">
-                    <CareIcon className="care-l-bed text-base" />
-                    {bed.name}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <CareIcon className="care-l-location-point text-base" />
-                    {bed.location_object?.name}
-                  </span>
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
+      {props.hideHeader ? null : (
+        <VitalsMonitorHeader patientAssetBed={props.patientAssetBed} />
       )}
       <div className="relative flex flex-col gap-2 divide-x-0 divide-y divide-blue-600 md:flex-row md:justify-between md:divide-x md:divide-y-0">
         <div>
@@ -138,6 +83,9 @@ export default function VentilatorPatientVitalsMonitor(
           />
         </VitalsNonWaveformContent>
       </div>
+      {props.hideFooter ? null : (
+        <VitalsMonitorFooter asset={props.patientAssetBed?.asset} />
+      )}
     </div>
   );
 }
