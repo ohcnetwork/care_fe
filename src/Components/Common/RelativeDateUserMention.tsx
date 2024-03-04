@@ -9,7 +9,7 @@ function RelativeDateUserMention(props: {
   withoutSuffix?: boolean;
 }) {
   return (
-    <div className="flex flex-row flex-wrap items-center justify-center ">
+    <div className="flex flex-row flex-wrap items-center justify-start ">
       <div className="tooltip">
         <span
           className={`tooltip-text tooltip-${props.tooltipPosition || "top"}`}

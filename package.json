@@ -128,6 +128,7 @@
     "autoprefixer": "^10.4.14",
     "cypress": "^13.5.0",
     "cypress-localstorage-commands": "^2.2.3",
+    "cypress-split": "^1.20.1",
     "eslint": "^8.44.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-config-standard": "^17.1.0",
