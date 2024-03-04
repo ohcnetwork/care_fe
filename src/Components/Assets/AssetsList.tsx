@@ -24,9 +24,6 @@ import { useTranslation } from "react-i18next";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
-import SwitchTabs from "../Common/components/SwitchTabs.js";
-import SortDropdownMenu from "../Common/SortDropdown.js";
-import { PATIENT_SORT_OPTIONS } from "../../Common/constants.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
