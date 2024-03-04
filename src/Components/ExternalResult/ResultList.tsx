@@ -240,15 +240,15 @@ export default function ResultList() {
           </span>
         }
         options={
-          <div className="flex w-full flex-col gap-2 items-center justify-between lg:flex-row lg:items-center">
-          <SearchInput
+          <div className="flex w-full flex-col items-center justify-between gap-2 lg:flex-row lg:items-center">
+            <SearchInput
               name="name"
               onChange={(e) => updateQuery({ [e.name]: e.value })}
               value={qParams.name}
               placeholder="Search by name"
             />
-        
-              <div className="lg:mt-4">
+
+            <div className="lg:mt-4">
               <PhoneNumberFormField
                 name="mobile_number"
                 value={phone_number}
@@ -257,13 +257,12 @@ export default function ResultList() {
                 placeholder="Search by Phone Number"
                 types={[]}
               />
-              </div>
-         
+            </div>
 
-              <AdvancedFilterButton
-                onClick={() => advancedFilter.setShow(true)}
-              />
-           
+            <AdvancedFilterButton
+              onClick={() => advancedFilter.setShow(true)}
+            />
+
             <ExportMenu
               label="Import/Export"
               exportItems={[

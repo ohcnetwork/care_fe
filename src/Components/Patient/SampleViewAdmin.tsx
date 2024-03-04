@@ -330,9 +330,11 @@ export default function SampleViewAdmin() {
             />
           </div>
           <div className="flex flex-col justify-between gap-6 lg:flex-row">
-          <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
-          <SampleFilter {...advancedFilter} key={window.location.search} />
-        </div>
+            <AdvancedFilterButton
+              onClick={() => advancedFilter.setShow(true)}
+            />
+            <SampleFilter {...advancedFilter} key={window.location.search} />
+          </div>
         </div>
       }
     >
@@ -344,7 +346,6 @@ export default function SampleViewAdmin() {
         />
       )}
       <div className=" gap-5 lg:grid lg:grid-cols-1">
-        
         <FilterBadges
           badges={({ badge, value }) => [
             badge("Patient Name", "patient_name"),

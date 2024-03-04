@@ -63,7 +63,6 @@ export const AdvancedFilterButton = ({ onClick }: { onClick: () => void }) => {
       id="advanced-filter"
     >
       <CareIcon className="care-l-filter" />
-      
     </ButtonV2>
   );
 };

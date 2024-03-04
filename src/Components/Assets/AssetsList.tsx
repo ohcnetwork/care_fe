@@ -272,7 +272,7 @@ const AssetsList = () => {
       options={
         <div className="flex w-full flex-col items-center justify-between lg:flex-row">
           <div className="mb-2 flex w-full flex-col items-center lg:mb-0 lg:w-fit lg:flex-row lg:gap-5"></div>
-          
+
           <SearchInput
             name="search"
             value={qParams.search}
@@ -280,22 +280,21 @@ const AssetsList = () => {
             placeholder="Search by name/serial no./QR code ID"
           />
           <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
-          
-          <div className="flex flex-col items-start justify-start gap-2 lg:ml-2">
-          <div className="flex w-full flex-col gap-2 md:flex-row lg:w-auto">
-            <ButtonV2
-              className="w-full py-[11px]"
-              onClick={() => setIsScannerActive(true)}
-            >
-              <CareIcon icon="l-search" className="mr-1 text-base" /> Scan Asset
-              QR
-            </ButtonV2>
-          </div>
-        </div>
+            <div className="flex flex-col items-start justify-start gap-2 lg:ml-2">
+              <div className="flex w-full flex-col gap-2 md:flex-row lg:w-auto">
+                <ButtonV2
+                  className="w-full py-[11px]"
+                  onClick={() => setIsScannerActive(true)}
+                >
+                  <CareIcon icon="l-search" className="mr-1 text-base" /> Scan
+                  Asset QR
+                </ButtonV2>
+              </div>
+            </div>
             <AdvancedFilterButton
               onClick={() => advancedFilter.setShow(true)}
             />
-     
+
             {authorizedForImportExport && (
               <div className="tooltip" data-testid="import-asset-button">
                 <ExportMenu
@@ -352,7 +351,7 @@ const AssetsList = () => {
                 />
               </div>
             )}
-                   <div
+            <div
               className="flex w-full flex-col md:flex-row"
               data-testid="create-asset-buttom"
             >
@@ -375,10 +374,6 @@ const AssetsList = () => {
         </div>
       }
     >
-    
-        
-      
-      
       <AssetFilter {...advancedFilter} key={window.location.search} />
       {isLoading ? (
         <Loading />

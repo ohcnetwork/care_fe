@@ -441,45 +441,40 @@ export default function ManageUsers() {
 
   return (
     <Page
-     title="User Management"
-      hideBack={true} 
+      title="User Management"
+      hideBack={true}
       breadcrumbs={false}
       componentRight={
         <span className="ml-2 flex items-center rounded-lg bg-primary-300 px-4  text-lg font-bold">
-       {userListData?.count || 0}
+          {userListData?.count || 0}
         </span>
       }
       options={
         <div className="flex w-full flex-col items-center justify-between lg:flex-row">
-           <div className="col-span-2 my-2 flex flex-col justify-between space-y-3 lg:flex-row lg:space-x-4 lg:space-y-0 lg:px-3">
-          <div className="w-full">
-            <SearchInput
-              id="search-by-username"
-              name="username"
-              onChange={(e) => updateQuery({ [e.name]: e.value })}
-              value={qParams.username}
-              placeholder="Search by username"
-            />
-          </div>
-         
+          <div className="col-span-2 my-2 flex flex-col justify-between space-y-3 lg:flex-row lg:space-x-4 lg:space-y-0 lg:px-3">
+            <div className="w-full">
+              <SearchInput
+                id="search-by-username"
+                name="username"
+                onChange={(e) => updateQuery({ [e.name]: e.value })}
+                value={qParams.username}
+                placeholder="Search by username"
+              />
+            </div>
 
-          <UserFilter {...advancedFilter} key={window.location.search} />
-        </div>
-        
+            <UserFilter {...advancedFilter} key={window.location.search} />
+          </div>
+
           <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
-       
             <AdvancedFilterButton
               onClick={() => advancedFilter.setShow(true)}
             />
-          
-          <div>
-         {userTypes.length && addUser}
-         </div>
-           
+
+            <div>{userTypes.length && addUser}</div>
           </div>
         </div>
       }
-      >
+    >
       {expandSkillList && (
         <SkillsSlideOver
           show={expandSkillList}
@@ -533,10 +528,6 @@ export default function ManageUsers() {
           </div>
         </div>
       </SlideOverCustom>
-
-       
-      
-   
 
       <div className="pb-2 pl-6">
         <FilterBadges
