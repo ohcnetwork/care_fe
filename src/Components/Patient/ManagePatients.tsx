@@ -778,13 +778,13 @@ export const PatientManager = () => {
             <AdvancedFilterButton
               onClick={() => advancedFilter.setShow(true)}
             />
-            <div className="flex ">
+            <div className="flex">
               <SortDropdownMenu
                 options={PATIENT_SORT_OPTIONS}
                 selected={qParams.ordering}
                 onSelect={updateQuery}
               />
-              <div className="tooltip  ml-4">
+              <div className="tooltip ml-4">
                 {!isExportAllowed ? (
                   <ButtonV2
                     onClick={() => {
