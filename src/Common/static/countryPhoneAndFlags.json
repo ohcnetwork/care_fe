@@ -57,11 +57,7 @@
   "DJ": { "flag": "🇩🇯", "name": "Djibouti", "code": "253" },
   "DK": { "flag": "🇩🇰", "name": "Denmark", "code": "45" },
   "DM": { "flag": "🇩🇲", "name": "Dominica", "code": "1-767" },
-  "DO": {
-    "flag": "🇩🇴",
-    "name": "Dominican Republic",
-    "code": "1"
-  },
+  "DO": { "flag": "🇩🇴", "name": "Dominican Republic", "code": "1" },
   "DZ": { "flag": "🇩🇿", "name": "Algeria", "code": "213" },
   "EC": { "flag": "🇪🇨", "name": "Ecuador", "code": "593" },
   "EE": { "flag": "🇪🇪", "name": "Estonia", "code": "372" },
@@ -105,11 +101,7 @@
   "IL": { "flag": "🇮🇱", "name": "Israel", "code": "972" },
   "IM": { "flag": "🇮🇲", "name": "Isle of Man", "code": "44-1624" },
   "IN": { "flag": "🇮🇳", "name": "India", "code": "91" },
-  "IO": {
-    "flag": "🇮🇴",
-    "name": "British Indian Ocean Territory",
-    "code": "246"
-  },
+  "IO": { "flag": "🇮🇴", "name": "British Indian Ocean Territory", "code": "246" },
   "IQ": { "flag": "🇮🇶", "name": "Iraq", "code": "964" },
   "IR": { "flag": "🇮🇷", "name": "Iran", "code": "98" },
   "IS": { "flag": "🇮🇸", "name": "Iceland", "code": "354" },

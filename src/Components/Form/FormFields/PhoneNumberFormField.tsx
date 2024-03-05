@@ -1,6 +1,6 @@
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 import FormField from "./FormField";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   classNames,
   parsePhoneNumber,
@@ -27,7 +27,13 @@ interface Props extends FormFieldBaseProps<string> {
 
 export default function PhoneNumberFormField(props: Props) {
   const field = useFormFieldPropsResolver(props as any);
-  const [error, setError] = useState<FieldError>();
+  const [error, setError] = useState<FieldError | undefined>();
+  const [country, setCountry] = useState<CountryData>({
+    flag: "🇮🇳",
+    name: "India",
+    code: "91",
+  });
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const validator = useMemo(
     () => PhoneNumberValidator(props.types),
@@ -51,19 +57,44 @@ export default function PhoneNumberFormField(props: Props) {
     [props.disableValidation]
   );
 
-  const setValue = (value: string) => {
-    value = value.replaceAll(/[^0-9+]/g, "");
-    if (value.length > 12 && value.startsWith("+910")) {
-      value = "+91" + value.slice(4);
-    }
+  const setValue = useCallback(
+    (value: string) => {
+      value = value.replaceAll(/[^0-9+]/g, "");
+      if (value.length > 12 && value.startsWith("+910")) {
+        value = "+91" + value.slice(4);
+      }
 
-    const error = validate(value, "change");
-    field.handleChange(value);
+      const error = validate(value, "change");
+      field.handleChange(value);
 
-    setError(error);
+      setError(error);
+    },
+    [field, validate]
+  );
+
+  const handleCountryChange = (value: CountryData): void => {
+    setCountry(value);
+    setValue(conditionPhoneCode(value.code));
+    setIsOpen(false);
   };
 
-  useEffect(() => setValue(field.value || "+91"), []);
+  useEffect(() => {
+    if (field.value && field.value.length > 0) {
+      if (field.value.startsWith("1800")) {
+        setCountry({ flag: "📞", name: "Support", code: "1800" });
+        return;
+      }
+      if (field.value === "+") {
+        setCountry({ flag: "🌍", name: "Other", code: "+" });
+        return;
+      }
+      setCountry(phoneCodes[getCountryCode(field.value)!]);
+    }
+  }, [setValue]);
+
+  useEffect(() => {
+    setValue(field.value || "+91");
+  }, []);
 
   return (
     <FormField
@@ -76,13 +107,27 @@ export default function PhoneNumberFormField(props: Props) {
       }}
     >
       <div className="relative rounded-md shadow-sm">
+        <div
+          className="absolute inset-y-0 left-0 w-[4.5rem] cursor-pointer p-0.5"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          <span className="flex h-full items-center rounded-md bg-slate-100 pl-4 ">
+            {country?.flag ?? "🇮🇳"}
+          </span>
+          {isOpen ? (
+            <CareIcon className="care-l-angle-up absolute right-1 top-1/2 -translate-y-1/2 text-2xl font-bold " />
+          ) : (
+            <CareIcon className="care-l-angle-down absolute right-1 top-1/2 -translate-y-1/2 text-2xl font-bold " />
+          )}
+        </div>
+
         <input
           type="tel"
           id={field.id}
           name={field.name}
           autoComplete={props.autoComplete ?? "tel"}
           className={classNames(
-            "cui-input-base pr-24 tracking-widest sm:leading-6 md:pr-28",
+            "cui-input-base h-full pl-20 tracking-widest sm:leading-6 ",
             field.error && "border-danger-500",
             field.className
           )}
@@ -93,35 +138,9 @@ export default function PhoneNumberFormField(props: Props) {
           disabled={field.disabled}
           onBlur={() => setError(validate(field.value, "blur"))}
         />
-        <div className="absolute inset-y-0 right-0 flex items-center">
-          <label htmlFor={field.id + "__country"} className="sr-only">
-            Country
-          </label>
-          <select
-            disabled={field.disabled}
-            id={field.id + "__country"}
-            name="country"
-            autoComplete="country"
-            className="cui-input-base h-full border-0 bg-transparent pl-2 pr-8 text-end font-medium tracking-wider text-gray-700 focus:ring-2 focus:ring-inset"
-            value={
-              getCountryCode(field.value) ??
-              (field.value?.startsWith("1800") ? "1800" : "Other")
-            }
-            onChange={(e) => {
-              if (e.target.value === "1800") return setValue("1800");
-              if (e.target.value === "Other") return setValue("");
-              setValue(conditionPhoneCode(phoneCodes[e.target.value].code));
-            }}
-          >
-            {Object.entries(phoneCodes).map(([country, { flag }]) => (
-              <option key={country} value={country}>
-                {flag} {country}
-              </option>
-            ))}
-            <option value="Other">Other</option>
-            <option value="1800">Support</option>
-          </select>
-        </div>
+        {isOpen && (
+          <CountryCodesList handleCountryChange={handleCountryChange} />
+        )}
       </div>
     </FormField>
   );
@@ -169,4 +188,79 @@ const formatPhoneNumber = (value: string, types: PhoneNumberType[]) => {
 
   const phoneNumber = parsePhoneNumber(value);
   return phoneNumber ? formatPhoneNumberUtil(phoneNumber) : value;
+};
+
+const CountryCodesList = ({ handleCountryChange }: any) => {
+  const [searchValue, setSearchValue] = useState<string>("");
+
+  return (
+    <div className="absolute z-10 w-full rounded-md border border-gray-300 bg-white shadow-lg transition-all duration-300">
+      <div className="relative m-2">
+        <CareIcon
+          icon="l-search"
+          className="absolute left-3 top-3 mr-1 text-base"
+        />
+        <input
+          type="search"
+          placeholder="Search"
+          className="w-full border-b border-gray-400 p-2 pl-10 focus:outline-none focus:ring-0"
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+        />
+      </div>
+
+      <ul className="max-h-[200px] overflow-x-hidden overflow-y-scroll px-2">
+        {Object.entries(phoneCodes)
+          .filter(([country, { flag, name, code }]) => {
+            if (searchValue === "") {
+              return true;
+            }
+            return (
+              name.toLowerCase().includes(searchValue.toLowerCase()) ||
+              code.includes(searchValue) ||
+              country.toLowerCase().includes(searchValue.toLowerCase()) ||
+              flag.includes(searchValue)
+            );
+          })
+          .map(([country, { flag, name, code }]) => (
+            <li
+              key={country}
+              className="flex cursor-pointer items-center gap-2 rounded-md p-2 hover:bg-primary-100 hover:text-primary-600"
+              onClick={() => {
+                handleCountryChange({ flag, name, code });
+              }}
+            >
+              <span>{flag}</span>
+              <span>{name}</span>
+              <span className="text-gray-600">
+                {" "}
+                ({conditionPhoneCode(code)})
+              </span>
+            </li>
+          ))}
+        <li
+          key={"support"}
+          className="flex cursor-pointer items-center gap-2 rounded-md p-2 hover:bg-primary-100 hover:text-primary-600"
+          onClick={() => {
+            handleCountryChange({ flag: "📞", name: "Support", code: "1800" });
+          }}
+        >
+          <span>📞</span>
+          <span>Support</span>
+          <span className="text-gray-600"> (1800)</span>
+        </li>
+        <li
+          key={"other"}
+          className="flex cursor-pointer items-center gap-2 rounded-md p-2 hover:bg-primary-100 hover:text-primary-600"
+          onClick={() => {
+            handleCountryChange({ flag: "🌍", name: "Other", code: "+" });
+          }}
+        >
+          <span>🌍</span>
+          <span>Other</span>
+          <span className="text-gray-600"> (+)</span>
+        </li>
+      </ul>
+    </div>
+  );
 };
