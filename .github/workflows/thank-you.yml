@@ -18,7 +18,7 @@ jobs:
         uses: actions/github-script@v6.3.3
         with:
           script: |
-            const thankyouNote = 'We truly appreciate your efforts. Thank you for taking the time to contribute; this is a very valuable contribution to us :1st_place_medal:. We always welcome your contribution :slightly_smiling_face:, so feel free to contribute to anything anytime, and never lose that spirit of innovation :raised_hands:.'
+            const thankyouNote = 'Your efforts have helped advance digital healthcare and TeleICU systems. :rocket: Thank you for taking the time out to make CARE better. We hope you continue to innovate and contribute; your impact is immense! :raised_hands:'
             const options = {
               issue_number: context.issue.number,
               owner: context.repo.owner,
