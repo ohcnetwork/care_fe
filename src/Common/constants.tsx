@@ -272,7 +272,7 @@ export const REVIEW_AT_CHOICES: Array<OptionsType> = [
 ];
 
 export const SYMPTOM_CHOICES = [
-  { id: 1, text: "ASYMPTOMATIC" },
+  { id: 1, text: "ASYMPTOMATIC", isSingleSelect: true },
   { id: 2, text: "FEVER" },
   { id: 3, text: "SORE THROAT" },
   { id: 4, text: "COUGH" },
@@ -689,20 +689,20 @@ export const MOTOR_RESPONSE_SCALE = [
   { value: 2, text: "Abnormal Extension(decerebrate)" },
   { value: 1, text: "No Response" },
 ];
-export const CONSULTATION_TABS: Array<OptionsType> = [
-  { id: 1, text: "UPDATES", desc: "Updates" },
-  { id: 13, text: "FEED", desc: "Feed" },
-  { id: 2, text: "SUMMARY", desc: "Summary" },
-  { id: 3, text: "MEDICINES", desc: "Medicines" },
-  { id: 4, text: "FILES", desc: "Files" },
-  { id: 5, text: "INVESTIGATIONS", desc: "Investigations" },
-  { id: 6, text: "ABG", desc: "ABG" },
-  { id: 7, text: "NURSING", desc: "Nursing" },
-  { id: 8, text: "NEUROLOGICAL_MONITORING", desc: "Neurological Monitoring" },
-  { id: 9, text: "VENTILATOR", desc: "Respiratory Support" },
-  { id: 10, text: "NUTRITION", desc: "Nutrition" },
-  { id: 11, text: "PRESSURE_SORE", desc: "Pressure Sore" },
-  { id: 12, text: "DIALYSIS", desc: "Dialysis" },
+export const CONSULTATION_TABS = [
+  { text: "UPDATES", desc: "Overview" },
+  { text: "FEED", desc: "Feed" },
+  { text: "SUMMARY", desc: "Vitals" },
+  { text: "ABG", desc: "ABG" },
+  { text: "MEDICINES", desc: "Medicines" },
+  { text: "FILES", desc: "Files" },
+  { text: "INVESTIGATIONS", desc: "Investigations" },
+  { text: "NEUROLOGICAL_MONITORING", desc: "Neuro" },
+  { text: "VENTILATOR", desc: "Ventilation" },
+  { text: "NUTRITION", desc: "Nutrition" },
+  { text: "PRESSURE_SORE", desc: "Pressure Sore" },
+  { text: "NURSING", desc: "Nursing" },
+  { text: "DIALYSIS", desc: "Dialysis" },
 ];
 
 export const RHYTHM_CHOICES: Array<OptionsType> = [
