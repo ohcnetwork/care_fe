@@ -2,7 +2,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { DropdownTransition } from "../Common/components/HelperComponents";
 import { Listbox } from "@headlessui/react";
 import { classNames } from "../../Utils/utils";
-import { ReactNode } from "react";
+import { ReactNode, useRef } from "react";
 
 type OptionCallback<T, R = void> = (option: T) => R;
 
@@ -63,6 +63,18 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
       return props.renderSelectedOptions(selectedOptions.map((o) => o.option));
   };
 
+  const buttonRef = useRef(null);
+
+  const handleSingleSelect = (o: any) => {
+    if (
+      o.option?.isSingleSelect === true &&
+      !selectedOptions.includes(o) &&
+      buttonRef.current
+    ) {
+      buttonRef.current.click();
+    }
+  };
+
   return (
     <div className={props.className} id={props.id}>
       <Listbox
@@ -80,7 +92,10 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
             </Listbox.Label>
             <div className="relative">
               <div>
-                <Listbox.Button className="cui-input-base flex w-full rounded">
+                <Listbox.Button
+                  className="cui-input-base flex w-full rounded"
+                  ref={buttonRef}
+                >
                   <div className="relative z-0 flex w-full items-center">
                     <div className="relative flex flex-1 items-center pr-4 focus:z-10">
                       <p className="ml-2.5 text-sm font-normal text-gray-600">
@@ -119,6 +134,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                       key={index}
                       className={dropdownOptionClassNames}
                       value={option}
+                      onClick={() => handleSingleSelect(option)}
                     >
                       {({ active }) => (
                         <div className="flex flex-col gap-2">
