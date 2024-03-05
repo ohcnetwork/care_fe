@@ -503,6 +503,10 @@ const AssetManage = (props: AssetManageProps) => {
           <Uptime
             route={routes.listAssetAvailability}
             params={{ external_id: asset.id }}
+            header={
+              <div className="text-xl font-semibold">Availability History</div>
+            }
+            parentClassNames="mt-8 flex w-full flex-col bg-white p-4 shadow-sm sm:rounded-lg"
           />
         )}
       <div className="mb-4 mt-8 text-xl font-semibold">Service History</div>
