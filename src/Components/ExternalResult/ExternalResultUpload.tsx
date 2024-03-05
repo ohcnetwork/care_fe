@@ -26,10 +26,15 @@ export default function ExternalResultUpload() {
     setValidationErrorCount(
       data.filter(
         (result: IExternalResult) =>
-          result.district !== user.district_object.name
+          (user.user_type === "StateAdmin" &&
+            result.address.split(",").pop()?.trim() !==
+              user.state_object.name) ||
+          (user.user_type !== "StateAdmin" &&
+            result.district !== user.district_object.name)
       ).length
     );
   };
+  console.log("validationErrorCount", validationErrorCount);
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
 
@@ -67,7 +72,11 @@ export default function ExternalResultUpload() {
               sample_tests: validationErrorCount
                 ? csvData.filter(
                     (data: IExternalResult) =>
-                      data.district === user.district_object.name
+                      (user.user_type === "StateAdmin" &&
+                        data.address.split(",").pop()?.trim() !==
+                          user.state_object.name) ||
+                      (user.user_type !== "StateAdmin" &&
+                        data.district !== user.district_object.name)
                   )
                 : csvData,
             },
@@ -179,7 +188,11 @@ export default function ExternalResultUpload() {
                       : null}
                   </div>
                   <div>
-                    {data.district !== user.district_object.name && (
+                    {((user.user_type === "StateAdmin" &&
+                      data.address.split(",").pop()?.trim() !==
+                        user.state_object.name) ||
+                      (user.user_type !== "StateAdmin" &&
+                        data.district !== user.district_object.name)) && (
                       <p className="mt-2 flex items-center justify-center gap-1 text-red-500">
                         <CareIcon icon="l-exclamation-triangle" /> Different
                         districts
