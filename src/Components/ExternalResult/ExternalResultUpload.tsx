@@ -34,7 +34,6 @@ export default function ExternalResultUpload() {
       ).length
     );
   };
-  console.log("validationErrorCount", validationErrorCount);
   const { t } = useTranslation();
   const { goBack } = useAppHistory();
 
