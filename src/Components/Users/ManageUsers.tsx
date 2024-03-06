@@ -471,7 +471,7 @@ export default function ManageUsers() {
               <AdvancedFilterButton
                 onClick={() => advancedFilter.setShow(true)}
               />
-              <div>{userTypes.length && addUser}</div>
+              <div>{userTypes.length > 0 && addUser}</div>
             </div>
           }
         />
