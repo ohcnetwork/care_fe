@@ -55,13 +55,17 @@ let make = (
     }
   })
 
-  let getStatus = (min, minText, max, maxText, val) => {
-    switch (val >= min, val <= max) {
-    | (true, true) => ("Normal", "#059669")
-    | (true, false) => (maxText, "#DC2626")
-    | _ => (minText, "#DC2626")
-    }
+let getStatus = (min, minText, max, maxText, val) => {
+  switch (val) {
+  | 0.0 => ("No pain", "#9CA3AF")
+  | 1.0 => ("Noticeable", "#FBBF24")
+  | 2.0 => ("Mild", "#F97316")
+  | 3.0 => ("High", "#F87171")
+  | 4.0 => ("Extremely high", "#EF4444")
+  | 5.0 => ("Unbearable", "#DC2626")
+  | _ => ("No pain", "#9CA3AF")
   }
+}
 
   <div
     hidden={!show}
@@ -104,7 +108,7 @@ let make = (
                       | None => setState(prev => {...prev, scale: 0})
                       }
                     }}
-                    getLabel={getStatus(2.0, "Low", 4.0, "High")}
+                    getLabel={getStatus(0.0, "No pain", 5.0, "Unbearable")}
                     hasError={ValidationUtils.isInputInRangeInt(
                       0,
                       5,
