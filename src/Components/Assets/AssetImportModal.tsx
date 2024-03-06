@@ -17,14 +17,16 @@ import DialogModal from "../Common/Dialog";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 interface Props {
   open: boolean;
   onClose: (() => void) | undefined;
   facility: FacilityModel;
+  onUpdate?: (() => void) | undefined;
 }
 
-const AssetImportModal = ({ open, onClose, facility }: Props) => {
+const AssetImportModal = ({ open, onClose, facility, onUpdate }: Props) => {
   const [isImporting, setIsImporting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<any>();
   const [preview, setPreview] =
@@ -170,7 +172,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
       Notification.Success({ msg: "Assets imported successfully" });
       await sleep(1000);
       setIsImporting(false);
-      window.location.reload();
+      onUpdate?.();
     } else {
       Notification.Error({ msg: "Error importing some assets" });
       await sleep(1000);
@@ -318,7 +320,11 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
                 className="focus:ring-blue mx-auto mt-4 max-w-xs items-center rounded-md border border-primary-500 bg-white px-3 py-2 text-sm font-medium leading-4 text-primary-700 transition duration-150 ease-in-out hover:text-primary-500 hover:shadow focus:border-primary-300 focus:outline-none active:bg-gray-50 active:text-primary-800"
                 href={sample_format_asset_import}
               >
-                <i className="fa fa-download mr-1" aria-hidden="true"></i>{" "}
+                <CareIcon
+                  icon="l-download-alt"
+                  className="mr-1 text-lg"
+                  aria-hidden="true"
+                />{" "}
                 <span>Sample Format</span>
               </a>
             </div>
@@ -327,7 +333,8 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
           <div className="flex flex-col gap-2 sm:flex-row">
             <div>
               <label className="flex cursor-pointer items-center justify-center gap-1 rounded-lg border border-primary-500 bg-white px-4 py-2 text-sm font-medium text-primary-500 transition-all hover:border-primary-400 hover:text-primary-400">
-                <i className="fas fa-cloud-upload-alt mr-2"></i>Upload a file
+                <CareIcon icon="l-cloud-upload" className="mr-2 text-lg" />
+                Upload a file
                 <input
                   data-testid="import-asset-file"
                   title="changeFile"
@@ -355,9 +362,9 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
               data-testid="asset-import-btn"
             >
               {isImporting ? (
-                <i className="fa-solid fa-spinner animate-spin" />
+                <CareIcon icon="l-spinner" className="animate-spin text-lg" />
               ) : (
-                <i className="fa-solid fa-file-import" />
+                <CareIcon icon="l-file-import" className="text-lg" />
               )}
               <span>{isImporting ? "Importing..." : "Import"}</span>
             </Submit>

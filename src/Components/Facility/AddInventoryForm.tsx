@@ -1,21 +1,16 @@
-import { useCallback, useReducer, useState, useEffect, lazy } from "react";
-import { useDispatch } from "react-redux";
+import { useReducer, useState, useEffect, lazy } from "react";
 import Card from "../../CAREUI/display/Card";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  getItems,
-  postInventory,
-  getAnyFacility,
-  getInventorySummary,
-} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import Page from "../Common/components/Page";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-import { InventoryItemsModel } from "./models";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
+
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm = {
@@ -58,76 +53,41 @@ export const AddInventoryForm = (props: any) => {
   const { goBack } = useAppHistory();
   const [state, dispatch] = useReducer(inventoryFormReducer, initialState);
   const { facilityId } = props;
-  const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [offset, _setOffset] = useState(0);
   const [stockError, setStockError] = useState("");
-  const [inventory, setInventory] = useState<any>([]);
-  const [data, setData] = useState<Array<InventoryItemsModel>>([]);
   const [currentUnit, setCurrentUnit] = useState<any>();
-  const [facilityName, setFacilityName] = useState("");
 
   const limit = 14;
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatchAction(getItems({ limit, offset }));
-      if (!status.aborted) {
-        if (res && res.data) {
-          setData(res.data.results);
-        }
-        setIsLoading(false);
-      }
+  const { data } = useQuery(routes.getItems, {
+    query: {
+      limit,
+      offset,
     },
-    [dispatchAction, offset]
-  );
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
+  });
+
+  const { data: inventory } = useQuery(routes.getInventorySummary, {
+    pathParams: {
+      facility_external_id: facilityId,
     },
-    [fetchData]
-  );
-
-  const fetchInventoryData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatchAction(
-        getInventorySummary(facilityId, { limit, offset })
-      );
-      if (!status.aborted) {
-        if (res && res.data) {
-          setInventory(res.data.results);
-        }
-        setIsLoading(false);
-      }
+    query: {
+      limit,
+      offset,
     },
-    [dispatchAction, facilityId]
-  );
+    prefetch: facilityId !== undefined,
+  });
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchInventoryData(status);
-    },
-    [fetchInventoryData]
-  );
-
-  useEffect(() => {
-    async function fetchFacilityName() {
-      if (facilityId) {
-        const res = await dispatchAction(getAnyFacility(facilityId));
-
-        setFacilityName(res?.data?.name || "");
-      } else {
-        setFacilityName("");
-      }
-    }
-    fetchFacilityName();
-  }, [dispatchAction, facilityId]);
+  const { data: facilityObject } = useQuery(routes.getAnyFacility, {
+    pathParams: { id: facilityId },
+    prefetch: !!facilityId,
+  });
 
   useEffect(() => {
     // set the default units according to the item
-    const item = data.find((item) => item.id === Number(state.form.id));
+    const item = data?.results.find(
+      (item) => item.id === Number(state.form.id)
+    );
     if (item) {
       dispatch({
         type: "set_form",
@@ -138,13 +98,15 @@ export const AddInventoryForm = (props: any) => {
   }, [state.form.id]);
 
   const defaultUnitConverter = (unitData: any) => {
-    const unitName = data[Number(unitData.item - 1)].allowed_units?.filter(
+    const unitName = data?.results[
+      Number(unitData.item - 1)
+    ].allowed_units?.filter(
       (u: any) => Number(u.id) === Number(unitData.unit)
     )[0].name;
     if (unitName === "Dozen") {
       return Number(unitData.quantity) * 12;
     }
-    if (unitName === "Gram") {
+    if (unitName === "gram") {
       return Number(unitData.quantity) / 1000;
     }
     return Number(unitData.quantity);
@@ -153,9 +115,9 @@ export const AddInventoryForm = (props: any) => {
   // this function determines whether the stock which user has demanded to use is available or not !
 
   const stockValidation = (data: any) => {
-    if (inventory && inventory.length) {
+    if (inventory && inventory.results.length) {
       // get the stock cont of item selected
-      const stockBefore = inventory.filter(
+      const stockBefore = inventory.results.filter(
         (inventoryItem: any) =>
           Number(inventoryItem.item_object.id) === Number(data.item)
       );
@@ -175,7 +137,7 @@ export const AddInventoryForm = (props: any) => {
       }
       setStockError("");
       return true;
-    } else if (inventory && inventory.length === 0) {
+    } else if (inventory && inventory.results.length === 0) {
       setStockError("No Stock Available !");
       setIsLoading(false);
       return false;
@@ -236,17 +198,24 @@ export const AddInventoryForm = (props: any) => {
     };
     // if user has selected "Add stock" or "stockValidation" function is true
     if (data.is_incoming || stockValidation(data)) {
-      const res = await dispatchAction(postInventory(data, { facilityId }));
-      setIsLoading(false);
-
-      if (res && res.data && (res.status === 200 || res.status === 201)) {
-        Notification.Success({
-          msg: "Inventory created successfully",
-        });
-        goBack();
-      } else {
-        setIsLoading(false);
+      // if user has selected grams as unit then convert it to kg
+      if (data.unit === 5) {
+        data.quantity = data.quantity / 1000;
+        data.unit = 6;
       }
+      await request(routes.createInventory, {
+        body: data,
+        pathParams: { facilityId },
+        onResponse: ({ res, data }) => {
+          if (res?.ok && data) {
+            Notification.Success({
+              msg: "Inventory created successfully",
+            });
+            goBack();
+          }
+        },
+      });
+      setIsLoading(false);
     } else {
       setIsLoading(false);
     }
@@ -266,7 +235,9 @@ export const AddInventoryForm = (props: any) => {
     <Page
       title={"Manage Inventory"}
       backUrl={`/facility/${facilityId}/inventory`}
-      crumbsReplacements={{ [facilityId]: { name: facilityName } }}
+      crumbsReplacements={{
+        [facilityId]: { name: facilityObject ? facilityObject.name : "" },
+      }}
     >
       <div className="mt-4">
         <Card>
@@ -280,7 +251,7 @@ export const AddInventoryForm = (props: any) => {
                   name="id"
                   onChange={handleChange}
                   value={state.form.id}
-                  options={data.map((e) => {
+                  options={(data?.results ?? []).map((e) => {
                     return { id: e.id, name: e.name };
                   })}
                   optionValue={(inventory) => inventory.id}
@@ -327,7 +298,7 @@ export const AddInventoryForm = (props: any) => {
                 />
               </div>
             </div>
-            <div className="mt-4 flex flex-col justify-between gap-2 md:flex-row">
+            <div className="cui-form-button-group">
               <Cancel onClick={() => goBack()} />
               <Submit onClick={handleSubmit} label="Add/Update Inventory" />
             </div>

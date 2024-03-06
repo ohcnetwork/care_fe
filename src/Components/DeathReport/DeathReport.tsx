@@ -14,6 +14,7 @@ import { navigate } from "raviger";
 import dayjs from "dayjs";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 type DeathReport = {
   name?: string;
@@ -115,8 +116,8 @@ export default function PrintDeathReport(props: { id: string }) {
           date_declared_positive: res.data?.date_declared_positive
             ? dayjs(res.data?.date_declared_positive).toDate()
             : "",
-          date_of_admission: res.data?.last_consultation?.admission_date
-            ? dayjs(res.data?.last_consultation?.admission_date).toDate()
+          date_of_admission: res.data?.last_consultation?.encounter_date
+            ? dayjs(res.data?.last_consultation?.encounter_date).toDate()
             : "",
           date_of_test: res.data?.date_of_test
             ? dayjs(res.data?.date_of_test).toDate()
@@ -137,16 +138,18 @@ export default function PrintDeathReport(props: { id: string }) {
     <div className="my-4">
       <div className="my-4 flex justify-end ">
         <button
+          id="print-deathreport"
           onClick={(_) => window.print()}
           className="btn btn-primary mr-2"
         >
-          <i className="fas fa-print mr-2"></i> Print Death Report
+          <CareIcon icon="l-print" className="mr-2 text-lg" /> Print Death
+          Report
         </button>
         <button
           onClick={(_) => setIsPrintMode(false)}
           className="btn btn-default"
         >
-          <i className="fas fa-times mr-2"></i> Close
+          <CareIcon icon="l-times" className="mr-2 text-lg" /> Close
         </button>
       </div>
 

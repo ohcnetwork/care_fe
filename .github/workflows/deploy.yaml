@@ -11,6 +11,10 @@ on:
       - master
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   IMAGE_NAME: care_fe
   AWS_DEFAULT_REGION: ap-south-1
@@ -31,7 +35,7 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ hashFiles('package-lock.json', 'Dockerfile') }}
@@ -83,7 +87,7 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ hashFiles('package-lock.json', 'Dockerfile') }}
@@ -145,7 +149,7 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ hashFiles('package-lock.json', 'Dockerfile') }}
@@ -195,6 +199,10 @@ jobs:
           token: ${{ secrets.GIT_ACCESS_TOKEN }}
           path: kube
           ref: main
+      
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20'
 
       # Setup gcloud CLI
       - uses: google-github-actions/setup-gcloud@94337306dda8180d967a56932ceb4ddcf01edae7
@@ -210,7 +218,7 @@ jobs:
           credentials: ${{ secrets.GKE_SA_KEY }}
 
       - name: install kubectl
-        uses: azure/setup-kubectl@v3.0
+        uses: azure/setup-kubectl@v3
         with:
           version: "v1.23.6"
         id: install
@@ -238,6 +246,10 @@ jobs:
           path: kube
           ref: main
 
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
       # Setup gcloud CLI
       - uses: google-github-actions/setup-gcloud@94337306dda8180d967a56932ceb4ddcf01edae7
         with:
@@ -252,7 +264,7 @@ jobs:
           credentials: ${{ secrets.GKE_SA_KEY }}
 
       - name: install kubectl
-        uses: azure/setup-kubectl@v3.0
+        uses: azure/setup-kubectl@v3
         with:
           version: "v1.23.6"
         id: install
@@ -280,6 +292,10 @@ jobs:
           path: kube
           ref: main
 
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
       # Setup gcloud CLI
       - uses: google-github-actions/setup-gcloud@94337306dda8180d967a56932ceb4ddcf01edae7
         with:
@@ -294,7 +310,7 @@ jobs:
           credentials: ${{ secrets.GKE_SA_KEY }}
 
       - name: install kubectl
-        uses: azure/setup-kubectl@v3.0
+        uses: azure/setup-kubectl@v3
         with:
           version: "v1.23.6"
         id: install
@@ -322,6 +338,10 @@ jobs:
           path: kube
           ref: main
 
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
       # Setup gcloud CLI
       - uses: google-github-actions/setup-gcloud@94337306dda8180d967a56932ceb4ddcf01edae7
         with:
@@ -336,7 +356,7 @@ jobs:
           credentials: ${{ secrets.GKE_SA_KEY }}
 
       - name: install kubectl
-        uses: azure/setup-kubectl@v3.0
+        uses: azure/setup-kubectl@v3
         with:
           version: "v1.23.6"
         id: install
@@ -364,6 +384,10 @@ jobs:
           path: kube
           ref: main
 
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
       # Setup gcloud CLI
       - uses: google-github-actions/setup-gcloud@94337306dda8180d967a56932ceb4ddcf01edae7
         with:
@@ -378,7 +402,7 @@ jobs:
           credentials: ${{ secrets.GKE_SA_KEY }}
 
       - name: install kubectl
-        uses: azure/setup-kubectl@v3.0
+        uses: azure/setup-kubectl@v3
         with:
           version: "v1.23.6"
         id: install
@@ -405,6 +429,10 @@ jobs:
           token: ${{ secrets.GIT_ACCESS_TOKEN  }}
           path: kube
           ref: main
+      
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20'
 
       # Setup gcloud CLI
       - uses: google-github-actions/setup-gcloud@94337306dda8180d967a56932ceb4ddcf01edae7
@@ -420,7 +448,7 @@ jobs:
           credentials: ${{ secrets.GKE_SA_KEY }}
 
       - name: install kubectl
-        uses: azure/setup-kubectl@v3.0
+        uses: azure/setup-kubectl@v3
         with:
           version: "v1.23.6"
         id: install
@@ -447,6 +475,10 @@ jobs:
           token: ${{ secrets.GIT_ACCESS_TOKEN }}
           path: kube
           ref: main
+      
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20'
 
       # Setup gcloud CLI
       - uses: google-github-actions/setup-gcloud@94337306dda8180d967a56932ceb4ddcf01edae7
@@ -462,7 +494,7 @@ jobs:
           credentials: ${{ secrets.GKE_SA_KEY }}
 
       - name: install kubectl
-        uses: azure/setup-kubectl@v3.0
+        uses: azure/setup-kubectl@v3
         with:
           version: "v1.23.6"
         id: install

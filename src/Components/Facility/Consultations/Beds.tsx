@@ -1,12 +1,10 @@
 import * as Notification from "../../../Utils/Notifications.js";
 
 import { BedModel, CurrentBed } from "../models";
-import { Dispatch, SetStateAction, useCallback, useState } from "react";
-import {
-  createConsultationBed,
-  listConsultationBeds,
-} from "../../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
+import { Dispatch, SetStateAction, useState } from "react";
+import routes from "../../../Redux/api";
+import request from "../../../Utils/request/request";
+import useQuery from "../../../Utils/request/useQuery";
 
 import { BedSelect } from "../../Common/BedSelect";
 import ButtonV2 from "../../Common/components/ButtonV2";
@@ -16,15 +14,14 @@ import { FieldLabel } from "../../Form/FormFields/FormField";
 import Loading from "../../Common/Loading";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import { formatDateTime } from "../../../Utils/utils";
-import { useDispatch } from "react-redux";
 import dayjs from "../../../Utils/dayjs";
 import { AssetSelect } from "../../Common/AssetSelect.js";
 import DialogModal from "../../Common/Dialog.js";
 import { Link } from "raviger";
 import {
   AssetClass,
-  AssetData,
   assetClassProps,
+  AssetData,
 } from "../../Assets/AssetTypes.js";
 import Chip from "../../../CAREUI/display/Chip.js";
 
@@ -40,7 +37,6 @@ interface BedsProps {
 }
 
 const Beds = (props: BedsProps) => {
-  const dispatch = useDispatch<any>();
   const { facilityId, consultationId, discharged } = props;
   const [bed, setBed] = useState<BedModel>({});
   const [startDate, setStartDate] = useState<string>(
@@ -48,37 +44,23 @@ const Beds = (props: BedsProps) => {
   );
   const [assets, setAssets] = useState<any[]>([]);
   const [consultationBeds, setConsultationBeds] = useState<CurrentBed[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [key, setKey] = useState(0);
   const [showBedDetails, setShowBedDetails] = useState<CurrentBed | null>(null);
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const [bedsData]: any = await Promise.all([
-        dispatch(listConsultationBeds({ consultation: consultationId })),
-      ]);
-      if (!status.aborted) {
-        setIsLoading(false);
-        if (!bedsData?.data)
-          Notification.Error({
-            msg: "Something went wrong..!",
-          });
-        else {
-          setConsultationBeds(bedsData.data.results);
-          setBed(bedsData.data.results[0]?.bed_object || {});
-          setAssets(bedsData.data.results[0]?.assets_objects || []);
-        }
+  const { loading } = useQuery(routes.listConsultationBeds, {
+    query: { consultation: consultationId },
+    onResponse: ({ res, data }) => {
+      if (res && res.status === 200 && data?.results) {
+        setConsultationBeds(data.results);
+        setBed(data?.results[0]?.bed_object || {});
+        setAssets(data?.results[0]?.assets_objects || []);
+      } else {
+        Notification.Error({
+          msg: "Something went wrong..!",
+        });
       }
     },
-    [consultationId, dispatch]
-  );
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [dispatch, fetchData, key]
-  );
+  });
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -88,13 +70,14 @@ const Beds = (props: BedsProps) => {
         msg: "Please select a bed first..!",
       });
 
-    const res: any = await dispatch(
-      createConsultationBed(
-        { start_date: startDate, assets: assets.map((asset) => asset.id) },
-        consultationId,
-        bed?.id
-      )
-    );
+    const { res } = await request(routes.createConsultationBed, {
+      body: {
+        start_date: startDate,
+        assets: assets.map((asset) => asset.id),
+        consultation: consultationId,
+        bed: bed?.id,
+      },
+    });
 
     if (res && res.status === 201) {
       Notification.Success({
@@ -106,7 +89,7 @@ const Beds = (props: BedsProps) => {
     }
   };
 
-  if (isLoading) {
+  if (loading) {
     if (props.smallLoader && props.smallLoader === true) {
       return (
         <div className="flex w-full items-center justify-center p-5 px-10">
@@ -242,7 +225,7 @@ const Beds = (props: BedsProps) => {
           <div className="mt-4 flex flex-row justify-center">
             <div>
               <ButtonV2 variant="primary" type="submit">
-                <i className="fas fa-bed" />
+                <CareIcon icon="l-bed" className="text-xl" />
                 Move to bed
               </ButtonV2>
             </div>

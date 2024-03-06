@@ -4,6 +4,8 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { Popover } from "@headlessui/react";
 import { classNames } from "../../Utils/utils";
 import dayjs from "../../Utils/dayjs";
+import * as Notification from "../../Utils/Notifications.js";
+import { t } from "i18next";
 
 type DatePickerType = "date" | "month" | "year";
 export type DatePickerPosition = "LEFT" | "RIGHT" | "CENTER";
@@ -16,6 +18,7 @@ interface Props {
   value: Date | undefined;
   min?: Date;
   max?: Date;
+  outOfLimitsErrorMessage?: string;
   onChange: (date: Date) => void;
   position?: DatePickerPosition;
   disabled?: boolean;
@@ -34,6 +37,7 @@ const DateInputV2: React.FC<Props> = ({
   value,
   min,
   max,
+  outOfLimitsErrorMessage,
   onChange,
   position,
   disabled,
@@ -100,16 +104,21 @@ const DateInputV2: React.FC<Props> = ({
   ) => void;
 
   const setDateValue = (date: number, close: CloseFunction) => () => {
-    isDateWithinConstraints(date) &&
-      onChange(
-        new Date(
-          datePickerHeaderDate.getFullYear(),
-          datePickerHeaderDate.getMonth(),
-          date
-        )
-      );
-    close();
-    setIsOpen?.(false);
+    isDateWithinConstraints(date)
+      ? (() => {
+          onChange(
+            new Date(
+              datePickerHeaderDate.getFullYear(),
+              datePickerHeaderDate.getMonth(),
+              date
+            )
+          );
+          close();
+          setIsOpen?.(false);
+        })()
+      : Notification.Error({
+          msg: outOfLimitsErrorMessage ?? "Cannot select date out of range",
+        });
   };
 
   const getDayCount = (date: Date) => {
@@ -220,7 +229,7 @@ const DateInputV2: React.FC<Props> = ({
                   readOnly
                   disabled={disabled}
                   className={`cui-input-base cursor-pointer disabled:cursor-not-allowed ${className}`}
-                  placeholder={placeholder ?? "Select date"}
+                  placeholder={placeholder ?? t("select_date")}
                   value={value && dayjs(value).format("DD/MM/YYYY")}
                 />
                 <div className="absolute right-0 top-1/2 -translate-y-1/2 p-2">
@@ -248,7 +257,7 @@ const DateInputV2: React.FC<Props> = ({
                             [dd, mm, yyyy].filter(Boolean).join("/")
                         ) || ""
                       } // Display the value in DD/MM/YYYY format
-                      placeholder="DD/MM/YYYY"
+                      placeholder={t("DD/MM/YYYY")}
                       onChange={(e) => {
                         setDisplayValue(e.target.value.replaceAll("/", ""));
                         const value = dayjs(e.target.value, "DD/MM/YYYY", true);
@@ -330,26 +339,41 @@ const DateInputV2: React.FC<Props> = ({
                             className="aspect-square w-[14.26%] border border-transparent p-1 text-center text-sm"
                           />
                         ))}
-                        {dayCount.map((d, i) => (
-                          <div
-                            key={i}
-                            id={`date-${d}`}
-                            className="aspect-square w-[14.26%]"
-                          >
+                        {dayCount.map((d, i) => {
+                          const withinConstraints = isDateWithinConstraints(d);
+                          const selected = value && isSelectedDate(d);
+
+                          const baseClasses =
+                            "flex h-full items-center justify-center rounded text-center text-sm leading-loose transition duration-100 ease-in-out";
+                          let conditionalClasses = "";
+
+                          if (withinConstraints) {
+                            if (selected) {
+                              conditionalClasses =
+                                "bg-primary-500 font-bold text-white";
+                            } else {
+                              conditionalClasses =
+                                "hover:bg-gray-300 cursor-pointer";
+                            }
+                          } else {
+                            conditionalClasses =
+                              "!cursor-not-allowed !text-gray-400";
+                          }
+                          return (
                             <div
-                              onClick={setDateValue(d, close)}
-                              className={classNames(
-                                "flex h-full cursor-pointer items-center justify-center rounded text-center text-sm leading-loose text-black transition duration-100 ease-in-out",
-                                value && isSelectedDate(d)
-                                  ? "bg-primary-500 font-bold text-white"
-                                  : "hover:bg-gray-300",
-                                !isDateWithinConstraints(d) && "!text-gray-300"
-                              )}
+                              key={i}
+                              id={`date-${d}`}
+                              className="aspect-square w-[14.26%]"
                             >
-                              {d}
+                              <div
+                                onClick={setDateValue(d, close)}
+                                className={`${baseClasses} ${conditionalClasses}`}
+                              >
+                                {d}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </>
                   )}

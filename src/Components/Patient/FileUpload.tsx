@@ -3,21 +3,12 @@ import CircularProgress from "../Common/components/CircularProgress";
 import {
   useCallback,
   useState,
-  useEffect,
   useRef,
   lazy,
   ChangeEvent,
+  useEffect,
 } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  viewUpload,
-  retrieveUpload,
-  createUpload,
-  getPatient,
-  editUpload,
-} from "../../Redux/actions";
-import { FileUploadModel } from "./models";
+import { CreateFileResponse, FileUploadModel } from "./models";
 import * as Notification from "../../Utils/Notifications.js";
 import { VoiceRecorder } from "../../Utils/VoiceRecorder";
 import Pagination from "../Common/Pagination";
@@ -37,8 +28,11 @@ import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import AuthorizedChild from "../../CAREUI/misc/AuthorizedChild";
 import Page from "../Common/components/Page";
-import FilePreviewDialog from "../Common/FilePreviewDialog";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
+import FilePreviewDialog from "../Common/FilePreviewDialog";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -72,6 +66,19 @@ const ExtImage: string[] = [
   "bmp",
   "webp",
   "jfif",
+];
+
+const previewExtensions = [
+  ".html",
+  ".htm",
+  ".pdf",
+  ".mp4",
+  ".webm",
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".gif",
+  ".webp",
 ];
 
 export const LinearProgressWithLabel = (props: any) => {
@@ -145,7 +152,6 @@ export const FileUpload = (props: FileUploadProps) => {
     claimId,
   } = props;
   const id = patientId;
-  const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedArchievedFiles, setuploadedArchievedFiles] = useState<
     Array<FileUploadModel>
@@ -157,7 +163,6 @@ export const FileUpload = (props: FileUploadProps) => {
     useState<Array<FileUploadModel>>([{}]);
   const [uploadStarted, setUploadStarted] = useState<boolean>(false);
   const [audiouploadStarted, setAudioUploadStarted] = useState<boolean>(false);
-  const [reload, setReload] = useState<boolean>(false);
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadFileName, setUploadFileName] = useState<string>("");
   const [uploadFileError, setUploadFileError] = useState<string>("");
@@ -165,7 +170,6 @@ export const FileUpload = (props: FileUploadProps) => {
   const [fileUrl, setFileUrl] = useState("");
   const [audioName, setAudioName] = useState<string>("");
   const [audioFileError, setAudioFileError] = useState<string>("");
-  const [contentType, setcontentType] = useState<string>("");
   const [downloadURL, setDownloadURL] = useState<string>();
   const FACING_MODE_USER = "user";
   const FACING_MODE_ENVIRONMENT = { exact: "environment" };
@@ -173,8 +177,8 @@ export const FileUpload = (props: FileUploadProps) => {
   const [previewImage, setPreviewImage] = useState(null);
   const [facingMode, setFacingMode] = useState<any>(FACING_MODE_USER);
   const videoConstraints = {
-    width: 1280,
-    height: 720,
+    width: { ideal: 4096 },
+    height: { ideal: 2160 },
     facingMode: "user",
   };
   const { width } = useWindowDimensions();
@@ -192,7 +196,7 @@ export const FileUpload = (props: FileUploadProps) => {
     isImage: false,
     name: "",
     extension: "",
-    zoom: 3,
+    zoom: 4,
     isZoomInDisabled: false,
     isZoomOutDisabled: false,
     rotation: 0,
@@ -205,8 +209,6 @@ export const FileUpload = (props: FileUploadProps) => {
   const [totalDischargeSummaryFilesCount, setTotalDischargeSummaryFilesCount] =
     useState(0);
   const [offset, setOffset] = useState(0);
-  const [facilityName, setFacilityName] = useState("");
-  const [patientName, setPatientName] = useState("");
   const [modalOpenForEdit, setModalOpenForEdit] = useState(false);
   const [modalOpenForCamera, setModalOpenForCamera] = useState(false);
   const [modalOpenForArchive, setModalOpenForArchive] = useState(false);
@@ -220,38 +222,26 @@ export const FileUpload = (props: FileUploadProps) => {
   const [sortFileState, setSortFileState] = useState("UNARCHIVED");
   const authUser = useAuthUser();
   const limit = RESULTS_PER_PAGE_LIMIT;
-  const [isActive, setIsActive] = useState(true);
   const [tabs, setTabs] = useState([
     { name: "Unarchived Files", value: "UNARCHIVED" },
     { name: "Archived Files", value: "ARCHIVED" },
   ]);
-  useEffect(() => {
-    async function fetchPatientName() {
-      if (patientId) {
-        const res = await dispatch(getPatient({ id: patientId }));
-        if (res.data) {
-          setPatientName(res.data.name);
-          setFacilityName(res.data.facility_object.name);
-          setIsActive(res.data.is_active);
-        }
-      } else {
-        setPatientName("");
-        setFacilityName("");
-      }
-    }
-    fetchPatientName();
-  }, [dispatch, patientId]);
+
+  const { data: patient } = useQuery(routes.getPatient, {
+    pathParams: { id: patientId },
+    prefetch: !!patientId,
+  });
 
   const captureImage = () => {
     setPreviewImage(webRef.current.getScreenshot());
-    fetch(webRef.current.getScreenshot())
-      .then((res) => res.blob())
-      .then((blob) => {
-        const myFile = new File([blob], "image.png", {
-          type: blob.type,
-        });
-        setFile(myFile);
+    const canvas = webRef.current.getCanvas();
+    canvas?.toBlob((blob: Blob) => {
+      const extension = blob.type.split("/").pop();
+      const myFile = new File([blob], `image.${extension}`, {
+        type: blob.type,
       });
+      setFile(myFile);
+    });
   };
 
   const handlePagination = (page: number, limit: number) => {
@@ -273,12 +263,36 @@ export const FileUpload = (props: FileUploadProps) => {
     CLAIM: "Supporting Info",
   };
 
+  const triggerDownload = async (url: string, filename: string) => {
+    try {
+      Notification.Success({ msg: "Downloading file..." });
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Network response was not ok.");
+
+      const data = await response.blob();
+      const blobUrl = window.URL.createObjectURL(data);
+
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+
+      // Clean up
+      window.URL.revokeObjectURL(blobUrl);
+      document.body.removeChild(a);
+    } catch (err) {
+      Notification.Error({ msg: "Failed to download file" });
+    }
+  };
+
   const handleClose = () => {
     setDownloadURL("");
+    setPreviewImage(null);
     setFileState({
       ...file_state,
       open: false,
-      zoom: 3,
+      zoom: 4,
       isZoomInDisabled: false,
       isZoomOutDisabled: false,
     });
@@ -297,103 +311,94 @@ export const FileUpload = (props: FileUploadProps) => {
     }
   };
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const unarchivedFileData = {
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+
+    const unarchivedQuery = await request(routes.viewUpload, {
+      query: {
         file_type: type,
         associating_id: getAssociatedId(),
         is_archived: false,
         limit: limit,
         offset: offset,
-      };
-      let res = await dispatch(viewUpload(unarchivedFileData));
-      if (!status.aborted) {
-        if (res?.data) {
-          audio_urls(res.data.results);
-          setuploadedUnarchievedFiles(
-            res?.data?.results?.filter(
-              (file: FileUploadModel) =>
-                file.upload_completed || file.file_category === "AUDIO"
-            )
-          );
-          setTotalUnarchievedFilesCount(res.data.count);
-        }
-        setIsLoading(false);
-      }
-      const archivedFileData = {
+      },
+    });
+
+    if (unarchivedQuery.data) {
+      prefetch_download_urls(unarchivedQuery.data.results);
+      setuploadedUnarchievedFiles(
+        unarchivedQuery.data.results?.filter(
+          (file) => file.upload_completed || file.file_category === "AUDIO"
+        )
+      );
+      setTotalUnarchievedFilesCount(unarchivedQuery.data.count);
+    }
+
+    const archivedQuery = await request(routes.viewUpload, {
+      query: {
         file_type: type,
         associating_id: getAssociatedId(),
         is_archived: true,
         limit: limit,
         offset: offset,
-      };
-      res = await dispatch(viewUpload(archivedFileData));
-      if (!status.aborted) {
-        if (res?.data) {
-          setuploadedArchievedFiles(res.data.results);
-          setTotalArchievedFilesCount(res.data.count);
-        }
-        setIsLoading(false);
-      }
-      if (type === "CONSULTATION") {
-        const dischargeSummaryFileData = {
+      },
+    });
+
+    if (archivedQuery.data) {
+      setuploadedArchievedFiles(archivedQuery.data.results);
+      setTotalArchievedFilesCount(archivedQuery.data.count);
+    }
+
+    if (type === "CONSULTATION") {
+      const dischargeSummaryQuery = await request(routes.viewUpload, {
+        query: {
           file_type: "DISCHARGE_SUMMARY",
           associating_id: getAssociatedId(),
           is_archived: false,
           limit: limit,
           offset: offset,
-        };
-        res = await dispatch(viewUpload(dischargeSummaryFileData));
-        if (!status.aborted) {
-          if (res?.data) {
-            setuploadedDischargeSummaryFiles(res.data.results);
-            setTotalDischargeSummaryFilesCount(res.data.count);
-            if (res?.data?.results?.length > 0) {
-              setTabs([
-                ...tabs,
-                {
-                  name: "Discharge Summary",
-                  value: "DISCHARGE_SUMMARY",
-                },
-              ]);
-            }
-          }
+        },
+      });
+      if (dischargeSummaryQuery.data) {
+        setuploadedDischargeSummaryFiles(dischargeSummaryQuery.data.results);
+        setTotalDischargeSummaryFilesCount(dischargeSummaryQuery.data.count);
+        if (dischargeSummaryQuery.data?.results?.length) {
+          setTabs([
+            ...tabs,
+            {
+              name: "Discharge Summary",
+              value: "DISCHARGE_SUMMARY",
+            },
+          ]);
         }
-        setIsLoading(false);
       }
-    },
-    [dispatch, id, offset]
-  );
+    }
 
-  // Store all audio urls for each audio file
-  const audio_urls = (files: any) => {
-    let audio_files = files || [];
-    audio_files = audio_files.filter(
-      (x: FileUploadModel) => x.file_category === "AUDIO"
+    setIsLoading(false);
+  }, [id, offset]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Store signed urls for non previewable files
+  const prefetch_download_urls = async (files: FileUploadModel[]) => {
+    const unsupportedFiles = files.filter(
+      (x) => !previewExtensions.includes(x.extension ?? "")
     );
-
-    const getURL = async (audio_files: any) => {
-      const data = { file_type: type, associating_id: getAssociatedId() };
-      const all_urls: any = {};
-
-      for (const x of audio_files) {
-        if (x.id) {
-          const responseData = await dispatch(retrieveUpload(data, x.id));
-          all_urls[`${x.id}`] = responseData.data.read_signed_url;
-        }
-      }
-      seturl(all_urls);
-    };
-    getURL(audio_files);
+    const query = { file_type: type, associating_id: getAssociatedId() };
+    const urls = await Promise.all(
+      unsupportedFiles.map(async (file) => {
+        const id = file.id as string;
+        const { data } = await request(routes.retrieveUpload, {
+          query,
+          pathParams: { id: id },
+        });
+        return [id, data?.read_signed_url];
+      })
+    );
+    seturl(Object.fromEntries(urls));
   };
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [dispatch, fetchData, id, reload]
-  );
 
   // Function to extract the extension of the file
   const getExtension = (url: string) => {
@@ -403,6 +408,7 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   const getIconClassName = (extensionName: string | undefined) => {
+    if (!extensionName) return "l-file-medical";
     // check for image files
     if (
       [
@@ -420,9 +426,9 @@ export const FileUpload = (props: FileUploadProps) => {
         ".pjp",
         ".svg",
         ".webp",
-      ].some((ext) => ext === extensionName)
+      ].includes(extensionName)
     ) {
-      return "fa-solid fa-file-image";
+      return "l-image";
     }
     // check for video files
     if (
@@ -442,59 +448,42 @@ export const FileUpload = (props: FileUploadProps) => {
         ".qt",
         ".flv",
         ".swf",
-      ].some((ext) => ext === extensionName)
+      ].includes(extensionName)
     ) {
-      return "fa-solid fa-file-video";
+      return "l-video";
     }
-    // check for compressed files
-    if (extensionName === ".zip" || extensionName === ".rar") {
-      return "fa-solid fa-file-zipper";
-    }
-    // check for misclaneous files whose icons are available freely in fontawesome
-    if (extensionName === ".pdf") {
-      return "fa-solid fa-file-pdf";
-    }
-    if (extensionName === ".docx") {
-      return "fa-solid fa-file-word";
-    }
-    if (extensionName === ".csv") {
-      return "fa-solid fa-file-csv";
-    }
-    if (extensionName === ".xlsx") {
-      return "fa-solid fa-file-excel";
-    }
-    if (extensionName === ".txt") {
-      return "fa-solid fa-file-lines";
-    }
+
     if (extensionName === ".pptx") {
-      return "fa-solid fa-file-powerpoint";
+      return "l-presentation-play";
     }
-    return "fa-solid fa-file-medical";
+    return "l-file-medical";
   };
 
-  const loadFile = async (id: any) => {
+  const loadFile = async (id: string) => {
     setFileUrl("");
     setFileState({ ...file_state, open: true });
-    const data = {
-      file_type: sortFileState === "DISCHARGE_SUMMARY" ? sortFileState : type,
-      associating_id: getAssociatedId(),
-    };
-    const responseData = await dispatch(retrieveUpload(data, id));
-    const file_extension = getExtension(responseData.data.read_signed_url);
-    if (file_extension === "pdf") {
-      window.open(responseData.data.read_signed_url, "_blank");
-      setFileState({ ...file_state, open: false });
-    } else {
-      setFileState({
-        ...file_state,
-        open: true,
-        name: responseData.data.name,
-        extension: file_extension,
-        isImage: ExtImage.includes(file_extension),
-      });
-      downloadFileUrl(responseData.data.read_signed_url);
-      setFileUrl(responseData.data.read_signed_url);
-    }
+    const { data } = await request(routes.retrieveUpload, {
+      query: {
+        file_type: sortFileState === "DISCHARGE_SUMMARY" ? sortFileState : type,
+        associating_id: getAssociatedId(),
+      },
+      pathParams: { id },
+    });
+
+    if (!data) return;
+
+    const signedUrl = data.read_signed_url as string;
+    const extension = getExtension(signedUrl);
+
+    setFileState({
+      ...file_state,
+      open: true,
+      name: data.name as string,
+      extension,
+      isImage: ExtImage.includes(extension),
+    });
+    downloadFileUrl(signedUrl);
+    setFileUrl(signedUrl);
   };
 
   const validateEditFileName = (name: any) => {
@@ -517,327 +506,70 @@ export const FileUpload = (props: FileUploadProps) => {
     }
   };
 
-  const partialupdateFileName = async (id: any, name: string) => {
-    const data = {
-      file_type: sortFileState === "DISCHARGE_SUMMARY" ? sortFileState : type,
-      name: name,
-      associating_id: getAssociatedId(),
-    };
-    if (validateEditFileName(name)) {
-      const res = await dispatch(
-        editUpload({ name: data.name }, id, data.file_type, data.associating_id)
-      );
-      if (res && res.status === 200) {
-        fetchData(res.status);
-        Notification.Success({
-          msg: "File name changed successfully",
-        });
-        setbtnloader(false);
-        setModalOpenForEdit(false);
-      } else {
-        setbtnloader(false);
-      }
-    } else {
+  const partialupdateFileName = async (id: string, name: string) => {
+    if (!validateEditFileName(name)) {
       setbtnloader(false);
+      return;
     }
+
+    const fileType =
+      sortFileState === "DISCHARGE_SUMMARY" ? sortFileState : type;
+
+    const { res } = await request(routes.editUpload, {
+      body: { name },
+      pathParams: {
+        id,
+        fileType,
+        associatingId: getAssociatedId(),
+      },
+    });
+
+    if (res?.ok) {
+      fetchData();
+      Notification.Success({ msg: "File name changed successfully" });
+      setModalOpenForEdit(false);
+    }
+    setbtnloader(false);
   };
 
-  const archiveFile = async (id: any, archiveReason: string) => {
-    const data = {
-      file_type: type,
-      is_archived: true,
-      archive_reason: archiveReason,
-      associating_id: getAssociatedId(),
-    };
-    if (validateArchiveReason(archiveReason)) {
-      const res = await dispatch(
-        editUpload(
-          {
-            is_archived: data.is_archived,
-            archive_reason: data.archive_reason,
-          },
-          id,
-          data.file_type,
-          data.associating_id
-        )
-      );
-      if (res && res.status === 200) {
-        fetchData(res.status);
-        Notification.Success({
-          msg: "File archived successfully",
-        });
-        setbtnloader(false);
-        setModalOpenForArchive(false);
-      } else {
-        setbtnloader(false);
-      }
-    } else {
+  const archiveFile = async (id: string, archive_reason: string) => {
+    if (!validateArchiveReason(archiveReason)) {
       setbtnloader(false);
+      return;
     }
+
+    const { res } = await request(routes.editUpload, {
+      body: { is_archived: true, archive_reason },
+      pathParams: {
+        id,
+        fileType: type,
+        associatingId: getAssociatedId(),
+      },
+    });
+
+    if (res?.ok) {
+      fetchData();
+      Notification.Success({ msg: "File archived successfully" });
+      setModalOpenForArchive(false);
+    }
+
+    setbtnloader(false);
   };
 
   const renderFileUpload = (item: FileUploadModel) => {
+    const isPreviewSupported = previewExtensions.includes(item.extension ?? "");
     return (
-      <>
-        <div
-          className="mt-4 rounded-lg border bg-white p-4 shadow"
-          key={item.id}
-        >
-          {!item.is_archived ? (
-            <>
-              {item.file_category === "AUDIO" ? (
-                <div className="flex flex-wrap justify-between space-y-2">
-                  <div className="flex flex-wrap justify-between space-x-2">
-                    <div>
-                      <i className="fa-solid fa-file-audio fa-3x m-3 text-primary-500"></i>
-                    </div>
-                    <div>
-                      <div>
-                        <span className="font-semibold leading-relaxed">
-                          File Name:{" "}
-                        </span>{" "}
-                        {item.name}
-                      </div>
-                      <div>
-                        <span className="font-semibold leading-relaxed">
-                          Created By:
-                        </span>{" "}
-                        {item.uploaded_by ? item.uploaded_by.username : null}
-                      </div>
-                      {item.created_date && (
-                        <RecordMeta
-                          prefix={
-                            <span className="font-semibold leading-relaxed">
-                              {t("created")}:
-                            </span>
-                          }
-                          time={item.created_date}
-                        />
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center">
-                    {item.id ? (
-                      Object.keys(url).length > 0 ? (
-                        <div className="flex flex-wrap">
-                          <audio
-                            className="m-auto max-h-full max-w-full object-contain"
-                            src={url[item.id]}
-                            controls
-                            preload="auto"
-                            controlsList="nodownload"
-                          />
-                        </div>
-                      ) : (
-                        <CircularProgress />
-                      )
-                    ) : (
-                      <div>File Not found</div>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap items-center">
-                    {item.id ? (
-                      Object.keys(url).length > 0 && (
-                        <div className="flex flex-wrap">
-                          <a
-                            href={url[item.id]}
-                            download={item.name}
-                            className="Button button-size-default button-shape-square button-primary-default m-1 flex w-full justify-center gap-2 outline-offset-1 hover:text-white focus:bg-primary-500 sm:w-auto"
-                          >
-                            <CareIcon className="care-l-arrow-circle-down text-lg" />{" "}
-                            DOWNLOAD
-                          </a>
-                          {item?.uploaded_by?.username === authUser.username ||
-                          authUser.user_type === "DistrictAdmin" ||
-                          authUser.user_type === "StateAdmin" ? (
-                            <>
-                              <ButtonV2
-                                onClick={() => {
-                                  setModalDetails({
-                                    name: item.name,
-                                    id: item.id,
-                                  });
-                                  setEditFileName(item?.name);
-                                  setModalOpenForEdit(true);
-                                }}
-                                className="m-1 w-full sm:w-auto"
-                              >
-                                <CareIcon className="care-l-pen text-lg" />
-                                EDIT FILE NAME
-                              </ButtonV2>
-                            </>
-                          ) : (
-                            <></>
-                          )}
-                          {item?.uploaded_by?.username === authUser.username ||
-                          authUser.user_type === "DistrictAdmin" ||
-                          authUser.user_type === "StateAdmin" ? (
-                            <>
-                              <ButtonV2
-                                onClick={() => {
-                                  setArchiveReason("");
-                                  setModalDetails({
-                                    name: item.name,
-                                    id: item.id,
-                                  });
-                                  setModalOpenForArchive(true);
-                                }}
-                                className="m-1 w-full sm:w-auto"
-                              >
-                                <CareIcon className="care-l-archive text-lg" />
-                                ARCHIVE
-                              </ButtonV2>
-                            </>
-                          ) : (
-                            <></>
-                          )}
-                        </div>
-                      )
-                    ) : (
-                      <div>File Not found</div>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-wrap justify-between space-y-2">
-                  <div className="flex flex-wrap justify-between space-x-2">
-                    <div>
-                      <i
-                        className={`${getIconClassName(
-                          item?.extension
-                        )} fa-3x m-3 text-primary-500`}
-                      ></i>
-                    </div>
-                    <div>
-                      <div>
-                        <span className="font-semibold leading-relaxed">
-                          File Name:{" "}
-                        </span>{" "}
-                        {item.name}
-                      </div>
-                      {sortFileState != "DISCHARGE_SUMMARY" && (
-                        <div>
-                          <span className="font-semibold leading-relaxed">
-                            Created By:
-                          </span>{" "}
-                          {item.uploaded_by ? item.uploaded_by.username : null}
-                        </div>
-                      )}
-                      {item.created_date && (
-                        <RecordMeta
-                          prefix={
-                            <span className="font-semibold leading-relaxed">
-                              {t("created")}:
-                            </span>
-                          }
-                          time={item.created_date}
-                        />
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap items-center">
-                    <ButtonV2
-                      onClick={() => {
-                        loadFile(item.id);
-                      }}
-                      className="m-1 w-full sm:w-auto"
-                    >
-                      {" "}
-                      <CareIcon className="care-l-eye text-lg" />
-                      PREVIEW FILE
-                    </ButtonV2>
-                    {item?.uploaded_by?.username === authUser.username ||
-                    authUser.user_type === "DistrictAdmin" ||
-                    authUser.user_type === "StateAdmin" ? (
-                      <>
-                        {" "}
-                        <ButtonV2
-                          onClick={() => {
-                            setModalDetails({ name: item.name, id: item.id });
-                            setEditFileName(item?.name);
-                            setModalOpenForEdit(true);
-                          }}
-                          className="m-1 w-full sm:w-auto"
-                        >
-                          <CareIcon className="care-l-pen text-lg" />
-                          EDIT FILE NAME
-                        </ButtonV2>
-                      </>
-                    ) : (
-                      <></>
-                    )}
-                    {sortFileState != "DISCHARGE_SUMMARY" &&
-                    (item?.uploaded_by?.username === authUser.username ||
-                      authUser.user_type === "DistrictAdmin" ||
-                      authUser.user_type === "StateAdmin") ? (
-                      <>
-                        <ButtonV2
-                          onClick={() => {
-                            setArchiveReason("");
-                            setModalDetails({ name: item.name, id: item.id });
-                            setModalOpenForArchive(true);
-                          }}
-                          className="m-1 w-full sm:w-auto"
-                        >
-                          <CareIcon className="care-l-archive text-lg" />
-                          ARCHIVE
-                        </ButtonV2>
-                      </>
-                    ) : (
-                      <></>
-                    )}
-                  </div>
-                </div>
-              )}
-            </>
-          ) : (
-            <>
+      <div className="mt-4 rounded-lg border bg-white p-4 shadow" key={item.id}>
+        {!item.is_archived ? (
+          <>
+            {item.file_category === "AUDIO" ? (
               <div className="flex flex-wrap justify-between space-y-2">
                 <div className="flex flex-wrap justify-between space-x-2">
                   <div>
-                    {item.file_category === "AUDIO" ? (
-                      <div className="relative">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth={1.5}
-                          stroke="currentColor"
-                          className="absolute bottom-1 right-1 h-6 w-6 text-red-600"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-
-                        <i className="fa-solid fa-file-audio fa-3x m-3 text-gray-500"></i>
-                      </div>
-                    ) : (
-                      <div className="relative">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth={1.5}
-                          stroke="currentColor"
-                          className="absolute bottom-1 right-1 h-6 w-6 text-red-600"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-
-                        <i
-                          className={`${getIconClassName(
-                            item?.extension
-                          )} fa-3x m-3 text-gray-500`}
-                        ></i>
-                      </div>
-                    )}
+                    <CareIcon
+                      icon="l-music"
+                      className="m-3 text-6xl text-primary-500"
+                    />
                   </div>
                   <div>
                     <div>
@@ -845,6 +577,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         File Name:{" "}
                       </span>{" "}
                       {item.name}
+                      {item.extension}
                     </div>
                     <div>
                       <span className="font-semibold leading-relaxed">
@@ -864,41 +597,311 @@ export const FileUpload = (props: FileUploadProps) => {
                     )}
                   </div>
                 </div>
+                <div className="flex items-center">
+                  {item.id ? (
+                    Object.keys(url).length > 0 ? (
+                      <div className="flex flex-wrap">
+                        <audio
+                          className="m-auto max-h-full max-w-full object-contain"
+                          src={url[item.id]}
+                          controls
+                          preload="auto"
+                          controlsList="nodownload"
+                        />
+                      </div>
+                    ) : (
+                      <CircularProgress />
+                    )
+                  ) : (
+                    <div>File Not found</div>
+                  )}
+                </div>
                 <div className="flex flex-wrap items-center">
-                  <ButtonV2
-                    variant="secondary"
-                    className="m-1 w-full sm:w-auto"
-                  >
-                    {" "}
-                    <CareIcon className="care-l-eye-slash text-lg" /> FILE
-                    ARCHIVED
-                  </ButtonV2>
-                  <ButtonV2
-                    onClick={() => {
-                      setModalDetails({
-                        name: item.name,
-                        reason: item.archive_reason,
-                        userArchived: item.archived_by?.username,
-                        archiveTime: item.archived_datetime,
-                      });
-                      setModalOpenForMoreDetails(true);
-                    }}
-                    className="m-1 w-full sm:w-auto"
-                  >
-                    <CareIcon className="care-l-question-circle text-lg" />
-                    MORE DETAILS
-                  </ButtonV2>
+                  {item.id ? (
+                    Object.keys(url).length > 0 && (
+                      <div className="flex flex-wrap">
+                        <ButtonV2
+                          onClick={() => {
+                            triggerDownload(
+                              url[item.id!],
+                              `${item.name}${item.extension}`
+                            );
+                          }}
+                          className="m-1 w-full sm:w-auto"
+                        >
+                          <CareIcon className="care-l-arrow-circle-down text-lg" />{" "}
+                          DOWNLOAD
+                        </ButtonV2>
+                        {item?.uploaded_by?.username === authUser.username ||
+                        authUser.user_type === "DistrictAdmin" ||
+                        authUser.user_type === "StateAdmin" ? (
+                          <>
+                            <ButtonV2
+                              onClick={() => {
+                                setModalDetails({
+                                  name: item.name,
+                                  id: item.id,
+                                });
+                                setEditFileName(item?.name);
+                                setModalOpenForEdit(true);
+                              }}
+                              className="m-1 w-full sm:w-auto"
+                            >
+                              <CareIcon className="care-l-pen text-lg" />
+                              RENAME
+                            </ButtonV2>
+                          </>
+                        ) : (
+                          <></>
+                        )}
+                        {item?.uploaded_by?.username === authUser.username ||
+                        authUser.user_type === "DistrictAdmin" ||
+                        authUser.user_type === "StateAdmin" ? (
+                          <>
+                            <ButtonV2
+                              onClick={() => {
+                                setArchiveReason("");
+                                setModalDetails({
+                                  name: item.name,
+                                  id: item.id,
+                                });
+                                setModalOpenForArchive(true);
+                              }}
+                              className="m-1 w-full sm:w-auto"
+                            >
+                              <CareIcon className="care-l-archive text-lg" />
+                              ARCHIVE
+                            </ButtonV2>
+                          </>
+                        ) : (
+                          <></>
+                        )}
+                      </div>
+                    )
+                  ) : (
+                    <div>File Not found</div>
+                  )}
                 </div>
               </div>
-            </>
-          )}
-        </div>
-      </>
+            ) : (
+              <div className="flex flex-wrap justify-between space-y-2">
+                <div className="flex flex-wrap justify-between space-x-2">
+                  <div>
+                    <CareIcon
+                      icon={getIconClassName(item?.extension)}
+                      className={"m-3 text-6xl text-primary-500"}
+                    />
+                  </div>
+                  <div>
+                    <div>
+                      <span className="font-semibold leading-relaxed">
+                        File Name:{" "}
+                      </span>{" "}
+                      {item.name}
+                      {item.extension}
+                    </div>
+                    {sortFileState != "DISCHARGE_SUMMARY" && (
+                      <div>
+                        <span className="font-semibold leading-relaxed">
+                          Created By:
+                        </span>{" "}
+                        {item.uploaded_by ? item.uploaded_by.username : null}
+                      </div>
+                    )}
+                    {item.created_date && (
+                      <RecordMeta
+                        prefix={
+                          <span className="font-semibold leading-relaxed">
+                            {t("created")}:
+                          </span>
+                        }
+                        time={item.created_date}
+                      />
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center">
+                  {isPreviewSupported ? (
+                    <ButtonV2
+                      onClick={() => {
+                        loadFile(item.id!);
+                      }}
+                      className="m-1 w-full sm:w-auto"
+                    >
+                      {" "}
+                      <CareIcon className="text-lg" icon="l-eye" />
+                      PREVIEW
+                    </ButtonV2>
+                  ) : (
+                    <ButtonV2
+                      className="m-1 w-full sm:w-auto"
+                      onClick={() => {
+                        triggerDownload(
+                          url[item.id!],
+                          `${item.name}${item.extension}`
+                        );
+                      }}
+                    >
+                      <CareIcon
+                        className="text-lg"
+                        icon="l-arrow-circle-down"
+                      />{" "}
+                      DOWNLOAD
+                    </ButtonV2>
+                  )}
+                  {item?.uploaded_by?.username === authUser.username ||
+                  authUser.user_type === "DistrictAdmin" ||
+                  authUser.user_type === "StateAdmin" ? (
+                    <>
+                      {" "}
+                      <ButtonV2
+                        onClick={() => {
+                          setModalDetails({ name: item.name, id: item.id });
+                          setEditFileName(item?.name);
+                          setModalOpenForEdit(true);
+                        }}
+                        className="m-1 w-full sm:w-auto"
+                      >
+                        <CareIcon className="care-l-pen text-lg" />
+                        RENAME
+                      </ButtonV2>
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                  {sortFileState != "DISCHARGE_SUMMARY" &&
+                  (item?.uploaded_by?.username === authUser.username ||
+                    authUser.user_type === "DistrictAdmin" ||
+                    authUser.user_type === "StateAdmin") ? (
+                    <>
+                      <ButtonV2
+                        onClick={() => {
+                          setArchiveReason("");
+                          setModalDetails({ name: item.name, id: item.id });
+                          setModalOpenForArchive(true);
+                        }}
+                        className="m-1 w-full sm:w-auto"
+                      >
+                        <CareIcon className="care-l-archive text-lg" />
+                        ARCHIVE
+                      </ButtonV2>
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="flex flex-wrap justify-between space-y-2">
+            <div className="flex flex-wrap justify-between space-x-2">
+              <div>
+                {item.file_category === "AUDIO" ? (
+                  <div className="relative">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="absolute bottom-1 right-1 h-6 w-6 text-red-600"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+
+                    <CareIcon
+                      icon="l-music"
+                      className="text-6xl text-gray-500"
+                    />
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="absolute bottom-1 right-1 h-6 w-6 text-red-600"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+
+                    <CareIcon
+                      icon={getIconClassName(item?.extension)}
+                      className="text-6xl text-gray-500"
+                    />
+                  </div>
+                )}
+              </div>
+              <div>
+                <div>
+                  <span className="font-semibold leading-relaxed">
+                    File Name:{" "}
+                  </span>{" "}
+                  {item.name}
+                  {item.extension}
+                </div>
+                <div>
+                  <span className="font-semibold leading-relaxed">
+                    Created By:
+                  </span>{" "}
+                  {item.uploaded_by ? item.uploaded_by.username : null}
+                </div>
+                {item.created_date && (
+                  <RecordMeta
+                    prefix={
+                      <span className="font-semibold leading-relaxed">
+                        {t("created")}:
+                      </span>
+                    }
+                    time={item.created_date}
+                  />
+                )}
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center">
+              <ButtonV2 variant="secondary" className="m-1 w-full sm:w-auto">
+                {" "}
+                <CareIcon className="care-l-eye-slash text-lg" /> FILE ARCHIVED
+              </ButtonV2>
+              <ButtonV2
+                onClick={() => {
+                  setModalDetails({
+                    name: item.name,
+                    reason: item.archive_reason,
+                    userArchived: item.archived_by?.username,
+                    archiveTime: item.archived_datetime,
+                  });
+                  setModalOpenForMoreDetails(true);
+                }}
+                className="m-1 w-full sm:w-auto"
+              >
+                <CareIcon className="care-l-question-circle text-lg" />
+                MORE DETAILS
+              </ButtonV2>
+            </div>
+          </div>
+        )}
+      </div>
     );
   };
 
   if (isLoading) {
-    return <Loading />;
+    return (
+      <div className="min-h-screen">
+        <Loading />
+      </div>
+    );
   }
 
   const onFileChange = (e: ChangeEvent<HTMLInputElement>): any => {
@@ -913,7 +916,6 @@ export const FileUpload = (props: FileUploadProps) => {
     );
 
     const ext: string = fileName.split(".")[1];
-    setcontentType(header_content_type[ext]);
 
     if (ExtImage.includes(ext)) {
       const options = {
@@ -928,16 +930,16 @@ export const FileUpload = (props: FileUploadProps) => {
     setFile(f);
   };
 
-  const uploadfile = (response: any) => {
-    const url = response.data.signed_url;
-    const internal_name = response.data.internal_name;
+  const uploadfile = async (data: CreateFileResponse) => {
+    const url = data.signed_url;
+    const internal_name = data.internal_name;
     const f = file;
     if (!f) return;
     const newFile = new File([f], `${internal_name}`);
 
     const config = {
       headers: {
-        "Content-type": contentType,
+        "Content-type": file?.type,
         "Content-disposition": "inline",
       },
       onUploadProgress: (progressEvent: any) => {
@@ -947,6 +949,7 @@ export const FileUpload = (props: FileUploadProps) => {
         setUploadPercent(percentCompleted);
       },
     };
+
     return new Promise<void>((resolve, reject) => {
       axios
         .put(url, newFile, config)
@@ -955,13 +958,12 @@ export const FileUpload = (props: FileUploadProps) => {
           // setUploadSuccess(true);
           setFile(null);
           setUploadFileName("");
-          setReload(!reload);
-          fetchData({ aborted: false });
+          fetchData();
           Notification.Success({
             msg: "File Uploaded Successfully",
           });
           setUploadFileError("");
-          resolve(response);
+          resolve();
         })
         .catch((e) => {
           Notification.Error({
@@ -990,18 +992,18 @@ export const FileUpload = (props: FileUploadProps) => {
     }
     return true;
   };
-  const markUploadComplete = async (response: any) => {
-    return dispatch(
-      editUpload(
-        { upload_completed: true },
-        response.data.id,
-        type,
-        getAssociatedId()
-      )
-    );
+  const markUploadComplete = (data: CreateFileResponse) => {
+    return request(routes.editUpload, {
+      body: { upload_completed: true },
+      pathParams: {
+        id: data.id,
+        fileType: type,
+        associatingId: getAssociatedId(),
+      },
+    });
   };
 
-  const handleUpload = async (status: any) => {
+  const handleUpload = async () => {
     if (!validateFileUpload()) return;
     const f = file;
 
@@ -1009,23 +1011,23 @@ export const FileUpload = (props: FileUploadProps) => {
     const filename = uploadFileName === "" && f ? f.name : uploadFileName;
     const name = f?.name;
     setUploadStarted(true);
-    // setUploadSuccess(false);
-    const requestData = {
-      original_name: name,
-      file_type: type,
-      name: filename,
-      associating_id: getAssociatedId(),
-      file_category: category,
-    };
-    dispatch(createUpload(requestData))
-      .then(uploadfile)
-      .then(markUploadComplete)
-      .catch(() => {
-        setUploadStarted(false);
-      })
-      .then(() => {
-        fetchData(status);
-      });
+
+    const { data } = await request(routes.createUpload, {
+      body: {
+        original_name: name,
+        file_type: type,
+        name: filename,
+        associating_id: getAssociatedId(),
+        file_category: category,
+        mime_type: f?.type,
+      },
+    });
+
+    if (data) {
+      await uploadfile(data);
+      await markUploadComplete(data);
+      await fetchData();
+    }
   };
 
   const createAudioBlob = (createdBlob: Blob) => {
@@ -1046,8 +1048,12 @@ export const FileUpload = (props: FileUploadProps) => {
     const internal_name = response.data.internal_name;
     const f = audioBlob;
     if (f === undefined) return;
-    const newFile = new File([f], `${internal_name}`, { type: "audio/mpeg" });
+    const newFile = new File([f], `${internal_name}`, { type: f.type });
     const config = {
+      headers: {
+        "Content-type": newFile?.type,
+        "Content-disposition": "inline",
+      },
       onUploadProgress: (progressEvent: any) => {
         const percentCompleted = Math.round(
           (progressEvent.loaded * 100) / progressEvent.total
@@ -1062,7 +1068,7 @@ export const FileUpload = (props: FileUploadProps) => {
         setAudioUploadStarted(false);
         // setUploadSuccess(true);
         setAudioName("");
-        setReload(!reload);
+        fetchData();
         Notification.Success({
           msg: "File Uploaded Successfully",
         });
@@ -1093,15 +1099,17 @@ export const FileUpload = (props: FileUploadProps) => {
     const filename =
       audioName.trim().length === 0 ? Date.now().toString() : audioName.trim();
     setAudioUploadStarted(true);
-    // setUploadSuccess(false);
-    const requestData = {
-      original_name: name,
-      file_type: type,
-      name: filename,
-      associating_id: getAssociatedId(),
-      file_category: category,
-    };
-    dispatch(createUpload(requestData))
+
+    request(routes.createUpload, {
+      body: {
+        original_name: name,
+        file_type: type,
+        name: filename,
+        associating_id: getAssociatedId(),
+        file_category: category,
+        mime_type: audioBlob?.type,
+      },
+    })
       .then(uploadAudiofile)
       .catch(() => {
         setAudioUploadStarted(false);
@@ -1154,10 +1162,10 @@ export const FileUpload = (props: FileUploadProps) => {
           {!previewImage ? (
             <div className="m-3">
               <Webcam
+                forceScreenshotSourceSize
+                screenshotQuality={1}
                 audio={false}
-                height={720}
                 screenshotFormat="image/jpeg"
-                width={1280}
                 ref={webRef}
                 videoConstraints={{ ...videoConstraints, facingMode }}
               />
@@ -1207,6 +1215,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   </ButtonV2>
                   <Submit
                     onClick={() => {
+                      setPreviewImage(null);
                       setModalOpenForCamera(false);
                     }}
                     className="m-2"
@@ -1267,6 +1276,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     <Submit
                       onClick={() => {
                         setModalOpenForCamera(false);
+                        setPreviewImage(null);
                       }}
                     >
                       {t("submit")}
@@ -1296,7 +1306,7 @@ export const FileUpload = (props: FileUploadProps) => {
               <CareIcon className="care-l-edit-alt text-lg text-primary-500" />
             </div>
             <div className="m-4">
-              <h1 className="text-xl text-black "> Edit File Name</h1>
+              <h1 className="text-xl text-black ">Rename File</h1>
             </div>
           </div>
         }
@@ -1306,7 +1316,7 @@ export const FileUpload = (props: FileUploadProps) => {
           onSubmit={(event: any) => {
             event.preventDefault();
             setbtnloader(true);
-            partialupdateFileName(modalDetails?.id, editFileName);
+            partialupdateFileName(modalDetails!.id!, editFileName);
           }}
           className="flex w-full flex-col"
         >
@@ -1352,7 +1362,7 @@ export const FileUpload = (props: FileUploadProps) => {
           onSubmit={(event: any) => {
             event.preventDefault();
             setbtnloader(true);
-            archiveFile(modalDetails?.id, archiveReason);
+            archiveFile(modalDetails!.id!, archiveReason);
           }}
           className="mx-2 my-4 flex w-full flex-col"
         >
@@ -1421,8 +1431,8 @@ export const FileUpload = (props: FileUploadProps) => {
         hideBack={hideBack}
         breadcrumbs={false}
         crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          [patientId]: { name: patientName },
+          [facilityId]: { name: patient?.facility_object?.name },
+          [patientId]: { name: patient?.name },
         }}
         backUrl={
           type === "CONSULTATION"
@@ -1527,6 +1537,7 @@ export const FileUpload = (props: FileUploadProps) => {
                               title="changeFile"
                               onChange={onFileChange}
                               type="file"
+                              accept="image/*,video/*,audio/*,text/plain,text/csv,application/rtf,application/msword,application/vnd.oasis.opendocument.text,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/pdf"
                               hidden
                             />
                           </label>
@@ -1545,8 +1556,12 @@ export const FileUpload = (props: FileUploadProps) => {
                     <ButtonV2
                       id="upload_file_button"
                       authorizeFor={NonReadOnlyUsers}
-                      disabled={!file || !uploadFileName || !isActive}
-                      onClick={() => handleUpload({ status })}
+                      disabled={
+                        !file ||
+                        !uploadFileName ||
+                        (patient && !patient.is_active)
+                      }
+                      onClick={handleUpload}
                       className="w-full"
                     >
                       <CareIcon className="care-l-cloud-upload text-lg" />
@@ -1563,7 +1578,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         setUploadFileName("");
                       }}
                     >
-                      <i className="fas fa-times"></i>
+                      <CareIcon icon="l-times" className="text-lg" />
                     </button>
                   </div>
                 )}

@@ -19,16 +19,16 @@ describe("Asset", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/assets");
   });
 
   it("Verify asset creation fields throws error if empty", () => {
     assetPage.createAsset();
-    assetPage.selectFacility("Dummy Facility 1");
+    assetPage.selectFacility("Dummy Facility 40");
     assetPage.clickCreateAsset();
 
     assetPage.verifyEmptyAssetNameError();
-    assetPage.verifyEmptyAssetTypeError();
     assetPage.verifyEmptyLocationError();
     assetPage.verifyEmptyStatusError();
     assetPage.verifyEmptyPhoneError();
@@ -38,9 +38,8 @@ describe("Asset", () => {
 
   it("Create an Asset", () => {
     assetPage.createAsset();
-    assetPage.selectFacility("Dummy Facility 1");
+    assetPage.selectFacility("Dummy Facility 40");
     assetPage.selectLocation("Camera Loc");
-    assetPage.selectAssetType("Internal");
     assetPage.selectAssetClass("ONVIF Camera");
 
     const qr_id_1 = uuidv4();
@@ -67,7 +66,6 @@ describe("Asset", () => {
     const qr_id_2 = uuidv4();
 
     assetPage.selectLocation("Camera Loc");
-    assetPage.selectAssetType("Internal");
     assetPage.selectAssetClass("ONVIF Camera");
     assetPage.enterAssetDetails(
       "New Test Asset 2",
@@ -138,9 +136,8 @@ describe("Asset", () => {
 
   it("Add an vital monitor asset and configure it", () => {
     assetPage.createAsset();
-    assetPage.selectFacility("Dummy Facility 1");
+    assetPage.selectFacility("Dummy Facility 40");
     assetPage.selectLocation("Camera Loc");
-    assetPage.selectAssetType("Internal");
     assetPage.selectAssetClass("HL7 Vitals Monitor");
 
     const qr_id_1 = uuidv4();

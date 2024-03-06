@@ -18,7 +18,6 @@ import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { navigate } from "raviger";
 import useConfig from "../../Common/hooks/useConfig";
 
 import useMergeState from "../../Common/hooks/useMergeState";
@@ -29,36 +28,12 @@ import dayjs from "dayjs";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 
-const clearFilterState = {
-  origin_facility: "",
-  origin_facility_ref: "",
-  shifting_approving_facility: "",
-  shifting_approving_facility_ref: "",
-  assigned_facility: "",
-  assigned_facility_ref: "",
-  emergency: "",
-  is_up_shift: "",
-  created_date_before: "",
-  created_date_after: "",
-  modified_date_before: "",
-  modified_date_after: "",
-  patient_phone_number: "",
-  ordering: "",
-  is_kasp: "",
-  status: "",
-  assigned_user_ref: "",
-  assigned_to: "",
-  disease_status: "",
-  is_antenatal: "",
-  breathlessness_level: "",
-};
-
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
 
 export default function ListFilter(props: any) {
   const { kasp_enabled, kasp_string, wartime_shifting } = useConfig();
-  const { filter, onChange, closeFilter } = props;
+  const { filter, onChange, closeFilter, removeFilters } = props;
 
   const { t } = useTranslation();
 
@@ -221,8 +196,7 @@ export default function ListFilter(props: any) {
       advancedFilter={props}
       onApply={applyFilter}
       onClear={() => {
-        navigate("/shifting");
-        setFilterState(clearFilterState);
+        removeFilters();
         closeFilter();
       }}
     >
@@ -410,7 +384,6 @@ export default function ListFilter(props: any) {
         name="patient_phone_number"
         value={filterState.patient_phone_number}
         onChange={handleFormFieldChange}
-        errorClassName="hidden"
         types={["mobile", "landline"]}
       />
       <DateRangeFormField

@@ -1,6 +1,3 @@
-@tailwind base;
-@tailwind components;
-
 .cui-input-legend::before {
     content: " ";
     position: absolute;
@@ -39,7 +36,7 @@
 .tooltip .tooltip-text {
     visibility: hidden;
     opacity: 0;
-    @apply bg-black/75 backdrop-blur text-white text-center p-2 rounded absolute z-50 text-sm block transition-all whitespace-nowrap
+    @apply bg-black/75 backdrop-blur text-white text-center p-2 rounded absolute z-50 text-sm block transition-opacity whitespace-nowrap pointer-events-none
 }
 
 .tooltip .tooltip-left {

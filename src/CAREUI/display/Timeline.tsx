@@ -14,7 +14,7 @@ export interface TimelineEvent<TType = string> {
 }
 
 interface TimelineProps {
-  className: string;
+  className?: string;
   children: React.ReactNode | React.ReactNode[];
   name: string;
 }
@@ -76,23 +76,29 @@ export const TimelineNode = (props: TimelineNodeProps) => {
           >
             {props.title || (
               <TimelineNodeTitle event={props.event}>
-                <p className="flex-auto py-0.5 text-xs leading-5 text-gray-600">
-                  {props.event.by && (
-                    <span className="font-medium text-gray-900">
-                      {formatName(props.event.by)}{" "}
-                    </span>
-                  )}
-                  {props.titleSuffix
-                    ? props.titleSuffix
-                    : `${props.event.type} the ${props.name || name}.`}
-                </p>
-                {props.actions && (
-                  <TimelineNodeActions>{props.actions}</TimelineNodeActions>
-                )}
-                <RecordMeta
-                  className="flex-none py-0.5 text-xs leading-5 text-gray-500"
-                  time={props.event.timestamp}
-                />
+                <div className="flex w-full justify-between gap-2">
+                  <p className="flex-auto py-0.5 text-xs leading-5 text-gray-600 md:w-2/3">
+                    {props.event.by && (
+                      <span className="font-medium text-gray-900">
+                        {formatName(props.event.by)}{" "}
+                        {props.event.by.user_type &&
+                          `(${props.event.by.user_type}) `}
+                      </span>
+                    )}
+                    {props.titleSuffix
+                      ? props.titleSuffix
+                      : `${props.event.type} the ${props.name || name}.`}
+                  </p>
+                  <div className="md:w-fit">
+                    {props.actions && (
+                      <TimelineNodeActions>{props.actions}</TimelineNodeActions>
+                    )}
+                    <RecordMeta
+                      className="flex-none py-0.5 text-xs leading-5 text-gray-500"
+                      time={props.event.timestamp}
+                    />
+                  </div>
+                </div>
               </TimelineNodeTitle>
             )}
           </div>

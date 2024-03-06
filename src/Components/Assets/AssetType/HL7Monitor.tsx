@@ -1,5 +1,5 @@
 import { SyntheticEvent, useEffect, useState } from "react";
-import { AssetData } from "../AssetTypes";
+import { AssetData, ResolvedMiddleware } from "../AssetTypes";
 import * as Notification from "../../../Utils/Notifications.js";
 import MonitorConfigure from "../configure/MonitorConfigure";
 import Loading from "../../Common/Loading";
@@ -13,7 +13,6 @@ import VentilatorPatientVitalsMonitor from "../../VitalsMonitor/VentilatorPatien
 import useAuthUser from "../../../Common/hooks/useAuthUser";
 import request from "../../../Utils/request/request";
 import routes from "../../../Redux/api";
-import useQuery from "../../../Utils/request/useQuery";
 
 interface HL7MonitorProps {
   assetId: string;
@@ -22,27 +21,20 @@ interface HL7MonitorProps {
 }
 
 const HL7Monitor = (props: HL7MonitorProps) => {
-  const { assetId, asset, facilityId } = props;
+  const { assetId, asset } = props;
   const [assetType, setAssetType] = useState("");
   const [middlewareHostname, setMiddlewareHostname] = useState("");
-  const [facilityMiddlewareHostname, setFacilityMiddlewareHostname] =
-    useState("");
+  const [resolvedMiddleware, setResolvedMiddleware] =
+    useState<ResolvedMiddleware>();
   const [isLoading, setIsLoading] = useState(true);
   const [localipAddress, setLocalIPAddress] = useState("");
   const [ipadrdress_error, setIpAddress_error] = useState("");
   const authUser = useAuthUser();
-  const { data: facility, loading } = useQuery(routes.getPermittedFacility, {
-    pathParams: { id: facilityId },
-    onResponse: ({ res, data }) => {
-      if (res?.status === 200 && data && data.middleware_address) {
-        setFacilityMiddlewareHostname(data.middleware_address);
-      }
-    },
-  });
 
   useEffect(() => {
     setAssetType(asset?.asset_class);
     setMiddlewareHostname(asset?.meta?.middleware_hostname);
+    setResolvedMiddleware(asset?.resolved_middleware);
     setLocalIPAddress(asset?.meta?.local_ip_address);
     setIsLoading(false);
   }, [asset]);
@@ -76,10 +68,12 @@ const HL7Monitor = (props: HL7MonitorProps) => {
     }
   };
 
-  const fallbackMiddleware =
-    asset?.location_object?.middleware_address || facilityMiddlewareHostname;
+  if (isLoading) return <Loading />;
 
-  if (isLoading || loading || !facility) return <Loading />;
+  const socketUrl = `wss://${
+    middlewareHostname || resolvedMiddleware?.hostname
+  }/observations/${localipAddress}`;
+
   return (
     <div className="mx-auto flex w-full xl:mt-8">
       <div className="mx-auto flex flex-col gap-4 xl:flex-row-reverse">
@@ -94,23 +88,21 @@ const HL7Monitor = (props: HL7MonitorProps) => {
                     label={
                       <div className="flex flex-row gap-1">
                         <p>Middleware Hostname</p>
-                        {!middlewareHostname && (
+                        {resolvedMiddleware?.source != "asset" && (
                           <div className="tooltip">
                             <CareIcon
                               icon="l-info-circle"
                               className="tooltip text-indigo-500 hover:text-indigo-600"
                             />
                             <span className="tooltip-text w-56 whitespace-normal">
-                              Middleware hostname sourced from{" "}
-                              {asset?.location_object?.middleware_address
-                                ? "asset location"
-                                : "asset facility"}
+                              Middleware hostname sourced from asset{" "}
+                              {resolvedMiddleware?.source}
                             </span>
                           </div>
                         )}
                       </div>
                     }
-                    placeholder={fallbackMiddleware}
+                    placeholder={resolvedMiddleware?.hostname}
                     value={middlewareHostname}
                     onChange={(e) => setMiddlewareHostname(e.value)}
                     errorClassName="hidden"
@@ -140,16 +132,18 @@ const HL7Monitor = (props: HL7MonitorProps) => {
 
         {assetType === "HL7MONITOR" && (
           <HL7PatientVitalsMonitor
-            socketUrl={`wss://${
-              middlewareHostname || fallbackMiddleware
-            }/observations/${localipAddress}`}
+            key={socketUrl}
+            socketUrl={socketUrl}
+            hideHeader={true}
+            hideFooter={true}
           />
         )}
         {assetType === "VENTILATOR" && (
           <VentilatorPatientVitalsMonitor
-            socketUrl={`wss://${
-              middlewareHostname || fallbackMiddleware
-            }/observations/${localipAddress}`}
+            key={socketUrl}
+            socketUrl={socketUrl}
+            hideHeader={true}
+            hideFooter={true}
           />
         )}
       </div>

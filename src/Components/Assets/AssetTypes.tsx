@@ -2,13 +2,21 @@ import { BedModel } from "../Facility/models";
 import { PerformedByModel } from "../HCX/misc";
 import { PatientModel } from "../Patient/models";
 
+export enum AssetLocationType {
+  OTHER = "OTHER",
+  WARD = "WARD",
+  ICU = "ICU",
+}
+
 export interface AssetLocationObject {
-  id: string;
+  id?: string;
   name: string;
   description: string;
   created_date?: string;
   modified_date?: string;
-  facility: {
+  location_type: AssetLocationType;
+  middleware_address?: string;
+  facility?: {
     id: string;
     name: string;
   };
@@ -64,6 +72,11 @@ export interface AssetService {
   note: string;
 }
 
+export interface ResolvedMiddleware {
+  hostname: string;
+  source: "asset" | "location" | "facility";
+}
+
 export interface AssetData {
   id: string;
   name: string;
@@ -85,13 +98,13 @@ export interface AssetData {
   qr_code_id: string;
   manufacturer: string;
   warranty_amc_end_of_validity: string;
+  resolved_middleware?: ResolvedMiddleware;
+  latest_status: string;
   last_service: AssetService;
   meta?: {
     [key: string]: any;
   };
 }
-
-export type AssetUpdate = Partial<AssetData>;
 
 export interface AssetsResponse {
   count: number;
@@ -100,16 +113,11 @@ export interface AssetsResponse {
   results: AssetData[];
 }
 
-export interface AssetUptimeRecord {
-  id: string;
-  asset: {
-    id: string;
-    name: string;
-  };
+export interface AvailabilityRecord {
+  linked_id: string;
+  linked_model: string;
   status: string;
   timestamp: string;
-  created_date: string;
-  modified_date: string;
 }
 
 export interface AssetTransaction {

@@ -1,8 +1,8 @@
 import { useCallback } from "react";
-import { useDispatch } from "react-redux";
-import { getAllSkills, getUserListSkills } from "../../Redux/actions";
 import AutoCompleteAsync from "../Form/AutoCompleteAsync";
-import { SkillObjectModel } from "../Users/models";
+import { SkillModel, SkillObjectModel } from "../Users/models";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 interface SkillSelectProps {
   id?: string;
@@ -11,12 +11,11 @@ interface SkillSelectProps {
   className?: string;
   searchAll?: boolean;
   multiple?: boolean;
-  showAll?: boolean;
   showNOptions?: number;
   disabled?: boolean;
   selected: SkillObjectModel | SkillObjectModel[] | null;
   setSelected: (selected: SkillObjectModel) => void;
-  username?: string;
+  userSkills?: SkillModel[];
 }
 
 export const SkillSelect = (props: SkillSelectProps) => {
@@ -27,41 +26,28 @@ export const SkillSelect = (props: SkillSelectProps) => {
     selected,
     setSelected,
     searchAll,
-    showAll = true,
     showNOptions = 10,
     disabled = false,
     className = "",
     errors = "",
-    username,
+    userSkills,
   } = props;
-
-  const dispatchAction: any = useDispatch();
 
   const skillSearch = useCallback(
     async (text: string) => {
-      const params = {
+      const query = {
         limit: 50,
         offset: 0,
         search_text: text,
         all: searchAll,
       };
 
-      const res = await dispatchAction(getAllSkills(params));
-
-      const linkedSkills = await dispatchAction(
-        getUserListSkills({ username: username })
+      const { data } = await request(routes.getAllSkills, { query });
+      return data?.results.filter(
+        (skill) => !userSkills?.some((userSkill) => userSkill.id === skill.id)
       );
-
-      const skillsList = linkedSkills?.data?.results;
-      const skillsID: string[] = [];
-      skillsList.map((skill: any) => skillsID.push(skill.skill_object.id));
-      const skills = res?.data?.results.filter(
-        (skill: any) => !skillsID.includes(skill.id)
-      );
-
-      return skills;
     },
-    [dispatchAction, searchAll, showAll]
+    [searchAll, userSkills]
   );
 
   return (

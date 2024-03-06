@@ -1,5 +1,4 @@
 import { useRef, useState } from "react";
-import { classNames } from "../../../Utils/utils";
 
 export default function AccordionV2(props: {
   children: JSX.Element | JSX.Element[];
@@ -55,15 +54,10 @@ export default function AccordionV2(props: {
         </button>
       </div>
       <div
-        className={classNames("transition-all duration-500 ease-in-out")}
+        className={`transition-all duration-500 ease-in-out ${
+          toggle ? "overflow-visible" : "h-0 overflow-hidden"
+        }`}
         ref={contentEl}
-        style={
-          toggle
-            ? {
-                overflow: "visible",
-              }
-            : { height: "0px", overflow: "hidden" }
-        }
       >
         {props.children}
       </div>

@@ -2,7 +2,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { DropdownTransition } from "../Common/components/HelperComponents";
 import { Listbox } from "@headlessui/react";
 import { classNames } from "../../Utils/utils";
-import { ReactNode } from "react";
+import { ReactNode, useRef } from "react";
 
 type OptionCallback<T, R = void> = (option: T) => R;
 
@@ -61,9 +61,18 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
     if (selectedOptions.length === 0) return placeholder;
     if (props.renderSelectedOptions)
       return props.renderSelectedOptions(selectedOptions.map((o) => o.option));
-    return (
-      <span className="text-gray-800">{`${selectedOptions.length} item(s) selected`}</span>
-    );
+  };
+
+  const buttonRef = useRef(null);
+
+  const handleSingleSelect = (o: any) => {
+    if (
+      o.option?.isSingleSelect === true &&
+      !selectedOptions.includes(o) &&
+      buttonRef.current
+    ) {
+      buttonRef.current.click();
+    }
   };
 
   return (
@@ -83,23 +92,39 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
             </Listbox.Label>
             <div className="relative">
               <div>
-                <Listbox.Button className="cui-input-base flex w-full rounded">
+                <Listbox.Button
+                  className="cui-input-base flex w-full rounded"
+                  ref={buttonRef}
+                >
                   <div className="relative z-0 flex w-full items-center">
                     <div className="relative flex flex-1 items-center pr-4 focus:z-10">
                       <p className="ml-2.5 text-sm font-normal text-gray-600">
                         <Placeholder />
                       </p>
+
+                      {selectedOptions.length !== 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {selectedOptions.map((option) => (
+                            <MultiSelectOptionChip
+                              key={option.value}
+                              label={option.selectedLabel}
+                              onRemove={() => {
+                                const updatedOptions = selectedOptions.filter(
+                                  (selectedOption) =>
+                                    selectedOption.value !== option.value
+                                );
+                                props.onChange(
+                                  updatedOptions.map((o) => o.value) as any
+                                );
+                              }}
+                            />
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <CareIcon className="care-l-angle-down -mb-0.5 text-lg text-gray-900" />
                   </div>
                 </Listbox.Button>
-                {selectedOptions.length !== 0 && (
-                  <div className="flex flex-wrap gap-2 p-2">
-                    {selectedOptions.map((option) => (
-                      <MultiSelectOptionChip label={option.selectedLabel} />
-                    ))}
-                  </div>
-                )}
               </div>
               <DropdownTransition show={open}>
                 <Listbox.Options className="cui-dropdown-base absolute top-12">
@@ -109,6 +134,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                       key={index}
                       className={dropdownOptionClassNames}
                       value={option}
+                      onClick={() => handleSingleSelect(option)}
                     >
                       {({ active }) => (
                         <div className="flex flex-col gap-2">
@@ -154,7 +180,7 @@ interface MultiSelectOptionChipProps {
 export const MultiSelectOptionChip = (props: MultiSelectOptionChipProps) => {
   return (
     <span className="flex items-center gap-2 rounded-full border-gray-300 bg-gray-200 px-3 text-xs text-gray-700">
-      <p className="py-1.5">{props.label}</p>
+      <p className="py-1">{props.label}</p>
       {props.onRemove && (
         <p
           className="cursor-pointer rounded-full hover:bg-white"
