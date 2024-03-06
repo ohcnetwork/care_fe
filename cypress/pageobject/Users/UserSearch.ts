@@ -63,12 +63,12 @@ export class UserPage {
   }
 
   selectState(state: string) {
-    cy.get("input[name='state']").click().type(state);
+    cy.get("'#state input").click().type(state);
     cy.get("[role='option']").contains(state).click();
   }
 
   selectDistrict(district: string) {
-    cy.get("input[name='district']").click().type(district);
+    cy.get("'#district input").click().type(district);
     cy.get("[role='option']").contains(district).click();
   }
 
