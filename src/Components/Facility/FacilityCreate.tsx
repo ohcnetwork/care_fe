@@ -366,6 +366,7 @@ export const FacilityCreate = (props: FacilityProps) => {
     let invalidForm = false;
     Object.keys(state.form).forEach((field) => {
       switch (field) {
+        case "facility_type":
         case "name":
         case "address":
           if (!state.form[field]) {

@@ -47,6 +47,7 @@ describe("Facility Creation", () => {
   const modifiedTriageValue = "50";
   const facilityErrorMessage = [
     "Required",
+    "Required",
     "Invalid Pincode",
     "Required",
     "Required",
