@@ -1,45 +1,41 @@
-import dayjs from "dayjs";
-import { navigate } from "raviger";
+import * as Notification from "../../Utils/Notifications.js";
 import { lazy, useState } from "react";
-import { useTranslation } from "react-i18next";
-import CountBlock from "../../CAREUI/display/Count";
-import CareIcon from "../../CAREUI/icons/CareIcon";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import ButtonV2, { Submit } from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import ConfirmHomeFacilityUpdateDialog from "./ConfirmHomeFacilityUpdateDialog";
+import CountBlock from "../../CAREUI/display/Count";
+import { FacilityModel } from "../Facility/models";
+import { FacilitySelect } from "../Common/FacilitySelect";
+import SearchInput from "../Form/SearchInput";
+import SkillsSlideOver from "./SkillsSlideOver";
 import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
 import { USER_TYPES } from "../../Common/constants";
-import useAuthUser from "../../Common/hooks/useAuthUser.js";
-import useFilters from "../../Common/hooks/useFilters";
-import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
-import routes from "../../Redux/api.js";
-import * as Notification from "../../Utils/Notifications.js";
-import request from "../../Utils/request/request.js";
-import useQuery from "../../Utils/request/useQuery.js";
+import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
+import UserDeleteDialog from "./UserDeleteDialog";
+import UserDetails from "../Common/UserDetails";
+import UserFilter from "./UserFilter";
 import {
   classNames,
   isUserOnline,
   relativeTime,
   showUserDelete,
 } from "../../Utils/utils";
-import { FacilitySelect } from "../Common/FacilitySelect";
-import Pagination from "../Common/Pagination";
-import UserDetails from "../Common/UserDetails";
-import UserDetailComponent from "../Common/UserDetailsComponet.js";
-import ButtonV2, { Submit } from "../Common/components/ButtonV2";
+import { navigate } from "raviger";
+import useFilters from "../../Common/hooks/useFilters";
+import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import CircularProgress from "../Common/components/CircularProgress.js";
 import Page from "../Common/components/Page.js";
-import { FacilityModel } from "../Facility/models";
+import dayjs from "dayjs";
 import TextFormField from "../Form/FormFields/TextFormField.js";
-import SearchInput from "../Form/SearchInput";
-import ConfirmHomeFacilityUpdateDialog from "./ConfirmHomeFacilityUpdateDialog";
-import SkillsSlideOver from "./SkillsSlideOver";
-import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
-import UserDeleteDialog from "./UserDeleteDialog";
-import UserFilter from "./UserFilter";
+import useAuthUser from "../../Common/hooks/useAuthUser.js";
+import routes from "../../Redux/api.js";
+import useQuery from "../../Utils/request/useQuery.js";
+import request from "../../Utils/request/request.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ManageUsers() {
-  const { t } = useTranslation();
   const { width } = useWindowDimensions();
   const {
     qParams,
@@ -111,7 +107,7 @@ export default function ManageUsers() {
       onClick={() => navigate("/users/add")}
     >
       <CareIcon icon="l-plus" className="text-lg" />
-      <p>{t("add_new_user")}</p>
+      <p>Add New User</p>
     </ButtonV2>
   );
 
@@ -257,18 +253,22 @@ export default function ManageUsers() {
                   } gap-2 md:grid md:grid-cols-2`}
                 >
                   {user.user_type && (
-                    <UserDetailComponent
-                      id="role"
-                      title="Role"
-                      value={user.user_type}
-                    />
+                    <div className="col-span-1">
+                      <UserDetails id="role" title="Role">
+                        <div className="break-all font-semibold">
+                          {user.user_type}
+                        </div>
+                      </UserDetails>
+                    </div>
                   )}
                   {user.district_object && (
-                    <UserDetailComponent
-                      id="district"
-                      title="District"
-                      value={user.district_object.name}
-                    />
+                    <div className="col-span-1">
+                      <UserDetails id="district" title="District">
+                        <div className="font-semibold">
+                          {user.district_object.name}
+                        </div>
+                      </UserDetails>
+                    </div>
                   )}
                   {user.user_type === "Doctor" && (
                     <>
@@ -336,13 +336,8 @@ export default function ManageUsers() {
                   {user.created_by && (
                     <div className="col-span-1">
                       <UserDetails id="created_by" title="Created by">
-                        <div className="overflow-hidden">
-                          <div
-                            className="truncate font-semibold"
-                            title={user.created_by}
-                          >
-                            {user.created_by}
-                          </div>
+                        <div className="break-all font-semibold">
+                          {user.created_by}
                         </div>
                       </UserDetails>
                     </div>
@@ -437,13 +432,13 @@ export default function ManageUsers() {
   } else if (userListData?.results && userListData?.results.length === 0) {
     manageUsers = (
       <div>
-        <h5> {t("no_users_found")}</h5>
+        <h5> No Users Found</h5>
       </div>
     );
   }
 
   return (
-    <Page title={t("user_management")} hideBack={true} breadcrumbs={false}>
+    <Page title="User Management" hideBack={true} breadcrumbs={false}>
       {expandSkillList && (
         <SkillsSlideOver
           show={expandSkillList}
@@ -455,8 +450,11 @@ export default function ManageUsers() {
         open={expandFacilityList}
         setOpen={setExpandFacilityList}
         slideFrom="right"
-        title={t("facilities")}
+        title="Facilities"
         dialogClass="md:w-[400px]"
+        onCloseClick={() => {
+          //fetchData({ aborted: false });
+        }}
       >
         <UserFacilities user={selectedUser} />
       </SlideOverCustom>
@@ -468,12 +466,12 @@ export default function ManageUsers() {
           setWeeklyHoursError("");
         }}
         slideFrom="right"
-        title={t("average_weekly_working_hours")}
+        title="Average weekly working hours"
         dialogClass="md:w-[400px]"
       >
         <div className="px-2">
           <dt className="mb-3 text-sm font-medium leading-5 text-black">
-            {t("set_average_weekly_working_hours_for")} {selectedUser}
+            Set Average weekly working hours for {selectedUser}
           </dt>
           <TextFormField
             name="weekly_working_hours"
@@ -490,7 +488,7 @@ export default function ManageUsers() {
             max={168}
           />
           <div className="mt-2 text-right">
-            <Submit onClick={handleWorkingHourSubmit} label={t("update")} />
+            <Submit onClick={handleWorkingHourSubmit} label="Update" />
           </div>
         </div>
       </SlideOverCustom>
@@ -510,7 +508,7 @@ export default function ManageUsers() {
               name="username"
               onChange={(e) => updateQuery({ [e.name]: e.value })}
               value={qParams.username}
-              placeholder={t("search_by_username")}
+              placeholder="Search by username"
             />
           </div>
           <div className="flex flex-col gap-2">
@@ -557,14 +555,9 @@ export default function ManageUsers() {
 }
 
 function UserFacilities(props: { user: any }) {
-  const { t } = useTranslation();
   const { user } = props;
   const username = user.username;
-  const limit = 20;
   const [isLoading, setIsLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [offset, setOffset] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
   const [facility, setFacility] = useState<any>(null);
   const [unlinkFacilityData, setUnlinkFacilityData] = useState<{
     show: boolean;
@@ -607,22 +600,7 @@ function UserFacilities(props: { user: any }) {
     refetch: refetchUserFacilities,
   } = useQuery(routes.userListFacility, {
     pathParams: { username },
-    query: {
-      limit,
-      offset,
-    },
-    onResponse: ({ res, data }) => {
-      if (res?.status === 200 && data) {
-        setTotalCount(data.count);
-      }
-    },
   });
-
-  const handlePagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentPage(page);
-    setOffset(offset);
-  };
 
   const updateHomeFacility = async (username: string, facility: any) => {
     setIsLoading(true);
@@ -698,7 +676,7 @@ function UserFacilities(props: { user: any }) {
           className="mt-1 h-[45px] w-[74px] text-base"
           onClick={() => addFacility(username, facility)}
         >
-          {t("add")}
+          Add
         </ButtonV2>
       </div>
       {isLoading || userFacilitiesLoading ? (
@@ -710,9 +688,7 @@ function UserFacilities(props: { user: any }) {
           {/* Home Facility section */}
           {user?.home_facility_object && (
             <div className="mt-2" id="home-facility">
-              <div className="mb-2 ml-2 text-lg font-bold">
-                {t("home_facility")}
-              </div>
+              <div className="mb-2 ml-2 text-lg font-bold">Home Facility</div>
               <div className="relative rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg">
                 <div className="flex items-center justify-between">
                   <span>{user?.home_facility_object?.name}</span>
@@ -730,7 +706,7 @@ function UserFacilities(props: { user: any }) {
                     >
                       <CareIcon className="care-l-link-broken" />
                       <span className="tooltip-text tooltip-left">
-                        {t("clear_home_facility")}
+                        Clear Home Facility
                       </span>
                     </button>
                   </div>
@@ -741,90 +717,77 @@ function UserFacilities(props: { user: any }) {
           )}
 
           {/* Linked Facilities section */}
-          {!!userFacilities?.results.length && (
+          {!!userFacilities?.length && (
             <div className="mt-2" id="linked-facility-list">
               <div className="mb-2 ml-2 text-lg font-bold">
-                {t("linked_facilities")}
+                Linked Facilities
               </div>
               <div className="flex flex-col">
-                {userFacilities.results.map(
-                  (facility: FacilityModel, i: number) => {
-                    if (user?.home_facility_object?.id === facility.id) {
-                      // skip if it's a home facility
-                      return null;
-                    }
-                    return (
-                      <div
-                        id={`facility_${i}`}
-                        key={`facility_${i}`}
-                        className={classNames(
-                          "relative rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg"
-                        )}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span>{facility.name}</span>
-                          <div className="flex items-center gap-2">
-                            <button
-                              className="tooltip text-lg hover:text-primary-500"
-                              id="home-facility-icon"
-                              onClick={() => {
-                                if (user?.home_facility_object) {
-                                  // has previous home facility
-                                  setReplaceHomeFacility({
-                                    show: true,
-                                    userName: username,
-                                    previousFacility:
-                                      user?.home_facility_object,
-                                    newFacility: facility,
-                                  });
-                                } else {
-                                  // no previous home facility
-                                  updateHomeFacility(username, facility);
-                                }
-                              }}
-                            >
-                              <CareIcon className="care-l-estate" />
-                              <span className="tooltip-text tooltip-left">
-                                Set as home facility
-                              </span>
-                            </button>
-                            <button
-                              id="unlink-facility-button"
-                              className="tooltip text-lg text-red-600"
-                              onClick={() =>
-                                setUnlinkFacilityData({
+                {userFacilities.map((facility: any, i: number) => {
+                  if (user?.home_facility_object?.id === facility.id) {
+                    // skip if it's a home facility
+                    return null;
+                  }
+                  return (
+                    <div
+                      id={`facility_${i}`}
+                      key={`facility_${i}`}
+                      className={classNames(
+                        "relative rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg"
+                      )}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span>{facility.name}</span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            className="tooltip text-lg hover:text-primary-500"
+                            id="home-facility-icon"
+                            onClick={() => {
+                              if (user?.home_facility_object) {
+                                // has previous home facility
+                                setReplaceHomeFacility({
                                   show: true,
-                                  facility: facility,
                                   userName: username,
-                                  isHomeFacility: false,
-                                })
+                                  previousFacility: user?.home_facility_object,
+                                  newFacility: facility,
+                                });
+                              } else {
+                                // no previous home facility
+                                updateHomeFacility(username, facility);
                               }
-                            >
-                              <CareIcon className="care-l-link-broken" />
-                              <span className="tooltip-text tooltip-left">
-                                Unlink Facility
-                              </span>
-                            </button>
-                          </div>
+                            }}
+                          >
+                            <CareIcon className="care-l-estate" />
+                            <span className="tooltip-text tooltip-left">
+                              Set as home facility
+                            </span>
+                          </button>
+                          <button
+                            id="unlink-facility-button"
+                            className="tooltip text-lg text-red-600"
+                            onClick={() =>
+                              setUnlinkFacilityData({
+                                show: true,
+                                facility: facility,
+                                userName: username,
+                                isHomeFacility: false,
+                              })
+                            }
+                          >
+                            <CareIcon className="care-l-link-broken" />
+                            <span className="tooltip-text tooltip-left">
+                              Unlink Facility
+                            </span>
+                          </button>
                         </div>
                       </div>
-                    );
-                  }
-                )}
+                    </div>
+                  );
+                })}
               </div>
-              {totalCount > limit && (
-                <div className="mt-4 flex w-full justify-center">
-                  <Pagination
-                    cPage={currentPage}
-                    defaultPerPage={limit}
-                    data={{ totalCount }}
-                    onChange={handlePagination}
-                  />
-                </div>
-              )}
             </div>
           )}
-          {!user?.home_facility_object && !userFacilities?.results.length && (
+          {!user?.home_facility_object && !userFacilities?.length && (
             <div className="my-2 flex h-96 flex-col content-center justify-center align-middle">
               <div className="w-full">
                 <img
@@ -834,7 +797,7 @@ function UserFacilities(props: { user: any }) {
                 />
               </div>
               <p className="pt-4 text-center text-lg font-semibold text-primary">
-                {t("no_linked_facilities")}
+                No Linked Facilities
               </p>
             </div>
           )}

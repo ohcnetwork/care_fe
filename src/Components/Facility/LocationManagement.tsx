@@ -11,7 +11,6 @@ import request from "../../Utils/request/request";
 import * as Notification from "../../Utils/Notifications.js";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import DialogModal from "../Common/Dialog";
-import Uptime from "../Common/Uptime";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -20,7 +19,6 @@ interface Props {
 }
 
 interface LocationProps extends LocationModel {
-  facilityId: string;
   setShowDeletePopup: (e: { open: boolean; name: string; id: string }) => void;
 }
 
@@ -111,11 +109,7 @@ export default function LocationManagement({ facilityId }: Props) {
             </PaginatedList.WhenLoading>
             <PaginatedList.Items<LocationModel> className="my-8 grid gap-3 @4xl:grid-cols-2 @6xl:grid-cols-3 @[100rem]:grid-cols-4 lg:mx-8">
               {(item) => (
-                <Location
-                  setShowDeletePopup={setShowDeletePopup}
-                  facilityId={facilityId}
-                  {...item}
-                />
+                <Location setShowDeletePopup={setShowDeletePopup} {...item} />
               )}
             </PaginatedList.Items>
           </div>
@@ -214,7 +208,6 @@ const Location = ({
   modified_date,
   id,
   setShowDeletePopup,
-  facilityId,
 }: LocationProps) => (
   <div className="flex h-full w-full flex-col rounded border border-gray-300 bg-white p-6 shadow-sm transition-all duration-200 ease-in-out hover:border-primary-400">
     <div className="flex-1">
@@ -248,16 +241,6 @@ const Location = ({
       >
         {middleware_address || "-"}
       </p>
-      <Uptime
-        route={routes.listFacilityAssetLocationAvailability}
-        params={{ external_id: id, facility_external_id: facilityId }}
-        header={
-          <p className="mt-3 text-sm font-semibold text-gray-700">
-            Middleware Uptime
-          </p>
-        }
-        centerInfoPanel
-      />
     </div>
 
     <ButtonV2

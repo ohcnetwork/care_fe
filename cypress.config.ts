@@ -1,6 +1,5 @@
 import { defineConfig } from "cypress";
 import fs from "fs";
-import cypressSplit from "cypress-split";
 
 export default defineConfig({
   projectId: "wf7d2m",
@@ -20,11 +19,6 @@ export default defineConfig({
           return null;
         },
       });
-
-      if (process.env.CYPRESS_SPLIT_TESTS === "true") {
-        cypressSplit(on, config);
-      }
-
       return config;
     },
     baseUrl: "http://localhost:4000",

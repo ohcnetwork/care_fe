@@ -68,19 +68,18 @@ export const Login = (props: { forgot?: boolean }) => {
       ) {
         if (!form[key].match(/\w/)) {
           hasError = true;
-          err[key] = "field_required";
+          err[key] = t("field_required");
         }
       }
       if (!form[key]) {
         hasError = true;
-        err[key] = "field_required";
+        err[key] = t("field_required");
       }
     });
     if (hasError) {
       setErrors(err);
       return false;
     }
-
     return form;
   };
 
@@ -93,7 +92,6 @@ export const Login = (props: { forgot?: boolean }) => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-
     setLoading(true);
     FiltersCache.invaldiateAll();
     const validated = validateData();
@@ -113,12 +111,12 @@ export const Login = (props: { forgot?: boolean }) => {
     if (typeof form.username === "string") {
       if (!form.username.match(/\w/)) {
         hasError = true;
-        err.username = "field_required";
+        err.username = t("field_required");
       }
     }
     if (!form.username) {
       hasError = true;
-      err.username = "field_required";
+      err.username = t("field_required");
     }
 
     if (hasError) {

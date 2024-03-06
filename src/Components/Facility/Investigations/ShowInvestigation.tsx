@@ -1,13 +1,17 @@
-import _, { set } from "lodash-es";
-import { navigate } from "raviger";
-import { lazy, useCallback, useReducer } from "react";
-import { useTranslation } from "react-i18next";
-import routes from "../../../Redux/api";
-import * as Notification from "../../../Utils/Notifications.js";
-import request from "../../../Utils/request/request";
-import useQuery from "../../../Utils/request/useQuery";
+import { useCallback, useReducer, useState, useEffect, lazy } from "react";
+import { useDispatch } from "react-redux";
+import { statusType, useAbortableEffect } from "../../../Common/utils";
+import {
+  editInvestigation,
+  getInvestigation,
+  getPatient,
+} from "../../../Redux/actions";
 import PageTitle from "../../Common/PageTitle";
 import InvestigationTable from "./InvestigationTable";
+import _ from "lodash-es";
+import { set } from "lodash-es";
+import { navigate } from "raviger";
+import * as Notification from "../../../Utils/Notifications.js";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 
@@ -36,49 +40,73 @@ const updateFormReducer = (state = initialState, action: any) => {
 };
 
 export default function ShowInvestigation(props: any) {
-  const { t } = useTranslation();
   const { consultationId, patientId, facilityId, sessionId } = props;
 
+  const dispatchAction: any = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
   const [state, dispatch] = useReducer(updateFormReducer, initialState);
-  const { loading: investigationLoading } = useQuery(routes.getInvestigation, {
-    pathParams: {
-      consultation_external_id: consultationId,
-    },
-    query: {
-      session: sessionId,
-    },
-    onResponse: (res) => {
-      if (res && res.data) {
-        const valueMap = res.data.results.reduce(
-          (acc: any, cur: { id: any }) => ({ ...acc, [cur.id]: cur }),
-          {}
-        );
+  const [facilityName, setFacilityName] = useState("");
+  const [patientName, setPatientName] = useState("");
 
-        const changedValues = res.data.results.reduce(
-          (acc: any, cur: any) => ({
-            ...acc,
-            [cur.id]: {
-              id: cur?.id,
-              initialValue: cur?.notes || cur?.value || null,
-              value: cur?.value || null,
-              notes: cur?.notes || null,
-            },
-          }),
-          {}
-        );
+  const fetchData = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      const res = await dispatchAction(
+        getInvestigation({ session: sessionId }, consultationId)
+      );
+      if (!status.aborted) {
+        if (res && res?.data?.results) {
+          const valueMap = res.data.results.reduce(
+            (acc: any, cur: { id: any }) => ({ ...acc, [cur.id]: cur }),
+            {}
+          );
 
-        dispatch({ type: "set_initial_values", initialValues: valueMap });
-        dispatch({ type: "set_changed_fields", changedFields: changedValues });
+          const changedValues = res.data.results.reduce(
+            (acc: any, cur: any) => ({
+              ...acc,
+              [cur.id]: {
+                id: cur?.id,
+                initialValue: cur?.notes || cur?.value || null,
+                value: cur?.value || null,
+                notes: cur?.notes || null,
+              },
+            }),
+            {}
+          );
+
+          dispatch({ type: "set_initial_values", initialValues: valueMap });
+          dispatch({
+            type: "set_changed_fields",
+            changedFields: changedValues,
+          });
+        }
+        setIsLoading(false);
       }
     },
-  });
-
-  const { data: patientData, loading: patientLoading } = useQuery(
-    routes.getPatient,
-    {
-      pathParams: { id: patientId },
-    }
+    [consultationId, dispatchAction, sessionId]
   );
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchData(status);
+    },
+    [fetchData]
+  );
+
+  useEffect(() => {
+    async function fetchPatientName() {
+      if (patientId) {
+        const res = await dispatchAction(getPatient({ id: patientId }));
+        if (res.data) {
+          setPatientName(res.data.name);
+          setFacilityName(res.data.facility_object.name);
+        }
+      } else {
+        setPatientName("");
+        setFacilityName("");
+      }
+    }
+    fetchPatientName();
+  }, [dispatchAction, patientId]);
 
   const handleValueChange = (value: any, name: string) => {
     const changedFields = { ...state.changedFields };
@@ -99,10 +127,9 @@ export default function ShowInvestigation(props: any) {
       }));
 
     if (data.length) {
-      const { res } = await request(routes.editInvestigation, {
-        pathParams: { consultation_external_id: consultationId },
-        body: { investigations: data },
-      });
+      const res = await dispatchAction(
+        editInvestigation({ investigations: data }, consultationId)
+      );
       if (res && res.status === 204) {
         Notification.Success({
           msg: "Investigation Updated successfully!",
@@ -132,29 +159,29 @@ export default function ShowInvestigation(props: any) {
     dispatch({ type: "set_changed_fields", changedFields: changedValues });
   }, [state.initialValues]);
 
-  if (patientLoading || investigationLoading) {
-    return <Loading />;
-  }
-
   return (
     <div className="mx-auto max-w-7xl px-4">
       <PageTitle
-        title={t("investigations")}
+        title="Investigation"
         className="mx-3 md:mx-4"
         crumbsReplacements={{
-          [facilityId]: { name: patientData?.facility_object?.name },
-          [patientId]: { name: patientData?.name },
+          [facilityId]: { name: facilityName },
+          [patientId]: { name: patientName },
         }}
         backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`}
       />
-      <InvestigationTable
-        title={`ID: ${sessionId}`}
-        data={state.initialValues}
-        changedFields={state.changedFields}
-        handleValueChange={handleValueChange}
-        handleUpdateCancel={handleUpdateCancel}
-        handleSave={handleSubmit}
-      />
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <InvestigationTable
+          title={`ID: ${sessionId}`}
+          data={state.initialValues}
+          changedFields={state.changedFields}
+          handleValueChange={handleValueChange}
+          handleUpdateCancel={handleUpdateCancel}
+          handleSave={handleSubmit}
+        />
+      )}
     </div>
   );
 }

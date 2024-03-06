@@ -1,21 +1,24 @@
-import { useCallback, useReducer, useState } from "react";
-import { InvestigationGroup, InvestigationType } from "..";
-
-import _ from "lodash";
-import { useTranslation } from "react-i18next";
-import routes from "../../../../Redux/api";
 import * as Notification from "../../../../Utils/Notifications";
-import request from "../../../../Utils/request/request";
-import { PaginatedResponse } from "../../../../Utils/request/types";
-import useQuery from "../../../../Utils/request/useQuery";
-import Loading from "../../../Common/Loading";
+import _ from "lodash-es";
+import { InvestigationGroup, InvestigationType } from "..";
+import {
+  getPatient,
+  getPatientInvestigation,
+  listInvestigationGroups,
+  listInvestigations,
+} from "../../../../Redux/actions";
+import { useCallback, useEffect, useReducer, useState } from "react";
+
+import AutocompleteMultiSelectFormField from "../../../Form/FormFields/AutocompleteMultiselect";
 import ButtonV2 from "../../../Common/components/ButtonV2";
 import CircularProgress from "../../../Common/components/CircularProgress";
-import Page from "../../../Common/components/Page";
-import AutocompleteMultiSelectFormField from "../../../Form/FormFields/AutocompleteMultiselect";
 import { FieldChangeEvent } from "../../../Form/FormFields/Utils";
+import { InvestigationResponse } from "./types";
+import Loading from "../../../Common/Loading";
+import Page from "../../../Common/components/Page";
 import ReportTable from "./ReportTable";
-import { Investigation, InvestigationResponse } from "./types";
+import { useDispatch } from "react-redux";
+import { useRef } from "react";
 
 const RESULT_PER_PAGE = 14;
 interface InitialState {
@@ -88,10 +91,16 @@ const investigationReportsReducer = (state = initialState, action: any) => {
 };
 
 const InvestigationReports = ({ id }: any) => {
-  const { t } = useTranslation();
+  const dispatchAction: any = useDispatch();
   const [page, setPage] = useState(1);
   const [sessionPage, setSessionPage] = useState(1);
   const [isNextSessionDisabled, setIsNextSessionDisabled] = useState(false);
+  const [patientDetails, setPatientDetails] = useState<{
+    name: string;
+    age: number;
+    date_of_birth: string;
+    hospitalName: string;
+  }>({ name: "", age: -1, date_of_birth: "", hospitalName: "" });
   const [state, dispatch] = useReducer(
     investigationReportsReducer,
     initialState
@@ -106,21 +115,17 @@ const InvestigationReports = ({ id }: any) => {
     selectedInvestigations,
   } = state as InitialState;
 
-  console.log("state", state);
-
   const fetchInvestigationsData = useCallback(
-    async (
-      onSuccess: (
-        data: PaginatedResponse<Investigation>,
-        pageNo: number
-      ) => void,
+    (
+      onSuccess: (data: any, pageNo: number) => void,
       curPage = 1,
       curSessionPage = 1
     ) => {
       dispatch({
         type: "set_loading",
-        payload: { ...isLoading, investigationLoading: true },
+        payload: { ...isLoading, tableData: true },
       });
+
       const pageStart = ((curPage || 1) - 1) * RESULT_PER_PAGE;
       const investigationsParams = (
         selectedInvestigations.length
@@ -136,27 +141,31 @@ const InvestigationReports = ({ id }: any) => {
         });
         dispatch({
           type: "set_loading",
-          payload: { ...isLoading, investigationLoading: false },
+          payload: { ...isLoading, tableData: false },
         });
         return;
       }
-      const data = await request(routes.getPatientInvestigation, {
-        pathParams: { patient_external_id: id },
-        query: {
-          investigations: investigationsParams,
-          session_page: curSessionPage,
-        },
+
+      dispatchAction(
+        getPatientInvestigation(
+          {
+            investigations: investigationsParams,
+            session_page: curSessionPage,
+          },
+          id
+        )
+      ).then((res: any) => {
+        dispatch({
+          type: "set_loading",
+          payload: { ...isLoading, tableData: false },
+        });
+        if (res?.data?.results) {
+          onSuccess(res.data, curPage);
+          setPage(curPage + 1);
+        }
       });
-      dispatch({
-        type: "set_loading",
-        payload: { ...isLoading, investigationLoading: false },
-      });
-      if (data && data.data?.results) {
-        onSuccess(data.data, curPage);
-        setPage(curPage + 1);
-      }
     },
-    [id, investigations, isLoading, selectedInvestigations]
+    [dispatchAction, id, investigations, isLoading, selectedInvestigations]
   );
 
   const fetchInvestigation = useCallback(async () => {
@@ -166,15 +175,14 @@ const InvestigationReports = ({ id }: any) => {
     });
 
     const data = await Promise.all(
-      selectedGroup.map((group) =>
-        request(routes.listInvestigations, {
-          query: { group: group },
-        })
-      )
+      selectedGroup.map((group, i) => {
+        return dispatchAction(
+          listInvestigations({ group: group }, `listInvestigations_${i}`)
+        ).then((res: any) => res.data && res.data.results);
+      })
     );
 
     const investigationList = _.chain(data)
-      .flatMap((i) => i?.data?.results)
       .compact()
       .flatten()
       .map((i) => ({
@@ -189,25 +197,52 @@ const InvestigationReports = ({ id }: any) => {
       type: "set_loading",
       payload: { ...isLoading, investigationLoading: false },
     });
-  }, [isLoading, selectedGroup]);
+  }, [dispatchAction, isLoading, selectedGroup]);
 
-  useQuery(routes.listInvestigationGroups, {
-    onResponse: (res) => {
+  const fetchInvestigationGroups = useRef(() => {
+    dispatch({
+      type: "set_loading",
+      payload: { ...isLoading, investigationLoading: false },
+    });
+
+    dispatchAction(listInvestigationGroups({})).then((res: any) => {
       if (res && res.data) {
         dispatch({
           type: "set_investigation_groups",
           payload: res.data.results,
         });
       }
-    },
+
+      dispatch({
+        type: "set_loading",
+        payload: { ...isLoading, investigationGroupLoading: false },
+      });
+    });
   });
 
-  const { data: patientData, loading: patientLoading } = useQuery(
-    routes.getPatient,
-    {
-      pathParams: { id: id },
+  useEffect(() => {
+    async function fetchPatientName() {
+      if (id) {
+        const res = await dispatchAction(getPatient({ id: id }));
+        if (res.data) {
+          setPatientDetails({
+            name: res.data.name,
+            age: res.data.age,
+            date_of_birth: res.data.date_of_birth,
+            hospitalName: res.data.facility_object.name,
+          });
+        }
+      } else {
+        setPatientDetails({
+          name: "",
+          age: -1,
+          date_of_birth: "",
+          hospitalName: "",
+        });
+      }
     }
-  );
+    fetchPatientName();
+  }, [dispatchAction, id]);
 
   const handleGroupSelect = ({ value }: FieldChangeEvent<string[]>) => {
     dispatch({ type: "set_investigations", payload: [] });
@@ -217,11 +252,13 @@ const InvestigationReports = ({ id }: any) => {
     dispatch({ type: "set_selected_group", payload: value });
   };
 
+  useEffect(() => {
+    fetchInvestigationGroups.current();
+  }, []);
+
+  // eslint-disable-next-line
   const handleLoadMore = () => {
-    const onSuccess = (
-      data: PaginatedResponse<Investigation>,
-      pageNo: number
-    ) => {
+    const onSuccess = (data: any, pageNo: number) => {
       if (data.results.length === 0 && pageNo + 1 <= totalPage) {
         fetchInvestigationsData(onSuccess, pageNo + 1, sessionPage);
       } else {
@@ -231,12 +268,13 @@ const InvestigationReports = ({ id }: any) => {
         });
       }
     };
+
     fetchInvestigationsData(onSuccess, page, sessionPage);
   };
 
   const handleGenerateReports = useCallback(
     (curSessionPage = 1) => {
-      const onSuccess = (data: PaginatedResponse<Investigation>) => {
+      const onSuccess = (data: any) => {
         if (curSessionPage > 1 && !data.results.length) {
           setSessionPage(curSessionPage - 1);
           setIsNextSessionDisabled(true);
@@ -251,8 +289,10 @@ const InvestigationReports = ({ id }: any) => {
             });
           }
         }
+
         document.getElementById("reports_section")?.scrollIntoView();
       };
+
       fetchInvestigationsData(onSuccess, 1, curSessionPage);
     },
     [fetchInvestigationsData]
@@ -281,16 +321,12 @@ const InvestigationReports = ({ id }: any) => {
   const prevSessionDisabled = sessionPage <= 1 || isLoading.tableData;
   const nextSessionDisabled = isNextSessionDisabled || isLoading.tableData;
 
-  if (patientLoading) {
-    return <Loading />;
-  }
-
   return (
     <Page
-      title={t("investigation_reports")}
+      title="Investigation Reports"
       crumbsReplacements={{
         patient: { style: "pointer-events-none" },
-        [id]: { name: patientData?.name },
+        [id]: { name: patientDetails.name },
       }}
     >
       {!isLoading.investigationGroupLoading ? (
@@ -299,14 +335,14 @@ const InvestigationReports = ({ id }: any) => {
             <AutocompleteMultiSelectFormField
               id="investigation-group-select"
               name="investigation-group-select"
-              label={t("select_investigation_groups")}
+              label="Select Investigation Groups"
               options={investigationGroups}
               value={selectedGroup}
               onChange={handleGroupSelect}
               optionLabel={(option) => option.name}
               optionValue={(option) => option.external_id}
               isLoading={isLoading.investigationLoading}
-              placeholder={t("select_groups")}
+              placeholder="Select Groups"
               selectAll
             />
           </div>
@@ -317,7 +353,7 @@ const InvestigationReports = ({ id }: any) => {
               variant="primary"
               className="my-2.5"
             >
-              {t("get_tests")}
+              Get Tests
             </ButtonV2>
           )}
           {!!isLoading.investigationLoading && (
@@ -329,7 +365,7 @@ const InvestigationReports = ({ id }: any) => {
                 <AutocompleteMultiSelectFormField
                   id="investigation-select"
                   name="investigation-select"
-                  label={t("select_investigation")}
+                  label="Select Investigations (all investigations will be selected by default)"
                   value={selectedInvestigations}
                   options={investigations}
                   onChange={({ value }) =>
@@ -341,7 +377,7 @@ const InvestigationReports = ({ id }: any) => {
                   optionLabel={(option) => option.name}
                   optionValue={(option) => option}
                   isLoading={isLoading.investigationLoading}
-                  placeholder={t("select_investigations")}
+                  placeholder="Select Investigations"
                 />
               </div>
 
@@ -354,7 +390,7 @@ const InvestigationReports = ({ id }: any) => {
                 variant="primary"
                 className="my-2.5"
               >
-                {t("generate_report")}
+                Generate Report
               </ButtonV2>
             </>
           )}
@@ -371,25 +407,20 @@ const InvestigationReports = ({ id }: any) => {
                     onClick={() => handleSessionPage("NEXT")}
                     disabled={prevSessionDisabled}
                   >
-                    {isLoading.tableData ? "Loading..." : t("next_sessions")}
+                    {isLoading.tableData ? "Loading..." : "Next Sessions"}
                   </ButtonV2>
                   <ButtonV2
                     onClick={() => handleSessionPage("PREV")}
                     disabled={nextSessionDisabled}
                   >
-                    {isLoading.tableData ? "Loading..." : t("prev_sessions")}
+                    {isLoading.tableData ? "Loading..." : "Prev Sessions"}
                   </ButtonV2>
                 </div>
 
                 <ReportTable
                   investigationData={investigationTableData}
-                  title={t("report")}
-                  patientDetails={{
-                    name: patientData?.name || "",
-                    age: patientData?.age || -1,
-                    date_of_birth: patientData?.date_of_birth || "",
-                    hospitalName: patientData?.facility_object?.name || "",
-                  }}
+                  title="Report"
+                  patientDetails={patientDetails}
                 />
 
                 {!loadMoreDisabled && (
@@ -399,7 +430,7 @@ const InvestigationReports = ({ id }: any) => {
                     className="my-2.5 w-full"
                     variant="primary"
                   >
-                    {t("load_more")}
+                    Load More
                   </ButtonV2>
                 )}
               </>

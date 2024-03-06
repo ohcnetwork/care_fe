@@ -4,7 +4,8 @@ import { LANGUAGE_NAMES } from "../../Locale/config";
 import { classNames } from "../../Utils/utils";
 
 export const LanguageSelectorLogin = () => {
-  const { i18n, t } = useTranslation();
+  const { i18n } = useTranslation();
+
   useEffect(() => {
     document.documentElement.setAttribute("lang", i18n.language);
   }, [i18n]);
@@ -19,7 +20,7 @@ export const LanguageSelectorLogin = () => {
 
   return (
     <div className="mt-8 flex flex-col items-center text-sm text-gray-800">
-      {t("available_in")}
+      Available in:
       <br />
       <div className="inline-flex flex-wrap gap-3">
         {Object.keys(LANGUAGE_NAMES).map((e: string) => (

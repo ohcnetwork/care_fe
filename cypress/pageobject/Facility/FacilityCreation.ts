@@ -289,7 +289,9 @@ class FacilityPage {
   }
 
   confirmDeleteFacility() {
-    cy.submitButton("Delete");
+    cy.intercept("DELETE", "**/api/v1/facility/**").as("deleteFacility");
+    cy.get("#submit").contains("Delete").click();
+    cy.wait("@deleteFacility").its("response.statusCode").should("eq", 403);
   }
 
   selectLocation(location: string) {

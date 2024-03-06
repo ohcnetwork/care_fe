@@ -207,8 +207,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
                     ?.start_date
                 }
                 key={`${props.patientAssetBed?.bed.id}-${hash}`}
-                patientAssetBed={props.patientAssetBed}
-                socketUrl={props.socketUrl || ""}
+                {...props}
                 config={config}
               />
             </div>

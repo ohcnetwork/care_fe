@@ -1,52 +1,53 @@
-import { useTranslation } from "react-i18next";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import routes from "../../../Redux/api";
-import dayjs from "../../../Utils/dayjs";
-import useQuery from "../../../Utils/request/useQuery";
-import Loading from "../../Common/Loading";
+import { getConsultation } from "../../../Redux/actions";
 import ButtonV2 from "../../Common/components/ButtonV2";
+import { InvestigationType } from "../../Common/prescription-builder/InvestigationBuilder";
 import { InvestigationResponse } from "./Reports/types";
+import dayjs from "../../../Utils/dayjs";
 
 export default function ViewInvestigationSuggestions(props: {
-  consultationId: string;
+  consultationId: any;
   logUrl?: string;
   investigations?: InvestigationResponse;
 }) {
-  const { t } = useTranslation();
   const {
     consultationId,
     logUrl,
     investigations: previousInvestigations,
   } = props;
+  const dispatch = useDispatch<any>();
 
-  const { data: investigations, loading } = useQuery(routes.getConsultation, {
-    pathParams: {
-      id: consultationId,
-    },
-  });
+  const [investigations, setInvestigations] = useState<
+    InvestigationType[] | null
+  >(null);
 
-  if (loading) {
-    return <Loading />;
-  }
+  useEffect(() => {
+    getConsultationData();
+  }, [consultationId]);
 
-  console.log("Investigations: ", investigations);
+  const getConsultationData = async () => {
+    const res = (await dispatch(getConsultation(consultationId))) as any;
+    setInvestigations(res.data.investigation || []);
+  };
 
   return (
     <div className="mt-5" id="investigation-suggestions">
-      <h3>{t("investigations_suggested")}</h3>
+      <h3>Investigations Suggested</h3>
       <table className="mt-3 hidden w-full rounded-xl bg-white shadow md:table">
         <thead className="bg-gray-200 text-left">
           <tr>
-            <th className="p-4">{t("investigations")}</th>
-            <th className="p-4">{t("to_be_conducted")}</th>
-            {logUrl && <th className="p-4">{t("log_report")}</th>}
+            <th className="p-4">Investigations</th>
+            <th className="p-4">To be conducted</th>
+            {logUrl && <th className="p-4">Log Report</th>}
           </tr>
         </thead>
         <tbody>
-          {investigations?.investigation &&
-          Array.isArray(investigations?.investigation) ? (
-            investigations.investigation.map((investigation, index) => {
+          {Array.isArray(investigations) ? (
+            investigations.map((investigation, index) => {
               let nextFurthestInvestigation: any = undefined;
+
               return (
                 <tr key={index} className="border-b border-b-gray-200">
                   <td className="p-4">
@@ -193,7 +194,7 @@ export default function ViewInvestigationSuggestions(props: {
           ) : (
             <tr>
               <td className="p-4" colSpan={3}>
-                {t("no_investigation_suggestions")}
+                No Investigation Suggestions
               </td>
             </tr>
           )}
@@ -201,7 +202,7 @@ export default function ViewInvestigationSuggestions(props: {
       </table>
       <div className="flex flex-col gap-4 md:hidden">
         {Array.isArray(investigations) ? (
-          investigations.investigation?.map((investigation, index) => {
+          investigations.map((investigation, index) => {
             let nextFurthestInvestigation: any = undefined;
 
             return (
@@ -314,7 +315,7 @@ export default function ViewInvestigationSuggestions(props: {
           })
         ) : (
           <div className="rounded-xl bg-white shadow">
-            {t("no_investigation_suggestions")}
+            No Investigation Suggestions
           </div>
         )}
       </div>

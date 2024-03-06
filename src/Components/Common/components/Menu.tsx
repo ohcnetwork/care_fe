@@ -14,7 +14,7 @@ interface DropdownMenuProps {
   variant?: ButtonVariant;
   size?: ButtonSize;
   icon?: JSX.Element | undefined;
-  children: ReactNode | ReactNode[];
+  children: JSX.Element | JSX.Element[];
   disabled?: boolean | undefined;
   className?: string | undefined;
   itemClassName?: string | undefined;

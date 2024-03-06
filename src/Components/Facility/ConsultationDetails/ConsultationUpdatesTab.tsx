@@ -111,7 +111,6 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                     meta: monitorBedData?.asset_object?.meta,
                   }}
                   socketUrl={hl7SocketUrl}
-                  hideHeader={true}
                 />
               </div>
               <div className="min-h-[400px] flex-1">
@@ -123,7 +122,6 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                     meta: ventilatorBedData?.asset_object?.meta,
                   }}
                   socketUrl={ventilatorSocketUrl}
-                  hideHeader={true}
                 />
               </div>
             </div>
@@ -159,7 +157,6 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                             }}
                             socketUrl={hl7SocketUrl}
                             config={vitals.config}
-                            hideHeader={true}
                           />
                         </div>
                       )}
@@ -176,7 +173,6 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                             }}
                             socketUrl={ventilatorSocketUrl}
                             config={vitals.config}
-                            hideHeader={true}
                           />
                         </div>
                       )}
