@@ -268,12 +268,15 @@ export const UserAdd = (props: UserProps) => {
   });
 
   const { loading: isStateLoading } = useQuery(routes.statesList, {
-    onResponse: (result) => {
-      if (!result || !result.res || !result.data) return;
+    onResponse: ({ data }) => {
+      if (!data) {
+        return;
+      }
+
       if (userIndex <= USER_TYPES.indexOf("StateAdmin")) {
         setStates([authUser.state_object!]);
       } else {
-        setStates(result.data.results);
+        setStates(data.results);
       }
     },
   });
@@ -327,9 +330,9 @@ export const UserAdd = (props: UserProps) => {
 
   const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
     setSelectedFacility(selected as FacilityModel[]);
-    const form: any = { ...state.form };
+    const form = { ...state.form };
     form.facilities = selected
-      ? (selected as FacilityModel[]).map((i) => i.id ?? -1)
+      ? (selected as FacilityModel[]).map((i) => parseInt(i.id as string) ?? -1)
       : [];
     dispatch({ type: "set_form", form });
   };
@@ -633,25 +636,16 @@ export const UserAdd = (props: UserProps) => {
               />
             </div>
 
-            {/* <SelectFormField
-              {...field("user_type")}
-              required
-              label="User Type"
-              options={userTypes}
-              optionLabel={(o) => o.role + (o.readOnly ? " (Read Only)" : "")}
-              optionValue={(o) => o.id}
-            /> */}
-
             <AutocompleteFormField
               {...field("user_type")}
               label="User Type"
               placeholder="Search for a user type..."
-              // value={userTypes}
               options={userTypes ?? []}
               optionLabel={(o) => o.role + (o.readOnly ? " (Read Only)" : "")}
               optionValue={(o) => o.id}
               required
             />
+
             {state.form.user_type === "Doctor" && (
               <>
                 <TextFormField
