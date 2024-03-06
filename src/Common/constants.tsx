@@ -116,7 +116,7 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   { id: 830, text: "Taluk Hospitals" },
   { id: 860, text: "District Hospitals" },
   { id: 870, text: "Govt Medical College Hospitals" },
-  { id: 9, text: "Govt. Labs" },
+  { id: 9, text: "Govt Labs" },
   { id: 10, text: "Private Labs" },
   { id: 7, text: "TeleMedicine" },
   { id: 2, text: "Private Hospital" },
