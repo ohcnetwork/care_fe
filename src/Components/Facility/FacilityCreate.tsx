@@ -65,7 +65,7 @@ interface FacilityProps {
 }
 
 type FacilityForm = {
-  facility_type: string;
+  facility_type?: string;
   name: string;
   state: number;
   district: number;
@@ -89,7 +89,7 @@ type FacilityForm = {
 };
 
 const initForm: FacilityForm = {
-  facility_type: "Primary Health Centres",
+  facility_type: undefined,
   name: "",
   state: 0,
   district: 0,
