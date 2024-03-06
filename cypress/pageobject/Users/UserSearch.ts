@@ -62,6 +62,11 @@ export class UserPage {
     cy.get("[role='option']").contains(role).click();
   }
 
+  selectState(state: string) {
+    cy.get("input[name='state']").click().type(state);
+    cy.get("[role='option']").contains(state).click();
+  }
+
   selectDistrict(district: string) {
     cy.get("input[name='district']").click().type(district);
     cy.get("[role='option']").contains(district).click();
