@@ -713,7 +713,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         history_of_present_illness: state.form.history_of_present_illness,
         treatment_plan: state.form.treatment_plan,
         discharge_date: state.form.discharge_date,
-        patient_no: state.form.patient_no,
+        patient_no: state.form.patient_no || null,
         create_diagnoses: isUpdate ? undefined : state.form.create_diagnoses,
         treating_physician: state.form.treating_physician,
         investigation: state.form.InvestigationAdvice,
