@@ -81,6 +81,11 @@ module.exports = {
       padding: {
         "1/5": "20%",
       },
+      scale: {
+        25: "0.25",
+        175: "1.75",
+        200: "2",
+      },
     },
   },
   content: ["./src/**/*.{html,md,js,jsx,ts,tsx,res}", "./index.html"],
