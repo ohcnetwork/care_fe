@@ -36,7 +36,7 @@ describe("Patient Consultation in multiple combination", () => {
   const patientWeight = "70";
   const patientHeight = "170";
   const medicineOne = "DOLO";
-  const patientIpNumber = "192.168";
+  const patientIpNumber = Math.random().toString(36).substring(7);
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
