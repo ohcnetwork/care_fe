@@ -406,7 +406,9 @@ export const PatientManager = () => {
 
   const { data: permittedFacilities } = useQuery(
     routes.getPermittedFacilities,
-    {}
+    {
+      query: { limit: 1 },
+    }
   );
 
   const LastAdmittedToTypeBadges = () => {
@@ -723,6 +725,9 @@ export const PatientManager = () => {
     };
   };
 
+  const onlyAccessibleFacility =
+    permittedFacilities?.count === 1 ? permittedFacilities.results[0] : null;
+
   return (
     <Page
       title={t("Patients")}
@@ -736,10 +741,8 @@ export const PatientManager = () => {
               onClick={() => {
                 if (qParams.facility)
                   navigate(`/facility/${qParams.facility}/patient`);
-                else if (permittedFacilities?.results.length === 1)
-                  navigate(
-                    `/facility/${permittedFacilities?.results[0].id}/patient`
-                  );
+                else if (onlyAccessibleFacility)
+                  navigate(`/facility/${onlyAccessibleFacility.id}/patient`);
                 else setShowDialog(true);
               }}
               className="w-full lg:w-fit"
@@ -752,12 +755,36 @@ export const PatientManager = () => {
           </div>
           <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
             {(authUser.user_type === "StateAdmin" ||
-              authUser.user_type === "StateReadOnlyAdmin") && (
+              authUser.user_type === "StateReadOnlyAdmin" ||
+              permittedFacilities?.count === 1 ||
+              qParams.facility) && (
               <SwitchTabs
                 tab1="Live"
                 tab2="Discharged"
                 onClickTab1={() => updateQuery({ is_active: "True" })}
-                onClickTab2={() => updateQuery({ is_active: "False" })}
+                onClickTab2={() => {
+                  if (qParams.facility) {
+                    navigate(
+                      `facility/${qParams.facility}/discharged-patients`
+                    );
+                    return;
+                  }
+
+                  if (onlyAccessibleFacility) {
+                    navigate(
+                      `facility/${onlyAccessibleFacility.id}/discharged-patients`
+                    );
+                    return;
+                  }
+
+                  if (
+                    authUser.user_type === "StateAdmin" ||
+                    authUser.user_type === "StateReadOnlyAdmin"
+                  ) {
+                    updateQuery({ is_active: "False" });
+                    return;
+                  }
+                }}
                 isTab2Active={tabValue ? true : false}
               />
             )}
