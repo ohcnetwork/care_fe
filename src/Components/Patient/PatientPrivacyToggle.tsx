@@ -1,10 +1,8 @@
 import * as Notification from "../../Utils/Notifications.js";
 import CareIcon from "../../CAREUI/icons/CareIcon.js";
 import { ConsultationModel } from "../Facility/models.js";
-import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { UserRole } from "../../Common/constants.js";
-import { getConsultationBed } from "../../Redux/actions.js";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
 import request from "../../Utils/request/request.js";
 import routes from "../../Redux/api.js";
@@ -17,7 +15,6 @@ export default function PatientPrivacyToggle(props: PatientPrivacyToggleProps) {
   const { consultationId, consultation, fetchPatientData } = props;
   const [privacy, setPrivacy] = useState<boolean>(false);
   const user = useAuthUser();
-  const dispatch: any = useDispatch();
 
   //condititonally render the privacy toggle button depending on user role
   const allowPrivacyToggle = () => {
@@ -47,22 +44,20 @@ export default function PatientPrivacyToggle(props: PatientPrivacyToggleProps) {
         return;
       }
       const bedId = consultation?.current_bed?.bed_object?.id;
-      const consultationBedID = consultation?.current_bed?.id;
+      const consultationBedID = consultation?.current_bed?.id ?? "";
       try {
-        const res = await dispatch(
-          getConsultationBed(
-            consultationId,
-            bedId as string,
-            consultationBedID as string
-          )
-        );
+        const { res, data } = await request(routes.getConsultationBed, {
+          body: { consultation: consultationId, bed: bedId },
+          pathParams: { external_id: consultationBedID },
+        });
+
         if (
           res &&
           res.status === 200 &&
-          res?.data &&
-          (res.data?.privacy == true || res.data?.privacy == false)
+          data &&
+          (data?.privacy == true || data?.privacy == false)
         ) {
-          setPrivacy(res.data.privacy);
+          setPrivacy(data.privacy);
         } else {
           Notification.Error({
             msg: "Failed to fetch privacy",
