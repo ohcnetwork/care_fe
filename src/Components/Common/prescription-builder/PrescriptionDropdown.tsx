@@ -14,7 +14,6 @@ export function PrescriptionDropdown(props: {
   onFocus?: () => void;
   onBlur?: () => void;
 }) {
-  props.tips = [];
   const { options, tips, value, setValue } = props;
   const [open, setOpen] = useState(false);
 
