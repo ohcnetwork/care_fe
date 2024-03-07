@@ -5,6 +5,7 @@ import {
   DISCHARGE_REASONS,
   GENDER_TYPES,
   SAMPLE_TEST_STATUS,
+  OCCUPATION_TYPES,
 } from "../../Common/constants";
 
 import * as Notification from "../../Utils/Notifications";
@@ -38,6 +39,10 @@ import request from "../../Utils/request/request";
 import PaginatedList from "../../CAREUI/misc/PaginatedList";
 
 const Loading = lazy(() => import("../Common/Loading"));
+
+export const parseOccupation = (occupation: string | undefined) => {
+  return OCCUPATION_TYPES.find((i) => i.value === occupation)?.text;
+};
 
 export const PatientHome = (props: any) => {
   const { facilityId, id } = props;
@@ -530,6 +535,14 @@ export const PatientHome = (props: any) => {
                       </div>
                     </div>
                   )}
+                <div className="sm:col-span-1">
+                  <div className="text-sm font-semibold leading-5 text-zinc-400">
+                    Occupation
+                  </div>
+                  <div className="mt-1  text-sm font-medium leading-5 ">
+                    {parseOccupation(patientData.meta_info?.occupation) || "-"}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
