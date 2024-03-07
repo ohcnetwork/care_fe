@@ -44,86 +44,6 @@ export const deleteAssetBed = (asset_id: string) =>
     }
   );
 
-export const getFacilityBed = (
-  facility_external_id: string,
-  location_id: string,
-  external_id: string
-) =>
-  fireRequest(
-    "getFacilityBed",
-    [],
-    { facility: facility_external_id, location: location_id },
-    { external_id }
-  );
-export const updateFacilityBed = (
-  params: object,
-  facility_external_id: string,
-  external_id: string,
-  location_id: string
-) =>
-  fireRequest(
-    "updateFacilityBed",
-    [],
-    { ...params, facility: facility_external_id, location: location_id },
-    {
-      external_id,
-    }
-  );
-export const deleteFacilityBed = (external_id: string) => {
-  return fireRequest("deleteFacilityBed", [], {}, { external_id });
-};
-
-// Consultation Beds
-export const listConsultationBeds = (params: object) =>
-  fireRequest("listConsultationBeds", [], params, {});
-export const createConsultationBed = (
-  params: object,
-  consultation_id: string,
-  bed_id: string
-) =>
-  fireRequest(
-    "createConsultationBed",
-    [],
-    { ...params, consultation: consultation_id, bed: bed_id },
-    {}
-  );
-
-export const getConsultationBed = (
-  consultation_external_id: string,
-  bed_id: string,
-  external_id: string
-) =>
-  fireRequest(
-    "getConsultationBed",
-    [],
-    { consultation: consultation_external_id, bed: bed_id },
-    { external_id }
-  );
-export const updateConsultationBed = (
-  params: object,
-  consultation_external_id: string,
-  external_id: string,
-  bed_id: string
-) =>
-  fireRequest(
-    "updateConsultationBed",
-    [],
-    { ...params, consultation: consultation_external_id, bed: bed_id },
-    {
-      external_id,
-    }
-  );
-
-export const togglePatientPrivacy = (external_id: string) =>
-  fireRequest(
-    "togglePatientPrivacy",
-    [],
-    {},
-    {
-      external_id: external_id,
-    }
-  );
-
 // Download Actions
 export const downloadFacility = () => {
   return fireRequest("downloadFacility");
@@ -337,18 +257,6 @@ export const operateAsset = (id: string, params: object) =>
 
 export const listPMJYPackages = (query?: string) =>
   fireRequest("listPMJYPackages", [], { query });
-
-export const getPublicKey = () => {
-  return fireRequest("getPublicKey", [], {}, {});
-};
-
-export const getUserPnconfig = (pathParams: object) => {
-  return fireRequest("getUserPnconfig", [], {}, pathParams);
-};
-
-export const updateUserPnconfig = (params: object, pathParams: object) => {
-  return fireRequest("updateUserPnconfig", [], params, pathParams);
-};
 
 // HCX Actions
 export const HCXActions = {
