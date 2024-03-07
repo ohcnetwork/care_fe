@@ -1,14 +1,10 @@
-import { useDispatch } from "react-redux";
-import {
-  getUserPnconfig,
-  updateUserPnconfig,
-  getPublicKey,
-} from "../../Redux/actions";
 import { useState } from "react";
 import * as Sentry from "@sentry/browser";
 import { useTranslation } from "react-i18next";
 import { Error } from "../../Utils/Notifications.js";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 type SubscriptionStatusType =
   | ""
@@ -18,7 +14,6 @@ type SubscriptionStatusType =
 
 export default function useNotificationSubscribe() {
   const { username } = useAuthUser();
-  const dispatch: any = useDispatch();
   const [subscriptionStatus, setSubscriptionStatus] =
     useState<SubscriptionStatusType>("");
   const [isSubscribing, setIsSubscribing] = useState(false);
@@ -26,12 +21,14 @@ export default function useNotificationSubscribe() {
 
   const intialSubscriptionState = async () => {
     try {
-      const res = await dispatch(getUserPnconfig({ username: username }));
+      const { data } = await request(routes.getUserPnconfig, {
+        pathParams: { username },
+      });
       const reg = await navigator.serviceWorker.ready;
       const subscription = await reg.pushManager.getSubscription();
-      if (!subscription && !res?.data?.pf_endpoint) {
+      if (!subscription && !data?.pf_endpoint) {
         setSubscriptionStatus("NotSubscribed");
-      } else if (subscription?.endpoint === res?.data?.pf_endpoint) {
+      } else if (subscription?.endpoint === data?.pf_endpoint) {
         setSubscriptionStatus("SubscribedOnThisDevice");
       } else {
         setSubscriptionStatus("SubscribedOnAnotherDevice");
@@ -65,9 +62,11 @@ export default function useNotificationSubscribe() {
                   pf_p256dh: "",
                   pf_auth: "",
                 };
-                await dispatch(
-                  updateUserPnconfig(data, { username: username })
-                );
+
+                await request(routes.updateUserPnconfig, {
+                  body: data,
+                  pathParams: { username },
+                });
 
                 setSubscriptionStatus("NotSubscribed");
                 setIsSubscribing(false);
@@ -89,8 +88,10 @@ export default function useNotificationSubscribe() {
 
   async function subscribe() {
     setIsSubscribing(true);
-    const response = await dispatch(getPublicKey());
-    const public_key = response.data.public_key;
+
+    const { data: responseData } = await request(routes.getPublicKey);
+
+    const public_key = responseData?.public_key;
     const sw = await navigator.serviceWorker.ready;
     const push = await sw.pushManager.subscribe({
       userVisibleOnly: true,
@@ -115,11 +116,12 @@ export default function useNotificationSubscribe() {
       pf_auth: auth,
     };
 
-    const res = await dispatch(
-      updateUserPnconfig(data, { username: username })
-    );
+    const { res } = await request(routes.updateUserPnconfig, {
+      body: data,
+      pathParams: { username },
+    });
 
-    if (res.status >= 200 && res.status <= 300) {
+    if (res && res?.status >= 200 && res?.status <= 300) {
       setSubscriptionStatus("SubscribedOnThisDevice");
     }
     setIsSubscribing(false);

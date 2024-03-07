@@ -155,7 +155,7 @@ export const Feed: React.FC<IFeedProps> = ({ facilityId, consultationId }) => {
               Camera is being used by...
             </div>
 
-            <div className="flex flex-row gap-1 text-sm font-semibold">
+            <div className="flex flex-col gap-1 text-sm font-semibold">
               <div>{`${cameraOccupier.firstName} ${cameraOccupier.lastName}-`}</div>
               <div className="text-green-600">{`${cameraOccupier.role}`}</div>
             </div>
