@@ -1,11 +1,5 @@
 import { useEffect, useState } from "react";
 import { AssetData, ResolvedMiddleware } from "../AssetTypes";
-import { useDispatch } from "react-redux";
-import {
-  partialUpdateAssetBed,
-  listAssetBeds,
-  deleteAssetBed,
-} from "../../../Redux/actions";
 import * as Notification from "../../../Utils/Notifications.js";
 import { BedModel } from "../../Facility/models";
 import axios from "axios";
@@ -58,7 +52,6 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
   const [updateBoundaryNotif, setUpdateBoundaryNotif] =
     useState<string>("notUpdated");
   const [presets, setPresets] = useState<any[]>([]);
-  const dispatch = useDispatch<any>();
 
   const mapZoomToBuffer = (zoom: number): number => {
     interface bufferAtZoom {
@@ -157,9 +150,12 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
   }, [asset]);
 
   const fetchBoundaryBedPreset = async () => {
-    const res = await dispatch(listAssetBeds({ bed: bed.id }));
-    if (res && res.status === 200 && res.data) {
-      let bedAssets: any[] = res.data.results;
+    const { res, data } = await request(routes.listAssetBeds, {
+      body: { bed: bed.id },
+    });
+
+    if (res && res.status === 200 && data) {
+      let bedAssets: any[] = data.results;
 
       if (bedAssets.length > 0) {
         let boundaryPreset = null;
@@ -234,9 +230,14 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
           utcTime: presetData.data.utcTime,
           range: range,
         };
-        const res = await Promise.resolve(
-          dispatch(createAssetBed({ meta: meta }, assetId, bed?.id as string))
-        );
+
+        const { res } = await request(routes.createAssetBed, {
+          body: {
+            meta: meta,
+            asset: assetId,
+            bed: bed?.id as string,
+          },
+        });
         if (res?.status === 201) {
           Notification.Success({
             msg: "Boundary Preset Added Successfully",
@@ -279,9 +280,11 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
           bed: boundaryPreset.bed_object.id,
           meta: boundaryPreset.meta,
         };
-        const res = await Promise.resolve(
-          dispatch(partialUpdateAssetBed(data, boundaryPreset.id as string))
-        );
+
+        const { res } = await request(routes.partialUpdateAssetBed, {
+          body: data,
+          pathParams: { external_id: boundaryPreset.id },
+        });
         if (res?.status === 200) {
           setUpdateBoundaryNotif("updated");
         } else {
@@ -300,9 +303,9 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
   const deleteBoundaryPreset = async () => {
     if (boundaryPreset) {
       try {
-        const res = await Promise.resolve(
-          dispatch(deleteAssetBed(boundaryPreset.id))
-        );
+        const { res } = await request(routes.deleteAssetBed, {
+          pathParams: { external_id: boundaryPreset.id },
+        });
         if (res?.status === 204) {
           Notification.Success({
             msg: "Boundary Preset Deleted Successfully",
