@@ -14,10 +14,11 @@ import Beds from "./Consultations/Beds";
 interface ConsultationProps {
   itemData: ConsultationModel;
   isLastConsultation?: boolean;
+  refetch: () => void;
 }
 
 export const ConsultationCard = (props: ConsultationProps) => {
-  const { itemData, isLastConsultation } = props;
+  const { itemData, isLastConsultation, refetch } = props;
   const { kasp_string } = useConfig();
   const [open, setOpen] = useState(false);
   const bedDialogTitle = itemData?.discharge_date
@@ -40,6 +41,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
             discharged={!!itemData?.discharge_date}
             consultationId={itemData?.id ?? ""}
             setState={setOpen}
+            fetchPatientData={refetch}
             smallLoader
             hideTitle
           />
