@@ -36,7 +36,7 @@ describe("Patient Consultation in multiple combination", () => {
   const patientWeight = "70";
   const patientHeight = "170";
   const medicineOne = "DOLO";
-  const patientIpNumber = "192.168";
+  const patientIpNumber = Math.random().toString(36).substring(7);
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -59,7 +59,7 @@ describe("Patient Consultation in multiple combination", () => {
     patientConsultationPage.selectConsultationStatus(
       "Outpatient/Emergency Room"
     );
-    patientConsultationPage.selectSymptoms("ASYMPTOMATIC");
+    cy.clickAndSelectOption("#symptoms", "ASYMPTOMATIC");
     patientConsultationPage.typePatientIllnessHistory(patientIllnessHistory);
     patientConsultationPage.typePatientExaminationHistory(
       patientExaminationHistory
@@ -175,7 +175,7 @@ describe("Patient Consultation in multiple combination", () => {
       "Outpatient/Emergency Room"
     );
     // Asymptomatic
-    patientConsultationPage.selectSymptoms("ASYMPTOMATIC");
+    cy.clickAndSelectOption("#symptoms", "ASYMPTOMATIC");
     // CRITICAL category
     patientConsultationPage.selectPatientCategory("Critical");
     patientConsultationPage.selectPatientSuggestion("Declare Death");
@@ -233,7 +233,7 @@ describe("Patient Consultation in multiple combination", () => {
     );
     patientConsultationPage.selectPatientWard("Dummy Location 1");
     // Asymptomatic
-    patientConsultationPage.selectSymptoms("ASYMPTOMATIC");
+    cy.clickAndSelectOption("#symptoms", "ASYMPTOMATIC");
     // Abnormal category
     patientConsultationPage.selectPatientCategory("Abnormal");
     patientConsultationPage.selectPatientSuggestion("Domiciliary Care");
