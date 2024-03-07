@@ -21,9 +21,9 @@ export const ConsultationCard = (props: ConsultationProps) => {
   const { itemData, isLastConsultation, refetch } = props;
   const { kasp_string } = useConfig();
   const [open, setOpen] = useState(false);
-  const bedDialogTitle = itemData?.discharge_date
+  const bedDialogTitle = itemData.discharge_date
     ? "Bed History"
-    : !itemData?.current_bed
+    : !itemData.current_bed
     ? "Assign Bed"
     : "Switch Bed";
   return (
@@ -34,12 +34,12 @@ export const ConsultationCard = (props: ConsultationProps) => {
         onClose={() => setOpen(false)}
         className="md:max-w-3xl"
       >
-        {itemData?.facility && itemData?.patient && itemData?.id ? (
+        {itemData.facility && itemData.patient && itemData.id ? (
           <Beds
-            facilityId={itemData?.facility}
-            patientId={itemData?.patient}
-            discharged={!!itemData?.discharge_date}
-            consultationId={itemData?.id ?? ""}
+            facilityId={itemData.facility}
+            patientId={itemData.patient}
+            discharged={!!itemData.discharge_date}
+            consultationId={itemData.id ?? ""}
             setState={setOpen}
             fetchPatientData={refetch}
             smallLoader
@@ -192,7 +192,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
             <ButtonV2
               className="h-auto whitespace-pre-wrap border border-gray-500 bg-white text-black hover:bg-gray-300"
               onClick={() => {
-                if (itemData?.admitted && !itemData?.current_bed) {
+                if (itemData.admitted && !itemData.current_bed) {
                   Notification.Error({
                     msg: "Please assign a bed to the patient",
                   });
