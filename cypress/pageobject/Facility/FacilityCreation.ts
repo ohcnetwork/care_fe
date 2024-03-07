@@ -66,8 +66,7 @@ class FacilityPage {
   }
 
   selectBedType(bedType: string) {
-    cy.get("div#bed-type button").click();
-    cy.get("[role='option']").contains(bedType).click();
+    cy.clickAndSelectOption("div#bed-type button", bedType);
   }
 
   isVisibleselectBedType() {
@@ -289,9 +288,7 @@ class FacilityPage {
   }
 
   confirmDeleteFacility() {
-    cy.intercept("DELETE", "**/api/v1/facility/**").as("deleteFacility");
-    cy.get("#submit").contains("Delete").click();
-    cy.wait("@deleteFacility").its("response.statusCode").should("eq", 403);
+    cy.submitButton("Delete");
   }
 
   selectLocation(location: string) {

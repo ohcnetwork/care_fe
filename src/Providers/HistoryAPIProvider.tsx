@@ -26,7 +26,6 @@ export default function HistoryAPIProvider(props: { children: ReactNode }) {
     },
     { onInitial: true }
   );
-
   const resetHistory = () => setHistory((history) => history.slice(0, 1));
 
   return (

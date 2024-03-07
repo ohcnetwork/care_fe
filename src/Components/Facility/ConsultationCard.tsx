@@ -112,8 +112,8 @@ export const ConsultationCard = (props: ConsultationProps) => {
       <div className="mt-8 flex flex-col">
         {
           <div className="flex flex-col items-center text-sm text-gray-700 md:flex-row">
-            Created :{" "}
-            <div className=" ml-1 text-black">
+            <div className=" font-medium text-black">Created : </div>
+            <div className=" ml-1 text-gray-700">
               <RelativeDateUserMention
                 tooltipPosition="right"
                 actionDate={itemData.created_date}
@@ -123,8 +123,8 @@ export const ConsultationCard = (props: ConsultationProps) => {
           </div>
         }
         <div className="flex flex-col items-center text-sm text-gray-700 md:flex-row">
-          Last Modified :{" "}
-          <div className=" ml-1 text-black">
+          <div className=" font-medium text-black">Last Modified : </div>
+          <div className=" ml-1 text-gray-700">
             <RelativeDateUserMention
               tooltipPosition="right"
               actionDate={itemData.modified_date}
@@ -163,7 +163,9 @@ export const ConsultationCard = (props: ConsultationProps) => {
                 `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds`
               )
             }
-            disabled={itemData.discharge_date}
+            disabled={
+              (itemData.discharge_date as string | undefined) != undefined
+            }
             authorizeFor={NonReadOnlyUsers}
           >
             Add Consultation Updates

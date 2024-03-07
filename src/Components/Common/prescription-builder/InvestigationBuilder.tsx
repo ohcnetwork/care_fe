@@ -151,18 +151,20 @@ export default function InvestigationBuilder(
                   Investigations Recommended
                   <span className="text-danger-500">{" *"}</span>
                 </div>
-                <PrescriptionMultiDropdown
-                  options={investigationsList}
-                  placeholder="Search Investigations"
-                  selectedValues={
-                    investigation.type?.constructor === Array
-                      ? investigation.type
-                      : []
-                  }
-                  setSelectedValues={setType}
-                  onFocus={() => setActiveIdx(i)}
-                  onBlur={() => setActiveIdx(null)}
-                />
+                <div id="search-patient-investigation">
+                  <PrescriptionMultiDropdown
+                    options={investigationsList}
+                    placeholder="Search Investigations"
+                    selectedValues={
+                      investigation.type?.constructor === Array
+                        ? investigation.type
+                        : []
+                    }
+                    setSelectedValues={setType}
+                    onFocus={() => setActiveIdx(i)}
+                    onBlur={() => setActiveIdx(null)}
+                  />
+                </div>
               </div>
               <div className="flex w-full shrink-0 flex-col justify-between">
                 <div className="flex flex-col gap-4 md:flex-row">
@@ -170,6 +172,7 @@ export default function InvestigationBuilder(
                     Is the investigation repetitive?
                     <br />
                     <input
+                      id="investigation-checkbox"
                       type="checkbox"
                       onFocus={() => setActiveIdx(i)}
                       onBlur={() => setActiveIdx(null)}
@@ -191,14 +194,16 @@ export default function InvestigationBuilder(
                       <div className="mb-1">
                         Frequency<span className="text-danger-500">{" *"}</span>
                       </div>
-                      <PrescriptionDropdown
-                        placeholder="Frequency"
-                        options={FREQUENCY}
-                        value={investigation.frequency || ""}
-                        setValue={setFrequency}
-                        onFocus={() => setActiveIdx(i)}
-                        onBlur={() => setActiveIdx(null)}
-                      />
+                      <div id="investigation-frequency">
+                        <PrescriptionDropdown
+                          placeholder="Frequency"
+                          options={FREQUENCY}
+                          value={investigation.frequency || ""}
+                          setValue={setFrequency}
+                          onFocus={() => setActiveIdx(i)}
+                          onBlur={() => setActiveIdx(null)}
+                        />
+                      </div>
                     </div>
                   ) : (
                     <div className="w-full">
