@@ -483,6 +483,7 @@ const routes = {
   getConsultationBed: {
     path: "/api/v1/consultationbed/{external_id}/",
     method: "GET",
+    TRes: Type<CurrentBed>(),
   },
   updateConsultationBed: {
     path: "/api/v1/consultationbed/{external_id}/",
