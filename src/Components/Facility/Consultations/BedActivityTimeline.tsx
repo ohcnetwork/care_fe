@@ -11,6 +11,39 @@ import { CurrentBed } from "../models";
 import { Popover, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 
+interface AssetDiff {
+  newlyLinkedAssets: AssetData[];
+  existingAssets: AssetData[];
+  unlinkedAssets: AssetData[];
+}
+
+const getAssetDiff = (a: AssetData[], b: AssetData[]): AssetDiff => {
+  const newlyLinkedAssets: AssetData[] = [];
+  const existingAssets: AssetData[] = [];
+  const unlinkedAssets: AssetData[] = [];
+
+  const bMap: Map<string, AssetData> = new Map();
+  b.forEach((asset) => bMap.set(asset.id, asset));
+  a.forEach((asset) => {
+    if (!bMap.has(asset.id)) {
+      unlinkedAssets.push(asset);
+    } else {
+      existingAssets.push(asset);
+    }
+  });
+  b.forEach((asset) => {
+    if (!a.find((aAsset) => aAsset.id === asset.id)) {
+      newlyLinkedAssets.push(asset);
+    }
+  });
+
+  return {
+    newlyLinkedAssets,
+    existingAssets,
+    unlinkedAssets,
+  };
+};
+
 interface Props {
   consultationBeds: CurrentBed[];
   loading?: boolean;
@@ -34,7 +67,7 @@ export default function BedActivityTimeline({
             <BedAllocationNode
               key={`activity-${bed.id}`}
               bed={bed}
-              prevBed={index > 0 ? consultationBeds[index + 1] : undefined}
+              prevBed={consultationBeds[index + 1] ?? undefined}
               isLastNode={index === consultationBeds.length - 1}
             />
           );
@@ -58,8 +91,11 @@ const BedAllocationNode = ({
     timestamp: bed.start_date,
     by: undefined,
     icon: bed.end_date === null ? "l-map-pin-alt" : "l-bed",
-    notes: bed.assets_objects?.length ? (
-      <BedTimelineAsset assets={bed.assets_objects} />
+    notes: bed.assets_objects ? (
+      <BedTimelineAsset
+        assets={bed.assets_objects}
+        prevBedAssets={prevBed?.assets_objects}
+      />
     ) : (
       ""
     ),
@@ -83,18 +119,45 @@ const BedAllocationNode = ({
   );
 };
 
-const BedTimelineAsset = ({ assets }: { assets: AssetData[] }) => {
+const BedTimelineAsset = ({
+  assets,
+  prevBedAssets,
+}: {
+  assets: AssetData[];
+  prevBedAssets?: AssetData[];
+}) => {
+  const { newlyLinkedAssets, existingAssets, unlinkedAssets } = getAssetDiff(
+    prevBedAssets || [],
+    assets
+  );
+
   return (
     <div className="flex flex-col">
-      <p className="font-semibold">Linked Assets</p>
-      <div className="ml-5 flex flex-col">
-        {assets.map((asset) => {
-          return (
-            <li key={asset.id} className="list-disc">
-              {asset.name}
-            </li>
-          );
-        })}
+      <div className="flex flex-col">
+        {newlyLinkedAssets.length !== 0 && (
+          <ul className="text-sm text-gray-600">Newly Linked Assets</ul>
+        )}
+        {newlyLinkedAssets.map((asset) => (
+          <li key={asset.id} className="list-disc text-xs text-gray-600">
+            {asset.name}
+          </li>
+        ))}
+        {existingAssets.length !== 0 && (
+          <ul className="text-sm text-gray-600">Existing Assets</ul>
+        )}
+        {existingAssets.map((asset) => (
+          <li key={asset.id} className="list-disc text-xs text-gray-600">
+            {asset.name}
+          </li>
+        ))}
+        {unlinkedAssets.length !== 0 && (
+          <ul className="text-sm text-gray-600">Unlinked Assets</ul>
+        )}
+        {unlinkedAssets.map((asset) => (
+          <li key={asset.id} className="list-disc text-xs text-gray-600">
+            {asset.name}
+          </li>
+        ))}
       </div>
     </div>
   );
