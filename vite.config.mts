@@ -77,7 +77,10 @@ export default defineConfig({
     port: 4000,
     proxy: {
       "/api": {
-        target: process.env.CARE_API ?? "https://work.khavinshankar.dev",
+        target:
+          "https://work.khavinshankar.dev" ??
+          process.env.CARE_API ??
+          "https://careapi.ohc.network",
         changeOrigin: true,
       },
     },
@@ -94,7 +97,10 @@ export default defineConfig({
     port: 4000,
     proxy: {
       "/api": {
-        target: process.env.CARE_API ?? "https://work.khavinshankar.dev",
+        target:
+          "https://work.khavinshankar.dev" ??
+          process.env.CARE_API ??
+          "https://careapi.ohc.network",
         changeOrigin: true,
       },
     },
