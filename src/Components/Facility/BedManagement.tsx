@@ -90,8 +90,7 @@ const BedRow = (props: BedRowProps) => {
       />
       <div
         key={id}
-        className="w-full border items-center justify-between mb-4 py-4 bg-white rounded-md gap-4 lg:flex lg:items-center transition-all duration-200 ease-in-out hover:border-primary-400"
-      >
+        className="w-full items-center justify-between rounded border border-gray-300 bg-white p-6 shadow-sm transition-all duration-200 ease-in-out hover:border-primary-400 lg:flex items-baseline gap-4 lg:flex lg:items-center">
         <div className="mt-2 space-y-2 px-4 lg:w-3/4">
           <div className="flex flex-col sm:flex-row">
             <p className="inline break-words text-xl capitalize">{name}</p>{" "}
