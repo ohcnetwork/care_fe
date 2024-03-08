@@ -28,6 +28,7 @@ import useAuthUser from "../../../Common/hooks/useAuthUser.js";
 import Spinner from "../../Common/Spinner.js";
 import useQuery from "../../../Utils/request/useQuery.js";
 import { ResolvedMiddleware } from "../../Assets/AssetTypes.js";
+import useWindowDimensions from "../../../Common/hooks/useWindowDimensions.js";
 
 interface IFeedProps {
   facilityId: string;
@@ -40,7 +41,10 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   const dispatch: any = useDispatch();
 
   const videoWrapper = useRef<HTMLDivElement>(null);
-
+  const { width } = useWindowDimensions();
+  const extremeSmallScreenBreakpoint = 320;
+  const isExtremeSmallScreen =
+    width <= extremeSmallScreenBreakpoint ? true : false;
   const [cameraAsset, setCameraAsset] = useState<ICameraAssetState>({
     id: "",
     accessKey: "",
@@ -550,7 +554,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
             </div>
           )}
         </div>
-        <div className="absolute right-8 top-8 z-10 flex flex-col gap-4">
+        <div className="right-8 top-8 z-20 hidden flex-col gap-4 lg:absolute lg:flex">
           {["fullScreen", "reset", "updatePreset", "zoomIn", "zoomOut"].map(
             (button, index) => {
               const option = cameraPTZ.find(
@@ -570,7 +574,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
             <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
           </div>
         </div>
-        <div className="absolute bottom-8 right-8 z-10">
+
+        <div className="bottom-8 right-8 z-20 hidden lg:absolute">
           <FeedButton
             camProp={cameraPTZ[4]}
             styleType="CHHOTUBUTTON"
@@ -584,7 +589,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               <span>Slow Network Detected</span>
             </div>
           )}
-        <div className="absolute bottom-8 left-8 z-10 grid grid-flow-col grid-rows-3 gap-1">
+        <div className=" absolute bottom-8 left-8 z-10 hidden grid-flow-col grid-rows-3 gap-1 lg:grid">
           {[
             false,
             cameraPTZ[2],
@@ -647,6 +652,44 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           })}
         </div>
       </div>
+      <div
+        className={`${
+          isExtremeSmallScreen ? " flex flex-wrap" : " md:flex "
+        } mt-4 w-full lg:hidden lg:max-w-lg `}
+      >
+        {cameraPTZ.map((option, index) => {
+          const shortcutKeyDescription =
+            option.shortcutKey &&
+            option.shortcutKey
+              .join(" + ")
+              .replace("Control", "Ctrl")
+              .replace("ArrowUp", "↑")
+              .replace("ArrowDown", "↓")
+              .replace("ArrowLeft", "←")
+              .replace("ArrowRight", "→");
+
+          return (
+            <button
+              key={index}
+              className="tooltip w-10 flex-1 border border-green-100 bg-green-100 px-3 py-2 text-lg font-bold hover:bg-green-200"
+              onClick={option.callback}
+            >
+              <span className="sr-only">{option.label}</span>
+              {option.icon ? (
+                <CareIcon className={`care-${option.icon}`} />
+              ) : (
+                <span className="flex h-full  items-center justify-center px-2 font-bold">
+                  {option.value}x
+                </span>
+              )}
+              <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm font-semibold">{`${option.label}  (${shortcutKeyDescription})`}</span>
+            </button>
+          );
+        })}
+        <div className="hidden pl-3 md:block">
+          <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
+        </div>
+      </div>
     </div>
   );
 };
@@ -684,7 +727,7 @@ export const FeedCameraPTZHelpButton = (props: { cameraPTZ: CameraPTZ[] }) => {
                   );
 
                   // Skip wrapping with + for joining with next key
-                  if (index === option.shortcutKey.length - 1)
+                  if (index === option.shortcutKey?.length - 1)
                     return keyElement;
 
                   return (
