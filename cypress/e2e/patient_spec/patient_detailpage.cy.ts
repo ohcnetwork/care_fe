@@ -31,7 +31,7 @@ describe("Patient Details", () => {
 
     // Verify the file is uploaded
     cy.verifyNotification("File Uploaded Successfully");
-    cy.get("#file-name").should("contain.text", fileName);
+    cy.get("#file-div").should("contain.text", fileName);
 
     // Download the file
     patientFileUploadPage.downloadFile();
@@ -51,7 +51,7 @@ describe("Patient Details", () => {
 
     // Verify the audio file is uploaded
     cy.verifyNotification("File Uploaded Successfully");
-    cy.get("#audio-file-name").should("contain.text", fileName);
+    cy.get("#file-div").should("contain.text", fileName);
 
     // Archive the audio file
     patientFileUploadPage.archiveFile();
@@ -81,42 +81,42 @@ describe("Patient Details", () => {
 
     // Verify the file is uploaded
     cy.verifyNotification("File Uploaded Successfully");
-    cy.get("#file-name").should("contain.text", oldFileName);
+    cy.get("#file-div").should("contain.text", oldFileName);
 
     // Edit the file name
-    patientFileUploadPage.verifyFileEditOption(true);
+    patientFileUploadPage.verifyFileRenameOption(true);
     const newFileName = `Cypress File ${new Date()
       .getTime()
       .toString()
       .slice(9)}`;
-    patientFileUploadPage.editFileName(newFileName);
+    patientFileUploadPage.renameFile(newFileName);
     patientFileUploadPage.clickSaveFileName();
 
     // Verify the file name is changed
     cy.verifyNotification("File name changed successfully");
-    cy.get("#file-name").should("contain.text", newFileName);
+    cy.get("#file-div").should("contain.text", newFileName);
 
     // Login as Nurse 2
     loginPage.login("dummynurse2", "Coronasafe@123");
     cy.reload();
 
     // Verify the file edit option is not available
-    cy.get("#file-name").should("contain.text", newFileName);
-    patientFileUploadPage.verifyFileEditOption(false);
+    cy.get("#file-div").should("contain.text", newFileName);
+    patientFileUploadPage.verifyFileRenameOption(false);
 
     // Login as District Admin
     loginPage.loginAsDisctrictAdmin();
     cy.reload();
 
     // Verify the file edit option is available
-    cy.get("#file-name").should("contain.text", newFileName);
-    patientFileUploadPage.verifyFileEditOption(true);
-    patientFileUploadPage.editFileName(oldFileName);
+    cy.get("#file-div").should("contain.text", newFileName);
+    patientFileUploadPage.verifyFileRenameOption(true);
+    patientFileUploadPage.renameFile(oldFileName);
     patientFileUploadPage.clickSaveFileName();
 
     // Verify the file name is changed
     cy.verifyNotification("File name changed successfully");
-    cy.get("#file-name").should("contain.text", oldFileName);
+    cy.get("#file-div").should("contain.text", oldFileName);
   });
 
   afterEach(() => {

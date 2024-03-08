@@ -20,8 +20,8 @@ export class PatientFileUploadPage {
   }
 
   downloadFile() {
-    cy.intercept("GET", "**/api/v1/files/**").as("downloadFile");
-    cy.get("#preview-file").click();
+    cy.intercept("GET", "**/patient-bucket/PATIENT/**").as("downloadFile");
+    cy.get("#download-file").click();
     cy.wait("@downloadFile").its("response.statusCode").should("eq", 200);
   }
 
@@ -33,7 +33,7 @@ export class PatientFileUploadPage {
 
   clickUploadAudioFile() {
     cy.intercept("POST", "**/api/v1/files/").as("uploadAudioFile");
-    cy.get("#upload-audio-file").click();
+    cy.get("#upload_audio_file").click();
     cy.wait("@uploadAudioFile").its("response.statusCode").should("eq", 201);
   }
 
@@ -57,18 +57,18 @@ export class PatientFileUploadPage {
     });
   }
 
-  verifyFileEditOption(status: boolean) {
+  verifyFileRenameOption(status: boolean) {
     cy.get("#file-div").then(($fileDiv) => {
       if (status) {
-        expect($fileDiv.text()).to.contain("EDIT FILE");
+        expect($fileDiv.text()).to.contain("RENAME");
       } else {
-        expect($fileDiv.text()).to.not.contain("EDIT FILE");
+        expect($fileDiv.text()).to.not.contain("RENAME");
       }
     });
   }
 
-  editFileName(newFileName: string) {
-    cy.get("#edit-file-name").click().scrollIntoView();
+  renameFile(newFileName: string) {
+    cy.get("button").contains("RENAME").click().scrollIntoView();
     cy.get("#editFileName").clear().type(newFileName);
   }
 

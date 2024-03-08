@@ -559,7 +559,11 @@ export const FileUpload = (props: FileUploadProps) => {
   const renderFileUpload = (item: FileUploadModel) => {
     const isPreviewSupported = previewExtensions.includes(item.extension ?? "");
     return (
-      <div className="mt-4 rounded-lg border bg-white p-4 shadow" key={item.id}>
+      <div
+        className="mt-4 rounded-lg border bg-white p-4 shadow"
+        id="file-div"
+        key={item.id}
+      >
         {!item.is_archived ? (
           <>
             {item.file_category === "AUDIO" ? (
@@ -659,6 +663,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         authUser.user_type === "StateAdmin" ? (
                           <>
                             <ButtonV2
+                              id="archive-file"
                               onClick={() => {
                                 setArchiveReason("");
                                 setModalDetails({
@@ -735,6 +740,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   ) : (
                     <ButtonV2
                       className="m-1 w-full sm:w-auto"
+                      id="download-file"
                       onClick={() => {
                         triggerDownload(
                           url[item.id!],
@@ -1408,9 +1414,10 @@ export const FileUpload = (props: FileUploadProps) => {
         <div className="flex flex-col">
           <div>
             <div className="text-md m-2 text-center">
-              <b>{modalDetails?.name}</b> file is archived.
+              <b id="archive-file-name">{modalDetails?.name}</b> file is
+              archived.
             </div>
-            <div className="text-md text-center">
+            <div className="text-md text-center" id="archive-file-reason">
               <b>Reason:</b> {modalDetails?.reason}
             </div>
             <div className="text-md text-center">
@@ -1490,6 +1497,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   {audioBlobExists && (
                     <div className="flex w-full items-center md:w-auto">
                       <ButtonV2
+                        id="upload_audio_file"
                         onClick={() => {
                           handleAudioUpload();
                         }}
