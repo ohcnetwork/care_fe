@@ -108,7 +108,7 @@ let getStatus = (val) => {
                       | None => setState(prev => {...prev, scale: 0})
                       }
                     }}
-                    getLabel={getStatus(0.0, "No pain", 5.0, "Unbearable")}
+                    getLabel={getStatus}
                     hasError={ValidationUtils.isInputInRangeInt(
                       0,
                       5,
