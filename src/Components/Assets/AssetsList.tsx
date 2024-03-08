@@ -38,13 +38,13 @@ const AssetsList = () => {
     resultsPerPage,
   } = useFilters({
     limit: 18,
+    cacheBlacklist: ["search"],
   });
   const [assets, setAssets] = useState([{} as AssetData]);
   const [isLoading, setIsLoading] = useState(false);
   const [isScannerActive, setIsScannerActive] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [facility, setFacility] = useState<FacilityModel>();
-  const [asset_type, setAssetType] = useState<string>();
   const [status, setStatus] = useState<string>();
   const [asset_class, setAssetClass] = useState<string>();
   const [importAssetModalOpen, setImportAssetModalOpen] = useState(false);
@@ -59,13 +59,16 @@ const AssetsList = () => {
     offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
     search_text: qParams.search || "",
     facility: qParams.facility || "",
-    asset_type: qParams.asset_type || "",
     asset_class: qParams.asset_class || "",
     location: qParams.facility ? qParams.location || "" : "",
     status: qParams.status || "",
+    warranty_amc_end_of_validity_before:
+      qParams.warranty_amc_end_of_validity_before || "",
+    warranty_amc_end_of_validity_after:
+      qParams.warranty_amc_end_of_validity_after || "",
   };
 
-  const { loading } = useQuery(routes.listAssets, {
+  const { refetch: assetsFetch, loading } = useQuery(routes.listAssets, {
     query: params,
     onResponse: ({ res, data }) => {
       if (res?.status === 200 && data) {
@@ -85,10 +88,6 @@ const AssetsList = () => {
     },
     prefetch: !!qParams.facility,
   });
-
-  useEffect(() => {
-    setAssetType(qParams.asset_type);
-  }, [qParams.asset_type]);
 
   useEffect(() => {
     setStatus(qParams.status);
@@ -154,7 +153,8 @@ const AssetsList = () => {
           onClick={() => setIsScannerActive(false)}
           className="btn btn-default mb-2"
         >
-          <i className="fas fa-times mr-2"></i> Close Scanner
+          <CareIcon icon="l-times" className="mr-1 text-lg" />
+          Close Scanner
         </button>
         <QrReader
           delay={300}
@@ -189,12 +189,12 @@ const AssetsList = () => {
           <Link
             key={asset.id}
             href={`/facility/${asset?.location_object.facility.id}/assets/${asset.id}`}
-            className="text-inherit"
+            className="h-full text-inherit"
             data-testid="created-asset-list"
           >
             <div
               key={asset.id}
-              className="border-1 w-full cursor-pointer items-center justify-center rounded-lg border border-transparent bg-white p-5 shadow hover:border-primary-500"
+              className="border-1 h-full w-full cursor-pointer items-center justify-center rounded-lg border border-transparent bg-white p-5 shadow hover:border-primary-500"
             >
               <div className="md:flex">
                 <p className="flex break-words text-xl font-medium capitalize">
@@ -235,6 +235,13 @@ const AssetsList = () => {
                   <Chip variant="danger" startIcon="l-cog" text="Not Working" />
                 )}
                 {warrantyAmcValidityChip(asset.warranty_amc_end_of_validity)}
+                {asset?.latest_status === "Down" && (
+                  <Chip
+                    variant="danger"
+                    startIcon="l-link-broken"
+                    text={asset?.latest_status}
+                  />
+                )}{" "}
               </div>
             </div>
           </Link>
@@ -338,7 +345,8 @@ const AssetsList = () => {
               className="w-full py-[11px]"
               onClick={() => setIsScannerActive(true)}
             >
-              <i className="fas fa-search mr-1"></i> Scan Asset QR
+              <CareIcon icon="l-search" className="mr-1 text-base" /> Scan Asset
+              QR
             </ButtonV2>
           </div>
           <div
@@ -375,7 +383,6 @@ const AssetsList = () => {
                 qParams.facility && facilityObject?.name
               ),
               badge("Name/Serial No./QR ID", "search"),
-              value("Asset Type", "asset_type", asset_type ?? ""),
               value("Asset Class", "asset_class", asset_class ?? ""),
               value("Status", "status", status?.replace(/_/g, " ") ?? ""),
               value(
@@ -432,6 +439,7 @@ const AssetsList = () => {
               return f;
             });
           }}
+          onUpdate={assetsFetch}
           facility={facility}
         />
       )}

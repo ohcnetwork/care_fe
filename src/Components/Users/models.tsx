@@ -6,6 +6,12 @@ interface HomeFacilityObjectModel {
   name?: string;
 }
 
+export type UpdatePasswordForm = {
+  old_password: string;
+  username: string;
+  new_password: string;
+};
+
 export type UserBareMinimum = {
   id: number;
   username: string;
@@ -16,16 +22,20 @@ export type UserBareMinimum = {
   last_login: string | undefined;
 };
 
+export type GenderType = "Male" | "Female" | "Transgender";
+
 export type UserModel = UserBareMinimum & {
   local_body?: number;
   district?: number;
   state?: number;
+  video_connect_link: string;
   phone_number?: string;
   alt_phone_number?: string;
-  gender?: number;
+  gender?: GenderType;
   age?: number;
   is_superuser?: boolean;
   verified?: boolean;
+  home_facility?: string;
   home_facility_object?: HomeFacilityObjectModel;
   local_body_object?: LocalBodyModel;
   district_object?: DistrictModel;
@@ -33,6 +43,7 @@ export type UserModel = UserBareMinimum & {
   doctor_qualification?: string;
   doctor_experience_commenced_on?: string;
   doctor_medical_council_registration?: string;
+  weekly_working_hours?: string | null;
 };
 
 export interface SkillObjectModel {
@@ -52,13 +63,16 @@ export interface UserAssignedModel extends UserBareMinimum {
   state?: number;
   phone_number?: string;
   alt_phone_number?: string;
+  video_connect_link: string;
   gender?: number;
   age?: number;
   is_superuser?: boolean;
   verified?: boolean;
+  home_facility?: string;
   home_facility_object?: HomeFacilityObjectModel;
   doctor_qualification?: string;
   doctor_experience_commenced_on?: Date;
   doctor_medical_council_registration?: string;
+  weekly_working_hours?: string;
   skills: SkillObjectModel[];
 }

@@ -24,14 +24,6 @@ export class AssetPage {
       });
   }
 
-  selectAssetType(assetType: string) {
-    cy.get("[data-testid=asset-type-input] button")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains(assetType).click();
-      });
-  }
-
   selectAssetClass(assetClass: string) {
     cy.get("[data-testid=asset-class-input] button")
       .click()
@@ -129,7 +121,7 @@ export class AssetPage {
     cy.get(
       "[data-testid=asset-last-serviced-on-input] input[type='text']"
     ).click();
-    cy.get("#date-input").click().type(lastServicedOn);
+    cy.get("#date-input").click().clear().type(lastServicedOn);
     cy.get("[data-testid=asset-notes-input] textarea").clear().type(notes);
   }
 
@@ -205,13 +197,6 @@ export class AssetPage {
     );
   }
 
-  verifyEmptyAssetTypeError() {
-    cy.get("[data-testid=asset-type-input] span").should(
-      "contain",
-      "Select an asset type"
-    );
-  }
-
   verifyEmptyStatusError() {
     cy.get("[data-testid=asset-working-status-input] span").should(
       "contain",
@@ -239,7 +224,7 @@ export class AssetPage {
   }
 
   selectjsonexportbutton() {
-    cy.intercept("GET", "**/api/v1/asset/?json=true**").as("getJsonexport");
+    cy.intercept("GET", "**/api/v1/asset/?**json=true**").as("getJsonexport");
     cy.get("#export-json-option").click();
     cy.wait("@getJsonexport").then(({ request, response }) => {
       expect(response.statusCode).to.eq(200);
@@ -248,7 +233,7 @@ export class AssetPage {
   }
 
   selectcsvexportbutton() {
-    cy.intercept("GET", "**/api/v1/asset/?csv=true**").as("getCsvexport");
+    cy.intercept("GET", "**/api/v1/asset/?**csv=true**").as("getCsvexport");
     cy.get("#export-csv-option").click();
     cy.wait("@getCsvexport").then(({ request, response }) => {
       expect(response.statusCode).to.eq(200);

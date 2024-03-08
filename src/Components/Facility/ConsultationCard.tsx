@@ -63,14 +63,14 @@ export const ConsultationCard = (props: ConsultationProps) => {
             </div>
           </div>
         )}
-        {itemData.admitted && itemData.admission_date && (
+        {itemData.admitted && itemData.encounter_date && (
           <div className="sm:col-span-1">
             <div className="sm:col-span-1">
               <div className="text-sm font-semibold leading-5 text-zinc-400">
                 Admitted on
               </div>
               <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
-                {formatDateTime(itemData.admission_date)}
+                {formatDateTime(itemData.encounter_date)}
                 {itemData.is_readmission && (
                   <Chip
                     size="small"
@@ -112,21 +112,25 @@ export const ConsultationCard = (props: ConsultationProps) => {
       <div className="mt-8 flex flex-col">
         {
           <div className="flex flex-col items-center text-sm text-gray-700 md:flex-row">
-            Created:{" "}
-            <RelativeDateUserMention
-              tooltipPosition="right"
-              actionDate={itemData.created_date}
-              user={itemData.created_by}
-            />
+            <div className=" font-medium text-black">Created : </div>
+            <div className=" ml-1 text-gray-700">
+              <RelativeDateUserMention
+                tooltipPosition="right"
+                actionDate={itemData.created_date}
+                user={itemData.created_by}
+              />
+            </div>
           </div>
         }
         <div className="flex flex-col items-center text-sm text-gray-700 md:flex-row">
-          Last Modified:{" "}
-          <RelativeDateUserMention
-            tooltipPosition="right"
-            actionDate={itemData.modified_date}
-            user={itemData.last_edited_by}
-          />
+          <div className=" font-medium text-black">Last Modified : </div>
+          <div className=" ml-1 text-gray-700">
+            <RelativeDateUserMention
+              tooltipPosition="right"
+              actionDate={itemData.modified_date}
+              user={itemData.last_edited_by}
+            />
+          </div>
         </div>
       </div>
       <div className="mt-4 flex w-full flex-col justify-between gap-1 md:flex-row">
@@ -158,6 +162,9 @@ export const ConsultationCard = (props: ConsultationProps) => {
               navigate(
                 `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds`
               )
+            }
+            disabled={
+              (itemData.discharge_date as string | undefined) != undefined
             }
             authorizeFor={NonReadOnlyUsers}
           >

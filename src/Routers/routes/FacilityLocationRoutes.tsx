@@ -3,6 +3,8 @@ import { AddInventoryForm } from "../../Components/Facility/AddInventoryForm";
 import { AddLocationForm } from "../../Components/Facility/AddLocationForm";
 import { BedManagement } from "../../Components/Facility/BedManagement";
 import LocationManagement from "../../Components/Facility/LocationManagement";
+import CentralLiveMonitoring from "../../Components/CameraFeed/CentralLiveMonitoring";
+import { AuthorizeUserRoute } from "../../Utils/AuthorizeFor";
 
 export default {
   "/facility/:facilityId/location": ({ facilityId }: any) => (
@@ -34,5 +36,10 @@ export default {
     bedId,
   }: any) => (
     <AddBedForm facilityId={facilityId} locationId={locationId} bedId={bedId} />
+  ),
+  "/facility/:facilityId/live-monitoring": (props: any) => (
+    <AuthorizeUserRoute userTypes={["StateAdmin", "DistrictAdmin", "Doctor"]}>
+      <CentralLiveMonitoring {...props} />
+    </AuthorizeUserRoute>
   ),
 };

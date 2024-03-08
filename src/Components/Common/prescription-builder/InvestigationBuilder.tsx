@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import {
-  listInvestigationGroups,
-  listInvestigations,
-} from "../../../Redux/actions";
 import { PrescriptionDropdown } from "./PrescriptionDropdown";
 import { PrescriptionMultiDropdown } from "./PrescriptionMultiselect";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
+import request from "../../../Utils/request/request";
+import routes from "../../../Redux/api";
+
 export type InvestigationType = {
   type?: string[];
   repetitive?: boolean;
@@ -35,7 +33,6 @@ export default function InvestigationBuilder(
 ) {
   const { investigations, setInvestigations } = props;
   const [investigationsList, setInvestigationsList] = useState<string[]>([]);
-  const dispatch: any = useDispatch();
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
   const additionalInvestigations = [
     ["Vitals", ["Temp", "Blood Pressure", "Respiratory Rate", "Pulse Rate"]],
@@ -85,26 +82,20 @@ export default function InvestigationBuilder(
   };
 
   const fetchInvestigations = async () => {
-    const res = await dispatch(listInvestigations({}));
-    if (res && res.data) {
-      return res.data.results.map(
-        (investigation: any) =>
-          investigation.name +
-          " -- " +
-          investigation.groups
-            .map((group: any) => " ( " + group.name + " ) ")
-            .join(", ")
-      );
-    }
-    return [];
+    const { data } = await request(routes.listInvestigations);
+    return (
+      data?.results.map(
+        (investigation) =>
+          `${investigation.name} -- ${investigation.groups
+            .map((group) => ` ( ${group.name} ) `)
+            .join(", ")}`
+      ) ?? []
+    );
   };
 
   const fetchInvestigationGroups = async () => {
-    const res = await dispatch(listInvestigationGroups({}));
-    if (res && res.data) {
-      return res.data.results.map((group: any) => group.name + " (GROUP)");
-    }
-    return [];
+    const { data } = await request(routes.listInvestigationGroups);
+    return data?.results.map((group) => `${group.name} (GROUP)`) ?? [];
   };
 
   return (
@@ -160,18 +151,20 @@ export default function InvestigationBuilder(
                   Investigations Recommended
                   <span className="text-danger-500">{" *"}</span>
                 </div>
-                <PrescriptionMultiDropdown
-                  options={investigationsList}
-                  placeholder="Search Investigations"
-                  selectedValues={
-                    investigation.type?.constructor === Array
-                      ? investigation.type
-                      : []
-                  }
-                  setSelectedValues={setType}
-                  onFocus={() => setActiveIdx(i)}
-                  onBlur={() => setActiveIdx(null)}
-                />
+                <div id="search-patient-investigation">
+                  <PrescriptionMultiDropdown
+                    options={investigationsList}
+                    placeholder="Search Investigations"
+                    selectedValues={
+                      investigation.type?.constructor === Array
+                        ? investigation.type
+                        : []
+                    }
+                    setSelectedValues={setType}
+                    onFocus={() => setActiveIdx(i)}
+                    onBlur={() => setActiveIdx(null)}
+                  />
+                </div>
               </div>
               <div className="flex w-full shrink-0 flex-col justify-between">
                 <div className="flex flex-col gap-4 md:flex-row">
@@ -179,6 +172,7 @@ export default function InvestigationBuilder(
                     Is the investigation repetitive?
                     <br />
                     <input
+                      id="investigation-checkbox"
                       type="checkbox"
                       onFocus={() => setActiveIdx(i)}
                       onBlur={() => setActiveIdx(null)}
@@ -200,14 +194,16 @@ export default function InvestigationBuilder(
                       <div className="mb-1">
                         Frequency<span className="text-danger-500">{" *"}</span>
                       </div>
-                      <PrescriptionDropdown
-                        placeholder="Frequency"
-                        options={FREQUENCY}
-                        value={investigation.frequency || ""}
-                        setValue={setFrequency}
-                        onFocus={() => setActiveIdx(i)}
-                        onBlur={() => setActiveIdx(null)}
-                      />
+                      <div id="investigation-frequency">
+                        <PrescriptionDropdown
+                          placeholder="Frequency"
+                          options={FREQUENCY}
+                          value={investigation.frequency || ""}
+                          setValue={setFrequency}
+                          onFocus={() => setActiveIdx(i)}
+                          onBlur={() => setActiveIdx(null)}
+                        />
+                      </div>
                     </div>
                   ) : (
                     <div className="w-full">

@@ -7,12 +7,12 @@ export class ManageUserPage {
     cy.get("#facilities").click();
   }
 
-  typeFacilityName(facilityName) {
-    cy.get("input[name='facility']").click().type(facilityName);
+  selectFacilityFromDropdown(facilityName) {
+    cy.searchAndSelectOption("input[name='facility']", facilityName);
   }
 
-  selectFacilityFromDropdown(facilityName) {
-    cy.get("[role='option']").contains(facilityName).click();
+  selectSkillFromDropdown(skill) {
+    cy.searchAndSelectOption("input[name='skill']", skill);
   }
 
   clickLinkFacility() {
@@ -36,7 +36,7 @@ export class ManageUserPage {
   }
 
   assertFacilityNotInDropdown(facilityName) {
-    this.typeFacilityName(facilityName);
+    cy.get("input[name='facility']").click().type(facilityName);
     cy.get("[role='option']").should("not.exist");
   }
 
@@ -94,6 +94,7 @@ export class ManageUserPage {
   }
 
   typeFacilitySearch(facilityName) {
+    cy.get("#search").click().clear();
     cy.get("#search").click().type(facilityName);
   }
 
@@ -102,6 +103,7 @@ export class ManageUserPage {
   }
 
   clickFacilityPatients() {
+    cy.get("#facility-patients").should("be.visible");
     cy.get("#facility-patients").click();
   }
 
@@ -127,10 +129,6 @@ export class ManageUserPage {
       .should("have.length", 1);
   }
 
-  typeSkill(skillName) {
-    cy.get("#select-skill").click().type(skillName);
-  }
-
   clickDoctorConnectButton() {
     cy.get("#doctor-connect-patient-button").click();
   }
@@ -146,6 +144,18 @@ export class ManageUserPage {
   assertDoctorConnectVisibility(realName) {
     cy.get("#doctor-connect-home-doctor").should("contain.text", realName);
     cy.get("#doctor-connect-remote-doctor").should("contain.text", realName);
+  }
+
+  assertVideoConnectLink(docName: string, link: string) {
+    cy.get("ul#options")
+      .find("li")
+      .contains(docName)
+      .within(() => {
+        cy.get("a").should(($a) => {
+          const hrefs = $a.map((i, el) => Cypress.$(el).attr("href")).get();
+          expect(hrefs).to.include(link);
+        });
+      });
   }
 }
 

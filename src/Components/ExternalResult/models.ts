@@ -20,6 +20,9 @@ export interface IExternalResult {
   sample_collection_date: string;
   patient_category: string;
   srf_id: string;
+  permanent_address: string;
+  test_id: string;
+  village: string;
   district_object: {
     id: number;
     name: string;
@@ -51,6 +54,9 @@ export interface ILocalBodies {
 }
 
 export interface IDeleteExternalResult {
+  detail: string;
+}
+export interface IDeleteBedCapacity {
   detail: string;
 }
 

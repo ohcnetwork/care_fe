@@ -1,71 +1,53 @@
-import { lazy, useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import { CURRENT_HEALTH_CHANGE, SYMPTOM_CHOICES } from "../../Common/constants";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getConsultationDailyRoundsDetails } from "../../Redux/actions";
+import { lazy, useState } from "react";
+import {
+  CONSCIOUSNESS_LEVEL,
+  CURRENT_HEALTH_CHANGE,
+  SYMPTOM_CHOICES,
+} from "../../Common/constants";
 import { DailyRoundsModel } from "./models";
 import Page from "../Common/components/Page";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { formatDateTime } from "../../Utils/utils";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 const Loading = lazy(() => import("../Common/Loading"));
 const symptomChoices = [...SYMPTOM_CHOICES];
 const currentHealthChoices = [...CURRENT_HEALTH_CHANGE];
 
 export const DailyRoundListDetails = (props: any) => {
   const { facilityId, patientId, consultationId, id } = props;
-  const dispatch: any = useDispatch();
   const [dailyRoundListDetailsData, setDailyRoundListDetails] =
     useState<DailyRoundsModel>({});
-  const [isLoading, setIsLoading] = useState(false);
 
-  const fetchpatient = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatch(
-        getConsultationDailyRoundsDetails({ consultationId, id })
-      );
-      if (!status.aborted) {
-        if (res && res.data) {
-          const currentHealth = currentHealthChoices.find(
-            (i) => i.text === res.data.current_health
-          );
+  const { loading: isLoading } = useQuery(routes.getDailyReport, {
+    pathParams: { consultationId, id },
+    onResponse: ({ res, data }) => {
+      if (res && data) {
+        const currentHealth = currentHealthChoices.find(
+          (i) => i.text === data.current_health
+        );
 
-          const data: DailyRoundsModel = {
-            ...res.data,
-            temperature: Number(res.data.temperature)
-              ? res.data.temperature
-              : "",
-            additional_symptoms_text: "",
-            medication_given:
-              Object.keys(res.data.medication_given).length === 0
-                ? []
-                : res.data.medication_given,
-            current_health: currentHealth
-              ? currentHealth.desc
-              : res.data.current_health,
-          };
-          if (res.data.additional_symptoms?.length) {
-            const symptoms = res.data.additional_symptoms.map(
-              (symptom: number) => {
-                const option = symptomChoices.find((i) => i.id === symptom);
-                return option ? option.text.toLowerCase() : symptom;
-              }
-            );
-            data.additional_symptoms_text = symptoms.join(", ");
-          }
-          setDailyRoundListDetails(data);
+        const tdata: DailyRoundsModel = {
+          ...data,
+          temperature: Number(data.temperature) ? data.temperature : "",
+          additional_symptoms_text: "",
+          medication_given: data.medication_given ?? [],
+
+          current_health: currentHealth
+            ? currentHealth.desc
+            : data.current_health,
+        };
+        if (data.additional_symptoms?.length) {
+          const symptoms = data.additional_symptoms.map((symptom: number) => {
+            const option = symptomChoices.find((i) => i.id === symptom);
+            return option ? option.text.toLowerCase() : symptom;
+          });
+          tdata.additional_symptoms_text = symptoms.join(", ");
         }
-        setIsLoading(false);
+        setDailyRoundListDetails(tdata);
       }
     },
-    [consultationId, dispatch, id]
-  );
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchpatient(status);
-    },
-    [dispatch, fetchpatient]
-  );
+  });
 
   if (isLoading) {
     return <Loading />;
@@ -182,6 +164,16 @@ export const DailyRoundListDetails = (props: any) => {
               Rhythm Description:{" "}
             </span>
             {dailyRoundListDetailsData.rhythm_detail ?? "-"}
+          </div>
+          <div className="md:col-span-2">
+            <span className="font-semibold leading-relaxed">
+              Level Of Consciousness:{" "}
+            </span>
+            {dailyRoundListDetailsData.consciousness_level
+              ? CONSCIOUSNESS_LEVEL.find(
+                  (i) => i.id === dailyRoundListDetailsData.consciousness_level
+                )?.text
+              : "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">

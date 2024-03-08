@@ -1,11 +1,11 @@
-import { navigate } from "raviger";
 import {
   AREACODES,
   IN_LANDLINE_AREA_CODES,
-  LocalStorageKeys,
+  USER_TYPES,
 } from "../Common/constants";
 import phoneCodesJson from "../Common/static/countryPhoneAndFlags.json";
 import dayjs from "./dayjs";
+import { UserModel } from "../Components/Users/models";
 
 interface ApacheParams {
   age: number;
@@ -78,8 +78,20 @@ const DATE_TIME_FORMAT = `${TIME_FORMAT}; ${DATE_FORMAT}`;
 
 type DateLike = Parameters<typeof dayjs>[0];
 
-export const formatDateTime = (date: DateLike, format = DATE_TIME_FORMAT) =>
-  dayjs(date).format(format);
+export const formatDateTime = (date: DateLike, format?: string) => {
+  const obj = dayjs(date);
+
+  if (format) {
+    return obj.format(format);
+  }
+
+  // If time is 00:00:00 of local timezone, format as date only
+  if (obj.isSame(obj.startOf("day"))) {
+    return obj.format(DATE_FORMAT);
+  }
+
+  return obj.format(DATE_TIME_FORMAT);
+};
 
 export const formatDate = (date: DateLike, format = DATE_FORMAT) =>
   formatDateTime(date, format);
@@ -87,9 +99,11 @@ export const formatDate = (date: DateLike, format = DATE_FORMAT) =>
 export const formatTime = (date: DateLike, format = TIME_FORMAT) =>
   formatDateTime(date, format);
 
-export const relativeDate = (date: DateLike) => {
+export const relativeDate = (date: DateLike, withoutSuffix = false) => {
   const obj = dayjs(date);
-  return `${obj.fromNow()} at ${obj.format(TIME_FORMAT)}`;
+  return `${obj.fromNow(withoutSuffix)}${
+    withoutSuffix ? " ago " : ""
+  } at ${obj.format(TIME_FORMAT)}`;
 };
 
 export const formatName = (user: { first_name: string; last_name: string }) => {
@@ -106,41 +120,6 @@ export const dateQueryString = (date: DateLike) => {
 };
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-export const handleSignOut = (forceReload: boolean) => {
-  Object.values(LocalStorageKeys).forEach((key) =>
-    localStorage.removeItem(key)
-  );
-  const redirectURL = new URLSearchParams(window.location.search).get(
-    "redirect"
-  );
-  const url = redirectURL ? `/?redirect=${redirectURL}` : "/";
-  if (forceReload) {
-    window.location.href = url;
-  } else {
-    navigate(url);
-  }
-};
-
-export const handleRedirection = () => {
-  const redirectParam = new URLSearchParams(window.location.search).get(
-    "redirect"
-  );
-  try {
-    if (redirectParam) {
-      const redirectURL = new URL(redirectParam);
-
-      if (redirectURL.origin === window.location.origin) {
-        const newPath = redirectURL.pathname + redirectURL.search;
-        window.location.href = `${window.location.origin}${newPath}`;
-        return;
-      }
-    }
-    window.location.href = "/facility";
-  } catch {
-    window.location.href = "/facility";
-  }
-};
 
 /**
  * Referred from: https://stackoverflow.com/a/9039885/7887936
@@ -163,9 +142,14 @@ function _isAppleDevice() {
 }
 
 /**
- * `true` if device is iOS, else `false`
+ * `true` if device is an Apple device, else `false`
  */
 export const isAppleDevice = _isAppleDevice();
+
+/**
+ * `true` if device is an iOS device, else `false`
+ */
+export const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
 /**
  * Conditionally concatenate classes. An alternate replacement for `clsx`.
@@ -232,13 +216,14 @@ export const parseCsvFile = async (
 
 export const getPincodeDetails = async (pincode: string, apiKey: string) => {
   const response = await fetch(
-    `https://api.data.gov.in/resource/5c2f62fe-5afa-4119-a499-fec9d604d5bd?api-key=${apiKey}&format=json&filters[pincode]=${pincode}&limit=1`
+    `https://api.data.gov.in/resource/6176ee09-3d56-4a3b-8115-21841576b2f6?api-key=${apiKey}&format=json&filters[pincode]=${pincode}&limit=1`
   );
   const data = await response.json();
   return data.records[0];
 };
 
 export const includesIgnoreCase = (str1: string, str2: string) => {
+  if (!str1 || !str2) return false;
   const lowerCaseStr1 = str1.toLowerCase();
   const lowerCaseStr2 = str2.toLowerCase();
   return (
@@ -436,4 +421,61 @@ export const formatAge = (
     return `${months} ${monthSuffix} ${days} ${daySuffix}`;
   }
   return `${age} ${yearSuffix}`;
+};
+
+export const scrollTo = (id: string | boolean) => {
+  const element = document.querySelector(`#${id}`);
+  element?.scrollIntoView({ behavior: "smooth", block: "center" });
+};
+
+export const showUserDelete = (authUser: UserModel, targetUser: UserModel) => {
+  // Auth user should be higher in hierarchy than target user
+  if (
+    USER_TYPES.indexOf(authUser.user_type) <=
+    USER_TYPES.indexOf(targetUser.user_type)
+  )
+    return false;
+
+  if (
+    authUser.user_type === "StateAdmin" &&
+    targetUser.state_object?.id === authUser.state
+  )
+    return true;
+
+  if (
+    authUser.user_type === "DistrictAdmin" &&
+    targetUser.district_object?.id === authUser.district
+  )
+    return true;
+
+  return false;
+};
+
+export const compareBy = <T extends object>(key: keyof T) => {
+  return (a: T, b: T) => {
+    return a[key] < b[key] ? -1 : a[key] > b[key] ? 1 : 0;
+  };
+};
+
+export const isValidUrl = (url?: string) => {
+  try {
+    new URL(url ?? "");
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+export const mergeQueryOptions = <T extends object>(
+  selected: T[],
+  queryOptions: T[],
+  compareBy: (obj: T) => T[keyof T]
+) => {
+  if (!selected.length) return queryOptions;
+  return [
+    ...selected,
+    ...queryOptions.filter(
+      (option) => !selected.find((s) => compareBy(s) === compareBy(option))
+    ),
+  ];
 };

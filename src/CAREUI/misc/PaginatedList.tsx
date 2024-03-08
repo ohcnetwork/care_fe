@@ -121,13 +121,17 @@ PaginatedList.Refresh = Refresh;
 
 interface ItemsProps<TItem> {
   className?: string;
-  children: (item: TItem) => JSX.Element | JSX.Element[];
+  children: (item: TItem, items: TItem[]) => JSX.Element | JSX.Element[];
   shimmer?: JSX.Element;
   shimmerCount?: number;
 }
 
 const Items = <TItem extends object>(props: ItemsProps<TItem>) => {
   const { loading, items } = useContextualized<TItem>();
+
+  if (loading || items.length === 0) {
+    return null;
+  }
 
   return (
     <ul className={props.className}>
@@ -137,9 +141,9 @@ const Items = <TItem extends object>(props: ItemsProps<TItem>) => {
               {props.shimmer}
             </li>
           ))
-        : items.map((item, index) => (
+        : items.map((item, index, items) => (
             <li key={index} className="w-full">
-              {props.children(item)}
+              {props.children(item, items)}
             </li>
           ))}
     </ul>
@@ -153,8 +157,16 @@ interface PaginatorProps {
   hideIfSinglePage?: boolean;
 }
 
-const Paginator = ({ className, hideIfSinglePage }: PaginatorProps) => {
+const Paginator = <TItem extends object>({
+  className,
+  hideIfSinglePage,
+}: PaginatorProps) => {
   const { data, perPage, currentPage, setPage } = useContextualized<object>();
+  const { loading } = useContextualized<TItem>();
+
+  if (loading) {
+    return null;
+  }
 
   if (hideIfSinglePage && (data?.count ?? 0) <= perPage) {
     return null;

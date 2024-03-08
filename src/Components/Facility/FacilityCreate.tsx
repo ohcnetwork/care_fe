@@ -1,7 +1,12 @@
 import * as Notification from "../../Utils/Notifications.js";
 
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
-import { CapacityModal, DoctorModal } from "./models";
+import {
+  CapacityModal,
+  DistrictModel,
+  DoctorModal,
+  FacilityRequest,
+} from "./models";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave.js";
 import {
   FACILITY_FEATURE_TYPES,
@@ -13,23 +18,13 @@ import {
   SelectFormField,
 } from "../Form/FormFields/SelectFormField";
 import { Popover, Transition } from "@headlessui/react";
-import { Fragment, lazy, useCallback, useState } from "react";
+import { Fragment, lazy, useState } from "react";
 import Steps, { Step } from "../Common/Steps";
-import {
-  createFacility,
-  getDistrictByState,
-  getLocalbodyByDistrict,
-  getPermittedFacility,
-  getStates,
-  getWardByLocalBody,
-  listCapacity,
-  listDoctor,
-  updateFacility,
-} from "../../Redux/actions";
 import {
   getPincodeDetails,
   includesIgnoreCase,
   parsePhoneNumber,
+  compareBy,
 } from "../../Utils/utils";
 import {
   phonePreg,
@@ -37,7 +32,6 @@ import {
   validateLongitude,
   validatePincode,
 } from "../../Common/validation";
-import { statusType, useAbortableEffect } from "../../Common/utils";
 
 import { BedCapacity } from "./BedCapacity";
 import BedTypeCard from "./BedTypeCard";
@@ -57,9 +51,12 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { navigate } from "raviger";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { PhoneNumberValidator } from "../Form/FieldValidators.js";
+import request from "../../Utils/request/request.js";
+import routes from "../../Redux/api.js";
+import useQuery from "../../Utils/request/useQuery.js";
+import { RequestResult } from "../../Utils/request/types.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -67,17 +64,8 @@ interface FacilityProps {
   facilityId?: string;
 }
 
-interface StateObj {
-  id: number;
-  name: string;
-}
-
-interface WardObj extends StateObj {
-  number: number;
-}
-
 type FacilityForm = {
-  facility_type: string;
+  facility_type?: string;
   name: string;
   state: number;
   district: number;
@@ -101,7 +89,7 @@ type FacilityForm = {
 };
 
 const initForm: FacilityForm = {
-  facility_type: "Private Hospital",
+  facility_type: undefined,
   name: "",
   state: 0,
   district: 0,
@@ -150,7 +138,6 @@ const facilityCreateReducer = (state = initialState, action: FormAction) => {
 export const FacilityCreate = (props: FacilityProps) => {
   const { t } = useTranslation();
   const { gov_data_api_key, kasp_string, kasp_enabled } = useConfig();
-  const dispatchAction: any = useDispatch();
   const { facilityId } = props;
 
   const [state, dispatch] = useAutoSaveReducer<FacilityForm>(
@@ -158,14 +145,6 @@ export const FacilityCreate = (props: FacilityProps) => {
     initialState
   );
   const [isLoading, setIsLoading] = useState(false);
-  const [isStateLoading, setIsStateLoading] = useState(false);
-  const [isDistrictLoading, setIsDistrictLoading] = useState(false);
-  const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
-  const [isWardLoading, setIsWardLoading] = useState(false);
-  const [states, setStates] = useState<StateObj[]>([]);
-  const [districts, setDistricts] = useState<StateObj[]>([]);
-  const [localBodies, setLocalBodies] = useState<StateObj[]>([]);
-  const [ward, setWard] = useState<WardObj[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [createdFacilityId, setCreatedFacilityId] = useState("");
   const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
@@ -173,39 +152,32 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
   const [bedCapacityKey, setBedCapacityKey] = useState(0);
   const [docCapacityKey, setDocCapacityKey] = useState(0);
+  const [stateId, setStateId] = useState<number>();
+  const [districtId, setDistrictId] = useState<number>();
+  const [localBodyId, setLocalBodyId] = useState<number>();
   const { goBack } = useAppHistory();
   const headerText = !facilityId ? "Create Facility" : "Update Facility";
   const buttonText = !facilityId ? "Save Facility" : "Update Facility";
 
-  const fetchDistricts = useCallback(
-    async (id: number) => {
-      if (id > 0) {
-        setIsDistrictLoading(true);
-        const districtList = await dispatchAction(getDistrictByState({ id }));
-        if (districtList) {
-          setDistricts([...districtList.data]);
-        }
-        setIsDistrictLoading(false);
-        return districtList ? [...districtList.data] : [];
-      }
+  const {
+    data: districtData,
+    refetch: districtFetch,
+    loading: isDistrictLoading,
+  } = useQuery(routes.getDistrictByState, {
+    pathParams: {
+      id: String(stateId),
     },
-    [dispatchAction]
-  );
+    prefetch: !!stateId,
+  });
 
-  const fetchLocalBody = useCallback(
-    async (id: number) => {
-      if (id > 0) {
-        setIsLocalbodyLoading(true);
-        const localBodyList = await dispatchAction(
-          getLocalbodyByDistrict({ id })
-        );
-        setIsLocalbodyLoading(false);
-        if (localBodyList) {
-          setLocalBodies([...localBodyList.data]);
-        }
-      }
-    },
-    [dispatchAction]
+  const { data: localbodyData, loading: isLocalbodyLoading } = useQuery(
+    routes.getLocalbodyByDistrict,
+    {
+      pathParams: {
+        id: String(districtId),
+      },
+      prefetch: !!districtId,
+    }
   );
 
   const getSteps = (): Step[] => {
@@ -245,89 +217,68 @@ export const FacilityCreate = (props: FacilityProps) => {
     ];
   };
 
-  const fetchWards = useCallback(
-    async (id: number) => {
-      if (id > 0) {
-        setIsWardLoading(true);
-        const wardList = await dispatchAction(getWardByLocalBody({ id }));
-        setIsWardLoading(false);
-        if (wardList) {
-          setWard([...wardList.data.results]);
-        }
-      }
-    },
-    [dispatchAction]
+  const { data: wardData, loading: isWardLoading } = useQuery(
+    routes.getWardByLocalBody,
+    {
+      pathParams: {
+        id: String(localBodyId),
+      },
+      prefetch: !!localBodyId,
+    }
   );
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
+  useQuery(routes.getPermittedFacility, {
+    pathParams: {
+      id: facilityId!,
+    },
+    prefetch: !!facilityId,
+    onResponse: ({ res, data }) => {
       if (facilityId) {
         setIsLoading(true);
-        const res = await dispatchAction(getPermittedFacility(facilityId));
-        if (!status.aborted && res.data) {
+        if (res?.ok && data) {
           const formData = {
-            facility_type: res.data.facility_type,
-            name: res.data.name,
-            state: res.data.state ? res.data.state : 0,
-            district: res.data.district ? res.data.district : 0,
-            local_body: res.data.local_body ? res.data.local_body : 0,
-            features: res.data.features || [],
-            ward: res.data.ward_object ? res.data.ward_object.id : 0,
-            kasp_empanelled: res.data.kasp_empanelled
-              ? String(res.data.kasp_empanelled)
-              : "false",
-            address: res.data.address,
-            pincode: res.data.pincode,
-            phone_number:
-              res.data.phone_number.length == 10
-                ? "+91" + res.data.phone_number
-                : res.data.phone_number,
-            latitude: res.data.latitude || "",
-            longitude: res.data.longitude || "",
-            type_b_cylinders: res.data.type_b_cylinders,
-            type_c_cylinders: res.data.type_c_cylinders,
-            type_d_cylinders: res.data.type_d_cylinders,
-            expected_type_b_cylinders: res.data.expected_type_b_cylinders,
-            expected_type_c_cylinders: res.data.expected_type_c_cylinders,
-            expected_type_d_cylinders: res.data.expected_type_d_cylinders,
-            expected_oxygen_requirement: res.data.expected_oxygen_requirement,
-            oxygen_capacity: res.data.oxygen_capacity,
+            facility_type: data.facility_type ? data.facility_type : "",
+            name: data.name ? data.name : "",
+            state: data.state ? data.state : 0,
+            district: data.district ? data.district : 0,
+            local_body: data.local_body ? data.local_body : 0,
+            features: data.features || [],
+            ward: data.ward_object ? data.ward_object.id : 0,
+            kasp_empanelled: "",
+            address: data.address ? data.address : "",
+            pincode: data.pincode ? data.pincode : "",
+            phone_number: data.phone_number
+              ? data.phone_number.length == 10
+                ? "+91" + data.phone_number
+                : data.phone_number
+              : "",
+            latitude: data.latitude ? parseFloat(data.latitude).toFixed(7) : "",
+            longitude: data.longitude
+              ? parseFloat(data.longitude).toFixed(7)
+              : "",
+            type_b_cylinders: data.type_b_cylinders,
+            type_c_cylinders: data.type_c_cylinders,
+            type_d_cylinders: data.type_d_cylinders,
+            expected_type_b_cylinders: data.expected_type_b_cylinders,
+            expected_type_c_cylinders: data.expected_type_c_cylinders,
+            expected_type_d_cylinders: data.expected_type_d_cylinders,
+            expected_oxygen_requirement: data.expected_oxygen_requirement,
+            oxygen_capacity: data.oxygen_capacity,
           };
           dispatch({ type: "set_form", form: formData });
-          Promise.all([
-            fetchDistricts(res.data.state),
-            fetchLocalBody(res.data.district),
-            fetchWards(res.data.local_body),
-          ]);
+          setStateId(data.state);
+          setDistrictId(data.district);
+          setLocalBodyId(data.local_body);
         } else {
           navigate(`/facility/${facilityId}`);
         }
         setIsLoading(false);
       }
     },
-    [dispatchAction, facilityId, fetchDistricts, fetchLocalBody, fetchWards]
-  );
+  });
 
-  const fetchStates = useCallback(
-    async (status: statusType) => {
-      setIsStateLoading(true);
-      const statesRes = await dispatchAction(getStates());
-      if (!status.aborted && statesRes.data.results) {
-        setStates([...statesRes.data.results]);
-      }
-      setIsStateLoading(false);
-    },
-    [dispatchAction]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      if (facilityId) {
-        fetchData(status);
-      }
-      fetchStates(status);
-    },
-    [dispatch, fetchData]
+  const { data: stateData, loading: isStateLoading } = useQuery(
+    routes.statesList
   );
 
   const handleChange = (e: FieldChangeEvent<unknown>) => {
@@ -343,8 +294,8 @@ export const FacilityCreate = (props: FacilityProps) => {
         type: "set_form",
         form: {
           ...state.form,
-          latitude: location.lat().toString(),
-          longitude: location.lng().toString(),
+          latitude: location.lat().toFixed(7),
+          longitude: location.lng().toFixed(7),
         },
       });
     }
@@ -358,16 +309,19 @@ export const FacilityCreate = (props: FacilityProps) => {
     const pincodeDetails = await getPincodeDetails(e.value, gov_data_api_key);
     if (!pincodeDetails) return;
 
-    const matchedState = states.find((state) => {
+    const matchedState = (stateData ? stateData.results : []).find((state) => {
       return includesIgnoreCase(state.name, pincodeDetails.statename);
     });
     if (!matchedState) return;
 
-    const fetchedDistricts = await fetchDistricts(matchedState.id);
+    const newDistrictDataResult: RequestResult<DistrictModel[]> =
+      await districtFetch({ pathParams: { id: String(matchedState.id) } });
+    const fetchedDistricts: DistrictModel[] = newDistrictDataResult.data || [];
+
     if (!fetchedDistricts) return;
 
     const matchedDistrict = fetchedDistricts.find((district) => {
-      return includesIgnoreCase(district.name, pincodeDetails.district);
+      return includesIgnoreCase(district.name, pincodeDetails.districtname);
     });
     if (!matchedDistrict) return;
 
@@ -381,7 +335,7 @@ export const FacilityCreate = (props: FacilityProps) => {
       },
     });
 
-    fetchLocalBody(matchedDistrict.id);
+    setDistrictId(matchedDistrict.id);
     setShowAutoFilledPincode(true);
     setTimeout(() => {
       setShowAutoFilledPincode(false);
@@ -412,6 +366,7 @@ export const FacilityCreate = (props: FacilityProps) => {
     let invalidForm = false;
     Object.keys(state.form).forEach((field) => {
       switch (field) {
+        case "facility_type":
         case "name":
         case "address":
           if (!state.form[field]) {
@@ -479,19 +434,18 @@ export const FacilityCreate = (props: FacilityProps) => {
     console.log(state.form);
     if (validated) {
       setIsLoading(true);
-      const data = {
+      const data: FacilityRequest = {
         facility_type: state.form.facility_type,
         name: state.form.name,
         district: state.form.district,
         state: state.form.state,
         address: state.form.address,
-        pincode: state.form.pincode,
         local_body: state.form.local_body,
         features: state.form.features,
         ward: state.form.ward,
-        kasp_empanelled: JSON.parse(state.form.kasp_empanelled),
-        latitude: state.form.latitude || null,
-        longitude: state.form.longitude || null,
+        pincode: state.form.pincode,
+        latitude: state.form.latitude,
+        longitude: state.form.longitude,
         phone_number: parsePhoneNumber(state.form.phone_number),
         oxygen_capacity: state.form.oxygen_capacity
           ? state.form.oxygen_capacity
@@ -520,18 +474,26 @@ export const FacilityCreate = (props: FacilityProps) => {
           ? state.form.expected_type_d_cylinders
           : 0,
       };
-      const res = await dispatchAction(
-        facilityId ? updateFacility(facilityId, data) : createFacility(data)
-      );
 
-      if (res && (res.status === 200 || res.status === 201) && res.data) {
-        const id = res.data.id;
+      const { res, data: requestData } = facilityId
+        ? await request(routes.updateFacility, {
+            body: data,
+            pathParams: {
+              id: facilityId,
+            },
+          })
+        : await request(routes.createFacility, {
+            body: data,
+          });
+
+      if (res?.ok && requestData) {
+        const id = requestData.id;
         dispatch({ type: "set_form", form: initForm });
         if (!facilityId) {
           Notification.Success({
             msg: "Facility added successfully",
           });
-          setCreatedFacilityId(id);
+          setCreatedFacilityId(String(id));
           setCurrentStep(2);
         } else {
           Notification.Success({
@@ -539,11 +501,6 @@ export const FacilityCreate = (props: FacilityProps) => {
           });
           navigate(`/facility/${facilityId}`);
         }
-      } else {
-        if (res?.data)
-          Notification.Error({
-            msg: "Something went wrong: " + (res.data.detail || ""),
-          });
       }
       setIsLoading(false);
     }
@@ -570,7 +527,10 @@ export const FacilityCreate = (props: FacilityProps) => {
     });
 
     capacityList = (
-      <div className="mt-4 grid w-full gap-7 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div
+        className="mt-4 grid w-full gap-7 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        id="total-bed-capacity"
+      >
         <BedTypeCard
           label={t("total_beds")}
           bedCapacityId={0}
@@ -603,11 +563,11 @@ export const FacilityCreate = (props: FacilityProps) => {
                 lastUpdated={res.modified_date}
                 removeBedType={removeCurrentBedType}
                 handleUpdate={async () => {
-                  const capacityRes = await dispatchAction(
-                    listCapacity({}, { facilityId: createdFacilityId })
-                  );
-                  if (capacityRes && capacityRes.data) {
-                    setCapacityData(capacityRes.data.results);
+                  const { res, data } = await request(routes.getCapacity, {
+                    pathParams: { facilityId: createdFacilityId },
+                  });
+                  if (res?.ok && data) {
+                    setCapacityData(data.results);
                   }
                 }}
               />
@@ -640,11 +600,11 @@ export const FacilityCreate = (props: FacilityProps) => {
               facilityId={createdFacilityId || ""}
               key={`bed_${data.id}`}
               handleUpdate={async () => {
-                const doctorRes = await dispatchAction(
-                  listDoctor({}, { facilityId: createdFacilityId })
-                );
-                if (doctorRes && doctorRes.data) {
-                  setDoctorData(doctorRes.data.results);
+                const { res, data } = await request(routes.listDoctor, {
+                  pathParams: { facilityId: createdFacilityId },
+                });
+                if (res?.ok && data) {
+                  setDoctorData(data.results);
                 }
               }}
               {...data}
@@ -686,11 +646,11 @@ export const FacilityCreate = (props: FacilityProps) => {
                 navigate(`/facility/${createdFacilityId}`);
               }}
               handleUpdate={async () => {
-                const doctorRes = await dispatchAction(
-                  listDoctor({}, { facilityId: createdFacilityId })
-                );
-                if (doctorRes && doctorRes.data) {
-                  setDoctorData(doctorRes.data.results);
+                const { res, data } = await request(routes.listDoctor, {
+                  pathParams: { facilityId: createdFacilityId },
+                });
+                if (res?.ok && data) {
+                  setDoctorData(data.results);
                 }
               }}
             />
@@ -699,7 +659,9 @@ export const FacilityCreate = (props: FacilityProps) => {
             <div className="justify-between md:flex md:pb-2">
               <div className="mb-2 text-xl font-bold">{t("doctors_list")}</div>
             </div>
-            <div className="mt-4">{doctorList}</div>
+            <div className="mt-4" id="total-doctor-capacity">
+              {doctorList}
+            </div>
           </div>
         </Page>
       );
@@ -721,11 +683,11 @@ export const FacilityCreate = (props: FacilityProps) => {
                 setCurrentStep(3);
               }}
               handleUpdate={async () => {
-                const capacityRes = await dispatchAction(
-                  listCapacity({}, { facilityId: createdFacilityId })
-                );
-                if (capacityRes && capacityRes.data) {
-                  setCapacityData(capacityRes.data.results);
+                const { res, data } = await request(routes.getCapacity, {
+                  pathParams: { facilityId: createdFacilityId },
+                });
+                if (res?.ok && data) {
+                  setCapacityData(data.results);
                 }
               }}
             />
@@ -756,11 +718,9 @@ export const FacilityCreate = (props: FacilityProps) => {
                 <DraftSection
                   handleDraftSelect={(newState: any) => {
                     dispatch({ type: "set_state", state: newState });
-                    Promise.all([
-                      fetchDistricts(newState.form.state),
-                      fetchLocalBody(newState.form.district),
-                      fetchWards(newState.form.local_body),
-                    ]);
+                    setStateId(newState.form.state);
+                    setDistrictId(newState.form.district);
+                    setLocalBodyId(newState.form.local_body);
                   }}
                   formData={state.form}
                 />
@@ -805,13 +765,13 @@ export const FacilityCreate = (props: FacilityProps) => {
                     placeholder="Choose State"
                     className={isStateLoading ? "animate-pulse" : ""}
                     disabled={isStateLoading}
-                    options={states}
+                    options={stateData ? stateData.results : []}
                     optionLabel={(o) => o.name}
                     optionValue={(o) => o.id}
                     onChange={(event) => {
                       handleChange(event);
                       if (!event) return;
-                      fetchDistricts(event.value);
+                      setStateId(event.value);
                     }}
                   />
                   <SelectFormField
@@ -820,13 +780,13 @@ export const FacilityCreate = (props: FacilityProps) => {
                     required
                     className={isDistrictLoading ? "animate-pulse" : ""}
                     disabled={isDistrictLoading}
-                    options={districts}
+                    options={districtData ? districtData : []}
                     optionLabel={(o) => o.name}
                     optionValue={(o) => o.id}
                     onChange={(event) => {
                       handleChange(event);
                       if (!event) return;
-                      fetchLocalBody(event.value);
+                      setDistrictId(event.value);
                     }}
                   />
                   <SelectFormField
@@ -835,13 +795,13 @@ export const FacilityCreate = (props: FacilityProps) => {
                     className={isLocalbodyLoading ? "animate-pulse" : ""}
                     disabled={isLocalbodyLoading}
                     placeholder="Choose Local Body"
-                    options={localBodies}
+                    options={localbodyData ? localbodyData : []}
                     optionLabel={(o) => o.name}
                     optionValue={(o) => o.id}
                     onChange={(event) => {
                       handleChange(event);
                       if (!event) return;
-                      fetchWards(event.value);
+                      setLocalBodyId(event.value);
                     }}
                   />
                   <SelectFormField
@@ -850,8 +810,8 @@ export const FacilityCreate = (props: FacilityProps) => {
                     className={isWardLoading ? "animate-pulse" : ""}
                     disabled={isWardLoading}
                     placeholder="Choose Ward"
-                    options={ward
-                      .sort((a, b) => a.number - b.number)
+                    options={(wardData ? wardData.results : [])
+                      .sort(compareBy("number"))
                       .map((e) => {
                         return {
                           id: e.id,

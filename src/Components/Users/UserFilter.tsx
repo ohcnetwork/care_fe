@@ -1,7 +1,3 @@
-import { useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { getDistrict } from "../../Redux/actions";
-import { navigate } from "raviger";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
 import { parsePhoneNumber } from "../../Utils/utils";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -11,6 +7,8 @@ import { USER_TYPE_OPTIONS } from "../../Common/constants";
 import useMergeState from "../../Common/hooks/useMergeState";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 
 const parsePhoneNumberForFilterParam = (phoneNumber: string) => {
   if (!phoneNumber) return "";
@@ -20,8 +18,7 @@ const parsePhoneNumberForFilterParam = (phoneNumber: string) => {
 };
 
 export default function UserFilter(props: any) {
-  const { filter, onChange, closeFilter } = props;
-  const dispatch: any = useDispatch();
+  const { filter, onChange, closeFilter, removeFilters } = props;
   const [filterState, setFilterState] = useMergeState({
     first_name: filter.first_name || "",
     last_name: filter.last_name || "",
@@ -31,16 +28,6 @@ export default function UserFilter(props: any) {
     district_id: filter.district_id || "",
     district_ref: null,
   });
-
-  const clearFilterState = {
-    first_name: "",
-    last_name: "",
-    phone_number: undefined,
-    alt_phone_number: undefined,
-    user_type: "",
-    district_id: "",
-    district_ref: null,
-  };
 
   const setDistrict = (selected: any) => {
     const filterData: any = { ...filterState };
@@ -69,17 +56,14 @@ export default function UserFilter(props: any) {
     onChange(data);
   };
 
-  useEffect(() => {
-    async function fetchData() {
-      if (filter.district_id) {
-        const { data: districtData } = await dispatch(
-          getDistrict(filter.district_id, "district")
-        );
-        setFilterState({ district_ref: districtData });
-      }
-    }
-    fetchData();
-  }, [dispatch]);
+  useQuery(routes.getDistrict, {
+    prefetch: !!filter.district_id,
+    pathParams: { id: filter.district_id },
+    onResponse: (result) => {
+      if (!result || !result.data || !result.res) return;
+      setFilterState({ district_ref: result.data });
+    },
+  });
 
   const handleChange = ({ name, value }: any) =>
     setFilterState({ ...filterState, [name]: value });
@@ -89,8 +73,7 @@ export default function UserFilter(props: any) {
       advancedFilter={props}
       onApply={applyFilter}
       onClear={() => {
-        navigate("/users");
-        setFilterState(clearFilterState);
+        removeFilters();
         closeFilter();
       }}
     >
@@ -134,26 +117,26 @@ export default function UserFilter(props: any) {
           errors={""}
         />
       </div>
-
-      <PhoneNumberFormField
-        label="Phone Number"
-        name="phone_number"
-        placeholder="Phone Number"
-        value={filterState.phone_number}
-        onChange={handleChange}
-        errorClassName="hidden"
-        types={["mobile", "landline"]}
-      />
-
-      <PhoneNumberFormField
-        label="Whatsapp Number"
-        name="alt_phone_number"
-        placeholder="WhatsApp Phone Number"
-        value={filterState.alt_phone_number}
-        onChange={handleChange}
-        errorClassName="hidden"
-        types={["mobile"]}
-      />
+      <div className="-mb-4">
+        <PhoneNumberFormField
+          label="Phone Number"
+          name="phone_number"
+          placeholder="Phone Number"
+          value={filterState.phone_number}
+          onChange={handleChange}
+          types={["mobile", "landline"]}
+        />
+      </div>
+      <div className="-mb-4">
+        <PhoneNumberFormField
+          label="Whatsapp Number"
+          name="alt_phone_number"
+          placeholder="WhatsApp Phone Number"
+          value={filterState.alt_phone_number}
+          onChange={handleChange}
+          types={["mobile"]}
+        />
+      </div>
     </FiltersSlideover>
   );
 }

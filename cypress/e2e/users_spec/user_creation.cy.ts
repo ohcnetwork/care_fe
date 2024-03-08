@@ -5,8 +5,8 @@ import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import { UserPage } from "../../pageobject/Users/UserSearch";
 import { UserCreationPage } from "../../pageobject/Users/UserCreation";
 import {
-  emergency_phone_number,
-  phone_number,
+  generatePhoneNumber,
+  generateEmergencyPhoneNumber,
 } from "../../pageobject/constants";
 
 describe("User Creation", () => {
@@ -15,7 +15,9 @@ describe("User Creation", () => {
   const userCreationPage = new UserCreationPage();
   const facilityPage = new FacilityPage();
   const assetSearchPage = new AssetSearchPage();
-  const fillFacilityName = "Dummy Facility 1";
+  const phone_number = generatePhoneNumber();
+  const emergency_phone_number = generateEmergencyPhoneNumber();
+  const fillFacilityName = "Dummy Facility 40";
   const makeid = (length: number) => {
     let result = "";
     const characters = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -25,7 +27,7 @@ describe("User Creation", () => {
     }
     return result;
   };
-  const username = makeid(25);
+  const username = makeid(8);
   const alreadylinkedusersviews = [
     "devdoctor",
     "devstaff2",
@@ -63,6 +65,7 @@ describe("User Creation", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
+    cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/users");
   });
 

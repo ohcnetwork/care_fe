@@ -22,6 +22,8 @@ import { useTranslation } from "react-i18next";
 import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
+import { ConsultationModel } from "../Facility/models.js";
+import CareIcon from "../../CAREUI/icons/CareIcon.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -72,7 +74,7 @@ export default function ShiftDetails(props: { id: string }) {
             <span className="copied-to-cb">{t("copied_to_clipboard")}</span>
           ) : (
             <span className="copy-to-cb">
-              <i className="fas fa-clipboard"></i>
+              <CareIcon icon="l-clipboard" className="text-2xl" />
             </span>
           )}
         </CopyToClipboard>
@@ -316,7 +318,7 @@ export default function ShiftDetails(props: { id: string }) {
 
   const printData = (data: any) => {
     const patientData = data.patient_object;
-    const consultation = data.patient.last_consultation;
+    const consultation = data.patient.last_consultation as ConsultationModel;
     const patientGender = GENDER_TYPES.find(
       (i) => i.id === patientData?.gender
     )?.text;
@@ -409,7 +411,7 @@ export default function ShiftDetails(props: { id: string }) {
                 {t("date_of_admission")}:{" "}
               </span>
               {formatDateTime(
-                consultation.admission_date || consultation.created_date
+                consultation.encounter_date || consultation.created_date
               ) || "-"}
             </div>
             <div>
@@ -518,13 +520,15 @@ export default function ShiftDetails(props: { id: string }) {
         <div className="my-4">
           <div className="my-4 flex justify-end gap-3">
             <ButtonV2 onClick={(_) => window.print()}>
-              <i className="fas fa-print mr-2"></i> {t("print_referral_letter")}
+              <CareIcon icon="l-print" className="mr-2 text-base" />{" "}
+              {t("print_referral_letter")}
             </ButtonV2>
             <ButtonV2
               onClick={(_) => setIsPrintMode(false)}
               variant="secondary"
             >
-              <i className="fas fa-times mr-2"></i> {t("close")}
+              <CareIcon icon="l-times" className="mr-2 text-base" />{" "}
+              {t("close")}
             </ButtonV2>
           </div>
           {printData(data)}
@@ -553,7 +557,8 @@ export default function ShiftDetails(props: { id: string }) {
               </ButtonV2>
 
               <ButtonV2 onClick={() => setIsPrintMode(true)}>
-                <i className="fas fa-file-alt mr-2"></i> {t("referral_letter")}
+                <CareIcon icon="l-file-alt" className="mr-2 text-base" />{" "}
+                {t("referral_letter")}
               </ButtonV2>
             </div>
           }
@@ -806,13 +811,12 @@ export default function ShiftDetails(props: { id: string }) {
                     {t("created")}
                   </div>
                   <div className="mt-1 whitespace-pre text-sm leading-5 text-gray-900">
-                    <div className="text-sm">
-                      {data?.created_by_object?.first_name}
-                      {data?.created_by_object?.last_name}
-                    </div>
-                    <div className="text-xs">
-                      {data?.created_date && formatDateTime(data?.created_date)}
-                    </div>
+                    <RecordMeta
+                      time={data?.created_date}
+                      user={data?.created_by_object}
+                      inlineUser={true}
+                      inlineClassName={"flex-wrap justify-center"}
+                    />
                   </div>
                 </div>
                 <div className="mt-2 lg:mt-0">
@@ -820,14 +824,12 @@ export default function ShiftDetails(props: { id: string }) {
                     {t("last_edited")}
                   </div>
                   <div className="mt-1 whitespace-pre text-sm leading-5 text-gray-900">
-                    <div className="text-sm">
-                      {data?.last_edited_by_object?.first_name}{" "}
-                      {data?.last_edited_by_object?.last_name}
-                    </div>
-                    <div className="text-xs">
-                      {data?.modified_date &&
-                        formatDateTime(data?.modified_date)}
-                    </div>
+                    <RecordMeta
+                      time={data?.modified_date}
+                      user={data?.last_edited_by_object}
+                      inlineUser={true}
+                      inlineClassName={"flex-wrap justify-center"}
+                    />
                   </div>
                 </div>
               </div>

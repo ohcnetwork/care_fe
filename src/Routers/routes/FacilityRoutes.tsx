@@ -8,7 +8,7 @@ import ResourceCreate from "../../Components/Resource/ResourceCreate";
 import CentralNursingStation from "../../Components/Facility/CentralNursingStation";
 import FacilityLocationRoutes from "./FacilityLocationRoutes";
 import FacilityInventoryRoutes from "./FacilityInventoryRoutes";
-import LiveFeedScreen from "../../Components/Facility/LiveFeedScreen";
+import DischargedPatientsList from "../../Components/Facility/DischargedPatientsList";
 
 export default {
   "/facility": () => <HospitalList />,
@@ -22,11 +22,11 @@ export default {
   "/facility/:facilityId/cns": ({ facilityId }: any) => (
     <CentralNursingStation facilityId={facilityId} />
   ),
-  "/facility/:facilityId/livefeed": ({ facilityId }: any) => (
-    <LiveFeedScreen facilityId={facilityId} />
-  ),
   "/facility/:facilityId": ({ facilityId }: any) => (
     <FacilityHome facilityId={facilityId} />
+  ),
+  "/facility/:id/discharged-patients": ({ id }: any) => (
+    <DischargedPatientsList facility_external_id={id} />
   ),
 
   "/facility/:facilityId/users": ({ facilityId }: any) => (

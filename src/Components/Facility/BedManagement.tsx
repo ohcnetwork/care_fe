@@ -1,14 +1,4 @@
-import { lazy, useCallback, useState } from "react";
-
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  getAnyFacility,
-  getFacilityAssetLocation,
-  listFacilityBeds,
-  deleteFacilityBed,
-} from "../../Redux/actions";
-import Pagination from "../Common/Pagination";
+import { lazy, useState } from "react";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { BedModel } from "./models";
 import { ReactElement } from "react";
@@ -18,6 +8,10 @@ import BedDeleteDialog from "./BedDeleteDialog";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import Page from "../Common/components/Page";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
+import useFilters from "../../Common/hooks/useFilters";
 const Loading = lazy(() => import("../Common/Loading"));
 
 interface BedManagementProps {
@@ -47,8 +41,6 @@ const BedRow = (props: BedRowProps) => {
     bedType,
     isOccupied,
   } = props;
-
-  const dispatchAction: any = useDispatch();
   const [bedData, setBedData] = useState<{
     show: boolean;
     name: string;
@@ -62,15 +54,11 @@ const BedRow = (props: BedRowProps) => {
   };
 
   const handleDeleteConfirm = async () => {
-    const res = await dispatchAction(deleteFacilityBed(id));
-    if (res?.status === 204) {
-      Notification.Success({
-        msg: "Bed deleted successfully",
-      });
-    } else {
-      Notification.Error({
-        msg: "Error while deleting Bed: " + (res?.data?.detail || ""),
-      });
+    const { res } = await request(routes.deleteFacilityBed, {
+      pathParams: { external_id: id },
+    });
+    if (res?.ok) {
+      Notification.Success({ msg: "Bed deleted successfully" });
     }
     setBedData({ show: false, name: "" });
     triggerRerender();
@@ -93,9 +81,14 @@ const BedRow = (props: BedRowProps) => {
         className="w-full items-center justify-between rounded border border-gray-300 bg-white p-6 shadow-sm transition-all duration-200 ease-in-out hover:border-primary-400 lg:flex items-baseline gap-4 lg:flex lg:items-center">
         <div className="mt-2 space-y-2 px-4 lg:w-3/4">
           <div className="flex flex-col sm:flex-row">
-            <p className="inline break-words text-xl capitalize">{name}</p>{" "}
+            <p
+              className="inline break-words text-xl capitalize"
+              id="view-bed-name"
+            >
+              {name}
+            </p>{" "}
             &nbsp;
-            <div>
+            <div id="view-bedbadges">
               {LOCATION_BED_TYPES.find((item) => item.id === bedType) && (
                 <p className="mb-1 inline-flex w-fit items-center rounded-md bg-blue-100 px-2.5 py-0.5 text-sm font-medium capitalize leading-5 text-blue-800">
                   {LOCATION_BED_TYPES.find(
@@ -118,6 +111,7 @@ const BedRow = (props: BedRowProps) => {
         </div>
         <div className="mt-4 flex flex-col gap-2 lg:mt-0 lg:flex-row">
           <ButtonV2
+            id="edit-bed-button"
             href={`/facility/${facilityId}/location/${locationId}/beds/${id}/update`}
             authorizeFor={NonReadOnlyUsers}
             className="w-full lg:w-auto"
@@ -129,6 +123,7 @@ const BedRow = (props: BedRowProps) => {
             Edit
           </ButtonV2>
           <ButtonV2
+            id="delete-bed-button"
             onClick={() => handleDelete(name, id)}
             authorizeFor={NonReadOnlyUsers}
             variant="danger"
@@ -150,109 +145,60 @@ const BedRow = (props: BedRowProps) => {
 
 export const BedManagement = (props: BedManagementProps) => {
   const { facilityId, locationId } = props;
-  const dispatchAction: any = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
   let bed: ReactElement | null = null;
   let BedList: ReactElement[] | ReactElement = [];
-  const [beds, setBeds] = useState<BedModel[]>([]);
-  const [offset, setOffset] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-  const [rerender, setRerender] = useState(false);
-  const [facilityName, setFacilityName] = useState("");
-  const [locationName, setLocationName] = useState("");
-  const limit = 14;
+  const { qParams, Pagination, resultsPerPage } = useFilters({});
 
-  const triggerRerender = () => {
-    setRerender(!rerender);
-  };
-
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const facility = await dispatchAction(getAnyFacility(facilityId));
-
-      setFacilityName(facility?.data?.name || "");
-
-      const location = await dispatchAction(
-        getFacilityAssetLocation(facilityId, locationId)
-      );
-
-      setLocationName(location?.data?.name || "");
-
-      const res = await dispatchAction(
-        listFacilityBeds({
-          limit,
-          offset,
-          facility: facilityId,
-          location: locationId,
-        })
-      );
-      if (!status.aborted) {
-        if (res?.data) {
-          setBeds(res.data.results);
-          setTotalCount(res.data.count);
-        }
-        setIsLoading(false);
-      }
+  const { data: location } = useQuery(routes.getFacilityAssetLocation, {
+    pathParams: {
+      facility_external_id: facilityId,
+      external_id: locationId,
     },
-    [dispatchAction, offset, rerender, facilityId, locationId]
-  );
+  });
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
+  const { loading, data, refetch } = useQuery(routes.listFacilityBeds, {
+    query: {
+      facility: facilityId,
+      location: locationId,
+      limit: resultsPerPage,
+      offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
     },
-    [fetchData]
-  );
+  });
 
-  const handlePagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentPage(page);
-    setOffset(offset);
-  };
-
-  if (beds && beds.length) {
-    BedList = beds.map((bedItem: BedModel) => (
+  if (data?.results.length) {
+    BedList = data.results.map((bedItem: BedModel) => (
       <BedRow
         id={bedItem.id ?? ""}
         facilityId={facilityId ?? ""}
         name={bedItem.name ?? ""}
         description={bedItem.description ?? ""}
         bedType={bedItem.bed_type ?? ""}
-        triggerRerender={triggerRerender}
+        triggerRerender={refetch}
         key={locationId ?? ""}
         locationId={locationId ?? ""}
         isOccupied={bedItem.is_occupied ?? false}
       />
     ));
-  } else if (beds && beds.length === 0) {
+  } else if (data?.results.length === 0) {
     BedList = (
-      <p className="flex w-full justify-center border-b border-gray-200 bg-white p-5 text-center text-2xl font-bold text-gray-500">
+      <p className="flex w-full justify-center bg-white p-5 text-center text-2xl font-bold text-gray-500">
         No beds available in this location
       </p>
     );
   }
 
-  if (beds) {
-    bed = (
-      <>
-        <div className="mt-5 flex grow flex-wrap bg-white p-4">{BedList}</div>
-        {totalCount > limit && (
-          <div className="mt-4 flex w-full justify-center">
-            <Pagination
-              cPage={currentPage}
-              defaultPerPage={limit}
-              data={{ totalCount }}
-              onChange={handlePagination}
-            />
-          </div>
-        )}
-      </>
-    );
-  }
+  bed = (
+    <>
+      <div className="mt-5 flex grow flex-wrap bg-white p-4">{BedList}</div>
+      {Boolean(data?.count && data.count > 0) && (
+        <div className="mt-4 flex w-full justify-center">
+          <Pagination totalCount={data?.count ?? 0} />
+        </div>
+      )}
+    </>
+  );
 
-  if (isLoading || !beds) {
+  if (loading) {
     return <Loading />;
   }
 
@@ -260,29 +206,24 @@ export const BedManagement = (props: BedManagementProps) => {
     <Page
       title="Bed Management"
       crumbsReplacements={{
-        [facilityId]: { name: facilityName },
+        [facilityId]: { name: location?.facility?.name },
         [locationId]: {
-          name: locationName,
+          name: location?.name,
           uri: `/facility/${facilityId}/location`,
         },
       }}
       backUrl={`/facility/${facilityId}/location/${locationId}`}
     >
       <div className="container mx-auto px-4 py-2 sm:px-8">
-        <div className="w-full bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold">Bed Management</h1>
-            <ButtonV2
-              href={`/facility/${facilityId}/location/${locationId}/beds/add`}
-              authorizeFor={NonReadOnlyUsers}
-              variant="primary"
-              className="flex items-center space-x-2"
-            >
-              <CareIcon className="care-l-plus text-lg" />
-              <span>Add New Bed(s)</span>
-            </ButtonV2>
-          </div>
-          {bed}
+        <div className="flex justify-end">
+          <ButtonV2
+            id="add-new-bed"
+            href={`/facility/${facilityId}/location/${locationId}/beds/add`}
+            authorizeFor={NonReadOnlyUsers}
+          >
+            <CareIcon className="care-l-plus text-lg" />
+            Add New Bed(s)
+          </ButtonV2>
         </div>
       </div>
     </Page>

@@ -1,12 +1,24 @@
 import { PerformedByModel } from "../HCX/misc";
+import { PRESCRIPTION_ROUTES } from "./CreatePrescriptionForm";
+
+export const DOSAGE_UNITS = [
+  "mg",
+  "g",
+  "ml",
+  "drop(s)",
+  "ampule(s)",
+  "tsp",
+] as const;
+
+export type DosageValue = `${number} ${(typeof DOSAGE_UNITS)[number]}`;
 
 interface BasePrescription {
   readonly id: string;
   medicine?: string;
   medicine_object?: MedibaseMedicine;
   medicine_old?: string;
-  route?: "ORAL" | "IV" | "IM" | "SC";
-  dosage: string;
+  route?: (typeof PRESCRIPTION_ROUTES)[number];
+  dosage: DosageValue;
   notes?: string;
   meta?: object;
   readonly prescription_type?: "DISCHARGE" | "REGULAR";
@@ -40,7 +52,7 @@ export interface NormalPrescription extends BasePrescription {
 
 export interface PRNPrescription extends BasePrescription {
   indicator: string;
-  max_dosage?: string;
+  max_dosage?: DosageValue;
   min_hours_between_doses?: number;
   is_prn: true;
   frequency?: undefined;
