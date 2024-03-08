@@ -106,38 +106,41 @@ export const VEHICLE_TYPES: Array<OptionsType> = [
 
 export const FACILITY_TYPES: Array<OptionsType> = [
   // { id: 1, text: "Educational Inst" },
-  { id: 2, text: "Private Hospital" },
-  { id: 3, text: "Other" },
   // { id: 4, text: "Hostel" },
   // { id: 5, text: "Hotel" },
   // { id: 6, text: "Lodge" },
-  { id: 7, text: "TeleMedicine" },
-  { id: 8, text: "Govt Hospital" },
-  { id: 9, text: "Labs" },
   { id: 800, text: "Primary Health Centres" },
-  { id: 801, text: "24x7 Public Health Centres" },
   { id: 802, text: "Family Health Centres" },
   { id: 803, text: "Community Health Centres" },
-  { id: 820, text: "Urban Primary Health Center" },
-  { id: 830, text: "Taluk Hospitals" },
-  { id: 831, text: "Taluk Headquarters Hospitals" },
   { id: 840, text: "Women and Child Health Centres" },
-  { id: 850, text: "General hospitals" },
+  { id: 830, text: "Taluk Hospitals" },
   { id: 860, text: "District Hospitals" },
   { id: 870, text: "Govt Medical College Hospitals" },
-
-  { id: 900, text: "Co-operative hospitals" },
+  { id: 9, text: "Govt Labs" },
+  { id: 10, text: "Private Labs" },
+  { id: 7, text: "TeleMedicine" },
+  { id: 2, text: "Private Hospital" },
   { id: 910, text: "Autonomous healthcare facility" },
+  { id: 1300, text: "Shifting Centre" },
+  { id: 1500, text: "Request Approving Center" },
+  { id: 1510, text: "Request Fulfilment Center" },
+  { id: 3, text: "Other" },
 
-  { id: 950, text: "Corona Testing Labs" },
-  { id: 1000, text: "Corona Care Centre" },
+  // { id: 8, text: "Govt Hospital" },
+  // { id: 801, text: "24x7 Public Health Centres" },
+  // { id: 820, text: "Urban Primary Health Center" },
+  // { id: 831, text: "Taluk Headquarters Hospitals" },
+  // { id: 850, text: "General hospitals" },
+
+  // { id: 900, text: "Co-operative hospitals" },
+
+  // { id: 950, text: "Corona Testing Labs" },
+  // { id: 1000, text: "Corona Care Centre" },
+
   // { id: 1010, text: "COVID-19 Domiciliary Care Center" },
   // { id: 1100, text: "First Line Treatment Centre" },
   // { id: 1200, text: "Second Line Treatment Center" },
-  { id: 1300, text: "Shifting Centre" },
   // { id: 1400, text: "Covid Management Center" },
-  { id: 1500, text: "Request Approving Center" },
-  { id: 1510, text: "Request Fulfilment Center" },
   // { id: 1600, text: "District War Room" },
 ];
 
@@ -272,7 +275,7 @@ export const REVIEW_AT_CHOICES: Array<OptionsType> = [
 ];
 
 export const SYMPTOM_CHOICES = [
-  { id: 1, text: "ASYMPTOMATIC" },
+  { id: 1, text: "ASYMPTOMATIC", isSingleSelect: true },
   { id: 2, text: "FEVER" },
   { id: 3, text: "SORE THROAT" },
   { id: 4, text: "COUGH" },
@@ -689,20 +692,20 @@ export const MOTOR_RESPONSE_SCALE = [
   { value: 2, text: "Abnormal Extension(decerebrate)" },
   { value: 1, text: "No Response" },
 ];
-export const CONSULTATION_TABS: Array<OptionsType> = [
-  { id: 1, text: "UPDATES", desc: "Updates" },
-  { id: 13, text: "FEED", desc: "Feed" },
-  { id: 2, text: "SUMMARY", desc: "Summary" },
-  { id: 3, text: "MEDICINES", desc: "Medicines" },
-  { id: 4, text: "FILES", desc: "Files" },
-  { id: 5, text: "INVESTIGATIONS", desc: "Investigations" },
-  { id: 6, text: "ABG", desc: "ABG" },
-  { id: 7, text: "NURSING", desc: "Nursing" },
-  { id: 8, text: "NEUROLOGICAL_MONITORING", desc: "Neurological Monitoring" },
-  { id: 9, text: "VENTILATOR", desc: "Respiratory Support" },
-  { id: 10, text: "NUTRITION", desc: "Nutrition" },
-  { id: 11, text: "PRESSURE_SORE", desc: "Pressure Sore" },
-  { id: 12, text: "DIALYSIS", desc: "Dialysis" },
+export const CONSULTATION_TABS = [
+  { text: "UPDATES", desc: "Overview" },
+  { text: "FEED", desc: "Feed" },
+  { text: "SUMMARY", desc: "Vitals" },
+  { text: "ABG", desc: "ABG" },
+  { text: "MEDICINES", desc: "Medicines" },
+  { text: "FILES", desc: "Files" },
+  { text: "INVESTIGATIONS", desc: "Investigations" },
+  { text: "NEUROLOGICAL_MONITORING", desc: "Neuro" },
+  { text: "VENTILATOR", desc: "Ventilation" },
+  { text: "NUTRITION", desc: "Nutrition" },
+  { text: "PRESSURE_SORE", desc: "Pressure Sore" },
+  { text: "NURSING", desc: "Nursing" },
+  { text: "DIALYSIS", desc: "Dialysis" },
 ];
 
 export const RHYTHM_CHOICES: Array<OptionsType> = [
