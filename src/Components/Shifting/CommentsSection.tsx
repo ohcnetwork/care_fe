@@ -41,8 +41,13 @@ const Comment = ({
         <p className="text-justify">
           {expanded ? comment : truncatedComment}
           {!expanded && remainingComment && (
-            <button onClick={toggleExpanded} className="ml-2 text-blue-500">
-              Read more
+            <button onClick={toggleExpanded} className="ml-2 text-green-600">
+              ..... Read more
+            </button>
+          )}
+          {expanded && remainingComment && (
+            <button onClick={toggleExpanded} className="ml-2 text-green-600">
+              Read less
             </button>
           )}
         </p>
