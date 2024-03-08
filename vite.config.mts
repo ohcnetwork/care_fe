@@ -1,7 +1,6 @@
 import { VitePWA } from "vite-plugin-pwa";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
-import 'dotenv/config';
 
 const cdnUrls =
   process.env.CARE_CDN_URL ??
@@ -10,6 +9,8 @@ const cdnUrls =
     "https://egov-s3-patient-data-10bedicu.s3.amazonaws.com",
     "http://localhost:4566",
   ].join(" ");
+
+  const local_care_api = process.env.CARE_API ?? "http://localhost:9000";
 
 export default defineConfig({
   envPrefix: "REACT_",
@@ -78,7 +79,7 @@ export default defineConfig({
     port: 4000,
     proxy: {
       "/api": {
-        target: process.env.CARE_API ?? "https://careapi.ohc.network",
+        target: local_care_api ?? "https://careapi.ohc.network",
         changeOrigin: true,
       },
     },
@@ -95,7 +96,7 @@ export default defineConfig({
     port: 4000,
     proxy: {
       "/api": {
-        target: process.env.CARE_API ?? "https://careapi.ohc.network",
+        target: local_care_api ?? "https://careapi.ohc.network",
         changeOrigin: true,
       },
     },
