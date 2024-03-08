@@ -55,7 +55,7 @@ let make = (
     }
   })
 
-let getStatus = (min, minText, max, maxText, val) => {
+let getStatus = (val) => {
   switch (val) {
   | 0.0 => ("No pain", "#9CA3AF")
   | 1.0 => ("Noticeable", "#FBBF24")
