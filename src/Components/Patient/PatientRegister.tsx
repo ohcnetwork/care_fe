@@ -1464,10 +1464,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     required
                                     placeholder={
                                       field("district").value
-                                        ? "Choose Localbody"
+                                        ? !localBody.length
+                                          ? "No options available"
+                                          : "Choose Localbody"
                                         : "Select District First"
                                     }
-                                    disabled={!field("district").value}
+                                    disabled={
+                                      !field("district").value ||
+                                      !localBody.length
+                                    }
                                     options={localBody}
                                     optionLabel={(o: any) => o.name}
                                     optionValue={(o: any) => o.id}
