@@ -65,7 +65,7 @@ interface FacilityProps {
 }
 
 type FacilityForm = {
-  facility_type: string;
+  facility_type?: string;
   name: string;
   state: number;
   district: number;
@@ -89,7 +89,7 @@ type FacilityForm = {
 };
 
 const initForm: FacilityForm = {
-  facility_type: "Private Hospital",
+  facility_type: undefined,
   name: "",
   state: 0,
   district: 0,
@@ -366,6 +366,7 @@ export const FacilityCreate = (props: FacilityProps) => {
     let invalidForm = false;
     Object.keys(state.form).forEach((field) => {
       switch (field) {
+        case "facility_type":
         case "name":
         case "address":
           if (!state.form[field]) {
