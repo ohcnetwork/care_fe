@@ -698,7 +698,7 @@ export default function PatientInfoCard(props: {
                                   userId: authUser?.id,
                                 });
                                 close();
-                                setShowLinkCareContext(true);
+                                setShowFetchABDMRecords(true);
                               }}
                             ></div>
                           </>
