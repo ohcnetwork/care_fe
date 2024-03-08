@@ -693,6 +693,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     if (validated) {
       setIsLoading(true);
       const data: any = {
+      const data: any = {
         symptoms: state.form.symptoms,
         other_symptoms: isOtherSymptomsSelected
           ? state.form.other_symptoms
@@ -765,6 +766,9 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
 
       if (state.form.patient_no) data["patient_no"] = state.form.patient_no;
 
+      const res = await dispatchAction(
+        id ? updateConsultation(id!, data) : createConsultation(data)
+      );
       setIsLoading(false);
       if (obj) {
         dispatch({ type: "set_form", form: initForm });

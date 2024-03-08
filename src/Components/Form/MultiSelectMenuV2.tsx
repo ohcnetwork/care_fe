@@ -3,6 +3,7 @@ import { DropdownTransition } from "../Common/components/HelperComponents";
 import { Listbox } from "@headlessui/react";
 import { classNames } from "../../Utils/utils";
 import { ReactNode, useRef } from "react";
+import { ReactNode, useRef } from "react";
 
 type OptionCallback<T, R = void> = (option: T) => R;
 
@@ -63,7 +64,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
       return props.renderSelectedOptions(selectedOptions.map((o) => o.option));
   };
 
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const buttonRef = useRef(null);
 
   const handleSingleSelect = (o: any) => {
     if (
@@ -104,17 +105,17 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
 
                       {selectedOptions.length !== 0 && (
                         <div className="flex flex-wrap gap-2">
-                          {selectedOptions.map((option, index) => (
+                          {selectedOptions.map((option) => (
                             <MultiSelectOptionChip
-                              key={index}
+                              key={option.value}
                               label={option.selectedLabel}
                               onRemove={() => {
                                 const updatedOptions = selectedOptions.filter(
                                   (selectedOption) =>
-                                    selectedOption.value !== option.value,
+                                    selectedOption.value !== option.value
                                 );
                                 props.onChange(
-                                  updatedOptions.map((o) => o.value) as any,
+                                  updatedOptions.map((o) => o.value) as any
                                 );
                               }}
                             />

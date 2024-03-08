@@ -757,6 +757,15 @@ export const PatientManager = () => {
             </ButtonV2>
           </div>
           <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
+<<<<<<< Updated upstream
+            <SwitchTabs
+              tab1="Live"
+              tab2="Discharged"
+              onClickTab1={() => updateQuery({ is_active: "True" })}
+              onClickTab2={() => updateQuery({ is_active: "False" })}
+              isTab2Active={tabValue ? true : false}
+            />
+=======
             {(authUser.user_type === "StateAdmin" ||
               authUser.user_type === "StateReadOnlyAdmin") && (
               <SwitchTabs
@@ -767,6 +776,7 @@ export const PatientManager = () => {
                 isTab2Active={tabValue ? true : false}
               />
             )}
+>>>>>>> Stashed changes
             {showDoctorConnect && (
               <ButtonV2
                 id="doctor-connect-patient-button"

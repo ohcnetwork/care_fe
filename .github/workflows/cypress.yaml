@@ -42,21 +42,22 @@ jobs:
           max_attempts: 5
           command: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
           on_retry_command: sleep 5
-
+      
       - name: Determine PR Origin
         id: pr_origin
         run: echo "::set-output name=is_forked::$( echo ${{ github.event.pull_request.head.repo.fork }})"
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
 
       - name: Install dependencies 📦
         run: npm install
 
       - name: Build & Compile rescript files ⚙️
         run: npm run build
+
+      - name: Install Specific Chrome Version
+        run: |
+          sudo apt-get install -y wget
+          sudo wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt-get install ./google-chrome-stable_current_amd64.deb
 
       - name: Install Specific Chrome Version
         run: |
@@ -122,3 +123,4 @@ jobs:
         with:
           name: cypress-videos
           path: cypress/videos
+      

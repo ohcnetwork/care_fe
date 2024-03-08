@@ -35,7 +35,7 @@ describe("Patient Consultation in multiple combination", () => {
   const procedureName = "Procedure No 1";
   const patientWeight = "70";
   const patientHeight = "170";
-  const medicineOne = "DOLOLUP";
+  const medicineOne = "DOLO";
   const patientIpNumber = Math.random().toString(36).substring(7);
 
   before(() => {

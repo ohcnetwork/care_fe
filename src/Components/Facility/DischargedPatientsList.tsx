@@ -7,6 +7,7 @@ import { PatientModel } from "../Patient/models";
 import useQuery from "../../Utils/request/useQuery";
 import { debounce } from "lodash-es";
 import SearchInput from "../Form/SearchInput";
+import { formatAge } from "../../Utils/utils";
 import { GENDER_TYPES } from "../../Common/constants";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
@@ -87,7 +88,7 @@ const PatientListItem = ({ patient }: { patient: PatientModel }) => {
         <h2 className="text-lg font-bold text-black">{patient.name}</h2>
         <span className="text-sm font-medium text-gray-800">
           {GENDER_TYPES.find((g) => g.id === patient.gender)?.text} -{" "}
-          {formatPatientAge(patient)}
+          {formatAge(patient.age, patient.date_of_birth)}
         </span>
         <div className="flex-1" />
         <RecordMeta
