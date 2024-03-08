@@ -1,8 +1,15 @@
 import Chip from "../../../CAREUI/display/Chip";
-import Timeline, { TimelineNode } from "../../../CAREUI/display/Timeline";
-import { classNames, formatDateTime } from "../../../Utils/utils";
+import Timeline, {
+  TimelineEvent,
+  TimelineNode,
+  TimelineNodeTitle,
+} from "../../../CAREUI/display/Timeline";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
+import { classNames, formatDateTime, relativeTime } from "../../../Utils/utils";
 import { AssetData } from "../../Assets/AssetTypes";
 import { CurrentBed } from "../models";
+import { Popover, Transition } from "@headlessui/react";
+import { Fragment } from "react";
 
 interface Props {
   consultationBeds: CurrentBed[];
@@ -46,27 +53,71 @@ const BedAllocationNode = ({
   prevBed?: CurrentBed;
   isLastNode: boolean;
 }) => {
+  const event: TimelineEvent = {
+    type: "allocated",
+    timestamp: bed.start_date,
+    by: undefined,
+    icon: bed.end_date === null ? "l-map-pin-alt" : "l-bed",
+    notes: bed.assets_objects?.length ? (
+      <BedTimelineAsset assets={bed.assets_objects} />
+    ) : (
+      ""
+    ),
+  };
+
   return (
     <>
       <TimelineNode
         name="bed"
-        event={{
-          type: "allocated",
-          timestamp: bed.start_date,
-          by: undefined,
-          icon: bed.end_date === null ? "l-map-pin-alt" : "l-bed",
-          notes: bed.assets_objects?.length ? (
-            <BedTimelineAsset assets={bed.assets_objects} />
-          ) : (
-            ""
-          ),
-        }}
-        titleSuffix={
-          <BedTitleSuffix bed={bed} isLastNode={isLastNode} prevBed={prevBed} />
+        event={event}
+        title={
+          <BedTimelineNodeTitle
+            event={event}
+            titleSuffix={<BedTitleSuffix bed={bed} prevBed={prevBed} />}
+            bed={bed}
+          />
         }
         isLast={isLastNode}
       />
     </>
+  );
+};
+
+const BedTimelineAsset = ({ assets }: { assets: AssetData[] }) => {
+  return (
+    <div className="flex flex-col">
+      <p className="font-semibold">Linked Assets</p>
+      <div className="ml-5 flex flex-col">
+        {assets.map((asset) => {
+          return (
+            <li key={asset.id} className="list-disc">
+              {asset.name}
+            </li>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+const BedTimelineNodeTitle = (props: {
+  event: TimelineEvent;
+  titleSuffix: React.ReactNode;
+  bed: CurrentBed;
+}) => {
+  const { event, titleSuffix, bed } = props;
+
+  return (
+    <TimelineNodeTitle event={event}>
+      <div className="flex w-full justify-between gap-2">
+        <p className="flex-auto py-0.5 text-xs leading-5 text-gray-600 md:w-2/3">
+          {titleSuffix}
+        </p>
+        <div className="md:w-fit">
+          <BedActivityIButtonPopover bed={bed} />
+        </div>
+      </div>
+    </TimelineNodeTitle>
   );
 };
 
@@ -106,19 +157,32 @@ const BedTitleSuffix = ({
   );
 };
 
-const BedTimelineAsset = ({ assets }: { assets: AssetData[] }) => {
+const BedActivityIButtonPopover = ({
+  bed,
+}: {
+  event?: TimelineEvent;
+  bed?: CurrentBed;
+}) => {
   return (
-    <div className="flex flex-col">
-      <p className="font-semibold">Linked Assets</p>
-      <div className="ml-5 flex flex-col">
-        {assets.map((asset) => {
-          return (
-            <li key={asset.id} className="list-disc">
-              {asset.name}
-            </li>
-          );
-        })}
-      </div>
-    </div>
+    <Popover className="relative text-sm text-gray-500 md:text-base">
+      <Popover.Button>
+        <CareIcon className="care-l-info-circle cursor-pointer text-gray-500 hover:text-gray-600" />
+      </Popover.Button>
+      <Transition
+        as={Fragment}
+        enter="transition ease-out duration-200"
+        enterFrom="opacity-0 translate-y-1"
+        enterTo="opacity-100 translate-y-0"
+        leave="transition ease-in duration-150"
+        leaveFrom="opacity-100 translate-y-0"
+        leaveTo="opacity-0 translate-y-1"
+      >
+        <Popover.Panel className="absolute z-10 -ml-32 mt-2 w-64 -translate-x-1/2 rounded-lg border border-gray-200 bg-white p-2 shadow-lg">
+          <p className="text-xs text-gray-600">
+            {relativeTime(bed?.start_date)}
+          </p>
+        </Popover.Panel>
+      </Transition>
+    </Popover>
   );
 };
