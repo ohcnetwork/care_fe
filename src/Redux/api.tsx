@@ -75,6 +75,8 @@ import {
   PNconfigData,
 } from "../Components/Notifications/models";
 import {
+  CreateFileRequest,
+  CreateFileResponse,
   DailyRoundsModel,
   FileUploadModel,
   PatientModel,
@@ -206,7 +208,7 @@ const routes = {
   userListFacility: {
     path: "/api/v1/users/{username}/get_facilities/",
     method: "GET",
-    TRes: Type<FacilityModel[]>(),
+    TRes: Type<PaginatedResponse<FacilityModel>>(),
   },
 
   addUserFacility: {
@@ -928,8 +930,13 @@ const routes = {
     path: "/api/v1/consultation/{id}/discharge_patient/",
     method: "POST",
   },
-  //Profile
+  listFacilityDischargedPatients: {
+    path: "/api/v1/facility/{facility_external_id}/discharged_patients/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<PatientModel>>(),
+  },
 
+  //Profile
   checkUsername: {
     path: "/api/v1/users/{username}/check_availability/",
     method: "GET",

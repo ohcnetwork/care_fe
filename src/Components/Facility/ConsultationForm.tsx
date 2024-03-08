@@ -694,7 +694,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     const validated = validateForm();
     if (validated) {
       setIsLoading(true);
-      const data = {
+      const data: any = {
         symptoms: state.form.symptoms,
         other_symptoms: isOtherSymptomsSelected
           ? state.form.other_symptoms
@@ -713,7 +713,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         history_of_present_illness: state.form.history_of_present_illness,
         treatment_plan: state.form.treatment_plan,
         discharge_date: state.form.discharge_date,
-        patient_no: state.form.patient_no,
         create_diagnoses: isUpdate ? undefined : state.form.create_diagnoses,
         treating_physician: state.form.treating_physician,
         investigation: state.form.InvestigationAdvice,
@@ -763,6 +762,8 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         height: Number(state.form.height),
         bed: bed && bed instanceof Array ? bed[0]?.id : bed?.id,
       };
+
+      if (state.form.patient_no) data["patient_no"] = state.form.patient_no;
 
       const res = await dispatchAction(
         id ? updateConsultation(id!, data) : createConsultation(data)
