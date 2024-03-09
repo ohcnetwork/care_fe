@@ -79,6 +79,7 @@ export const Feed: React.FC<IFeedProps> = ({ facilityId, consultationId }) => {
 
   const [borderAlert, setBorderAlert] = useState<any>(null);
   const [privacy, setPrivacy] = useState<boolean>(false);
+  const [privacyLockedBy, setPrivacyLockedBy] = useState<string>("");
   const [videoStartTime, setVideoStartTime] = useState<Date | null>(null);
   const [statusReported, setStatusReported] = useState(false);
   const [resolvedMiddleware, setResolvedMiddleware] =
@@ -308,6 +309,7 @@ export const Feed: React.FC<IFeedProps> = ({ facilityId, consultationId }) => {
           }
           if (data?.current_bed?.privacy) {
             setPrivacy(data?.current_bed?.privacy);
+            setPrivacyLockedBy(data?.current_bed?.meta?.locked_by);
           }
         }
       }
@@ -851,7 +853,7 @@ export const Feed: React.FC<IFeedProps> = ({ facilityId, consultationId }) => {
     );
   };
 
-  if (privacy && Object.keys(cameraOccupier).length !== 0) {
+  if (privacy && privacyLockedBy !== authUser.username) {
     return <PrivacyOnCard />;
   }
 

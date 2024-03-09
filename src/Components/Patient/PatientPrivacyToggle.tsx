@@ -77,7 +77,14 @@ export default function PatientPrivacyToggle(props: PatientPrivacyToggleProps) {
     ) {
       getPrivacyInfo();
     }
-  }, [consultation]);
+
+    // disable privacy beforeunload window event handler
+    window.addEventListener("beforeunload", () => {
+      if (allowPrivacyToggle() && privacy) {
+        disablePrivacy();
+      }
+    });
+  }, [consultation, allowPrivacyToggle, privacy]);
 
   //function to enable the privacy of the patient
   const enablePrivacy = async () => {
