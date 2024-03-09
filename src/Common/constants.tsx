@@ -4,6 +4,7 @@ import { SortOption } from "../Components/Common/SortDropdown";
 import { dateQueryString } from "../Utils/utils";
 import { IconName } from "../CAREUI/icons/CareIcon";
 import { PhoneNumberValidator } from "../Components/Form/FieldValidators";
+import { SchemaType } from "./schemaParser";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 export const PAGINATION_LIMIT = 36;
@@ -894,23 +895,23 @@ export const BLACKLISTED_PATHS: RegExp[] = [
   /\/facility\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/patient\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/consultation\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/dialysis+/i,
 ];
 
-export const XLSXAssetImportSchema = {
-  Name: { prop: "name", type: String },
+export const AssetImportSchema: SchemaType = {
+  Name: { prop: "name", type: "string" },
   Type: {
     prop: "asset_type",
-    type: String,
+    type: "string",
     oneOf: ["INTERNAL", "EXTERNAL"],
     required: true,
   },
   Class: {
     prop: "asset_class",
-    type: String,
+    type: "string",
     oneOf: ["HL7MONITOR", "ONVIF", "VENTILATOR", ""],
   },
-  Description: { prop: "description", type: String },
+  Description: { prop: "description", type: "string" },
   "Working Status": {
     prop: "is_working",
-    type: Boolean,
+    type: "boolean",
     parse: (status: string) => {
       if (status === "WORKING") {
         return true;
@@ -922,18 +923,15 @@ export const XLSXAssetImportSchema = {
     },
     required: true,
   },
-  "Not Working Reason": {
-    prop: "not_working_reason",
-    type: String,
-  },
-  "Serial Number": { prop: "serial_number", type: String },
-  "QR Code ID": { prop: "qr_code_id", type: String },
-  Manufacturer: { prop: "manufacturer", type: String },
-  "Vendor Name": { prop: "vendor_name", type: String },
-  "Support Name": { prop: "support_name", type: String },
+  "Not Working Reason": { prop: "not_working_reason", type: "string" },
+  "Serial Number": { prop: "serial_number", type: "string" },
+  "QR Code ID": { prop: "qr_code_id", type: "string" },
+  Manufacturer: { prop: "manufacturer", type: "string" },
+  "Vendor Name": { prop: "vendor_name", type: "string" },
+  "Support Name": { prop: "support_name", type: "string" },
   "Support Email": {
     prop: "support_email",
-    type: String,
+    type: "string",
     parse: (email: string) => {
       if (!email) return null;
       const isValid = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
@@ -947,7 +945,7 @@ export const XLSXAssetImportSchema = {
   },
   "Support Phone Number": {
     prop: "support_phone",
-    type: String,
+    type: "string",
     parse: (phone: number | string) => {
       phone = String(phone);
       if (phone.length === 10 && !phone.startsWith("1800")) {
@@ -972,13 +970,10 @@ export const XLSXAssetImportSchema = {
   },
   "Warranty End Date": {
     prop: "warranty_amc_end_of_validity",
-    type: String,
+    type: "string",
     parse: (date: string) => {
       if (!date) return null;
-      const parts = date.split("-");
-      const reformattedDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
-      const parsed = new Date(reformattedDateStr);
-
+      const parsed = new Date(date);
       if (String(parsed) === "Invalid Date") {
         throw new Error("Invalid Warranty End Date:" + date);
       }
@@ -988,12 +983,10 @@ export const XLSXAssetImportSchema = {
   },
   "Last Service Date": {
     prop: "last_serviced_on",
-    type: String,
+    type: "string",
     parse: (date: string) => {
       if (!date) return null;
-      const parts = date.split("-");
-      const reformattedDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
-      const parsed = new Date(reformattedDateStr);
+      const parsed = new Date(date);
 
       if (String(parsed) === "Invalid Date") {
         throw new Error("Invalid Last Service Date:" + date);
@@ -1002,33 +995,78 @@ export const XLSXAssetImportSchema = {
       return dateQueryString(parsed);
     },
   },
-  Notes: { prop: "notes", type: String },
-  META: {
-    prop: "meta",
-    type: {
-      "Config - IP Address": {
-        prop: "local_ip_address",
-        type: String,
-        parse: (ip: string) => {
-          if (!ip) return null;
-          const isValid =
-            /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
-              ip
-            );
+  Notes: { prop: "notes", type: "string" },
+  "Config - IP Address": {
+    parent: "meta",
+    prop: "local_ip_address",
+    type: "string",
+    parse: (ip: string) => {
+      if (!ip) return null;
+      const isValid =
+        /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
+          ip
+        );
 
-          if (!isValid) {
-            throw new Error("Invalid Config IP Address: " + ip);
-          }
+      if (!isValid) {
+        throw new Error("Invalid Config IP Address: " + ip);
+      }
 
-          return ip;
-        },
-      },
-      "Config - Camera Access Key": {
-        prop: "camera_access_key",
-        type: String,
-      },
+      return ip;
     },
   },
+  "Config: Camera Access Key": {
+    parent: "meta",
+    prop: "camera_access_key",
+    type: "string",
+  },
+};
+
+export const ExternalResultImportSchema: SchemaType = {
+  District: { prop: "district", type: "any" },
+  "srf id": { prop: "srf_id", type: "string" },
+  name: { prop: "name", type: "string" },
+  age: { prop: "age", type: "number" },
+  "age in": { prop: "age_in", type: "string" },
+  gender: { prop: "gender", type: "string" },
+  "mobile number": { prop: "mobile_number", type: "any" },
+  address: { prop: "address", type: "string" },
+  ward: { prop: "ward", type: "number" },
+  "local body": { prop: "local_body", type: "string" },
+  "local body type": { prop: "local_body_type", type: "string" },
+  source: { prop: "source", type: "string" },
+  "Sample Collection Date": {
+    prop: "sample_collection_date",
+    type: "string",
+    parse: (date: string) => {
+      if (!date) return null;
+      const parsed = new Date(date);
+      if (String(parsed) === "Invalid Date") {
+        throw new Error("Invalid Date:" + date);
+      }
+
+      return dateQueryString(parsed);
+    },
+  },
+  "result date": {
+    prop: "result_date",
+    type: "string",
+    parse: (date: string) => {
+      if (!date) return null;
+      const parsed = new Date(date);
+      if (String(parsed) === "Invalid Date") {
+        throw new Error("Invalid Date:" + date);
+      }
+
+      return dateQueryString(parsed);
+    },
+  },
+  "test type": { prop: "test_type", type: "string" },
+  "lab name": { prop: "lab_name", type: "string" },
+  "sample type": { prop: "sample_type", type: "string" },
+  "patient status": { prop: "patient_status", type: "string" },
+  "Is Repeat": { prop: "is_repeat", type: "string" },
+  "patient category": { prop: "patient_category", type: "string" },
+  result: { prop: "result", type: "string" },
 };
 
 export const USER_TYPES_MAP = {
