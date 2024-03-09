@@ -1,14 +1,16 @@
 import _ from "lodash-es";
 import { navigate } from "raviger";
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy } from "react";
 import useConfig from "../../Common/hooks/useConfig";
 import * as Notification from "../../Utils/Notifications.js";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { ExternalResultImportSchema } from "../../Common/constants";
-import ExcelFileDragAndDrop from "../Common/ExcelFIleDragAndDrop";
 import DialogModal from "../Common/Dialog";
 import { IExternalResult } from "./models";
+const ExcelFileDragAndDrop = lazy(
+  () => import("../Common/ExcelFIleDragAndDrop")
+);
 
 interface Props {
   open: boolean;

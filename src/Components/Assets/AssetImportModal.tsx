@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, lazy } from "react";
 import { sleep } from "../../Utils/utils";
 import { FacilityModel } from "../Facility/models";
 import { AssetData } from "./AssetTypes";
@@ -11,7 +11,9 @@ import DialogModal from "../Common/Dialog";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import ExcelFileDragAndDrop from "../Common/ExcelFIleDragAndDrop";
+const ExcelFileDragAndDrop = lazy(
+  () => import("../Common/ExcelFIleDragAndDrop")
+);
 
 interface Props {
   open: boolean;
