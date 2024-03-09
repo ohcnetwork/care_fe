@@ -1,4 +1,4 @@
-interface SingleKeySchema {
+export interface SingleKeySchema {
   parent?: string;
   prop: string;
   type: string;
@@ -11,17 +11,27 @@ export interface SchemaType {
   [key: string]: SingleKeySchema;
 }
 
-interface DataWithError {
+export interface DataWithError {
   [key: string]: {
     value: any;
     error?: string;
   };
 }
 
+export interface ParsedData {
+  [key: string]: any;
+}
+
+export interface ErrorData {
+  index: number;
+  key: string;
+  error: string;
+}
+
 interface parseDataProps {
   dataWithErrors: DataWithError[];
-  parsedData: { [key: string]: any }[];
-  errors: { index: number; key: string; error: string }[];
+  parsedData: ParsedData[];
+  errors: ErrorData[];
 }
 
 const validateAndParse = (
@@ -77,8 +87,8 @@ const parseDataWithSchema = (
   data: any[],
   schema: SchemaType
 ): parseDataProps => {
-  const errors: { index: number; key: string; error: string }[] = [];
-  const parsedData: { [key: string]: any }[] = [];
+  const errors: ErrorData[] = [];
+  const parsedData: ParsedData[] = [];
   const dataWithErrors: DataWithError[] = data.map((item, index) => {
     return Object.keys(schema).reduce((acc, key) => {
       const {
@@ -114,7 +124,7 @@ const parseDataWithSchema = (
       }
 
       return acc;
-    }, {} as { [key: string]: any });
+    }, {} as ParsedData);
   });
 
   return { dataWithErrors, parsedData, errors };
@@ -123,7 +133,7 @@ const parseDataWithSchema = (
 const schemaParser = (
   dataArray: any[],
   schema: SchemaType
-): parseDataProps & { ParsedDataWithOutErrors: { [key: string]: any }[] } => {
+): parseDataProps & { ParsedDataWithOutErrors: ParsedData[] } => {
   const { dataWithErrors, parsedData, errors } = parseDataWithSchema(
     dataArray,
     schema
