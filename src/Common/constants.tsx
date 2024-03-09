@@ -1023,17 +1023,17 @@ export const AssetImportSchema: SchemaType = {
 
 export const ExternalResultImportSchema: SchemaType = {
   District: { prop: "district", type: "any" },
-  "srf id": { prop: "srf_id", type: "string" },
-  name: { prop: "name", type: "string" },
-  age: { prop: "age", type: "number" },
-  "age in": { prop: "age_in", type: "string" },
-  gender: { prop: "gender", type: "string" },
-  "mobile number": { prop: "mobile_number", type: "any" },
-  address: { prop: "address", type: "string" },
-  ward: { prop: "ward", type: "number" },
-  "local body": { prop: "local_body", type: "string" },
-  "local body type": { prop: "local_body_type", type: "string" },
-  source: { prop: "source", type: "string" },
+  "SRF ID": { prop: "srf_id", type: "string" },
+  Name: { prop: "name", type: "string" },
+  Age: { prop: "age", type: "number" },
+  "Age in": { prop: "age_in", type: "string" },
+  Gender: { prop: "gender", type: "string" },
+  "Mobile Number": { prop: "mobile_number", type: "any" },
+  Address: { prop: "address", type: "string" },
+  Ward: { prop: "ward", type: "number" },
+  "Local Body": { prop: "local_body", type: "string" },
+  "Local Body Type": { prop: "local_body_type", type: "string" },
+  Source: { prop: "source", type: "string" },
   "Sample Collection Date": {
     prop: "sample_collection_date",
     type: "string",
@@ -1047,7 +1047,7 @@ export const ExternalResultImportSchema: SchemaType = {
       return dateQueryString(parsed);
     },
   },
-  "result date": {
+  "Result Date": {
     prop: "result_date",
     type: "string",
     parse: (date: string) => {
@@ -1060,13 +1060,13 @@ export const ExternalResultImportSchema: SchemaType = {
       return dateQueryString(parsed);
     },
   },
-  "test type": { prop: "test_type", type: "string" },
-  "lab name": { prop: "lab_name", type: "string" },
-  "sample type": { prop: "sample_type", type: "string" },
-  "patient status": { prop: "patient_status", type: "string" },
+  "Test Type": { prop: "test_type", type: "string" },
+  "Lab Name": { prop: "lab_name", type: "string" },
+  "Sample Type": { prop: "sample_type", type: "string" },
+  "Patient Status": { prop: "patient_status", type: "string" },
   "Is Repeat": { prop: "is_repeat", type: "string" },
-  "patient category": { prop: "patient_category", type: "string" },
-  result: { prop: "result", type: "string" },
+  "Patient Category": { prop: "patient_category", type: "string" },
+  Result: { prop: "result", type: "string" },
 };
 
 export const USER_TYPES_MAP = {
