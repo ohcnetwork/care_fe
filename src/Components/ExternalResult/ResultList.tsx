@@ -18,7 +18,7 @@ import useQuery from "../../Utils/request/useQuery";
 import { parsePhoneNumber } from "../../Utils/utils";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import ExternalResultUploadModal from "./ExternalResultUploadModal";
+import ExternalResultImportModal from "./ExternalResultImportModal";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -269,7 +269,7 @@ export default function ResultList() {
         }
       >
         {importModalOpen && (
-          <ExternalResultUploadModal
+          <ExternalResultImportModal
             open={importModalOpen}
             onClose={() => setImportModalOpen(false)}
           />
