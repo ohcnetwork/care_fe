@@ -131,11 +131,6 @@ export const fireRequest = (
             return;
           }
 
-          // 409 is for conflict on access to an asset
-          if (error.response.status === 409 && key === "operateAsset") {
-            return error.response;
-          }
-
           // currentUser is ignored because on the first page load
           // 403 error is displayed for invalid credential.
           if (error.response.status === 403 && key === "currentUser") {

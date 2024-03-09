@@ -5,7 +5,7 @@ export const FeedRoutes = {
   operateAsset: {
     path: "/api/v1/asset/{id}/operate_assets/",
     method: "POST",
-    TRes: Type<object>(),
+    TRes: Type<any>(),
     TBody: Type<{ action: OperationAction }>(),
   },
 } as const;
