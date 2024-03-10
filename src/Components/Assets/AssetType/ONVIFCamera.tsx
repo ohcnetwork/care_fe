@@ -151,7 +151,7 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
 
   const fetchBoundaryBedPreset = async () => {
     const { res, data } = await request(routes.listAssetBeds, {
-      body: { bed: bed.id },
+      query: { bed: bed.id },
     });
 
     if (res && res.status === 200 && data) {

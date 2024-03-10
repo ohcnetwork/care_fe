@@ -13,7 +13,6 @@ import {
 } from "../../../Common/hooks/useMSEplayer";
 import { PTZState, useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 import { useEffect, useRef, useState } from "react";
-import { listAssetBeds } from "../../../Redux/actions";
 // import { statusType, useAbortableEffect } from "../../../Common/utils";
 import ButtonV2 from "../../Common/components/ButtonV2.js";
 
@@ -386,20 +385,20 @@ export const Feed: React.FC<IFeedProps> = ({ facilityId, consultationId }) => {
 
   const getBedPresets = async (asset: any) => {
     if (asset.id && bed) {
-      const bedAssets = await dispatch(listAssetBeds({ asset: asset.id, bed }));
-      if (bedAssets?.data?.results?.length) {
-        bedAssets.data.results = bedAssets.data.results.filter(
-          (bedAsset: any) => {
-            if (bedAsset.meta.type === "boundary") {
-              setBoundaryPreset(bedAsset);
-              return false;
-            } else {
-              return true;
-            }
+      const { data } = await request(routes.listAssetBeds, {
+        query: { asset: asset.id, bed },
+      });
+      if (data?.results?.length) {
+        data.results = data.results.filter((bedAsset: any) => {
+          if (bedAsset.meta.type === "boundary") {
+            setBoundaryPreset(bedAsset);
+            return false;
+          } else {
+            return true;
           }
-        );
+        });
       }
-      setBedPresets(bedAssets?.data?.results);
+      setBedPresets(data?.results);
       //       const { data: bedAssets } = await request(routes.listAssetBeds, {
       //         query: { asset: asset.id, bed },
       //       });
