@@ -28,7 +28,6 @@ import useAuthUser from "../../../Common/hooks/useAuthUser.js";
 import Spinner from "../../Common/Spinner.js";
 import useQuery from "../../../Utils/request/useQuery.js";
 import { ResolvedMiddleware } from "../../Assets/AssetTypes.js";
-import useWindowDimensions from "../../../Common/hooks/useWindowDimensions.js";
 
 interface IFeedProps {
   facilityId: string;
@@ -41,10 +40,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   const dispatch: any = useDispatch();
 
   const videoWrapper = useRef<HTMLDivElement>(null);
-  const { width } = useWindowDimensions();
-  const extremeSmallScreenBreakpoint = 320;
-  const isExtremeSmallScreen =
-    width <= extremeSmallScreenBreakpoint ? true : false;
+
   const [cameraAsset, setCameraAsset] = useState<ICameraAssetState>({
     id: "",
     accessKey: "",
@@ -652,11 +648,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           })}
         </div>
       </div>
-      <div
-        className={`${
-          isExtremeSmallScreen ? " flex flex-wrap" : " md:flex "
-        } mt-4 w-full lg:hidden lg:max-w-lg `}
-      >
+      <div className="mt-4 flex w-full flex-wrap  lg:hidden">
         {cameraPTZ.map((option, index) => {
           const shortcutKeyDescription =
             option.shortcutKey &&
