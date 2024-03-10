@@ -81,6 +81,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   }, [cameraState]);
 
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  // const isIOS = true
 
   const liveFeedPlayerRef = useRef<HTMLVideoElement | ReactPlayer | null>(null);
 
@@ -165,6 +166,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     ? `wss://${resolvedMiddleware?.hostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`
     : `https://${resolvedMiddleware?.hostname}/stream/${cameraAsset?.accessKey}/channel/0/hls/live/index.m3u8?uuid=${cameraAsset?.accessKey}&channel=0`;
 
+  // here is the error, its resolving:
   const {
     startStream,
     // setVideoEl,
