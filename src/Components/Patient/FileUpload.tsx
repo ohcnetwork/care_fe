@@ -32,6 +32,7 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import FilePreviewDialog from "../Common/FilePreviewDialog";
+import uploadFile from "../../Utils/request/uploadFile";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -937,49 +938,46 @@ export const FileUpload = (props: FileUploadProps) => {
     const newFile = new File([f], `${internal_name}`);
 
     return new Promise<void>((resolve, reject) => {
-      console.log("I am here haha");
-      const xhr = new XMLHttpRequest();
-      xhr.open("PUT", url, true);
-      xhr.setRequestHeader("Content-Type", file?.type);
-
-      xhr.upload.onprogress = function (event: ProgressEvent) {
-        if (event.lengthComputable) {
-          const percentComplete = Math.round(
-            (event.loaded / event.total) * 100
-          );
-          setUploadPercent(percentComplete);
-        }
-      };
-
-      xhr.onload = () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          setUploadStarted(false);
-          setFile(null);
-          setUploadFileName("");
-          fetchData();
-          Notification.Success({
-            msg: "File Uploaded Successfully",
-          });
-          setUploadFileError("");
-          resolve();
-        } else {
+      uploadFile(
+        url,
+        newFile,
+        "PUT",
+        { "Content-Type": file?.type },
+        (xhr: XMLHttpRequest) => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            setUploadStarted(false);
+            setFile(null);
+            setUploadFileName("");
+            fetchData();
+            Notification.Success({
+              msg: "File Uploaded Successfully",
+            });
+            setUploadFileError("");
+            resolve();
+          } else {
+            Notification.Error({
+              msg: "Error Uploading File: " + xhr.statusText,
+            });
+            setUploadStarted(false);
+            reject();
+          }
+        },
+        (event: ProgressEvent) => {
+          if (event.lengthComputable) {
+            const percentComplete = Math.round(
+              (event.loaded / event.total) * 100
+            );
+            setUploadPercent(percentComplete);
+          }
+        },
+        () => {
           Notification.Error({
-            msg: "Error Uploading File: " + xhr.statusText,
+            msg: "Error Uploading File: Network Error",
           });
           setUploadStarted(false);
           reject();
         }
-      };
-
-      xhr.onerror = () => {
-        Notification.Error({
-          msg: "Error Uploading File: Network Error",
-        });
-        setUploadStarted(false);
-        reject();
-      };
-
-      xhr.send(newFile);
+      );
     });
   };
 
@@ -1058,36 +1056,36 @@ export const FileUpload = (props: FileUploadProps) => {
     if (f === undefined) return;
     const newFile = new File([f], `${internal_name}`, { type: f.type });
 
-    const xhr = new XMLHttpRequest();
-
-    xhr.open("PUT", url, true);
-    xhr.setRequestHeader("Content-Type", newFile?.type);
-
-    xhr.upload.onprogress = function (event: ProgressEvent) {
-      if (event.lengthComputable) {
-        const percentComplete = Math.round((event.loaded / event.total) * 100);
-        setUploadPercent(percentComplete);
-      }
-    };
-    xhr.onload = function () {
-      if (xhr.status >= 200 && xhr.status < 300) {
+    uploadFile(
+      url,
+      newFile,
+      "PUT",
+      { "Content-Type": newFile?.type },
+      (xhr: XMLHttpRequest) => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          setAudioUploadStarted(false);
+          // setUploadSuccess(true);
+          setAudioName("");
+          fetchData();
+          Notification.Success({
+            msg: "File Uploaded Successfully",
+          });
+        } else {
+          setAudioUploadStarted(false);
+        }
+      },
+      (event: ProgressEvent) => {
+        if (event.lengthComputable) {
+          const percentComplete = Math.round(
+            (event.loaded / event.total) * 100
+          );
+          setUploadPercent(percentComplete);
+        }
+      },
+      () => {
         setAudioUploadStarted(false);
-        // setUploadSuccess(true);
-        setAudioName("");
-        fetchData();
-        Notification.Success({
-          msg: "File Uploaded Successfully",
-        });
-      } else {
-        setAudioUploadStarted(false);
       }
-    };
-
-    xhr.onerror = function () {
-      setAudioUploadStarted(false);
-    };
-
-    xhr.send(newFile);
+    );
   };
 
   const validateAudioUpload = () => {

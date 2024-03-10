@@ -17,6 +17,7 @@ import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { useTranslation } from "react-i18next";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
+import uploadFile from "../../Utils/request/uploadFile";
 
 interface Props {
   sample: SampleTestModel;
@@ -103,38 +104,41 @@ const UpdateStatusDialog = (props: Props) => {
     if (f === undefined) return;
     const newFile = new File([f], `${internal_name}`);
 
-    const xhr = new XMLHttpRequest();
-    xhr.open("PUT", url);
-    xhr.setRequestHeader("Content-Type", contentType);
-    xhr.setRequestHeader("Content-disposition", "inline");
-
-    xhr.upload.onprogress = function (event: ProgressEvent) {
-      if (event.lengthComputable) {
-        const percentComplete = Math.round((event.loaded / event.total) * 100);
-        setUploadPercent(percentComplete);
-      }
-    };
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
+    uploadFile(
+      url,
+      newFile,
+      "PUT",
+      {
+        "Content-Type": contentType,
+        "Content-disposition": "inline",
+      },
+      (xhr: XMLHttpRequest) => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          setUploadStarted(false);
+          setUploadDone(true);
+          request(routes.editUpload, {
+            pathParams: {
+              id: data.id,
+              fileType: "SAMPLE_MANAGEMENT",
+              associatingId: sample.id?.toString() ?? "",
+            },
+            body: { upload_completed: true },
+          });
+          Notification.Success({ msg: "File Uploaded Successfully" });
+        } else {
+          setUploadStarted(false);
+        }
+      },
+      (e: ProgressEvent) => {
+        if (e.lengthComputable) {
+          const percentComplete = Math.round((e.loaded / e.total) * 100);
+          setUploadPercent(percentComplete);
+        }
+      },
+      () => {
         setUploadStarted(false);
-        setUploadDone(true);
-        request(routes.editUpload, {
-          pathParams: {
-            id: data.id,
-            fileType: "SAMPLE_MANAGEMENT",
-            associatingId: sample.id?.toString() ?? "",
-          },
-          body: { upload_completed: true },
-        });
-        Notification.Success({ msg: "File Uploaded Successfully" });
-      } else {
-        setUploadStarted(false);
       }
-    };
-    xhr.onerror = () => {
-      setUploadStarted(false);
-    };
-    xhr.send(newFile);
+    );
   };
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -19,6 +19,7 @@ import { LocalStorageKeys } from "../../Common/constants";
 import DialogModal from "../Common/Dialog";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
+import uploadFile from "../../Utils/request/uploadFile";
 interface Props {
   open: boolean;
   onClose: (() => void) | undefined;
@@ -104,32 +105,35 @@ const CoverImageEditModal = ({
 
     const formData = new FormData();
     formData.append("cover_image", selectedFile);
-
+    const url = `/api/v1/facility/${facility.id}/cover_image/`;
     setIsUploading(true);
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", `/api/v1/facility/${facility.id}/cover_image/`);
-    xhr.setRequestHeader(
-      "Authorization",
-      "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken)
-    );
-    xhr.onload = function () {
-      if (xhr.status === 200) {
-        Success({ msg: "Cover image updated." });
-      } else {
+
+    uploadFile(
+      url,
+      formData,
+      "POST",
+      {
+        Authorization:
+          "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken),
+      },
+      (xhr: XMLHttpRequest) => {
+        if (xhr.status === 200) {
+          Success({ msg: "Cover image updated." });
+        } else {
+          Notification.Error({
+            msg: "Something went wrong!",
+          });
+          setIsUploading(false);
+        }
+      },
+      null,
+      () => {
         Notification.Error({
-          msg: "Something went wrong!",
+          msg: "Network Failure. Please check your internet connectivity.",
         });
         setIsUploading(false);
       }
-    };
-    xhr.onerror = function () {
-      Notification.Error({
-        msg: "Network Failure. Please check your internet connectivity.",
-      });
-      setIsUploading(false);
-    };
-
-    xhr.send(formData);
+    );
 
     await sleep(1000);
     setIsUploading(false);
