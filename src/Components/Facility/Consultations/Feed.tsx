@@ -406,7 +406,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-4 px-3">
           <p className="block text-lg font-medium"> Camera Presets :</p>
-          <div className="flex items-center">
+          <div className="flex flex-wrap items-center">
             {bedPresets?.map((preset: any, index: number) => (
               <button
                 key={preset.id}
@@ -444,7 +444,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                   getCameraStatus({});
                 }}
                 className={classNames(
-                  "block border border-gray-500 px-4 py-2 first:rounded-l last:rounded-r",
+                  "w-30  block  h-14 border border-gray-500 px-4 py-2 first:rounded-l last:rounded-r",
                   currentPreset === preset
                     ? "border-primary-500 bg-primary-500 text-white"
                     : "bg-transparent",
@@ -457,7 +457,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         </div>
       </div>
       <div
-        className="relative flex aspect-video w-full grow-0 items-center justify-center overflow-hidden rounded-xl bg-black"
+        className="relative mt-2 flex aspect-video w-full grow-0 items-center justify-center overflow-hidden rounded-xl bg-black"
         ref={videoWrapper}
       >
         {isIOS ? (
