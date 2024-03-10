@@ -12,13 +12,12 @@ import {
   useMSEMediaPlayer,
 } from "../../../Common/hooks/useMSEplayer";
 import { PTZState, useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 
 import CareIcon, { IconName } from "../../../CAREUI/icons/CareIcon.js";
 import FeedButton from "./FeedButton";
 import Loading from "../../Common/Loading";
 import ReactPlayer from "react-player";
-import { classNames } from "../../../Utils/utils";
 import { useDispatch } from "react-redux";
 import { useHLSPLayer } from "../../../Common/hooks/useHLSPlayer";
 import useKeyboardShortcut from "use-keyboard-shortcut";
@@ -28,6 +27,8 @@ import useAuthUser from "../../../Common/hooks/useAuthUser.js";
 import Spinner from "../../Common/Spinner.js";
 import useQuery from "../../../Utils/request/useQuery.js";
 import { ResolvedMiddleware } from "../../Assets/AssetTypes.js";
+import { Popover, Transition } from "@headlessui/react";
+import ButtonV2 from "../../Common/components/ButtonV2.js";
 
 interface IFeedProps {
   facilityId: string;
@@ -404,55 +405,84 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   return (
     <div className="flex h-[calc(100vh-1.5rem)] flex-col px-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-4 px-3">
+        <div className="flex w-full items-center justify-between gap-4 px-3">
           <p className="block text-lg font-medium"> Camera Presets :</p>
-          <div className="flex flex-wrap items-center">
-            {bedPresets?.map((preset: any, index: number) => (
-              <button
-                key={preset.id}
-                onClick={() => {
-                  setLoading(CAMERA_STATES.MOVING.GENERIC);
-                  // gotoBedPreset(preset);
-                  absoluteMove(preset.meta.position, {
-                    onSuccess: () => {
-                      setLoading(CAMERA_STATES.IDLE);
-                      setCurrentPreset(preset);
-                      console.log(
-                        "onSuccess: Set Preset to " + preset?.meta?.preset_name,
-                      );
-                      triggerGoal("Camera Preset Clicked", {
-                        presetName: preset?.meta?.preset_name,
-                        consultationId,
-                        userId: authUser.id,
-                        result: "success",
-                      });
-                    },
-                    onError: () => {
-                      setLoading(CAMERA_STATES.IDLE);
-                      setCurrentPreset(preset);
-                      console.log(
-                        "onError: Set Preset to " + preset?.meta?.preset_name,
-                      );
-                      triggerGoal("Camera Preset Clicked", {
-                        presetName: preset?.meta?.preset_name,
-                        consultationId,
-                        userId: authUser.id,
-                        result: "error",
-                      });
-                    },
-                  });
-                  getCameraStatus({});
-                }}
-                className={classNames(
-                  "w-30  block  h-14 border border-gray-500 px-4 py-2 first:rounded-l last:rounded-r",
-                  currentPreset === preset
-                    ? "border-primary-500 bg-primary-500 text-white"
-                    : "bg-transparent",
-                )}
+          <div className="flex flex-wrap items-center bg-gray-100">
+            <Popover className="relative">
+              <Popover.Button>
+                <ButtonV2 variant="secondary" border>
+                  <CareIcon className="care-l-setting text-lg" />
+                  Presets
+                </ButtonV2>
+              </Popover.Button>
+              <Transition
+                as={Fragment}
+                enter="transition ease-out duration-200"
+                enterFrom="opacity-0 translate-y-1"
+                enterTo="opacity-100 translate-y-0"
+                leave="transition ease-in duration-150"
+                leaveFrom="opacity-100 translate-y-0"
+                leaveTo="opacity-0 translate-y-1"
               >
-                {preset.meta.preset_name || `Preset ${index + 1}`}
-              </button>
-            ))}
+                <Popover.Panel className="absolute z-30 mt-1 h-60 w-60 -translate-x-1/3 overflow-y-scroll px-4 sm:px-0 md:w-96 md:-translate-x-1/2 lg:max-w-3xl">
+                  <div className="rounded-lg shadow-lg ring-1 ring-gray-400">
+                    <div className="rounded-t-lg bg-gray-100 px-6 py-4">
+                      <span className="block text-sm text-gray-800">
+                        Camera(s) preset
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      {bedPresets?.map((preset: any, index: number) => (
+                        <ButtonV2
+                          key={preset.id}
+                          variant={
+                            currentPreset === "preset" ? "primary" : "secondary"
+                          }
+                          onClick={() => {
+                            setLoading(CAMERA_STATES.MOVING.GENERIC);
+                            // gotoBedPreset(preset);
+                            absoluteMove(preset.meta.position, {
+                              onSuccess: () => {
+                                setLoading(CAMERA_STATES.IDLE);
+                                setCurrentPreset(preset);
+                                console.log(
+                                  "onSuccess: Set Preset to " +
+                                    preset?.meta?.preset_name
+                                );
+                                triggerGoal("Camera Preset Clicked", {
+                                  presetName: preset?.meta?.preset_name,
+                                  consultationId,
+                                  userId: authUser.id,
+                                  result: "success",
+                                });
+                              },
+                              onError: () => {
+                                setLoading(CAMERA_STATES.IDLE);
+                                setCurrentPreset(preset);
+                                console.log(
+                                  "onError: Set Preset to " +
+                                    preset?.meta?.preset_name
+                                );
+                                triggerGoal("Camera Preset Clicked", {
+                                  presetName: preset?.meta?.preset_name,
+                                  consultationId,
+                                  userId: authUser.id,
+                                  result: "error",
+                                });
+                              },
+                            });
+                            getCameraStatus({});
+                          }}
+                          className="w-full"
+                        >
+                          {preset.meta.preset_name || `Preset ${index + 1}`}
+                        </ButtonV2>
+                      ))}
+                    </div>
+                  </div>
+                </Popover.Panel>
+              </Transition>
+            </Popover>
           </div>
         </div>
       </div>
