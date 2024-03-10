@@ -1,4 +1,3 @@
-import axios from "axios";
 import {
   ChangeEventHandler,
   useCallback,
@@ -107,19 +106,14 @@ const CoverImageEditModal = ({
     formData.append("cover_image", selectedFile);
 
     setIsUploading(true);
-    try {
-      const response = await axios.post(
-        `/api/v1/facility/${facility.id}/cover_image/`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization:
-              "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken),
-          },
-        }
-      );
-      if (response.status === 200) {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `/api/v1/facility/${facility.id}/cover_image/`);
+    xhr.setRequestHeader(
+      "Authorization",
+      "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken)
+    );
+    xhr.onload = function () {
+      if (xhr.status === 200) {
         Success({ msg: "Cover image updated." });
       } else {
         Notification.Error({
@@ -127,12 +121,15 @@ const CoverImageEditModal = ({
         });
         setIsUploading(false);
       }
-    } catch (e) {
+    };
+    xhr.onerror = function () {
       Notification.Error({
         msg: "Network Failure. Please check your internet connectivity.",
       });
       setIsUploading(false);
-    }
+    };
+
+    xhr.send(formData);
 
     await sleep(1000);
     setIsUploading(false);

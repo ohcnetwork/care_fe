@@ -1,5 +1,4 @@
 import { useEffect, useState, useReducer } from "react";
-import axios from "axios";
 import {
   SAMPLE_TEST_STATUS,
   SAMPLE_TEST_RESULT,
@@ -104,22 +103,19 @@ const UpdateStatusDialog = (props: Props) => {
     if (f === undefined) return;
     const newFile = new File([f], `${internal_name}`);
 
-    const config = {
-      headers: {
-        "Content-type": contentType,
-        "Content-disposition": "inline",
-      },
-      onUploadProgress: (progressEvent: any) => {
-        const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
-        );
-        setUploadPercent(percentCompleted);
-      },
-    };
+    const xhr = new XMLHttpRequest();
+    xhr.open("PUT", url);
+    xhr.setRequestHeader("Content-Type", contentType);
+    xhr.setRequestHeader("Content-disposition", "inline");
 
-    axios
-      .put(url, newFile, config)
-      .then(() => {
+    xhr.upload.onprogress = function (event: ProgressEvent) {
+      if (event.lengthComputable) {
+        const percentComplete = Math.round((event.loaded / event.total) * 100);
+        setUploadPercent(percentComplete);
+      }
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
         setUploadStarted(false);
         setUploadDone(true);
         request(routes.editUpload, {
@@ -130,10 +126,15 @@ const UpdateStatusDialog = (props: Props) => {
           },
           body: { upload_completed: true },
         });
-
         Notification.Success({ msg: "File Uploaded Successfully" });
-      })
-      .catch(() => setUploadStarted(false));
+      } else {
+        setUploadStarted(false);
+      }
+    };
+    xhr.onerror = () => {
+      setUploadStarted(false);
+    };
+    xhr.send(newFile);
   };
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

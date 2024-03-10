@@ -1,4 +1,3 @@
-import axios from "axios";
 import CircularProgress from "../Common/components/CircularProgress";
 import {
   useCallback,
@@ -937,25 +936,24 @@ export const FileUpload = (props: FileUploadProps) => {
     if (!f) return;
     const newFile = new File([f], `${internal_name}`);
 
-    const config = {
-      headers: {
-        "Content-type": file?.type,
-        "Content-disposition": "inline",
-      },
-      onUploadProgress: (progressEvent: any) => {
-        const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
-        );
-        setUploadPercent(percentCompleted);
-      },
-    };
-
     return new Promise<void>((resolve, reject) => {
-      axios
-        .put(url, newFile, config)
-        .then(() => {
+      console.log("I am here haha");
+      const xhr = new XMLHttpRequest();
+      xhr.open("PUT", url, true);
+      xhr.setRequestHeader("Content-Type", file?.type);
+
+      xhr.upload.onprogress = function (event: ProgressEvent) {
+        if (event.lengthComputable) {
+          const percentComplete = Math.round(
+            (event.loaded / event.total) * 100
+          );
+          setUploadPercent(percentComplete);
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
           setUploadStarted(false);
-          // setUploadSuccess(true);
           setFile(null);
           setUploadFileName("");
           fetchData();
@@ -964,14 +962,24 @@ export const FileUpload = (props: FileUploadProps) => {
           });
           setUploadFileError("");
           resolve();
-        })
-        .catch((e) => {
+        } else {
           Notification.Error({
-            msg: "Error Uploading File: " + e.message,
+            msg: "Error Uploading File: " + xhr.statusText,
           });
           setUploadStarted(false);
           reject();
+        }
+      };
+
+      xhr.onerror = () => {
+        Notification.Error({
+          msg: "Error Uploading File: Network Error",
         });
+        setUploadStarted(false);
+        reject();
+      };
+
+      xhr.send(newFile);
     });
   };
 
@@ -1049,22 +1057,20 @@ export const FileUpload = (props: FileUploadProps) => {
     const f = audioBlob;
     if (f === undefined) return;
     const newFile = new File([f], `${internal_name}`, { type: f.type });
-    const config = {
-      headers: {
-        "Content-type": newFile?.type,
-        "Content-disposition": "inline",
-      },
-      onUploadProgress: (progressEvent: any) => {
-        const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
-        );
-        setUploadPercent(percentCompleted);
-      },
-    };
 
-    axios
-      .put(url, newFile, config)
-      .then(() => {
+    const xhr = new XMLHttpRequest();
+
+    xhr.open("PUT", url, true);
+    xhr.setRequestHeader("Content-Type", newFile?.type);
+
+    xhr.upload.onprogress = function (event: ProgressEvent) {
+      if (event.lengthComputable) {
+        const percentComplete = Math.round((event.loaded / event.total) * 100);
+        setUploadPercent(percentComplete);
+      }
+    };
+    xhr.onload = function () {
+      if (xhr.status >= 200 && xhr.status < 300) {
         setAudioUploadStarted(false);
         // setUploadSuccess(true);
         setAudioName("");
@@ -1072,10 +1078,16 @@ export const FileUpload = (props: FileUploadProps) => {
         Notification.Success({
           msg: "File Uploaded Successfully",
         });
-      })
-      .catch(() => {
+      } else {
         setAudioUploadStarted(false);
-      });
+      }
+    };
+
+    xhr.onerror = function () {
+      setAudioUploadStarted(false);
+    };
+
+    xhr.send(newFile);
   };
 
   const validateAudioUpload = () => {
