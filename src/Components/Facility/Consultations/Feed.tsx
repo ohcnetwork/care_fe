@@ -12,7 +12,7 @@ import {
   useMSEMediaPlayer,
 } from "../../../Common/hooks/useMSEplayer";
 import { PTZState, useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 
 import CareIcon, { IconName } from "../../../CAREUI/icons/CareIcon.js";
 import FeedButton from "./FeedButton";
@@ -26,9 +26,7 @@ import { triggerGoal } from "../../../Integrations/Plausible.js";
 import useAuthUser from "../../../Common/hooks/useAuthUser.js";
 import Spinner from "../../Common/Spinner.js";
 import useQuery from "../../../Utils/request/useQuery.js";
-import { AssetBedModel, ResolvedMiddleware } from "../../Assets/AssetTypes.js";
-import { SelectFormField } from "../../Form/FormFields/SelectFormField.js";
-import AssetBedSelect from "../../CameraFeed/AssetBedSelect.js";
+import { ResolvedMiddleware } from "../../Assets/AssetTypes.js";
 
 interface IFeedProps {
   facilityId: string;
@@ -404,7 +402,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   return (
     <div className="flex h-[calc(100vh-1.5rem)] flex-col px-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="hidden w-full items-center justify-between gap-4 px-3 md:flex">
+        <div className="flex items-center gap-4 px-3">
           <p className="block text-lg font-medium"> Camera Presets :</p>
           <div className="flex flex-wrap items-center">
             {bedPresets?.map((preset: any, index: number) => (
@@ -412,41 +410,39 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                 key={preset.id}
                 onClick={() => {
                   setLoading(CAMERA_STATES.MOVING.GENERIC);
-                  absoluteMove(
-                    presetDetails.length > 0 && presetDetails[0].meta?.position,
-                    {
-                      onSuccess: () => {
-                        setLoading(CAMERA_STATES.IDLE);
-                        setCurrentPreset(presetDetails[0]);
-                        console.log(
-                          "onSuccess: Set Preset to " + selectedPreset.value
-                        );
-                        triggerGoal("Camera Preset Clicked", {
-                          presetName: selectedPreset.value,
-                          consultationId,
-                          userId: authUser.id,
-                          result: "success",
-                        });
-                      },
-                      onError: () => {
-                        setLoading(CAMERA_STATES.IDLE);
-                        setCurrentPreset(presetDetails[0]);
-                        console.log(
-                          "onError: Set Preset to " + selectedPreset.value
-                        );
-                        triggerGoal("Camera Preset Clicked", {
-                          presetName: selectedPreset.value,
-                          consultationId,
-                          userId: authUser.id,
-                          result: "error",
-                        });
-                      },
-                    }
-                  );
+                  // gotoBedPreset(preset);
+                  absoluteMove(preset.meta.position, {
+                    onSuccess: () => {
+                      setLoading(CAMERA_STATES.IDLE);
+                      setCurrentPreset(preset);
+                      console.log(
+                        "onSuccess: Set Preset to " + preset?.meta?.preset_name
+                      );
+                      triggerGoal("Camera Preset Clicked", {
+                        presetName: preset?.meta?.preset_name,
+                        consultationId,
+                        userId: authUser.id,
+                        result: "success",
+                      });
+                    },
+                    onError: () => {
+                      setLoading(CAMERA_STATES.IDLE);
+                      setCurrentPreset(preset);
+                      console.log(
+                        "onError: Set Preset to " + preset?.meta?.preset_name
+                      );
+                      triggerGoal("Camera Preset Clicked", {
+                        presetName: preset?.meta?.preset_name,
+                        consultationId,
+                        userId: authUser.id,
+                        result: "error",
+                      });
+                    },
+                  });
                   getCameraStatus({});
                 }}
                 className={classNames(
-                  "block border border-gray-500 px-4 py-2 first:rounded-l last:rounded-r",
+                  "w-30  block  h-14 border border-gray-500 px-4 py-2 first:rounded-l last:rounded-r",
                   currentPreset === preset
                     ? "border-primary-500 bg-primary-500 text-white"
                     : "bg-transparent"
