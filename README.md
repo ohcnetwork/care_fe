@@ -66,8 +66,7 @@ Authenticate to staging API with any of the following credentials
 #### Contributing to CARE
 
 - Create a branch from the latest [`develop`](https://github.com/coronasafe/care_fe/tree/develop) branch when starting to work on an issue.
-- Once the changes are pushed to the branch, make a pull request.
-- Ensure meaningful titles are given for the PR (example: "💊 Adds support for editing prescriptions" #6369)
+- Once the changes are pushed to the branch, make a pull request with a meaningful title (example: "💊 Adds support for editing prescriptions" #6369)
 - Ensure the issue number is mentioned in the PR with a closing tag by following the PR body template. (Refer: [Linking a pull request to an issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword))
 - Once the code review is done, the PR will be marked with a "Needs Testing" label where it'll be queued for QA testing.
 - Once tested, the PR would be marked with a "Tested" label and would be queued for merge.
