@@ -436,7 +436,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                         <ButtonV2
                           key={preset.id}
                           variant={
-                            currentPreset === "preset" ? "primary" : "secondary"
+                            currentPreset === preset ? "primary" : "secondary"
                           }
                           onClick={() => {
                             setLoading(CAMERA_STATES.MOVING.GENERIC);
