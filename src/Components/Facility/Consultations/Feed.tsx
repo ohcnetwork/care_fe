@@ -467,72 +467,58 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           </div>
         </div>
       </div>
-      <div>
-        <div className="z-100 flex  w-full  items-center justify-between  gap-1 bg-zinc-900 px-4 py-0.5 md:hidden md:gap-2">
-          <span className="text-xs font-semibold text-white md:text-sm">
-            Camera presets
-          </span>
-
-          <div className="w-64">
-            <AssetBedSelect
-              asset={bedPresets}
-              value={preset}
-              onChange={setPreset}
-            />
-          </div>
-        </div>
-        <div
-          className="relative  flex aspect-video w-full grow-0 flex-col items-center justify-center overflow-hidden rounded-b-xl bg-black"
-          ref={videoWrapper}
-        >
-          {isIOS ? (
-            <ReactPlayer
-              url={url}
-              ref={liveFeedPlayerRef.current as any}
-              controls={false}
-              playsinline={true}
-              playing={true}
-              muted={true}
-              onPlay={() => {
-                setVideoStartTime(() => new Date());
-              }}
-              width="100%"
-              height="100%"
-              onBuffer={() => {
-                const delay = calculateVideoLiveDelay();
-                if (delay > 5) {
-                  setStreamStatus(StreamStatus.Loading);
-                }
-              }}
-              onError={(e: any, _: any, hlsInstance: any) => {
-                if (e === "hlsError") {
-                  const recovered = hlsInstance.recoverMediaError();
-                  console.log(recovered);
-                }
-              }}
-              onEnded={() => {
-                setStreamStatus(StreamStatus.Stop);
-              }}
-            />
-          ) : (
-            <video
-              id="mse-video"
-              autoPlay
-              muted
-              playsInline
-              className="max-h-full max-w-full"
-              onPlay={() => {
-                setVideoStartTime(() => new Date());
-              }}
-              onWaiting={() => {
-                const delay = calculateVideoLiveDelay();
-                if (delay > 5) {
-                  setStreamStatus(StreamStatus.Loading);
-                }
-              }}
-              ref={liveFeedPlayerRef as any}
-            />
-          )}
+      <div
+        className="relative flex aspect-video w-full grow-0 items-center justify-center overflow-hidden rounded-xl bg-black"
+        ref={videoWrapper}
+      >
+        {isIOS ? (
+          <ReactPlayer
+            url={url}
+            ref={liveFeedPlayerRef.current as any}
+            controls={false}
+            playsinline={true}
+            playing={true}
+            muted={true}
+            onPlay={() => {
+              setVideoStartTime(() => new Date());
+            }}
+            width="100%"
+            height="100%"
+            onBuffer={() => {
+              const delay = calculateVideoLiveDelay();
+              if (delay > 5) {
+                setStreamStatus(StreamStatus.Loading);
+              }
+            }}
+            onError={(e: any, _: any, hlsInstance: any) => {
+              if (e === "hlsError") {
+                const recovered = hlsInstance.recoverMediaError();
+                console.log(recovered);
+              }
+            }}
+            onEnded={() => {
+              setStreamStatus(StreamStatus.Stop);
+            }}
+          />
+        ) : (
+          <video
+            id="mse-video"
+            autoPlay
+            muted
+            playsInline
+            className="max-h-full max-w-full"
+            onPlay={() => {
+              setVideoStartTime(() => new Date());
+            }}
+            onWaiting={() => {
+              const delay = calculateVideoLiveDelay();
+              if (delay > 5) {
+                setStreamStatus(StreamStatus.Loading);
+              }
+            }}
+            ref={liveFeedPlayerRef as any}
+          />
+        )}
 
           {loading !== CAMERA_STATES.IDLE && (
             <div className="absolute inset-x-0 top-2 flex items-center justify-center text-center">
