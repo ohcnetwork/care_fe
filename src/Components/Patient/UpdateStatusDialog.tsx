@@ -129,12 +129,7 @@ const UpdateStatusDialog = (props: Props) => {
           setUploadStarted(false);
         }
       },
-      (e: ProgressEvent) => {
-        if (e.lengthComputable) {
-          const percentComplete = Math.round((e.loaded / e.total) * 100);
-          setUploadPercent(percentComplete);
-        }
-      },
+      setUploadPercent,
       () => {
         setUploadStarted(false);
       }

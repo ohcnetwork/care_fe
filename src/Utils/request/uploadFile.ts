@@ -1,10 +1,13 @@
+import { Dispatch, SetStateAction } from "react";
+import { handleUploadPercentage } from "./utils";
+
 const uploadFile = (
   url: string,
   file: File | FormData,
   reqMethod: string,
   headers: object,
   onLoad: (xhr: XMLHttpRequest) => void,
-  onProgress: ((event: ProgressEvent) => void) | null,
+  setUploadPercent: Dispatch<SetStateAction<number>> | null,
   onError: () => void
 ) => {
   const xhr = new XMLHttpRequest();
@@ -18,9 +21,9 @@ const uploadFile = (
     onLoad(xhr);
   };
 
-  if (onProgress !== null) {
+  if (setUploadPercent != null) {
     xhr.upload.onprogress = (event: ProgressEvent) => {
-      onProgress(event);
+      handleUploadPercentage(event, setUploadPercent);
     };
   }
 
