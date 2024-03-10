@@ -225,7 +225,8 @@ export const BedManagement = (props: BedManagementProps) => {
             Add New Bed(s)
           </ButtonV2>
         </div>
+        {bed}
       </div>
     </Page>
   );
-}  
+};
