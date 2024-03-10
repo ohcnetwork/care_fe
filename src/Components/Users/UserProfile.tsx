@@ -5,7 +5,12 @@ import * as Notification from "../../Utils/Notifications.js";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
 import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
-import { classNames, isValidUrl, parsePhoneNumber } from "../../Utils/utils";
+import {
+  classNames,
+  dateQueryString,
+  isValidUrl,
+  parsePhoneNumber,
+} from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
@@ -190,10 +195,11 @@ export default function UserProfile() {
           return;
         case "date_of_birth":
           if (!states.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = "Enter a valid date of birth";
             invalidForm = true;
           } else if (
-            dayjs(states.form[field]).isAfter(dayjs().subtract(1, "year"))
+            !dayjs(states.form[field]).isValid() ||
+            dayjs(states.form[field]).isAfter(dayjs().subtract(17, "year"))
           ) {
             errors[field] = "Enter a valid date of birth";
             invalidForm = true;
@@ -294,17 +300,6 @@ export default function UserProfile() {
       form: { ...states.form, [event.name]: event.value },
     });
   };
-  const handleDateChange = (e: FieldChangeEvent<Date>) => {
-    if (dayjs(e.value).isValid()) {
-      dispatch({
-        type: "set_form",
-        form: {
-          ...states.form,
-          [e.name]: dayjs(e.value).format("YYYY-MM-DD"),
-        },
-      });
-    }
-  };
 
   const getDate = (value: any) =>
     value && dayjs(value).isValid() && dayjs(value).toDate();
@@ -332,7 +327,7 @@ export default function UserProfile() {
         phone_number: parsePhoneNumber(states.form.phoneNumber) ?? "",
         alt_phone_number: parsePhoneNumber(states.form.altPhoneNumber) ?? "",
         gender: states.form.gender,
-        date_of_birth: states.form.date_of_birth,
+        date_of_birth: dateQueryString(states.form.date_of_birth),
         doctor_qualification:
           states.form.user_type === "Doctor"
             ? states.form.doctor_qualification
@@ -531,7 +526,10 @@ export default function UserProfile() {
                       {userData?.last_name || "-"}
                     </dd>
                   </div>
-                  <div className="my-2  sm:col-span-1" id="age-profile-details">
+                  <div
+                    className="my-2  sm:col-span-1"
+                    id="date_of_birth-profile-details"
+                  >
                     <dt className="text-sm font-medium leading-5 text-black">
                       Date of Birth
                     </dt>
@@ -663,10 +661,8 @@ export default function UserProfile() {
                         <DateFormField
                           {...fieldProps("date_of_birth")}
                           label="Date of Birth"
-                          required
                           className="col-span-6 sm:col-span-3"
                           value={getDate(states.form.date_of_birth)}
-                          onChange={handleDateChange}
                           position="LEFT"
                           disableFuture={true}
                         />
