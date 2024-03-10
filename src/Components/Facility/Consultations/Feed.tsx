@@ -448,9 +448,71 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                     : "bg-transparent"
                 )}
               >
+<<<<<<< HEAD
                 {preset.meta.preset_name || `Preset ${index + 1}`}
               </button>
             ))}
+=======
+                <Popover.Panel className="absolute z-30 mt-1 h-60 w-60 -translate-x-1/3 overflow-y-scroll px-4 sm:px-0 md:w-96 md:-translate-x-1/2 lg:max-w-3xl">
+                  <div className="rounded-lg shadow-lg ring-1 ring-gray-400">
+                    <div className="rounded-t-lg bg-gray-100 px-6 py-4">
+                      <span className="block text-sm text-gray-800">
+                        Camera(s) preset
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      {bedPresets?.map((preset: any, index: number) => (
+                        <ButtonV2
+                          key={preset.id}
+                          variant={
+                            currentPreset === preset ? "primary" : "secondary"
+                          }
+                          onClick={() => {
+                            setLoading(CAMERA_STATES.MOVING.GENERIC);
+                            // gotoBedPreset(preset);
+                            absoluteMove(preset.meta.position, {
+                              onSuccess: () => {
+                                setLoading(CAMERA_STATES.IDLE);
+                                setCurrentPreset(preset);
+                                console.log(
+                                  "onSuccess: Set Preset to " +
+                                    preset?.meta?.preset_name
+                                );
+                                triggerGoal("Camera Preset Clicked", {
+                                  presetName: preset?.meta?.preset_name,
+                                  consultationId,
+                                  userId: authUser.id,
+                                  result: "success",
+                                });
+                              },
+                              onError: () => {
+                                setLoading(CAMERA_STATES.IDLE);
+                                setCurrentPreset(preset);
+                                console.log(
+                                  "onError: Set Preset to " +
+                                    preset?.meta?.preset_name
+                                );
+                                triggerGoal("Camera Preset Clicked", {
+                                  presetName: preset?.meta?.preset_name,
+                                  consultationId,
+                                  userId: authUser.id,
+                                  result: "error",
+                                });
+                              },
+                            });
+                            getCameraStatus({});
+                          }}
+                          className="w-full"
+                        >
+                          {preset.meta.preset_name || `Preset ${index + 1}`}
+                        </ButtonV2>
+                      ))}
+                    </div>
+                  </div>
+                </Popover.Panel>
+              </Transition>
+            </Popover>
+>>>>>>> 82bdecd0 (preset fixes)
           </div>
         </div>
       </div>
