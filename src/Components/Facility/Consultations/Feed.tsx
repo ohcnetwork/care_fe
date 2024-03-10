@@ -461,7 +461,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         </div>
       </div>
       <div
-        className="relative flex h-[calc(100vh-1.5rem-90px)] grow-0 items-center justify-center overflow-hidden rounded-xl bg-black"
+        className="relative flex aspect-video w-full grow-0 items-center justify-center overflow-hidden rounded-xl bg-black"
         ref={videoWrapper}
       >
         {isIOS ? (
