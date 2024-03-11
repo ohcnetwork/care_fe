@@ -41,7 +41,7 @@ export default function DailyRoundsList({ consultation }: Props) {
             />
           </div>
 
-          <div className="-mt-2 flex max-h-[100vh] min-h-full w-full flex-col gap-4">
+          <div className="flex max-h-[100vh] min-h-full w-full flex-col gap-4">
             <div className="flex flex-col gap-4 overflow-y-auto overflow-x-hidden px-3">
               <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-gray-200 bg-white p-5 text-center text-2xl font-bold text-gray-500">
                 <span className="flex justify-center rounded-lg bg-white p-3 text-gray-700  ">
