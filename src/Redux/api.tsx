@@ -68,7 +68,7 @@ import {
   StateModel,
   WardModel,
 } from "../Components/Facility/models";
-import { Prescription } from "../Components/Medicine/models";
+import { MedibaseMedicine, Prescription } from "../Components/Medicine/models";
 import {
   NotificationData,
   PNconfigData,
@@ -1119,6 +1119,7 @@ const routes = {
   // Medibase
   listMedibaseMedicines: {
     path: "/api/v1/medibase/",
+    TRes: Type<MedibaseMedicine[]>(),
   },
 
   // Resource

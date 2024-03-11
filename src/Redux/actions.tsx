@@ -1,5 +1,4 @@
 import { HCXClaimModel, HCXPolicyModel } from "../Components/HCX/models";
-import { MedibaseMedicine } from "../Components/Medicine/models";
 import { fireRequest } from "./fireRequest";
 
 // Facility
@@ -202,18 +201,6 @@ export const editInvestigation = (
   return fireRequest("editInvestigation", [], params, {
     consultation_external_id: consultation_external_id,
   });
-};
-
-// ICD11
-export const listICD11Diagnosis = (params: object) => {
-  return fireRequest("listICD11Diagnosis", [], params, null);
-};
-// Medibase
-export const listMedibaseMedicines = (
-  query: string,
-  type?: MedibaseMedicine["type"]
-) => {
-  return fireRequest("listMedibaseMedicines", [], { query, type });
 };
 
 // Resource
