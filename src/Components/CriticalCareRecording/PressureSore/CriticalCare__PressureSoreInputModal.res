@@ -50,11 +50,101 @@ let make = (
   }
 
   let handleClickOutside = %raw(`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     function (event, ref, hideModal) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       if (ref.current && !ref.current.contains(event.target)) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         hideModal(event)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   `)
 
   let getModalPosition = React.useMemo(() => {
@@ -98,86 +188,132 @@ let make = (
                   {str(PressureSore.regionToString(state.region))}
                 </span>
               </div>
-              <div className="flex flex-col sm:flex-row justify-center mt-2">
-                <div className="w-full">
-                  <label className="block font-medium text-black text-left"> {str("Width")} </label>
-                  <input
-                    type_="number"
-                    value={state.width->Belt.Float.toString}
-                    step={0.1}
-                    placeholder="Width (cm)"
-                    className="cui-input-base px-2 py-1"
-                    disabled={previewMode}
-                    onChange={e => {
-                      let value = ReactEvent.Form.target(e)["value"]->Belt.Float.fromString
-                      switch value {
-                      | Some(value) => setState(prev => {...prev, width: value})
-                      | None => setState(prev => {...prev, width: 0.0})
-                      }
-                    }}
-                  />
-                </div>
-                <div>
-                  <label className="block font-medium text-black text-left">
-                    {str("Height")}
-                  </label>
-                  <input
-                    type_="number"
-                    value={state.length->Belt.Float.toString}
-                    step={0.1}
-                    placeholder="Length (cm)"
-                    className="cui-input-base px-2 py-1"
-                    disabled={previewMode}
-                    onChange={e => {
-                      let value = ReactEvent.Form.target(e)["value"]->Belt.Float.fromString
-                      switch value {
-                      | Some(value) => setState(prev => {...prev, length: value})
-                      | None => setState(prev => {...prev, length: 0.0})
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-2 mt-2">
-                <CriticalCare__Dropdown
-                  id="exudate-amount"
-                  label="Exudate amount"
-                  value={state.exudate_amount->PressureSore.encodeExudateAmount}
-                  updateCB={value =>
-                    setState(prev => {
-                      ...prev,
-                      exudate_amount: value->PressureSore.decodeExtrudateAmount,
-                    })}
-                  placeholder="Exudate amount"
-                  selectables=["None", "Light", "Moderate", "Heavy"]
-                  disabled={previewMode}
-                />
-                <CriticalCare__Dropdown
-                  id="tissue-type"
-                  label="Tissue type"
-                  value={state.tissue_type->PressureSore.encodeTissueType}
-                  updateCB={value =>
-                    setState(prev => {...prev, tissue_type: value->PressureSore.decodeTissueType})}
-                  placeholder="Tissue type"
-                  selectables=["Closed", "Epithelial", "Granulation", "Slough", "Necrotic"]
-                  disabled={previewMode}
-                />
-              </div>
-              <div className="mt-2">
-                <label className="block font-medium text-black text-left">
-                  {str("Description")}
-                </label>
-                <textarea
-                  placeholder="Description"
-                  value={state.description}
-                  onChange={e => {
-                    let value = ReactEvent.Form.target(e)["value"]
-                    setState(prev => {...prev, description: value})
-                  }}
-                  className="cui-input-base px-2 py-1"
-                  disabled={previewMode}
-                />
-              </div>
+              {!previewMode
+                ? <>
+                    <div className="flex flex-col sm:flex-row justify-center mt-2">
+                      <div className="w-full">
+                        <label className="block font-medium text-black text-left">
+                          {str("Width")}
+                        </label>
+                        <input
+                          type_="number"
+                          value={state.width->Belt.Float.toString}
+                          step={0.1}
+                          placeholder="Width (cm)"
+                          className="cui-input-base px-2 py-1"
+                          disabled={previewMode}
+                          onChange={e => {
+                            let value = ReactEvent.Form.target(e)["value"]->Belt.Float.fromString
+                            switch value {
+                            | Some(value) => setState(prev => {...prev, width: value})
+                            | None => setState(prev => {...prev, width: 0.0})
+                            }
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-medium text-black text-left">
+                          {str("Height")}
+                        </label>
+                        <input
+                          type_="number"
+                          value={state.length->Belt.Float.toString}
+                          step={0.1}
+                          placeholder="Length (cm)"
+                          className="cui-input-base px-2 py-1"
+                          disabled={previewMode}
+                          onChange={e => {
+                            let value = ReactEvent.Form.target(e)["value"]->Belt.Float.fromString
+                            switch value {
+                            | Some(value) => setState(prev => {...prev, length: value})
+                            | None => setState(prev => {...prev, length: 0.0})
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-2 mt-2">
+                      <CriticalCare__Dropdown
+                        id="exudate-amount"
+                        label="Exudate amount"
+                        value={state.exudate_amount->PressureSore.encodeExudateAmount}
+                        updateCB={value =>
+                          setState(prev => {
+                            ...prev,
+                            exudate_amount: value->PressureSore.decodeExtrudateAmount,
+                          })}
+                        placeholder="Exudate amount"
+                        selectables=["None", "Light", "Moderate", "Heavy"]
+                        disabled={previewMode}
+                      />
+                      <CriticalCare__Dropdown
+                        id="tissue-type"
+                        label="Tissue type"
+                        value={state.tissue_type->PressureSore.encodeTissueType}
+                        updateCB={value =>
+                          setState(prev => {
+                            ...prev,
+                            tissue_type: value->PressureSore.decodeTissueType,
+                          })}
+                        placeholder="Tissue type"
+                        selectables=["Closed", "Epithelial", "Granulation", "Slough", "Necrotic"]
+                        disabled={previewMode}
+                      />
+                    </div>
+                    <div className="mt-2">
+                      <label className="block font-medium text-black text-left">
+                        {str("Description")}
+                      </label>
+                      <textarea
+                        placeholder="Description"
+                        value={state.description}
+                        onChange={e => {
+                          let value = ReactEvent.Form.target(e)["value"]
+                          setState(prev => {...prev, description: value})
+                        }}
+                        className="cui-input-base px-2 py-1"
+                        disabled={previewMode}
+                      />
+                    </div>
+                  </>
+                : <>
+                    <div>
+                      <div className="grid grid-cols-2 items-center gap-4 justify-around mt-4">
+                        <div className="flex flex-col items-center text-center">
+                          <div className="text-black font-bold text-xl">
+                            {str(state.width->Belt.Float.toString)}
+                          </div>
+                          <div className="text-sm text-gray-700"> {str("Width")} </div>
+                        </div>
+                        <div className="flex flex-col items-center text-center">
+                          <div className="text-black font-bold text-xl">
+                            {str(state.length->Belt.Float.toString)}
+                          </div>
+                          <div className="text-sm text-gray-700"> {str("Length")} </div>
+                        </div>
+                        <div className="flex flex-col items-center text-center">
+                          <div className="text-black font-bold text-xl">
+                            {str(state.exudate_amount->PressureSore.encodeExudateAmount)}
+                          </div>
+                          <div className="text-sm text-gray-700"> {str("Exudate Amount")} </div>
+                        </div>
+                        <div className="flex flex-col items-center text-center">
+                          <div className="text-black font-bold text-xl">
+                            {str(state.tissue_type->PressureSore.encodeTissueType)}
+                          </div>
+                          <div className="text-sm text-gray-700"> {str("Tissue Type")} </div>
+                        </div>
+                      </div>
+                    </div>
+                    {state.description !== ""
+                      ? <div className="mt-4">
+                          <label className="block text-sm text-gray-700 text-left">
+                            {str("Description")}
+                          </label>
+                          <div className="text-black"> {str(state.description)} </div>
+                        </div>
+                      : React.null}
+                  </>}
             </div>
           </div>
         </div>
@@ -200,7 +336,7 @@ let make = (
               type_="button"
               onClick={hideModal}
               className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-              {str("Cancel")}
+              {str(!previewMode ? "Cancel" : "Close")}
             </button>
           </div>
         </div>
