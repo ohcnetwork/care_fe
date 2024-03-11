@@ -28,7 +28,6 @@ const Comment = ({
   const toggleExpanded = () => {
     setExpanded(!expanded);
   };
-
   const truncatedComment = comment.split(" ").slice(0, 20).join(" ");
   const remainingComment = comment.split(" ").slice(20).join(" ");
 
