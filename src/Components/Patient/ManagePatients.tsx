@@ -799,6 +799,7 @@ export const PatientManager = () => {
                           });
                         }, 500);
                       }}
+                      // fixed issue
                       className="mr-5 w-full lg:w-fit"
                     >
                       <CareIcon className="care-l-export" />
