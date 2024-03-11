@@ -63,13 +63,11 @@ export class UserPage {
   }
 
   selectState(state: string) {
-    cy.get("#state input").click().type(state);
-    cy.get("[role='option']").contains(state).click();
+    cy.searchAndSelectOption("#state", state);
   }
 
   selectDistrict(district: string) {
-    cy.get("#district input").click().type(district);
-    cy.get("[role='option']").contains(district).click();
+    cy.searchAndSelectOption("#district", district);
   }
 
   typeInPhoneNumber(phone: string) {
