@@ -415,14 +415,14 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               options={bedPresets?.map((preset: any) => preset)}
               optionLabel={(preset: any) => preset?.meta?.preset_name}
               optionValue={(preset: any) => preset}
-              placeholder={currentPreset?.value?.meta?.preset_name as string}
+              value={currentPreset}
               onChange={(preset: any) => {
                 setLoading(CAMERA_STATES.MOVING.GENERIC);
                 absoluteMove(preset?.value?.meta?.position, {
                   onSuccess: () => {
                     setLoading(CAMERA_STATES.IDLE);
                     setCurrentPreset(preset);
-                    console.log(preset);
+
                     console.log(
                       "onSuccess: Set Preset to " +
                         preset?.value?.meta?.preset_name
