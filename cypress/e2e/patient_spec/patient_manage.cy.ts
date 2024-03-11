@@ -49,9 +49,9 @@ describe("Patient", () => {
     patientPage.visitPatient("Dummy Patient 4");
     patientPrescription.visitEditPrescriptionPage();
     patientPrescription.clickAddPrescription();
-    patientPrescription.interceptMediaBase();
+    patientPrescription.interceptMedibase();
     patientPrescription.selectMedicinebox();
-    patientPrescription.waitForMediabaseStatusCode();
+    patientPrescription.waitForMedibaseStatusCode();
     patientPrescription.selectMedicine("DOLO");
     patientPrescription.enterDosage("4");
     patientPrescription.selectDosageFrequency("Twice daily");
