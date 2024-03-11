@@ -774,64 +774,65 @@ export const PatientManager = () => {
                 <p className="lg:my-[2px]">Doctor Connect</p>
               </ButtonV2>
             )}
-
-            <AdvancedFilterButton
-              onClick={() => advancedFilter.setShow(true)}
-            />
-            <div className="flex ">
-              <SortDropdownMenu
-                options={PATIENT_SORT_OPTIONS}
-                selected={qParams.ordering}
-                onSelect={updateQuery}
+            <div className="vs:block sm:flex md:flex">
+              <AdvancedFilterButton
+                onClick={() => advancedFilter.setShow(true)}
               />
-              <div className="tooltip  ml-4">
-                {!isExportAllowed ? (
-                  <ButtonV2
-                    onClick={() => {
-                      advancedFilter.setShow(true);
-                      setTimeout(() => {
-                        const element =
-                          document.getElementById("bed-type-select");
-                        if (element)
-                          element.scrollIntoView({ behavior: "smooth" });
-                        Notification.Warn({
-                          msg: "Please select a seven day period.",
-                        });
-                      }, 500);
-                    }}
-                    className="mr-5 w-full lg:w-fit"
-                  >
-                    <CareIcon className="care-l-export" />
-                    <span className="my-[3px] sm:my-0 md:my-0 lg:my-[3px]">
-                      Export
-                    </span>
-                  </ButtonV2>
-                ) : (
-                  <ExportMenu
-                    disabled={!isExportAllowed}
-                    exportItems={[
-                      {
-                        label:
-                          tabValue === 0
-                            ? "Live patients"
-                            : "Discharged patients",
-                        action: exportPatients(true),
-                        parse: preventDuplicatePatientsDuetoPolicyId,
-                      },
-                      {
-                        label: "All patients",
-                        action: exportPatients(false),
-                        parse: preventDuplicatePatientsDuetoPolicyId,
-                      },
-                    ]}
-                  />
-                )}
+              <div className="flex vs:mt-4 sm:ml-4 sm:mt-0 lg:mt-0">
+                <SortDropdownMenu
+                  options={PATIENT_SORT_OPTIONS}
+                  selected={qParams.ordering}
+                  onSelect={updateQuery}
+                />
+                <div className="tooltip  ml-4">
+                  {!isExportAllowed ? (
+                    <ButtonV2
+                      onClick={() => {
+                        advancedFilter.setShow(true);
+                        setTimeout(() => {
+                          const element =
+                            document.getElementById("bed-type-select");
+                          if (element)
+                            element.scrollIntoView({ behavior: "smooth" });
+                          Notification.Warn({
+                            msg: "Please select a seven day period.",
+                          });
+                        }, 500);
+                      }}
+                      className="mr-5 w-full lg:w-fit"
+                    >
+                      <CareIcon className="care-l-export" />
+                      <span className="my-[3px] sm:my-0 md:my-0 lg:my-[3px]">
+                        Export
+                      </span>
+                    </ButtonV2>
+                  ) : (
+                    <ExportMenu
+                      disabled={!isExportAllowed}
+                      exportItems={[
+                        {
+                          label:
+                            tabValue === 0
+                              ? "Live patients"
+                              : "Discharged patients",
+                          action: exportPatients(true),
+                          parse: preventDuplicatePatientsDuetoPolicyId,
+                        },
+                        {
+                          label: "All patients",
+                          action: exportPatients(false),
+                          parse: preventDuplicatePatientsDuetoPolicyId,
+                        },
+                      ]}
+                    />
+                  )}
 
-                {!isExportAllowed && (
-                  <span className="tooltip-text tooltip-bottom -translate-x-1/2">
-                    Select a seven day period
-                  </span>
-                )}
+                  {!isExportAllowed && (
+                    <span className="tooltip-text tooltip-bottom -translate-x-1/2">
+                      Select a seven day period
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
