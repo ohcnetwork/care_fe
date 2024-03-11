@@ -98,7 +98,7 @@ let make = (
                   {str(PressureSore.regionToString(state.region))}
                 </span>
               </div>
-              <div className="flex flex-col sm:flex-row justify-center mt-2">
+              <div className="flex flex-col sm:flex-row justify-center mt-2 grid grid-cols-2 gap-2">
                 <div className="w-full">
                   <label className="block font-medium text-black text-left"> {str("Width")} </label>
                   <input
