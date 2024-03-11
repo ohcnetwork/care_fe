@@ -133,32 +133,30 @@ const BedTimelineAsset = ({
 
   return (
     <div className="flex flex-col">
-      <div className="flex flex-col">
-        {newlyLinkedAssets.length !== 0 && (
-          <ul className="text-sm text-gray-600">Newly Linked Assets</ul>
-        )}
-        {newlyLinkedAssets.map((asset) => (
-          <li key={asset.id} className="list-disc text-xs text-gray-600">
-            {asset.name}
-          </li>
-        ))}
-        {existingAssets.length !== 0 && (
-          <ul className="text-sm text-gray-600">Existing Assets</ul>
-        )}
-        {existingAssets.map((asset) => (
-          <li key={asset.id} className="list-disc text-xs text-gray-600">
-            {asset.name}
-          </li>
-        ))}
-        {unlinkedAssets.length !== 0 && (
-          <ul className="text-sm text-gray-600">Unlinked Assets</ul>
-        )}
-        {unlinkedAssets.map((asset) => (
-          <li key={asset.id} className="list-disc text-xs text-gray-600">
-            {asset.name}
-          </li>
-        ))}
-      </div>
+      {newlyLinkedAssets.length !== 0 && (
+        <ul className="text-sm text-gray-600">Newly Linked Assets</ul>
+      )}
+      {newlyLinkedAssets.map((asset) => (
+        <li key={asset.id} className="list-disc text-xs text-gray-600">
+          {asset.name}
+        </li>
+      ))}
+      {existingAssets.length !== 0 && (
+        <ul className="text-sm text-gray-600">Existing Assets</ul>
+      )}
+      {existingAssets.map((asset) => (
+        <li key={asset.id} className="list-disc text-xs text-gray-600">
+          {asset.name}
+        </li>
+      ))}
+      {unlinkedAssets.length !== 0 && (
+        <ul className="text-sm text-gray-600">Unlinked Assets</ul>
+      )}
+      {unlinkedAssets.map((asset) => (
+        <li key={asset.id} className="list-disc text-xs text-gray-600">
+          {asset.name}
+        </li>
+      ))}
     </div>
   );
 };
