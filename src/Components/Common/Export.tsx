@@ -78,7 +78,7 @@ export const ExportButton = ({
         onClick={() =>
           exportFile(props.action, props.filenamePrefix, type, parse)
         }
-        className="tooltip mx-2  text-lg text-secondary-800 disabled:bg-transparent disabled:text-secondary-500"
+        className="tooltip mx-2 text-lg text-secondary-800 disabled:bg-transparent disabled:text-secondary-500"
         variant="secondary"
         ghost
         circle
