@@ -103,7 +103,7 @@ export const PatientManager = () => {
   });
   const authUser = useAuthUser();
   const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
-  const [showDialog, setShowDialog] = useState(false);
+  const [showDialog, setShowDialog] = useState<"create" | "list-discharged">();
   const [showDoctors, setShowDoctors] = useState(false);
   const [showDoctorConnect, setShowDoctorConnect] = useState(false);
   const [phone_number, setPhoneNumber] = useState("");
@@ -743,7 +743,7 @@ export const PatientManager = () => {
                   navigate(`/facility/${qParams.facility}/patient`);
                 else if (onlyAccessibleFacility)
                   navigate(`/facility/${onlyAccessibleFacility.id}/patient`);
-                else setShowDialog(true);
+                else setShowDialog("create");
               }}
               className="w-full lg:w-fit"
             >
@@ -754,40 +754,30 @@ export const PatientManager = () => {
             </ButtonV2>
           </div>
           <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
-            {(authUser.user_type === "StateAdmin" ||
-              authUser.user_type === "StateReadOnlyAdmin" ||
-              permittedFacilities?.count === 1 ||
-              qParams.facility) && (
-              <SwitchTabs
-                tab1="Live"
-                tab2="Discharged"
-                onClickTab1={() => updateQuery({ is_active: "True" })}
-                onClickTab2={() => {
-                  if (qParams.facility) {
-                    navigate(
-                      `facility/${qParams.facility}/discharged-patients`
-                    );
-                    return;
-                  }
+            <SwitchTabs
+              tab1="Live"
+              tab2="Discharged"
+              onClickTab1={() => updateQuery({ is_active: "True" })}
+              onClickTab2={() => {
+                // Navigate to dedicated discharged list page if filtered by a facility or user has access only to one facility.
+                const id = qParams.facility || onlyAccessibleFacility?.id;
+                if (id) {
+                  navigate(`facility/${id}/discharged-patients`);
+                  return;
+                }
 
-                  if (onlyAccessibleFacility) {
-                    navigate(
-                      `facility/${onlyAccessibleFacility.id}/discharged-patients`
-                    );
-                    return;
-                  }
+                if (
+                  authUser.user_type === "StateAdmin" ||
+                  authUser.user_type === "StateReadOnlyAdmin"
+                ) {
+                  updateQuery({ is_active: "False" });
+                  return;
+                }
 
-                  if (
-                    authUser.user_type === "StateAdmin" ||
-                    authUser.user_type === "StateReadOnlyAdmin"
-                  ) {
-                    updateQuery({ is_active: "False" });
-                    return;
-                  }
-                }}
-                isTab2Active={tabValue ? true : false}
-              />
-            )}
+                setShowDialog("list-discharged");
+              }}
+              isTab2Active={!!tabValue}
+            />
             {showDoctorConnect && (
               <ButtonV2
                 id="doctor-connect-patient-button"
@@ -865,12 +855,21 @@ export const PatientManager = () => {
       }
     >
       <FacilitiesSelectDialogue
-        show={showDialog}
+        show={!!showDialog}
         setSelected={(e) => setSelectedFacility(e)}
         selectedFacility={selectedFacility}
-        handleOk={() => navigate(`facility/${selectedFacility.id}/patient`)}
+        handleOk={() => {
+          switch (showDialog) {
+            case "create":
+              navigate(`facility/${selectedFacility.id}/patient`);
+              break;
+            case "list-discharged":
+              navigate(`facility/${selectedFacility.id}/discharged-patients`);
+              break;
+          }
+        }}
         handleCancel={() => {
-          setShowDialog(false);
+          setShowDialog(undefined);
           setSelectedFacility({ name: "" });
         }}
       />

@@ -35,7 +35,7 @@ const DischargedPatientsList = ({
       options={
         <>
           <SearchInput
-            className="mr-4 w-full max-w-md"
+            className="mr-4 w-full max-w-sm"
             placeholder="Search by patient name"
             name="name"
             value={search.name}
@@ -45,12 +45,7 @@ const DischargedPatientsList = ({
             tab1="Live"
             tab2="Discharged"
             className="mr-4"
-            onClickTab1={() =>
-              navigate(`/patients?facility=${facility_external_id}`)
-            }
-            onClickTab2={() => {
-              // Voluntarily doing nothing since we are already in the dedicated discharged patients list page...
-            }}
+            onClickTab1={() => navigate("/patients")}
             isTab2Active
           />
         </>
