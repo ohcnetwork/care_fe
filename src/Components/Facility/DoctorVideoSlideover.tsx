@@ -6,7 +6,6 @@ import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
 import { relativeTime } from "../../Utils/utils";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { triggerGoal } from "../../Integrations/Plausible";
-import Chip from "../../CAREUI/display/Chip";
 import Switch from "../../CAREUI/interactive/Switch";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
@@ -72,7 +71,7 @@ export default function DoctorVideoSlideover(props: {
       open={show}
       setOpen={setShow}
       title="Doctor Connect"
-      dialogClass="md:w-[400px]"
+      dialogClass="md:w-[450px]"
     >
       {/* Title and close button */}
       <p className="-mt-3 pb-4 text-sm text-gray-600">
@@ -117,7 +116,6 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
   const facilityId = props.facilityId;
   const icon: IconName =
     user.user_type === "Doctor" ? "l-user-md" : "l-user-nurse";
-  const authUser = useAuthUser();
 
   return (
     <li
@@ -157,20 +155,20 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
             )
           }
         </div>
-        <div className="ml-4 flex-auto">
-          <p className="flex justify-between gap-2 text-sm font-medium text-gray-700">
+        <div className="ml-4 flex flex-auto flex-col gap-1">
+          <div className="flex justify-between gap-2 text-sm font-medium text-gray-700">
             <span>
               {user.first_name} {user.last_name}
-            </span>
-            <Chip
-              text={
-                isHomeUser(user, facilityId)
+              <span className="pl-1 font-normal text-gray-700">
+                (
+                {isHomeUser(user, facilityId)
                   ? user.user_type
-                  : `TeleICU Hub ${user.user_type}`
-              }
-              size="small"
-            />
-          </p>
+                  : `TeleICU Hub ${user.user_type}`}
+                )
+              </span>
+            </span>
+            <DoctorConnectButtons user={user} />
+          </div>
           {!!user.skills.length && (
             <div className="mt-1 text-sm leading-5 text-gray-900">
               <div className="flex flex-wrap gap-2">
@@ -185,99 +183,104 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
               </div>
             </div>
           )}
-          <p className="mt-1.5 flex gap-2 text-sm text-gray-500">
-            <a
-              role="button"
-              href="#"
-              onClick={async () =>
-                await navigator.clipboard.writeText(
-                  user?.alt_phone_number || ""
-                )
-              }
-            >
-              <span className="tooltip">
-                <span className="tooltip-text tooltip-top">
-                  Copy Phone number
+          <div className="flex justify-between gap-2 text-sm text-gray-500">
+            <div className="flex items-center gap-1">
+              <a
+                role="button"
+                href="#"
+                onClick={async () =>
+                  await navigator.clipboard.writeText(
+                    user?.alt_phone_number || ""
+                  )
+                }
+              >
+                <span className="tooltip">
+                  <span className="tooltip-text tooltip-top">
+                    Copy Phone number
+                  </span>
+                  <CareIcon className="care-l-clipboard h-5 w-5" />
                 </span>
-                <CareIcon className="care-l-clipboard h-5 w-5" />
-              </span>
-            </a>
-            <span>{user.alt_phone_number}</span>
-          </p>
-          <div className="mt-1.5 flex justify-between gap-2 text-sm text-gray-500">
-            <div className="flex gap-2">
-              {user.video_connect_link && (
-                <a
-                  href={user.video_connect_link}
-                  onClick={() => {
-                    triggerGoal("Doctor Connect Click", {
-                      medium: "Video Call",
-                      userId: authUser.id,
-                      targetUserType: user.user_type,
-                    });
-                  }}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <div className="tooltip">
-                    <span className="tooltip-text tooltip-right">
-                      Connect on a Video Call
-                    </span>
-                    <CareIcon icon="l-video" className="h-5 w-5" />
-                  </div>
-                </a>
-              )}
-              <a
-                href={
-                  user.alt_phone_number
-                    ? `https://api.whatsapp.com/send/?phone=${encodeURIComponent(
-                        user.alt_phone_number
-                      )}&text=${encodeURIComponent(
-                        `Hey ${user.first_name} ${user.last_name}, I have a query regarding a patient.\n\nPatient Link: ${window.location.href}`
-                      )}`
-                    : "#"
-                }
-                onClick={() => {
-                  triggerGoal("Doctor Connect Click", {
-                    medium: "WhatsApp",
-                    userId: authUser.id,
-                    targetUserType: user.user_type,
-                  });
-                }}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <div className="tooltip">
-                  <span className="tooltip-text tooltip-right">
-                    Connect on WhatsApp
-                  </span>
-                  <CareIcon className="care-l-whatsapp h-5 w-5" />
-                </div>
               </a>
-              <a
-                href={
-                  user.alt_phone_number ? `tel:${user.alt_phone_number}` : "#"
-                }
-                onClick={() => {
-                  triggerGoal("Doctor Connect Click", {
-                    medium: "Phone Call",
-                    userId: authUser.id,
-                    targetUserType: user.user_type,
-                  });
-                }}
-              >
-                <div className="tooltip">
-                  <span className="tooltip-text tooltip-right">
-                    Connect on Phone
-                  </span>
-                  <CareIcon className="care-l-phone-alt h-5 w-5" />
-                </div>
-              </a>
+              <span>{user.alt_phone_number}</span>
             </div>
-            {user.last_login && <span>{relativeTime(user.last_login)}</span>}
+            <div className="text-sm text-gray-500">
+              {user.last_login && <span>{relativeTime(user.last_login)}</span>}
+            </div>
           </div>
         </div>
       </a>
     </li>
+  );
+}
+
+function DoctorConnectButtons(props: { user: UserAssignedModel }) {
+  const user = props.user;
+  const authUser = useAuthUser();
+  return (
+    <div className="flex gap-2">
+      {user.video_connect_link && (
+        <a
+          href={user.video_connect_link}
+          onClick={() => {
+            triggerGoal("Doctor Connect Click", {
+              medium: "Video Call",
+              userId: authUser.id,
+              targetUserType: user.user_type,
+            });
+          }}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <div className="tooltip">
+            <span className="tooltip-text tooltip-right">
+              Connect on a Video Call
+            </span>
+            <CareIcon icon="l-video" className="h-5 w-5" />
+          </div>
+        </a>
+      )}
+      <a
+        href={
+          user.alt_phone_number
+            ? `https://api.whatsapp.com/send/?phone=${encodeURIComponent(
+                user.alt_phone_number
+              )}&text=${encodeURIComponent(
+                `Hey ${user.first_name} ${user.last_name}, I have a query regarding a patient.\n\nPatient Link: ${window.location.href}`
+              )}`
+            : "#"
+        }
+        onClick={() => {
+          triggerGoal("Doctor Connect Click", {
+            medium: "WhatsApp",
+            userId: authUser.id,
+            targetUserType: user.user_type,
+          });
+        }}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <div className="tooltip">
+          <span className="tooltip-text tooltip-right">
+            Connect on WhatsApp
+          </span>
+          <CareIcon className="care-l-whatsapp h-5 w-5" />
+        </div>
+      </a>
+      <a
+        href={user.alt_phone_number ? `tel:${user.alt_phone_number}` : "#"}
+        onClick={() => {
+          triggerGoal("Doctor Connect Click", {
+            medium: "Phone Call",
+            userId: authUser.id,
+            targetUserType: user.user_type,
+          });
+        }}
+      >
+        <div className="tooltip">
+          <span className="tooltip-text tooltip-right">Connect on Phone</span>
+          <CareIcon className="care-l-phone-alt h-5 w-5" />
+        </div>
+      </a>
+    </div>
   );
 }
