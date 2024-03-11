@@ -9,6 +9,7 @@ import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import DistrictAutocompleteFormField from "../Common/DistrictAutocompleteFormField";
 import StateAutocompleteFormField from "../Common/StateAutocompleteFormField";
 import { useTranslation } from "react-i18next";
+import * as Notify from "../../Utils/Notifications";
 
 const parsePhoneNumberForFilterParam = (phoneNumber: string) => {
   if (!phoneNumber) return "";
@@ -49,6 +50,12 @@ export default function UserFilter(props: any) {
       district: district || "",
       state: district ? state || "" : "",
     };
+    if (state && !district) {
+      Notify.Warn({
+        msg: "District is required when state is selected",
+      });
+      return;
+    }
     onChange(data);
   };
 
