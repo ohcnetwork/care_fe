@@ -29,7 +29,7 @@ export class UserPage {
       .and("include", "phone_number=%2B919876543219")
       .and("include", "alt_phone_number=%2B919876543219")
       .and("include", "user_type=Doctor")
-      .and("include", "district_id=7");
+      .and("include", "district=7");
   }
 
   checkUsernameText(username: string) {
