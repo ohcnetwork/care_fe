@@ -905,11 +905,11 @@ export const FileUpload = (props: FileUploadProps) => {
   }
 
   const onFileChange = (e: ChangeEvent<HTMLInputElement>): any => {
-    if (e.target.files == null) {
+    if (e.target.files == null || e.target.files.length === 0) {
       throw new Error("Error finding e.target.files");
     }
     const f = e.target.files[0];
-    const fileName = f.name;
+    const fileName = f ? f.name : Date.now().toString(); // use timestamp as filename for unnamed files
     setFile(e.target.files[0]);
     setUploadFileName(
       fileName.substring(0, fileName.lastIndexOf(".")) || fileName
