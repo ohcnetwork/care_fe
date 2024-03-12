@@ -973,12 +973,25 @@ export const AssetImportSchema: SchemaType = {
     type: "string",
     parse: (date: string) => {
       if (!date) return null;
-      const parsed = new Date(date);
-      if (String(parsed) === "Invalid Date") {
-        throw new Error("Invalid Warranty End Date:" + date);
+      //handles both "YYYY-MM-DD" and long date format eg : Wed Oct 14 2020 05:30:00 GMT+0530 (India Standard Time)
+      if (isNaN(Date.parse(date))) {
+        const parts = date.split("-");
+        if (parts.length !== 3) {
+          throw new Error("Invalid Date Format: " + date);
+        }
+        const reformattedDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+        const parsed = new Date(reformattedDateStr);
+        if (String(parsed) === "Invalid Date") {
+          throw new Error("Invalid Date: " + date);
+        }
+        return dateQueryString(parsed);
+      } else {
+        const parsed = new Date(date);
+        if (String(parsed) === "Invalid Date") {
+          throw new Error("Invalid Date: " + date);
+        }
+        return dateQueryString(parsed);
       }
-
-      return dateQueryString(parsed);
     },
   },
   "Last Service Date": {
@@ -986,16 +999,27 @@ export const AssetImportSchema: SchemaType = {
     type: "string",
     parse: (date: string) => {
       if (!date) return null;
-      const parsed = new Date(date);
-
-      if (String(parsed) === "Invalid Date") {
-        throw new Error("Invalid Last Service Date:" + date);
+      if (isNaN(Date.parse(date))) {
+        const parts = date.split("-");
+        if (parts.length !== 3) {
+          throw new Error("Invalid Date Format: " + date);
+        }
+        const reformattedDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+        const parsed = new Date(reformattedDateStr);
+        if (String(parsed) === "Invalid Date") {
+          throw new Error("Invalid Date: " + date);
+        }
+        return dateQueryString(parsed);
+      } else {
+        const parsed = new Date(date);
+        if (String(parsed) === "Invalid Date") {
+          throw new Error("Invalid Date: " + date);
+        }
+        return dateQueryString(parsed);
       }
-
-      return dateQueryString(parsed);
     },
   },
-  Notes: { prop: "notes", type: "string" },
+  Notes: { prop: "note", type: "string" },
   "Config - IP Address": {
     parent: "meta",
     prop: "local_ip_address",
@@ -1039,12 +1063,19 @@ export const ExternalResultImportSchema: SchemaType = {
     type: "string",
     parse: (date: string) => {
       if (!date) return null;
-      const parsed = new Date(date);
-      if (String(parsed) === "Invalid Date") {
-        throw new Error("Invalid Date:" + date);
+      if (isNaN(Date.parse(date))) {
+        const parsed = new Date(date);
+        if (String(parsed) === "Invalid Date") {
+          throw new Error("Invalid Date: " + date);
+        }
+        return dateQueryString(parsed);
+      } else {
+        const parsed = new Date(date);
+        if (String(parsed) === "Invalid Date") {
+          throw new Error("Invalid Date: " + date);
+        }
+        return dateQueryString(parsed);
       }
-
-      return dateQueryString(parsed);
     },
   },
   "Result Date": {
@@ -1052,12 +1083,19 @@ export const ExternalResultImportSchema: SchemaType = {
     type: "string",
     parse: (date: string) => {
       if (!date) return null;
-      const parsed = new Date(date);
-      if (String(parsed) === "Invalid Date") {
-        throw new Error("Invalid Date:" + date);
+      if (isNaN(Date.parse(date))) {
+        const parsed = new Date(date);
+        if (String(parsed) === "Invalid Date") {
+          throw new Error("Invalid Date: " + date);
+        }
+        return dateQueryString(parsed);
+      } else {
+        const parsed = new Date(date);
+        if (String(parsed) === "Invalid Date") {
+          throw new Error("Invalid Date: " + date);
+        }
+        return dateQueryString(parsed);
       }
-
-      return dateQueryString(parsed);
     },
   },
   "Test Type": { prop: "test_type", type: "string" },

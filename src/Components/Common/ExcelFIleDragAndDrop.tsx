@@ -54,10 +54,22 @@ export default function ExcelFileDragAndDrop({
 
       reader.onload = (e) => {
         const result = (e.target as FileReader).result;
-        const workbook = XLSX.read(result, { type: "binary" });
+        const workbook = XLSX.read(result, {
+          type: "binary",
+          cellDates: true,
+        });
         const worksheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[worksheetName];
         const data = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+        //converts the date to string
+        data.forEach((row: any) => {
+          _.forIn(row, (value: any, key) => {
+            if (value instanceof Date) {
+              row[key] = value.toISOString().split("T")[0];
+            }
+          });
+        });
+
         setFileData(data);
       };
       reader.onerror = () => {
