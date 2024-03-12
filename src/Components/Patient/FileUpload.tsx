@@ -1414,10 +1414,10 @@ export const FileUpload = (props: FileUploadProps) => {
               <b>Reason:</b> {modalDetails?.reason}
             </div>
             <div className="text-md text-center">
-              <b>Archived_by:</b> {modalDetails?.userArchived}
+              <b>Archived by:</b> {modalDetails?.userArchived}
             </div>
             <div className="text-md text-center">
-              <b>Time of Archive:</b>
+              <b>Time of Archive: </b>
               {formatDateTime(modalDetails?.archiveTime)}
             </div>
           </div>
@@ -1472,7 +1472,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       </ButtonV2>
                     </div>
                   )}
-                  <div className="flex flex-col items-center gap-4 md:flex-row">
+                  <div className="flex flex-col items-center gap-4 md:flex-row md:flex-wrap lg:flex-nowrap">
                     <VoiceRecorder
                       createAudioBlob={createAudioBlob}
                       confirmAudioBlobExists={confirmAudioBlobExists}
