@@ -63,11 +63,13 @@ Authenticate to staging API with any of the following credentials
   role: Doctor
 ```
 
-#### 🏷️ Make use labels to update the PR/issue status
+#### Contributing to CARE
 
-- Mark your PRs as `work-in-progress` if it's still being worked on.
-- Once you have solved the related issue, mark your PR with `need testing` and `need review` labels.
-- When you’re making a PR with lots of code changes that affects multiple functionalities, or is likely to break, make sure you tag it with `Major Code Change` label.
+- Create a branch with branch name of the format `issues/{issue#}/{short-name}` (example `issues/7001/edit-prescriptions`) from the latest [`develop`](https://github.com/coronasafe/care_fe/tree/develop) branch when starting to work on an issue.
+- Once the changes are pushed to the branch, make a pull request with a meaningful title (example: "💊 Adds support for editing prescriptions" #6369)
+- Ensure the issue number is mentioned in the PR with a closing tag by following the PR body template. (Refer: [Linking a pull request to an issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword))
+- Once the code review is done, the PR will be marked with a "Needs Testing" label where it'll be queued for QA testing.
+- Once tested, the PR would be marked with a "Tested" label and would be queued for merge.
 
 #### 🧪 Run cypress tests
 

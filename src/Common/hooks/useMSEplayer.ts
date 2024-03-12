@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react";
-import axios from "axios";
 
 export interface IAsset {
   middlewareHostname: string;
@@ -45,9 +44,18 @@ const stopStream =
   (payload: { id: string }, options: IOptions) => {
     const { id } = payload;
     ws?.close();
-    axios
-      .post(`https://${middlewareHostname}/stop`, {
-        id,
+    fetch(`https://${middlewareHostname}/stop`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id }),
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("network response was not ok");
+        }
+        return res.json();
       })
       .then((res) => options?.onSuccess && options.onSuccess(res))
       .catch((err) => options.onError && options.onError(err));
