@@ -132,31 +132,29 @@ const BedTimelineAsset = ({
   );
 
   return (
-    <div className="flex flex-col">
-      {newlyLinkedAssets.length !== 0 && (
-        <ul className="text-sm text-gray-600">Newly Linked Assets</ul>
-      )}
-      {newlyLinkedAssets.map((asset) => (
-        <li key={asset.id} className="list-disc text-xs text-gray-600">
-          {asset.name}
-        </li>
-      ))}
-      {existingAssets.length !== 0 && (
-        <ul className="text-sm text-gray-600">Existing Assets</ul>
-      )}
-      {existingAssets.map((asset) => (
-        <li key={asset.id} className="list-disc text-xs text-gray-600">
-          {asset.name}
-        </li>
-      ))}
-      {unlinkedAssets.length !== 0 && (
-        <ul className="text-sm text-gray-600">Unlinked Assets</ul>
-      )}
-      {unlinkedAssets.map((asset) => (
-        <li key={asset.id} className="list-disc text-xs text-gray-600">
-          {asset.name}
-        </li>
-      ))}
+    <div className="flex flex-col gap-1">
+      <p className="text-md font-semibold">Assets</p>
+      {newlyLinkedAssets.length > 0 &&
+        newlyLinkedAssets.map((newAsset) => (
+          <div className="flex gap-1 text-primary">
+            <CareIcon className="care-l-plus-circle" />
+            <span>{newAsset.name}</span>
+          </div>
+        ))}
+      {existingAssets.length > 0 &&
+        existingAssets.map((existingAsset) => (
+          <div className="flex gap-1">
+            <CareIcon className="care-l-check-circle" />
+            <span>{existingAsset.name}</span>
+          </div>
+        ))}
+      {unlinkedAssets.length > 0 &&
+        unlinkedAssets.map((unlinkedAsset) => (
+          <div className="flex gap-1 text-gray-500">
+            <CareIcon className="care-l-minus-circle" />
+            <span className="line-through">{unlinkedAsset.name}</span>
+          </div>
+        ))}
     </div>
   );
 };
