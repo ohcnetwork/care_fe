@@ -256,7 +256,7 @@ const ExcelViewer = ({
             handleSubmit(selectedRowsData);
             handleClose();
           }}
-          data-testid="asset-import-btn"
+          data-testid="import-btn"
         >
           <CareIcon icon="l-file-import" className="text-lg" />
           <span>Import {selectedRows.length} selected fields</span>

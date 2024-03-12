@@ -155,6 +155,7 @@ export default function ExcelFileDragAndDrop({
           {!selectedFile && "Drag & drop xlsx/csv file to upload"}
         </p>
         <input
+          data-testid="import-file"
           type="file"
           accept=".csv, .xlsx"
           onChange={(e) => {
@@ -238,9 +239,9 @@ export default function ExcelFileDragAndDrop({
           disabled={loading}
         />
         <Submit
+          data-testid="import-btn"
           onClick={() => handleSubmit(validData)}
           disabled={loading || !selectedFile || validData.length === 0}
-          data-testid="asset-import-btn"
         >
           {loading ? (
             <CareIcon icon="l-spinner" className="animate-spin text-lg" />
