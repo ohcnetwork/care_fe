@@ -129,7 +129,50 @@ const parseDataWithSchema = (
 
   return { dataWithErrors, parsedData, errors };
 };
-
+/**
+ * This function takes in an array of JSON data and a schema and returns the parsed data and the data with errors
+ * @param dataArray The array of JSON data to be parsed
+ * @param schema The schema to validate and parse the data against
+ * @returns An object containing the parsed data, data with errors, and data without errors
+ * @example
+ * const data = [
+ *  { name: "Ram", age: 25 },
+ *  { name: "Raj", age: "30" },
+ *  { name: "Sam", age: 35 },
+ * ];
+ *
+ * const schema = {
+ *  name: { prop: "name", type: "string", required: true },
+ *  age: { prop: "age", type: "number", required: true , parse: (value) => {
+ *    if(value < 0 || value > 100) throw new Error("age should be between 0 and 100");
+ *    return value;
+ * },
+ * };
+ *
+ * const { dataWithErrors, parsedData, ParsedDataWithOutErrors, errors } = schemaParser(data, schema);
+ *
+ * dataWithErrors => [
+ * { name: { value: "Ram" }, age: { value: 25 } },
+ * { name: { value: "Raj" }, age: { value: "30", error: "age should be of type number" } },
+ * { name: { value: "Sam" }, age: { value: 35 } },
+ * ]
+ *
+ * parsedData => [
+ * { name: "Ram", age: 25 },
+ * { name: "Raj", age: "30" },
+ * { name: "Sam", age: 35 },
+ * ]
+ *
+ * ParsedDataWithOutErrors => [
+ * { name: "Ram", age: 25 },
+ * { name: "Sam", age: 35 },
+ * ]
+ *
+ * errors => [
+ * { index: 1, key: "age", error: "age should be of type number" }
+ * ]
+ *
+ */
 const schemaParser = (
   dataArray: any[],
   schema: SchemaType
