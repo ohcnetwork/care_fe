@@ -1457,7 +1457,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         className="col-span-6"
                         {...field("is_telemedicine")}
                         value={JSON.parse(state.form.is_telemedicine)}
-                        label="Is Telemedicine required for the patient?"
+                        label="Would you like to refer the patient for remote monitoring to an external doctor?"
                       />
 
                       {JSON.parse(state.form.is_telemedicine) && (
