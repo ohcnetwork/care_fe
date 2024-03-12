@@ -400,35 +400,40 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   }
 
   if (getConsultationLoading) return <Loading />;
-  console.log(bedPresets[0]?.meta);
+  console.log(currentPreset);
   return (
     <div className="flex h-[calc(100vh-1.5rem)] flex-col px-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex w-full items-center justify-between gap-4 px-3">
           <p className="block text-lg font-medium"> Camera Presets :</p>
-          <div className="z-30 flex flex-wrap items-center justify-center bg-gray-100 ">
+          <div className=" z-30 flex flex-wrap items-center justify-center bg-gray-100 ">
             <SelectFormField
               id="preset"
               name="preset"
               label=" Preset"
               errorClassName="hidden"
-              options={bedPresets?.map((preset: any) => preset)}
-              optionLabel={(preset: any) => preset?.meta?.preset_name}
+              options={bedPresets?.map(
+                (preset: any) => preset?.meta?.preset_name
+              )}
+              optionLabel={(preset: any) => preset}
               optionValue={(preset: any) => preset}
-              value={currentPreset}
-              onChange={(preset: any) => {
+              value={currentPreset?.meta?.preset_name}
+              onChange={(selectedPreset: any) => {
+                const presetDetails = bedPresets?.filter(
+                  (preset: any) =>
+                    preset?.meta?.preset_name === selectedPreset.value
+                );
                 setLoading(CAMERA_STATES.MOVING.GENERIC);
-                absoluteMove(preset?.value?.meta?.position, {
+                absoluteMove(presetDetails[0]?.meta?.position, {
                   onSuccess: () => {
                     setLoading(CAMERA_STATES.IDLE);
-                    setCurrentPreset(preset);
+                    setCurrentPreset(presetDetails[0]);
 
                     console.log(
-                      "onSuccess: Set Preset to " +
-                        preset?.value?.meta?.preset_name
+                      "onSuccess: Set Preset to " + selectedPreset.value
                     );
                     triggerGoal("Camera Preset Clicked", {
-                      presetName: preset?.value?.meta?.preset_name,
+                      presetName: selectedPreset.value,
                       consultationId,
                       userId: authUser.id,
                       result: "success",
@@ -436,13 +441,12 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                   },
                   onError: () => {
                     setLoading(CAMERA_STATES.IDLE);
-                    setCurrentPreset(preset);
+                    setCurrentPreset(presetDetails[0]);
                     console.log(
-                      "onError: Set Preset to " +
-                        preset?.value?.meta?.preset_name
+                      "onError: Set Preset to " + selectedPreset.value
                     );
                     triggerGoal("Camera Preset Clicked", {
-                      presetName: preset?.value?.meta?.preset_name,
+                      presetName: selectedPreset.value,
                       consultationId,
                       userId: authUser.id,
                       result: "error",
