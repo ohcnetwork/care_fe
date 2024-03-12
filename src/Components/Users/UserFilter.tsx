@@ -111,13 +111,13 @@ export default function UserFilter(props: any) {
         />
       </div>
 
-      <StateAutocompleteFormField {...field("state")} className="-mb-4" />
+      <StateAutocompleteFormField {...field("state")} errorClassName="hidden" />
       <DistrictAutocompleteFormField
+        errorClassName="hidden"
         {...field("district")}
-        className="-mb-4"
         state={filterState.state}
       />
-      <div className="-mb-4">
+      <div>
         <PhoneNumberFormField
           label="Phone Number"
           name="phone_number"
