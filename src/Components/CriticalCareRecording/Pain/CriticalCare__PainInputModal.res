@@ -57,9 +57,9 @@ let make = (
 
   let getStatus = (min, minText, max, maxText, val) => {
     switch (val >= min, val <= max) {
-    | (true, true) => ("Normal", "#059669")
+    | (true, true) => ("Mild", "#f7ba00")
     | (true, false) => (maxText, "#DC2626")
-    | _ => (minText, "#DC2626")
+    | _ => (minText, "#059669")
     }
   }
 
@@ -93,7 +93,7 @@ let make = (
                     className="px-0 py-5 m-0"
                     disabled={previewMode}
                     start={"0"}
-                    end={"5"}
+                    end={"10"}
                     interval={"1"}
                     step={1.0}
                     value={Belt.Float.toString(painScale)}
@@ -104,10 +104,10 @@ let make = (
                       | None => setState(prev => {...prev, scale: 0})
                       }
                     }}
-                    getLabel={getStatus(2.0, "Low", 4.0, "High")}
+                    getLabel={getStatus(4.0, "Low", 6.0, "High")}
                     hasError={ValidationUtils.isInputInRangeInt(
                       0,
-                      5,
+                      10,
                       Belt.Float.toString(painScale)->Belt.Int.fromString,
                     )}
                   />
