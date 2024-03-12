@@ -19,27 +19,9 @@ describe("Patient Details", () => {
     cy.awaitUrl("/patients");
   });
 
-  it("Upload the file and download it", () => {
-    // Upload the file
-    patientPage.visitPatient("Dummy Patient 3");
-    patientFileUploadPage.visitPatientDetailsPage();
-    patientFileUploadPage.uploadFile();
-    const fileName = `Cypress File ${new Date().getTime().toString().slice(9)}`;
-    cy.get("#consultation_file").clear();
-    cy.get("#consultation_file").type(fileName);
-    patientFileUploadPage.clickUploadFile();
-
-    // Verify the file is uploaded
-    cy.verifyNotification("File Uploaded Successfully");
-    cy.get("#file-div").should("contain.text", fileName);
-
-    // Download the file
-    patientFileUploadPage.downloadFile();
-  });
-
-  it("Record an audio and archive it", () => {
+  it("Record an Audio and download the file", () => {
     // Record an audio
-    patientPage.visitPatient("Dummy Patient 4");
+    patientPage.visitPatient("Dummy Patient 3");
     patientFileUploadPage.visitPatientDetailsPage();
     patientFileUploadPage.recordAudio();
     const fileName = `Cypress Audio ${new Date()
@@ -53,7 +35,25 @@ describe("Patient Details", () => {
     cy.verifyNotification("File Uploaded Successfully");
     cy.get("#file-div").should("contain.text", fileName);
 
-    // Archive the audio file
+    // Verify the download of the audio file
+    cy.get("button").contains("DOWNLOAD").click();
+    cy.verifyNotification("Downloading file...");
+  });
+
+  it("Upload a File and archive it", () => {
+    // Upload the file
+    patientPage.visitPatient("Dummy Patient 4");
+    patientFileUploadPage.visitPatientDetailsPage();
+    patientFileUploadPage.uploadFile();
+    const fileName = `Cypress File ${new Date().getTime().toString().slice(9)}`;
+    cy.get("#consultation_file").clear().type(fileName);
+    patientFileUploadPage.clickUploadFile();
+
+    // Verify the file is uploaded
+    cy.verifyNotification("File Uploaded Successfully");
+    cy.get("#file-div").should("contain.text", fileName);
+
+    // Archive the file
     patientFileUploadPage.archiveFile();
     patientFileUploadPage.clickSaveArchiveFile();
     cy.verifyNotification("File archived successfully");

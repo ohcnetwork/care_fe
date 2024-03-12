@@ -663,7 +663,6 @@ export const FileUpload = (props: FileUploadProps) => {
                         authUser.user_type === "StateAdmin" ? (
                           <>
                             <ButtonV2
-                              id="archive-file"
                               onClick={() => {
                                 setArchiveReason("");
                                 setModalDetails({

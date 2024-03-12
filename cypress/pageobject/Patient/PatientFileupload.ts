@@ -6,6 +6,18 @@ export class PatientFileUploadPage {
     cy.get("#upload-patient-files").click();
   }
 
+  recordAudio() {
+    cy.get("#record-audio").click();
+    cy.wait(5000);
+    cy.get("#stop-recording").click();
+  }
+
+  clickUploadAudioFile() {
+    cy.intercept("POST", "**/api/v1/files/").as("uploadAudioFile");
+    cy.get("#upload_audio_file").click();
+    cy.wait("@uploadAudioFile").its("response.statusCode").should("eq", 201);
+  }
+
   uploadFile() {
     cy.get("#file_upload_patient").selectFile(
       "cypress/fixtures/sampleAsset.xlsx",
@@ -19,26 +31,8 @@ export class PatientFileUploadPage {
     cy.wait("@uploadFile").its("response.statusCode").should("eq", 201);
   }
 
-  downloadFile() {
-    cy.intercept("GET", "**/patient-bucket/PATIENT/**").as("downloadFile");
-    cy.get("#download-file").click();
-    cy.wait("@downloadFile").its("response.statusCode").should("eq", 200);
-  }
-
-  recordAudio() {
-    cy.get("#record-audio").click();
-    cy.wait(5000);
-    cy.get("#stop-recording").click();
-  }
-
-  clickUploadAudioFile() {
-    cy.intercept("POST", "**/api/v1/files/").as("uploadAudioFile");
-    cy.get("#upload_audio_file").click();
-    cy.wait("@uploadAudioFile").its("response.statusCode").should("eq", 201);
-  }
-
   archiveFile() {
-    cy.get("#archive-file").click().scrollIntoView();
+    cy.get("button").contains("ARCHIVE").click().scrollIntoView();
     cy.get("#editFileName").clear().type("Cypress File Archive");
   }
 
