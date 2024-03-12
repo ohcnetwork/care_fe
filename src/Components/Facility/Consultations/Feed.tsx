@@ -661,12 +661,10 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                 );
               }
 
-              return out;
-            })}
-          </div>
+            return out;
+          })}
         </div>
       </div>
-
       <div className="mt-4 flex w-full flex-wrap lg:hidden">
         {cameraPTZ.map((option, index) => {
           const shortcutKeyDescription =
