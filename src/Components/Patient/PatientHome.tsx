@@ -1375,6 +1375,7 @@ export const PatientHome = (props: any) => {
                     isLastConsultation={
                       item.id == patientData.last_consultation?.id
                     }
+                    refetch={refetch}
                   />
                 )}
               </PaginatedList.Items>
