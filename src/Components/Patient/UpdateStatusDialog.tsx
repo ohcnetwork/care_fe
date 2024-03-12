@@ -1,5 +1,4 @@
 import { useEffect, useState, useReducer } from "react";
-import axios from "axios";
 import {
   SAMPLE_TEST_STATUS,
   SAMPLE_TEST_RESULT,
@@ -18,6 +17,7 @@ import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { useTranslation } from "react-i18next";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
+import uploadFile from "../../Utils/request/uploadFile";
 
 interface Props {
   sample: SampleTestModel;
@@ -104,36 +104,36 @@ const UpdateStatusDialog = (props: Props) => {
     if (f === undefined) return;
     const newFile = new File([f], `${internal_name}`);
 
-    const config = {
-      headers: {
-        "Content-type": contentType,
+    uploadFile(
+      url,
+      newFile,
+      "PUT",
+      {
+        "Content-Type": contentType,
         "Content-disposition": "inline",
       },
-      onUploadProgress: (progressEvent: any) => {
-        const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
-        );
-        setUploadPercent(percentCompleted);
+      (xhr: XMLHttpRequest) => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          setUploadStarted(false);
+          setUploadDone(true);
+          request(routes.editUpload, {
+            pathParams: {
+              id: data.id,
+              fileType: "SAMPLE_MANAGEMENT",
+              associatingId: sample.id?.toString() ?? "",
+            },
+            body: { upload_completed: true },
+          });
+          Notification.Success({ msg: "File Uploaded Successfully" });
+        } else {
+          setUploadStarted(false);
+        }
       },
-    };
-
-    axios
-      .put(url, newFile, config)
-      .then(() => {
+      setUploadPercent,
+      () => {
         setUploadStarted(false);
-        setUploadDone(true);
-        request(routes.editUpload, {
-          pathParams: {
-            id: data.id,
-            fileType: "SAMPLE_MANAGEMENT",
-            associatingId: sample.id?.toString() ?? "",
-          },
-          body: { upload_completed: true },
-        });
-
-        Notification.Success({ msg: "File Uploaded Successfully" });
-      })
-      .catch(() => setUploadStarted(false));
+      }
+    );
   };
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
