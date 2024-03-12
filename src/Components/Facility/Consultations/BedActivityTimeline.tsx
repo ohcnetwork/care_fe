@@ -134,6 +134,11 @@ const BedTimelineAsset = ({
   return (
     <div className="flex flex-col gap-1">
       <p className="text-md font-semibold">Assets</p>
+      {newlyLinkedAssets.length === 0 &&
+        existingAssets.length === 0 &&
+        unlinkedAssets.length === 0 && (
+          <p className="text-gray-500">No assets linked</p>
+        )}
       {newlyLinkedAssets.length > 0 &&
         newlyLinkedAssets.map((newAsset) => (
           <div className="flex gap-1 text-primary">
