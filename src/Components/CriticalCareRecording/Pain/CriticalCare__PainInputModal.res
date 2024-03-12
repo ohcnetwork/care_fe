@@ -138,9 +138,9 @@ let make = (
               ? <button
                   type_="button"
                   onClick={e => {
-                    if(painScale==0.0){
+                    if (painScale == 0.0) {
                       hideModal(e)
-                    }else{
+                    } else {
                       updatePart(state)
                       hideModal(e)
                     }
