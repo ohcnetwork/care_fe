@@ -400,7 +400,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   }
 
   if (getConsultationLoading) return <Loading />;
-  console.log(currentPreset);
+
   return (
     <div className="flex h-[calc(100vh-1.5rem)] flex-col px-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
