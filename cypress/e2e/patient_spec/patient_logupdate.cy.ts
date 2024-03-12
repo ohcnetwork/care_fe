@@ -31,7 +31,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
       .type("Physical Examination Info");
     cy.clickAndSelectOption("#patient_category", "Abnormal");
     cy.get("#other_details").click().type("Physical Examination Info");
-    cy.clickAndMultiSelectOption("#additional_symptoms", "ASYMPTOMATIC");
+    cy.clickAndSelectOption("#additional_symptoms", "ASYMPTOMATIC");
     cy.searchAndSelectOption("#systolic", "119");
     cy.searchAndSelectOption("#diastolic", "150");
     cy.searchAndSelectOption("#pulse", "152");
@@ -60,7 +60,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.clickAndSelectOption("#patient_category", "Abnormal");
     cy.clickAndSelectOption("#rounds_type", "Telemedicine");
     cy.get("#other_details").click().type("Physical Examination Info");
-    cy.clickAndMultiSelectOption("#additional_symptoms", "ASYMPTOMATIC");
+    cy.clickAndSelectOption("#additional_symptoms", "ASYMPTOMATIC");
     cy.searchAndSelectOption("#systolic", "119");
     cy.searchAndSelectOption("#diastolic", "150");
     cy.searchAndSelectOption("#pulse", "152");
@@ -88,7 +88,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
       .click()
       .type("Physical Examination Info");
     cy.get("#other_details").click().type("Physical Examination Info");
-    cy.clickAndMultiSelectOption("#additional_symptoms", "ASYMPTOMATIC");
+    cy.clickAndSelectOption("#additional_symptoms", "ASYMPTOMATIC");
     cy.searchAndSelectOption("#systolic", "119");
     cy.searchAndSelectOption("#diastolic", "150");
     cy.searchAndSelectOption("#pulse", "152");
