@@ -1,4 +1,3 @@
-import axios from "axios";
 import CircularProgress from "../Common/components/CircularProgress";
 import {
   useCallback,
@@ -33,6 +32,7 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import FilePreviewDialog from "../Common/FilePreviewDialog";
+import uploadFile from "../../Utils/request/uploadFile";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -936,42 +936,41 @@ export const FileUpload = (props: FileUploadProps) => {
     const f = file;
     if (!f) return;
     const newFile = new File([f], `${internal_name}`);
-
-    const config = {
-      headers: {
-        "Content-type": file?.type,
-        "Content-disposition": "inline",
-      },
-      onUploadProgress: (progressEvent: any) => {
-        const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
-        );
-        setUploadPercent(percentCompleted);
-      },
-    };
-
+    console.log("filetype: ", newFile.type);
     return new Promise<void>((resolve, reject) => {
-      axios
-        .put(url, newFile, config)
-        .then(() => {
-          setUploadStarted(false);
-          // setUploadSuccess(true);
-          setFile(null);
-          setUploadFileName("");
-          fetchData();
-          Notification.Success({
-            msg: "File Uploaded Successfully",
-          });
-          setUploadFileError("");
-          resolve();
-        })
-        .catch((e) => {
+      uploadFile(
+        url,
+        newFile,
+        "PUT",
+        { "Content-Type": file?.type },
+        (xhr: XMLHttpRequest) => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            setUploadStarted(false);
+            setFile(null);
+            setUploadFileName("");
+            fetchData();
+            Notification.Success({
+              msg: "File Uploaded Successfully",
+            });
+            setUploadFileError("");
+            resolve();
+          } else {
+            Notification.Error({
+              msg: "Error Uploading File: " + xhr.statusText,
+            });
+            setUploadStarted(false);
+            reject();
+          }
+        },
+        setUploadPercent,
+        () => {
           Notification.Error({
-            msg: "Error Uploading File: " + e.message,
+            msg: "Error Uploading File: Network Error",
           });
           setUploadStarted(false);
           reject();
-        });
+        }
+      );
     });
   };
 
@@ -1049,33 +1048,30 @@ export const FileUpload = (props: FileUploadProps) => {
     const f = audioBlob;
     if (f === undefined) return;
     const newFile = new File([f], `${internal_name}`, { type: f.type });
-    const config = {
-      headers: {
-        "Content-type": newFile?.type,
-        "Content-disposition": "inline",
-      },
-      onUploadProgress: (progressEvent: any) => {
-        const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
-        );
-        setUploadPercent(percentCompleted);
-      },
-    };
 
-    axios
-      .put(url, newFile, config)
-      .then(() => {
+    uploadFile(
+      url,
+      newFile,
+      "PUT",
+      { "Content-Type": newFile?.type },
+      (xhr: XMLHttpRequest) => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          setAudioUploadStarted(false);
+          // setUploadSuccess(true);
+          setAudioName("");
+          fetchData();
+          Notification.Success({
+            msg: "File Uploaded Successfully",
+          });
+        } else {
+          setAudioUploadStarted(false);
+        }
+      },
+      setUploadPercent,
+      () => {
         setAudioUploadStarted(false);
-        // setUploadSuccess(true);
-        setAudioName("");
-        fetchData();
-        Notification.Success({
-          msg: "File Uploaded Successfully",
-        });
-      })
-      .catch(() => {
-        setAudioUploadStarted(false);
-      });
+      }
+    );
   };
 
   const validateAudioUpload = () => {
