@@ -38,13 +38,17 @@ let make = (
   }, [state])
 
   let handleSubmit = e => {
-    updatePart(state)
-    hideModal(e)
     let region = PressureSore.regionToString(state.region)
-    if (state.length > 0.0 && state.width == 0.0) || (state.length == 0.0 && state.width > 0.0) {
+    if(state.length === 0.0 && state.width === 0.0){
+      hideModal(e)
+    }
+    else if (state.length > 0.0 && state.width == 0.0) || (state.length == 0.0 && state.width > 0.0) {
+      hideModal(e)
       Notifications.error({msg: `Please fill in both width and length for ${region} part`})
       setState(prev => {...prev, length: 0.0, width: 0.0})
     } else {
+      updatePart(state)
+      hideModal(e)
       Notifications.success({msg: `${region} part updated`})
     }
   }
