@@ -661,7 +661,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           })}
         </div>
       </div>
-      <div className="mt-4 flex w-full flex-wrap  lg:hidden">
+      <div className="mt-4 flex w-full flex-wrap lg:hidden">
         {cameraPTZ.map((option, index) => {
           const shortcutKeyDescription =
             option.shortcutKey &&
