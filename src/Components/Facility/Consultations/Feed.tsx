@@ -404,13 +404,13 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   return (
     <div className="flex h-[calc(100vh-1.5rem)] flex-col px-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex w-full items-center justify-between gap-4 px-3">
+        <div className="flex w-full items-center justify-between gap-4 px-3 md:justify-start">
           <p className="block text-lg font-medium"> Camera Presets :</p>
           <div className=" z-30 flex flex-wrap items-center justify-center bg-gray-100 ">
             <SelectFormField
               id="preset"
               name="preset"
-              label=" Preset"
+              labelClassName="hidden"
               errorClassName="hidden"
               options={bedPresets?.map(
                 (preset: any) => preset?.meta?.preset_name
@@ -419,41 +419,49 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               optionValue={(preset: any) => preset}
               value={currentPreset?.meta?.preset_name}
               onChange={(selectedPreset: any) => {
-                const presetDetails = bedPresets?.filter(
-                  (preset: any) =>
-                    preset?.meta?.preset_name === selectedPreset.value
-                );
-                setLoading(CAMERA_STATES.MOVING.GENERIC);
-                absoluteMove(presetDetails[0]?.meta?.position, {
-                  onSuccess: () => {
-                    setLoading(CAMERA_STATES.IDLE);
-                    setCurrentPreset(presetDetails[0]);
-
-                    console.log(
-                      "onSuccess: Set Preset to " + selectedPreset.value
-                    );
-                    triggerGoal("Camera Preset Clicked", {
-                      presetName: selectedPreset.value,
-                      consultationId,
-                      userId: authUser.id,
-                      result: "success",
-                    });
-                  },
-                  onError: () => {
-                    setLoading(CAMERA_STATES.IDLE);
-                    setCurrentPreset(presetDetails[0]);
-                    console.log(
-                      "onError: Set Preset to " + selectedPreset.value
-                    );
-                    triggerGoal("Camera Preset Clicked", {
-                      presetName: selectedPreset.value,
-                      consultationId,
-                      userId: authUser.id,
-                      result: "error",
-                    });
-                  },
-                });
-                getCameraStatus({});
+                console.log(selectedPreset.value);
+                if (selectedPreset.value === undefined) {
+                  setCurrentPreset(undefined);
+                  return;
+                } else {
+                  const presetDetails = bedPresets?.filter(
+                    (preset: any) =>
+                      preset?.meta?.preset_name === selectedPreset.value
+                  );
+                  setLoading(CAMERA_STATES.MOVING.GENERIC);
+                  absoluteMove(
+                    presetDetails.length > 0 && presetDetails[0].meta?.position,
+                    {
+                      onSuccess: () => {
+                        setLoading(CAMERA_STATES.IDLE);
+                        setCurrentPreset(presetDetails[0]);
+                        console.log(
+                          "onSuccess: Set Preset to " + selectedPreset.value
+                        );
+                        triggerGoal("Camera Preset Clicked", {
+                          presetName: selectedPreset.value,
+                          consultationId,
+                          userId: authUser.id,
+                          result: "success",
+                        });
+                      },
+                      onError: () => {
+                        setLoading(CAMERA_STATES.IDLE);
+                        setCurrentPreset(presetDetails[0]);
+                        console.log(
+                          "onError: Set Preset to " + selectedPreset.value
+                        );
+                        triggerGoal("Camera Preset Clicked", {
+                          presetName: selectedPreset.value,
+                          consultationId,
+                          userId: authUser.id,
+                          result: "error",
+                        });
+                      },
+                    }
+                  );
+                  getCameraStatus({});
+                }
               }}
               className="w-40 md:w-60"
             />
