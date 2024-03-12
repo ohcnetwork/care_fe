@@ -909,7 +909,7 @@ export const FileUpload = (props: FileUploadProps) => {
       return;
     }
     const f = e.target.files[0];
-    const fileName = f ? f.name : Date.now().toString(); // use timestamp as filename for unnamed files
+    const fileName = f.name;
     setFile(e.target.files[0]);
     setUploadFileName(
       fileName.substring(0, fileName.lastIndexOf(".")) || fileName
