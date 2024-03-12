@@ -63,11 +63,11 @@ export class UserPage {
   }
 
   selectState(state: string) {
-    cy.searchAndSelectOption("#state", state);
+    cy.searchAndSelectOption("#state input", state);
   }
 
   selectDistrict(district: string) {
-    cy.searchAndSelectOption("#district", district);
+    cy.searchAndSelectOption("#district input", district);
   }
 
   typeInPhoneNumber(phone: string) {
