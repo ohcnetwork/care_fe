@@ -33,27 +33,15 @@ let make = (
 
   let handleClickOutside = %raw(`
 
-
-
     function (event, ref, hideModal) {
-
-
 
       if (ref.current && !ref.current.contains(event.target)) {
 
-
-
         hideModal(event)
-
-
 
       }
 
-
-
     }
-
-
 
   `)
 
@@ -73,11 +61,13 @@ let make = (
     }
   })
 
-  let getStatus = (min, minText, max, maxText, val) => {
-    switch (val >= min, val <= max) {
-    | (true, true) => ("Normal", "#059669")
-    | (true, false) => (maxText, "#DC2626")
-    | _ => (minText, "#DC2626")
+  let getLabels = val => {
+    if val < 4 {
+      ("Low", "green")
+    } else if val < 8 {
+      ("Mild", "orange")
+    } else {
+      ("High", "red")
     }
   }
 
@@ -96,7 +86,7 @@ let make = (
           ~top=getModalPosition()["top"],
           (),
         )}
-        className="transform max-w-[350px] rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-fit">
+        className="transform max-w-[350px] rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-fit overflow-hidden">
         <div className="bg-white px-4 pt-2 pb-4 sm:p-6 sm:pb-4">
           <div className="sm:flex sm:items-start">
             <div className="mt-3 text-center sm:mt-0 sm:text-left">
@@ -112,7 +102,7 @@ let make = (
                         className="px-0 py-5 m-0"
                         disabled={previewMode}
                         start={"0"}
-                        end={"5"}
+                        end={"10"}
                         interval={"1"}
                         step={1.0}
                         value={Belt.Float.toString(painScale)}
@@ -123,10 +113,10 @@ let make = (
                           | None => setState(prev => {...prev, scale: 0})
                           }
                         }}
-                        getLabel={getStatus(2.0, "Low", 4.0, "High")}
+                        getLabel={_ => getLabels(Belt.Float.toInt(painScale))}
                         hasError={ValidationUtils.isInputInRangeInt(
                           0,
-                          5,
+                          10,
                           Belt.Float.toString(painScale)->Belt.Int.fromString,
                         )}
                       />

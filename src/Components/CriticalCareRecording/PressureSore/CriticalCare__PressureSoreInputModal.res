@@ -51,99 +51,15 @@ let make = (
 
   let handleClickOutside = %raw(`
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     function (event, ref, hideModal) {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
       if (ref.current && !ref.current.contains(event.target)) {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         hideModal(event)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
       }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   `)
 
@@ -178,7 +94,7 @@ let make = (
           ~top=getModalPosition()["top"],
           (),
         )}
-        className="transform max-w-[350px] rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-fit">
+        className="transform max-w-[350px] rounded-lg overflow-hidden bg-white text-left shadow-xl transition-all sm:my-8 sm:w-fit">
         <div className="bg-white px-4 pt-2 pb-4 sm:p-6 sm:pb-4">
           <div className="sm:flex sm:items-start">
             <div className="mt-3 text-center sm:mt-0 sm:text-left">
