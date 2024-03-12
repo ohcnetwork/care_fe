@@ -905,7 +905,7 @@ export const FileUpload = (props: FileUploadProps) => {
   }
 
   const onFileChange = (e: ChangeEvent<HTMLInputElement>): any => {
-    if (!e.target.files?.length) {
+    if (e.target.files == null || e.target.files.length === 0) {
       return;
     }
     const f = e.target.files[0];
