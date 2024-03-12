@@ -774,6 +774,9 @@ export const PatientManager = () => {
                   return;
                 }
 
+                Notification.Warn({
+                  msg: "Facility needs to be selected to view discharged patients.",
+                });
                 setShowDialog("list-discharged");
               }}
               isTab2Active={!!tabValue}
