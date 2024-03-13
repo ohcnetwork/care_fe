@@ -105,12 +105,15 @@ export const Comment = ({
         <p className="text-justify">
           {expanded ? comment : truncatedComment}
           {!expanded && remainingComment && (
-            <button onClick={toggleExpanded} className="ml-2 text-green-600">
+            <button
+              onClick={toggleExpanded}
+              className="ml-2  text-primary-600 "
+            >
               {t("read_more")}
             </button>
           )}
           {expanded && remainingComment && (
-            <button onClick={toggleExpanded} className="ml-2 text-green-600">
+            <button onClick={toggleExpanded} className="ml-2 text-primary-600">
               {t("read_less")}
             </button>
           )}
