@@ -1,4 +1,3 @@
-import axios from "axios";
 import {
   ChangeEventHandler,
   useCallback,
@@ -20,6 +19,7 @@ import { LocalStorageKeys } from "../../Common/constants";
 import DialogModal from "../Common/Dialog";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
+import uploadFile from "../../Utils/request/uploadFile";
 interface Props {
   open: boolean;
   onClose: (() => void) | undefined;
@@ -105,34 +105,35 @@ const CoverImageEditModal = ({
 
     const formData = new FormData();
     formData.append("cover_image", selectedFile);
-
+    const url = `/api/v1/facility/${facility.id}/cover_image/`;
     setIsUploading(true);
-    try {
-      const response = await axios.post(
-        `/api/v1/facility/${facility.id}/cover_image/`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization:
-              "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken),
-          },
+
+    uploadFile(
+      url,
+      formData,
+      "POST",
+      {
+        Authorization:
+          "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken),
+      },
+      (xhr: XMLHttpRequest) => {
+        if (xhr.status === 200) {
+          Success({ msg: "Cover image updated." });
+        } else {
+          Notification.Error({
+            msg: "Something went wrong!",
+          });
+          setIsUploading(false);
         }
-      );
-      if (response.status === 200) {
-        Success({ msg: "Cover image updated." });
-      } else {
+      },
+      null,
+      () => {
         Notification.Error({
-          msg: "Something went wrong!",
+          msg: "Network Failure. Please check your internet connectivity.",
         });
         setIsUploading(false);
       }
-    } catch (e) {
-      Notification.Error({
-        msg: "Network Failure. Please check your internet connectivity.",
-      });
-      setIsUploading(false);
-    }
+    );
 
     await sleep(1000);
     setIsUploading(false);
