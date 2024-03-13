@@ -4,13 +4,13 @@ on:
   push:
     branches:
       - develop
-      - master
+      - staging
     tags:
       - v*
   pull_request:
     branches:
       - develop
-      - master
+      - staging
   workflow_dispatch:
 
 concurrency:
@@ -89,8 +89,8 @@ jobs:
           flavor: |
             latest=false
 
-      - name: Setup QEMU
-        uses: docker/setup-qemu-action@v3
+      # - name: Setup QEMU
+      #   uses: docker/setup-qemu-action@v3
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -123,7 +123,7 @@ jobs:
           file: Dockerfile
           push: true
           provenance: false
-          platforms: linux/amd64,linux/arm64
+          # platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
