@@ -60,6 +60,7 @@ import useAuthUser from "../../Common/hooks/useAuthUser.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
+import SelectMenuV2 from "../Form/SelectMenuV2.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -90,6 +91,7 @@ const vaccines = ["Select", ...VACCINES];
 const initForm: any = {
   name: "",
   age: "",
+  year_of_birth: "",
   gender: "",
   phone_number: "+91",
   emergency_phone_number: "+91",
@@ -196,6 +198,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const [districts, setDistricts] = useState<any[]>([]);
   const [localBody, setLocalBody] = useState<any[]>([]);
   const [ward, setWard] = useState<any[]>([]);
+  const [isDob, setIsDob] = useState<"date_of_birth" | "age" | "alert">(
+    "date_of_birth"
+  );
   const [statusDialog, setStatusDialog] = useState<{
     show?: boolean;
     transfer?: boolean;
@@ -523,7 +528,29 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         case "name":
         case "gender":
         case "date_of_birth":
-          errors[field] = RequiredFieldValidator()(form[field]);
+          if (!form["age"] && !form["date_of_birth"]) {
+            errors[field] = "Please fill the date of birth or age";
+            errors[field] = "Please fill the date of birth or age";
+          } else if (!form["age"]) {
+            errors[field] = RequiredFieldValidator()(form[field]);
+            form["year_of_birth"] = form[field]
+              ? new Date(form[field]).getFullYear()
+              : null;
+          }
+          return;
+        case "age":
+          if (form[field]) {
+            if (form[field] >= 0) {
+              form["year_of_birth"] = new Date().getFullYear() - form[field];
+              form["date_of_birth"] = new Date(
+                new Date().getFullYear() - form[field],
+                0,
+                1
+              );
+            } else {
+              errors[field] = "Please enter valid age";
+            }
+          }
           return;
         case "permanent_address":
           if (!form.sameAddress) {
@@ -701,6 +728,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       emergency_phone_number: parsePhoneNumber(formData.emergency_phone_number),
       date_of_birth: dateQueryString(formData.date_of_birth),
       disease_status: formData.disease_status,
+      year_of_birth: formData.year_of_birth,
       date_of_test: formData.date_of_test ? formData.date_of_test : undefined,
       date_of_result: formData.date_of_result
         ? formData.date_of_result
@@ -1264,17 +1292,92 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               label={"Name"}
                             />
                           </div>
-                          <div
-                            data-testid="date-of-birth"
-                            id="date_of_birth-div"
-                          >
-                            <DateFormField
-                              containerClassName="w-full"
-                              {...field("date_of_birth")}
-                              label="Date of Birth"
-                              required
-                              position="LEFT"
-                              disableFuture
+                          <div>
+                            <div className="pl-1">
+                              {" "}
+                              {isDob == "date_of_birth" || isDob == "alert"
+                                ? "Date of Birth"
+                                : "Age"}{" "}
+                              <span className="text-red-500">*</span>
+                            </div>
+                            <div className="mb-2 grid w-full grid-cols-12 pt-2">
+                              <div className="col-span-2 grid">
+                                <SelectMenuV2
+                                  options={[{ id: 2, text: "Age" }]}
+                                  placeholder="Dob"
+                                  optionLabel={(o: any) => o.text}
+                                  optionValue={(o) => o.id}
+                                  value={isDob == "age" ? 2 : undefined}
+                                  onChange={(v) => {
+                                    setIsDob(
+                                      v != 2 ? "date_of_birth" : "alert"
+                                    );
+                                  }}
+                                />
+                              </div>
+                              <div className="col-span-10 pl-1">
+                                {isDob == "date_of_birth" ||
+                                isDob == "alert" ? (
+                                  <div
+                                    data-testid="date-of-birth"
+                                    id="date_of_birth-div"
+                                  >
+                                    <DateFormField
+                                      containerClassName="w-full"
+                                      {...field("date_of_birth")}
+                                      required
+                                      position="LEFT"
+                                      disableFuture
+                                    />
+                                  </div>
+                                ) : (
+                                  <div id="age-div">
+                                    <TextFormField
+                                      {...field("age")}
+                                      trailing={
+                                        field("age").value !== "" ? (
+                                          <p className="pr-12 text-xs text-gray-700 sm:pr-16 sm:text-sm">
+                                            <span className="inline md:hidden lg:inline">
+                                              Year of Birth :
+                                            </span>
+                                            {new Date().getFullYear() -
+                                              field("age").value}
+                                          </p>
+                                        ) : (
+                                          <p></p>
+                                        )
+                                      }
+                                      placeholder="Enter the age"
+                                      onChange={(e) => {
+                                        field("age").onChange(e);
+                                      }}
+                                      className="col-span-6 sm:col-span-3"
+                                      type="number"
+                                      min={0}
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <ConfirmDialog
+                              title={"Alert!"}
+                              description={
+                                <div>
+                                  <div>
+                                    If You enter Age we will consider only year
+                                    of birth according to your age
+                                  </div>
+                                  <b>
+                                    Recomended only if you forget your date of
+                                    birth
+                                  </b>
+                                </div>
+                              }
+                              action="Confirm"
+                              variant="danger"
+                              show={isDob == "alert"}
+                              onClose={() => setIsDob("date_of_birth")}
+                              onConfirm={() => setIsDob("age")}
                             />
                           </div>
                           <div data-testid="Gender" id="gender-div">
