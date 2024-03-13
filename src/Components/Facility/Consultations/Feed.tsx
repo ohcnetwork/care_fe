@@ -419,7 +419,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               optionValue={(preset: any) => preset}
               value={currentPreset?.meta?.preset_name}
               onChange={(selectedPreset: any) => {
-                console.log(selectedPreset.value);
                 if (selectedPreset.value === undefined) {
                   setCurrentPreset(undefined);
                   return;
