@@ -31,25 +31,26 @@ jobs:
     runs-on: ubuntu-latest
     name: Test
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
       - name: Cache Docker layers
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-build-${{ hashFiles('package-lock.json', 'Dockerfile') }}
+          key: ${{ runner.os }}-buildx-test-${{ hashFiles('package-lock.json', 'Dockerfile') }}
           restore-keys: |
-            ${{ runner.os }}-buildx-build-
+            ${{ runner.os }}-buildx-test-
 
       - name: Test build
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: Dockerfile
           push: false
+          provenance: false
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
 
