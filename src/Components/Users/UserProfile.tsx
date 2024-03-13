@@ -250,7 +250,7 @@ export default function UserProfile() {
             invalidForm = true;
           } else if (
             (states.form.user_type === "Doctor" &&
-              Number(states.form.doctor_experience_commenced_on) > 100) ||
+              Number(states.form.doctor_experience_commenced_on) >= 100) ||
             Number(states.form.doctor_experience_commenced_on) < 0
           ) {
             errors[field] =
