@@ -1303,7 +1303,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             <div className="mb-2 grid w-full grid-cols-12 pt-2">
                               <div className="col-span-2 grid">
                                 <SelectMenuV2
-                                  options={[{ id: 2, text: "Age" }]}
+                                  id="select-menu"
+                                  options={[
+                                    { id: 2, text: "Age", value: "age" },
+                                  ]}
                                   placeholder="Dob"
                                   optionLabel={(o: any) => o.text}
                                   optionValue={(o) => o.id}
@@ -1359,26 +1362,28 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 )}
                               </div>
                             </div>
-                            <ConfirmDialog
-                              title={"Alert!"}
-                              description={
-                                <div>
+                            <div id="age-confirm-dialog">
+                              <ConfirmDialog
+                                title={"Alert!"}
+                                description={
                                   <div>
-                                    If You enter Age we will consider only year
-                                    of birth according to your age
+                                    <div>
+                                      If You enter Age we will consider only
+                                      year of birth according to your age
+                                    </div>
+                                    <b>
+                                      Recomended only if you forget your date of
+                                      birth
+                                    </b>
                                   </div>
-                                  <b>
-                                    Recomended only if you forget your date of
-                                    birth
-                                  </b>
-                                </div>
-                              }
-                              action="Confirm"
-                              variant="danger"
-                              show={isDob == "alert"}
-                              onClose={() => setIsDob("date_of_birth")}
-                              onConfirm={() => setIsDob("age")}
-                            />
+                                }
+                                action="Confirm"
+                                variant="danger"
+                                show={isDob == "alert"}
+                                onClose={() => setIsDob("date_of_birth")}
+                                onConfirm={() => setIsDob("age")}
+                              />
+                            </div>
                           </div>
                           <div data-testid="Gender" id="gender-div">
                             <SelectFormField

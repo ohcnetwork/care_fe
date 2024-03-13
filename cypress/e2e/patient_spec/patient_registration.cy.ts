@@ -29,6 +29,8 @@ describe("Patient Creation with consultation", () => {
   const phone_number = generatePhoneNumber();
   const emergency_phone_number = generateEmergencyPhoneNumber();
   const age = calculateAge();
+  const patientage = "20";
+  const yearOfBirthfromAge = "2004";
   const patientFacility = "Dummy Facility 40";
   const patientDateOfBirth = "01012001";
   const patientOneName = "Patient With No Consultation";
@@ -133,6 +135,66 @@ describe("Patient Creation with consultation", () => {
     cy.visit("/patients");
     patientPage.typePatientNameList(patientOneName);
     patientPage.verifyPatientNameList(patientOneName);
+  });
+
+  it("Create a new patient with all field in registration form with age and verify", () => {
+    // patient details with all the available fields except covid
+    patientPage.createPatient();
+    patientPage.selectFacility(patientFacility);
+    patientPage.patientformvisibility();
+    // Patient Details page
+    patientPage.typePatientPhoneNumber(phone_number);
+    patientPage.typePatientEmergencyNumber(emergency_phone_number);
+    patientPage.typePatientAge(patientage);
+    patientPage.typePatientName(patientOneName);
+    patientPage.selectPatientGender(patientOneGender);
+    patientPage.typePatientAddress(patientOneAddress);
+    facilityPage.fillPincode(patientOnePincode);
+    facilityPage.selectStateOnPincode(patientOneState);
+    facilityPage.selectDistrictOnPincode(patientOneDistrict);
+    facilityPage.selectLocalBody(patientOneLocalbody);
+    facilityPage.selectWard(patientOneWard);
+    // Patient Medical History
+    patientMedicalHistory.typePatientPresentHealth(patientOnePresentHealth);
+    patientMedicalHistory.typePatientOngoingMedication(
+      patientOneOngoingMedication
+    );
+    patientMedicalHistory.typeMedicalHistory(2, "Diabetes");
+    patientMedicalHistory.typeMedicalHistory(3, "Heart Disease");
+    patientMedicalHistory.typeMedicalHistory(4, "HyperTension");
+    patientMedicalHistory.typeMedicalHistory(5, "Kidney Diseases");
+    patientMedicalHistory.typeMedicalHistory(6, "Lung Diseases/Asthma");
+    patientMedicalHistory.typeMedicalHistory(7, "Cancer");
+    patientMedicalHistory.typeMedicalHistory(8, "Other");
+    patientMedicalHistory.typePatientAllergies(patientOneAllergies);
+    patientPage.selectPatientBloodGroup(patientOneBloodGroup);
+    patientPage.clickCreatePatient();
+    patientPage.verifyPatientIsCreated();
+    // Verify the patient details
+    patientPage.clickCancelButton();
+    cy.wait(3000);
+    patientPage.savePatientUrl();
+    patientPage.verifyPatientDashboardDetails(
+      patientOneGender,
+      patientage,
+      patientOneName,
+      phone_number,
+      emergency_phone_number,
+      yearOfBirthfromAge,
+      patientOneBloodGroup
+    );
+    patientMedicalHistory.verifyPatientMedicalDetails(
+      patientOnePresentHealth,
+      patientOneOngoingMedication,
+      patientOneAllergies,
+      "Diabetes",
+      "Heart Disease",
+      "HyperTension",
+      "Kidney Diseases",
+      "Lung Diseases/Asthma",
+      "Cancer",
+      "Other"
+    );
   });
 
   it("Edit the patient details with no consultation and verify", () => {
