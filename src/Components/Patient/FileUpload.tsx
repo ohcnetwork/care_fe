@@ -565,7 +565,9 @@ export const FileUpload = (props: FileUploadProps) => {
     setbtnloader(false);
   };
 
-  const handleSetMicPermission = (isPermitted: boolean) => {
+  const handleSetMicPermission: (isPermitted: boolean) => void = (
+    isPermitted
+  ) => {
     setIsMicPermission(isPermitted);
   };
 
