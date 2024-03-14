@@ -141,21 +141,21 @@ const BedTimelineAsset = ({
         )}
       {newlyLinkedAssets.length > 0 &&
         newlyLinkedAssets.map((newAsset) => (
-          <div className="flex gap-1 text-primary">
+          <div key={newAsset.id} className="flex gap-1 text-primary">
             <CareIcon className="care-l-plus-circle" />
             <span>{newAsset.name}</span>
           </div>
         ))}
       {existingAssets.length > 0 &&
         existingAssets.map((existingAsset) => (
-          <div className="flex gap-1">
+          <div key={existingAsset.id} className="flex gap-1">
             <CareIcon className="care-l-check-circle" />
             <span>{existingAsset.name}</span>
           </div>
         ))}
       {unlinkedAssets.length > 0 &&
         unlinkedAssets.map((unlinkedAsset) => (
-          <div className="flex gap-1 text-gray-500">
+          <div key={unlinkedAsset.id} className="flex gap-1 text-gray-500">
             <CareIcon className="care-l-minus-circle" />
             <span className="line-through">{unlinkedAsset.name}</span>
           </div>
