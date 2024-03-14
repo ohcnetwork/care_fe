@@ -198,9 +198,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const [districts, setDistricts] = useState<any[]>([]);
   const [localBody, setLocalBody] = useState<any[]>([]);
   const [ward, setWard] = useState<any[]>([]);
-  const [isDob, setIsDob] = useState<"date_of_birth" | "age" | "alert">(
-    "date_of_birth"
-  );
+  const [ageInputType, setAgeInputType] = useState<
+    "date_of_birth" | "age" | "alert_for_age"
+  >("date_of_birth");
   const [statusDialog, setStatusDialog] = useState<{
     show?: boolean;
     transfer?: boolean;
@@ -407,7 +407,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             local_body: data.local_body ? data.local_body : "",
             ward: data.ward_object ? data.ward_object.id : undefined,
             village: data.village ? data.village : "",
-            medical_history: [],
+            medical_history: [] as Array<number>,
             is_antenatal: String(!!data.is_antenatal),
             allergies: data.allergies ? data.allergies : "",
             pincode: data.pincode ? data.pincode : "",
@@ -458,7 +458,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               );
               if (medicalHistory) {
                 formData.medical_history.push(Number(medicalHistory.id));
-                formData[`medical_history_${String(medicalHistory.id)}`] =
+                (formData as any)[`medical_history_${medicalHistory.id}`] =
                   i.details;
               }
             }
@@ -527,31 +527,34 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         case "address":
         case "name":
         case "gender":
-        case "date_of_birth":
-          if (!form["age"] && !form["date_of_birth"]) {
-            errors[field] = "Please fill the date of birth or age";
-            errors[field] = "Please fill the date of birth or age";
-          } else if (!form["age"]) {
-            errors[field] = RequiredFieldValidator()(form[field]);
-            form["year_of_birth"] = form[field]
-              ? new Date(form[field]).getFullYear()
-              : null;
-          }
+          errors[field] = RequiredFieldValidator()(form[field]);
           return;
         case "age":
-          if (form[field]) {
-            if (form[field] >= 0) {
-              form["year_of_birth"] = new Date().getFullYear() - form[field];
-              form["date_of_birth"] = new Date(
-                new Date().getFullYear() - form[field],
-                0,
-                1
-              );
-            } else {
-              errors[field] = "Please enter valid age";
-            }
+        case "date_of_birth": {
+          const field = ageInputType === "age" ? "age" : "date_of_birth";
+
+          errors[field] = RequiredFieldValidator()(form[field]);
+          if (errors[field]) {
+            return;
           }
+
+          if (field === "age") {
+            if (form.age < 0) {
+              errors.age = "Age cannot be less than 0";
+              return;
+            }
+
+            form.date_of_birth = null;
+            form.year_of_birth = new Date().getFullYear() - form.age;
+          }
+
+          if (field === "date_of_birth") {
+            form.age = null;
+            form.year_of_birth = null;
+          }
+
           return;
+        }
         case "permanent_address":
           if (!form.sameAddress) {
             errors[field] = RequiredFieldValidator()(form[field]);
@@ -726,9 +729,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       abha_number: state.form.abha_number,
       phone_number: parsePhoneNumber(formData.phone_number),
       emergency_phone_number: parsePhoneNumber(formData.emergency_phone_number),
-      date_of_birth: dateQueryString(formData.date_of_birth),
+      date_of_birth:
+        ageInputType === "date_of_birth"
+          ? dateQueryString(formData.date_of_birth)
+          : null,
+      year_of_birth: ageInputType === "age" ? formData.year_of_birth : null,
       disease_status: formData.disease_status,
-      year_of_birth: formData.year_of_birth,
       date_of_test: formData.date_of_test ? formData.date_of_test : undefined,
       date_of_result: formData.date_of_result
         ? formData.date_of_result
@@ -1293,41 +1299,52 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             />
                           </div>
                           <div>
-                            <div className="pl-1">
-                              {" "}
-                              {isDob == "date_of_birth" || isDob == "alert"
-                                ? "Date of Birth"
-                                : "Age"}{" "}
-                              <span className="text-red-500">*</span>
-                            </div>
-                            <div className="mb-2 grid w-full grid-cols-12 pt-2">
-                              <div className="col-span-2 grid">
-                                <SelectMenuV2
-                                  id="select-menu"
-                                  options={[
-                                    { id: 2, text: "Age", value: "age" },
-                                  ]}
-                                  placeholder="Dob"
-                                  optionLabel={(o: any) => o.text}
-                                  optionValue={(o) => o.id}
-                                  value={isDob == "age" ? 2 : undefined}
-                                  onChange={(v) => {
-                                    setIsDob(
-                                      v != 2 ? "date_of_birth" : "alert"
-                                    );
-                                  }}
-                                />
-                              </div>
-                              <div className="col-span-10 pl-1">
-                                {isDob == "date_of_birth" ||
-                                isDob == "alert" ? (
+                            <FieldLabel required>
+                              {ageInputType === "age" ? "Age" : "Date of Birth"}
+                            </FieldLabel>
+                            <div className="flex w-full items-center gap-2">
+                              <SelectMenuV2
+                                className="w-32"
+                                options={
+                                  [
+                                    {
+                                      value: "date_of_birth",
+                                      text: "D.O.B.",
+                                    },
+                                    { value: "age", text: "Age" },
+                                  ] as const
+                                }
+                                required
+                                optionLabel={(o) => o.text}
+                                optionValue={(o) =>
+                                  o.value === "date_of_birth"
+                                    ? "date_of_birth"
+                                    : "age"
+                                }
+                                value={ageInputType}
+                                onChange={(v) => {
+                                  if (
+                                    v === "age" &&
+                                    ageInputType === "date_of_birth"
+                                  ) {
+                                    setAgeInputType("alert_for_age");
+                                    return;
+                                  }
+                                  setAgeInputType(v);
+                                }}
+                              />
+                              <div className="w-full">
+                                {ageInputType !== "age" ? (
                                   <div
                                     data-testid="date-of-birth"
                                     id="date_of_birth-div"
+                                    className="w-full"
                                   >
                                     <DateFormField
+                                      className="w-full"
                                       containerClassName="w-full"
                                       {...field("date_of_birth")}
+                                      errorClassName="hidden"
                                       required
                                       position="LEFT"
                                       disableFuture
@@ -1337,23 +1354,21 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   <div id="age-div">
                                     <TextFormField
                                       {...field("age")}
+                                      errorClassName="hidden"
                                       trailing={
-                                        field("age").value !== "" ? (
+                                        field("age").value !== "" && (
                                           <p className="pr-12 text-xs text-gray-700 sm:pr-16 sm:text-sm">
                                             <span className="inline md:hidden lg:inline">
-                                              Year of Birth :
+                                              Year of Birth:{" "}
                                             </span>
-                                            {new Date().getFullYear() -
-                                              field("age").value}
+                                            <span className="font-bold">
+                                              {new Date().getFullYear() -
+                                                field("age").value}
+                                            </span>
                                           </p>
-                                        ) : (
-                                          <p></p>
                                         )
                                       }
                                       placeholder="Enter the age"
-                                      onChange={(e) => {
-                                        field("age").onChange(e);
-                                      }}
                                       className="col-span-6 sm:col-span-3"
                                       type="number"
                                       min={0}
@@ -1362,26 +1377,32 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 )}
                               </div>
                             </div>
+                            <FieldErrorText
+                              error={
+                                field("age").error ||
+                                field("date_of_birth").error
+                              }
+                            />
                             <div id="age-confirm-dialog">
                               <ConfirmDialog
                                 title={"Alert!"}
                                 description={
                                   <div>
                                     <div>
-                                      If You enter Age we will consider only
-                                      year of birth according to your age
+                                      If you enter age, system will consider
+                                      only the year of birth as per the age
                                     </div>
                                     <b>
-                                      Recomended only if you forget your date of
-                                      birth
+                                      Recomended only if you date of birth is
+                                      not known
                                     </b>
                                   </div>
                                 }
                                 action="Confirm"
-                                variant="danger"
-                                show={isDob == "alert"}
-                                onClose={() => setIsDob("date_of_birth")}
-                                onConfirm={() => setIsDob("age")}
+                                variant="warning"
+                                show={ageInputType == "alert_for_age"}
+                                onClose={() => setAgeInputType("date_of_birth")}
+                                onConfirm={() => setAgeInputType("age")}
                               />
                             </div>
                           </div>
