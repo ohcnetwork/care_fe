@@ -179,6 +179,22 @@ export default function ManageUsers() {
     });
   };
 
+  const isValidUserType = (): boolean => {
+    const userType: userRole = authUser.user_type;
+    const validUserTypes = [
+      "WardAdmin",
+      "LocalBodyAdmin",
+      "DistrictLabAdmin",
+      "DistrictReadOnlyAdmin",
+      "DistrictAdmin",
+      "StateLabAdmin",
+      "StateReadOnlyAdmin",
+      "StateAdmin",
+    ];
+
+    return validUserTypes.includes(userType);
+  };
+
   let userList: any[] = [];
 
   userListData?.results &&
@@ -206,34 +222,36 @@ export default function ManageUsers() {
                       {user.username}
                     </div>
                   )}
-                  <div className="min-width-50 shrink-0 text-sm text-gray-600">
-                    {user.last_login && cur_online ? (
-                      <span>
-                        {" "}
-                        <CareIcon icon="l-clock" className="text-lg" />{" "}
-                        Currently Online
-                      </span>
-                    ) : (
-                      <>
+                  {isValidUserType() && (
+                    <div className="min-width-50 shrink-0 text-sm text-gray-600">
+                      {user.last_login && cur_online ? (
                         <span>
-                          <CareIcon icon="l-clock" className="text-lg" /> Last
-                          Online:{" "}
+                          {" "}
+                          <CareIcon icon="l-clock" className="text-lg" />{" "}
+                          Currently Online
                         </span>
-                        <span
-                          aria-label="Online"
-                          className={classNames(
-                            "inline-block h-2 w-2 shrink-0 rounded-full",
-                            cur_online ? "bg-primary-400" : "bg-gray-300"
-                          )}
-                        ></span>
-                        <span className="pl-2">
-                          {user.last_login
-                            ? relativeTime(user.last_login)
-                            : "Never"}
-                        </span>
-                      </>
-                    )}
-                  </div>
+                      ) : (
+                        <>
+                          <span>
+                            <CareIcon icon="l-clock" className="text-lg" /> Last
+                            Online:{" "}
+                          </span>
+                          <span
+                            aria-label="Online"
+                            className={classNames(
+                              "inline-block h-2 w-2 shrink-0 rounded-full",
+                              cur_online ? "bg-primary-400" : "bg-gray-300"
+                            )}
+                          ></span>
+                          <span className="pl-2">
+                            {user.last_login
+                              ? relativeTime(user.last_login)
+                              : "Never"}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div
                   id="name"
@@ -241,7 +259,7 @@ export default function ManageUsers() {
                 >
                   {`${user.first_name} ${user.last_name}`}
 
-                  {user.last_login && cur_online ? (
+                  {isValidUserType() && user.last_login && cur_online ? (
                     <div
                       className="h-4 w-4 rounded-full bg-primary-500"
                       aria-label="Online"
@@ -278,7 +296,7 @@ export default function ManageUsers() {
                       value={user.district_object.name}
                     />
                   )}
-                  {user.user_type === "Doctor" && (
+                  {isValidUserType() && user.user_type === "Doctor" && (
                     <>
                       <div className="col-span-1">
                         <UserDetails
@@ -327,7 +345,7 @@ export default function ManageUsers() {
                     </>
                   )}
                 </div>
-                {user.local_body_object && (
+                {isValidUserType() && user.local_body_object && (
                   <UserDetails id="local_body" title="Location">
                     <div className="font-semibold">
                       {user.local_body_object.name}
@@ -355,7 +373,7 @@ export default function ManageUsers() {
                       </UserDetails>
                     </div>
                   )}
-                  {user.username && (
+                  {isValidUserType() && user.username && (
                     <div className="col-span-1">
                       <UserDetails id="home_facility" title="Home Facility">
                         <span className="block font-semibold">
@@ -366,22 +384,24 @@ export default function ManageUsers() {
                     </div>
                   )}
                 </div>
-                <div>
-                  <UserDetails
-                    id="working-hours"
-                    title="Average weekly working hours"
-                  >
-                    {user.weekly_working_hours ? (
-                      <span className="font-semibold">
-                        {user.weekly_working_hours} hours
-                      </span>
-                    ) : (
-                      <span className="text-gray-600">-</span>
-                    )}
-                  </UserDetails>
-                </div>
+                {isValidUserType() && (
+                  <div>
+                    <UserDetails
+                      id="working-hours"
+                      title="Average weekly working hours"
+                    >
+                      {user.weekly_working_hours ? (
+                        <span className="font-semibold">
+                          {user.weekly_working_hours} hours
+                        </span>
+                      ) : (
+                        <span className="text-gray-600">-</span>
+                      )}
+                    </UserDetails>
+                  </div>
+                )}
               </div>
-              {user.username && (
+              {isValidUserType() && user.username && (
                 <div className="mb-0 mt-auto flex w-full flex-col justify-between gap-2 p-4">
                   <div className="flex flex-col gap-2 @sm:flex-row">
                     <ButtonV2
