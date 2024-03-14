@@ -90,7 +90,7 @@ const BedAllocationNode = ({
     type: "allocated",
     timestamp: bed.start_date,
     by: undefined,
-    icon: bed.end_date === null ? "l-map-pin-alt" : "l-bed",
+    icon: "l-bed",
     notes: bed.assets_objects ? (
       <BedTimelineAsset
         assets={bed.assets_objects}
