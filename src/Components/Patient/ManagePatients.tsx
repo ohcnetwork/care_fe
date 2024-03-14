@@ -848,22 +848,21 @@ export const PatientManager = () => {
         }}
       />
 
-      <div className="manualGrid my-4 mb-[-12px] mt-5 grid-cols-1 gap-3 px-2 sm:grid-cols-4 md:px-0">
-        <div className="mt-2 flex h-full flex-col gap-3 xl:flex-row">
-          <div className="flex-1">
-            <CountBlock
-              text="Total Patients"
-              count={data?.count || 0}
-              loading={isLoading}
-              icon="l-user-injured"
-              className="pb-12"
-            />
-          </div>
+      <div className="mt-5">
+        <div className="my-2">
+          <CountBlock
+            text="Total Patients"
+            count={data?.count || 0}
+            loading={isLoading}
+            icon="l-user-injured"
+            className=""
+          />
         </div>
-        <div className="col-span-3 w-full">
-          <div className="col-span-2 mt-2">
-            <div className="mt-1 md:flex md:gap-4">
+        <div className="my-4">
+          <div className="my-4">
+            <div className="gap-4 lg:flex">
               <SearchInput
+                className=""
                 label="Search by Patient"
                 placeholder="Enter patient name"
                 {...queryField("name")}
@@ -875,7 +874,7 @@ export const PatientManager = () => {
                 {...queryField("patient_no")}
               />
             </div>
-            <div className="md:flex md:gap-4">
+            <div className="gap-4 lg:flex">
               <PhoneNumberFormField
                 label="Search by Primary Number"
                 {...queryField("phone_number", "+91")}
@@ -896,6 +895,7 @@ export const PatientManager = () => {
           </div>
         </div>
       </div>
+
       <div className="col-span-3 mt-6 flex flex-wrap">
         <FilterBadges
           badges={({

@@ -266,38 +266,44 @@ export default function ResultList() {
           />
         }
       >
-        <div className="relative my-4 grid-cols-1 gap-5 px-2 sm:grid-cols-3 md:px-0 lg:grid">
-          <CountBlock
-            text="Total Results"
-            count={data?.count || 0}
-            loading={loading}
-            icon="l-clipboard-notes"
-            className="flex-1"
-          />
-          <div className="mt-2">
-            <SearchInput
-              name="name"
-              onChange={(e) => updateQuery({ [e.name]: e.value })}
-              value={qParams.name}
-              placeholder="Search by name"
+        <div className="mt-5 flex flex-col justify-between lg:flex-row lg:items-center">
+          <div className="my-4 md:mr-4 lg:mb-0">
+            <CountBlock
+              text="Total Results"
+              count={data?.count || 0}
+              loading={loading}
+              icon="l-clipboard-notes"
+              className="flex-1"
             />
-            <div className="w-full max-w-sm">
+          </div>
+          <div className="flex flex-col lg:flex-row">
+            <div className="mb-4 w-fit lg:mb-0 lg:mr-4">
+              <SearchInput
+                label="Search by Name"
+                labelClassName="my-2 text-sm font-medium"
+                name="name"
+                onChange={(e) => updateQuery({ [e.name]: e.value })}
+                value={qParams.name}
+                placeholder="Search by name"
+              />
+            </div>
+            <div className="flex max-w-sm items-center">
               <PhoneNumberFormField
                 label="Search by number"
                 name="mobile_number"
-                labelClassName="my-2 text-sm font-medium"
+                labelClassName="my-2 text-sm font-medium grow"
                 value={phone_number}
                 onChange={(e) => setPhoneNum(e.value)}
                 error={phoneNumberError}
                 placeholder="Search by Phone Number"
                 types={["mobile", "landline"]}
               />
+              <div className="ml-4 mt-2">
+                <AdvancedFilterButton
+                  onClick={() => advancedFilter.setShow(true)}
+                />
+              </div>
             </div>
-          </div>
-          <div className="ml-auto mt-4 flex flex-col justify-evenly gap-4 lg:mt-0">
-            <AdvancedFilterButton
-              onClick={() => advancedFilter.setShow(true)}
-            />
           </div>
         </div>
 

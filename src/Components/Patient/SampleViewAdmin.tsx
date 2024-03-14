@@ -317,7 +317,7 @@ export default function SampleViewAdmin() {
       )}
       <div className="mt-5 gap-5 lg:grid lg:grid-cols-1">
         <div className="flex flex-col justify-between gap-6 lg:flex-row">
-          <div className="w-full">
+          <div className="">
             <CountBlock
               text="Total Samples Taken"
               count={sampeleData?.count || 0}
@@ -326,25 +326,29 @@ export default function SampleViewAdmin() {
               className="flex-1"
             />
           </div>
-
-          <div className="flex w-full flex-col gap-3">
+          <div className="flex w-full flex-col gap-3 lg:flex-row">
             <SearchInput
               name="patient_name"
               value={qParams.patient_name}
               onChange={(e) => updateQuery({ [e.name]: e.value })}
               placeholder="Search patient"
+              className="w-full"
             />
-            <SearchInput
-              name="district_name"
-              value={qParams.district_name}
-              onChange={(e) => updateQuery({ [e.name]: e.value })}
-              placeholder="Search by district"
-              secondary
-            />
+            <div className="flex w-full gap-3">
+              <SearchInput
+                name="district_name"
+                value={qParams.district_name}
+                onChange={(e) => updateQuery({ [e.name]: e.value })}
+                placeholder="Search by district"
+                secondary
+                className="w-full"
+              />
+              <AdvancedFilterButton
+                onClick={() => advancedFilter.setShow(true)}
+              />
+              <SampleFilter {...advancedFilter} key={window.location.search} />
+            </div>
           </div>
-
-          <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
-          <SampleFilter {...advancedFilter} key={window.location.search} />
         </div>
         <FilterBadges
           badges={({ badge, value }) => [

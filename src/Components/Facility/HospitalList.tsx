@@ -182,7 +182,7 @@ export const HospitalList = () => {
         />
       }
     >
-      <div className="mt-4 gap-2 lg:flex">
+      <div className="mt-4 gap-2 xl:flex">
         <CountBlock
           text="Total Facilities"
           count={permittedData ? permittedData.count : 0}
@@ -190,7 +190,7 @@ export const HospitalList = () => {
           icon="l-hospital"
           className="flex-1"
         />
-        <div className="my-4 flex grow flex-col justify-between gap-2 sm:flex-row">
+        <div className="my-3 flex items-center gap-2 xl:min-w-[400px]">
           <SearchInput
             name="search"
             value={qParams.search}

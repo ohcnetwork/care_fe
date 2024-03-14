@@ -53,17 +53,15 @@ export default function FiltersSlideover({
 }
 
 export const AdvancedFilterButton = ({ onClick }: { onClick: () => void }) => {
-  const { t } = useTranslation();
   return (
     <ButtonV2
       ghost
       border
-      className="w-full bg-white sm:w-auto"
+      className=" bg-white px-4 py-3"
       onClick={onClick}
       id="advanced-filter"
     >
       <CareIcon className="care-l-filter" />
-      <span className="py-0.5">{t("advanced_filters")}</span>
     </ButtonV2>
   );
 };

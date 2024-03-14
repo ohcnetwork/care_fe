@@ -318,31 +318,32 @@ const AssetsList = () => {
         </>
       }
     >
-      <div className="mt-5 gap-3 space-y-2 lg:flex">
+      <div className="mt-5 items-center justify-evenly gap-2 lg:flex">
         <CountBlock
           text="Total Assets"
           count={totalCount}
           loading={loading}
           icon="l-monitor-heart-rate"
-          className="flex-1"
+          className=""
         />
-        <div className="flex-1">
+        <div className="my-5 grow">
           <SearchInput
             name="search"
             value={qParams.search}
             onChange={(e) => updateQuery({ [e.name]: e.value })}
             placeholder="Search by name/serial no./QR code ID"
+            className="w-full"
           />
         </div>
-        <div className="flex flex-col items-start justify-start gap-2 lg:ml-2">
-          <div className="flex w-full flex-col gap-2 md:flex-row lg:w-auto">
+        <div className="flex items-center gap-2">
+          <div className="flex gap-2">
             <div className="w-full">
               <AdvancedFilterButton
                 onClick={() => advancedFilter.setShow(true)}
               />
             </div>
             <ButtonV2
-              className="w-full py-[11px]"
+              className="w-full py-3"
               onClick={() => setIsScannerActive(true)}
             >
               <CareIcon icon="l-search" className="mr-1 text-base" /> Scan Asset
@@ -355,7 +356,7 @@ const AssetsList = () => {
           >
             <ButtonV2
               authorizeFor={NonReadOnlyUsers}
-              className="inline-flex w-full items-center justify-center"
+              className="inline-flex w-full items-center justify-center py-3"
               onClick={() => {
                 if (qParams.facility) {
                   navigate(`/facility/${qParams.facility}/assets/new`);

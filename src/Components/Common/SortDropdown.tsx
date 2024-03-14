@@ -23,7 +23,7 @@ export default function SortDropdownMenu(props: Props) {
     <DropdownMenu
       title={props.label ?? t("sort_by")}
       variant="secondary"
-      className="border border-primary-500 bg-white"
+      className="border border-primary-500 bg-white p-[10px]"
       icon={<CareIcon className="care-l-sort" />}
     >
       {props.options.map(({ isAscending, value }) => (

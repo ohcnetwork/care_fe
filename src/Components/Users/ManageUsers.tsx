@@ -118,7 +118,7 @@ export default function ManageUsers() {
       className="w-full"
       onClick={() => navigate("/users/add")}
     >
-      <CareIcon icon="l-plus" className="text-lg" />
+      <CareIcon icon="l-plus" className="py-[13.5px] text-lg" />
       <p>{t("add_new_user")}</p>
     </ButtonV2>
   );
@@ -503,7 +503,7 @@ export default function ManageUsers() {
         </div>
       </SlideOverCustom>
 
-      <div className="m-4 mt-5 grid grid-cols-1 sm:grid-cols-3 md:gap-5 md:px-2">
+      <div className="m-4 mt-5 grid grid-cols-1 md:gap-5 md:px-2 lg:grid-cols-3">
         <CountBlock
           text="Total Users"
           count={userListData?.count || 0}
@@ -519,13 +519,14 @@ export default function ManageUsers() {
               onChange={(e) => updateQuery({ [e.name]: e.value })}
               value={qParams.username}
               placeholder={t("search_by_username")}
+              className="w-full"
             />
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="flex w-full gap-2">
+            {userTypes.length && addUser}
             <AdvancedFilterButton
               onClick={() => advancedFilter.setShow(true)}
             />
-            {userTypes.length && addUser}
           </div>
 
           <UserFilter {...advancedFilter} key={window.location.search} />
