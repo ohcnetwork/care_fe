@@ -405,72 +405,39 @@ const getRelativeDateSuffix = (abbreviated: boolean) => {
   };
 };
 
-export const formatAge = (
-  age?: number,
-  date_of_birth?: string,
-  abbreviated = false
-) => {
-  if (!age && !date_of_birth) return undefined;
-  if (!age) age = 0;
-
+export const formatPatientAge = (obj: PatientModel, abbreviated = false) => {
   const suffixes = getRelativeDateSuffix(abbreviated);
 
-  if (age < 1 && date_of_birth) {
-    const dob = new Date(date_of_birth);
-    const today = new Date();
-    const diffTime = Math.abs(today.getTime() - dob.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    const months = Math.floor(diffDays / 30);
-    const days = diffDays % 30;
-    if (months === 0) {
-      return `${days} ${suffixes.day}`;
-    }
-    return `${months} ${suffixes.month} ${days} ${suffixes.day}`;
-  }
-  return `${age} ${suffixes.year}`;
-};
+  const start = dayjs(
+    obj.date_of_birth
+      ? new Date(obj.date_of_birth)
+      : new Date(obj.year_of_birth, 0, 1)
+  );
 
-export const formatPatientAge = (
-  data: Pick<
-    PatientModel,
-    "date_of_birth" | "year_of_birth" | "age" | "age_days"
-  >,
-  abbreviated = false
-) => {
-  const suffixes = getRelativeDateSuffix(abbreviated);
+  const end = dayjs(
+    obj.death_datetime ? new Date(obj.death_datetime) : new Date()
+  );
 
-  if (data.age) {
-    return `${data.age}${suffixes.year}`;
-  }
-
-  const formatAgeFromDays = (ageDays: number) => {
-    const months = Math.floor(ageDays / 30);
-    const days = ageDays % 30;
-
-    if (months) {
-      return `${months}${suffixes.month} ${days}${suffixes.day}`;
-    }
-    return `${days}${suffixes.day}`;
-  };
-
-  // Voluntarily checking if `date_of_birth` non null as age_days could have
-  // value if date_of_birth is null but has `year_of_birth`.
-  if (data.age_days != null && data.date_of_birth) {
-    return formatAgeFromDays(data.age_days);
-  }
-
-  if (data.date_of_birth) {
-    return formatAgeFromDays(
-      dayjs(new Date()).diff(dayjs(data.date_of_birth), "days")
-    );
-  }
-
-  const years = new Date().getFullYear() - data.year_of_birth!;
+  const years = end.diff(start, "years");
   if (years) {
     return `${years}${suffixes.year}`;
   }
 
-  return `${data.year_of_birth} (birth year)`;
+  // Skip representing as no. of months/days if we don't know the date of birth
+  // since it would anyways be inaccurate.
+  if (!obj.date_of_birth) {
+    return abbreviated
+      ? `Born ${obj.year_of_birth}`
+      : `Born on ${obj.year_of_birth}`;
+  }
+
+  const days = end.diff(start, "years");
+  const month = (days / 30) | 0;
+  const day = days % 30;
+  if (month) {
+    return `${month}${suffixes.month} ${day}${suffixes.day}`;
+  }
+  return `${day}${suffixes.day}`;
 };
 
 export const scrollTo = (id: string | boolean) => {

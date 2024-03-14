@@ -15,9 +15,9 @@ import { SampleTestCard } from "./SampleTestCard";
 import Chip from "../../CAREUI/display/Chip";
 import {
   classNames,
-  formatAge,
   formatDate,
   formatDateTime,
+  formatPatientAge,
 } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
@@ -337,12 +337,7 @@ export const PatientHome = (props: any) => {
               <div>
                 <div className="flex flex-row gap-4">
                   <h1 className="flex flex-row pb-3 text-2xl font-bold">
-                    {patientData.name} -{" "}
-                    {formatAge(
-                      patientData.age,
-                      patientData.date_of_birth,
-                      true
-                    )}
+                    {patientData.name} - {formatPatientAge(patientData, true)}
                   </h1>
                   <div className="ml-auto mr-9 flex flex-wrap gap-3">
                     {patientData.is_vaccinated ? (

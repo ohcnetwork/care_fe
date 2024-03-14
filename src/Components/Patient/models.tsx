@@ -111,9 +111,8 @@ export interface PatientModel {
   number_of_doses?: number;
   last_vaccinated_date?: string;
   date_of_birth?: string;
-  year_of_birth?: number;
-  readonly age?: number;
-  readonly age_days?: number;
+  readonly year_of_birth: number;
+  readonly death_datetime: string | null;
   blood_group?: string;
   review_interval?: number;
   review_time?: string;
