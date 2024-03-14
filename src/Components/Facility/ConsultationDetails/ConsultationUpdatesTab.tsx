@@ -10,7 +10,11 @@ import useVitalsAspectRatioConfig from "../../VitalsMonitor/useVitalsAspectRatio
 import { DISCHARGE_REASONS, SYMPTOM_CHOICES } from "../../../Common/constants";
 import PrescriptionsTable from "../../Medicine/PrescriptionsTable";
 import Chip from "../../../CAREUI/display/Chip";
-import { formatAge, formatDate, formatDateTime } from "../../../Utils/utils";
+import {
+  formatDate,
+  formatDateTime,
+  formatPatientAge,
+} from "../../../Utils/utils";
 import ReadMore from "../../Common/components/Readmore";
 import DailyRoundsList from "../Consultations/DailyRoundsList";
 import EventsList from "./Events/EventsList";
@@ -629,12 +633,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                   <div>
                     Age {" - "}
                     <span className="font-semibold">
-                      {props.patientData.age !== undefined // 0 is a valid age, so we need to check for undefined
-                        ? formatAge(
-                            props.patientData.age,
-                            props.patientData.date_of_birth
-                          )
-                        : "-"}
+                      {formatPatientAge(props.patientData)}
                     </span>
                   </div>
                   <div id="patient-weight">

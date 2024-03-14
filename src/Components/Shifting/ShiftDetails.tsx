@@ -15,7 +15,7 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 import Page from "../Common/components/Page";
 import QRCode from "qrcode.react";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
-import { formatAge, formatDateTime } from "../../Utils/utils";
+import { formatDateTime, formatPatientAge } from "../../Utils/utils";
 import useConfig from "../../Common/hooks/useConfig";
 
 import { useTranslation } from "react-i18next";
@@ -24,6 +24,7 @@ import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
 import { ConsultationModel } from "../Facility/models.js";
 import CareIcon from "../../CAREUI/icons/CareIcon.js";
+import { PatientModel } from "../Patient/models.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -94,13 +95,7 @@ export default function ShiftDetails(props: { id: string }) {
       "\n" +
       t("age") +
       ":" +
-      +(
-        formatAge(
-          data?.patient_object?.age,
-          data?.patient_object?.date_of_birth,
-          true
-        ) ?? "-"
-      ) +
+      +formatPatientAge(data.patient_object, true) +
       "\n" +
       t("origin_facility") +
       ":" +
@@ -128,7 +123,7 @@ export default function ShiftDetails(props: { id: string }) {
     setIsCopied(false);
   }, 5000);
 
-  const showPatientCard = (patientData: any) => {
+  const showPatientCard = (patientData: PatientModel) => {
     const patientGender = GENDER_TYPES.find(
       (i) => i.id === patientData?.gender
     )?.text;
@@ -185,7 +180,7 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 {t("age")}:{" "}
               </span>
-              {formatAge(patientData?.age, patientData?.date_of_birth, true)}
+              {formatPatientAge(patientData, true)}
             </div>
           )}
           {patientData?.gender === 2 && patientData?.is_antenatal && (
@@ -370,7 +365,7 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 {t("age")}:{" "}
               </span>
-              {formatAge(patientData.age, patientData.date_of_birth, true)}
+              {formatPatientAge(patientData, true)}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">

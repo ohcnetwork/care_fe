@@ -6,6 +6,7 @@ import {
 import phoneCodesJson from "../Common/static/countryPhoneAndFlags.json";
 import dayjs from "./dayjs";
 import { UserModel } from "../Components/Users/models";
+import { PatientModel } from "../Components/Patient/models";
 
 interface ApacheParams {
   age: number;
@@ -396,6 +397,14 @@ export const getCountryCode = (phoneNumber: string) => {
   return undefined;
 };
 
+const getRelativeDateSuffix = (abbreviated: boolean) => {
+  return {
+    day: abbreviated ? "d" : "days",
+    month: abbreviated ? "mo" : "months",
+    year: abbreviated ? "yr" : "years",
+  };
+};
+
 export const formatAge = (
   age?: number,
   date_of_birth?: string,
@@ -404,9 +413,7 @@ export const formatAge = (
   if (!age && !date_of_birth) return undefined;
   if (!age) age = 0;
 
-  const daySuffix = abbreviated ? "d" : "days";
-  const monthSuffix = abbreviated ? "mo" : "months";
-  const yearSuffix = abbreviated ? "yr" : "years";
+  const suffixes = getRelativeDateSuffix(abbreviated);
 
   if (age < 1 && date_of_birth) {
     const dob = new Date(date_of_birth);
@@ -416,11 +423,54 @@ export const formatAge = (
     const months = Math.floor(diffDays / 30);
     const days = diffDays % 30;
     if (months === 0) {
-      return `${days} ${daySuffix}`;
+      return `${days} ${suffixes.day}`;
     }
-    return `${months} ${monthSuffix} ${days} ${daySuffix}`;
+    return `${months} ${suffixes.month} ${days} ${suffixes.day}`;
   }
-  return `${age} ${yearSuffix}`;
+  return `${age} ${suffixes.year}`;
+};
+
+export const formatPatientAge = (
+  data: Pick<
+    PatientModel,
+    "date_of_birth" | "year_of_birth" | "age" | "age_days"
+  >,
+  abbreviated = false
+) => {
+  const suffixes = getRelativeDateSuffix(abbreviated);
+
+  if (data.age) {
+    return `${data.age}${suffixes.year}`;
+  }
+
+  const formatAgeFromDays = (ageDays: number) => {
+    const months = Math.floor(ageDays / 30);
+    const days = ageDays % 30;
+
+    if (months) {
+      return `${months}${suffixes.month} ${days}${suffixes.day}`;
+    }
+    return `${days}${suffixes.day}`;
+  };
+
+  // Voluntarily checking if `date_of_birth` non null as age_days could have
+  // value if date_of_birth is null but has `year_of_birth`.
+  if (data.age_days != null && data.date_of_birth) {
+    return formatAgeFromDays(data.age_days);
+  }
+
+  if (data.date_of_birth) {
+    return formatAgeFromDays(
+      dayjs(new Date()).diff(dayjs(data.date_of_birth), "days")
+    );
+  }
+
+  const years = new Date().getFullYear() - data.year_of_birth!;
+  if (years) {
+    return `${years}${suffixes.year}`;
+  }
+
+  return `${data.year_of_birth} (birth year)`;
 };
 
 export const scrollTo = (id: string | boolean) => {
