@@ -100,6 +100,14 @@ export class PatientPage {
       });
   }
 
+  selectPatientOccupation(occupation: string) {
+    cy.get("#occupation")
+      .click()
+      .then(() => {
+        cy.get("[role='option']").contains(occupation).click();
+      });
+  }
+
   clickCreatePatient() {
     cy.intercept("POST", "**/api/v1/patient/").as("createPatient");
     cy.get("button[data-testid='submit-button']").click();
@@ -146,7 +154,8 @@ export class PatientPage {
     phoneNumber,
     emergencyPhoneNumber,
     yearOfBirth,
-    bloodGroup
+    bloodGroup,
+    occupation
   ) {
     cy.url().should("include", "/facility/");
     cy.get("[data-testid=patient-dashboard]").then(($dashboard) => {
@@ -157,6 +166,7 @@ export class PatientPage {
       expect($dashboard).to.contain(emergencyPhoneNumber);
       expect($dashboard).to.contain(yearOfBirth);
       expect($dashboard).to.contain(bloodGroup);
+      expect($dashboard).to.contain(occupation);
     });
   }
 
