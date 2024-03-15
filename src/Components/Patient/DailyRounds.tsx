@@ -224,9 +224,9 @@ export const DailyRounds = (props: any) => {
                   (i) => i.text === dailyReportsData?.results[0].rhythm
                 )?.id) ||
               "0",
-            temperature: parseFloat(
-              dailyReportsData?.results[0].temperature || "0"
-            ),
+            temperature: dailyReportsData?.results[0].temperature
+              ? parseFloat(dailyReportsData?.results[0].temperature)
+              : null,
           },
         };
       }
