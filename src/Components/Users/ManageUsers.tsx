@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { navigate } from "raviger";
-import { lazy, useState } from "react";
+import { lazy, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -73,8 +73,7 @@ export default function ManageUsers() {
   const [weeklyHoursError, setWeeklyHoursError] = useState<string>("");
 
   const extremeSmallScreenBreakpoint = 320;
-  const isExtremeSmallScreen =
-    width <= extremeSmallScreenBreakpoint ? true : false;
+  const isExtremeSmallScreen = width <= extremeSmallScreenBreakpoint;
 
   const {
     data: userListData,
@@ -92,15 +91,24 @@ export default function ManageUsers() {
       phone_number: qParams.phone_number,
       alt_phone_number: qParams.alt_phone_number,
       user_type: qParams.user_type,
-      district_id: qParams.district_id,
+      district_id: qParams.district,
     },
   });
+
+  useEffect(() => {
+    if (!qParams.state && qParams.district) {
+      advancedFilter.removeFilters(["district"]);
+    }
+    if (!qParams.district && qParams.state) {
+      advancedFilter.removeFilters(["state"]);
+    }
+  }, [advancedFilter, qParams]);
 
   const { data: districtData, loading: districtDataLoading } = useQuery(
     routes.getDistrict,
     {
-      prefetch: !!qParams.district_id,
-      pathParams: { id: qParams.district_id },
+      prefetch: !!qParams.district,
+      pathParams: { id: qParams.district },
     }
   );
 
@@ -535,8 +543,8 @@ export default function ManageUsers() {
             badge("Role", "user_type"),
             value(
               "District",
-              "district_id",
-              qParams.district_id ? districtData?.name || "" : ""
+              "district",
+              qParams.district ? districtData?.name || "" : ""
             ),
           ]}
         />
