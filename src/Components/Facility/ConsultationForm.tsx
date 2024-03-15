@@ -761,7 +761,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         weight: Number(state.form.weight),
         height: Number(state.form.height),
         bed: bed && bed instanceof Array ? bed[0]?.id : bed?.id,
-        patient_no: state.form.patient_no,
+        patient_no: state.form.patient_no || null,
       };
 
       const res = await dispatchAction(
