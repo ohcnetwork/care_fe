@@ -615,6 +615,7 @@ export const PatientHome = (props: any) => {
                   DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id && (
                   <div>
                     <ButtonV2
+                      id="death-report"
                       className="mt-6 w-full"
                       name="death_report"
                       onClick={() => navigate(`/death_report/${id}`)}
@@ -1374,6 +1375,7 @@ export const PatientHome = (props: any) => {
                     isLastConsultation={
                       item.id == patientData.last_consultation?.id
                     }
+                    refetch={refetch}
                   />
                 )}
               </PaginatedList.Items>

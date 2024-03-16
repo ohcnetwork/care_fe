@@ -16,5 +16,22 @@
   "NORMAL": "Normal",
   "VENTILATOR": "Critical Care",
   "AUTOMATED": "Automated",
-  "TELEMEDICINE": "Telemedicine"
+  "TELEMEDICINE": "Telemedicine",
+  "investigations": "Investigations",
+  "search_investigation_placeholder": "Search Investigation & Groups",
+  "save_investigation": "Save Investigation",
+  "investigation_reports": "Investigation Reports",
+  "no_investigation": "No investigation Reports found",
+  "investigations_suggested": "Investigations Suggested",
+  "to_be_conducted": "To be conducted",
+  "log_report": "Log Report",
+  "no_investigation_suggestions": "No Investigation Suggestions",
+  "select_investigation": "Select Investigations (all investigations will be selected by default)",
+  "select_investigations": "Select Investigations",
+  "get_tests": "Get Tests",
+  "select_investigation_groups": "Select Investigation Groups",
+  "select_groups": "Select Groups",
+  "generate_report": "Generate Report",
+  "prev_sessions": "Prev Sessions",
+  "next_sessions": "Next Sessions"
 }

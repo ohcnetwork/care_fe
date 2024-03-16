@@ -58,7 +58,10 @@ export default function DiagnosesListAccordion(props: Props) {
         <h3 className="my-2 text-lg font-semibold leading-relaxed text-gray-900">
           Diagnoses
         </h3>
-        <div className="grid grid-cols-1 items-start gap-2 lg:grid-cols-2 2xl:grid-cols-3">
+        <div
+          className="grid grid-cols-1 items-start gap-2 lg:grid-cols-2 2xl:grid-cols-3"
+          id="diagnoses-view"
+        >
           {Object.entries(diagnoses).map(
             ([status, diagnoses]) =>
               !!diagnoses.length && (
