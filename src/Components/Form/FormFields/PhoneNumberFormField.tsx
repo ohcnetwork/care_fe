@@ -14,7 +14,7 @@ import {
   PhoneNumberValidator,
   PhoneNumberType,
 } from "../FieldValidators";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
+import CareIcon, { IconName } from "../../../CAREUI/icons/CareIcon";
 
 const phoneCodes: Record<string, CountryData> = phoneCodesJson;
 
@@ -115,9 +115,15 @@ export default function PhoneNumberFormField(props: Props) {
             {country?.flag ?? "🇮🇳"}
           </span>
           {isOpen ? (
-            <CareIcon className="care-l-angle-up absolute right-1 top-1/2 -translate-y-1/2 text-2xl font-bold " />
+            <CareIcon
+              icon="l-angle-up"
+              className="absolute right-1 top-1/2 -translate-y-1/2 text-2xl font-bold"
+            />
           ) : (
-            <CareIcon className="care-l-angle-down absolute right-1 top-1/2 -translate-y-1/2 text-2xl font-bold " />
+            <CareIcon
+              icon="l-angle-down"
+              className="absolute right-1 top-1/2 -translate-y-1/2 text-2xl font-bold"
+            />
           )}
         </div>
 
@@ -146,7 +152,7 @@ export default function PhoneNumberFormField(props: Props) {
   );
 }
 
-const phoneNumberTypeIcons: Record<PhoneNumberType, string> = {
+const phoneNumberTypeIcons: Record<PhoneNumberType, IconName> = {
   international_mobile: "l-globe",
   indian_mobile: "l-mobile-android",
   mobile: "l-mobile-android",
@@ -159,10 +165,8 @@ const PhoneNumberTypesHelp = ({ types }: { types: PhoneNumberType[] }) => (
     {types.map((type) => (
       <span key={type} className="tooltip mt-1">
         <CareIcon
-          className={classNames(
-            `care-${phoneNumberTypeIcons[type]}`,
-            "text-lg text-gray-500"
-          )}
+          icon={phoneNumberTypeIcons[type]}
+          className="text-lg text-gray-500"
         />
         <span className="tooltip-text tooltip-bottom -translate-x-1/2 translate-y-1 text-xs capitalize">
           {type.replace("_", " ")}

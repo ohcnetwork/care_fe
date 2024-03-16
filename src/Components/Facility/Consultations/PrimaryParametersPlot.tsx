@@ -229,9 +229,15 @@ export const PrimaryParametersPlot = ({
                               }`}
                             >
                               {rhythmDetails.rhythm === 5 ? (
-                                <CareIcon className="care-l-check-circle text-xl" />
+                                <CareIcon
+                                  icon="l-check-circle"
+                                  className="text-xl"
+                                />
                               ) : (
-                                <CareIcon className="care-l-times-circle text-xl" />
+                                <CareIcon
+                                  icon="l-times-circle"
+                                  className="text-xl"
+                                />
                               )}
                             </span>
                           </div>

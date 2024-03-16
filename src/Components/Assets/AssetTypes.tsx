@@ -1,3 +1,4 @@
+import { IconName } from "../../CAREUI/icons/CareIcon";
 import { BedModel } from "../Facility/models";
 import { PerformedByModel } from "../HCX/misc";
 import { PatientModel } from "../Patient/models";
@@ -42,7 +43,13 @@ export const AssetStatus = {
   maintenance: "Under Maintenance",
 };
 
-export const assetClassProps = {
+export const assetClassProps: {
+  [key in AssetClass]: {
+    name: string;
+    description?: string;
+    icon: IconName;
+  };
+} = {
   ONVIF: {
     name: "ONVIF Camera",
     description: "",

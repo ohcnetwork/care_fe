@@ -742,7 +742,7 @@ export const GENDER: { [key: number]: string } = GENDER_TYPES.reduce(
 );
 
 export type CameraPTZ = {
-  icon?: string;
+  icon?: IconName;
   label: string;
   action: string;
   loadingLabel?: string;

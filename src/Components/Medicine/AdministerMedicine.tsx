@@ -33,14 +33,14 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
     <ConfirmDialog
       action={
         <>
-          <CareIcon className="care-l-syringe text-lg" />
+          <CareIcon icon="l-syringe" className="text-lg" />
           {t("administer_medicine")}
         </>
       }
       title={t("administer_medicine")}
       description={
         <div className="text-sm font-semibold leading-relaxed text-gray-600">
-          <CareIcon className="care-l-history-alt pr-1" /> Last administered
+          <CareIcon icon="l-history-alt" className="pr-1" /> Last administered
           <span className="pl-1">
             {prescription.last_administered_on
               ? formatDateTime(prescription.last_administered_on)

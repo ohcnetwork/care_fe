@@ -1,6 +1,6 @@
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
 import { AssetData } from "./AssetTypes";
-import { classNames, formatDate } from "../../Utils/utils";
+import { formatDate } from "../../Utils/utils";
 import CopyToClipboard from "react-copy-to-clipboard";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
@@ -52,7 +52,7 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
                           {t("copied_to_clipboard")}
                         </span>
                       ) : (
-                        <CareIcon className="care-l-copy text-lg" />
+                        <CareIcon icon="l-copy" className="text-lg" />
                       )}
                     </CopyToClipboard>
                     <span className="tooltip-text">Copy to clipboard</span>
@@ -85,9 +85,7 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
                       }
                       className="border-b border-primary-300 text-primary-300 hover:text-primary-400"
                     >
-                      <CareIcon
-                        className={classNames(`care-${item[2]}`, "mr-1")}
-                      />
+                      <CareIcon icon={item[2] as IconName} className="mr-1" />
                       {item[1]}
                     </a>
                   </>

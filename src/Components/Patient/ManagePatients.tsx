@@ -503,7 +503,10 @@ export const PatientManager = () => {
               ) : patient.last_consultation?.suggestion === "DC" ? (
                 <div className="flex h-full flex-col items-center justify-center">
                   <div className="tooltip">
-                    <CareIcon className="care-l-estate text-3xl text-gray-500" />
+                    <CareIcon
+                      icon="l-estate"
+                      className="text-3xl text-gray-500"
+                    />
                     <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-sm font-medium">
                       Domiciliary Care
                     </span>
@@ -744,7 +747,7 @@ export const PatientManager = () => {
               }}
               className="w-full lg:w-fit"
             >
-              <CareIcon className="care-l-plus text-lg" />
+              <CareIcon icon="l-plus" className="text-lg" />
               <p id="add-patient-div" className="lg:my-[2px]">
                 Add Patient Details
               </p>
@@ -773,7 +776,7 @@ export const PatientManager = () => {
                   setShowDoctors(true);
                 }}
               >
-                <CareIcon className="care-l-phone text-lg" />
+                <CareIcon icon="l-phone" className="text-lg" />
                 <p className="lg:my-[2px]">Doctor Connect</p>
               </ButtonV2>
             )}
@@ -803,7 +806,7 @@ export const PatientManager = () => {
                   }}
                   className="mr-5 w-full lg:w-fit"
                 >
-                  <CareIcon className="care-l-export" />
+                  <CareIcon icon="l-export" />
                   <span className="lg:my-[3px]">Export</span>
                 </ButtonV2>
               ) : (

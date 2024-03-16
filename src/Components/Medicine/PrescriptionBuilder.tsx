@@ -79,7 +79,7 @@ export default function PrescriptionBuilder({
         disabled={disabled}
       >
         <div className="flex w-full justify-start gap-2">
-          <CareIcon className="care-l-plus text-lg" />
+          <CareIcon icon="l-plus" className="text-lg" />
           <span className="font-bold">
             {t(is_prn ? "add_prn_prescription" : "add_prescription_medication")}
           </span>
@@ -94,7 +94,7 @@ export default function PrescriptionBuilder({
           )}
           description={
             <div className="mt-2 flex w-full justify-start gap-2 text-warning-500">
-              <CareIcon className="care-l-exclamation-triangle text-base" />
+              <CareIcon icon="l-exclamation-triangle" className="text-base" />
               <span>{t("modification_caution_note")}</span>
             </div>
           }

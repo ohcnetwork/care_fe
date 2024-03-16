@@ -6,7 +6,7 @@ import iconData from "./UniconPaths.json";
 export type IconName = keyof typeof iconData;
 
 export interface CareIconProps {
-  icon?: IconName;
+  icon: IconName;
   className?: string | undefined;
   onClick?: React.MouseEventHandler<HTMLSpanElement> | undefined;
   id?: string;
@@ -16,7 +16,7 @@ export interface CareIconProps {
  * ### CARE's Official Icon Library.
  * @param className icon class name
  * @returns icon component
- * @example ```<CareIcon className="care-l-hospital" /> ```
+ * @example ```<CareIcon icon="l-hospital"/> ```
  *
  * @see [icon library](https://iconscout.com/unicons/)
  */

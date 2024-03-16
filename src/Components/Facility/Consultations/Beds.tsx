@@ -127,13 +127,14 @@ const Beds = (props: BedsProps) => {
                 <p className="flex break-words text-xl font-medium capitalize">
                   <span className="mr-2 text-primary-500">
                     <CareIcon
-                      className={`care-${
+                      icon={
                         (
                           (asset.asset_class &&
                             assetClassProps[asset.asset_class]) ||
                           assetClassProps.NONE
                         ).icon
-                      } text-2xl`}
+                      }
+                      className="text-2xl"
                     />
                   </span>
                   <p
@@ -146,11 +147,17 @@ const Beds = (props: BedsProps) => {
               </div>
               <p className="text-sm font-normal">
                 <span className="text-sm font-medium">
-                  <CareIcon className="care-l-location-point mr-1 text-primary-500" />
+                  <CareIcon
+                    icon="l-location-point"
+                    className="mr-1 text-primary-500"
+                  />
                   {asset?.location_object?.name}
                 </span>
                 <span className="ml-2 text-sm font-medium">
-                  <CareIcon className="care-l-hospital mr-1 text-primary-500" />
+                  <CareIcon
+                    icon="l-hospital"
+                    className="mr-1 text-primary-500"
+                  />
                   {asset?.location_object?.facility?.name}
                 </span>
               </p>
@@ -178,7 +185,7 @@ const Beds = (props: BedsProps) => {
               ghost
               onClick={() => props.setState && props.setState(false)}
             >
-              <CareIcon className="care-l-times text-lg" />
+              <CareIcon icon="l-times" className="text-lg" />
             </ButtonV2>
           )}
         </div>

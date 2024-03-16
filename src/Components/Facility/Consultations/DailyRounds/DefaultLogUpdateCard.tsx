@@ -41,7 +41,7 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
           className="w-full"
           onClick={props.onViewDetails}
         >
-          <CareIcon className="care-l-eye text-lg" />
+          <CareIcon icon="l-eye" className="text-lg" />
           <span>{t("view_details")}</span>
         </ButtonV2>
         <ButtonV2
@@ -52,7 +52,7 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
           className="w-full"
           onClick={props.onUpdateLog}
         >
-          <CareIcon className="care-l-pen text-lg" />
+          <CareIcon icon="l-pen" className="text-lg" />
           <span>{t("update_log")}</span>
         </ButtonV2>
       </div>

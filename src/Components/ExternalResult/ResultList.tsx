@@ -245,7 +245,7 @@ export default function ResultList() {
                       label: "Import Results",
                       action: () => navigate("/external_results/upload"),
                       options: {
-                        icon: <CareIcon className="care-l-import" />,
+                        icon: <CareIcon icon="l-import" />,
                       },
                     },
                   ]
@@ -259,7 +259,7 @@ export default function ResultList() {
                   ),
                 filePrefix: "external_results",
                 options: {
-                  icon: <CareIcon className="care-l-export" />,
+                  icon: <CareIcon icon="l-export" />,
                 },
               },
             ]}

@@ -202,7 +202,7 @@ function UserListItem(props: { user: UserAssignedModel }) {
                     <span className="tooltip-text tooltip-left">
                       Connect on WhatsApp
                     </span>
-                    <CareIcon className="care-l-whatsapp h-5 w-5" />
+                    <CareIcon icon="l-whatsapp" className="h-5 w-5" />
                   </div>
                 </a>
                 <a
@@ -221,7 +221,7 @@ function UserListItem(props: { user: UserAssignedModel }) {
                     <span className="tooltip-text tooltip-left">
                       Connect on Phone
                     </span>
-                    <CareIcon className="care-l-phone-alt h-5 w-5" />
+                    <CareIcon icon="l-phone-alt" className="h-5 w-5" />
                   </div>
                 </a>
               </div>
@@ -251,7 +251,7 @@ function UserListItem(props: { user: UserAssignedModel }) {
                   <span className="tooltip-text tooltip-top">
                     Copy Phone number
                   </span>
-                  <CareIcon className="care-l-clipboard h-5 w-5" />
+                  <CareIcon icon="l-clipboard" className="h-5 w-5" />
                 </div>
               </a>
               <span>{user.alt_phone_number}</span>
