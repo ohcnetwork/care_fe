@@ -7,12 +7,12 @@ export class ManageUserPage {
     cy.get("#facilities").click();
   }
 
-  typeFacilityName(facilityName) {
-    cy.get("input[name='facility']").click().type(facilityName);
+  selectFacilityFromDropdown(facilityName) {
+    cy.searchAndSelectOption("input[name='facility']", facilityName);
   }
 
-  selectFacilityFromDropdown(facilityName) {
-    cy.get("[role='option']").contains(facilityName).click();
+  selectSkillFromDropdown(skill) {
+    cy.searchAndSelectOption("input[name='skill']", skill);
   }
 
   clickLinkFacility() {
@@ -36,7 +36,7 @@ export class ManageUserPage {
   }
 
   assertFacilityNotInDropdown(facilityName) {
-    this.typeFacilityName(facilityName);
+    cy.get("input[name='facility']").click().type(facilityName);
     cy.get("[role='option']").should("not.exist");
   }
 
@@ -127,10 +127,6 @@ export class ManageUserPage {
     cy.get("#doctor-connect-home-doctor")
       .contains(skillName)
       .should("have.length", 1);
-  }
-
-  typeSkill(skillName) {
-    cy.get("#select-skill").click().type(skillName);
   }
 
   clickDoctorConnectButton() {
