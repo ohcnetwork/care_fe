@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { AssetData, ResolvedMiddleware } from "../AssetTypes";
 import * as Notification from "../../../Utils/Notifications.js";
 import { BedModel } from "../../Facility/models";
-import axios from "axios";
 import { getCameraConfig } from "../../../Utils/transformUtils";
 import CameraConfigure from "../configure/CameraConfigure";
 import Loading from "../../Common/Loading";
@@ -100,13 +99,18 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
     };
     try {
       setLoadingAddPreset(true);
-      const presetData = await axios.get(
+
+      const response = await fetch(
         `https://${resolvedMiddleware?.hostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
       );
+      if (!response.ok) {
+        throw new Error("Network error");
+      }
+      const presetData = await response.json();
 
       const { res } = await request(routes.createAssetBed, {
         body: {
-          meta: { ...data, ...presetData.data },
+          meta: { ...data, ...presetData },
           asset: assetId,
           bed: bed?.id as string,
         },

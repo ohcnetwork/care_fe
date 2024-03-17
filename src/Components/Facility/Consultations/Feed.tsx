@@ -362,7 +362,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                     position: data?.position,
                   },
                 },
-                pathParams: { id: currentPreset?.id },
+                pathParams: { external_id: currentPreset?.id },
               }
             );
             if (res && assetBedData && res.status === 200) {
