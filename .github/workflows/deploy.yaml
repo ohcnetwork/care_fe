@@ -4,13 +4,13 @@ on:
   push:
     branches:
       - develop
-      - master
+      - staging
     tags:
       - v*
   pull_request:
     branches:
       - develop
-      - master
+      - staging
   workflow_dispatch:
 
 concurrency:
