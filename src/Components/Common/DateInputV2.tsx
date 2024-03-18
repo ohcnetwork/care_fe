@@ -159,6 +159,22 @@ const DateInputV2: React.FC<Props> = ({
     return true;
   };
 
+  const isDateWithinLimits = (parsedDate: dayjs.Dayjs): boolean => {
+    if (parsedDate?.isValid()) {
+      if (
+        (max && parsedDate.toDate() > max) ||
+        (min && parsedDate.toDate() < min)
+      ) {
+        Notification.Error({
+          msg: outOfLimitsErrorMessage ?? "Cannot select date out of range",
+        });
+        return false;
+      }
+      return true;
+    }
+    return false;
+  };
+
   const isSelectedMonth = (month: number) =>
     month === datePickerHeaderDate.getMonth();
 
@@ -261,7 +277,7 @@ const DateInputV2: React.FC<Props> = ({
                       onChange={(e) => {
                         setDisplayValue(e.target.value.replaceAll("/", ""));
                         const value = dayjs(e.target.value, "DD/MM/YYYY", true);
-                        if (value.isValid()) {
+                        if (isDateWithinLimits(value)) {
                           onChange(value.toDate());
                           close();
                           setIsOpen?.(false);
