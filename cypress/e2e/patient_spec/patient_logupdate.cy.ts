@@ -59,12 +59,18 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.submitButton("Save");
     cy.verifyNotification("Consultation Updates details created successfully");
     // verify the copied previous value
-    cy.verifyContentPresence("#basic-information", [additionalSymptoms]);
-    patientLogupdate.clickVitals();
-    cy.wait(3000);
-    cy.get("#bp-chart canvas")
-      .trigger("mousemove", { clientX: 100, clientY: 150 }) // Use the actual selector for the tooltip
-      .should("contain", "119");
+    cy.closeNotification();
+    patientLogupdate.clickLogupdate();
+    patientLogupdate.clickCopyPreviousValue();
+    patientLogupdate.selectPatientCategory(patientCategory);
+    cy.submitButton("Save");
+    cy.closeNotification();
+    cy.verifyContentPresence("#physical_examination_info", [
+      physicalExamination,
+    ]);
+    cy.verifyContentPresence("#rhythm_detail", [patientRhythm]);
+    cy.submitButton("Continue");
+    cy.verifyNotification("Consultation Updates details updated successfully");
   });
 
   it("Create a new log normal update for a domicilary care patient and edit it", () => {
@@ -140,6 +146,13 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.get("#consciousness_level-2").click();
     cy.submitButton("Save");
     cy.verifyNotification("Consultation Updates details created successfully");
+    // Verify the card content
+    cy.verifyContentPresence("#basic-information", [additionalSymptoms]);
+    patientLogupdate.clickVitals();
+    cy.verifyContentPresence("#vital-section", [
+      patientRhythm,
+      patientRhythmType,
+    ]);
   });
 
   afterEach(() => {
