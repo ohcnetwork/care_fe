@@ -15,17 +15,12 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
   const physicalExamination = "physical examination details";
   const otherExamination = "Other";
   const patientSystolic = "119";
-
   const patientDiastolic = "150";
-
   const patientModifiedSystolic = "120";
   const patientModifiedDiastolic = "145";
   const patientPulse = "152";
-
   const patientTemperature = "96.6";
-
   const patientRespiratory = "140";
-
   const patientSpo2 = "15";
   const patientRhythmType = "Regular";
   const patientRhythm = "Normal Rhythm";
