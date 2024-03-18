@@ -10,8 +10,6 @@ const cdnUrls =
     "http://localhost:4566",
   ].join(" ");
 
-  const local_care_api = process.env.CARE_API ?? "http://localhost:9000";
-
 export default defineConfig({
   envPrefix: "REACT_",
   plugins: [
@@ -79,7 +77,7 @@ export default defineConfig({
     port: 4000,
     proxy: {
       "/api": {
-        target: local_care_api ?? "https://careapi.ohc.network",
+        target: process.env.CARE_API ?? "https://careapi.ohc.network",
         changeOrigin: true,
       },
     },
@@ -96,7 +94,7 @@ export default defineConfig({
     port: 4000,
     proxy: {
       "/api": {
-        target: local_care_api ?? "https://careapi.ohc.network",
+        target: process.env.CARE_API ?? "https://careapi.ohc.network",
         changeOrigin: true,
       },
     },
