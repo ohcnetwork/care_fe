@@ -15,12 +15,17 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
   const physicalExamination = "physical examination details";
   const otherExamination = "Other";
   const patientSystolic = "119";
+
   const patientDiastolic = "150";
+
   const patientModifiedSystolic = "120";
   const patientModifiedDiastolic = "145";
   const patientPulse = "152";
+
   const patientTemperature = "96.6";
+
   const patientRespiratory = "140";
+
   const patientSpo2 = "15";
   const patientRhythmType = "Regular";
   const patientRhythm = "Normal Rhythm";
@@ -34,6 +39,37 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.restoreLocalStorage();
     cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/patients");
+  });
+
+  it("Create a new log teleicu update for a domicilary care patient and verify the copy previous value function", () => {
+    patientPage.visitPatient("Dummy Patient 11");
+    patientConsultationPage.clickEditConsultationButton();
+    patientConsultationPage.selectPatientSuggestion("Domiciliary Care");
+    cy.submitButton("Update Consultation");
+    cy.verifyNotification("Consultation updated successfully");
+    patientLogupdate.clickLogupdate();
+    patientLogupdate.typePhysicalExamination(physicalExamination);
+    patientLogupdate.typeOtherDetails(otherExamination);
+    patientLogupdate.typeAdditionalSymptoms(additionalSymptoms);
+    patientLogupdate.selectPatientCategory(patientCategory);
+    patientLogupdate.typeSystolic(patientSystolic);
+    patientLogupdate.typeDiastolic(patientDiastolic);
+    patientLogupdate.typePulse(patientPulse);
+    patientLogupdate.typeTemperature(patientTemperature);
+    patientLogupdate.typeRespiratory(patientRespiratory);
+    patientLogupdate.typeSpo2(patientSpo2);
+    patientLogupdate.selectRhythm(patientRhythmType);
+    patientLogupdate.typeRhythm(patientRhythm);
+    cy.get("#consciousness_level-2").click();
+    cy.submitButton("Save");
+    cy.verifyNotification("Consultation Updates details created successfully");
+    // verify the copied previous value
+    cy.verifyContentPresence("#basic-information", [additionalSymptoms]);
+    patientLogupdate.clickVitals();
+    cy.wait(3000);
+    cy.get("#bp-chart canvas")
+      .trigger("mousemove", { clientX: 100, clientY: 150 }) // Use the actual selector for the tooltip
+      .should("contain", "119");
   });
 
   it("Create a new log normal update for a domicilary care patient and edit it", () => {
@@ -86,31 +122,6 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     ]);
   });
 
-  it("Create a new log teleicu update for a domicilary care patient and verify the copy previous value function", () => {
-    patientPage.visitPatient("Dummy Patient 11");
-    patientConsultationPage.clickEditConsultationButton();
-    cy.wait(5000);
-    patientConsultationPage.selectPatientSuggestion("Domiciliary Care");
-    cy.submitButton("Update Consultation");
-    cy.verifyNotification("Consultation updated successfully");
-    cy.get("#log-update").contains("Log Update").click();
-    patientLogupdate.selectPatientCategory("Abnormal");
-    patientLogupdate.typePhysicalExamination("#physical_examination_info");
-    patientLogupdate.typeOtherDetails("Physical Examination Info");
-    patientLogupdate.typeAdditionalSymptoms("ASYMPTOMATIC");
-    patientLogupdate.typeSystolic("119");
-    patientLogupdate.typeDiastolic("150");
-    patientLogupdate.typePulse("152");
-    patientLogupdate.typeTemperature("96.6");
-    patientLogupdate.typeRespiratory("150");
-    patientLogupdate.typeSpo2("15");
-    patientLogupdate.selectRhythm("Regular");
-    patientLogupdate.typeRhythm("Normal Rhythm");
-    cy.get("#consciousness_level-2").click();
-    cy.submitButton("Save");
-    cy.verifyNotification("Consultation Updates details created successfully");
-  });
-
   it("Create a new log normal update for a admission patient and verify its reflection in cards", () => {
     patientPage.visitPatient("Dummy Patient 13");
     patientLogupdate.clickLogupdate();
@@ -119,18 +130,18 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.submitButton("Move to bed");
     patientLogupdate.clickLogupdate();
     cy.closeNotification();
-    patientLogupdate.selectPatientCategory("Abnormal");
-    patientLogupdate.typePhysicalExamination("#physical_examination_info");
-    patientLogupdate.typeOtherDetails("Physical Examination Info");
-    patientLogupdate.typeAdditionalSymptoms("ASYMPTOMATIC");
-    patientLogupdate.typeSystolic("119");
-    patientLogupdate.typeDiastolic("150");
-    patientLogupdate.typePulse("152");
-    patientLogupdate.typeTemperature("96.6");
-    patientLogupdate.typeRespiratory("150");
-    patientLogupdate.typeSpo2("15");
-    patientLogupdate.selectRhythm("Regular");
-    patientLogupdate.typeRhythm("Normal Rhythm");
+    patientLogupdate.typePhysicalExamination(physicalExamination);
+    patientLogupdate.typeOtherDetails(otherExamination);
+    patientLogupdate.typeAdditionalSymptoms(additionalSymptoms);
+    patientLogupdate.selectPatientCategory(patientCategory);
+    patientLogupdate.typeSystolic(patientSystolic);
+    patientLogupdate.typeDiastolic(patientDiastolic);
+    patientLogupdate.typePulse(patientPulse);
+    patientLogupdate.typeTemperature(patientTemperature);
+    patientLogupdate.typeRespiratory(patientRespiratory);
+    patientLogupdate.typeSpo2(patientSpo2);
+    patientLogupdate.selectRhythm(patientRhythmType);
+    patientLogupdate.typeRhythm(patientRhythm);
     cy.get("#consciousness_level-2").click();
     cy.submitButton("Save");
     cy.verifyNotification("Consultation Updates details created successfully");

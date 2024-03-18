@@ -68,5 +68,10 @@ class PatientLogupdate {
   clickClearButtonInElement(elementId) {
     cy.get(elementId).find("#clear-button").click();
   }
+
+  clickVitals() {
+    cy.get("#consultation_tab_nav").scrollIntoView();
+    cy.verifyAndClickElement("#consultation_tab_nav", "Vitals");
+  }
 }
 export default PatientLogupdate;
