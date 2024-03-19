@@ -35,6 +35,7 @@ export default function NumericWithUnitsFormField(props: Props) {
           autoComplete={props.autoComplete}
           required={field.required}
           value={numValue}
+          disabled={props.disabled}
           onChange={(e) =>
             field.handleChange(Number(e.target.value) + " " + unitValue)
           }
@@ -48,6 +49,7 @@ export default function NumericWithUnitsFormField(props: Props) {
             onChange={(e) =>
               field.handleChange(numValue + " " + e.target.value)
             }
+            disabled={props.disabled}
           >
             {props.units.map((unit) => (
               <option key={unit}>{unit}</option>

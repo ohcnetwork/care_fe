@@ -40,7 +40,11 @@ export default function PrescriptionDetailCard({
               >
                 {prescription.prescription_type === "DISCHARGE" &&
                   `${t("discharge")} `}
-                {t(prescription.is_prn ? "prn_prescription" : "prescription")}
+                {t(
+                  prescription.dosage_type === "PRN"
+                    ? "prn_prescription"
+                    : "prescription"
+                )}
                 {` #${prescription.id?.slice(-5)}`}
               </h3>
               {prescription.discontinued && (
@@ -82,37 +86,64 @@ export default function PrescriptionDetailCard({
           </div>
         </div>
 
-        <div className="mt-4 grid grid-cols-9 items-center gap-2">
-          <Detail className="col-span-9 md:col-span-5" label={t("medicine")}>
+        <div className="mt-4 grid grid-cols-10 items-center gap-2">
+          <Detail
+            className={
+              prescription.dosage_type === "TITRATED"
+                ? "col-span-10"
+                : "col-span-10 md:col-span-4"
+            }
+            label={t("medicine")}
+          >
             {prescription.medicine_object?.name ?? prescription.medicine_old}
           </Detail>
           <Detail
-            className="col-span-5 break-all md:col-span-2"
+            className="col-span-10 break-all sm:col-span-4"
             label={t("route")}
           >
             {prescription.route &&
               t("PRESCRIPTION_ROUTE_" + prescription.route)}
           </Detail>
-          <Detail className="col-span-4 md:col-span-2" label={t("dosage")}>
-            {prescription.dosage}
-          </Detail>
-
-          {prescription.is_prn ? (
+          {prescription.dosage_type === "TITRATED" ? (
             <>
               <Detail
-                className="col-span-9 md:col-span-5"
+                className="col-span-5 sm:col-span-3"
+                label={t("start_dosage")}
+              >
+                {prescription.base_dosage}
+              </Detail>
+              <Detail
+                className="col-span-5 sm:col-span-3"
+                label={t("target_dosage")}
+              >
+                {prescription.target_dosage}
+              </Detail>
+            </>
+          ) : (
+            <Detail
+              className="col-span-10 sm:col-span-6 md:col-span-2"
+              label={t("dosage")}
+            >
+              {prescription.base_dosage}
+            </Detail>
+          )}
+
+          {prescription.dosage_type === "PRN" ? (
+            <>
+              <Detail
+                className="col-span-10 md:col-span-6"
                 label={t("indicator")}
               >
                 {prescription.indicator}
               </Detail>
               <Detail
-                className="col-span-9 md:col-span-2"
+                className="col-span-10 md:col-span-2"
                 label={t("max_dosage_24_hrs")}
               >
                 {prescription.max_dosage}
               </Detail>
               <Detail
-                className="col-span-9 md:col-span-2"
+                className="col-span-10 md:col-span-2"
                 label={t("min_time_bw_doses")}
               >
                 {prescription.min_hours_between_doses &&
@@ -128,21 +159,33 @@ export default function PrescriptionDetailCard({
                       prescription.frequency.toUpperCase()
                   )}
               </Detail>
-              <Detail className="col-span-4" label={t("days")}>
+              <Detail className="col-span-5" label={t("days")}>
                 {prescription.days}
               </Detail>
             </>
           )}
 
+          {prescription.instruction_on_titration && (
+            <Detail
+              className="col-span-10"
+              label={t("instruction_on_titration")}
+            >
+              <ReadMore
+                text={prescription.instruction_on_titration}
+                minChars={120}
+              />
+            </Detail>
+          )}
+
           {prescription.notes && (
-            <Detail className="col-span-9" label={t("notes")}>
+            <Detail className="col-span-10" label={t("notes")}>
               <ReadMore text={prescription.notes} minChars={120} />
             </Detail>
           )}
 
           {prescription.discontinued && (
             <Detail
-              className="col-span-9"
+              className="col-span-10"
               label={t("reason_for_discontinuation")}
             >
               {prescription.discontinued_reason}
