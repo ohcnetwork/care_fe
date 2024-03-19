@@ -5,6 +5,12 @@ class PatientLogupdate {
     cy.wait(2000);
   }
 
+  selectBed(bed: string) {
+    cy.searchAndSelectOption("input[name='bed']", bed);
+    cy.submitButton("Move to bed");
+    cy.wait(2000);
+  }
+
   selectPatientCategory(category: string) {
     cy.clickAndSelectOption("#patient_category", category);
   }
