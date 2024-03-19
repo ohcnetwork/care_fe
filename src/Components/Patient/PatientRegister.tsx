@@ -5,6 +5,7 @@ import {
   DISEASE_STATUS,
   GENDER_TYPES,
   MEDICAL_HISTORY_CHOICES,
+  OCCUPATION_TYPES,
   TEST_TYPE,
   VACCINES,
 } from "../../Common/constants";
@@ -41,7 +42,7 @@ import { HCXPolicyModel } from "../HCX/models";
 import HCXPolicyValidator from "../HCX/validators";
 import InsuranceDetailsBuilder from "../HCX/InsuranceDetailsBuilder";
 import LinkABHANumberModal from "../ABDM/LinkABHANumberModal";
-import { PatientModel } from "./models";
+import { PatientModel, Occupation } from "./models";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
@@ -85,6 +86,7 @@ const medicalHistoryChoices = MEDICAL_HISTORY_CHOICES.reduce(
 const genderTypes = GENDER_TYPES;
 const diseaseStatus = [...DISEASE_STATUS];
 const bloodGroups = [...BLOOD_GROUPS];
+const occupationTypes = OCCUPATION_TYPES;
 const testType = [...TEST_TYPE];
 const vaccines = ["Select", ...VACCINES];
 
@@ -169,6 +171,12 @@ const patientFormReducer = (state = initialState, action: any) => {
     default:
       return state;
   }
+};
+export const parseOccupationFromExt = (occupation: Occupation) => {
+  const occupationObject = OCCUPATION_TYPES.find(
+    (item) => item.value === occupation
+  );
+  return occupationObject?.id;
 };
 
 export const PatientRegister = (props: PatientRegisterProps) => {
@@ -310,6 +318,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           : state.form.gender,
       });
       field.onChange({
+        name: "occupation",
+        value: data.meta_info?.occupation ?? state.form.occupation,
+      });
+      field.onChange({
         name: "test_id",
         value: data.test_id ? data.test_id : state.form.test_id,
       });
@@ -426,6 +438,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               data.instituion_of_health_care_worker
                 ? data.instituion_of_health_care_worker
                 : "",
+            meta_info: data.meta_info ?? {},
+            occupation: data.meta_info?.occupation
+              ? parseOccupationFromExt(data.meta_info.occupation)
+              : null,
 
             number_of_primary_contacts: data.number_of_primary_contacts
               ? data.number_of_primary_contacts
@@ -779,6 +795,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       local_body:
         formData.nationality === "India" ? formData.local_body : undefined,
       ward: formData.ward,
+      meta_info: {
+        ...state.form?.meta_info,
+        occupation: formData.occupation ?? null,
+      },
       village: formData.village,
       address: formData.address ? formData.address : undefined,
       permanent_address: formData.sameAddress
@@ -1646,6 +1666,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   />
                                 )}
                               </div>
+                              <SelectFormField
+                                {...field("occupation")}
+                                label="Occupation"
+                                placeholder="Select Occupation"
+                                options={occupationTypes}
+                                optionLabel={(o) => o.text}
+                                optionValue={(o) => o.id}
+                              />
                             </>
                           ) : (
                             <div id="passport_no-div">

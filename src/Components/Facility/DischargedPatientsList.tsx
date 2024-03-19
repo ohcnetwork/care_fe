@@ -1,4 +1,4 @@
-import { Link, useQueryParams } from "raviger";
+import { Link, navigate, useQueryParams } from "raviger";
 import routes from "../../Redux/api";
 import Page from "../Common/components/Page";
 import PaginatedList from "../../CAREUI/misc/PaginatedList";
@@ -11,12 +11,15 @@ import { GENDER_TYPES } from "../../Common/constants";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { formatPatientAge } from "../../Utils/utils";
+import { useTranslation } from "react-i18next";
+import SwitchTabs from "../Common/components/SwitchTabs";
 
 const DischargedPatientsList = ({
   facility_external_id,
 }: {
   facility_external_id: string;
 }) => {
+  const { t } = useTranslation();
   const facilityQuery = useQuery(routes.getAnyFacility, {
     pathParams: { id: facility_external_id },
   });
@@ -25,18 +28,27 @@ const DischargedPatientsList = ({
 
   return (
     <Page
-      title="Discharged Patients"
+      title={t("discharged_patients")}
       crumbsReplacements={{
         [facility_external_id]: { name: facilityQuery.data?.name },
       }}
       options={
-        <SearchInput
-          className="mr-4 w-full max-w-md"
-          placeholder="Search by patient name"
-          name="name"
-          value={search.name}
-          onChange={debounce((e) => setSearch({ [e.name]: e.value }), 300)}
-        />
+        <>
+          <SearchInput
+            className="mr-4 w-full max-w-sm"
+            placeholder="Search by patient name"
+            name="name"
+            value={search.name}
+            onChange={debounce((e) => setSearch({ [e.name]: e.value }), 300)}
+          />
+          <SwitchTabs
+            tab1="Live"
+            tab2="Discharged"
+            className="mr-4"
+            onClickTab1={() => navigate("/patients")}
+            isTab2Active
+          />
+        </>
       }
     >
       <PaginatedList
@@ -45,9 +57,9 @@ const DischargedPatientsList = ({
         query={search}
       >
         {() => (
-          <div className="flex flex-col gap-4 p-4">
+          <div className="flex flex-col gap-4 py-4 lg:px-4 lg:py-8">
             <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-gray-200 bg-white p-5 text-center text-2xl font-bold text-gray-500">
-              <span>No dischaged patients present in this facility</span>
+              <span>{t("discharged_patients_empty")}</span>
             </PaginatedList.WhenEmpty>
 
             <PaginatedList.WhenLoading>

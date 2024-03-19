@@ -21,13 +21,8 @@ export class PatientPage {
   }
 
   selectFacility(facilityName: string) {
-    cy.get("input[name='facilities']")
-      .type(facilityName)
-      .then(() => {
-        cy.get("[role='option']").contains(facilityName).click();
-      });
-    cy.get("button").should("contain", "Select");
-    cy.get("button").get("#submit").click();
+    cy.searchAndSelectOption("input[name='facilities']", facilityName);
+    cy.submitButton("Select");
   }
 
   interceptCreatePatientAPI() {
@@ -91,19 +86,15 @@ export class PatientPage {
   }
 
   selectPatientGender(gender: string) {
-    cy.get("[data-testid=Gender] button")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains(gender).click();
-      });
+    cy.clickAndSelectOption("[data-testid=Gender] button", gender);
   }
 
   selectPatientBloodGroup(bloodgroup: string) {
-    cy.get("#blood_group")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains(bloodgroup).click();
-      });
+    cy.clickAndSelectOption("#blood_group", bloodgroup);
+  }
+
+  selectPatientOccupation(occupation: string) {
+    cy.clickAndSelectOption("#occupation", occupation);
   }
 
   clickCreatePatient() {
@@ -152,7 +143,8 @@ export class PatientPage {
     phoneNumber,
     emergencyPhoneNumber,
     yearOfBirth,
-    bloodGroup
+    bloodGroup,
+    occupation
   ) {
     cy.url().should("include", "/facility/");
     cy.get("[data-testid=patient-dashboard]").then(($dashboard) => {
@@ -163,6 +155,7 @@ export class PatientPage {
       expect($dashboard).to.contain(emergencyPhoneNumber);
       expect($dashboard).to.contain(yearOfBirth);
       expect($dashboard).to.contain(bloodGroup);
+      expect($dashboard).to.contain(occupation);
     });
   }
 

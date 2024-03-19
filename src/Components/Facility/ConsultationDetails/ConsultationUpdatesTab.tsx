@@ -134,7 +134,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
           </section>
         )}
       <div className="flex flex-col xl:flex-row">
-        <div className="w-full xl:w-2/3">
+        <div className="w-full xl:w-2/3" id="basic-information">
           <PageTitle
             title="Basic Information"
             hideBack={true}
