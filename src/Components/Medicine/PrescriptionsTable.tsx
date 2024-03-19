@@ -38,7 +38,11 @@ export default function PrescriptionsTable({
 
   const { data } = useQuery(MedicineRoutes.listPrescriptions, {
     pathParams: { consultation },
-    query: { is_prn, prescription_type, limit: 100 },
+    query: {
+      dosage_type: is_prn ? "PRN" : "REGULAR,TITRATED",
+      prescription_type,
+      limit: 100,
+    },
   });
 
   const lastModified = data?.results[0]?.modified_date;
@@ -193,8 +197,11 @@ export default function PrescriptionsTable({
                   min_hours_between_doses__pretty:
                     obj.min_hours_between_doses &&
                     obj.min_hours_between_doses + " hour(s)",
-                  last_administered__pretty: obj.last_administered_on ? (
-                    <RecordMeta time={obj.last_administered_on} />
+                  last_administered__pretty: obj.last_administration
+                    ?.administered_date ? (
+                    <RecordMeta
+                      time={obj.last_administration?.administered_date}
+                    />
                   ) : (
                     "never"
                   ),
@@ -275,7 +282,7 @@ export default function PrescriptionsTable({
 const COMMON_TKEYS = {
   medicine: "medicine",
   route: "route__pretty",
-  dosage: "dosage",
+  base_dosage: "base_dosage",
 };
 
 const REGULAR_NORMAL_TKEYS = {

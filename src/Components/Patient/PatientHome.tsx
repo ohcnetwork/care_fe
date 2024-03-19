@@ -5,6 +5,7 @@ import {
   DISCHARGE_REASONS,
   GENDER_TYPES,
   SAMPLE_TEST_STATUS,
+  OCCUPATION_TYPES,
 } from "../../Common/constants";
 
 import * as Notification from "../../Utils/Notifications";
@@ -38,6 +39,10 @@ import request from "../../Utils/request/request";
 import PaginatedList from "../../CAREUI/misc/PaginatedList";
 
 const Loading = lazy(() => import("../Common/Loading"));
+
+export const parseOccupation = (occupation: string | undefined) => {
+  return OCCUPATION_TYPES.find((i) => i.value === occupation)?.text;
+};
 
 export const PatientHome = (props: any) => {
   const { facilityId, id } = props;
@@ -419,7 +424,7 @@ export const PatientHome = (props: any) => {
                   {patientGender} | {patientData.blood_group || "-"}
                 </p>
               </div>
-              <div className="mb-8 mt-2 grid grid-cols-1 items-center gap-x-4 gap-y-2 md:grid-cols-2 md:gap-y-8 lg:grid-cols-3">
+              <div className="mb-8 mt-2 grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-2 md:gap-y-8 lg:grid-cols-4">
                 <div className="sm:col-span-1">
                   <div className="text-sm font-semibold leading-5 text-zinc-400">
                     Date of Birth
@@ -530,6 +535,14 @@ export const PatientHome = (props: any) => {
                       </div>
                     </div>
                   )}
+                <div className="sm:col-span-1">
+                  <div className="text-sm font-semibold leading-5 text-zinc-400">
+                    Occupation
+                  </div>
+                  <div className="mt-1  text-sm font-medium leading-5 ">
+                    {parseOccupation(patientData.meta_info?.occupation) || "-"}
+                  </div>
+                </div>
               </div>
             </div>
           </div>

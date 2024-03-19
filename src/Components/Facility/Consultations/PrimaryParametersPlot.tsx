@@ -147,7 +147,7 @@ export const PrimaryParametersPlot = ({
 
   return (
     <div>
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2" id="vital-section">
         <div className="m-2 overflow-x-auto rounded-lg border bg-white px-4 pt-4 shadow md:w-full">
           <StackedLinePlot title="BP" xData={dates} yData={BPData} />
         </div>

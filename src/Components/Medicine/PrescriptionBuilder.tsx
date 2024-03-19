@@ -31,7 +31,11 @@ export default function PrescriptionBuilder({
 
   const { data, refetch } = useQuery(MedicineRoutes.listPrescriptions, {
     pathParams: { consultation },
-    query: { is_prn, prescription_type, limit: 100 },
+    query: {
+      dosage_type: is_prn ? "PRN" : "REGULAR,TITRATED",
+      prescription_type,
+      limit: 100,
+    },
   });
 
   return (
@@ -118,5 +122,7 @@ export default function PrescriptionBuilder({
   );
 }
 
-const DefaultPrescription: Partial<NormalPrescription> = { is_prn: false };
-const DefaultPRNPrescription: Partial<PRNPrescription> = { is_prn: true };
+const DefaultPrescription: Partial<NormalPrescription> = {
+  dosage_type: "REGULAR",
+};
+const DefaultPRNPrescription: Partial<PRNPrescription> = { dosage_type: "PRN" };
