@@ -151,8 +151,10 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.get("#basic-information").scrollIntoView();
     cy.verifyContentPresence("#basic-information", [additionalSymptoms]);
     patientLogupdate.clickVitals();
-    cy.wait(3000);
-    cy.get("#patientRhythm").scrollIntoView();
+    cy.get("#vital-section")
+      .contains("Rhythm")
+      .should("be.visible")
+      .scrollIntoView();
     cy.verifyContentPresence("#vital-section", [
       patientRhythm,
       patientRhythmType,
