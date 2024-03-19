@@ -46,29 +46,20 @@ const getTempRange = (value?: number) => {
 };
 
 const getLOCLabel = (value: number) => {
-  let retVal = "";
-  if (value == 0) {
-    retVal = "UNKNOWN";
+  if (value % 5 != 0 || (value > 30 && value < 0)) {
+    return;
   }
-  if (value == 5) {
-    retVal = "ALERT";
-  }
-  if (value == 10) {
-    retVal = "RESPONDS_TO_VOICE";
-  }
-  if (value == 15) {
-    retVal = "RESPONDS_TO_PAIN";
-  }
-  if (value == 20) {
-    retVal = "UNRESPONSIVE";
-  }
-  if (value == 25) {
-    retVal = "AGITATED_OR_CONFUSED";
-  }
-  if (value == 30) {
-    retVal = "ONSET_OF_AGITATION_AND_CONFUSION";
-  }
-  return retVal;
+  const LOC = [
+    "UNKNOWN",
+    "ALERT",
+    "RESPONDS_TO_VOICE",
+    "RESPONDS_TO_PAIN",
+    "UNRESPONSIVE",
+    "AGITATED_OR_CONFUSED",
+    "ONSET_OF_AGITATION_AND_CONFUSION",
+  ];
+  const LOCindex = value / 5;
+  return LOC[LOCindex];
 };
 
 const getLOCRange = (value?: DailyRoundsModel["consciousness_level"]) => {

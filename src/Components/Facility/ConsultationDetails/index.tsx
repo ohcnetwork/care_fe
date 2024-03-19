@@ -113,7 +113,7 @@ export const ConsultationDetails = (props: any) => {
             ...res.data,
             symptoms_text: "",
           };
-          if (res?.data?.mews_field) {
+          if (res.data.mews_field) {
             const mewsRes = res.data.mews_field;
             setMewsFields(mewsRes);
           }
