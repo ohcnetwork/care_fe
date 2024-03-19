@@ -18,6 +18,8 @@ interface FacilitySelectProps {
   freeText?: boolean;
   selected?: FacilityModel | FacilityModel[] | null;
   setSelected: (selected: FacilityModel | FacilityModel[] | null) => void;
+  districtCode?: string;
+  stateCode?: string;
 }
 
 export const FacilitySelect = (props: FacilitySelectProps) => {
@@ -35,6 +37,8 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
     district,
     freeText = false,
     errors = "",
+    districtCode = "",
+    stateCode = "",
   } = props;
 
   const facilitySearch = useCallback(
@@ -46,7 +50,8 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
         all: searchAll,
         facility_type: facilityType,
         exclude_user: exclude_user,
-        district,
+        district: districtCode,
+        state: stateCode,
       };
 
       const { data } = await request(

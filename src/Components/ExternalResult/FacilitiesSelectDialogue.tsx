@@ -3,6 +3,7 @@ import DialogModal from "../Common/Dialog";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
 import { useTranslation } from "react-i18next";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
 interface Props {
   show: boolean;
@@ -15,6 +16,7 @@ interface Props {
 const FacilitiesSelectDialog = (props: Props) => {
   const { show, handleOk, handleCancel, selectedFacility, setSelected } = props;
   const { t } = useTranslation();
+  const authUser = useAuthUser();
 
   return (
     <DialogModal
@@ -29,6 +31,16 @@ const FacilitiesSelectDialog = (props: Props) => {
         errors=""
         showAll={false}
         multiple={false}
+        {...(authUser?.user_type === "DistrictAdmin"
+          ? {
+              districtCode: authUser.district?.toString(),
+            }
+          : {})}
+        {...(authUser?.user_type === "StateAdmin"
+          ? {
+              stateCode: authUser.state?.toString(),
+            }
+          : {})}
       />
       <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
         <Cancel onClick={handleCancel} />
