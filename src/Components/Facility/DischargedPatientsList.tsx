@@ -79,7 +79,7 @@ const DischargedPatientsList = ({
             </PaginatedList.Items>
 
             <div className="flex w-full items-center justify-center">
-              <PaginatedList.Paginator />
+              <PaginatedList.Paginator hideIfSinglePage />
             </div>
           </div>
         )}
