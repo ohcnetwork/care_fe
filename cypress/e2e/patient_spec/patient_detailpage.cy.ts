@@ -64,11 +64,10 @@ describe("Patient Details", () => {
     // Login as Nurse 1
     loginPage.login("dummynurse1", "Coronasafe@123");
     cy.reload();
+    cy.wait(2000);
 
     // Visit the patient details page
-    // patientPage.visitPatient("");
-    cy.visit("/users");
-    cy.get("#this-is-for-testing").click();
+    patientPage.visitPatient("Dummy Patient 5");
     patientFileUploadPage.visitPatientDetailsPage();
 
     // Upload the file
