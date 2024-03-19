@@ -130,6 +130,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.searchAndSelectOption("input[name='bed']", "Dummy Bed 6");
     cy.submitButton("Move to bed");
     cy.wait(2000);
+    cy.closeNotification();
     patientLogupdate.clickLogupdate();
     patientLogupdate.typePhysicalExamination(physicalExamination);
     patientLogupdate.typeOtherDetails(otherExamination);
@@ -147,8 +148,10 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.submitButton("Save");
     cy.verifyNotification("Consultation Updates details created successfully");
     // Verify the card content
+    cy.get("#basic-information").scrollIntoView();
     cy.verifyContentPresence("#basic-information", [additionalSymptoms]);
     patientLogupdate.clickVitals();
+    cy.get("#patientRhythm").scrollIntoView();
     cy.verifyContentPresence("#vital-section", [
       patientRhythm,
       patientRhythmType,
