@@ -4,8 +4,8 @@ import { classNames } from "../../../Utils/utils";
 export default function SwitchTabs(props: {
   className?: string;
   isTab2Active: boolean;
-  onClickTab1: () => void;
-  onClickTab2: () => void;
+  onClickTab1?: () => void;
+  onClickTab2?: () => void;
   tab1: ReactNode;
   tab2: ReactNode;
 }) {
