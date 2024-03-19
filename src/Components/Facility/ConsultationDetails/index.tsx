@@ -99,6 +99,7 @@ export const ConsultationDetails = (props: any) => {
     }
   };
   const [showPatientNotesPopup, setShowPatientNotesPopup] = useState(false);
+  const [mewsFields, setMewsFields] = useState();
 
   const authUser = useAuthUser();
 
@@ -112,6 +113,10 @@ export const ConsultationDetails = (props: any) => {
             ...res.data,
             symptoms_text: "",
           };
+          if (res?.data?.mews_field) {
+            const mewsRes = res.data.mews_field;
+            setMewsFields(mewsRes);
+          }
           if (res.data.symptoms?.length) {
             const symptoms = res.data.symptoms
               .filter((symptom: number) => symptom !== 9)
@@ -345,6 +350,7 @@ export const ConsultationDetails = (props: any) => {
               consultationId={consultationId}
               activeShiftingData={activeShiftingData}
               showAbhaProfile={qParams["show-abha-profile"] === "true"}
+              mewsField={mewsFields}
             />
 
             <div className="flex flex-col justify-between px-4 md:flex-row">

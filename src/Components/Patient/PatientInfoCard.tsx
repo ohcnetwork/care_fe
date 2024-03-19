@@ -41,6 +41,7 @@ export default function PatientInfoCard(props: {
   activeShiftingData: any;
   consultationId: string;
   showAbhaProfile?: boolean;
+  mewsField: any;
 }) {
   const authUser = useAuthUser();
   const { t } = useTranslation();
@@ -462,7 +463,13 @@ export default function PatientInfoCard(props: {
         >
           {consultation?.last_daily_round && (
             <div className="col-span-1 flex w-full justify-center bg-white px-4 lg:flex-row">
-              <Mews dailyRound={consultation?.last_daily_round} />
+              <Mews
+                dailyRound={props.mewsField}
+                modified_date={
+                  props.mewsField.modified_date ??
+                  consultation?.last_daily_round?.modified_date
+                }
+              />
             </div>
           )}
           {!!consultation?.discharge_date && (
