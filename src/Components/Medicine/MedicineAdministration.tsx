@@ -6,23 +6,31 @@ import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { Error, Success } from "../../Utils/Notifications";
-import { classNames, formatDateTime } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import dayjs from "../../Utils/dayjs";
 import TextFormField from "../Form/FormFields/TextFormField";
 import request from "../../Utils/request/request";
 import MedicineRoutes from "./routes";
 import useSlug from "../../Common/hooks/useSlug";
+import DosageFormField from "../Form/FormFields/DosageFormField";
+import { AdministrationDosageValidator } from "./validators";
 
 interface Props {
   prescriptions: Prescription[];
   onDone: () => void;
 }
 
+type DosageField = {
+  dosage: MedicineAdministrationRecord["dosage"];
+  error?: string;
+};
+
 export default function MedicineAdministration(props: Props) {
   const { t } = useTranslation();
   const consultation = useSlug("consultation");
   const [shouldAdminister, setShouldAdminister] = useState<boolean[]>([]);
+  const [dosages, setDosages] = useState<DosageField[]>([]);
   const [notes, setNotes] = useState<MedicineAdministrationRecord["notes"][]>(
     []
   );
@@ -39,6 +47,7 @@ export default function MedicineAdministration(props: Props) {
 
   useEffect(() => {
     setShouldAdminister(Array(prescriptions.length).fill(false));
+    setDosages(Array(prescriptions.length).fill({ dosage: undefined }));
     setNotes(Array(prescriptions.length).fill(""));
     setIsCustomTime(Array(prescriptions.length).fill(false));
     setCustomTime(
@@ -47,13 +56,31 @@ export default function MedicineAdministration(props: Props) {
   }, [props.prescriptions]);
 
   const handleSubmit = async () => {
-    const administrations = prescriptions
-      .map((prescription, i) => ({
-        prescription,
-        notes: notes[i],
-        administered_date: isCustomTime[i] ? customTime[i] : undefined,
-      }))
-      .filter((_, i) => shouldAdminister[i]);
+    const administrations = [];
+
+    for (let i = 0; i < prescriptions.length; i++) {
+      if (shouldAdminister[i]) {
+        if (prescriptions[i].dosage_type === "TITRATED") {
+          const error = AdministrationDosageValidator(
+            prescriptions[i].base_dosage,
+            prescriptions[i].target_dosage
+          )(dosages[i].dosage);
+          setDosages((dosages) => {
+            const newDosages = [...dosages];
+            newDosages[i].error = error;
+            return newDosages;
+          });
+          if (error) return;
+        }
+        const administration = {
+          prescription: prescriptions[i],
+          notes: notes[i],
+          dosage: dosages[i].dosage,
+          administered_date: isCustomTime[i] ? customTime[i] : undefined,
+        };
+        administrations.push(administration);
+      }
+    }
 
     const ok = await Promise.all(
       administrations.map(({ prescription, ...body }) =>
@@ -74,7 +101,6 @@ export default function MedicineAdministration(props: Props) {
   };
 
   const selectedCount = shouldAdminister.filter(Boolean).length;
-  const is_prn = prescriptions.some((obj) => obj.is_prn);
 
   return (
     <div className="flex flex-col gap-3">
@@ -85,12 +111,7 @@ export default function MedicineAdministration(props: Props) {
           readonly
           selected={shouldAdminister[index]}
         >
-          <div
-            className={classNames(
-              "mt-4 flex w-full flex-col gap-2 border-t-2 border-dashed border-gray-500 py-2 pt-4 md:ml-4 md:mt-0 md:border-l-2 md:border-t-0 md:pl-4 md:pt-0",
-              is_prn ? "max-w-sm" : "max-w-[600px]"
-            )}
-          >
+          <div className="mt-4 flex w-full max-w-sm flex-col gap-2 border-t-2 border-dashed border-gray-500 py-2 pt-4 md:ml-4 md:mt-0 md:border-l-2 md:border-t-0 md:pl-4 md:pt-0">
             <CheckBoxFormField
               name="should_administer"
               label={t("select_for_administration")}
@@ -108,17 +129,40 @@ export default function MedicineAdministration(props: Props) {
               <CareIcon className="care-l-history-alt pr-1" />{" "}
               {t("last_administered")}
               <span className="pl-1">
-                {obj.last_administered_on
-                  ? formatDateTime(obj.last_administered_on)
+                {obj.last_administration?.administered_date
+                  ? formatDateTime(obj.last_administration?.administered_date)
                   : t("never")}
               </span>
-            </div>
-            <div
-              className={classNames(
-                "flex gap-4",
-                is_prn ? "flex-wrap" : "flex-col lg:flex-row lg:gap-6"
+              {obj.dosage_type === "TITRATED" && (
+                <span className="whitespace-nowrap">
+                  <CareIcon className="care-l-syringe" /> {t("dosage")}
+                  {":"} {obj.last_administration?.dosage ?? "NA"}
+                </span>
               )}
-            >
+            </div>
+            <div className="flex flex-wrap gap-4">
+              {obj.dosage_type === "TITRATED" && (
+                <DosageFormField
+                  name="dosage"
+                  label={
+                    t("dosage") + ` (${obj.base_dosage} - ${obj.target_dosage})`
+                  }
+                  value={dosages[index]?.dosage}
+                  onChange={({ value }) =>
+                    setDosages((dosages) => {
+                      const newDosages = [...dosages];
+                      newDosages[index].dosage = value;
+                      return newDosages;
+                    })
+                  }
+                  required
+                  min={obj.base_dosage}
+                  max={obj.target_dosage}
+                  disabled={!shouldAdminister[index]}
+                  error={dosages[index]?.error}
+                  errorClassName={dosages[index]?.error ? "block" : "hidden"}
+                />
+              )}
               <TextAreaFormField
                 label={t("administration_notes")}
                 className="w-full"
