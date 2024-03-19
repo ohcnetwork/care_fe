@@ -492,7 +492,10 @@ export default function PatientInfoCard(props: {
             {patient.is_active &&
               consultation?.id &&
               !consultation?.discharge_date && (
-                <div className="h-10 min-h-[40px] w-full min-w-[170px] lg:w-auto">
+                <div
+                  className="h-10 min-h-[40px] w-full min-w-[170px] lg:w-auto"
+                  id="log-update"
+                >
                   <ButtonV2
                     variant={
                       !(consultation?.facility !== patient.facility) &&
