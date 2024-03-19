@@ -66,7 +66,7 @@ describe("Patient Details", () => {
     cy.reload();
 
     // Visit the patient details page
-    patientPage.visitPatient("Dummy Patient 5");
+    patientPage.visitPatient("Dummy Patient 7");
     patientFileUploadPage.visitPatientDetailsPage();
 
     // Upload the file
