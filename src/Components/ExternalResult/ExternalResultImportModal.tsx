@@ -66,6 +66,7 @@ export default function ExternalResultImportModal({ open, onClose }: Props) {
         setLoading(false);
       } finally {
         setLoading(false);
+        onClose();
       }
     } else {
       setLoading(false);

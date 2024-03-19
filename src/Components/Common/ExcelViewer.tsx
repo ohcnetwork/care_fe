@@ -211,25 +211,27 @@ const ExcelViewer = ({
             )}
           </div>
           {fileData && fileData.length > 5 && (
-            <div className="relative flex w-full flex-wrap justify-between">
-              <p className="my-6 w-full text-gray-600 md:absolute md:w-auto">
+            <div className="flex w-full flex-wrap items-center justify-between">
+              <p className="my-6 text-gray-600 md:w-auto">
                 Showing {currentPage * rowsPerPage - rowsPerPage + 1} to{" "}
                 {currentPage * rowsPerPage > fileData.length
                   ? fileData.length
                   : currentPage * rowsPerPage}{" "}
                 of {fileData.length} entries
               </p>
-              <Pagination
-                cPage={currentPage}
-                defaultPerPage={rowsPerPage}
-                data={{ totalCount: fileData.length }}
-                onChange={(page, rowsPerPage) => {
-                  setCurrentPage(page);
-                  setRowsPerPage(rowsPerPage);
-                }}
-              />
+              {rowsPerPage < fileData.length && (
+                <Pagination
+                  cPage={currentPage}
+                  defaultPerPage={rowsPerPage}
+                  data={{ totalCount: fileData.length }}
+                  onChange={(page, rowsPerPage) => {
+                    setCurrentPage(page);
+                    setRowsPerPage(rowsPerPage);
+                  }}
+                />
+              )}
               <select
-                className="absolute right-0 my-4 ml-2 h-9 w-[4.5rem] rounded-md border border-primary-400 py-0 pl-2 pr-4 text-gray-600"
+                className="my-4 ml-2 h-9 w-[4.5rem] rounded-md border border-primary-400 py-0 pl-2 pr-4 text-gray-600"
                 value={rowsPerPage}
                 onChange={(e) => {
                   setRowsPerPage(+e.target.value);
