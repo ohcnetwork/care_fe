@@ -66,7 +66,10 @@ describe("Patient Details", () => {
     cy.reload();
 
     // Visit the patient details page
-    patientPage.visitPatient("Dummy Patient 7");
+    // patientPage.visitPatient("");
+    cy.get("#name").click().type("");
+    cy.intercept("GET", "**/api/v1/consultation/**").as("getPatient");
+    cy.get("#this-is-for-testing").click();
     patientFileUploadPage.visitPatientDetailsPage();
 
     // Upload the file
