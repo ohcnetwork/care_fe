@@ -905,8 +905,8 @@ export const FileUpload = (props: FileUploadProps) => {
   }
 
   const onFileChange = (e: ChangeEvent<HTMLInputElement>): any => {
-    if (e.target.files == null) {
-      throw new Error("Error finding e.target.files");
+    if (!e.target.files?.length) {
+      return;
     }
     const f = e.target.files[0];
     const fileName = f.name;
