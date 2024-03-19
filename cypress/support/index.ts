@@ -34,6 +34,10 @@ declare global {
       ): Chainable<Element>;
       preventPrint(): Chainable<Window>;
       closeNotification(): Chainable<Element>;
+      verifyContentPresence(
+        selector: string,
+        texts: string[]
+      ): Chainable<Element>;
     }
   }
 }
