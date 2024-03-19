@@ -87,8 +87,8 @@ export default function BoardView() {
       </div>
 
       <BadgesList {...{ appliedFilters, FilterBadges }} />
-      <ScrollingComponent className="mt-4 flex flex-1 items-start overflow-x-scroll px-4 pb-2 @container">
-        <div className="mt-4 flex flex-1 items-start overflow-x-scroll px-4 pb-2">
+      <ScrollingComponent className="mt-4 flex flex-1 items-start overflow-x-scroll px-0 pb-2 @container">
+        <div className="mt-4 flex flex-1 items-start overflow-x-scroll px-0 pb-2">
           {isLoading ? (
             <Loading />
           ) : (
