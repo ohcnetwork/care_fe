@@ -1,5 +1,5 @@
 import useFullscreen from "../../Common/hooks/useFullscreen";
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
 import HL7PatientVitalsMonitor from "../VitalsMonitor/HL7PatientVitalsMonitor";
 import useFilters from "../../Common/hooks/useFilters";
 import Loading from "../Common/Loading";
@@ -21,6 +21,8 @@ import routes from "../../Redux/api";
 import { getVitalsMonitorSocketUrl } from "../VitalsMonitor/utils";
 
 const PER_PAGE_LIMIT = 6;
+const PER_PAGE_LIMIT_LARGE = 9;
+const LARGE_SCREEN_WIDTH = 2560;
 
 const SORT_OPTIONS: SortOption[] = [
   { isAscending: true, value: "bed__name" },
@@ -34,18 +36,19 @@ interface Props {
 }
 
 export default function CentralNursingStation({ facilityId }: Props) {
+  const [perPageLimit, setPerPageLimit] = useState(PER_PAGE_LIMIT);
   const { t } = useTranslation();
   const [isFullscreen, setFullscreen] = useFullscreen();
   const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
-    limit: PER_PAGE_LIMIT,
+    limit: perPageLimit,
   });
   const query = useQuery(routes.listPatientAssetBeds, {
     pathParams: { facility_external_id: facilityId },
     query: {
       ...qParams,
       page: qParams.page || 1,
-      limit: PER_PAGE_LIMIT,
-      offset: (qParams.page ? qParams.page - 1 : 0) * PER_PAGE_LIMIT,
+      limit: perPageLimit,
+      offset: (qParams.page ? qParams.page - 1 : 0) * perPageLimit,
       asset_class: "HL7MONITOR",
       ordering: qParams.ordering || "bed__name",
       bed_is_occupied:
@@ -54,6 +57,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
   });
 
   const totalCount = query.data?.count ?? 0;
+
   const data = query.data?.results.map((obj) => ({
     patientAssetBed: obj,
     socketUrl: getVitalsMonitorSocketUrl(obj.asset),
@@ -69,6 +73,26 @@ export default function CentralNursingStation({ facilityId }: Props) {
     "2xl": 16 / 11,
     "3xl": 12 / 11,
   });
+
+  useEffect(() => {
+    const updatePerPageLimit = () => {
+      if (window.innerWidth > LARGE_SCREEN_WIDTH) {
+        console.log("hello");
+        setPerPageLimit(PER_PAGE_LIMIT_LARGE);
+      } else {
+        console.log("hii");
+        setPerPageLimit(PER_PAGE_LIMIT);
+      }
+    };
+
+    updatePerPageLimit();
+
+    window.addEventListener("resize", updatePerPageLimit);
+
+    return () => {
+      window.removeEventListener("resize", updatePerPageLimit);
+    };
+  }, []);
 
   return (
     <Page
