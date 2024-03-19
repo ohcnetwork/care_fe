@@ -29,8 +29,6 @@ describe("Patient Creation with consultation", () => {
   const phone_number = generatePhoneNumber();
   const emergency_phone_number = generateEmergencyPhoneNumber();
   const age = calculateAge();
-  const patientage = "20";
-  const yearOfBirthfromAge = "2004";
   const patientFacility = "Dummy Facility 40";
   const patientDateOfBirth = "01012001";
   const patientOneName = "Patient With No Consultation";
@@ -145,7 +143,7 @@ describe("Patient Creation with consultation", () => {
     // Patient Details page
     patientPage.typePatientPhoneNumber(phone_number);
     patientPage.typePatientEmergencyNumber(emergency_phone_number);
-    patientPage.typePatientAge(patientage);
+    patientPage.typePatientAge(age.toString());
     patientPage.typePatientName(patientOneName);
     patientPage.selectPatientGender(patientOneGender);
     patientPage.typePatientAddress(patientOneAddress);
@@ -176,11 +174,11 @@ describe("Patient Creation with consultation", () => {
     patientPage.savePatientUrl();
     patientPage.verifyPatientDashboardDetails(
       patientOneGender,
-      patientage,
+      age,
       patientOneName,
       phone_number,
       emergency_phone_number,
-      yearOfBirthfromAge,
+      yearOfBirth,
       patientOneBloodGroup
     );
     patientMedicalHistory.verifyPatientMedicalDetails(
