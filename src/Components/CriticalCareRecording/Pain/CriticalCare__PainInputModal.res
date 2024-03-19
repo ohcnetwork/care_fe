@@ -142,8 +142,12 @@ let getStatus = (val) => {
               ? <button
                   type_="button"
                   onClick={e => {
-                    updatePart(state)
-                    hideModal(e)
+                    if (painScale == 0.0) {
+                      hideModal(e)
+                    } else {
+                      updatePart(state)
+                      hideModal(e)
+                    }
                   }}
                   className="inline-flex w-full justify-center rounded-md border border-transparent bg-primary-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm">
                   {str("Apply")}
