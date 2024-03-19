@@ -424,7 +424,7 @@ export const PatientHome = (props: any) => {
                   {patientGender} | {patientData.blood_group || "-"}
                 </p>
               </div>
-              <div className="mb-8 mt-2 grid grid-cols-1 items-center gap-x-4 gap-y-2 md:grid-cols-2 md:gap-y-8 lg:grid-cols-3">
+              <div className="mb-8 mt-2 grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-2 md:gap-y-8 lg:grid-cols-4">
                 <div className="sm:col-span-1">
                   <div className="text-sm font-semibold leading-5 text-zinc-400">
                     Date of Birth
