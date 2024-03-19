@@ -129,6 +129,8 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.verifyNotification("Please assign a bed to the patient");
     cy.searchAndSelectOption("input[name='bed']", "Dummy Bed 6");
     cy.submitButton("Move to bed");
+    cy.verifyNotification("Bed allocated successfully");
+    cy.closeNotification();
     patientLogupdate.clickLogupdate();
     cy.closeNotification();
     patientLogupdate.typePhysicalExamination(physicalExamination);

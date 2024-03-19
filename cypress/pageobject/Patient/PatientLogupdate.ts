@@ -1,5 +1,6 @@
 class PatientLogupdate {
   clickLogupdate() {
+    cy.get("##log-update").scrollIntoView();
     cy.verifyAndClickElement("#log-update", "Log Update");
     cy.wait(2000);
   }
