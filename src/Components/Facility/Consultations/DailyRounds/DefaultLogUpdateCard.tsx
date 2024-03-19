@@ -15,7 +15,10 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
   const { t } = useTranslation();
 
   return (
-    <div className="flex w-full flex-col gap-4 rounded-lg border border-gray-400 p-4 @container">
+    <div
+      className="flex w-full flex-col gap-4 rounded-lg border border-gray-400 p-4 @container"
+      id="dailyround-entry"
+    >
       <LogUpdateCardAttribute
         attributeKey={"Round Type" as any}
         attributeValue={t(round.rounds_type)}
