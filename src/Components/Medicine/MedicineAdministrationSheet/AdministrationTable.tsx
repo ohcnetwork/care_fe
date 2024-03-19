@@ -29,7 +29,11 @@ export default function MedicineAdministrationTable({
                 <span className="text-sm">{t("medicine")}</span>
                 <span className="hidden px-2 text-center text-xs leading-none lg:block">
                   <p>Dosage &</p>
-                  <p>{!prescriptions[0]?.is_prn ? "Frequency" : "Indicator"}</p>
+                  <p>
+                    {prescriptions[0]?.dosage_type !== "PRN"
+                      ? "Frequency"
+                      : "Indicator"}
+                  </p>
                 </span>
               </div>
             </th>
