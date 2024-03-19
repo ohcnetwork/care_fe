@@ -141,10 +141,20 @@ const ExcelViewer = ({
                                 {errors.some(
                                   (err) => err.index === currentRowIndex
                                 ) ? (
-                                  <CareIcon
-                                    icon="l-exclamation-triangle"
-                                    className="text-lg text-danger-500"
-                                  />
+                                  <span
+                                    title={`Error in column(s) ${errors
+                                      .filter(
+                                        (err) => err.index === currentRowIndex
+                                      )
+                                      .map((err) => err.key)
+                                      .join(", ")}
+                                      `}
+                                  >
+                                    <CareIcon
+                                      icon="l-exclamation-triangle"
+                                      className="text-lg text-danger-500"
+                                    />
+                                  </span>
                                 ) : (
                                   <input
                                     type="checkbox"
@@ -258,6 +268,7 @@ const ExcelViewer = ({
             handleSubmit(selectedRowsData);
             handleClose();
           }}
+          disabled={selectedRows.length === 0}
           data-testid="import-btn"
         >
           <CareIcon icon="l-file-import" className="text-lg" />
