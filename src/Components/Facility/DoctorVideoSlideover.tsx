@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import SlideOver from "../../CAREUI/interactive/SlideOver";
 import { UserAssignedModel } from "../Users/models";
 import { SkillObjectModel } from "../Users/models";
@@ -6,6 +6,7 @@ import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
 import { relativeTime } from "../../Utils/utils";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { triggerGoal } from "../../Integrations/Plausible";
+import { Warn } from "../../Utils/Notifications";
 import Switch from "../../CAREUI/interactive/Switch";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
@@ -117,6 +118,64 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
   const icon: IconName =
     user.user_type === "Doctor" ? "l-user-md" : "l-user-nurse";
 
+  function connectOnWhatsApp(e: React.MouseEvent<HTMLAnchorElement>) {
+    e.stopPropagation();
+    if (!user.alt_phone_number) return;
+    const phoneNumber = user.alt_phone_number;
+    const message = `Hey ${user.first_name} ${user.last_name}, I have a query regarding a patient.\n\nPatient Link: ${window.location.href}`;
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappAppURL = `whatsapp://send?phone=${phoneNumber}&text=${encodedMessage}`;
+    const whatsappWebURL = `https://web.whatsapp.com/send?phone=${phoneNumber}&text=${encodedMessage}`;
+
+    const userAgent = navigator.userAgent;
+    const isEdge = /edge\/\d+/i.test(userAgent);
+    const isMobileFirefoxOrSafari =
+      /iPhone|iPad|iPod|Android/i.test(userAgent) &&
+      (/Firefox/i.test(userAgent) ||
+        (/Safari/i.test(userAgent) && !/Chrome/i.test(userAgent)));
+    const isSafari = /Safari/i.test(userAgent) && !/Chrome/i.test(userAgent);
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(userAgent);
+
+    const openWhatsAppWebFallback = () => {
+      if (isMobile) {
+        Warn({
+          msg: "Please install WhatsApp to connect with the doctor",
+        });
+      }
+      window.open(whatsappWebURL, "_blank");
+    };
+
+    if (isEdge) {
+      if (navigator.msLaunchUri) {
+        navigator.msLaunchUri(whatsappAppURL, null, openWhatsAppWebFallback);
+      } else {
+        openWhatsAppWebFallback();
+      }
+    } else {
+      const attemptOpenWhatsApp = (url: string) => {
+        if (isMobileFirefoxOrSafari || isSafari) {
+          const iframe = document.createElement("iframe");
+          iframe.style.display = "none";
+          iframe.src = url;
+          document.body.appendChild(iframe);
+        } else {
+          window.location.href = url;
+        }
+      };
+
+      attemptOpenWhatsApp(whatsappAppURL);
+
+      const fallbackTimeout = setTimeout(() => {
+        openWhatsAppWebFallback();
+      }, 1250);
+
+      // Listen for when the window loses focus, indicating app launch success
+      window.addEventListener("blur", () => {
+        clearTimeout(fallbackTimeout);
+      });
+    }
+  }
+
   return (
     <li
       key={user.id}
@@ -130,20 +189,7 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
       role="option"
       tabIndex={-1}
     >
-      <a
-        href={
-          user.alt_phone_number
-            ? `https://api.whatsapp.com/send/?phone=${encodeURIComponent(
-                user.alt_phone_number
-              )}&text=${encodeURIComponent(
-                `Hey ${user.first_name} ${user.last_name}, I have a query regarding a patient.\n\nPatient Link: ${window.location.href}`
-              )}`
-            : "#"
-        }
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex"
-      >
+      <a className="flex" onClick={connectOnWhatsApp}>
         <div className="flex flex-none items-center justify-center sm:h-6 sm:w-6 md:h-10 md:w-10">
           {
             // Show online icon based on last_login
@@ -239,26 +285,7 @@ function DoctorConnectButtons(props: { user: UserAssignedModel }) {
           </div>
         </a>
       )}
-      <a
-        href={
-          user.alt_phone_number
-            ? `https://api.whatsapp.com/send/?phone=${encodeURIComponent(
-                user.alt_phone_number
-              )}&text=${encodeURIComponent(
-                `Hey ${user.first_name} ${user.last_name}, I have a query regarding a patient.\n\nPatient Link: ${window.location.href}`
-              )}`
-            : "#"
-        }
-        onClick={() => {
-          triggerGoal("Doctor Connect Click", {
-            medium: "WhatsApp",
-            userId: authUser.id,
-            targetUserType: user.user_type,
-          });
-        }}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
+      <a onClick={connectOnWhatsApp}>
         <div className="tooltip">
           <span className="tooltip-text tooltip-right">
             Connect on WhatsApp
