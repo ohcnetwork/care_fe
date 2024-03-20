@@ -402,8 +402,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       if (!status.aborted) {
         if (res?.ok && data) {
           setPatientName(data.name || "");
+          if (data.year_of_birth) {
+            setAgeInputType("age");
+          }
           const formData = {
             ...data,
+            age: data.year_of_birth
+              ? new Date().getFullYear() - data.year_of_birth
+              : "",
             health_id_number: data.abha_number_object?.abha_number || "",
             health_id: data.abha_number_object?.health_id || "",
             nationality: data.nationality ? data.nationality : "India",
@@ -1325,7 +1331,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             <div className="flex w-full items-center gap-2">
                               <SelectMenuV2
                                 id="age-input-type-selector"
-                                className="w-32"
+                                className="w-44 lg:w-32"
                                 options={
                                   [
                                     {
@@ -1377,17 +1383,17 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                       {...field("age")}
                                       errorClassName="hidden"
                                       trailing={
-                                        field("age").value !== "" && (
-                                          <p className="pr-12 text-xs text-gray-700 sm:pr-16 sm:text-sm">
-                                            <span className="inline md:hidden lg:inline">
-                                              Year of Birth:{" "}
-                                            </span>
-                                            <span className="font-bold">
-                                              {new Date().getFullYear() -
+                                        <p className="pr-12 text-xs text-gray-700 sm:pr-16 sm:text-sm">
+                                          <span className="inline md:hidden lg:inline">
+                                            {field("age").value !== "" &&
+                                              "Year of Birth: "}
+                                          </span>
+                                          <span className="font-bold">
+                                            {field("age").value !== "" &&
+                                              new Date().getFullYear() -
                                                 field("age").value}
-                                            </span>
-                                          </p>
-                                        )
+                                          </span>
+                                        </p>
                                       }
                                       placeholder="Enter the age"
                                       className="col-span-6 sm:col-span-3"
