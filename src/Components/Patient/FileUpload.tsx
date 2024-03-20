@@ -234,6 +234,23 @@ export const FileUpload = (props: FileUploadProps) => {
   ]);
   const [isMicPermission, setIsMicPermission] = useState(true);
 
+  useEffect(() => {
+    const checkMicPermission = async () => {
+      try {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        setIsMicPermission(true);
+      } catch (error) {
+        setIsMicPermission(false);
+      }
+    };
+
+    checkMicPermission();
+
+    return () => {
+      setIsMicPermission(true);
+    };
+  }, []);
+
   const { data: patient } = useQuery(routes.getPatient, {
     pathParams: { id: patientId },
     prefetch: !!patientId,
