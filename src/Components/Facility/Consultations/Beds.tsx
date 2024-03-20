@@ -115,7 +115,7 @@ const Beds = (props: BedsProps) => {
         {showBedDetails?.assets_objects?.map((asset: AssetData) => (
           <Link
             key={asset.id}
-            href={`/facility/${asset?.location_object.facility.id}/assets/${asset.id}`}
+            href={`/facility/${asset?.location_object.facility?.id}/assets/${asset.id}`}
             className="mx-2 text-inherit"
             data-testid="created-asset-list"
           >
@@ -185,7 +185,7 @@ const Beds = (props: BedsProps) => {
       )}
       {!discharged ? (
         <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-2">
             <div>
               <FieldLabel id="asset-type">Bed</FieldLabel>
               <BedSelect
