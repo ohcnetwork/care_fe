@@ -65,7 +65,7 @@ describe("Patient Details", () => {
     loginPage.login("dummynurse1", "Coronasafe@123");
     cy.reload();
 
-    cy.visit("/facility");
+    cy.visit("/users");
 
     // Visit the patient details page
     patientPage.visitPatient("Dummy Patient 5");
