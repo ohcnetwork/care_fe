@@ -213,7 +213,10 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
                 )
               </span>
             </span>
-            <DoctorConnectButtons user={user} />
+            <DoctorConnectButtons
+              user={user}
+              connectOnWhatsApp={connectOnWhatsApp}
+            />
           </div>
           {!!user.skills.length && (
             <div className="mt-1 text-sm leading-5 text-gray-900">
@@ -259,7 +262,10 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
   );
 }
 
-function DoctorConnectButtons(props: { user: UserAssignedModel }) {
+function DoctorConnectButtons(props: {
+  user: UserAssignedModel;
+  connectOnWhatsApp: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+}) {
   const user = props.user;
   const authUser = useAuthUser();
   return (
@@ -285,7 +291,7 @@ function DoctorConnectButtons(props: { user: UserAssignedModel }) {
           </div>
         </a>
       )}
-      <a onClick={connectOnWhatsApp}>
+      <a onClick={props.connectOnWhatsApp}>
         <div className="tooltip">
           <span className="tooltip-text tooltip-right">
             Connect on WhatsApp
