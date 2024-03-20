@@ -422,10 +422,14 @@ export const PatientHome = (props: any) => {
               <div className="mb-8 mt-2 grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-2 md:gap-y-8 lg:grid-cols-4">
                 <div className="sm:col-span-1">
                   <div className="text-sm font-semibold leading-5 text-zinc-400">
-                    Date of Birth
+                    {patientData.date_of_birth
+                      ? "Date of Birth"
+                      : "Year of Birth"}
                   </div>
                   <div className="mt-1 text-sm font-medium leading-5">
-                    {formatDate(patientData?.date_of_birth)}
+                    {patientData.date_of_birth
+                      ? formatDate(patientData.date_of_birth)
+                      : patientData.year_of_birth}
                   </div>
                 </div>
                 <div className="sm:col-span-1">
