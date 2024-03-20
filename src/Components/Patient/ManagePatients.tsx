@@ -103,7 +103,7 @@ export const PatientManager = () => {
   });
   const authUser = useAuthUser();
   const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
-  const [showDialog, setShowDialog] = useState(false);
+  const [showDialog, setShowDialog] = useState<"create" | "list-discharged">();
   const [showDoctors, setShowDoctors] = useState(false);
   const [showDoctorConnect, setShowDoctorConnect] = useState(false);
   const [phone_number, setPhoneNumber] = useState("");
@@ -406,7 +406,9 @@ export const PatientManager = () => {
 
   const { data: permittedFacilities } = useQuery(
     routes.getPermittedFacilities,
-    {}
+    {
+      query: { limit: 1 },
+    }
   );
 
   const LastAdmittedToTypeBadges = () => {
@@ -723,6 +725,9 @@ export const PatientManager = () => {
     };
   };
 
+  const onlyAccessibleFacility =
+    permittedFacilities?.count === 1 ? permittedFacilities.results[0] : null;
+
   return (
     <Page
       title={t("Patients")}
@@ -736,11 +741,9 @@ export const PatientManager = () => {
               onClick={() => {
                 if (qParams.facility)
                   navigate(`/facility/${qParams.facility}/patient`);
-                else if (permittedFacilities?.results.length === 1)
-                  navigate(
-                    `/facility/${permittedFacilities?.results[0].id}/patient`
-                  );
-                else setShowDialog(true);
+                else if (onlyAccessibleFacility)
+                  navigate(`/facility/${onlyAccessibleFacility.id}/patient`);
+                else setShowDialog("create");
               }}
               className="w-full lg:w-fit"
             >
@@ -755,8 +758,28 @@ export const PatientManager = () => {
               tab1="Live"
               tab2="Discharged"
               onClickTab1={() => updateQuery({ is_active: "True" })}
-              onClickTab2={() => updateQuery({ is_active: "False" })}
-              isTab2Active={tabValue ? true : false}
+              onClickTab2={() => {
+                // Navigate to dedicated discharged list page if filtered by a facility or user has access only to one facility.
+                const id = qParams.facility || onlyAccessibleFacility?.id;
+                if (id) {
+                  navigate(`facility/${id}/discharged-patients`);
+                  return;
+                }
+
+                if (
+                  authUser.user_type === "StateAdmin" ||
+                  authUser.user_type === "StateReadOnlyAdmin"
+                ) {
+                  updateQuery({ is_active: "False" });
+                  return;
+                }
+
+                Notification.Warn({
+                  msg: "Facility needs to be selected to view discharged patients.",
+                });
+                setShowDialog("list-discharged");
+              }}
+              isTab2Active={!!tabValue}
             />
             {showDoctorConnect && (
               <ButtonV2
@@ -835,12 +858,21 @@ export const PatientManager = () => {
       }
     >
       <FacilitiesSelectDialogue
-        show={showDialog}
+        show={!!showDialog}
         setSelected={(e) => setSelectedFacility(e)}
         selectedFacility={selectedFacility}
-        handleOk={() => navigate(`facility/${selectedFacility.id}/patient`)}
+        handleOk={() => {
+          switch (showDialog) {
+            case "create":
+              navigate(`facility/${selectedFacility.id}/patient`);
+              break;
+            case "list-discharged":
+              navigate(`facility/${selectedFacility.id}/discharged-patients`);
+              break;
+          }
+        }}
         handleCancel={() => {
-          setShowDialog(false);
+          setShowDialog(undefined);
           setSelectedFacility({ name: "" });
         }}
       />

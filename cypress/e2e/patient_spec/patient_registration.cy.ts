@@ -59,6 +59,7 @@ describe("Patient Creation with consultation", () => {
   const patientTransferFacility = "Dummy Shifting Center";
   const patientTransferName = "Dummy Patient 10";
   const patientExternalName = "Patient 20";
+  const patientOccupation = "Student";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -88,6 +89,7 @@ describe("Patient Creation with consultation", () => {
     facilityPage.selectDistrictOnPincode(patientOneDistrict);
     facilityPage.selectLocalBody(patientOneLocalbody);
     facilityPage.selectWard(patientOneWard);
+    patientPage.selectPatientOccupation(patientOccupation);
     // Patient Medical History
     patientMedicalHistory.typePatientPresentHealth(patientOnePresentHealth);
     patientMedicalHistory.typePatientOngoingMedication(
@@ -115,7 +117,8 @@ describe("Patient Creation with consultation", () => {
       phone_number,
       emergency_phone_number,
       yearOfBirth,
-      patientOneBloodGroup
+      patientOneBloodGroup,
+      patientOccupation
     );
     patientMedicalHistory.verifyPatientMedicalDetails(
       patientOnePresentHealth,
@@ -202,7 +205,8 @@ describe("Patient Creation with consultation", () => {
       phone_number,
       emergency_phone_number,
       yearOfBirth,
-      patientOneUpdatedBloodGroup
+      patientOneUpdatedBloodGroup,
+      patientOccupation
     );
     // Verify No medical history
     patientMedicalHistory.verifyNoSymptosPresent("Diabetes");
