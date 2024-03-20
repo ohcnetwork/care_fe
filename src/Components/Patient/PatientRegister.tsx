@@ -402,7 +402,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       if (!status.aborted) {
         if (res?.ok && data) {
           setPatientName(data.name || "");
-          if (data.year_of_birth) {
+          if (!data.date_of_birth) {
             setAgeInputType("age");
           }
           const formData = {
@@ -1383,11 +1383,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                       {...field("age")}
                                       errorClassName="hidden"
                                       trailing={
-                                        <p className="pr-12 text-xs text-gray-700 sm:pr-16 sm:text-sm">
-                                          <span className="inline md:hidden lg:inline">
+                                        <p className="absolute right-16 text-xs text-gray-700 sm:text-sm">
+                                          <p className="hidden  sm:inline min-[768px]:hidden lg:inline">
                                             {field("age").value !== "" &&
-                                              "Year of Birth: "}
-                                          </span>
+                                              "Year_of_Birth:"}
+                                          </p>
                                           <span className="font-bold">
                                             {field("age").value !== "" &&
                                               new Date().getFullYear() -
