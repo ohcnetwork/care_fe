@@ -62,10 +62,8 @@ describe("Patient Details", () => {
 
   it("User-level Based Permission for File Modification", () => {
     // Login as Nurse 1
-    loginPage.login("dummynurse1", "Coronasafe@123");
+    loginPage.login("dummynurse2", "Coronasafe@123");
     cy.reload();
-
-    cy.visit("/users");
 
     // Visit the patient details page
     patientPage.visitPatient("Dummy Patient 5");
@@ -99,7 +97,7 @@ describe("Patient Details", () => {
     cy.get("#file-div").should("contain.text", newFileName);
 
     // Login as Nurse 2
-    loginPage.login("dummynurse2", "Coronasafe@123");
+    loginPage.login("dummynurse1", "Coronasafe@123");
     cy.reload();
 
     // Verify the file edit option is not available
