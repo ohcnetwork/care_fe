@@ -23,7 +23,6 @@ describe("Patient Details", () => {
     // Record an audio
     patientPage.visitPatient("Dummy Patient 3");
     patientFileUploadPage.visitPatientDetailsPage();
-    cy.get("#this is a test").click();
     patientFileUploadPage.recordAudio();
     const fileName = `Cypress Audio ${new Date()
       .getTime()
@@ -66,7 +65,7 @@ describe("Patient Details", () => {
     loginPage.login("dummynurse1", "Coronasafe@123");
     cy.reload();
 
-    cy.visit("/user/profile");
+    cy.visit("/facility");
 
     // Visit the patient details page
     patientPage.visitPatient("Dummy Patient 5");
