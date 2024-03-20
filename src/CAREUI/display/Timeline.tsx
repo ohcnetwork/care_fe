@@ -23,7 +23,7 @@ const TimelineContext = createContext("");
 
 export default function Timeline({ className, children, name }: TimelineProps) {
   return (
-    <div className={className}>
+    <div className={className} id="list">
       <ol role="list" className="space-y-6">
         <TimelineContext.Provider value={name}>
           {children}
