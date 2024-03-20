@@ -91,6 +91,8 @@ const BedAllocationNode = ({
     timestamp: bed.start_date,
     by: undefined,
     icon: "l-bed",
+    iconWrapperStyle: bed.end_date === null ? "bg-primary-400" : "",
+    iconStyle: bed.end_date === null ? "text-white" : "",
     notes: bed.assets_objects ? (
       <BedTimelineAsset
         assets={bed.assets_objects}
@@ -205,7 +207,7 @@ const BedTitleSuffix = ({
           ? "Asset changed in" + " "
           : "Transferred to" + " "}
         <span className="font-semibold">{`${bed.bed_object.name} (${bed.bed_object.bed_type}) in ${bed.bed_object.location_object?.name}`}</span>
-        {bed.end_date === null ? (
+        {bed.end_date === null && (
           <Chip
             text="In Use"
             startIcon="l-notes"
@@ -213,8 +215,6 @@ const BedTitleSuffix = ({
             variant="primary"
             className="ml-5"
           />
-        ) : (
-          ""
         )}
       </p>
     </div>
