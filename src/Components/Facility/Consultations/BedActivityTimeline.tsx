@@ -91,7 +91,7 @@ const BedAllocationNode = ({
     timestamp: bed.start_date,
     by: undefined,
     icon: "l-bed",
-    iconWrapperStyle: bed.end_date === null ? "bg-primary-400" : "",
+    iconWrapperStyle: bed.end_date === null ? "bg-green-500" : "",
     iconStyle: bed.end_date === null ? "text-white" : "",
     notes: bed.assets_objects ? (
       <BedTimelineAsset
