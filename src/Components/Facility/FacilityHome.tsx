@@ -189,7 +189,7 @@ export const FacilityHome = (props: any) => {
             <div className="flex flex-1 flex-col">
               <div className="flex items-start gap-4">
                 <div
-                  className={`group relative hidden h-[20rem] w-[88px] text-clip rounded transition-all duration-200 ease-in-out md:flex lg:h-[20rem] lg:w-[20rem] ${
+                  className={`group relative hidden h-[20rem] w-[88px] text-clip rounded transition-all duration-200 ease-in-out md:mr-2 md:flex lg:mr-6 lg:h-[20rem] lg:w-[20rem] ${
                     hasPermissionToEditCoverImage && "cursor-pointer"
                   }`}
                   onClick={() =>
