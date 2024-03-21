@@ -207,6 +207,7 @@ const Beds = (props: BedsProps) => {
               onChange={(e) => setStartDate(e.value)}
               max={dayjs().format("YYYY-MM-DDTHH:mm")}
               error=""
+              errorClassName="hidden"
             />
             <div>
               <FieldLabel id="assets-link-label">Link Assets</FieldLabel>
@@ -222,7 +223,7 @@ const Beds = (props: BedsProps) => {
               />
             </div>
           </div>
-          <div className="mt-4 flex flex-row justify-center">
+          <div className="mt-4 flex flex-row justify-end">
             <div>
               <ButtonV2 variant="primary" type="submit">
                 <CareIcon icon="l-bed" className="text-xl" />
@@ -235,6 +236,7 @@ const Beds = (props: BedsProps) => {
         ""
       )}
       <div>
+        <hr className="mt-4 border-t-2" />
         <h3 className="my-4 text-lg">Previous beds: </h3>
         {consultationBeds.length > 0 ? (
           <BedActivityTimeline
