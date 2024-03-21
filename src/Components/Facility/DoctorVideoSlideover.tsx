@@ -284,7 +284,7 @@ function DoctorConnectButtons(props: {
           rel="noopener noreferrer"
         >
           <div className="tooltip">
-            <span className="tooltip-text tooltip-right">
+            <span className="tooltip-text tooltip-left">
               Connect on a Video Call
             </span>
             <CareIcon icon="l-video" className="h-5 w-5" />
@@ -293,9 +293,7 @@ function DoctorConnectButtons(props: {
       )}
       <a onClick={props.connectOnWhatsApp}>
         <div className="tooltip">
-          <span className="tooltip-text tooltip-right">
-            Connect on WhatsApp
-          </span>
+          <span className="tooltip-text tooltip-left">Connect on WhatsApp</span>
           <CareIcon className="care-l-whatsapp h-5 w-5" />
         </div>
       </a>
@@ -310,7 +308,7 @@ function DoctorConnectButtons(props: {
         }}
       >
         <div className="tooltip">
-          <span className="tooltip-text tooltip-right">Connect on Phone</span>
+          <span className="tooltip-text tooltip-left">Connect on Phone</span>
           <CareIcon className="care-l-phone-alt h-5 w-5" />
         </div>
       </a>
