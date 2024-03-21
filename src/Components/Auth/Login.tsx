@@ -308,6 +308,7 @@ export const Login = (props: { forgot?: boolean }) => {
                       value={form.password}
                       onChange={handleChange}
                       error={errors.password}
+                      outerClassName="mb-4"
                       size="large"
                       className="font-extrabold"
                     />

@@ -12,6 +12,7 @@ interface Props {
   options: SortOption[];
   onSelect: (query: { ordering: string }) => void;
   selected?: string;
+  className?: string;
 }
 
 /**
@@ -23,7 +24,11 @@ export default function SortDropdownMenu(props: Props) {
     <DropdownMenu
       title={props.label ?? t("sort_by")}
       variant="secondary"
-      className="border border-primary-500 bg-white"
+      className={
+        props.className
+          ? props.className + " border  border-primary-500 bg-white"
+          : " border  border-primary-500 bg-white"
+      }
       icon={<CareIcon className="care-l-sort" />}
     >
       {props.options.map(({ isAscending, value }) => (
