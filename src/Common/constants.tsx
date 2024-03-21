@@ -1172,3 +1172,15 @@ export const IN_LANDLINE_AREA_CODES = [
   "891",
   "4822",
 ];
+export const OCCUPATION_TYPES = [
+  { id: 1, text: "Student", value: "STUDENT" },
+  {
+    id: 2,
+    text: "Businessman",
+    value: "BUSINESSMAN",
+  },
+  { id: 3, text: "Healthcare Worker", value: "HEALTH_CARE_WORKER" },
+  { id: 4, text: "Healthcare Lab Worker", value: "HEALTH_CARE_LAB_WORKER" },
+  { id: 5, text: "Animal Handler", value: "ANIMAL_HANDLER" },
+  { id: 6, text: "Others", value: "OTHERS" },
+];
