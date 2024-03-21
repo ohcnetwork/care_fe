@@ -753,7 +753,7 @@ export const PatientManager = () => {
               </p>
             </ButtonV2>
           </div>
-          <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
+          <div className="flex flex-col items-center justify-end gap-2 vs:w-full lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
             <SwitchTabs
               tab1="Live"
               tab2="Discharged"
@@ -797,16 +797,16 @@ export const PatientManager = () => {
                 <p className="lg:my-[2px]">Doctor Connect</p>
               </ButtonV2>
             )}
-            <div className="w-full  vs:flex vs:flex-col vs:justify-center sm:flex md:flex">
+            <div className="vs:block vs:w-full  vs:justify-center sm:flex  sm:w-full sm:justify-between md:flex lg:flex">
               <AdvancedFilterButton
                 onClick={() => advancedFilter.setShow(true)}
               />
-              <div className="flex vs:mt-4 vs:w-full vs:justify-between sm:ml-0 sm:mt-4 lg:mt-0">
+              <div className="flex vs:mt-4 vs:w-full vs:justify-between  sm:ml-6 sm:mt-0 sm:w-[65%] lg:mt-0">
                 <SortDropdownMenu
                   options={PATIENT_SORT_OPTIONS}
                   selected={qParams.ordering}
                   onSelect={updateQuery}
-                  className="vs:w-[125%] sm:w-[220%]"
+                  className="vs:w-[125%] md:w-full lg:w-[100%]"
                 />
                 <div className="tooltip ml-4 w-[45%]">
                   {!isExportAllowed ? (
@@ -824,7 +824,7 @@ export const PatientManager = () => {
                         }, 500);
                       }}
                       // fixed issue
-                      className="mr-5 vs:w-[100%] lg:w-fit"
+                      className="mr-5 vs:w-[100%]  lg:w-fit"
                     >
                       <CareIcon className="care-l-export" />
                       <span className="my-[3px] sm:my-0 md:my-0 lg:my-[3px]">
