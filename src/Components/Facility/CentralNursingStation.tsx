@@ -19,6 +19,7 @@ import useVitalsAspectRatioConfig from "../VitalsMonitor/useVitalsAspectRatioCon
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import { getVitalsMonitorSocketUrl } from "../VitalsMonitor/utils";
+import useBreakpoints from "../../Common/hooks/useBreakpoints";
 
 const PER_PAGE_LIMIT = 6;
 const PER_PAGE_LIMIT_LARGE = 9;
@@ -62,6 +63,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
     patientAssetBed: obj,
     socketUrl: getVitalsMonitorSocketUrl(obj.asset),
   }));
+  console.log("data is : ", data);
 
   const { config, hash } = useVitalsAspectRatioConfig({
     default: 6 / 11,
@@ -74,25 +76,15 @@ export default function CentralNursingStation({ facilityId }: Props) {
     "3xl": 12 / 11,
   });
 
+  const size = useBreakpoints({ "4k": 2560, default: 1920 });
+
   useEffect(() => {
-    const updatePerPageLimit = () => {
-      if (window.innerWidth > LARGE_SCREEN_WIDTH) {
-        console.log("hello");
-        setPerPageLimit(PER_PAGE_LIMIT_LARGE);
-      } else {
-        console.log("hii");
-        setPerPageLimit(PER_PAGE_LIMIT);
-      }
-    };
-
-    updatePerPageLimit();
-
-    window.addEventListener("resize", updatePerPageLimit);
-
-    return () => {
-      window.removeEventListener("resize", updatePerPageLimit);
-    };
-  }, []);
+    if (size < LARGE_SCREEN_WIDTH) {
+      setPerPageLimit(PER_PAGE_LIMIT);
+    } else {
+      setPerPageLimit(PER_PAGE_LIMIT_LARGE);
+    }
+  }, [size]);
 
   return (
     <Page
