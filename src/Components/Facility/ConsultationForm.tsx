@@ -761,9 +761,8 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         weight: Number(state.form.weight),
         height: Number(state.form.height),
         bed: bed && bed instanceof Array ? bed[0]?.id : bed?.id,
+        patient_no: state.form.patient_no || null,
       };
-
-      if (state.form.patient_no) data["patient_no"] = state.form.patient_no;
 
       const res = await dispatchAction(
         id ? updateConsultation(id!, data) : createConsultation(data)
@@ -1457,7 +1456,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         className="col-span-6"
                         {...field("is_telemedicine")}
                         value={JSON.parse(state.form.is_telemedicine)}
-                        label="Is Telemedicine required for the patient?"
+                        label="Would you like to refer the patient for remote monitoring to an external doctor?"
                       />
 
                       {JSON.parse(state.form.is_telemedicine) && (
