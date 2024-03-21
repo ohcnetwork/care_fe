@@ -98,7 +98,7 @@
     "redux": "^4.2.1",
     "redux-thunk": "^2.4.2",
     "rehype-raw": "^6.1.1",
-    "rescript-webapi": "^0.8.0",
+    "rescript-webapi": "^0.9.1",
     "use-keyboard-shortcut": "^1.1.6",
     "uuid": "^9.0.1"
   },
