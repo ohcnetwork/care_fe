@@ -387,6 +387,13 @@ const AssetManage = (props: AssetManageProps) => {
                   {warrantyAmcValidityChip(
                     asset?.warranty_amc_end_of_validity as string
                   )}
+                  {asset?.latest_status === "Down" && (
+                    <Chip
+                      variant="danger"
+                      startIcon="l-link-broken"
+                      text={asset?.latest_status}
+                    />
+                  )}
                 </div>
               </div>
               <div className="mt-3 hidden text-gray-700 sm:block">
