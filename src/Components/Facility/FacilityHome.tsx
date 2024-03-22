@@ -313,7 +313,7 @@ export const FacilityHome = (props: any) => {
               </div>
             </div>
           </div>
-          <div className="mt-4 flex flex-col justify-between">
+          <div className="mt-4 flex h-[20rem] flex-col justify-between">
             <div className="w-full md:w-auto">
               <DropdownMenu
                 id="manage-facility-dropdown"
