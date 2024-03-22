@@ -431,9 +431,8 @@ export const formatPatientAge = (obj: PatientModel, abbreviated = false) => {
       : `Born on ${obj.year_of_birth}`;
   }
 
-  const days = end.diff(start, "years");
-  const month = (days / 30) | 0;
-  const day = days % 30;
+  const month = end.diff(start, "month");
+  const day = end.diff(start.add(month, "month"), "day");
   if (month) {
     return `${month}${suffixes.month} ${day}${suffixes.day}`;
   }
