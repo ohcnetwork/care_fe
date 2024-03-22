@@ -54,12 +54,10 @@ export default function CentralNursingStation({ facilityId }: Props) {
   });
 
   const totalCount = query.data?.count ?? 0;
-
   const data = query.data?.results.map((obj) => ({
     patientAssetBed: obj,
     socketUrl: getVitalsMonitorSocketUrl(obj.asset),
   }));
-  console.log("data is : ", data);
 
   const { config, hash } = useVitalsAspectRatioConfig({
     default: 6 / 11,
