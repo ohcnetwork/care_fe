@@ -59,7 +59,7 @@
     "@pnotify/mobile": "^5.2.0",
     "@react-spring/web": "^9.7.3",
     "@rescript/react": "^0.11.0",
-    "@sentry/browser": "^7.57.0",
+    "@sentry/browser": "^7.108.0",
     "@yaireo/ui-range": "^2.1.15",
     "axios": "^1.4.0",
     "browser-image-compression": "^2.0.2",
