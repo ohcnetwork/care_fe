@@ -229,11 +229,11 @@ export const LinePlot = (props: any) => {
 
   return (
     <>
-      <span className="sr-only">
-        {yData[yData.length - 1]
-          ? properRoundOf(yData[yData.length - 1])
-          : "NA"}
-      </span>
+      {yData.map((value: any) => (
+        <span className="sr-only px-1">
+          {value ? properRoundOf(value) : "NA"}
+        </span>
+      ))}
       <ReactEchartsCore
         echarts={echarts}
         option={generalOptions}
