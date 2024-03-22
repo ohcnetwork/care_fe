@@ -230,7 +230,7 @@ export const LinePlot = (props: any) => {
   return (
     <>
       {yData.map((value: any, idx: any) => (
-        <span id={`${title}${idx + 1}`} className="sr-only px-1">
+        <span id={`${title}-${idx + 1}`} className="sr-only px-1">
           {value ? properRoundOf(value) : "NA"}
         </span>
       ))}
