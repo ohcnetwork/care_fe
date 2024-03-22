@@ -1,5 +1,5 @@
 import useFullscreen from "../../Common/hooks/useFullscreen";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment } from "react";
 import HL7PatientVitalsMonitor from "../VitalsMonitor/HL7PatientVitalsMonitor";
 import useFilters from "../../Common/hooks/useFilters";
 import Loading from "../Common/Loading";
@@ -21,10 +21,6 @@ import routes from "../../Redux/api";
 import { getVitalsMonitorSocketUrl } from "../VitalsMonitor/utils";
 import useBreakpoints from "../../Common/hooks/useBreakpoints";
 
-const PER_PAGE_LIMIT = 6;
-const PER_PAGE_LIMIT_LARGE = 9;
-const LARGE_SCREEN_WIDTH = 2560;
-
 const SORT_OPTIONS: SortOption[] = [
   { isAscending: true, value: "bed__name" },
   { isAscending: false, value: "-bed__name" },
@@ -37,7 +33,7 @@ interface Props {
 }
 
 export default function CentralNursingStation({ facilityId }: Props) {
-  const [perPageLimit, setPerPageLimit] = useState(PER_PAGE_LIMIT);
+  const perPageLimit = useBreakpoints({ "4k": 9, default: 6 });
   const { t } = useTranslation();
   const [isFullscreen, setFullscreen] = useFullscreen();
   const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
@@ -75,16 +71,6 @@ export default function CentralNursingStation({ facilityId }: Props) {
     "2xl": 16 / 11,
     "3xl": 12 / 11,
   });
-
-  const size = useBreakpoints({ "4k": 2560, default: 1920 });
-
-  useEffect(() => {
-    if (size < LARGE_SCREEN_WIDTH) {
-      setPerPageLimit(PER_PAGE_LIMIT);
-    } else {
-      setPerPageLimit(PER_PAGE_LIMIT_LARGE);
-    }
-  }, [size]);
 
   return (
     <Page
