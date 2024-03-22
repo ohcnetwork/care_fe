@@ -46,8 +46,6 @@ export default ({ show, setShow, username }: IProps) => {
         body: { skill: skill.id },
       });
 
-      console.log(res);
-
       if (!res?.ok) {
         Notification.Error({
           msg: "Error while adding skill",

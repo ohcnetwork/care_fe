@@ -638,12 +638,12 @@ function UserFacilities(props: { user: any }) {
       pathParams: { username },
       body: { home_facility: facility.id.toString() },
     });
-    if (res && res.status === 200) user.home_facility_object = facility;
-    if (res?.status !== 200) {
+    if (!res?.ok) {
       Notification.Error({
         msg: "Error while updating Home facility",
       });
     } else {
+      user.home_facility_object = facility;
       Notification.Success({
         msg: "Home Facility updated successfully",
       });
@@ -658,12 +658,13 @@ function UserFacilities(props: { user: any }) {
       const { res } = await request(routes.clearHomeFacility, {
         pathParams: { username },
       });
-      if (res && res.status === 204) user.home_facility_object = null;
-      if (res?.status !== 204) {
+
+      if (!res?.ok) {
         Notification.Error({
           msg: "Error while clearing home facility",
         });
       } else {
+        user.home_facility_object = null;
         Notification.Success({
           msg: "Home Facility cleared successfully",
         });
@@ -673,7 +674,7 @@ function UserFacilities(props: { user: any }) {
         pathParams: { username },
         body: { facility: unlinkFacilityData?.facility?.id?.toString() },
       });
-      if (res?.status !== 204) {
+      if (!res?.ok) {
         Notification.Error({
           msg: "Error while unlinking home facility",
         });
@@ -695,9 +696,7 @@ function UserFacilities(props: { user: any }) {
       body: { facility: facility.id.toString() },
     });
 
-    console.log(res);
-
-    if (res?.status !== 201) {
+    if (!res?.ok) {
       Notification.Error({
         msg: "Error while linking facility",
       });
