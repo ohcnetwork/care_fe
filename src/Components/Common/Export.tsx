@@ -39,6 +39,25 @@ export const ExportMenu = ({
 }: ExportMenuProps) => {
   const { isExporting, exportFile } = useExport();
 
+  if (exportItems.length === 1) {
+    const item = exportItems[0];
+
+    return (
+      <ButtonV2
+        disabled={isExporting || disabled}
+        onClick={() =>
+          exportFile(item.action, item.filePrefix, item.type, item.parse)
+        }
+        border
+        ghost
+        className="py-2.5"
+      >
+        <CareIcon className="care-l-export" />
+        {isExporting ? "Exporting..." : label}
+      </ButtonV2>
+    );
+  }
+
   return (
     <div key="export-menu" id="export-button">
       <DropdownMenu
