@@ -1330,7 +1330,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             </FieldLabel>
                             <div className="flex w-full items-center gap-2">
                               <SelectMenuV2
-                                id="age-input-type-selector"
+                                id="ageOrDob-selector"
                                 className="w-44 lg:w-32"
                                 options={
                                   [
@@ -1416,12 +1416,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 description={
                                   <div>
                                     <div>
-                                      If you enter age, system will consider
-                                      only the year of birth as per the age
+                                      While entering a patient's age is an
+                                      option, please note that only the year of
+                                      birth will be captured from this
+                                      information.
                                     </div>
                                     <b>
-                                      Recomended only if you date of birth is
-                                      not known
+                                      Recommended only when the patient's date
+                                      of birth is unknown
                                     </b>
                                   </div>
                                 }

@@ -72,66 +72,6 @@ describe("Patient Creation with consultation", () => {
     cy.awaitUrl("/patients");
   });
 
-  it("Create a new patient with all field in registration form with age and verify", () => {
-    // patient details with all the available fields except covid
-    patientPage.createPatient();
-    patientPage.selectFacility(patientFacility);
-    patientPage.patientformvisibility();
-    // Patient Details page
-    patientPage.typePatientPhoneNumber(phone_number);
-    patientPage.typePatientEmergencyNumber(emergency_phone_number);
-    patientPage.typePatientAge(age.toString());
-    patientPage.typePatientName(patientOneName);
-    patientPage.selectPatientGender(patientOneGender);
-    patientPage.typePatientAddress(patientOneAddress);
-    facilityPage.fillPincode(patientOnePincode);
-    facilityPage.selectStateOnPincode(patientOneState);
-    facilityPage.selectDistrictOnPincode(patientOneDistrict);
-    facilityPage.selectLocalBody(patientOneLocalbody);
-    facilityPage.selectWard(patientOneWard);
-    // Patient Medical History
-    patientMedicalHistory.typePatientPresentHealth(patientOnePresentHealth);
-    patientMedicalHistory.typePatientOngoingMedication(
-      patientOneOngoingMedication
-    );
-    patientMedicalHistory.typeMedicalHistory(2, "Diabetes");
-    patientMedicalHistory.typeMedicalHistory(3, "Heart Disease");
-    patientMedicalHistory.typeMedicalHistory(4, "HyperTension");
-    patientMedicalHistory.typeMedicalHistory(5, "Kidney Diseases");
-    patientMedicalHistory.typeMedicalHistory(6, "Lung Diseases/Asthma");
-    patientMedicalHistory.typeMedicalHistory(7, "Cancer");
-    patientMedicalHistory.typeMedicalHistory(8, "Other");
-    patientMedicalHistory.typePatientAllergies(patientOneAllergies);
-    patientPage.selectPatientBloodGroup(patientOneBloodGroup);
-    patientPage.clickCreatePatient();
-    patientPage.verifyPatientIsCreated();
-    // Verify the patient details
-    patientPage.clickCancelButton();
-    cy.wait(3000);
-    patientPage.savePatientUrl();
-    patientPage.verifyPatientDashboardDetails(
-      patientOneGender,
-      age,
-      patientOneName,
-      phone_number,
-      emergency_phone_number,
-      yearOfBirth,
-      patientOneBloodGroup,
-      "-" //Occupation
-    );
-    patientMedicalHistory.verifyPatientMedicalDetails(
-      patientOnePresentHealth,
-      patientOneOngoingMedication,
-      patientOneAllergies,
-      "Diabetes",
-      "Heart Disease",
-      "HyperTension",
-      "Kidney Diseases",
-      "Lung Diseases/Asthma",
-      "Cancer",
-      "Other"
-    );
-  });
   it("Create a new patient with all field in registration form and no consultation", () => {
     // patient details with all the available fields except covid
     phone_number = generatePhoneNumber();

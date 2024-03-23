@@ -51,7 +51,7 @@ export class PatientPage {
     cy.get("#date-input").click().type(dateOfBirth);
   }
   typePatientAge(age: string) {
-    cy.clickAndSelectOption("#age-input-type-selector", "Age");
+    cy.clickAndSelectOption("#ageOrDob-selector", "Age");
     cy.submitButton("Confirm");
     cy.get("#age-div").click().type(age);
   }
