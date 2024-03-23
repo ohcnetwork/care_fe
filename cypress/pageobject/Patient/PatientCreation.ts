@@ -46,14 +46,15 @@ export class PatientPage {
   }
 
   typePatientDateOfBirth(dateOfBirth: string) {
+    cy.clickAndSelectOption("#ageOrDob-selector", "D.O.B");
     cy.get("#date_of_birth").scrollIntoView();
     cy.get("#date_of_birth").should("be.visible").click();
     cy.get("#date-input").click().type(dateOfBirth);
   }
-  typePatientAge(age: string) {
+  typePatientAge(age: number) {
     cy.clickAndSelectOption("#ageOrDob-selector", "Age");
     cy.submitButton("Confirm");
-    cy.get("#age-div").click().type(age);
+    cy.get("#age").clear().type(age);
   }
 
   typePatientName(patientName: string) {
@@ -143,7 +144,8 @@ export class PatientPage {
     emergencyPhoneNumber,
     yearOfBirth,
     bloodGroup,
-    occupation
+    occupation,
+    DobOrAge
   ) {
     cy.url().should("include", "/facility/");
     cy.get("[data-testid=patient-dashboard]").then(($dashboard) => {
@@ -155,6 +157,7 @@ export class PatientPage {
       expect($dashboard).to.contain(yearOfBirth);
       expect($dashboard).to.contain(bloodGroup);
       expect($dashboard).to.contain(occupation);
+      expect($dashboard).to.contain(DobOrAge);
     });
   }
 
