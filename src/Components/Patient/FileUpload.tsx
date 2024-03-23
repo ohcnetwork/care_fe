@@ -974,7 +974,45 @@ export const FileUpload = (props: FileUploadProps) => {
     });
   };
 
-  const validateFileUpload = () => {
+  const isFileTypeSupported = (file: File): Promise<boolean> => {
+    console.log("here3");
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const arr = new Uint8Array(reader.result as ArrayBuffer).subarray(0, 4);
+        let header = "";
+        for (let i = 0; i < arr.length; i++) {
+          header += arr[i].toString(16);
+        }
+
+        // Define magic numbers for image, audio, and PDF files
+        const imageMagicNumbers = ["89504e47", "ffd8ffe0", "ffd8ffe1"]; // PNG, JPG, JPEG
+        const audioMagicNumbers = ["494433", "4d546864", "52494646"]; // MP3, MIDI, WAV
+        const pdfMagicNumber = "25504446"; // PDF
+
+        // Check if the header matches any of the magic numbers
+        if (
+          imageMagicNumbers.includes(header) ||
+          audioMagicNumbers.includes(header) ||
+          header === pdfMagicNumber
+        ) {
+          // File type is supported
+          resolve(true);
+        } else {
+          // File type is not supported
+          resolve(false);
+        }
+      };
+
+      reader.onerror = () => {
+        reject(new Error("Failed to read file."));
+      };
+
+      reader.readAsArrayBuffer(file);
+    });
+  };
+  const validateFileUpload = async () => {
+    console.log("here");
     const filenameLength = uploadFileName.trim().length;
     const f = file;
     if (f === undefined || f === null) {
@@ -987,6 +1025,13 @@ export const FileUpload = (props: FileUploadProps) => {
     }
     if (f.size > 10e7) {
       setUploadFileError("Maximum size of files is 100 MB");
+      return false;
+    }
+    const fileTypeSupported = await isFileTypeSupported(f);
+    if (!fileTypeSupported) {
+      setUploadFileError(
+        "File type not supported.Supported file formats : .png, .jpeg, .jpg, .mp3, .midi, .wav, .pdf"
+      );
       return false;
     }
     return true;
@@ -1003,7 +1048,8 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   const handleUpload = async () => {
-    if (!validateFileUpload()) return;
+    if (!(await validateFileUpload())) return;
+    console.log("here2");
     const f = file;
 
     const category = "UNSPECIFIED";
@@ -1572,6 +1618,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       onClick={() => {
                         setFile(null);
                         setUploadFileName("");
+                        setUploadFileError("");
                       }}
                     >
                       <CareIcon icon="l-times" className="text-lg" />
