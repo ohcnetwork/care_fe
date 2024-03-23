@@ -1533,7 +1533,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                 />
                 <div className="flex flex-col gap-4">
                   {state.form.consent_records.map((record, index) => (
-                    <div className="bg-gray-100 rounded-xl overflow-hidden border border-gray-300">
+                    <div className="bg-gray-100 rounded-xl overflow-hidden border border-gray-300" key={index}>
                       <div className="flex items-center justify-between bg-gray-200 p-4">
                         <button type="button" className="font-bold" onClick={() => setCollapsedConsentRecords((prev) => prev.includes(record.type) ? prev.filter((r) => r !== record.type) : [...prev, record.type])}>
                           <CareIcon className={`care-l-arrow-${collapsedConsentRecords.includes(record.type) ? "down" : "up"} mr-2`} />

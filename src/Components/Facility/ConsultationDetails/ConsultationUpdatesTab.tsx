@@ -674,7 +674,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                 Consent Records
               </h3>
               {props.consultationData.consent_records?.map((record, i) => (
-                <div className="border-b mt-4">
+                <div className="border-b mt-4" key={i}>
                   <div className="font-bold">
                     {CONSENT_TYPE_CHOICES.find((c) => c.id === record.type)?.text} {record.patient_code_status && `( ${CONSENT_PATIENT_CODE_STATUS_CHOICES.find((c) => c.id === record.patient_code_status)?.text} )`}
                   </div>
