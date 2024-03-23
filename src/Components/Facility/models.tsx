@@ -7,6 +7,7 @@ import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 import { AssignedToObjectModel, DailyRoundsModel } from "../Patient/models";
 import { UserBareMinimum } from "../Users/models";
+import { ConsentRecord } from "./ConsultationForm";
 
 export interface LocalBodyModel {
   id: number;
@@ -164,6 +165,7 @@ export interface ConsultationModel {
   is_readmission?: boolean;
   medico_legal_case?: boolean;
   investigation?: InvestigationType[];
+  consent_records?: ConsentRecord[];
 }
 
 export interface PatientStatsModel {
@@ -424,15 +426,15 @@ export type VentilatorPlotRes = {
 export interface DailyRoundsBody {
   page?: number;
   fields:
-    | ABGPlotsFields[]
-    | DialysisPlotsFields[]
-    | NeurologicalTablesFields[]
-    | NursingPlotFields[]
-    | NutritionPlotsFields[]
-    | PainDiagramsFields[]
-    | PressureSoreDiagramsFields[]
-    | PrimaryParametersPlotFields[]
-    | VentilatorPlotFields[];
+  | ABGPlotsFields[]
+  | DialysisPlotsFields[]
+  | NeurologicalTablesFields[]
+  | NursingPlotFields[]
+  | NutritionPlotsFields[]
+  | PainDiagramsFields[]
+  | PressureSoreDiagramsFields[]
+  | PrimaryParametersPlotFields[]
+  | VentilatorPlotFields[];
 }
 
 export interface DailyRoundsRes {
@@ -440,15 +442,15 @@ export interface DailyRoundsRes {
   page_size: number;
   results: {
     [date: string]:
-      | PressureSoreDiagramsRes
-      | ABGPlotsRes
-      | DialysisPlotsRes
-      | NeurologicalTablesRes
-      | NursingPlotRes
-      | NutritionPlotsRes
-      | PainDiagramsRes
-      | PrimaryParametersPlotRes
-      | VentilatorPlotRes;
+    | PressureSoreDiagramsRes
+    | ABGPlotsRes
+    | DialysisPlotsRes
+    | NeurologicalTablesRes
+    | NursingPlotRes
+    | NutritionPlotsRes
+    | PainDiagramsRes
+    | PrimaryParametersPlotRes
+    | VentilatorPlotRes;
   };
 }
 
