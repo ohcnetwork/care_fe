@@ -832,16 +832,8 @@ export const PatientManager = () => {
                   disabled={!isExportAllowed}
                   exportItems={[
                     {
-                      label:
-                        tabValue === 0
-                          ? "Live patients"
-                          : "Discharged patients",
+                      label: "Export Live patients",
                       action: exportPatients(true),
-                      parse: preventDuplicatePatientsDuetoPolicyId,
-                    },
-                    {
-                      label: "All patients",
-                      action: exportPatients(false),
                       parse: preventDuplicatePatientsDuetoPolicyId,
                     },
                   ]}
