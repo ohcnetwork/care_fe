@@ -1187,3 +1187,15 @@ export const CONSENT_PATIENT_CODE_STATUS_CHOICES = [
   { id: 3, text: "Comfort Care Only" },
   { id: 4, text: "Active treatment (Default)" },
 ]
+export const OCCUPATION_TYPES = [
+  { id: 1, text: "Student", value: "STUDENT" },
+  {
+    id: 2,
+    text: "Businessman",
+    value: "BUSINESSMAN",
+  },
+  { id: 3, text: "Healthcare Worker", value: "HEALTH_CARE_WORKER" },
+  { id: 4, text: "Healthcare Lab Worker", value: "HEALTH_CARE_LAB_WORKER" },
+  { id: 5, text: "Animal Handler", value: "ANIMAL_HANDLER" },
+  { id: 6, text: "Others", value: "OTHERS" },
+];

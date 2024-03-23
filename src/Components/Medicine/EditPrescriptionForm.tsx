@@ -1,13 +1,12 @@
 import { useState } from "react";
 import Form from "../Form/Form";
-import { DOSAGE_UNITS, Prescription } from "./models";
+import { Prescription } from "./models";
 import request from "../../Utils/request/request";
 import * as Notification from "../../Utils/Notifications";
 import useSlug from "../../Common/hooks/useSlug";
 import { RequiredFieldValidator } from "../Form/FieldValidators";
 import { useTranslation } from "react-i18next";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import NumericWithUnitsFormField from "../Form/FormFields/NumericWithUnitsFormField";
 import {
   PRESCRIPTION_FREQUENCIES,
   PRESCRIPTION_ROUTES,
@@ -16,6 +15,8 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { EditPrescriptionFormValidator } from "./validators";
 import MedicineRoutes from "./routes";
+import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+import DosageFormField from "../Form/FormFields/DosageFormField";
 
 interface Props {
   initial: Prescription;
@@ -88,6 +89,27 @@ export default function EditPrescriptionForm(props: Props) {
             {...field("discontinued_reason")}
           />
 
+          {props.initial.dosage_type !== "PRN" && (
+            <CheckBoxFormField
+              label={t("titrate_dosage")}
+              name="Titrate Dosage"
+              value={field("dosage_type").value === "TITRATED"}
+              onChange={(e) => {
+                if (e.value) {
+                  field("dosage_type").onChange({
+                    name: "dosage_type",
+                    value: "TITRATED",
+                  });
+                } else {
+                  field("dosage_type").onChange({
+                    name: "dosage_type",
+                    value: "REGULAR",
+                  });
+                }
+              }}
+            />
+          )}
+
           <div className="flex items-center gap-4">
             <SelectFormField
               className="flex-1"
@@ -97,27 +119,44 @@ export default function EditPrescriptionForm(props: Props) {
               optionLabel={(key) => t("PRESCRIPTION_ROUTE_" + key)}
               optionValue={(key) => key}
             />
-            <NumericWithUnitsFormField
-              className="flex-1"
-              label={t("dosage")}
-              {...field("dosage", RequiredFieldValidator())}
-              required
-              units={DOSAGE_UNITS}
-              min={0}
-            />
+            {field("dosage_type").value === "TITRATED" ? (
+              <div className="flex w-full gap-4">
+                <DosageFormField
+                  className="flex-1"
+                  label={t("start_dosage")}
+                  {...field("base_dosage", RequiredFieldValidator())}
+                  required
+                  min={0}
+                />
+                <DosageFormField
+                  className="flex-1"
+                  label={t("target_dosage")}
+                  {...field("target_dosage", RequiredFieldValidator())}
+                  required
+                  min={0}
+                />
+              </div>
+            ) : (
+              <DosageFormField
+                className="flex-1"
+                label={t("dosage")}
+                {...field("base_dosage", RequiredFieldValidator())}
+                required={field("dosage_type").value !== "TITRATED"}
+                min={0}
+              />
+            )}
           </div>
 
-          {props.initial.is_prn ? (
+          {props.initial.dosage_type === "PRN" ? (
             <>
               <TextFormField
                 label={t("indicator")}
                 {...field("indicator", RequiredFieldValidator())}
                 required
               />
-              <NumericWithUnitsFormField
+              <DosageFormField
                 className="flex-1"
                 label={t("max_dosage_24_hrs")}
-                units={DOSAGE_UNITS}
                 min={0}
                 {...field("max_dosage")}
               />
@@ -152,6 +191,13 @@ export default function EditPrescriptionForm(props: Props) {
                 {...field("days")}
               />
             </div>
+          )}
+
+          {field("dosage_type").value === "TITRATED" && (
+            <TextAreaFormField
+              label={t("instruction_on_titration")}
+              {...field("instruction_on_titration")}
+            />
           )}
 
           <TextAreaFormField label={t("notes")} {...field("notes")} />
