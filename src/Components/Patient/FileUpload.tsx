@@ -975,7 +975,6 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   const isFileTypeSupported = (file: File): Promise<boolean> => {
-    console.log("here3");
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -1012,7 +1011,6 @@ export const FileUpload = (props: FileUploadProps) => {
     });
   };
   const validateFileUpload = async () => {
-    console.log("here");
     const filenameLength = uploadFileName.trim().length;
     const f = file;
     if (f === undefined || f === null) {
@@ -1049,7 +1047,6 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const handleUpload = async () => {
     if (!(await validateFileUpload())) return;
-    console.log("here2");
     const f = file;
 
     const category = "UNSPECIFIED";
