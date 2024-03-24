@@ -254,10 +254,12 @@ export default function UserProfile() {
             errors[field] = "Field is required";
             invalidForm = true;
           } else if (
-            states.form.user_type === "Doctor" &&
-            Number(states.form.doctor_experience_commenced_on) > 100
+            (states.form.user_type === "Doctor" &&
+              Number(states.form.doctor_experience_commenced_on) >= 100) ||
+            Number(states.form.doctor_experience_commenced_on) < 0
           ) {
-            errors[field] = "Doctor experience should be less than 100 years";
+            errors[field] =
+              "Doctor experience should be at least 0 years and less than 100 years.";
             invalidForm = true;
           }
           return;

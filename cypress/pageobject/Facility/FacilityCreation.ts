@@ -66,8 +66,7 @@ class FacilityPage {
   }
 
   selectBedType(bedType: string) {
-    cy.get("div#bed-type button").click();
-    cy.get("[role='option']").contains(bedType).click();
+    cy.clickAndSelectOption("div#bed-type button", bedType);
   }
 
   isVisibleselectBedType() {
