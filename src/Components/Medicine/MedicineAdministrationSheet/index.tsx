@@ -83,7 +83,7 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
       <SubHeading
         title={is_prn ? "PRN Prescriptions" : "Prescriptions"}
         lastModified={
-          prescriptions?.[0]?.last_administered_on ??
+          prescriptions?.[0]?.last_administration?.created_date ??
           prescriptions?.[0]?.modified_date
         }
         options={
