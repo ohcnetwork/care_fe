@@ -443,7 +443,7 @@ export default function UserProfile() {
                   {showEdit ? "Cancel" : "Edit User Profile"}
                 </ButtonV2>
                 <ButtonV2 variant="danger" onClick={signOut}>
-                  <CareIcon className="care-l-sign-out-alt" />
+                  <CareIcon icon="l-sign-out-alt" />
                   Sign out
                 </ButtonV2>
               </div>
@@ -834,7 +834,7 @@ export default function UserProfile() {
             <UpdatableApp silentlyAutoUpdate={false}>
               <ButtonV2 disabled={true}>
                 <div className="flex items-center gap-4">
-                  <CareIcon className="care-l-exclamation text-2xl" />
+                  <CareIcon icon="l-exclamation" className="text-2xl" />
                   Update available
                 </div>
               </ButtonV2>
@@ -849,8 +849,9 @@ export default function UserProfile() {
                 {" "}
                 <div className="flex items-center gap-4">
                   <CareIcon
+                    icon="l-sync"
                     className={classNames(
-                      "care-l-sync text-2xl",
+                      "text-2xl",
                       updateStatus.isChecking && "animate-spin"
                     )}
                   />

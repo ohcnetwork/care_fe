@@ -648,7 +648,7 @@ export const PatientHome = (props: any) => {
                       )
                     }
                   >
-                    <CareIcon className="care-l-edit-alt text-lg" />
+                    <CareIcon icon="l-edit-alt" className="text-lg" />
                     Update Details
                   </ButtonV2>
                 </div>
@@ -665,7 +665,7 @@ export const PatientHome = (props: any) => {
                     }
                     authorizeFor={NonReadOnlyUsers}
                   >
-                    <CareIcon className="care-l-lock text-lg" />
+                    <CareIcon icon="l-lock" className="text-lg" />
                     {patientData.allow_transfer
                       ? "Disable Transfer"
                       : "Allow Transfer"}
@@ -685,9 +685,9 @@ export const PatientHome = (props: any) => {
           >
             <div>Shifting</div>
             {showShifts ? (
-              <CareIcon className="care-l-angle-up text-2xl" />
+              <CareIcon icon="l-angle-up" className="text-2xl" />
             ) : (
-              <CareIcon className="care-l-angle-down text-2xl" />
+              <CareIcon icon="l-angle-down" className="text-2xl" />
             )}
           </div>
           <div
@@ -727,7 +727,10 @@ export const PatientHome = (props: any) => {
                               title="Shifting status"
                               className="flex items-center text-sm font-semibold leading-5 text-zinc-400"
                             >
-                              <CareIcon className="care-l-truck mr-2 text-lg" />
+                              <CareIcon
+                                icon="l-truck"
+                                className="mr-2 text-lg"
+                              />
                               <dd className="text-sm font-bold leading-5 text-gray-900">
                                 {shift.status}
                               </dd>
@@ -738,7 +741,10 @@ export const PatientHome = (props: any) => {
                               title=" Origin facility"
                               className="flex items-center text-sm font-semibold leading-5 text-zinc-400"
                             >
-                              <CareIcon className="care-l-plane-fly mr-2 text-lg" />
+                              <CareIcon
+                                icon="l-plane-fly"
+                                className="mr-2 text-lg"
+                              />
                               <dd className="text-sm font-bold leading-5 text-gray-900">
                                 {(shift.origin_facility_object || {})?.name}
                               </dd>
@@ -749,7 +755,10 @@ export const PatientHome = (props: any) => {
                               title="Shifting approving facility"
                               className="flex items-center text-sm font-semibold leading-5 text-zinc-400"
                             >
-                              <CareIcon className="care-l-user-check mr-2 text-lg" />
+                              <CareIcon
+                                icon="l-user-check"
+                                className="mr-2 text-lg"
+                              />
                               <dd className="text-sm font-bold leading-5 text-gray-900">
                                 {
                                   (
@@ -765,7 +774,10 @@ export const PatientHome = (props: any) => {
                               title=" Assigned facility"
                               className="flex items-center text-sm font-semibold leading-5 text-zinc-400"
                             >
-                              <CareIcon className="care-l-plane-arrival mr-2 text-lg" />
+                              <CareIcon
+                                icon="l-plane-arrival"
+                                className="mr-2 text-lg"
+                              />
                               <dd className="text-sm font-bold leading-5 text-gray-900">
                                 {(shift.assigned_facility_object || {})?.name ||
                                   "Yet to be decided"}
@@ -785,7 +797,10 @@ export const PatientHome = (props: any) => {
                                   : "rounded p-1 font-normal text-red-600")
                               }
                             >
-                              <CareIcon className="care-l-stopwatch mr-2 text-lg" />
+                              <CareIcon
+                                icon="l-stopwatch"
+                                className="mr-2 text-lg"
+                              />
                               <dd className="text-sm font-bold leading-5">
                                 {formatDateTime(shift.modified_date) || "--"}
                               </dd>
@@ -801,7 +816,7 @@ export const PatientHome = (props: any) => {
                             navigate(`/shifting/${shift.external_id}`)
                           }
                         >
-                          <CareIcon className="care-l-eye mr-2 text-lg" />
+                          <CareIcon icon="l-eye" className="mr-2 text-lg" />
                           All Details
                         </ButtonV2>
                       </div>
@@ -1029,7 +1044,10 @@ export const PatientHome = (props: any) => {
                     )}
                   >
                     <span>
-                      <CareIcon className="care-l-chat-bubble-user text-5xl" />
+                      <CareIcon
+                        icon="l-chat-bubble-user"
+                        className="text-5xl"
+                      />
                     </span>
                   </div>
 
@@ -1047,7 +1065,7 @@ export const PatientHome = (props: any) => {
                 <div className="h-full space-y-2 rounded-lg border border-green-700 bg-white p-4 shadow hover:cursor-pointer hover:bg-gray-200">
                   <div className="text-center text-green-700">
                     <span>
-                      <CareIcon className="care-l-file-search-alt text-5xl" />
+                      <CareIcon icon="l-file-search-alt" className="text-5xl" />
                     </span>
                   </div>
                   <div>
@@ -1068,7 +1086,7 @@ export const PatientHome = (props: any) => {
                 <div className="h-full space-y-2 rounded-lg border border-green-700 bg-white p-4 shadow hover:cursor-pointer hover:bg-gray-200">
                   <div className="text-center text-green-700">
                     <span>
-                      <CareIcon className="care-l-file-upload text-5xl" />
+                      <CareIcon icon="l-file-upload" className="text-5xl" />
                     </span>
                   </div>
                   <div>
@@ -1101,7 +1119,7 @@ export const PatientHome = (props: any) => {
                     }  text-center `}
                   >
                     <span>
-                      <CareIcon className="care-l-ambulance text-5xl" />
+                      <CareIcon icon="l-ambulance" className="text-5xl" />
                     </span>
                   </div>
 
@@ -1143,7 +1161,7 @@ export const PatientHome = (props: any) => {
                     } text-center  `}
                   >
                     <span>
-                      <CareIcon className="care-l-medkit text-5xl" />
+                      <CareIcon icon="l-medkit" className="text-5xl" />
                     </span>
                   </div>
                   <div>
@@ -1169,7 +1187,7 @@ export const PatientHome = (props: any) => {
                 <div className="h-full space-y-2 rounded-lg border border-green-700 bg-white p-4 shadow hover:cursor-pointer hover:bg-gray-200">
                   <div className="text-center text-green-700">
                     <span>
-                      <CareIcon className="care-l-clipboard-notes text-5xl" />
+                      <CareIcon icon="l-clipboard-notes" className="text-5xl" />
                     </span>
                   </div>
                   <div>
@@ -1204,7 +1222,7 @@ export const PatientHome = (props: any) => {
                     )}
                   >
                     <span>
-                      <CareIcon className="care-l-users-alt text-5xl" />
+                      <CareIcon icon="l-users-alt" className="text-5xl" />
                     </span>
                   </div>
                   <div>
@@ -1243,7 +1261,7 @@ export const PatientHome = (props: any) => {
                     }
                   >
                     <span className="flex w-full items-center justify-start gap-2">
-                      <CareIcon className="care-l-chat-bubble-user text-xl" />
+                      <CareIcon icon="l-chat-bubble-user" className="text-xl" />
                       Add Consultation
                     </span>
                   </ButtonV2>
@@ -1256,7 +1274,7 @@ export const PatientHome = (props: any) => {
                     }
                   >
                     <span className="flex w-full items-center justify-start gap-2">
-                      <CareIcon className="care-l-file-search-alt text-xl" />
+                      <CareIcon icon="l-file-search-alt" className="text-xl" />
                       Investigations Summary
                     </span>
                   </ButtonV2>
@@ -1271,7 +1289,7 @@ export const PatientHome = (props: any) => {
                     }
                   >
                     <span className="flex w-full items-center justify-start gap-2">
-                      <CareIcon className="care-l-file-upload text-xl" />
+                      <CareIcon icon="l-file-upload" className="text-xl" />
                       View/Upload Patient Files
                     </span>
                   </ButtonV2>
@@ -1288,7 +1306,7 @@ export const PatientHome = (props: any) => {
                     authorizeFor={NonReadOnlyUsers}
                   >
                     <span className="flex w-full items-center justify-start gap-2">
-                      <CareIcon className="care-l-ambulance text-xl" />
+                      <CareIcon icon="l-ambulance" className="text-xl" />
                       Shift Patient
                     </span>
                   </ButtonV2>
@@ -1305,7 +1323,7 @@ export const PatientHome = (props: any) => {
                     authorizeFor={NonReadOnlyUsers}
                   >
                     <span className="flex w-full items-center justify-start gap-2">
-                      <CareIcon className="care-l-medkit text-xl" />
+                      <CareIcon icon="l-medkit" className="text-xl" />
                       Request Sample Test
                     </span>
                   </ButtonV2>
@@ -1320,7 +1338,7 @@ export const PatientHome = (props: any) => {
                     }
                   >
                     <span className="flex w-full items-center justify-start gap-2">
-                      <CareIcon className="care-l-clipboard-notes text-xl" />
+                      <CareIcon icon="l-clipboard-notes" className="text-xl" />
                       View Patient Notes
                     </span>
                   </ButtonV2>
@@ -1333,7 +1351,7 @@ export const PatientHome = (props: any) => {
                     authorizeFor={NonReadOnlyUsers}
                   >
                     <span className="flex w-full items-center justify-start gap-2">
-                      <CareIcon className="care-l-users-alt text-xl" />
+                      <CareIcon icon="l-users-alt" className="text-xl" />
                       Assign to a volunteer
                     </span>
                   </ButtonV2>

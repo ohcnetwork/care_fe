@@ -272,7 +272,7 @@ export default function ListView() {
               className="py-[11px]"
               onClick={() => navigate("/shifting/board", { query: qParams })}
             >
-              <CareIcon className="care-l-list-ul rotate-90" />
+              <CareIcon icon="l-list-ul" className="rotate-90" />
               {t("board_view")}
             </ButtonV2>
 
