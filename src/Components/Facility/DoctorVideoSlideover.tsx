@@ -309,7 +309,7 @@ function DoctorConnectButtons(props: {
       >
         <div className="tooltip">
           <span className="tooltip-text tooltip-left">Connect on Phone</span>
-          <CareIcon className="care-l-phone-alt h-5 w-5" />
+          <CareIcon icon="l-phone-alt" className="h-5 w-5" />
         </div>
       </a>
     </div>
