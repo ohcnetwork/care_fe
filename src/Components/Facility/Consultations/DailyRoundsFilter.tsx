@@ -45,7 +45,7 @@ export default function DailyRoundsFilter(props: Props) {
             variant={isFilterApplied ? "primary" : "secondary"}
             className="mr-5 border"
           >
-            <CareIcon className="care-l-filter" />
+            <CareIcon icon="l-filter" />
             {t("filter")}
           </ButtonV2>
         </Popover.Button>

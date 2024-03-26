@@ -52,7 +52,7 @@ export const SkillsArray = ({
                 disabled={isLoading || !authorizeForAddSkill}
                 onClick={() => setDeleteSkill(skill)}
               >
-                <CareIcon className="care-l-times text-lg" />
+                <CareIcon icon="l-times" className="text-lg" />
               </ButtonV2>
             </div>
           </div>

@@ -59,7 +59,7 @@ export default function LinkABHANumberModal({
 
   const title = (
     <div className="flex items-center gap-3">
-      <CareIcon className="care-l-link text-xl" />
+      <CareIcon icon="l-link" className="text-xl" />
       <h2 className="text-xl font-bold text-black">
         {currentStep === "ScanExistingQR"
           ? "Link Existing ABHA Number"
@@ -752,7 +752,7 @@ const VerifyMobileSection = ({
         />
       ) : (
         <p className="-mt-4 text-sm text-warning-600">
-          <CareIcon className="care-l-exclamation-triangle h-4 w-4" /> OTP is
+          <CareIcon icon="l-exclamation-triangle" className="h-4 w-4" /> OTP is
           generated if the above phone number is not linked with given Aadhaar
           number.
         </p>
@@ -833,7 +833,7 @@ const CreateHealthIDSection = ({
       />
 
       <p className="-mt-4 text-sm text-warning-600">
-        <CareIcon className="care-l-exclamation-triangle h-4 w-4" /> Existing
+        <CareIcon icon="l-exclamation-triangle" className="h-4 w-4" /> Existing
         ABHA Address is used if ABHA Number already exists.
       </p>
 
