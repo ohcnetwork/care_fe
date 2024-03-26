@@ -5,7 +5,13 @@ import * as Notification from "../../Utils/Notifications.js";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
 import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
-import { classNames, isValidUrl, parsePhoneNumber } from "../../Utils/utils";
+import {
+  classNames,
+  dateQueryString,
+  formatDate,
+  isValidUrl,
+  parsePhoneNumber,
+} from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
@@ -18,13 +24,13 @@ import { PhoneNumberValidator } from "../Form/FieldValidators";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
-
+import DateFormField from "../Form/FormFields/DateFormField";
 const Loading = lazy(() => import("../Common/Loading"));
 
 type EditForm = {
   firstName: string;
   lastName: string;
-  age: string;
+  date_of_birth: Date | null | string;
   gender: GenderType;
   email: string;
   video_connect_link: string | undefined;
@@ -34,12 +40,12 @@ type EditForm = {
   doctor_qualification: string | undefined;
   doctor_experience_commenced_on: number | string | undefined;
   doctor_medical_council_registration: string | undefined;
-  weekly_working_hours: string | null;
+  weekly_working_hours: string | null | undefined;
 };
 type ErrorForm = {
   firstName: string;
   lastName: string;
-  age: string;
+  date_of_birth: string | null;
   gender: string;
   email: string;
   video_connect_link: string | undefined;
@@ -62,7 +68,7 @@ type Action =
 const initForm: EditForm = {
   firstName: "",
   lastName: "",
-  age: "",
+  date_of_birth: null,
   gender: "Male",
   video_connect_link: "",
   email: "",
@@ -145,7 +151,7 @@ export default function UserProfile() {
       const formData: EditForm = {
         firstName: result.data.first_name,
         lastName: result.data.last_name,
-        age: result.data.age?.toString() || "",
+        date_of_birth: result.data.date_of_birth || null,
         gender: result.data.gender || "Male",
         email: result.data.email,
         video_connect_link: result.data.video_connect_link,
@@ -188,15 +194,15 @@ export default function UserProfile() {
             invalidForm = true;
           }
           return;
-        case "age":
+        case "date_of_birth":
           if (!states.form[field]) {
-            errors[field] = "This field is required";
+            errors[field] = "Enter a valid date of birth";
             invalidForm = true;
           } else if (
-            Number(states.form[field]) <= 0 ||
-            !/^\d+$/.test(states.form[field])
+            !dayjs(states.form[field]).isValid() ||
+            dayjs(states.form[field]).isAfter(dayjs().subtract(17, "year"))
           ) {
-            errors[field] = "Age must be a number greater than 0";
+            errors[field] = "Enter a valid date of birth";
             invalidForm = true;
           }
           return;
@@ -298,6 +304,9 @@ export default function UserProfile() {
     });
   };
 
+  const getDate = (value: any) =>
+    value && dayjs(value).isValid() && dayjs(value).toDate();
+
   const fieldProps = (name: string) => {
     return {
       name,
@@ -321,7 +330,7 @@ export default function UserProfile() {
         phone_number: parsePhoneNumber(states.form.phoneNumber) ?? "",
         alt_phone_number: parsePhoneNumber(states.form.altPhoneNumber) ?? "",
         gender: states.form.gender,
-        age: +states.form.age,
+        date_of_birth: dateQueryString(states.form.date_of_birth),
         doctor_qualification:
           states.form.user_type === "Doctor"
             ? states.form.doctor_qualification
@@ -520,12 +529,17 @@ export default function UserProfile() {
                       {userData?.last_name || "-"}
                     </dd>
                   </div>
-                  <div className="my-2  sm:col-span-1" id="age-profile-details">
+                  <div
+                    className="my-2  sm:col-span-1"
+                    id="date_of_birth-profile-details"
+                  >
                     <dt className="text-sm font-medium leading-5 text-black">
-                      Age
+                      Date of Birth
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {userData?.age || "-"}
+                      {userData?.date_of_birth
+                        ? formatDate(userData?.date_of_birth)
+                        : "-"}
                     </dd>
                   </div>
                   <div className="my-2  sm:col-span-1">
@@ -649,13 +663,14 @@ export default function UserProfile() {
                           label="Last name"
                           className="col-span-6 sm:col-span-3"
                         />
-                        <TextFormField
-                          {...fieldProps("age")}
+                        <DateFormField
+                          {...fieldProps("date_of_birth")}
+                          label="Date of Birth"
                           required
-                          label="Age"
                           className="col-span-6 sm:col-span-3"
-                          type="number"
-                          min={1}
+                          value={getDate(states.form.date_of_birth)}
+                          position="LEFT"
+                          disableFuture={true}
                         />
                         <SelectFormField
                           {...fieldProps("gender")}
