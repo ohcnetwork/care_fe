@@ -106,7 +106,10 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                     </p>
                   </div>
                   {showChevronIcon && (
-                    <CareIcon className="care-l-angle-down -mb-0.5 text-lg text-gray-900" />
+                    <CareIcon
+                      icon="l-angle-down"
+                      className="-mb-0.5 text-lg text-gray-900"
+                    />
                   )}
                 </div>
               </Listbox.Button>
@@ -132,7 +135,10 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                               {props.optionIcon
                                 ? option.icon
                                 : selected && (
-                                    <CareIcon className="care-l-check text-lg" />
+                                    <CareIcon
+                                      icon="l-check"
+                                      className="text-lg"
+                                    />
                                   )}
                             </div>
                             {option.description && (

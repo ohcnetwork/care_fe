@@ -101,7 +101,7 @@ export const InvestigationTable = ({
               setShowForm((prev) => !prev);
             }}
           >
-            {!showForm && <CareIcon className="care-l-edit mr-2" />}
+            {!showForm && <CareIcon icon="l-edit" className="mr-2" />}
             {showForm ? "Cancel" : "Update Details"}
           </ButtonV2>
           {showForm && (

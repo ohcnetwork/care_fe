@@ -122,7 +122,10 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                         </div>
                       )}
                     </div>
-                    <CareIcon className="care-l-angle-down -mb-0.5 text-lg text-gray-900" />
+                    <CareIcon
+                      icon="l-angle-down"
+                      className="-mb-0.5 text-lg text-gray-900"
+                    />
                   </div>
                 </Listbox.Button>
               </div>
@@ -142,7 +145,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                             {option.label}
                             {(option.icon || option.isSelected) &&
                               (option.isSelected ? (
-                                <CareIcon className="care-l-check text-lg" />
+                                <CareIcon icon="l-check" className="text-lg" />
                               ) : (
                                 option.icon
                               ))}
@@ -186,7 +189,7 @@ export const MultiSelectOptionChip = (props: MultiSelectOptionChipProps) => {
           className="cursor-pointer rounded-full hover:bg-white"
           onClick={props.onRemove}
         >
-          <CareIcon className="care-l-times text-base" />
+          <CareIcon icon="l-times" className="text-base" />
         </p>
       )}
     </span>

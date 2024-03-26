@@ -126,7 +126,7 @@ export default function MedicineAdministration(props: Props) {
               errorClassName="hidden"
             />
             <div className="text-sm font-semibold leading-relaxed text-gray-600">
-              <CareIcon className="care-l-history-alt pr-1" />{" "}
+              <CareIcon icon="l-history-alt" className="pr-1" />{" "}
               {t("last_administered")}
               <span className="pl-1">
                 {obj.last_administration?.administered_date
@@ -135,7 +135,7 @@ export default function MedicineAdministration(props: Props) {
               </span>
               {obj.dosage_type === "TITRATED" && (
                 <span className="whitespace-nowrap">
-                  <CareIcon className="care-l-syringe" /> {t("dosage")}
+                  <CareIcon icon="l-syringe" /> {t("dosage")}
                   {":"} {obj.last_administration?.dosage ?? "NA"}
                 </span>
               )}
@@ -224,7 +224,7 @@ export default function MedicineAdministration(props: Props) {
       ))}
       <div className="flex justify-end">
         <ButtonV2 onClick={handleSubmit} disabled={!selectedCount}>
-          <CareIcon className="care-l-syringe text-lg" />
+          <CareIcon icon="l-syringe" className="text-lg" />
           {t("administer_selected_medicines")}{" "}
           {selectedCount > 0 && `(${selectedCount})`}
         </ButtonV2>
