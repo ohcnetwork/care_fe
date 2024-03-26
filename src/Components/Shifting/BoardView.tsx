@@ -166,7 +166,7 @@ export default function BoardView() {
               className="py-[11px]"
               onClick={() => navigate("/shifting/list", { query: qParams })}
             >
-              <CareIcon className="care-l-list-ul" />
+              <CareIcon icon="l-list-ul" />
               {t("list_view")}
             </ButtonV2>
             <AdvancedFilterButton
