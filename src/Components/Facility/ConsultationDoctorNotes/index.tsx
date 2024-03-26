@@ -143,7 +143,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
             disabled={!patientActive}
             authorizeFor={NonReadOnlyUsers}
           >
-            <CareIcon className="care-l-message text-lg" />
+            <CareIcon icon="l-message" className="text-lg" />
           </ButtonV2>
         </div>
       </div>
