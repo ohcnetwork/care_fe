@@ -112,7 +112,7 @@ describe("User Creation", () => {
     );
     userCreationPage.verifyElementContainsText(
       "date_of_birth-profile-details",
-      "1998-01-01"
+      "01-01-1998"
     );
     userCreationPage.verifyElementContainsText(
       "emailid-profile-details",
