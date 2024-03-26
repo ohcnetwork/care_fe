@@ -22,11 +22,31 @@ export default function ExternalResultImportModal({ open, onClose }: Props) {
   const [loading, setLoading] = useState(false);
 
   const fetchUser = async () => {
-    const { data: userData } = await request(routes.currentUser, {
+    const { data: user } = await request(routes.currentUser, {
       pathParams: {},
     });
+
+    ExternalResultImportSchema.Address.parse = (value: string) => {
+      if (
+        user?.user_type === "StateAdmin" ||
+        user?.user_type === "StateLabAdmin"
+      ) {
+        if (value.split(",").pop()?.trim() === user?.state_object?.name) {
+          return value;
+        } else {
+          throw new Error("State should be the same as the user's state");
+        }
+      }
+      return value;
+    };
+
     ExternalResultImportSchema.District.parse = (value: string) => {
-      if (value !== userData?.district_object?.name) {
+      if (
+        user?.user_type === "StateAdmin" ||
+        user?.user_type === "StateLabAdmin"
+      ) {
+        return value;
+      } else if (value !== user?.district_object?.name) {
         throw new Error("District should be the same as the user's district");
       }
     };
