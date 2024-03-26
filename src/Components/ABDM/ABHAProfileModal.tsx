@@ -54,11 +54,13 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
           <div className="flex items-center gap-2">
             <CareIcon
               onClick={() => downloadAbhaCard("pdf")}
-              className="care-l-print cursor-pointer"
+              icon="l-print"
+              className="cursor-pointer"
             />
             <CareIcon
               onClick={() => downloadAbhaCard("png")}
-              className="care-l-import cursor-pointer"
+              icon="l-import"
+              className="cursor-pointer"
             />
           </div>
         </div>

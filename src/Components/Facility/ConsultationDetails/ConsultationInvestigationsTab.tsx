@@ -23,7 +23,7 @@ export const ConsultationInvestigationsTab = (props: ConsultationTabProps) => {
               )
             }
           >
-            <CareIcon className="care-l-plus" />
+            <CareIcon icon="l-plus" />
             <span>{t("log_lab_results")}</span>
           </ButtonV2>
         </div>

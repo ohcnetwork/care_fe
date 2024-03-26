@@ -267,26 +267,26 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
 
   const sections = {
     "Consultation Details": {
-      iconClass: "care-l-medkit",
+      iconClass: "l-medkit",
       visible: consultationDetailsVisible,
       ref: consultationDetailsRef,
     },
     Diagnosis: {
-      iconClass: "care-l-stethoscope",
+      iconClass: "l-stethoscope",
       visible: diagnosisVisible,
       ref: diagnosisRef,
     },
     "Treatment Plan": {
-      iconClass: "care-l-clipboard-alt",
+      iconClass: "l-clipboard-alt",
       visible: treatmentPlanVisible,
       ref: treatmentPlanRef,
     },
     "Bed Status": {
-      iconClass: "care-l-bed",
+      iconClass: "l-bed",
       visible: bedStatusVisible,
       ref: bedStatusRef,
     },
-  };
+  } as const;
 
   useEffect(() => {
     setCurrentSection((prev) => {
@@ -838,7 +838,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         className="col-span-6 -ml-2 mb-6 flex flex-row items-center"
         ref={section.ref as LegacyRef<HTMLDivElement>}
       >
-        <CareIcon className={`${section.iconClass} mr-3 text-xl`} />
+        <CareIcon icon={section.iconClass} className="mr-3 text-xl" />
         <label className="text-lg font-bold text-gray-900">
           {sectionTitle}
           {required && <span className="text-danger-500">{" *"}</span>}
@@ -941,7 +941,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                   setCurrentSection(sectionTitle as ConsultationFormSection);
                 }}
               >
-                <CareIcon className={`${section.iconClass} text-lg`} />
+                <CareIcon icon={section.iconClass} className="text-lg" />
                 <span>{sectionTitle}</span>
               </button>
             );
