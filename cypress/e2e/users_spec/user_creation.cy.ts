@@ -37,7 +37,7 @@ describe("User Creation", () => {
     "Please select the User Type",
     "Please enter valid phone number",
     "Please enter the username",
-    "Field is required",
+    "Please enter date in DD/MM/YYYY format",
     "Please enter the password",
     "Confirm password is required",
     "First Name is required",

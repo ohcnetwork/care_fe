@@ -8,6 +8,7 @@ import ButtonV2, { Submit } from "../Common/components/ButtonV2";
 import {
   classNames,
   dateQueryString,
+  formatDate,
   isValidUrl,
   parsePhoneNumber,
 } from "../../Utils/utils";
@@ -29,7 +30,7 @@ const Loading = lazy(() => import("../Common/Loading"));
 type EditForm = {
   firstName: string;
   lastName: string;
-  date_of_birth: Date | null;
+  date_of_birth: Date | null | string;
   gender: GenderType;
   email: string;
   video_connect_link: string | undefined;
@@ -39,7 +40,7 @@ type EditForm = {
   doctor_qualification: string | undefined;
   doctor_experience_commenced_on: number | string | undefined;
   doctor_medical_council_registration: string | undefined;
-  weekly_working_hours: string | null;
+  weekly_working_hours: string | null | undefined;
 };
 type ErrorForm = {
   firstName: string;
@@ -536,7 +537,9 @@ export default function UserProfile() {
                       Date of Birth
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {userData?.date_of_birth?.toString() || "-"}
+                      {userData?.date_of_birth
+                        ? formatDate(userData?.date_of_birth)
+                        : "-"}
                     </dd>
                   </div>
                   <div className="my-2  sm:col-span-1">
@@ -663,6 +666,7 @@ export default function UserProfile() {
                         <DateFormField
                           {...fieldProps("date_of_birth")}
                           label="Date of Birth"
+                          required
                           className="col-span-6 sm:col-span-3"
                           value={getDate(states.form.date_of_birth)}
                           position="LEFT"

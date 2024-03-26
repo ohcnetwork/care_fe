@@ -469,7 +469,7 @@ export const UserAdd = (props: UserProps) => {
           return;
         case "date_of_birth":
           if (!state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = "Please enter date in DD/MM/YYYY format";
             invalidForm = true;
           } else if (
             dayjs(state.form[field]).isAfter(dayjs().subtract(1, "year"))

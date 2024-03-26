@@ -32,7 +32,7 @@ export type UserModel = UserBareMinimum & {
   phone_number?: string;
   alt_phone_number?: string;
   gender?: GenderType;
-  date_of_birth: Date | null;
+  date_of_birth: Date | null | string;
   is_superuser?: boolean;
   verified?: boolean;
   home_facility?: string;
