@@ -271,7 +271,7 @@ const AssetManage = (props: AssetManageProps) => {
       <div className="flex grow-0 flex-col md:w-[200px]">
         <div className="flex-start flex items-center">
           <div className="w-8">
-            <CareIcon className={`care-l-${item.icon} fill-gray-700 text-lg`} />
+            <CareIcon icon={item.icon} className="fill-gray-700 text-lg" />
           </div>
           <div className="break-words text-gray-700">{item.label}</div>
         </div>
@@ -332,7 +332,7 @@ const AssetManage = (props: AssetManageProps) => {
           ghost
           border
         >
-          <CareIcon className="care-l-export text-lg" />
+          <CareIcon icon="l-export" className="text-lg" />
           Export as JSON
         </ButtonV2>
       }
@@ -357,7 +357,8 @@ const AssetManage = (props: AssetManageProps) => {
                   </span>
                   <div className="tooltip tooltip-bottom">
                     <CareIcon
-                      className={`care-l-${assetClassProp.icon} fill-gray-700 text-3xl`}
+                      icon={assetClassProp.icon}
+                      className="fill-gray-700 text-3xl"
                     />
                     <span className="tooltip-text">{assetClassProp.name}</span>
                   </div>
@@ -397,17 +398,17 @@ const AssetManage = (props: AssetManageProps) => {
               {[
                 {
                   label: asset?.location_object.facility.name,
-                  icon: "location-pin-alt",
+                  icon: "l-location-pin-alt",
                   content: asset?.location_object.name,
                 },
                 {
                   label: "Asset QR Code ID",
-                  icon: "qrcode-scan",
+                  icon: "l-qrcode-scan",
                   content: asset?.qr_code_id,
                 },
                 {
                   label: "Not working reason",
-                  icon: "exclamation-circle",
+                  icon: "l-exclamation-circle",
                   content: asset?.not_working_reason,
                   hide: asset?.is_working,
                 },
@@ -425,7 +426,7 @@ const AssetManage = (props: AssetManageProps) => {
                 data-testid="asset-update-button"
                 authorizeFor={NonReadOnlyUsers}
               >
-                <CareIcon className="care-l-pen mr-1 h-4" />
+                <CareIcon icon="l-pen" className="mr-1 h-4" />
                 {t("update")}
               </ButtonV2>
               {asset?.asset_class &&
@@ -442,7 +443,7 @@ const AssetManage = (props: AssetManageProps) => {
                     id="configure-asset"
                     data-testid="asset-configure-button"
                   >
-                    <CareIcon className="care-l-setting h-4" />
+                    <CareIcon icon="l-setting" className="h-4" />
                     {t("configure")}
                   </ButtonV2>
                 )}
@@ -454,7 +455,7 @@ const AssetManage = (props: AssetManageProps) => {
                   data-testid="asset-delete-button"
                   className="inline-flex"
                 >
-                  <CareIcon className="care-l-trash h-4" />
+                  <CareIcon icon="l-trash" className="h-4" />
                   <span className="md:hidden">{t("delete")}</span>
                 </ButtonV2>
               )}
@@ -467,14 +468,14 @@ const AssetManage = (props: AssetManageProps) => {
                 {[
                   {
                     label: "Last serviced on",
-                    icon: "wrench",
+                    icon: "l-wrench",
                     content:
                       asset?.last_service?.serviced_on &&
                       formatDate(asset?.last_service?.serviced_on),
                   },
                   {
                     label: "Notes",
-                    icon: "notes",
+                    icon: "l-notes",
                     content: asset?.last_service?.note,
                   },
                 ].map(detailBlock)}

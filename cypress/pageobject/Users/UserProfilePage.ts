@@ -1,3 +1,5 @@
+import { cy } from "local-cypress";
+
 export default class UserProfilePage {
   assertVideoConnectLink(link: string) {
     cy.get("#videoconnectlink-profile-details").should("contain.text", link);
@@ -15,8 +17,10 @@ export default class UserProfilePage {
     cy.get("#submit").click();
   }
 
-  typeAge(age: string) {
-    cy.get("#age").click().clear().type(age);
+  typedate_of_birth(date_of_birth: string) {
+    //check
+    cy.get("#date_of_birth").click();
+    cy.get("#date-input").clear().type(date_of_birth);
   }
 
   selectGender(gender: string) {
@@ -55,8 +59,11 @@ export default class UserProfilePage {
       .type(medicalCouncilRegistration);
   };
 
-  assertAge(age: string) {
-    cy.get("#age-profile-details").should("contain.text", age);
+  assertdate_of_birth(date_of_birth: string) {
+    cy.get("#date_of_birth-profile-details").should(
+      "contain.text",
+      date_of_birth
+    );
   }
 
   assertGender(gender: string) {

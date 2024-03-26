@@ -228,7 +228,7 @@ export const ConsultationDetails = (props: any) => {
   //             <p>{diagnosis.label}</p>
   //             <div>
   //               <ToolTip text="Principal Diagnosis" position="BOTTOM">
-  //                 <CareIcon className="care-l-stethoscope rounded-lg bg-primary-500  p-1 text-2xl text-white" />
+  //                 <CareIcon icon="l-stethoscope" className="rounded-lg bg-primary-500 p-1 text-2xl text-white"/>
   //               </ToolTip>
   //             </div>
   //           </div>

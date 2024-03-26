@@ -120,6 +120,7 @@ export class PatientConsultationPage {
       "#consultation-buttons",
       "Edit Consultation Details"
     );
+    cy.wait(3000);
   }
 
   visitShiftRequestPage() {
