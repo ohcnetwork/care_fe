@@ -27,7 +27,11 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
 
   const [showDiscontinued, setShowDiscontinued] = useState(false);
 
-  const filters = { is_prn, prescription_type: "REGULAR", limit: 100 };
+  const filters = {
+    dosage_type: is_prn ? "PRN" : "REGULAR,TITRATED",
+    prescription_type: "REGULAR",
+    limit: 100,
+  };
 
   const { data, loading, refetch } = useQuery(
     MedicineRoutes.listPrescriptions,
@@ -79,7 +83,7 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
       <SubHeading
         title={is_prn ? "PRN Prescriptions" : "Prescriptions"}
         lastModified={
-          prescriptions?.[0]?.last_administered_on ??
+          prescriptions?.[0]?.last_administration?.created_date ??
           prescriptions?.[0]?.modified_date
         }
         options={

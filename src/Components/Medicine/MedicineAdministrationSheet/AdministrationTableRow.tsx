@@ -49,7 +49,7 @@ export default function MedicineAdministrationTableRow({
         ),
         archived: false,
       },
-      key: `${prescription.last_administered_on}`,
+      key: `${prescription.last_administration?.administered_date}`,
     }
   );
 
@@ -141,7 +141,9 @@ export default function MedicineAdministrationTableRow({
           onClose={() => setShowEdit(false)}
           show={showEdit}
           title={`${t("edit")} ${t(
-            prescription.is_prn ? "prn_prescription" : "prescription_medication"
+            prescription.dosage_type === "PRN"
+              ? "prn_prescription"
+              : "prescription_medication"
           )}: ${
             prescription.medicine_object?.name ?? prescription.medicine_old
           }`}
@@ -193,9 +195,16 @@ export default function MedicineAdministrationTableRow({
           </div>
 
           <div className="flex gap-1 text-xs font-semibold text-gray-900 lg:flex-col lg:px-2 lg:text-center">
-            <p>{prescription.dosage}</p>
+            {prescription.dosage_type !== "TITRATED" ? (
+              <p>{prescription.base_dosage}</p>
+            ) : (
+              <p>
+                {prescription.base_dosage} - {prescription.target_dosage}
+              </p>
+            )}
+
             <p>
-              {!prescription.is_prn
+              {prescription.dosage_type !== "PRN"
                 ? t("PRESCRIPTION_FREQUENCY_" + prescription.frequency)
                 : prescription.indicator}
             </p>
