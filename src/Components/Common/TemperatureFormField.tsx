@@ -3,7 +3,6 @@ import { FormFieldBaseProps } from "../Form/FormFields/Utils";
 import RangeAutocompleteFormField from "../Form/FormFields/RangeAutocompleteFormField";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "./components/ButtonV2";
-import { classNames } from "../../Utils/utils";
 
 type TemperatureUnit = "celsius" | "fahrenheit";
 
@@ -24,31 +23,31 @@ export default function TemperatureFormField(props: Props) {
         {
           value: 95,
           label: "Low",
-          icon: <CareIcon className="care-l-temperature-empty" />,
+          icon: <CareIcon icon="l-temperature-empty" />,
           className: "text-danger-500",
         },
         {
           value: 96.6,
           label: "Low",
-          icon: <CareIcon className="care-l-temperature-quarter" />,
+          icon: <CareIcon icon="l-temperature-quarter" />,
           className: "text-warning-500",
         },
         {
           value: 97.6,
           label: "Normal",
-          icon: <CareIcon className="care-l-temperature-half" />,
+          icon: <CareIcon icon="l-temperature-half" />,
           className: "text-primary-500",
         },
         {
           value: 99.6,
           label: "High",
-          icon: <CareIcon className="care-l-temperature-three-quarter" />,
+          icon: <CareIcon icon="l-temperature-three-quarter" />,
           className: "text-warning-500",
         },
         {
           value: 101.6,
           label: "High",
-          icon: <CareIcon className="care-l-temperature" />,
+          icon: <CareIcon icon="l-temperature" />,
           className: "text-danger-500",
         },
       ]}
@@ -66,7 +65,10 @@ export default function TemperatureFormField(props: Props) {
           border
           onClick={() => setUnit(unit === "celsius" ? "fahrenheit" : "celsius")}
         >
-          <CareIcon className={classNames("text-sm", `care-l-${unit}`)} />
+          <CareIcon
+            icon={unit === "celsius" ? "l-celsius" : "l-fahrenheit"}
+            className="text-sm"
+          />
         </ButtonV2>
       }
     />

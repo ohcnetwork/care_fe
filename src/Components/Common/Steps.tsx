@@ -29,7 +29,8 @@ export default function Steps(props: { steps: Step[] }) {
                 <span className="flex items-center px-6 py-4 text-sm font-medium">
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-600 group-hover:bg-green-800">
                     <CareIcon
-                      className="care-l-check h-6 w-6 text-white"
+                      icon="l-check"
+                      className="h-6 w-6 text-white"
                       aria-hidden="true"
                     />
                   </span>

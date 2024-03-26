@@ -392,7 +392,7 @@ export default function ManageUsers() {
                         setSelectedUser(user);
                       }}
                     >
-                      <CareIcon className="care-l-hospital text-lg" />
+                      <CareIcon icon="l-hospital" className="text-lg" />
                       <p>Linked Facilities</p>
                     </ButtonV2>
                     <ButtonV2
@@ -403,7 +403,7 @@ export default function ManageUsers() {
                         setSelectedUser(user.username);
                       }}
                     >
-                      <CareIcon className="care-l-award text-xl" />
+                      <CareIcon icon="l-award" className="text-xl" />
                       <p>Linked Skills</p>
                     </ButtonV2>
                   </div>
@@ -420,7 +420,7 @@ export default function ManageUsers() {
                           setWeeklyHours(user.weekly_working_hours);
                         }}
                       >
-                        <CareIcon className="care-l-clock text-xl" />
+                        <CareIcon icon="l-clock" className="text-xl" />
                         <p>Set Average weekly working hours</p>
                       </ButtonV2>
                     </div>
@@ -769,7 +769,7 @@ function UserFacilities(props: { user: any }) {
                         })
                       }
                     >
-                      <CareIcon className="care-l-link-broken" />
+                      <CareIcon icon="l-link-broken" />
                       <span className="tooltip-text tooltip-left">
                         {t("clear_home_facility")}
                       </span>
@@ -824,7 +824,7 @@ function UserFacilities(props: { user: any }) {
                                 }
                               }}
                             >
-                              <CareIcon className="care-l-estate" />
+                              <CareIcon icon="l-estate" />
                               <span className="tooltip-text tooltip-left">
                                 Set as home facility
                               </span>
@@ -841,7 +841,7 @@ function UserFacilities(props: { user: any }) {
                                 })
                               }
                             >
-                              <CareIcon className="care-l-link-broken" />
+                              <CareIcon icon="l-link-broken" />
                               <span className="tooltip-text tooltip-left">
                                 Unlink Facility
                               </span>
