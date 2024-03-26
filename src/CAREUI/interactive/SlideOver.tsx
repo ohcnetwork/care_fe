@@ -116,7 +116,7 @@ export default function SlideOver({
                       onCloseClick && onCloseClick();
                     }}
                   >
-                    <CareIcon className="care-l-arrow-left" />
+                    <CareIcon icon="l-arrow-left" />
                   </button>
                   <div className="flex w-full">
                     <h1 className="w-full text-xl font-black">{title}</h1>

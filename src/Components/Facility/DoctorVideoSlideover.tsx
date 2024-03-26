@@ -247,7 +247,7 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
                   <span className="tooltip-text tooltip-top">
                     Copy Phone number
                   </span>
-                  <CareIcon className="care-l-clipboard h-5 w-5" />
+                  <CareIcon icon="l-clipboard" className="h-5 w-5" />
                 </span>
               </a>
               <span>{user.alt_phone_number}</span>
@@ -294,7 +294,7 @@ function DoctorConnectButtons(props: {
       <a onClick={props.connectOnWhatsApp}>
         <div className="tooltip">
           <span className="tooltip-text tooltip-left">Connect on WhatsApp</span>
-          <CareIcon className="care-l-whatsapp h-5 w-5" />
+          <CareIcon icon="l-whatsapp" className="h-5 w-5" />
         </div>
       </a>
       <a

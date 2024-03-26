@@ -182,9 +182,9 @@ export const NutritionPlots = (props: any) => {
         >
           <div> IO Balance Plots</div>
           {showIO ? (
-            <CareIcon className="care-l-angle-up text-2xl font-bold" />
+            <CareIcon icon="l-angle-up" className="text-2xl font-bold" />
           ) : (
-            <CareIcon className="care-l-angle-down text-2xl font-bold" />
+            <CareIcon icon="l-angle-down" className="text-2xl font-bold" />
           )}
         </div>
 
@@ -224,9 +224,9 @@ export const NutritionPlots = (props: any) => {
         >
           <div>Intake</div>
           {showIntake ? (
-            <CareIcon className="care-l-angle-up text-2xl font-bold" />
+            <CareIcon icon="l-angle-up" className="text-2xl font-bold" />
           ) : (
-            <CareIcon className="care-l-angle-down text-2xl font-bold" />
+            <CareIcon icon="l-angle-down" className="text-2xl font-bold" />
           )}
         </div>
         <div className={showIntake ? "grid gap-4 md:grid-cols-2" : "hidden"}>
@@ -331,9 +331,9 @@ export const NutritionPlots = (props: any) => {
         >
           <div> Output</div>
           {showOutput ? (
-            <CareIcon className="care-l-angle-up text-2xl font-bold" />
+            <CareIcon icon="l-angle-up" className="text-2xl font-bold" />
           ) : (
-            <CareIcon className="care-l-angle-down text-2xl font-bold" />
+            <CareIcon icon="l-angle-down" className="text-2xl font-bold" />
           )}
         </div>
         <div
