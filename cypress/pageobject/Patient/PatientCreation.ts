@@ -46,13 +46,14 @@ export class PatientPage {
   }
 
   typePatientDateOfBirth(dateOfBirth: string) {
-    cy.clickAndSelectOption("#ageOrDob-selector", "D.O.B");
+    cy.clickAndSelectOption("#patientAge", "D.O.B");
     cy.get("#date_of_birth").scrollIntoView();
     cy.get("#date_of_birth").should("be.visible").click();
     cy.get("#date-input").click().type(dateOfBirth);
   }
-  typePatientAge(age: number) {
-    cy.clickAndSelectOption("#ageOrDob-selector", "Age");
+
+  typePatientAge(age: string) {
+    cy.clickAndSelectOption("#patientAge", "Age");
     cy.submitButton("Confirm");
     cy.get("#age").clear().type(age);
   }

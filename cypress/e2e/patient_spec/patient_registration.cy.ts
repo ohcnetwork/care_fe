@@ -26,8 +26,8 @@ describe("Patient Creation with consultation", () => {
   const patientExternal = new PatientExternal();
   const patientInsurance = new PatientInsurance();
   const patientMedicalHistory = new PatientMedicalHistory();
-  let phone_number = generatePhoneNumber();
-  let emergency_phone_number = generateEmergencyPhoneNumber();
+  const phone_number = generatePhoneNumber();
+  const emergency_phone_number = generateEmergencyPhoneNumber();
   const age = calculateAge();
   const patientFacility = "Dummy Facility 40";
   const patientDateOfBirth = "01012001";
@@ -74,15 +74,13 @@ describe("Patient Creation with consultation", () => {
 
   it("Create a new patient with all field in registration form and no consultation", () => {
     // patient details with all the available fields except covid
-    phone_number = generatePhoneNumber();
-    emergency_phone_number = generateEmergencyPhoneNumber();
     patientPage.createPatient();
     patientPage.selectFacility(patientFacility);
     patientPage.patientformvisibility();
     // Patient Details page
     patientPage.typePatientPhoneNumber(phone_number);
     patientPage.typePatientEmergencyNumber(emergency_phone_number);
-    patientPage.typePatientAge(age);
+    patientPage.typePatientAge(age.toString());
     patientPage.typePatientName(patientOneName);
     patientPage.selectPatientGender(patientOneGender);
     patientPage.typePatientAddress(patientOneAddress);
@@ -211,7 +209,7 @@ describe("Patient Creation with consultation", () => {
       yearOfBirth,
       patientOneUpdatedBloodGroup,
       patientOccupation,
-      "Date of Birth"
+      yearOfBirth
     );
     // Verify No medical history
     patientMedicalHistory.verifyNoSymptosPresent("Diabetes");

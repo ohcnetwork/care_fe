@@ -1333,7 +1333,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             </FieldLabel>
                             <div className="flex w-full items-center gap-2">
                               <SelectMenuV2
-                                id="ageOrDob-selector"
+                                id="patientAge"
                                 className="w-44 lg:w-32"
                                 options={
                                   [
