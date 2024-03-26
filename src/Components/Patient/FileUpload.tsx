@@ -629,7 +629,10 @@ export const FileUpload = (props: FileUploadProps) => {
                           }}
                           className="m-1 w-full sm:w-auto"
                         >
-                          <CareIcon className="care-l-arrow-circle-down text-lg" />{" "}
+                          <CareIcon
+                            icon="l-arrow-circle-down"
+                            className="text-lg"
+                          />{" "}
                           DOWNLOAD
                         </ButtonV2>
                         {item?.uploaded_by?.username === authUser.username ||
@@ -647,7 +650,7 @@ export const FileUpload = (props: FileUploadProps) => {
                               }}
                               className="m-1 w-full sm:w-auto"
                             >
-                              <CareIcon className="care-l-pen text-lg" />
+                              <CareIcon icon="l-pen" className="text-lg" />
                               RENAME
                             </ButtonV2>
                           </>
@@ -669,7 +672,7 @@ export const FileUpload = (props: FileUploadProps) => {
                               }}
                               className="m-1 w-full sm:w-auto"
                             >
-                              <CareIcon className="care-l-archive text-lg" />
+                              <CareIcon icon="l-archive" className="text-lg" />
                               ARCHIVE
                             </ButtonV2>
                           </>
@@ -762,7 +765,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         }}
                         className="m-1 w-full sm:w-auto"
                       >
-                        <CareIcon className="care-l-pen text-lg" />
+                        <CareIcon icon="l-pen" className="text-lg" />
                         RENAME
                       </ButtonV2>
                     </>
@@ -782,7 +785,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         }}
                         className="m-1 w-full sm:w-auto"
                       >
-                        <CareIcon className="care-l-archive text-lg" />
+                        <CareIcon icon="l-archive" className="text-lg" />
                         ARCHIVE
                       </ButtonV2>
                     </>
@@ -872,7 +875,8 @@ export const FileUpload = (props: FileUploadProps) => {
             <div className="flex flex-wrap items-center">
               <ButtonV2 variant="secondary" className="m-1 w-full sm:w-auto">
                 {" "}
-                <CareIcon className="care-l-eye-slash text-lg" /> FILE ARCHIVED
+                <CareIcon icon="l-eye-slash" className="text-lg" /> FILE
+                ARCHIVED
               </ButtonV2>
               <ButtonV2
                 onClick={() => {
@@ -886,7 +890,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 }}
                 className="m-1 w-full sm:w-auto"
               >
-                <CareIcon className="care-l-question-circle text-lg" />
+                <CareIcon icon="l-question-circle" className="text-lg" />
                 MORE DETAILS
               </ButtonV2>
             </div>
@@ -905,8 +909,8 @@ export const FileUpload = (props: FileUploadProps) => {
   }
 
   const onFileChange = (e: ChangeEvent<HTMLInputElement>): any => {
-    if (e.target.files == null) {
-      throw new Error("Error finding e.target.files");
+    if (!e.target.files?.length) {
+      return;
     }
     const f = e.target.files[0];
     const fileName = f.name;
@@ -1144,7 +1148,10 @@ export const FileUpload = (props: FileUploadProps) => {
         title={
           <div className="flex flex-row">
             <div className="rounded-full bg-primary-100 px-5 py-4">
-              <CareIcon className="care-l-camera-change text-lg text-primary-500" />
+              <CareIcon
+                icon="l-camera-change"
+                className="text-lg text-primary-500"
+              />
             </div>
             <div className="m-4">
               <h1 className="text-xl text-black "> Camera</h1>
@@ -1239,7 +1246,7 @@ export const FileUpload = (props: FileUploadProps) => {
         <div className={`${isLaptopScreen ? " " : " hidden "}`}>
           <div className="m-4 flex lg:hidden">
             <ButtonV2 onClick={handleSwitchCamera}>
-              <CareIcon className="care-l-camera-change text-lg" />
+              <CareIcon icon="l-camera-change" className="text-lg" />
               {`${t("switch")} ${t("camera")}`}
             </ButtonV2>
           </div>
@@ -1254,7 +1261,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         captureImage();
                       }}
                     >
-                      <CareIcon className="care-l-capture text-lg" />
+                      <CareIcon icon="l-capture" className="text-lg" />
                       {t("capture")}
                     </ButtonV2>
                   </div>
@@ -1299,7 +1306,10 @@ export const FileUpload = (props: FileUploadProps) => {
         title={
           <div className="flex flex-row">
             <div className="rounded-full bg-primary-100 px-5 py-4">
-              <CareIcon className="care-l-edit-alt text-lg text-primary-500" />
+              <CareIcon
+                icon="l-edit-alt"
+                className="text-lg text-primary-500"
+              />
             </div>
             <div className="m-4">
               <h1 className="text-xl text-black ">Rename File</h1>
@@ -1343,7 +1353,10 @@ export const FileUpload = (props: FileUploadProps) => {
         title={
           <div className="flex flex-row">
             <div className="my-1 mr-3 rounded-full bg-red-100 px-5 py-4 text-center">
-              <CareIcon className="care-l-exclamation-triangle text-lg text-danger-500 " />
+              <CareIcon
+                icon="l-exclamation-triangle"
+                className="text-lg text-danger-500"
+              />
             </div>
             <div className="text-grey-200 text-sm">
               <h1 className="text-xl text-black">Archive File</h1>
@@ -1390,7 +1403,10 @@ export const FileUpload = (props: FileUploadProps) => {
         title={
           <div className="flex flex-row">
             <div className="my-1 mr-3 rounded-full bg-primary-100 px-5 py-4 text-center">
-              <CareIcon className="care-l-question-circle text-lg text-primary-500 " />
+              <CareIcon
+                icon="l-question-circle"
+                className="text-lg text-primary-500"
+              />
             </div>
             <div className="text-grey-200 text-sm">
               <h1 className="text-xl text-black">File Details</h1>
@@ -1410,10 +1426,10 @@ export const FileUpload = (props: FileUploadProps) => {
               <b>Reason:</b> {modalDetails?.reason}
             </div>
             <div className="text-md text-center">
-              <b>Archived_by:</b> {modalDetails?.userArchived}
+              <b>Archived by:</b> {modalDetails?.userArchived}
             </div>
             <div className="text-md text-center">
-              <b>Time of Archive:</b>
+              <b>Time of Archive: </b>
               {formatDateTime(modalDetails?.archiveTime)}
             </div>
           </div>
@@ -1464,11 +1480,11 @@ export const FileUpload = (props: FileUploadProps) => {
                           deleteAudioBlob();
                         }}
                       >
-                        <CareIcon className="care-l-trash h-4" /> Delete
+                        <CareIcon icon="l-trash" className="h-4" /> Delete
                       </ButtonV2>
                     </div>
                   )}
-                  <div className="flex flex-col items-center gap-4 md:flex-row">
+                  <div className="flex flex-col items-center gap-4 md:flex-row md:flex-wrap lg:flex-nowrap">
                     <VoiceRecorder
                       createAudioBlob={createAudioBlob}
                       confirmAudioBlobExists={confirmAudioBlobExists}
@@ -1477,7 +1493,10 @@ export const FileUpload = (props: FileUploadProps) => {
                     />
                     {!audioBlobExists && (
                       <span className="text-sm font-medium text-warning-500">
-                        <CareIcon className="care-l-exclamation-triangle mr-1 text-base" />
+                        <CareIcon
+                          icon="l-exclamation-triangle"
+                          className="mr-1 text-base"
+                        />
                         Please allow browser permission before you start
                         speaking
                       </span>
@@ -1491,7 +1510,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         }}
                         className="w-full"
                       >
-                        <CareIcon className={"care-l-cloud-upload text-xl"} />
+                        <CareIcon icon="l-cloud-upload" className="text-xl" />
                         Save
                       </ButtonV2>
                     </div>
@@ -1526,7 +1545,10 @@ export const FileUpload = (props: FileUploadProps) => {
                       {({ isAuthorized }) =>
                         isAuthorized ? (
                           <label className="button-size-default button-shape-square button-primary-default inline-flex h-min w-full cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500">
-                            <CareIcon className="care-l-file-upload-alt text-lg" />
+                            <CareIcon
+                              icon="l-file-upload-alt"
+                              className="text-lg"
+                            />
                             {t("choose_file")}
                             <input
                               id="file_upload_patient"
@@ -1546,7 +1568,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       onClick={() => setModalOpenForCamera(true)}
                       className="w-full"
                     >
-                      <CareIcon className="care-l-camera mr-2 text-lg" />
+                      <CareIcon icon="l-camera" className="mr-2 text-lg" />
                       Open Camera
                     </ButtonV2>
                     <ButtonV2
@@ -1560,7 +1582,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       onClick={handleUpload}
                       className="w-full"
                     >
-                      <CareIcon className="care-l-cloud-upload text-lg" />
+                      <CareIcon icon="l-cloud-upload" className="text-lg" />
                       {t("upload")}
                     </ButtonV2>
                   </div>

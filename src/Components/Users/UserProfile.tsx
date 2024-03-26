@@ -249,10 +249,12 @@ export default function UserProfile() {
             errors[field] = "Field is required";
             invalidForm = true;
           } else if (
-            states.form.user_type === "Doctor" &&
-            Number(states.form.doctor_experience_commenced_on) > 100
+            (states.form.user_type === "Doctor" &&
+              Number(states.form.doctor_experience_commenced_on) >= 100) ||
+            Number(states.form.doctor_experience_commenced_on) < 0
           ) {
-            errors[field] = "Doctor experience should be less than 100 years";
+            errors[field] =
+              "Doctor experience should be at least 0 years and less than 100 years.";
             invalidForm = true;
           }
           return;
@@ -441,7 +443,7 @@ export default function UserProfile() {
                   {showEdit ? "Cancel" : "Edit User Profile"}
                 </ButtonV2>
                 <ButtonV2 variant="danger" onClick={signOut}>
-                  <CareIcon className="care-l-sign-out-alt" />
+                  <CareIcon icon="l-sign-out-alt" />
                   Sign out
                 </ButtonV2>
               </div>
@@ -832,7 +834,7 @@ export default function UserProfile() {
             <UpdatableApp silentlyAutoUpdate={false}>
               <ButtonV2 disabled={true}>
                 <div className="flex items-center gap-4">
-                  <CareIcon className="care-l-exclamation text-2xl" />
+                  <CareIcon icon="l-exclamation" className="text-2xl" />
                   Update available
                 </div>
               </ButtonV2>
@@ -847,8 +849,9 @@ export default function UserProfile() {
                 {" "}
                 <div className="flex items-center gap-4">
                   <CareIcon
+                    icon="l-sync"
                     className={classNames(
-                      "care-l-sync text-2xl",
+                      "text-2xl",
                       updateStatus.isChecking && "animate-spin"
                     )}
                   />

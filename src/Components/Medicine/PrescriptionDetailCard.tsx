@@ -66,7 +66,7 @@ export default function PrescriptionDetailCard({
                     ghost
                     border
                   >
-                    <CareIcon className="care-l-syringe text-base" />
+                    <CareIcon icon="l-syringe" className="text-base" />
                     {t("administer")}
                   </ButtonV2>
                   <ButtonV2
@@ -78,7 +78,7 @@ export default function PrescriptionDetailCard({
                     border
                     onClick={props.onDiscontinueClick}
                   >
-                    <CareIcon className="care-l-ban text-base" />
+                    <CareIcon icon="l-ban" className="text-base" />
                     {t("discontinue")}
                   </ButtonV2>
                 </div>

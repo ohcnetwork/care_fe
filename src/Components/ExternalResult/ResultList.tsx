@@ -246,7 +246,7 @@ export default function ResultList() {
                     {
                       label: "Import Results",
                       options: {
-                        icon: <CareIcon className="care-l-import" />,
+                        icon: <CareIcon icon="l-import" />,
                         onClick: () => setImportModalOpen(true),
                       },
                     },
@@ -261,7 +261,7 @@ export default function ResultList() {
                   ),
                 filePrefix: "external_results",
                 options: {
-                  icon: <CareIcon className="care-l-export" />,
+                  icon: <CareIcon icon="l-export" />,
                 },
               },
             ]}

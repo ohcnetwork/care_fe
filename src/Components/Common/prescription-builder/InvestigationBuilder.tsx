@@ -142,7 +142,7 @@ export default function InvestigationBuilder(
                 }
               >
                 Delete Investigation
-                <CareIcon className="care-l-trash-alt h-4 w-4" />
+                <CareIcon icon="l-trash-alt" className="h-4 w-4" />
               </button>
             </div>
             <div className="flex flex-col gap-2">
