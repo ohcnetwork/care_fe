@@ -75,7 +75,7 @@ let make = (
   })
 
   <>
-    <section className={"slider-box " ++ className}>
+    <section id={title} className={"slider-box " ++ className}>
       <div className="slider-head flex justify-between flex-col sm:flex-row sm:items-center">
         <div className="flex items-center">
           <h1 className="m-2"> {title->str} </h1> titleNeighbour

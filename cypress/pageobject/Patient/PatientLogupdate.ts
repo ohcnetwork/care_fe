@@ -11,6 +11,13 @@ class PatientLogupdate {
     cy.wait(2000);
   }
 
+  clickAndVerifySlide(sliderId: string, value: string) {
+    cy.get(`${sliderId} input[type="range"]`)
+      .invoke("val", value)
+      .trigger("input");
+    cy.get(`${sliderId} input[type="range"]`).should("have.value", value);
+  }
+
   selectPatientCategory(category: string) {
     cy.clickAndSelectOption("#patient_category", category);
   }

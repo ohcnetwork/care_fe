@@ -36,6 +36,29 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.awaitUrl("/patients");
   });
 
+  it("Create a new critical care log update and verify its reflection", () => {
+    patientPage.visitPatient("Dummy Patient 14");
+    patientConsultationPage.clickEditConsultationButton();
+    patientConsultationPage.selectPatientSuggestion("Domiciliary Care");
+    cy.submitButton("Update Consultation");
+    cy.verifyNotification("Consultation updated successfully");
+    patientLogupdate.clickLogupdate();
+    patientLogupdate.selectPatientCategory(patientCategory);
+    cy.clickAndSelectOption("#rounds_type", "Critical Care");
+    cy.submitButton("Save");
+    cy.verifyNotification("Consultation Updates details created successfully");
+    // Edit the vitals sections
+    cy.verifyAndClickElement("#editorToggle", "Vitals");
+    patientLogupdate.clickAndVerifySlide("#Systolic", "90");
+    patientLogupdate.clickAndVerifySlide("#Diastolic", "90");
+    patientLogupdate.clickAndVerifySlide("#Spo2", "90");
+    patientLogupdate.clickAndVerifySlide("#Temperature", "101.6");
+    cy.get("#description").type("Rhythm Description");
+    cy.submitButton("Update Details");
+    // Edit the Neurological Monitors
+    cy.verifyAndClickElement("#editorToggle", "Neurological Monitoring");
+  });
+
   it("Create a new log teleicu update for a domicilary care patient and verify the copy previous value function", () => {
     patientPage.visitPatient("Dummy Patient 11");
     patientConsultationPage.clickEditConsultationButton();
