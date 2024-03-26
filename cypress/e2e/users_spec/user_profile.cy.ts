@@ -49,7 +49,7 @@ describe("Manage User Profile", () => {
 
     cy.verifyNotification("Details updated successfully");
 
-    userProfilePage.assertdate_of_birth("1999-01-01");
+    userProfilePage.assertdate_of_birth("01/01/1999");
     userProfilePage.assertGender(gender);
     userProfilePage.assertEmail(email);
     userProfilePage.assertPhone(phone);
