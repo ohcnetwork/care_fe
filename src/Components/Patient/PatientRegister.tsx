@@ -222,7 +222,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   useEffect(() => {
     if (extId && formField) {
       setCareExtId(extId);
-      fetchExtResultData(null, formField);
+      fetchExtResultData(formField);
     }
   }, [careExtId, formField]);
 
@@ -284,8 +284,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     }
   };
 
-  const fetchExtResultData = async (e: any, field: any) => {
-    if (e) e.preventDefault();
+  const fetchExtResultData = async (field: any) => {
     if (!careExtId) return;
     const { res, data } = await request(routes.externalResult, {
       pathParams: { id: careExtId },
@@ -311,10 +310,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         value: data.gender
           ? parseGenderFromExt(data.gender, state.form.gender)
           : state.form.gender,
-      });
-      field.onChange({
-        name: "occupation",
-        value: data.meta_info?.occupation ?? state.form.occupation,
       });
       field.onChange({
         name: "test_id",
@@ -1120,7 +1115,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   id="submit-importexternalresult-button"
                   className="btn btn-primary mr-4"
                   onClick={(e) => {
-                    fetchExtResultData(e, showImport?.field?.("name"));
+                    e.preventDefault();
+                    fetchExtResultData(showImport?.field?.("name"));
                   }}
                   disabled={!careExtId}
                 >
