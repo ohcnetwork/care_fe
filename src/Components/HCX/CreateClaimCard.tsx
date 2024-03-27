@@ -153,7 +153,7 @@ export default function CreateClaimCard({
             Check Insurance Policy Eligibility
           </h1>
           <ButtonV2 onClick={() => setShowAddPolicy(true)} ghost border>
-            <CareIcon className="care-l-edit-alt text-lg" />
+            <CareIcon icon="l-edit-alt" className="text-lg" />
             Edit Patient Insurance Details
           </ButtonV2>
         </div>
@@ -177,7 +177,7 @@ export default function CreateClaimCard({
               setItems([...(items ?? []), { name: "", id: "", price: 0 }])
             }
           >
-            <CareIcon className="care-l-plus text-lg" />
+            <CareIcon icon="l-plus" className="text-lg" />
             <span>Add Item</span>
           </ButtonV2>
         </div>
@@ -229,7 +229,7 @@ export default function CreateClaimCard({
           onClick={handleSubmit}
           className="min-w-[200px]"
         >
-          {isCreating && <CareIcon className="care-l-spinner animate-spin" />}
+          {isCreating && <CareIcon icon="l-spinner" className="animate-spin" />}
           {isCreating
             ? `Creating ${use === "claim" ? "Claim" : "Pre-Authorization"}...`
             : "Proceed"}

@@ -267,7 +267,7 @@ const Location = ({
       className="mt-3 w-full"
       href={`location/${id}/beds`}
     >
-      <CareIcon className="care-l-bed text-lg" />
+      <CareIcon icon="l-bed" className="text-lg" />
       Manage Beds
     </ButtonV2>
     <div className="mt-2 flex w-full flex-col gap-2 md:flex-row">
@@ -280,7 +280,7 @@ const Location = ({
           href={`location/${id}/update`}
           authorizeFor={NonReadOnlyUsers}
         >
-          <CareIcon className="care-l-pen text-lg" />
+          <CareIcon icon="l-pen" className="text-lg" />
           Edit
         </ButtonV2>
       </div>
@@ -295,7 +295,7 @@ const Location = ({
           }
           authorizeFor={NonReadOnlyUsers}
         >
-          <CareIcon className="care-l-trash text-lg" />
+          <CareIcon icon="l-trash" className="text-lg" />
           Delete
         </ButtonV2>
       </div>

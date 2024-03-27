@@ -66,7 +66,7 @@ const SidebarItemBase = forwardRef(
             {t(props.text)}
           </span>
           {external && !shrinked && (
-            <CareIcon className="care-l-external-link-alt text-lg" />
+            <CareIcon icon="l-external-link-alt" className="text-lg" />
           )}
         </div>
 

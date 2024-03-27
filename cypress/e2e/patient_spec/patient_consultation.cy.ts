@@ -376,7 +376,6 @@ describe("Patient Consultation in multiple combination", () => {
   it("Edit created consultation to existing patient", () => {
     patientPage.visitPatient("Dummy Patient 13");
     patientConsultationPage.clickEditConsultationButton();
-    cy.wait(5000);
     patientConsultationPage.typePatientIllnessHistory("editted");
     patientConsultationPage.selectPatientDiagnosis(
       diagnosis5,

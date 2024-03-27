@@ -27,7 +27,7 @@ export class PatientPrescription {
   }
 
   enterDosage(doseAmount: string) {
-    cy.get("#dosage").type(doseAmount, { force: true });
+    cy.get("#base_dosage").type(doseAmount, { force: true });
   }
 
   selectDosageFrequency(frequency: string) {

@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { navigate } from "raviger";
-import { lazy, useState } from "react";
+import { lazy, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -73,8 +73,7 @@ export default function ManageUsers() {
   const [weeklyHoursError, setWeeklyHoursError] = useState<string>("");
 
   const extremeSmallScreenBreakpoint = 320;
-  const isExtremeSmallScreen =
-    width <= extremeSmallScreenBreakpoint ? true : false;
+  const isExtremeSmallScreen = width <= extremeSmallScreenBreakpoint;
 
   const {
     data: userListData,
@@ -92,15 +91,24 @@ export default function ManageUsers() {
       phone_number: qParams.phone_number,
       alt_phone_number: qParams.alt_phone_number,
       user_type: qParams.user_type,
-      district_id: qParams.district_id,
+      district_id: qParams.district,
     },
   });
+
+  useEffect(() => {
+    if (!qParams.state && qParams.district) {
+      advancedFilter.removeFilters(["district"]);
+    }
+    if (!qParams.district && qParams.state) {
+      advancedFilter.removeFilters(["state"]);
+    }
+  }, [advancedFilter, qParams]);
 
   const { data: districtData, loading: districtDataLoading } = useQuery(
     routes.getDistrict,
     {
-      prefetch: !!qParams.district_id,
-      pathParams: { id: qParams.district_id },
+      prefetch: !!qParams.district,
+      pathParams: { id: qParams.district },
     }
   );
 
@@ -384,7 +392,7 @@ export default function ManageUsers() {
                         setSelectedUser(user);
                       }}
                     >
-                      <CareIcon className="care-l-hospital text-lg" />
+                      <CareIcon icon="l-hospital" className="text-lg" />
                       <p>Linked Facilities</p>
                     </ButtonV2>
                     <ButtonV2
@@ -395,7 +403,7 @@ export default function ManageUsers() {
                         setSelectedUser(user.username);
                       }}
                     >
-                      <CareIcon className="care-l-award text-xl" />
+                      <CareIcon icon="l-award" className="text-xl" />
                       <p>Linked Skills</p>
                     </ButtonV2>
                   </div>
@@ -412,7 +420,7 @@ export default function ManageUsers() {
                           setWeeklyHours(user.weekly_working_hours);
                         }}
                       >
-                        <CareIcon className="care-l-clock text-xl" />
+                        <CareIcon icon="l-clock" className="text-xl" />
                         <p>Set Average weekly working hours</p>
                       </ButtonV2>
                     </div>
@@ -535,8 +543,8 @@ export default function ManageUsers() {
             badge("Role", "user_type"),
             value(
               "District",
-              "district_id",
-              qParams.district_id ? districtData?.name || "" : ""
+              "district",
+              qParams.district ? districtData?.name || "" : ""
             ),
           ]}
         />
@@ -728,7 +736,7 @@ function UserFacilities(props: { user: any }) {
                         })
                       }
                     >
-                      <CareIcon className="care-l-link-broken" />
+                      <CareIcon icon="l-link-broken" />
                       <span className="tooltip-text tooltip-left">
                         {t("clear_home_facility")}
                       </span>
@@ -783,7 +791,7 @@ function UserFacilities(props: { user: any }) {
                                 }
                               }}
                             >
-                              <CareIcon className="care-l-estate" />
+                              <CareIcon icon="l-estate" />
                               <span className="tooltip-text tooltip-left">
                                 Set as home facility
                               </span>
@@ -800,7 +808,7 @@ function UserFacilities(props: { user: any }) {
                                 })
                               }
                             >
-                              <CareIcon className="care-l-link-broken" />
+                              <CareIcon icon="l-link-broken" />
                               <span className="tooltip-text tooltip-left">
                                 Unlink Facility
                               </span>

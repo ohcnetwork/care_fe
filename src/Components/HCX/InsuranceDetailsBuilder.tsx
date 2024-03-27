@@ -105,7 +105,7 @@ const InsuranceDetailEditCard = ({
         <FieldLabel className="my-auto !font-bold">Policy</FieldLabel>
         <ButtonV2 variant="danger" type="button" ghost onClick={handleRemove}>
           Delete
-          <CareIcon className="care-l-trash-alt text-lg" />
+          <CareIcon icon="l-trash-alt" className="text-lg" />
         </ButtonV2>
       </div>
 

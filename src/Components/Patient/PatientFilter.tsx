@@ -599,7 +599,7 @@ export default function PatientFilter(props: any) {
                 setFilterState({ ...filterState, facility_type: v })
               }
               optionIcon={() => (
-                <CareIcon className="care-l-hospital text-lg" />
+                <CareIcon icon="l-hospital" className="text-lg" />
               )}
             />
           </div>
@@ -675,7 +675,7 @@ export default function PatientFilter(props: any) {
               optionValue={({ id }) => id}
               optionIcon={({ id }) => (
                 <>
-                  <CareIcon className="care-l-syringe mr-2 w-5" />
+                  <CareIcon icon="l-syringe" className="mr-2 w-5" />
                   <span className="font-bold">{id}</span>
                 </>
               )}

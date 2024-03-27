@@ -1,5 +1,6 @@
 import { ConsultationModel, PatientCategory } from "../Facility/models";
 import { PerformedByModel } from "../HCX/misc";
+import { OCCUPATION_TYPES } from "../../Common/constants";
 
 export interface FlowModel {
   id?: number;
@@ -127,6 +128,11 @@ export interface PatientModel {
   created_by?: PerformedByModel;
   assigned_to?: { first_name?: string; username?: string; last_name?: string };
   assigned_to_object?: AssignedToObjectModel;
+  occupation?: Occupation;
+  meta_info?: {
+    id: number;
+    occupation: Occupation;
+  };
 
   // ABDM related
   abha_number?: string;
@@ -370,3 +376,5 @@ export interface FileUploadModel {
   archived_by?: PerformedByModel;
   archived_datetime?: string;
 }
+
+export type Occupation = (typeof OCCUPATION_TYPES)[number]["value"];
