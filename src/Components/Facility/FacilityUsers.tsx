@@ -21,7 +21,6 @@ import useAuthUser from "../../Common/hooks/useAuthUser";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
-import { UserModel } from "../Users/models";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -262,7 +261,7 @@ export default function FacilityUsers(props: any) {
   facilityUserData &&
     facilityUserData.results &&
     facilityUserData.results.length &&
-    (userList = facilityUserData.results.map((user: UserModel) => {
+    (userList = facilityUserData.results.map((user) => {
       return (
         <div
           key={`usr_${user.id}`}
@@ -333,11 +332,6 @@ export default function FacilityUsers(props: any) {
                   </UserDetails>
                 )}
                 <div className="flex justify-between">
-                  {user.created_by && (
-                    <UserDetails title="Created by">
-                      <div className="font-semibold">{user.created_by}</div>
-                    </UserDetails>
-                  )}
                   {user.phone_number && (
                     <div className="mt-2 border-t bg-gray-50 px-6 py-2">
                       <div className="flex justify-between py-4">
@@ -359,9 +353,9 @@ export default function FacilityUsers(props: any) {
 
                 {user.username && (
                   <UserDetails title="Facilities">
-                    {user.facilities &&
-                      showFacilities(user.username, user.facilities)}
-                    {!user.facilities && (
+                    {(user as any).facilities &&
+                      showFacilities(user.username, (user as any).facilities)}
+                    {!(user as any).facilities && (
                       <a
                         onClick={() => loadFacilities(user.username)}
                         className={`inline-block ${facilityClassname}`}
