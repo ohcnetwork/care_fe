@@ -197,14 +197,10 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         origin_facility: state.form.origin_facility_object?.id,
         shifting_approving_facility:
           state.form?.shifting_approving_facility_object?.id,
-        assigned_facility:
-          state.form?.assigned_facility_object?.id != -1
-            ? state.form?.assigned_facility_object?.id
-            : null,
-        assigned_facility_external:
-          state.form?.assigned_facility_object?.id === -1
-            ? state.form?.assigned_facility_object?.name
-            : null,
+        assigned_facility: state.form?.assigned_facility_object?.id,
+        assigned_facility_external: !state.form?.assigned_facility_object?.id
+          ? state.form?.assigned_facility_object?.name
+          : null,
         patient: state.form.patient_object?.id,
         emergency: [true, "true"].includes(state.form.emergency),
         is_kasp: [true, "true"].includes(state.form.is_kasp),

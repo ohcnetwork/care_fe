@@ -69,7 +69,7 @@ export default function DailyRoundsList({ consultation }: Props) {
                               username: "",
                               id: -1,
                               email: "",
-                              last_login: "",
+                              last_login: new Date().toISOString(),
                             },
                             icon: "l-robot",
                           }}
