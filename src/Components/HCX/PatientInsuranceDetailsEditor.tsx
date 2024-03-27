@@ -111,7 +111,7 @@ export default function PatientInsuranceDetailsEditor({
             ])
           }
         >
-          <CareIcon className="care-l-plus text-lg" />
+          <CareIcon icon="l-plus" className="text-lg" />
           <span>Add Insurance Details</span>
         </ButtonV2>
         <div className="md:flex-1" />
@@ -119,7 +119,7 @@ export default function PatientInsuranceDetailsEditor({
         <Submit border disabled={isUpdating} onClick={handleSubmit}>
           {isUpdating ? (
             <>
-              <CareIcon className="care-l-spinner animate-spin text-lg" />
+              <CareIcon icon="l-spinner" className="animate-spin text-lg" />
               <span>Updating...</span>
             </>
           ) : (

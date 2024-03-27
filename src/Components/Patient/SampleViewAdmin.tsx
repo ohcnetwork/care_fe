@@ -199,7 +199,10 @@ export default function SampleViewAdmin() {
                       Contact:{" "}
                     </span>
                     Confirmed carrier
-                    <CareIcon className="care-l-exclamation-triangle text-xl font-bold text-red-500" />
+                    <CareIcon
+                      icon="l-exclamation-triangle"
+                      className="text-xl font-bold text-red-500"
+                    />
                   </div>
                 )}
                 {item.patient_has_suspected_contact &&
@@ -209,7 +212,10 @@ export default function SampleViewAdmin() {
                         Contact:{" "}
                       </span>
                       Suspected carrier
-                      <CareIcon className="care-l-exclamation-triangle text-xl font-bold text-yellow-500" />
+                      <CareIcon
+                        icon="l-exclamation-triangle"
+                        className="text-xl font-bold text-yellow-500"
+                      />
                     </div>
                   )}
                 {item.has_sari && (
@@ -218,14 +224,20 @@ export default function SampleViewAdmin() {
                       SARI:{" "}
                     </span>
                     Severe Acute Respiratory illness
-                    <CareIcon className="care-l-exclamation-triangle text-xl font-bold text-orange-500" />
+                    <CareIcon
+                      icon="l-exclamation-triangle"
+                      className="text-xl font-bold text-orange-500"
+                    />
                   </div>
                 )}
                 {item.has_ari && !item.has_sari && (
                   <div>
                     <span className="font-semibold leading-relaxed">ARI: </span>
                     Acute Respiratory illness
-                    <CareIcon className=" care-l-exclamation-triangle text-xl font-bold text-yellow-500" />
+                    <CareIcon
+                      icon="l-exclamation-triangle"
+                      className="text-xl font-bold text-yellow-500"
+                    />
                   </div>
                 )}
               </div>

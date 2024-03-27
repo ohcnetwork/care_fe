@@ -139,7 +139,10 @@ export default function InventoryLog(props: any) {
                 variant="primary"
               >
                 <span>
-                  <CareIcon className="care-l-exclamation-triangle pr-2 text-lg" />
+                  <CareIcon
+                    icon="l-exclamation-triangle"
+                    className="pr-2 text-lg"
+                  />
                   UnMark
                 </span>
               </ButtonV2>
@@ -150,7 +153,10 @@ export default function InventoryLog(props: any) {
                 variant="danger"
               >
                 <span>
-                  <CareIcon className="care-l-exclamation-circle pr-2 text-lg" />
+                  <CareIcon
+                    icon="l-exclamation-circle"
+                    className="pr-2 text-lg"
+                  />
                   Mark as Accident
                 </span>
               </ButtonV2>
@@ -244,7 +250,10 @@ export default function InventoryLog(props: any) {
                     disabled={saving}
                   >
                     <span>
-                      <CareIcon className="care-l-exclamation-circle pr-2 text-lg" />
+                      <CareIcon
+                        icon="l-exclamation-circle"
+                        className="pr-2 text-lg"
+                      />
                       Delete Last Entry
                     </span>
                   </ButtonV2>
