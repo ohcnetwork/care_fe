@@ -1525,12 +1525,13 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                 <div className="flex flex-col gap-4 pb-4">
                   {sectionTitle("Consent Records", true)}
                 </div>
+                {id ? (<>
                 <SelectFormField
                   {...selectField("consent_type")}
                   onChange={handleConsentTypeChange}
                   label="Add Consent Type"
                   options={CONSENT_TYPE_CHOICES.filter(c => !state.form.consent_records.map((record) => record.type).includes(c.id))}
-                />
+                  />
                 <div className="flex flex-col gap-4">
                   {state.form.consent_records.map((record, index) => (
                     <div className="bg-gray-100 rounded-xl overflow-hidden border border-gray-300" key={index}>
@@ -1550,7 +1551,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                               form: { ...state.form, consent_records: newRecords },
                             });
                           }}
-                        >
+                          >
                           <CareIcon className="care-l-trash-alt h-4 w-4" />
                         </button>
                       </div>
@@ -1558,11 +1559,11 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         <div className="px-4 pt-4">
                           {record.type === 2 && (
                             <SelectFormField
-                              {...selectField("consent_type")}
-                              onChange={handleConsentPCSChange}
-                              label="Patient Code Status"
-                              value={record.patient_code_status}
-                              options={CONSENT_PATIENT_CODE_STATUS_CHOICES}
+                            {...selectField("consent_type")}
+                            onChange={handleConsentPCSChange}
+                            label="Patient Code Status"
+                            value={record.patient_code_status}
+                            options={CONSENT_PATIENT_CODE_STATUS_CHOICES}
                             />
                           )}
                         </div>
@@ -1572,17 +1573,22 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                           unspecified
                           className="w-full"
                           consultationId={id + "-" + record.type}
-                        />
+                          />
                       </div>
                     </div>
                   ))}
                 </div>
+                  </>) : (
+                    <div>
+                      <p className="text-sm text-gray-700">Please save the consultation to add consent records</p>
+                    </div>
+                  )}
                 <div className="mt-6 flex flex-col justify-end gap-3 sm:flex-row">
                   <Cancel
                     onClick={() =>
                       navigate(`/facility/${facilityId}/patient/${patientId}`)
                     }
-                  />
+                    />
                   <Submit
                     onClick={handleSubmit}
                     label={
