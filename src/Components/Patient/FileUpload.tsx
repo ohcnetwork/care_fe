@@ -237,8 +237,14 @@ export const FileUpload = (props: FileUploadProps) => {
   useEffect(() => {
     const checkMicPermission = async () => {
       try {
-        await navigator.mediaDevices.getUserMedia({ audio: true });
-        setIsMicPermission(true);
+        const permissions = await navigator.permissions.query({
+          name: "microphone" as PermissionName,
+        });
+        if (permissions.state === "granted") {
+          setIsMicPermission(true);
+        } else {
+          setIsMicPermission(false);
+        }
       } catch (error) {
         setIsMicPermission(false);
       }
