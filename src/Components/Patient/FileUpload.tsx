@@ -104,6 +104,7 @@ interface FileUploadProps {
   patientId?: any;
   facilityId?: any;
   consultationId?: any;
+  consentId?: string;
   hideBack: boolean;
   audio?: boolean;
   unspecified: boolean;
@@ -146,6 +147,7 @@ export const FileUpload = (props: FileUploadProps) => {
     facilityId,
     consultationId,
     patientId,
+    consentId,
     type,
     hideBack,
     audio,
@@ -305,6 +307,7 @@ export const FileUpload = (props: FileUploadProps) => {
       case "PATIENT":
         return patientId;
       case "CONSENT_RECORD":
+        return consentId;
       case "CONSULTATION":
         return consultationId;
       case "SAMPLE_MANAGEMENT":

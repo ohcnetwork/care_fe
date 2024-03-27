@@ -669,11 +669,12 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                 </div>
               </div>
             </div>
+            {(props.consultationData.consent_records?.filter(record => record.deleted !== true) || []).length > 0 && (<>
             <div className="col-span-1 md:col-span-2 overflow-hidden rounded-lg bg-white shadow p-4">
               <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
                 Consent Records
               </h3>
-              {props.consultationData.consent_records?.map((record, i) => (
+              {props.consultationData.consent_records?.filter(record => record.deleted !== true)?.map((record, i) => (
                 <div className="border-b mt-4" key={i}>
                   <div className="font-bold">
                     {CONSENT_TYPE_CHOICES.find((c) => c.id === record.type)?.text} {record.patient_code_status && `( ${CONSENT_PATIENT_CODE_STATUS_CHOICES.find((c) => c.id === record.patient_code_status)?.text} )`}
@@ -683,12 +684,14 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                     hideBack
                     unspecified
                     className="w-full"
-                    consultationId={props.consultationData.id + "-" + record.type}
+                    consentId={record.id}
                     hideUpload
-                  />
+                    />
                 </div>
               ))}
             </div>
+            </>
+            )}
           </div>
         </div>
         <div className="w-full pl-0 md:pl-4 xl:w-1/3">
