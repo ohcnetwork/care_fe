@@ -328,16 +328,8 @@ export interface DailyRoundsModel {
   rounds_type?: (typeof DailyRoundTypes)[number];
   last_updated_by_telemedicine?: boolean;
   created_by_telemedicine?: boolean;
-  created_by?: {
-    first_name?: string;
-    last_name?: string;
-    user_type?: string;
-  };
-  last_edited_by?: {
-    first_name?: string;
-    last_name?: string;
-    user_type?: string;
-  };
+  created_by?: PerformedByModel;
+  last_edited_by?: PerformedByModel;
   bed?: string;
 }
 
