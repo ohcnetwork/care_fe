@@ -51,7 +51,6 @@ describe("Patient", () => {
     patientPrescription.clickAddPrescription();
     patientPrescription.interceptMedibase();
     patientPrescription.selectMedicinebox();
-    patientPrescription.waitForMedibaseStatusCode();
     patientPrescription.selectMedicine("DOLO");
     patientPrescription.enterDosage("4");
     patientPrescription.selectDosageFrequency("Twice daily");

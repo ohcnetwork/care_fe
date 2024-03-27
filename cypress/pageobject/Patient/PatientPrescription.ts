@@ -6,7 +6,7 @@ export class PatientPrescription {
   }
 
   interceptMedibase() {
-    cy.intercept("GET", "**/api/v1/medibase/").as("getMedibase");
+    cy.intercept("GET", "**/api/v1/medibase/**").as("getMedibase");
   }
 
   selectMedicine(medicine: string) {

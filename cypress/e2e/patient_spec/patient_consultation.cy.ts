@@ -101,7 +101,6 @@ describe("Patient Consultation in multiple combination", () => {
     patientPrescription.clickAddPrescription();
     patientPrescription.interceptMedibase();
     patientPrescription.selectMedicinebox();
-    patientPrescription.waitForMedibaseStatusCode();
     patientPrescription.selectMedicine(medicineOne);
     patientPrescription.enterDosage("3");
     patientPrescription.selectDosageFrequency("Twice daily");
