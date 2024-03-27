@@ -375,7 +375,7 @@ export default function PatientInfoCard(props: {
                             }
                           </b>{" "}
                           on {formatDateTime(consultation.encounter_date)},
-                          {consultation?.new_discharge_reason === "EXP" ? (
+                          {consultation?.new_discharge_reason === 3 ? (
                             <span>
                               {" "}
                               <b>Expired on</b>{" "}
