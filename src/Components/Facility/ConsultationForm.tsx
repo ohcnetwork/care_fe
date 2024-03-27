@@ -933,7 +933,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   const handleConsentTypeChange: FieldChangeEventHandler<number> = async (event) => {
     if (!id) return;
     const consentRecords = [...state.form.consent_records];
-    if (consentRecords.map((cr) => cr.type).includes(event.value)) {
+    if (consentRecords.filter(cr => cr.deleted !== true).map((cr) => cr.type).includes(event.value)) {
       return;
     } else {
       const randomId = "consent-" + new Date().getTime().toString();
