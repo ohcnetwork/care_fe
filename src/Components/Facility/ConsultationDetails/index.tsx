@@ -1,7 +1,6 @@
 import {
   CONSULTATION_TABS,
   GENDER_TYPES,
-  OptionsType,
   SYMPTOM_CHOICES,
 } from "../../../Common/constants";
 import { ConsultationModel } from "../models";
@@ -420,7 +419,7 @@ export const ConsultationDetails = (props: any) => {
                 className="flex space-x-6 overflow-x-auto pb-2 pl-2 "
                 id="consultation_tab_nav"
               >
-                {CONSULTATION_TABS.map((p: OptionsType) => {
+                {CONSULTATION_TABS.map((p) => {
                   if (p.text === "FEED") {
                     if (
                       isCameraAttached === false || // No camera attached

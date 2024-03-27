@@ -512,8 +512,8 @@ export interface PatientNotesModel {
 
 export interface PatientNoteStateType {
   notes: PatientNotesModel[];
-  patientId: string;
-  facilityId: string;
+  patientId?: string;
+  facilityId?: string;
   cPage: number;
   totalPages: number;
 }

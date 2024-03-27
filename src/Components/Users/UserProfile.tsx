@@ -34,7 +34,7 @@ type EditForm = {
   doctor_qualification: string | undefined;
   doctor_experience_commenced_on: number | string | undefined;
   doctor_medical_council_registration: string | undefined;
-  weekly_working_hours: string | null;
+  weekly_working_hours?: string | null;
 };
 type ErrorForm = {
   firstName: string;

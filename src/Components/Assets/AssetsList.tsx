@@ -130,7 +130,7 @@ const AssetsList = () => {
     try {
       if (assetData) {
         navigate(
-          `/facility/${assetData.location_object.facility.id}/assets/${assetId}`
+          `/facility/${assetData.location_object.facility?.id}/assets/${assetId}`
         );
       }
     } catch (err) {
@@ -188,7 +188,7 @@ const AssetsList = () => {
         {assets.map((asset: AssetData) => (
           <Link
             key={asset.id}
-            href={`/facility/${asset?.location_object.facility.id}/assets/${asset.id}`}
+            href={`/facility/${asset?.location_object.facility?.id}/assets/${asset.id}`}
             className="h-full text-inherit"
             data-testid="created-asset-list"
           >
