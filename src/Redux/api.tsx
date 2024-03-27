@@ -101,6 +101,7 @@ import { Investigation } from "../Components/Facility/Investigations/Reports/typ
 import { HCXPolicyModel } from "../Components/HCX/models";
 import { IComment, IResource } from "../Components/Resource/models";
 import { IShift } from "../Components/Shifting/models";
+import { ScribeModel } from "../Components/Scribe/Scribe";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -126,6 +127,24 @@ const routes = {
     method: "GET",
     noAuth: true,
     TRes: Type<IConfig>(),
+  },
+
+  createScribe: {
+    path: "/api/v1/scribe/",
+    method: "POST",
+    TReq: Type<ScribeModel>(),
+    TRes: Type<ScribeModel>(),
+  },
+  getScribe: {
+    path: "/api/v1/scribe/{external_id}/",
+    method: "GET",
+    TRes: Type<ScribeModel>(),
+  },
+  updateScribe: {
+    path: "/api/v1/scribe/{external_id}/",
+    method: "PUT",
+    TReq: Type<ScribeModel>(),
+    TRes: Type<ScribeModel>(),
   },
 
   // Auth Endpoints

@@ -37,6 +37,8 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import PatientCategorySelect from "./PatientCategorySelect";
 import RadioFormField from "../Form/FormFields/RadioFormField";
+import { Scribe } from "../Scribe/Scribe";
+import { DAILY_ROUND_FORM_SCRIBE_DATA } from "../Scribe/formDetails";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm: any = {
@@ -415,6 +417,20 @@ export const DailyRounds = (props: any) => {
       }
       className="mx-auto max-w-4xl"
     >
+      <div className="flex w-full justify-end md:m-4">
+        <Scribe
+          fields={DAILY_ROUND_FORM_SCRIBE_DATA}
+          onFormUpdate={(fields) => {
+            dispatch({
+              type: "set_form",
+              form: { ...state.form, ...fields },
+            });
+            fields.action !== undefined && setPreviousAction(fields.action);
+            fields.review_interval !== undefined &&
+              setPreviousReviewInterval(Number(fields.review_interval));
+          }}
+        />
+      </div>
       <form
         onSubmit={(e) => handleSubmit(e)}
         className="w-full max-w-4xl rounded-lg bg-white px-8 py-5 shadow md:m-4 md:px-16 md:py-11"

@@ -192,7 +192,7 @@ export const Cancel = ({ label = "Cancel", ...props }: CommonButtonProps) => {
       children={
         <>
           <CareIcon icon="l-times-circle" className="text-lg" />
-          <span className="whitespace-pre-wrap">{t(label)}</span>
+          {label && <span className="whitespace-pre-wrap">{t(label)}</span>}
         </>
       }
       {...props}
