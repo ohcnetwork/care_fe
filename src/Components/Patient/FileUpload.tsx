@@ -1443,7 +1443,7 @@ export const FileUpload = (props: FileUploadProps) => {
       </DialogModal>
       {!props.hideUpload && (
       <Page
-        title={`${UPLOAD_HEADING[type]}`}
+        title={UPLOAD_HEADING[type]}
         hideBack={hideBack}
         breadcrumbs={false}
         crumbsReplacements={{
@@ -1610,7 +1610,7 @@ export const FileUpload = (props: FileUploadProps) => {
         </div>
       </Page>
       )}
-      <Page title={`${VIEW_HEADING[type]}`} hideBack={true} breadcrumbs={false}>
+      <Page title={VIEW_HEADING[type]} hideBack={true} breadcrumbs={false}>
         <HeadedTabs
           tabs={tabs}
           handleChange={handleTabChange}
