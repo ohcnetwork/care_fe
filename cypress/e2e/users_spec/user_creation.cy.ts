@@ -37,7 +37,7 @@ describe("User Creation", () => {
     "Please select the User Type",
     "Please enter valid phone number",
     "Please enter the username",
-    "Please enter date in YYYY/MM/DD format",
+    "Please enter date in DD/MM/YYYY format",
     "Please enter the password",
     "Confirm password is required",
     "First Name is required",
@@ -52,10 +52,7 @@ describe("User Creation", () => {
   const EXPECTED_PROFILE_ERROR_MESSAGES = [
     "Field is required",
     "Field is required",
-    "This field is required",
     "Please enter valid phone number",
-    "This field is required",
-    "This field is required",
   ];
 
   before(() => {
@@ -81,7 +78,6 @@ describe("User Creation", () => {
       "District Editted"
     );
     userCreationPage.typeIntoElementByIdPostClear("lastName", "Cypress");
-    userCreationPage.typeIntoElementByIdPostClear("age", "22");
     userCreationPage.selectDropdownOption("gender", "Male");
     userCreationPage.typeIntoElementByIdPostClear(
       "phoneNumber",
@@ -93,6 +89,10 @@ describe("User Creation", () => {
     );
     userCreationPage.typeIntoElementByIdPostClear("email", "test@test.com");
     userCreationPage.typeIntoElementByIdPostClear("weekly_working_hours", "14");
+    userCreationPage.typeIntoElementByIdPostClearDob(
+      "date_of_birth",
+      "01011998"
+    );
     userCreationPage.clickElementById("submit");
     userCreationPage.verifyElementContainsText(
       "contactno-profile-details",
@@ -110,7 +110,10 @@ describe("User Creation", () => {
       "lastname-profile-details",
       "Cypress"
     );
-    userCreationPage.verifyElementContainsText("age-profile-details", "22");
+    userCreationPage.verifyElementContainsText(
+      "date_of_birth-profile-details",
+      "01/01/1998"
+    );
     userCreationPage.verifyElementContainsText(
       "emailid-profile-details",
       "test@test.com"
@@ -130,7 +133,6 @@ describe("User Creation", () => {
     userCreationPage.clickElementById("edit-cancel-profile-button");
     userCreationPage.clearIntoElementById("firstName");
     userCreationPage.clearIntoElementById("lastName");
-    userCreationPage.clearIntoElementById("age");
     userCreationPage.clearIntoElementById("phoneNumber");
     userCreationPage.clearIntoElementById("altPhoneNumber");
     userCreationPage.clearIntoElementById("weekly_working_hours");
