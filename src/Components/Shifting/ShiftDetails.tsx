@@ -182,7 +182,7 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 {t("age")}:{" "}
               </span>
-              {formatPatientAge(patientData, true)}
+              {patientData ? formatPatientAge(patientData, true) : ""}
             </div>
           )}
           {patientData?.gender === 2 && patientData?.is_antenatal && (
@@ -367,7 +367,7 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 {t("age")}:{" "}
               </span>
-              {formatPatientAge(patientData, true)}
+              {patientData ? formatPatientAge(patientData, true) : ""}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
