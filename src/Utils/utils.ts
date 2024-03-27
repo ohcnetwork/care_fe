@@ -409,13 +409,13 @@ export const formatPatientAge = (obj: PatientModel, abbreviated = false) => {
   const suffixes = getRelativeDateSuffix(abbreviated);
 
   const start = dayjs(
-    obj?.date_of_birth
-      ? new Date(obj?.date_of_birth)
-      : new Date(obj?.year_of_birth, 0, 1)
+    obj.date_of_birth
+      ? new Date(obj.date_of_birth)
+      : new Date(obj.year_of_birth, 0, 1)
   );
 
   const end = dayjs(
-    obj?.death_datetime ? new Date(obj.death_datetime) : new Date()
+    obj.death_datetime ? new Date(obj.death_datetime) : new Date()
   );
 
   const years = end.diff(start, "years");
@@ -425,10 +425,10 @@ export const formatPatientAge = (obj: PatientModel, abbreviated = false) => {
 
   // Skip representing as no. of months/days if we don't know the date of birth
   // since it would anyways be inaccurate.
-  if (!obj?.date_of_birth) {
+  if (!obj.date_of_birth) {
     return abbreviated
-      ? `Born ${obj?.year_of_birth}`
-      : `Born on ${obj?.year_of_birth}`;
+      ? `Born ${obj.year_of_birth}`
+      : `Born on ${obj.year_of_birth}`;
   }
 
   const month = end.diff(start, "month");
