@@ -1598,6 +1598,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                             )}
                           </div>
                           <FileUpload
+                            changePageMetadata={false}
                             type="CONSENT_RECORD"
                             hideBack
                             unspecified

@@ -112,6 +112,7 @@ interface FileUploadProps {
   claimId?: string;
   className?: string;
   hideUpload?: boolean;
+  changePageMetadata?: boolean;
 }
 
 interface URLS {
@@ -154,6 +155,7 @@ export const FileUpload = (props: FileUploadProps) => {
     unspecified,
     sampleId,
     claimId,
+    changePageMetadata
   } = props;
   const id = patientId;
   const [isLoading, setIsLoading] = useState(false);
@@ -1446,6 +1448,7 @@ export const FileUpload = (props: FileUploadProps) => {
       </DialogModal>
       {!props.hideUpload && (
         <Page
+          changePageMetadata={changePageMetadata}
           title={UPLOAD_HEADING[type]}
           hideBack={hideBack}
           breadcrumbs={false}
@@ -1613,7 +1616,7 @@ export const FileUpload = (props: FileUploadProps) => {
           </div>
         </Page>
       )}
-      <Page title={VIEW_HEADING[type]} hideBack={true} breadcrumbs={false}>
+      <Page title={VIEW_HEADING[type]} hideBack={true} breadcrumbs={false} changePageMetadata={changePageMetadata} >
         <HeadedTabs
           tabs={tabs}
           handleChange={handleTabChange}

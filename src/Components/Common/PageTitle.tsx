@@ -16,16 +16,17 @@ export interface PageTitleProps {
    */
   onBackClick?: () => boolean | void;
   justifyContents?:
-    | "justify-center"
-    | "justify-start"
-    | "justify-end"
-    | "justify-between";
+  | "justify-center"
+  | "justify-start"
+  | "justify-end"
+  | "justify-between";
   breadcrumbs?: boolean;
   crumbsReplacements?: {
     [key: string]: { name?: string; uri?: string; style?: string };
   };
   focusOnLoad?: boolean;
   isInsidePage?: boolean;
+  changePageMetadata?: boolean;
 }
 
 export default function PageTitle({
@@ -40,6 +41,7 @@ export default function PageTitle({
   justifyContents = "justify-start",
   focusOnLoad = false,
   isInsidePage = false,
+  changePageMetadata = true,
 }: PageTitleProps) {
   const divRef = useRef<any>();
 
@@ -56,7 +58,7 @@ export default function PageTitle({
       ref={divRef}
       className={isInsidePage ? "" : `mb-2 pt-4 md:mb-4 ${className}`}
     >
-      <PageHeadTitle title={title} />
+      {changePageMetadata && <PageHeadTitle title={title} />}
       <div className={classNames("flex items-center", justifyContents)}>
         <div className="flex items-center">
           {!hideBack && (
