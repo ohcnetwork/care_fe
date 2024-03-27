@@ -284,6 +284,11 @@ export const DailyRoundTypes = [
 
 export interface DailyRoundsModel {
   ventilator_spo2?: number;
+  ventilator_interface?:
+    | "UNKNOWN"
+    | "OXYGEN_SUPPORT"
+    | "NON_INVASIVE"
+    | "INVASIVE";
   spo2?: string;
   rhythm?: string;
   rhythm_detail?: string;

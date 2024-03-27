@@ -414,7 +414,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             local_body: data.local_body ? data.local_body : "",
             ward: data.ward_object ? data.ward_object.id : undefined,
             village: data.village ? data.village : "",
-            medical_history: [],
+            medical_history: [] as number[],
             is_antenatal: String(!!data.is_antenatal),
             allergies: data.allergies ? data.allergies : "",
             pincode: data.pincode ? data.pincode : "",
@@ -469,8 +469,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               );
               if (medicalHistory) {
                 formData.medical_history.push(Number(medicalHistory.id));
-                formData[`medical_history_${String(medicalHistory.id)}`] =
-                  i.details;
+                (formData as any)[
+                  `medical_history_${String(medicalHistory.id)}`
+                ] = i.details;
               }
             }
           );
