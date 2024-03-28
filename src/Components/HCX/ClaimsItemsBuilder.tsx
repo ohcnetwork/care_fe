@@ -70,7 +70,7 @@ export default function ClaimsItemsBuilder(props: Props) {
                     disabled={props.disabled}
                   >
                     Delete
-                    <CareIcon className="care-l-trash-alt text-lg" />
+                    <CareIcon icon="l-trash-alt" className="text-lg" />
                   </ButtonV2>
                 )}
               </div>

@@ -38,7 +38,10 @@ export const LanguageSelector = (props: any) => {
         ))}
       </select>
       <div className="pointer-events-none absolute right-0 z-10 mr-1 h-auto w-8">
-        <CareIcon className={`care-l-angle-down text-xl ${props.className}`} />
+        <CareIcon
+          icon="l-angle-down"
+          className={`text-xl ${props.className}`}
+        />
       </div>
     </div>
   );
