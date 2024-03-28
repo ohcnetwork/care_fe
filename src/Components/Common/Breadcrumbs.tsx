@@ -55,7 +55,7 @@ export default function Breadcrumbs(props: any) {
           <li>
             <div>
               <Link href="/" className="text-gray-500 hover:text-gray-700">
-                <CareIcon className="care-l-estate mr-1 text-lg" />
+                <CareIcon icon="l-estate" className="mr-1 text-lg" />
                 <span className="sr-only">Home</span>
               </Link>
             </div>

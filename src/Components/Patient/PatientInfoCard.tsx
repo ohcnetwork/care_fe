@@ -324,7 +324,10 @@ export default function PatientInfoCard(props: {
                     <div>
                       <div>
                         <div className="inline-flex w-full items-center justify-start rounded border border-gray-500 bg-gray-100 p-1 px-3 text-xs font-semibold leading-4">
-                          <CareIcon className="care-l-estate mr-1 text-base text-gray-700" />
+                          <CareIcon
+                            icon="l-estate"
+                            className="mr-1 text-base text-gray-700"
+                          />
                           <span>Domiciliary Care</span>
                         </div>
                       </div>
@@ -525,7 +528,7 @@ export default function PatientInfoCard(props: {
                     className="w-full"
                   >
                     <span className="flex w-full items-center justify-center gap-2">
-                      <CareIcon className="care-l-plus text-xl" />
+                      <CareIcon icon="l-plus" className="text-xl" />
                       <p className="font-semibold">Log Update</p>
                     </span>
                   </ButtonV2>
@@ -537,8 +540,8 @@ export default function PatientInfoCard(props: {
                       <>
                         <p className="mt-0.5 text-xs text-red-500">
                           <div className="text-center">
-                            <CareIcon className="care-l-exclamation-triangle" />{" "}
-                            No update filed in the last 24 hours
+                            <CareIcon icon="l-exclamation-triangle" /> No update
+                            filed in the last 24 hours
                           </div>
                         </p>
                       </>
@@ -558,7 +561,7 @@ export default function PatientInfoCard(props: {
                   [
                     `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/update`,
                     "Edit Consultation Details",
-                    "pen",
+                    "l-pen",
                     patient.is_active &&
                       consultation?.id &&
                       !consultation?.discharge_date,
@@ -566,13 +569,13 @@ export default function PatientInfoCard(props: {
                   [
                     `/patient/${patient.id}/investigation_reports`,
                     "Investigation Summary",
-                    "align-alt",
+                    "l-align-alt",
                     true,
                   ],
                   [
                     `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/treatment-summary`,
                     "Treatment Summary",
-                    "file-medical",
+                    "l-file-medical",
                     consultation?.id,
                   ],
                 ]
@@ -582,7 +585,7 @@ export default function PatientInfoCard(props: {
                           [
                             `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/claims`,
                             "Claims",
-                            "copy-landscape",
+                            "l-copy-landscape",
                             consultation?.id,
                           ],
                         ]
@@ -623,7 +626,8 @@ export default function PatientInfoCard(props: {
                             }}
                           >
                             <CareIcon
-                              className={`care-l-${action[2]} text-lg text-primary-500`}
+                              icon={action[2]}
+                              className="text-lg text-primary-500"
                             />
                             <span>{action[1]}</span>
                           </Link>
@@ -658,7 +662,10 @@ export default function PatientInfoCard(props: {
                                 });
                               }}
                             >
-                              <CareIcon className="care-l-user-square text-lg text-primary-500" />
+                              <CareIcon
+                                icon="l-user-square"
+                                className="text-lg text-primary-500"
+                              />
                               <span>Show ABHA Profile</span>
                             </div>
                             <div
@@ -673,7 +680,10 @@ export default function PatientInfoCard(props: {
                                 setShowLinkCareContext(true);
                               }}
                             >
-                              <CareIcon className="care-l-link text-lg text-primary-500" />
+                              <CareIcon
+                                icon="l-link"
+                                className="text-lg text-primary-500"
+                              />
                               <span>Link Care Context</span>
                             </div>
                           </>
@@ -691,7 +701,10 @@ export default function PatientInfoCard(props: {
                           }}
                         >
                           <span className="flex w-full items-center justify-start gap-2">
-                            <CareIcon className="care-l-link text-lg text-primary-500" />
+                            <CareIcon
+                              icon="l-link"
+                              className="text-lg text-primary-500"
+                            />
                             <p>Link ABHA Number</p>
                           </span>
                         </div>
@@ -719,7 +732,10 @@ export default function PatientInfoCard(props: {
                             }}
                           >
                             <span className="flex w-full items-center justify-start gap-2">
-                              <CareIcon className="care-l-ambulance text-lg text-primary-500" />
+                              <CareIcon
+                                icon="l-ambulance"
+                                className="text-lg text-primary-500"
+                              />
                               <p>Track Shifting</p>
                             </span>
                           </div>
@@ -734,7 +750,10 @@ export default function PatientInfoCard(props: {
                             }}
                           >
                             <span className="flex w-full items-center justify-start gap-2">
-                              <CareIcon className="care-l-ambulance text-lg text-primary-500" />
+                              <CareIcon
+                                icon="l-ambulance"
+                                className="text-lg text-primary-500"
+                              />
                               <p>Shift Patient</p>
                             </span>
                           </div>
@@ -753,7 +772,10 @@ export default function PatientInfoCard(props: {
                       }}
                     >
                       <span className="flex w-full items-center justify-start gap-2">
-                        <CareIcon className="care-l-clipboard-notes text-lg text-primary-500" />
+                        <CareIcon
+                          icon="l-clipboard-notes"
+                          className="text-lg text-primary-500"
+                        />
                         <p>{t("discharge_summary")}</p>
                       </span>
                     </div>
@@ -775,7 +797,8 @@ export default function PatientInfoCard(props: {
                     >
                       <span className="flex w-full items-center justify-start gap-2">
                         <CareIcon
-                          className={`care-l-hospital text-lg ${
+                          icon="l-hospital"
+                          className={`text-lg ${
                             consultation?.discharge_date
                               ? "text-gray-500"
                               : "text-primary-500"

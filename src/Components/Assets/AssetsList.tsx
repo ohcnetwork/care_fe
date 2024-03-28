@@ -200,13 +200,14 @@ const AssetsList = () => {
                 <p className="flex break-words text-xl font-medium capitalize">
                   <span className="mr-2 text-primary-500">
                     <CareIcon
-                      className={`care-l-${
+                      icon={
                         (
                           (asset.asset_class &&
                             assetClassProps[asset.asset_class]) ||
                           assetClassProps.NONE
                         ).icon
-                      } text-2xl`}
+                      }
+                      className="text-2xl"
                     />
                   </span>
                   <p
@@ -219,11 +220,17 @@ const AssetsList = () => {
               </div>
               <p className="text-sm font-normal">
                 <span className="text-sm font-medium">
-                  <CareIcon className="care-l-location-point mr-1 text-primary-500" />
+                  <CareIcon
+                    icon="l-location-point"
+                    className="mr-1 text-primary-500"
+                  />
                   {asset?.location_object?.name}
                 </span>
                 <span className="ml-2 text-sm font-medium">
-                  <CareIcon className="care-l-hospital mr-1 text-primary-500" />
+                  <CareIcon
+                    icon="l-hospital"
+                    className="mr-1 text-primary-500"
+                  />
                   {asset?.location_object?.facility?.name}
                 </span>
               </p>
@@ -272,7 +279,10 @@ const AssetsList = () => {
                     label: "Import Assets",
                     options: {
                       icon: (
-                        <CareIcon className="care-l-import import-assets-button" />
+                        <CareIcon
+                          icon="l-import"
+                          className="import-assets-button"
+                        />
                       ),
                       onClick: () => setImportAssetModalOpen(true),
                     },
@@ -289,7 +299,7 @@ const AssetsList = () => {
                     type: "json",
                     filePrefix: `assets_${facility?.name ?? "all"}`,
                     options: {
-                      icon: <CareIcon className="care-l-export" />,
+                      icon: <CareIcon icon="l-export" />,
                       disabled: totalCount === 0 || !authorizedForImportExport,
                       id: "export-json-option",
                     },
@@ -306,7 +316,7 @@ const AssetsList = () => {
                     type: "csv",
                     filePrefix: `assets_${facility?.name ?? "all"}`,
                     options: {
-                      icon: <CareIcon className="care-l-export" />,
+                      icon: <CareIcon icon="l-export" />,
                       disabled: totalCount === 0 || !authorizedForImportExport,
                       id: "export-csv-option",
                     },
@@ -364,7 +374,7 @@ const AssetsList = () => {
                 }
               }}
             >
-              <CareIcon className="care-l-plus-circle text-lg" />
+              <CareIcon icon="l-plus-circle" className="text-lg" />
               <span>{t("create_asset")}</span>
             </ButtonV2>
           </div>
