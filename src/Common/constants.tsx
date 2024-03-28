@@ -45,22 +45,22 @@ export const USER_TYPE_OPTIONS: {
   role: string;
   readOnly?: boolean;
 }[] = [
-    { id: "Pharmacist", role: "Pharmacist", readOnly: false },
-    { id: "Volunteer", role: "Volunteer", readOnly: false },
-    { id: "StaffReadOnly", role: "Staff", readOnly: true },
-    { id: "Staff", role: "Staff", readOnly: false },
-    { id: "NurseReadOnly", role: "Nurse", readOnly: true },
-    { id: "Nurse", role: "Nurse", readOnly: false },
-    { id: "Doctor", role: "Doctor", readOnly: false },
-    { id: "WardAdmin", role: "Ward Admin", readOnly: false },
-    { id: "LocalBodyAdmin", role: "Local Body Admin", readOnly: false },
-    { id: "DistrictLabAdmin", role: "District Lab Admin", readOnly: false },
-    { id: "DistrictReadOnlyAdmin", role: "District Admin", readOnly: true },
-    { id: "DistrictAdmin", role: "District Admin", readOnly: false },
-    { id: "StateLabAdmin", role: "State Lab Admin", readOnly: false },
-    { id: "StateReadOnlyAdmin", role: "State Admin", readOnly: true },
-    { id: "StateAdmin", role: "State Admin", readOnly: false },
-  ];
+  { id: "Pharmacist", role: "Pharmacist", readOnly: false },
+  { id: "Volunteer", role: "Volunteer", readOnly: false },
+  { id: "StaffReadOnly", role: "Staff", readOnly: true },
+  { id: "Staff", role: "Staff", readOnly: false },
+  { id: "NurseReadOnly", role: "Nurse", readOnly: true },
+  { id: "Nurse", role: "Nurse", readOnly: false },
+  { id: "Doctor", role: "Doctor", readOnly: false },
+  { id: "WardAdmin", role: "Ward Admin", readOnly: false },
+  { id: "LocalBodyAdmin", role: "Local Body Admin", readOnly: false },
+  { id: "DistrictLabAdmin", role: "District Lab Admin", readOnly: false },
+  { id: "DistrictReadOnlyAdmin", role: "District Admin", readOnly: true },
+  { id: "DistrictAdmin", role: "District Admin", readOnly: false },
+  { id: "StateLabAdmin", role: "State Lab Admin", readOnly: false },
+  { id: "StateReadOnlyAdmin", role: "State Admin", readOnly: true },
+  { id: "StateAdmin", role: "State Admin", readOnly: false },
+];
 
 export const USER_TYPES = USER_TYPE_OPTIONS.map((o) => o.id);
 
@@ -212,11 +212,11 @@ export const getBedTypes = ({
 }: Pick<IConfig, "kasp_enabled" | "kasp_string">) => {
   const kaspBedTypes = kasp_enabled
     ? [
-      { id: 40, text: kasp_string + " Ordinary Beds" },
-      { id: 60, text: kasp_string + " Oxygen beds" },
-      { id: 50, text: kasp_string + " ICU (ICU without ventilator)" },
-      { id: 70, text: kasp_string + " ICU (ICU with ventilator)" },
-    ]
+        { id: 40, text: kasp_string + " Ordinary Beds" },
+        { id: 60, text: kasp_string + " Oxygen beds" },
+        { id: 50, text: kasp_string + " ICU (ICU without ventilator)" },
+        { id: 70, text: kasp_string + " ICU (ICU with ventilator)" },
+      ]
     : [];
 
   return [
@@ -387,11 +387,11 @@ export const PATIENT_CATEGORIES: {
   text: PatientCategory;
   twClass: string;
 }[] = [
-    { id: "Comfort", text: "Comfort Care", twClass: "patient-comfort" },
-    { id: "Stable", text: "Stable", twClass: "patient-stable" },
-    { id: "Moderate", text: "Abnormal", twClass: "patient-abnormal" },
-    { id: "Critical", text: "Critical", twClass: "patient-critical" },
-  ];
+  { id: "Comfort", text: "Comfort Care", twClass: "patient-comfort" },
+  { id: "Stable", text: "Stable", twClass: "patient-stable" },
+  { id: "Moderate", text: "Abnormal", twClass: "patient-abnormal" },
+  { id: "Critical", text: "Critical", twClass: "patient-critical" },
+];
 
 export const PATIENT_FILTER_CATEGORIES = PATIENT_CATEGORIES;
 
@@ -844,37 +844,37 @@ export const FACILITY_FEATURE_TYPES: {
   name: string;
   icon: IconName;
 }[] = [
-    {
-      id: 1,
-      name: "CT Scan",
-      icon: "l-compact-disc",
-    },
-    {
-      id: 2,
-      name: "Maternity Care",
-      icon: "l-baby-carriage",
-    },
-    {
-      id: 3,
-      name: "X-Ray",
-      icon: "l-clipboard-alt",
-    },
-    {
-      id: 4,
-      name: "Neonatal Care",
-      icon: "l-baby-carriage",
-    },
-    {
-      id: 5,
-      name: "Operation Theater",
-      icon: "l-syringe",
-    },
-    {
-      id: 6,
-      name: "Blood Bank",
-      icon: "l-medical-drip",
-    },
-  ];
+  {
+    id: 1,
+    name: "CT Scan",
+    icon: "l-compact-disc",
+  },
+  {
+    id: 2,
+    name: "Maternity Care",
+    icon: "l-baby-carriage",
+  },
+  {
+    id: 3,
+    name: "X-Ray",
+    icon: "l-clipboard-alt",
+  },
+  {
+    id: 4,
+    name: "Neonatal Care",
+    icon: "l-baby-carriage",
+  },
+  {
+    id: 5,
+    name: "Operation Theater",
+    icon: "l-syringe",
+  },
+  {
+    id: 6,
+    name: "Blood Bank",
+    icon: "l-medical-drip",
+  },
+];
 
 export const WAVEFORM_VIEWABLE_LENGTH = 400;
 
@@ -1179,14 +1179,14 @@ export const CONSENT_TYPE_CHOICES = [
   { id: 3, text: "Consent for procedure" },
   { id: 4, text: "High risk consent" },
   { id: 5, text: "Others" },
-]
+];
 
 export const CONSENT_PATIENT_CODE_STATUS_CHOICES = [
   { id: 1, text: "Do Not Hospitalise (DNH)" },
   { id: 2, text: "Do Not Resuscitate (DNR)" },
   { id: 3, text: "Comfort Care Only" },
   { id: 4, text: "Active treatment (Default)" },
-]
+];
 export const OCCUPATION_TYPES = [
   { id: 1, text: "Student", value: "STUDENT" },
   {
