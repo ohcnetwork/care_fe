@@ -1,0 +1,43 @@
+name: Auto Add Needs Testing Label
+
+on:
+  pull_request:
+    types: [opened, reopened, edited]
+  issue_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  auto_label:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check PR Conditions and Add Label
+        id: check_conditions
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            const isDraft = pr.draft;
+            const isReadyForTestingComment = context.payload.comment?.body.includes('ready for testing');
+            const isChangesRequired = context.payload.review?.state === 'changes_requested';
+
+            if ((isReadyForTestingComment && !isDraft) || (!isDraft && pr.draft_changed) || isChangesRequired) {
+              await github.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                labels: ['needs testing']
+              });
+            }
+
+            if (isChangesRequired) {
+              await github.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body: 'Reminder: To add the "needs testing" label, comment "ready for testing" on this PR.'
+              });
+            }
