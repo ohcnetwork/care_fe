@@ -16,10 +16,10 @@ export interface PageTitleProps {
    */
   onBackClick?: () => boolean | void;
   justifyContents?:
-  | "justify-center"
-  | "justify-start"
-  | "justify-end"
-  | "justify-between";
+    | "justify-center"
+    | "justify-start"
+    | "justify-end"
+    | "justify-between";
   breadcrumbs?: boolean;
   crumbsReplacements?: {
     [key: string]: { name?: string; uri?: string; style?: string };

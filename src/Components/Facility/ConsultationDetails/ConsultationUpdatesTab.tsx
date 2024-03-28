@@ -7,7 +7,12 @@ import { BedModel } from "../models";
 import HL7PatientVitalsMonitor from "../../VitalsMonitor/HL7PatientVitalsMonitor";
 import VentilatorPatientVitalsMonitor from "../../VitalsMonitor/VentilatorPatientVitalsMonitor";
 import useVitalsAspectRatioConfig from "../../VitalsMonitor/useVitalsAspectRatioConfig";
-import { CONSENT_PATIENT_CODE_STATUS_CHOICES, CONSENT_TYPE_CHOICES, DISCHARGE_REASONS, SYMPTOM_CHOICES } from "../../../Common/constants";
+import {
+  CONSENT_PATIENT_CODE_STATUS_CHOICES,
+  CONSENT_TYPE_CHOICES,
+  DISCHARGE_REASONS,
+  SYMPTOM_CHOICES,
+} from "../../../Common/constants";
 import PrescriptionsTable from "../../Medicine/PrescriptionsTable";
 import Chip from "../../../CAREUI/display/Chip";
 import { formatAge, formatDate, formatDateTime } from "../../../Utils/utils";
@@ -187,10 +192,11 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
               )}
             {props.consultationData.discharge_date && (
               <div
-                className={`gap-4 overflow-hidden rounded-lg bg-white shadow ${props.consultationData.new_discharge_reason ===
-                  DISCHARGE_REASONS.find((i) => i.text == "Recovered")?.id &&
+                className={`gap-4 overflow-hidden rounded-lg bg-white shadow ${
+                  props.consultationData.new_discharge_reason ===
+                    DISCHARGE_REASONS.find((i) => i.text == "Recovered")?.id &&
                   "lg:col-span-2"
-                  }`}
+                }`}
               >
                 <div className="px-4 py-5 sm:p-6">
                   <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
@@ -209,103 +215,103 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                     {props.consultationData.new_discharge_reason ===
                       DISCHARGE_REASONS.find((i) => i.text == "Referred")
                         ?.id && (
-                        <div>
-                          Referred Facility {" - "}
-                          <span className="font-semibold">
-                            {props.consultationData.referred_to_external ||
-                              props.consultationData.referred_to_object?.name ||
-                              "--"}
-                          </span>
-                        </div>
-                      )}
+                      <div>
+                        Referred Facility {" - "}
+                        <span className="font-semibold">
+                          {props.consultationData.referred_to_external ||
+                            props.consultationData.referred_to_object?.name ||
+                            "--"}
+                        </span>
+                      </div>
+                    )}
                     {props.consultationData.new_discharge_reason ===
                       DISCHARGE_REASONS.find((i) => i.text == "Recovered")
                         ?.id && (
-                        <div className="grid gap-4">
-                          <div>
-                            Discharge Date {" - "}
-                            <span className="font-semibold">
-                              {props.consultationData.discharge_date
-                                ? formatDate(
+                      <div className="grid gap-4">
+                        <div>
+                          Discharge Date {" - "}
+                          <span className="font-semibold">
+                            {props.consultationData.discharge_date
+                              ? formatDate(
                                   props.consultationData.discharge_date
                                 )
-                                : "--/--/---- --:-- --"}
-                            </span>
-                          </div>
-                          <div>
-                            Advice {" - "}
-                            <span className="font-semibold">
-                              {props.consultationData.discharge_notes ?? "--"}
-                            </span>
-                          </div>
-                          <div className="overflow-x-auto overflow-y-hidden">
-                            <PrescriptionsTable
-                              is_prn={false}
-                              readonly
-                              prescription_type="DISCHARGE"
-                            />
-                          </div>
-                          <hr className="my-2 border border-gray-300"></hr>
-                          <div className="overflow-x-auto overflow-y-hidden">
-                            <PrescriptionsTable
-                              is_prn
-                              readonly
-                              prescription_type="DISCHARGE"
-                            />
-                          </div>
+                              : "--/--/---- --:-- --"}
+                          </span>
                         </div>
-                      )}
+                        <div>
+                          Advice {" - "}
+                          <span className="font-semibold">
+                            {props.consultationData.discharge_notes ?? "--"}
+                          </span>
+                        </div>
+                        <div className="overflow-x-auto overflow-y-hidden">
+                          <PrescriptionsTable
+                            is_prn={false}
+                            readonly
+                            prescription_type="DISCHARGE"
+                          />
+                        </div>
+                        <hr className="my-2 border border-gray-300"></hr>
+                        <div className="overflow-x-auto overflow-y-hidden">
+                          <PrescriptionsTable
+                            is_prn
+                            readonly
+                            prescription_type="DISCHARGE"
+                          />
+                        </div>
+                      </div>
+                    )}
                     {props.consultationData.new_discharge_reason ===
                       DISCHARGE_REASONS.find((i) => i.text == "Expired")
                         ?.id && (
-                        <div className="grid gap-4">
-                          <div>
-                            Date of Death {" - "}
-                            <span className="font-semibold">
-                              {props.consultationData.death_datetime
-                                ? formatDateTime(
+                      <div className="grid gap-4">
+                        <div>
+                          Date of Death {" - "}
+                          <span className="font-semibold">
+                            {props.consultationData.death_datetime
+                              ? formatDateTime(
                                   props.consultationData.death_datetime
                                 )
-                                : "--:--"}
-                            </span>
-                          </div>
-                          <div>
-                            Cause of death {" - "}
-                            <span className="font-semibold">
-                              {props.consultationData.discharge_notes ?? "--"}
-                            </span>
-                          </div>
-                          <div>
-                            Confirmed By {" - "}
-                            <span className="font-semibold">
-                              {props.consultationData.death_confirmed_doctor ??
-                                "--"}
-                            </span>
-                          </div>
+                              : "--:--"}
+                          </span>
                         </div>
-                      )}
+                        <div>
+                          Cause of death {" - "}
+                          <span className="font-semibold">
+                            {props.consultationData.discharge_notes ?? "--"}
+                          </span>
+                        </div>
+                        <div>
+                          Confirmed By {" - "}
+                          <span className="font-semibold">
+                            {props.consultationData.death_confirmed_doctor ??
+                              "--"}
+                          </span>
+                        </div>
+                      </div>
+                    )}
                     {[2, 4].includes(
                       props.consultationData.new_discharge_reason ?? 0
                     ) && (
-                        <div className="grid gap-4">
-                          <div>
-                            Discharge Date {" - "}
-                            <span className="font-semibold">
-                              {props.consultationData.discharge_date
-                                ? formatDateTime(
+                      <div className="grid gap-4">
+                        <div>
+                          Discharge Date {" - "}
+                          <span className="font-semibold">
+                            {props.consultationData.discharge_date
+                              ? formatDateTime(
                                   props.consultationData.discharge_date
                                 )
-                                : "--/--/---- --:-- --"}
-                            </span>
-                          </div>
-                          <div>
-                            Notes {" - "}
-                            <span className="font-semibold">
-                              {props.consultationData.discharge_notes ?? "--"}
-                            </span>
-                          </div>
+                              : "--/--/---- --:-- --"}
+                          </span>
                         </div>
-                      )}
+                        <div>
+                          Notes {" - "}
+                          <span className="font-semibold">
+                            {props.consultationData.discharge_notes ?? "--"}
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -322,42 +328,42 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                     </div>
                     {props.consultationData.last_daily_round
                       ?.additional_symptoms && (
-                        <>
-                          <div className="my-4 flex flex-wrap items-center gap-2">
-                            {props.consultationData.last_daily_round?.additional_symptoms.map(
-                              (symptom: any, index: number) => (
-                                <Chip
-                                  key={index}
-                                  text={
-                                    SYMPTOM_CHOICES.find(
-                                      (choice) => choice.id === symptom
-                                    )?.text ?? "Err. Unknown"
-                                  }
-                                  size="small"
-                                />
-                              )
-                            )}
-                          </div>
-                          {props.consultationData.last_daily_round
-                            ?.other_symptoms && (
-                              <div className="capitalize">
-                                <div className="text-xs font-semibold">
-                                  Other Symptoms:
-                                </div>
-                                {
-                                  props.consultationData.last_daily_round
-                                    ?.other_symptoms
+                      <>
+                        <div className="my-4 flex flex-wrap items-center gap-2">
+                          {props.consultationData.last_daily_round?.additional_symptoms.map(
+                            (symptom: any, index: number) => (
+                              <Chip
+                                key={index}
+                                text={
+                                  SYMPTOM_CHOICES.find(
+                                    (choice) => choice.id === symptom
+                                  )?.text ?? "Err. Unknown"
                                 }
-                              </div>
-                            )}
-                          <span className="text-xs font-semibold leading-relaxed text-gray-800">
-                            from{" "}
-                            {formatDate(
-                              props.consultationData.last_daily_round.taken_at
-                            )}
-                          </span>
-                        </>
-                      )}
+                                size="small"
+                              />
+                            )
+                          )}
+                        </div>
+                        {props.consultationData.last_daily_round
+                          ?.other_symptoms && (
+                          <div className="capitalize">
+                            <div className="text-xs font-semibold">
+                              Other Symptoms:
+                            </div>
+                            {
+                              props.consultationData.last_daily_round
+                                ?.other_symptoms
+                            }
+                          </div>
+                        )}
+                        <span className="text-xs font-semibold leading-relaxed text-gray-800">
+                          from{" "}
+                          {formatDate(
+                            props.consultationData.last_daily_round.taken_at
+                          )}
+                        </span>
+                      </>
+                    )}
                     <hr className="my-4 border border-gray-300" />
                     <div className="text-sm font-semibold uppercase">
                       Consultation Update
@@ -460,35 +466,35 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
 
             {(props.consultationData.operation ??
               props.consultationData.special_instruction) && (
-                <div className="overflow-hidden rounded-lg bg-white shadow">
-                  <div className="px-4 py-5 sm:p-6" id="consultation-notes">
-                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                      Notes
-                    </h3>
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      {props.consultationData.operation && (
-                        <div className="mt-4">
-                          <h5>Operation</h5>
-                          <ReadMore
-                            text={props.consultationData.operation}
-                            minChars={250}
-                          />
-                        </div>
-                      )}
+              <div className="overflow-hidden rounded-lg bg-white shadow">
+                <div className="px-4 py-5 sm:p-6" id="consultation-notes">
+                  <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                    Notes
+                  </h3>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    {props.consultationData.operation && (
+                      <div className="mt-4">
+                        <h5>Operation</h5>
+                        <ReadMore
+                          text={props.consultationData.operation}
+                          minChars={250}
+                        />
+                      </div>
+                    )}
 
-                      {props.consultationData.special_instruction && (
-                        <div className="mt-4">
-                          <h5>Special Instruction</h5>
-                          <ReadMore
-                            text={props.consultationData.special_instruction}
-                            minChars={250}
-                          />
-                        </div>
-                      )}
-                    </div>
+                    {props.consultationData.special_instruction && (
+                      <div className="mt-4">
+                        <h5>Special Instruction</h5>
+                        <ReadMore
+                          text={props.consultationData.special_instruction}
+                          minChars={250}
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
-              )}
+              </div>
+            )}
           </div>
           {props.consultationData.procedure &&
             props.consultationData.procedure.length > 0 && (
@@ -631,9 +637,9 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                     <span className="font-semibold">
                       {props.patientData.age !== undefined // 0 is a valid age, so we need to check for undefined
                         ? formatAge(
-                          props.patientData.age,
-                          props.patientData.date_of_birth
-                        )
+                            props.patientData.age,
+                            props.patientData.date_of_birth
+                          )
                         : "-"}
                     </span>
                   </div>
@@ -655,7 +661,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                       {Math.sqrt(
                         (Number(props.consultationData.weight) *
                           Number(props.consultationData.height)) /
-                        3600
+                          3600
                       ).toFixed(2)}{" "}
                       m<sup>2</sup>
                     </span>
@@ -669,28 +675,45 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                 </div>
               </div>
             </div>
-            {(props.consultationData.consent_records?.filter(record => record.deleted !== true) || []).length > 0 && (<>
-            <div className="col-span-1 md:col-span-2 overflow-hidden rounded-lg bg-white shadow p-4">
-              <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                Consent Records
-              </h3>
-              {props.consultationData.consent_records?.filter(record => record.deleted !== true)?.map((record, i) => (
-                <div className="border-b mt-4" key={i}>
-                  <div className="font-bold">
-                    {CONSENT_TYPE_CHOICES.find((c) => c.id === record.type)?.text} {record.patient_code_status && `( ${CONSENT_PATIENT_CODE_STATUS_CHOICES.find((c) => c.id === record.patient_code_status)?.text} )`}
-                  </div>
-                  <FileUpload
-                    type="CONSENT_RECORD"
-                    hideBack
-                    unspecified
-                    className="w-full"
-                    consentId={record.id}
-                    hideUpload
-                    />
+            {(
+              props.consultationData.consent_records?.filter(
+                (record) => record.deleted !== true
+              ) || []
+            ).length > 0 && (
+              <>
+                <div className="col-span-1 overflow-hidden rounded-lg bg-white p-4 shadow md:col-span-2">
+                  <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                    Consent Records
+                  </h3>
+                  {props.consultationData.consent_records
+                    ?.filter((record) => record.deleted !== true)
+                    ?.map((record, i) => (
+                      <div className="mt-4 border-b" key={i}>
+                        <div className="font-bold">
+                          {
+                            CONSENT_TYPE_CHOICES.find(
+                              (c) => c.id === record.type
+                            )?.text
+                          }{" "}
+                          {record.patient_code_status &&
+                            `( ${
+                              CONSENT_PATIENT_CODE_STATUS_CHOICES.find(
+                                (c) => c.id === record.patient_code_status
+                              )?.text
+                            } )`}
+                        </div>
+                        <FileUpload
+                          type="CONSENT_RECORD"
+                          hideBack
+                          unspecified
+                          className="w-full"
+                          consentId={record.id}
+                          hideUpload
+                        />
+                      </div>
+                    ))}
                 </div>
-              ))}
-            </div>
-            </>
+              </>
             )}
           </div>
         </div>

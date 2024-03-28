@@ -426,15 +426,15 @@ export type VentilatorPlotRes = {
 export interface DailyRoundsBody {
   page?: number;
   fields:
-  | ABGPlotsFields[]
-  | DialysisPlotsFields[]
-  | NeurologicalTablesFields[]
-  | NursingPlotFields[]
-  | NutritionPlotsFields[]
-  | PainDiagramsFields[]
-  | PressureSoreDiagramsFields[]
-  | PrimaryParametersPlotFields[]
-  | VentilatorPlotFields[];
+    | ABGPlotsFields[]
+    | DialysisPlotsFields[]
+    | NeurologicalTablesFields[]
+    | NursingPlotFields[]
+    | NutritionPlotsFields[]
+    | PainDiagramsFields[]
+    | PressureSoreDiagramsFields[]
+    | PrimaryParametersPlotFields[]
+    | VentilatorPlotFields[];
 }
 
 export interface DailyRoundsRes {
@@ -442,15 +442,15 @@ export interface DailyRoundsRes {
   page_size: number;
   results: {
     [date: string]:
-    | PressureSoreDiagramsRes
-    | ABGPlotsRes
-    | DialysisPlotsRes
-    | NeurologicalTablesRes
-    | NursingPlotRes
-    | NutritionPlotsRes
-    | PainDiagramsRes
-    | PrimaryParametersPlotRes
-    | VentilatorPlotRes;
+      | PressureSoreDiagramsRes
+      | ABGPlotsRes
+      | DialysisPlotsRes
+      | NeurologicalTablesRes
+      | NursingPlotRes
+      | NutritionPlotsRes
+      | PainDiagramsRes
+      | PrimaryParametersPlotRes
+      | VentilatorPlotRes;
   };
 }
 

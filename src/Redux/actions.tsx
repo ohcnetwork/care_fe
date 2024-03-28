@@ -109,7 +109,7 @@ export const updateConsultation = (id: string, params: object) => {
 };
 export const partialUpdateConsultation = (id: string, params: object) => {
   return fireRequest("partialUpdateConsultation", [], params, { id: id });
-}
+};
 
 export const generateDischargeSummary = (pathParams: object) => {
   return fireRequest("dischargeSummaryGenerate", [], {}, pathParams);

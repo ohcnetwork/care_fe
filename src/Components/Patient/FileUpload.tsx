@@ -155,7 +155,7 @@ export const FileUpload = (props: FileUploadProps) => {
     unspecified,
     sampleId,
     claimId,
-    changePageMetadata
+    changePageMetadata,
   } = props;
   const id = patientId;
   const [isLoading, setIsLoading] = useState(false);
@@ -567,7 +567,10 @@ export const FileUpload = (props: FileUploadProps) => {
   const renderFileUpload = (item: FileUploadModel) => {
     const isPreviewSupported = previewExtensions.includes(item.extension ?? "");
     return (
-      <div className={`mt-4 rounded-lg border bg-white p-4 shadow `} key={item.id}>
+      <div
+        className={"mt-4 rounded-lg border bg-white p-4 shadow "}
+        key={item.id}
+      >
         {!item.is_archived ? (
           <>
             {item.file_category === "AUDIO" ? (
@@ -644,8 +647,8 @@ export const FileUpload = (props: FileUploadProps) => {
                           DOWNLOAD
                         </ButtonV2>
                         {item?.uploaded_by?.username === authUser.username ||
-                          authUser.user_type === "DistrictAdmin" ||
-                          authUser.user_type === "StateAdmin" ? (
+                        authUser.user_type === "DistrictAdmin" ||
+                        authUser.user_type === "StateAdmin" ? (
                           <>
                             <ButtonV2
                               onClick={() => {
@@ -666,8 +669,8 @@ export const FileUpload = (props: FileUploadProps) => {
                           <></>
                         )}
                         {item?.uploaded_by?.username === authUser.username ||
-                          authUser.user_type === "DistrictAdmin" ||
-                          authUser.user_type === "StateAdmin" ? (
+                        authUser.user_type === "DistrictAdmin" ||
+                        authUser.user_type === "StateAdmin" ? (
                           <>
                             <ButtonV2
                               onClick={() => {
@@ -761,8 +764,8 @@ export const FileUpload = (props: FileUploadProps) => {
                     </ButtonV2>
                   )}
                   {item?.uploaded_by?.username === authUser.username ||
-                    authUser.user_type === "DistrictAdmin" ||
-                    authUser.user_type === "StateAdmin" ? (
+                  authUser.user_type === "DistrictAdmin" ||
+                  authUser.user_type === "StateAdmin" ? (
                     <>
                       {" "}
                       <ButtonV2
@@ -781,9 +784,9 @@ export const FileUpload = (props: FileUploadProps) => {
                     <></>
                   )}
                   {sortFileState != "DISCHARGE_SUMMARY" &&
-                    (item?.uploaded_by?.username === authUser.username ||
-                      authUser.user_type === "DistrictAdmin" ||
-                      authUser.user_type === "StateAdmin") ? (
+                  (item?.uploaded_by?.username === authUser.username ||
+                    authUser.user_type === "DistrictAdmin" ||
+                    authUser.user_type === "StateAdmin") ? (
                     <>
                       <ButtonV2
                         onClick={() => {
@@ -1462,7 +1465,11 @@ export const FileUpload = (props: FileUploadProps) => {
               : `/facility/${facilityId}/patient/${patientId}`
           }
         >
-          <div className={`${audio ? "grid-cols-2" : "grid-cols-1"} gap-4 md:grid w-full`}>
+          <div
+            className={`${
+              audio ? "grid-cols-2" : "grid-cols-1"
+            } w-full gap-4 md:grid`}
+          >
             {audio ? (
               <div className="rounded-lg border bg-white p-4 shadow">
                 <h4 className="mb-4">Record and Upload Audio File</h4>
@@ -1616,7 +1623,12 @@ export const FileUpload = (props: FileUploadProps) => {
           </div>
         </Page>
       )}
-      <Page title={VIEW_HEADING[type]} hideBack={true} breadcrumbs={false} changePageMetadata={changePageMetadata} >
+      <Page
+        title={VIEW_HEADING[type]}
+        hideBack={true}
+        breadcrumbs={false}
+        changePageMetadata={changePageMetadata}
+      >
         <HeadedTabs
           tabs={tabs}
           handleChange={handleTabChange}
