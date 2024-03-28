@@ -281,7 +281,7 @@ export default function ShiftDetails(props: { id: string }) {
 
   const showFacilityCard = (facilityData: any) => {
     return (
-      <div className="mt-2 h-full rounded-lg border bg-white p-4 text-black shadow">
+      <div className="mt-2 rounded-lg border bg-white p-4 text-black shadow lg:h-[25vh] lg:w-[30vw]">
         <div>
           <span className="mr-1 font-semibold leading-relaxed">
             {t("name")}:{" "}
@@ -796,10 +796,6 @@ export default function ShiftDetails(props: { id: string }) {
                 </h4>
                 {showPatientCard(data?.patient_object)}
               </div>
-              <div className="mb-10 mr-3 md:mr-8">
-                <h4 className="mt-8">{t("comments")}</h4>
-                <CommentSection id={props.id} />
-              </div>
             </div>
 
             <div className="col-span-2">
@@ -838,12 +834,12 @@ export default function ShiftDetails(props: { id: string }) {
 
                 {showFacilityCard(data?.origin_facility_object)}
               </div>
-              {!data?.assigned_facility_external && (
+              {/* {!data?.assigned_facility_external && (
                 <div>
                   <h4 className="mt-8">{t("details_of_assigned_facility")}</h4>
                   {showFacilityCard(data?.assigned_facility_object)}
                 </div>
-              )}
+              )} */}
               {wartime_shifting && (
                 <div>
                   <h4 className="mt-8">
@@ -852,6 +848,28 @@ export default function ShiftDetails(props: { id: string }) {
                   {showFacilityCard(data?.shifting_approving_facility_object)}
                 </div>
               )}
+            </div>
+            <div
+              className="Details of assigned facility flex w-full flex-col lg:flex-row
+
+"
+            >
+              <div className="Details of assigned facility">
+                {!data?.assigned_facility_external && (
+                  <div className=" w-full lg:w-[50vw]">
+                    <h4 className="mt-8">
+                      {t("details_of_assigned_facility")}
+                    </h4>
+                    {showFacilityCard(data?.assigned_facility_object)}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="">
+            <div className="mb-10 mr-3 md:mr-8">
+              <h4 className="mt-8">{t("comments")}</h4>
+              <CommentSection id={props.id} />
             </div>
           </div>
         </Page>

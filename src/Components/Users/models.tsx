@@ -45,7 +45,6 @@ export type UserModel = UserBareMinimum & {
   doctor_medical_council_registration?: string;
   weekly_working_hours?: string | null;
 };
-
 export interface SkillObjectModel {
   id: string;
   name: string;

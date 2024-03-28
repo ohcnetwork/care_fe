@@ -89,13 +89,35 @@ export const Comment = ({
   modified_date,
 }: IComment) => {
   const { t } = useTranslation();
+  const [expanded, setExpanded] = useState(false);
+  const toggleExpanded = () => {
+    setExpanded(!expanded);
+  };
+  const truncatedComment = comment.split(" ").slice(0, 20).join(" ");
+  const remainingComment = comment.split(" ").slice(20).join(" ");
+
   return (
     <div
       key={id}
       className="mt-4 flex w-full flex-col rounded-lg border border-gray-300 bg-white p-4 text-gray-800"
     >
       <div className="flex  w-full ">
-        <p className="text-justify">{comment}</p>
+        <p className="text-justify">
+          {expanded ? comment : truncatedComment}
+          {!expanded && remainingComment && (
+            <button
+              onClick={toggleExpanded}
+              className="ml-2  text-primary-600 "
+            >
+              {t("read_more")}
+            </button>
+          )}
+          {expanded && remainingComment && (
+            <button onClick={toggleExpanded} className="ml-2 text-primary-600">
+              {t("read_less")}
+            </button>
+          )}
+        </p>
       </div>
       <div className="mt-3">
         <span className="text-xs text-gray-500">

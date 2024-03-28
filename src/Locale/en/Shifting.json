@@ -82,5 +82,7 @@
   "transfer_in_progress": "TRANSFER IN PROGRESS",
   "patient_state": "Patient State",
   "yet_to_be_decided": "Yet to be decided",
-  "awaiting_destination_approval": "AWAITING DESTINATION APPROVAL"
+  "awaiting_destination_approval": "AWAITING DESTINATION APPROVAL",
+  "read_more": "Read More",
+  "read_less": "Read Less"
 }
