@@ -184,7 +184,7 @@ export default function BoardView() {
             <>
               {renderArrowIcons("left")}
               <div
-                className="mx-11 flex max-h-[75vh] w-full flex-row overflow-y-auto overflow-x-hidden"
+                className="mx-11 flex max-h-[75vh] w-full flex-row overflow-x-auto overflow-y-auto"
                 ref={containerRef}
               >
                 {boardFilter.map((board) => (
