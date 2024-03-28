@@ -13,6 +13,7 @@ import {
 
 import * as echarts from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
+import { properRoundOf } from "../../../../Utils/utils";
 echarts.use([
   BarChart,
   LineChart,
@@ -46,7 +47,9 @@ export const LinePlot = (props: any) => {
       containLabel: true,
     },
     title: {
-      text: `${title} [ {0|${yData[yData.length - 1]?.toFixed(2) || "NA"}} ]`,
+      text: `${title} [ {0|${
+        yData[yData.length - 1] ? properRoundOf(yData[yData.length - 1]) : "NA"
+      }} ]`,
       textStyle: {
         fontSize: 14,
         rich: {
@@ -225,11 +228,18 @@ export const LinePlot = (props: any) => {
   }
 
   return (
-    <ReactEchartsCore
-      echarts={echarts}
-      option={generalOptions}
-      className={props.classes}
-      lazyUpdate={props.type === "WAVEFORM"}
-    />
+    <>
+      {yData.map((value: any, idx: any) => (
+        <span id={`${title}-${idx + 1}`} className="sr-only px-1">
+          {value ? properRoundOf(value) : "NA"}
+        </span>
+      ))}
+      <ReactEchartsCore
+        echarts={echarts}
+        option={generalOptions}
+        className={props.classes}
+        lazyUpdate={props.type === "WAVEFORM"}
+      />
+    </>
   );
 };

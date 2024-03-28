@@ -37,16 +37,16 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
     <ConfirmDialog
       action={
         <>
-          <CareIcon className="care-l-syringe text-lg" />
+          <CareIcon icon="l-syringe" className="text-lg" />
           {t("administer_medicine")}
         </>
       }
       title={t("administer_medicine")}
       description={
         <div className="text-sm font-semibold leading-relaxed text-gray-600">
-          <CareIcon className="care-l-history-alt pr-1" /> Last administered
+          <CareIcon icon="l-history-alt" className="pr-1" /> Last administered
           <span className="whitespace-nowrap pl-2">
-            <CareIcon className="care-l-clock" />{" "}
+            <CareIcon icon="l-clock" />{" "}
             {prescription.last_administration?.administered_date
               ? formatDateTime(
                   prescription.last_administration.administered_date
@@ -55,12 +55,12 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
           </span>
           {prescription.dosage_type === "TITRATED" && (
             <span className="whitespace-nowrap pl-2">
-              <CareIcon className="care-l-syringe" /> {t("dosage")}
+              <CareIcon icon="l-syringe" /> {t("dosage")}
               {":"} {prescription.last_administration?.dosage ?? "NA"}
             </span>
           )}
           <span className="whitespace-nowrap pl-2">
-            <CareIcon className="care-l-user" /> Administered by:{" "}
+            <CareIcon icon="l-user" /> Administered by:{" "}
             {prescription.last_administration?.administered_by?.username ??
               "NA"}
           </span>
