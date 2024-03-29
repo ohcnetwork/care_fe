@@ -183,7 +183,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
           <Pagination
             className=""
             cPage={qParams.page}
-            defaultPerPage={PER_PAGE_LIMIT}
+            defaultPerPage={perPageLimit}
             data={{ totalCount }}
             onChange={(page) => updatePage(page)}
           />
