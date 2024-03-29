@@ -9,6 +9,7 @@ import {
   relativeTime,
   showUserDelete,
 } from "../../Utils/utils";
+import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
 import Pagination from "../Common/Pagination";
 import UserDetails from "../Common/UserDetails";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -22,16 +23,21 @@ import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import { UserModel } from "../Users/models";
+import { UserFacilities } from "../Users/ManageUsers";
+import { useTranslation } from "react-i18next";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function FacilityUsers(props: any) {
+  const { t } = useTranslation();
   const { facilityId } = props;
   let manageUsers: any = null;
   const [isUnlinkFacilityLoading, setIsUnlinkFacilityLoading] = useState(false);
   const [isAddFacilityLoading, setIsAddFacilityLoading] = useState(false);
   const [isLoadFacilityLoading, setIsLoadFacilityLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [expandFacilityList, setExpandFacilityList] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [offset, setOffset] = useState(0);
   const authUser = useAuthUser();
@@ -176,7 +182,7 @@ export default function FacilityUsers(props: any) {
       ? "text-gray-500"
       : "text-blue-500 hover:text-blue-800"
   );
-
+  //change iver here
   const showLinkFacility = (username: string) => {
     return (
       <a
@@ -362,13 +368,17 @@ export default function FacilityUsers(props: any) {
                     {user.facilities &&
                       showFacilities(user.username, user.facilities)}
                     {!user.facilities && (
-                      <a
-                        onClick={() => loadFacilities(user.username)}
-                        className={`inline-block ${facilityClassname}`}
-                        href="#"
+                      <ButtonV2
+                        id="facilities"
+                        className="flex w-full items-center @sm:w-1/2"
+                        onClick={() => {
+                          setExpandFacilityList(!expandFacilityList);
+                          setSelectedUser(user);
+                        }}
                       >
-                        Click here to show
-                      </a>
+                        <CareIcon className="care-l-hospital text-lg" />
+                        <p>Linked Facilities</p>
+                      </ButtonV2>
                     )}
                   </UserDetails>
                 )}
@@ -436,6 +446,15 @@ export default function FacilityUsers(props: any) {
           />
         )}
       </div>
+      <SlideOverCustom
+        open={expandFacilityList}
+        setOpen={setExpandFacilityList}
+        slideFrom="right"
+        title={t("facilities")}
+        dialogClass="md:w-[400px]"
+      >
+        <UserFacilities user={selectedUser} />
+      </SlideOverCustom>
       <div className="px-3 md:px-8">
         <div>{manageUsers}</div>
       </div>
