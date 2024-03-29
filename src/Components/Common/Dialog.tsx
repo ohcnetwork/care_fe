@@ -40,7 +40,7 @@ const DialogModal = (props: DialogProps) => {
           </Transition.Child>
 
           <div className="fixed inset-0 overflow-y-auto">
-            <div className="flex min-h-full items-center justify-center p-4 text-center">
+            <div className="flex min-h-fit justify-center p-4 text-center">
               <Transition.Child
                 as={Fragment}
                 enter="ease-out duration-300"
@@ -54,7 +54,7 @@ const DialogModal = (props: DialogProps) => {
                   className={classNames(
                     className,
                     fixedWidth && "w-full max-w-md",
-                    "transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+                    "mb-12 mt-12 transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
                   )}
                 >
                   <Dialog.Title
