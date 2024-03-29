@@ -26,11 +26,8 @@ import { triggerGoal } from "../../../Integrations/Plausible.js";
 import useAuthUser from "../../../Common/hooks/useAuthUser.js";
 import Spinner from "../../Common/Spinner.js";
 import useQuery from "../../../Utils/request/useQuery.js";
-import { ResolvedMiddleware } from "../../Assets/AssetTypes.js";
-<<<<<<< HEAD
-=======
+import { AssetBedModel, ResolvedMiddleware } from "../../Assets/AssetTypes.js";
 import { SelectFormField } from "../../Form/FormFields/SelectFormField.js";
->>>>>>> 323c32c1 (need help)
 
 interface IFeedProps {
   facilityId: string;
@@ -403,11 +400,11 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   }
 
   if (getConsultationLoading) return <Loading />;
-
+  console.log(bedPresets);
   return (
     <div className="flex h-[calc(100vh-1.5rem)] flex-col px-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex w-full items-center justify-between gap-4 px-3 md:justify-start">
+        <div className="hidden w-full items-center justify-between gap-4 px-3 md:flex">
           <p className="block text-lg font-medium"> Camera Presets :</p>
           <div className="z-30 flex flex-wrap items-center justify-center bg-gray-100 ">
             <SelectFormField
@@ -465,65 +462,78 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                   getCameraStatus({});
                 }
               }}
-              className="w-40 md:w-60"
+              className="w-40 md:w-60 "
             />
 >>>>>>> 323c32c1 (need help)
           </div>
         </div>
       </div>
+      <div>
+        <div className="z-100 flex  w-full  items-center justify-between  gap-1 bg-zinc-900 px-4 py-0.5 md:hidden md:gap-2">
+          <span className="text-xs font-semibold text-white md:text-sm">
+            Camera presets
+          </span>
 
-      <div
-        className="relative mt-2 flex aspect-video w-full grow-0 items-center justify-center overflow-hidden rounded-xl bg-black"
-        ref={videoWrapper}
-      >
-        {isIOS ? (
-          <ReactPlayer
-            url={url}
-            ref={liveFeedPlayerRef.current as any}
-            controls={false}
-            playsinline={true}
-            playing={true}
-            muted={true}
-            onPlay={() => {
-              setVideoStartTime(() => new Date());
-            }}
-            width="100%"
-            height="100%"
-            onBuffer={() => {
-              const delay = calculateVideoLiveDelay();
-              if (delay > 5) {
-                setStreamStatus(StreamStatus.Loading);
-              }
-            }}
-            onError={(e: any, _: any, hlsInstance: any) => {
-              if (e === "hlsError") {
-                const recovered = hlsInstance.recoverMediaError();
-                console.log(recovered);
-              }
-            }}
-            onEnded={() => {
-              setStreamStatus(StreamStatus.Stop);
-            }}
-          />
-        ) : (
-          <video
-            id="mse-video"
-            autoPlay
-            muted
-            playsInline
-            className="max-h-full max-w-full"
-            onPlay={() => {
-              setVideoStartTime(() => new Date());
-            }}
-            onWaiting={() => {
-              const delay = calculateVideoLiveDelay();
-              if (delay > 5) {
-                setStreamStatus(StreamStatus.Loading);
-              }
-            }}
-            ref={liveFeedPlayerRef as any}
-          />
-        )}
+          <div className="w-64">
+            <AssetBedSelect
+              asset={bedPresets}
+              value={preset}
+              onChange={setPreset}
+            />
+          </div>
+        </div>
+        <div
+          className="relative  flex aspect-video w-full grow-0 flex-col items-center justify-center overflow-hidden rounded-b-xl bg-black"
+          ref={videoWrapper}
+        >
+          {isIOS ? (
+            <ReactPlayer
+              url={url}
+              ref={liveFeedPlayerRef.current as any}
+              controls={false}
+              playsinline={true}
+              playing={true}
+              muted={true}
+              onPlay={() => {
+                setVideoStartTime(() => new Date());
+              }}
+              width="100%"
+              height="100%"
+              onBuffer={() => {
+                const delay = calculateVideoLiveDelay();
+                if (delay > 5) {
+                  setStreamStatus(StreamStatus.Loading);
+                }
+              }}
+              onError={(e: any, _: any, hlsInstance: any) => {
+                if (e === "hlsError") {
+                  const recovered = hlsInstance.recoverMediaError();
+                  console.log(recovered);
+                }
+              }}
+              onEnded={() => {
+                setStreamStatus(StreamStatus.Stop);
+              }}
+            />
+          ) : (
+            <video
+              id="mse-video"
+              autoPlay
+              muted
+              playsInline
+              className="max-h-full max-w-full"
+              onPlay={() => {
+                setVideoStartTime(() => new Date());
+              }}
+              onWaiting={() => {
+                const delay = calculateVideoLiveDelay();
+                if (delay > 5) {
+                  setStreamStatus(StreamStatus.Loading);
+                }
+              }}
+              ref={liveFeedPlayerRef as any}
+            />
+          )}
 
           {loading !== CAMERA_STATES.IDLE && (
             <div className="absolute inset-x-0 top-2 flex items-center justify-center text-center">
@@ -660,10 +670,12 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                 );
               }
 
-            return out;
-          })}
+              return out;
+            })}
+          </div>
         </div>
       </div>
+
       <div className="mt-4 flex w-full flex-wrap lg:hidden">
         {cameraPTZ.map((option, index) => {
           const shortcutKeyDescription =
