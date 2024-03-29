@@ -1,18 +1,21 @@
-import { Dialog, Transition } from "@headlessui/react";
-import { classNames } from "../../Utils/utils";
 import CircularProgress from "./components/CircularProgress";
 import { useTranslation } from "react-i18next";
 import { StateInterface } from "../Patient/FileUpload";
-import { Dispatch, Fragment, ReactNode, SetStateAction } from "react";
+import { Dispatch, ReactNode, SetStateAction, useState } from "react";
 import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
+import ButtonV2, { Cancel } from "./components/ButtonV2";
+import DialogModal from "./Dialog";
+import PDFViewer from "./PDFViewer";
 
 export const zoom_values = [
-  "h-1/6 w-1/6 my-40",
-  "h-2/6 w-2/6 my-32",
-  "h-3/6 w-3/6 my-24",
-  "h-4/6 w-4/6 my-20",
-  "h-5/6 w-5/6 my-16",
-  "h-full w-full my-12",
+  "scale-25",
+  "scale-50",
+  "scale-75",
+  "scale-100",
+  "scale-125",
+  "scale-150",
+  "scale-175",
+  "scale-200",
 ];
 
 type FilePreviewProps = {
@@ -30,19 +33,12 @@ type FilePreviewProps = {
 };
 
 const FilePreviewDialog = (props: FilePreviewProps) => {
-  const {
-    title,
-    description,
-    show,
-    onClose,
-    file_state,
-    setFileState,
-    downloadURL,
-    fileUrl,
-    className,
-    fixedWidth = true,
-  } = props;
+  const { show, onClose, file_state, setFileState, downloadURL, fileUrl } =
+    props;
   const { t } = useTranslation();
+
+  const [page, setPage] = useState(1);
+  const [numPages, setNumPages] = useState(1);
 
   const handleZoomIn = () => {
     const checkFull = file_state.zoom === zoom_values.length;
@@ -60,6 +56,12 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     });
   };
 
+  const handleClose = () => {
+    setPage(1);
+    setNumPages(1);
+    onClose?.();
+  };
+
   const handleRotate = (rotation: number) => {
     setFileState((prev: any) => ({
       ...prev,
@@ -67,160 +69,179 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
     }));
   };
 
-  return (
-    <div>
-      <Transition appear show={show} as={Fragment}>
-        <Dialog as="div" className="relative z-10" onClose={onClose}>
-          <Transition.Child
-            as={Fragment}
-            enter="ease-out duration-300"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="ease-in duration-200"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-all" />
-          </Transition.Child>
+  function getRotationClass(rotation: number) {
+    let normalizedRotation = ((rotation % 360) + 360) % 360; // Normalize rotation to be within [0, 360)
+    if (normalizedRotation > 180) {
+      normalizedRotation -= 360; // Adjust to be within [-180, 180)
+    }
+    return normalizedRotation === -90 // Special case for -90 rotation since tailwind doesn't support 270deg
+      ? "-rotate-90"
+      : `rotate-${normalizedRotation}`;
+  }
 
-          <div className="fixed inset-0 overflow-y-auto">
-            <div className="flex min-h-full items-center justify-center p-4 text-center">
-              <Transition.Child
-                as={Fragment}
-                enter="ease-out duration-300"
-                enterFrom="opacity-0 scale-95"
-                enterTo="opacity-100 scale-100"
-                leave="ease-in duration-200"
-                leaveFrom="opacity-100 scale-100"
-                leaveTo="opacity-0 scale-95"
-              >
-                <Dialog.Panel
-                  className={classNames(
-                    className,
-                    fixedWidth && "w-full max-w-md",
-                    "transform rounded-2xl p-6 text-left align-middle shadow-xl transition-all"
-                  )}
-                >
-                  <Dialog.Title
-                    as="h4"
-                    className="flex justify-between text-lg font-medium leading-6 text-gray-900"
+  return (
+    <DialogModal
+      fixedWidth={false}
+      className="z-10 h-full w-full max-w-5xl flex-col gap-4 rounded-lg bg-white p-4 shadow-xl md:p-6"
+      onClose={() => {
+        handleClose();
+      }}
+      title="File Preview"
+      show={show}
+    >
+      {fileUrl ? (
+        <>
+          <div className="mb-2 flex flex-col items-center justify-between md:flex-row">
+            <p className="text-md font-semibold text-gray-700">
+              {file_state.name}.{file_state.extension}
+            </p>
+            <div className="flex gap-4">
+              {downloadURL && downloadURL.length > 0 && (
+                <ButtonV2>
+                  <a
+                    href={downloadURL}
+                    className="text-white"
+                    download={`${file_state.name}.${file_state.extension}`}
                   >
-                    <div>
-                      <h4>{title}</h4>
-                      <p className="mt-2 text-sm text-gray-600">
-                        {description}
-                      </p>
-                    </div>
-                    {props.titleAction}
-                  </Dialog.Title>
-                  {fileUrl && fileUrl.length > 0 ? (
-                    <div className="flex">
-                      <div className="absolute flex h-full flex-col justify-between p-2 sm:inset-x-4 sm:top-4 sm:h-auto sm:flex-row sm:p-0">
-                        <div className="flex gap-3">
-                          {file_state.isImage && (
-                            <>
-                              {[
-                                [
-                                  t("Zoom In"),
-                                  "l-search-plus",
-                                  handleZoomIn,
-                                  file_state.zoom === zoom_values.length,
-                                ],
-                                [
-                                  t("Zoom Out"),
-                                  "l-search-minus",
-                                  handleZoomOut,
-                                  file_state.zoom === 1,
-                                ],
-                                [
-                                  t("Rotate Left"),
-                                  "l-corner-up-left",
-                                  () => handleRotate(-90),
-                                  false,
-                                ],
-                                [
-                                  t("Rotate Right"),
-                                  "l-corner-up-right",
-                                  () => handleRotate(90),
-                                  false,
-                                ],
-                              ].map((button, index) => (
-                                <button
-                                  key={index}
-                                  onClick={button[2] as () => void}
-                                  className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70"
-                                  disabled={button[3] as boolean}
-                                >
-                                  <CareIcon
-                                    icon={button[1] as IconName}
-                                    className="mr-2 text-lg"
-                                  />
-                                  {button[0] as string}
-                                </button>
-                              ))}
-                            </>
-                          )}
-                        </div>
-                        <div className="flex gap-3">
-                          {downloadURL && downloadURL.length > 0 && (
-                            <a
-                              href={downloadURL}
-                              download={`${file_state.name}.${file_state.extension}`}
-                              className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70"
-                            >
-                              <CareIcon
-                                icon="l-download-alt"
-                                className="mr-2 text-lg"
-                              />
-                              Download
-                            </a>
-                          )}
-                          <button
-                            onClick={onClose}
-                            className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70"
-                          >
-                            <CareIcon icon="l-times" className="mr-2 text-lg" />
-                            Close
-                          </button>
-                        </div>
-                      </div>
-                      <div className="h-[80vh] w-full">
-                        {file_state.isImage ? (
-                          <img
-                            src={fileUrl}
-                            alt="file"
-                            className={
-                              "mx-auto object-contain " +
-                              zoom_values[file_state.zoom]
-                            }
-                            style={{
-                              transform: `rotate(${file_state.rotation}deg)`,
-                            }}
-                          />
-                        ) : (
-                          <iframe
-                            sandbox=""
-                            title="Source Files"
-                            src={fileUrl}
-                            className="mx-auto h-5/6 w-5/6 border-2 border-black bg-white md:my-6 md:w-4/6"
-                          />
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex h-screen items-center justify-center">
-                      <div className="text-center">
-                        <CircularProgress />
-                      </div>
-                    </div>
-                  )}
-                </Dialog.Panel>
-              </Transition.Child>
+                    <CareIcon icon="l-file-download" className="h-4 w-4" />
+                    <span>Download</span>
+                  </a>
+                </ButtonV2>
+              )}
+              <Cancel onClick={onClose} label="Close" />
             </div>
           </div>
-        </Dialog>
-      </Transition>
-    </div>
+          <div className="flex flex-1 items-center justify-center">
+            <div className="flex h-[75vh] w-full items-center justify-center overflow-scroll rounded-lg border border-gray-200">
+              {file_state.isImage ? (
+                <img
+                  src={fileUrl}
+                  alt="file"
+                  className={`${
+                    zoom_values[file_state.zoom - 1]
+                  } ${getRotationClass(file_state.rotation)}`}
+                />
+              ) : file_state.extension === "pdf" ? (
+                <PDFViewer
+                  url={fileUrl}
+                  onDocumentLoadSuccess={(numPages: number) => {
+                    setPage(1);
+                    setNumPages(numPages);
+                  }}
+                  pageNumber={page}
+                />
+              ) : (
+                <iframe
+                  sandbox=""
+                  title="Source Files"
+                  src={fileUrl}
+                  className="h-[75vh] w-full"
+                />
+              )}
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="mt-2 flex w-full flex-col justify-center gap-3 md:flex-row">
+              {file_state.isImage && (
+                <>
+                  {[
+                    [
+                      t("Zoom In"),
+                      "l-search-plus",
+                      handleZoomIn,
+                      file_state.zoom === zoom_values.length,
+                    ],
+                    [
+                      `${25 * file_state.zoom}%`,
+                      false,
+                      () => {
+                        setFileState({ ...file_state, zoom: 4 });
+                      },
+                      false,
+                    ],
+                    [
+                      t("Zoom Out"),
+                      "l-search-minus",
+                      handleZoomOut,
+                      file_state.zoom === 1,
+                    ],
+                    [
+                      t("Rotate Left"),
+                      "l-corner-up-left",
+                      () => handleRotate(-90),
+                      false,
+                    ],
+                    [
+                      t("Rotate Right"),
+                      "l-corner-up-right",
+                      () => handleRotate(90),
+                      false,
+                    ],
+                  ].map((button, index) => (
+                    <ButtonV2
+                      border
+                      ghost
+                      key={index}
+                      onClick={button[2] as () => void}
+                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70"
+                      disabled={button[3] as boolean}
+                    >
+                      {button[1] && (
+                        <CareIcon
+                          icon={button[1] as IconName}
+                          className="mr-2 text-lg"
+                        />
+                      )}
+                      {button[0] as string}
+                    </ButtonV2>
+                  ))}
+                </>
+              )}
+              {file_state.extension === "pdf" && (
+                <>
+                  {[
+                    [
+                      "Previous",
+                      "l-arrow-left",
+                      () => setPage((prev) => prev - 1),
+                      page === 1,
+                    ],
+                    [`${page}/${numPages}`, false, () => ({}), false],
+                    [
+                      "Next",
+                      "l-arrow-right",
+                      () => setPage((prev) => prev + 1),
+                      page === numPages,
+                    ],
+                  ].map((button, index) => (
+                    <ButtonV2
+                      border
+                      ghost
+                      key={index}
+                      onClick={button[2] as () => void}
+                      className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70"
+                      disabled={button[3] as boolean}
+                    >
+                      {button[1] && (
+                        <CareIcon
+                          icon={button[1] as IconName}
+                          className="mr-2 text-lg"
+                        />
+                      )}
+                      {button[0] as string}
+                    </ButtonV2>
+                  ))}
+                </>
+              )}
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="flex h-[75vh] items-center justify-center">
+          <CircularProgress />
+        </div>
+      )}
+    </DialogModal>
   );
 };
 

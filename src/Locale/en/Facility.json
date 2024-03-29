@@ -51,5 +51,7 @@
   "last_serviced_on": "Last Serviced On",
   "notes": "Notes",
   "create_asset": "Create Asset",
-  "create_add_more": "Create & Add More"
+  "create_add_more": "Create & Add More",
+  "discharged_patients": "Discharged Patients",
+  "discharged_patients_empty": "No discharged patients present in this facility"
 }
