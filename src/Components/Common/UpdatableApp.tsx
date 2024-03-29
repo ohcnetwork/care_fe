@@ -121,6 +121,7 @@ const UpdateAppPopup = ({ onUpdate }: UpdateAppPopupProps) => {
       <Popover className="rounded-xl bg-alert-600 px-5 py-4 text-white shadow-2xl shadow-alert-900">
         <div className="flex items-center gap-4">
           <CareIcon
+            icon="l-sync"
             className={classNames(
               "care-l-sync text-2xl",
               isUpdating && "animate-spin"
@@ -155,7 +156,7 @@ const AppUpdatedAlert = ({ show }: AppUpdatedAlertProps) => {
     <AlertTransition show={show}>
       <Popover className="rounded-xl bg-primary-500 px-5 py-4 text-white shadow-2xl shadow-primary-500">
         <div className="flex items-center gap-4">
-          <CareIcon className="care-l-thumbs-up text-2xl" />
+          <CareIcon icon="l-thumbs-up" className="text-2xl" />
           <span className="mr-4 flex flex-col">
             <p className="font-semibold">Updated successfully</p>
             <p className="text-sm font-medium">

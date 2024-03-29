@@ -221,7 +221,7 @@ export default function FacilityUsers(props: any) {
                     })
                   }
                 >
-                  <CareIcon className="care-l-multiply" />
+                  <CareIcon icon="l-multiply" />
                 </ButtonV2>
               </div>
             </div>

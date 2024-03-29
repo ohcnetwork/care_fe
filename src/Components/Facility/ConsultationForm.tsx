@@ -8,6 +8,8 @@ import {
   PATIENT_CATEGORIES,
   REVIEW_AT_CHOICES,
   TELEMEDICINE_ACTIONS,
+  CONSENT_TYPE_CHOICES,
+  CONSENT_PATIENT_CODE_STATUS_CHOICES,
 } from "../../Common/constants";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
@@ -30,6 +32,7 @@ import {
   createConsultation,
   getConsultation,
   getPatient,
+  partialUpdateConsultation,
   updateConsultation,
 } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -74,11 +77,20 @@ import {
   CreateDiagnosesBuilder,
   EditDiagnosesBuilder,
 } from "../Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder.js";
+import { FileUpload } from "../Patient/FileUpload.js";
+import ConfirmDialog from "../Common/ConfirmDialog.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
 
 type BooleanStrings = "true" | "false";
+
+export type ConsentRecord = {
+  id: string;
+  type: (typeof CONSENT_TYPE_CHOICES)[number]["id"];
+  patient_code_status?: (typeof CONSENT_PATIENT_CODE_STATUS_CHOICES)[number]["id"];
+  deleted?: boolean;
+};
 
 type FormDetails = {
   symptoms: number[];
@@ -128,6 +140,7 @@ type FormDetails = {
   death_confirmed_doctor: string;
   InvestigationAdvice: InvestigationType[];
   procedures: ProcedureType[];
+  consent_records: ConsentRecord[];
 };
 
 const initForm: FormDetails = {
@@ -178,6 +191,7 @@ const initForm: FormDetails = {
   death_confirmed_doctor: "",
   InvestigationAdvice: [],
   procedures: [],
+  consent_records: [],
 };
 
 const initError = Object.assign(
@@ -228,6 +242,7 @@ type ConsultationFormSection =
   | "Consultation Details"
   | "Diagnosis"
   | "Treatment Plan"
+  | "Consent Records"
   | "Bed Status";
 
 type Props = {
@@ -261,38 +276,51 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   const [diagnosisVisible, diagnosisRef] = useVisibility(-300);
   const [treatmentPlanVisible, treatmentPlanRef] = useVisibility(-300);
   const [bedStatusVisible, bedStatusRef] = useVisibility(-300);
+  const [consentRecordsVisible, consentRecordsRef] = useVisibility(-300);
   const [disabledFields, setDisabledFields] = useState<string[]>([]);
+  const [collapsedConsentRecords, setCollapsedConsentRecords] = useState<
+    number[]
+  >([]);
+  const [showDeleteConsent, setShowDeleteConsent] = useState<string | null>(
+    null
+  );
 
   const { min_encounter_date } = useConfig();
 
   const sections = {
     "Consultation Details": {
-      iconClass: "care-l-medkit",
+      iconClass: "l-medkit",
       visible: consultationDetailsVisible,
       ref: consultationDetailsRef,
     },
     Diagnosis: {
-      iconClass: "care-l-stethoscope",
+      iconClass: "l-stethoscope",
       visible: diagnosisVisible,
       ref: diagnosisRef,
     },
     "Treatment Plan": {
-      iconClass: "care-l-clipboard-alt",
+      iconClass: "l-clipboard-alt",
       visible: treatmentPlanVisible,
       ref: treatmentPlanRef,
     },
+    "Consent Records": {
+      iconClass: "care-l-file-alt",
+      visible: consentRecordsVisible,
+      ref: consentRecordsRef,
+    },
     "Bed Status": {
-      iconClass: "care-l-bed",
+      iconClass: "l-bed",
       visible: bedStatusVisible,
       ref: bedStatusRef,
     },
-  };
+  } as const;
 
   useEffect(() => {
     setCurrentSection((prev) => {
       if (consultationDetailsVisible) return "Consultation Details";
       if (diagnosisVisible) return "Diagnosis";
       if (treatmentPlanVisible) return "Treatment Plan";
+      if (consentRecordsVisible) return "Consent Records";
       if (bedStatusVisible) return "Bed Status";
       return prev;
     });
@@ -300,6 +328,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     consultationDetailsVisible,
     diagnosisVisible,
     treatmentPlanVisible,
+    consentRecordsVisible,
     bedStatusVisible,
   ]);
 
@@ -762,6 +791,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         height: Number(state.form.height),
         bed: bed && bed instanceof Array ? bed[0]?.id : bed?.id,
         patient_no: state.form.patient_no || null,
+        consent_records: state.form.consent_records || [],
       };
 
       const res = await dispatchAction(
@@ -838,7 +868,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         className="col-span-6 -ml-2 mb-6 flex flex-row items-center"
         ref={section.ref as LegacyRef<HTMLDivElement>}
       >
-        <CareIcon className={`${section.iconClass} mr-3 text-xl`} />
+        <CareIcon icon={section.iconClass} className="mr-3 text-xl" />
         <label className="text-lg font-bold text-gray-900">
           {sectionTitle}
           {required && <span className="text-danger-500">{" *"}</span>}
@@ -904,6 +934,62 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     };
   };
 
+  const handleConsentTypeChange: FieldChangeEventHandler<number> = async (
+    event
+  ) => {
+    if (!id) return;
+    const consentRecords = [...state.form.consent_records];
+    if (
+      consentRecords
+        .filter((cr) => cr.deleted !== true)
+        .map((cr) => cr.type)
+        .includes(event.value)
+    ) {
+      return;
+    } else {
+      const randomId = "consent-" + new Date().getTime().toString();
+      const newRecords = [
+        ...consentRecords,
+        { id: randomId, type: event.value },
+      ];
+      await dispatchAction(
+        partialUpdateConsultation(id, { consent_records: newRecords })
+      );
+      dispatch({
+        type: "set_form",
+        form: { ...state.form, consent_records: newRecords },
+      });
+    }
+  };
+
+  const handleConsentPCSChange: FieldChangeEventHandler<number> = (event) => {
+    dispatch({
+      type: "set_form",
+      form: {
+        ...state.form,
+        consent_records: state.form.consent_records.map((cr) =>
+          cr.type === 2 ? { ...cr, patient_code_status: event.value } : cr
+        ),
+      },
+    });
+  };
+
+  const handleDeleteConsent = async () => {
+    const consent_id = showDeleteConsent;
+    if (!consent_id || !id) return;
+    const newRecords = state.form.consent_records.map((cr) =>
+      cr.id === consent_id ? { ...cr, deleted: true } : cr
+    );
+    await dispatchAction(
+      partialUpdateConsultation(id, { consent_records: newRecords })
+    );
+    dispatch({
+      type: "set_form",
+      form: { ...state.form, consent_records: newRecords },
+    });
+    setShowDeleteConsent(null);
+  };
+
   return (
     <div className="relative flex flex-col pb-2">
       <PageTitle
@@ -923,7 +1009,10 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
       <div className="top-0 mt-5 flex grow-0 sm:mx-12">
         <div className="fixed hidden h-full w-72 flex-col xl:flex">
           {Object.keys(sections).map((sectionTitle) => {
-            if (!isUpdate && sectionTitle === "Bed Status") {
+            if (
+              !isUpdate &&
+              ["Bed Status", "Consent Records"].includes(sectionTitle)
+            ) {
               return null;
             }
             const isCurrent = currentSection === sectionTitle;
@@ -941,7 +1030,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                   setCurrentSection(sectionTitle as ConsultationFormSection);
                 }}
               >
-                <CareIcon className={`${section.iconClass} text-lg`} />
+                <CareIcon icon={section.iconClass} className="text-lg" />
                 <span>{sectionTitle}</span>
               </button>
             );
@@ -1477,7 +1566,114 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                     </>
                   )}
                 </div>
-
+                {id && (
+                  <>
+                    <div className="flex flex-col gap-4 pb-4">
+                      {sectionTitle("Consent Records", true)}
+                    </div>
+                    <ConfirmDialog
+                      show={showDeleteConsent !== null}
+                      onClose={() => setShowDeleteConsent(null)}
+                      onConfirm={handleDeleteConsent}
+                      action="Delete"
+                      variant="danger"
+                      description={
+                        "Are you sure you want to delete this consent record?"
+                      }
+                      title="Delete Consent"
+                      className="w-auto"
+                    />
+                    <SelectFormField
+                      {...selectField("consent_type")}
+                      onChange={handleConsentTypeChange}
+                      label="Add Consent Type"
+                      options={CONSENT_TYPE_CHOICES.filter(
+                        (c) =>
+                          !state.form.consent_records
+                            .filter((r) => r.deleted !== true)
+                            .map((record) => record.type)
+                            .includes(c.id)
+                      )}
+                    />
+                    <div className="flex flex-col gap-4">
+                      {state.form.consent_records
+                        .filter((record) => record.deleted !== true)
+                        .map((record, index) => (
+                          <div
+                            className="overflow-hidden rounded-xl border border-gray-300 bg-gray-100"
+                            key={index}
+                          >
+                            <div className="flex items-center justify-between bg-gray-200 p-4">
+                              <button
+                                type="button"
+                                className="font-bold"
+                                onClick={() =>
+                                  setCollapsedConsentRecords((prev) =>
+                                    prev.includes(record.type)
+                                      ? prev.filter((r) => r !== record.type)
+                                      : [...prev, record.type]
+                                  )
+                                }
+                              >
+                                <CareIcon
+                                  className={`care-l-arrow-${
+                                    collapsedConsentRecords.includes(
+                                      record.type
+                                    )
+                                      ? "down"
+                                      : "up"
+                                  } mr-2`}
+                                />
+                                {
+                                  CONSENT_TYPE_CHOICES.find(
+                                    (c) => c.id === record.type
+                                  )?.text
+                                }
+                              </button>
+                              <button
+                                className="text-red-400"
+                                type="button"
+                                onClick={() => {
+                                  setShowDeleteConsent(record.id);
+                                }}
+                              >
+                                <CareIcon className="care-l-trash-alt h-4 w-4" />
+                              </button>
+                            </div>
+                            <div
+                              className={`${
+                                collapsedConsentRecords.includes(record.type)
+                                  ? "hidden"
+                                  : ""
+                              }`}
+                            >
+                              <div className="px-4 pt-4">
+                                {record.type === 2 && (
+                                  <SelectFormField
+                                    {...selectField("consent_type")}
+                                    onChange={handleConsentPCSChange}
+                                    label="Patient Code Status"
+                                    value={record.patient_code_status}
+                                    options={
+                                      CONSENT_PATIENT_CODE_STATUS_CHOICES
+                                    }
+                                  />
+                                )}
+                              </div>
+                              <FileUpload
+                                changePageMetadata={false}
+                                type="CONSENT_RECORD"
+                                hideBack
+                                unspecified
+                                className="w-full"
+                                consentId={record.id}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </>
+                )}
                 <div className="mt-6 flex flex-col justify-end gap-3 sm:flex-row">
                   <Cancel
                     onClick={() =>

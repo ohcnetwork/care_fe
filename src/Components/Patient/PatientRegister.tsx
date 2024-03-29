@@ -1106,7 +1106,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       <div className="mt-4">
         <div className="mx-4 my-8 rounded bg-purple-100 p-4 text-xs font-semibold text-purple-800">
           <div className="mx-1 mb-1 flex items-center text-lg font-bold">
-            <CareIcon className=" care-l-info-circle mr-1 text-2xl font-bold" />{" "}
+            <CareIcon
+              icon="l-info-circle"
+              className="mr-1 text-2xl font-bold"
+            />{" "}
             Please enter the correct date of birth for the patient
           </div>
           <p className="text-sm font-normal text-black">
@@ -1208,7 +1211,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             setQuery({ extId: "" }, { replace: true });
                           }}
                         >
-                          <CareIcon className="care-l-import text-lg" />
+                          <CareIcon icon="l-import" className="text-lg" />
                           Import From External Results
                         </ButtonV2>
                       </div>
@@ -1592,7 +1595,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         <AccordionV2
                           className="mt-2 shadow-none md:mt-0 lg:mt-0"
                           expandIcon={
-                            <CareIcon className="care-l-angle-down text-2xl font-bold" />
+                            <CareIcon
+                              icon="l-angle-down"
+                              className="text-2xl font-bold"
+                            />
                           }
                           title={
                             <h1 className="text-left text-xl font-bold text-purple-500">
@@ -1926,7 +1932,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             }
                             data-testid="add-insurance-button"
                           >
-                            <CareIcon className="care-l-plus text-lg" />
+                            <CareIcon icon="l-plus" className="text-lg" />
                             <span>Add Insurance Details</span>
                           </ButtonV2>
                         </div>
