@@ -41,7 +41,7 @@ export default function ClaimCreatedModal({ claim, ...props }: Props) {
       titleAction={
         <Submit disabled={isMakingClaim} onClick={handleSubmit}>
           {isMakingClaim && (
-            <CareIcon className="care-l-spinner animate-spin" />
+            <CareIcon icon="l-spinner" className="animate-spin" />
           )}
           {isMakingClaim
             ? `Requesting ${use === "Claim" ? "Claim" : "Pre-Authorization"}...`

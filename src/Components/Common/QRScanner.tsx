@@ -73,8 +73,9 @@ const QRScanner = ({
       <TextFormField
         trailing={
           <CareIcon
+            icon="l-focus"
             onClick={() => setShowScanner(true)}
-            className="care-l-focus z-50 cursor-pointer text-black"
+            className="z-50 cursor-pointer text-black"
           />
         }
         error={error}
