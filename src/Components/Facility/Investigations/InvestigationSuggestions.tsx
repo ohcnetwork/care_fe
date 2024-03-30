@@ -182,7 +182,7 @@ export default function ViewInvestigationSuggestions(props: {
                           investigation.type?.join("_-_")
                         }
                       >
-                        <CareIcon className="care-l-plus" />
+                        <CareIcon icon="l-plus" />
                         <span>Log Report</span>
                       </ButtonV2>
                     </td>
@@ -305,7 +305,7 @@ export default function ViewInvestigationSuggestions(props: {
                       investigation.type?.join("_-_")
                     }
                   >
-                    <CareIcon className="care-l-plus" />
+                    <CareIcon icon="l-plus" />
                     <span>Log Report</span>
                   </ButtonV2>
                 )}

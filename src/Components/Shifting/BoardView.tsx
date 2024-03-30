@@ -113,7 +113,7 @@ export default function BoardView() {
       isIconEnable && (
         <div
           className={`relative z-20 self-center ${
-            direction === "right" ? "-left-12" : ""
+            direction === "right" ? "-left-5" : ""
           }`}
         >
           <CareIcon
@@ -166,7 +166,7 @@ export default function BoardView() {
               className="py-[11px]"
               onClick={() => navigate("/shifting/list", { query: qParams })}
             >
-              <CareIcon className="care-l-list-ul" />
+              <CareIcon icon="l-list-ul" />
               {t("list_view")}
             </ButtonV2>
             <AdvancedFilterButton
@@ -184,7 +184,7 @@ export default function BoardView() {
             <>
               {renderArrowIcons("left")}
               <div
-                className="mx-11 flex max-h-[75vh] w-full flex-row overflow-y-auto overflow-x-hidden"
+                className="mx-0 flex max-h-[75vh] w-full flex-row overflow-y-auto overflow-x-hidden"
                 ref={containerRef}
               >
                 {boardFilter.map((board) => (

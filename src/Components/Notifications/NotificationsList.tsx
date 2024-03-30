@@ -121,11 +121,8 @@ const NotificationTile = ({
             }}
           >
             <CareIcon
-              className={
-                isMarkingAsRead
-                  ? "care-l-spinner animate-spin"
-                  : "care-l-envelope-check"
-              }
+              icon={isMarkingAsRead ? "l-spinner" : "l-envelope-check"}
+              className={isMarkingAsRead ? "animate-spin" : ""}
             />
             <span className="text-xs">{t("mark_as_read")}</span>
           </ButtonV2>
@@ -134,7 +131,7 @@ const NotificationTile = ({
             ghost
             className="shrink-0 bg-white px-2 py-1 font-semibold hover:bg-secondary-300"
           >
-            <CareIcon className="care-l-envelope-open" />
+            <CareIcon icon="l-envelope-open" />
             <span className="text-xs">{t("open")}</span>
           </ButtonV2>
         </div>
@@ -212,21 +209,21 @@ export default function NotificationsList({
     if (status === "NotSubscribed") {
       return (
         <>
-          <CareIcon className="care-l-bell" />
+          <CareIcon icon="l-bell" />
           <span className="text-xs">{t("subscribe")}</span>
         </>
       );
     } else if (status === "SubscribedOnAnotherDevice") {
       return (
         <>
-          <CareIcon className="care-l-bell" />
+          <CareIcon icon="l-bell" />
           <span className="text-xs">{t("subscribe_on_this_device")}</span>
         </>
       );
     } else {
       return (
         <>
-          <CareIcon className="care-l-bell-slash" />
+          <CareIcon icon="l-bell-slash" />
           <span className="text-xs">{t("unsubscribe")}</span>
         </>
       );
@@ -414,7 +411,7 @@ export default function NotificationsList({
       <Item
         text={t("Notifications")}
         do={() => setOpen(!open)}
-        icon={<CareIcon className="care-l-bell h-5" />}
+        icon={<CareIcon icon="l-bell" className="h-5" />}
         badgeCount={unreadCount}
         handleOverflow={handleOverflow}
       />
@@ -438,7 +435,7 @@ export default function NotificationsList({
                 setOffset(0);
               }}
             >
-              <CareIcon className="care-l-sync" />
+              <CareIcon icon="l-sync" />
               <span className="text-xs">{t("reload")}</span>
             </ButtonV2>
             <ButtonV2
@@ -457,11 +454,8 @@ export default function NotificationsList({
               onClick={handleMarkAllAsRead}
             >
               <CareIcon
-                className={
-                  isMarkingAllAsRead
-                    ? "care-l-spinner animate-spin"
-                    : "care-l-envelope-check"
-                }
+                icon={isMarkingAllAsRead ? "l-spinner" : "l-envelope-check"}
+                className={isMarkingAllAsRead ? "animate-spin" : ""}
               />
               <span className="text-xs">{t("mark_all_as_read")}</span>
             </ButtonV2>
@@ -470,9 +464,7 @@ export default function NotificationsList({
               variant="secondary"
               onClick={() => setShowUnread(!showUnread)}
             >
-              <CareIcon
-                className={showUnread ? "care-l-filter-slash" : "care-l-filter"}
-              />
+              <CareIcon icon={showUnread ? "l-filter-slash" : "l-filter"} />
 
               <span className="text-xs">
                 {showUnread

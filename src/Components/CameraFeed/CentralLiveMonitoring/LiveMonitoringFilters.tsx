@@ -7,7 +7,6 @@ import useFilters from "../../../Common/hooks/useFilters";
 import { Fragment } from "react";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import useSlug from "../../../Common/hooks/useSlug";
-import { classNames } from "../../../Utils/utils";
 
 interface Props {
   perPageLimit: number;
@@ -27,7 +26,7 @@ const LiveMonitoringFilters = (props: Props) => {
       <Popover className="relative">
         <Popover.Button>
           <ButtonV2 variant="secondary" border>
-            <CareIcon className="care-l-setting text-lg" />
+            <CareIcon icon="l-setting" className="text-lg" />
             Settings and Filters
           </ButtonV2>
         </Popover.Button>
@@ -112,12 +111,12 @@ const LiveMonitoringFilters = (props: Props) => {
                   className="tooltip !h-11"
                 >
                   <CareIcon
-                    className={classNames(
+                    icon={
                       props.isFullscreen
-                        ? "care-l-compress-arrows"
-                        : "care-l-expand-arrows-alt",
-                      "text-lg"
-                    )}
+                        ? "l-compress-arrows"
+                        : "l-expand-arrows-alt"
+                    }
+                    className="text-lg"
                   />
                   {props.isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
                 </ButtonV2>
