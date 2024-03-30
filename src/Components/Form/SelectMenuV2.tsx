@@ -106,7 +106,10 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                     </p>
                   </div>
                   {showChevronIcon && (
-                    <CareIcon className="care-l-angle-down -mb-0.5 text-lg text-gray-900" />
+                    <CareIcon
+                      icon="l-angle-down"
+                      className="-mb-0.5 text-lg text-gray-900"
+                    />
                   )}
                 </div>
               </Listbox.Button>
@@ -116,46 +119,43 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                   props.position === "above" ? "bottom-0 mb-12" : "top-0 mt-12"
                 )}
               >
-                {options.length ? (
-                  <DropdownTransition show={open}>
-                    <Listbox.Options className="cui-dropdown-base">
-                      {options.map((option, index) => (
-                        <Listbox.Option
-                          id={`${props.id}-option-${option.value}`}
-                          key={index}
-                          className={dropdownOptionClassNames}
-                          value={option}
-                        >
-                          {({ active, selected }) => (
-                            <div className="flex flex-col gap-2">
-                              <div className="flex justify-between">
-                                {option.label}
-                                {props.optionIcon
-                                  ? option.icon
-                                  : selected && (
-                                      <CareIcon className="care-l-check text-lg" />
-                                    )}
-                              </div>
-                              {option.description && (
-                                <p
-                                  className={`font-normal ${
-                                    active
-                                      ? "text-primary-200"
-                                      : "text-gray-700"
-                                  }`}
-                                >
-                                  {option.description}
-                                </p>
-                              )}
+                <DropdownTransition show={open}>
+                  <Listbox.Options className="cui-dropdown-base">
+                    {options.map((option, index) => (
+                      <Listbox.Option
+                        id={`${props.id}-option-${option.value}`}
+                        key={index}
+                        className={dropdownOptionClassNames}
+                        value={option}
+                      >
+                        {({ active, selected }) => (
+                          <div className="flex flex-col gap-2">
+                            <div className="flex justify-between">
+                              {option.label}
+                              {props.optionIcon
+                                ? option.icon
+                                : selected && (
+                                    <CareIcon
+                                      icon="l-check"
+                                      className="text-lg"
+                                    />
+                                  )}
                             </div>
-                          )}
-                        </Listbox.Option>
-                      ))}
-                    </Listbox.Options>
-                  </DropdownTransition>
-                ) : (
-                  <></>
-                )}
+                            {option.description && (
+                              <p
+                                className={`font-normal ${
+                                  active ? "text-primary-200" : "text-gray-700"
+                                }`}
+                              >
+                                {option.description}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </Listbox.Option>
+                    ))}
+                  </Listbox.Options>
+                </DropdownTransition>
               </div>
             </div>
           </>

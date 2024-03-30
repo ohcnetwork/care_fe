@@ -220,7 +220,10 @@ const Map: React.FC<MapProps> = ({
               ref={mapCloseRef}
               onClick={handleOnClose}
             >
-              <CareIcon className="care-l-times-circle text-2xl text-gray-800" />
+              <CareIcon
+                icon="l-times-circle"
+                className="text-2xl text-gray-800"
+              />
             </div>
           </Popover.Button>
         )}
@@ -235,7 +238,10 @@ const Map: React.FC<MapProps> = ({
               )
             }
           >
-            <CareIcon className="care-l-user-location text-2xl text-gray-800" />
+            <CareIcon
+              icon="l-user-location"
+              className="text-2xl text-gray-800"
+            />
           </div>
         )}
       </>

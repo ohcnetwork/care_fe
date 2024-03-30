@@ -14,7 +14,7 @@ import {
 import { PTZState, useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 import { useEffect, useRef, useState } from "react";
 
-import CareIcon from "../../../CAREUI/icons/CareIcon.js";
+import CareIcon, { IconName } from "../../../CAREUI/icons/CareIcon.js";
 import FeedButton from "./FeedButton";
 import Loading from "../../Common/Loading";
 import ReactPlayer from "react-player";
@@ -362,7 +362,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                     position: data?.position,
                   },
                 },
-                pathParams: { id: currentPreset?.id },
+                pathParams: { external_id: currentPreset?.id },
               }
             );
             if (res && assetBedData && res.status === 200) {
@@ -580,7 +580,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         {streamStatus === StreamStatus.Playing &&
           calculateVideoLiveDelay() > 3 && (
             <div className="absolute left-8 top-8 z-10 flex items-center gap-2 rounded-3xl bg-red-400 px-3 py-1.5 text-xs font-semibold text-gray-100">
-              <CareIcon className="care-l-wifi-slash h-4 w-4" />
+              <CareIcon icon="l-wifi-slash" className="h-4 w-4" />
               <span>Slow Network Detected</span>
             </div>
           )}
@@ -658,7 +658,7 @@ export const FeedCameraPTZHelpButton = (props: { cameraPTZ: CameraPTZ[] }) => {
       key="option.action"
       className="tooltip rounded text-2xl text-gray-600"
     >
-      <CareIcon className="care-l-question-circle" />
+      <CareIcon icon="l-question-circle" />
 
       <ul className="tooltip-text tooltip-left -top-60 right-10 p-2 text-sm">
         {cameraPTZ.map((option) => {
@@ -676,7 +676,7 @@ export const FeedCameraPTZHelpButton = (props: { cameraPTZ: CameraPTZ[] }) => {
                       className="rounded-md border border-gray-500 p-1.5 font-mono shadow-md"
                     >
                       {isArrowKey ? (
-                        <CareIcon className={`care-${option.icon}`} />
+                        <CareIcon icon={option.icon as IconName} />
                       ) : (
                         hotkey
                       )}

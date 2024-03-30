@@ -103,7 +103,7 @@ export const PatientManager = () => {
   });
   const authUser = useAuthUser();
   const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
-  const [showDialog, setShowDialog] = useState(false);
+  const [showDialog, setShowDialog] = useState<"create" | "list-discharged">();
   const [showDoctors, setShowDoctors] = useState(false);
   const [showDoctorConnect, setShowDoctorConnect] = useState(false);
   const [phone_number, setPhoneNumber] = useState("");
@@ -406,7 +406,9 @@ export const PatientManager = () => {
 
   const { data: permittedFacilities } = useQuery(
     routes.getPermittedFacilities,
-    {}
+    {
+      query: { limit: 1 },
+    }
   );
 
   const LastAdmittedToTypeBadges = () => {
@@ -503,7 +505,10 @@ export const PatientManager = () => {
               ) : patient.last_consultation?.suggestion === "DC" ? (
                 <div className="flex h-full flex-col items-center justify-center">
                   <div className="tooltip">
-                    <CareIcon className="care-l-estate text-3xl text-gray-500" />
+                    <CareIcon
+                      icon="l-estate"
+                      className="text-3xl text-gray-500"
+                    />
                     <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-sm font-medium">
                       Domiciliary Care
                     </span>
@@ -723,6 +728,9 @@ export const PatientManager = () => {
     };
   };
 
+  const onlyAccessibleFacility =
+    permittedFacilities?.count === 1 ? permittedFacilities.results[0] : null;
+
   return (
     <Page
       title={t("Patients")}
@@ -736,15 +744,13 @@ export const PatientManager = () => {
               onClick={() => {
                 if (qParams.facility)
                   navigate(`/facility/${qParams.facility}/patient`);
-                else if (permittedFacilities?.results.length === 1)
-                  navigate(
-                    `/facility/${permittedFacilities?.results[0].id}/patient`
-                  );
-                else setShowDialog(true);
+                else if (onlyAccessibleFacility)
+                  navigate(`/facility/${onlyAccessibleFacility.id}/patient`);
+                else setShowDialog("create");
               }}
               className="w-full lg:w-fit"
             >
-              <CareIcon className="care-l-plus text-lg" />
+              <CareIcon icon="l-plus" className="text-lg" />
               <p id="add-patient-div" className="lg:my-[2px]">
                 Add Patient Details
               </p>
@@ -755,8 +761,28 @@ export const PatientManager = () => {
               tab1="Live"
               tab2="Discharged"
               onClickTab1={() => updateQuery({ is_active: "True" })}
-              onClickTab2={() => updateQuery({ is_active: "False" })}
-              isTab2Active={tabValue ? true : false}
+              onClickTab2={() => {
+                // Navigate to dedicated discharged list page if filtered by a facility or user has access only to one facility.
+                const id = qParams.facility || onlyAccessibleFacility?.id;
+                if (id) {
+                  navigate(`facility/${id}/discharged-patients`);
+                  return;
+                }
+
+                if (
+                  authUser.user_type === "StateAdmin" ||
+                  authUser.user_type === "StateReadOnlyAdmin"
+                ) {
+                  updateQuery({ is_active: "False" });
+                  return;
+                }
+
+                Notification.Warn({
+                  msg: "Facility needs to be selected to view discharged patients.",
+                });
+                setShowDialog("list-discharged");
+              }}
+              isTab2Active={!!tabValue}
             />
             {showDoctorConnect && (
               <ButtonV2
@@ -770,7 +796,7 @@ export const PatientManager = () => {
                   setShowDoctors(true);
                 }}
               >
-                <CareIcon className="care-l-phone text-lg" />
+                <CareIcon icon="l-phone" className="text-lg" />
                 <p className="lg:my-[2px]">Doctor Connect</p>
               </ButtonV2>
             )}
@@ -800,7 +826,7 @@ export const PatientManager = () => {
                   }}
                   className="mr-5 w-full lg:w-fit"
                 >
-                  <CareIcon className="care-l-export" />
+                  <CareIcon icon="l-export" />
                   <span className="lg:my-[3px]">Export</span>
                 </ButtonV2>
               ) : (
@@ -808,16 +834,8 @@ export const PatientManager = () => {
                   disabled={!isExportAllowed}
                   exportItems={[
                     {
-                      label:
-                        tabValue === 0
-                          ? "Live patients"
-                          : "Discharged patients",
+                      label: "Export Live patients",
                       action: exportPatients(true),
-                      parse: preventDuplicatePatientsDuetoPolicyId,
-                    },
-                    {
-                      label: "All patients",
-                      action: exportPatients(false),
                       parse: preventDuplicatePatientsDuetoPolicyId,
                     },
                   ]}
@@ -835,12 +853,21 @@ export const PatientManager = () => {
       }
     >
       <FacilitiesSelectDialogue
-        show={showDialog}
+        show={!!showDialog}
         setSelected={(e) => setSelectedFacility(e)}
         selectedFacility={selectedFacility}
-        handleOk={() => navigate(`facility/${selectedFacility.id}/patient`)}
+        handleOk={() => {
+          switch (showDialog) {
+            case "create":
+              navigate(`facility/${selectedFacility.id}/patient`);
+              break;
+            case "list-discharged":
+              navigate(`facility/${selectedFacility.id}/discharged-patients`);
+              break;
+          }
+        }}
         handleCancel={() => {
-          setShowDialog(false);
+          setShowDialog(undefined);
           setSelectedFacility({ name: "" });
         }}
       />

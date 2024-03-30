@@ -3,7 +3,7 @@ import { SidebarItem, ShrinkedSidebarItem } from "./SidebarItem";
 import SidebarUserCard from "./SidebarUserCard";
 import NotificationItem from "../../Notifications/NotificationsList";
 import useActiveLink from "../../../Common/hooks/useActiveLink";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
+import CareIcon, { IconName } from "../../../CAREUI/icons/CareIcon";
 import useConfig from "../../../Common/hooks/useConfig";
 import SlideOver from "../../../CAREUI/interactive/SlideOver";
 import { classNames } from "../../../Utils/utils";
@@ -36,26 +36,30 @@ const StatelessSidebar = ({
 }: StatelessSidebarProps) => {
   const authUser = useAuthUser();
 
-  const NavItems = [
-    { text: "Facilities", to: "/facility", icon: "care-l-hospital" },
-    { text: "Patients", to: "/patients", icon: "care-l-user-injured" },
-    { text: "Assets", to: "/assets", icon: "care-l-shopping-cart-alt" },
-    { text: "Sample Test", to: "/sample", icon: "care-l-medkit" },
-    { text: "Shifting", to: "/shifting", icon: "care-l-ambulance" },
-    { text: "Resource", to: "/resource", icon: "care-l-heart-medical" },
+  const NavItems: {
+    text: string;
+    to: string;
+    icon: IconName;
+  }[] = [
+    { text: "Facilities", to: "/facility", icon: "l-hospital" },
+    { text: "Patients", to: "/patients", icon: "l-user-injured" },
+    { text: "Assets", to: "/assets", icon: "l-shopping-cart-alt" },
+    { text: "Sample Test", to: "/sample", icon: "l-medkit" },
+    { text: "Shifting", to: "/shifting", icon: "l-ambulance" },
+    { text: "Resource", to: "/resource", icon: "l-heart-medical" },
     ...(!["Nurse", "NurseReadOnly", "Staff", "StaffReadOnly"].includes(
       authUser.user_type
     )
-      ? [
+      ? ([
           {
             text: "External Results",
             to: "/external_results",
-            icon: "care-l-clipboard-notes",
+            icon: "l-clipboard-notes",
           },
-        ]
+        ] as const)
       : []),
-    { text: "Users", to: "/users", icon: "care-l-users-alt" },
-    { text: "Notice Board", to: "/notice_board", icon: "care-l-meeting-board" },
+    { text: "Users", to: "/users", icon: "l-users-alt" },
+    { text: "Notice Board", to: "/notice_board", icon: "l-meeting-board" },
   ];
 
   const { main_logo } = useConfig();
@@ -134,7 +138,7 @@ const StatelessSidebar = ({
                 ref={i.to === activeLink ? activeLinkRef : undefined}
                 key={i.text}
                 {...i}
-                icon={<CareIcon className={`${i.icon} h-5`} />}
+                icon={<CareIcon icon={i.icon} className="h-5" />}
                 selected={i.to === activeLink}
                 do={() => onItemClick && onItemClick(false)}
                 handleOverflow={handleOverflow}
@@ -151,7 +155,7 @@ const StatelessSidebar = ({
             <Item
               text="Dashboard"
               to={dashboard_url}
-              icon={<CareIcon className="care-l-dashboard text-lg" />}
+              icon={<CareIcon icon="l-dashboard" className="text-lg" />}
               external
               handleOverflow={handleOverflow}
             />

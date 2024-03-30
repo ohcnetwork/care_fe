@@ -1,4 +1,3 @@
-import axios from "axios";
 import {
   ChangeEventHandler,
   useCallback,
@@ -20,6 +19,7 @@ import { LocalStorageKeys } from "../../Common/constants";
 import DialogModal from "../Common/Dialog";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
+import uploadFile from "../../Utils/request/uploadFile";
 interface Props {
   open: boolean;
   onClose: (() => void) | undefined;
@@ -105,34 +105,35 @@ const CoverImageEditModal = ({
 
     const formData = new FormData();
     formData.append("cover_image", selectedFile);
-
+    const url = `/api/v1/facility/${facility.id}/cover_image/`;
     setIsUploading(true);
-    try {
-      const response = await axios.post(
-        `/api/v1/facility/${facility.id}/cover_image/`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization:
-              "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken),
-          },
+
+    uploadFile(
+      url,
+      formData,
+      "POST",
+      {
+        Authorization:
+          "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken),
+      },
+      (xhr: XMLHttpRequest) => {
+        if (xhr.status === 200) {
+          Success({ msg: "Cover image updated." });
+        } else {
+          Notification.Error({
+            msg: "Something went wrong!",
+          });
+          setIsUploading(false);
         }
-      );
-      if (response.status === 200) {
-        Success({ msg: "Cover image updated." });
-      } else {
+      },
+      null,
+      () => {
         Notification.Error({
-          msg: "Something went wrong!",
+          msg: "Network Failure. Please check your internet connectivity.",
         });
         setIsUploading(false);
       }
-    } catch (e) {
-      Notification.Error({
-        msg: "Network Failure. Please check your internet connectivity.",
-      });
-      setIsUploading(false);
-    }
+    );
 
     await sleep(1000);
     setIsUploading(false);
@@ -251,7 +252,7 @@ const CoverImageEditModal = ({
                   id="upload-cover-image"
                   className="flex w-full cursor-pointer items-center justify-center gap-1 rounded-lg border border-primary-500 bg-white px-4 py-2 text-sm font-medium text-primary-500 transition-all hover:border-primary-400 hover:text-primary-400"
                 >
-                  <CareIcon className="care-l-cloud-upload text-lg" />
+                  <CareIcon icon="l-cloud-upload" className="text-lg" />
                   {t("upload_an_image")}
                   <input
                     title="changeFile"
@@ -293,9 +294,9 @@ const CoverImageEditModal = ({
                 disabled={isUploading}
               >
                 {isUploading ? (
-                  <CareIcon className="care-l-spinner animate-spin text-lg" />
+                  <CareIcon icon="l-spinner" className="animate-spin text-lg" />
                 ) : (
-                  <CareIcon className="care-l-save text-lg" />
+                  <CareIcon icon="l-save" className="text-lg" />
                 )}
                 <span>
                   {isUploading ? `${t("uploading")}...` : `${t("save")}`}
@@ -370,7 +371,10 @@ const CoverImageEditModal = ({
                       </ButtonV2>
                       <ButtonV2 onClick={handleUpload} className="my-2 w-full">
                         {isCaptureImgBeingUploaded && (
-                          <CareIcon className="care-l-spinner animate-spin text-lg" />
+                          <CareIcon
+                            icon="l-spinner"
+                            className="animate-spin text-lg"
+                          />
                         )}
                         {t("submit")}
                       </ButtonV2>
@@ -396,7 +400,7 @@ const CoverImageEditModal = ({
             <div className={`${isLaptopScreen ? " " : " hidden "}`}>
               <div className="m-4 flex lg:hidden">
                 <ButtonV2 onClick={handleSwitchCamera}>
-                  <CareIcon className="care-l-camera-change text-lg" />
+                  <CareIcon icon="l-camera-change" className="text-lg" />
                   {`${t("switch")} ${t("camera")}`}
                 </ButtonV2>
               </div>
@@ -411,7 +415,7 @@ const CoverImageEditModal = ({
                             captureImage();
                           }}
                         >
-                          <CareIcon className="care-l-capture text-lg" />
+                          <CareIcon icon="l-capture" className="text-lg" />
                           {t("capture")}
                         </ButtonV2>
                       </div>
@@ -429,7 +433,10 @@ const CoverImageEditModal = ({
                         <Submit disabled={isUploading} onClick={handleUpload}>
                           {isCaptureImgBeingUploaded ? (
                             <>
-                              <CareIcon className="care-l-spinner animate-spin text-lg" />
+                              <CareIcon
+                                icon="l-spinner"
+                                className="animate-spin text-lg"
+                              />
                               {`${t("submitting")}...`}
                             </>
                           ) : (

@@ -181,3 +181,11 @@ Cypress.Commands.add("closeNotification", () => {
       cy.wrap($div).click();
     });
 });
+
+Cypress.Commands.add("verifyContentPresence", (selector, texts) => {
+  cy.get(selector).then(($el) => {
+    texts.forEach((text) => {
+      cy.wrap($el).should("contain", text);
+    });
+  });
+});
