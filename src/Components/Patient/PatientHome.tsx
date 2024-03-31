@@ -1108,6 +1108,7 @@ export const PatientHome = (props: any) => {
 
                   <div>
                     <p
+                      id="shift_patient"
                       className={`${
                         isPatientInactive(patientData, facilityId) &&
                         "text-gray-700"
@@ -1149,6 +1150,7 @@ export const PatientHome = (props: any) => {
                   </div>
                   <div>
                     <p
+                      id="sample-request"
                       className={`${
                         isPatientInactive(patientData, facilityId) &&
                         " text-gray-700 "
@@ -1210,6 +1212,7 @@ export const PatientHome = (props: any) => {
                   </div>
                   <div>
                     <p
+                      id="volunteer_assign"
                       className={classNames(
                         "text-center text-sm font-medium",
                         isPatientInactive(patientData, facilityId)
