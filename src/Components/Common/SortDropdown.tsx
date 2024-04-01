@@ -24,7 +24,7 @@ export default function SortDropdownMenu(props: Props) {
       title={props.label ?? t("sort_by")}
       variant="secondary"
       className="border border-primary-500 bg-white"
-      icon={<CareIcon className="care-l-sort" />}
+      icon={<CareIcon icon="l-sort" />}
     >
       {props.options.map(({ isAscending, value }) => (
         <DropdownItem
@@ -36,11 +36,7 @@ export default function SortDropdownMenu(props: Props) {
           onClick={() => props.onSelect({ ordering: value })}
           icon={
             <CareIcon
-              className={
-                isAscending
-                  ? "care-l-sort-amount-up"
-                  : "care-l-sort-amount-down"
-              }
+              icon={isAscending ? "l-sort-amount-up" : "l-sort-amount-down"}
             />
           }
         >
