@@ -703,6 +703,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                             } )`}
                         </div>
                         <FileUpload
+                          changePageMetadata={false}
                           type="CONSENT_RECORD"
                           hideBack
                           unspecified
