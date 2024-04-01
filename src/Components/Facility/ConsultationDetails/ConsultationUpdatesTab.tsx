@@ -723,7 +723,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             tab2={
               <div className="flex items-center justify-center gap-1 text-sm">
                 Events
-                <span className="rounded-lg bg-warning-400 p-[1px] px-1 text-[10px] text-white">
+                <span className="rounded-lg bg-warning-400 p-px px-1 text-[10px] text-white">
                   beta
                 </span>
               </div>

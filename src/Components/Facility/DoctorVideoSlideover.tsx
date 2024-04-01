@@ -112,7 +112,6 @@ export default function DoctorVideoSlideover(props: {
   );
 }
 
-
 type MSLaunchURI = (
   uri: string,
   successCB?: null | (() => void),
