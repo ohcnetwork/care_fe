@@ -162,7 +162,7 @@ export default function PatientInfoCard(props: {
           <div className="flex justify-evenly lg:justify-normal">
             <div className="flex flex-col items-start lg:items-center">
               <div
-                className={`w-24 min-w-20 bg-gray-200 ${categoryClass}-profile h-full`}
+                className={`min-w-20 w-24 bg-gray-200 ${categoryClass}-profile h-full`}
               >
                 {consultation?.current_bed &&
                 consultation?.discharge_date === null ? (
