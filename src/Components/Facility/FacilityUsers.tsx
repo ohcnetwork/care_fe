@@ -3,12 +3,7 @@ import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import * as Notification from "../../Utils/Notifications.js";
-import {
-  classNames,
-  isUserOnline,
-  relativeTime,
-  showUserDelete,
-} from "../../Utils/utils";
+import { classNames, isUserOnline, relativeTime } from "../../Utils/utils";
 import Pagination from "../Common/Pagination";
 import UserDetails from "../Common/UserDetails";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -17,7 +12,6 @@ import { FacilityModel } from "../Facility/models";
 import LinkFacilityDialog from "../Users/LinkFacilityDialog";
 import UnlinkFacilityDialog from "../Users/UnlinkFacilityDialog";
 import UserDeleteDialog from "../Users/UserDeleteDialog";
-import useAuthUser from "../../Common/hooks/useAuthUser";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
@@ -33,7 +27,6 @@ export default function FacilityUsers(props: any) {
   const [currentPage, setCurrentPage] = useState(1);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [offset, setOffset] = useState(0);
-  const authUser = useAuthUser();
 
   const [linkFacility, setLinkFacility] = useState<{
     show: boolean;
@@ -159,14 +152,6 @@ export default function FacilityUsers(props: any) {
     });
     setUserData({ show: false, username: "", name: "" });
     facilityUserFetch();
-  };
-
-  const handleDelete = (user: any) => {
-    setUserData({
-      show: true,
-      username: user.username,
-      name: `${user.first_name} ${user.last_name}`,
-    });
   };
 
   const facilityClassname = classNames(
@@ -300,14 +285,6 @@ export default function FacilityUsers(props: any) {
                   className="mt-2 flex gap-3 text-2xl font-bold capitalize"
                 >
                   {`${user.first_name} ${user.last_name}`}
-                  {showUserDelete(authUser, user) && (
-                    <div
-                      className="w-8 cursor-pointer rounded-lg bg-red-50 text-xl text-red-600 hover:bg-red-50 hover:text-red-700"
-                      onClick={() => handleDelete(user)}
-                    >
-                      <CareIcon icon="l-trash" className="ml-[5px]" />
-                    </div>
-                  )}
                 </div>
 
                 <div className="flex justify-between">
@@ -316,21 +293,7 @@ export default function FacilityUsers(props: any) {
                       <div className="font-semibold">{user.user_type}</div>
                     </UserDetails>
                   )}
-                  {user.district_object && (
-                    <UserDetails title="District">
-                      <div className="font-semibold">
-                        {user.district_object.name}
-                      </div>
-                    </UserDetails>
-                  )}
                 </div>
-                {user.local_body_object && (
-                  <UserDetails title="Location">
-                    <div className="font-semibold">
-                      {user.local_body_object.name}
-                    </div>
-                  </UserDetails>
-                )}
                 <div className="flex justify-between">
                   {user.phone_number && (
                     <div className="mt-2 border-t bg-gray-50 px-6 py-2">

@@ -304,7 +304,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
       ref: treatmentPlanRef,
     },
     "Consent Records": {
-      iconClass: "care-l-file-alt",
+      iconClass: "l-file-alt",
       visible: consentRecordsVisible,
       ref: consentRecordsRef,
     },
@@ -1614,13 +1614,14 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                                 }
                               >
                                 <CareIcon
-                                  className={`care-l-arrow-${
+                                  icon={
                                     collapsedConsentRecords.includes(
                                       record.type
                                     )
-                                      ? "down"
-                                      : "up"
-                                  } mr-2`}
+                                      ? "l-arrow-down"
+                                      : "l-arrow-up"
+                                  }
+                                  className="mr-2"
                                 />
                                 {
                                   CONSENT_TYPE_CHOICES.find(
@@ -1635,7 +1636,10 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                                   setShowDeleteConsent(record.id);
                                 }}
                               >
-                                <CareIcon className="care-l-trash-alt h-4 w-4" />
+                                <CareIcon
+                                  icon="l-trash-alt"
+                                  className="h-4 w-4"
+                                />
                               </button>
                             </div>
                             <div
