@@ -112,6 +112,12 @@ export default function DoctorVideoSlideover(props: {
   );
 }
 
+type MSLaunchURI = (
+  uri: string,
+  successCB?: null | (() => void),
+  noHandlerCB?: null | (() => void)
+) => void;
+
 function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
   const user = props.user;
   const facilityId = props.facilityId;
@@ -146,8 +152,9 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
     };
 
     if (isEdge) {
-      if (navigator.msLaunchUri) {
-        navigator.msLaunchUri(whatsappAppURL, null, openWhatsAppWebFallback);
+      if ("msLaunchUri" in navigator) {
+        const launch = navigator.msLaunchUri as MSLaunchURI;
+        launch(whatsappAppURL, null, openWhatsAppWebFallback);
       } else {
         openWhatsAppWebFallback();
       }

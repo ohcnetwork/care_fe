@@ -58,7 +58,7 @@ type UserForm = {
   gender: string;
   password: string;
   c_password: string;
-  facilities: Array<number>;
+  facilities: Array<string>;
   home_facility: FacilityModel | null;
   username: string;
   first_name: string;
@@ -326,7 +326,7 @@ export const UserAdd = (props: UserProps) => {
     setSelectedFacility(selected as FacilityModel[]);
     const form = { ...state.form };
     form.facilities = selected
-      ? (selected as FacilityModel[]).map((i) => i.id ?? -1)
+      ? (selected as FacilityModel[]).map((i) => i.id!)
       : [];
     dispatch({ type: "set_form", form });
   };
