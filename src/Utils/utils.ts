@@ -411,7 +411,7 @@ export const formatPatientAge = (obj: PatientModel, abbreviated = false) => {
   const start = dayjs(
     obj.date_of_birth
       ? new Date(obj.date_of_birth)
-      : new Date(obj.year_of_birth, 0, 1)
+      : new Date(obj.year_of_birth!, 0, 1)
   );
 
   const end = dayjs(

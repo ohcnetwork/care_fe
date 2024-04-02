@@ -791,7 +791,7 @@ export default function ShiftDetails(props: { id: string }) {
                 <h4 className="mt-8">
                   {t("details_of_patient")} {showCopyToclipBoard(data)}
                 </h4>
-                {showPatientCard(data?.patient_object)}
+                {data?.patient_object && showPatientCard(data?.patient_object)}
               </div>
               <div className="mb-10 mr-3 md:mr-8">
                 <h4 className="mt-8">{t("comments")}</h4>
