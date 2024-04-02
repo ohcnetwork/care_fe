@@ -26,8 +26,9 @@ import { triggerGoal } from "../../../Integrations/Plausible.js";
 import useAuthUser from "../../../Common/hooks/useAuthUser.js";
 import Spinner from "../../Common/Spinner.js";
 import useQuery from "../../../Utils/request/useQuery.js";
-import { ResolvedMiddleware } from "../../Assets/AssetTypes.js";
+import { AssetBedModel, ResolvedMiddleware } from "../../Assets/AssetTypes.js";
 import { SelectFormField } from "../../Form/FormFields/SelectFormField.js";
+import AssetBedSelect from "../../CameraFeed/AssetBedSelect.js";
 
 interface IFeedProps {
   facilityId: string;
@@ -142,7 +143,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   const [presets, setPresets] = useState<any>([]);
   const [currentPreset, setCurrentPreset] = useState<any>();
   // const [showDefaultPresets, setShowDefaultPresets] = useState<boolean>(false);
-
+  const [preset, setPreset] = useState<AssetBedModel>();
   const [loading, setLoading] = useState<string>(CAMERA_STATES.IDLE);
   const [camTimeout, setCamTimeout] = useState<number>(0);
   useEffect(() => {
@@ -400,11 +401,11 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   }
 
   if (getConsultationLoading) return <Loading />;
-
+  console.log(bedPresets);
   return (
     <div className="flex h-[calc(100vh-1.5rem)] flex-col px-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex w-full items-center justify-between gap-4 px-3 md:justify-start">
+        <div className="hidden w-full items-center justify-between gap-4 px-3 md:flex">
           <p className="block text-lg font-medium"> Camera Presets :</p>
           <div className=" z-30 flex flex-wrap items-center justify-center bg-gray-100 ">
             <SelectFormField
@@ -462,204 +463,219 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                   getCameraStatus({});
                 }
               }}
-              className="w-40 md:w-60"
+              className="w-40 md:w-60 "
             />
           </div>
         </div>
       </div>
+      <div>
+        <div className="z-100 flex  w-full  items-center justify-between  gap-1 bg-zinc-900 px-4 py-0.5 md:hidden md:gap-2">
+          <span className="text-xs font-semibold text-white md:text-sm">
+            Camera presets
+          </span>
 
-      <div
-        className="relative mt-2 flex aspect-video w-full grow-0 items-center justify-center overflow-hidden rounded-xl bg-black"
-        ref={videoWrapper}
-      >
-        {isIOS ? (
-          <ReactPlayer
-            url={url}
-            ref={liveFeedPlayerRef.current as any}
-            controls={false}
-            playsinline={true}
-            playing={true}
-            muted={true}
-            onPlay={() => {
-              setVideoStartTime(() => new Date());
-            }}
-            width="100%"
-            height="100%"
-            onBuffer={() => {
-              const delay = calculateVideoLiveDelay();
-              if (delay > 5) {
-                setStreamStatus(StreamStatus.Loading);
-              }
-            }}
-            onError={(e: any, _: any, hlsInstance: any) => {
-              if (e === "hlsError") {
-                const recovered = hlsInstance.recoverMediaError();
-                console.log(recovered);
-              }
-            }}
-            onEnded={() => {
-              setStreamStatus(StreamStatus.Stop);
-            }}
-          />
-        ) : (
-          <video
-            id="mse-video"
-            autoPlay
-            muted
-            playsInline
-            className="max-h-full max-w-full"
-            onPlay={() => {
-              setVideoStartTime(() => new Date());
-            }}
-            onWaiting={() => {
-              const delay = calculateVideoLiveDelay();
-              if (delay > 5) {
-                setStreamStatus(StreamStatus.Loading);
-              }
-            }}
-            ref={liveFeedPlayerRef as any}
-          />
-        )}
-
-        {loading !== CAMERA_STATES.IDLE && (
-          <div className="absolute inset-x-0 top-2 flex items-center justify-center text-center">
-            <div className="inline-flex items-center gap-2 rounded bg-white/70 p-4">
-              <div className="an h-4 w-4 animate-spin rounded-full border-2 border-b-0 border-primary-500" />
-              <p className="text-base font-bold">{loading}</p>
-            </div>
-          </div>
-        )}
-        <div className="absolute bottom-0 right-0 flex h-full w-full items-center justify-center p-4 text-white">
-          {streamStatus === StreamStatus.Offline && (
-            <div className="text-center">
-              <p className="font-bold">
-                STATUS: <span className="text-red-600">OFFLINE</span>
-              </p>
-              <p className="font-semibold ">Feed is currently not live.</p>
-              <p className="font-semibold ">Trying to connect... </p>
-              <p className="mt-2 flex justify-center">
-                <Spinner circle={{ fill: "none" }} />
-              </p>
-            </div>
-          )}
-          {streamStatus === StreamStatus.Stop && (
-            <div className="text-center">
-              <p className="font-bold">
-                STATUS: <span className="text-red-600">STOPPED</span>
-              </p>
-              <p className="font-semibold ">Feed is Stooped.</p>
-              <p className="font-semibold ">
-                Click refresh button to start feed.
-              </p>
-            </div>
-          )}
-          {streamStatus === StreamStatus.Loading && (
-            <div className="text-center">
-              <p className="font-bold ">
-                STATUS: <span className="text-red-600"> LOADING</span>
-              </p>
-              <p className="font-semibold ">Fetching latest feed.</p>
-            </div>
-          )}
-        </div>
-        <div className="right-8 top-8 z-20 hidden flex-col gap-4 lg:absolute lg:flex">
-          {["fullScreen", "reset", "updatePreset", "zoomIn", "zoomOut"].map(
-            (button, index) => {
-              const option = cameraPTZ.find(
-                (option) => option.action === button,
-              );
-              return (
-                <FeedButton
-                  key={index}
-                  camProp={option}
-                  styleType="CHHOTUBUTTON"
-                  clickAction={() => option?.callback()}
-                />
-              );
-            },
-          )}
-          <div className="hidden pl-3 md:block">
-            <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
+          <div className="w-64">
+            <AssetBedSelect
+              asset={bedPresets}
+              value={preset}
+              onChange={setPreset}
+            />
           </div>
         </div>
+        <div
+          className="relative  flex aspect-video w-full grow-0 flex-col items-center justify-center overflow-hidden rounded-b-xl bg-black"
+          ref={videoWrapper}
+        >
+          {isIOS ? (
+            <ReactPlayer
+              url={url}
+              ref={liveFeedPlayerRef.current as any}
+              controls={false}
+              playsinline={true}
+              playing={true}
+              muted={true}
+              onPlay={() => {
+                setVideoStartTime(() => new Date());
+              }}
+              width="100%"
+              height="100%"
+              onBuffer={() => {
+                const delay = calculateVideoLiveDelay();
+                if (delay > 5) {
+                  setStreamStatus(StreamStatus.Loading);
+                }
+              }}
+              onError={(e: any, _: any, hlsInstance: any) => {
+                if (e === "hlsError") {
+                  const recovered = hlsInstance.recoverMediaError();
+                  console.log(recovered);
+                }
+              }}
+              onEnded={() => {
+                setStreamStatus(StreamStatus.Stop);
+              }}
+            />
+          ) : (
+            <video
+              id="mse-video"
+              autoPlay
+              muted
+              playsInline
+              className="max-h-full max-w-full"
+              onPlay={() => {
+                setVideoStartTime(() => new Date());
+              }}
+              onWaiting={() => {
+                const delay = calculateVideoLiveDelay();
+                if (delay > 5) {
+                  setStreamStatus(StreamStatus.Loading);
+                }
+              }}
+              ref={liveFeedPlayerRef as any}
+            />
+          )}
 
-        <div className="bottom-8 right-8 z-20 hidden lg:absolute">
-          <FeedButton
-            camProp={cameraPTZ[4]}
-            styleType="CHHOTUBUTTON"
-            clickAction={() => cameraPTZ[4].callback()}
-          />
-        </div>
-        {streamStatus === StreamStatus.Playing &&
-          calculateVideoLiveDelay() > 3 && (
-            <div className="absolute left-8 top-8 z-10 flex items-center gap-2 rounded-3xl bg-red-400 px-3 py-1.5 text-xs font-semibold text-gray-100">
-              <CareIcon icon="l-wifi-slash" className="h-4 w-4" />
-              <span>Slow Network Detected</span>
+          {loading !== CAMERA_STATES.IDLE && (
+            <div className="absolute inset-x-0 top-2 flex items-center justify-center text-center">
+              <div className="inline-flex items-center gap-2 rounded bg-white/70 p-4">
+                <div className="an h-4 w-4 animate-spin rounded-full border-2 border-b-0 border-primary-500" />
+                <p className="text-base font-bold">{loading}</p>
+              </div>
             </div>
           )}
-        <div className=" absolute bottom-8 left-8 z-10 hidden grid-flow-col grid-rows-3 gap-1 lg:grid">
-          {[
-            false,
-            cameraPTZ[2],
-            false,
-            cameraPTZ[0],
-            false,
-            cameraPTZ[1],
-            false,
-            cameraPTZ[3],
-            false,
-          ].map((c, i) => {
-            let out = <div className="h-[60px] w-[60px]" key={i}></div>;
-            if (c) {
-              const button = c as any;
-              out = (
-                <FeedButton
-                  key={i}
-                  camProp={button}
-                  styleType="BUTTON"
-                  clickAction={() => {
-                    triggerGoal("Camera Feed Moved", {
-                      direction: button.action,
-                      consultationId,
-                      userId: authUser.id,
-                    });
+          <div className="absolute bottom-0 right-0 flex h-full w-full items-center justify-center p-4 text-white">
+            {streamStatus === StreamStatus.Offline && (
+              <div className="text-center">
+                <p className="font-bold">
+                  STATUS: <span className="text-red-600">OFFLINE</span>
+                </p>
+                <p className="font-semibold ">Feed is currently not live.</p>
+                <p className="font-semibold ">Trying to connect... </p>
+                <p className="mt-2 flex justify-center">
+                  <Spinner circle={{ fill: "none" }} />
+                </p>
+              </div>
+            )}
+            {streamStatus === StreamStatus.Stop && (
+              <div className="text-center">
+                <p className="font-bold">
+                  STATUS: <span className="text-red-600">STOPPED</span>
+                </p>
+                <p className="font-semibold ">Feed is Stooped.</p>
+                <p className="font-semibold ">
+                  Click refresh button to start feed.
+                </p>
+              </div>
+            )}
+            {streamStatus === StreamStatus.Loading && (
+              <div className="text-center">
+                <p className="font-bold ">
+                  STATUS: <span className="text-red-600"> LOADING</span>
+                </p>
+                <p className="font-semibold ">Fetching latest feed.</p>
+              </div>
+            )}
+          </div>
+          <div className="right-8 top-8 z-0 hidden flex-col gap-4 lg:absolute lg:flex">
+            {["fullScreen", "reset", "updatePreset", "zoomIn", "zoomOut"].map(
+              (button, index) => {
+                const option = cameraPTZ.find(
+                  (option) => option.action === button
+                );
+                return (
+                  <FeedButton
+                    key={index}
+                    camProp={option}
+                    styleType="CHHOTUBUTTON"
+                    clickAction={() => option?.callback()}
+                  />
+                );
+              }
+            )}
+            <div className="hidden pl-3 md:block">
+              <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
+            </div>
+          </div>
 
-                    button.callback();
-                    if (cameraState) {
-                      let x = cameraState.x;
-                      let y = cameraState.y;
-                      switch (button.action) {
-                        case "left":
-                          x += -0.1 / cameraState.precision;
-                          break;
+          <div className="bottom-8 right-8 z-20 hidden lg:absolute">
+            <FeedButton
+              camProp={cameraPTZ[4]}
+              styleType="CHHOTUBUTTON"
+              clickAction={() => cameraPTZ[4].callback()}
+            />
+          </div>
+          {streamStatus === StreamStatus.Playing &&
+            calculateVideoLiveDelay() > 3 && (
+              <div className="absolute left-8 top-8 z-10 flex items-center gap-2 rounded-3xl bg-red-400 px-3 py-1.5 text-xs font-semibold text-gray-100">
+                <CareIcon className="care-l-wifi-slash h-4 w-4" />
+                <span>Slow Network Detected</span>
+              </div>
+            )}
+          <div className=" absolute bottom-8 left-8 z-10 hidden grid-flow-col grid-rows-3 gap-1 lg:grid">
+            {[
+              false,
+              cameraPTZ[2],
+              false,
+              cameraPTZ[0],
+              false,
+              cameraPTZ[1],
+              false,
+              cameraPTZ[3],
+              false,
+            ].map((c, i) => {
+              let out = <div className="h-[60px] w-[60px]" key={i}></div>;
+              if (c) {
+                const button = c as any;
+                out = (
+                  <FeedButton
+                    key={i}
+                    camProp={button}
+                    styleType="BUTTON"
+                    clickAction={() => {
+                      triggerGoal("Camera Feed Moved", {
+                        direction: button.action,
+                        consultationId,
+                        userId: authUser.id,
+                      });
 
-                        case "right":
-                          x += 0.1 / cameraState.precision;
-                          break;
+                      button.callback();
+                      if (cameraState) {
+                        let x = cameraState.x;
+                        let y = cameraState.y;
+                        switch (button.action) {
+                          case "left":
+                            x += -0.1 / cameraState.precision;
+                            break;
 
-                        case "down":
-                          y += -0.1 / cameraState.precision;
-                          break;
+                          case "right":
+                            x += 0.1 / cameraState.precision;
+                            break;
 
-                        case "up":
-                          y += 0.1 / cameraState.precision;
-                          break;
+                          case "down":
+                            y += -0.1 / cameraState.precision;
+                            break;
 
-                        default:
-                          break;
+                          case "up":
+                            y += 0.1 / cameraState.precision;
+                            break;
+
+                          default:
+                            break;
+                        }
+
+                        setCameraState({ ...cameraState, x: x, y: y });
                       }
+                    }}
+                  />
+                );
+              }
 
-                      setCameraState({ ...cameraState, x: x, y: y });
-                    }
-                  }}
-                />
-              );
-            }
-
-            return out;
-          })}
+              return out;
+            })}
+          </div>
         </div>
       </div>
+
       <div className="mt-4 flex w-full flex-wrap lg:hidden">
         {cameraPTZ.map((option, index) => {
           const shortcutKeyDescription =
