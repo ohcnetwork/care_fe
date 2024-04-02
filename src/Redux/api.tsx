@@ -86,6 +86,7 @@ import {
   SkillModel,
   SkillObjectModel,
   UpdatePasswordForm,
+  UserAssignedModel,
   UserModel,
 } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
@@ -354,7 +355,7 @@ const routes = {
 
   getFacilityUsers: {
     path: "/api/v1/facility/{facility_id}/get_users/",
-    TRes: Type<PaginatedResponse<UserModel>>(),
+    TRes: Type<PaginatedResponse<UserAssignedModel>>(),
   },
 
   listFacilityAssetLocation: {
@@ -540,8 +541,8 @@ const routes = {
   partialUpdateConsultation: {
     path: "/api/v1/consultation/{id}/",
     method: "PATCH",
-    TRes: Type<Partial<ConsultationModel>>(),
-    TBody: Type<ConsultationModel>(),
+    TBody: Type<Partial<ConsultationModel>>(),
+    TRes: Type<ConsultationModel>(),
   },
   deleteConsultation: {
     path: "/api/v1/consultation/{id}/",

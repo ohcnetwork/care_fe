@@ -6,9 +6,7 @@ import {
   FormFieldBaseProps,
   useFormFieldPropsResolver,
 } from "../Form/FormFields/Utils";
-import { DailyRoundsModel } from "../Patient/models";
-
-type BloodPressure = NonNullable<DailyRoundsModel["bp"]>;
+import { BloodPressure } from "../Patient/models";
 
 type Props = FormFieldBaseProps<BloodPressure>;
 

@@ -115,7 +115,7 @@ const Beds = (props: BedsProps) => {
         {showBedDetails?.assets_objects?.map((asset: AssetData) => (
           <Link
             key={asset.id}
-            href={`/facility/${asset?.location_object.facility.id}/assets/${asset.id}`}
+            href={`/facility/${asset?.location_object.facility?.id}/assets/${asset.id}`}
             className="mx-2 text-inherit"
             data-testid="created-asset-list"
           >
@@ -244,7 +244,7 @@ const Beds = (props: BedsProps) => {
       <div>
         <h3 className="my-4 text-lg">Previous beds: </h3>
         <div className="overflow-hidden rounded-xl">
-          <div className="grid grid-cols-4 gap-[1px]">
+          <div className="grid grid-cols-4 gap-px">
             <div className="bg-primary-500 py-2 text-center font-bold text-white">
               Bed
             </div>
@@ -260,7 +260,7 @@ const Beds = (props: BedsProps) => {
           </div>
           {consultationBeds.length > 0 ? (
             consultationBeds.map((bed) => (
-              <div className="grid grid-cols-4 gap-[1px]" key={bed?.id}>
+              <div className="grid grid-cols-4 gap-px" key={bed?.id}>
                 <div className="break-words bg-primary-100 p-2 text-center">
                   {bed?.bed_object?.name}
                   {bed?.assets_objects && bed.assets_objects.length > 0 && (

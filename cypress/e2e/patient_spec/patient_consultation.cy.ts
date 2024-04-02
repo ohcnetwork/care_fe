@@ -192,6 +192,7 @@ describe("Patient Consultation in multiple combination", () => {
     cy.verifyNotification(
       "Create Diagnoses - Atleast one diagnosis is required"
     );
+    cy.closeNotification();
     patientConsultationPage.selectPatientDiagnosis(
       diagnosis4,
       "add-icd11-diagnosis-as-confirmed"
