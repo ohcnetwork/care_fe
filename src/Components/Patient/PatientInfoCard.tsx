@@ -162,7 +162,7 @@ export default function PatientInfoCard(props: {
           <div className="flex justify-evenly lg:justify-normal">
             <div className="flex flex-col items-start lg:items-center">
               <div
-                className={`w-24 min-w-[5rem] bg-gray-200 ${categoryClass}-profile h-full`}
+                className={`w-24 min-w-20 bg-gray-200 ${categoryClass}-profile h-full`}
               >
                 {consultation?.current_bed &&
                 consultation?.discharge_date === null ? (
@@ -375,7 +375,7 @@ export default function PatientInfoCard(props: {
                             }
                           </b>{" "}
                           on {formatDateTime(consultation.encounter_date)},
-                          {consultation?.new_discharge_reason === "EXP" ? (
+                          {consultation?.new_discharge_reason === 3 ? (
                             <span>
                               {" "}
                               <b>Expired on</b>{" "}

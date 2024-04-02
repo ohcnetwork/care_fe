@@ -315,7 +315,7 @@ export const DISCHARGE_REASONS = [
   { id: 2, text: "Referred" },
   { id: 3, text: "Expired" },
   { id: 4, text: "LAMA" },
-];
+] as const;
 
 export const CONSCIOUSNESS_LEVEL = [
   { id: "UNRESPONSIVE", text: "Unresponsive" },
@@ -1171,6 +1171,21 @@ export const IN_LANDLINE_AREA_CODES = [
   "870",
   "891",
   "4822",
+];
+
+export const CONSENT_TYPE_CHOICES = [
+  { id: 1, text: "Consent for admission" },
+  { id: 2, text: "Patient Code Status" },
+  { id: 3, text: "Consent for procedure" },
+  { id: 4, text: "High risk consent" },
+  { id: 5, text: "Others" },
+];
+
+export const CONSENT_PATIENT_CODE_STATUS_CHOICES = [
+  { id: 1, text: "Do Not Hospitalise (DNH)" },
+  { id: 2, text: "Do Not Resuscitate (DNR)" },
+  { id: 3, text: "Comfort Care Only" },
+  { id: 4, text: "Active treatment (Default)" },
 ];
 export const OCCUPATION_TYPES = [
   { id: 1, text: "Student", value: "STUDENT" },

@@ -85,7 +85,7 @@
     ],
     "tailwindcss/no-custom-classname": "off",
     "tailwindcss/migration-from-tailwind-2": "error",
-    "tailwindcss/classnames-order": "error",
+    "tailwindcss/classnames-order": "off",
     "tailwindcss/enforces-shorthand": "off",
     "tailwindcss/no-contradicting-classname": "error"
   },
