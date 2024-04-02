@@ -1,6 +1,6 @@
 import { useState } from "react";
 import ConfirmDialog from "../Common/ConfirmDialog";
-import { Prescription } from "./models";
+import { DosageValue, Prescription } from "./models";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { Success } from "../../Utils/Notifications";
 import PrescriptionDetailCard from "./PrescriptionDetailCard";
@@ -26,7 +26,7 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
   const consultation = useSlug("consultation");
   const [isLoading, setIsLoading] = useState(false);
   const [notes, setNotes] = useState<string>("");
-  const [dosage, setDosage] = useState<string | undefined>();
+  const [dosage, setDosage] = useState<DosageValue>();
   const [error, setError] = useState<string>();
   const [isCustomTime, setIsCustomTime] = useState(false);
   const [customTime, setCustomTime] = useState<string>(

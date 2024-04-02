@@ -56,7 +56,6 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
 
       if (freeText)
         data?.results?.push({
-          id: -1,
           name: text,
         });
       return data?.results;

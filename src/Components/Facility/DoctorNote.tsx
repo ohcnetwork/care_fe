@@ -33,7 +33,6 @@ const DoctorNote = (props: DoctorNoteProps) => {
         >
           {state.notes.map((note: any) => (
             <PatientNoteCard
-              state={state}
               note={note}
               key={note.id}
               setReload={setReload}

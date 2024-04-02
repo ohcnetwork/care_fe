@@ -59,7 +59,8 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
 
   const showChevronIcon = props.showChevronIcon ?? true;
 
-  const placeholder = props.placeholder ?? "Select";
+  const placeholder =
+    valueOptions?.length > 0 ? props.placeholder ?? "Select" : "No options";
   const defaultOption = {
     label: placeholder,
     selectedLabel: <p className="font-normal text-gray-600">{placeholder}</p>,
@@ -77,7 +78,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
   return (
     <div className={props.className} id={props.id}>
       <Listbox
-        disabled={props.disabled}
+        disabled={props.disabled || valueOptions?.length === 0}
         value={value}
         onChange={(selection: any) => props.onChange(selection.value)}
       >
