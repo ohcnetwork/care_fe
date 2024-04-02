@@ -95,7 +95,7 @@ const InsuranceDetailEditCard = ({
 }) => {
   const { enable_hcx } = useConfig();
   const seletedInsurer =
-    policy.insurer_id || policy.insurer_name
+    policy.insurer_id && policy.insurer_name
       ? { code: policy.insurer_id, name: policy.insurer_name }
       : undefined;
 
