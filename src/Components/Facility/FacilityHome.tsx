@@ -38,7 +38,7 @@ export const getFacilityFeatureIcon = (featureId: number) => {
   const feature = FACILITY_FEATURE_TYPES.find((f) => f.id === featureId);
   if (!feature?.icon) return null;
   return typeof feature.icon === "string" ? (
-    <CareIcon className={`care-l-${feature.icon} text-lg`} />
+    <CareIcon icon={feature.icon} className="text-lg" />
   ) : (
     feature.icon
   );
@@ -318,13 +318,13 @@ export const FacilityHome = (props: any) => {
               <DropdownMenu
                 id="manage-facility-dropdown"
                 title="Manage Facility"
-                icon={<CareIcon className="care-l-setting text-lg" />}
+                icon={<CareIcon icon="l-setting" className="text-lg" />}
               >
                 <DropdownItem
                   id="update-facility"
                   onClick={() => navigate(`/facility/${facilityId}/update`)}
                   authorizeFor={NonReadOnlyUsers}
-                  icon={<CareIcon className="care-l-edit-alt text-lg" />}
+                  icon={<CareIcon icon="l-edit-alt" className="text-lg" />}
                 >
                   Update Facility
                 </DropdownItem>
@@ -332,14 +332,14 @@ export const FacilityHome = (props: any) => {
                   id="configure-facility"
                   onClick={() => navigate(`/facility/${facilityId}/configure`)}
                   authorizeFor={NonReadOnlyUsers}
-                  icon={<CareIcon className="care-l-setting text-lg" />}
+                  icon={<CareIcon icon="l-setting" className="text-lg" />}
                 >
                   Configure Facility
                 </DropdownItem>
                 <DropdownItem
                   id="inventory-management"
                   onClick={() => navigate(`/facility/${facilityId}/inventory`)}
-                  icon={<CareIcon className="care-l-clipboard-alt w-5 " />}
+                  icon={<CareIcon icon="l-clipboard-alt" className="w-5" />}
                 >
                   Inventory Management
                 </DropdownItem>
@@ -347,7 +347,9 @@ export const FacilityHome = (props: any) => {
                   id="location-management"
                   onClick={() => navigate(`/facility/${facilityId}/location`)}
                   authorizeFor={NonReadOnlyUsers}
-                  icon={<CareIcon className="care-l-location-point text-lg" />}
+                  icon={
+                    <CareIcon icon="l-location-point" className="text-lg" />
+                  }
                 >
                   Location Management
                 </DropdownItem>
@@ -357,7 +359,7 @@ export const FacilityHome = (props: any) => {
                     navigate(`/facility/${facilityId}/resource/new`)
                   }
                   authorizeFor={NonReadOnlyUsers}
-                  icon={<CareIcon className="care-l-gold text-lg" />}
+                  icon={<CareIcon icon="l-gold" className="text-lg" />}
                 >
                   Resource Request
                 </DropdownItem>
@@ -365,21 +367,21 @@ export const FacilityHome = (props: any) => {
                   id="create-assets"
                   onClick={() => navigate(`/facility/${facilityId}/assets/new`)}
                   authorizeFor={NonReadOnlyUsers}
-                  icon={<CareIcon className="care-l-plus-circle text-lg" />}
+                  icon={<CareIcon icon="l-plus-circle" className="text-lg" />}
                 >
                   Create Asset
                 </DropdownItem>
                 <DropdownItem
                   id="view-assets"
                   onClick={() => navigate(`/assets?facility=${facilityId}`)}
-                  icon={<CareIcon className="care-l-medkit text-lg" />}
+                  icon={<CareIcon icon="l-medkit" className="text-lg" />}
                 >
                   View Assets
                 </DropdownItem>
                 <DropdownItem
                   id="view-users"
                   onClick={() => navigate(`/facility/${facilityId}/users`)}
-                  icon={<CareIcon className="care-l-users-alt text-lg" />}
+                  icon={<CareIcon icon="l-users-alt" className="text-lg" />}
                 >
                   View Users
                 </DropdownItem>
@@ -389,7 +391,7 @@ export const FacilityHome = (props: any) => {
                     variant="danger"
                     onClick={() => setOpenDeleteDialog(true)}
                     className="flex items-center gap-3"
-                    icon={<CareIcon className="care-l-trash-alt text-lg" />}
+                    icon={<CareIcon icon="l-trash-alt" className="text-lg" />}
                   >
                     Delete Facility
                   </DropdownItem>
@@ -405,7 +407,7 @@ export const FacilityHome = (props: any) => {
                 className="mt-2 flex w-full flex-row justify-center md:w-auto"
                 onClick={() => navigate(`/facility/${facilityId}/cns`)}
               >
-                <CareIcon className="care-l-monitor-heart-rate text-lg" />
+                <CareIcon icon="l-monitor-heart-rate" className="text-lg" />
                 <span>Central Nursing Station</span>
               </ButtonV2>
               <LiveMonitoringButton />
@@ -417,7 +419,7 @@ export const FacilityHome = (props: any) => {
                 onClick={() => navigate(`/facility/${facilityId}/patient`)}
                 authorizeFor={NonReadOnlyUsers}
               >
-                <CareIcon className="care-l-plus text-lg" />
+                <CareIcon icon="l-plus" className="text-lg" />
                 <span className="text-sm">Add Details of a Patient</span>
               </ButtonV2>
               <ButtonV2
@@ -428,7 +430,7 @@ export const FacilityHome = (props: any) => {
                 className="mt-2 flex w-full flex-row justify-center md:w-auto"
                 onClick={() => navigate(`/patients?facility=${facilityId}`)}
               >
-                <CareIcon className="care-l-user-injured text-lg" />
+                <CareIcon icon="l-user-injured" className="text-lg" />
                 <span>View Patients</span>
               </ButtonV2>
               <ButtonV2
@@ -441,7 +443,7 @@ export const FacilityHome = (props: any) => {
                   navigate(`/facility/${facilityId}/discharged-patients`)
                 }
               >
-                <CareIcon className="care-l-user-injured text-lg" />
+                <CareIcon icon="l-user-injured" className="text-lg" />
                 <span>View Discharged Patients</span>
               </ButtonV2>
             </div>

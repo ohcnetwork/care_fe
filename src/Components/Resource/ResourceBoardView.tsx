@@ -76,7 +76,7 @@ export default function BoardView() {
           />
           <div className="flex w-full flex-col gap-2 lg:mr-4 lg:w-fit lg:flex-row lg:gap-4">
             <ButtonV2 className="py-[11px]" onClick={onListViewBtnClick}>
-              <CareIcon className="care-l-list-ul" />
+              <CareIcon icon="l-list-ul" />
               {t("list_view")}
             </ButtonV2>
             <AdvancedFilterButton
@@ -87,8 +87,8 @@ export default function BoardView() {
       </div>
 
       <BadgesList {...{ appliedFilters, FilterBadges }} />
-      <ScrollingComponent className="mt-4 flex flex-1 items-start overflow-x-scroll px-4 pb-2 @container">
-        <div className="mt-4 flex flex-1 items-start overflow-x-scroll px-4 pb-2">
+      <ScrollingComponent className="mt-4 flex flex-1 items-start overflow-x-scroll px-0 pb-2 @container">
+        <div className="mt-4 flex flex-1 items-start overflow-x-scroll px-0 pb-2">
           {isLoading ? (
             <Loading />
           ) : (

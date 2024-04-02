@@ -222,7 +222,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   useEffect(() => {
     if (extId && formField) {
       setCareExtId(extId);
-      fetchExtResultData(null, formField);
+      fetchExtResultData(formField);
     }
   }, [careExtId, formField]);
 
@@ -284,8 +284,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     }
   };
 
-  const fetchExtResultData = async (e: any, field: any) => {
-    if (e) e.preventDefault();
+  const fetchExtResultData = async (field: any) => {
     if (!careExtId) return;
     const { res, data } = await request(routes.externalResult, {
       pathParams: { id: careExtId },
@@ -311,10 +310,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         value: data.gender
           ? parseGenderFromExt(data.gender, state.form.gender)
           : state.form.gender,
-      });
-      field.onChange({
-        name: "occupation",
-        value: data.meta_info?.occupation ?? state.form.occupation,
       });
       field.onChange({
         name: "test_id",
@@ -414,7 +409,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             local_body: data.local_body ? data.local_body : "",
             ward: data.ward_object ? data.ward_object.id : undefined,
             village: data.village ? data.village : "",
-            medical_history: [],
+            medical_history: [] as number[],
             is_antenatal: String(!!data.is_antenatal),
             allergies: data.allergies ? data.allergies : "",
             pincode: data.pincode ? data.pincode : "",
@@ -469,8 +464,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               );
               if (medicalHistory) {
                 formData.medical_history.push(Number(medicalHistory.id));
-                formData[`medical_history_${String(medicalHistory.id)}`] =
-                  i.details;
+                (formData as any)[
+                  `medical_history_${String(medicalHistory.id)}`
+                ] = i.details;
               }
             }
           );
@@ -1074,7 +1070,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       <div className="mt-4">
         <div className="mx-4 my-8 rounded bg-purple-100 p-4 text-xs font-semibold text-purple-800">
           <div className="mx-1 mb-1 flex items-center text-lg font-bold">
-            <CareIcon className=" care-l-info-circle mr-1 text-2xl font-bold" />{" "}
+            <CareIcon
+              icon="l-info-circle"
+              className="mr-1 text-2xl font-bold"
+            />{" "}
             Please enter the correct date of birth for the patient
           </div>
           <p className="text-sm font-normal text-black">
@@ -1116,7 +1115,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   id="submit-importexternalresult-button"
                   className="btn btn-primary mr-4"
                   onClick={(e) => {
-                    fetchExtResultData(e, showImport?.field?.("name"));
+                    e.preventDefault();
+                    fetchExtResultData(showImport?.field?.("name"));
                   }}
                   disabled={!careExtId}
                 >
@@ -1176,7 +1176,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             setQuery({ extId: "" }, { replace: true });
                           }}
                         >
-                          <CareIcon className="care-l-import text-lg" />
+                          <CareIcon icon="l-import" className="text-lg" />
                           Import From External Results
                         </ButtonV2>
                       </div>
@@ -1560,7 +1560,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         <AccordionV2
                           className="mt-2 shadow-none md:mt-0 lg:mt-0"
                           expandIcon={
-                            <CareIcon className="care-l-angle-down text-2xl font-bold" />
+                            <CareIcon
+                              icon="l-angle-down"
+                              className="text-2xl font-bold"
+                            />
                           }
                           title={
                             <h1 className="text-left text-xl font-bold text-purple-500">
@@ -1894,7 +1897,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             }
                             data-testid="add-insurance-button"
                           >
-                            <CareIcon className="care-l-plus text-lg" />
+                            <CareIcon icon="l-plus" className="text-lg" />
                             <span>Add Insurance Details</span>
                           </ButtonV2>
                         </div>

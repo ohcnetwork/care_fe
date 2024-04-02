@@ -95,7 +95,7 @@ const InsuranceDetailEditCard = ({
 }) => {
   const { enable_hcx } = useConfig();
   const seletedInsurer =
-    policy.insurer_id || policy.insurer_name
+    policy.insurer_id && policy.insurer_name
       ? { code: policy.insurer_id, name: policy.insurer_name }
       : undefined;
 
@@ -105,7 +105,7 @@ const InsuranceDetailEditCard = ({
         <FieldLabel className="my-auto !font-bold">Policy</FieldLabel>
         <ButtonV2 variant="danger" type="button" ghost onClick={handleRemove}>
           Delete
-          <CareIcon className="care-l-trash-alt text-lg" />
+          <CareIcon icon="l-trash-alt" className="text-lg" />
         </ButtonV2>
       </div>
 
