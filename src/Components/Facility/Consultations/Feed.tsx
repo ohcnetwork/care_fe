@@ -26,8 +26,9 @@ import { triggerGoal } from "../../../Integrations/Plausible.js";
 import useAuthUser from "../../../Common/hooks/useAuthUser.js";
 import Spinner from "../../Common/Spinner.js";
 import useQuery from "../../../Utils/request/useQuery.js";
-import { AssetBedModel, ResolvedMiddleware } from "../../Assets/AssetTypes.js";
+import { ResolvedMiddleware } from "../../Assets/AssetTypes.js";
 import { SelectFormField } from "../../Form/FormFields/SelectFormField.js";
+import CameraPresetSelect from "../../CameraFeed/CameraPresetSelect.js";
 
 interface IFeedProps {
   facilityId: string;
@@ -142,7 +143,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   const [presets, setPresets] = useState<any>([]);
   const [currentPreset, setCurrentPreset] = useState<any>();
   // const [showDefaultPresets, setShowDefaultPresets] = useState<boolean>(false);
-  const [preset, setPreset] = useState<AssetBedModel>();
   const [loading, setLoading] = useState<string>(CAMERA_STATES.IDLE);
   const [camTimeout, setCamTimeout] = useState<number>(0);
   useEffect(() => {
@@ -400,7 +400,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   }
 
   if (getConsultationLoading) return <Loading />;
-  console.log(bedPresets);
   return (
     <div className="flex h-[calc(100vh-1.5rem)] flex-col px-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -418,50 +417,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
               optionLabel={(preset: any) => preset}
               optionValue={(preset: any) => preset}
               value={currentPreset?.meta?.preset_name}
-              onChange={(selectedPreset: any) => {
-                if (selectedPreset.value === undefined) {
-                  setCurrentPreset(undefined);
-                  return;
-                } else {
-                  const presetDetails = bedPresets?.filter(
-                    (preset: any) =>
-                      preset?.meta?.preset_name === selectedPreset.value
-                  );
-                  setLoading(CAMERA_STATES.MOVING.GENERIC);
-                  absoluteMove(
-                    presetDetails.length > 0 && presetDetails[0].meta?.position,
-                    {
-                      onSuccess: () => {
-                        setLoading(CAMERA_STATES.IDLE);
-                        setCurrentPreset(presetDetails[0]);
-                        console.log(
-                          "onSuccess: Set Preset to " + selectedPreset.value
-                        );
-                        triggerGoal("Camera Preset Clicked", {
-                          presetName: selectedPreset.value,
-                          consultationId,
-                          userId: authUser.id,
-                          result: "success",
-                        });
-                      },
-                      onError: () => {
-                        setLoading(CAMERA_STATES.IDLE);
-                        setCurrentPreset(presetDetails[0]);
-                        console.log(
-                          "onError: Set Preset to " + selectedPreset.value
-                        );
-                        triggerGoal("Camera Preset Clicked", {
-                          presetName: selectedPreset.value,
-                          consultationId,
-                          userId: authUser.id,
-                          result: "error",
-                        });
-                      },
-                    }
-                  );
-                  getCameraStatus({});
-                }
-              }}
+              onChange={(preset: any) => cameraPresetChange(preset)}
               className="w-40 md:w-60 "
             />
 >>>>>>> 323c32c1 (need help)
@@ -475,15 +431,15 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           </span>
 
           <div className="w-64">
-            <AssetBedSelect
+            <CameraPresetSelect
               asset={bedPresets}
-              value={preset}
-              onChange={setPreset}
+              value={currentPreset}
+              onChange={cameraPresetChange}
             />
           </div>
         </div>
         <div
-          className="relative  flex aspect-video w-full grow-0 flex-col items-center justify-center overflow-hidden rounded-b-xl bg-black"
+          className="relative  flex aspect-video w-full grow-0 flex-col items-center justify-center overflow-hidden rounded-b-xl bg-black md:mt-2"
           ref={videoWrapper}
         >
           {isIOS ? (
