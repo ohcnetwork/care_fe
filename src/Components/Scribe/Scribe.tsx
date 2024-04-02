@@ -49,6 +49,11 @@ interface ScribeProps {
   onFormUpdate: (fields: any) => void;
 }
 
+const SCRIBE_FILE_TYPES = {
+  OTHER: 0,
+  SCRIBE: 1,
+};
+
 export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
   const { enable_scribe } = useConfig();
   const [open, setOpen] = useState(false);
@@ -111,7 +116,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
       request(routes.createScribeFileUpload, {
         body: {
           original_name: name,
-          file_type: "SCRIBE",
+          file_type: SCRIBE_FILE_TYPES.SCRIBE,
           name: filename,
           associating_id: associatingId,
           file_category: category,

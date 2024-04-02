@@ -346,7 +346,7 @@ export interface FacilityNameModel {
 type FileCategory = "UNSPECIFIED" | "XRAY" | "AUDIO" | "IDENTITY_PROOF";
 
 export interface CreateFileRequest {
-  file_type: string;
+  file_type: string | number;
   file_category: FileCategory;
   name: string;
   associating_id: string;
