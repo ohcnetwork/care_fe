@@ -132,7 +132,7 @@ export const AutocompleteMutliSelect = <T, V>(
             )}
           </div>
           {value.length !== 0 && (
-            <div className="flex flex-wrap gap-2 p-2">
+            <div className="absolute top-0 flex flex-wrap gap-2 p-2">
               {value.map((v) => (
                 <MultiSelectOptionChip
                   label={v.label}
