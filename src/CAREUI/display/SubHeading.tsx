@@ -18,7 +18,7 @@ export default function SubHeading(props: Props) {
         </span>
         {props.lastModified && (
           <div className="ml-3 flex flex-row gap-2 text-xs font-medium text-gray-600">
-            <CareIcon className="care-l-history-alt text-sm" />
+            <CareIcon icon="l-history-alt" className="text-sm" />
             <RecordMeta time={props.lastModified} prefix="Last modified" />
           </div>
         )}
