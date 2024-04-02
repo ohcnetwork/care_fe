@@ -1,14 +1,9 @@
 import { HCXClaimModel, HCXPolicyModel } from "../Components/HCX/models";
-import { MedibaseMedicine } from "../Components/Medicine/models";
 import { fireRequest } from "./fireRequest";
 
 // Facility
 export const getUserList = (params: object, key?: string) => {
   return fireRequest("userList", [], params, null, key);
-};
-
-export const getAnyFacility = (id: number | string, key?: string) => {
-  return fireRequest("getAnyFacility", [], {}, { id: id }, key);
 };
 
 export const getFacilityUsers = (id: string, params?: object) => {
@@ -68,9 +63,6 @@ export const getAllPatient = (params: object, altKey: string) => {
 export const getPatient = (pathParam: object) => {
   return fireRequest("getPatient", [], {}, pathParam);
 };
-export const patchPatient = (params: object, pathParam: object) => {
-  return fireRequest("patchPatient", [], params, pathParam);
-};
 
 // District/State/Local body/ward
 export const getDistrictByName = (params: object) => {
@@ -107,6 +99,9 @@ export const getConsultation = (id: string) => {
 export const updateConsultation = (id: string, params: object) => {
   return fireRequest("updateConsultation", [], params, { id: id });
 };
+export const partialUpdateConsultation = (id: string, params: object) => {
+  return fireRequest("partialUpdateConsultation", [], params, { id: id });
+};
 
 export const generateDischargeSummary = (pathParams: object) => {
   return fireRequest("dischargeSummaryGenerate", [], {}, pathParams);
@@ -140,80 +135,6 @@ export const downloadShiftRequests = (params: object) => {
 // External Results
 export const externalResultList = (params: object, altKey: string) => {
   return fireRequest("externalResultList", [], params, null, altKey);
-};
-
-export const externalResult = (pathParam: object) => {
-  return fireRequest("externalResult", [], {}, pathParam);
-};
-
-// Investigation
-
-export const listInvestigations = (
-  params: object,
-  altKey = "listInvestigations"
-) => {
-  return fireRequest("listInvestigations", [], params, null, altKey);
-};
-
-export const listInvestigationGroups = (params: object) => {
-  return fireRequest("listInvestigationGroups", [], params);
-};
-
-export const createInvestigation = (
-  params: object,
-  consultation_external_id: string
-) => {
-  return fireRequest("createInvestigation", [], params, {
-    consultation_external_id: consultation_external_id,
-  });
-};
-
-export const getInvestigationSessions = (
-  params: object,
-  consultation_external_id: string
-) => {
-  return fireRequest("getInvestigationSessions", [], params, {
-    consultation_external_id: consultation_external_id,
-  });
-};
-
-export const getInvestigation = (
-  params: object,
-  consultation_external_id: string
-) => {
-  return fireRequest("getInvestigation", [], params, {
-    consultation_external_id: consultation_external_id,
-  });
-};
-
-export const getPatientInvestigation = (
-  params: object,
-  patient_external_id: string
-) => {
-  return fireRequest("getPatientInvestigation", [], params, {
-    patient_external_id: patient_external_id,
-  });
-};
-
-export const editInvestigation = (
-  params: object,
-  consultation_external_id: string
-) => {
-  return fireRequest("editInvestigation", [], params, {
-    consultation_external_id: consultation_external_id,
-  });
-};
-
-// ICD11
-export const listICD11Diagnosis = (params: object) => {
-  return fireRequest("listICD11Diagnosis", [], params, null);
-};
-// Medibase
-export const listMedibaseMedicines = (
-  query: string,
-  type?: MedibaseMedicine["type"]
-) => {
-  return fireRequest("listMedibaseMedicines", [], { query, type });
 };
 
 // Resource

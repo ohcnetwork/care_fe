@@ -31,7 +31,7 @@ export const useAbortableEffect = (
 };
 
 export const parseOptionId: (
-  options: OptionsType[],
+  options: readonly OptionsType[],
   id: string | string[]
 ) => string = (options, id) => {
   const textArray = options

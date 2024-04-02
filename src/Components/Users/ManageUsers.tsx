@@ -638,7 +638,16 @@ function UserFacilities(props: { user: any }) {
       pathParams: { username },
       body: { home_facility: facility.id.toString() },
     });
-    if (res && res.status === 200) user.home_facility_object = facility;
+    if (!res?.ok) {
+      Notification.Error({
+        msg: "Error while updating Home facility",
+      });
+    } else {
+      user.home_facility_object = facility;
+      Notification.Success({
+        msg: "Home Facility updated successfully",
+      });
+    }
     await refetchUserFacilities();
     setIsLoading(false);
   };
@@ -649,12 +658,31 @@ function UserFacilities(props: { user: any }) {
       const { res } = await request(routes.clearHomeFacility, {
         pathParams: { username },
       });
-      if (res && res.status === 204) user.home_facility_object = null;
+
+      if (!res?.ok) {
+        Notification.Error({
+          msg: "Error while clearing home facility",
+        });
+      } else {
+        user.home_facility_object = null;
+        Notification.Success({
+          msg: "Home Facility cleared successfully",
+        });
+      }
     } else {
-      await request(routes.deleteUserFacility, {
+      const { res } = await request(routes.deleteUserFacility, {
         pathParams: { username },
         body: { facility: unlinkFacilityData?.facility?.id?.toString() },
       });
+      if (!res?.ok) {
+        Notification.Error({
+          msg: "Error while unlinking home facility",
+        });
+      } else {
+        Notification.Success({
+          msg: "Facility unlinked successfully",
+        });
+      }
     }
     await refetchUserFacilities();
     hideUnlinkFacilityModal();
@@ -667,9 +695,14 @@ function UserFacilities(props: { user: any }) {
       pathParams: { username },
       body: { facility: facility.id.toString() },
     });
-    if (res?.status !== 201) {
+
+    if (!res?.ok) {
       Notification.Error({
         msg: "Error while linking facility",
+      });
+    } else {
+      Notification.Success({
+        msg: "Facility linked successfully",
       });
     }
     await refetchUserFacilities();
