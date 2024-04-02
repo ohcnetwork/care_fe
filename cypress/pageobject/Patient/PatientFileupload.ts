@@ -1,9 +1,19 @@
 import { cy } from "local-cypress";
 
-export class PatientFileUploadPage {
+export class PatientFileUpload {
   visitPatientDetailsPage() {
     cy.get("#patient-details").click();
     cy.get("#upload-patient-files").click();
+  }
+
+  typeAudioName(name: string) {
+    cy.get("#consultation_audio_file").clear();
+    cy.get("#consultation_audio_file").click().type(name);
+  }
+
+  typeFileName(name: string) {
+    cy.get("#consultation_file").clear();
+    cy.get("#consultation_file").click().type(name);
   }
 
   recordAudio() {
@@ -14,7 +24,7 @@ export class PatientFileUploadPage {
 
   clickUploadAudioFile() {
     cy.intercept("POST", "**/api/v1/files/").as("uploadAudioFile");
-    cy.get("#upload_audio_file").click();
+    cy.verifyAndClickElement("#upload_audio_file", "Save");
     cy.wait("@uploadAudioFile").its("response.statusCode").should("eq", 201);
   }
 
