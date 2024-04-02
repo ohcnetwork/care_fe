@@ -77,7 +77,7 @@ export default function ResourceDetails(props: { id: string }) {
   const ApprovalLetter = (data: any) => {
     return (
       <div id="section-to-print" className="print bg-white">
-        <div className="mx-20 p-4">
+        <div className="mx-4 p-2 lg:mx-20 ">
           <div className="mt-6 text-center text-xl font-bold">
             APPROVAL LETTER
           </div>
