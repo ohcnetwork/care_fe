@@ -11,7 +11,8 @@ describe("Patient Details", () => {
   const cypressFileName = "cypress name";
   const newFileName = "cypress modified name";
   const patientNameOne = "Dummy Patient 3";
-  const patientNameTwo = "Dummy Patient 5";
+  const patientNameTwo = "Dummy Patient 4";
+  const patientNameThree = "Dummy Patient 5";
   before(() => {
     loginPage.loginAsDisctrictAdmin();
     cy.saveLocalStorage();
@@ -32,7 +33,7 @@ describe("Patient Details", () => {
     patientFileUpload.clickUploadAudioFile();
     // Verify the audio file is uploaded
     cy.verifyNotification("File Uploaded Successfully");
-    cy.verifyContentPresence("#file-div", [cypressAudioName]);
+    patientFileUpload.verifyUploadFilePresence(cypressAudioName);
     // Verify the download of the audio file
     cy.get("button").contains("DOWNLOAD").click();
     cy.verifyNotification("Downloading file...");
@@ -40,14 +41,15 @@ describe("Patient Details", () => {
 
   it("Upload a File and archive it", () => {
     // Upload the file
-    patientPage.visitPatient(patientNameOne);
+    patientPage.visitPatient(patientNameTwo);
     patientFileUpload.visitPatientDetailsPage();
     patientFileUpload.uploadFile();
     patientFileUpload.typeFileName(cypressFileName);
     patientFileUpload.clickUploadFile();
     // Verify the file is uploaded
     cy.verifyNotification("File Uploaded Successfully");
-    cy.verifyContentPresence("#file-div", [cypressFileName]);
+    cy.closeNotification();
+    patientFileUpload.verifyUploadFilePresence(cypressFileName);
     // Archive the file
     patientFileUpload.archiveFile();
     patientFileUpload.clickSaveArchiveFile();
@@ -60,7 +62,7 @@ describe("Patient Details", () => {
     loginPage.login("dummynurse1", "Coronasafe@123");
     cy.reload();
     // Visit the patient details page
-    patientPage.visitPatient(patientNameTwo);
+    patientPage.visitPatient(patientNameThree);
     patientFileUpload.visitPatientDetailsPage();
     // Upload the file
     patientFileUpload.uploadFile();
@@ -68,31 +70,34 @@ describe("Patient Details", () => {
     patientFileUpload.clickUploadFile();
     // Verify the file is uploaded
     cy.verifyNotification("File Uploaded Successfully");
-    cy.verifyContentPresence("#file-div", [cypressFileName]);
+    cy.closeNotification();
+    patientFileUpload.verifyUploadFilePresence(cypressFileName);
     // Edit the file name
     patientFileUpload.verifyFileRenameOption(true);
     patientFileUpload.renameFile(newFileName);
     patientFileUpload.clickSaveFileName();
     // Verify the file name is changed
     cy.verifyNotification("File name changed successfully");
-    cy.verifyContentPresence("#file-div", [newFileName]);
+    cy.closeNotification();
+    patientFileUpload.verifyUploadFilePresence(newFileName);
     // Login as Nurse 2
     loginPage.login("dummynurse2", "Coronasafe@123");
     cy.reload();
     // Verify the file edit option is not available
-    cy.verifyContentPresence("#file-div", [newFileName]);
+    patientFileUpload.verifyUploadFilePresence(newFileName);
     patientFileUpload.verifyFileRenameOption(false);
     // Login as District Admin
     loginPage.loginAsDisctrictAdmin();
     cy.reload();
     // Verify the file edit option is available
-    cy.verifyContentPresence("#file-div", [newFileName]);
+    patientFileUpload.verifyUploadFilePresence(newFileName);
     patientFileUpload.verifyFileRenameOption(true);
     patientFileUpload.renameFile(cypressFileName);
     patientFileUpload.clickSaveFileName();
     // Verify the file name is changed
     cy.verifyNotification("File name changed successfully");
-    cy.verifyContentPresence("#file-div", [cypressFileName]);
+    cy.closeNotification();
+    patientFileUpload.verifyUploadFilePresence(cypressFileName);
   });
 
   afterEach(() => {

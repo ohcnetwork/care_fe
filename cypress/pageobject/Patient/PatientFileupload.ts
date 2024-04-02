@@ -28,6 +28,12 @@ export class PatientFileUpload {
     cy.wait("@uploadAudioFile").its("response.statusCode").should("eq", 201);
   }
 
+  verifyUploadFilePresence(fileName: string) {
+    cy.wait(2000);
+    cy.get("#file-div").scrollIntoView();
+    cy.verifyContentPresence("#file-div", [fileName]);
+  }
+
   uploadFile() {
     cy.get("#file_upload_patient").selectFile(
       "cypress/fixtures/sampleAsset.xlsx",
