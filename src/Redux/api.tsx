@@ -131,21 +131,33 @@ const routes = {
   },
 
   createScribe: {
-    path: "/api/v1/scribe/",
+    path: "/api/care_scribe/scribe/",
     method: "POST",
     TReq: Type<ScribeModel>(),
     TRes: Type<ScribeModel>(),
   },
   getScribe: {
-    path: "/api/v1/scribe/{external_id}/",
+    path: "/api/care_scribe/scribe/{external_id}/",
     method: "GET",
     TRes: Type<ScribeModel>(),
   },
   updateScribe: {
-    path: "/api/v1/scribe/{external_id}/",
+    path: "/api/care_scribe/scribe/{external_id}/",
     method: "PUT",
     TReq: Type<ScribeModel>(),
     TRes: Type<ScribeModel>(),
+  },
+  createScribeFileUpload: {
+    path: "/api/care_scribe/scribe_file/",
+    method: "POST",
+    TBody: Type<CreateFileRequest>(),
+    TRes: Type<CreateFileResponse>(),
+  },
+  editScribeFileUpload: {
+    path: "/api/care_scribe/scribe_file/{id}/?file_type={fileType}&associating_id={associatingId}",
+    method: "PATCH",
+    TBody: Type<Partial<FileUploadModel>>(),
+    TRes: Type<FileUploadModel>(),
   },
 
   // Auth Endpoints

@@ -108,10 +108,10 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
       const name = "audio.mp3";
       const filename = Date.now().toString();
 
-      request(routes.createUpload, {
+      request(routes.createScribeFileUpload, {
         body: {
           original_name: name,
-          file_type: "AI",
+          file_type: "SCRIBE",
           name: filename,
           associating_id: associatingId,
           file_category: category,
@@ -222,11 +222,11 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
   }, [stage, audioBlobs]);
 
   const markUploadComplete = (external_id: string, associating_id: string) => {
-    return request(routes.editUpload, {
+    return request(routes.editScribeFileUpload, {
       body: { upload_completed: true },
       pathParams: {
         id: external_id,
-        fileType: "AI",
+        fileType: "SCRIBE",
         associatingId: associating_id,
       },
     });
