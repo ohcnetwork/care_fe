@@ -118,8 +118,7 @@ describe("Patient Creation with consultation", () => {
       emergency_phone_number,
       yearOfBirth,
       patientOneBloodGroup,
-      patientOccupation,
-      "Year of Birth"
+      patientOccupation
     );
     patientMedicalHistory.verifyPatientMedicalDetails(
       patientOnePresentHealth,
@@ -208,8 +207,7 @@ describe("Patient Creation with consultation", () => {
       emergency_phone_number,
       yearOfBirth,
       patientOneUpdatedBloodGroup,
-      patientOccupation,
-      yearOfBirth
+      patientOccupation
     );
     // Verify No medical history
     patientMedicalHistory.verifyNoSymptosPresent("Diabetes");

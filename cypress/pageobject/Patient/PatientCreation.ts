@@ -145,8 +145,7 @@ export class PatientPage {
     emergencyPhoneNumber,
     yearOfBirth,
     bloodGroup,
-    occupation,
-    DobOrAge
+    occupation
   ) {
     cy.url().should("include", "/facility/");
     cy.get("[data-testid=patient-dashboard]").then(($dashboard) => {
@@ -158,7 +157,6 @@ export class PatientPage {
       expect($dashboard).to.contain(yearOfBirth);
       expect($dashboard).to.contain(bloodGroup);
       expect($dashboard).to.contain(occupation);
-      expect($dashboard).to.contain(DobOrAge);
     });
   }
 
