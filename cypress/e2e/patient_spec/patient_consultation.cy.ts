@@ -35,7 +35,7 @@ describe("Patient Consultation in multiple combination", () => {
   const procedureName = "Procedure No 1";
   const patientWeight = "70";
   const patientHeight = "170";
-  const medicineOne = "DOLO";
+  const medicineOne = "DOLOLUP";
   const patientIpNumber = Math.random().toString(36).substring(7);
 
   before(() => {
@@ -106,6 +106,7 @@ describe("Patient Consultation in multiple combination", () => {
     patientPrescription.enterDosage("3");
     patientPrescription.selectDosageFrequency("Twice daily");
     cy.submitButton("Submit");
+    cy.wait(2000);
     cy.verifyNotification("Medicine prescribed");
     patientPrescription.clickReturnToDashboard();
     // Verify the data's across the dashboard
