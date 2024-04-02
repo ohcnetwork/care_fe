@@ -116,7 +116,7 @@ const HL7Monitor = (props: HL7MonitorProps) => {
                     error={ipadrdress_error}
                   />
                   <Submit className="w-full">
-                    <CareIcon className="care-l-save" />
+                    <CareIcon icon="l-save" />
                     <span>Save Configuration</span>
                   </Submit>
                 </div>

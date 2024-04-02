@@ -160,7 +160,7 @@ export default function HCXPolicyEligibilityCheck({
         >
           {isChecking ? (
             <>
-              <CareIcon className="care-l-spinner animate-spin text-lg" />
+              <CareIcon icon="l-spinner" className="animate-spin text-lg" />
               <span>Checking ...</span>
             </>
           ) : (
@@ -179,9 +179,7 @@ const EligibilityChip = ({ eligible }: { eligible: boolean }) => {
         eligible ? "bg-primary-100 text-primary-500" : "bg-red-500 text-white"
       }`}
     >
-      <CareIcon
-        className={`care-l-${eligible ? "check" : "times"} text-base`}
-      />
+      <CareIcon icon={eligible ? "l-check" : "l-times"} className="text-base" />
       <span className="text-xs uppercase">
         {eligible ? "Eligible" : "Not Eligible"}
       </span>

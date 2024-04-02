@@ -16,8 +16,13 @@ const initForm = {
   id: "",
   quantity: "",
 };
+const initError = Object.assign(
+  {},
+  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+);
 const initialState = {
   form: { ...initForm },
+  errors: { ...initError },
 };
 
 const inventoryFormReducer = (state = initialState, action: any) => {
@@ -99,8 +104,32 @@ export const SetInventoryForm = (props: any) => {
     }
   }, [state.form.id]);
 
+  const validateForm = () => {
+    const errors = { ...initError };
+    let invalidForm = false;
+
+    Object.keys(state.form).forEach((field) => {
+      switch (field) {
+        case "quantity":
+          if (!state.form[field]?.length) {
+            errors[field] = "Please select a quantity";
+            invalidForm = true;
+          } else if (state.form[field] < 0) {
+            errors[field] = "Quantity can't be negative";
+            invalidForm = true;
+          }
+          return;
+      }
+    });
+
+    dispatch({ type: "set_error", errors });
+    return !invalidForm;
+  };
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+    const validated = validateForm();
+    if (!validated) return;
     await request(routes.setMinQuantity, {
       pathParams: { facilityId },
       body: {
@@ -159,6 +188,7 @@ export const SetInventoryForm = (props: any) => {
               type="number"
               value={state.form.quantity}
               onChange={handleChange}
+              error={state.errors.quantity}
             />
 
             <TextFormField

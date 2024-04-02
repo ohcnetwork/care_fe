@@ -129,7 +129,7 @@ export default function MedicineAdministrationTableRow({
                 }
                 onClick={() => setShowAdminister(true)}
               >
-                <CareIcon className="care-l-syringe text-lg" />
+                <CareIcon icon="l-syringe" className="text-lg" />
                 {t("administer")}
               </Submit>
             </div>

@@ -58,7 +58,7 @@ type UserForm = {
   gender: string;
   password: string;
   c_password: string;
-  facilities: Array<number>;
+  facilities: Array<string>;
   home_facility: FacilityModel | null;
   username: string;
   first_name: string;
@@ -67,7 +67,6 @@ type UserForm = {
   phone_number: string;
   alt_phone_number: string;
   phone_number_is_whatsapp: boolean;
-  age: number;
   date_of_birth: Date | null;
   state: number;
   district: number;
@@ -91,7 +90,6 @@ const initForm: UserForm = {
   phone_number: "+91",
   alt_phone_number: "+91",
   phone_number_is_whatsapp: true,
-  age: 0,
   date_of_birth: null,
   state: 0,
   district: 0,
@@ -328,7 +326,7 @@ export const UserAdd = (props: UserProps) => {
     setSelectedFacility(selected as FacilityModel[]);
     const form = { ...state.form };
     form.facilities = selected
-      ? (selected as FacilityModel[]).map((i) => i.id ?? -1)
+      ? (selected as FacilityModel[]).map((i) => i.id!)
       : [];
     dispatch({ type: "set_form", form });
   };
@@ -471,7 +469,12 @@ export const UserAdd = (props: UserProps) => {
           return;
         case "date_of_birth":
           if (!state.form[field]) {
-            errors[field] = "Please enter date in YYYY/MM/DD format";
+            errors[field] = "Please enter date in DD/MM/YYYY format";
+            invalidForm = true;
+          } else if (
+            dayjs(state.form[field]).isAfter(dayjs().subtract(1, "year"))
+          ) {
+            errors[field] = "Enter a valid date of birth";
             invalidForm = true;
           }
           return;
@@ -543,7 +546,6 @@ export const UserAdd = (props: UserProps) => {
               : state.form.alt_phone_number
           ) ?? "",
         date_of_birth: dateQueryString(state.form.date_of_birth),
-        age: Number(dayjs().diff(state.form.date_of_birth, "years", false)),
         doctor_qualification:
           state.form.user_type === "Doctor"
             ? state.form.doctor_qualification

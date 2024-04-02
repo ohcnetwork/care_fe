@@ -143,7 +143,7 @@ export const AddBedForm = ({ facilityId, locationId, bedId }: Props) => {
         title={action}
         backUrl={`/facility/${facilityId}/location/${locationId}/beds`}
         crumbsReplacements={{
-          [facilityId]: { name: location?.facility.name },
+          [facilityId]: { name: location?.facility?.name },
           [locationId]: {
             name: location?.name,
             uri: `/facility/${facilityId}/location`,

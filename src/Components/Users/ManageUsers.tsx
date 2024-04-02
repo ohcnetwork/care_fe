@@ -392,7 +392,7 @@ export default function ManageUsers() {
                         setSelectedUser(user);
                       }}
                     >
-                      <CareIcon className="care-l-hospital text-lg" />
+                      <CareIcon icon="l-hospital" className="text-lg" />
                       <p>Linked Facilities</p>
                     </ButtonV2>
                     <ButtonV2
@@ -403,7 +403,7 @@ export default function ManageUsers() {
                         setSelectedUser(user.username);
                       }}
                     >
-                      <CareIcon className="care-l-award text-xl" />
+                      <CareIcon icon="l-award" className="text-xl" />
                       <p>Linked Skills</p>
                     </ButtonV2>
                   </div>
@@ -420,7 +420,7 @@ export default function ManageUsers() {
                           setWeeklyHours(user.weekly_working_hours);
                         }}
                       >
-                        <CareIcon className="care-l-clock text-xl" />
+                        <CareIcon icon="l-clock" className="text-xl" />
                         <p>Set Average weekly working hours</p>
                       </ButtonV2>
                     </div>
@@ -638,7 +638,16 @@ function UserFacilities(props: { user: any }) {
       pathParams: { username },
       body: { home_facility: facility.id.toString() },
     });
-    if (res && res.status === 200) user.home_facility_object = facility;
+    if (!res?.ok) {
+      Notification.Error({
+        msg: "Error while updating Home facility",
+      });
+    } else {
+      user.home_facility_object = facility;
+      Notification.Success({
+        msg: "Home Facility updated successfully",
+      });
+    }
     await refetchUserFacilities();
     setIsLoading(false);
   };
@@ -649,12 +658,31 @@ function UserFacilities(props: { user: any }) {
       const { res } = await request(routes.clearHomeFacility, {
         pathParams: { username },
       });
-      if (res && res.status === 204) user.home_facility_object = null;
+
+      if (!res?.ok) {
+        Notification.Error({
+          msg: "Error while clearing home facility",
+        });
+      } else {
+        user.home_facility_object = null;
+        Notification.Success({
+          msg: "Home Facility cleared successfully",
+        });
+      }
     } else {
-      await request(routes.deleteUserFacility, {
+      const { res } = await request(routes.deleteUserFacility, {
         pathParams: { username },
         body: { facility: unlinkFacilityData?.facility?.id?.toString() },
       });
+      if (!res?.ok) {
+        Notification.Error({
+          msg: "Error while unlinking home facility",
+        });
+      } else {
+        Notification.Success({
+          msg: "Facility unlinked successfully",
+        });
+      }
     }
     await refetchUserFacilities();
     hideUnlinkFacilityModal();
@@ -667,9 +695,14 @@ function UserFacilities(props: { user: any }) {
       pathParams: { username },
       body: { facility: facility.id.toString() },
     });
-    if (res?.status !== 201) {
+
+    if (!res?.ok) {
       Notification.Error({
         msg: "Error while linking facility",
+      });
+    } else {
+      Notification.Success({
+        msg: "Facility linked successfully",
       });
     }
     await refetchUserFacilities();
@@ -736,7 +769,7 @@ function UserFacilities(props: { user: any }) {
                         })
                       }
                     >
-                      <CareIcon className="care-l-link-broken" />
+                      <CareIcon icon="l-link-broken" />
                       <span className="tooltip-text tooltip-left">
                         {t("clear_home_facility")}
                       </span>
@@ -791,7 +824,7 @@ function UserFacilities(props: { user: any }) {
                                 }
                               }}
                             >
-                              <CareIcon className="care-l-estate" />
+                              <CareIcon icon="l-estate" />
                               <span className="tooltip-text tooltip-left">
                                 Set as home facility
                               </span>
@@ -808,7 +841,7 @@ function UserFacilities(props: { user: any }) {
                                 })
                               }
                             >
-                              <CareIcon className="care-l-link-broken" />
+                              <CareIcon icon="l-link-broken" />
                               <span className="tooltip-text tooltip-left">
                                 Unlink Facility
                               </span>

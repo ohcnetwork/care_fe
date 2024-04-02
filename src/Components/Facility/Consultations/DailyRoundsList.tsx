@@ -13,6 +13,7 @@ import { useSlugs } from "../../../Common/hooks/useSlug";
 import Timeline, { TimelineNode } from "../../../CAREUI/display/Timeline";
 import { useState } from "react";
 import { QueryParams } from "../../../Utils/request/types";
+import { UserRole } from "../../../Common/constants";
 
 interface Props {
   consultation: ConsultationModel;
@@ -41,8 +42,8 @@ export default function DailyRoundsList({ consultation }: Props) {
             />
           </div>
 
-          <div className="flex w-full flex-col gap-4">
-            <div className="flex max-h-[85vh] flex-col gap-4 overflow-y-auto overflow-x-hidden px-3">
+          <div className="flex max-h-screen min-h-full w-full flex-col gap-4">
+            <div className="flex flex-col gap-4 overflow-y-auto overflow-x-hidden px-3">
               <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-gray-200 bg-white p-5 text-center text-2xl font-bold text-gray-500">
                 <span className="flex justify-center rounded-lg bg-white p-3 text-gray-700  ">
                   {t("no_consultation_updates")}
@@ -61,13 +62,14 @@ export default function DailyRoundsList({ consultation }: Props) {
                             type: "created",
                             timestamp: item.taken_at?.toString() ?? "",
                             by: {
-                              user_type: "",
+                              user_type:
+                                "Virtual Nursing Assistant" as UserRole,
                               first_name: "Virtual",
                               last_name: "Assistant",
                               username: "",
-                              id: "",
+                              id: -1,
                               email: "",
-                              last_login: "",
+                              last_login: new Date().toISOString(),
                             },
                             icon: "l-robot",
                           }}
@@ -92,15 +94,7 @@ export default function DailyRoundsList({ consultation }: Props) {
                         event={{
                           type: "created",
                           timestamp: item.taken_at?.toString() ?? "",
-                          by: {
-                            user_type: item.created_by?.user_type ?? "",
-                            first_name: item.created_by?.first_name ?? "",
-                            last_name: item.created_by?.last_name ?? "",
-                            username: "",
-                            id: "",
-                            email: "",
-                            last_login: "",
-                          },
+                          by: item.created_by,
                           icon: "l-user-nurse",
                         }}
                         isLast={items.indexOf(item) == items.length - 1}
@@ -116,9 +110,9 @@ export default function DailyRoundsList({ consultation }: Props) {
                   }}
                 </PaginatedList.Items>
               </Timeline>
-              <div className="flex w-full items-center justify-center">
-                <PaginatedList.Paginator hideIfSinglePage />
-              </div>
+            </div>
+            <div className="flex w-full items-center justify-center">
+              <PaginatedList.Paginator hideIfSinglePage />
             </div>
           </div>
         </>
