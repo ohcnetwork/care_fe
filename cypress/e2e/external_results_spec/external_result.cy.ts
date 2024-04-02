@@ -45,7 +45,7 @@ describe("Edit Profile Testing", () => {
     cy.get("[data-testid=import-file]")
       .selectFile("cypress/fixtures/externalresultsample.csv", { force: true })
       .wait(100);
-    cy.get("#submit").contains("Import").click();
+    cy.submitButton("Import");
     cy.wait("@import").then((interception) => {
       expect(interception.response.statusCode).to.equal(202);
     });
