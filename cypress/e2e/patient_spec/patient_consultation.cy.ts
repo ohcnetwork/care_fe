@@ -99,9 +99,8 @@ describe("Patient Consultation in multiple combination", () => {
     cy.verifyNotification("Consultation created successfully");
     // Below code for the prescription module only present while creating a new consultation
     patientPrescription.clickAddPrescription();
-    patientPrescription.interceptMediaBase();
+    patientPrescription.interceptMedibase();
     patientPrescription.selectMedicinebox();
-    patientPrescription.waitForMediabaseStatusCode();
     patientPrescription.selectMedicine(medicineOne);
     patientPrescription.enterDosage("3");
     patientPrescription.selectDosageFrequency("Twice daily");
