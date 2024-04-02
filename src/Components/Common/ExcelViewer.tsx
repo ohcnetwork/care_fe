@@ -17,7 +17,7 @@ type FilePreviewProps = {
   errors?: { index: number; key: string; error: string }[];
   handleSubmit: (data: ParsedData[]) => void;
   showCheckbox?: boolean;
-  parsedData?: ParsedData[];
+  parsedData: ParsedData[];
 };
 
 const ExcelViewer = ({
@@ -186,7 +186,7 @@ const ExcelViewer = ({
                               </td>
                             )}
                             {Object.entries(row).map(
-                              ([key, value], colIndex) => {
+                              ([key, value]: [string, any], colIndex) => {
                                 const error = errors.find(
                                   (err) =>
                                     err.index === currentRowIndex &&
@@ -200,11 +200,12 @@ const ExcelViewer = ({
                                       className={`
                                   max-w-[150px] overflow-hidden text-ellipsis whitespace-nowrap border px-4 py-2
                                   ${!!error && "text-red-500"}
-                                  }
                                 `}
-                                      title={error ? error.error : value}
+                                      title={
+                                        error ? error.error : String(value)
+                                      }
                                     >
-                                      {value}
+                                      {String(value)}
                                     </td>
                                   </>
                                 );

@@ -78,7 +78,7 @@ const validateAndParse = (
     }
 
     return { [key]: { value: parsedValue } };
-  } catch (error) {
+  } catch (error: any) {
     return { [key]: { value, error: error.message } };
   }
 };

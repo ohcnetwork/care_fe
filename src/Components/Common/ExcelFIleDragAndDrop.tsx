@@ -38,7 +38,7 @@ export default function ExcelFileDragAndDrop({
   const [parsedData, setParsedData] = useState<ParsedData[]>([]);
 
   const { t } = useTranslation();
-  const fileInputRef = useRef(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const closeModal = () => {
     setSelectedFile(undefined);
@@ -100,7 +100,7 @@ export default function ExcelFileDragAndDrop({
   }, [fileData]);
 
   const dragProps = useDragAndDrop();
-  const onDrop = (e) => {
+  const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     dragProps.setDragOver(false);
 
