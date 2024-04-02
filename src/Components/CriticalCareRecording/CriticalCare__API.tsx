@@ -1,4 +1,6 @@
 import { fireRequestV2 } from "../../Redux/fireRequest";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 
 export const loadDailyRound = (
   consultationId: string,
@@ -23,4 +25,23 @@ export const updateDailyRound = (
     consultationId,
     id,
   });
+};
+
+export const getAsset = (consultationId: string) => {
+  return request(routes.listConsultationBeds, {
+    query: { consultation: consultationId },
+  }).then((result) => {
+    console.log(
+      "result: ",
+      result.data?.results[0].assets_objects?.filter(
+        (asset) => asset.asset_class == "VENTILATOR"
+      )
+    );
+    const data = result.data?.results[0].assets_objects?.filter(
+      (asset) => asset.asset_class == "VENTILATOR"
+    );
+    console.log(data?.length);
+    return data?.length;
+  });
+  // return len
 };

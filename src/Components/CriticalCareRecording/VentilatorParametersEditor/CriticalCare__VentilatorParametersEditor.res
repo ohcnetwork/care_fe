@@ -5,6 +5,9 @@ open CriticalCare__Types
 external updateDailyRound: (string, string, Js.Json.t, _ => unit, _ => unit) => unit =
   "updateDailyRound"
 
+@module("../CriticalCare__API")
+external getAsset: (string) => Js.Promise.t<int>  = "getAsset";
+
 open VentilatorParameters
 
 let string_of_int = data => Belt.Option.mapWithDefault(data, "", Js.Int.toString)
@@ -206,6 +209,8 @@ let initialState: VentilatorParameters.t => VentilatorParameters.state = ventila
 @react.component
 let make = (~ventilatorParameters: VentilatorParameters.t, ~id, ~consultationId, ~updateCB) => {
   let (state, send) = React.useReducer(reducer, initialState(ventilatorParameters))
+  let (isOpen, setIsOpen) = React.useState(() => false);
+  let toggleOpen = () => setIsOpen(prevState => !prevState);
 
   let editor = switch state.ventilator_interface {
   | INVASIVE => <CriticalCare__VentilatorParametersEditor__Invasive state send />
@@ -286,6 +291,18 @@ let make = (~ventilatorParameters: VentilatorParameters.t, ~id, ~consultationId,
         className="btn btn-primary btn-large w-full">
         {str("Update Details")}
       </button>
+      <DialogModal
+        title={str("This is for testing")} 
+        show={isOpen}
+        onClose = {_ => toggleOpen()}
+        className="md:max-w-3xl"
+        >
+        <Beds
+        patientId = {id}
+        consultationId = {consultationId}
+        setState = {_ => toggleOpen()}
+        />
+      </DialogModal>
     </div>
   </div>
 }
