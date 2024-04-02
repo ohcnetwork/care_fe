@@ -429,3 +429,10 @@ export const mergeQueryOptions = <T extends object>(
     ),
   ];
 };
+
+export const properRoundOf = (value: number) => {
+  if (value % 1 === 0) {
+    return value.toFixed();
+  }
+  return value.toFixed(2);
+};
