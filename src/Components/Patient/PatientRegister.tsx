@@ -223,7 +223,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   useEffect(() => {
     if (extId && formField) {
       setCareExtId(extId);
-      fetchExtResultData(null, formField);
+      fetchExtResultData(formField);
     }
   }, [careExtId, formField]);
 
@@ -285,8 +285,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     }
   };
 
-  const fetchExtResultData = async (e: any, field: any) => {
-    if (e) e.preventDefault();
+  const fetchExtResultData = async (field: any) => {
     if (!careExtId) return;
     const { res, data } = await request(routes.externalResult, {
       pathParams: { id: careExtId },
@@ -312,10 +311,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         value: data.gender
           ? parseGenderFromExt(data.gender, state.form.gender)
           : state.form.gender,
-      });
-      field.onChange({
-        name: "occupation",
-        value: data.meta_info?.occupation ?? state.form.occupation,
       });
       field.onChange({
         name: "test_id",
@@ -415,7 +410,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             local_body: data.local_body ? data.local_body : "",
             ward: data.ward_object ? data.ward_object.id : undefined,
             village: data.village ? data.village : "",
-            medical_history: [],
+            medical_history: [] as number[],
             is_antenatal: String(!!data.is_antenatal),
             allergies: data.allergies ? data.allergies : "",
             pincode: data.pincode ? data.pincode : "",
@@ -470,8 +465,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               );
               if (medicalHistory) {
                 formData.medical_history.push(Number(medicalHistory.id));
-                formData[`medical_history_${String(medicalHistory.id)}`] =
-                  i.details;
+                (formData as any)[
+                  `medical_history_${String(medicalHistory.id)}`
+                ] = i.details;
               }
             }
           );
@@ -1165,25 +1161,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     Cancel Import
                   </button>
                 </div>
-              </div>
-            )}
-            <>
-              <div className={`${showImport.show && "hidden"}`}>
-                <Form<PatientModel>
-                  defaults={id ? state.form : initForm}
-                  validate={validateForm}
-                  onSubmit={handleSubmit}
-                  submitLabel={buttonText}
-                  onCancel={() => navigate("/facility")}
-                  className="bg-transparent px-1 py-2 md:px-2"
-                  onDraftRestore={(newState) => {
-                    dispatch({ type: "set_state", state: newState });
-                    Promise.all([
-                      fetchDistricts(newState.form.state ?? 0),
-                      fetchLocalBody(newState.form.district?.toString() ?? ""),
-                      fetchWards(newState.form.local_body?.toString() ?? ""),
-                      duplicateCheck(newState.form.phone_number ?? ""),
-                    ]);
+                <button
+                  id="submit-importexternalresult-button"
+                  className="btn btn-primary mr-4"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    fetchExtResultData(showImport?.field?.("name"));
                   }}
                   noPadding
                 >

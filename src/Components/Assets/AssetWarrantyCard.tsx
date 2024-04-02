@@ -62,7 +62,7 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
             </div>
           ))}
         </div>
-        <div className="mb-2 hidden h-[1px] w-full bg-white/40 xl:block" />
+        <div className="mb-2 hidden h-px w-full bg-white/40 xl:block" />
         <div className="shrink-0">
           <div>
             <div className="mb-1 text-xs uppercase italic tracking-widest text-gray-200">
