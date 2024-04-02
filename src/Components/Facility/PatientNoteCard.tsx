@@ -1,10 +1,6 @@
 import { relativeDate, formatDateTime, classNames } from "../../Utils/utils";
 import { USER_TYPES_MAP } from "../../Common/constants";
-import {
-  PatientNoteStateType,
-  PatientNotesEditModel,
-  PatientNotesModel,
-} from "./models";
+import { PatientNotesEditModel, PatientNotesModel } from "./models";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useState } from "react";
@@ -16,18 +12,18 @@ import { t } from "i18next";
 import dayjs from "dayjs";
 import Spinner from "../Common/Spinner";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import useSlug from "../../Common/hooks/useSlug";
 
 const PatientNoteCard = ({
-  state,
   note,
   setReload,
   disableEdit,
 }: {
-  state: PatientNoteStateType;
   note: PatientNotesModel;
   setReload: any;
   disableEdit?: boolean;
 }) => {
+  const patientId = useSlug("patient");
   const [isEditing, setIsEditing] = useState(false);
   const [noteField, setNoteField] = useState(note.note);
   const [showEditHistory, setShowEditHistory] = useState(false);
@@ -36,7 +32,7 @@ const PatientNoteCard = ({
 
   const fetchEditHistory = async () => {
     const { res, data } = await request(routes.getPatientNoteEditHistory, {
-      pathParams: { patientId: state.patientId, noteId: note.id },
+      pathParams: { patientId, noteId: note.id },
     });
     if (res?.status === 200) {
       setEditHistory(data?.results ?? []);
@@ -59,7 +55,7 @@ const PatientNoteCard = ({
     }
 
     const { res } = await request(routes.updatePatientNote, {
-      pathParams: { patientId: state.patientId, noteId: note.id },
+      pathParams: { patientId, noteId: note.id },
       body: payload,
     });
     if (res?.status === 200) {

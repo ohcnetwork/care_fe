@@ -26,7 +26,7 @@ const AssetConfigure = ({ assetId, facilityId }: AssetConfigureProps) => {
       <Page
         title={`Configure HL7 Monitor: ${asset.name}`}
         crumbsReplacements={{
-          [facilityId]: { name: asset.location_object.facility.name },
+          [facilityId]: { name: asset.location_object.facility?.name },
           assets: { uri: `/assets?facility=${facilityId}` },
           [assetId]: { name: asset?.name },
         }}
@@ -42,7 +42,7 @@ const AssetConfigure = ({ assetId, facilityId }: AssetConfigureProps) => {
       <Page
         title={`Configure Ventilator: ${asset?.name}`}
         crumbsReplacements={{
-          [facilityId]: { name: asset?.location_object.facility.name },
+          [facilityId]: { name: asset?.location_object.facility?.name },
           assets: { uri: `/assets?facility=${facilityId}` },
           [assetId]: { name: asset?.name },
         }}
@@ -57,7 +57,7 @@ const AssetConfigure = ({ assetId, facilityId }: AssetConfigureProps) => {
     <Page
       title={`Configure ONVIF Camera: ${asset?.name}`}
       crumbsReplacements={{
-        [facilityId]: { name: asset?.location_object.facility.name },
+        [facilityId]: { name: asset?.location_object.facility?.name },
         assets: { uri: `/assets?facility=${facilityId}` },
         [assetId]: { name: asset?.name },
       }}

@@ -282,16 +282,23 @@ export const DailyRoundTypes = [
   "TELEMEDICINE",
 ] as const;
 
+export interface BloodPressure {
+  diastolic?: number;
+  mean?: number;
+  systolic?: number;
+}
+
 export interface DailyRoundsModel {
   ventilator_spo2?: number;
+  ventilator_interface?:
+    | "UNKNOWN"
+    | "OXYGEN_SUPPORT"
+    | "NON_INVASIVE"
+    | "INVASIVE";
   spo2?: string;
   rhythm?: string;
   rhythm_detail?: string;
-  bp?: {
-    diastolic?: number;
-    mean?: number;
-    systolic?: number;
-  };
+  bp?: BloodPressure;
   pulse?: number;
   resp?: number;
   temperature?: string;
@@ -307,7 +314,7 @@ export interface DailyRoundsModel {
   other_symptoms?: string;
   admitted_to?: string;
   patient_category?: PatientCategory;
-  output?: DailyRoundsOutput;
+  output?: DailyRoundsOutput[];
   recommend_discharge?: boolean;
   created_date?: string;
   modified_date?: string;
@@ -323,16 +330,8 @@ export interface DailyRoundsModel {
   rounds_type?: (typeof DailyRoundTypes)[number];
   last_updated_by_telemedicine?: boolean;
   created_by_telemedicine?: boolean;
-  created_by?: {
-    first_name?: string;
-    last_name?: string;
-    user_type?: string;
-  };
-  last_edited_by?: {
-    first_name?: string;
-    last_name?: string;
-    user_type?: string;
-  };
+  created_by?: PerformedByModel;
+  last_edited_by?: PerformedByModel;
   bed?: string;
 }
 
