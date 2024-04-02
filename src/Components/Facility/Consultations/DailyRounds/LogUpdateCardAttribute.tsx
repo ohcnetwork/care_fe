@@ -1,5 +1,10 @@
 import PatientCategoryBadge from "../../../Common/PatientCategoryBadge";
-import { DailyRoundsModel } from "../../../Patient/models";
+import {
+  BloodPressure,
+  DailyRoundsModel,
+  DailyRoundsOutput,
+} from "../../../Patient/models";
+import { PatientCategory } from "../../models";
 
 interface Props<T extends keyof DailyRoundsModel> {
   attributeKey: T;
@@ -28,7 +33,7 @@ const LogUpdateCardAttribute = <T extends keyof DailyRoundsModel>({
       return (
         <div className="flex flex-col items-center gap-2 md:flex-row">
           <AttributeLabel attributeKey={attributeKey} />
-          <PatientCategoryBadge category={attributeValue} />
+          <PatientCategoryBadge category={attributeValue as PatientCategory} />
         </div>
       );
 
@@ -37,7 +42,8 @@ const LogUpdateCardAttribute = <T extends keyof DailyRoundsModel>({
         <div className="flex flex-col items-center gap-2 md:flex-row">
           <AttributeLabel attributeKey={attributeKey} />
           <span className="text-sm font-semibold text-gray-700">
-            {attributeValue.systolic}/{attributeValue.diastolic} mmHg
+            {(attributeValue as BloodPressure).systolic}/
+            {(attributeValue as BloodPressure).diastolic} mmHg
           </span>
         </div>
       );
@@ -47,7 +53,7 @@ const LogUpdateCardAttribute = <T extends keyof DailyRoundsModel>({
         <div className="flex flex-col gap-2 md:flex-row">
           <AttributeLabel attributeKey={attributeKey} />
           <span className="flex flex-wrap gap-x-2 gap-y-1 text-sm text-gray-700">
-            {attributeValue.map((output: any) => (
+            {(attributeValue as DailyRoundsOutput[]).map((output) => (
               <span className="font-semibold" key={output.name}>
                 {output.name}: {output.quantity}
               </span>

@@ -13,7 +13,7 @@ const OtpFormField = ({ length = 6, ...props }: TextAreaFormFieldProps) => {
   const inputs = useRef<Record<number, HTMLInputElement | null>>({});
 
   return (
-    <FormField props={props}>
+    <FormField field={props}>
       <div className="flex items-center justify-evenly">
         {new Array(length).fill(null).map((_, i) => (
           <input
