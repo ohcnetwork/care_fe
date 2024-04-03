@@ -124,7 +124,7 @@ export const Mews = ({ mewsField }: { mewsField: MewsFieldModel }) => {
                     .toLowerCase()}
                 </span>
               </p>
-              Last Updated: {formatDateTime(mewsField?.modified_date)}
+              Last Updated: {formatDateTime(mewsField.modified_date)}
             </div>
           </div>
           <div></div>
