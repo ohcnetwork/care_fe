@@ -240,11 +240,7 @@ export const FileUpload = (props: FileUploadProps) => {
         const permissions = await navigator.permissions.query({
           name: "microphone" as PermissionName,
         });
-        if (permissions.state === "granted") {
-          setIsMicPermission(true);
-        } else {
-          setIsMicPermission(false);
-        }
+        setIsMicPermission(permissions.state === "granted");
       } catch (error) {
         setIsMicPermission(false);
       }
