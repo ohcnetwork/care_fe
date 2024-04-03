@@ -15,7 +15,12 @@ import { useState } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon.js";
 import useConfig from "../../Common/hooks/useConfig.js";
 import dayjs from "../../Utils/dayjs.js";
-import { classNames, formatDate, formatDateTime } from "../../Utils/utils.js";
+import {
+  classNames,
+  formatDate,
+  formatDateTime,
+  formatPatientAge,
+} from "../../Utils/utils.js";
 import ABHAProfileModal from "../ABDM/ABHAProfileModal.js";
 import LinkABHANumberModal from "../ABDM/LinkABHANumberModal.js";
 import LinkCareContextModal from "../ABDM/LinkCareContextModal.js";
@@ -217,7 +222,7 @@ export default function PatientInfoCard(props: {
               >
                 {patient.name}
                 <div className="ml-3 mr-2 mt-[6px] text-sm font-semibold text-gray-600">
-                  {patient.age} years • {patient.gender}
+                  {formatPatientAge(patient, true)} • {patient.gender}
                 </div>
                 <div className="mr-3 flex flex-col items-center">
                   <Link
@@ -262,7 +267,7 @@ export default function PatientInfoCard(props: {
               >
                 {patient.name}
                 <div className="ml-3 mr-2 mt-[6px] text-sm font-semibold text-gray-600">
-                  {patient.age} years • {patient.gender}
+                  {formatPatientAge(patient, true)} • {patient.gender}
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2 text-sm sm:flex-row">
