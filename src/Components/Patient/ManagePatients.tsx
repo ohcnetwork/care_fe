@@ -31,7 +31,7 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import SearchInput from "../Form/SearchInput";
 import SortDropdownMenu from "../Common/SortDropdown";
 import SwitchTabs from "../Common/components/SwitchTabs";
-import { formatAge, parsePhoneNumber } from "../../Utils/utils.js";
+import { formatPatientAge, parsePhoneNumber } from "../../Utils/utils.js";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page.js";
@@ -531,7 +531,7 @@ export const PatientManager = () => {
                 >
                   <span className="text-xl capitalize">{patient.name}</span>
                   <span className="text-gray-800">
-                    {formatAge(patient.age, patient.date_of_birth, true)}
+                    {formatPatientAge(patient, true)}
                   </span>
                 </div>
               </div>
