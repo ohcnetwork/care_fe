@@ -42,6 +42,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientConsultationPage.selectPatientSuggestion("Domiciliary Care");
     cy.submitButton("Update Consultation");
     cy.verifyNotification("Consultation updated successfully");
+    cy.closeNotification();
     patientLogupdate.clickLogupdate();
     patientLogupdate.typePhysicalExamination(physicalExamination);
     patientLogupdate.typeOtherDetails(otherExamination);
@@ -79,6 +80,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientConsultationPage.selectPatientSuggestion("Domiciliary Care");
     cy.submitButton("Update Consultation");
     cy.verifyNotification("Consultation updated successfully");
+    cy.closeNotification();
     patientLogupdate.clickLogupdate();
     patientLogupdate.typePhysicalExamination(physicalExamination);
     patientLogupdate.typeOtherDetails(otherExamination);
@@ -95,6 +97,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.get("#consciousness_level-2").click();
     cy.submitButton("Save");
     cy.verifyNotification("Consultation Updates details created successfully");
+    cy.closeNotification();
     // edit the card and verify the data.
     patientLogupdate.clickLogupdateCard("#dailyround-entry", patientCategory);
     cy.verifyContentPresence("#consultation-preview", [
@@ -144,6 +147,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeRhythm(patientRhythm);
     cy.get("#consciousness_level-2").click();
     cy.submitButton("Save");
+    cy.wait(2000);
     cy.verifyNotification("Consultation Updates details created successfully");
     // Verify the card content
     cy.get("#basic-information").scrollIntoView();
