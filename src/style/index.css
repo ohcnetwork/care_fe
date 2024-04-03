@@ -1273,3 +1273,6 @@ input[type="number"] {
     color: #2856ff;
     font-size: 1rem;
 }
+.empty-height{
+    height: 75px;
+}
