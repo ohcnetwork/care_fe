@@ -1531,7 +1531,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         reset={resetRecording}
                         setResetRecording={setResetRecording}
                         handleSetMicPermission={setIsMicPermission}
-                    />
+                      />
                       {!audioBlobExists && !isMicPermission && (
                         <span className="text-sm font-medium text-warning-500">
                           <CareIcon
