@@ -38,6 +38,7 @@ import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
 import { IShift } from "./models.js";
 import request from "../../Utils/request/request.js";
+import { PatientModel } from "../Patient/models.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -196,14 +197,10 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         origin_facility: state.form.origin_facility_object?.id,
         shifting_approving_facility:
           state.form?.shifting_approving_facility_object?.id,
-        assigned_facility:
-          state.form?.assigned_facility_object?.id != -1
-            ? state.form?.assigned_facility_object?.id
-            : null,
-        assigned_facility_external:
-          state.form?.assigned_facility_object?.id === -1
-            ? state.form?.assigned_facility_object?.name
-            : null,
+        assigned_facility: state.form?.assigned_facility_object?.id,
+        assigned_facility_external: !state.form?.assigned_facility_object?.id
+          ? state.form?.assigned_facility_object?.name
+          : null,
         patient: state.form.patient_object?.id,
         emergency: [true, "true"].includes(state.form.emergency),
         is_kasp: [true, "true"].includes(state.form.is_kasp),
@@ -251,17 +248,19 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     onResponse: ({ res, data }) => {
       if (res?.ok && data) {
         const d = data;
-        setConsultationData(d.patient.last_consultation as ConsultationModel);
+        setConsultationData(
+          (d.patient as PatientModel).last_consultation as ConsultationModel
+        );
         if (d.assigned_facility_external)
           d["assigned_facility_object"] = {
-            id: -1,
             name: String(data.assigned_facility_external),
           };
         d["initial_status"] = data.status;
         d["status"] = qParams.status || data.status;
         const patient_category =
-          d.patient.last_consultation?.last_daily_round?.patient_category ??
-          d.patient.last_consultation?.category;
+          (d.patient as PatientModel).last_consultation?.last_daily_round
+            ?.patient_category ??
+          (d.patient as PatientModel).last_consultation?.category;
         d["patient_category"] =
           PATIENT_CATEGORIES.find((c) => c.text === patient_category)?.id ?? "";
         dispatch({ type: "set_form", form: d });

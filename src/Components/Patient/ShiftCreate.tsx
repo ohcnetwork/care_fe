@@ -202,17 +202,11 @@ export const ShiftCreate = (props: patientShiftProps) => {
       const data = {
         status: wartime_shifting ? "PENDING" : "APPROVED",
         origin_facility: props.facilityId,
-        shifting_approving_facility: (
-          state.form.shifting_approving_facility || {}
-        ).id,
-        assigned_facility:
-          state.form?.assigned_facility?.id != -1
-            ? state.form?.assigned_facility?.id
-            : null,
-        assigned_facility_external:
-          state.form?.assigned_facility?.id === -1
-            ? state.form?.assigned_facility?.name
-            : null,
+        shifting_approving_facility: state.form.shifting_approving_facility?.id,
+        assigned_facility: state.form?.assigned_facility?.id,
+        assigned_facility_external: !state.form?.assigned_facility?.id
+          ? state.form?.assigned_facility?.name
+          : null,
         patient: props.patientId,
         emergency: state.form.emergency === "true",
         is_up_shift: state.form.is_up_shift === "true",

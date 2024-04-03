@@ -181,7 +181,7 @@ export default function ListView() {
           </div>
           <div className="flex w-full flex-col gap-2 lg:w-fit lg:flex-row lg:gap-4">
             <ButtonV2 className="py-[11px]" onClick={onBoardViewBtnClick}>
-              <CareIcon className="care-l-list-ul rotate-90" />
+              <CareIcon icon="l-list-ul" className="rotate-90" />
               {t("board_view")}
             </ButtonV2>
 
