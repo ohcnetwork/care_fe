@@ -1,4 +1,3 @@
-import { DailyRoundsModel } from "../../Patient/models";
 import { formatDateTime } from "../../../Utils/utils";
 
 const getRespScore = (value?: number) => {
@@ -62,7 +61,7 @@ const getLOCLabel = (value: number) => {
   return LOC[LOCindex];
 };
 
-const getLOCRange = (value?: DailyRoundsModel["consciousness_level"]) => {
+const getLOCRange = (value: string | undefined) => {
   if (!value) return;
 
   return {
