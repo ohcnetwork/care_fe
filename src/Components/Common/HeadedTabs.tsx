@@ -42,6 +42,7 @@ export default function HeadedTabs(props: headedTabsProps) {
             {tabs.map((tab) => (
               <div
                 key={tab.name}
+                id={tab.name.split(" ").join("-").toLowerCase()}
                 className={`${
                   tab.value === currentTabState
                     ? "border-primary-500 text-primary-600"
