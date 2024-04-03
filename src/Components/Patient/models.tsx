@@ -288,6 +288,22 @@ export interface BloodPressure {
   systolic?: number;
 }
 
+export interface MewsFieldModel {
+  bp?: BloodPressure;
+  pulse?: number;
+  resp?: number;
+  temperature?: string;
+  consciousness_level?:
+    | "UNRESPONSIVE"
+    | "RESPONDS_TO_PAIN"
+    | "RESPONDS_TO_VOICE"
+    | "ALERT"
+    | "AGITATED_OR_CONFUSED"
+    | "ONSET_OF_AGITATION_AND_CONFUSION"
+    | "UNKNOWN";
+  modified_date?: string;
+}
+
 export interface DailyRoundsModel {
   ventilator_spo2?: number;
   ventilator_interface?:

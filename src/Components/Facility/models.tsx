@@ -9,7 +9,11 @@ import { InvestigationType } from "../Common/prescription-builder/InvestigationB
 import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
-import { AssignedToObjectModel, DailyRoundsModel } from "../Patient/models";
+import {
+  AssignedToObjectModel,
+  DailyRoundsModel,
+  MewsFieldModel,
+} from "../Patient/models";
 import { UserBareMinimum } from "../Users/models";
 import { ConsentRecord } from "./ConsultationForm";
 
@@ -129,6 +133,7 @@ export interface ConsultationModel {
   referred_from_facility_object?: FacilityModel;
   referred_from_facility_external?: string;
   referred_by_external?: string;
+  mews_field?: MewsFieldModel;
   transferred_from_location?: LocationModel["id"];
   transferred_from_location_object?: LocationModel;
   suggestion?: ConsultationSuggestionValue;

@@ -1,5 +1,6 @@
 import { formatDateTime } from "../../../Utils/utils";
-
+import { MewsFieldModel } from "../../Patient/models";
+// import { mewsFieldsModel } from "../../Patient/models";
 const getRespScore = (value?: number) => {
   if (typeof value !== "number") return;
 
@@ -44,24 +45,7 @@ const getTempRange = (value?: number) => {
   return 2;
 };
 
-const getLOCLabel = (value: number) => {
-  if (value % 5 != 0 || (value > 30 && value < 0)) {
-    return;
-  }
-  const LOC = [
-    "UNKNOWN",
-    "ALERT",
-    "RESPONDS_TO_VOICE",
-    "RESPONDS_TO_PAIN",
-    "UNRESPONSIVE",
-    "AGITATED_OR_CONFUSED",
-    "ONSET_OF_AGITATION_AND_CONFUSION",
-  ];
-  const LOCindex = value / 5;
-  return LOC[LOCindex];
-};
-
-const getLOCRange = (value: string | undefined) => {
+const getLOCRange = (value: MewsFieldModel["consciousness_level"]) => {
   if (!value) return;
 
   return {
@@ -83,7 +67,7 @@ const getBorderColor = (score: number) => {
   return "border-danger-500";
 };
 
-export const Mews = ({ dailyRound, modified_date }: any) => {
+export const Mews = ({ mewsField }: { mewsField: MewsFieldModel }) => {
   const mewsCard = (isMissing: boolean, data: string[] | number) => {
     if (isMissing) {
       return (
@@ -96,7 +80,10 @@ export const Mews = ({ dailyRound, modified_date }: any) => {
             <div className="tooltip-text tooltip-bottom w-48 -translate-x-1/2 translate-y-3 whitespace-pre-wrap text-xs font-medium lg:w-64">
               <span className="font-bold">{(data as string[]).join(", ")}</span>{" "}
               data is missing from the last log update.
-              <br /> Last Updated: {formatDateTime(modified_date)}
+              <br />{" "}
+              {mewsField.modified_date
+                ? `Last Updated: ${formatDateTime(mewsField.modified_date)}`
+                : "No log is updated in last 30 min"}
             </div>
           </div>
           <div></div>
@@ -116,29 +103,28 @@ export const Mews = ({ dailyRound, modified_date }: any) => {
             <span className="mt-1 text-xs font-medium text-gray-700">MEWS</span>
             <div className="tooltip-text tooltip-bottom w-48 -translate-x-1/2 translate-y-3 whitespace-pre-wrap text-xs font-medium lg:w-64">
               <p>
-                Resp. Rate: <span className="font-bold">{dailyRound.resp}</span>
+                Resp. Rate: <span className="font-bold">{mewsField.resp}</span>
               </p>
               <p>
-                Heart Rate:{" "}
-                <span className="font-bold">{dailyRound.pulse}</span>
+                Heart Rate: <span className="font-bold">{mewsField.pulse}</span>
               </p>
               <p>
                 Systolic BP:{" "}
-                <span className="font-bold">{dailyRound.bp?.systolic}</span>
+                <span className="font-bold">{mewsField.bp?.systolic}</span>
               </p>
               <p>
                 Temperature:{" "}
-                <span className="font-bold">{dailyRound.temperature}</span>
+                <span className="font-bold">{mewsField.temperature}</span>
               </p>
               <p>
                 Consciousness:{" "}
                 <span className="font-bold capitalize">
-                  {getLOCLabel(dailyRound.consciousness_level)
+                  {mewsField.consciousness_level
                     ?.replaceAll("_", " ")
                     .toLowerCase()}
                 </span>
               </p>
-              Last Updated: {formatDateTime(modified_date)}
+              Last Updated: {formatDateTime(mewsField?.modified_date)}
             </div>
           </div>
           <div></div>
@@ -148,15 +134,13 @@ export const Mews = ({ dailyRound, modified_date }: any) => {
   };
 
   const scores = {
-    "Respiratory rate": getRespScore(dailyRound.resp),
-    "Heart rate": getHeartRateScore(dailyRound.pulse),
-    "Systolic BP": getSystolicBPScore(dailyRound.bp?.systolic),
+    "Respiratory rate": getRespScore(mewsField.resp),
+    "Heart rate": getHeartRateScore(mewsField.pulse),
+    "Systolic BP": getSystolicBPScore(mewsField.bp?.systolic),
     Temperature: getTempRange(
-      dailyRound.temperature ? parseFloat(dailyRound.temperature) : undefined
+      mewsField.temperature ? parseFloat(mewsField.temperature) : undefined
     ),
-    "Level of Consciousness": getLOCRange(
-      getLOCLabel(dailyRound.consciousness_level)
-    ),
+    "Level of Consciousness": getLOCRange(mewsField.consciousness_level),
   };
 
   if (Object.values(scores).some((value) => value === undefined)) {
