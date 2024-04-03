@@ -61,6 +61,7 @@ import useAuthUser from "../../Common/hooks/useAuthUser.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
+import SelectMenuV2 from "../Form/SelectMenuV2.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -92,6 +93,7 @@ const vaccines = ["Select", ...VACCINES];
 const initForm: any = {
   name: "",
   age: "",
+  year_of_birth: "",
   gender: "",
   phone_number: "+91",
   emergency_phone_number: "+91",
@@ -204,6 +206,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const [districts, setDistricts] = useState<any[]>([]);
   const [localBody, setLocalBody] = useState<any[]>([]);
   const [ward, setWard] = useState<any[]>([]);
+  const [ageInputType, setAgeInputType] = useState<
+    "date_of_birth" | "age" | "alert_for_age"
+  >("date_of_birth");
   const [statusDialog, setStatusDialog] = useState<{
     show?: boolean;
     transfer?: boolean;
@@ -392,8 +397,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       if (!status.aborted) {
         if (res?.ok && data) {
           setPatientName(data.name || "");
+          if (!data.date_of_birth) {
+            setAgeInputType("age");
+          }
           const formData = {
             ...data,
+            age: data.year_of_birth
+              ? new Date().getFullYear() - data.year_of_birth
+              : "",
             health_id_number: data.abha_number_object?.abha_number || "",
             health_id: data.abha_number_object?.health_id || "",
             nationality: data.nationality ? data.nationality : "India",
@@ -464,9 +475,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               );
               if (medicalHistory) {
                 formData.medical_history.push(Number(medicalHistory.id));
-                (formData as any)[
-                  `medical_history_${String(medicalHistory.id)}`
-                ] = i.details;
+                (formData as any)[`medical_history_${medicalHistory.id}`] =
+                  i.details;
               }
             }
           );
@@ -534,9 +544,34 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         case "address":
         case "name":
         case "gender":
-        case "date_of_birth":
           errors[field] = RequiredFieldValidator()(form[field]);
           return;
+        case "age":
+        case "date_of_birth": {
+          const field = ageInputType === "age" ? "age" : "date_of_birth";
+
+          errors[field] = RequiredFieldValidator()(form[field]);
+          if (errors[field]) {
+            return;
+          }
+
+          if (field === "age") {
+            if (form.age < 0) {
+              errors.age = "Age cannot be less than 0";
+              return;
+            }
+
+            form.date_of_birth = null;
+            form.year_of_birth = new Date().getFullYear() - form.age;
+          }
+
+          if (field === "date_of_birth") {
+            form.age = null;
+            form.year_of_birth = null;
+          }
+
+          return;
+        }
         case "permanent_address":
           if (!form.sameAddress) {
             errors[field] = RequiredFieldValidator()(form[field]);
@@ -711,7 +746,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       abha_number: state.form.abha_number,
       phone_number: parsePhoneNumber(formData.phone_number),
       emergency_phone_number: parsePhoneNumber(formData.emergency_phone_number),
-      date_of_birth: dateQueryString(formData.date_of_birth),
+      date_of_birth:
+        ageInputType === "date_of_birth"
+          ? dateQueryString(formData.date_of_birth)
+          : null,
+      year_of_birth: ageInputType === "age" ? formData.year_of_birth : null,
       disease_status: formData.disease_status,
       date_of_test: formData.date_of_test ? formData.date_of_test : undefined,
       date_of_result: formData.date_of_result
@@ -1138,7 +1177,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           )}
           <>
             <div className={`${showImport.show && "hidden"}`}>
-              <Form<PatientModel>
+              <Form<PatientModel & { age?: number }>
                 defaults={id ? state.form : initForm}
                 validate={validateForm}
                 onSubmit={handleSubmit}
@@ -1284,18 +1323,116 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               label={"Name"}
                             />
                           </div>
-                          <div
-                            data-testid="date-of-birth"
-                            id="date_of_birth-div"
-                          >
-                            <DateFormField
-                              containerClassName="w-full"
-                              {...field("date_of_birth")}
-                              label="Date of Birth"
-                              required
-                              position="LEFT"
-                              disableFuture
+                          <div>
+                            <FieldLabel required>
+                              {ageInputType === "age" ? "Age" : "Date of Birth"}
+                            </FieldLabel>
+                            <div className="flex w-full items-center gap-2">
+                              <SelectMenuV2
+                                id="patientAge"
+                                className="w-44 lg:w-32"
+                                options={
+                                  [
+                                    {
+                                      value: "date_of_birth",
+                                      text: "D.O.B.",
+                                    },
+                                    { value: "age", text: "Age" },
+                                  ] as const
+                                }
+                                required
+                                optionLabel={(o) => o.text}
+                                optionValue={(o) =>
+                                  o.value === "date_of_birth"
+                                    ? "date_of_birth"
+                                    : "age"
+                                }
+                                value={ageInputType}
+                                onChange={(v) => {
+                                  if (
+                                    v === "age" &&
+                                    ageInputType === "date_of_birth"
+                                  ) {
+                                    setAgeInputType("alert_for_age");
+                                    return;
+                                  }
+                                  setAgeInputType(v);
+                                }}
+                              />
+                              <div className="w-full">
+                                {ageInputType !== "age" ? (
+                                  <div
+                                    data-testid="date-of-birth"
+                                    id="date_of_birth-div"
+                                    className="w-full"
+                                  >
+                                    <DateFormField
+                                      className="w-full"
+                                      containerClassName="w-full"
+                                      {...field("date_of_birth")}
+                                      errorClassName="hidden"
+                                      required
+                                      position="LEFT"
+                                      disableFuture
+                                    />
+                                  </div>
+                                ) : (
+                                  <div id="age-div">
+                                    <TextFormField
+                                      {...field("age")}
+                                      errorClassName="hidden"
+                                      trailing={
+                                        <p className="absolute right-16 text-xs text-gray-700 sm:text-sm">
+                                          <p className="hidden  sm:inline min-[768px]:hidden lg:inline">
+                                            {field("age").value !== "" &&
+                                              "Year_of_Birth:"}
+                                          </p>
+                                          <span className="font-bold">
+                                            {field("age").value !== "" &&
+                                              new Date().getFullYear() -
+                                                field("age").value}
+                                          </span>
+                                        </p>
+                                      }
+                                      placeholder="Enter the age"
+                                      className="col-span-6 sm:col-span-3"
+                                      type="number"
+                                      min={0}
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <FieldErrorText
+                              error={
+                                field("age").error ||
+                                field("date_of_birth").error
+                              }
                             />
+                            <div id="age-confirm-dialog">
+                              <ConfirmDialog
+                                title={"Alert!"}
+                                description={
+                                  <div>
+                                    <div>
+                                      While entering a patient's age is an
+                                      option, please note that only the year of
+                                      birth will be captured from this
+                                      information.
+                                    </div>
+                                    <b>
+                                      Recommended only when the patient's date
+                                      of birth is unknown
+                                    </b>
+                                  </div>
+                                }
+                                action="Confirm"
+                                variant="warning"
+                                show={ageInputType == "alert_for_age"}
+                                onClose={() => setAgeInputType("date_of_birth")}
+                                onConfirm={() => setAgeInputType("age")}
+                              />
+                            </div>
                           </div>
                           <div data-testid="Gender" id="gender-div">
                             <SelectFormField
