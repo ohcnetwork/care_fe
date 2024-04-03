@@ -588,12 +588,6 @@ export const FileUpload = (props: FileUploadProps) => {
     setbtnloader(false);
   };
 
-  const handleSetMicPermission: (isPermitted: boolean) => void = (
-    isPermitted
-  ) => {
-    setIsMicPermission(isPermitted);
-  };
-
   const renderFileUpload = (item: FileUploadModel) => {
     const isPreviewSupported = previewExtensions.includes(item.extension ?? "");
     return (
