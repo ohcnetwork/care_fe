@@ -1,6 +1,5 @@
 import { formatDateTime } from "../../../Utils/utils";
 import { MewsFieldModel } from "../../Patient/models";
-// import { mewsFieldsModel } from "../../Patient/models";
 const getRespScore = (value?: number) => {
   if (typeof value !== "number") return;
 
