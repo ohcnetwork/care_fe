@@ -468,12 +468,11 @@ export default function PatientInfoCard(props: {
           className="col-span-2 flex w-full flex-col items-center justify-center gap-2 px-4 py-1 lg:col-span-1 2xl:flex-row"
           id="consultation-buttons"
         >
-          {consultation?.last_daily_round?.modified_date &&
-            consultation?.mews_field && (
-              <div className="col-span-1 flex w-full justify-center bg-white px-4 lg:flex-row">
-                <Mews mewsField={consultation?.mews_field} />
-              </div>
-            )}
+          {consultation?.mews_field && (
+            <div className="col-span-1 flex w-full justify-center bg-white px-4 lg:flex-row">
+              <Mews mewsField={consultation.mews_field} />
+            </div>
+          )}
           {!!consultation?.discharge_date && (
             <div className="flex min-w-max flex-col items-center justify-center">
               <div className="text-sm font-normal leading-5 text-gray-500">
