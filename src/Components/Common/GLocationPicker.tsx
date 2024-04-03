@@ -209,7 +209,7 @@ const Map: React.FC<MapProps> = ({
           id="pac-input"
           ref={searchRef}
           type="text"
-          className="cui-input-base peer m-[10px] w-[60%] py-2.5"
+          className="cui-input-base peer m-[10px] w-3/5 py-2.5"
           placeholder="Start typing to search"
         />
         {handleOnClose && (

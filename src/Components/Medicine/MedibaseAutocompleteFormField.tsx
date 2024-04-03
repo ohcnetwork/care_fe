@@ -1,7 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Switch from "../../CAREUI/interactive/Switch";
-import { useAsyncOptions } from "../../Common/hooks/useAsyncOptions";
-import { listMedibaseMedicines } from "../../Redux/actions";
 import { Autocomplete } from "../Form/FormFields/Autocomplete";
 import FormField from "../Form/FormFields/FormField";
 import {
@@ -9,20 +7,21 @@ import {
   useFormFieldPropsResolver,
 } from "../Form/FormFields/Utils";
 import { MedibaseMedicine } from "./models";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import { mergeQueryOptions } from "../../Utils/utils";
 
 export default function MedibaseAutocompleteFormField(
   props: FormFieldBaseProps<MedibaseMedicine>
 ) {
   const field = useFormFieldPropsResolver(props);
-  const { isLoading, options, fetchOptions } =
-    useAsyncOptions<MedibaseMedicine>("id");
 
   const [query, setQuery] = useState("");
   const [type, setType] = useState<MedibaseMedicine["type"]>();
 
-  useEffect(() => {
-    fetchOptions(listMedibaseMedicines(query, type));
-  }, [query, type]);
+  const { data, loading } = useQuery(routes.listMedibaseMedicines, {
+    query: { query, type },
+  });
 
   return (
     <FormField
@@ -49,7 +48,11 @@ export default function MedibaseAutocompleteFormField(
         value={field.value}
         required
         onChange={field.handleChange}
-        options={options(field.value && !query && [field.value])}
+        options={mergeQueryOptions(
+          field.value && !query ? [field.value] : [],
+          data ?? [],
+          (obj) => obj.id
+        )}
         optionLabel={(option) => option.name.toUpperCase()}
         optionDescription={(option) => <OptionDescription medicine={option} />}
         optionValue={(option) => option}
@@ -61,7 +64,7 @@ export default function MedibaseAutocompleteFormField(
           )
         }
         onQuery={setQuery}
-        isLoading={isLoading}
+        isLoading={loading}
       />
     </FormField>
   );

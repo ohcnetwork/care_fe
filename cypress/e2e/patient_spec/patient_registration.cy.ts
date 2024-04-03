@@ -80,7 +80,7 @@ describe("Patient Creation with consultation", () => {
     // Patient Details page
     patientPage.typePatientPhoneNumber(phone_number);
     patientPage.typePatientEmergencyNumber(emergency_phone_number);
-    patientPage.typePatientDateOfBirth(patientDateOfBirth);
+    patientPage.typePatientAge(age.toString());
     patientPage.typePatientName(patientOneName);
     patientPage.selectPatientGender(patientOneGender);
     patientPage.typePatientAddress(patientOneAddress);
@@ -146,6 +146,7 @@ describe("Patient Creation with consultation", () => {
     // change the gender to female and input data to related changed field
     cy.wait(3000);
     patientPage.selectPatientGender(patientOneUpdatedGender);
+    patientPage.typePatientDateOfBirth(patientDateOfBirth);
     patientPage.clickPatientAntenatalStatusYes();
     patientPage.selectPatientBloodGroup(patientOneUpdatedBloodGroup);
     // Edit the patient consultation , select none medical history and multiple health ID
