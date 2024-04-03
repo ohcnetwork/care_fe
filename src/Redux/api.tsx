@@ -68,7 +68,7 @@ import {
   StateModel,
   WardModel,
 } from "../Components/Facility/models";
-import { Prescription } from "../Components/Medicine/models";
+import { MedibaseMedicine, Prescription } from "../Components/Medicine/models";
 import {
   NotificationData,
   PNconfigData,
@@ -541,8 +541,8 @@ const routes = {
   partialUpdateConsultation: {
     path: "/api/v1/consultation/{id}/",
     method: "PATCH",
-    TRes: Type<Partial<ConsultationModel>>(),
-    TBody: Type<ConsultationModel>(),
+    TBody: Type<Partial<ConsultationModel>>(),
+    TRes: Type<ConsultationModel>(),
   },
   deleteConsultation: {
     path: "/api/v1/consultation/{id}/",
@@ -1120,6 +1120,7 @@ const routes = {
   // Medibase
   listMedibaseMedicines: {
     path: "/api/v1/medibase/",
+    TRes: Type<MedibaseMedicine[]>(),
   },
 
   // Resource

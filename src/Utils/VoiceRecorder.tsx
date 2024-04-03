@@ -4,6 +4,7 @@ import ButtonV2 from "../Components/Common/components/ButtonV2";
 import CareIcon from "../CAREUI/icons/CareIcon";
 import { NonReadOnlyUsers } from "./AuthorizeFor";
 import { useTranslation } from "react-i18next";
+
 export const VoiceRecorder = (props: any) => {
   const { t } = useTranslation();
   const { createAudioBlob, confirmAudioBlobExists, reset, setResetRecording } =
@@ -49,6 +50,7 @@ export const VoiceRecorder = (props: any) => {
                 {t("recording") + "..."}
               </div>
               <ButtonV2
+                id="stop-recording"
                 onClick={() => {
                   stopRecording();
                   confirmAudioBlobExists();
@@ -67,6 +69,7 @@ export const VoiceRecorder = (props: any) => {
           <div>
             {!audioURL && (
               <ButtonV2
+                id="record-audio"
                 onClick={startRecording}
                 authorizeFor={NonReadOnlyUsers}
                 className="w-full md:w-fit"

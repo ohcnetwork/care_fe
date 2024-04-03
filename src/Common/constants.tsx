@@ -315,7 +315,7 @@ export const DISCHARGE_REASONS = [
   { id: 2, text: "Referred" },
   { id: 3, text: "Expired" },
   { id: 4, text: "LAMA" },
-];
+] as const;
 
 export const CONSCIOUSNESS_LEVEL = [
   { id: "UNRESPONSIVE", text: "Unresponsive" },
