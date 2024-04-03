@@ -317,6 +317,7 @@ export const ConsultationDetails = (props: any) => {
             <Link
               href={`/facility/${patientData.facility}/patient/${patientData.id}`}
               className="btn btn-primary m-1 w-full hover:text-white"
+              id="patient-details"
             >
               Patient Details
             </Link>
