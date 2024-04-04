@@ -86,6 +86,10 @@ const BedAllocationNode = ({
   prevBed?: CurrentBed;
   isLastNode: boolean;
 }) => {
+  const { newlyLinkedAssets, existingAssets, unlinkedAssets } = getAssetDiff(
+    prevBed?.assets_objects ?? [],
+    bed.assets_objects ?? []
+  );
   const event: TimelineEvent = {
     type: "allocated",
     timestamp: bed.start_date,
@@ -93,14 +97,18 @@ const BedAllocationNode = ({
     icon: "l-bed",
     iconWrapperStyle: bed.end_date === null ? "bg-green-500" : "",
     iconStyle: bed.end_date === null ? "text-white" : "",
-    notes: bed.assets_objects ? (
-      <BedTimelineAsset
-        assets={bed.assets_objects}
-        prevBedAssets={prevBed?.assets_objects}
-      />
-    ) : (
-      ""
-    ),
+    notes:
+      newlyLinkedAssets.length === 0 &&
+      existingAssets.length === 0 &&
+      unlinkedAssets.length === 0 ? (
+        ""
+      ) : (
+        <BedTimelineAsset
+          newlyLinkedAssets={newlyLinkedAssets}
+          existingAssets={existingAssets}
+          unlinkedAssets={unlinkedAssets}
+        />
+      ),
   };
 
   return (
@@ -122,17 +130,14 @@ const BedAllocationNode = ({
 };
 
 const BedTimelineAsset = ({
-  assets,
-  prevBedAssets,
+  newlyLinkedAssets,
+  existingAssets,
+  unlinkedAssets,
 }: {
-  assets: AssetData[];
-  prevBedAssets?: AssetData[];
+  newlyLinkedAssets: AssetData[];
+  existingAssets: AssetData[];
+  unlinkedAssets: AssetData[];
 }) => {
-  const { newlyLinkedAssets, existingAssets, unlinkedAssets } = getAssetDiff(
-    prevBedAssets || [],
-    assets
-  );
-
   return (
     <div className="flex flex-col gap-1">
       <p className="text-md font-semibold">Assets</p>
@@ -144,21 +149,21 @@ const BedTimelineAsset = ({
       {newlyLinkedAssets.length > 0 &&
         newlyLinkedAssets.map((newAsset) => (
           <div key={newAsset.id} className="flex gap-1 text-primary">
-            <CareIcon className="care-l-plus-circle" />
+            <CareIcon icon="l-plus-circle" />
             <span>{newAsset.name}</span>
           </div>
         ))}
       {existingAssets.length > 0 &&
         existingAssets.map((existingAsset) => (
           <div key={existingAsset.id} className="flex gap-1">
-            <CareIcon className="care-l-check-circle" />
+            <CareIcon icon="l-check-circle" />
             <span>{existingAsset.name}</span>
           </div>
         ))}
       {unlinkedAssets.length > 0 &&
         unlinkedAssets.map((unlinkedAsset) => (
           <div key={unlinkedAsset.id} className="flex gap-1 text-gray-500">
-            <CareIcon className="care-l-minus-circle" />
+            <CareIcon icon="l-minus-circle" />
             <span className="line-through">{unlinkedAsset.name}</span>
           </div>
         ))}
@@ -230,7 +235,10 @@ const BedActivityIButtonPopover = ({
   return (
     <Popover className="relative text-sm text-gray-500 md:text-base">
       <Popover.Button>
-        <CareIcon className="care-l-info-circle cursor-pointer text-gray-500 hover:text-gray-600" />
+        <CareIcon
+          icon="l-info-circle"
+          className="cursor-pointer text-gray-500 hover:text-gray-600"
+        />
       </Popover.Button>
       <Transition
         as={Fragment}
