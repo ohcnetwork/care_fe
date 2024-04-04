@@ -933,6 +933,8 @@ const routes = {
   dischargePatient: {
     path: "/api/v1/consultation/{id}/discharge_patient/",
     method: "POST",
+    TBody: Type<object>(),
+    TRes: Type<object>(),
   },
   listFacilityDischargedPatients: {
     path: "/api/v1/facility/{facility_external_id}/discharged_patients/",

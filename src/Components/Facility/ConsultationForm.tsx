@@ -40,7 +40,6 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
 import { UserModel } from "../Users/models";
-import { dischargePatient } from "../../Redux/actions";
 
 import { navigate } from "raviger";
 import useAppHistory from "../../Common/hooks/useAppHistory";
@@ -673,24 +672,18 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     death_datetime: string,
     death_confirmed_doctor: string
   ) => {
-    const dischargeResponse = await dispatchAction(
-      dischargePatient(
-        {
-          new_discharge_reason: DISCHARGE_REASONS.find(
-            (i) => i.text === "Expired"
-          )?.id,
-          discharge_notes: cause_of_death,
-          death_datetime: death_datetime,
-          death_confirmed_doctor: death_confirmed_doctor,
-          discharge_date: dayjs().toISOString(),
-        },
-        { id }
-      )
-    );
-
-    if (dischargeResponse?.status === 200) {
-      return dischargeResponse;
-    }
+    await request(routes.dischargePatient, {
+      pathParams: { id },
+      body: {
+        new_discharge_reason: DISCHARGE_REASONS.find(
+          (i) => i.text === "Expired"
+        )?.id,
+        discharge_notes: cause_of_death,
+        death_datetime: death_datetime,
+        death_confirmed_doctor: death_confirmed_doctor,
+        discharge_date: dayjs().toISOString(),
+      },
+    });
   };
 
   const handleSubmit = async (
