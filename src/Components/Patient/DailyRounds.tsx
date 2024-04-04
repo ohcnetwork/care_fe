@@ -16,7 +16,6 @@ import {
   createDailyReport,
   getConsultationDailyRoundsDetails,
   getDailyReport,
-  getPatient,
   updateDailyReport,
 } from "../../Redux/actions";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
@@ -37,6 +36,8 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import PatientCategorySelect from "./PatientCategorySelect";
 import RadioFormField from "../Form/FormFields/RadioFormField";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm: any = {
@@ -172,16 +173,18 @@ export const DailyRounds = (props: any) => {
       }
       setIsLoading(false);
       if (patientId) {
-        const res = await dispatchAction(getPatient({ id: patientId }));
-        if (res.data) {
-          setPatientName(res.data.name);
-          setFacilityName(res.data.facility_object.name);
-          setConsultationSuggestion(res.data.last_consultation?.suggestion);
+        const { data } = await request(routes.getPatient, {
+          pathParams: { id: patientId },
+        });
+        if (data) {
+          setPatientName(data.name!);
+          setFacilityName(data.facility_object!.name);
+          setConsultationSuggestion(data.last_consultation?.suggestion);
           setPreviousReviewInterval(
-            Number(res.data.last_consultation.review_interval)
+            Number(data.last_consultation?.review_interval)
           );
           const getAction =
-            TELEMEDICINE_ACTIONS.find((action) => action.id === res.data.action)
+            TELEMEDICINE_ACTIONS.find((action) => action.id === data.action)
               ?.text || "NO_ACTION";
           setPreviousAction(getAction);
           setInitialData({
