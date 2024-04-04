@@ -74,11 +74,6 @@ export const downloadSampleTests = (params: object) => {
   return fireRequest("getTestSampleList", [], { ...params, csv: 1 });
 };
 
-// Daily Rounds
-export const getConsultationDailyRoundsDetails = (pathParam: object) => {
-  return fireRequest("getDailyReport", [], {}, pathParam);
-};
-
 // Consultation
 export const createConsultation = (params: object) => {
   return fireRequest("createConsultation", [], params);

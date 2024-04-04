@@ -1,8 +1,7 @@
 import { navigate } from "raviger";
 
 import dayjs from "dayjs";
-import { lazy, useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
+import { lazy, useCallback, useEffect, useState } from "react";
 import {
   CONSCIOUSNESS_LEVEL,
   PATIENT_CATEGORIES,
@@ -11,8 +10,6 @@ import {
   TELEMEDICINE_ACTIONS,
 } from "../../Common/constants";
 import useAppHistory from "../../Common/hooks/useAppHistory";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getConsultationDailyRoundsDetails } from "../../Redux/actions";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 import * as Notification from "../../Utils/Notifications";
 import { formatDateTime } from "../../Utils/utils";
@@ -101,7 +98,6 @@ const DailyRoundsFormReducer = (state = initialState, action: any) => {
 
 export const DailyRounds = (props: any) => {
   const { goBack } = useAppHistory();
-  const dispatchAction: any = useDispatch();
   const { facilityId, patientId, consultationId, id } = props;
   const [state, dispatch] = useAutoSaveReducer<any>(
     DailyRoundsFormReducer,
@@ -136,80 +132,70 @@ export const DailyRounds = (props: any) => {
     "consciousness_level",
   ];
 
-  const fetchRoundDetails = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      let formData: any = initialData;
-      if (id) {
-        const res = await dispatchAction(
-          getConsultationDailyRoundsDetails({ consultationId, id })
-        );
+  const fetchRoundDetails = useCallback(async () => {
+    setIsLoading(true);
+    let formData: any = initialData;
+    if (id) {
+      const { data } = await request(routes.getDailyReport, {
+        pathParams: { consultationId, id },
+      });
 
-        if (!status.aborted) {
-          if (res?.data) {
-            const data = {
-              ...res.data,
-              patient_category: res.data.patient_category
-                ? PATIENT_CATEGORIES.find(
-                    (i) => i.text === res.data.patient_category
-                  )?.id ?? ""
-                : "",
-              rhythm:
-                (res.data.rhythm &&
-                  RHYTHM_CHOICES.find((i) => i.text === res.data.rhythm)?.id) ||
-                "0",
-              admitted_to: res.data.admitted_to
-                ? res.data.admitted_to
-                : "Select",
-            };
-            formData = { ...formData, ...data };
-          }
-        }
+      if (data) {
+        formData = {
+          ...formData,
+          ...data,
+          patient_category: data.patient_category
+            ? PATIENT_CATEGORIES.find((i) => i.text === data.patient_category)
+                ?.id ?? ""
+            : "",
+          rhythm:
+            (data.rhythm &&
+              RHYTHM_CHOICES.find((i) => i.text === data.rhythm)?.id) ||
+            "0",
+          admitted_to: data.admitted_to ? data.admitted_to : "Select",
+        };
       }
-      setIsLoading(false);
-      if (patientId) {
-        const { data } = await request(routes.getPatient, {
-          pathParams: { id: patientId },
+    }
+    setIsLoading(false);
+    if (patientId) {
+      const { data } = await request(routes.getPatient, {
+        pathParams: { id: patientId },
+      });
+      if (data) {
+        setPatientName(data.name!);
+        setFacilityName(data.facility_object!.name);
+        setConsultationSuggestion(data.last_consultation?.suggestion);
+        setPreviousReviewInterval(
+          Number(data.last_consultation?.review_interval)
+        );
+        const getAction =
+          TELEMEDICINE_ACTIONS.find((action) => action.id === data.action)
+            ?.text || "NO_ACTION";
+        setPreviousAction(getAction);
+        setInitialData({
+          ...initialData,
+          action: getAction,
         });
-        if (data) {
-          setPatientName(data.name!);
-          setFacilityName(data.facility_object!.name);
-          setConsultationSuggestion(data.last_consultation?.suggestion);
-          setPreviousReviewInterval(
-            Number(data.last_consultation?.review_interval)
-          );
-          const getAction =
-            TELEMEDICINE_ACTIONS.find((action) => action.id === data.action)
-              ?.text || "NO_ACTION";
-          setPreviousAction(getAction);
-          setInitialData({
-            ...initialData,
-            action: getAction,
-          });
-          formData = { ...formData, ...{ action: getAction } };
-        }
-      } else {
-        setPatientName("");
-        setFacilityName("");
+        formData = { ...formData, ...{ action: getAction } };
       }
-      if (consultationId && !id) {
-        const { data } = await request(routes.getDailyReports, {
-          pathParams: { consultationId },
-          query: { limit: 1, offset: 0 },
-        });
-        setHasPreviousLog(!!data?.count);
-      }
-      dispatch({ type: "set_form", form: formData });
-      setInitialData(formData);
-    },
-    [consultationId, id, dispatchAction, patientId]
-  );
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchRoundDetails(status);
-    },
-    [dispatchAction, fetchRoundDetails]
-  );
+    } else {
+      setPatientName("");
+      setFacilityName("");
+    }
+    if (consultationId && !id) {
+      const { data } = await request(routes.getDailyReports, {
+        pathParams: { consultationId },
+        query: { limit: 1, offset: 0 },
+      });
+      setHasPreviousLog(!!data?.count);
+    }
+    dispatch({ type: "set_form", form: formData });
+    setInitialData(formData);
+  }, [consultationId, id, patientId]);
+
+  useEffect(() => {
+    fetchRoundDetails();
+  }, [fetchRoundDetails]);
 
   const validateForm = () => {
     const errors = { ...initError };
