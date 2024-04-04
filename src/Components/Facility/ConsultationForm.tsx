@@ -21,7 +21,6 @@ import { LegacyRef, createRef, lazy, useEffect, useState } from "react";
 import ProcedureBuilder, {
   ProcedureType,
 } from "../Common/prescription-builder/ProcedureBuilder";
-import { partialUpdateConsultation } from "../../Redux/actions";
 import { BedSelect } from "../Common/BedSelect";
 import Beds from "./Consultations/Beds";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -44,7 +43,6 @@ import { UserModel } from "../Users/models";
 import { navigate } from "raviger";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
 import useVisibility from "../../Utils/useVisibility";
 import dayjs from "../../Utils/dayjs";
 import RouteToFacilitySelect, {
@@ -241,7 +239,6 @@ type Props = {
 export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   const { goBack } = useAppHistory();
   const { kasp_enabled, kasp_string } = useConfig();
-  const dispatchAction: any = useDispatch();
   const [state, dispatch] = useAutoSaveReducer<FormDetails>(
     consultationFormReducer,
     initialState
@@ -929,9 +926,10 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         ...consentRecords,
         { id: randomId, type: event.value },
       ];
-      await dispatchAction(
-        partialUpdateConsultation(id, { consent_records: newRecords })
-      );
+      await request(routes.partialUpdateConsultation, {
+        pathParams: { id },
+        body: { consent_records: newRecords },
+      });
       dispatch({
         type: "set_form",
         form: { ...state.form, consent_records: newRecords },
@@ -957,9 +955,10 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     const newRecords = state.form.consent_records.map((cr) =>
       cr.id === consent_id ? { ...cr, deleted: true } : cr
     );
-    await dispatchAction(
-      partialUpdateConsultation(id, { consent_records: newRecords })
-    );
+    await request(routes.partialUpdateConsultation, {
+      pathParams: { id },
+      body: { consent_records: newRecords },
+    });
     dispatch({
       type: "set_form",
       form: { ...state.form, consent_records: newRecords },
