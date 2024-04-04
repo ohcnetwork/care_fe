@@ -17,24 +17,11 @@ import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
-import {
-  LegacyRef,
-  createRef,
-  lazy,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { LegacyRef, createRef, lazy, useEffect, useState } from "react";
 import ProcedureBuilder, {
   ProcedureType,
 } from "../Common/prescription-builder/ProcedureBuilder";
-import {
-  getConsultation,
-  getPatient,
-  partialUpdateConsultation,
-} from "../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-
+import { partialUpdateConsultation } from "../../Redux/actions";
 import { BedSelect } from "../Common/BedSelect";
 import Beds from "./Consultations/Beds";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -79,6 +66,7 @@ import { FileUpload } from "../Patient/FileUpload.js";
 import ConfirmDialog from "../Common/ConfirmDialog.js";
 import request from "../../Utils/request/request.js";
 import routes from "../../Redux/api.js";
+import useQuery from "../../Utils/request/useQuery.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -332,29 +320,21 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     bedStatusVisible,
   ]);
 
-  useEffect(() => {
-    async function fetchPatientName() {
-      if (patientId) {
-        setIsLoading(true);
-        const res = await dispatchAction(getPatient({ id: patientId }));
-        if (res.data) {
-          if (isUpdate) {
-            dispatch({
-              type: "set_form",
-              form: { ...state.form, action: res.data.action },
-            });
-          }
-          setPatientName(res.data.name);
-          setFacilityName(res.data.facility_object.name);
-        }
-      } else {
-        setPatientName("");
-        setFacilityName("");
+  const { loading: loadingPatient } = useQuery(routes.getPatient, {
+    pathParams: { id: patientId },
+    onResponse: ({ data }) => {
+      if (!data) return;
+      if (isUpdate) {
+        dispatch({
+          type: "set_form",
+          form: { ...state.form, action: data.action },
+        });
       }
-      if (!id) setIsLoading(false);
-    }
-    fetchPatientName();
-  }, [dispatchAction, patientId]);
+      setPatientName(data.name ?? "");
+      setFacilityName(data.facility_object?.name ?? "");
+    },
+    prefetch: !!patientId,
+  });
 
   useEffect(() => {
     dispatch({
@@ -385,96 +365,97 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     }
   };
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      if (!patientId) setIsLoading(true);
-      const res = await dispatchAction(getConsultation(id!));
-      handleFormFieldChange({
-        name: "InvestigationAdvice",
-        value: !Array.isArray(res.data.investigation)
-          ? []
-          : res.data.investigation,
-      });
-      handleFormFieldChange({
-        name: "procedures",
-        value: !Array.isArray(res.data.procedure) ? [] : res.data.procedure,
-      });
-      if (res.data.suggestion === "R") {
-        if (res.data.referred_to_external)
-          setReferredToFacility({
-            name: res.data.referred_to_external,
-          });
-        else setReferredToFacility(res.data.referred_to_object);
-      }
-      if (res.data.route_to_facility === 20) {
-        if (res.data.referred_from_facility_external)
-          setReferredFromFacility({
-            name: res.data.referred_from_facility_external,
-          });
-        else setReferredFromFacility(res.data.referred_from_facility_object);
-      }
-      if (!status.aborted) {
-        if (res?.data) {
+  const { loading: consultationLoading, refetch } = useQuery(
+    routes.getConsultation,
+    {
+      pathParams: { id: id! },
+      prefetch: !!(id && ((patientId && patientName) || !patientId)),
+      onResponse: ({ data }) => {
+        if (!data) return;
+        handleFormFieldChange({
+          name: "InvestigationAdvice",
+          value:
+            (Array.isArray(data.investigation) && data.investigation) || [],
+        });
+        handleFormFieldChange({
+          name: "procedures",
+          value: (Array.isArray(data.procedure) && data.procedure) || [],
+        });
+        if (data.suggestion === "R") {
+          if (data.referred_to_external)
+            setReferredToFacility({
+              name: data.referred_to_external,
+            });
+          else setReferredToFacility(data.referred_to_object ?? null);
+        }
+        if (data.route_to_facility === 20) {
+          if (data.referred_from_facility_external)
+            setReferredFromFacility({
+              name: data.referred_from_facility_external,
+            });
+          else
+            setReferredFromFacility(data.referred_from_facility_object ?? null);
+        }
+
+        if (data) {
           const formData = {
-            ...res.data,
-            symptoms_onset_date: isoStringToDate(res.data.symptoms_onset_date),
-            encounter_date: isoStringToDate(res.data.encounter_date),
-            icu_admission_date: isoStringToDate(res.data.icu_admission_date),
-            admitted: res.data.admitted ? String(res.data.admitted) : "false",
-            admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
-            category: res.data.category
-              ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)
-                  ?.id ?? ""
+            ...data,
+            symptoms_onset_date:
+              data.symptoms_onset_date &&
+              isoStringToDate(data.symptoms_onset_date),
+            encounter_date: isoStringToDate(data.encounter_date),
+            icu_admission_date:
+              data.icu_admission_date &&
+              isoStringToDate(data.icu_admission_date),
+            admitted: data.admitted ? String(data.admitted) : "false",
+            admitted_to: data.admitted_to ? data.admitted_to : "",
+            category: data.category
+              ? PATIENT_CATEGORIES.find((i) => i.text === data.category)?.id ??
+                ""
               : "",
-            patient_no: res.data.patient_no ?? "",
-            OPconsultation: res.data.consultation_notes,
-            is_telemedicine: `${res.data.is_telemedicine}`,
-            is_kasp: `${res.data.is_kasp}`,
-            assigned_to: res.data.assigned_to || "",
-            assigned_to_object: res.data.assigned_to_object,
-            treating_physician: res.data.treating_physician || "",
-            treating_physician_object: res.data.treating_physician_object,
-            ett_tt: res.data.ett_tt ? Number(res.data.ett_tt) : 3,
-            special_instruction: res.data.special_instruction || "",
-            weight: res.data.weight ? res.data.weight : "",
-            height: res.data.height ? res.data.height : "",
-            bed: res.data?.current_bed?.bed_object || null,
-            new_discharge_reason: res.data?.new_discharge_reason || null,
-            cause_of_death: res.data?.discharge_notes || "",
-            death_datetime: res.data?.death_datetime || "",
-            death_confirmed_doctor: res.data?.death_confirmed_doctor || "",
-            InvestigationAdvice: Array.isArray(res.data.investigation)
-              ? res.data.investigation
+            patient_no: data.patient_no ?? "",
+            OPconsultation: data.consultation_notes,
+            is_telemedicine: `${data.is_telemedicine}`,
+            is_kasp: `${data.is_kasp}`,
+            assigned_to: data.assigned_to || "",
+            assigned_to_object: data.assigned_to_object,
+            treating_physician: data.treating_physician || "",
+            treating_physician_object: data.treating_physician_object,
+            ett_tt: data.ett_tt ? Number(data.ett_tt) : 3,
+            special_instruction: data.special_instruction || "",
+            weight: data.weight ? data.weight : "",
+            height: data.height ? data.height : "",
+            bed: data?.current_bed?.bed_object || null,
+            new_discharge_reason: data?.new_discharge_reason || null,
+            cause_of_death: data?.discharge_notes || "",
+            death_datetime: data?.death_datetime || "",
+            death_confirmed_doctor: data?.death_confirmed_doctor || "",
+            InvestigationAdvice: Array.isArray(data.investigation)
+              ? data.investigation
               : [],
-            diagnoses: res.data.diagnoses.sort(
+            diagnoses: data.diagnoses?.sort(
               (a: ConsultationDiagnosis, b: ConsultationDiagnosis) =>
                 ConditionVerificationStatuses.indexOf(a.verification_status) -
                 ConditionVerificationStatuses.indexOf(b.verification_status)
             ),
           };
-          dispatch({ type: "set_form", form: { ...state.form, ...formData } });
+          dispatch({
+            type: "set_form",
+            form: { ...state.form, ...(formData as unknown as FormDetails) },
+          });
           setBed(formData.bed);
 
-          if (res.data.last_daily_round && state.form.category) {
+          if (data.last_daily_round && state.form.category) {
             setDisabledFields((fields) => [...fields, "category"]);
           }
         } else {
           goBack();
         }
-        setIsLoading(false);
-      }
-    },
-    [dispatchAction, id, patientName, patientId]
+      },
+    }
   );
 
-  useAbortableEffect(
-    (status: statusType) => {
-      if (id && ((patientId && patientName) || !patientId)) fetchData(status);
-    },
-    [fetchData, id, patientId, patientName]
-  );
-
-  if (isLoading) return <Loading />;
+  if (isLoading || loadingPatient || consultationLoading) return <Loading />;
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -1704,7 +1685,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                     facilityId={facilityId}
                     patientId={patientId}
                     consultationId={id}
-                    fetchPatientData={fetchData}
+                    fetchPatientData={() => refetch()}
                   />
                 </div>
               </>

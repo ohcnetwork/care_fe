@@ -148,6 +148,7 @@ export interface ConsultationModel {
   consultation_notes?: string;
   is_telemedicine?: boolean;
   procedure?: ProcedureType[];
+  assigned_to?: string;
   assigned_to_object?: AssignedToObjectModel;
   created_by?: any;
   last_edited_by?: any;
