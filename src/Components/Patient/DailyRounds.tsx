@@ -13,10 +13,8 @@ import {
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
-  createDailyReport,
   getConsultationDailyRoundsDetails,
   getDailyReport,
-  updateDailyReport,
 } from "../../Redux/actions";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 import * as Notification from "../../Utils/Notifications";
@@ -316,20 +314,16 @@ export const DailyRounds = (props: any) => {
         data = baseData;
       }
 
-      let res;
       if (id) {
-        res = await dispatchAction(
-          updateDailyReport(data, { consultationId, id })
-        );
-      } else {
-        res = await dispatchAction(createDailyReport(data, { consultationId }));
-      }
+        const { data: obj } = await request(routes.updateDailyReport, {
+          body: data,
+          pathParams: { consultationId, id },
+        });
 
-      setIsLoading(false);
-      if (res && res.data && (res.status === 201 || res.status === 200)) {
-        dispatch({ type: "set_form", form: initForm });
+        setIsLoading(false);
 
-        if (id) {
+        if (obj) {
+          dispatch({ type: "set_form", form: initForm });
           Notification.Success({
             msg: "Consultation Updates details updated successfully",
           });
@@ -339,17 +333,26 @@ export const DailyRounds = (props: any) => {
             );
           } else {
             navigate(
-              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${res.data.external_id}/update`
+              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${obj.id}/update`
             );
           }
-        } else {
+        }
+      } else {
+        const { data: obj } = await request(routes.createDailyRounds, {
+          pathParams: { consultationId },
+          body: data,
+        });
+        setIsLoading(false);
+        if (obj) {
+          dispatch({ type: "set_form", form: initForm });
+
           Notification.Success({
             msg: "Consultation Updates details created successfully",
           });
           if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
             if (data.clone_last) {
               navigate(
-                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${res.data.external_id}/update`
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${obj.id}/update`
               );
             } else {
               navigate(
@@ -359,17 +362,15 @@ export const DailyRounds = (props: any) => {
           } else {
             if (data.clone_last) {
               navigate(
-                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${res.data.external_id}/update`
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${obj.id}/update`
               );
             } else {
               navigate(
-                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${res.data.external_id}/update`
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${obj.id}/update`
               );
             }
           }
         }
-      } else {
-        setIsLoading(false);
       }
     }
   };

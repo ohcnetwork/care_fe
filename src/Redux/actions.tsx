@@ -75,13 +75,6 @@ export const downloadSampleTests = (params: object) => {
 };
 
 // Daily Rounds
-
-export const createDailyReport = (params: object, pathParam: object) => {
-  return fireRequest("createDailyRounds", [], params, pathParam);
-};
-export const updateDailyReport = (params: object, pathParam: object) => {
-  return fireRequest("updateDailyReport", [], params, pathParam);
-};
 export const getDailyReport = (params: object, pathParam: object) => {
   return fireRequest("getDailyReports", [], params, pathParam);
 };
