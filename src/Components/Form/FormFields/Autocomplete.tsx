@@ -24,7 +24,7 @@ type AutocompleteFormFieldProps<T, V> = FormFieldBaseProps<V> & {
   error?: string;
 };
 
-const AutocompleteFormField = <T, V>(
+export const AutocompleteFormField = <T, V>(
   props: AutocompleteFormFieldProps<T, V>
 ) => {
   const field = useFormFieldPropsResolver(props);
