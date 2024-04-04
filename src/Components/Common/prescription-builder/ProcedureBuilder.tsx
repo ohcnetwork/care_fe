@@ -60,7 +60,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                     }
                   >
                     Delete Procedure
-                    <CareIcon className="care-l-trash-alt h-4 w-4" />
+                    <CareIcon icon="l-trash-alt" className="h-4 w-4" />
                   </button>
                 </div>
                 <div className="w-full">

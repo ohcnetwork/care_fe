@@ -1,7 +1,6 @@
 import {
   CONSULTATION_TABS,
   GENDER_TYPES,
-  OptionsType,
   SYMPTOM_CHOICES,
 } from "../../../Common/constants";
 import { ConsultationModel } from "../models";
@@ -228,7 +227,7 @@ export const ConsultationDetails = (props: any) => {
   //             <p>{diagnosis.label}</p>
   //             <div>
   //               <ToolTip text="Principal Diagnosis" position="BOTTOM">
-  //                 <CareIcon className="care-l-stethoscope rounded-lg bg-primary-500  p-1 text-2xl text-white" />
+  //                 <CareIcon icon="l-stethoscope" className="rounded-lg bg-primary-500 p-1 text-2xl text-white"/>
   //               </ToolTip>
   //             </div>
   //           </div>
@@ -318,6 +317,7 @@ export const ConsultationDetails = (props: any) => {
             <Link
               href={`/facility/${patientData.facility}/patient/${patientData.id}`}
               className="btn btn-primary m-1 w-full hover:text-white"
+              id="patient-details"
             >
               Patient Details
             </Link>
@@ -420,7 +420,7 @@ export const ConsultationDetails = (props: any) => {
                 className="flex space-x-6 overflow-x-auto pb-2 pl-2 "
                 id="consultation_tab_nav"
               >
-                {CONSULTATION_TABS.map((p: OptionsType) => {
+                {CONSULTATION_TABS.map((p) => {
                   if (p.text === "FEED") {
                     if (
                       isCameraAttached === false || // No camera attached

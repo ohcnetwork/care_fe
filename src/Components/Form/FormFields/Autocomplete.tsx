@@ -121,7 +121,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
         label: query,
         description: undefined,
         search: query.toLowerCase(),
-        icon: <CareIcon className="care-l-plus" />,
+        icon: <CareIcon icon="l-plus" />,
         value: query,
       },
       ...mappedOptions,
@@ -168,7 +168,8 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                   {value && !props.isLoading && !props.required && (
                     <div className="tooltip" id="clear-button">
                       <CareIcon
-                        className="care-l-times-circle h-4 w-4 text-gray-800 transition-colors duration-200 ease-in-out hover:text-gray-500"
+                        icon="l-times-circle"
+                        className="h-4 w-4 text-gray-800 transition-colors duration-200 ease-in-out hover:text-gray-500"
                         onClick={(e) => {
                           e.preventDefault();
                           props.onChange(undefined);
@@ -181,9 +182,9 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                   )}
 
                   {props.isLoading ? (
-                    <CareIcon className="care-l-spinner animate-spin" />
+                    <CareIcon icon="l-spinner" className="animate-spin" />
                   ) : (
-                    <CareIcon className="care-l-angle-down" />
+                    <CareIcon icon="l-angle-down" />
                   )}
                 </div>
               </Combobox.Button>

@@ -47,7 +47,7 @@ export default function NoFeedAvailable(props: Props) {
           className="bg-black text-white hover:bg-white/30"
           border
           size="small"
-          href={`/facility/${props.asset.location_object.facility.id}/assets/${props.asset.id}/configure`}
+          href={`/facility/${props.asset.location_object.facility?.id}/assets/${props.asset.id}/configure`}
         >
           <CareIcon icon="l-cog" className="text-base" />
           Configure

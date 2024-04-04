@@ -185,7 +185,7 @@ const CoverImageEditModal = ({
     >
       <div className="flex h-full w-full items-center justify-center overflow-y-auto">
         {!isCameraOpen ? (
-          <form className="flex max-h-screen min-h-[24rem] w-full flex-col overflow-auto">
+          <form className="flex max-h-screen min-h-96 w-full flex-col overflow-auto">
             {hasImage ? (
               <>
                 <div className="flex flex-1 items-center justify-center rounded-lg">
@@ -252,7 +252,7 @@ const CoverImageEditModal = ({
                   id="upload-cover-image"
                   className="flex w-full cursor-pointer items-center justify-center gap-1 rounded-lg border border-primary-500 bg-white px-4 py-2 text-sm font-medium text-primary-500 transition-all hover:border-primary-400 hover:text-primary-400"
                 >
-                  <CareIcon className="care-l-cloud-upload text-lg" />
+                  <CareIcon icon="l-cloud-upload" className="text-lg" />
                   {t("upload_an_image")}
                   <input
                     title="changeFile"
@@ -294,9 +294,9 @@ const CoverImageEditModal = ({
                 disabled={isUploading}
               >
                 {isUploading ? (
-                  <CareIcon className="care-l-spinner animate-spin text-lg" />
+                  <CareIcon icon="l-spinner" className="animate-spin text-lg" />
                 ) : (
-                  <CareIcon className="care-l-save text-lg" />
+                  <CareIcon icon="l-save" className="text-lg" />
                 )}
                 <span>
                   {isUploading ? `${t("uploading")}...` : `${t("save")}`}
@@ -305,7 +305,7 @@ const CoverImageEditModal = ({
             </div>
           </form>
         ) : (
-          <div className="flex max-h-screen min-h-[24rem] flex-col overflow-auto">
+          <div className="flex max-h-screen min-h-96 flex-col overflow-auto">
             <div className="mb-1 mt-2 flex flex-col">
               <span className="text-xl font-medium">
                 {t("capture_cover_photo")}
@@ -371,7 +371,10 @@ const CoverImageEditModal = ({
                       </ButtonV2>
                       <ButtonV2 onClick={handleUpload} className="my-2 w-full">
                         {isCaptureImgBeingUploaded && (
-                          <CareIcon className="care-l-spinner animate-spin text-lg" />
+                          <CareIcon
+                            icon="l-spinner"
+                            className="animate-spin text-lg"
+                          />
                         )}
                         {t("submit")}
                       </ButtonV2>
@@ -397,7 +400,7 @@ const CoverImageEditModal = ({
             <div className={`${isLaptopScreen ? " " : " hidden "}`}>
               <div className="m-4 flex lg:hidden">
                 <ButtonV2 onClick={handleSwitchCamera}>
-                  <CareIcon className="care-l-camera-change text-lg" />
+                  <CareIcon icon="l-camera-change" className="text-lg" />
                   {`${t("switch")} ${t("camera")}`}
                 </ButtonV2>
               </div>
@@ -412,7 +415,7 @@ const CoverImageEditModal = ({
                             captureImage();
                           }}
                         >
-                          <CareIcon className="care-l-capture text-lg" />
+                          <CareIcon icon="l-capture" className="text-lg" />
                           {t("capture")}
                         </ButtonV2>
                       </div>
@@ -430,7 +433,10 @@ const CoverImageEditModal = ({
                         <Submit disabled={isUploading} onClick={handleUpload}>
                           {isCaptureImgBeingUploaded ? (
                             <>
-                              <CareIcon className="care-l-spinner animate-spin text-lg" />
+                              <CareIcon
+                                icon="l-spinner"
+                                className="animate-spin text-lg"
+                              />
                               {`${t("submitting")}...`}
                             </>
                           ) : (

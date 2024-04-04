@@ -19,7 +19,7 @@ const useRangePagination = ({ bounds, perPage, ...props }: Props) => {
 
   useEffect(() => {
     setCurrentRange(getInitialBounds(bounds, perPage, props.defaultEnd));
-  }, [bounds, perPage, props.defaultEnd]);
+  }, [JSON.stringify(bounds), perPage, props.defaultEnd]);
 
   const next = () => {
     const { end } = currentRange;

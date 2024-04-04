@@ -249,7 +249,10 @@ const DateInputV2: React.FC<Props> = ({
                   value={value && dayjs(value).format("DD/MM/YYYY")}
                 />
                 <div className="absolute right-0 top-1/2 -translate-y-1/2 p-2">
-                  <CareIcon className="care-l-calendar-alt text-lg text-gray-600" />
+                  <CareIcon
+                    icon="l-calendar-alt"
+                    className="text-lg text-gray-600"
+                  />
                 </div>
               </Popover.Button>
 
@@ -296,7 +299,7 @@ const DateInputV2: React.FC<Props> = ({
                         className="inline-flex aspect-square cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-gray-300"
                         onClick={decrement}
                       >
-                        <CareIcon className="care-l-angle-left-b text-lg" />
+                        <CareIcon icon="l-angle-left-b" className="text-lg" />
                       </button>
 
                       <div className="flex items-center justify-center text-sm">
@@ -329,7 +332,7 @@ const DateInputV2: React.FC<Props> = ({
                         className="inline-flex aspect-square cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-gray-300"
                         onClick={increment}
                       >
-                        <CareIcon className="care-l-angle-right-b text-lg" />
+                        <CareIcon icon="l-angle-right-b" className="text-lg" />
                       </button>
                     </div>
                   </div>
