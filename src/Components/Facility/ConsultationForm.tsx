@@ -29,11 +29,9 @@ import ProcedureBuilder, {
   ProcedureType,
 } from "../Common/prescription-builder/ProcedureBuilder";
 import {
-  createConsultation,
   getConsultation,
   getPatient,
   partialUpdateConsultation,
-  updateConsultation,
 } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 
@@ -79,6 +77,8 @@ import {
 } from "../Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder.js";
 import { FileUpload } from "../Patient/FileUpload.js";
 import ConfirmDialog from "../Common/ConfirmDialog.js";
+import request from "../../Utils/request/request.js";
+import routes from "../../Redux/api.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -792,16 +792,21 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         consent_records: state.form.consent_records || [],
       };
 
-      const res = await dispatchAction(
-        id ? updateConsultation(id!, data) : createConsultation(data)
+      const { data: obj } = await request(
+        id ? routes.updateConsultation : routes.createConsultation,
+        {
+          pathParams: id ? { id } : undefined,
+          body: data,
+        }
       );
+
       setIsLoading(false);
-      if (res?.data && res.status !== 400) {
+      if (obj) {
         dispatch({ type: "set_form", form: initForm });
 
         if (data.suggestion === "DD") {
           await declareThePatientDead(
-            res.data.id,
+            obj.id,
             state.form.cause_of_death,
             state.form.death_datetime,
             state.form.death_confirmed_doctor
@@ -809,13 +814,13 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         }
 
         Notification.Success({
-          msg: res.data.discharge_date
+          msg: obj.discharge_date
             ? "Patient discharged successfully"
             : `Consultation ${id ? "updated" : "created"} successfully`,
         });
 
         navigate(
-          `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}`
+          `/facility/${facilityId}/patient/${patientId}/consultation/${obj.id}`
         );
 
         if (data.suggestion === "R") {
@@ -823,7 +828,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           return;
         } else if (!id && data.suggestion === "A") {
           navigate(
-            `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}/prescriptions`
+            `/facility/${facilityId}/patient/${patientId}/consultation/${obj.id}/prescriptions`
           );
         }
       }
