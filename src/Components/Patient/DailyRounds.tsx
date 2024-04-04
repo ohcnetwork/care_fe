@@ -12,10 +12,7 @@ import {
 } from "../../Common/constants";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  getConsultationDailyRoundsDetails,
-  getDailyReport,
-} from "../../Redux/actions";
+import { getConsultationDailyRoundsDetails } from "../../Redux/actions";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 import * as Notification from "../../Utils/Notifications";
 import { formatDateTime } from "../../Utils/utils";
@@ -196,25 +193,11 @@ export const DailyRounds = (props: any) => {
         setFacilityName("");
       }
       if (consultationId && !id) {
-        const res = await dispatchAction(
-          getDailyReport({ limit: 1, offset: 0 }, { consultationId })
-        );
-        setHasPreviousLog(res.data.count > 0);
-        formData = {
-          ...formData,
-          ...{
-            patient_category: res.data.patient_category
-              ? PATIENT_CATEGORIES.find(
-                  (i) => i.text === res.data.patient_category
-                )?.id ?? ""
-              : "",
-            rhythm:
-              (res.data.rhythm &&
-                RHYTHM_CHOICES.find((i) => i.text === res.data.rhythm)?.id) ||
-              "0",
-            temperature: parseFloat(res.data.temperature),
-          },
-        };
+        const { data } = await request(routes.getDailyReports, {
+          pathParams: { consultationId },
+          query: { limit: 1, offset: 0 },
+        });
+        setHasPreviousLog(!!data?.count);
       }
       dispatch({ type: "set_form", form: formData });
       setInitialData(formData);
