@@ -147,7 +147,7 @@ export const PrimaryParametersPlot = ({
 
   return (
     <div>
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2" id="vital-section">
         <div className="m-2 overflow-x-auto rounded-lg border bg-white px-4 pt-4 shadow md:w-full">
           <StackedLinePlot title="BP" xData={dates} yData={BPData} />
         </div>
@@ -229,9 +229,15 @@ export const PrimaryParametersPlot = ({
                               }`}
                             >
                               {rhythmDetails.rhythm === 5 ? (
-                                <CareIcon className="care-l-check-circle text-xl" />
+                                <CareIcon
+                                  icon="l-check-circle"
+                                  className="text-xl"
+                                />
                               ) : (
-                                <CareIcon className="care-l-times-circle text-xl" />
+                                <CareIcon
+                                  icon="l-times-circle"
+                                  className="text-xl"
+                                />
                               )}
                             </span>
                           </div>

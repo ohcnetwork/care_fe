@@ -35,7 +35,7 @@ describe("Patient Consultation in multiple combination", () => {
   const procedureName = "Procedure No 1";
   const patientWeight = "70";
   const patientHeight = "170";
-  const medicineOne = "DOLO";
+  const medicineOne = "DOLOLUP";
   const patientIpNumber = Math.random().toString(36).substring(7);
 
   before(() => {
@@ -99,13 +99,13 @@ describe("Patient Consultation in multiple combination", () => {
     cy.verifyNotification("Consultation created successfully");
     // Below code for the prescription module only present while creating a new consultation
     patientPrescription.clickAddPrescription();
-    patientPrescription.interceptMediaBase();
+    patientPrescription.interceptMedibase();
     patientPrescription.selectMedicinebox();
-    patientPrescription.waitForMediabaseStatusCode();
     patientPrescription.selectMedicine(medicineOne);
     patientPrescription.enterDosage("3");
     patientPrescription.selectDosageFrequency("Twice daily");
     cy.submitButton("Submit");
+    cy.wait(2000);
     cy.verifyNotification("Medicine prescribed");
     patientPrescription.clickReturnToDashboard();
     // Verify the data's across the dashboard
@@ -193,6 +193,7 @@ describe("Patient Consultation in multiple combination", () => {
     cy.verifyNotification(
       "Create Diagnoses - Atleast one diagnosis is required"
     );
+    cy.closeNotification();
     patientConsultationPage.selectPatientDiagnosis(
       diagnosis4,
       "add-icd11-diagnosis-as-confirmed"
@@ -376,7 +377,6 @@ describe("Patient Consultation in multiple combination", () => {
   it("Edit created consultation to existing patient", () => {
     patientPage.visitPatient("Dummy Patient 13");
     patientConsultationPage.clickEditConsultationButton();
-    cy.wait(5000);
     patientConsultationPage.typePatientIllnessHistory("editted");
     patientConsultationPage.selectPatientDiagnosis(
       diagnosis5,

@@ -7,7 +7,7 @@ import Card from "../../CAREUI/display/Card";
 import { FileUpload } from "./FileUpload";
 import Page from "../Common/components/Page";
 import _ from "lodash-es";
-import { formatAge, formatDateTime } from "../../Utils/utils";
+import { formatDateTime, formatPatientAge } from "../../Utils/utils";
 
 import { navigate } from "raviger";
 import { DetailRoute } from "../../Routers/types";
@@ -102,7 +102,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             ) : (
               <div>
                 <span className="font-semibold leading-relaxed">Age: </span>
-                {formatAge(patientData?.age, patientData?.date_of_birth)}
+                {formatPatientAge(patientData)}
               </div>
             )}
             <div>

@@ -6,6 +6,7 @@ import {
 import phoneCodesJson from "../Common/static/countryPhoneAndFlags.json";
 import dayjs from "./dayjs";
 import { UserModel } from "../Components/Users/models";
+import { PatientModel } from "../Components/Patient/models";
 
 interface ApacheParams {
   age: number;
@@ -396,31 +397,60 @@ export const getCountryCode = (phoneNumber: string) => {
   return undefined;
 };
 
-export const formatAge = (
-  age?: number,
-  date_of_birth?: string,
-  abbreviated = false
-) => {
-  if (!age && !date_of_birth) return undefined;
-  if (!age) age = 0;
+const getRelativeDateSuffix = (abbreviated: boolean) => {
+  return {
+    day: abbreviated ? "d" : "days",
+    month: abbreviated ? "mo" : "months",
+    year: abbreviated ? "yr" : "years",
+  };
+};
 
-  const daySuffix = abbreviated ? "d" : "days";
-  const monthSuffix = abbreviated ? "mo" : "months";
-  const yearSuffix = abbreviated ? "yr" : "years";
+export const patientAgeInYears = (obj: PatientModel) => {
+  const start = dayjs(
+    obj.date_of_birth
+      ? new Date(obj.date_of_birth)
+      : new Date(obj.year_of_birth!, 0, 1)
+  );
 
-  if (age < 1 && date_of_birth) {
-    const dob = new Date(date_of_birth);
-    const today = new Date();
-    const diffTime = Math.abs(today.getTime() - dob.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    const months = Math.floor(diffDays / 30);
-    const days = diffDays % 30;
-    if (months === 0) {
-      return `${days} ${daySuffix}`;
-    }
-    return `${months} ${monthSuffix} ${days} ${daySuffix}`;
+  const end = dayjs(
+    obj.death_datetime ? new Date(obj.death_datetime) : new Date()
+  );
+
+  return end.diff(start, "years");
+};
+
+export const formatPatientAge = (obj: PatientModel, abbreviated = false) => {
+  const suffixes = getRelativeDateSuffix(abbreviated);
+
+  const start = dayjs(
+    obj.date_of_birth
+      ? new Date(obj.date_of_birth)
+      : new Date(obj.year_of_birth!, 0, 1)
+  );
+
+  const end = dayjs(
+    obj.death_datetime ? new Date(obj.death_datetime) : new Date()
+  );
+
+  const years = end.diff(start, "years");
+  if (years) {
+    return `${years}${suffixes.year}`;
   }
-  return `${age} ${yearSuffix}`;
+
+  // Skip representing as no. of months/days if we don't know the date of birth
+  // since it would anyways be inaccurate.
+  if (!obj.date_of_birth) {
+    return abbreviated
+      ? `Born ${obj.year_of_birth}`
+      : `Born on ${obj.year_of_birth}`;
+  }
+
+  const month = end.diff(start, "month");
+  const day = end.diff(start.add(month, "month"), "day");
+  if (month) {
+    return `${month}${suffixes.month} ${day}${suffixes.day}`;
+  }
+  return `${day}${suffixes.day}`;
 };
 
 export const scrollTo = (id: string | boolean) => {
@@ -478,4 +508,11 @@ export const mergeQueryOptions = <T extends object>(
       (option) => !selected.find((s) => compareBy(s) === compareBy(option))
     ),
   ];
+};
+
+export const properRoundOf = (value: number) => {
+  if (value % 1 === 0) {
+    return value.toFixed();
+  }
+  return value.toFixed(2);
 };

@@ -51,7 +51,7 @@ export const SymptomsSelect = (props: FormFieldBaseProps<number[]>) => {
     if (value.includes(ASYMPTOMATIC_ID) && id !== ASYMPTOMATIC_ID)
       return (
         <div className="items-center">
-          <CareIcon className="care-l-exclamation-triangle mr-2" />
+          <CareIcon icon="l-exclamation-triangle" className="mr-2" />
           <span>
             also unselects <b className="font-medium">Asymptomatic</b>
           </span>
@@ -61,7 +61,7 @@ export const SymptomsSelect = (props: FormFieldBaseProps<number[]>) => {
     if (!value.includes(ASYMPTOMATIC_ID) && id === ASYMPTOMATIC_ID)
       return (
         <span>
-          <CareIcon className="care-l-exclamation-triangle mr-2" />
+          <CareIcon icon="l-exclamation-triangle" className="mr-2" />
           {`also unselects the other ${value.length} option(s)`}
         </span>
       );
