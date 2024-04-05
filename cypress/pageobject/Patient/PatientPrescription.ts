@@ -5,8 +5,8 @@ export class PatientPrescription {
       .click();
   }
 
-  interceptMediaBase() {
-    cy.intercept("GET", "**/api/v1/medibase/**").as("getMediaBase");
+  interceptMedibase() {
+    cy.intercept("GET", "**/api/v1/medibase/**").as("getMedibase");
   }
 
   selectMedicine(medicine: string) {
@@ -22,8 +22,8 @@ export class PatientPrescription {
     ).click();
   }
 
-  waitForMediabaseStatusCode() {
-    cy.wait("@getMediaBase").its("response.statusCode").should("eq", 200);
+  waitForMedibaseStatusCode() {
+    cy.wait("@getMedibase").its("response.statusCode").should("eq", 200);
   }
 
   enterDosage(doseAmount: string) {

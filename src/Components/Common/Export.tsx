@@ -52,7 +52,7 @@ export const ExportMenu = ({
         ghost
         className="py-2.5"
       >
-        <CareIcon className="care-l-export" />
+        <CareIcon icon="l-export" />
         {isExporting ? "Exporting..." : label}
       </ButtonV2>
     );

@@ -147,6 +147,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeRhythm(patientRhythm);
     cy.get("#consciousness_level-2").click();
     cy.submitButton("Save");
+    cy.wait(2000);
     cy.verifyNotification("Consultation Updates details created successfully");
     // Verify the card content
     cy.get("#basic-information").scrollIntoView();
