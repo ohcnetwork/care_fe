@@ -1203,14 +1203,14 @@ export const OCCUPATION_TYPES = [
   {
     id: 8,
     text: "Business or Finance related Occupations",
-    value: "Business_related",
+    value: "BUSINESS_RELATED",
   },
   { id: 9, text: "Engineer", value: "ENGINEER" },
   { id: 10, text: "Teacher", value: "TEACHER" },
   {
     id: 11,
     text: "Other Professional Occupations",
-    value: "Other_Professions",
+    value: "OTHER_PROFESSIONS",
   },
   {
     id: 12,
