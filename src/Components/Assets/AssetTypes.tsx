@@ -156,6 +156,7 @@ export interface AssetBedModel {
   meta: Record<string, any>;
   asset?: string;
   bed?: string;
+  patient?: PatientModel;
 }
 
 export type AssetBedBody = Partial<AssetBedModel>;

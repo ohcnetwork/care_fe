@@ -5,6 +5,7 @@ import AssetBedSelect from "./AssetBedSelect";
 
 interface Props {
   asset: AssetData;
+  facilityId: string;
 }
 
 export default function LocationFeedTile(props: Props) {
@@ -14,12 +15,14 @@ export default function LocationFeedTile(props: Props) {
     <CameraFeed
       asset={props.asset}
       silent
+      patient={preset?.patient}
       preset={preset?.meta.position}
       shortcutsDisabled
     >
       <div className="w-64">
         <AssetBedSelect
           asset={props.asset}
+          facilityId={props.facilityId}
           value={preset}
           onChange={setPreset}
         />

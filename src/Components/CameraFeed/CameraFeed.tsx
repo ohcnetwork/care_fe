@@ -10,7 +10,9 @@ import FeedNetworkSignal from "./FeedNetworkSignal";
 import NoFeedAvailable from "./NoFeedAvailable";
 import FeedControls from "./FeedControls";
 import Fullscreen from "../../CAREUI/misc/Fullscreen";
-
+import { PatientModel } from "../Patient/models";
+import { formatPatientAge } from "../../../src/Utils/utils";
+import { GENDER_TYPES } from "../../Common/constants";
 interface Props {
   children?: React.ReactNode;
   asset: AssetData;
@@ -24,6 +26,7 @@ interface Props {
   // Controls
   constrolsDisabled?: boolean;
   shortcutsDisabled?: boolean;
+  patient?: PatientModel;
 }
 
 export default function CameraFeed(props: Props) {
@@ -85,6 +88,8 @@ export default function CameraFeed(props: Props) {
     setState("loading");
     initializeStream();
   };
+  const getPatientGender = (patientData: any) =>
+    GENDER_TYPES.find((i) => i.id === patientData?.gender)?.icon || "";
 
   return (
     <Fullscreen fullscreen={isFullscreen} onExit={() => setFullscreen(false)}>
@@ -108,7 +113,19 @@ export default function CameraFeed(props: Props) {
               />
             </div>
           </div>
-          {props.children}
+          <div className="flex text-xs font-bold text-gray-500">
+            <div className="flex flex-col">
+              <div>{props.patient?.name}</div>
+              <div>
+                {" "}
+                {props.patient
+                  ? `${formatPatientAge(props.patient)} | `
+                  : ""}{" "}
+                {getPatientGender(props.patient)}
+              </div>
+            </div>
+            <div className="pt-3">{props.children}</div>
+          </div>
         </div>
 
         <div className="group relative aspect-video">

@@ -67,7 +67,7 @@ export default function CentralLiveMonitoring(props: { facilityId: string }) {
           <div className="mt-1 grid grid-cols-1 place-content-center gap-1 lg:grid-cols-2 3xl:grid-cols-3">
             {data.results.map((asset) => (
               <div className="text-clip" key={asset.id}>
-                <LocationFeedTile asset={asset} />
+                <LocationFeedTile asset={asset} facilityId={props.facilityId} />
               </div>
             ))}
           </div>

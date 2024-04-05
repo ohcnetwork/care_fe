@@ -6,10 +6,12 @@ import { AssetBedModel, AssetData } from "../Assets/AssetTypes";
 import { BedModel } from "../Facility/models";
 import { Listbox, Transition } from "@headlessui/react";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { useQueryParams } from "raviger";
 
 interface Props {
   asset?: AssetData;
   bed?: BedModel;
+  facilityId: string;
   value?: AssetBedModel;
   onChange?: (value: AssetBedModel) => void;
 }
@@ -26,10 +28,44 @@ export default function AssetBedSelect(props: Props) {
     },
   });
 
+  const [qParams] = useQueryParams();
+  const { data: patientBedData, loading: patientDataLoad } = useQuery(
+    routes.listPatientAssetBeds,
+    {
+      pathParams: { facility_external_id: props.facilityId },
+      query: {
+        asset_class: "ONVIF",
+        location: qParams.location,
+        bed_is_occupied: true,
+      },
+    }
+  );
+  //Find the patient data for the bed
+  const updatedData = data?.results.map((obj) => {
+    if (
+      patientBedData?.results?.findIndex(
+        (p) => p.bed.id === obj.bed_object.id
+      ) !== -1
+    ) {
+      return {
+        ...obj,
+        patient:
+          patientBedData?.results[
+            patientBedData?.results?.findIndex(
+              (p) => p.bed.id === obj.bed_object.id
+            )
+          ].patient,
+      };
+    } else return obj;
+  });
   const selected = props.value;
 
   return (
-    <Listbox value={selected} onChange={props.onChange} disabled={loading}>
+    <Listbox
+      value={selected}
+      onChange={props.onChange}
+      disabled={loading && patientDataLoad}
+    >
       <div className="relative">
         <Listbox.Button className="relative w-full cursor-default pr-6 text-right text-xs text-zinc-400 focus:outline-none disabled:cursor-not-allowed disabled:bg-transparent disabled:text-zinc-700 sm:text-sm">
           <span className="block truncate">
@@ -46,9 +82,10 @@ export default function AssetBedSelect(props: Props) {
           leaveTo="opacity-0"
         >
           <Listbox.Options className="absolute z-20 mt-1 max-h-48 w-full overflow-auto rounded-b-lg bg-zinc-900/75 py-1 text-base shadow-lg ring-1 ring-white/5 backdrop-blur-sm focus:outline-none sm:text-sm md:max-h-60">
-            {data?.results.map((obj) => (
+            {updatedData?.map((obj) => (
               <Listbox.Option
                 key={obj.id}
+                title={`${obj.patient?.name ?? "No patient"} `}
                 className={({ active }) =>
                   `relative cursor-default select-none px-2 py-1 ${
                     active ? "bg-zinc-700 text-white" : "text-zinc-400"
