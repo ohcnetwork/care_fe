@@ -18,7 +18,7 @@ type AutocompleteMultiSelectFormFieldProps<T, V> = FormFieldBaseProps<V[]> & {
   optionLabel: OptionCallback<T, string>;
   optionValue?: OptionCallback<T, V>;
   onQuery?: (query: string) => void;
-  dropdownIcon: React.ReactNode | undefined;
+  dropdownIcon?: React.ReactNode | undefined;
   isLoading?: boolean;
   selectAll?: boolean;
 };
