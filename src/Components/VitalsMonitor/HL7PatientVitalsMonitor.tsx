@@ -149,7 +149,10 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
             )}
             style={waveformCanvas.size}
           >
-            <CareIcon className="care-l-cloud-times mb-2 animate-pulse text-4xl" />
+            <CareIcon
+              icon="l-cloud-times"
+              className="mb-2 animate-pulse text-4xl"
+            />
             <span className="font-bold">No incoming data from HL7 Monitor</span>
           </div>
           <div

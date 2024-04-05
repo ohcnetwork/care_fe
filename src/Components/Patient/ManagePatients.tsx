@@ -31,7 +31,7 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import SearchInput from "../Form/SearchInput";
 import SortDropdownMenu from "../Common/SortDropdown";
 import SwitchTabs from "../Common/components/SwitchTabs";
-import { formatAge, parsePhoneNumber } from "../../Utils/utils.js";
+import { formatPatientAge, parsePhoneNumber } from "../../Utils/utils.js";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page.js";
@@ -480,7 +480,7 @@ export const PatientManager = () => {
             </span>
           </div>
           <div className="flex flex-col items-start gap-4 md:flex-row">
-            <div className="h-20 w-full min-w-[5rem] rounded-lg border border-gray-300 bg-gray-50 md:w-20">
+            <div className="h-20 w-full min-w-20 rounded-lg border border-gray-300 bg-gray-50 md:w-20">
               {patient?.last_consultation?.current_bed &&
               patient?.last_consultation?.discharge_date === null ? (
                 <div className="tooltip flex h-full flex-col items-center justify-center">
@@ -505,14 +505,17 @@ export const PatientManager = () => {
               ) : patient.last_consultation?.suggestion === "DC" ? (
                 <div className="flex h-full flex-col items-center justify-center">
                   <div className="tooltip">
-                    <CareIcon className="care-l-estate text-3xl text-gray-500" />
+                    <CareIcon
+                      icon="l-estate"
+                      className="text-3xl text-gray-500"
+                    />
                     <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-sm font-medium">
                       Domiciliary Care
                     </span>
                   </div>
                 </div>
               ) : (
-                <div className="flex min-h-[5rem] items-center justify-center">
+                <div className="flex min-h-20 items-center justify-center">
                   <CareIcon
                     icon="l-user-injured"
                     className="text-3xl text-gray-500"
@@ -528,7 +531,7 @@ export const PatientManager = () => {
                 >
                   <span className="text-xl capitalize">{patient.name}</span>
                   <span className="text-gray-800">
-                    {formatAge(patient.age, patient.date_of_birth, true)}
+                    {formatPatientAge(patient, true)}
                   </span>
                 </div>
               </div>
@@ -747,7 +750,7 @@ export const PatientManager = () => {
               }}
               className="w-full lg:w-fit"
             >
-              <CareIcon className="care-l-plus text-lg" />
+              <CareIcon icon="l-plus" className="text-lg" />
               <p id="add-patient-div" className="lg:my-[2px]">
                 Add Patient Details
               </p>
@@ -793,7 +796,7 @@ export const PatientManager = () => {
                   setShowDoctors(true);
                 }}
               >
-                <CareIcon className="care-l-phone text-lg" />
+                <CareIcon icon="l-phone" className="text-lg" />
                 <p className="lg:my-[2px]">Doctor Connect</p>
               </ButtonV2>
             )}
@@ -823,7 +826,7 @@ export const PatientManager = () => {
                   }}
                   className="mr-5 w-full lg:w-fit"
                 >
-                  <CareIcon className="care-l-export" />
+                  <CareIcon icon="l-export" />
                   <span className="lg:my-[3px]">Export</span>
                 </ButtonV2>
               ) : (

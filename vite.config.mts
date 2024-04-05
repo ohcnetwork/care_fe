@@ -1,6 +1,8 @@
 import { VitePWA } from "vite-plugin-pwa";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
+import checker from "vite-plugin-checker";
+import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
 
 const cdnUrls =
   process.env.CARE_CDN_URL ??
@@ -14,6 +16,10 @@ export default defineConfig({
   envPrefix: "REACT_",
   plugins: [
     react(),
+    checker({ typescript: true }),
+    treeShakeCareIcons({
+      iconWhitelist: ["default"],
+    }),
     VitePWA({
       strategies: "injectManifest",
       srcDir: "src",

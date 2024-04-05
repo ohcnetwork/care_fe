@@ -160,6 +160,9 @@ export const AddInventoryForm = (props: any) => {
           if (!state.form[field]?.length) {
             errors[field] = "Please select a quantity";
             invalidForm = true;
+          } else if (state.form[field] <= 0) {
+            errors[field] = "Quantity must be more than 0";
+            invalidForm = true;
           }
           return;
         case "unit":

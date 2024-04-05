@@ -52,7 +52,7 @@ export const ExportMenu = ({
         ghost
         className="py-2.5"
       >
-        <CareIcon className="care-l-export" />
+        <CareIcon icon="l-export" />
         {isExporting ? "Exporting..." : label}
       </ButtonV2>
     );
@@ -63,7 +63,7 @@ export const ExportMenu = ({
       <DropdownMenu
         disabled={isExporting || disabled}
         title={isExporting ? "Exporting..." : label}
-        icon={<CareIcon className="care-l-export" />}
+        icon={<CareIcon icon="l-export" />}
         className="tooltip border-primary-500 bg-white text-primary-500 hover:bg-primary-100 enabled:border"
       >
         {exportItems.map((item) => (
@@ -103,9 +103,9 @@ export const ExportButton = ({
         circle
       >
         {isExporting ? (
-          <CareIcon className="care-l-spinner-alt animate-spin" />
+          <CareIcon icon="l-spinner-alt" className="animate-spin" />
         ) : (
-          <CareIcon className="care-l-export" />
+          <CareIcon icon="l-export" />
         )}
         <span className={`tooltip-text ${tooltipClassName}`}>
           {props.tooltip || "Export"}
