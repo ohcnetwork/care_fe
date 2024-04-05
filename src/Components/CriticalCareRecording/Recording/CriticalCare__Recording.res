@@ -164,6 +164,8 @@ let make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
                 updateCB={updateDailyRound(send, VentilatorParametersEditor)}
                 id
                 consultationId
+                patientId
+                facilityId
               />
             | ArterialBloodGasAnalysisEditor =>
               <CriticalCare__ABGAnalysisEditor

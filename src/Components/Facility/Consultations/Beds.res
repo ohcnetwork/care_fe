@@ -2,6 +2,7 @@ type reactClass
 module Beds = {
   @module("./Beds.tsx") @react.component
   external make: (
+    ~facilityId: string,
     ~patientId: string,
     ~consultationId: string,
     ~setState: unit => unit,
@@ -9,5 +10,9 @@ module Beds = {
 }
 
 @react.component
-let make = (~patientId: string, ~consultationId: string, ~setState: unit => unit) =>
-  <Beds patientId consultationId setState/>
+let make = (
+  ~facilityId: string,
+  ~patientId: string,
+  ~consultationId: string,
+  ~setState: unit => unit,
+) => <Beds facilityId patientId consultationId setState />

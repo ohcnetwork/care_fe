@@ -27,21 +27,16 @@ export const updateDailyRound = (
   });
 };
 
-export const getAsset = (consultationId: string) => {
-  return request(routes.listConsultationBeds, {
+export const getAsset = (
+  consultationId: string,
+  setAsset: React.Dispatch<React.SetStateAction<number>>
+) => {
+  request(routes.listConsultationBeds, {
     query: { consultation: consultationId },
   }).then((result) => {
-    console.log(
-      "result: ",
-      result.data?.results[0].assets_objects?.filter(
-        (asset) => asset.asset_class == "VENTILATOR"
-      )
-    );
     const data = result.data?.results[0].assets_objects?.filter(
       (asset) => asset.asset_class == "VENTILATOR"
     );
-    console.log(data?.length);
-    return data?.length;
+    setAsset(data?.length || 0);
   });
-  // return len
 };
