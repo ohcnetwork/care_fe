@@ -1210,7 +1210,7 @@ export const OCCUPATION_TYPES = [
   {
     id: 11,
     text: "Other Professional Occupations",
-    value: "OTHER_PROFESSIONS",
+    value: "OTHER_PROFESSIONAL_OCCUPATIONS",
   },
   {
     id: 12,
