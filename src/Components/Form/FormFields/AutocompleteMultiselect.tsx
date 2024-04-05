@@ -3,7 +3,7 @@ import {
   MultiSelectOptionChip,
   dropdownOptionClassNames,
 } from "../MultiSelectMenuV2";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { Combobox } from "@headlessui/react";
 import { DropdownTransition } from "../../Common/components/HelperComponents";
@@ -18,7 +18,7 @@ type AutocompleteMultiSelectFormFieldProps<T, V> = FormFieldBaseProps<V[]> & {
   optionLabel: OptionCallback<T, string>;
   optionValue?: OptionCallback<T, V>;
   onQuery?: (query: string) => void;
-  dropdownIcon?: React.ReactNode | undefined;
+  dropdownIcon: React.ReactNode | undefined;
   isLoading?: boolean;
   selectAll?: boolean;
 };
@@ -47,6 +47,7 @@ type AutocompleteMutliSelectProps<T, V = T> = {
   disabled?: boolean | undefined;
   value: V[];
   placeholder?: string;
+  optionDescription?: OptionCallback<T, ReactNode>;
   optionLabel: OptionCallback<T, string>;
   optionValue?: OptionCallback<T, V>;
   className?: string;
@@ -77,6 +78,7 @@ export const AutocompleteMutliSelect = <T, V>(
     const label = props.optionLabel(option);
     return {
       label,
+      description: props.optionDescription && props.optionDescription(option),
       search: label.toLowerCase(),
       value: (props.optionValue ? props.optionValue(option) : option) as V,
     };
@@ -114,7 +116,7 @@ export const AutocompleteMutliSelect = <T, V>(
               placeholder={
                 value.length
                   ? `${value.length} item(s) selected`
-                  : props.placeholder || "Select"
+                  : props.placeholder ?? "Select"
               }
               onChange={(event) => setQuery(event.target.value.toLowerCase())}
               autoComplete="off"
@@ -175,10 +177,21 @@ export const AutocompleteMutliSelect = <T, V>(
                       value={option}
                     >
                       {({ selected }) => (
-                        <div className="flex justify-between">
-                          {option.label}
-                          {selected && (
-                            <CareIcon icon="l-check" className="text-lg" />
+                        <div className="flex flex-col gap-2">
+                          <div className="flex justify-between">
+                            {option.label}
+                            {selected && (
+                              <CareIcon icon="l-check" className="text-lg" />
+                            )}
+                          </div>
+                          {option.description && (
+                            <p
+                              className={`font-normal ${
+                                selected ? "text-primary-200" : "text-gray-700"
+                              }`}
+                            >
+                              {option.description}
+                            </p>
                           )}
                         </div>
                       )}
