@@ -318,7 +318,7 @@ const AssetManage = (props: AssetManageProps) => {
     <Page
       title="Asset Details"
       crumbsReplacements={{
-        [facilityId]: { name: asset?.location_object.facility.name },
+        [facilityId]: { name: asset?.location_object.facility?.name },
         assets: { uri: `/assets?facility=${facilityId}` },
         [assetId]: {
           name: asset?.name,
@@ -388,6 +388,13 @@ const AssetManage = (props: AssetManageProps) => {
                   {warrantyAmcValidityChip(
                     asset?.warranty_amc_end_of_validity as string
                   )}
+                  {asset?.latest_status === "Down" && (
+                    <Chip
+                      variant="danger"
+                      startIcon="l-link-broken"
+                      text={asset?.latest_status}
+                    />
+                  )}
                 </div>
               </div>
               <div className="mt-3 hidden text-gray-700 sm:block">
@@ -397,7 +404,7 @@ const AssetManage = (props: AssetManageProps) => {
             <div className="flex flex-col gap-6">
               {[
                 {
-                  label: asset?.location_object.facility.name,
+                  label: asset?.location_object.facility?.name,
                   icon: "l-location-pin-alt",
                   content: asset?.location_object.name,
                 },
@@ -419,7 +426,7 @@ const AssetManage = (props: AssetManageProps) => {
                 className="flex gap-2"
                 onClick={() =>
                   navigate(
-                    `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}/update`
+                    `/facility/${asset?.location_object.facility?.id}/assets/${asset?.id}/update`
                   )
                 }
                 id="update-asset"
@@ -437,7 +444,7 @@ const AssetManage = (props: AssetManageProps) => {
                   <ButtonV2
                     onClick={() =>
                       navigate(
-                        `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}/configure`
+                        `/facility/${asset?.location_object.facility?.id}/assets/${asset?.id}/configure`
                       )
                     }
                     id="configure-asset"

@@ -5,5 +5,10 @@
   "semi": true,
   "jsxSingleQuote": false,
   "arrowParens": "always",
-  "tailwindFunctions": ["classNames"]
+  "tailwindFunctions": [
+    "classNames"
+  ],
+  "plugins": [
+    "prettier-plugin-tailwindcss"
+  ]
 }
