@@ -1019,6 +1019,11 @@ const routes = {
     method: "PATCH",
     TRes: Type<NotificationData>(),
   },
+  markNotificationAsUnRead: {
+    path: "/api/v1/notification/{id}/",
+    method: "PATCH",
+    TRes: Type<NotificationData>(),
+  },
   getPublicKey: {
     path: "/api/v1/notification/public_key/",
     method: "GET",
