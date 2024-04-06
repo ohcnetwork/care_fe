@@ -43,7 +43,7 @@ function runTests(testDescription, visitPatientFileUploadSection) {
     it("Upload a File and archive it", () => {
       // Upload the file
       patientPage.visitPatient(patientNameTwo);
-      patientFileUpload.clickFileUploadIcon();
+      visitPatientFileUploadSection.call(patientFileUpload);
       patientFileUpload.uploadFile();
       patientFileUpload.typeFileName(cypressFileName);
       patientFileUpload.clickUploadFile();
@@ -64,7 +64,7 @@ function runTests(testDescription, visitPatientFileUploadSection) {
       cy.reload();
       // Visit the patient details page
       patientPage.visitPatient(patientNameThree);
-      patientFileUpload.clickFileUploadIcon();
+      visitPatientFileUploadSection.call(patientFileUpload);
       // Upload the file
       patientFileUpload.uploadFile();
       patientFileUpload.typeFileName(cypressFileName);
