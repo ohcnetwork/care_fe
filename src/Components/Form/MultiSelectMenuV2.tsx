@@ -108,7 +108,8 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                             <MultiSelectOptionChip
                               key={index}
                               label={option.selectedLabel}
-                              onRemove={() => {
+                              onRemove={(e) => {
+                                e.stopPropagation();
                                 const updatedOptions = selectedOptions.filter(
                                   (selectedOption) =>
                                     selectedOption.value !== option.value
@@ -177,7 +178,7 @@ export default MultiSelectMenuV2;
 
 interface MultiSelectOptionChipProps {
   label: ReactNode;
-  onRemove?: () => void;
+  onRemove?: (e: any) => void;
 }
 
 export const MultiSelectOptionChip = (props: MultiSelectOptionChipProps) => {
