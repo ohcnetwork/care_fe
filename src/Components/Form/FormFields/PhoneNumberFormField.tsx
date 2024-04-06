@@ -1,6 +1,6 @@
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 import FormField from "./FormField";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import {
   classNames,
   parsePhoneNumber,
@@ -34,6 +34,7 @@ export default function PhoneNumberFormField(props: Props) {
     code: "91",
   });
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const componentRef = useRef<HTMLDivElement>(null);
 
   const validator = useMemo(
     () => PhoneNumberValidator(props.types),
@@ -96,6 +97,23 @@ export default function PhoneNumberFormField(props: Props) {
     setValue(field.value || "+91");
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        componentRef.current &&
+        !componentRef.current.contains(e.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <FormField
       field={{
@@ -106,7 +124,7 @@ export default function PhoneNumberFormField(props: Props) {
         ),
       }}
     >
-      <div className="relative rounded-md shadow-sm">
+      <div className="relative rounded-md shadow-sm" ref={componentRef}>
         <div
           className="absolute inset-y-0 left-0 w-[4.5rem] cursor-pointer p-0.5"
           onClick={() => setIsOpen(!isOpen)}
