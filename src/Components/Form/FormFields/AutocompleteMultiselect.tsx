@@ -177,7 +177,7 @@ export const AutocompleteMutliSelect = <T, V>(
                       value={option}
                     >
                       {({ selected }) => (
-                        <div className="flex flex-col gap-2">
+                        <>
                           <div className="flex justify-between">
                             {option.label}
                             {selected && (
@@ -193,7 +193,7 @@ export const AutocompleteMutliSelect = <T, V>(
                               {option.description}
                             </p>
                           )}
-                        </div>
+                        </>
                       )}
                     </Combobox.Option>
                   ))}
