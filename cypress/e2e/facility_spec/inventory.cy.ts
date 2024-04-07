@@ -7,6 +7,7 @@ describe("Inventory Management Section", () => {
   const facilityPage = new FacilityPage();
   const loginPage = new LoginPage();
   const facilityHome = new FacilityHome();
+  const inventoryName = "PPE";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -51,9 +52,10 @@ describe("Inventory Management Section", () => {
   it("Add New Inventory | Verify Backend and manual Minimum", () => {
     // Add Inventory
     facilityPage.clickManageInventory();
-    facilityPage.fillInventoryDetails("PPE", "Add Stock", "5");
+    facilityPage.fillInventoryDetails(inventoryName, "Add Stock", "5");
     facilityPage.clickAddInventory();
     facilityPage.verifySuccessNotification("Inventory created successfully");
+    cy.closeNotification();
     // Verify Backend minimum badge
     facilityPage.verifyBadgeWithText(".badge-danger", "Low Stock");
     // modify with manual minimum badge
@@ -68,7 +70,7 @@ describe("Inventory Management Section", () => {
       } else {
         // Otherwise, click the 'set-minimum-quantity' element
         facilityPage.clickSetMinimumQuantity();
-        facilityPage.fillInventoryMinimumDetails("PPE", "1");
+        facilityPage.fillInventoryMinimumDetails(inventoryName, "1");
         facilityPage.clickSetButton();
         facilityPage.verifySuccessNotification(
           "Minimum quantiy updated successfully"
@@ -76,6 +78,7 @@ describe("Inventory Management Section", () => {
       }
     });
   });
+
   afterEach(() => {
     cy.saveLocalStorage();
   });
