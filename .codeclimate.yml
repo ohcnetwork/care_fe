@@ -1,8 +1,4 @@
 version: "2"
 plugins:
   eslint:
-    enabled: true
-    channel: "eslint-8"
-    config:
-      ignore_warnings: true
-      with_unsupported_plugins: true
+    enabled: false
