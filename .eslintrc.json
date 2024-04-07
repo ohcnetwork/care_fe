@@ -99,6 +99,7 @@
     "*.res",
     "*.css",
     "*.csv",
-    "Dockerfile"
+    "Dockerfile",
+    "scripts/generate-build-version.js"
   ]
 }
