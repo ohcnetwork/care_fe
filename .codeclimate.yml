@@ -5,3 +5,4 @@ plugins:
     channel: "eslint-8"
     config:
       ignore_warnings: true
+      with_unsupported_plugins: true
