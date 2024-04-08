@@ -5,7 +5,7 @@ import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import {
   generatePhoneNumber,
   generateEmergencyPhoneNumber,
-} from "../../pageobject/constants";
+} from "../../pageobject/utils/constants";
 import PatientTransfer from "../../pageobject/Patient/PatientTransfer";
 import PatientExternal from "../../pageobject/Patient/PatientExternal";
 import PatientInsurance from "../../pageobject/Patient/PatientInsurance";
