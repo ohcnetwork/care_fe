@@ -593,6 +593,11 @@ export type InventoryLogResponse = InventorySummaryResponse & {
   created_by: number;
 };
 
+export type PatientTransferRequest = {
+  facility: string;
+  year_of_birth: string;
+};
+
 export type PatientTransferResponse = {
   id: string;
   patient: string;
