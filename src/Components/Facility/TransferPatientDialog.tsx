@@ -2,7 +2,6 @@ import * as Notification from "../../Utils/Notifications.js";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { useReducer, useState } from "react";
 import { DupPatientModel } from "./models";
-import { FieldLabel } from "../Form/FormFields/FormField";
 import { OptionsType } from "../../Common/constants";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { navigate } from "raviger";
@@ -63,7 +62,22 @@ const TransferPatientDialog = (props: Props) => {
     };
   });
 
+  const maxYear = new Date().getFullYear();
+
   const handleChange = (e: FieldChangeEvent<unknown>) => {
+    if (
+      e.name === "year_of_birth" &&
+      parseInt((e.value as string) || "0") > maxYear
+    ) {
+      dispatch({
+        type: "set_error",
+        errors: {
+          ...state.errors,
+          [e.name]: `Cannot be greater than ${maxYear}`,
+        },
+      });
+      return;
+    }
     dispatch({
       type: "set_form",
       form: { ...state.form, [e.name]: e.value },
@@ -143,38 +157,34 @@ const TransferPatientDialog = (props: Props) => {
             </p>
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div>
-              <FieldLabel required className="text-sm">
-                Patient
-              </FieldLabel>
-              <SelectFormField
-                id="patient"
-                name="patient"
-                required
-                placeholder="Select patient"
-                options={patientOptions}
-                optionLabel={(patient) => patient.text}
-                optionValue={(patient) => patient.id}
-                value={state.form.patient}
-                onChange={handleChange}
-                error={state.errors.patient}
-              />
-            </div>
-            <div>
-              <TextFormField
-                required
-                type="number"
-                id="year_of_birth"
-                name="year_of_birth"
-                label="Year of birth"
-                value={state.form.year_of_birth}
-                min="1900"
-                max={new Date().getFullYear()}
-                onChange={handleChange}
-                placeholder="Enter year of birth"
-                error={state.errors.year_of_birth}
-              />
-            </div>
+            <SelectFormField
+              id="patient"
+              name="patient"
+              required
+              label="Patient"
+              labelClassName="text-sm"
+              placeholder="Select patient"
+              options={patientOptions}
+              optionLabel={(patient) => patient.text}
+              optionValue={(patient) => patient.id}
+              value={state.form.patient}
+              onChange={handleChange}
+              error={state.errors.patient}
+            />
+            <TextFormField
+              required
+              type="number"
+              id="year_of_birth"
+              name="year_of_birth"
+              label="Year of birth"
+              labelClassName="text-sm"
+              value={state.form.year_of_birth}
+              min="1900"
+              max={maxYear}
+              onChange={handleChange}
+              placeholder="Enter year of birth"
+              error={state.errors.year_of_birth}
+            />
           </div>
         </div>
       </div>
