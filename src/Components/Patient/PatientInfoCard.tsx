@@ -704,7 +704,10 @@ export default function PatientInfoCard(props: {
                                 });
                               }}
                             >
-                              <CareIcon className="care-l-user-square text-lg text-primary-500" />
+                              <CareIcon
+                                icon="l-user-square"
+                                className="text-lg text-primary-500"
+                              />
                               <span>Fetch Records over ABDM</span>
                             </div>
                           </>

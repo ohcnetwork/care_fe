@@ -385,7 +385,7 @@ export const FacilityHome = (props: any) => {
                 <DropdownItem
                   id="view-abdm-records"
                   onClick={() => navigate(`/facility/${facilityId}/abdm`)}
-                  icon={<CareIcon className="care-l-file-network text-lg" />}
+                  icon={<CareIcon icon="l-file-network" className="text-lg" />}
                 >
                   View ABDM Records
                 </DropdownItem>

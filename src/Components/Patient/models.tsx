@@ -334,7 +334,6 @@ export interface DailyRoundsModel {
   created_by?: PerformedByModel;
   last_edited_by?: PerformedByModel;
   bed?: string;
-  ventilator_interface?: string;
 }
 
 export interface FacilityNameModel {

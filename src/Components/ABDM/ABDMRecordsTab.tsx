@@ -106,7 +106,7 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
             ghost
             className="max-w-2xl text-sm text-gray-700 hover:text-gray-900"
           >
-            <CareIcon className="care-l-refresh" /> check status
+            <CareIcon icon="l-refresh" /> check status
           </ButtonV2>
           <p className="mt-1 max-w-2xl text-sm text-gray-500">
             created {dayjs(consent.created_date).fromNow()}
