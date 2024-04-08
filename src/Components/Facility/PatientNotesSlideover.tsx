@@ -137,7 +137,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
     <div className="flex gap-1">
       {show && (
         <Link
-          className="flex size-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
+          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
           href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/notes`}
         >
           <CareIcon
@@ -160,7 +160,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
         />
       </div>
       <div
-        className="flex size-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
+        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
         onClick={() => setShowPatientNotesPopup(false)}
       >
         <CareIcon

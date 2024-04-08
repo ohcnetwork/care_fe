@@ -1034,7 +1034,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             );
           })}
         </div>
-        <div className="flex size-full overflow-auto xl:ml-72">
+        <div className="flex h-full w-full overflow-auto xl:ml-72">
           <div className="w-full max-w-4xl">
             <form
               onSubmit={handleSubmit}

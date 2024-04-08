@@ -126,7 +126,7 @@ interface TimelineNodeTitleProps {
 export const TimelineNodeTitle = (props: TimelineNodeTitleProps) => {
   return (
     <>
-      <div className="relative flex size-6 flex-none items-center justify-center rounded-full bg-gray-200 transition-all duration-200 ease-in-out group-hover:bg-primary-500">
+      <div className="relative flex h-6 w-6 flex-none items-center justify-center rounded-full bg-gray-200 transition-all duration-200 ease-in-out group-hover:bg-primary-500">
         <CareIcon
           className="text-base text-gray-700 transition-all duration-200 ease-in-out group-hover:text-white"
           aria-hidden="true"

@@ -194,7 +194,7 @@ const AssetsList = () => {
           >
             <div
               key={asset.id}
-              className="border-1 size-full cursor-pointer items-center justify-center rounded-lg border border-transparent bg-white p-5 shadow hover:border-primary-500"
+              className="border-1 h-full w-full cursor-pointer items-center justify-center rounded-lg border border-transparent bg-white p-5 shadow hover:border-primary-500"
             >
               <div className="md:flex">
                 <p className="flex break-words text-xl font-medium capitalize">

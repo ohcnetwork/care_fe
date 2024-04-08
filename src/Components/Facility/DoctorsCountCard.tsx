@@ -47,7 +47,7 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
       <div className="flex h-full flex-col rounded-sm border border-[#D2D6DC] shadow-sm">
         <div className="flex flex-1 items-center justify-start gap-3 px-4 py-6">
           <div className={`rounded-full p-4 ${specialization?.desc}`}>
-            <DoctorIcon className="w-5 h-5 fill-current text-white" />
+            <DoctorIcon className="h-5 w-5 fill-current text-white" />
           </div>
           <div>
             <div className="text-sm font-medium text-[#808080]">
