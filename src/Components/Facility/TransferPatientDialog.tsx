@@ -100,6 +100,11 @@ const TransferPatientDialog = (props: Props) => {
             errors[field] = "This field is required";
             invalidForm = true;
           }
+
+          if (parseInt(state.form[field] || "0") > maxYear) {
+            errors[field] = `Cannot be greater than ${maxYear}`;
+            invalidForm = true;
+          }
           return;
         default:
           return;
@@ -109,8 +114,7 @@ const TransferPatientDialog = (props: Props) => {
     return !invalidForm;
   };
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     const validForm = validateForm();
     if (validForm) {
       setIsLoading(true);
@@ -193,7 +197,10 @@ const TransferPatientDialog = (props: Props) => {
         <Submit
           id="submit-transferpatient"
           disabled={isLoading}
-          onClick={handleSubmit}
+          onClick={(e) => {
+            e.preventDefault();
+            handleSubmit();
+          }}
           label="Transfer Suspect / Patient"
         />
       </div>
