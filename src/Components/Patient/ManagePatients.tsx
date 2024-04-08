@@ -654,7 +654,7 @@ export const PatientManager = () => {
                           text="No update in 24 hours"
                         />
                         <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center">
-                          <span className="center absolute inline-flex h-4 w-3 animate-ping rounded-full bg-red-400"></span>
+                          <span className="center absolute inline-flex h-4 w-4 animate-ping rounded-full bg-red-400"></span>
                           <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
                         </span>
                       </span>
