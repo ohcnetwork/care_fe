@@ -405,6 +405,20 @@ const getRelativeDateSuffix = (abbreviated: boolean) => {
   };
 };
 
+export const patientAgeInYears = (obj: PatientModel) => {
+  const start = dayjs(
+    obj.date_of_birth
+      ? new Date(obj.date_of_birth)
+      : new Date(obj.year_of_birth!, 0, 1)
+  );
+
+  const end = dayjs(
+    obj.death_datetime ? new Date(obj.death_datetime) : new Date()
+  );
+
+  return end.diff(start, "years");
+};
+
 export const formatPatientAge = (obj: PatientModel, abbreviated = false) => {
   const suffixes = getRelativeDateSuffix(abbreviated);
 
