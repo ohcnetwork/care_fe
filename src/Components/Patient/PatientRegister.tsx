@@ -1335,7 +1335,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   [
                                     {
                                       value: "date_of_birth",
-                                      text: "D.O.B.",
+                                      text: "DOB",
                                     },
                                     { value: "age", text: "Age" },
                                   ] as const
