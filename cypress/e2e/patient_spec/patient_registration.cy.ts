@@ -247,7 +247,7 @@ describe("Patient Creation with consultation", () => {
     patientTransfer.clickAdmitPatientRecordButton();
     patientTransfer.clickTransferPopupContinueButton();
     patientTransfer.clickTransferPatientNameList(patientTransferName);
-    patientTransfer.clickTransferPatientDob(patientDateOfBirth);
+    patientTransfer.clickTransferPatientYOB(yearOfBirth);
     patientTransfer.clickTransferSubmitButton();
     patientTransfer.verifyFacilitySuccessfullMessage();
     patientTransfer.clickConsultationCancelButton();
@@ -263,7 +263,7 @@ describe("Patient Creation with consultation", () => {
     patientTransfer.clickAdmitPatientRecordButton();
     patientTransfer.clickTransferPopupContinueButton();
     patientTransfer.clickTransferPatientNameList(patientTransferName);
-    patientTransfer.clickTransferPatientDob(patientDateOfBirth);
+    patientTransfer.clickTransferPatientYOB(yearOfBirth);
     patientTransfer.clickTransferSubmitButton();
     patientTransfer.verifyFacilityErrorMessage();
   });
