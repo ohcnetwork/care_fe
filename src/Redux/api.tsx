@@ -64,6 +64,7 @@ import {
   PatientNotesEditModel,
   PatientNotesModel,
   PatientStatsModel,
+  PatientTransferRequest,
   PatientTransferResponse,
   StateModel,
   WardModel,
@@ -704,6 +705,7 @@ const routes = {
   transferPatient: {
     path: "/api/v1/patient/{id}/transfer/",
     method: "POST",
+    TBody: Type<PatientTransferRequest>(),
     TRes: Type<PatientTransferResponse>(),
   },
   getPatientNotes: {
