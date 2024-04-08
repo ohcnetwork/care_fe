@@ -304,7 +304,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
       ref: treatmentPlanRef,
     },
     "Consent Records": {
-      iconClass: "care-l-file-alt",
+      iconClass: "l-file-alt",
       visible: consentRecordsVisible,
       ref: consentRecordsRef,
     },
@@ -402,7 +402,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
       if (res.data.suggestion === "R") {
         if (res.data.referred_to_external)
           setReferredToFacility({
-            id: -1,
             name: res.data.referred_to_external,
           });
         else setReferredToFacility(res.data.referred_to_object);
@@ -410,7 +409,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
       if (res.data.route_to_facility === 20) {
         if (res.data.referred_from_facility_external)
           setReferredFromFacility({
-            id: -1,
             name: res.data.referred_from_facility_external,
           });
         else setReferredFromFacility(res.data.referred_from_facility_object);
@@ -884,12 +882,12 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     const selectedFacility = selected as FacilityModel;
     setReferredToFacility(selectedFacility);
     const form: FormDetails = { ...state.form };
-    if (selectedFacility?.id) {
-      if (selectedFacility.id === -1) {
+    if (selectedFacility) {
+      if (!selectedFacility.id) {
         form.referred_to_external = selectedFacility.name ?? "";
         delete form.referred_to;
       } else {
-        form.referred_to = selectedFacility.id.toString() || "";
+        form.referred_to = selectedFacility.id;
         delete form.referred_to_external;
       }
     }
@@ -902,12 +900,12 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     const selectedFacility = selected as FacilityModel;
     setReferredFromFacility(selectedFacility);
     const form: FormDetails = { ...state.form };
-    if (selectedFacility?.id) {
-      if (selectedFacility.id === -1) {
+    if (selectedFacility) {
+      if (!selectedFacility.id) {
         form.referred_from_facility_external = selectedFacility.name ?? "";
         delete form.referred_from_facility;
       } else {
-        form.referred_from_facility = selectedFacility.id.toString() || "";
+        form.referred_from_facility = selectedFacility.id;
         delete form.referred_from_facility_external;
       }
     }
@@ -1616,13 +1614,14 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                                 }
                               >
                                 <CareIcon
-                                  className={`care-l-arrow-${
+                                  icon={
                                     collapsedConsentRecords.includes(
                                       record.type
                                     )
-                                      ? "down"
-                                      : "up"
-                                  } mr-2`}
+                                      ? "l-arrow-down"
+                                      : "l-arrow-up"
+                                  }
+                                  className="mr-2"
                                 />
                                 {
                                   CONSENT_TYPE_CHOICES.find(
@@ -1637,7 +1636,10 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                                   setShowDeleteConsent(record.id);
                                 }}
                               >
-                                <CareIcon className="care-l-trash-alt h-4 w-4" />
+                                <CareIcon
+                                  icon="l-trash-alt"
+                                  className="h-4 w-4"
+                                />
                               </button>
                             </div>
                             <div
