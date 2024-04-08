@@ -45,6 +45,7 @@ export default ({ show, setShow, username }: IProps) => {
         pathParams: { username },
         body: { skill: skill.id },
       });
+
       if (!res?.ok) {
         Notification.Error({
           msg: "Error while adding skill",
@@ -69,6 +70,10 @@ export default ({ show, setShow, username }: IProps) => {
       if (res?.status !== 204) {
         Notification.Error({
           msg: "Error while unlinking skill",
+        });
+      } else {
+        Notification.Success({
+          msg: "Skill unlinked successfully",
         });
       }
       setDeleteSkill(null);

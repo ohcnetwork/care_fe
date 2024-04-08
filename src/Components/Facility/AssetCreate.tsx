@@ -389,8 +389,8 @@ const AssetCreate = (props: AssetProps) => {
       >
         <section className="text-center">
           <h1 className="flex flex-col items-center py-10 text-6xl">
-            <div className="size-40 flex items-center justify-center rounded-full bg-gray-200 p-5">
-              <CareIcon className="care-l-map-marker text-green-600" />
+            <div className="flex h-40 w-40 items-center justify-center rounded-full bg-gray-200 p-5">
+              <CareIcon icon="l-map-marker" className="text-green-600" />
             </div>
           </h1>
           <p className="text-gray-600">
@@ -496,7 +496,7 @@ const AssetCreate = (props: AssetProps) => {
               );
             })}
           </div>
-          <div className="size-full flex overflow-auto xl:ml-72">
+          <div className="flex h-full w-full overflow-auto xl:ml-72">
             <div className="w-full max-w-3xl 2xl:max-w-4xl">
               <form
                 onSubmit={(e) => handleSubmit(e, false)}
@@ -673,7 +673,10 @@ const AssetCreate = (props: AssetProps) => {
                         className="ml-1 mt-1 flex h-10 cursor-pointer items-center justify-self-end rounded border border-gray-400 px-4 hover:bg-gray-200"
                         onClick={() => setIsScannerActive(true)}
                       >
-                        <CareIcon className="care-l-focus cursor-pointer text-lg" />
+                        <CareIcon
+                          icon="l-focus"
+                          className="cursor-pointer text-lg"
+                        />
                       </div>
                     </div>
                   </div>

@@ -5,7 +5,7 @@ import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import {
   generatePhoneNumber,
   generateEmergencyPhoneNumber,
-} from "../../pageobject/constants";
+} from "../../pageobject/utils/constants";
 import PatientTransfer from "../../pageobject/Patient/PatientTransfer";
 import PatientExternal from "../../pageobject/Patient/PatientExternal";
 import PatientInsurance from "../../pageobject/Patient/PatientInsurance";
@@ -59,6 +59,7 @@ describe("Patient Creation with consultation", () => {
   const patientTransferFacility = "Dummy Shifting Center";
   const patientTransferName = "Dummy Patient 10";
   const patientExternalName = "Patient 20";
+  const patientOccupation = "Student";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -79,7 +80,7 @@ describe("Patient Creation with consultation", () => {
     // Patient Details page
     patientPage.typePatientPhoneNumber(phone_number);
     patientPage.typePatientEmergencyNumber(emergency_phone_number);
-    patientPage.typePatientDateOfBirth(patientDateOfBirth);
+    patientPage.typePatientAge(age.toString());
     patientPage.typePatientName(patientOneName);
     patientPage.selectPatientGender(patientOneGender);
     patientPage.typePatientAddress(patientOneAddress);
@@ -88,6 +89,7 @@ describe("Patient Creation with consultation", () => {
     facilityPage.selectDistrictOnPincode(patientOneDistrict);
     facilityPage.selectLocalBody(patientOneLocalbody);
     facilityPage.selectWard(patientOneWard);
+    patientPage.selectPatientOccupation(patientOccupation);
     // Patient Medical History
     patientMedicalHistory.typePatientPresentHealth(patientOnePresentHealth);
     patientMedicalHistory.typePatientOngoingMedication(
@@ -115,7 +117,8 @@ describe("Patient Creation with consultation", () => {
       phone_number,
       emergency_phone_number,
       yearOfBirth,
-      patientOneBloodGroup
+      patientOneBloodGroup,
+      patientOccupation
     );
     patientMedicalHistory.verifyPatientMedicalDetails(
       patientOnePresentHealth,
@@ -143,6 +146,7 @@ describe("Patient Creation with consultation", () => {
     // change the gender to female and input data to related changed field
     cy.wait(3000);
     patientPage.selectPatientGender(patientOneUpdatedGender);
+    patientPage.typePatientDateOfBirth(patientDateOfBirth);
     patientPage.clickPatientAntenatalStatusYes();
     patientPage.selectPatientBloodGroup(patientOneUpdatedBloodGroup);
     // Edit the patient consultation , select none medical history and multiple health ID
@@ -202,7 +206,8 @@ describe("Patient Creation with consultation", () => {
       phone_number,
       emergency_phone_number,
       yearOfBirth,
-      patientOneUpdatedBloodGroup
+      patientOneUpdatedBloodGroup,
+      patientOccupation
     );
     // Verify No medical history
     patientMedicalHistory.verifyNoSymptosPresent("Diabetes");
