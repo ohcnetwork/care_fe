@@ -90,17 +90,8 @@ export const getConsultationDailyRoundsDetails = (pathParam: object) => {
 };
 
 // Consultation
-export const createConsultation = (params: object) => {
-  return fireRequest("createConsultation", [], params);
-};
 export const getConsultation = (id: string) => {
   return fireRequest("getConsultation", [], {}, { id: id });
-};
-export const updateConsultation = (id: string, params: object) => {
-  return fireRequest("updateConsultation", [], params, { id: id });
-};
-export const partialUpdateConsultation = (id: string, params: object) => {
-  return fireRequest("partialUpdateConsultation", [], params, { id: id });
 };
 
 export const generateDischargeSummary = (pathParams: object) => {

@@ -529,6 +529,8 @@ const routes = {
   createConsultation: {
     path: "/api/v1/consultation/",
     method: "POST",
+    TBody: Type<ConsultationModel>(),
+    TRes: Type<ConsultationModel>(),
   },
   getConsultation: {
     path: "/api/v1/consultation/{id}/",
@@ -538,6 +540,8 @@ const routes = {
   updateConsultation: {
     path: "/api/v1/consultation/{id}/",
     method: "PUT",
+    TBody: Type<ConsultationModel>(),
+    TRes: Type<ConsultationModel>(),
   },
   partialUpdateConsultation: {
     path: "/api/v1/consultation/{id}/",
@@ -931,6 +935,8 @@ const routes = {
   dischargePatient: {
     path: "/api/v1/consultation/{id}/discharge_patient/",
     method: "POST",
+    TBody: Type<object>(),
+    TRes: Type<object>(),
   },
   listFacilityDischargedPatients: {
     path: "/api/v1/facility/{facility_external_id}/discharged_patients/",
