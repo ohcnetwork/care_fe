@@ -1,6 +1,6 @@
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 import FormField from "./FormField";
-import { useCallback, useEffect, useMemo, useState, useRef } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   classNames,
   parsePhoneNumber,
@@ -15,6 +15,7 @@ import {
   PhoneNumberType,
 } from "../FieldValidators";
 import CareIcon, { IconName } from "../../../CAREUI/icons/CareIcon";
+import useClickOutside from "../../../Common/hooks/useClickOutside";
 
 const phoneCodes: Record<string, CountryData> = phoneCodesJson;
 
@@ -33,8 +34,8 @@ export default function PhoneNumberFormField(props: Props) {
     name: "India",
     code: "91",
   });
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const componentRef = useRef<HTMLDivElement>(null);
+  const [isOpen, setIsOpen, componentRef] =
+    useClickOutside<HTMLDivElement>(false);
 
   const validator = useMemo(
     () => PhoneNumberValidator(props.types),
@@ -95,23 +96,6 @@ export default function PhoneNumberFormField(props: Props) {
 
   useEffect(() => {
     setValue(field.value || "+91");
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        componentRef.current &&
-        !componentRef.current.contains(e.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
   }, []);
 
   return (
