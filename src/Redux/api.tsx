@@ -64,6 +64,7 @@ import {
   PatientNotesEditModel,
   PatientNotesModel,
   PatientStatsModel,
+  PatientTransferRequest,
   PatientTransferResponse,
   StateModel,
   WardModel,
@@ -528,6 +529,8 @@ const routes = {
   createConsultation: {
     path: "/api/v1/consultation/",
     method: "POST",
+    TBody: Type<ConsultationModel>(),
+    TRes: Type<ConsultationModel>(),
   },
   getConsultation: {
     path: "/api/v1/consultation/{id}/",
@@ -537,6 +540,8 @@ const routes = {
   updateConsultation: {
     path: "/api/v1/consultation/{id}/",
     method: "PUT",
+    TBody: Type<ConsultationModel>(),
+    TRes: Type<ConsultationModel>(),
   },
   partialUpdateConsultation: {
     path: "/api/v1/consultation/{id}/",
@@ -550,10 +555,14 @@ const routes = {
   },
   createDailyRounds: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/",
+    TBody: Type<DailyRoundsModel>(),
+    TRes: Type<DailyRoundsModel>(),
     method: "POST",
   },
   updateDailyReport: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/{id}/",
+    TBody: Type<DailyRoundsModel>(),
+    TRes: Type<DailyRoundsModel>(),
     method: "PUT",
   },
   updateDailyRound: {
@@ -700,6 +709,7 @@ const routes = {
   transferPatient: {
     path: "/api/v1/patient/{id}/transfer/",
     method: "POST",
+    TBody: Type<PatientTransferRequest>(),
     TRes: Type<PatientTransferResponse>(),
   },
   getPatientNotes: {
@@ -929,6 +939,8 @@ const routes = {
   dischargePatient: {
     path: "/api/v1/consultation/{id}/discharge_patient/",
     method: "POST",
+    TBody: Type<object>(),
+    TRes: Type<object>(),
   },
   listFacilityDischargedPatients: {
     path: "/api/v1/facility/{facility_external_id}/discharged_patients/",
