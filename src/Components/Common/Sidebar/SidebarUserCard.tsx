@@ -31,7 +31,7 @@ const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
           shrinked ? "hidden" : "grow"
         } flex min-w-0 flex-col pb-2 pl-3`}
       >
-        <div className="min-h-6 flex items-center">
+        <div className="flex min-h-6 items-center">
           <Link
             href="/user/profile"
             className="flex-nowrap overflow-hidden break-words font-semibold text-white"
@@ -41,7 +41,7 @@ const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
           </Link>
         </div>
         <div
-          className="min-h-6 flex cursor-pointer items-center"
+          className="flex min-h-6 cursor-pointer items-center"
           onClick={signOut}
         >
           <CareIcon

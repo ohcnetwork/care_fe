@@ -157,7 +157,7 @@ export default function SampleViewAdmin() {
                   </div>
                   <div>
                     {item.sample_type && (
-                      <span className="text-wrap mx-1 truncate rounded-md bg-blue-200 px-2 py-1 text-sm font-bold text-blue-800">
+                      <span className="mx-1 truncate text-wrap rounded-md bg-blue-200 px-2 py-1 text-sm font-bold text-blue-800">
                         Type: {item.sample_type}
                       </span>
                     )}

@@ -33,5 +33,6 @@
   "select_groups": "Select Groups",
   "generate_report": "Generate Report",
   "prev_sessions": "Prev Sessions",
-  "next_sessions": "Next Sessions"
+  "next_sessions": "Next Sessions",
+  "no_changes": "No changes"
 }

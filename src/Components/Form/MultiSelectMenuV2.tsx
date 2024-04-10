@@ -63,7 +63,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
       return props.renderSelectedOptions(selectedOptions.map((o) => o.option));
   };
 
-  const buttonRef = useRef(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const handleSingleSelect = (o: any) => {
     if (
@@ -104,9 +104,9 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
 
                       {selectedOptions.length !== 0 && (
                         <div className="flex flex-wrap gap-2">
-                          {selectedOptions.map((option) => (
+                          {selectedOptions.map((option, index) => (
                             <MultiSelectOptionChip
-                              key={option.value}
+                              key={index}
                               label={option.selectedLabel}
                               onRemove={() => {
                                 const updatedOptions = selectedOptions.filter(
