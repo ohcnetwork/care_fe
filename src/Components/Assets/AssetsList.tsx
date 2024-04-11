@@ -124,7 +124,6 @@ const AssetsList = () => {
     }
     setIsLoading(false);
     Notification.Error({ msg: "Invalid Asset Id" });
-    setIsScannerActive(false);
   };
 
   const checkValidAssetId = async (assetId: string) => {
