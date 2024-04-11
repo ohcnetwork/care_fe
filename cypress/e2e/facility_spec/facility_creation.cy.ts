@@ -1,5 +1,13 @@
 // FacilityCreation
-import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
+import {
+  cy,
+  describe,
+  before,
+  beforeEach,
+  it,
+  afterEach,
+  expect,
+} from "local-cypress";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import FacilityHome from "../../pageobject/Facility/FacilityHome";
@@ -38,6 +46,7 @@ describe("Facility Creation", () => {
   const initialTriageValue = "60";
   const modifiedTriageValue = "50";
   const facilityErrorMessage = [
+    "Required",
     "Required",
     "Invalid Pincode",
     "Required",
@@ -115,6 +124,7 @@ describe("Facility Creation", () => {
     facilityPage.submitForm();
     userCreationPage.verifyErrorMessages(facilityErrorMessage);
     facilityPage.fillFacilityName(facilityName);
+    facilityPage.clickUpdateFacilityType("Primary Health Centres");
     facilityPage.clickfacilityfeatureoption();
     facilityFeature.forEach((featureText) => {
       cy.get("[role='option']").contains(featureText).click();
@@ -202,6 +212,7 @@ describe("Facility Creation", () => {
   it("Create a new facility with single bed and doctor capacity", () => {
     facilityPage.visitCreateFacilityPage();
     facilityPage.fillFacilityName(facilityName);
+    facilityPage.clickUpdateFacilityType("Primary Health Centres");
     facilityPage.fillPincode("682001");
     facilityPage.selectStateOnPincode("Kerala");
     facilityPage.selectDistrictOnPincode("Ernakulam");
@@ -241,6 +252,7 @@ describe("Facility Creation", () => {
   it("Create a new facility with no bed and doctor capacity", () => {
     facilityPage.visitCreateFacilityPage();
     facilityPage.fillFacilityName(facilityName);
+    facilityPage.clickUpdateFacilityType("Primary Health Centres");
     facilityPage.fillPincode("682001");
     facilityPage.selectStateOnPincode("Kerala");
     facilityPage.selectDistrictOnPincode("Ernakulam");
@@ -279,7 +291,7 @@ describe("Facility Creation", () => {
     facilityPage.visitUpdateFacilityPage(facilityUrl1);
     facilityPage.clickManageFacilityDropdown();
     facilityPage.clickUpdateFacilityOption();
-    facilityPage.clickUpdateFacilityType("Govt Hospital");
+    facilityPage.clickUpdateFacilityType("Primary Health Centres");
     facilityPage.fillAddress(facilityUpdateAddress);
     facilityPage.fillOxygenCapacity(oxygenCapacity);
     facilityPage.fillExpectedOxygenRequirement(oxygenExpected);

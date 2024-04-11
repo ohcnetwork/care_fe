@@ -8,6 +8,8 @@ import {
   PATIENT_CATEGORIES,
   REVIEW_AT_CHOICES,
   TELEMEDICINE_ACTIONS,
+  CONSENT_TYPE_CHOICES,
+  CONSENT_PATIENT_CODE_STATUS_CHOICES,
 } from "../../Common/constants";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
@@ -15,25 +17,10 @@ import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
-import {
-  LegacyRef,
-  createRef,
-  lazy,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { LegacyRef, createRef, lazy, useEffect, useState } from "react";
 import ProcedureBuilder, {
   ProcedureType,
 } from "../Common/prescription-builder/ProcedureBuilder";
-import {
-  createConsultation,
-  getConsultation,
-  getPatient,
-  updateConsultation,
-} from "../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-
 import { BedSelect } from "../Common/BedSelect";
 import Beds from "./Consultations/Beds";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -52,12 +39,10 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
 import { UserModel } from "../Users/models";
-import { dischargePatient } from "../../Redux/actions";
 
 import { navigate } from "raviger";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
 import useVisibility from "../../Utils/useVisibility";
 import dayjs from "../../Utils/dayjs";
 import RouteToFacilitySelect, {
@@ -74,11 +59,23 @@ import {
   CreateDiagnosesBuilder,
   EditDiagnosesBuilder,
 } from "../Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder.js";
+import { FileUpload } from "../Patient/FileUpload.js";
+import ConfirmDialog from "../Common/ConfirmDialog.js";
+import request from "../../Utils/request/request.js";
+import routes from "../../Redux/api.js";
+import useQuery from "../../Utils/request/useQuery.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
 
 type BooleanStrings = "true" | "false";
+
+export type ConsentRecord = {
+  id: string;
+  type: (typeof CONSENT_TYPE_CHOICES)[number]["id"];
+  patient_code_status?: (typeof CONSENT_PATIENT_CODE_STATUS_CHOICES)[number]["id"];
+  deleted?: boolean;
+};
 
 type FormDetails = {
   symptoms: number[];
@@ -128,6 +125,7 @@ type FormDetails = {
   death_confirmed_doctor: string;
   InvestigationAdvice: InvestigationType[];
   procedures: ProcedureType[];
+  consent_records: ConsentRecord[];
 };
 
 const initForm: FormDetails = {
@@ -178,6 +176,7 @@ const initForm: FormDetails = {
   death_confirmed_doctor: "",
   InvestigationAdvice: [],
   procedures: [],
+  consent_records: [],
 };
 
 const initError = Object.assign(
@@ -228,6 +227,7 @@ type ConsultationFormSection =
   | "Consultation Details"
   | "Diagnosis"
   | "Treatment Plan"
+  | "Consent Records"
   | "Bed Status";
 
 type Props = {
@@ -239,7 +239,6 @@ type Props = {
 export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   const { goBack } = useAppHistory();
   const { kasp_enabled, kasp_string } = useConfig();
-  const dispatchAction: any = useDispatch();
   const [state, dispatch] = useAutoSaveReducer<FormDetails>(
     consultationFormReducer,
     initialState
@@ -261,38 +260,51 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   const [diagnosisVisible, diagnosisRef] = useVisibility(-300);
   const [treatmentPlanVisible, treatmentPlanRef] = useVisibility(-300);
   const [bedStatusVisible, bedStatusRef] = useVisibility(-300);
+  const [consentRecordsVisible, consentRecordsRef] = useVisibility(-300);
   const [disabledFields, setDisabledFields] = useState<string[]>([]);
+  const [collapsedConsentRecords, setCollapsedConsentRecords] = useState<
+    number[]
+  >([]);
+  const [showDeleteConsent, setShowDeleteConsent] = useState<string | null>(
+    null
+  );
 
   const { min_encounter_date } = useConfig();
 
   const sections = {
     "Consultation Details": {
-      iconClass: "care-l-medkit",
+      iconClass: "l-medkit",
       visible: consultationDetailsVisible,
       ref: consultationDetailsRef,
     },
     Diagnosis: {
-      iconClass: "care-l-stethoscope",
+      iconClass: "l-stethoscope",
       visible: diagnosisVisible,
       ref: diagnosisRef,
     },
     "Treatment Plan": {
-      iconClass: "care-l-clipboard-alt",
+      iconClass: "l-clipboard-alt",
       visible: treatmentPlanVisible,
       ref: treatmentPlanRef,
     },
+    "Consent Records": {
+      iconClass: "l-file-alt",
+      visible: consentRecordsVisible,
+      ref: consentRecordsRef,
+    },
     "Bed Status": {
-      iconClass: "care-l-bed",
+      iconClass: "l-bed",
       visible: bedStatusVisible,
       ref: bedStatusRef,
     },
-  };
+  } as const;
 
   useEffect(() => {
     setCurrentSection((prev) => {
       if (consultationDetailsVisible) return "Consultation Details";
       if (diagnosisVisible) return "Diagnosis";
       if (treatmentPlanVisible) return "Treatment Plan";
+      if (consentRecordsVisible) return "Consent Records";
       if (bedStatusVisible) return "Bed Status";
       return prev;
     });
@@ -300,32 +312,25 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     consultationDetailsVisible,
     diagnosisVisible,
     treatmentPlanVisible,
+    consentRecordsVisible,
     bedStatusVisible,
   ]);
 
-  useEffect(() => {
-    async function fetchPatientName() {
-      if (patientId) {
-        setIsLoading(true);
-        const res = await dispatchAction(getPatient({ id: patientId }));
-        if (res.data) {
-          if (isUpdate) {
-            dispatch({
-              type: "set_form",
-              form: { ...state.form, action: res.data.action },
-            });
-          }
-          setPatientName(res.data.name);
-          setFacilityName(res.data.facility_object.name);
-        }
-      } else {
-        setPatientName("");
-        setFacilityName("");
+  const { loading: loadingPatient } = useQuery(routes.getPatient, {
+    pathParams: { id: patientId },
+    onResponse: ({ data }) => {
+      if (!data) return;
+      if (isUpdate) {
+        dispatch({
+          type: "set_form",
+          form: { ...state.form, action: data.action },
+        });
       }
-      if (!id) setIsLoading(false);
-    }
-    fetchPatientName();
-  }, [dispatchAction, patientId]);
+      setPatientName(data.name ?? "");
+      setFacilityName(data.facility_object?.name ?? "");
+    },
+    prefetch: !!patientId,
+  });
 
   useEffect(() => {
     dispatch({
@@ -356,98 +361,97 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     }
   };
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      if (!patientId) setIsLoading(true);
-      const res = await dispatchAction(getConsultation(id!));
-      handleFormFieldChange({
-        name: "InvestigationAdvice",
-        value: !Array.isArray(res.data.investigation)
-          ? []
-          : res.data.investigation,
-      });
-      handleFormFieldChange({
-        name: "procedures",
-        value: !Array.isArray(res.data.procedure) ? [] : res.data.procedure,
-      });
-      if (res.data.suggestion === "R") {
-        if (res.data.referred_to_external)
-          setReferredToFacility({
-            id: -1,
-            name: res.data.referred_to_external,
-          });
-        else setReferredToFacility(res.data.referred_to_object);
-      }
-      if (res.data.route_to_facility === 20) {
-        if (res.data.referred_from_facility_external)
-          setReferredFromFacility({
-            id: -1,
-            name: res.data.referred_from_facility_external,
-          });
-        else setReferredFromFacility(res.data.referred_from_facility_object);
-      }
-      if (!status.aborted) {
-        if (res?.data) {
+  const { loading: consultationLoading, refetch } = useQuery(
+    routes.getConsultation,
+    {
+      pathParams: { id: id! },
+      prefetch: !!(id && ((patientId && patientName) || !patientId)),
+      onResponse: ({ data }) => {
+        if (!data) return;
+        handleFormFieldChange({
+          name: "InvestigationAdvice",
+          value:
+            (Array.isArray(data.investigation) && data.investigation) || [],
+        });
+        handleFormFieldChange({
+          name: "procedures",
+          value: (Array.isArray(data.procedure) && data.procedure) || [],
+        });
+        if (data.suggestion === "R") {
+          if (data.referred_to_external)
+            setReferredToFacility({
+              name: data.referred_to_external,
+            });
+          else setReferredToFacility(data.referred_to_object ?? null);
+        }
+        if (data.route_to_facility === 20) {
+          if (data.referred_from_facility_external)
+            setReferredFromFacility({
+              name: data.referred_from_facility_external,
+            });
+          else
+            setReferredFromFacility(data.referred_from_facility_object ?? null);
+        }
+
+        if (data) {
           const formData = {
-            ...res.data,
-            symptoms_onset_date: isoStringToDate(res.data.symptoms_onset_date),
-            encounter_date: isoStringToDate(res.data.encounter_date),
-            icu_admission_date: isoStringToDate(res.data.icu_admission_date),
-            admitted: res.data.admitted ? String(res.data.admitted) : "false",
-            admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
-            category: res.data.category
-              ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)
-                  ?.id ?? ""
+            ...data,
+            symptoms_onset_date:
+              data.symptoms_onset_date &&
+              isoStringToDate(data.symptoms_onset_date),
+            encounter_date: isoStringToDate(data.encounter_date),
+            icu_admission_date:
+              data.icu_admission_date &&
+              isoStringToDate(data.icu_admission_date),
+            admitted: data.admitted ? String(data.admitted) : "false",
+            admitted_to: data.admitted_to ? data.admitted_to : "",
+            category: data.category
+              ? PATIENT_CATEGORIES.find((i) => i.text === data.category)?.id ??
+                ""
               : "",
-            patient_no: res.data.patient_no ?? "",
-            OPconsultation: res.data.consultation_notes,
-            is_telemedicine: `${res.data.is_telemedicine}`,
-            is_kasp: `${res.data.is_kasp}`,
-            assigned_to: res.data.assigned_to || "",
-            assigned_to_object: res.data.assigned_to_object,
-            treating_physician: res.data.treating_physician || "",
-            treating_physician_object: res.data.treating_physician_object,
-            ett_tt: res.data.ett_tt ? Number(res.data.ett_tt) : 3,
-            special_instruction: res.data.special_instruction || "",
-            weight: res.data.weight ? res.data.weight : "",
-            height: res.data.height ? res.data.height : "",
-            bed: res.data?.current_bed?.bed_object || null,
-            new_discharge_reason: res.data?.new_discharge_reason || null,
-            cause_of_death: res.data?.discharge_notes || "",
-            death_datetime: res.data?.death_datetime || "",
-            death_confirmed_doctor: res.data?.death_confirmed_doctor || "",
-            InvestigationAdvice: Array.isArray(res.data.investigation)
-              ? res.data.investigation
+            patient_no: data.patient_no ?? "",
+            OPconsultation: data.consultation_notes,
+            is_telemedicine: `${data.is_telemedicine}`,
+            is_kasp: `${data.is_kasp}`,
+            assigned_to: data.assigned_to || "",
+            assigned_to_object: data.assigned_to_object,
+            treating_physician: data.treating_physician || "",
+            treating_physician_object: data.treating_physician_object,
+            ett_tt: data.ett_tt ? Number(data.ett_tt) : 3,
+            special_instruction: data.special_instruction || "",
+            weight: data.weight ? data.weight : "",
+            height: data.height ? data.height : "",
+            bed: data?.current_bed?.bed_object || null,
+            new_discharge_reason: data?.new_discharge_reason || null,
+            cause_of_death: data?.discharge_notes || "",
+            death_datetime: data?.death_datetime || "",
+            death_confirmed_doctor: data?.death_confirmed_doctor || "",
+            InvestigationAdvice: Array.isArray(data.investigation)
+              ? data.investigation
               : [],
-            diagnoses: res.data.diagnoses.sort(
+            diagnoses: data.diagnoses?.sort(
               (a: ConsultationDiagnosis, b: ConsultationDiagnosis) =>
                 ConditionVerificationStatuses.indexOf(a.verification_status) -
                 ConditionVerificationStatuses.indexOf(b.verification_status)
             ),
           };
-          dispatch({ type: "set_form", form: { ...state.form, ...formData } });
+          dispatch({
+            type: "set_form",
+            form: { ...state.form, ...(formData as unknown as FormDetails) },
+          });
           setBed(formData.bed);
 
-          if (res.data.last_daily_round && state.form.category) {
+          if (data.last_daily_round && state.form.category) {
             setDisabledFields((fields) => [...fields, "category"]);
           }
         } else {
           goBack();
         }
-        setIsLoading(false);
-      }
-    },
-    [dispatchAction, id, patientName, patientId]
+      },
+    }
   );
 
-  useAbortableEffect(
-    (status: statusType) => {
-      if (id && ((patientId && patientName) || !patientId)) fetchData(status);
-    },
-    [fetchData, id, patientId, patientName]
-  );
-
-  if (isLoading) return <Loading />;
+  if (isLoading || loadingPatient || consultationLoading) return <Loading />;
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -665,24 +669,18 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     death_datetime: string,
     death_confirmed_doctor: string
   ) => {
-    const dischargeResponse = await dispatchAction(
-      dischargePatient(
-        {
-          new_discharge_reason: DISCHARGE_REASONS.find(
-            (i) => i.text === "Expired"
-          )?.id,
-          discharge_notes: cause_of_death,
-          death_datetime: death_datetime,
-          death_confirmed_doctor: death_confirmed_doctor,
-          discharge_date: dayjs().toISOString(),
-        },
-        { id }
-      )
-    );
-
-    if (dischargeResponse?.status === 200) {
-      return dischargeResponse;
-    }
+    await request(routes.dischargePatient, {
+      pathParams: { id },
+      body: {
+        new_discharge_reason: DISCHARGE_REASONS.find(
+          (i) => i.text === "Expired"
+        )?.id,
+        discharge_notes: cause_of_death,
+        death_datetime: death_datetime,
+        death_confirmed_doctor: death_confirmed_doctor,
+        discharge_date: dayjs().toISOString(),
+      },
+    });
   };
 
   const handleSubmit = async (
@@ -694,7 +692,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     const validated = validateForm();
     if (validated) {
       setIsLoading(true);
-      const data = {
+      const data: any = {
         symptoms: state.form.symptoms,
         other_symptoms: isOtherSymptomsSelected
           ? state.form.other_symptoms
@@ -713,7 +711,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         history_of_present_illness: state.form.history_of_present_illness,
         treatment_plan: state.form.treatment_plan,
         discharge_date: state.form.discharge_date,
-        patient_no: state.form.patient_no,
         create_diagnoses: isUpdate ? undefined : state.form.create_diagnoses,
         treating_physician: state.form.treating_physician,
         investigation: state.form.InvestigationAdvice,
@@ -762,18 +759,25 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         weight: Number(state.form.weight),
         height: Number(state.form.height),
         bed: bed && bed instanceof Array ? bed[0]?.id : bed?.id,
+        patient_no: state.form.patient_no || null,
+        consent_records: state.form.consent_records || [],
       };
 
-      const res = await dispatchAction(
-        id ? updateConsultation(id!, data) : createConsultation(data)
+      const { data: obj } = await request(
+        id ? routes.updateConsultation : routes.createConsultation,
+        {
+          pathParams: id ? { id } : undefined,
+          body: data,
+        }
       );
+
       setIsLoading(false);
-      if (res?.data && res.status !== 400) {
+      if (obj) {
         dispatch({ type: "set_form", form: initForm });
 
         if (data.suggestion === "DD") {
           await declareThePatientDead(
-            res.data.id,
+            obj.id,
             state.form.cause_of_death,
             state.form.death_datetime,
             state.form.death_confirmed_doctor
@@ -781,13 +785,13 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         }
 
         Notification.Success({
-          msg: res.data.discharge_date
+          msg: obj.discharge_date
             ? "Patient discharged successfully"
             : `Consultation ${id ? "updated" : "created"} successfully`,
         });
 
         navigate(
-          `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}`
+          `/facility/${facilityId}/patient/${patientId}/consultation/${obj.id}`
         );
 
         if (data.suggestion === "R") {
@@ -795,7 +799,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           return;
         } else if (!id && data.suggestion === "A") {
           navigate(
-            `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}/prescriptions`
+            `/facility/${facilityId}/patient/${patientId}/consultation/${obj.id}/prescriptions`
           );
         }
       }
@@ -838,7 +842,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         className="col-span-6 -ml-2 mb-6 flex flex-row items-center"
         ref={section.ref as LegacyRef<HTMLDivElement>}
       >
-        <CareIcon className={`${section.iconClass} mr-3 text-xl`} />
+        <CareIcon icon={section.iconClass} className="mr-3 text-xl" />
         <label className="text-lg font-bold text-gray-900">
           {sectionTitle}
           {required && <span className="text-danger-500">{" *"}</span>}
@@ -854,12 +858,12 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     const selectedFacility = selected as FacilityModel;
     setReferredToFacility(selectedFacility);
     const form: FormDetails = { ...state.form };
-    if (selectedFacility?.id) {
-      if (selectedFacility.id === -1) {
+    if (selectedFacility) {
+      if (!selectedFacility.id) {
         form.referred_to_external = selectedFacility.name ?? "";
         delete form.referred_to;
       } else {
-        form.referred_to = selectedFacility.id.toString() || "";
+        form.referred_to = selectedFacility.id;
         delete form.referred_to_external;
       }
     }
@@ -872,12 +876,12 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     const selectedFacility = selected as FacilityModel;
     setReferredFromFacility(selectedFacility);
     const form: FormDetails = { ...state.form };
-    if (selectedFacility?.id) {
-      if (selectedFacility.id === -1) {
+    if (selectedFacility) {
+      if (!selectedFacility.id) {
         form.referred_from_facility_external = selectedFacility.name ?? "";
         delete form.referred_from_facility;
       } else {
-        form.referred_from_facility = selectedFacility.id.toString() || "";
+        form.referred_from_facility = selectedFacility.id;
         delete form.referred_from_facility_external;
       }
     }
@@ -904,6 +908,64 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     };
   };
 
+  const handleConsentTypeChange: FieldChangeEventHandler<number> = async (
+    event
+  ) => {
+    if (!id) return;
+    const consentRecords = [...state.form.consent_records];
+    if (
+      consentRecords
+        .filter((cr) => cr.deleted !== true)
+        .map((cr) => cr.type)
+        .includes(event.value)
+    ) {
+      return;
+    } else {
+      const randomId = "consent-" + new Date().getTime().toString();
+      const newRecords = [
+        ...consentRecords,
+        { id: randomId, type: event.value },
+      ];
+      await request(routes.partialUpdateConsultation, {
+        pathParams: { id },
+        body: { consent_records: newRecords },
+      });
+      dispatch({
+        type: "set_form",
+        form: { ...state.form, consent_records: newRecords },
+      });
+    }
+  };
+
+  const handleConsentPCSChange: FieldChangeEventHandler<number> = (event) => {
+    dispatch({
+      type: "set_form",
+      form: {
+        ...state.form,
+        consent_records: state.form.consent_records.map((cr) =>
+          cr.type === 2 ? { ...cr, patient_code_status: event.value } : cr
+        ),
+      },
+    });
+  };
+
+  const handleDeleteConsent = async () => {
+    const consent_id = showDeleteConsent;
+    if (!consent_id || !id) return;
+    const newRecords = state.form.consent_records.map((cr) =>
+      cr.id === consent_id ? { ...cr, deleted: true } : cr
+    );
+    await request(routes.partialUpdateConsultation, {
+      pathParams: { id },
+      body: { consent_records: newRecords },
+    });
+    dispatch({
+      type: "set_form",
+      form: { ...state.form, consent_records: newRecords },
+    });
+    setShowDeleteConsent(null);
+  };
+
   return (
     <div className="relative flex flex-col pb-2">
       <PageTitle
@@ -923,7 +985,10 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
       <div className="top-0 mt-5 flex grow-0 sm:mx-12">
         <div className="fixed hidden h-full w-72 flex-col xl:flex">
           {Object.keys(sections).map((sectionTitle) => {
-            if (!isUpdate && sectionTitle === "Bed Status") {
+            if (
+              !isUpdate &&
+              ["Bed Status", "Consent Records"].includes(sectionTitle)
+            ) {
               return null;
             }
             const isCurrent = currentSection === sectionTitle;
@@ -941,7 +1006,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                   setCurrentSection(sectionTitle as ConsultationFormSection);
                 }}
               >
-                <CareIcon className={`${section.iconClass} text-lg`} />
+                <CareIcon icon={section.iconClass} className="text-lg" />
                 <span>{sectionTitle}</span>
               </button>
             );
@@ -1456,7 +1521,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         className="col-span-6"
                         {...field("is_telemedicine")}
                         value={JSON.parse(state.form.is_telemedicine)}
-                        label="Is Telemedicine required for the patient?"
+                        label="Would you like to refer the patient for remote monitoring to an external doctor?"
                       />
 
                       {JSON.parse(state.form.is_telemedicine) && (
@@ -1477,7 +1542,118 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                     </>
                   )}
                 </div>
-
+                {id && (
+                  <>
+                    <div className="flex flex-col gap-4 pb-4">
+                      {sectionTitle("Consent Records", true)}
+                    </div>
+                    <ConfirmDialog
+                      show={showDeleteConsent !== null}
+                      onClose={() => setShowDeleteConsent(null)}
+                      onConfirm={handleDeleteConsent}
+                      action="Delete"
+                      variant="danger"
+                      description={
+                        "Are you sure you want to delete this consent record?"
+                      }
+                      title="Delete Consent"
+                      className="w-auto"
+                    />
+                    <SelectFormField
+                      {...selectField("consent_type")}
+                      onChange={handleConsentTypeChange}
+                      label="Add Consent Type"
+                      options={CONSENT_TYPE_CHOICES.filter(
+                        (c) =>
+                          !state.form.consent_records
+                            .filter((r) => r.deleted !== true)
+                            .map((record) => record.type)
+                            .includes(c.id)
+                      )}
+                    />
+                    <div className="flex flex-col gap-4">
+                      {state.form.consent_records
+                        .filter((record) => record.deleted !== true)
+                        .map((record, index) => (
+                          <div
+                            className="overflow-hidden rounded-xl border border-gray-300 bg-gray-100"
+                            key={index}
+                          >
+                            <div className="flex items-center justify-between bg-gray-200 p-4">
+                              <button
+                                type="button"
+                                className="font-bold"
+                                onClick={() =>
+                                  setCollapsedConsentRecords((prev) =>
+                                    prev.includes(record.type)
+                                      ? prev.filter((r) => r !== record.type)
+                                      : [...prev, record.type]
+                                  )
+                                }
+                              >
+                                <CareIcon
+                                  icon={
+                                    collapsedConsentRecords.includes(
+                                      record.type
+                                    )
+                                      ? "l-arrow-down"
+                                      : "l-arrow-up"
+                                  }
+                                  className="mr-2"
+                                />
+                                {
+                                  CONSENT_TYPE_CHOICES.find(
+                                    (c) => c.id === record.type
+                                  )?.text
+                                }
+                              </button>
+                              <button
+                                className="text-red-400"
+                                type="button"
+                                onClick={() => {
+                                  setShowDeleteConsent(record.id);
+                                }}
+                              >
+                                <CareIcon
+                                  icon="l-trash-alt"
+                                  className="h-4 w-4"
+                                />
+                              </button>
+                            </div>
+                            <div
+                              className={`${
+                                collapsedConsentRecords.includes(record.type)
+                                  ? "hidden"
+                                  : ""
+                              }`}
+                            >
+                              <div className="px-4 pt-4">
+                                {record.type === 2 && (
+                                  <SelectFormField
+                                    {...selectField("consent_type")}
+                                    onChange={handleConsentPCSChange}
+                                    label="Patient Code Status"
+                                    value={record.patient_code_status}
+                                    options={
+                                      CONSENT_PATIENT_CODE_STATUS_CHOICES
+                                    }
+                                  />
+                                )}
+                              </div>
+                              <FileUpload
+                                changePageMetadata={false}
+                                type="CONSENT_RECORD"
+                                hideBack
+                                unspecified
+                                className="w-full"
+                                consentId={record.id}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </>
+                )}
                 <div className="mt-6 flex flex-col justify-end gap-3 sm:flex-row">
                   <Cancel
                     onClick={() =>
@@ -1501,7 +1677,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                     facilityId={facilityId}
                     patientId={patientId}
                     consultationId={id}
-                    fetchPatientData={fetchData}
+                    fetchPatientData={() => refetch()}
                   />
                 </div>
               </>

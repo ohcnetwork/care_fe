@@ -2,6 +2,7 @@ import { PatientAssetBed } from "../Assets/AssetTypes";
 import { Link } from "raviger";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { GENDER_TYPES } from "../../Common/constants";
+import { formatPatientAge } from "../../Utils/utils";
 
 interface VitalsMonitorHeaderProps {
   patientAssetBed?: PatientAssetBed;
@@ -21,13 +22,13 @@ const VitalsMonitorHeader = ({ patientAssetBed }: VitalsMonitorHeaderProps) => {
           </Link>
         ) : (
           <span className="flex items-center gap-1 text-gray-500">
-            <CareIcon className="care-l-ban" />
+            <CareIcon icon="l-ban" />
             No Patient
           </span>
         )}
         {patient && (
           <span className="text-xs font-bold text-gray-400 md:text-sm">
-            {patient.age}y;{" "}
+            {`${formatPatientAge(patient)}; `}
             {GENDER_TYPES.find((g) => g.id === patient.gender)?.icon}
           </span>
         )}
@@ -39,11 +40,14 @@ const VitalsMonitorHeader = ({ patientAssetBed }: VitalsMonitorHeaderProps) => {
             href={`/facility/${patient?.facility_object?.id}/location/${bed?.location_object?.id}/beds`}
           >
             <span className="flex items-center gap-1 hover:text-white">
-              <CareIcon className="care-l-bed text-sm md:text-base" />
+              <CareIcon icon="l-bed" className="text-sm md:text-base" />
               <span>{bed.name}</span>
             </span>
             <span className="flex items-center gap-1 hover:text-white">
-              <CareIcon className="care-l-location-point text-sm md:text-base" />
+              <CareIcon
+                icon="l-location-point"
+                className="text-sm md:text-base"
+              />
               <span>{bed.location_object?.name}</span>
             </span>
           </Link>

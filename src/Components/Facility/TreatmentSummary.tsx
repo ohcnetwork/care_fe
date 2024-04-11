@@ -1,5 +1,9 @@
 import { GENDER_TYPES } from "../../Common/constants";
-import { formatAge, formatDate, formatDateTime } from "../../Utils/utils";
+import {
+  formatDate,
+  formatDateTime,
+  formatPatientAge,
+} from "../../Utils/utils";
 import useSlug from "../../Common/hooks/useSlug";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import routes from "../../Redux/api";
@@ -53,8 +57,8 @@ const TreatmentSummary = (props: any) => {
           <div className="text-right font-bold">{formatDate(date)}</div>
 
           <div className="mb-5 mt-2 border border-gray-800">
-            <div className="grid border-b-2 border-gray-800 print:grid-cols-3 sm:grid-cols-2 print:md:grid-cols-3">
-              <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0 print:border-r-2 sm:border-b-0 sm:border-r-2">
+            <div className="grid border-b-2 border-gray-800 sm:grid-cols-2 print:grid-cols-3 print:md:grid-cols-3">
+              <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 sm:border-b-0 sm:border-r-2 print:border-b-0 print:border-r-2">
                 <b>Name :</b> {patientData?.name ?? ""}
               </div>
               <div className="col-span-1 px-3 py-2">
@@ -62,17 +66,13 @@ const TreatmentSummary = (props: any) => {
               </div>
             </div>
 
-            <div className="grid border-b-2 border-gray-800 print:grid-cols-3 sm:grid-cols-2 print:md:grid-cols-3">
-              <div className="col-span-1 grid print:grid-cols-2 sm:grid-cols-2 ">
-                <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0 print:border-r-2 sm:border-b-0 sm:border-r-2">
+            <div className="grid border-b-2 border-gray-800 sm:grid-cols-2 print:grid-cols-3 print:md:grid-cols-3">
+              <div className="col-span-1 grid sm:grid-cols-2 print:grid-cols-2 ">
+                <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 sm:border-b-0 sm:border-r-2 print:border-b-0 print:border-r-2">
                   <b>Age :</b>{" "}
-                  {formatAge(
-                    patientData?.age ?? 0,
-                    patientData?.date_of_birth ?? "",
-                    true
-                  )}
+                  {patientData ? formatPatientAge(patientData, true) : ""}
                 </div>
-                <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0 print:border-r-2 sm:border-b-0 sm:border-r-2">
+                <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 sm:border-b-0 sm:border-r-2 print:border-b-0 print:border-r-2">
                   <b>OP :</b> {consultationData?.patient_no ?? ""}
                 </div>
               </div>
@@ -87,8 +87,8 @@ const TreatmentSummary = (props: any) => {
               </div>
             </div>
 
-            <div className="grid border-b-2 border-gray-800 print:grid-cols-3 sm:grid-cols-2 print:md:grid-cols-3">
-              <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0 print:border-r-2 sm:border-b-0 sm:border-r-2">
+            <div className="grid border-b-2 border-gray-800 sm:grid-cols-2 print:grid-cols-3 print:md:grid-cols-3">
+              <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 sm:border-b-0 sm:border-r-2 print:border-b-0 print:border-r-2">
                 <b>Gender : </b>
                 {GENDER_TYPES.find((i) => i.id === patientData?.gender)?.text}
               </div>
@@ -106,7 +106,7 @@ const TreatmentSummary = (props: any) => {
 
             <div className="border-b-2 border-gray-800 px-5 py-2">
               <b>Comorbidities :</b>
-              <div className="mx-0 print:mx-5 sm:mx-5">
+              <div className="mx-0 sm:mx-5 print:mx-5">
                 <table className="w-full border-collapse border border-gray-800">
                   <thead>
                     <tr>
@@ -187,7 +187,7 @@ const TreatmentSummary = (props: any) => {
             <div className="border-b-2 border-gray-800 px-5 py-2">
               <b>Relevant investigations :</b>
 
-              <div className="mx-0 overflow-x-auto print:mx-5 sm:mx-5">
+              <div className="mx-0 overflow-x-auto sm:mx-5 print:mx-5">
                 <table className="w-full border-collapse border border-gray-800">
                   <thead>
                     <tr>
@@ -282,7 +282,7 @@ const TreatmentSummary = (props: any) => {
               )}
               <b className="mb-2">Treatment summary/Treament Plan :</b>
 
-              <div className="mx-0 overflow-x-auto print:mx-5 sm:mx-5">
+              <div className="mx-0 overflow-x-auto sm:mx-5 print:mx-5">
                 <table className="w-full border-collapse border border-gray-800">
                   <thead>
                     <tr>

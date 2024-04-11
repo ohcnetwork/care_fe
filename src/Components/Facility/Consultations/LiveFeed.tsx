@@ -411,7 +411,7 @@ const LiveFeed = (props: any) => {
               {streamStatus === StreamStatus.Playing &&
                 calculateVideoLiveDelay() > 3 && (
                   <div className="absolute left-8 top-12 z-10 flex items-center gap-2 rounded-3xl bg-red-400 px-3 py-1.5 text-xs font-semibold text-gray-100">
-                    <CareIcon className="care-l-wifi-slash h-4 w-4" />
+                    <CareIcon icon="l-wifi-slash" className="h-4 w-4" />
                     <span>Slow Network Detected</span>
                   </div>
                 )}
@@ -485,7 +485,7 @@ const LiveFeed = (props: any) => {
                   >
                     <span className="sr-only">{option.label}</span>
                     {option.icon ? (
-                      <CareIcon className={`care-${option.icon}`} />
+                      <CareIcon icon={option.icon} />
                     ) : (
                       <span className="flex h-full w-8 items-center justify-center px-2 font-bold">
                         {option.value}x
@@ -652,7 +652,7 @@ const LiveFeed = (props: any) => {
                     fetchCameraPresets();
                   }}
                 >
-                  <CareIcon className="care-l-redo h-4 text-lg" /> Refresh
+                  <CareIcon icon="l-redo" className="h-4 text-lg" /> Refresh
                 </button>
               )}
             </div>

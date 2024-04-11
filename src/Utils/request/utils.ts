@@ -1,3 +1,4 @@
+import { Dispatch, SetStateAction } from "react";
 import { LocalStorageKeys } from "../../Common/constants";
 import * as Notification from "../Notifications";
 import { QueryParams, RequestOptions } from "./types";
@@ -95,4 +96,14 @@ export function mergeRequestOptions<TData>(
     },
     silent: overrides.silent ?? options.silent,
   };
+}
+
+export function handleUploadPercentage(
+  event: ProgressEvent,
+  setUploadPercent: Dispatch<SetStateAction<number>>
+) {
+  if (event.lengthComputable) {
+    const percentComplete = Math.round((event.loaded / event.total) * 100);
+    setUploadPercent(percentComplete);
+  }
 }

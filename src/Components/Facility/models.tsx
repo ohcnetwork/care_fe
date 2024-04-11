@@ -1,4 +1,8 @@
-import { ConsultationSuggestionValue, UserRole } from "../../Common/constants";
+import {
+  ConsultationSuggestionValue,
+  DISCHARGE_REASONS,
+  UserRole,
+} from "../../Common/constants";
 import { AssetData, AssetLocationType } from "../Assets/AssetTypes";
 import { RouteToFacility } from "../Common/RouteToFacilitySelect";
 import { InvestigationType } from "../Common/prescription-builder/InvestigationBuilder";
@@ -7,6 +11,7 @@ import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 import { AssignedToObjectModel, DailyRoundsModel } from "../Patient/models";
 import { UserBareMinimum } from "../Users/models";
+import { ConsentRecord } from "./ConsultationForm";
 
 export interface LocalBodyModel {
   id: number;
@@ -104,7 +109,7 @@ export interface ConsultationModel {
   category?: PatientCategory;
   created_date?: string;
   discharge_date?: string;
-  new_discharge_reason?: number;
+  new_discharge_reason?: (typeof DISCHARGE_REASONS)[number]["id"];
   discharge_prescription?: NormalPrescription;
   discharge_prn_prescription?: PRNPrescription;
   discharge_notes?: string;
@@ -143,6 +148,7 @@ export interface ConsultationModel {
   consultation_notes?: string;
   is_telemedicine?: boolean;
   procedure?: ProcedureType[];
+  assigned_to?: string;
   assigned_to_object?: AssignedToObjectModel;
   created_by?: any;
   last_edited_by?: any;
@@ -164,6 +170,7 @@ export interface ConsultationModel {
   is_readmission?: boolean;
   medico_legal_case?: boolean;
   investigation?: InvestigationType[];
+  consent_records?: ConsentRecord[];
 }
 
 export interface PatientStatsModel {
@@ -512,8 +519,8 @@ export interface PatientNotesModel {
 
 export interface PatientNoteStateType {
   notes: PatientNotesModel[];
-  patientId: string;
-  facilityId: string;
+  patientId?: string;
+  facilityId?: string;
   cPage: number;
   totalPages: number;
 }
@@ -585,6 +592,11 @@ export type InventoryLogResponse = InventorySummaryResponse & {
   probable_accident: boolean;
   unit: number;
   created_by: number;
+};
+
+export type PatientTransferRequest = {
+  facility: string;
+  year_of_birth: string;
 };
 
 export type PatientTransferResponse = {
