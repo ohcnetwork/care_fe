@@ -119,8 +119,12 @@ const AssetsList = () => {
         return data?.results[0].id;
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
+      Notification.Error({ msg: err });
     }
+    setIsLoading(false);
+    Notification.Error({ msg: "Invalid Asset Id" });
+    setIsScannerActive(false);
   };
 
   const checkValidAssetId = async (assetId: string) => {
@@ -161,7 +165,9 @@ const AssetsList = () => {
           onScan={async (value: string | null) => {
             if (value) {
               const assetId = await getAssetIdFromQR(value);
-              checkValidAssetId(assetId ?? value);
+              if (assetId) {
+                checkValidAssetId(assetId);
+              }
             }
           }}
           onError={(e) =>
