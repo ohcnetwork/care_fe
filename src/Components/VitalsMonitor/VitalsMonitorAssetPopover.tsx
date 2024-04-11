@@ -18,7 +18,10 @@ const VitalsMonitorAssetPopover = ({
   return (
     <Popover className="relative">
       <Popover.Button>
-        <CareIcon className="care-l-info-circle cursor-pointer text-sm text-gray-500 hover:text-white md:text-base" />
+        <CareIcon
+          icon="l-info-circle"
+          className="cursor-pointer text-sm text-gray-500 hover:text-white md:text-base"
+        />
       </Popover.Button>
       <Transition
         as={Fragment}
@@ -33,13 +36,14 @@ const VitalsMonitorAssetPopover = ({
           <div className="flex flex-col gap-3 p-5">
             <div className="flex items-center gap-2 text-lg font-bold">
               <CareIcon
-                className={`care-l-${
+                icon={
                   (
                     (asset?.asset_class &&
                       assetClassProps[asset.asset_class]) ||
                     assetClassProps.NONE
                   ).icon
-                } text-2xl`}
+                }
+                className="text-2xl"
               />
               <p>{asset?.name}</p>
             </div>
@@ -64,7 +68,7 @@ const VitalsMonitorAssetPopover = ({
               id="configure-asset"
               data-testid="asset-configure-button"
             >
-              <CareIcon className="care-l-setting h-4" />
+              <CareIcon icon="l-setting" className="h-4" />
               {t("configure")}
             </ButtonV2>
           </div>

@@ -10,14 +10,15 @@ export function computeActivityBounds(prescriptions: Prescription[]) {
     )
   );
 
-  // get end by finding latest of all presciption's last_administered_on
+  // get end by finding latest of all presciption's last administration time
   const end = new Date(
     prescriptions
-      .filter((prescription) => prescription.last_administered_on)
+      .filter((prescription) => prescription.last_administration?.created_date)
       .reduce(
         (latest, curr) =>
-          curr.last_administered_on && curr.last_administered_on > latest
-            ? curr.last_administered_on
+          curr.last_administration?.created_date &&
+          curr.last_administration?.created_date > latest
+            ? curr.last_administration?.created_date
             : latest,
         prescriptions[0]?.created_date ?? new Date()
       )
