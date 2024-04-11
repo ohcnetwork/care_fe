@@ -199,36 +199,32 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
             disableEdit={!patientActive}
           />
           <div className="relative mx-4 flex items-center">
-            <div className=" w-full px-12">
-              <AutoExpandingTextInputFormField
-                id="doctor_notes_textarea"
-                maxHeight={160}
-                rows={1}
-                name="note"
-                value={noteField}
-                onChange={(e) => setNoteField(e.value)}
-                className="grow"
-                errorClassName="hidden"
-                placeholder="Type your Note"
-                disabled={!patientActive}
-                onFocus={() => setFocused(true)}
-                onBlur={() => setFocused(false)}
-              />
-            </div>
-            <div className="flex items-center">
-              <ButtonV2
-                id="add_doctor_note_button"
-                onClick={onAddNote}
-                border={false}
-                className="absolute right-2"
-                ghost
-                size="small"
-                disabled={!patientActive}
-                authorizeFor={NonReadOnlyUsers}
-              >
-                <CareIcon className="care-l-message text-lg" />
-              </ButtonV2>
-            </div>
+            <AutoExpandingTextInputFormField
+               id="doctor_notes_textarea"
+               maxHeight={160}
+               rows={1}
+               name="note"
+               value={noteField}
+               onChange={(e) => setNoteField(e.value)}
+               className="grow"
+               errorClassName="hidden"
+               placeholder="Type your Note"
+               disabled={!patientActive}
+               onFocus={() => setFocused(true)}
+               onBlur={() => setFocused(false)}
+             />
+             <ButtonV2
+               id="add_doctor_note_button"
+               onClick={onAddNote}
+               border={false}
+               className="absolute right-2"
+               ghost
+               size="small"
+               disabled={!patientActive}
+               authorizeFor={NonReadOnlyUsers}
+             >
+               <CareIcon className="care-l-message text-lg" />
+             </ButtonV2>
           </div>
         </div>
       )}
