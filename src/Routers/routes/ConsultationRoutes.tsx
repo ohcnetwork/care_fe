@@ -9,6 +9,7 @@ import { make as CriticalCareRecording } from "../../Components/CriticalCareReco
 import { ConsultationDetails } from "../../Components/Facility/ConsultationDetails";
 import TreatmentSummary from "../../Components/Facility/TreatmentSummary";
 import ConsultationDoctorNotes from "../../Components/Facility/ConsultationDoctorNotes";
+import ConsultationMedicineLogs from "../../Components/Facility/ConsultationDetails/ConsultationMedicineLogs";
 
 export default {
   "/facility/:facilityId/patient/:patientId/consultation": ({
@@ -57,6 +58,15 @@ export default {
         facilityId={facilityId}
         patientId={patientId}
         sessionId={sessionId}
+      />
+    ),
+  "/facility/:facilityId/patient/:patientId/consultation/:id/medicine/:medicineId":
+    ({ facilityId, patientId, id, medicineId }: any) => (
+      <ConsultationMedicineLogs
+        consultationId={id}
+        facilityId={facilityId}
+        patientId={patientId}
+        medicineId={medicineId}
       />
     ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/daily-rounds": ({
