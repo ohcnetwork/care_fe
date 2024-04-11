@@ -104,27 +104,31 @@ const PatientNotes = (props: PatientNotesProps) => {
         />
 
         <div className="relative mx-4 flex items-center">
-          <TextFormField
-            name="note"
-            value={noteField}
-            onChange={(e) => setNoteField(e.value)}
-            className="grow"
-            type="text"
-            errorClassName="hidden"
-            placeholder="Type your Note"
-            disabled={!patientActive}
-          />
-          <ButtonV2
-            onClick={onAddNote}
-            border={false}
-            className="absolute right-2"
-            ghost
-            size="small"
-            disabled={!patientActive}
-            authorizeFor={NonReadOnlyUsers}
-          >
-            <CareIcon icon="l-message" className="text-lg" />
-          </ButtonV2>
+          <div className=" w-full px-12">
+            <TextFormField
+              name="note"
+              value={noteField}
+              onChange={(e) => setNoteField(e.value)}
+              className="grow"
+              type="text"
+              errorClassName="hidden"
+              placeholder="Type your Note"
+              disabled={!patientActive}
+            />
+          </div>
+          <div className="flex items-center">
+            <ButtonV2
+              onClick={onAddNote}
+              border={false}
+              className="absolute right-2"
+              ghost
+              size="small"
+              disabled={!patientActive}
+              authorizeFor={NonReadOnlyUsers}
+            >
+              <CareIcon icon="l-message" className="text-lg" />
+            </ButtonV2>
+          </div>
         </div>
       </div>
     </Page>
