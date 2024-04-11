@@ -294,7 +294,7 @@ describe("Patient Consultation in multiple combination", () => {
     // verify the free text in referring facility name
     patientConsultationPage.typeReferringFacility("Life Care Hospital");
     // Vomiting and Nausea symptoms
-    patientConsultationPage.selectSymptoms(["VOMITING", "SORE THROAT"]);
+    patientConsultationPage.typeAndSelectSymptoms(["VOMITING", "SORE THROAT"]);
     // Stable category
     patientConsultationPage.selectPatientCategory("Stable");
     // Date of symptoms
@@ -339,7 +339,7 @@ describe("Patient Consultation in multiple combination", () => {
       "Outpatient/Emergency Room"
     );
     // Select the Symptoms - Sore throat and fever symptoms
-    patientConsultationPage.selectSymptoms(["FEVER", "SORE THROAT"]);
+    patientConsultationPage.typeAndSelectSymptoms(["FEVER", "SORE THROAT"]);
     // Comfort Care category
     patientConsultationPage.selectPatientCategory("Comfort Care");
     // Date of symptoms
