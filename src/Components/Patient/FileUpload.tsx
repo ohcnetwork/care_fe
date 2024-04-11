@@ -33,6 +33,8 @@ import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import FilePreviewDialog from "../Common/FilePreviewDialog";
 import uploadFile from "../../Utils/request/uploadFile";
+import { Image } from "image-js";
+import { PDFDocument } from "pdf-lib";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -144,6 +146,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const [audioBlobExists, setAudioBlobExists] = useState(false);
   const [resetRecording, setResetRecording] = useState(false);
   const [file, setFile] = useState<File | null>();
+  const [files, setFiles] = useState<File[]>([]);
   const {
     facilityId,
     consultationId,
@@ -266,7 +269,7 @@ export const FileUpload = (props: FileUploadProps) => {
       const myFile = new File([blob], `image.${extension}`, {
         type: blob.type,
       });
-      setFile(myFile);
+      setFiles([...files, myFile]);
     });
   };
 
@@ -941,13 +944,13 @@ export const FileUpload = (props: FileUploadProps) => {
     );
   }
 
-  const onFileChange = (e: ChangeEvent<HTMLInputElement>): any => {
+  const onMultipleFileChange = (e: ChangeEvent<HTMLInputElement>): any => {
     if (!e.target.files?.length) {
       return;
     }
     const f = e.target.files[0];
     const fileName = f.name;
-    setFile(e.target.files[0]);
+    setFiles([...files, e.target.files[0]]);
     setUploadFileName(
       fileName.substring(0, fileName.lastIndexOf(".")) || fileName
     );
@@ -960,11 +963,12 @@ export const FileUpload = (props: FileUploadProps) => {
         alwaysKeepResolution: true,
       };
       imageCompression(f, options).then((compressedFile: File) => {
-        setFile(compressedFile);
+        setFiles([...files, compressedFile]);
       });
       return;
     }
-    setFile(f);
+
+    setFiles([...files, f]);
   };
 
   const uploadfile = async (data: CreateFileResponse) => {
@@ -984,6 +988,9 @@ export const FileUpload = (props: FileUploadProps) => {
           if (xhr.status >= 200 && xhr.status < 300) {
             setUploadStarted(false);
             setFile(null);
+            if (files.length > 0) {
+              setFiles([]);
+            }
             setUploadFileName("");
             fetchData();
             Notification.Success({
@@ -1063,6 +1070,67 @@ export const FileUpload = (props: FileUploadProps) => {
       await uploadfile(data);
       await markUploadComplete(data);
       await fetchData();
+    }
+  };
+
+  const prepareUploadFile = async () => {
+    console.log("[+] inside multi file handler");
+    if (uploadFileName.trim().length === 0) {
+      setUploadFileError("Please give a name !!");
+      return false;
+    }
+    if (files.length === 1) {
+      console.log("entered into single mode");
+      setFile(files[0]);
+    } else {
+      console.log("entered into multi mode");
+      const pdfDoc = await PDFDocument.create();
+
+      for (const img of files) {
+        const imgBuffer = await img.arrayBuffer();
+        const image = await Image.load(imgBuffer);
+
+        const canvas = image.getCanvas();
+        // const ctx = canvas.getContext("2d");
+
+        const pngCanvas = document.createElement("canvas");
+        const pngCtx = pngCanvas.getContext("2d");
+
+        if (!pngCtx) {
+          console.error("Failed to get 2D context for canvas");
+          continue;
+        }
+
+        pngCanvas.width = canvas.width;
+        pngCanvas.height = canvas.height;
+
+        pngCtx.drawImage(canvas, 0, 0);
+
+        const pngImageBuffer = pngCanvas.toDataURL("image/png");
+
+        const binaryString = atob(pngImageBuffer.split(",")[1]);
+        const length = binaryString.length;
+        const pngUint8Array = new Uint8Array(length);
+        for (let i = 0; i < length; i++) {
+          pngUint8Array[i] = binaryString.charCodeAt(i);
+        }
+
+        const embeddedImage = await pdfDoc.embedPng(pngUint8Array);
+        const { width, height } = embeddedImage;
+        const page = pdfDoc.addPage([width, height]);
+        page.drawImage(embeddedImage, {
+          x: 0,
+          y: 0,
+          width: width,
+          height: height,
+        });
+      }
+
+      const pdfBytes = await pdfDoc.save();
+      const blob = new Blob([pdfBytes], { type: "application/pdf" });
+      const f = new File([blob], uploadFileName, { type: "application/pdf" });
+
+      setFile(f);
     }
   };
 
@@ -1595,7 +1663,7 @@ export const FileUpload = (props: FileUploadProps) => {
                               <input
                                 id="file_upload_patient"
                                 title="changeFile"
-                                onChange={onFileChange}
+                                onChange={onMultipleFileChange}
                                 type="file"
                                 accept="image/*,video/*,audio/*,text/plain,text/csv,application/rtf,application/msword,application/vnd.oasis.opendocument.text,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/pdf"
                                 hidden
@@ -1614,6 +1682,29 @@ export const FileUpload = (props: FileUploadProps) => {
                         Open Camera
                       </ButtonV2>
                       <ButtonV2
+                        disabled={files.length < 1}
+                        onClick={() => {
+                          prepareUploadFile();
+                        }}
+                        className="w-full"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="h-6 w-6"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5"
+                          />
+                        </svg>
+                        Prepare File
+                      </ButtonV2>
+                      <ButtonV2
                         id="upload_file_button"
                         authorizeFor={NonReadOnlyUsers}
                         disabled={
@@ -1629,18 +1720,28 @@ export const FileUpload = (props: FileUploadProps) => {
                       </ButtonV2>
                     </div>
                   )}
-                  {file && (
-                    <div className="mt-2 flex items-center justify-between rounded bg-gray-200 px-4 py-2">
-                      {file?.name}
-                      <button
-                        onClick={() => {
-                          setFile(null);
-                          setUploadFileName("");
-                        }}
-                      >
-                        <CareIcon icon="l-times" className="text-lg" />
-                      </button>
+                  {files.length > 0 ? (
+                    <div>
+                      {files.map((f: File, index: number) => (
+                        <div
+                          key={index}
+                          className="mt-2 flex items-center justify-between rounded bg-gray-200 px-4 py-2"
+                        >
+                          {f?.name}
+                          <button
+                            onClick={() => {
+                              const temparr = [...files];
+                              temparr.splice(index, 1);
+                              setFiles(temparr);
+                            }}
+                          >
+                            <CareIcon icon="l-times" className="text-lg" />
+                          </button>
+                        </div>
+                      ))}
                     </div>
+                  ) : (
+                    ""
                   )}
                 </div>
               </div>
