@@ -66,6 +66,14 @@ const NotificationTile = ({
         return `/facility/${data.facility}/patient/${data.patient}/notes`;
       case "MESSAGE":
         return "/notice_board/";
+      case "CONSULTATION_FILE_UPLOAD_CREATED":
+        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/files`;
+      case "PATIENT_FILE_UPLOAD_CREATED":
+        return `/facility/${data.facility}/patient/${data.patient}/files`;
+      case "PATIENT_PRESCRIPTION_CREATED":
+        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/medicines`;
+      case "PATIENT_PRESCRIPTION_UPDATED":
+        return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/medicines`;
       default:
         return "#";
     }

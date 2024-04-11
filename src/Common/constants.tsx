@@ -618,6 +618,16 @@ export const NOTIFICATION_EVENTS: NotificationEvent[] = [
     text: "Patient Note Added",
     icon: "l-notes",
   },
+  {
+    id: "PATIENT_PRESCRIPTION_CREATED",
+    text: "Patient Consultation Created",
+    icon: "l-capsule",
+  },
+  {
+    id: "PATIENT_PRESCRIPTION_UPDATED",
+    text: "Patient Consultation Updated",
+    icon: "l-capsule",
+  },
 ];
 
 export const BREATHLESSNESS_LEVEL = [
