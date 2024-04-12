@@ -145,15 +145,10 @@ Cypress.Commands.add(
 Cypress.Commands.add(
   "typeAndMultiSelectOption",
   (selector: string, options: string[]) => {
-    cy.get(selector)
-      .click()
-      .then(() => {
-        options.forEach((option) => {
-          cy.get(selector).type(option);
-          cy.get("[role='option']").contains(option).click();
-        });
-        cy.get(selector).click();
-      });
+    cy.wrap(options).each((option: string) => {
+      cy.get(selector).click().type(option);
+      cy.get("[role='option']").contains(option).click();
+    });
   }
 );
 Cypress.Commands.add(
