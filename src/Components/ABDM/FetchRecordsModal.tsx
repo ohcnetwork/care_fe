@@ -147,6 +147,18 @@ export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
         options={ABDM_HI_TYPE}
         label="Health Information Types"
         placeholder="Select One or More HI Types"
+        labelSuffix={
+          hiTypes.length !== ABDM_HI_TYPE.length && (
+            <ButtonV2
+              ghost
+              onClick={() => {
+                setHiTypes(ABDM_HI_TYPE.map((type) => type.value));
+              }}
+            >
+              Select All
+            </ButtonV2>
+          )
+        }
         value={hiTypes}
         optionLabel={(option) => option.label}
         optionValue={(option) => option.value}
