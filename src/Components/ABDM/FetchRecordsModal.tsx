@@ -174,6 +174,7 @@ export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
         label="Consent Expiry Date"
         required
         disablePast
+        position="TOP-RIGHT"
       />
 
       <div className="mt-6 flex items-center justify-end">
