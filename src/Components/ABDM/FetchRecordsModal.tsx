@@ -44,7 +44,7 @@ export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
   const [isMakingConsentRequest, setIsMakingConsentRequest] = useState(false);
   const [hiTypes, setHiTypes] = useState<string[]>([]);
   const [expiryDate, setExpiryDate] = useState<Date>(
-    dayjs().add(5, "minutes").toDate()
+    dayjs().add(30, "day").toDate()
   );
   const [errors, setErrors] = useState<any>({});
 
