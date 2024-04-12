@@ -130,7 +130,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                 </Listbox.Button>
               </div>
               <DropdownTransition show={open}>
-                <Listbox.Options className="cui-dropdown-base absolute top-12">
+                <Listbox.Options className="cui-dropdown-base absolute top-full">
                   {options.map((option, index) => (
                     <Listbox.Option
                       id={`${props.id}-option-${index}`}
@@ -187,7 +187,10 @@ export const MultiSelectOptionChip = (props: MultiSelectOptionChipProps) => {
       {props.onRemove && (
         <p
           className="cursor-pointer rounded-full hover:bg-white"
-          onClick={props.onRemove}
+          onClick={(e) => {
+            e.stopPropagation();
+            props.onRemove?.();
+          }}
         >
           <CareIcon icon="l-times" className="text-base" />
         </p>
