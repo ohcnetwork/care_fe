@@ -25,7 +25,7 @@ declare global {
       ): Chainable<Element>;
       typeAndMultiSelectOption(
         selector: string,
-        symptoms: string | string[]
+        symptoms: string[]
       ): Chainable<Element>;
       clickAndTypeDate(date: string, selector: string): Chainable<Element>;
       clickAndSelectOption(
