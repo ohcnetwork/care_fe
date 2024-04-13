@@ -6,7 +6,7 @@ import PatientMedicalHistory from "../../pageobject/Patient/PatientMedicalHistor
 import {
   generatePhoneNumber,
   generateEmergencyPhoneNumber,
-} from "../../pageobject/constants";
+} from "../utils/constants";
 
 class PatientPredefined {
   createPatient() {
