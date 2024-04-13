@@ -985,5 +985,5 @@ export const FacilityCreate = (props: FacilityProps) => {
 };
 
 const FieldUnit = ({ unit }: { unit: string }) => {
-  return <p className="mr-8 text-xs text-gray-700">{unit}</p>;
+  return <p className="mr-1 text-xs text-gray-700">{unit}</p>;
 };
