@@ -13,6 +13,8 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { formatPatientAge } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import SwitchTabs from "../Common/components/SwitchTabs";
+import Chip from "../../CAREUI/display/Chip";
+import { useState } from "react";
 
 const DischargedPatientsList = ({
   facility_external_id,
@@ -25,6 +27,7 @@ const DischargedPatientsList = ({
   });
 
   const [search, setSearch] = useQueryParams();
+  const [count, setCount] = useState<number | undefined>(undefined);
 
   return (
     <Page
@@ -32,6 +35,16 @@ const DischargedPatientsList = ({
       crumbsReplacements={{
         [facility_external_id]: { name: facilityQuery.data?.name },
       }}
+      componentRight={
+        count ? (
+          <Chip
+            variant="primary"
+            size="small"
+            text={count?.toString()}
+            className="ml-2"
+          />
+        ) : null
+      }
       options={
         <>
           <SearchInput
@@ -56,33 +69,38 @@ const DischargedPatientsList = ({
         pathParams={{ facility_external_id }}
         query={search}
       >
-        {() => (
-          <div className="flex flex-col gap-4 py-4 lg:px-4 lg:py-8">
-            <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-gray-200 bg-white p-5 text-center text-2xl font-bold text-gray-500">
-              <span>{t("discharged_patients_empty")}</span>
-            </PaginatedList.WhenEmpty>
+        {({ data }) => {
+          if (count !== data?.count) {
+            setCount(data?.count);
+          }
+          return (
+            <div className="flex flex-col gap-4 py-4 lg:px-4 lg:py-8">
+              <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-gray-200 bg-white p-5 text-center text-2xl font-bold text-gray-500">
+                <span>{t("discharged_patients_empty")}</span>
+              </PaginatedList.WhenEmpty>
 
-            <PaginatedList.WhenLoading>
-              <Loading />
-            </PaginatedList.WhenLoading>
+              <PaginatedList.WhenLoading>
+                <Loading />
+              </PaginatedList.WhenLoading>
 
-            <PaginatedList.Items<PatientModel> className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {(patient) => (
-                <Link
-                  key={patient.id}
-                  href={`/facility/${facility_external_id}/patient/${patient.id}`}
-                  className="text-black"
-                >
-                  <PatientListItem patient={patient} />
-                </Link>
-              )}
-            </PaginatedList.Items>
+              <PaginatedList.Items<PatientModel> className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {(patient) => (
+                  <Link
+                    key={patient.id}
+                    href={`/facility/${facility_external_id}/patient/${patient.id}`}
+                    className="text-black"
+                  >
+                    <PatientListItem patient={patient} />
+                  </Link>
+                )}
+              </PaginatedList.Items>
 
-            <div className="flex w-full items-center justify-center">
-              <PaginatedList.Paginator hideIfSinglePage />
+              <div className="flex w-full items-center justify-center">
+                <PaginatedList.Paginator hideIfSinglePage />
+              </div>
             </div>
-          </div>
-        )}
+          );
+        }}
       </PaginatedList>
     </Page>
   );
