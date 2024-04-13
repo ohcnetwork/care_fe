@@ -15,7 +15,11 @@ import {
 } from "../../../Common/constants";
 import PrescriptionsTable from "../../Medicine/PrescriptionsTable";
 import Chip from "../../../CAREUI/display/Chip";
-import { formatAge, formatDate, formatDateTime } from "../../../Utils/utils";
+import {
+  formatDate,
+  formatDateTime,
+  formatPatientAge,
+} from "../../../Utils/utils";
 import ReadMore from "../../Common/components/Readmore";
 import DailyRoundsList from "../Consultations/DailyRoundsList";
 import EventsList from "./Events/EventsList";
@@ -635,12 +639,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                   <div>
                     Age {" - "}
                     <span className="font-semibold">
-                      {props.patientData.age !== undefined // 0 is a valid age, so we need to check for undefined
-                        ? formatAge(
-                            props.patientData.age,
-                            props.patientData.date_of_birth
-                          )
-                        : "-"}
+                      {formatPatientAge(props.patientData)}
                     </span>
                   </div>
                   <div id="patient-weight">
@@ -703,6 +702,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                             } )`}
                         </div>
                         <FileUpload
+                          changePageMetadata={false}
                           type="CONSENT_RECORD"
                           hideBack
                           unspecified
@@ -723,7 +723,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             tab2={
               <div className="flex items-center justify-center gap-1 text-sm">
                 Events
-                <span className="rounded-lg bg-warning-400 p-[1px] px-1 text-[10px] text-white">
+                <span className="rounded-lg bg-warning-400 p-px px-1 text-[10px] text-white">
                   beta
                 </span>
               </div>

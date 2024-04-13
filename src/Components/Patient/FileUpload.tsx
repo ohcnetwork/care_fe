@@ -232,6 +232,26 @@ export const FileUpload = (props: FileUploadProps) => {
     { name: "Unarchived Files", value: "UNARCHIVED" },
     { name: "Archived Files", value: "ARCHIVED" },
   ]);
+  const [isMicPermission, setIsMicPermission] = useState(true);
+
+  useEffect(() => {
+    const checkMicPermission = async () => {
+      try {
+        const permissions = await navigator.permissions.query({
+          name: "microphone" as PermissionName,
+        });
+        setIsMicPermission(permissions.state === "granted");
+      } catch (error) {
+        setIsMicPermission(false);
+      }
+    };
+
+    checkMicPermission();
+
+    return () => {
+      setIsMicPermission(true);
+    };
+  }, []);
 
   const { data: patient } = useQuery(routes.getPatient, {
     pathParams: { id: patientId },
@@ -569,6 +589,7 @@ export const FileUpload = (props: FileUploadProps) => {
     return (
       <div
         className={"mt-4 rounded-lg border bg-white p-4 shadow "}
+        id="file-div"
         key={item.id}
       >
         {!item.is_archived ? (
@@ -749,6 +770,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   ) : (
                     <ButtonV2
                       className="m-1 w-full sm:w-auto"
+                      id="download-file"
                       onClick={() => {
                         triggerDownload(
                           url[item.id!],
@@ -1431,9 +1453,10 @@ export const FileUpload = (props: FileUploadProps) => {
         <div className="flex flex-col">
           <div>
             <div className="text-md m-2 text-center">
-              <b>{modalDetails?.name}</b> file is archived.
+              <b id="archive-file-name">{modalDetails?.name}</b> file is
+              archived.
             </div>
-            <div className="text-md text-center">
+            <div className="text-md text-center" id="archive-file-reason">
               <b>Reason:</b> {modalDetails?.reason}
             </div>
             <div className="text-md text-center">
@@ -1507,8 +1530,9 @@ export const FileUpload = (props: FileUploadProps) => {
                         confirmAudioBlobExists={confirmAudioBlobExists}
                         reset={resetRecording}
                         setResetRecording={setResetRecording}
+                        handleSetMicPermission={setIsMicPermission}
                       />
-                      {!audioBlobExists && (
+                      {!audioBlobExists && !isMicPermission && (
                         <span className="text-sm font-medium text-warning-500">
                           <CareIcon
                             icon="l-exclamation-triangle"
@@ -1522,6 +1546,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     {audioBlobExists && (
                       <div className="flex w-full items-center md:w-auto">
                         <ButtonV2
+                          id="upload_audio_file"
                           onClick={() => {
                             handleAudioUpload();
                           }}

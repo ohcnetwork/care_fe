@@ -106,7 +106,7 @@ export const FacilityHome = (props: any) => {
   const editCoverImageTooltip = hasPermissionToEditCoverImage && (
     <div
       id="facility-coverimage"
-      className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center bg-black text-sm text-gray-300 opacity-0 transition-[opacity] hover:opacity-60 md:h-[88px]"
+      className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center bg-black text-sm text-gray-300 opacity-0 transition-opacity hover:opacity-60 md:h-[88px]"
     >
       <CareIcon icon="l-pen" className="text-lg" />
       <span className="mt-2">{`${hasCoverImage ? "Edit" : "Upload"}`}</span>

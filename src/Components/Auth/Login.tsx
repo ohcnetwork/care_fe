@@ -218,7 +218,7 @@ export const Login = (props: { forgot?: boolean }) => {
                   alt="Logo of Digital Public Goods Alliance"
                 />
               </a>
-              <div className="ml-2 h-8 w-[1px] rounded-full bg-white/50" />
+              <div className="ml-2 h-8 w-px rounded-full bg-white/50" />
               <a
                 href={coronasafe_url}
                 rel="noopener noreferrer"
@@ -264,7 +264,7 @@ export const Login = (props: { forgot?: boolean }) => {
                     className="h-14 rounded-lg py-3"
                     alt="state logo"
                   />
-                  <div className="mx-4 h-8 w-[1px] rounded-full bg-gray-600" />
+                  <div className="mx-4 h-8 w-px rounded-full bg-gray-600" />
                 </>
               )}
               <img
