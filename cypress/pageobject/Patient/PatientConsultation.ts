@@ -95,24 +95,6 @@ export class PatientConsultationPage {
     cy.searchAndSelectOption("#referred_from_facility", referringFacility);
   }
 
-  visitFilesPage() {
-    cy.get("#consultation_tab_nav").scrollIntoView();
-    cy.get("#consultation_tab_nav").contains("Files").click();
-  }
-
-  uploadFile() {
-    cy.get("#file_upload_patient").selectFile(
-      "cypress/fixtures/sampleAsset.xlsx",
-      { force: true }
-    );
-  }
-
-  clickUploadFile() {
-    cy.intercept("POST", "**/api/v1/files/").as("uploadFile");
-    cy.get("#upload_file_button").click();
-    cy.wait("@uploadFile").its("response.statusCode").should("eq", 201);
-  }
-
   clickEditConsultationButton() {
     cy.get("#consultation-buttons").scrollIntoView();
     cy.get("button").contains("Manage Patient").click();
