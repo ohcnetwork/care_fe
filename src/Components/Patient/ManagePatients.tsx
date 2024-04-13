@@ -756,7 +756,7 @@ export const PatientManager = () => {
               </p>
             </ButtonV2>
           </div>
-          <div className="flex flex-col items-center justify-end gap-2 vs:w-full lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
+          <div className="flex flex-col items-center justify-end gap-2  vs:w-full lg:ml-[12%] lg:w-fit lg:flex-row lg:gap-3">
             <SwitchTabs
               tab1="Live"
               tab2="Discharged"
@@ -800,11 +800,11 @@ export const PatientManager = () => {
                 <p className="lg:my-[2px]">Doctor Connect</p>
               </ButtonV2>
             )}
-            <div className="vs:block vs:w-full  vs:justify-center sm:flex  sm:w-full sm:justify-between md:flex lg:flex">
+            <div className="vs:block vs:w-full  vs:justify-center sm:mr-0  sm:flex sm:w-full sm:justify-between md:mr-8  md:flex md:w-fit lg:flex">
               <AdvancedFilterButton
                 onClick={() => advancedFilter.setShow(true)}
               />
-              <div className="flex vs:mt-4 vs:w-full vs:justify-between  sm:ml-6 sm:mt-0 sm:w-[65%] lg:mt-0">
+              <div className="flex vs:mt-4 vs:w-full vs:justify-between  sm:ml-6 sm:mt-0 sm:w-[65%] md:ml-3 md:w-fit lg:mt-0">
                 <SortDropdownMenu
                   options={PATIENT_SORT_OPTIONS}
                   selected={qParams.ordering}
