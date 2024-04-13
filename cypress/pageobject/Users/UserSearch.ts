@@ -29,7 +29,7 @@ export class UserPage {
       .and("include", "phone_number=%2B919876543219")
       .and("include", "alt_phone_number=%2B919876543219")
       .and("include", "user_type=Doctor")
-      .and("include", "district_id=7");
+      .and("include", "district=7");
   }
 
   checkUsernameText(username: string) {
@@ -62,9 +62,12 @@ export class UserPage {
     cy.get("[role='option']").contains(role).click();
   }
 
+  selectState(state: string) {
+    cy.searchAndSelectOption("#state input", state);
+  }
+
   selectDistrict(district: string) {
-    cy.get("input[name='district']").click().type(district);
-    cy.get("[role='option']").contains(district).click();
+    cy.searchAndSelectOption("#district input", district);
   }
 
   typeInPhoneNumber(phone: string) {

@@ -171,7 +171,7 @@ export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
       type="submit"
       children={
         <>
-          <CareIcon className="care-l-check-circle text-lg" />
+          <CareIcon icon="l-check-circle" className="text-lg" />
           <span className="whitespace-pre-wrap">{t(label)}</span>
         </>
       }
@@ -191,7 +191,7 @@ export const Cancel = ({ label = "Cancel", ...props }: CommonButtonProps) => {
       border
       children={
         <>
-          <CareIcon className="care-l-times-circle text-lg" />
+          <CareIcon icon="l-times-circle" className="text-lg" />
           <span className="whitespace-pre-wrap">{t(label)}</span>
         </>
       }

@@ -752,7 +752,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     />
                     {showAutoFilledPincode && (
                       <div className="flex items-center gap-2 text-primary-500">
-                        <CareIcon className="care-l-check-circle" />
+                        <CareIcon icon="l-check-circle" />
                         <span className="text-sm">
                           State and district auto-filled from pincode
                         </span>
@@ -930,7 +930,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                             id="facility-location-button"
                             className="tooltip p-2"
                           >
-                            <CareIcon className="care-l-map-marker text-xl" />
+                            <CareIcon icon="l-map-marker" className="text-xl" />
                             <span className="tooltip-text tooltip-bottom">
                               Select location from map
                             </span>

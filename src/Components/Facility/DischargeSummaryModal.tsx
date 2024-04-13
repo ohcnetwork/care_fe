@@ -155,7 +155,10 @@ export default function DischargeSummaryModal(props: Props) {
             {t("email_discharge_summary_description")}
           </span>
           <span className="text-sm text-warning-600">
-            <CareIcon className="care-l-exclamation-triangle mr-1 text-base" />
+            <CareIcon
+              icon="l-exclamation-triangle"
+              className="mr-1 text-base"
+            />
             {`${t("disclaimer")}: ${t("generated_summary_caution")}`}
           </span>
         </div>
@@ -178,9 +181,9 @@ export default function DischargeSummaryModal(props: Props) {
           <Cancel onClick={props.onClose} />
           <Submit onClick={handleDownload} disabled={downloading}>
             {downloading ? (
-              <CareIcon className="care-l-spinner animate-spin text-lg" />
+              <CareIcon icon="l-spinner" className="animate-spin text-lg" />
             ) : (
-              <CareIcon className="care-l-file-download-alt text-lg" />
+              <CareIcon icon="l-file-download-alt" className="text-lg" />
             )}
             <span>
               {generating
@@ -192,9 +195,9 @@ export default function DischargeSummaryModal(props: Props) {
           </Submit>
           <Submit onClick={handleEmail} disabled={emailing}>
             {emailing ? (
-              <CareIcon className="care-l-spinner animate-spin text-lg" />
+              <CareIcon icon="l-spinner" className="animate-spin text-lg" />
             ) : (
-              <CareIcon className="care-l-fast-mail text-lg" />
+              <CareIcon icon="l-fast-mail" className="text-lg" />
             )}
             <span>{t("send_email")}</span>
           </Submit>

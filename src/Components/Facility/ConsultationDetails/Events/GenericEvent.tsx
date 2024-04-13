@@ -1,8 +1,6 @@
 import type { ReactNode } from "react";
-import { EventGeneric } from "./types";
-
 interface IProps {
-  event: EventGeneric;
+  values: Record<string, any>;
 }
 
 /**
@@ -72,10 +70,11 @@ const formatValue = (value: unknown, key?: string): ReactNode => {
   return JSON.stringify(value);
 };
 
-export default function GenericEvent({ event }: IProps) {
+export default function GenericEvent({ values }: IProps) {
+  console.log("value", values);
   return (
     <div className="flex w-full flex-col gap-4 rounded-lg border border-gray-400 p-4 @container">
-      {Object.entries(event.value).map(([key, value]) => (
+      {values.map(([key, value]: [string, any]) => (
         <div className="flex w-full flex-col items-center gap-2 md:flex-row">
           <span className="text-xs uppercase text-gray-700">
             {key.replace(/_/g, " ")}

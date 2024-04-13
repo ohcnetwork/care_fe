@@ -28,6 +28,7 @@ describe("User Homepage", () => {
     userPage.typeInFirstName("Dev");
     userPage.typeInLastName("Doctor");
     userPage.selectRole("Doctor");
+    userPage.selectState("Kerala");
     userPage.selectDistrict("Ernakulam");
     userPage.typeInPhoneNumber(phone_number);
     userPage.typeInAltPhoneNumber(alt_phone_number);
