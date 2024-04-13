@@ -1,7 +1,7 @@
 import { cy } from "local-cypress";
 
 export class PatientFileUpload {
-  visitPatientDetailsPage() {
+  clickFileUploadIcon() {
     cy.get("#patient-details").click();
     cy.get("#upload-patient-files").click();
   }
@@ -9,6 +9,10 @@ export class PatientFileUpload {
   typeAudioName(name: string) {
     cy.get("#consultation_audio_file").clear();
     cy.get("#consultation_audio_file").click().type(name);
+  }
+
+  clickFileTab() {
+    cy.verifyAndClickElement("#consultation_tab_nav", "Files");
   }
 
   typeFileName(name: string) {

@@ -148,6 +148,7 @@ export interface ConsultationModel {
   consultation_notes?: string;
   is_telemedicine?: boolean;
   procedure?: ProcedureType[];
+  assigned_to?: string;
   assigned_to_object?: AssignedToObjectModel;
   created_by?: any;
   last_edited_by?: any;
@@ -591,6 +592,11 @@ export type InventoryLogResponse = InventorySummaryResponse & {
   probable_accident: boolean;
   unit: number;
   created_by: number;
+};
+
+export type PatientTransferRequest = {
+  facility: string;
+  year_of_birth: string;
 };
 
 export type PatientTransferResponse = {
