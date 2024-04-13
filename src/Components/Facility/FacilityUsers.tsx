@@ -329,9 +329,6 @@ export default function FacilityUsers(props: any) {
 
                 {user.username && (
                   <UserDetails title="Facilities">
-                    {user.facilities &&
-                      showFacilities(user.username, user.facilities)}
-                    {!user.facilities && (
                       <ButtonV2
                         id="facilities"
                         className="flex w-full items-center @sm:w-1/2"
@@ -340,10 +337,9 @@ export default function FacilityUsers(props: any) {
                           setSelectedUser(user);
                         }}
                       >
-                        <CareIcon className="care-l-hospital text-lg" />
+                        <CareIcon icon="l-hospital" className="text-lg" />
                         <p>Linked Facilities</p>
                       </ButtonV2>
-                    )}
                   </UserDetails>
                 )}
               </div>
