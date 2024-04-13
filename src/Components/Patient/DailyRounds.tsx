@@ -1,8 +1,7 @@
 import { navigate } from "raviger";
 
 import dayjs from "dayjs";
-import { lazy, useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
+import { lazy, useCallback, useEffect, useState } from "react";
 import {
   CONSCIOUSNESS_LEVEL,
   PATIENT_CATEGORIES,
@@ -11,14 +10,6 @@ import {
   TELEMEDICINE_ACTIONS,
 } from "../../Common/constants";
 import useAppHistory from "../../Common/hooks/useAppHistory";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  createDailyReport,
-  getConsultationDailyRoundsDetails,
-  getDailyReport,
-  getPatient,
-  updateDailyReport,
-} from "../../Redux/actions";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 import * as Notification from "../../Utils/Notifications";
 import { formatDateTime } from "../../Utils/utils";
@@ -37,6 +28,8 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import PatientCategorySelect from "./PatientCategorySelect";
 import RadioFormField from "../Form/FormFields/RadioFormField";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm: any = {
@@ -105,7 +98,6 @@ const DailyRoundsFormReducer = (state = initialState, action: any) => {
 
 export const DailyRounds = (props: any) => {
   const { goBack } = useAppHistory();
-  const dispatchAction: any = useDispatch();
   const { facilityId, patientId, consultationId, id } = props;
   const [state, dispatch] = useAutoSaveReducer<any>(
     DailyRoundsFormReducer,
@@ -140,92 +132,70 @@ export const DailyRounds = (props: any) => {
     "consciousness_level",
   ];
 
-  const fetchRoundDetails = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      let formData: any = initialData;
-      if (id) {
-        const res = await dispatchAction(
-          getConsultationDailyRoundsDetails({ consultationId, id })
-        );
+  const fetchRoundDetails = useCallback(async () => {
+    setIsLoading(true);
+    let formData: any = initialData;
+    if (id) {
+      const { data } = await request(routes.getDailyReport, {
+        pathParams: { consultationId, id },
+      });
 
-        if (!status.aborted) {
-          if (res?.data) {
-            const data = {
-              ...res.data,
-              patient_category: res.data.patient_category
-                ? PATIENT_CATEGORIES.find(
-                    (i) => i.text === res.data.patient_category
-                  )?.id ?? ""
-                : "",
-              rhythm:
-                (res.data.rhythm &&
-                  RHYTHM_CHOICES.find((i) => i.text === res.data.rhythm)?.id) ||
-                "0",
-              admitted_to: res.data.admitted_to
-                ? res.data.admitted_to
-                : "Select",
-            };
-            formData = { ...formData, ...data };
-          }
-        }
-      }
-      setIsLoading(false);
-      if (patientId) {
-        const res = await dispatchAction(getPatient({ id: patientId }));
-        if (res.data) {
-          setPatientName(res.data.name);
-          setFacilityName(res.data.facility_object.name);
-          setConsultationSuggestion(res.data.last_consultation?.suggestion);
-          setPreviousReviewInterval(
-            Number(res.data.last_consultation.review_interval)
-          );
-          const getAction =
-            TELEMEDICINE_ACTIONS.find((action) => action.id === res.data.action)
-              ?.text || "NO_ACTION";
-          setPreviousAction(getAction);
-          setInitialData({
-            ...initialData,
-            action: getAction,
-          });
-          formData = { ...formData, ...{ action: getAction } };
-        }
-      } else {
-        setPatientName("");
-        setFacilityName("");
-      }
-      if (consultationId && !id) {
-        const res = await dispatchAction(
-          getDailyReport({ limit: 1, offset: 0 }, { consultationId })
-        );
-        setHasPreviousLog(res.data.count > 0);
+      if (data) {
         formData = {
           ...formData,
-          ...{
-            patient_category: res.data.patient_category
-              ? PATIENT_CATEGORIES.find(
-                  (i) => i.text === res.data.patient_category
-                )?.id ?? ""
-              : "",
-            rhythm:
-              (res.data.rhythm &&
-                RHYTHM_CHOICES.find((i) => i.text === res.data.rhythm)?.id) ||
-              "0",
-            temperature: parseFloat(res.data.temperature),
-          },
+          ...data,
+          patient_category: data.patient_category
+            ? PATIENT_CATEGORIES.find((i) => i.text === data.patient_category)
+                ?.id ?? ""
+            : "",
+          rhythm:
+            (data.rhythm &&
+              RHYTHM_CHOICES.find((i) => i.text === data.rhythm)?.id) ||
+            "0",
+          admitted_to: data.admitted_to ? data.admitted_to : "Select",
         };
       }
-      dispatch({ type: "set_form", form: formData });
-      setInitialData(formData);
-    },
-    [consultationId, id, dispatchAction, patientId]
-  );
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchRoundDetails(status);
-    },
-    [dispatchAction, fetchRoundDetails]
-  );
+    }
+    setIsLoading(false);
+    if (patientId) {
+      const { data } = await request(routes.getPatient, {
+        pathParams: { id: patientId },
+      });
+      if (data) {
+        setPatientName(data.name!);
+        setFacilityName(data.facility_object!.name);
+        setConsultationSuggestion(data.last_consultation?.suggestion);
+        setPreviousReviewInterval(
+          Number(data.last_consultation?.review_interval)
+        );
+        const getAction =
+          TELEMEDICINE_ACTIONS.find((action) => action.id === data.action)
+            ?.text || "NO_ACTION";
+        setPreviousAction(getAction);
+        setInitialData({
+          ...initialData,
+          action: getAction,
+        });
+        formData = { ...formData, ...{ action: getAction } };
+      }
+    } else {
+      setPatientName("");
+      setFacilityName("");
+    }
+    if (consultationId && !id) {
+      const { data } = await request(routes.getDailyReports, {
+        pathParams: { consultationId },
+        query: { limit: 1, offset: 0 },
+      });
+      setHasPreviousLog(!!data?.count);
+    }
+    dispatch({ type: "set_form", form: formData });
+    setInitialData(formData);
+  }, [consultationId, id, patientId]);
+
+  useEffect(() => {
+    fetchRoundDetails();
+  }, [fetchRoundDetails]);
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -313,20 +283,16 @@ export const DailyRounds = (props: any) => {
         data = baseData;
       }
 
-      let res;
       if (id) {
-        res = await dispatchAction(
-          updateDailyReport(data, { consultationId, id })
-        );
-      } else {
-        res = await dispatchAction(createDailyReport(data, { consultationId }));
-      }
+        const { data: obj } = await request(routes.updateDailyReport, {
+          body: data,
+          pathParams: { consultationId, id },
+        });
 
-      setIsLoading(false);
-      if (res && res.data && (res.status === 201 || res.status === 200)) {
-        dispatch({ type: "set_form", form: initForm });
+        setIsLoading(false);
 
-        if (id) {
+        if (obj) {
+          dispatch({ type: "set_form", form: initForm });
           Notification.Success({
             msg: "Consultation Updates details updated successfully",
           });
@@ -336,17 +302,26 @@ export const DailyRounds = (props: any) => {
             );
           } else {
             navigate(
-              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${res.data.external_id}/update`
+              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${obj.id}/update`
             );
           }
-        } else {
+        }
+      } else {
+        const { data: obj } = await request(routes.createDailyRounds, {
+          pathParams: { consultationId },
+          body: data,
+        });
+        setIsLoading(false);
+        if (obj) {
+          dispatch({ type: "set_form", form: initForm });
+
           Notification.Success({
             msg: "Consultation Updates details created successfully",
           });
           if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
             if (data.clone_last) {
               navigate(
-                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${res.data.external_id}/update`
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${obj.id}/update`
               );
             } else {
               navigate(
@@ -356,17 +331,15 @@ export const DailyRounds = (props: any) => {
           } else {
             if (data.clone_last) {
               navigate(
-                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${res.data.external_id}/update`
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${obj.id}/update`
               );
             } else {
               navigate(
-                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${res.data.external_id}/update`
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${obj.id}/update`
               );
             }
           }
         }
-      } else {
-        setIsLoading(false);
       }
     }
   };
