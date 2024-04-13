@@ -18,13 +18,13 @@ import { FacilityModel } from "../Facility/models";
 import LinkFacilityDialog from "../Users/LinkFacilityDialog";
 import UnlinkFacilityDialog from "../Users/UnlinkFacilityDialog";
 import UserDeleteDialog from "../Users/UserDeleteDialog";
-import useAuthUser from "../../Common/hooks/useAuthUser";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import { UserModel } from "../Users/models";
 import { UserFacilities } from "../Users/ManageUsers";
 import { useTranslation } from "react-i18next";
+
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -40,7 +40,6 @@ export default function FacilityUsers(props: any) {
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [offset, setOffset] = useState(0);
-  const authUser = useAuthUser();
 
   const [linkFacility, setLinkFacility] = useState<{
     show: boolean;
@@ -168,14 +167,6 @@ export default function FacilityUsers(props: any) {
     facilityUserFetch();
   };
 
-  const handleDelete = (user: any) => {
-    setUserData({
-      show: true,
-      username: user.username,
-      name: `${user.first_name} ${user.last_name}`,
-    });
-  };
-
   const facilityClassname = classNames(
     "align-baseline text-sm font-bold",
     isAddFacilityLoading || isUnlinkFacilityLoading || isLoadFacilityLoading
@@ -268,7 +259,7 @@ export default function FacilityUsers(props: any) {
   facilityUserData &&
     facilityUserData.results &&
     facilityUserData.results.length &&
-    (userList = facilityUserData.results.map((user: UserModel) => {
+    (userList = facilityUserData.results.map((user) => {
       return (
         <div
           key={`usr_${user.id}`}
@@ -307,14 +298,6 @@ export default function FacilityUsers(props: any) {
                   className="mt-2 flex gap-3 text-2xl font-bold capitalize"
                 >
                   {`${user.first_name} ${user.last_name}`}
-                  {showUserDelete(authUser, user) && (
-                    <div
-                      className="w-8 cursor-pointer rounded-lg bg-red-50 text-xl text-red-600 hover:bg-red-50 hover:text-red-700"
-                      onClick={() => handleDelete(user)}
-                    >
-                      <CareIcon icon="l-trash" className="ml-[5px]" />
-                    </div>
-                  )}
                 </div>
 
                 <div className="flex justify-between">
@@ -323,27 +306,8 @@ export default function FacilityUsers(props: any) {
                       <div className="font-semibold">{user.user_type}</div>
                     </UserDetails>
                   )}
-                  {user.district_object && (
-                    <UserDetails title="District">
-                      <div className="font-semibold">
-                        {user.district_object.name}
-                      </div>
-                    </UserDetails>
-                  )}
                 </div>
-                {user.local_body_object && (
-                  <UserDetails title="Location">
-                    <div className="font-semibold">
-                      {user.local_body_object.name}
-                    </div>
-                  </UserDetails>
-                )}
                 <div className="flex justify-between">
-                  {user.created_by && (
-                    <UserDetails title="Created by">
-                      <div className="font-semibold">{user.created_by}</div>
-                    </UserDetails>
-                  )}
                   {user.phone_number && (
                     <div className="mt-2 border-t bg-gray-50 px-6 py-2">
                       <div className="flex justify-between py-4">

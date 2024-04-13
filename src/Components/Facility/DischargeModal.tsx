@@ -31,7 +31,7 @@ interface PreDischargeFormInterface {
   discharge_date?: string;
   death_datetime?: string;
   death_confirmed_doctor?: string;
-  referred_to?: number | null | undefined;
+  referred_to?: string | null | undefined;
   referred_to_external?: string | null | undefined;
 }
 
@@ -167,12 +167,10 @@ const DischargeModal = ({
 
   const handleFacilitySelect = (selected: FacilityModel) => {
     setFacility(selected);
-    const { id, name } = selected || {};
-    const isExternal = id === -1;
     setPreDischargeForm((prev) => ({
       ...prev,
-      referred_to: isExternal ? null : id,
-      referred_to_external: isExternal ? name : null,
+      referred_to: selected.id ?? null,
+      referred_to_external: !selected.id ? selected.name : null,
     }));
   };
 

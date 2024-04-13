@@ -35,9 +35,10 @@ export default function useVisibility<Element extends HTMLElement>(
   };
 
   useEffect(() => {
+    onScroll();
     document.addEventListener("scroll", onScroll, true);
     return () => document.removeEventListener("scroll", onScroll, true);
-  });
+  }, [currentElement.current]);
 
   return [isVisible, currentElement];
 }

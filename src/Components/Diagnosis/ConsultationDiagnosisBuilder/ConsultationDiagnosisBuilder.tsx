@@ -29,7 +29,7 @@ export const CreateDiagnosesBuilder = (props: CreateDiagnosesProps) => {
                 value={diagnosis}
                 onChange={(action) => {
                   if (action.type === "remove") {
-                    props.onChange(props.value.toSpliced(index, 1));
+                    props.onChange([...props.value].splice(index, 1));
                   }
 
                   if (action.type === "edit") {

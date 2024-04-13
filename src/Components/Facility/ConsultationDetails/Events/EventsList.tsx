@@ -1,12 +1,12 @@
 import { useTranslation } from "react-i18next";
-import { useSlugs } from "../../../../Common/hooks/useSlug";
-import PaginatedList from "../../../../CAREUI/misc/PaginatedList";
-import routes from "../../../../Redux/api";
 import { TimelineNode } from "../../../../CAREUI/display/Timeline";
+import PaginatedList from "../../../../CAREUI/misc/PaginatedList";
+import { useSlugs } from "../../../../Common/hooks/useSlug";
+import routes from "../../../../Redux/api";
 import LoadingLogUpdateCard from "../../Consultations/DailyRounds/LoadingCard";
 import GenericEvent from "./GenericEvent";
-import { EventGeneric } from "./types";
 import { getEventIcon } from "./iconMap";
+import { EventGeneric } from "./types";
 
 export default function EventsList() {
   const [consultationId] = useSlugs("consultation");
@@ -47,6 +47,20 @@ export default function EventsList() {
                     isLast={items.indexOf(item) == items.length - 1}
                   >
                     {(() => {
+                      const values = Object.entries(item.value).filter(
+                        ([_, value]) => value !== null && value !== undefined
+                      );
+
+                      if (values.length === 0) {
+                        return (
+                          <div className="flex w-full flex-col items-center gap-2 md:flex-row">
+                            <span className="text-xs uppercase text-gray-700">
+                              {t("no_changes")}
+                            </span>
+                          </div>
+                        );
+                      }
+
                       switch (item.event_type.name) {
                         case "INTERNAL_TRANSFER":
                         case "CLINICAL":
@@ -54,7 +68,7 @@ export default function EventsList() {
                         case "ENCOUNTER_SUMMARY":
                         case "HEALTH":
                         default:
-                          return <GenericEvent event={item} />;
+                          return <GenericEvent values={values} />;
                       }
                     })()}
                   </TimelineNode>
