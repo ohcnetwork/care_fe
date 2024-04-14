@@ -36,6 +36,7 @@ const CoverImageEditModal = ({
   facility,
 }: Props) => {
   const [isUploading, setIsUploading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<any>();
   const [preview, setPreview] = useState<string>();
   const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
@@ -143,14 +144,16 @@ const CoverImageEditModal = ({
   };
 
   const handleDelete = async () => {
+    setIsDeleting(true);
     const { res } = await request(routes.deleteFacilityCoverImage, {
       pathParams: { id: facility.id! },
     });
     if (res?.ok) {
       Success({ msg: "Cover image deleted" });
-      onDelete?.();
-      closeModal();
     }
+    setIsDeleting(false);
+    onDelete?.();
+    closeModal();
   };
 
   const hasImage = !!(preview || facility.read_cover_image_url);
@@ -283,9 +286,19 @@ const CoverImageEditModal = ({
                 <ButtonV2
                   variant="danger"
                   onClick={handleDelete}
-                  disabled={isUploading}
+                  disabled={isDeleting}
                 >
-                  {t("delete")}
+                  {isDeleting ? (
+                    <CareIcon
+                      icon="l-spinner"
+                      className="animate-spin text-lg"
+                    />
+                  ) : (
+                    <CareIcon icon="l-save" className="text-lg" />
+                  )}
+                  <span>
+                    {isDeleting ? `${t("Deleting")}...` : `${t("delete")}`}
+                  </span>
                 </ButtonV2>
               )}
               <ButtonV2
