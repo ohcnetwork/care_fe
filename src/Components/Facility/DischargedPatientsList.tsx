@@ -7,10 +7,7 @@ import { PatientModel } from "../Patient/models";
 import useQuery from "../../Utils/request/useQuery";
 import { debounce } from "lodash-es";
 import SearchInput from "../Form/SearchInput";
-import {
-  DISCHARGED_PATIENT_SORT_OPTIONS,
-  GENDER_TYPES,
-} from "../../Common/constants";
+import { PATIENT_SORT_OPTIONS, GENDER_TYPES } from "../../Common/constants";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { formatPatientAge } from "../../Utils/utils";
@@ -53,7 +50,7 @@ const DischargedPatientsList = ({
             )}
           />
           <SortDropdownMenu
-            options={DISCHARGED_PATIENT_SORT_OPTIONS}
+            options={PATIENT_SORT_OPTIONS}
             selected={qParams.ordering}
             onSelect={(e) => setQParams({ ...qParams, ordering: e.ordering })}
           />
