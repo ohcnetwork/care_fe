@@ -14,7 +14,8 @@ import { formatPatientAge } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import SwitchTabs from "../Common/components/SwitchTabs";
 import SortDropdownMenu from "../Common/SortDropdown";
-import { useState } from "react";
+import { useEffect } from "react";
+import useFilters from "../../Common/hooks/useFilters";
 
 const DischargedPatientsList = ({
   facility_external_id,
@@ -26,10 +27,11 @@ const DischargedPatientsList = ({
     pathParams: { id: facility_external_id },
   });
 
-  const [qParams, setQParams] = useState({
-    name: "",
-    ordering: "-modified_date",
-  });
+  const { qParams, updateQuery, FilterBadges } = useFilters({});
+
+  useEffect(() => {
+    updateQuery({ ordering: "-modified_date" });
+  }, []);
 
   return (
     <Page
@@ -44,15 +46,12 @@ const DischargedPatientsList = ({
             placeholder="Search by patient name"
             name="name"
             value={qParams.name}
-            onChange={debounce(
-              (e) => setQParams({ ...qParams, [e.name]: e.value }),
-              300
-            )}
+            onChange={debounce((e) => updateQuery({ name: e.value }))}
           />
           <SortDropdownMenu
             options={PATIENT_SORT_OPTIONS}
             selected={qParams.ordering}
-            onSelect={(e) => setQParams({ ...qParams, ordering: e.ordering })}
+            onSelect={(e) => updateQuery({ ordering: e.ordering })}
           />
           <SwitchTabs
             tab1="Live"
@@ -64,6 +63,9 @@ const DischargedPatientsList = ({
         </>
       }
     >
+      <div className="col-span-3 mt-6 flex flex-wrap">
+        <FilterBadges badges={({ ordering }) => [ordering()]} />
+      </div>
       <PaginatedList
         route={routes.listFacilityDischargedPatients}
         pathParams={{ facility_external_id }}
