@@ -109,7 +109,7 @@ export const FacilityConfigure = (props: IProps) => {
     setIsLoading(false);
     if (res?.ok) {
       Notification.Success({
-        msg: "Facility updated successfully",
+        msg: "Facility middleware updated successfully",
       });
       navigate(`/facility/${facilityId}`);
     } else {
