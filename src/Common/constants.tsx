@@ -206,6 +206,13 @@ export const PATIENT_SORT_OPTIONS: SortOption[] = [
   { isAscending: false, value: "-name" },
 ];
 
+export const DISCHARGED_PATIENT_SORT_OPTIONS: SortOption[] = [
+  { isAscending: false, value: "-created_date" },
+  { isAscending: true, value: "created_date" },
+  { isAscending: false, value: "-modified_date" },
+  { isAscending: true, value: "modified_date" },
+];
+
 export const getBedTypes = ({
   kasp_enabled,
   kasp_string,

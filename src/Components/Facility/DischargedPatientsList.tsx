@@ -1,4 +1,4 @@
-import { Link, navigate, useQueryParams } from "raviger";
+import { Link, navigate } from "raviger";
 import routes from "../../Redux/api";
 import Page from "../Common/components/Page";
 import PaginatedList from "../../CAREUI/misc/PaginatedList";
@@ -7,12 +7,17 @@ import { PatientModel } from "../Patient/models";
 import useQuery from "../../Utils/request/useQuery";
 import { debounce } from "lodash-es";
 import SearchInput from "../Form/SearchInput";
-import { GENDER_TYPES } from "../../Common/constants";
+import {
+  DISCHARGED_PATIENT_SORT_OPTIONS,
+  GENDER_TYPES,
+} from "../../Common/constants";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { formatPatientAge } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import SwitchTabs from "../Common/components/SwitchTabs";
+import SortDropdownMenu from "../Common/SortDropdown";
+import { useState } from "react";
 
 const DischargedPatientsList = ({
   facility_external_id,
@@ -24,7 +29,10 @@ const DischargedPatientsList = ({
     pathParams: { id: facility_external_id },
   });
 
-  const [search, setSearch] = useQueryParams();
+  const [qParams, setQParams] = useState({
+    name: "",
+    ordering: "-modified_date",
+  });
 
   return (
     <Page
@@ -38,8 +46,16 @@ const DischargedPatientsList = ({
             className="mr-4 w-full max-w-sm"
             placeholder="Search by patient name"
             name="name"
-            value={search.name}
-            onChange={debounce((e) => setSearch({ [e.name]: e.value }), 300)}
+            value={qParams.name}
+            onChange={debounce(
+              (e) => setQParams({ ...qParams, [e.name]: e.value }),
+              300
+            )}
+          />
+          <SortDropdownMenu
+            options={DISCHARGED_PATIENT_SORT_OPTIONS}
+            selected={qParams.ordering}
+            onSelect={(e) => setQParams({ ...qParams, ordering: e.ordering })}
           />
           <SwitchTabs
             tab1="Live"
@@ -54,7 +70,7 @@ const DischargedPatientsList = ({
       <PaginatedList
         route={routes.listFacilityDischargedPatients}
         pathParams={{ facility_external_id }}
-        query={search}
+        query={qParams}
       >
         {() => (
           <div className="flex flex-col gap-4 py-4 lg:px-4 lg:py-8">
