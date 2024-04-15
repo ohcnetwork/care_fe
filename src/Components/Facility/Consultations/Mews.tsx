@@ -159,7 +159,7 @@ export const Mews = ({ mewsField }: { mewsField: MewsFieldModel }) => {
     <div>
       {mewsCard(
         false,
-        Object.values(scores as Record<string, number>).reduce((p, v) => p + v)
+        Object.values(scores as Record<string, number>).reduce((p, v) => p + v),
       )}
     </div>
   );
