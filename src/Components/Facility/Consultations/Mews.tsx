@@ -94,7 +94,7 @@ export const Mews = ({ mewsField }: { mewsField: MewsFieldModel }) => {
           <div className="tooltip flex flex-col items-center">
             <div
               className={`flex h-7 w-7 items-center justify-center rounded-full border-2 ${getBorderColor(
-                Number(data)
+                Number(data),
               )}`}
             >
               <span className="text-sm font-semibold">{data}</span>
@@ -137,7 +137,11 @@ export const Mews = ({ mewsField }: { mewsField: MewsFieldModel }) => {
     "Heart rate": getHeartRateScore(mewsField.pulse),
     "Systolic BP": getSystolicBPScore(mewsField.bp?.systolic),
     Temperature: getTempRange(
+
       mewsField.temperature ? parseFloat(mewsField.temperature) : undefined
+
+
+
     ),
     "Level of Consciousness": getLOCRange(mewsField.consciousness_level),
   };
@@ -149,7 +153,7 @@ export const Mews = ({ mewsField }: { mewsField: MewsFieldModel }) => {
           true,
           Object.entries(scores)
             .filter(([_, value]) => value === undefined)
-            .map(([key]) => key)
+            .map(([key]) => key),
         )}
       </div>
     );
@@ -159,7 +163,7 @@ export const Mews = ({ mewsField }: { mewsField: MewsFieldModel }) => {
     <div>
       {mewsCard(
         false,
-        Object.values(scores as Record<string, number>).reduce((p, v) => p + v)
+        Object.values(scores as Record<string, number>).reduce((p, v) => p + v),
       )}
     </div>
   );

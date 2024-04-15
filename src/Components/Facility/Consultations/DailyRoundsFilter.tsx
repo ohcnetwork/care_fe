@@ -34,7 +34,7 @@ export default function DailyRoundsFilter(props: Props) {
   });
 
   const isFilterApplied = Object.values(filter ?? {}).some(
-    (val) => val !== undefined
+    (val) => val !== undefined,
   );
 
   return (

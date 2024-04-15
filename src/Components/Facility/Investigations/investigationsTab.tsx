@@ -22,7 +22,7 @@ export default function InvestigationTab(props: {
       pathParams: {
         consultation_external_id: consultationId,
       },
-    }
+    },
   );
 
   const { data: investigationSessions, loading: investigationSessionLoading } =

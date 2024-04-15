@@ -57,7 +57,7 @@ export const TimelineNode = (props: TimelineNodeProps) => {
       <div
         className={classNames(
           props.isLast ? "h-6" : "-bottom-6",
-          "absolute left-0 top-0 flex w-6 justify-center"
+          "absolute left-0 top-0 flex w-6 justify-center",
         )}
       >
         <div className="w-px bg-gray-300" />
@@ -66,14 +66,14 @@ export const TimelineNode = (props: TimelineNodeProps) => {
       <div
         className={classNames(
           props.className,
-          "group flex w-full flex-col items-start gap-y-1"
+          "group flex w-full flex-col items-start gap-y-1",
         )}
       >
         <div className="relative flex w-full justify-between gap-x-4">
           <div
             className={classNames(
               "flex w-full gap-x-4",
-              props.event.cancelled && "line-through"
+              props.event.cancelled && "line-through",
             )}
           >
             {props.title || (

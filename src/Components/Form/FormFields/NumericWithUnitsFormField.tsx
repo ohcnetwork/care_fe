@@ -27,7 +27,7 @@ export default function NumericWithUnitsFormField(props: Props) {
           className={classNames(
             "cui-input-base pr-24 sm:leading-6 md:pr-28",
             field.error && "border-danger-500",
-            field.className
+            field.className,
           )}
           placeholder={props.placeholder}
           min={props.min}

@@ -82,7 +82,7 @@ export const AddLocationForm = ({ facilityId, locationId }: Props) => {
     if (
       middlewareAddress &&
       middlewareAddress.match(
-        /^(?!https?:\/\/)[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*\.[a-zA-Z]{2,}$/
+        /^(?!https?:\/\/)[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*\.[a-zA-Z]{2,}$/,
       ) === null
     ) {
       error.middlewareAddress = "Invalid Middleware Address";
