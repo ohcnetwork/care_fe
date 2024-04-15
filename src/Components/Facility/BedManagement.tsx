@@ -93,7 +93,7 @@ const BedRow = (props: BedRowProps) => {
               {LOCATION_BED_TYPES.find((item) => item.id === bedType) && (
                 <p className="mb-1 inline-flex w-fit items-center rounded-md bg-blue-100 px-2.5 py-0.5 text-sm font-medium capitalize leading-5 text-blue-800">
                   {LOCATION_BED_TYPES.find(
-                    (item) => item.id === bedType
+                    (item) => item.id === bedType,
                   )?.name?.slice(0, 25) + (bedType.length > 25 ? "..." : "")}
                 </p>
               )}

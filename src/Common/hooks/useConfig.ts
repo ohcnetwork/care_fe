@@ -76,6 +76,10 @@ export interface IConfig {
    */
   enable_abdm: boolean;
   /**
+   * Env to enable scribe features
+   */
+  enable_scribe: boolean;
+  /**
    * Env to toggle peacetime and wartime shifting
    */
   wartime_shifting: boolean;

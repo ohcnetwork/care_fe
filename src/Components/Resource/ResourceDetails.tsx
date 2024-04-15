@@ -387,7 +387,7 @@ export default function ResourceDetails(props: { id: string }) {
               "mt-8 grid grid-cols-1 gap-x-6 gap-y-12",
               data.assigned_facility_object
                 ? "lg:grid-cols-3"
-                : "lg:grid-cols-2"
+                : "lg:grid-cols-2",
             )}
           >
             <div>

@@ -57,7 +57,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   const [assignedUser, SetAssignedUser] = useState<UserModel>();
 
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
-    {} as ConsultationModel
+    {} as ConsultationModel,
   );
   const [showDischargeModal, setShowDischargeModal] = useState(false);
   const { t } = useTranslation();
@@ -83,7 +83,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
 
   const initError = Object.assign(
     {},
-    ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+    ...Object.keys(initForm).map((k) => ({ [k]: "" })),
   );
 
   const initialState = {
@@ -249,7 +249,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
       if (res?.ok && data) {
         const d = data;
         setConsultationData(
-          (d.patient as PatientModel).last_consultation as ConsultationModel
+          (d.patient as PatientModel).last_consultation as ConsultationModel,
         );
         if (d.assigned_facility_external)
           d["assigned_facility_object"] = {
