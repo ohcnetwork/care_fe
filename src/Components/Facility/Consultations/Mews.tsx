@@ -137,11 +137,7 @@ export const Mews = ({ mewsField }: { mewsField: MewsFieldModel }) => {
     "Heart rate": getHeartRateScore(mewsField.pulse),
     "Systolic BP": getSystolicBPScore(mewsField.bp?.systolic),
     Temperature: getTempRange(
-
       mewsField.temperature ? parseFloat(mewsField.temperature) : undefined
-
-
-
     ),
     "Level of Consciousness": getLOCRange(mewsField.consciousness_level),
   };
