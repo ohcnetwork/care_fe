@@ -203,7 +203,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
                   );
                 }
               }}
-              disabled={itemData.discharge_date}
+              disabled={!!itemData.discharge_date}
               authorizeFor={NonReadOnlyUsers}
             >
               Add Consultation Updates

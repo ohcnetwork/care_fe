@@ -16,6 +16,7 @@ import AutocompleteMultiSelectFormField from "../../../Form/FormFields/Autocompl
 import { FieldChangeEvent } from "../../../Form/FormFields/Utils";
 import ReportTable from "./ReportTable";
 import { Investigation, InvestigationResponse } from "./types";
+import { formatPatientAge } from "../../../../Utils/utils";
 
 const RESULT_PER_PAGE = 14;
 interface InitialState {
@@ -386,8 +387,7 @@ const InvestigationReports = ({ id }: any) => {
                   title={t("report")}
                   patientDetails={{
                     name: patientData?.name || "",
-                    age: patientData?.age || -1,
-                    date_of_birth: patientData?.date_of_birth || "",
+                    age: patientData ? formatPatientAge(patientData, true) : "",
                     hospitalName: patientData?.facility_object?.name || "",
                   }}
                 />

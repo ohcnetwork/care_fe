@@ -141,6 +141,7 @@ describe("Facility Manage Functions", () => {
     facilityManage.verifySuccessMessageVisibilityAndContent(
       "Bed capacity added successfully"
     );
+    cy.closeNotification();
     facilityManage.verifyFacilityBedCapacity(totalCapacity);
     facilityManage.verifyFacilityBedCapacity(currentOccupied);
     // edit a existing bed
@@ -151,6 +152,7 @@ describe("Facility Manage Functions", () => {
     facilityManage.verifySuccessMessageVisibilityAndContent(
       "Bed capacity updated successfully"
     );
+    cy.closeNotification();
     facilityManage.verifyFacilityBedCapacity(totalUpdatedCapacity);
     facilityManage.verifyFacilityBedCapacity(currentUpdatedOccupied);
     // delete a bed

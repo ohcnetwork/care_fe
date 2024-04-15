@@ -65,7 +65,7 @@ jobs:
 
   build:
     needs: test
-    if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/staging' || github.ref == 'refs/tags/v*'
+    if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/staging' || startsWith(github.event.ref, 'refs/tags/v')
     name: Build & Push to container registries
     runs-on: ubuntu-latest
     steps:
@@ -135,7 +135,7 @@ jobs:
 
   notify-release:
     needs: build
-    if: github.ref == 'refs/tags/v*'
+    if: startsWith(github.event.ref, 'refs/tags/v')
     name: Notify release
     runs-on: ubuntu-latest
     steps:

@@ -1,5 +1,9 @@
 import { GENDER_TYPES } from "../../Common/constants";
-import { formatAge, formatDate, formatDateTime } from "../../Utils/utils";
+import {
+  formatDate,
+  formatDateTime,
+  formatPatientAge,
+} from "../../Utils/utils";
 import useSlug from "../../Common/hooks/useSlug";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import routes from "../../Redux/api";
@@ -66,11 +70,7 @@ const TreatmentSummary = (props: any) => {
               <div className="col-span-1 grid print:grid-cols-2 sm:grid-cols-2 ">
                 <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0 print:border-r-2 sm:border-b-0 sm:border-r-2">
                   <b>Age :</b>{" "}
-                  {formatAge(
-                    patientData?.age ?? 0,
-                    patientData?.date_of_birth ?? "",
-                    true
-                  )}
+                  {patientData ? formatPatientAge(patientData, true) : ""}
                 </div>
                 <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0 print:border-r-2 sm:border-b-0 sm:border-r-2">
                   <b>OP :</b> {consultationData?.patient_no ?? ""}
