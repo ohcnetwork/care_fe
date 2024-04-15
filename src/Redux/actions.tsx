@@ -11,7 +11,7 @@ export const getFacilityUsers = (id: string, params?: object) => {
     "getFacilityUsers",
     [],
     { ...params },
-    { facility_id: id }
+    { facility_id: id },
   );
 };
 
@@ -26,7 +26,7 @@ export const partialUpdateAssetBed = (params: object, asset_id: string) =>
     { ...params },
     {
       external_id: asset_id,
-    }
+    },
   );
 
 export const deleteAssetBed = (asset_id: string) =>
@@ -36,7 +36,7 @@ export const deleteAssetBed = (asset_id: string) =>
     {},
     {
       external_id: asset_id,
-    }
+    },
   );
 
 // Download Actions
@@ -89,7 +89,7 @@ export const previewDischargeSummary = (pathParams: object) => {
     {},
     pathParams,
     undefined,
-    true
+    true,
   );
 };
 export const emailDischargeSummary = (params: object, pathParams: object) => {
@@ -195,7 +195,7 @@ export const HCXActions = {
           use: "preauthorization",
         },
         {},
-        `listPreAuths-${consultation}`
+        `listPreAuths-${consultation}`,
       );
     },
   },

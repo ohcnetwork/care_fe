@@ -54,7 +54,7 @@ export default function ResponsiveMedicineTable(props: {
               <tr
                 className={classNames(
                   "bg-white",
-                  props.onClick && "cursor-pointer hover:bg-gray-200"
+                  props.onClick && "cursor-pointer hover:bg-gray-200",
                 )}
                 key={index}
                 onClick={() => props.onClick && props.onClick(med)}

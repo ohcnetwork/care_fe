@@ -9,7 +9,7 @@ import VitalsMonitorHeader from "./VitalsMonitorHeader";
 import VitalsMonitorFooter from "./VitalsMonitorFooter";
 
 export default function VentilatorPatientVitalsMonitor(
-  props: IVitalsComponentProps
+  props: IVitalsComponentProps,
 ) {
   const { connect, waveformCanvas, data, isOnline } =
     useVentilatorVitalsMonitor(props.config);
@@ -28,7 +28,7 @@ export default function VentilatorPatientVitalsMonitor(
           <div
             className={classNames(
               "flex flex-col items-center justify-center gap-1 p-1 text-center font-mono font-medium text-warning-500",
-              isOnline && "hidden"
+              isOnline && "hidden",
             )}
             style={waveformCanvas.size}
           >
