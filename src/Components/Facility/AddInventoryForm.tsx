@@ -211,9 +211,16 @@ export const AddInventoryForm = (props: any) => {
         pathParams: { facilityId },
         onResponse: ({ res, data }) => {
           if (res?.ok && data) {
-            Notification.Success({
-              msg: "Inventory created successfully",
-            });
+            if (data.is_incoming) {
+              Notification.Success({
+                msg: "Inventory created successfully",
+              });
+            } else if (!data.is_incoming) {
+              Notification.Success({
+                msg: "Inventory use stock updated successfully",
+              });
+            }
+
             goBack();
           }
         },
