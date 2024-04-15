@@ -620,12 +620,12 @@ export const NOTIFICATION_EVENTS: NotificationEvent[] = [
   },
   {
     id: "PATIENT_PRESCRIPTION_CREATED",
-    text: "Patient Consultation Created",
+    text: "Patient Prescription Created",
     icon: "l-capsule",
   },
   {
     id: "PATIENT_PRESCRIPTION_UPDATED",
-    text: "Patient Consultation Updated",
+    text: "Patient Prescription Updated",
     icon: "l-capsule",
   },
 ];
