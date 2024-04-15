@@ -1050,12 +1050,12 @@ export const FileUpload = (props: FileUploadProps) => {
 
     const { data } = await request(routes.createUpload, {
       body: {
-        original_name: name,
+        original_name: name ?? "",
         file_type: type,
         name: filename,
         associating_id: getAssociatedId(),
         file_category: category,
-        mime_type: f?.type,
+        mime_type: f?.type ?? "",
       },
     });
 
@@ -1140,7 +1140,7 @@ export const FileUpload = (props: FileUploadProps) => {
         name: filename,
         associating_id: getAssociatedId(),
         file_category: category,
-        mime_type: audioBlob?.type,
+        mime_type: audioBlob?.type ?? "",
       },
     })
       .then(uploadAudiofile)

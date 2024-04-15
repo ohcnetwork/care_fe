@@ -159,7 +159,7 @@ const UpdateStatusDialog = (props: Props) => {
         original_name: name,
         file_type: "SAMPLE_MANAGEMENT",
         name: `${sample.patient_name} Sample Report`,
-        associating_id: sample.id,
+        associating_id: sample.id ?? "",
         file_category: category,
         mime_type: contentType,
       },
