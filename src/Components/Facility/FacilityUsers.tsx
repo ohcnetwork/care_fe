@@ -7,7 +7,6 @@ import {
   classNames,
   isUserOnline,
   relativeTime,
-  showUserDelete,
 } from "../../Utils/utils";
 import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
 import Pagination from "../Common/Pagination";
@@ -21,10 +20,8 @@ import UserDeleteDialog from "../Users/UserDeleteDialog";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
-import { UserModel } from "../Users/models";
 import { UserFacilities } from "../Users/ManageUsers";
 import { useTranslation } from "react-i18next";
-
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -186,15 +183,15 @@ export default function FacilityUsers(props: any) {
     );
   };
 
-  const showFacilities = (username: string, facilities: FacilityModel[]) => {
-    if (!facilities || !facilities.length) {
-      return (
-        <>
-          <div className="font-semibold">No Facilities!</div>
-          {showLinkFacility(username)}
-        </>
-      );
-    }
+  // const showFacilities = (username: string, facilities: FacilityModel[]) => {
+  //   if (!facilities || !facilities.length) {
+  //     return (
+  //       <>
+  //         <div className="font-semibold">No Facilities!</div>
+  //         {showLinkFacility(username)}
+  //       </>
+  //     );
+  //   }
     return (
       <div className="col-span-full sm:col-span-3 sm:col-start-2">
         <div className="mb-2">
@@ -329,11 +326,11 @@ export default function FacilityUsers(props: any) {
 
                 {user.username && (
                   <UserDetails title="Facilities">
-                      <ButtonV2
-                        id="facilities"
-                        className="flex w-full items-center @sm:w-1/2"
-                        onClick={() => {
-                          setExpandFacilityList(!expandFacilityList);
+                    <ButtonV2
+                      id="facilities"
+                      className="flex w-full items-center @sm:w-1/2"
+                      onClick={() => {
+                      setExpandFacilityList(!expandFacilityList);
                           setSelectedUser(user);
                         }}
                       >
