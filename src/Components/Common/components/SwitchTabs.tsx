@@ -13,7 +13,7 @@ export default function SwitchTabs(props: {
     <div
       className={classNames(
         "relative grid w-full grid-cols-2 items-center gap-4 rounded-md bg-primary-500/10 px-4 py-3 lg:w-52",
-        props.className
+        props.className,
       )}
     >
       <div

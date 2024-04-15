@@ -61,7 +61,7 @@ const initError = formErrorKeys.reduce(
     acc[key] = "";
     return acc;
   },
-  {}
+  {},
 );
 
 const fieldRef = formErrorKeys.reduce(
@@ -69,7 +69,7 @@ const fieldRef = formErrorKeys.reduce(
     acc[key] = createRef();
     return acc;
   },
-  {}
+  {},
 );
 
 const initialState = {
@@ -840,7 +840,7 @@ const AssetCreate = (props: AssetProps) => {
                             });
                           } else {
                             setLastServicedOn(
-                              dayjs(date.value).format("YYYY-MM-DD")
+                              dayjs(date.value).format("YYYY-MM-DD"),
                             );
                           }
                         }}
@@ -860,7 +860,7 @@ const AssetCreate = (props: AssetProps) => {
                         name="notes"
                         label={t("notes")}
                         placeholder={t(
-                          "Eg. Details on functionality, service, etc."
+                          "Eg. Details on functionality, service, etc.",
                         )}
                         value={notes}
                         onChange={(e) => setNotes(e.value)}
@@ -875,7 +875,7 @@ const AssetCreate = (props: AssetProps) => {
                         navigate(
                           assetId
                             ? `/facility/${facilityId}/assets/${assetId}`
-                            : `/facility/${facilityId}`
+                            : `/facility/${facilityId}`,
                         )
                       }
                     />

@@ -31,7 +31,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
   const handleApproval1 = async (
     sample: SampleTestModel,
     status: number,
-    result: number
+    result: number,
   ) => {
     const sampleData: any = {
       id: sample.id,
@@ -80,14 +80,14 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
         itemData.result === "POSITIVE"
           ? "border-red-500 bg-red-100 hover:border-red-700"
           : itemData.result === "NEGATIVE"
-          ? "border-primary-500 bg-primary-100 hover:border-primary-700"
-          : "bg-white hover:border-primary-500"
+            ? "border-primary-500 bg-primary-100 hover:border-primary-700"
+            : "bg-white hover:border-primary-500"
       } mt-4 block cursor-pointer rounded-lg border bg-white p-4 text-black shadow`}
     >
       <div
         onClick={(_e) =>
           navigate(
-            `/facility/${facilityId}/patient/${patientId}/sample/${itemData.id}`
+            `/facility/${facilityId}/patient/${patientId}/sample/${itemData.id}`,
           )
         }
         className="ml-2 mt-2 grid grid-cols-1 gap-4 md:grid-cols-4"

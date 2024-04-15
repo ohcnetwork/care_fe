@@ -18,7 +18,7 @@ export const NursingPlot = (props: any) => {
   useEffect(() => {
     const fetchDailyRounds = async (
       currentPage: number,
-      consultationId: string
+      consultationId: string,
     ) => {
       const { res, data } = await request(routes.dailyRoundsAnalyse, {
         body: {
@@ -54,13 +54,13 @@ export const NursingPlot = (props: any) => {
       x.nursing.map((f: any) => {
         f["date"] = x.date;
         return f;
-      })
+      }),
     )
     .reduce((accumulator, value) => accumulator.concat(value), []);
 
   const filterEmpty = (field: any) => {
     const filtered = dataToDisplay.filter(
-      (i: any) => i.procedure === field.text
+      (i: any) => i.procedure === field.text,
     );
     return filtered.length > 0;
   };
@@ -115,7 +115,7 @@ export const NursingPlot = (props: any) => {
                         ))}
                     </div>
                   </div>
-                )
+                ),
             )}
           </div>
         </div>

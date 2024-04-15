@@ -17,26 +17,10 @@ import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
-import {
-  LegacyRef,
-  createRef,
-  lazy,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { LegacyRef, createRef, lazy, useEffect, useState } from "react";
 import ProcedureBuilder, {
   ProcedureType,
 } from "../Common/prescription-builder/ProcedureBuilder";
-import {
-  createConsultation,
-  getConsultation,
-  getPatient,
-  partialUpdateConsultation,
-  updateConsultation,
-} from "../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-
 import { BedSelect } from "../Common/BedSelect";
 import Beds from "./Consultations/Beds";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -55,12 +39,10 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
 import { UserModel } from "../Users/models";
-import { dischargePatient } from "../../Redux/actions";
 
 import { navigate } from "raviger";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
 import useVisibility from "../../Utils/useVisibility";
 import dayjs from "../../Utils/dayjs";
 import RouteToFacilitySelect, {
@@ -79,6 +61,9 @@ import {
 } from "../Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder.js";
 import { FileUpload } from "../Patient/FileUpload.js";
 import ConfirmDialog from "../Common/ConfirmDialog.js";
+import request from "../../Utils/request/request.js";
+import routes from "../../Redux/api.js";
+import useQuery from "../../Utils/request/useQuery.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -196,7 +181,7 @@ const initForm: FormDetails = {
 
 const initError = Object.assign(
   {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
 );
 
 const isoStringToDate = (isoDate: string) =>
@@ -214,7 +199,7 @@ const fieldRef = formErrorKeys.reduce(
     acc[key] = createRef();
     return acc;
   },
-  {}
+  {},
 );
 
 const consultationFormReducer = (state = initialState, action: FormAction) => {
@@ -254,10 +239,9 @@ type Props = {
 export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   const { goBack } = useAppHistory();
   const { kasp_enabled, kasp_string } = useConfig();
-  const dispatchAction: any = useDispatch();
   const [state, dispatch] = useAutoSaveReducer<FormDetails>(
     consultationFormReducer,
-    initialState
+    initialState,
   );
   const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
   const [referredToFacility, setReferredToFacility] =
@@ -270,7 +254,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   const isUpdate = !!id;
 
   const [currentSection, setCurrentSection] = useState<ConsultationFormSection>(
-    "Consultation Details"
+    "Consultation Details",
   );
   const [consultationDetailsVisible, consultationDetailsRef] = useVisibility();
   const [diagnosisVisible, diagnosisRef] = useVisibility(-300);
@@ -282,7 +266,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     number[]
   >([]);
   const [showDeleteConsent, setShowDeleteConsent] = useState<string | null>(
-    null
+    null,
   );
 
   const { min_encounter_date } = useConfig();
@@ -332,29 +316,21 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     bedStatusVisible,
   ]);
 
-  useEffect(() => {
-    async function fetchPatientName() {
-      if (patientId) {
-        setIsLoading(true);
-        const res = await dispatchAction(getPatient({ id: patientId }));
-        if (res.data) {
-          if (isUpdate) {
-            dispatch({
-              type: "set_form",
-              form: { ...state.form, action: res.data.action },
-            });
-          }
-          setPatientName(res.data.name);
-          setFacilityName(res.data.facility_object.name);
-        }
-      } else {
-        setPatientName("");
-        setFacilityName("");
+  const { loading: loadingPatient } = useQuery(routes.getPatient, {
+    pathParams: { id: patientId },
+    onResponse: ({ data }) => {
+      if (!data) return;
+      if (isUpdate) {
+        dispatch({
+          type: "set_form",
+          form: { ...state.form, action: data.action },
+        });
       }
-      if (!id) setIsLoading(false);
-    }
-    fetchPatientName();
-  }, [dispatchAction, patientId]);
+      setPatientName(data.name ?? "");
+      setFacilityName(data.facility_object?.name ?? "");
+    },
+    prefetch: !!patientId,
+  });
 
   useEffect(() => {
     dispatch({
@@ -385,96 +361,97 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     }
   };
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      if (!patientId) setIsLoading(true);
-      const res = await dispatchAction(getConsultation(id!));
-      handleFormFieldChange({
-        name: "InvestigationAdvice",
-        value: !Array.isArray(res.data.investigation)
-          ? []
-          : res.data.investigation,
-      });
-      handleFormFieldChange({
-        name: "procedures",
-        value: !Array.isArray(res.data.procedure) ? [] : res.data.procedure,
-      });
-      if (res.data.suggestion === "R") {
-        if (res.data.referred_to_external)
-          setReferredToFacility({
-            name: res.data.referred_to_external,
-          });
-        else setReferredToFacility(res.data.referred_to_object);
-      }
-      if (res.data.route_to_facility === 20) {
-        if (res.data.referred_from_facility_external)
-          setReferredFromFacility({
-            name: res.data.referred_from_facility_external,
-          });
-        else setReferredFromFacility(res.data.referred_from_facility_object);
-      }
-      if (!status.aborted) {
-        if (res?.data) {
+  const { loading: consultationLoading, refetch } = useQuery(
+    routes.getConsultation,
+    {
+      pathParams: { id: id! },
+      prefetch: !!(id && ((patientId && patientName) || !patientId)),
+      onResponse: ({ data }) => {
+        if (!data) return;
+        handleFormFieldChange({
+          name: "InvestigationAdvice",
+          value:
+            (Array.isArray(data.investigation) && data.investigation) || [],
+        });
+        handleFormFieldChange({
+          name: "procedures",
+          value: (Array.isArray(data.procedure) && data.procedure) || [],
+        });
+        if (data.suggestion === "R") {
+          if (data.referred_to_external)
+            setReferredToFacility({
+              name: data.referred_to_external,
+            });
+          else setReferredToFacility(data.referred_to_object ?? null);
+        }
+        if (data.route_to_facility === 20) {
+          if (data.referred_from_facility_external)
+            setReferredFromFacility({
+              name: data.referred_from_facility_external,
+            });
+          else
+            setReferredFromFacility(data.referred_from_facility_object ?? null);
+        }
+
+        if (data) {
           const formData = {
-            ...res.data,
-            symptoms_onset_date: isoStringToDate(res.data.symptoms_onset_date),
-            encounter_date: isoStringToDate(res.data.encounter_date),
-            icu_admission_date: isoStringToDate(res.data.icu_admission_date),
-            admitted: res.data.admitted ? String(res.data.admitted) : "false",
-            admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
-            category: res.data.category
-              ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)
-                  ?.id ?? ""
+            ...data,
+            symptoms_onset_date:
+              data.symptoms_onset_date &&
+              isoStringToDate(data.symptoms_onset_date),
+            encounter_date: isoStringToDate(data.encounter_date),
+            icu_admission_date:
+              data.icu_admission_date &&
+              isoStringToDate(data.icu_admission_date),
+            admitted: data.admitted ? String(data.admitted) : "false",
+            admitted_to: data.admitted_to ? data.admitted_to : "",
+            category: data.category
+              ? PATIENT_CATEGORIES.find((i) => i.text === data.category)?.id ??
+                ""
               : "",
-            patient_no: res.data.patient_no ?? "",
-            OPconsultation: res.data.consultation_notes,
-            is_telemedicine: `${res.data.is_telemedicine}`,
-            is_kasp: `${res.data.is_kasp}`,
-            assigned_to: res.data.assigned_to || "",
-            assigned_to_object: res.data.assigned_to_object,
-            treating_physician: res.data.treating_physician || "",
-            treating_physician_object: res.data.treating_physician_object,
-            ett_tt: res.data.ett_tt ? Number(res.data.ett_tt) : 3,
-            special_instruction: res.data.special_instruction || "",
-            weight: res.data.weight ? res.data.weight : "",
-            height: res.data.height ? res.data.height : "",
-            bed: res.data?.current_bed?.bed_object || null,
-            new_discharge_reason: res.data?.new_discharge_reason || null,
-            cause_of_death: res.data?.discharge_notes || "",
-            death_datetime: res.data?.death_datetime || "",
-            death_confirmed_doctor: res.data?.death_confirmed_doctor || "",
-            InvestigationAdvice: Array.isArray(res.data.investigation)
-              ? res.data.investigation
+            patient_no: data.patient_no ?? "",
+            OPconsultation: data.consultation_notes,
+            is_telemedicine: `${data.is_telemedicine}`,
+            is_kasp: `${data.is_kasp}`,
+            assigned_to: data.assigned_to || "",
+            assigned_to_object: data.assigned_to_object,
+            treating_physician: data.treating_physician || "",
+            treating_physician_object: data.treating_physician_object,
+            ett_tt: data.ett_tt ? Number(data.ett_tt) : 3,
+            special_instruction: data.special_instruction || "",
+            weight: data.weight ? data.weight : "",
+            height: data.height ? data.height : "",
+            bed: data?.current_bed?.bed_object || null,
+            new_discharge_reason: data?.new_discharge_reason || null,
+            cause_of_death: data?.discharge_notes || "",
+            death_datetime: data?.death_datetime || "",
+            death_confirmed_doctor: data?.death_confirmed_doctor || "",
+            InvestigationAdvice: Array.isArray(data.investigation)
+              ? data.investigation
               : [],
-            diagnoses: res.data.diagnoses.sort(
+            diagnoses: data.diagnoses?.sort(
               (a: ConsultationDiagnosis, b: ConsultationDiagnosis) =>
                 ConditionVerificationStatuses.indexOf(a.verification_status) -
-                ConditionVerificationStatuses.indexOf(b.verification_status)
+                ConditionVerificationStatuses.indexOf(b.verification_status),
             ),
           };
-          dispatch({ type: "set_form", form: { ...state.form, ...formData } });
+          dispatch({
+            type: "set_form",
+            form: { ...state.form, ...(formData as unknown as FormDetails) },
+          });
           setBed(formData.bed);
 
-          if (res.data.last_daily_round && state.form.category) {
+          if (data.last_daily_round && state.form.category) {
             setDisabledFields((fields) => [...fields, "category"]);
           }
         } else {
           goBack();
         }
-        setIsLoading(false);
-      }
+      },
     },
-    [dispatchAction, id, patientName, patientId]
   );
 
-  useAbortableEffect(
-    (status: statusType) => {
-      if (id && ((patientId && patientName) || !patientId)) fetchData(status);
-    },
-    [fetchData, id, patientId, patientName]
-  );
-
-  if (isLoading) return <Loading />;
+  if (isLoading || loadingPatient || consultationLoading) return <Loading />;
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -537,9 +514,8 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             min_encounter_date &&
             dayjs(state.form.encounter_date).isBefore(dayjs(min_encounter_date))
           ) {
-            errors[
-              field
-            ] = `Admission date cannot be before ${min_encounter_date}`;
+            errors[field] =
+              `Admission date cannot be before ${min_encounter_date}`;
             invalidForm = true;
           }
           return;
@@ -610,9 +586,8 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           return;
         case "is_kasp":
           if (!state.form[field]) {
-            errors[
-              field
-            ] = `Please select an option, ${kasp_string} is mandatory`;
+            errors[field] =
+              `Please select an option, ${kasp_string} is mandatory`;
             invalidForm = true;
           }
           return;
@@ -690,32 +665,26 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     id: string,
     cause_of_death: string,
     death_datetime: string,
-    death_confirmed_doctor: string
+    death_confirmed_doctor: string,
   ) => {
-    const dischargeResponse = await dispatchAction(
-      dischargePatient(
-        {
-          new_discharge_reason: DISCHARGE_REASONS.find(
-            (i) => i.text === "Expired"
-          )?.id,
-          discharge_notes: cause_of_death,
-          death_datetime: death_datetime,
-          death_confirmed_doctor: death_confirmed_doctor,
-          discharge_date: dayjs().toISOString(),
-        },
-        { id }
-      )
-    );
-
-    if (dischargeResponse?.status === 200) {
-      return dischargeResponse;
-    }
+    await request(routes.dischargePatient, {
+      pathParams: { id },
+      body: {
+        new_discharge_reason: DISCHARGE_REASONS.find(
+          (i) => i.text === "Expired",
+        )?.id,
+        discharge_notes: cause_of_death,
+        death_datetime: death_datetime,
+        death_confirmed_doctor: death_confirmed_doctor,
+        discharge_date: dayjs().toISOString(),
+      },
+    });
   };
 
   const handleSubmit = async (
     e:
       | React.FormEvent<HTMLFormElement>
-      | React.MouseEvent<HTMLButtonElement, MouseEvent>
+      | React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
     e.preventDefault();
     const validated = validateForm();
@@ -792,30 +761,35 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         consent_records: state.form.consent_records || [],
       };
 
-      const res = await dispatchAction(
-        id ? updateConsultation(id!, data) : createConsultation(data)
+      const { data: obj } = await request(
+        id ? routes.updateConsultation : routes.createConsultation,
+        {
+          pathParams: id ? { id } : undefined,
+          body: data,
+        },
       );
+
       setIsLoading(false);
-      if (res?.data && res.status !== 400) {
+      if (obj) {
         dispatch({ type: "set_form", form: initForm });
 
         if (data.suggestion === "DD") {
           await declareThePatientDead(
-            res.data.id,
+            obj.id,
             state.form.cause_of_death,
             state.form.death_datetime,
-            state.form.death_confirmed_doctor
+            state.form.death_confirmed_doctor,
           );
         }
 
         Notification.Success({
-          msg: res.data.discharge_date
+          msg: obj.discharge_date
             ? "Patient discharged successfully"
             : `Consultation ${id ? "updated" : "created"} successfully`,
         });
 
         navigate(
-          `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}`
+          `/facility/${facilityId}/patient/${patientId}/consultation/${obj.id}`,
         );
 
         if (data.suggestion === "R") {
@@ -823,7 +797,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           return;
         } else if (!id && data.suggestion === "A") {
           navigate(
-            `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}/prescriptions`
+            `/facility/${facilityId}/patient/${patientId}/consultation/${obj.id}/prescriptions`,
           );
         }
       }
@@ -857,7 +831,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
 
   const sectionTitle = (
     sectionTitle: ConsultationFormSection,
-    required = false
+    required = false,
   ) => {
     const section = sections[sectionTitle];
     return (
@@ -877,7 +851,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   };
 
   const handleReferredToFacilityChange = (
-    selected: FacilityModel | FacilityModel[] | null
+    selected: FacilityModel | FacilityModel[] | null,
   ) => {
     const selectedFacility = selected as FacilityModel;
     setReferredToFacility(selectedFacility);
@@ -895,7 +869,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   };
 
   const handleReferredFromFacilityChange = (
-    selected: FacilityModel | FacilityModel[] | null
+    selected: FacilityModel | FacilityModel[] | null,
   ) => {
     const selectedFacility = selected as FacilityModel;
     setReferredFromFacility(selectedFacility);
@@ -933,7 +907,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   };
 
   const handleConsentTypeChange: FieldChangeEventHandler<number> = async (
-    event
+    event,
   ) => {
     if (!id) return;
     const consentRecords = [...state.form.consent_records];
@@ -950,9 +924,10 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         ...consentRecords,
         { id: randomId, type: event.value },
       ];
-      await dispatchAction(
-        partialUpdateConsultation(id, { consent_records: newRecords })
-      );
+      await request(routes.partialUpdateConsultation, {
+        pathParams: { id },
+        body: { consent_records: newRecords },
+      });
       dispatch({
         type: "set_form",
         form: { ...state.form, consent_records: newRecords },
@@ -966,7 +941,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
       form: {
         ...state.form,
         consent_records: state.form.consent_records.map((cr) =>
-          cr.type === 2 ? { ...cr, patient_code_status: event.value } : cr
+          cr.type === 2 ? { ...cr, patient_code_status: event.value } : cr,
         ),
       },
     });
@@ -976,11 +951,12 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     const consent_id = showDeleteConsent;
     if (!consent_id || !id) return;
     const newRecords = state.form.consent_records.map((cr) =>
-      cr.id === consent_id ? { ...cr, deleted: true } : cr
+      cr.id === consent_id ? { ...cr, deleted: true } : cr,
     );
-    await dispatchAction(
-      partialUpdateConsultation(id, { consent_records: newRecords })
-    );
+    await request(routes.partialUpdateConsultation, {
+      pathParams: { id },
+      body: { consent_records: newRecords },
+    });
     dispatch({
       type: "set_form",
       form: { ...state.form, consent_records: newRecords },
@@ -1182,7 +1158,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         {Math.sqrt(
                           (Number(state.form.weight) *
                             Number(state.form.height)) /
-                            3600
+                            3600,
                         ).toFixed(2)}
                         m<sup>2</sup>
                       </span>
@@ -1239,7 +1215,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       label="Decision after consultation"
                       {...selectField("suggestion")}
                       options={CONSULTATION_SUGGESTION.filter(
-                        (option) => !("deprecated" in option)
+                        (option) => !("deprecated" in option),
                       )}
                     />
                   </div>
@@ -1308,14 +1284,14 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                   <div
                     className={classNames(
                       "col-span-6",
-                      state.form.route_to_facility === 30 && "xl:col-span-3"
+                      state.form.route_to_facility === 30 && "xl:col-span-3",
                     )}
                     ref={fieldRef["encounter_date"]}
                   >
                     <TextFormField
                       {...field("encounter_date")}
                       required={["A", "DC", "OP"].includes(
-                        state.form.suggestion
+                        state.form.suggestion,
                       )}
                       label={
                         {
@@ -1329,7 +1305,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       }
                       type="datetime-local"
                       value={dayjs(state.form.encounter_date).format(
-                        "YYYY-MM-DDTHH:mm"
+                        "YYYY-MM-DDTHH:mm",
                       )}
                       max={dayjs().format("YYYY-MM-DDTHH:mm")}
                       min={
@@ -1345,7 +1321,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       className={classNames(
                         "col-span-6",
                         ["A", "DC"].includes(state.form.suggestion) &&
-                          "xl:col-span-3"
+                          "xl:col-span-3",
                       )}
                       ref={fieldRef["icu_admission_date"]}
                     >
@@ -1356,7 +1332,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         value={
                           state.form.icu_admission_date &&
                           dayjs(state.form.icu_admission_date).format(
-                            "YYYY-MM-DDTHH:mm"
+                            "YYYY-MM-DDTHH:mm",
                           )
                         }
                       />
@@ -1590,7 +1566,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                           !state.form.consent_records
                             .filter((r) => r.deleted !== true)
                             .map((record) => record.type)
-                            .includes(c.id)
+                            .includes(c.id),
                       )}
                     />
                     <div className="flex flex-col gap-4">
@@ -1609,14 +1585,14 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                                   setCollapsedConsentRecords((prev) =>
                                     prev.includes(record.type)
                                       ? prev.filter((r) => r !== record.type)
-                                      : [...prev, record.type]
+                                      : [...prev, record.type],
                                   )
                                 }
                               >
                                 <CareIcon
                                   icon={
                                     collapsedConsentRecords.includes(
-                                      record.type
+                                      record.type,
                                     )
                                       ? "l-arrow-down"
                                       : "l-arrow-up"
@@ -1625,7 +1601,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                                 />
                                 {
                                   CONSENT_TYPE_CHOICES.find(
-                                    (c) => c.id === record.type
+                                    (c) => c.id === record.type,
                                   )?.text
                                 }
                               </button>
@@ -1699,7 +1675,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                     facilityId={facilityId}
                     patientId={patientId}
                     consultationId={id}
-                    fetchPatientData={fetchData}
+                    fetchPatientData={() => refetch()}
                   />
                 </div>
               </>

@@ -51,7 +51,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
 
       const { data } = await request(
         showAll ? routes.getAllFacilities : routes.getPermittedFacilities,
-        { query }
+        { query },
       );
 
       if (freeText)
@@ -60,7 +60,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
         });
       return data?.results;
     },
-    [searchAll, showAll, facilityType, district, exclude_user, freeText]
+    [searchAll, showAll, facilityType, district, exclude_user, freeText],
   );
 
   return (

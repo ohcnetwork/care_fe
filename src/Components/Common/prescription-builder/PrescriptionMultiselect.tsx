@@ -48,7 +48,7 @@ export function PrescriptionMultiDropdown(props: {
                   type="button"
                   onClick={() => {
                     setSelectedValues(
-                      selectedValues.filter((v) => v !== selectedValue)
+                      selectedValues.filter((v) => v !== selectedValue),
                     );
                   }}
                 >
@@ -72,7 +72,7 @@ export function PrescriptionMultiDropdown(props: {
         ref={dropRef}
         className={classNames(
           "absolute left-0 top-[calc(100%+10px)] z-40 max-h-[300px] w-full overflow-auto rounded-md bg-white shadow-lg",
-          !open && "hidden"
+          !open && "hidden",
         )}
       >
         {options
@@ -87,13 +87,13 @@ export function PrescriptionMultiDropdown(props: {
                   "block w-full px-4 py-2 text-left text-sm leading-5 text-gray-700 hover:text-gray-900 focus:text-gray-900 focus:outline-none",
                   selectedValues.includes(option)
                     ? "bg-primary-100 hover:bg-primary-200"
-                    : "hover:bg-gray-100 focus:bg-gray-100"
+                    : "hover:bg-gray-100 focus:bg-gray-100",
                 )}
                 onClick={() => {
                   setSelectedValues(
                     selectedValues.includes(option)
                       ? selectedValues.filter((v) => v !== option)
-                      : [...selectedValues, option]
+                      : [...selectedValues, option],
                   );
                 }}
               >

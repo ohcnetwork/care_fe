@@ -5,7 +5,7 @@ import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import {
   generatePhoneNumber,
   generateEmergencyPhoneNumber,
-} from "../../pageobject/constants";
+} from "../../pageobject/utils/constants";
 import PatientTransfer from "../../pageobject/Patient/PatientTransfer";
 import PatientExternal from "../../pageobject/Patient/PatientExternal";
 import PatientInsurance from "../../pageobject/Patient/PatientInsurance";
@@ -247,7 +247,7 @@ describe("Patient Creation with consultation", () => {
     patientTransfer.clickAdmitPatientRecordButton();
     patientTransfer.clickTransferPopupContinueButton();
     patientTransfer.clickTransferPatientNameList(patientTransferName);
-    patientTransfer.clickTransferPatientDob(patientDateOfBirth);
+    patientTransfer.clickTransferPatientYOB(yearOfBirth);
     patientTransfer.clickTransferSubmitButton();
     patientTransfer.verifyFacilitySuccessfullMessage();
     patientTransfer.clickConsultationCancelButton();
@@ -263,7 +263,7 @@ describe("Patient Creation with consultation", () => {
     patientTransfer.clickAdmitPatientRecordButton();
     patientTransfer.clickTransferPopupContinueButton();
     patientTransfer.clickTransferPatientNameList(patientTransferName);
-    patientTransfer.clickTransferPatientDob(patientDateOfBirth);
+    patientTransfer.clickTransferPatientYOB(yearOfBirth);
     patientTransfer.clickTransferSubmitButton();
     patientTransfer.verifyFacilityErrorMessage();
   });
