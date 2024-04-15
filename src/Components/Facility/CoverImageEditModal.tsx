@@ -59,7 +59,7 @@ const CoverImageEditModal = ({
     setFacingMode((prevState: any) =>
       prevState === FACING_MODE_USER
         ? FACING_MODE_ENVIRONMENT
-        : FACING_MODE_USER
+        : FACING_MODE_USER,
     );
   }, []);
 
@@ -132,7 +132,7 @@ const CoverImageEditModal = ({
           msg: "Network Failure. Please check your internet connectivity.",
         });
         setIsUploading(false);
-      }
+      },
     );
 
     await sleep(1000);
@@ -185,7 +185,7 @@ const CoverImageEditModal = ({
     >
       <div className="flex h-full w-full items-center justify-center overflow-y-auto">
         {!isCameraOpen ? (
-          <form className="min-h-96 flex max-h-screen w-full flex-col overflow-auto">
+          <form className="flex max-h-screen min-h-96 w-full flex-col overflow-auto">
             {hasImage ? (
               <>
                 <div className="flex flex-1 items-center justify-center rounded-lg">
@@ -305,7 +305,7 @@ const CoverImageEditModal = ({
             </div>
           </form>
         ) : (
-          <div className="min-h-96 flex max-h-screen flex-col overflow-auto">
+          <div className="flex max-h-screen min-h-96 flex-col overflow-auto">
             <div className="mb-1 mt-2 flex flex-col">
               <span className="text-xl font-medium">
                 {t("capture_cover_photo")}

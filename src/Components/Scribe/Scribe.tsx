@@ -251,7 +251,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
         // Upload each audio blob
         setScribeID(response.data?.external_id ?? "");
         const promises = audioBlobs.map((blob) =>
-          uploadAudio(blob, response.data?.external_id ?? "")
+          uploadAudio(blob, response.data?.external_id ?? ""),
         );
         Promise.all(promises)
           .then(() => {
@@ -334,7 +334,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
   const processFormField = (
     fieldDetails: Field | undefined,
     formFields: { [key: string]: string | string[] | number },
-    field: string
+    field: string,
   ) => {
     if (fieldDetails?.options) {
       // Check if the form field is an array (multiple selections allowed)
@@ -343,7 +343,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
         return (formFields[field] as string[])
           .map((option) => {
             const optionDetails = fieldDetails.options?.find(
-              (o) => o.id === option
+              (o) => o.id === option,
             );
             return optionDetails?.text ?? option; // Use option text if found, otherwise fallback to option ID
           })
@@ -465,7 +465,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
                 >
                   <CareIcon
                     icon="l-times-circle"
-                    className=" flex scale-x-[-1] justify-center text-lg"
+                    className=" flex -scale-x-100 justify-center text-lg"
                   />
                 </ButtonV2>
               </div>
@@ -544,7 +544,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
                             .filter((field) => formFields?.[field])
                             .map((field) => {
                               const fieldDetails = fields.find(
-                                (f) => f?.id === field
+                                (f) => f?.id === field,
                               );
                               return (
                                 <div
@@ -558,7 +558,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
                                     {processFormField(
                                       fieldDetails,
                                       formFields,
-                                      field
+                                      field,
                                     )}
                                   </p>
                                 </div>

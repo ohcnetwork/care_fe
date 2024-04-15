@@ -65,7 +65,7 @@ const AutoCompleteAsync = (props: Props) => {
         setData(data?.slice(0, showNOptions) || []);
         setLoading(false);
       }, debounceTime),
-    [fetchData, showNOptions, debounceTime]
+    [fetchData, showNOptions, debounceTime],
   );
 
   useEffect(() => {
@@ -175,7 +175,7 @@ const AutoCompleteAsync = (props: Props) => {
                   label={optionLabel(option)}
                   onRemove={() =>
                     onChange(
-                      selected.filter((item: any) => item.id !== option.id)
+                      selected.filter((item: any) => item.id !== option.id),
                     )
                   }
                 />

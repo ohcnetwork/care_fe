@@ -364,7 +364,7 @@ export const PatientManager = () => {
     let category_name;
     if (qParams.category) {
       category_name = PATIENT_CATEGORIES.find(
-        (item: any) => qParams.category === item.id
+        (item: any) => qParams.category === item.id,
       )?.text;
 
       return String(category_name);
@@ -401,14 +401,14 @@ export const PatientManager = () => {
         external_id: qParams.last_consultation_current_bed__location,
       },
       prefetch: !!qParams.last_consultation_current_bed__location,
-    }
+    },
   );
 
   const { data: permittedFacilities } = useQuery(
     routes.getPermittedFacilities,
     {
       query: { limit: 1 },
-    }
+    },
   );
 
   const LastAdmittedToTypeBadges = () => {
@@ -480,7 +480,7 @@ export const PatientManager = () => {
             </span>
           </div>
           <div className="flex flex-col items-start gap-4 md:flex-row">
-            <div className="min-w-20 h-20 w-full rounded-lg border border-gray-300 bg-gray-50 md:w-20">
+            <div className="h-20 w-full min-w-20 rounded-lg border border-gray-300 bg-gray-50 md:w-20">
               {patient?.last_consultation?.current_bed &&
               patient?.last_consultation?.discharge_date === null ? (
                 <div className="tooltip flex h-full flex-col items-center justify-center">
@@ -515,7 +515,7 @@ export const PatientManager = () => {
                   </div>
                 </div>
               ) : (
-                <div className="min-h-20 flex items-center justify-center">
+                <div className="flex min-h-20 items-center justify-center">
                   <CareIcon
                     icon="l-user-injured"
                     className="text-3xl text-gray-500"
@@ -644,7 +644,7 @@ export const PatientManager = () => {
                       !patient.is_active
                     ) &&
                     dayjs(patient.last_consultation?.modified_date).isBefore(
-                      new Date().getTime() - 24 * 60 * 60 * 1000
+                      new Date().getTime() - 24 * 60 * 60 * 1000,
                     ) && (
                       <span className="relative inline-flex">
                         <Chip
@@ -672,7 +672,7 @@ export const PatientManager = () => {
                       (resp) =>
                         resp.text ===
                         patient.last_consultation?.last_daily_round
-                          ?.ventilator_interface
+                          ?.ventilator_interface,
                     )?.id
                   }
                 </div>
@@ -946,12 +946,12 @@ export const PatientManager = () => {
             badge("Is Antenatal", "is_antenatal"),
             badge(
               "Is Medico-Legal Case",
-              "last_consultation_medico_legal_case"
+              "last_consultation_medico_legal_case",
             ),
             value(
               "Facility",
               "facility",
-              qParams.facility ? facilityData?.name || "" : ""
+              qParams.facility ? facilityData?.name || "" : "",
             ),
             value(
               "Location",
@@ -959,13 +959,13 @@ export const PatientManager = () => {
               qParams.last_consultation_current_bed__location
                 ? facilityAssetLocationData?.name ||
                     qParams.last_consultation_current_bed__locations
-                : ""
+                : "",
             ),
             badge("Facility Type", "facility_type"),
             value(
               "District",
               "district",
-              qParams.district ? districtData?.name || "" : ""
+              qParams.district ? districtData?.name || "" : "",
             ),
             ordering(),
             value("Category", "category", getTheCategoryFromId()),
@@ -974,12 +974,12 @@ export const PatientManager = () => {
               "Respiratory Support",
               "ventilator_interface",
               qParams.ventilator_interface &&
-                t(`RESPIRATORY_SUPPORT_${qParams.ventilator_interface}`)
+                t(`RESPIRATORY_SUPPORT_${qParams.ventilator_interface}`),
             ),
             value(
               "Gender",
               "gender",
-              parseOptionId(GENDER_TYPES, qParams.gender) || ""
+              parseOptionId(GENDER_TYPES, qParams.gender) || "",
             ),
             {
               name: "Admitted to",
@@ -997,15 +997,15 @@ export const PatientManager = () => {
               value(
                 DIAGNOSES_FILTER_LABELS[key],
                 key,
-                getDiagnosisFilterValue(key).join(", ")
-              )
+                getDiagnosisFilterValue(key).join(", "),
+              ),
             ),
             badge("Declared Status", "is_declared_positive"),
             ...dateRange("Result", "date_of_result"),
             ...dateRange("Declared positive", "date_declared_positive"),
             ...dateRange(
               "Symptoms onset",
-              "last_consultation_symptoms_onset_date"
+              "last_consultation_symptoms_onset_date",
             ),
             ...dateRange("Last vaccinated", "last_vaccinated_date"),
             {
@@ -1017,8 +1017,8 @@ export const PatientManager = () => {
               "last_consultation__new_discharge_reason",
               parseOptionId(
                 DISCHARGE_REASONS,
-                qParams.last_consultation__new_discharge_reason
-              ) || ""
+                qParams.last_consultation__new_discharge_reason,
+              ) || "",
             ),
           ]}
           children={

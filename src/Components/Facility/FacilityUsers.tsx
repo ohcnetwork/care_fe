@@ -158,7 +158,7 @@ export default function FacilityUsers(props: any) {
     "align-baseline text-sm font-bold",
     isAddFacilityLoading || isUnlinkFacilityLoading || isLoadFacilityLoading
       ? "text-gray-500"
-      : "text-blue-500 hover:text-blue-800"
+      : "text-blue-500 hover:text-blue-800",
   );
 
   const showLinkFacility = (username: string) => {

@@ -32,7 +32,7 @@ const SearchInput = ({
     if (value !== props.value) {
       const timeoutId = setTimeout(
         () => onChange && onChange({ name, value: value || "" }),
-        debouncePeriod
+        debouncePeriod,
       );
       return () => clearTimeout(timeoutId);
     }
@@ -43,7 +43,7 @@ const SearchInput = ({
   useKeyboardShortcut(
     props.hotkey || [isAppleDevice ? "Meta" : "Control", "K"],
     () => !props.secondary && ref.current?.focus(),
-    { overrideSystem: !props.secondary }
+    { overrideSystem: !props.secondary },
   );
 
   const shortcutKeyIcon =

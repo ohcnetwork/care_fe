@@ -4,7 +4,7 @@ export const loadDailyRound = (
   consultationId: string,
   id: string,
   successCB: any = () => null,
-  errorCB: any = () => null
+  errorCB: any = () => null,
 ) => {
   fireRequestV2("getDailyReport", [], {}, successCB, errorCB, {
     consultationId,
@@ -17,7 +17,7 @@ export const updateDailyRound = (
   id: string,
   params: object,
   successCB: any = () => null,
-  errorCB: any = () => null
+  errorCB: any = () => null,
 ) => {
   fireRequestV2("updateDailyRound", [], params, successCB, errorCB, {
     consultationId,

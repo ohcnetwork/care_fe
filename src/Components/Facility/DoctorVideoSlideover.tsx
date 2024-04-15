@@ -28,7 +28,7 @@ export default function DoctorVideoSlideover(props: {
 }) {
   const { show, facilityId, setShow } = props;
   const [filteredDoctors, setFilteredDoctors] = useState<UserAssignedModel[]>(
-    []
+    [],
   );
   const [filter, setFilter] = useState<FilterTypes>(FilterTypes.ALL);
 
@@ -51,7 +51,7 @@ export default function DoctorVideoSlideover(props: {
             (filter === FilterTypes.NURSE &&
               isHomeUser(user, facilityId) &&
               user.user_type === "Nurse") ||
-            (filter === FilterTypes.TELEICU && !isHomeUser(user, facilityId)))
+            (filter === FilterTypes.TELEICU && !isHomeUser(user, facilityId))),
       );
     };
     if (users?.results && !loading) {
@@ -61,8 +61,8 @@ export default function DoctorVideoSlideover(props: {
             const aIsHomeUser = isHomeUser(a, facilityId);
             const bIsHomeUser = isHomeUser(b, facilityId);
             return aIsHomeUser === bIsHomeUser ? 0 : aIsHomeUser ? -1 : 1;
-          }
-        )
+          },
+        ),
       );
     }
   }, [facilityId, filter, loading, users?.results]);
@@ -83,7 +83,7 @@ export default function DoctorVideoSlideover(props: {
           tabs={
             Object.values(FilterTypes).reduce(
               (acc, type) => ({ ...acc, [type]: type }),
-              {}
+              {},
             ) as Record<FilterTypes, string>
           }
           selected={filter}
@@ -115,7 +115,7 @@ export default function DoctorVideoSlideover(props: {
 type MSLaunchURI = (
   uri: string,
   successCB?: null | (() => void),
-  noHandlerCB?: null | (() => void)
+  noHandlerCB?: null | (() => void),
 ) => void;
 
 function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
@@ -246,7 +246,7 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
                 href="#"
                 onClick={async () =>
                   await navigator.clipboard.writeText(
-                    user?.alt_phone_number || ""
+                    user?.alt_phone_number || "",
                   )
                 }
               >

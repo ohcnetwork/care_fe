@@ -8,7 +8,7 @@ export default function PDFViewer(
     url: string;
     pageNumber: number;
     onDocumentLoadSuccess: (numPages: number) => void;
-  }>
+  }>,
 ) {
   pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
 

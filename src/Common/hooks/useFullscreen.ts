@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 
 export default function useFullscreen(): [
   boolean,
-  (value: boolean, element?: HTMLElement) => void
+  (value: boolean, element?: HTMLElement) => void,
 ] {
   const [isFullscreen, _setIsFullscreen] = useState(
-    !!document.fullscreenElement
+    !!document.fullscreenElement,
   );
 
   useEffect(() => {
@@ -21,14 +21,16 @@ export default function useFullscreen(): [
   function openFullscreen(elem: HTMLElement) {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    if (elem.webkitEnterFullscreen) elem.webkitEnterFullscreen(); // Safari
+    if (elem.webkitEnterFullscreen)
+      elem.webkitEnterFullscreen(); // Safari
     else elem.requestFullscreen();
   }
 
   function exitFullscreen(elem: HTMLElement) {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    if (elem.webkitExitFullscreen) elem.webkitExitFullscreen(); // Safari
+    if (elem.webkitExitFullscreen)
+      elem.webkitExitFullscreen(); // Safari
     else document.exitFullscreen();
   }
 

@@ -48,7 +48,7 @@ export const CreateDiagnosesBuilder = (props: CreateDiagnosesProps) => {
         <div className="w-full rounded-b-lg bg-gray-200 px-4 pt-4">
           <AddICD11Diagnosis
             disallowed={props.value.map(
-              (obj) => obj.diagnosis_object as ICD11DiagnosisModel
+              (obj) => obj.diagnosis_object as ICD11DiagnosisModel,
             )}
             onAdd={async (diagnosis) => {
               props.onChange([...props.value, diagnosis]);
@@ -67,7 +67,7 @@ export const CreateDiagnosesBuilder = (props: CreateDiagnosesProps) => {
               ...d,
               is_principal:
                 d.diagnosis_object?.id === value?.diagnosis_object?.id,
-            }))
+            })),
           );
         }}
       />
@@ -97,8 +97,8 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
                     diagnoses.map((diagnose, i) =>
                       i === index
                         ? (action.value as ConsultationDiagnosis)
-                        : diagnose
-                    )
+                        : diagnose,
+                    ),
                   );
                 }}
               />
@@ -111,7 +111,7 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
         <div className="w-full rounded-b-lg bg-gray-200 px-4 pt-4">
           <AddICD11Diagnosis
             disallowed={diagnoses.map(
-              (obj) => obj.diagnosis_object as ICD11DiagnosisModel
+              (obj) => obj.diagnosis_object as ICD11DiagnosisModel,
             )}
             onAdd={async (diagnosis) => {
               const { res, data, error } = await request(
@@ -119,7 +119,7 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
                 {
                   pathParams: { consultation },
                   body: diagnosis,
-                }
+                },
               );
 
               if (res?.ok && data) {
@@ -150,12 +150,12 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
                   pathParams: { consultation, id: d.id },
                   body: { ...d, is_principal: false },
                 });
-              })
+              }),
           );
 
           if (!value) {
             setDiagnoses((diagnoses) =>
-              diagnoses.map((d) => ({ ...d, is_principal: false }))
+              diagnoses.map((d) => ({ ...d, is_principal: false })),
             );
             return;
           }
@@ -166,14 +166,14 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
             {
               pathParams: { consultation, id: value.id },
               body: { ...value, is_principal: true },
-            }
+            },
           );
 
           if (res?.ok && data) {
             setDiagnoses((diagnoses) =>
               diagnoses.map((d) =>
-                d.id === data.id ? data : { ...d, is_principal: false }
-              )
+                d.id === data.id ? data : { ...d, is_principal: false },
+              ),
             );
           }
 

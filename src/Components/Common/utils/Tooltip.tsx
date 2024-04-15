@@ -34,7 +34,7 @@ export default function ToolTip(props: TooltipProps) {
     status === true
       ? "visible -translate-y-1 opacity-100"
       : "invisible translate-y-0 opacity-0",
-    props.className && props.className
+    props.className && props.className,
   );
 
   return (
