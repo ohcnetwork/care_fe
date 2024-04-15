@@ -154,6 +154,7 @@ jobs:
     steps:
       - name: Trigger deploy
         run: |
-          JSON='{ "substitutions": { "care_be_tag":"", "care_fe_tag": "staging-latest", "metabase_tag": "" } }'
+          COMMIT_SHA=${{ github.sha }}
+          JSON='{ "substitutions": { "care_be_tag":"", "care_fe_tag": "'"$COMMIT_SHA"'", "metabase_tag": "" } }'
           curl --location ${{ secrets.STAGING_GCP_DEPLOY_URL }} \
             --header 'Content-Type: application/json' --data "$JSON"
