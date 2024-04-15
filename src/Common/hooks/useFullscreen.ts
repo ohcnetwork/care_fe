@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
 
+interface HTMLElementWithFullscreen extends HTMLElement {
+  webkitEnterFullscreen?: () => void;
+  webkitExitFullscreen?: () => void;
+}
+
 export default function useFullscreen(): [
   boolean,
   (value: boolean, element?: HTMLElement) => void,
@@ -18,7 +23,7 @@ export default function useFullscreen(): [
       document.removeEventListener("fullscreenchange", onFullscreenChange);
   }, []);
 
-  function openFullscreen(elem: HTMLElement) {
+  function openFullscreen(elem: HTMLElementWithFullscreen) {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     if (elem.webkitEnterFullscreen)
@@ -26,7 +31,7 @@ export default function useFullscreen(): [
     else elem.requestFullscreen();
   }
 
-  function exitFullscreen(elem: HTMLElement) {
+  function exitFullscreen(elem: HTMLElementWithFullscreen) {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     if (elem.webkitExitFullscreen)
