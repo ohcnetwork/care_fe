@@ -29,13 +29,13 @@ export const updateDailyRound = (
 
 export const getAsset = (
   consultationId: string,
-  setAsset: React.Dispatch<React.SetStateAction<number>>
+  setAsset: React.Dispatch<React.SetStateAction<number>>,
 ) => {
   request(routes.listConsultationBeds, {
     query: { consultation: consultationId, limit: 1 },
   }).then(({ data }) => {
     const assets = data?.results[0].assets_objects?.filter(
-      (asset) => asset.asset_class == "VENTILATOR"
+      (asset) => asset.asset_class == "VENTILATOR",
     );
     setAsset(assets?.length || 0);
   });
