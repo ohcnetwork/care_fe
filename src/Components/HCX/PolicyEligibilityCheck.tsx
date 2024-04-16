@@ -42,7 +42,7 @@ export default function HCXPolicyEligibilityCheck({
             acc[policy.id ?? ""] =
               !policy.error_text && policy.outcome === "Processing Complete";
           return acc;
-        }, {})
+        }, {}),
       );
       setIsChecking(false);
     }

@@ -84,7 +84,7 @@ export default function DailyRoundsList({ consultation }: Props) {
                     }
 
                     const itemUrl = ["NORMAL", "TELEMEDICINE"].includes(
-                      item.rounds_type as string
+                      item.rounds_type as string,
                     )
                       ? `${consultationUrl}/daily-rounds/${item.id}`
                       : `${consultationUrl}/daily_rounds/${item.id}`;

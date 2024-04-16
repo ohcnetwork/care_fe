@@ -24,7 +24,7 @@ export const DailyRoundListDetails = (props: any) => {
     onResponse: ({ res, data }) => {
       if (res && data) {
         const currentHealth = currentHealthChoices.find(
-          (i) => i.text === data.current_health
+          (i) => i.text === data.current_health,
         );
 
         const tdata: DailyRoundsModel = {
@@ -174,7 +174,7 @@ export const DailyRoundListDetails = (props: any) => {
             </span>
             {dailyRoundListDetailsData.consciousness_level
               ? CONSCIOUSNESS_LEVEL.find(
-                  (i) => i.id === dailyRoundListDetailsData.consciousness_level
+                  (i) => i.id === dailyRoundListDetailsData.consciousness_level,
                 )?.text
               : "-"}
           </div>
