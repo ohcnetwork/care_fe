@@ -105,7 +105,7 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
         </div>
       ) : (
         <>
-          <div className="absolute inset-y-0 right-7 flex translate-y-0 items-center pr-3 opacity-100 transition-all delay-300 duration-500 ease-in-out peer-focus:translate-y-1 peer-focus:opacity-0">
+          <div className="absolute inset-y-0 right-0 md:right-6 flex translate-y-0 items-center pr-3 opacity-100 transition-all delay-300 duration-500 ease-in-out peer-focus:translate-y-1 peer-focus:opacity-0">
             {trailing}
           </div>
           <div className="absolute inset-y-0 right-0 md:right-6 flex -translate-y-1 items-center pr-3 opacity-0 transition-all delay-300 duration-500 ease-in-out peer-focus:translate-y-0 peer-focus:opacity-100">
