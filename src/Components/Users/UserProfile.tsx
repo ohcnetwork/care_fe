@@ -83,7 +83,7 @@ const initForm: EditForm = {
 
 const initError: ErrorForm = Object.assign(
   {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
+  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
 );
 
 const initialState: State = {
@@ -163,7 +163,7 @@ export default function UserProfile() {
         doctor_qualification: result.data.doctor_qualification,
         doctor_experience_commenced_on: dayjs().diff(
           dayjs(result.data.doctor_experience_commenced_on),
-          "years",
+          "years"
         ),
         doctor_medical_council_registration:
           result.data.doctor_medical_council_registration,
@@ -180,7 +180,7 @@ export default function UserProfile() {
     routes.userListSkill,
     {
       pathParams: { username: authUser.username },
-    },
+    }
   );
 
   const setNewPasswordErrorCallFun = (value: string) => {
@@ -190,7 +190,7 @@ export default function UserProfile() {
     }
     setNewPasswordError(
       [
-        value?.length >= 8
+        value.length >= 8
           ? ""
           : "Password should be at least 8 characters long",
         value !== value.toUpperCase()
@@ -382,9 +382,9 @@ export default function UserProfile() {
                 .subtract(
                   parseInt(
                     (states.form.doctor_experience_commenced_on as string) ??
-                      "0",
+                      "0"
                   ),
-                  "years",
+                  "years"
                 )
                 .format("YYYY-MM-DD")
             : undefined,
@@ -441,13 +441,20 @@ export default function UserProfile() {
     e.preventDefault();
     //validating form
     if (
-      changePasswordForm.new_password_1 != changePasswordForm.new_password_2
+      changePasswordForm.new_password_1 !== changePasswordForm.new_password_2
     ) {
       Notification.Error({
         msg: "Passwords are different in new password and confirmation password column.",
       });
     } else if (
-      changePasswordForm.new_password_1 == changePasswordForm.old_password
+      newPasswordError !== "" ||
+      changePasswordErrors.password_confirmation !== ""
+    ) {
+      Notification.Error({
+        msg: "Entered Password is not valid, please check!",
+      });
+    } else if (
+      changePasswordForm.new_password_1 === changePasswordForm.old_password
     ) {
       Notification.Error({
         msg: "New password is same as old password, Please enter a different new password.",
@@ -465,16 +472,7 @@ export default function UserProfile() {
         Notification.Success({
           msg: "Password changed!",
         });
-      } else if (
-        !(
-          Array.isArray(error?.old_password) &&
-          error.old_password.some((password: string) =>
-            password.includes(
-              "Wrong password entered. Please check your password."
-            )
-          )
-        )
-      ) {
+      } else if (!error) {
         Notification.Error({
           msg: "There was some error. Please try again in some time.",
         });
@@ -782,7 +780,7 @@ export default function UserProfile() {
                             />
                             <TextFormField
                               {...fieldProps(
-                                "doctor_medical_council_registration",
+                                "doctor_medical_council_registration"
                               )}
                               required
                               className="col-span-6 sm:col-span-3"
@@ -925,7 +923,7 @@ export default function UserProfile() {
                     icon="l-sync"
                     className={classNames(
                       "text-2xl",
-                      updateStatus.isChecking && "animate-spin",
+                      updateStatus.isChecking && "animate-spin"
                     )}
                   />
                   {updateStatus.isChecking
