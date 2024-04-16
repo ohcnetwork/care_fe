@@ -22,7 +22,7 @@ function DistrictSelect(props: DistrictSelectProps) {
       const res = await dispatchAction(getDistrictByName(params));
       return res?.data?.results;
     },
-    [dispatchAction]
+    [dispatchAction],
   );
 
   return (

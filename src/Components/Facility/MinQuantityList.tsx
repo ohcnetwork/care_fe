@@ -29,7 +29,7 @@ export default function MinQuantityList(props: any) {
         offset,
       },
       prefetch: !!facilityId,
-    }
+    },
   );
 
   const { data: facilityObject } = useQuery(routes.getAnyFacility, {

@@ -50,7 +50,7 @@ interface UseMSEMediaPlayerReturnType {
   getPTZPayload: (
     action: PTZ,
     precision?: number,
-    value?: number
+    value?: number,
   ) => PTZPayload;
   getCameraStatus: (options: IOptions) => void;
   getPresets: (options: IOptions) => void;
@@ -80,7 +80,7 @@ const getCameraStatus =
         action: {
           type: "get_status",
         },
-      })
+      }),
     );
     resp &&
       (resp.status === 200
@@ -97,7 +97,7 @@ const getPresets =
         action: {
           type: "get_presets",
         },
-      })
+      }),
     );
     resp &&
       (resp.status === 200
@@ -119,7 +119,7 @@ const gotoPreset =
           type: "goto_preset",
           data: payload,
         },
-      })
+      }),
     );
     resp &&
       (resp.status === 200
@@ -137,7 +137,7 @@ const absoluteMove =
           type: "absolute_move",
           data: payload,
         },
-      })
+      }),
     );
     resp &&
       (resp.status === 200
@@ -155,7 +155,7 @@ const relativeMove =
           type: "relative_move",
           data: payload,
         },
-      })
+      }),
     );
     resp &&
       (resp.status === 200
@@ -166,7 +166,7 @@ const relativeMove =
 export const getPTZPayload = (
   action: PTZ,
   precision = 1,
-  value?: number
+  value?: number,
 ): PTZPayload => {
   let x = 0;
   let y = 0;
