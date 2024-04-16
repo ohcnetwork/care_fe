@@ -22,7 +22,7 @@ export const PressureSoreDiagrams = (props: any) => {
   useEffect(() => {
     const fetchDailyRounds = async (
       currentPage: number,
-      consultationId: string
+      consultationId: string,
     ) => {
       setIsLoading(true);
       const { res, data: dailyRounds } = await request(
@@ -35,13 +35,13 @@ export const PressureSoreDiagrams = (props: any) => {
           pathParams: {
             consultationId,
           },
-        }
+        },
       );
       if (res && res.ok && dailyRounds) {
         const keys = Object.keys(dailyRounds.results || {}).filter(
           (key) =>
             (dailyRounds.results[key] as PressureSoreDiagramsRes).pressure_sore
-              .length
+              .length,
         );
         const data: any = {};
         keys.forEach((key) => (data[key] = dailyRounds.results[key]));

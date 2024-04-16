@@ -56,10 +56,10 @@ const testFormReducer = (state = initialState, action: any) => {
 
 const listOfInvestigations = (
   group_id: string,
-  investigations: InvestigationType[]
+  investigations: InvestigationType[],
 ) => {
   return investigations.filter(
-    (i) => i.groups.filter((g) => g.external_id === group_id).length !== 0
+    (i) => i.groups.filter((g) => g.external_id === group_id).length !== 0,
   );
 };
 
@@ -95,7 +95,7 @@ const Investigation = (props: {
               .split(",")
               .map((group) => group.split("( ")[1].split(" )")[0]),
           };
-    }
+    },
   );
 
   const [selectedGroup, setSelectedGroup] = useState<string[]>([]);
@@ -124,7 +124,7 @@ const Investigation = (props: {
           setSession(new Date().toString());
         }
       },
-    }
+    },
   );
 
   useEffect(() => {
@@ -136,7 +136,7 @@ const Investigation = (props: {
       const prefilledGroups = preselectedInvestigations
         .filter((inv: any) => inv.isGroup)
         .map((inv: any) =>
-          investigationGroups.results.find((group) => group.name === inv.name)
+          investigationGroups.results.find((group) => group.name === inv.name),
         )
         .map((group: any) => {
           return {
@@ -149,14 +149,14 @@ const Investigation = (props: {
         .filter((inv: any) => !inv.isGroup)
         .map((inv: any) => {
           const investigation = investigations.results.find(
-            (investigation) => investigation.name === inv.name
+            (investigation) => investigation.name === inv.name,
           );
           // check if investigation contains all groups
           if (
             inv.groups.every((group: string) =>
               investigation?.groups.find(
-                (investigationGroup) => investigationGroup.name === group
-              )
+                (investigationGroup) => investigationGroup.name === group,
+              ),
             )
           ) {
             return investigation;
@@ -169,7 +169,7 @@ const Investigation = (props: {
         ...prefilledGroups.map((group: any) => group?.external_id || ""),
         ...prefilledInvestigations
           .map((investigation: any) =>
-            investigation?.groups.map((group: any) => group.external_id)
+            investigation?.groups.map((group: any) => group.external_id),
           )
           .flat(),
       ];
@@ -197,7 +197,7 @@ const Investigation = (props: {
             : {
                 notes: state.form[i.external_id]?.notes,
                 investigation_type: i.investigation_type,
-              })
+              }),
     );
     setState({ type: "set_form", form });
   };
@@ -217,7 +217,7 @@ const Investigation = (props: {
           };
         })
         .filter(
-          (i) => ![null, undefined, NaN, ""].includes(i.notes || i.value)
+          (i) => ![null, undefined, NaN, ""].includes(i.notes || i.value),
         );
 
       if (data.length) {
@@ -233,7 +233,7 @@ const Investigation = (props: {
             msg: "Investigation created successfully!",
           });
           navigate(
-            `/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}`
+            `/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}`,
           );
         } else {
           setSaving(false);
@@ -288,18 +288,18 @@ const Investigation = (props: {
                     acc.concat(
                       isInvestigation(option)
                         ? option.groups.map((e) => e.external_id)
-                        : []
+                        : [],
                     ),
-                  []
+                  [],
                 ),
-              ].filter((v, i, a) => a.indexOf(v) == i)
+              ].filter((v, i, a) => a.indexOf(v) == i),
             );
           }}
         />
 
         {selectedGroup.map((group_id) => {
           const currentGroupsInvestigations = selectedInvestigations.filter(
-            (e) => e.groups.map((e) => e.external_id).includes(group_id)
+            (e) => e.groups.map((e) => e.external_id).includes(group_id),
           );
           const filteredInvestigations = currentGroupsInvestigations.length
             ? currentGroupsInvestigations
