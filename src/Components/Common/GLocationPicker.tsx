@@ -13,7 +13,7 @@ interface GLocationPickerProps {
   handleOnChange: (location: google.maps.LatLng) => void;
   handleOnClose?: () => void;
   handleOnSelectCurrentLocation?: (
-    setCenter: (lat: number, lng: number) => void
+    setCenter: (lat: number, lng: number) => void,
   ) => void;
 }
 
@@ -26,7 +26,7 @@ const GLocationPicker = ({
 }: GLocationPickerProps) => {
   const { gmaps_api_key } = useConfig();
   const [location, setLocation] = React.useState<google.maps.LatLng | null>(
-    null
+    null,
   );
   const [zoom, setZoom] = React.useState(4);
   const [center, setCenter] = React.useState<
@@ -100,7 +100,7 @@ interface MapProps extends google.maps.MapOptions {
   handleOnChange?: (location: google.maps.LatLng) => void;
   handleOnClose?: () => void;
   handleOnSelectCurrentLocation?: (
-    setCenter: (lat: number, lng: number) => void
+    setCenter: (lat: number, lng: number) => void,
   ) => void;
   children?: React.ReactNode;
 }
@@ -128,7 +128,7 @@ const Map: React.FC<MapProps> = ({
       setMap(
         new window.google.maps.Map(ref.current, {
           mapTypeControl: false,
-        })
+        }),
       );
     }
   }, [ref, map]);
@@ -136,7 +136,7 @@ const Map: React.FC<MapProps> = ({
   React.useEffect(() => {
     if (searchRef.current && map && !searchBox) {
       map.controls[google.maps.ControlPosition.TOP_CENTER].push(
-        searchRef.current
+        searchRef.current,
       );
 
       setSearchBox(new window.google.maps.places.SearchBox(searchRef.current));
@@ -167,7 +167,7 @@ const Map: React.FC<MapProps> = ({
   React.useEffect(() => {
     if (mapCloseRef.current && map) {
       map.controls[google.maps.ControlPosition.TOP_RIGHT].push(
-        mapCloseRef.current
+        mapCloseRef.current,
       );
     }
   }, [mapCloseRef, map]);
@@ -175,7 +175,7 @@ const Map: React.FC<MapProps> = ({
   React.useEffect(() => {
     if (currentLocationSelectRef.current && map) {
       map.controls[google.maps.ControlPosition.TOP_LEFT].push(
-        currentLocationSelectRef.current
+        currentLocationSelectRef.current,
       );
     }
   }, [currentLocationSelectRef, map]);
@@ -189,7 +189,7 @@ const Map: React.FC<MapProps> = ({
   React.useEffect(() => {
     if (map) {
       ["click", "idle"].forEach((eventName) =>
-        google.maps.event.clearListeners(map, eventName)
+        google.maps.event.clearListeners(map, eventName),
       );
 
       if (onClick) {
@@ -234,7 +234,7 @@ const Map: React.FC<MapProps> = ({
             ref={currentLocationSelectRef}
             onClick={() =>
               handleOnSelectCurrentLocation((lat: number, lng: number) =>
-                map?.setCenter(new window.google.maps.LatLng(lat, lng))
+                map?.setCenter(new window.google.maps.LatLng(lat, lng)),
               )
             }
           >
@@ -305,7 +305,7 @@ function useDeepCompareMemoize(value: any) {
 
 function useDeepCompareEffectForMaps(
   callback: React.EffectCallback,
-  dependencies: any[]
+  dependencies: any[],
 ) {
   React.useEffect(callback, dependencies.map(useDeepCompareMemoize));
 }

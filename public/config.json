@@ -23,5 +23,6 @@
     "sample_format_external_result_import": "/External-Results-Template.csv",
     "enable_abdm": true,
     "enable_hcx": false,
+    "enable_scribe": false,
     "min_encounter_date": "2020-01-01"
 }

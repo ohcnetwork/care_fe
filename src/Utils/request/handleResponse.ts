@@ -4,7 +4,7 @@ import { navigate } from "raviger";
 
 export default function handleResponse(
   { res, error }: RequestResult<unknown>,
-  silent?: boolean
+  silent?: boolean,
 ) {
   const notify = silent ? undefined : Notifications;
 

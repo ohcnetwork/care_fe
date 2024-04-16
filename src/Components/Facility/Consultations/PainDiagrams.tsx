@@ -27,13 +27,13 @@ export const PainDiagrams = (props: any) => {
           pathParams: {
             consultationId,
           },
-        }
+        },
       );
       if (res && res.ok && dailyRound?.results) {
         const keys = Object.keys(dailyRound.results || {}).filter(
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
-          (key) => dailyRound.results[key].pain_scale_enhanced.length
+          (key) => dailyRound.results[key].pain_scale_enhanced.length,
         );
         const data: any = {};
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment

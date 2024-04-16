@@ -30,7 +30,7 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
   const [error, setError] = useState<string>();
   const [isCustomTime, setIsCustomTime] = useState(false);
   const [customTime, setCustomTime] = useState<string>(
-    dayjs().format("YYYY-MM-DDTHH:mm")
+    dayjs().format("YYYY-MM-DDTHH:mm"),
   );
 
   return (
@@ -49,7 +49,7 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
             <CareIcon icon="l-clock" />{" "}
             {prescription.last_administration?.administered_date
               ? formatDateTime(
-                  prescription.last_administration.administered_date
+                  prescription.last_administration.administered_date,
                 )
               : t("never")}
           </span>
@@ -72,7 +72,7 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
         if (prescription.dosage_type === "TITRATED") {
           const error = AdministrationDosageValidator(
             prescription.base_dosage,
-            prescription.target_dosage
+            prescription.target_dosage,
           )(dosage);
           setError(error);
           if (error) return;
