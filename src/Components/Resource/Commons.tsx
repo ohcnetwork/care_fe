@@ -27,8 +27,8 @@ export const formatFilter = (params: any) => {
       (filter.emergency && filter.emergency) === "--"
         ? ""
         : filter.emergency === "yes"
-        ? "true"
-        : "false",
+          ? "true"
+          : "false",
     limit: 14,
     offset: filter.offset,
     created_date_before: filter.created_date_before || undefined,

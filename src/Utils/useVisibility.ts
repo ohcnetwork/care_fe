@@ -20,7 +20,7 @@ import { useRef, useEffect, useState, MutableRefObject } from "react";
  * ```
  */
 export default function useVisibility<Element extends HTMLElement>(
-  offset = 0
+  offset = 0,
 ): [boolean, MutableRefObject<Element | undefined>] {
   const [isVisible, setIsVisible] = useState(false);
   const currentElement = useRef<Element>();
