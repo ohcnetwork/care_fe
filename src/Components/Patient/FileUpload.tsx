@@ -232,6 +232,26 @@ export const FileUpload = (props: FileUploadProps) => {
     { name: "Unarchived Files", value: "UNARCHIVED" },
     { name: "Archived Files", value: "ARCHIVED" },
   ]);
+  const [isMicPermission, setIsMicPermission] = useState(true);
+
+  useEffect(() => {
+    const checkMicPermission = async () => {
+      try {
+        const permissions = await navigator.permissions.query({
+          name: "microphone" as PermissionName,
+        });
+        setIsMicPermission(permissions.state === "granted");
+      } catch (error) {
+        setIsMicPermission(false);
+      }
+    };
+
+    checkMicPermission();
+
+    return () => {
+      setIsMicPermission(true);
+    };
+  }, []);
 
   const { data: patient } = useQuery(routes.getPatient, {
     pathParams: { id: patientId },
@@ -1030,12 +1050,12 @@ export const FileUpload = (props: FileUploadProps) => {
 
     const { data } = await request(routes.createUpload, {
       body: {
-        original_name: name,
+        original_name: name ?? "",
         file_type: type,
         name: filename,
         associating_id: getAssociatedId(),
         file_category: category,
-        mime_type: f?.type,
+        mime_type: f?.type ?? "",
       },
     });
 
@@ -1120,7 +1140,7 @@ export const FileUpload = (props: FileUploadProps) => {
         name: filename,
         associating_id: getAssociatedId(),
         file_category: category,
-        mime_type: audioBlob?.type,
+        mime_type: audioBlob?.type ?? "",
       },
     })
       .then(uploadAudiofile)
@@ -1510,8 +1530,9 @@ export const FileUpload = (props: FileUploadProps) => {
                         confirmAudioBlobExists={confirmAudioBlobExists}
                         reset={resetRecording}
                         setResetRecording={setResetRecording}
+                        handleSetMicPermission={setIsMicPermission}
                       />
-                      {!audioBlobExists && (
+                      {!audioBlobExists && !isMicPermission && (
                         <span className="text-sm font-medium text-warning-500">
                           <CareIcon
                             icon="l-exclamation-triangle"

@@ -564,7 +564,7 @@ export default function ManageUsers() {
   );
 }
 
-function UserFacilities(props: { user: any }) {
+export function UserFacilities(props: { user: any }) {
   const { t } = useTranslation();
   const { user } = props;
   const username = user.username;
