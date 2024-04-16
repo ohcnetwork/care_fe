@@ -215,7 +215,7 @@ export const AddInventoryForm = (props: any) => {
               Notification.Success({
                 msg: "Inventory created successfully",
               });
-            } else if (!data.is_incoming) {
+            } else {
               Notification.Success({
                 msg: "Inventory use stock updated successfully",
               });
