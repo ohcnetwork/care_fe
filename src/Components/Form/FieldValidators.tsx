@@ -18,7 +18,7 @@ export type FieldValidator<T> = (value: T, ...args: any) => FieldError;
  * @returns `FieldError`
  */
 export const MultiValidator = <T,>(
-  validators: FieldValidator<T>[]
+  validators: FieldValidator<T>[],
 ): FieldValidator<T> => {
   const validator = (value: T) => {
     for (const validate of validators) {
@@ -30,7 +30,7 @@ export const MultiValidator = <T,>(
 };
 
 export const AnyValidator = <T,>(
-  validators: FieldValidator<T>[]
+  validators: FieldValidator<T>[],
 ): FieldValidator<T> => {
   const validator = (value: T) => {
     for (const validate of validators) {
@@ -80,7 +80,7 @@ export const EmailValidator = (message = "Invalid email address") => {
 const INDIAN_MOBILE_NUMBER_REGEX = /^(?=^\+91)(^\+91[6-9]\d{9}$)/;
 const INTERNATIONAL_MOBILE_NUMBER_REGEX = /^(?!^\+91)(^\+\d{1,3}\d{8,14}$)/;
 const MOBILE_NUMBER_REGEX = new RegExp(
-  `(${INDIAN_MOBILE_NUMBER_REGEX.source})|(${INTERNATIONAL_MOBILE_NUMBER_REGEX.source})`
+  `(${INDIAN_MOBILE_NUMBER_REGEX.source})|(${INTERNATIONAL_MOBILE_NUMBER_REGEX.source})`,
 );
 const INDIAN_LANDLINE_NUMBER_REGEX = /^\+91[2-9]\d{7,9}$/;
 const INDIAN_SUPPORT_NUMBER_REGEX = /^(1800|1860)\d{6,7}$/;
@@ -97,11 +97,11 @@ export type PhoneNumberType = keyof typeof PHONE_NUMBER_REGEX_MAP;
 
 export const PhoneNumberValidator = (
   type: PhoneNumberType[] = ["mobile", "landline"],
-  message = "Invalid phone number"
+  message = "Invalid phone number",
 ) => {
   const regexes = type.map((t) => PHONE_NUMBER_REGEX_MAP[t]);
   return RegexValidator(
     new RegExp(regexes.map((r) => r.source).join("|")),
-    message
+    message,
   );
 };

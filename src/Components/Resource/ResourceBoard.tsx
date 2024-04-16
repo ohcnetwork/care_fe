@@ -209,13 +209,13 @@ export default function ResourceBoard({
           status: board,
           offset: offset,
         }),
-      }
+      },
     );
     if (res?.ok && newPageData) {
       setData((prev) =>
         prev
           ? { ...prev, results: [...prev.results, ...newPageData.results] }
-          : newPageData
+          : newPageData,
       );
     }
     setIsLoading((loading) => reduceLoading("COMPLETE", loading));
@@ -234,7 +234,7 @@ export default function ResourceBoard({
       ref={drop}
       className={classNames(
         "e mr-2 h-full w-full  shrink-0 overflow-y-auto rounded-md bg-gray-200 pb-4 @lg:w-1/2 @3xl:w-1/3 @7xl:w-1/4",
-        isOver && "cursor-move"
+        isOver && "cursor-move",
       )}
     >
       <div className="sticky top-0 rounded bg-gray-200 pt-2">

@@ -31,7 +31,7 @@ const Pagination = ({
         }
       }
     },
-    [defaultPerPage, cPage]
+    [defaultPerPage, cPage],
   );
 
   const getPageNumbers = () => {
