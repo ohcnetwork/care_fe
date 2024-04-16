@@ -1,5 +1,9 @@
 import { GENDER_TYPES } from "../../Common/constants";
-import { formatAge, formatDate, formatDateTime } from "../../Utils/utils";
+import {
+  formatDate,
+  formatDateTime,
+  formatPatientAge,
+} from "../../Utils/utils";
 import useSlug from "../../Common/hooks/useSlug";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import routes from "../../Redux/api";
@@ -66,11 +70,7 @@ const TreatmentSummary = (props: any) => {
               <div className="col-span-1 grid sm:grid-cols-2 print:grid-cols-2 ">
                 <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 sm:border-b-0 sm:border-r-2 print:border-b-0 print:border-r-2">
                   <b>Age :</b>{" "}
-                  {formatAge(
-                    patientData?.age ?? 0,
-                    patientData?.date_of_birth ?? "",
-                    true
-                  )}
+                  {patientData ? formatPatientAge(patientData, true) : ""}
                 </div>
                 <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 sm:border-b-0 sm:border-r-2 print:border-b-0 print:border-r-2">
                   <b>OP :</b> {consultationData?.patient_no ?? ""}
@@ -129,7 +129,7 @@ const TreatmentSummary = (props: any) => {
                               </td>
                             </tr>
                           );
-                        }
+                        },
                       )
                     ) : (
                       <tr>
@@ -222,7 +222,7 @@ const TreatmentSummary = (props: any) => {
                                 {formatDate(
                                   value["session_object"][
                                     "session_created_date"
-                                  ]
+                                  ],
                                 )}
                               </td>
                               <td className="border border-gray-800 text-center">
@@ -244,7 +244,7 @@ const TreatmentSummary = (props: any) => {
                               </td>
                             </tr>
                           );
-                        }
+                        },
                       )
                     ) : (
                       <tr>
@@ -297,7 +297,7 @@ const TreatmentSummary = (props: any) => {
                       <tr>
                         <td className="border border-gray-800 text-center">
                           {formatDateTime(
-                            consultationData.last_daily_round.modified_date
+                            consultationData.last_daily_round.modified_date,
                           )}
                         </td>
                         <td className="border border-gray-800 text-center">

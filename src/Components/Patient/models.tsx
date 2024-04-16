@@ -49,7 +49,6 @@ export interface PatientModel {
   id?: string;
   action?: number;
   name?: string;
-  age?: number;
   allow_transfer?: boolean;
   discharge?: boolean;
   gender?: number;
@@ -113,6 +112,8 @@ export interface PatientModel {
   number_of_doses?: number;
   last_vaccinated_date?: string;
   date_of_birth?: string;
+  year_of_birth?: number;
+  readonly death_datetime?: string;
   blood_group?: string;
   review_interval?: number;
   review_time?: string;
@@ -345,7 +346,7 @@ export interface FacilityNameModel {
 type FileCategory = "UNSPECIFIED" | "XRAY" | "AUDIO" | "IDENTITY_PROOF";
 
 export interface CreateFileRequest {
-  file_type: string;
+  file_type: string | number;
   file_category: FileCategory;
   name: string;
   associating_id: string;

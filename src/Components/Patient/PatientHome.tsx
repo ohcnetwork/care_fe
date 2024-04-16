@@ -16,9 +16,9 @@ import { SampleTestCard } from "./SampleTestCard";
 import Chip from "../../CAREUI/display/Chip";
 import {
   classNames,
-  formatAge,
   formatDate,
   formatDateTime,
+  formatPatientAge,
 } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
@@ -80,7 +80,7 @@ export const PatientHome = (props: any) => {
       },
     });
     navigate(
-      `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`
+      `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`,
     );
   };
 
@@ -170,7 +170,7 @@ export const PatientHome = (props: any) => {
         patient: id,
       },
       prefetch: isShiftClicked,
-    }
+    },
   );
 
   const confirmApproval = (status: number, sample: any) => {
@@ -208,7 +208,7 @@ export const PatientHome = (props: any) => {
   }
 
   const patientGender = GENDER_TYPES.find(
-    (i) => i.id === patientData.gender
+    (i) => i.id === patientData.gender,
   )?.text;
 
   let patientMedHis: any[] = [];
@@ -327,7 +327,7 @@ export const PatientHome = (props: any) => {
                 disabled={!patientData.is_active}
                 onClick={() =>
                   navigate(
-                    `/facility/${patientData?.facility}/patient/${id}/consultation`
+                    `/facility/${patientData?.facility}/patient/${id}/consultation`,
                   )
                 }
               >
@@ -342,12 +342,7 @@ export const PatientHome = (props: any) => {
               <div>
                 <div className="flex flex-row gap-4">
                   <h1 className="flex flex-row pb-3 text-2xl font-bold">
-                    {patientData.name} -{" "}
-                    {formatAge(
-                      patientData.age,
-                      patientData.date_of_birth,
-                      true
-                    )}
+                    {patientData.name} - {formatPatientAge(patientData, true)}
                   </h1>
                   <div className="ml-auto mr-9 flex flex-wrap gap-3">
                     {patientData.is_vaccinated ? (
@@ -427,10 +422,14 @@ export const PatientHome = (props: any) => {
               <div className="mb-8 mt-2 grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-2 md:gap-y-8 lg:grid-cols-4">
                 <div className="sm:col-span-1">
                   <div className="text-sm font-semibold leading-5 text-zinc-400">
-                    Date of Birth
+                    {patientData.date_of_birth
+                      ? "Date of Birth"
+                      : "Year of Birth"}
                   </div>
                   <div className="mt-1 text-sm font-medium leading-5">
-                    {formatDate(patientData?.date_of_birth)}
+                    {patientData.date_of_birth
+                      ? formatDate(patientData.date_of_birth)
+                      : patientData.year_of_birth}
                   </div>
                 </div>
                 <div className="sm:col-span-1">
@@ -645,7 +644,7 @@ export const PatientHome = (props: any) => {
                     authorizeFor={NonReadOnlyUsers}
                     onClick={() =>
                       navigate(
-                        `/facility/${patientData?.facility}/patient/${id}/update`
+                        `/facility/${patientData?.facility}/patient/${id}/update`,
                       )
                     }
                   >
@@ -831,7 +830,7 @@ export const PatientHome = (props: any) => {
                                 !shift.patient_object.allow_transfer ||
                                 !(
                                   ["DistrictAdmin", "StateAdmin"].includes(
-                                    authUser.user_type
+                                    authUser.user_type,
                                   ) ||
                                   authUser.home_facility_object?.id ===
                                     shift.assigned_facility
@@ -944,7 +943,7 @@ export const PatientHome = (props: any) => {
                 !patientData.ongoing_medication &&
                 !(patientData.gender === 2 && patientData.is_antenatal) &&
                 !patientData.medical_history?.some(
-                  (history) => history.disease !== "NO"
+                  (history) => history.disease !== "NO",
                 ) && (
                   <div className="flex w-full items-center justify-center text-xl font-bold text-gray-500">
                     No Medical History Available
@@ -1021,12 +1020,12 @@ export const PatientHome = (props: any) => {
                   "w-full rounded-lg border",
                   isPatientEligibleForNewConsultation(patientData)
                     ? "cursor-pointer border-green-700 hover:bg-primary-400"
-                    : "border-gray-700 text-gray-700 hover:cursor-not-allowed"
+                    : "border-gray-700 text-gray-700 hover:cursor-not-allowed",
                 )}
                 onClick={() =>
                   isPatientEligibleForNewConsultation(patientData) &&
                   navigate(
-                    `/facility/${patientData?.facility}/patient/${id}/consultation`
+                    `/facility/${patientData?.facility}/patient/${id}/consultation`,
                   )
                 }
               >
@@ -1034,14 +1033,14 @@ export const PatientHome = (props: any) => {
                   className={classNames(
                     "h-full space-y-2 rounded-lg bg-white p-4 shadow",
                     isPatientEligibleForNewConsultation(patientData) &&
-                      "hover:bg-gray-200"
+                      "hover:bg-gray-200",
                   )}
                 >
                   <div
                     className={classNames(
                       "text-center",
                       isPatientEligibleForNewConsultation(patientData) &&
-                        "text-green-700"
+                        "text-green-700",
                     )}
                   >
                     <span>
@@ -1080,7 +1079,7 @@ export const PatientHome = (props: any) => {
                 className="w-full"
                 onClick={() =>
                   navigate(
-                    `/facility/${patientData?.facility}/patient/${id}/files/`
+                    `/facility/${patientData?.facility}/patient/${id}/files/`,
                   )
                 }
               >
@@ -1141,7 +1140,7 @@ export const PatientHome = (props: any) => {
                 onClick={() => {
                   if (!isPatientInactive(patientData, facilityId)) {
                     navigate(
-                      `/facility/${patientData?.facility}/patient/${id}/sample-test`
+                      `/facility/${patientData?.facility}/patient/${id}/sample-test`,
                     );
                   }
                 }}
@@ -1151,7 +1150,7 @@ export const PatientHome = (props: any) => {
                     "h-full space-y-2 rounded-lg border bg-white p-4 shadow",
                     isPatientInactive(patientData, facilityId)
                       ? " border-gray-700 hover:cursor-not-allowed"
-                      : " border-green-700 hover:cursor-pointer hover:bg-gray-200"
+                      : " border-green-700 hover:cursor-pointer hover:bg-gray-200",
                   )}
                 >
                   <div
@@ -1181,7 +1180,7 @@ export const PatientHome = (props: any) => {
                 className="w-full"
                 onClick={() =>
                   navigate(
-                    `/facility/${patientData?.facility}/patient/${id}/notes`
+                    `/facility/${patientData?.facility}/patient/${id}/notes`,
                   )
                 }
               >
@@ -1211,7 +1210,7 @@ export const PatientHome = (props: any) => {
                     "h-full space-y-2 rounded-lg border bg-white p-4 shadow",
                     isPatientInactive(patientData, facilityId)
                       ? "border-gray-700 hover:cursor-not-allowed"
-                      : "border-green-700 hover:cursor-pointer hover:bg-gray-200"
+                      : "border-green-700 hover:cursor-pointer hover:bg-gray-200",
                   )}
                 >
                   <div
@@ -1219,7 +1218,7 @@ export const PatientHome = (props: any) => {
                       "text-center",
                       isPatientInactive(patientData, facilityId)
                         ? "text-gray-700"
-                        : "text-green-700"
+                        : "text-green-700",
                     )}
                   >
                     <span>
@@ -1232,7 +1231,7 @@ export const PatientHome = (props: any) => {
                         "text-center text-sm font-medium",
                         isPatientInactive(patientData, facilityId)
                           ? "text-gray-700"
-                          : "text-black"
+                          : "text-black",
                       )}
                     >
                       Assign to a volunteer
@@ -1257,7 +1256,7 @@ export const PatientHome = (props: any) => {
                     }
                     onClick={() =>
                       navigate(
-                        `/facility/${patientData?.facility}/patient/${id}/consultation`
+                        `/facility/${patientData?.facility}/patient/${id}/consultation`,
                       )
                     }
                   >
@@ -1283,9 +1282,10 @@ export const PatientHome = (props: any) => {
                 <div>
                   <ButtonV2
                     className="w-full"
+                    id="upload-patient-files"
                     onClick={() =>
                       navigate(
-                        `/facility/${patientData?.facility}/patient/${id}/files`
+                        `/facility/${patientData?.facility}/patient/${id}/files`,
                       )
                     }
                   >
@@ -1301,7 +1301,7 @@ export const PatientHome = (props: any) => {
                     disabled={isPatientInactive(patientData, facilityId)}
                     onClick={() =>
                       navigate(
-                        `/facility/${facilityId}/patient/${id}/shift/new`
+                        `/facility/${facilityId}/patient/${id}/shift/new`,
                       )
                     }
                     authorizeFor={NonReadOnlyUsers}
@@ -1318,7 +1318,7 @@ export const PatientHome = (props: any) => {
                     disabled={isPatientInactive(patientData, facilityId)}
                     onClick={() =>
                       navigate(
-                        `/facility/${patientData?.facility}/patient/${id}/sample-test`
+                        `/facility/${patientData?.facility}/patient/${id}/sample-test`,
                       )
                     }
                     authorizeFor={NonReadOnlyUsers}
@@ -1334,7 +1334,7 @@ export const PatientHome = (props: any) => {
                     className="w-full"
                     onClick={() =>
                       navigate(
-                        `/facility/${patientData?.facility}/patient/${id}/notes`
+                        `/facility/${patientData?.facility}/patient/${id}/notes`,
                       )
                     }
                   >

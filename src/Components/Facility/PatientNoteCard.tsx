@@ -71,7 +71,7 @@ const PatientNoteCard = ({
       <div
         className={classNames(
           "mt-4 flex w-full flex-col rounded-lg border border-gray-300 bg-white p-3 text-gray-800",
-          note.user_type === "RemoteSpecialist" && "border-primary-400"
+          note.user_type === "RemoteSpecialist" && "border-primary-400",
         )}
       >
         <div className="flex justify-between">
@@ -99,7 +99,7 @@ const PatientNoteCard = ({
               // If last edited date is same as created date, then it is not edited
               !dayjs(note.last_edited_date).isSame(
                 note.created_date,
-                "second"
+                "second",
               ) && (
                 <div className="flex">
                   <div

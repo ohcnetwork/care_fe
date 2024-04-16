@@ -102,7 +102,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                         {value.icon}
                       </div>
                     )}
-                    <p className="ml-2.5 break-all text-sm font-medium">
+                    <p className="ml-2.5 whitespace-nowrap break-all text-sm font-medium">
                       {value.selectedLabel}
                     </p>
                   </div>
@@ -117,7 +117,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
               <div
                 className={classNames(
                   "absolute z-10 w-full",
-                  props.position === "above" ? "bottom-0 mb-12" : "top-0 mt-12"
+                  props.position === "above" ? "bottom-0 mb-12" : "top-0 mt-12",
                 )}
               >
                 <DropdownTransition show={open}>

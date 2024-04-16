@@ -152,9 +152,9 @@ export default function CentralNursingStation({ facilityId }: Props) {
                       name="hide_monitors_without_patient"
                       label="Hide Monitors without Patient"
                       value={JSON.parse(
-                        qParams.hide_monitors_without_patient ?? true
+                        qParams.hide_monitors_without_patient ?? true,
                       )}
-                      onChange={(e) => updateQuery({ [e.name]: e.value })}
+                      onChange={(e) => updateQuery({ [e.name]: `${e.value}` })}
                       labelClassName="text-sm"
                       errorClassName="hidden"
                     />

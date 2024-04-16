@@ -59,7 +59,7 @@ const CoverImageEditModal = ({
     setFacingMode((prevState: any) =>
       prevState === FACING_MODE_USER
         ? FACING_MODE_ENVIRONMENT
-        : FACING_MODE_USER
+        : FACING_MODE_USER,
     );
   }, []);
 
@@ -132,7 +132,7 @@ const CoverImageEditModal = ({
           msg: "Network Failure. Please check your internet connectivity.",
         });
         setIsUploading(false);
-      }
+      },
     );
 
     await sleep(1000);

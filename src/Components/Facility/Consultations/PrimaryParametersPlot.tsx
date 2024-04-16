@@ -38,7 +38,7 @@ export const PrimaryParametersPlot = ({
   useEffect(() => {
     const fetchDailyRounds = async (
       currentPage: number,
-      consultationId: string
+      consultationId: string,
     ) => {
       const { res, data } = await request(routes.dailyRoundsAnalyse, {
         body: {
@@ -132,7 +132,7 @@ export const PrimaryParametersPlot = ({
       const key: string = dayjs(obj[0]).format("MMMM D, YYYY");
       const lst: Array<any> = Object.prototype.hasOwnProperty.call(
         rhythmValues,
-        key
+        key,
       )
         ? rhythmValues[key]
         : [];
@@ -267,7 +267,7 @@ export const PrimaryParametersPlot = ({
                         </div>
                       </div>
                     </li>
-                  ))
+                  )),
                 )}
               </ul>
             </div>
