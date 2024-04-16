@@ -3,28 +3,30 @@ import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import * as Notification from "../../Utils/Notifications.js";
-import { classNames, isUserOnline, relativeTime } from "../../Utils/utils";
+import { isUserOnline, relativeTime } from "../../Utils/utils";
+import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
 import Pagination from "../Common/Pagination";
 import UserDetails from "../Common/UserDetails";
 import ButtonV2 from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
-import { FacilityModel } from "../Facility/models";
 import LinkFacilityDialog from "../Users/LinkFacilityDialog";
-import UnlinkFacilityDialog from "../Users/UnlinkFacilityDialog";
 import UserDeleteDialog from "../Users/UserDeleteDialog";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
+import { UserFacilities } from "../Users/ManageUsers";
+import { useTranslation } from "react-i18next";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function FacilityUsers(props: any) {
+  const { t } = useTranslation();
   const { facilityId } = props;
   let manageUsers: any = null;
-  const [isUnlinkFacilityLoading, setIsUnlinkFacilityLoading] = useState(false);
   const [isAddFacilityLoading, setIsAddFacilityLoading] = useState(false);
-  const [isLoadFacilityLoading, setIsLoadFacilityLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [expandFacilityList, setExpandFacilityList] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [offset, setOffset] = useState(0);
 
@@ -38,12 +40,6 @@ export default function FacilityUsers(props: any) {
     username: string;
     name: string;
   }>({ show: false, username: "", name: "" });
-
-  const [unlinkFacilityData, setUnlinkFacilityData] = useState<{
-    show: boolean;
-    userName: string;
-    facility?: FacilityModel;
-  }>({ show: false, userName: "", facility: undefined });
 
   const limit = RESULTS_PER_PAGE_LIMIT;
 
@@ -71,10 +67,9 @@ export default function FacilityUsers(props: any) {
   };
 
   const loadFacilities = async (username: string) => {
-    if (isUnlinkFacilityLoading || isAddFacilityLoading) {
+    if (isAddFacilityLoading) {
       return;
     }
-    setIsLoadFacilityLoading(true);
     const { res, data } = await request(routes.userListFacility, {
       pathParams: { username: username },
     });
@@ -88,22 +83,6 @@ export default function FacilityUsers(props: any) {
           : user;
       });
     }
-    setIsLoadFacilityLoading(false);
-  };
-
-  const showLinkFacilityModal = (username: string) => {
-    setLinkFacility({
-      show: true,
-      username,
-    });
-  };
-
-  const hideUnlinkFacilityModal = () => {
-    setUnlinkFacilityData({
-      show: false,
-      facility: undefined,
-      userName: "",
-    });
   };
 
   const hideLinkFacilityModal = () => {
@@ -111,27 +90,6 @@ export default function FacilityUsers(props: any) {
       show: false,
       username: "",
     });
-  };
-
-  const handleUnlinkFacilitySubmit = async () => {
-    setIsUnlinkFacilityLoading(true);
-    await request(routes.deleteUserFacility, {
-      // body given in the dispatch call but there is no body in API documentation
-      body: { facility: String(unlinkFacilityData?.facility?.id) },
-      pathParams: {
-        username: unlinkFacilityData.userName,
-      },
-      onResponse: ({ res }) => {
-        if (res?.status === 204) {
-          Notification.Success({
-            msg: "User Facility deleted successfully",
-          });
-        }
-      },
-    });
-    setIsUnlinkFacilityLoading(false);
-    loadFacilities(unlinkFacilityData.userName);
-    hideUnlinkFacilityModal();
   };
 
   const handleCancel = () => {
@@ -152,77 +110,6 @@ export default function FacilityUsers(props: any) {
     });
     setUserData({ show: false, username: "", name: "" });
     facilityUserFetch();
-  };
-
-  const facilityClassname = classNames(
-    "align-baseline text-sm font-bold",
-    isAddFacilityLoading || isUnlinkFacilityLoading || isLoadFacilityLoading
-      ? "text-gray-500"
-      : "text-blue-500 hover:text-blue-800"
-  );
-
-  const showLinkFacility = (username: string) => {
-    return (
-      <a
-        onClick={() => showLinkFacilityModal(username)}
-        className={facilityClassname}
-        href="#"
-      >
-        Link new facility
-      </a>
-    );
-  };
-
-  const showFacilities = (username: string, facilities: FacilityModel[]) => {
-    if (!facilities || !facilities.length) {
-      return (
-        <>
-          <div className="font-semibold">No Facilities!</div>
-          {showLinkFacility(username)}
-        </>
-      );
-    }
-    return (
-      <div className="col-span-full sm:col-span-3 sm:col-start-2">
-        <div className="mb-2">
-          {facilities.map((facility, i) => (
-            <div
-              key={`facility_${i}`}
-              className="font-gbold mr-3 mt-2 inline-block rounded-md border-2 py-1 pl-3"
-            >
-              <div className="flex items-center  space-x-1">
-                <div className="font-semibold">{facility.name}</div>
-                <ButtonV2
-                  size="small"
-                  circle
-                  variant="secondary"
-                  disabled={isUnlinkFacilityLoading}
-                  onClick={() =>
-                    setUnlinkFacilityData({
-                      show: true,
-                      facility: facility,
-                      userName: username,
-                    })
-                  }
-                >
-                  <CareIcon icon="l-multiply" />
-                </ButtonV2>
-              </div>
-            </div>
-          ))}
-        </div>
-        {showLinkFacility(username)}
-        {unlinkFacilityData.show && (
-          <UnlinkFacilityDialog
-            facilityName={unlinkFacilityData.facility?.name || ""}
-            userName={unlinkFacilityData.userName}
-            isHomeFacility={false}
-            handleCancel={hideUnlinkFacilityModal}
-            handleOk={handleUnlinkFacilitySubmit}
-          />
-        )}
-      </div>
-    );
   };
 
   const addFacility = async (username: string, facility: any) => {
@@ -316,17 +203,17 @@ export default function FacilityUsers(props: any) {
 
                 {user.username && (
                   <UserDetails title="Facilities">
-                    {(user as any).facilities &&
-                      showFacilities(user.username, (user as any).facilities)}
-                    {!(user as any).facilities && (
-                      <a
-                        onClick={() => loadFacilities(user.username)}
-                        className={`inline-block ${facilityClassname}`}
-                        href="#"
-                      >
-                        Click here to show
-                      </a>
-                    )}
+                    <ButtonV2
+                      id="facilities"
+                      className="flex w-full items-center @sm:w-1/2"
+                      onClick={() => {
+                        setExpandFacilityList(!expandFacilityList);
+                        setSelectedUser(user);
+                      }}
+                    >
+                      <CareIcon icon="l-hospital" className="text-lg" />
+                      <p>Linked Facilities</p>
+                    </ButtonV2>
                   </UserDetails>
                 )}
               </div>
@@ -393,6 +280,15 @@ export default function FacilityUsers(props: any) {
           />
         )}
       </div>
+      <SlideOverCustom
+        open={expandFacilityList}
+        setOpen={setExpandFacilityList}
+        slideFrom="right"
+        title={t("facilities")}
+        dialogClass="md:w-[400px]"
+      >
+        <UserFacilities user={selectedUser} />
+      </SlideOverCustom>
       <div className="px-3 md:px-8">
         <div>{manageUsers}</div>
       </div>

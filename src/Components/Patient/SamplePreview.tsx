@@ -33,7 +33,7 @@ function SampleReportSection({ title, fields }: ISampleReportSectionProps) {
           <div
             className={classNames(
               "flex border-b border-gray-800",
-              i % 2 === 0 && "border-x"
+              i % 2 === 0 && "border-x",
             )}
           >
             <div className="w-[65%] border-r border-gray-800 py-2">
@@ -66,7 +66,7 @@ export default function SampleReport(props: ISamplePreviewProps) {
         id,
         sampleId,
       },
-    }
+    },
   );
 
   if (sampleData) {
@@ -159,7 +159,7 @@ export default function SampleReport(props: ISamplePreviewProps) {
                       title: "Collection Date",
                       value: sampleData?.specimen_details?.created_date
                         ? formatDateTime(
-                            sampleData?.specimen_details?.created_date
+                            sampleData?.specimen_details?.created_date,
                           )
                         : "NA",
                     },
@@ -267,7 +267,7 @@ export default function SampleReport(props: ISamplePreviewProps) {
                       title: "Places of travel",
                       value:
                         sampleData?.exposure_history?.places_of_travel?.join(
-                          ", "
+                          ", ",
                         ),
                     },
                     {
@@ -362,7 +362,7 @@ export default function SampleReport(props: ISamplePreviewProps) {
                       title: "Medical Conditions",
                       value:
                         sampleData?.medical_conditions?.medical_conditions_list?.join(
-                          ", "
+                          ", ",
                         ),
                     },
                   ]}

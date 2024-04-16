@@ -64,12 +64,12 @@ const UpdateStatusDialog = (props: Props) => {
   const [uploadDone, setUploadDone] = useState<boolean>(false);
 
   const currentStatus = SAMPLE_TEST_STATUS.find(
-    (i) => i.text === sample.status
+    (i) => i.text === sample.status,
   );
 
   const status = String(sample.status) as keyof typeof SAMPLE_FLOW_RULES;
   const validStatusChoices = statusChoices.filter(
-    (i) => status && statusFlow[status] && statusFlow[status].includes(i.text)
+    (i) => status && statusFlow[status] && statusFlow[status].includes(i.text),
   );
 
   useEffect(() => {
@@ -132,7 +132,7 @@ const UpdateStatusDialog = (props: Props) => {
       setUploadPercent,
       () => {
         setUploadStarted(false);
-      }
+      },
     );
   };
 
@@ -159,7 +159,7 @@ const UpdateStatusDialog = (props: Props) => {
         original_name: name,
         file_type: "SAMPLE_MANAGEMENT",
         name: `${sample.patient_name} Sample Report`,
-        associating_id: sample.id,
+        associating_id: sample.id ?? "",
         file_category: category,
         mime_type: contentType,
       },
