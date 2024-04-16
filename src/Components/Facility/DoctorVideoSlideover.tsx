@@ -28,7 +28,7 @@ export default function DoctorVideoSlideover(props: {
 }) {
   const { show, facilityId, setShow } = props;
   const [filteredDoctors, setFilteredDoctors] = useState<UserAssignedModel[]>(
-    []
+    [],
   );
   const [filter, setFilter] = useState<FilterTypes>(FilterTypes.ALL);
 
@@ -51,7 +51,7 @@ export default function DoctorVideoSlideover(props: {
             (filter === FilterTypes.NURSE &&
               isHomeUser(user, facilityId) &&
               user.user_type === "Nurse") ||
-            (filter === FilterTypes.TELEICU && !isHomeUser(user, facilityId)))
+            (filter === FilterTypes.TELEICU && !isHomeUser(user, facilityId))),
       );
     };
     if (users?.results && !loading) {
@@ -61,8 +61,8 @@ export default function DoctorVideoSlideover(props: {
             const aIsHomeUser = isHomeUser(a, facilityId);
             const bIsHomeUser = isHomeUser(b, facilityId);
             return aIsHomeUser === bIsHomeUser ? 0 : aIsHomeUser ? -1 : 1;
-          }
-        )
+          },
+        ),
       );
     }
   }, [facilityId, filter, loading, users?.results]);
@@ -78,12 +78,12 @@ export default function DoctorVideoSlideover(props: {
       <p className="-mt-3 pb-4 text-sm text-gray-600">
         Select a doctor to connect via video
       </p>
-      <div className="flex justify-center">
+      <div className="flex justify-center" id="doctor-connect-filter-tabs">
         <Switch
           tabs={
             Object.values(FilterTypes).reduce(
               (acc, type) => ({ ...acc, [type]: type }),
-              {}
+              {},
             ) as Record<FilterTypes, string>
           }
           selected={filter}
@@ -115,7 +115,7 @@ export default function DoctorVideoSlideover(props: {
 type MSLaunchURI = (
   uri: string,
   successCB?: null | (() => void),
-  noHandlerCB?: null | (() => void)
+  noHandlerCB?: null | (() => void),
 ) => void;
 
 function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
@@ -244,11 +244,12 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
               <a
                 role="button"
                 href="#"
-                onClick={async () =>
+                onClick={async (e) => {
+                  e.stopPropagation();
                   await navigator.clipboard.writeText(
-                    user?.alt_phone_number || ""
-                  )
-                }
+                    user?.alt_phone_number || "",
+                  );
+                }}
               >
                 <span className="tooltip">
                   <span className="tooltip-text tooltip-top">
@@ -280,7 +281,8 @@ function DoctorConnectButtons(props: {
       {user.video_connect_link && (
         <a
           href={user.video_connect_link}
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             triggerGoal("Doctor Connect Click", {
               medium: "Video Call",
               userId: authUser.id,
@@ -306,7 +308,8 @@ function DoctorConnectButtons(props: {
       </a>
       <a
         href={user.alt_phone_number ? `tel:${user.alt_phone_number}` : "#"}
-        onClick={() => {
+        onClick={(e) => {
+          e.stopPropagation();
           triggerGoal("Doctor Connect Click", {
             medium: "Phone Call",
             userId: authUser.id,

@@ -58,7 +58,7 @@ export default function FeedAlert({ state }: Props) {
           <CareIcon
             className={classNames(
               "text-base",
-              state === "loading" && "animate-spin"
+              state === "loading" && "animate-spin",
             )}
             icon={ALERT_ICON_MAP[state]}
           />

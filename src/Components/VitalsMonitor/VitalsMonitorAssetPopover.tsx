@@ -62,7 +62,7 @@ const VitalsMonitorAssetPopover = ({
             <ButtonV2
               onClick={() =>
                 navigate(
-                  `/facility/${asset?.location_object.facility?.id}/assets/${asset?.id}/configure`
+                  `/facility/${asset?.location_object.facility?.id}/assets/${asset?.id}/configure`,
                 )
               }
               id="configure-asset"

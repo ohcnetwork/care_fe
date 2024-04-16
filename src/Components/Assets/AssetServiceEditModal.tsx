@@ -197,12 +197,12 @@ export const AssetServiceEditModal = (props: {
                   if (
                     dayjs(date.value).format("YYYY-MM-DD") >
                     new Date(
-                      props.service_record.created_date
+                      props.service_record.created_date,
                     ).toLocaleDateString("en-ca")
                   ) {
                     Notification.Error({
                       msg: `Service date can't be after ${formatDate(
-                        props.service_record.created_date
+                        props.service_record.created_date,
                       )} (Creation date)`,
                     });
                   } else {

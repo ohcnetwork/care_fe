@@ -24,7 +24,7 @@ export default ({ show, setShow, username }: IProps) => {
   /* added const {t} hook here and relevant text to Common.json to avoid eslint error  */
   const { t } = useTranslation();
   const [selectedSkill, setSelectedSkill] = useState<SkillObjectModel | null>(
-    null
+    null,
   );
   const [isLoading, setIsLoading] = useState(false);
   const [deleteSkill, setDeleteSkill] = useState<SkillModel | null>(null);
@@ -59,7 +59,7 @@ export default ({ show, setShow, username }: IProps) => {
       setIsLoading(false);
       await refetchUserSkills();
     },
-    [refetchUserSkills]
+    [refetchUserSkills],
   );
 
   const removeSkill = useCallback(
@@ -79,11 +79,11 @@ export default ({ show, setShow, username }: IProps) => {
       setDeleteSkill(null);
       await refetchUserSkills();
     },
-    [refetchUserSkills]
+    [refetchUserSkills],
   );
 
   const authorizeForAddSkill = useIsAuthorized(
-    AuthorizeFor(["DistrictAdmin", "StateAdmin"])
+    AuthorizeFor(["DistrictAdmin", "StateAdmin"]),
   );
 
   const hasSkills = skills?.results?.length || 0 > 0;

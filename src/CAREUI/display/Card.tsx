@@ -3,7 +3,7 @@ import { HTMLAttributes, ReactNode } from "react";
 export default function Card(
   props: {
     children?: ReactNode;
-  } & HTMLAttributes<HTMLDivElement>
+  } & HTMLAttributes<HTMLDivElement>,
 ) {
   const { children, ...rest } = props;
   return (
