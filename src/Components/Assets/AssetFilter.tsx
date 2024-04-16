@@ -23,7 +23,7 @@ function AssetFilter(props: any) {
   const [facility, setFacility] = useState<FacilityModel | null>(null);
   const [asset_status, setAssetStatus] = useState<string>(filter.status || "");
   const [asset_class, setAssetClass] = useState<string>(
-    filter.asset_class || ""
+    filter.asset_class || "",
   );
   const [facilityId, setFacilityId] = useState<string | "">(filter.facility);
   const [locationId, setLocationId] = useState<string | "">(filter.location);
@@ -46,7 +46,7 @@ function AssetFilter(props: any) {
   useEffect(() => {
     setFacilityId(facility?.id ? `${facility?.id}` : "");
     setLocationId(
-      facility?.id === qParams.facility ? qParams.location ?? "" : ""
+      facility?.id === qParams.facility ? qParams.location ?? "" : "",
     );
   }, [facility?.id, qParams.facility, qParams.location]);
 
@@ -62,7 +62,7 @@ function AssetFilter(props: any) {
       status: asset_status ?? "",
       location: locationId ?? "",
       warranty_amc_end_of_validity_before: dateQueryString(
-        warrantyExpiry.before
+        warrantyExpiry.before,
       ),
       warranty_amc_end_of_validity_after: dateQueryString(warrantyExpiry.after),
     };

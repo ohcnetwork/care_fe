@@ -51,7 +51,7 @@ export default function ListView() {
       pathParams: { externalId: shift.external_id },
     });
     navigate(
-      `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`
+      `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`,
     );
   };
 
@@ -213,7 +213,7 @@ export default function ListView() {
                     !shift.patient_object.allow_transfer ||
                     !(
                       ["DistrictAdmin", "StateAdmin"].includes(
-                        authUser.user_type
+                        authUser.user_type,
                       ) ||
                       authUser.home_facility_object?.id ===
                         shift.assigned_facility
