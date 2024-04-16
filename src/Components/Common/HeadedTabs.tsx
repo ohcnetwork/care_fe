@@ -24,7 +24,7 @@ export default function HeadedTabs(props: headedTabsProps) {
           defaultValue={tabs[0].value}
           onChange={(e) => {
             handleChange(
-              tabs.filter((tab) => tab.name === e.target.value)[0].value
+              tabs.filter((tab) => tab.name === e.target.value)[0].value,
             );
           }}
         >

@@ -53,7 +53,7 @@ export const fireRequest = (
   params: any = {},
   pathParam?: any,
   altKey?: string,
-  suppressNotif?: boolean
+  suppressNotif?: boolean,
 ) => {
   return (dispatch: any) => {
     // cancel previous api call
@@ -181,7 +181,7 @@ export const fireRequestV2 = (
   successCallback: any = () => undefined,
   errorCallback: any = () => undefined,
   pathParam?: any,
-  altKey?: string
+  altKey?: string,
 ) => {
   // cancel previous api call
   if (isRunning[altKey ? altKey : key]) {

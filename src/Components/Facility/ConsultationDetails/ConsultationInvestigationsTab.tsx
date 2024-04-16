@@ -19,7 +19,7 @@ export const ConsultationInvestigationsTab = (props: ConsultationTabProps) => {
             disabled={!props.patientData.is_active}
             onClick={() =>
               navigate(
-                `/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}/investigation/`
+                `/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}/investigation/`,
               )
             }
           >
