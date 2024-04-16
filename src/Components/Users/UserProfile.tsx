@@ -83,7 +83,7 @@ const initForm: EditForm = {
 
 const initError: ErrorForm = Object.assign(
   {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
 );
 
 const initialState: State = {
@@ -163,7 +163,7 @@ export default function UserProfile() {
         doctor_qualification: result.data.doctor_qualification,
         doctor_experience_commenced_on: dayjs().diff(
           dayjs(result.data.doctor_experience_commenced_on),
-          "years"
+          "years",
         ),
         doctor_medical_council_registration:
           result.data.doctor_medical_council_registration,
@@ -180,7 +180,7 @@ export default function UserProfile() {
     routes.userListSkill,
     {
       pathParams: { username: authUser.username },
-    }
+    },
   );
 
   const setNewPasswordErrorCallFun = (value: string) => {
@@ -382,9 +382,9 @@ export default function UserProfile() {
                 .subtract(
                   parseInt(
                     (states.form.doctor_experience_commenced_on as string) ??
-                      "0"
+                      "0",
                   ),
-                  "years"
+                  "years",
                 )
                 .format("YYYY-MM-DD")
             : undefined,
@@ -782,7 +782,7 @@ export default function UserProfile() {
                             />
                             <TextFormField
                               {...fieldProps(
-                                "doctor_medical_council_registration"
+                                "doctor_medical_council_registration",
                               )}
                               required
                               className="col-span-6 sm:col-span-3"
@@ -925,7 +925,7 @@ export default function UserProfile() {
                     icon="l-sync"
                     className={classNames(
                       "text-2xl",
-                      updateStatus.isChecking && "animate-spin"
+                      updateStatus.isChecking && "animate-spin",
                     )}
                   />
                   {updateStatus.isChecking
