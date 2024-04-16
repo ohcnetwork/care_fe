@@ -7,7 +7,7 @@ import { UserCreationPage } from "../../pageobject/Users/UserCreation";
 import {
   generatePhoneNumber,
   generateEmergencyPhoneNumber,
-} from "../../pageobject/constants";
+} from "../../pageobject/utils/constants";
 
 describe("User Creation", () => {
   const userPage = new UserPage();

@@ -22,7 +22,7 @@ const saveLink = async (assetId: string, bedId: string) => {
 const update_Link = async (
   assetbedId: string,
   assetId: string,
-  bed: BedModel
+  bed: BedModel,
 ) => {
   await request(routes.partialUpdateAssetBed, {
     pathParams: { external_id: assetbedId },
@@ -55,7 +55,7 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
           update_Link(
             assetBed?.results[0].id as string,
             asset.id as string,
-            bed as BedModel
+            bed as BedModel,
           );
         } else {
           saveLink(asset.id as string, bed?.id as string);

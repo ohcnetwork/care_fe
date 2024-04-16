@@ -12,10 +12,9 @@ class PatientTransfer {
     cy.get("li[role=option]").contains(facilityName).click();
   }
 
-  clickTransferPatientDob(dateOfBirth: string) {
-    cy.get("#dateofbirth-transferform").scrollIntoView();
-    cy.get("#dateofbirth-transferform").should("be.visible").click();
-    cy.get("#date-input").click().type(dateOfBirth);
+  clickTransferPatientYOB(yearOfBirth: string) {
+    cy.get("#year_of_birth").scrollIntoView();
+    cy.get("#year_of_birth").should("be.visible").click().type(yearOfBirth);
   }
 
   clickTransferSubmitButton() {

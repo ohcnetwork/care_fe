@@ -127,10 +127,10 @@ export default function ShiftDetails(props: { id: string }) {
 
   const showPatientCard = (patientData: PatientModel) => {
     const patientGender = GENDER_TYPES.find(
-      (i) => i.id === patientData?.gender
+      (i) => i.id === patientData?.gender,
     )?.text;
     const testType = TEST_TYPE_CHOICES.find(
-      (i) => i.id === patientData?.test_type
+      (i) => i.id === patientData?.test_type,
     )?.text;
 
     return (
@@ -317,10 +317,10 @@ export default function ShiftDetails(props: { id: string }) {
     const patientData = data.patient_object;
     const consultation = data.patient.last_consultation as ConsultationModel;
     const patientGender = GENDER_TYPES.find(
-      (i) => i.id === patientData?.gender
+      (i) => i.id === patientData?.gender,
     )?.text;
     const testType = TEST_TYPE_CHOICES.find(
-      (i) => i.id === patientData?.test_type
+      (i) => i.id === patientData?.test_type,
     )?.text;
 
     return (
@@ -408,7 +408,7 @@ export default function ShiftDetails(props: { id: string }) {
                 {t("date_of_admission")}:{" "}
               </span>
               {formatDateTime(
-                consultation.encounter_date || consultation.created_date
+                consultation.encounter_date || consultation.created_date,
               ) || "-"}
             </div>
             <div>
@@ -589,7 +589,7 @@ export default function ShiftDetails(props: { id: string }) {
                 <span className="font-semibold leading-relaxed">Status: </span>
                 <span className="badge badge-pill badge-primary px-2 py-1">
                   {shiftStatusOptions.find(
-                    (option) => data?.status === option.text
+                    (option) => data?.status === option.text,
                   )?.label || data?.status}
                 </span>
               </div>

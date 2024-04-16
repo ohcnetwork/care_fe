@@ -25,13 +25,13 @@ export default function BadgesList(props: any) {
   });
   const originFacility = useFacilityQuery(qParams.origin_facility);
   const approvingFacility = useFacilityQuery(
-    qParams.shifting_approving_facility
+    qParams.shifting_approving_facility,
   );
   const assignedFacility = useFacilityQuery(qParams.assigned_facility);
 
   const getDescShiftingFilterOrder = (ordering: any) => {
     const foundItem = SHIFTING_FILTER_ORDER.find(
-      (item) => item.text === ordering
+      (item) => item.text === ordering,
     );
     return foundItem ? foundItem.desc : "";
   };
@@ -55,29 +55,29 @@ export default function BadgesList(props: any) {
           "assigned_to",
           qParams.assigned_to
             ? formatFacilityBadgeValue(assignedUser?.results[0])
-            : ""
+            : "",
         ),
         value(
           t("assigned_facility"),
           "assigned_facility",
-          qParams.assigned_facility ? assignedFacility?.data?.name || "" : ""
+          qParams.assigned_facility ? assignedFacility?.data?.name || "" : "",
         ),
         value(
           t("origin_facility"),
           "origin_facility",
-          qParams.origin_facility ? originFacility?.data?.name || "" : ""
+          qParams.origin_facility ? originFacility?.data?.name || "" : "",
         ),
         value(
           t("shifting_approval_facility"),
           "shifting_approving_facility",
           qParams.shifting_approving_facility
             ? approvingFacility?.data?.name || ""
-            : ""
+            : "",
         ),
         value(
           t("ordering"),
           "ordering",
-          getDescShiftingFilterOrder(qParams.ordering)
+          getDescShiftingFilterOrder(qParams.ordering),
         ),
       ]}
     />

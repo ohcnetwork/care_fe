@@ -49,7 +49,7 @@ export default function DischargeSummaryModal(props: Props) {
       setGenerating(false);
 
       const res = await dispatch(
-        previewDischargeSummary({ external_id: props.consultation.id })
+        previewDischargeSummary({ external_id: props.consultation.id }),
       );
 
       if (res.status === 200) {
@@ -67,7 +67,7 @@ export default function DischargeSummaryModal(props: Props) {
   const handleRegenDischargeSummary = async () => {
     setDownloading(true);
     const res = await dispatch(
-      generateDischargeSummary({ external_id: props.consultation.id })
+      generateDischargeSummary({ external_id: props.consultation.id }),
     );
     if (res.status === 406) {
       Error({
@@ -85,7 +85,7 @@ export default function DischargeSummaryModal(props: Props) {
   const downloadDischargeSummary = async () => {
     // returns summary or 202 if new create task started
     const res = await dispatch(
-      previewDischargeSummary({ external_id: props.consultation.id })
+      previewDischargeSummary({ external_id: props.consultation.id }),
     );
 
     if (res.status === 202) {
@@ -131,7 +131,7 @@ export default function DischargeSummaryModal(props: Props) {
     }
 
     const res = await dispatch(
-      emailDischargeSummary({ email }, { external_id: props.consultation.id })
+      emailDischargeSummary({ email }, { external_id: props.consultation.id }),
     );
 
     if (res.status === 202) {
@@ -189,8 +189,8 @@ export default function DischargeSummaryModal(props: Props) {
               {generating
                 ? t("generating") + "..."
                 : downloading
-                ? t("downloading") + "..."
-                : t("download")}
+                  ? t("downloading") + "..."
+                  : t("download")}
             </span>
           </Submit>
           <Submit onClick={handleEmail} disabled={emailing}>
