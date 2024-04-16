@@ -96,7 +96,7 @@ export default function CameraFeed(props: Props) {
       <div
         className={classNames(
           "flex flex-col overflow-clip rounded-xl bg-black",
-          props.className
+          props.className,
         )}
       >
         <div className="flex items-center justify-between bg-zinc-900 px-4 py-0.5">

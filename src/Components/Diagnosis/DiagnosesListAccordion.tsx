@@ -66,7 +66,7 @@ export default function DiagnosesListAccordion(props: Props) {
             ([status, diagnoses]) =>
               !!diagnoses.length && (
                 <DiagnosesOfStatus key={status} diagnoses={diagnoses} />
-              )
+              ),
           )}
         </div>
         <ButtonV2

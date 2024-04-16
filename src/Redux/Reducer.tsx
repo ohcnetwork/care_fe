@@ -19,7 +19,7 @@ const reducer = (
   state = {
     config: cachedConfig,
   },
-  changeAction: any
+  changeAction: any,
 ) => {
   switch (changeAction.type) {
     case actions.FETCH_REQUEST: {
