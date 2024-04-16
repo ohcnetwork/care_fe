@@ -51,7 +51,7 @@ type MultiSelectFormFieldProps<T, V = T> = FormFieldBaseProps<V[]> & {
 };
 
 export const MultiSelectFormField = <T, V>(
-  props: MultiSelectFormFieldProps<T, V>
+  props: MultiSelectFormFieldProps<T, V>,
 ) => {
   const field = useFormFieldPropsResolver(props);
   return (

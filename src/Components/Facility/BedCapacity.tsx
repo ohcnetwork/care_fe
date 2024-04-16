@@ -77,7 +77,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
         // disable existing bed types
         const updatedBedTypes = getBedTypes(config).map((type: OptionsType) => {
           const isExisting = existingData.find(
-            (i: CapacityModal) => i.room_type === type.id
+            (i: CapacityModal) => i.room_type === type.id,
           );
           return {
             ...type,
@@ -173,7 +173,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
         {
           pathParams: { facilityId, ...(id ? { bed_id: id.toString() } : {}) },
           body: bodyData,
-        }
+        },
       );
       setIsLoading(false);
       if (data) {
