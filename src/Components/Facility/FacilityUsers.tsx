@@ -183,57 +183,57 @@ export default function FacilityUsers(props: any) {
     );
   };
 
-  // const showFacilities = (username: string, facilities: FacilityModel[]) => {
-  //   if (!facilities || !facilities.length) {
-  //     return (
-  //       <>
-  //         <div className="font-semibold">No Facilities!</div>
-  //         {showLinkFacility(username)}
-  //       </>
-  //     );
-  //   }
-  //   return (
-  //     <div className="col-span-full sm:col-span-3 sm:col-start-2">
-  //       <div className="mb-2">
-  //         {facilities.map((facility, i) => (
-  //           <div
-  //             key={`facility_${i}`}
-  //             className="font-gbold mr-3 mt-2 inline-block rounded-md border-2 py-1 pl-3"
-  //           >
-  //             <div className="flex items-center  space-x-1">
-  //               <div className="font-semibold">{facility.name}</div>
-  //               <ButtonV2
-  //                 size="small"
-  //                 circle
-  //                 variant="secondary"
-  //                 disabled={isUnlinkFacilityLoading}
-  //                 onClick={() =>
-  //                   setUnlinkFacilityData({
-  //                     show: true,
-  //                     facility: facility,
-  //                     userName: username,
-  //                   })
-  //                 }
-  //               >
-  //                 <CareIcon icon="l-multiply" />
-  //               </ButtonV2>
-  //             </div>
-  //           </div>
-  //         ))}
-  //       </div>
-  //       {showLinkFacility(username)}
-  //       {unlinkFacilityData.show && (
-  //         <UnlinkFacilityDialog
-  //           facilityName={unlinkFacilityData.facility?.name || ""}
-  //           userName={unlinkFacilityData.userName}
-  //           isHomeFacility={false}
-  //           handleCancel={hideUnlinkFacilityModal}
-  //           handleOk={handleUnlinkFacilitySubmit}
-  //         />
-  //       )}
-  //     </div>
-  //   );
-  // };
+  const showFacilities = (username: string, facilities: FacilityModel[]) => {
+    if (!facilities || !facilities.length) {
+      return (
+        <>
+          <div className="font-semibold">No Facilities!</div>
+          {showLinkFacility(username)}
+        </>
+      );
+    }
+    return (
+      <div className="col-span-full sm:col-span-3 sm:col-start-2">
+        <div className="mb-2">
+          {facilities.map((facility, i) => (
+            <div
+              key={`facility_${i}`}
+              className="font-gbold mr-3 mt-2 inline-block rounded-md border-2 py-1 pl-3"
+            >
+              <div className="flex items-center  space-x-1">
+                <div className="font-semibold">{facility.name}</div>
+                <ButtonV2
+                  size="small"
+                  circle
+                  variant="secondary"
+                  disabled={isUnlinkFacilityLoading}
+                  onClick={() =>
+                    setUnlinkFacilityData({
+                      show: true,
+                      facility: facility,
+                      userName: username,
+                    })
+                  }
+                >
+                  <CareIcon icon="l-multiply" />
+                </ButtonV2>
+              </div>
+            </div>
+          ))}
+        </div>
+        {showLinkFacility(username)}
+        {unlinkFacilityData.show && (
+          <UnlinkFacilityDialog
+            facilityName={unlinkFacilityData.facility?.name || ""}
+            userName={unlinkFacilityData.userName}
+            isHomeFacility={false}
+            handleCancel={hideUnlinkFacilityModal}
+            handleOk={handleUnlinkFacilitySubmit}
+          />
+        )}
+      </div>
+    );
+  };
 
   const addFacility = async (username: string, facility: any) => {
     hideLinkFacilityModal();
