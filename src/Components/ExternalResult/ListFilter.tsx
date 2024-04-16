@@ -88,7 +88,7 @@ export default function ListFilter(props: any) {
   const handleDateRangeChange = (
     startDateId: string,
     endDateId: string,
-    e: any
+    e: any,
   ) => {
     const filterData: any = { ...filterState };
     filterData[startDateId] = e.value.start?.toString();
@@ -134,10 +134,10 @@ export default function ListFilter(props: any) {
       result_date_before: dateQueryString(result_date_before),
       result_date_after: dateQueryString(result_date_after),
       sample_collection_date_after: dateQueryString(
-        sample_collection_date_after
+        sample_collection_date_after,
       ),
       sample_collection_date_before: dateQueryString(
-        sample_collection_date_before
+        sample_collection_date_before,
       ),
       srf_id: srf_id,
     };
@@ -241,7 +241,7 @@ export default function ListFilter(props: any) {
           handleDateRangeChange(
             "sample_collection_date_after",
             "sample_collection_date_before",
-            e
+            e,
           )
         }
         label={t("sample_collection_date")}

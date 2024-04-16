@@ -28,11 +28,11 @@ export const FacilityBedCapacity = (props: any) => {
   } else {
     const totalBedCount = capacityQuery.data.results.reduce(
       (acc, x) => acc + (x.total_capacity ? x.total_capacity : 0),
-      0
+      0,
     );
     const totalOccupiedBedCount = capacityQuery.data.results.reduce(
       (acc, x) => acc + (x.current_capacity ? x.current_capacity : 0),
-      0
+      0,
     );
 
     capacityList = (
