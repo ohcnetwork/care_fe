@@ -11,7 +11,7 @@ export const getFacilityUsers = (id: string, params?: object) => {
     "getFacilityUsers",
     [],
     { ...params },
-    { facility_id: id }
+    { facility_id: id },
   );
 };
 
@@ -26,7 +26,7 @@ export const partialUpdateAssetBed = (params: object, asset_id: string) =>
     { ...params },
     {
       external_id: asset_id,
-    }
+    },
   );
 
 export const deleteAssetBed = (asset_id: string) =>
@@ -36,7 +36,7 @@ export const deleteAssetBed = (asset_id: string) =>
     {},
     {
       external_id: asset_id,
-    }
+    },
   );
 
 // Download Actions
@@ -74,33 +74,9 @@ export const downloadSampleTests = (params: object) => {
   return fireRequest("getTestSampleList", [], { ...params, csv: 1 });
 };
 
-// Daily Rounds
-
-export const createDailyReport = (params: object, pathParam: object) => {
-  return fireRequest("createDailyRounds", [], params, pathParam);
-};
-export const updateDailyReport = (params: object, pathParam: object) => {
-  return fireRequest("updateDailyReport", [], params, pathParam);
-};
-export const getDailyReport = (params: object, pathParam: object) => {
-  return fireRequest("getDailyReports", [], params, pathParam);
-};
-export const getConsultationDailyRoundsDetails = (pathParam: object) => {
-  return fireRequest("getDailyReport", [], {}, pathParam);
-};
-
 // Consultation
-export const createConsultation = (params: object) => {
-  return fireRequest("createConsultation", [], params);
-};
 export const getConsultation = (id: string) => {
   return fireRequest("getConsultation", [], {}, { id: id });
-};
-export const updateConsultation = (id: string, params: object) => {
-  return fireRequest("updateConsultation", [], params, { id: id });
-};
-export const partialUpdateConsultation = (id: string, params: object) => {
-  return fireRequest("partialUpdateConsultation", [], params, { id: id });
 };
 
 export const generateDischargeSummary = (pathParams: object) => {
@@ -113,7 +89,7 @@ export const previewDischargeSummary = (pathParams: object) => {
     {},
     pathParams,
     undefined,
-    true
+    true,
   );
 };
 export const emailDischargeSummary = (params: object, pathParams: object) => {
@@ -219,7 +195,7 @@ export const HCXActions = {
           use: "preauthorization",
         },
         {},
-        `listPreAuths-${consultation}`
+        `listPreAuths-${consultation}`,
       );
     },
   },

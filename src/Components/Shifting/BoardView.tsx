@@ -48,10 +48,10 @@ export default function BoardView() {
     : ["CANCELLED", "PATIENT EXPIRED"];
 
   const completedBoards = shiftStatusOptions.filter((option) =>
-    COMPLETED.includes(option.text)
+    COMPLETED.includes(option.text),
   );
   const activeBoards = shiftStatusOptions.filter(
-    (option) => !COMPLETED.includes(option.text)
+    (option) => !COMPLETED.includes(option.text),
   );
 
   const [boardFilter, setBoardFilter] = useState(activeBoards);
@@ -71,7 +71,7 @@ export default function BoardView() {
       setIsLeftScrollable(container.scrollLeft > 0);
       setIsRightScrollable(
         container.scrollLeft + container.clientWidth <
-          container.scrollWidth - 10
+          container.scrollWidth - 10,
       );
     };
 

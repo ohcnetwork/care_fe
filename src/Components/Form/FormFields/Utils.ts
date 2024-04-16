@@ -20,7 +20,7 @@ export type FieldChangeEventHandler<T> = (event: FieldChangeEvent<T>) => void;
  */
 export type FormFieldBaseProps<
   T,
-  Form extends FormDetails | undefined = undefined
+  Form extends FormDetails | undefined = undefined,
 > = {
   label?: React.ReactNode;
   labelSuffix?: React.ReactNode;
@@ -59,9 +59,9 @@ export type FormFieldBaseProps<
  */
 export const useFormFieldPropsResolver = <
   T,
-  Form extends FormDetails | undefined = undefined
+  Form extends FormDetails | undefined = undefined,
 >(
-  props: FormFieldBaseProps<T, Form>
+  props: FormFieldBaseProps<T, Form>,
 ) => {
   if (props.context) {
     // Voluntarily disabling the rule of hooks here because we want to use the

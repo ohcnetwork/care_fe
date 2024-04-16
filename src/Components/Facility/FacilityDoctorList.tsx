@@ -61,7 +61,7 @@ export const FacilityDoctorList = (props: any) => {
           const removeCurrentDoctorData = (doctorId: number | undefined) => {
             if (doctorQuery.data !== undefined) {
               doctorQuery.data?.results.filter(
-                (i: DoctorModal) => i.id !== doctorId
+                (i: DoctorModal) => i.id !== doctorId,
               );
               doctorQuery.refetch();
             }
