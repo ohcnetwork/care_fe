@@ -21,7 +21,7 @@ const BREAKPOINT_WIDTH: Record<Breakpoints, number> = {
  * @returns The value mapped to the current breakpoint.
  */
 export default function useBreakpoints<T>(
-  map: Partial<Record<Breakpoints, T>> & { default: T }
+  map: Partial<Record<Breakpoints, T>> & { default: T },
 ) {
   const { width } = useWindowDimensions();
 

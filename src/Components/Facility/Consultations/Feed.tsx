@@ -123,7 +123,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                     ?.middleware_address,
               });
               setResolvedMiddleware(
-                bedAssets.data.results[0].asset_object.resolved_middleware
+                bedAssets.data.results[0].asset_object.resolved_middleware,
               );
               setCameraConfig(bedAssets.data.results[0].meta);
               setCameraState({
@@ -158,7 +158,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     return () => clearTimeout(timeout);
   }, [camTimeout]);
   const [streamStatus, setStreamStatus] = useState<StreamStatus>(
-    StreamStatus.Offline
+    StreamStatus.Offline,
   );
 
   const url = !isIOS
@@ -275,7 +275,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         bedPresets?.find(
           (preset: any) =>
             String(preset?.meta?.preset_name).trim().toLowerCase() ===
-            PATIENT_DEFAULT_PRESET
+            PATIENT_DEFAULT_PRESET,
         ) || bedPresets?.[0];
 
       if (preset) {
@@ -320,7 +320,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   } = {
     precision: () => {
       setPrecision((precision: number) =>
-        precision === 16 ? 1 : precision * 2
+        precision === 16 ? 1 : precision * 2,
       );
     },
     reset: () => {
@@ -343,7 +343,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         !isFullscreen,
         videoWrapper.current
           ? videoWrapper.current
-          : (liveFeedPlayerRef.current as HTMLElement)
+          : (liveFeedPlayerRef.current as HTMLElement),
       );
     },
     updatePreset: (option) => {
@@ -363,7 +363,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                   },
                 },
                 pathParams: { external_id: currentPreset?.id },
-              }
+              },
             );
             if (res && assetBedData && res.status === 200) {
               Notification.Success({ msg: "Preset Updated" });
@@ -418,7 +418,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                       setLoading(CAMERA_STATES.IDLE);
                       setCurrentPreset(preset);
                       console.log(
-                        "onSuccess: Set Preset to " + preset?.meta?.preset_name
+                        "onSuccess: Set Preset to " + preset?.meta?.preset_name,
                       );
                       triggerGoal("Camera Preset Clicked", {
                         presetName: preset?.meta?.preset_name,
@@ -431,7 +431,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                       setLoading(CAMERA_STATES.IDLE);
                       setCurrentPreset(preset);
                       console.log(
-                        "onError: Set Preset to " + preset?.meta?.preset_name
+                        "onError: Set Preset to " + preset?.meta?.preset_name,
                       );
                       triggerGoal("Camera Preset Clicked", {
                         presetName: preset?.meta?.preset_name,
@@ -447,7 +447,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                   "block border border-gray-500 px-4 py-2 first:rounded-l last:rounded-r",
                   currentPreset === preset
                     ? "border-primary-500 bg-primary-500 text-white"
-                    : "bg-transparent"
+                    : "bg-transparent",
                 )}
               >
                 {preset.meta.preset_name || `Preset ${index + 1}`}
@@ -554,7 +554,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           {["fullScreen", "reset", "updatePreset", "zoomIn", "zoomOut"].map(
             (button, index) => {
               const option = cameraPTZ.find(
-                (option) => option.action === button
+                (option) => option.action === button,
               );
               return (
                 <FeedButton
@@ -564,7 +564,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                   clickAction={() => option?.callback()}
                 />
               );
-            }
+            },
           )}
           <div className="hidden pl-3 md:block">
             <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />

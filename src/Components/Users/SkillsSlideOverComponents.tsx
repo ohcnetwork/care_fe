@@ -38,7 +38,7 @@ export const SkillsArray = ({
         <div
           key={`facility_${i}`}
           className={classNames(
-            "relative cursor-pointer rounded px-4 py-5 transition duration-200 ease-in-out hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg lg:px-8"
+            "relative cursor-pointer rounded px-4 py-5 transition duration-200 ease-in-out hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg lg:px-8",
           )}
         >
           <div className="flex justify-between">

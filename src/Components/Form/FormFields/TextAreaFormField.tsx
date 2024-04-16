@@ -15,7 +15,7 @@ export type TextAreaFormFieldProps = FormFieldBaseProps<string> & {
 const TextAreaFormField = forwardRef(
   (
     { rows = 3, ...props }: TextAreaFormFieldProps,
-    ref?: React.Ref<HTMLTextAreaElement>
+    ref?: React.Ref<HTMLTextAreaElement>,
   ) => {
     const field = useFormFieldPropsResolver(props as any);
     return (
@@ -38,7 +38,7 @@ const TextAreaFormField = forwardRef(
         />
       </FormField>
     );
-  }
+  },
 );
 
 export default TextAreaFormField;

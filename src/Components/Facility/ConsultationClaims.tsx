@@ -29,7 +29,7 @@ export default function ConsultationClaims({
       HCXActions.claims.list({
         ordering: "-modified_date",
         consultation: consultationId,
-      })
+      }),
     );
 
     if (res.data && res.data.results) {
@@ -64,7 +64,7 @@ export default function ConsultationClaims({
         className="grow-0 pl-6"
         onBackClick={() => {
           navigate(
-            `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
+            `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
           );
           return false;
         }}
