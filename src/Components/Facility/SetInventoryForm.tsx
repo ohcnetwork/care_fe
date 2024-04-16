@@ -18,7 +18,7 @@ const initForm = {
 };
 const initError = Object.assign(
   {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
 );
 const initialState = {
   form: { ...initForm },
@@ -74,7 +74,7 @@ export const SetInventoryForm = (props: any) => {
         onResponse: ({ res, data }) => {
           if (res && data) {
             const filteredData = data.results.filter(
-              (item) => !existingItemIDs.includes(item.id as number)
+              (item) => !existingItemIDs.includes(item.id as number),
             );
             setData(filteredData);
             dispatch({

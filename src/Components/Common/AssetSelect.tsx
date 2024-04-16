@@ -52,7 +52,7 @@ export const AssetSelect = (props: AssetSelectProps) => {
       const { data } = await request(routes.listAssets, { query });
       return data?.results;
     },
-    [asset_class, facility, in_use_by_consultation, is_permanent, is_working]
+    [asset_class, facility, in_use_by_consultation, is_permanent, is_working],
   );
 
   return (

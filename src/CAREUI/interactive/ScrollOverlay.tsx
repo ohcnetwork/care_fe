@@ -20,7 +20,7 @@ export default function ScrollOverlay(props: Props) {
       <div
         className={classNames(
           "sticky inset-x-0 -bottom-3.5 z-10 flex items-end justify-center bg-gradient-to-t from-gray-900/90 to-transparent text-white transition-all duration-500 ease-in-out md:bottom-0",
-          hasScrollContent ? "h-16 opacity-75" : "h-0 opacity-0"
+          hasScrollContent ? "h-16 opacity-75" : "h-0 opacity-0",
         )}
       >
         {hasScrollContent && props.overlay}
