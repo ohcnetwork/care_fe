@@ -100,7 +100,7 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
       );
     const _trailing =
       trailing === trailingFocused ? (
-        <div className="absolute inset-y-0 right-7 flex items-center pr-3">
+        <div className="absolute inset-y-0 right-0 md:right-6 flex items-center pr-3">
           {trailing}
         </div>
       ) : (
