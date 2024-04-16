@@ -52,8 +52,8 @@ export default function PrescriptionsTable({
         ? REGULAR_PRN_TKEYS
         : REGULAR_NORMAL_TKEYS
       : is_prn
-      ? DISCHARGE_PRN_TKEYS
-      : DISCHARGE_NORMAL_TKEYS;
+        ? DISCHARGE_PRN_TKEYS
+        : DISCHARGE_NORMAL_TKEYS;
 
   return (
     <div>

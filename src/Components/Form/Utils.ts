@@ -12,13 +12,13 @@ export type FormAction<T = FormDetails> =
   | { type: "set_state"; state: FormState<T> };
 export type FormReducer<T = FormDetails> = (
   prevState: FormState<T>,
-  action: FormAction<T>
+  action: FormAction<T>,
 ) => FormState<T>;
 export type FormDraft = { timestamp: number; form: FormDetails };
 
 export const formReducer = <T = FormDetails>(
   state: FormState<T>,
-  action: FormAction<T>
+  action: FormAction<T>,
 ): FormState<T> => {
   switch (action.type) {
     case "set_form":

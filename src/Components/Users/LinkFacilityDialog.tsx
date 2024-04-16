@@ -7,7 +7,7 @@ interface Props {
   username: string;
   handleOk: (
     username: string,
-    facility: FacilityModel | FacilityModel[] | null
+    facility: FacilityModel | FacilityModel[] | null,
   ) => void;
   handleCancel: () => void;
 }
