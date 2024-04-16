@@ -14,7 +14,7 @@ interface Props {
 
 const useRangePagination = ({ bounds, perPage, ...props }: Props) => {
   const [currentRange, setCurrentRange] = useState(
-    getInitialBounds(bounds, perPage, props.defaultEnd)
+    getInitialBounds(bounds, perPage, props.defaultEnd),
   );
 
   useEffect(() => {
@@ -90,7 +90,7 @@ export default useRangePagination;
 const getInitialBounds = (
   bounds: DateRange,
   perPage: number,
-  defaultEnd?: boolean
+  defaultEnd?: boolean,
 ) => {
   const deltaBounds = bounds.end.valueOf() - bounds.start.valueOf();
 

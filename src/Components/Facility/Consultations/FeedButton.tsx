@@ -53,7 +53,7 @@ export default function FeedButton(props: {
           "tooltip-text top-2.5 text-sm font-semibold",
           props.camProp.label.includes("Move")
             ? "tooltip-right"
-            : "tooltip-left"
+            : "tooltip-left",
         )}
       >
         {`${props.camProp.label}  (${shortcutKeyDescription(props.camProp)})`}

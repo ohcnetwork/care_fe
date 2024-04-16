@@ -40,7 +40,7 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
   const [loadingAddPreset, setLoadingAddPreset] = useState(false);
   const [loadingSetConfiguration, setLoadingSetConfiguration] = useState(false);
   const [refreshPresetsHash, setRefreshPresetsHash] = useState(
-    Number(new Date())
+    Number(new Date()),
   );
   const { data: facility, loading } = useQuery(routes.getPermittedFacility, {
     pathParams: { id: facilityId },
@@ -101,7 +101,7 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
       setLoadingAddPreset(true);
 
       const response = await fetch(
-        `https://${resolvedMiddleware?.hostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
+        `https://${resolvedMiddleware?.hostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`,
       );
       if (!response.ok) {
         throw new Error("Network error");

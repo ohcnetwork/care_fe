@@ -25,7 +25,7 @@ export default function PrescriptionDetailCard({
         props.selected
           ? "border-primary-500"
           : "border-spacing-2 border-dashed border-gray-500",
-        prescription.discontinued && "bg-gray-200 opacity-80"
+        prescription.discontinued && "bg-gray-200 opacity-80",
       )}
     >
       <div className="flex flex-1 flex-col">
@@ -35,7 +35,7 @@ export default function PrescriptionDetailCard({
               <h3
                 className={classNames(
                   "text-lg font-bold transition-all duration-200 ease-in-out",
-                  props.selected ? "text-black" : "text-gray-700"
+                  props.selected ? "text-black" : "text-gray-700",
                 )}
               >
                 {prescription.prescription_type === "DISCHARGE" &&
@@ -43,7 +43,7 @@ export default function PrescriptionDetailCard({
                 {t(
                   prescription.dosage_type === "PRN"
                     ? "prn_prescription"
-                    : "prescription"
+                    : "prescription",
                 )}
                 {` #${prescription.id?.slice(-5)}`}
               </h3>
@@ -156,7 +156,7 @@ export default function PrescriptionDetailCard({
                 {prescription.frequency &&
                   t(
                     "PRESCRIPTION_FREQUENCY_" +
-                      prescription.frequency.toUpperCase()
+                      prescription.frequency.toUpperCase(),
                   )}
               </Detail>
               <Detail className="col-span-5" label={t("days")}>

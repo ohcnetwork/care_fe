@@ -24,8 +24,8 @@ export const ConsultationCard = (props: ConsultationProps) => {
   const bedDialogTitle = itemData.discharge_date
     ? "Bed History"
     : !itemData.current_bed
-    ? "Assign Bed"
-    : "Switch Bed";
+      ? "Assign Bed"
+      : "Switch Bed";
   return (
     <>
       <DialogModal
@@ -172,7 +172,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
             className="h-auto whitespace-pre-wrap border border-gray-500 bg-white text-black hover:bg-gray-300"
             onClick={() =>
               navigate(
-                `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}`
+                `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}`,
               )
             }
           >
@@ -182,7 +182,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
             className="h-auto whitespace-pre-wrap border border-gray-500 bg-white text-black hover:bg-gray-300"
             onClick={() =>
               navigate(
-                `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/files/`
+                `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/files/`,
               )
             }
           >
@@ -199,7 +199,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
                   setOpen(true);
                 } else {
                   navigate(
-                    `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds`
+                    `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds`,
                   );
                 }
               }}

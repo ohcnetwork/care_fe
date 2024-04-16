@@ -8,7 +8,7 @@ export type StreamStatus = "playing" | "stop" | "loading" | "offline";
 
 export default function usePlayer(
   streamUrl: string,
-  ref: MutableRefObject<HTMLVideoElement | ReactPlayer | null>
+  ref: MutableRefObject<HTMLVideoElement | ReactPlayer | null>,
 ) {
   const [playedOn, setPlayedOn] = useState<Date>();
   const [status, setStatus] = useState<StreamStatus>("stop");
@@ -39,7 +39,7 @@ export default function usePlayer(
         },
       });
     },
-    [ref.current, streamUrl]
+    [ref.current, streamUrl],
   );
 
   const onPlayCB = () => {
