@@ -13,7 +13,7 @@ import VentilatorVitalsRenderer from "./VentilatorWaveformsRenderer";
 import { getChannel, getVitalsCanvasSizeAndDuration } from "./utils";
 
 export default function useVentilatorVitalsMonitor(
-  config?: IVitalsComponentProps["config"]
+  config?: IVitalsComponentProps["config"],
 ) {
   const waveformForegroundCanvas = useCanvas();
   const waveformBackgroundCanvas = useCanvas();
@@ -67,7 +67,7 @@ export default function useVentilatorVitalsMonitor(
         const _renderer = renderer.current;
         device.current?.on(
           "pressure-waveform",
-          ingestTo(_renderer, "pressure")
+          ingestTo(_renderer, "pressure"),
         );
         device.current?.on("flow-waveform", ingestTo(_renderer, "flow"));
         device.current?.on("volume-waveform", ingestTo(_renderer, "volume"));
@@ -82,26 +82,26 @@ export default function useVentilatorVitalsMonitor(
 
       device.current.once("pressure-waveform", (observation) => {
         pressureOptionsRef.current = getChannel(
-          observation as VentilatorVitalsWaveformData
+          observation as VentilatorVitalsWaveformData,
         );
         obtainRenderer();
       });
 
       device.current.once("flow-waveform", (observation) => {
         flowOptionsRef.current = getChannel(
-          observation as VentilatorVitalsWaveformData
+          observation as VentilatorVitalsWaveformData,
         );
         obtainRenderer();
       });
 
       device.current.once("volume-waveform", (observation) => {
         volumeOptionsRef.current = getChannel(
-          observation as VentilatorVitalsWaveformData
+          observation as VentilatorVitalsWaveformData,
         );
         obtainRenderer();
       });
     },
-    [waveformForegroundCanvas.contextRef, waveformBackgroundCanvas]
+    [waveformForegroundCanvas.contextRef, waveformBackgroundCanvas],
   );
 
   return {
@@ -124,14 +124,14 @@ export default function useVentilatorVitalsMonitor(
 
 const ingestTo = (
   vitalsRenderer: VentilatorVitalsRenderer,
-  channel: "pressure" | "flow" | "volume"
+  channel: "pressure" | "flow" | "volume",
 ) => {
   return (observation: VentilatorData) => {
     vitalsRenderer.append(
       channel,
       (observation as VentilatorVitalsWaveformData).data
         .split(" ")
-        .map((x) => parseInt(x)) || []
+        .map((x) => parseInt(x)) || [],
     );
   };
 };

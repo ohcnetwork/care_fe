@@ -39,7 +39,7 @@ export default function PhoneNumberFormField(props: Props) {
 
   const validator = useMemo(
     () => PhoneNumberValidator(props.types),
-    [props.types]
+    [props.types],
   );
 
   const validate = useMemo(
@@ -56,7 +56,7 @@ export default function PhoneNumberFormField(props: Props) {
         return newError;
       }
     },
-    [props.disableValidation]
+    [props.disableValidation],
   );
 
   const setValue = useCallback(
@@ -71,7 +71,7 @@ export default function PhoneNumberFormField(props: Props) {
 
       setError(error);
     },
-    [field, validate]
+    [field, validate],
   );
 
   const handleCountryChange = (value: CountryData): void => {
@@ -137,7 +137,7 @@ export default function PhoneNumberFormField(props: Props) {
           className={classNames(
             "cui-input-base h-full pl-20 tracking-widest sm:leading-6 ",
             field.error && "border-danger-500",
-            field.className
+            field.className,
           )}
           maxLength={field.value?.startsWith("1800") ? 11 : 15}
           placeholder={props.placeholder}

@@ -70,7 +70,7 @@ const ShiftCard = ({ shift, filter }: any) => {
       pathParams: { externalId: shift.external_id },
     });
     navigate(
-      `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`
+      `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`,
     );
   };
   return (
@@ -85,7 +85,7 @@ const ShiftCard = ({ shift, filter }: any) => {
         <div
           className={classNames(
             "flex h-full flex-col justify-between p-4",
-            shift.patient_object.disease_status == "POSITIVE" && "bg-red-50"
+            shift.patient_object.disease_status == "POSITIVE" && "bg-red-50",
           )}
         >
           <div>
@@ -230,7 +230,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                   !shift.patient_object.allow_transfer ||
                   !(
                     ["DistrictAdmin", "StateAdmin"].includes(
-                      authUser.user_type
+                      authUser.user_type,
                     ) ||
                     authUser.home_facility_object?.id ===
                       shift.assigned_facility
@@ -335,7 +335,7 @@ export default function ShiftingBoard({
       setData((prev) =>
         prev
           ? { ...prev, results: [...prev.results, ...newPageData.results] }
-          : newPageData
+          : newPageData,
       );
     }
     setIsLoading((loading) => reduceLoading("COMPLETE", loading));
@@ -363,7 +363,7 @@ export default function ShiftingBoard({
       ref={drop}
       className={classNames(
         "mr-2 h-full w-full flex-shrink-0 rounded-md bg-gray-200 pb-4 md:w-1/2 lg:w-1/3 xl:w-1/4",
-        isOver && "cursor-move"
+        isOver && "cursor-move",
       )}
       style={{ minHeight: `${containerHeight + 100}px` }}
     >

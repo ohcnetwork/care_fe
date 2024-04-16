@@ -117,7 +117,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
               <div
                 className={classNames(
                   "absolute z-10 w-full",
-                  props.position === "above" ? "bottom-0 mb-12" : "top-0 mt-12"
+                  props.position === "above" ? "bottom-0 mb-12" : "top-0 mt-12",
                 )}
               >
                 <DropdownTransition show={open}>
