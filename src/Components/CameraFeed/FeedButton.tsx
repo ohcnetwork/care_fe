@@ -16,7 +16,7 @@ export default function FeedButton(props: Props) {
     <button
       className={classNames(
         "flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-700/50 bg-zinc-800/40 shadow-none transition hover:bg-zinc-50 hover:text-zinc-800 hover:shadow hover:backdrop-blur-xl active:shadow-2xl md:backdrop-blur-md",
-        props.className
+        props.className,
       )}
       type="button"
       onClick={props.onTrigger}

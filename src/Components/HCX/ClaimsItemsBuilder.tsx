@@ -29,14 +29,14 @@ export default function ClaimsItemsBuilder(props: Props) {
                   name: event.value.name,
                   price: event.value.price,
                 }
-              : obj
-          )
+              : obj,
+          ),
         );
       } else {
         field.handleChange(
           (props.value || [])?.map((obj, i) =>
-            i === index ? { ...obj, [event.name]: event.value } : obj
-          )
+            i === index ? { ...obj, [event.name]: event.value } : obj,
+          ),
         );
       }
     };

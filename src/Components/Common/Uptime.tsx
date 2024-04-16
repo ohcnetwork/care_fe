@@ -22,7 +22,7 @@ const STATUS_COLORS_TEXT = {
 
 const now = dayjs();
 const formatDateBeforeDays = Array.from({ length: 100 }, (_, index) =>
-  now.subtract(index, "days").format("DD MMMM YYYY")
+  now.subtract(index, "days").format("DD MMMM YYYY"),
 );
 
 const uptimeScore: number[] = Array.from({ length: 100 }, () => 0);
@@ -82,10 +82,10 @@ function UptimeInfo({
                           dayjs
                             .duration(
                               dayjs(endTimestamp).diff(
-                                dayjs(incident.timestamp)
-                              )
+                                dayjs(incident.timestamp),
+                              ),
                             )
-                            .asMinutes()
+                            .asMinutes(),
                         )
                       : "Ongoing";
                     if (
@@ -94,7 +94,7 @@ function UptimeInfo({
                     )
                       totalMinutes += dayjs(endTimestamp).diff(
                         dayjs(incident.timestamp),
-                        "minutes"
+                        "minutes",
                       );
 
                     return (
@@ -154,8 +154,8 @@ function UptimeInfoPopover({
           day > numDays - 10
             ? "-translate-x-6"
             : day < 10
-            ? "-translate-x-full"
-            : "-translate-x-1/2"
+              ? "-translate-x-full"
+              : "-translate-x-1/2",
         )}
         static
       >
@@ -172,7 +172,7 @@ export default function Uptime(
     header?: React.ReactNode;
     parentClassNames?: string;
     centerInfoPanel?: boolean;
-  }>
+  }>,
 ) {
   const [summary, setSummary] = useState<{
     [key: number]: AvailabilityRecord[];
@@ -184,7 +184,7 @@ export default function Uptime(
   const availabilityData = data?.results ?? [];
   const graphElem = useRef<HTMLDivElement>(null);
   const [numDays, setNumDays] = useState(
-    Math.floor((window.innerWidth - 1024) / 20)
+    Math.floor((window.innerWidth - 1024) / 20),
   );
   const [hoveredDay, setHoveredDay] = useState(-1);
 
@@ -229,7 +229,7 @@ export default function Uptime(
       } else {
         if (
           recordsByDayBefore[i].filter(
-            (r) => dayjs(r.timestamp).get("hour") < 8
+            (r) => dayjs(r.timestamp).get("hour") < 8,
           ).length === 0
         ) {
           recordsByDayBefore[i].unshift({
@@ -259,7 +259,7 @@ export default function Uptime(
         .set("hour", 0)
         .set("minute", 0)
         .set("second", 0),
-      "days"
+      "days",
     );
 
     const days = Math.max(1, Math.min(daysAvailable, displayDays));
@@ -297,7 +297,7 @@ export default function Uptime(
         const recordsInPeriod = dayRecords.filter(
           (record) =>
             dayjs(record.timestamp).hour() >= start &&
-            dayjs(record.timestamp).hour() < end
+            dayjs(record.timestamp).hour() < end,
         );
         recordsInPeriodCache[i] = recordsInPeriod;
         if (recordsInPeriod.length === 0) {
@@ -318,7 +318,7 @@ export default function Uptime(
             statusColors.push(
               STATUS_COLORS[
                 previousLatestRecord?.status as keyof typeof STATUS_COLORS
-              ] ?? STATUS_COLORS["Not Monitored"]
+              ] ?? STATUS_COLORS["Not Monitored"],
             );
             recordsInPeriodCache[i] = [previousLatestRecord];
           } else {
@@ -326,19 +326,19 @@ export default function Uptime(
           }
         } else if (
           recordsInPeriod.some(
-            (record) => record.status === AssetStatus["down"]
+            (record) => record.status === AssetStatus["down"],
           )
         ) {
           statusColors.push(STATUS_COLORS["Down"]);
         } else if (
           recordsInPeriod.some(
-            (record) => record.status === AssetStatus["maintenance"]
+            (record) => record.status === AssetStatus["maintenance"],
           )
         ) {
           statusColors.push(STATUS_COLORS["Under Maintenance"]);
         } else if (
           recordsInPeriod.some(
-            (record) => record.status === AssetStatus["operational"]
+            (record) => record.status === AssetStatus["operational"],
           )
         ) {
           statusColors.push(STATUS_COLORS["Operational"]);

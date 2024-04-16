@@ -40,7 +40,7 @@ const initForm: SampleTestModel = {
 
 const initError = Object.assign(
   {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
 );
 
 const initialState = {
@@ -289,7 +289,7 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
             <TextAreaFormField
               {...field(
                 "atypical_presentation",
-                "Atypical presentation details"
+                "Atypical presentation details",
               )}
               required
             />

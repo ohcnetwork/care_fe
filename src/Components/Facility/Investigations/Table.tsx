@@ -88,7 +88,7 @@ export const TestTable = ({ title, data, state, dispatch }: any) => {
                   >
                     {heading}
                   </th>
-                )
+                ),
               )}
             </tr>
           </thead>
@@ -111,7 +111,7 @@ export const TestTable = ({ title, data, state, dispatch }: any) => {
                           : e.value,
                         `${t.external_id}.${
                           t.investigation_type === "Float" ? "value" : "notes"
-                        }`
+                        }`,
                       )
                     }
                   />
