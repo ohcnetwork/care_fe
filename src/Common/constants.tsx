@@ -748,7 +748,7 @@ export const CAMERA_TYPE = [
 
 export const GENDER: { [key: number]: string } = GENDER_TYPES.reduce(
   (acc, curr) => ({ ...acc, [curr.id]: curr.text }),
-  {}
+  {},
 );
 
 export type CameraPTZ = {
@@ -1023,7 +1023,7 @@ export const XLSXAssetImportSchema = {
           if (!ip) return null;
           const isValid =
             /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
-              ip
+              ip,
             );
 
           if (!isValid) {

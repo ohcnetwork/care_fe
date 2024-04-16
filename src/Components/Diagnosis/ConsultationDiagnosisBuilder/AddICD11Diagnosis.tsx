@@ -58,7 +58,7 @@ export default function AddICD11Diagnosis(props: AddICD11DiagnosisProps) {
         options={mergeQueryOptions(
           selected ? [selected] : [],
           data ?? [],
-          (obj) => obj.id
+          (obj) => obj.id,
         )}
         optionLabel={(option) => option.label}
         optionValue={(option) => option}
