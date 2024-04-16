@@ -60,7 +60,7 @@ export default function AppRouter() {
 
   if (
     !["Nurse", "NurseReadOnly", "Staff", "StaffReadOnly"].includes(
-      authUser.user_type
+      authUser.user_type,
     )
   ) {
     routes = { ...routes, ...ExternalResultRoutes };
@@ -86,13 +86,13 @@ export default function AppRouter() {
   }, [path]);
 
   const [shrinked, setShrinked] = useState(
-    localStorage.getItem(SIDEBAR_SHRINK_PREFERENCE_KEY) === "true"
+    localStorage.getItem(SIDEBAR_SHRINK_PREFERENCE_KEY) === "true",
   );
 
   useEffect(() => {
     localStorage.setItem(
       SIDEBAR_SHRINK_PREFERENCE_KEY,
-      shrinked ? "true" : "false"
+      shrinked ? "true" : "false",
     );
   }, [shrinked]);
 
