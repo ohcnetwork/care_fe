@@ -244,11 +244,12 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
               <a
                 role="button"
                 href="#"
-                onClick={async () =>
+                onClick={async (e) => {
+                  e.stopPropagation();
                   await navigator.clipboard.writeText(
                     user?.alt_phone_number || "",
-                  )
-                }
+                  );
+                }}
               >
                 <span className="tooltip">
                   <span className="tooltip-text tooltip-top">
@@ -280,7 +281,8 @@ function DoctorConnectButtons(props: {
       {user.video_connect_link && (
         <a
           href={user.video_connect_link}
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             triggerGoal("Doctor Connect Click", {
               medium: "Video Call",
               userId: authUser.id,
@@ -306,7 +308,8 @@ function DoctorConnectButtons(props: {
       </a>
       <a
         href={user.alt_phone_number ? `tel:${user.alt_phone_number}` : "#"}
-        onClick={() => {
+        onClick={(e) => {
+          e.stopPropagation();
           triggerGoal("Doctor Connect Click", {
             medium: "Phone Call",
             userId: authUser.id,
