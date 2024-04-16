@@ -72,7 +72,7 @@ const AssetImportModal = ({ open, onClose, facility, onUpdate }: Props) => {
             case "csv": {
               const parsedData = await parseCsvFile(
                 selectedFile,
-                XLSXAssetImportSchema
+                XLSXAssetImportSchema,
               );
               setPreview(parsedData);
               break;
@@ -188,11 +188,11 @@ const AssetImportModal = ({ open, onClose, facility, onUpdate }: Props) => {
     const dropedFile = e?.dataTransfer?.files[0];
     if (
       !["xlsx", "csv", "json"].includes(
-        dropedFile?.name?.split(".")?.pop() || ""
+        dropedFile?.name?.split(".")?.pop() || "",
       )
     )
       return dragProps.setFileDropError(
-        "Please drop a JSON / Excel file to upload!"
+        "Please drop a JSON / Excel file to upload!",
       );
     setSelectedFile(dropedFile);
   };

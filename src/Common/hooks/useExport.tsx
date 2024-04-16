@@ -17,7 +17,7 @@ export default function useExport() {
   const exportCSV = async (
     filenamePrefix: string,
     action: any,
-    parse = (data: string) => data
+    parse = (data: string) => data,
   ) => {
     setIsExporting(true);
 
@@ -40,7 +40,7 @@ export default function useExport() {
   const exportJSON = async (
     filenamePrefix: string,
     action: any,
-    parse = (data: string) => data
+    parse = (data: string) => data,
   ) => {
     setIsExporting(true);
 
@@ -62,7 +62,7 @@ export default function useExport() {
     action: any,
     filePrefix = "export",
     type = "csv",
-    parse = (data: string) => data
+    parse = (data: string) => data,
   ) => {
     if (!action) return;
 

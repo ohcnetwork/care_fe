@@ -73,7 +73,7 @@ const AssetManage = (props: AssetManageProps) => {
         setTransactionFilter(
           data.qr_code_id
             ? { qr_code_id: data.qr_code_id }
-            : { external_id: assetId }
+            : { external_id: assetId },
         );
       }
     },
@@ -99,7 +99,7 @@ const AssetManage = (props: AssetManageProps) => {
       pathParams: {
         asset_external_id: assetId,
       },
-    }
+    },
   );
 
   const handlePagination = (page: number, limit: number) => {
@@ -158,7 +158,7 @@ const AssetManage = (props: AssetManageProps) => {
               </span>
             </td>
           </tr>
-        ))
+        )),
       );
     } else {
       setTransactionDetails(
@@ -169,7 +169,7 @@ const AssetManage = (props: AssetManageProps) => {
           >
             <h5>No Transactions Found</h5>
           </td>
-        </tr>
+        </tr>,
       );
     }
   };
@@ -235,7 +235,7 @@ const AssetManage = (props: AssetManageProps) => {
               </ButtonV2>
             </td>
           </tr>
-        ))
+        )),
       );
     } else {
       setServiceDetails(
@@ -246,7 +246,7 @@ const AssetManage = (props: AssetManageProps) => {
           >
             <h5>No Service Logs Found</h5>
           </td>
-        </tr>
+        </tr>,
       );
     }
   };
@@ -386,7 +386,7 @@ const AssetManage = (props: AssetManageProps) => {
                     />
                   )}
                   {warrantyAmcValidityChip(
-                    asset?.warranty_amc_end_of_validity as string
+                    asset?.warranty_amc_end_of_validity as string,
                   )}
                   {asset?.latest_status === "Down" && (
                     <Chip
@@ -426,7 +426,7 @@ const AssetManage = (props: AssetManageProps) => {
                 className="flex gap-2"
                 onClick={() =>
                   navigate(
-                    `/facility/${asset?.location_object.facility?.id}/assets/${asset?.id}/update`
+                    `/facility/${asset?.location_object.facility?.id}/assets/${asset?.id}/update`,
                   )
                 }
                 id="update-asset"
@@ -439,12 +439,12 @@ const AssetManage = (props: AssetManageProps) => {
               {asset?.asset_class &&
                 (asset?.asset_class !== "ONVIF" ||
                   ["DistrictAdmin", "StateAdmin", "Doctor"].includes(
-                    authUser.user_type
+                    authUser.user_type,
                   )) && (
                   <ButtonV2
                     onClick={() =>
                       navigate(
-                        `/facility/${asset?.location_object.facility?.id}/assets/${asset?.id}/configure`
+                        `/facility/${asset?.location_object.facility?.id}/assets/${asset?.id}/configure`,
                       )
                     }
                     id="configure-asset"

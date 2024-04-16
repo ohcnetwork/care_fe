@@ -37,14 +37,14 @@ export const formatFilter = (params: any) => {
       (filter.emergency && filter.emergency) === ""
         ? ""
         : filter.emergency === "yes"
-        ? "true"
-        : "false",
+          ? "true"
+          : "false",
     is_up_shift:
       (filter.is_up_shift && filter.is_up_shift) === ""
         ? ""
         : filter.is_up_shift === "yes"
-        ? "true"
-        : "false",
+          ? "true"
+          : "false",
     limit: limit,
     offset: filter.offset,
     patient_name: filter.patient_name || undefined,
@@ -61,14 +61,14 @@ export const formatFilter = (params: any) => {
       (filter.is_kasp && filter.is_kasp) === ""
         ? ""
         : filter.is_kasp === "yes"
-        ? "true"
-        : "false",
+          ? "true"
+          : "false",
     is_antenatal:
       (filter.is_antenatal && filter.is_antenatal) === ""
         ? ""
         : filter.is_antenatal === "yes"
-        ? "true"
-        : "false",
+          ? "true"
+          : "false",
   };
 };
 

@@ -25,7 +25,7 @@ type AutocompleteFormFieldProps<T, V> = FormFieldBaseProps<V> & {
 };
 
 const AutocompleteFormField = <T, V>(
-  props: AutocompleteFormFieldProps<T, V>
+  props: AutocompleteFormFieldProps<T, V>,
 ) => {
   const field = useFormFieldPropsResolver(props);
   return (
@@ -112,7 +112,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
     if (!query) return mappedOptions;
 
     const knownOption = mappedOptions.find(
-      (o) => o.value == props.value || o.label == props.value
+      (o) => o.value == props.value || o.label == props.value,
     );
 
     if (knownOption) return mappedOptions;
@@ -215,7 +215,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                         <div
                           className={classNames(
                             "text-sm",
-                            active ? "text-primary-200" : "text-gray-700"
+                            active ? "text-primary-200" : "text-gray-700",
                           )}
                         >
                           {option.description}

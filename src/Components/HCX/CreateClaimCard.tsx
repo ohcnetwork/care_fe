@@ -42,7 +42,7 @@ export default function CreateClaimCard({
   useEffect(() => {
     async function autoFill() {
       const latestApprovedPreAuthsRes = await dispatch(
-        HCXActions.preauths.list(consultationId)
+        HCXActions.preauths.list(consultationId),
       );
 
       if (latestApprovedPreAuthsRes.data?.results?.length) {
@@ -68,7 +68,7 @@ export default function CreateClaimCard({
               price: 0.0,
               category: "900000", // provider's packages
             };
-          })
+          }),
         );
       } else {
         setItems([]);
@@ -110,7 +110,7 @@ export default function CreateClaimCard({
         items,
         consultation: consultationId,
         use,
-      })
+      }),
     );
 
     if (res.data) {
@@ -184,7 +184,7 @@ export default function CreateClaimCard({
         <span
           className={classNames(
             policy ? "opacity-0" : "opacity-100",
-            "text-gray-700 transition-opacity duration-300 ease-in-out"
+            "text-gray-700 transition-opacity duration-300 ease-in-out",
           )}
         >
           Select a policy to add items
@@ -201,7 +201,7 @@ export default function CreateClaimCard({
           {items ? (
             <span className="font-bold tracking-wider">
               {formatCurrency(
-                items.map((p) => p.price).reduce((a, b) => a + b, 0.0)
+                items.map((p) => p.price).reduce((a, b) => a + b, 0.0),
               )}
             </span>
           ) : (
