@@ -26,7 +26,7 @@ export const checkForUpdate = async () => {
 
   if (res.status !== 200) {
     console.error(
-      `Skipped checking for updates. Failed to fetch '${META_URL}'.`
+      `Skipped checking for updates. Failed to fetch '${META_URL}'.`,
     );
     return;
   }
@@ -124,7 +124,7 @@ const UpdateAppPopup = ({ onUpdate }: UpdateAppPopupProps) => {
             icon="l-sync"
             className={classNames(
               "care-l-sync text-2xl",
-              isUpdating && "animate-spin"
+              isUpdating && "animate-spin",
             )}
           />
           <span className="mr-4 flex flex-col">

@@ -43,7 +43,7 @@ export default function Chip({
           custom: "",
         }[variant],
 
-        props.className
+        props.className,
       )}
       title={props.tooltip}
     >

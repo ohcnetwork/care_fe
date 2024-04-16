@@ -185,7 +185,7 @@ class HL7VitalsRenderer {
       cursor.x - deltaRows * size.width,
       1 + transform(channel.options.highLimit) + (deltaRows * size.height) / 4,
       10,
-      size.height / 4
+      size.height / 4,
     );
   }
 

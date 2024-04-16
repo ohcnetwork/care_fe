@@ -10,7 +10,7 @@ const TestRow = ({ data, i, onChange, showForm, value, isChanged }: any) => {
     <tr
       className={classNames(
         i % 2 == 0 ? "bg-gray-50" : "bg-white",
-        isChanged && "!bg-primary-300"
+        isChanged && "!bg-primary-300",
       )}
       x-description="Even row"
     >
@@ -137,7 +137,7 @@ export const InvestigationTable = ({
                     >
                       {heading}
                     </th>
-                  )
+                  ),
                 )}
               </tr>
             </thead>
