@@ -78,7 +78,7 @@ export default function DoctorVideoSlideover(props: {
       <p className="-mt-3 pb-4 text-sm text-gray-600">
         Select a doctor to connect via video
       </p>
-      <div className="flex justify-center">
+      <div className="flex justify-center" id="doctor-connect-filter-tabs">
         <Switch
           tabs={
             Object.values(FilterTypes).reduce(
