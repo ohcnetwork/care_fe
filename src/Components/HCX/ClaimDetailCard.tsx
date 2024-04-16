@@ -40,7 +40,7 @@ export default function ClaimDetailCard({ claim }: IProps) {
               "rounded p-1 px-2 text-sm font-bold text-white shadow",
               status === "Approved" && "bg-primary-400",
               status === "Rejected" && "bg-danger-400",
-              status === "Pending" && "bg-yellow-400"
+              status === "Pending" && "bg-yellow-400",
             )}
           >
             {status}

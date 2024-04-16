@@ -22,7 +22,7 @@ const useRecorder = (handleMicPermission) => {
             });
             setIsRecording(false);
             handleMicPermission(false);
-          }
+          },
         );
       }
       return;

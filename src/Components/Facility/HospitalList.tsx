@@ -65,7 +65,7 @@ export const HospitalList = () => {
         facility_type: qParams.facility_type,
         kasp_empanelled: qParams.kasp_empanelled,
       },
-    }
+    },
   );
 
   const { data: stateData } = useQuery(routes.getState, {
@@ -208,22 +208,22 @@ export const HospitalList = () => {
           value(
             "State",
             "state",
-            qParams.state && stateData ? stateData.name : ""
+            qParams.state && stateData ? stateData.name : "",
           ),
           value(
             "District",
             "district",
-            qParams.district && districtData ? districtData.name : ""
+            qParams.district && districtData ? districtData.name : "",
           ),
           value(
             "Local Body",
             "local_body",
-            qParams.local_body && localBodyData ? localBodyData.name : ""
+            qParams.local_body && localBodyData ? localBodyData.name : "",
           ),
           value(
             "Facility type",
             "facility_type",
-            findFacilityTypeById(qParams.facility_type) || ""
+            findFacilityTypeById(qParams.facility_type) || "",
           ),
           kasp("Empanelled", "kasp_empanelled"),
         ]}
