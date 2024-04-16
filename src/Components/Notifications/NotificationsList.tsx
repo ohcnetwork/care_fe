@@ -86,7 +86,7 @@ const NotificationTile = ({
       }}
       className={classNames(
         "relative cursor-pointer rounded px-4 py-5 transition duration-200 ease-in-out hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg lg:px-8",
-        result.read_at && "text-gray-500"
+        result.read_at && "text-gray-500",
       )}
     >
       <div className="flex justify-between">
@@ -109,7 +109,7 @@ const NotificationTile = ({
           <ButtonV2
             className={classNames(
               "bg-white px-2 py-1 font-semibold hover:bg-secondary-300",
-              result.read_at && "invisible"
+              result.read_at && "invisible",
             )}
             variant="secondary"
             border
@@ -121,11 +121,8 @@ const NotificationTile = ({
             }}
           >
             <CareIcon
-              className={
-                isMarkingAsRead
-                  ? "care-l-spinner animate-spin"
-                  : "care-l-envelope-check"
-              }
+              icon={isMarkingAsRead ? "l-spinner" : "l-envelope-check"}
+              className={isMarkingAsRead ? "animate-spin" : ""}
             />
             <span className="text-xs">{t("mark_as_read")}</span>
           </ButtonV2>
@@ -134,7 +131,7 @@ const NotificationTile = ({
             ghost
             className="shrink-0 bg-white px-2 py-1 font-semibold hover:bg-secondary-300"
           >
-            <CareIcon className="care-l-envelope-open" />
+            <CareIcon icon="l-envelope-open" />
             <span className="text-xs">{t("open")}</span>
           </ButtonV2>
         </div>
@@ -212,21 +209,21 @@ export default function NotificationsList({
     if (status === "NotSubscribed") {
       return (
         <>
-          <CareIcon className="care-l-bell" />
+          <CareIcon icon="l-bell" />
           <span className="text-xs">{t("subscribe")}</span>
         </>
       );
     } else if (status === "SubscribedOnAnotherDevice") {
       return (
         <>
-          <CareIcon className="care-l-bell" />
+          <CareIcon icon="l-bell" />
           <span className="text-xs">{t("subscribe_on_this_device")}</span>
         </>
       );
     } else {
       return (
         <>
-          <CareIcon className="care-l-bell-slash" />
+          <CareIcon icon="l-bell-slash" />
           <span className="text-xs">{t("unsubscribe")}</span>
         </>
       );
@@ -286,14 +283,14 @@ export default function NotificationsList({
     const p256dh = btoa(
       String.fromCharCode.apply(
         null,
-        new Uint8Array(push.getKey("p256dh") as any) as any
-      )
+        new Uint8Array(push.getKey("p256dh") as any) as any,
+      ),
     );
     const auth = btoa(
       String.fromCharCode.apply(
         null,
-        new Uint8Array(push.getKey("auth") as any) as any
-      )
+        new Uint8Array(push.getKey("auth") as any) as any,
+      ),
     );
 
     const data = {
@@ -321,7 +318,7 @@ export default function NotificationsList({
           pathParams: { id: notification.id },
           body: { read_at: new Date() },
         });
-      })
+      }),
     );
     setReload(!reload);
     setIsMarkingAllAsRead(false);
@@ -338,8 +335,8 @@ export default function NotificationsList({
           setUnreadCount(
             res.data.results?.reduce(
               (acc: number, result: any) => acc + (result.read_at ? 0 : 1),
-              0
-            )
+              0,
+            ),
           );
           setTotalCount(res.data.count);
         }
@@ -364,7 +361,7 @@ export default function NotificationsList({
         {data
           .filter((notification: any) => notification.event != "PUSH_MESSAGE")
           .filter((notification: any) =>
-            showUnread ? notification.read_at === null : true
+            showUnread ? notification.read_at === null : true,
           )
           .map((result: any) => (
             <NotificationTile
@@ -414,7 +411,7 @@ export default function NotificationsList({
       <Item
         text={t("Notifications")}
         do={() => setOpen(!open)}
-        icon={<CareIcon className="care-l-bell h-5" />}
+        icon={<CareIcon icon="l-bell" className="h-5" />}
         badgeCount={unreadCount}
         handleOverflow={handleOverflow}
       />
@@ -438,7 +435,7 @@ export default function NotificationsList({
                 setOffset(0);
               }}
             >
-              <CareIcon className="care-l-sync" />
+              <CareIcon icon="l-sync" />
               <span className="text-xs">{t("reload")}</span>
             </ButtonV2>
             <ButtonV2
@@ -457,11 +454,8 @@ export default function NotificationsList({
               onClick={handleMarkAllAsRead}
             >
               <CareIcon
-                className={
-                  isMarkingAllAsRead
-                    ? "care-l-spinner animate-spin"
-                    : "care-l-envelope-check"
-                }
+                icon={isMarkingAllAsRead ? "l-spinner" : "l-envelope-check"}
+                className={isMarkingAllAsRead ? "animate-spin" : ""}
               />
               <span className="text-xs">{t("mark_all_as_read")}</span>
             </ButtonV2>
@@ -470,9 +464,7 @@ export default function NotificationsList({
               variant="secondary"
               onClick={() => setShowUnread(!showUnread)}
             >
-              <CareIcon
-                className={showUnread ? "care-l-filter-slash" : "care-l-filter"}
-              />
+              <CareIcon icon={showUnread ? "l-filter-slash" : "l-filter"} />
 
               <span className="text-xs">
                 {showUnread

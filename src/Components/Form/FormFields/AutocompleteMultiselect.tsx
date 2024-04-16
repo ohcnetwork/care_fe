@@ -24,7 +24,7 @@ type AutocompleteMultiSelectFormFieldProps<T, V> = FormFieldBaseProps<V[]> & {
 };
 
 const AutocompleteMultiSelectFormField = <T, V>(
-  props: AutocompleteMultiSelectFormFieldProps<T, V>
+  props: AutocompleteMultiSelectFormFieldProps<T, V>,
 ) => {
   const field = useFormFieldPropsResolver(props);
   return (
@@ -66,7 +66,7 @@ type AutocompleteMutliSelectProps<T, V = T> = {
  * customizability.
  */
 export const AutocompleteMutliSelect = <T, V>(
-  props: AutocompleteMutliSelectProps<T, V>
+  props: AutocompleteMutliSelectProps<T, V>,
 ) => {
   const [query, setQuery] = useState(""); // Ensure lower case
   useEffect(() => {
@@ -109,7 +109,7 @@ export const AutocompleteMutliSelect = <T, V>(
               multiple
               className={classNames(
                 "cui-input-base truncate pr-16",
-                props.error && "border-danger-500"
+                props.error && "border-danger-500",
               )}
               placeholder={
                 value.length
@@ -123,9 +123,9 @@ export const AutocompleteMutliSelect = <T, V>(
               <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
                 <div className="absolute right-0 top-1 mr-2 flex items-center text-lg text-gray-900">
                   {props.isLoading ? (
-                    <CareIcon className="care-l-spinner animate-spin" />
+                    <CareIcon icon="l-spinner" className="animate-spin" />
                   ) : (
-                    <CareIcon className="care-l-angle-down -mb-1.5" />
+                    <CareIcon icon="l-angle-down" className="-mb-1.5" />
                   )}
                 </div>
               </Combobox.Button>
@@ -138,7 +138,7 @@ export const AutocompleteMutliSelect = <T, V>(
                   label={v.label}
                   onRemove={() =>
                     props.onChange(
-                      value.map((o) => o.value).filter((o) => o !== v.value)
+                      value.map((o) => o.value).filter((o) => o !== v.value),
                     )
                   }
                 />
@@ -162,7 +162,7 @@ export const AutocompleteMutliSelect = <T, V>(
                       <div className="flex justify-between">
                         Select All
                         {value.length === filteredOptions.length && (
-                          <CareIcon className="care-l-check text-lg" />
+                          <CareIcon icon="l-check" className="text-lg" />
                         )}
                       </div>
                     </Combobox.Option>
@@ -178,7 +178,7 @@ export const AutocompleteMutliSelect = <T, V>(
                         <div className="flex justify-between">
                           {option.label}
                           {selected && (
-                            <CareIcon className="care-l-check text-lg" />
+                            <CareIcon icon="l-check" className="text-lg" />
                           )}
                         </div>
                       )}
@@ -187,7 +187,7 @@ export const AutocompleteMutliSelect = <T, V>(
                 </>
               ) : (
                 <span className="flex items-center justify-center gap-2 py-6">
-                  {!query && <CareIcon className="care-l-search text-lg" />}
+                  {!query && <CareIcon icon="l-search" className="text-lg" />}
                   {query ? "No results" : "Type to search"}
                 </span>
               )}
@@ -202,7 +202,7 @@ export const AutocompleteMutliSelect = <T, V>(
 const Searching = () => {
   return (
     <div className="flex items-center justify-center gap-2 py-6">
-      <CareIcon className="care-l-spinner animate-spin text-xl" />
+      <CareIcon icon="l-spinner" className="animate-spin text-xl" />
       <span>Searching...</span>
     </div>
   );

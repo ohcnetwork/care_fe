@@ -41,23 +41,23 @@ export default function MedicineAdministrationTableRow({
         prescription: prescription.id,
         administered_date_after: formatDateTime(
           props.intervals[0].start,
-          "YYYY-MM-DD"
+          "YYYY-MM-DD",
         ),
         administered_date_before: formatDateTime(
           props.intervals[props.intervals.length - 1].end,
-          "YYYY-MM-DD"
+          "YYYY-MM-DD",
         ),
         archived: false,
       },
-      key: `${prescription.last_administered_on}`,
-    }
+      key: `${prescription.last_administration?.administered_date}`,
+    },
   );
 
   return (
     <tr
       className={classNames(
         "group transition-all duration-200 ease-in-out",
-        loading ? "bg-gray-300" : "bg-white hover:bg-primary-100"
+        loading ? "bg-gray-300" : "bg-white hover:bg-primary-100",
       )}
     >
       {showDiscontinue && (
@@ -129,7 +129,7 @@ export default function MedicineAdministrationTableRow({
                 }
                 onClick={() => setShowAdminister(true)}
               >
-                <CareIcon className="care-l-syringe text-lg" />
+                <CareIcon icon="l-syringe" className="text-lg" />
                 {t("administer")}
               </Submit>
             </div>
@@ -141,7 +141,9 @@ export default function MedicineAdministrationTableRow({
           onClose={() => setShowEdit(false)}
           show={showEdit}
           title={`${t("edit")} ${t(
-            prescription.is_prn ? "prn_prescription" : "prescription_medication"
+            prescription.dosage_type === "PRN"
+              ? "prn_prescription"
+              : "prescription_medication",
           )}: ${
             prescription.medicine_object?.name ?? prescription.medicine_old
           }`}
@@ -173,7 +175,7 @@ export default function MedicineAdministrationTableRow({
             <span
               className={classNames(
                 "text-sm font-semibold",
-                prescription.discontinued ? "text-gray-700" : "text-gray-900"
+                prescription.discontinued ? "text-gray-700" : "text-gray-900",
               )}
             >
               {prescription.medicine_object?.name ?? prescription.medicine_old}
@@ -193,9 +195,16 @@ export default function MedicineAdministrationTableRow({
           </div>
 
           <div className="flex gap-1 text-xs font-semibold text-gray-900 lg:flex-col lg:px-2 lg:text-center">
-            <p>{prescription.dosage}</p>
+            {prescription.dosage_type !== "TITRATED" ? (
+              <p>{prescription.base_dosage}</p>
+            ) : (
+              <p>
+                {prescription.base_dosage} - {prescription.target_dosage}
+              </p>
+            )}
+
             <p>
-              {!prescription.is_prn
+              {prescription.dosage_type !== "PRN"
                 ? t("PRESCRIPTION_FREQUENCY_" + prescription.frequency)
                 : prescription.indicator}
             </p>

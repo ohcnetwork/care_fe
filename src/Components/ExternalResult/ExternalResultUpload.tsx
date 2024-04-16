@@ -2,16 +2,16 @@ import _ from "lodash-es";
 import { navigate } from "raviger";
 import { lazy, useEffect, useState } from "react";
 import CSVReader from "react-csv-reader";
-import useConfig from "../../Common/hooks/useConfig";
-import * as Notification from "../../Utils/Notifications.js";
-const PageTitle = lazy(() => import("../Common/PageTitle"));
 import { useTranslation } from "react-i18next";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import { IExternalResult } from "./models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import useAppHistory from "../../Common/hooks/useAppHistory";
+import useConfig from "../../Common/hooks/useConfig";
+import routes from "../../Redux/api";
+import * as Notification from "../../Utils/Notifications.js";
+import request from "../../Utils/request/request";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
+import { IExternalResult } from "./models";
+const PageTitle = lazy(() => import("../Common/PageTitle"));
 
 export default function ExternalResultUpload() {
   const { sample_format_external_result_import } = useConfig();
@@ -26,8 +26,13 @@ export default function ExternalResultUpload() {
     setValidationErrorCount(
       data.filter(
         (result: IExternalResult) =>
-          result.district !== user.district_object.name
-      ).length
+          ((user.user_type === "StateAdmin" ||
+            user.user_type === "StateLabAdmin") &&
+            result.address.split(",").pop()?.trim() !==
+              user.state_object.name) ||
+          (user.user_type !== "StateAdmin" &&
+            result.district !== user.district_object.name),
+      ).length,
     );
   };
   const { t } = useTranslation();
@@ -67,7 +72,12 @@ export default function ExternalResultUpload() {
               sample_tests: validationErrorCount
                 ? csvData.filter(
                     (data: IExternalResult) =>
-                      data.district === user.district_object.name
+                      ((user.user_type === "StateAdmin" ||
+                        user.user_type === "StateLabAdmin") &&
+                        data.address.split(",").pop()?.trim() !==
+                          user.state_object.name) ||
+                      (user.user_type !== "StateAdmin" &&
+                        data.district !== user.district_object.name),
                   )
                 : csvData,
             },
@@ -179,7 +189,13 @@ export default function ExternalResultUpload() {
                       : null}
                   </div>
                   <div>
-                    {data.district !== user.district_object.name && (
+                    {(((user.user_type === "StateAdmin" ||
+                      user.user_type === "StateLabAdmin") &&
+                      data.address.split(",").pop()?.trim() !==
+                        user.state_object.name) ||
+                      (user.user_type !== "StateAdmin" &&
+                        user.user_type !== "StateLabAdmin" &&
+                        data.district !== user.district_object.name)) && (
                       <p className="mt-2 flex items-center justify-center gap-1 text-red-500">
                         <CareIcon icon="l-exclamation-triangle" /> Different
                         districts

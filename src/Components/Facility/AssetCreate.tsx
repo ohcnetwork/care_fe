@@ -61,7 +61,7 @@ const initError = formErrorKeys.reduce(
     acc[key] = "";
     return acc;
   },
-  {}
+  {},
 );
 
 const fieldRef = formErrorKeys.reduce(
@@ -69,7 +69,7 @@ const fieldRef = formErrorKeys.reduce(
     acc[key] = createRef();
     return acc;
   },
-  {}
+  {},
 );
 
 const initialState = {
@@ -390,7 +390,7 @@ const AssetCreate = (props: AssetProps) => {
         <section className="text-center">
           <h1 className="flex flex-col items-center py-10 text-6xl">
             <div className="flex h-40 w-40 items-center justify-center rounded-full bg-gray-200 p-5">
-              <CareIcon className="care-l-map-marker text-green-600" />
+              <CareIcon icon="l-map-marker" className="text-green-600" />
             </div>
           </h1>
           <p className="text-gray-600">
@@ -673,7 +673,10 @@ const AssetCreate = (props: AssetProps) => {
                         className="ml-1 mt-1 flex h-10 cursor-pointer items-center justify-self-end rounded border border-gray-400 px-4 hover:bg-gray-200"
                         onClick={() => setIsScannerActive(true)}
                       >
-                        <CareIcon className="care-l-focus cursor-pointer text-lg" />
+                        <CareIcon
+                          icon="l-focus"
+                          className="cursor-pointer text-lg"
+                        />
                       </div>
                     </div>
                   </div>
@@ -837,7 +840,7 @@ const AssetCreate = (props: AssetProps) => {
                             });
                           } else {
                             setLastServicedOn(
-                              dayjs(date.value).format("YYYY-MM-DD")
+                              dayjs(date.value).format("YYYY-MM-DD"),
                             );
                           }
                         }}
@@ -857,7 +860,7 @@ const AssetCreate = (props: AssetProps) => {
                         name="notes"
                         label={t("notes")}
                         placeholder={t(
-                          "Eg. Details on functionality, service, etc."
+                          "Eg. Details on functionality, service, etc.",
                         )}
                         value={notes}
                         onChange={(e) => setNotes(e.value)}
@@ -872,7 +875,7 @@ const AssetCreate = (props: AssetProps) => {
                         navigate(
                           assetId
                             ? `/facility/${facilityId}/assets/${assetId}`
-                            : `/facility/${facilityId}`
+                            : `/facility/${facilityId}`,
                         )
                       }
                     />

@@ -225,7 +225,7 @@ class FacilityPage {
     homeQuarantine,
     isolation,
     referred,
-    confirmedPositive
+    confirmedPositive,
   ) {
     cy.get("#num_patients_visited").clear().click().type(visited);
     cy.get("#num_patients_home_quarantine")
@@ -324,7 +324,7 @@ class FacilityPage {
   verifyFacilityBadgeContent(expectedText: string) {
     cy.get("[data-testid='Facility/District Name']").should(
       "contain",
-      expectedText
+      expectedText,
     );
   }
 
@@ -363,6 +363,7 @@ class FacilityPage {
   }
 
   fillInventoryDetails(name: string, status: string, quantity: string) {
+    cy.wait(2000);
     cy.get("div#id").click();
     cy.get("div#id ul li").contains(name).click();
     cy.get("div#isIncoming").click();
@@ -371,6 +372,7 @@ class FacilityPage {
   }
 
   fillInventoryMinimumDetails(name: string, quantity: string) {
+    cy.wait(2000);
     cy.get("div#id").click();
     cy.get("div#id ul li").contains(name).click();
     cy.get("[name='quantity']").type(quantity);
@@ -378,7 +380,7 @@ class FacilityPage {
 
   clickAddInventory() {
     cy.intercept("POST", "**/api/v1/facility/*/inventory/").as(
-      "createInventory"
+      "createInventory",
     );
     cy.get("button").contains("Add/Update Inventory").click();
     cy.wait("@createInventory").its("response.statusCode").should("eq", 201);
@@ -394,7 +396,7 @@ class FacilityPage {
     facility: string,
     title: string,
     quantity: string,
-    description: string
+    description: string,
   ) {
     cy.get("#refering_facility_contact_name").type(name);
     cy.get("#refering_facility_contact_number").type(phone_number);

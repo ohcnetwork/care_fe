@@ -99,7 +99,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
 
   const initError = Object.assign(
     {},
-    ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+    ...Object.keys(initForm).map((k) => ({ [k]: "" })),
   );
 
   const initialState = {
@@ -118,7 +118,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
           data.last_consultation?.last_daily_round?.patient_category ??
           data.last_consultation?.category;
         setPatientCategory(
-          PATIENT_CATEGORIES.find((c) => c.text === patient_category)?.id
+          PATIENT_CATEGORIES.find((c) => c.text === patient_category)?.id,
         );
       }
     },
@@ -162,7 +162,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
             isInvalidForm = true;
           } else if (
             !PhoneNumberValidator()(
-              parsePhoneNumber(state.form[field]) ?? ""
+              parsePhoneNumber(state.form[field]) ?? "",
             ) === undefined ||
             !phonePreg(String(parsePhoneNumber(state.form[field])))
           ) {
@@ -202,17 +202,11 @@ export const ShiftCreate = (props: patientShiftProps) => {
       const data = {
         status: wartime_shifting ? "PENDING" : "APPROVED",
         origin_facility: props.facilityId,
-        shifting_approving_facility: (
-          state.form.shifting_approving_facility || {}
-        ).id,
-        assigned_facility:
-          state.form?.assigned_facility?.id != -1
-            ? state.form?.assigned_facility?.id
-            : null,
-        assigned_facility_external:
-          state.form?.assigned_facility?.id === -1
-            ? state.form?.assigned_facility?.name
-            : null,
+        shifting_approving_facility: state.form.shifting_approving_facility?.id,
+        assigned_facility: state.form?.assigned_facility?.id,
+        assigned_facility_external: !state.form?.assigned_facility?.id
+          ? state.form?.assigned_facility?.name
+          : null,
         patient: props.patientId,
         emergency: state.form.emergency === "true",
         is_up_shift: state.form.is_up_shift === "true",
@@ -224,13 +218,13 @@ export const ShiftCreate = (props: patientShiftProps) => {
         refering_facility_contact_name:
           state.form.refering_facility_contact_name,
         refering_facility_contact_number: parsePhoneNumber(
-          state.form.refering_facility_contact_number
+          state.form.refering_facility_contact_number,
         ),
         breathlessness_level: state.form.breathlessness_level,
         patient_category: patientCategory,
         ambulance_driver_name: state.form.ambulance_driver_name,
         ambulance_phone_number: parsePhoneNumber(
-          state.form.ambulance_phone_number
+          state.form.ambulance_phone_number,
         ),
         ambulance_number: state.form.ambulance_number,
       };

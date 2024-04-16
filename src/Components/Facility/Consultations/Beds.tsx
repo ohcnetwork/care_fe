@@ -40,7 +40,7 @@ const Beds = (props: BedsProps) => {
   const { facilityId, consultationId, discharged } = props;
   const [bed, setBed] = useState<BedModel>({});
   const [startDate, setStartDate] = useState<string>(
-    dayjs().format("YYYY-MM-DDTHH:mm")
+    dayjs().format("YYYY-MM-DDTHH:mm"),
   );
   const [assets, setAssets] = useState<any[]>([]);
   const [consultationBeds, setConsultationBeds] = useState<CurrentBed[]>([]);
@@ -115,7 +115,7 @@ const Beds = (props: BedsProps) => {
         {showBedDetails?.assets_objects?.map((asset: AssetData) => (
           <Link
             key={asset.id}
-            href={`/facility/${asset?.location_object.facility.id}/assets/${asset.id}`}
+            href={`/facility/${asset?.location_object.facility?.id}/assets/${asset.id}`}
             className="mx-2 text-inherit"
             data-testid="created-asset-list"
           >
@@ -127,13 +127,14 @@ const Beds = (props: BedsProps) => {
                 <p className="flex break-words text-xl font-medium capitalize">
                   <span className="mr-2 text-primary-500">
                     <CareIcon
-                      className={`care-l-${
+                      icon={
                         (
                           (asset.asset_class &&
                             assetClassProps[asset.asset_class]) ||
                           assetClassProps.NONE
                         ).icon
-                      } text-2xl`}
+                      }
+                      className="text-2xl"
                     />
                   </span>
                   <p
@@ -146,11 +147,17 @@ const Beds = (props: BedsProps) => {
               </div>
               <p className="text-sm font-normal">
                 <span className="text-sm font-medium">
-                  <CareIcon className="care-l-location-point mr-1 text-primary-500" />
+                  <CareIcon
+                    icon="l-location-point"
+                    className="mr-1 text-primary-500"
+                  />
                   {asset?.location_object?.name}
                 </span>
                 <span className="ml-2 text-sm font-medium">
-                  <CareIcon className="care-l-hospital mr-1 text-primary-500" />
+                  <CareIcon
+                    icon="l-hospital"
+                    className="mr-1 text-primary-500"
+                  />
                   {asset?.location_object?.facility?.name}
                 </span>
               </p>
@@ -178,7 +185,7 @@ const Beds = (props: BedsProps) => {
               ghost
               onClick={() => props.setState && props.setState(false)}
             >
-              <CareIcon className="care-l-times text-lg" />
+              <CareIcon icon="l-times" className="text-lg" />
             </ButtonV2>
           )}
         </div>
@@ -237,7 +244,7 @@ const Beds = (props: BedsProps) => {
       <div>
         <h3 className="my-4 text-lg">Previous beds: </h3>
         <div className="overflow-hidden rounded-xl">
-          <div className="grid grid-cols-4 gap-[1px]">
+          <div className="grid grid-cols-4 gap-px">
             <div className="bg-primary-500 py-2 text-center font-bold text-white">
               Bed
             </div>
@@ -253,7 +260,7 @@ const Beds = (props: BedsProps) => {
           </div>
           {consultationBeds.length > 0 ? (
             consultationBeds.map((bed) => (
-              <div className="grid grid-cols-4 gap-[1px]" key={bed?.id}>
+              <div className="grid grid-cols-4 gap-px" key={bed?.id}>
                 <div className="break-words bg-primary-100 p-2 text-center">
                   {bed?.bed_object?.name}
                   {bed?.assets_objects && bed.assets_objects.length > 0 && (

@@ -38,7 +38,11 @@ export default function PrescriptionsTable({
 
   const { data } = useQuery(MedicineRoutes.listPrescriptions, {
     pathParams: { consultation },
-    query: { is_prn, prescription_type, limit: 100 },
+    query: {
+      dosage_type: is_prn ? "PRN" : "REGULAR,TITRATED",
+      prescription_type,
+      limit: 100,
+    },
   });
 
   const lastModified = data?.results[0]?.modified_date;
@@ -48,8 +52,8 @@ export default function PrescriptionsTable({
         ? REGULAR_PRN_TKEYS
         : REGULAR_NORMAL_TKEYS
       : is_prn
-      ? DISCHARGE_PRN_TKEYS
-      : DISCHARGE_NORMAL_TKEYS;
+        ? DISCHARGE_PRN_TKEYS
+        : DISCHARGE_NORMAL_TKEYS;
 
   return (
     <div>
@@ -115,7 +119,7 @@ export default function PrescriptionsTable({
                 variant="danger"
                 onClick={() => setShowDiscontinueFor(detailedViewFor)}
               >
-                <CareIcon className="care-l-ban text-lg" />
+                <CareIcon icon="l-ban" className="text-lg" />
                 {t("discontinue")}
               </Submit>
               <Submit
@@ -125,7 +129,7 @@ export default function PrescriptionsTable({
                 }
                 onClick={() => setShowAdministerFor(detailedViewFor)}
               >
-                <CareIcon className="care-l-syringe text-lg" />
+                <CareIcon icon="l-syringe" className="text-lg" />
                 {t("administer")}
               </Submit>
             </div>
@@ -138,7 +142,7 @@ export default function PrescriptionsTable({
             {is_prn ? "PRN Prescriptions" : "Prescriptions"}
           </span>
           <div className="text-gray-600">
-            <CareIcon className="care-l-history-alt pr-2" />
+            <CareIcon icon="l-history-alt" className="pr-2" />
             <span className="text-xs">
               {lastModified && formatDateTime(lastModified)}
             </span>
@@ -153,7 +157,7 @@ export default function PrescriptionsTable({
               href="prescriptions"
               className="w-full lg:w-auto"
             >
-              <CareIcon className="care-l-pen text-lg" />
+              <CareIcon icon="l-pen" className="text-lg" />
               <span className="hidden lg:block">{t("edit_prescriptions")}</span>
               <span className="block lg:hidden">{t("edit")}</span>
             </ButtonV2>
@@ -164,7 +168,7 @@ export default function PrescriptionsTable({
               onClick={() => setShowBulkAdminister(true)}
               className="w-full lg:w-auto"
             >
-              <CareIcon className="care-l-syringe text-lg" />
+              <CareIcon icon="l-syringe" className="text-lg" />
               <span className="hidden lg:block">
                 {t("administer_medicines")}
               </span>
@@ -193,8 +197,11 @@ export default function PrescriptionsTable({
                   min_hours_between_doses__pretty:
                     obj.min_hours_between_doses &&
                     obj.min_hours_between_doses + " hour(s)",
-                  last_administered__pretty: obj.last_administered_on ? (
-                    <RecordMeta time={obj.last_administered_on} />
+                  last_administered__pretty: obj.last_administration
+                    ?.administered_date ? (
+                    <RecordMeta
+                      time={obj.last_administration?.administered_date}
+                    />
                   ) : (
                     "never"
                   ),
@@ -218,7 +225,7 @@ export default function PrescriptionsTable({
                       if (med.discontinued) {
                         return (
                           <div className="flex w-full items-center justify-center gap-1 font-medium text-gray-700">
-                            <CareIcon className="care-l-ban" />
+                            <CareIcon icon="l-ban" />
                             <span className="text-sm">{t("discontinued")}</span>
                           </div>
                         );
@@ -237,7 +244,7 @@ export default function PrescriptionsTable({
                               setShowAdministerFor(med);
                             }}
                           >
-                            <CareIcon className="care-l-syringe text-base" />
+                            <CareIcon icon="l-syringe" className="text-base" />
                             {t("administer")}
                           </ButtonV2>
                           <ButtonV2
@@ -251,7 +258,7 @@ export default function PrescriptionsTable({
                               setShowDiscontinueFor(med);
                             }}
                           >
-                            <CareIcon className="care-l-ban text-base" />
+                            <CareIcon icon="l-ban" className="text-base" />
                             {t("discontinue")}
                           </ButtonV2>
                         </div>
@@ -275,7 +282,7 @@ export default function PrescriptionsTable({
 const COMMON_TKEYS = {
   medicine: "medicine",
   route: "route__pretty",
-  dosage: "dosage",
+  base_dosage: "base_dosage",
 };
 
 const REGULAR_NORMAL_TKEYS = {

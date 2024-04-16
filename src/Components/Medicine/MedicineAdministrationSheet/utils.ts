@@ -6,21 +6,22 @@ export function computeActivityBounds(prescriptions: Prescription[]) {
     prescriptions.reduce(
       (earliest, curr) =>
         earliest < curr.created_date ? earliest : curr.created_date,
-      prescriptions[0]?.created_date ?? new Date()
-    )
+      prescriptions[0]?.created_date ?? new Date(),
+    ),
   );
 
-  // get end by finding latest of all presciption's last_administered_on
+  // get end by finding latest of all presciption's last administration time
   const end = new Date(
     prescriptions
-      .filter((prescription) => prescription.last_administered_on)
+      .filter((prescription) => prescription.last_administration?.created_date)
       .reduce(
         (latest, curr) =>
-          curr.last_administered_on && curr.last_administered_on > latest
-            ? curr.last_administered_on
+          curr.last_administration?.created_date &&
+          curr.last_administration?.created_date > latest
+            ? curr.last_administration?.created_date
             : latest,
-        prescriptions[0]?.created_date ?? new Date()
-      )
+        prescriptions[0]?.created_date ?? new Date(),
+      ),
   );
 
   // floor start to 00:00 of the day

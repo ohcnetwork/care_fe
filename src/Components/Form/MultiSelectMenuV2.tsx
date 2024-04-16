@@ -63,7 +63,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
       return props.renderSelectedOptions(selectedOptions.map((o) => o.option));
   };
 
-  const buttonRef = useRef(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const handleSingleSelect = (o: any) => {
     if (
@@ -104,17 +104,17 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
 
                       {selectedOptions.length !== 0 && (
                         <div className="flex flex-wrap gap-2">
-                          {selectedOptions.map((option) => (
+                          {selectedOptions.map((option, index) => (
                             <MultiSelectOptionChip
-                              key={option.value}
+                              key={index}
                               label={option.selectedLabel}
                               onRemove={() => {
                                 const updatedOptions = selectedOptions.filter(
                                   (selectedOption) =>
-                                    selectedOption.value !== option.value
+                                    selectedOption.value !== option.value,
                                 );
                                 props.onChange(
-                                  updatedOptions.map((o) => o.value) as any
+                                  updatedOptions.map((o) => o.value) as any,
                                 );
                               }}
                             />
@@ -122,7 +122,10 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                         </div>
                       )}
                     </div>
-                    <CareIcon className="care-l-angle-down -mb-0.5 text-lg text-gray-900" />
+                    <CareIcon
+                      icon="l-angle-down"
+                      className="-mb-0.5 text-lg text-gray-900"
+                    />
                   </div>
                 </Listbox.Button>
               </div>
@@ -142,7 +145,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                             {option.label}
                             {(option.icon || option.isSelected) &&
                               (option.isSelected ? (
-                                <CareIcon className="care-l-check text-lg" />
+                                <CareIcon icon="l-check" className="text-lg" />
                               ) : (
                                 option.icon
                               ))}
@@ -186,7 +189,7 @@ export const MultiSelectOptionChip = (props: MultiSelectOptionChipProps) => {
           className="cursor-pointer rounded-full hover:bg-white"
           onClick={props.onRemove}
         >
-          <CareIcon className="care-l-times text-base" />
+          <CareIcon icon="l-times" className="text-base" />
         </p>
       )}
     </span>
@@ -207,6 +210,6 @@ export const dropdownOptionClassNames = ({
     active && "bg-primary-500 text-white",
     !active && selected && "text-primary-500",
     !active && !selected && "text-gray-900",
-    selected ? "font-semibold" : "font-normal"
+    selected ? "font-semibold" : "font-normal",
   );
 };

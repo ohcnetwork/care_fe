@@ -7,7 +7,7 @@ import { UserCreationPage } from "../../pageobject/Users/UserCreation";
 import {
   generatePhoneNumber,
   generateEmergencyPhoneNumber,
-} from "../../pageobject/constants";
+} from "../../pageobject/utils/constants";
 
 describe("User Creation", () => {
   const userPage = new UserPage();
@@ -37,7 +37,7 @@ describe("User Creation", () => {
     "Please select the User Type",
     "Please enter valid phone number",
     "Please enter the username",
-    "Please enter date in YYYY/MM/DD format",
+    "Please enter date in DD/MM/YYYY format",
     "Please enter the password",
     "Confirm password is required",
     "First Name is required",
@@ -52,10 +52,7 @@ describe("User Creation", () => {
   const EXPECTED_PROFILE_ERROR_MESSAGES = [
     "Field is required",
     "Field is required",
-    "This field is required",
     "Please enter valid phone number",
-    "This field is required",
-    "This field is required",
   ];
 
   before(() => {
@@ -73,55 +70,61 @@ describe("User Creation", () => {
     userCreationPage.clickElementById("profilenamelink");
     userCreationPage.verifyElementContainsText(
       "username-profile-details",
-      "devdistrictadmin"
+      "devdistrictadmin",
     );
     userCreationPage.clickElementById("edit-cancel-profile-button");
     userCreationPage.typeIntoElementByIdPostClear(
       "firstName",
-      "District Editted"
+      "District Editted",
     );
     userCreationPage.typeIntoElementByIdPostClear("lastName", "Cypress");
-    userCreationPage.typeIntoElementByIdPostClear("age", "22");
     userCreationPage.selectDropdownOption("gender", "Male");
     userCreationPage.typeIntoElementByIdPostClear(
       "phoneNumber",
-      "+91" + phone_number
+      "+91" + phone_number,
     );
     userCreationPage.typeIntoElementByIdPostClear(
       "altPhoneNumber",
-      "+91" + emergency_phone_number
+      "+91" + emergency_phone_number,
     );
     userCreationPage.typeIntoElementByIdPostClear("email", "test@test.com");
     userCreationPage.typeIntoElementByIdPostClear("weekly_working_hours", "14");
+    userCreationPage.typeIntoElementByIdPostClearDob(
+      "date_of_birth",
+      "01011998",
+    );
     userCreationPage.clickElementById("submit");
     userCreationPage.verifyElementContainsText(
       "contactno-profile-details",
-      "+91" + phone_number
+      "+91" + phone_number,
     );
     userCreationPage.verifyElementContainsText(
       "whatsapp-profile-details",
-      "+91" + emergency_phone_number
+      "+91" + emergency_phone_number,
     );
     userCreationPage.verifyElementContainsText(
       "firstname-profile-details",
-      "District Editted"
+      "District Editted",
     );
     userCreationPage.verifyElementContainsText(
       "lastname-profile-details",
-      "Cypress"
+      "Cypress",
     );
-    userCreationPage.verifyElementContainsText("age-profile-details", "22");
+    userCreationPage.verifyElementContainsText(
+      "date_of_birth-profile-details",
+      "01/01/1998",
+    );
     userCreationPage.verifyElementContainsText(
       "emailid-profile-details",
-      "test@test.com"
+      "test@test.com",
     );
     userCreationPage.verifyElementContainsText(
       "gender-profile-details",
-      "Male"
+      "Male",
     );
     userCreationPage.verifyElementContainsText(
       "averageworkinghour-profile-details",
-      "14"
+      "14",
     );
   });
 
@@ -130,7 +133,6 @@ describe("User Creation", () => {
     userCreationPage.clickElementById("edit-cancel-profile-button");
     userCreationPage.clearIntoElementById("firstName");
     userCreationPage.clearIntoElementById("lastName");
-    userCreationPage.clearIntoElementById("age");
     userCreationPage.clearIntoElementById("phoneNumber");
     userCreationPage.clearIntoElementById("altPhoneNumber");
     userCreationPage.clearIntoElementById("weekly_working_hours");
@@ -152,7 +154,7 @@ describe("User Creation", () => {
     userCreationPage.typeIntoElementById("doctor_experience_commenced_on", "2");
     userCreationPage.typeIntoElementById(
       "doctor_medical_council_registration",
-      "123456789"
+      "123456789",
     );
     userCreationPage.typeIntoElementById("first_name", "cypress test");
     userCreationPage.typeIntoElementById("last_name", "staff user");
@@ -169,13 +171,13 @@ describe("User Creation", () => {
     userCreationPage.verifyElementContainsText("district", "Ernakulam");
     userCreationPage.verifyElementContainsText(
       "home_facility",
-      "Dummy Shifting Center"
+      "Dummy Shifting Center",
     );
     userCreationPage.verifyElementContainsText("doctor-qualification", "MBBS");
     userCreationPage.verifyElementContainsText("doctor-experience", "2");
     userCreationPage.verifyElementContainsText(
       "medical-council-registration",
-      "123456789"
+      "123456789",
     );
   });
 

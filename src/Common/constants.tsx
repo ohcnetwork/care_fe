@@ -315,7 +315,7 @@ export const DISCHARGE_REASONS = [
   { id: 2, text: "Referred" },
   { id: 3, text: "Expired" },
   { id: 4, text: "LAMA" },
-];
+] as const;
 
 export const CONSCIOUSNESS_LEVEL = [
   { id: "UNRESPONSIVE", text: "Unresponsive" },
@@ -738,11 +738,11 @@ export const CAMERA_TYPE = [
 
 export const GENDER: { [key: number]: string } = GENDER_TYPES.reduce(
   (acc, curr) => ({ ...acc, [curr.id]: curr.text }),
-  {}
+  {},
 );
 
 export type CameraPTZ = {
-  icon?: string;
+  icon?: IconName;
   label: string;
   action: string;
   loadingLabel?: string;
@@ -1013,7 +1013,7 @@ export const XLSXAssetImportSchema = {
           if (!ip) return null;
           const isValid =
             /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
-              ip
+              ip,
             );
 
           if (!isValid) {
@@ -1171,4 +1171,31 @@ export const IN_LANDLINE_AREA_CODES = [
   "870",
   "891",
   "4822",
+];
+
+export const CONSENT_TYPE_CHOICES = [
+  { id: 1, text: "Consent for admission" },
+  { id: 2, text: "Patient Code Status" },
+  { id: 3, text: "Consent for procedure" },
+  { id: 4, text: "High risk consent" },
+  { id: 5, text: "Others" },
+];
+
+export const CONSENT_PATIENT_CODE_STATUS_CHOICES = [
+  { id: 1, text: "Do Not Hospitalise (DNH)" },
+  { id: 2, text: "Do Not Resuscitate (DNR)" },
+  { id: 3, text: "Comfort Care Only" },
+  { id: 4, text: "Active treatment (Default)" },
+];
+export const OCCUPATION_TYPES = [
+  { id: 1, text: "Student", value: "STUDENT" },
+  {
+    id: 2,
+    text: "Businessman",
+    value: "BUSINESSMAN",
+  },
+  { id: 3, text: "Healthcare Worker", value: "HEALTH_CARE_WORKER" },
+  { id: 4, text: "Healthcare Lab Worker", value: "HEALTH_CARE_LAB_WORKER" },
+  { id: 5, text: "Animal Handler", value: "ANIMAL_HANDLER" },
+  { id: 6, text: "Others", value: "OTHERS" },
 ];

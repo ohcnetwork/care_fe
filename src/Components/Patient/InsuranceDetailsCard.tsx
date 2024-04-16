@@ -57,7 +57,7 @@ export const InsuranceDetialsCard = (props: InsuranceDetails) => {
                     id="insurance-view-details"
                     onClick={() => {
                       navigate(
-                        `/facility/${data.patient_object?.facility_object?.id}/patient/${data.patient_object?.id}/insurance`
+                        `/facility/${data.patient_object?.facility_object?.id}/patient/${data.patient_object?.id}/insurance`,
                       );
                     }}
                     className="h-auto whitespace-pre-wrap border border-gray-500 bg-white text-black hover:bg-gray-300"

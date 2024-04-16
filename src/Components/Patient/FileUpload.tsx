@@ -1,4 +1,3 @@
-import axios from "axios";
 import CircularProgress from "../Common/components/CircularProgress";
 import {
   useCallback,
@@ -33,6 +32,7 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import FilePreviewDialog from "../Common/FilePreviewDialog";
+import uploadFile from "../../Utils/request/uploadFile";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -104,11 +104,15 @@ interface FileUploadProps {
   patientId?: any;
   facilityId?: any;
   consultationId?: any;
+  consentId?: string;
   hideBack: boolean;
   audio?: boolean;
   unspecified: boolean;
   sampleId?: string;
   claimId?: string;
+  className?: string;
+  hideUpload?: boolean;
+  changePageMetadata?: boolean;
 }
 
 interface URLS {
@@ -144,12 +148,14 @@ export const FileUpload = (props: FileUploadProps) => {
     facilityId,
     consultationId,
     patientId,
+    consentId,
     type,
     hideBack,
     audio,
     unspecified,
     sampleId,
     claimId,
+    changePageMetadata,
   } = props;
   const id = patientId;
   const [isLoading, setIsLoading] = useState(false);
@@ -188,7 +194,7 @@ export const FileUpload = (props: FileUploadProps) => {
     setFacingMode((prevState: any) =>
       prevState === FACING_MODE_USER
         ? FACING_MODE_ENVIRONMENT
-        : FACING_MODE_USER
+        : FACING_MODE_USER,
     );
   }, []);
   const initialState = {
@@ -226,6 +232,26 @@ export const FileUpload = (props: FileUploadProps) => {
     { name: "Unarchived Files", value: "UNARCHIVED" },
     { name: "Archived Files", value: "ARCHIVED" },
   ]);
+  const [isMicPermission, setIsMicPermission] = useState(true);
+
+  useEffect(() => {
+    const checkMicPermission = async () => {
+      try {
+        const permissions = await navigator.permissions.query({
+          name: "microphone" as PermissionName,
+        });
+        setIsMicPermission(permissions.state === "granted");
+      } catch (error) {
+        setIsMicPermission(false);
+      }
+    };
+
+    checkMicPermission();
+
+    return () => {
+      setIsMicPermission(true);
+    };
+  }, []);
 
   const { data: patient } = useQuery(routes.getPatient, {
     pathParams: { id: patientId },
@@ -302,6 +328,8 @@ export const FileUpload = (props: FileUploadProps) => {
     switch (type) {
       case "PATIENT":
         return patientId;
+      case "CONSENT_RECORD":
+        return consentId;
       case "CONSULTATION":
         return consultationId;
       case "SAMPLE_MANAGEMENT":
@@ -328,8 +356,8 @@ export const FileUpload = (props: FileUploadProps) => {
       prefetch_download_urls(unarchivedQuery.data.results);
       setuploadedUnarchievedFiles(
         unarchivedQuery.data.results?.filter(
-          (file) => file.upload_completed || file.file_category === "AUDIO"
-        )
+          (file) => file.upload_completed || file.file_category === "AUDIO",
+        ),
       );
       setTotalUnarchievedFilesCount(unarchivedQuery.data.count);
     }
@@ -384,7 +412,7 @@ export const FileUpload = (props: FileUploadProps) => {
   // Store signed urls for non previewable files
   const prefetch_download_urls = async (files: FileUploadModel[]) => {
     const unsupportedFiles = files.filter(
-      (x) => !previewExtensions.includes(x.extension ?? "")
+      (x) => !previewExtensions.includes(x.extension ?? ""),
     );
     const query = { file_type: type, associating_id: getAssociatedId() };
     const urls = await Promise.all(
@@ -395,7 +423,7 @@ export const FileUpload = (props: FileUploadProps) => {
           pathParams: { id: id },
         });
         return [id, data?.read_signed_url];
-      })
+      }),
     );
     seturl(Object.fromEntries(urls));
   };
@@ -559,7 +587,11 @@ export const FileUpload = (props: FileUploadProps) => {
   const renderFileUpload = (item: FileUploadModel) => {
     const isPreviewSupported = previewExtensions.includes(item.extension ?? "");
     return (
-      <div className="mt-4 rounded-lg border bg-white p-4 shadow" key={item.id}>
+      <div
+        className={"mt-4 rounded-lg border bg-white p-4 shadow "}
+        id="file-div"
+        key={item.id}
+      >
         {!item.is_archived ? (
           <>
             {item.file_category === "AUDIO" ? (
@@ -624,12 +656,15 @@ export const FileUpload = (props: FileUploadProps) => {
                           onClick={() => {
                             triggerDownload(
                               url[item.id!],
-                              `${item.name}${item.extension}`
+                              `${item.name}${item.extension}`,
                             );
                           }}
                           className="m-1 w-full sm:w-auto"
                         >
-                          <CareIcon className="care-l-arrow-circle-down text-lg" />{" "}
+                          <CareIcon
+                            icon="l-arrow-circle-down"
+                            className="text-lg"
+                          />{" "}
                           DOWNLOAD
                         </ButtonV2>
                         {item?.uploaded_by?.username === authUser.username ||
@@ -647,7 +682,7 @@ export const FileUpload = (props: FileUploadProps) => {
                               }}
                               className="m-1 w-full sm:w-auto"
                             >
-                              <CareIcon className="care-l-pen text-lg" />
+                              <CareIcon icon="l-pen" className="text-lg" />
                               RENAME
                             </ButtonV2>
                           </>
@@ -669,7 +704,7 @@ export const FileUpload = (props: FileUploadProps) => {
                               }}
                               className="m-1 w-full sm:w-auto"
                             >
-                              <CareIcon className="care-l-archive text-lg" />
+                              <CareIcon icon="l-archive" className="text-lg" />
                               ARCHIVE
                             </ButtonV2>
                           </>
@@ -735,10 +770,11 @@ export const FileUpload = (props: FileUploadProps) => {
                   ) : (
                     <ButtonV2
                       className="m-1 w-full sm:w-auto"
+                      id="download-file"
                       onClick={() => {
                         triggerDownload(
                           url[item.id!],
-                          `${item.name}${item.extension}`
+                          `${item.name}${item.extension}`,
                         );
                       }}
                     >
@@ -762,7 +798,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         }}
                         className="m-1 w-full sm:w-auto"
                       >
-                        <CareIcon className="care-l-pen text-lg" />
+                        <CareIcon icon="l-pen" className="text-lg" />
                         RENAME
                       </ButtonV2>
                     </>
@@ -782,7 +818,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         }}
                         className="m-1 w-full sm:w-auto"
                       >
-                        <CareIcon className="care-l-archive text-lg" />
+                        <CareIcon icon="l-archive" className="text-lg" />
                         ARCHIVE
                       </ButtonV2>
                     </>
@@ -872,7 +908,8 @@ export const FileUpload = (props: FileUploadProps) => {
             <div className="flex flex-wrap items-center">
               <ButtonV2 variant="secondary" className="m-1 w-full sm:w-auto">
                 {" "}
-                <CareIcon className="care-l-eye-slash text-lg" /> FILE ARCHIVED
+                <CareIcon icon="l-eye-slash" className="text-lg" /> FILE
+                ARCHIVED
               </ButtonV2>
               <ButtonV2
                 onClick={() => {
@@ -886,7 +923,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 }}
                 className="m-1 w-full sm:w-auto"
               >
-                <CareIcon className="care-l-question-circle text-lg" />
+                <CareIcon icon="l-question-circle" className="text-lg" />
                 MORE DETAILS
               </ButtonV2>
             </div>
@@ -905,14 +942,14 @@ export const FileUpload = (props: FileUploadProps) => {
   }
 
   const onFileChange = (e: ChangeEvent<HTMLInputElement>): any => {
-    if (e.target.files == null) {
-      throw new Error("Error finding e.target.files");
+    if (!e.target.files?.length) {
+      return;
     }
     const f = e.target.files[0];
     const fileName = f.name;
     setFile(e.target.files[0]);
     setUploadFileName(
-      fileName.substring(0, fileName.lastIndexOf(".")) || fileName
+      fileName.substring(0, fileName.lastIndexOf(".")) || fileName,
     );
 
     const ext: string = fileName.split(".")[1];
@@ -936,42 +973,41 @@ export const FileUpload = (props: FileUploadProps) => {
     const f = file;
     if (!f) return;
     const newFile = new File([f], `${internal_name}`);
-
-    const config = {
-      headers: {
-        "Content-type": file?.type,
-        "Content-disposition": "inline",
-      },
-      onUploadProgress: (progressEvent: any) => {
-        const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
-        );
-        setUploadPercent(percentCompleted);
-      },
-    };
-
+    console.log("filetype: ", newFile.type);
     return new Promise<void>((resolve, reject) => {
-      axios
-        .put(url, newFile, config)
-        .then(() => {
-          setUploadStarted(false);
-          // setUploadSuccess(true);
-          setFile(null);
-          setUploadFileName("");
-          fetchData();
-          Notification.Success({
-            msg: "File Uploaded Successfully",
-          });
-          setUploadFileError("");
-          resolve();
-        })
-        .catch((e) => {
+      uploadFile(
+        url,
+        newFile,
+        "PUT",
+        { "Content-Type": file?.type },
+        (xhr: XMLHttpRequest) => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            setUploadStarted(false);
+            setFile(null);
+            setUploadFileName("");
+            fetchData();
+            Notification.Success({
+              msg: "File Uploaded Successfully",
+            });
+            setUploadFileError("");
+            resolve();
+          } else {
+            Notification.Error({
+              msg: "Error Uploading File: " + xhr.statusText,
+            });
+            setUploadStarted(false);
+            reject();
+          }
+        },
+        setUploadPercent,
+        () => {
           Notification.Error({
-            msg: "Error Uploading File: " + e.message,
+            msg: "Error Uploading File: Network Error",
           });
           setUploadStarted(false);
           reject();
-        });
+        },
+      );
     });
   };
 
@@ -1014,12 +1050,12 @@ export const FileUpload = (props: FileUploadProps) => {
 
     const { data } = await request(routes.createUpload, {
       body: {
-        original_name: name,
+        original_name: name ?? "",
         file_type: type,
         name: filename,
         associating_id: getAssociatedId(),
         file_category: category,
-        mime_type: f?.type,
+        mime_type: f?.type ?? "",
       },
     });
 
@@ -1049,33 +1085,30 @@ export const FileUpload = (props: FileUploadProps) => {
     const f = audioBlob;
     if (f === undefined) return;
     const newFile = new File([f], `${internal_name}`, { type: f.type });
-    const config = {
-      headers: {
-        "Content-type": newFile?.type,
-        "Content-disposition": "inline",
-      },
-      onUploadProgress: (progressEvent: any) => {
-        const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
-        );
-        setUploadPercent(percentCompleted);
-      },
-    };
 
-    axios
-      .put(url, newFile, config)
-      .then(() => {
+    uploadFile(
+      url,
+      newFile,
+      "PUT",
+      { "Content-Type": newFile?.type },
+      (xhr: XMLHttpRequest) => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          setAudioUploadStarted(false);
+          // setUploadSuccess(true);
+          setAudioName("");
+          fetchData();
+          Notification.Success({
+            msg: "File Uploaded Successfully",
+          });
+        } else {
+          setAudioUploadStarted(false);
+        }
+      },
+      setUploadPercent,
+      () => {
         setAudioUploadStarted(false);
-        // setUploadSuccess(true);
-        setAudioName("");
-        fetchData();
-        Notification.Success({
-          msg: "File Uploaded Successfully",
-        });
-      })
-      .catch(() => {
-        setAudioUploadStarted(false);
-      });
+      },
+    );
   };
 
   const validateAudioUpload = () => {
@@ -1107,7 +1140,7 @@ export const FileUpload = (props: FileUploadProps) => {
         name: filename,
         associating_id: getAssociatedId(),
         file_category: category,
-        mime_type: audioBlob?.type,
+        mime_type: audioBlob?.type ?? "",
       },
     })
       .then(uploadAudiofile)
@@ -1132,7 +1165,7 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   return (
-    <div className={hideBack ? "py-2" : "p-4"}>
+    <div className={`${hideBack ? "py-2" : "p-4"} ${props.className}`}>
       <FilePreviewDialog
         show={file_state.open}
         fileUrl={fileUrl}
@@ -1148,7 +1181,10 @@ export const FileUpload = (props: FileUploadProps) => {
         title={
           <div className="flex flex-row">
             <div className="rounded-full bg-primary-100 px-5 py-4">
-              <CareIcon className="care-l-camera-change text-lg text-primary-500" />
+              <CareIcon
+                icon="l-camera-change"
+                className="text-lg text-primary-500"
+              />
             </div>
             <div className="m-4">
               <h1 className="text-xl text-black "> Camera</h1>
@@ -1243,7 +1279,7 @@ export const FileUpload = (props: FileUploadProps) => {
         <div className={`${isLaptopScreen ? " " : " hidden "}`}>
           <div className="m-4 flex lg:hidden">
             <ButtonV2 onClick={handleSwitchCamera}>
-              <CareIcon className="care-l-camera-change text-lg" />
+              <CareIcon icon="l-camera-change" className="text-lg" />
               {`${t("switch")} ${t("camera")}`}
             </ButtonV2>
           </div>
@@ -1258,7 +1294,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         captureImage();
                       }}
                     >
-                      <CareIcon className="care-l-capture text-lg" />
+                      <CareIcon icon="l-capture" className="text-lg" />
                       {t("capture")}
                     </ButtonV2>
                   </div>
@@ -1303,7 +1339,10 @@ export const FileUpload = (props: FileUploadProps) => {
         title={
           <div className="flex flex-row">
             <div className="rounded-full bg-primary-100 px-5 py-4">
-              <CareIcon className="care-l-edit-alt text-lg text-primary-500" />
+              <CareIcon
+                icon="l-edit-alt"
+                className="text-lg text-primary-500"
+              />
             </div>
             <div className="m-4">
               <h1 className="text-xl text-black ">Rename File</h1>
@@ -1347,7 +1386,10 @@ export const FileUpload = (props: FileUploadProps) => {
         title={
           <div className="flex flex-row">
             <div className="my-1 mr-3 rounded-full bg-red-100 px-5 py-4 text-center">
-              <CareIcon className="care-l-exclamation-triangle text-lg text-danger-500 " />
+              <CareIcon
+                icon="l-exclamation-triangle"
+                className="text-lg text-danger-500"
+              />
             </div>
             <div className="text-grey-200 text-sm">
               <h1 className="text-xl text-black">Archive File</h1>
@@ -1394,7 +1436,10 @@ export const FileUpload = (props: FileUploadProps) => {
         title={
           <div className="flex flex-row">
             <div className="my-1 mr-3 rounded-full bg-primary-100 px-5 py-4 text-center">
-              <CareIcon className="care-l-question-circle text-lg text-primary-500 " />
+              <CareIcon
+                icon="l-question-circle"
+                className="text-lg text-primary-500"
+              />
             </div>
             <div className="text-grey-200 text-sm">
               <h1 className="text-xl text-black">File Details</h1>
@@ -1408,16 +1453,17 @@ export const FileUpload = (props: FileUploadProps) => {
         <div className="flex flex-col">
           <div>
             <div className="text-md m-2 text-center">
-              <b>{modalDetails?.name}</b> file is archived.
+              <b id="archive-file-name">{modalDetails?.name}</b> file is
+              archived.
             </div>
-            <div className="text-md text-center">
+            <div className="text-md text-center" id="archive-file-reason">
               <b>Reason:</b> {modalDetails?.reason}
             </div>
             <div className="text-md text-center">
-              <b>Archived_by:</b> {modalDetails?.userArchived}
+              <b>Archived by:</b> {modalDetails?.userArchived}
             </div>
             <div className="text-md text-center">
-              <b>Time of Archive:</b>
+              <b>Time of Archive: </b>
               {formatDateTime(modalDetails?.archiveTime)}
             </div>
           </div>
@@ -1426,169 +1472,188 @@ export const FileUpload = (props: FileUploadProps) => {
           </div>
         </div>
       </DialogModal>
-      <Page
-        title={`${UPLOAD_HEADING[type]}`}
-        hideBack={hideBack}
-        breadcrumbs={false}
-        crumbsReplacements={{
-          [facilityId]: { name: patient?.facility_object?.name },
-          [patientId]: { name: patient?.name },
-        }}
-        backUrl={
-          type === "CONSULTATION"
-            ? `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
-            : `/facility/${facilityId}/patient/${patientId}`
-        }
-      >
-        <div className="grid-cols-2 gap-4 md:grid">
-          {audio ? (
-            <div className="rounded-lg border bg-white p-4 shadow">
-              <h4 className="mb-4">Record and Upload Audio File</h4>
-              <TextFormField
-                name="consultation_audio_file"
-                type="text"
-                label="Enter Audio File Name (optional)"
-                value={audioName}
-                disabled={uploadStarted}
-                onChange={(e: any) => {
-                  setAudioName(e.value);
-                }}
-                error={audioFileError}
-              />
-              {audiouploadStarted ? (
-                <LinearProgressWithLabel value={uploadPercent} />
-              ) : (
-                <div className="flex w-full flex-col items-center justify-between gap-2 lg:flex-row">
-                  {audioBlobExists && (
-                    <div className="flex w-full items-center md:w-auto">
+      {!props.hideUpload && (
+        <Page
+          changePageMetadata={changePageMetadata}
+          title={UPLOAD_HEADING[type]}
+          hideBack={hideBack}
+          breadcrumbs={false}
+          crumbsReplacements={{
+            [facilityId]: { name: patient?.facility_object?.name },
+            [patientId]: { name: patient?.name },
+          }}
+          backUrl={
+            type === "CONSULTATION"
+              ? `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
+              : `/facility/${facilityId}/patient/${patientId}`
+          }
+        >
+          <div
+            className={`${
+              audio ? "grid-cols-2" : "grid-cols-1"
+            } w-full gap-4 md:grid`}
+          >
+            {audio ? (
+              <div className="rounded-lg border bg-white p-4 shadow">
+                <h4 className="mb-4">Record and Upload Audio File</h4>
+                <TextFormField
+                  name="consultation_audio_file"
+                  type="text"
+                  label="Enter Audio File Name (optional)"
+                  value={audioName}
+                  disabled={uploadStarted}
+                  onChange={(e: any) => {
+                    setAudioName(e.value);
+                  }}
+                  error={audioFileError}
+                />
+                {audiouploadStarted ? (
+                  <LinearProgressWithLabel value={uploadPercent} />
+                ) : (
+                  <div className="flex w-full flex-col items-center justify-between gap-2 lg:flex-row">
+                    {audioBlobExists && (
+                      <div className="flex w-full items-center md:w-auto">
+                        <ButtonV2
+                          variant="danger"
+                          className="w-full"
+                          onClick={() => {
+                            deleteAudioBlob();
+                          }}
+                        >
+                          <CareIcon icon="l-trash" className="h-4" /> Delete
+                        </ButtonV2>
+                      </div>
+                    )}
+                    <div className="flex flex-col items-center gap-4 md:flex-row md:flex-wrap lg:flex-nowrap">
+                      <VoiceRecorder
+                        createAudioBlob={createAudioBlob}
+                        confirmAudioBlobExists={confirmAudioBlobExists}
+                        reset={resetRecording}
+                        setResetRecording={setResetRecording}
+                        handleSetMicPermission={setIsMicPermission}
+                      />
+                      {!audioBlobExists && !isMicPermission && (
+                        <span className="text-sm font-medium text-warning-500">
+                          <CareIcon
+                            icon="l-exclamation-triangle"
+                            className="mr-1 text-base"
+                          />
+                          Please allow browser permission before you start
+                          speaking
+                        </span>
+                      )}
+                    </div>
+                    {audioBlobExists && (
+                      <div className="flex w-full items-center md:w-auto">
+                        <ButtonV2
+                          id="upload_audio_file"
+                          onClick={() => {
+                            handleAudioUpload();
+                          }}
+                          className="w-full"
+                        >
+                          <CareIcon icon="l-cloud-upload" className="text-xl" />
+                          Save
+                        </ButtonV2>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : null}
+            {unspecified ? (
+              <div className="mt-4 flex-wrap rounded-lg border bg-white p-4 shadow md:mt-0">
+                <div>
+                  <h4 className="mb-4">Upload New File</h4>
+                </div>
+                <TextFormField
+                  name="consultation_file"
+                  type="text"
+                  label="Enter File Name"
+                  required
+                  value={uploadFileName}
+                  disabled={uploadStarted}
+                  onChange={(e: any) => {
+                    setUploadFileName(e.value);
+                  }}
+                  error={uploadFileError}
+                />
+                <div>
+                  {uploadStarted ? (
+                    <LinearProgressWithLabel value={uploadPercent} />
+                  ) : (
+                    <div className="flex flex-col items-center justify-start gap-2 md:justify-end xl:flex-row">
+                      <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
+                        {({ isAuthorized }) =>
+                          isAuthorized ? (
+                            <label className="button-size-default button-shape-square button-primary-default inline-flex h-min w-full cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500">
+                              <CareIcon
+                                icon="l-file-upload-alt"
+                                className="text-lg"
+                              />
+                              {t("choose_file")}
+                              <input
+                                id="file_upload_patient"
+                                title="changeFile"
+                                onChange={onFileChange}
+                                type="file"
+                                accept="image/*,video/*,audio/*,text/plain,text/csv,application/rtf,application/msword,application/vnd.oasis.opendocument.text,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/pdf"
+                                hidden
+                              />
+                            </label>
+                          ) : (
+                            <></>
+                          )
+                        }
+                      </AuthorizedChild>
                       <ButtonV2
-                        variant="danger"
+                        onClick={() => setModalOpenForCamera(true)}
                         className="w-full"
-                        onClick={() => {
-                          deleteAudioBlob();
-                        }}
                       >
-                        <CareIcon className="care-l-trash h-4" /> Delete
+                        <CareIcon icon="l-camera" className="mr-2 text-lg" />
+                        Open Camera
+                      </ButtonV2>
+                      <ButtonV2
+                        id="upload_file_button"
+                        authorizeFor={NonReadOnlyUsers}
+                        disabled={
+                          !file ||
+                          !uploadFileName ||
+                          (patient && !patient.is_active)
+                        }
+                        onClick={handleUpload}
+                        className="w-full"
+                      >
+                        <CareIcon icon="l-cloud-upload" className="text-lg" />
+                        {t("upload")}
                       </ButtonV2>
                     </div>
                   )}
-                  <div className="flex flex-col items-center gap-4 md:flex-row">
-                    <VoiceRecorder
-                      createAudioBlob={createAudioBlob}
-                      confirmAudioBlobExists={confirmAudioBlobExists}
-                      reset={resetRecording}
-                      setResetRecording={setResetRecording}
-                    />
-                    {!audioBlobExists && (
-                      <span className="text-sm font-medium text-warning-500">
-                        <CareIcon className="care-l-exclamation-triangle mr-1 text-base" />
-                        Please allow browser permission before you start
-                        speaking
-                      </span>
-                    )}
-                  </div>
-                  {audioBlobExists && (
-                    <div className="flex w-full items-center md:w-auto">
-                      <ButtonV2
+                  {file && (
+                    <div className="mt-2 flex items-center justify-between rounded bg-gray-200 px-4 py-2">
+                      {file?.name}
+                      <button
                         onClick={() => {
-                          handleAudioUpload();
+                          setFile(null);
+                          setUploadFileName("");
                         }}
-                        className="w-full"
                       >
-                        <CareIcon className={"care-l-cloud-upload text-xl"} />
-                        Save
-                      </ButtonV2>
+                        <CareIcon icon="l-times" className="text-lg" />
+                      </button>
                     </div>
                   )}
                 </div>
-              )}
-            </div>
-          ) : null}
-          {unspecified ? (
-            <div className="mt-4 flex-wrap rounded-lg border bg-white p-4 shadow md:mt-0">
-              <div>
-                <h4 className="mb-4">Upload New File</h4>
               </div>
-              <TextFormField
-                name="consultation_file"
-                type="text"
-                label="Enter File Name"
-                required
-                value={uploadFileName}
-                disabled={uploadStarted}
-                onChange={(e: any) => {
-                  setUploadFileName(e.value);
-                }}
-                error={uploadFileError}
-              />
-              <div>
-                {uploadStarted ? (
-                  <LinearProgressWithLabel value={uploadPercent} />
-                ) : (
-                  <div className="flex flex-col items-center justify-start gap-2 md:justify-end xl:flex-row">
-                    <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
-                      {({ isAuthorized }) =>
-                        isAuthorized ? (
-                          <label className="button-size-default button-shape-square button-primary-default inline-flex h-min w-full cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500">
-                            <CareIcon className="care-l-file-upload-alt text-lg" />
-                            {t("choose_file")}
-                            <input
-                              id="file_upload_patient"
-                              title="changeFile"
-                              onChange={onFileChange}
-                              type="file"
-                              accept="image/*,video/*,audio/*,text/plain,text/csv,application/rtf,application/msword,application/vnd.oasis.opendocument.text,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/pdf"
-                              hidden
-                            />
-                          </label>
-                        ) : (
-                          <></>
-                        )
-                      }
-                    </AuthorizedChild>
-                    <ButtonV2
-                      onClick={() => setModalOpenForCamera(true)}
-                      className="w-full"
-                    >
-                      <CareIcon className="care-l-camera mr-2 text-lg" />
-                      Open Camera
-                    </ButtonV2>
-                    <ButtonV2
-                      id="upload_file_button"
-                      authorizeFor={NonReadOnlyUsers}
-                      disabled={
-                        !file ||
-                        !uploadFileName ||
-                        (patient && !patient.is_active)
-                      }
-                      onClick={handleUpload}
-                      className="w-full"
-                    >
-                      <CareIcon className="care-l-cloud-upload text-lg" />
-                      {t("upload")}
-                    </ButtonV2>
-                  </div>
-                )}
-                {file && (
-                  <div className="mt-2 flex items-center justify-between rounded bg-gray-200 px-4 py-2">
-                    {file?.name}
-                    <button
-                      onClick={() => {
-                        setFile(null);
-                        setUploadFileName("");
-                      }}
-                    >
-                      <CareIcon icon="l-times" className="text-lg" />
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : null}
-        </div>
-      </Page>
-
-      <Page title={`${VIEW_HEADING[type]}`} hideBack={true} breadcrumbs={false}>
+            ) : null}
+          </div>
+        </Page>
+      )}
+      <Page
+        title={VIEW_HEADING[type]}
+        hideBack={true}
+        breadcrumbs={false}
+        changePageMetadata={changePageMetadata}
+      >
         <HeadedTabs
           tabs={tabs}
           handleChange={handleTabChange}
@@ -1599,7 +1664,7 @@ export const FileUpload = (props: FileUploadProps) => {
           <>
             {uploadedUnarchievedFiles?.length > 0 ? (
               uploadedUnarchievedFiles.map((item: FileUploadModel) =>
-                renderFileUpload(item)
+                renderFileUpload(item),
               )
             ) : (
               <div className="mt-4 rounded-lg border bg-white p-4 shadow">
@@ -1624,7 +1689,7 @@ export const FileUpload = (props: FileUploadProps) => {
           <>
             {uploadedArchievedFiles?.length > 0 ? (
               uploadedArchievedFiles.map((item: FileUploadModel) =>
-                renderFileUpload(item)
+                renderFileUpload(item),
               )
             ) : (
               <div className="mt-4 rounded-lg border bg-white p-4 shadow">
@@ -1650,7 +1715,7 @@ export const FileUpload = (props: FileUploadProps) => {
             <>
               {uploadedDischargeSummaryFiles.length > 0 ? (
                 uploadedDischargeSummaryFiles.map((item: FileUploadModel) =>
-                  renderFileUpload(item)
+                  renderFileUpload(item),
                 )
               ) : (
                 <div className="mt-4 rounded-lg border bg-white p-4 shadow">

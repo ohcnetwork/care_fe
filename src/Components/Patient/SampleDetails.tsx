@@ -7,7 +7,7 @@ import Card from "../../CAREUI/display/Card";
 import { FileUpload } from "./FileUpload";
 import Page from "../Common/components/Page";
 import _ from "lodash-es";
-import { formatAge, formatDateTime } from "../../Utils/utils";
+import { formatDateTime, formatPatientAge } from "../../Utils/utils";
 
 import { navigate } from "raviger";
 import { DetailRoute } from "../../Routers/types";
@@ -28,7 +28,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
           navigate("/not-found");
         }
       },
-    }
+    },
   );
 
   const yesOrNoBadge = (param: any) =>
@@ -40,10 +40,10 @@ export const SampleDetails = ({ id }: DetailRoute) => {
 
   const showPatientCard = (patientData: any) => {
     const patientGender = GENDER_TYPES.find(
-      (i) => i.id === patientData?.gender
+      (i) => i.id === patientData?.gender,
     )?.text;
     const testType = TEST_TYPE_CHOICES.find(
-      (i) => i.id === patientData?.test_type
+      (i) => i.id === patientData?.test_type,
     )?.text;
 
     return (
@@ -102,7 +102,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             ) : (
               <div>
                 <span className="font-semibold leading-relaxed">Age: </span>
-                {formatAge(patientData?.age, patientData?.date_of_birth)}
+                {formatPatientAge(patientData)}
               </div>
             )}
             <div>

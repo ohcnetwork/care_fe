@@ -65,7 +65,7 @@ const AutoCompleteAsync = (props: Props) => {
         setData(data?.slice(0, showNOptions) || []);
         setLoading(false);
       }, debounceTime),
-    [fetchData, showNOptions, debounceTime]
+    [fetchData, showNOptions, debounceTime],
   );
 
   useEffect(() => {
@@ -109,7 +109,8 @@ const AutoCompleteAsync = (props: Props) => {
                   {hasSelection && !loading && !required && (
                     <div className="tooltip">
                       <CareIcon
-                        className="care-l-times-circle mb-[-5px] h-4 w-4 text-gray-800 transition-colors duration-200 ease-in-out hover:text-gray-500"
+                        icon="l-times-circle"
+                        className="mb-[-5px] h-4 w-4 text-gray-800 transition-colors duration-200 ease-in-out hover:text-gray-500"
                         onClick={(e) => {
                           e.preventDefault();
                           onChange(null);
@@ -121,9 +122,12 @@ const AutoCompleteAsync = (props: Props) => {
                     </div>
                   )}
                   {loading ? (
-                    <CareIcon className="care-l-spinner -mb-1.5 animate-spin" />
+                    <CareIcon
+                      icon="l-spinner"
+                      className="-mb-1.5 animate-spin"
+                    />
                   ) : (
-                    <CareIcon className="care-l-angle-down -mb-1.5" />
+                    <CareIcon icon="l-angle-down" className="-mb-1.5" />
                   )}
                 </div>
               </Combobox.Button>
@@ -155,7 +159,7 @@ const AutoCompleteAsync = (props: Props) => {
                           )}
                         </div>
                         {selected && (
-                          <CareIcon className="care-l-check text-lg" />
+                          <CareIcon icon="l-check" className="text-lg" />
                         )}
                       </div>
                     )}
@@ -171,7 +175,7 @@ const AutoCompleteAsync = (props: Props) => {
                   label={optionLabel(option)}
                   onRemove={() =>
                     onChange(
-                      selected.filter((item: any) => item.id !== option.id)
+                      selected.filter((item: any) => item.id !== option.id),
                     )
                   }
                 />
