@@ -35,7 +35,7 @@ interface Props<TItem> extends QueryOptions<PaginatedResponse<TItem>> {
   perPage?: number;
   children: (
     ctx: PaginatedListContext<TItem>,
-    query: ReturnType<typeof useQuery<PaginatedResponse<TItem>>>
+    query: ReturnType<typeof useQuery<PaginatedResponse<TItem>>>,
   ) => JSX.Element | JSX.Element[];
 }
 

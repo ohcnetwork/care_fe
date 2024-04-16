@@ -44,7 +44,7 @@ const getRedactedUrl = () => {
       // Replace all uuids in the URL with "ID_REDACTED"
       .replace(
         /[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12}/gi,
-        "ID_REDACTED"
+        "ID_REDACTED",
       )
       // Replace all numbers in the URL's path params with "ID_REDACTED"
       .replace(/\/\d+/g, "/ID_REDACTED")

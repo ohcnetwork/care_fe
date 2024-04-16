@@ -6,12 +6,12 @@ import { QueryParams, RequestOptions } from "./types";
 export function makeUrl(
   path: string,
   query?: QueryParams,
-  pathParams?: Record<string, string | number>
+  pathParams?: Record<string, string | number>,
 ) {
   if (pathParams) {
     path = Object.entries(pathParams).reduce(
       (acc, [key, value]) => acc.replace(`{${key}}`, `${value}`),
-      path
+      path,
     );
   }
 
@@ -41,7 +41,7 @@ const ensurePathNotMissingReplacements = (path: string) => {
 
   if (missingParams) {
     const msg = `Missing path params: ${missingParams.join(
-      ", "
+      ", ",
     )}. Path: ${path}`;
     Notification.Error({ msg });
     throw new Error(msg);
@@ -77,7 +77,7 @@ export function getAuthorizationHeader() {
 
 export function mergeRequestOptions<TData>(
   options: RequestOptions<TData>,
-  overrides: RequestOptions<TData>
+  overrides: RequestOptions<TData>,
 ): RequestOptions<TData> {
   return {
     ...options,
@@ -100,7 +100,7 @@ export function mergeRequestOptions<TData>(
 
 export function handleUploadPercentage(
   event: ProgressEvent,
-  setUploadPercent: Dispatch<SetStateAction<number>>
+  setUploadPercent: Dispatch<SetStateAction<number>>,
 ) {
   if (event.lengthComputable) {
     const percentComplete = Math.round((event.loaded / event.total) * 100);

@@ -50,7 +50,7 @@ export default function AuthUserProvider({ children, unauthorized }: Props) {
 
       return query;
     },
-    [refetch]
+    [refetch],
   );
 
   const signOut = useCallback(async () => {

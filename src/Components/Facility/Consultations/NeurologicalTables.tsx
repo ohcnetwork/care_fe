@@ -123,7 +123,7 @@ export const NeurologicalTable = (props: any) => {
   useEffect(() => {
     const fetchDailyRounds = async (
       currentPage: number,
-      consultationId: string
+      consultationId: string,
     ) => {
       const { res, data } = await request(routes.dailyRoundsAnalyse, {
         body: {
@@ -229,11 +229,11 @@ export const NeurologicalTable = (props: any) => {
         date: formatDateTime(x[0]),
         left:
           REACTION_OPTIONS.find(
-            (item) => item.id === x[1].left_pupil_light_reaction
+            (item) => item.id === x[1].left_pupil_light_reaction,
           )?.value || "--",
         right:
           REACTION_OPTIONS.find(
-            (item) => item.id === x[1].right_pupil_light_reaction
+            (item) => item.id === x[1].right_pupil_light_reaction,
           )?.value || "--",
       });
     }
@@ -256,11 +256,11 @@ export const NeurologicalTable = (props: any) => {
         date: formatDateTime(x[0]),
         left:
           LIMP_OPTIONS.find(
-            (item) => item.id === x[1].limb_response_upper_extremity_left
+            (item) => item.id === x[1].limb_response_upper_extremity_left,
           )?.value || "--",
         right:
           LIMP_OPTIONS.find(
-            (item) => item.id === x[1].limb_response_upper_extremity_right
+            (item) => item.id === x[1].limb_response_upper_extremity_right,
           )?.value || "--",
       });
     }
@@ -273,11 +273,11 @@ export const NeurologicalTable = (props: any) => {
         date: formatDateTime(x[0]),
         left:
           LIMP_OPTIONS.find(
-            (item) => item.id === x[1].limb_response_lower_extremity_left
+            (item) => item.id === x[1].limb_response_lower_extremity_left,
           )?.value || "--",
         right:
           LIMP_OPTIONS.find(
-            (item) => item.id === x[1].limb_response_lower_extremity_right
+            (item) => item.id === x[1].limb_response_lower_extremity_right,
           )?.value || "--",
       });
     }
