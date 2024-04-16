@@ -51,7 +51,7 @@ const requiredFields: any = {
 
 const initError = Object.assign(
   {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
 );
 
 const initialState = {

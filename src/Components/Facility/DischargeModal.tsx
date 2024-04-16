@@ -31,7 +31,7 @@ interface PreDischargeFormInterface {
   discharge_date?: string;
   death_datetime?: string;
   death_confirmed_doctor?: string;
-  referred_to?: number | null | undefined;
+  referred_to?: string | null | undefined;
   referred_to_external?: string | null | undefined;
 }
 
@@ -79,7 +79,7 @@ const DischargeModal = ({
         ordering: "-modified_date",
         use: "claim",
         consultation: consultationData.id,
-      })
+      }),
     );
 
     if (res?.data?.results?.length > 0) {
@@ -151,8 +151,8 @@ const DischargeModal = ({
           discharge: value,
           discharge_date: dayjs(preDischargeForm.discharge_date).toISOString(),
         },
-        { id: consultationData.id }
-      )
+        { id: consultationData.id },
+      ),
     );
 
     setIsSendingDischargeApi(false);
@@ -167,12 +167,10 @@ const DischargeModal = ({
 
   const handleFacilitySelect = (selected: FacilityModel) => {
     setFacility(selected);
-    const { id, name } = selected || {};
-    const isExternal = id === -1;
     setPreDischargeForm((prev) => ({
       ...prev,
-      referred_to: isExternal ? null : id,
-      referred_to_external: isExternal ? name : null,
+      referred_to: selected.id ?? null,
+      referred_to_external: !selected.id ? selected.name : null,
     }));
   };
 
@@ -182,7 +180,7 @@ const DischargeModal = ({
         <div>
           <p>Discharge patient from CARE</p>
           <span className="mt-1 flex gap-1 text-sm font-medium text-warning-500">
-            <CareIcon className="care-l-exclamation-triangle text-base" />
+            <CareIcon icon="l-exclamation-triangle" className="text-base" />
             <p>Caution: this action is irreversible.</p>
           </span>
         </div>
@@ -281,7 +279,7 @@ const DischargeModal = ({
           }}
           required
           min={dayjs(consultationData?.encounter_date).format(
-            "YYYY-MM-DDTHH:mm"
+            "YYYY-MM-DDTHH:mm",
           )}
           max={dayjs().format("YYYY-MM-DDTHH:mm")}
           error={

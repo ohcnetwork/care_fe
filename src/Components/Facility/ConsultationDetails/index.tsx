@@ -1,7 +1,6 @@
 import {
   CONSULTATION_TABS,
   GENDER_TYPES,
-  OptionsType,
   SYMPTOM_CHOICES,
 } from "../../../Common/constants";
 import { ConsultationModel } from "../models";
@@ -78,7 +77,7 @@ export const ConsultationDetails = (props: any) => {
   const [qParams, _] = useQueryParams();
 
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
-    {} as ConsultationModel
+    {} as ConsultationModel,
   );
   const [patientData, setPatientData] = useState<PatientModel>({});
   const [activeShiftingData, setActiveShiftingData] = useState<Array<any>>([]);
@@ -123,7 +122,7 @@ export const ConsultationDetails = (props: any) => {
           }
           if (facilityId != data.facility || patientId != data.patient) {
             navigate(
-              `/facility/${data.facility}/patient/${data.patient}/consultation/${data?.id}`
+              `/facility/${data.facility}/patient/${data.patient}/consultation/${data?.id}`,
             );
           }
           setConsultationData(data);
@@ -131,7 +130,7 @@ export const ConsultationDetails = (props: any) => {
             ? await dispatch(
                 listAssetBeds({
                   bed: data?.current_bed?.bed_object?.id,
-                })
+                }),
               )
             : null;
           const isCameraAttachedRes =
@@ -147,7 +146,7 @@ export const ConsultationDetails = (props: any) => {
             const patientGender = getPatientGender(patientRes.data);
             const patientAddress = getPatientAddress(patientRes.data);
             const patientComorbidities = getPatientComorbidities(
-              patientRes.data
+              patientRes.data,
             );
             const data = {
               ...patientRes.data,
@@ -165,7 +164,7 @@ export const ConsultationDetails = (props: any) => {
 
           // Get shifting data
           const shiftingRes = await dispatch(
-            listShiftRequests({ patient: id }, "shift-list-call")
+            listShiftRequests({ patient: id }, "shift-list-call"),
           );
           if (shiftingRes?.data?.results) {
             const data = shiftingRes.data.results;
@@ -177,7 +176,7 @@ export const ConsultationDetails = (props: any) => {
         setIsLoading(false);
       }
     },
-    [consultationId, dispatch, patientData.is_vaccinated]
+    [consultationId, dispatch, patientData.is_vaccinated],
   );
 
   useAbortableEffect((status: statusType) => {
@@ -228,7 +227,7 @@ export const ConsultationDetails = (props: any) => {
   //             <p>{diagnosis.label}</p>
   //             <div>
   //               <ToolTip text="Principal Diagnosis" position="BOTTOM">
-  //                 <CareIcon className="care-l-stethoscope rounded-lg bg-primary-500  p-1 text-2xl text-white" />
+  //                 <CareIcon icon="l-stethoscope" className="rounded-lg bg-primary-500 p-1 text-2xl text-white"/>
   //               </ToolTip>
   //             </div>
   //           </div>
@@ -273,7 +272,7 @@ export const ConsultationDetails = (props: any) => {
                 name:
                   consultationData.suggestion === "A"
                     ? `Admitted on ${formatDateTime(
-                        consultationData.encounter_date!
+                        consultationData.encounter_date!,
                       )}`
                     : consultationData.suggestion_text,
               },
@@ -304,7 +303,7 @@ export const ConsultationDetails = (props: any) => {
                 {patientData.last_consultation?.id &&
                   isCameraAttached &&
                   ["DistrictAdmin", "StateAdmin", "Doctor"].includes(
-                    authUser.user_type
+                    authUser.user_type,
                   ) && (
                     <Link
                       href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
@@ -318,6 +317,7 @@ export const ConsultationDetails = (props: any) => {
             <Link
               href={`/facility/${patientData.facility}/patient/${patientData.id}`}
               className="btn btn-primary m-1 w-full hover:text-white"
+              id="patient-details"
             >
               Patient Details
             </Link>
@@ -326,7 +326,7 @@ export const ConsultationDetails = (props: any) => {
               onClick={() =>
                 showPatientNotesPopup
                   ? navigate(
-                      `/facility/${facilityId}/patient/${patientId}/notes`
+                      `/facility/${facilityId}/patient/${patientId}/notes`,
                     )
                   : setShowPatientNotesPopup(true)
               }
@@ -365,7 +365,7 @@ export const ConsultationDetails = (props: any) => {
                       {relativeTime(
                         consultationData.discharge_date
                           ? consultationData.discharge_date
-                          : consultationData.encounter_date
+                          : consultationData.encounter_date,
                       )}
                     </div>
                   )}
@@ -420,14 +420,14 @@ export const ConsultationDetails = (props: any) => {
                 className="flex space-x-6 overflow-x-auto pb-2 pl-2 "
                 id="consultation_tab_nav"
               >
-                {CONSULTATION_TABS.map((p: OptionsType) => {
+                {CONSULTATION_TABS.map((p) => {
                   if (p.text === "FEED") {
                     if (
                       isCameraAttached === false || // No camera attached
                       consultationData?.discharge_date || // Discharged
                       !consultationData?.current_bed?.bed_object?.id || // Not admitted to bed
                       !["DistrictAdmin", "StateAdmin", "Doctor"].includes(
-                        authUser.user_type
+                        authUser.user_type,
                       ) // Not admin or doctor
                     )
                       return null; // Hide feed tab

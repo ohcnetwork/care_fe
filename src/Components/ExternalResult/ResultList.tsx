@@ -90,7 +90,7 @@ export default function ResultList() {
     const updatedLsgList = dataList.lsgList.filter((x: any) => x.id !== id);
     const lsgParams = updatedLsgList.map((x: any) => x.id);
     const updatedWardList = dataList.wardList.filter(
-      (x: any) => x.local_body_id !== id
+      (x: any) => x.local_body_id !== id,
     );
     const wardParams = updatedWardList.map((x: any) => x.id);
     updateQuery({ [paramKey]: lsgParams, ["wards"]: wardParams });
@@ -122,8 +122,8 @@ export default function ResultList() {
               paramKey === "local_bodies"
                 ? removeLSGFilter(paramKey, value.id)
                 : paramKey === "wards"
-                ? removeWardFilter(paramKey, value.id)
-                : null
+                  ? removeWardFilter(paramKey, value.id)
+                  : null
             }
           />
         </span>
@@ -245,7 +245,7 @@ export default function ResultList() {
                       label: "Import Results",
                       action: () => navigate("/external_results/upload"),
                       options: {
-                        icon: <CareIcon className="care-l-import" />,
+                        icon: <CareIcon icon="l-import" />,
                       },
                     },
                   ]
@@ -255,11 +255,11 @@ export default function ResultList() {
                 action: () =>
                   externalResultList(
                     { ...qParams, csv: true },
-                    "externalResultList"
+                    "externalResultList",
                   ),
                 filePrefix: "external_results",
                 options: {
-                  icon: <CareIcon className="care-l-export" />,
+                  icon: <CareIcon icon="l-export" />,
                 },
               },
             ]}

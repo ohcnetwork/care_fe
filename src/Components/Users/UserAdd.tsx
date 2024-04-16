@@ -58,7 +58,7 @@ type UserForm = {
   gender: string;
   password: string;
   c_password: string;
-  facilities: Array<number>;
+  facilities: Array<string>;
   home_facility: FacilityModel | null;
   username: string;
   first_name: string;
@@ -67,7 +67,6 @@ type UserForm = {
   phone_number: string;
   alt_phone_number: string;
   phone_number_is_whatsapp: boolean;
-  age: number;
   date_of_birth: Date | null;
   state: number;
   district: number;
@@ -91,7 +90,6 @@ const initForm: UserForm = {
   phone_number: "+91",
   alt_phone_number: "+91",
   phone_number_is_whatsapp: true,
-  age: 0,
   date_of_birth: null,
   state: 0,
   district: 0,
@@ -110,7 +108,7 @@ const STAFF_OR_NURSE_USER = [
 
 const initError = Object.assign(
   {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
 );
 
 const initialState = {
@@ -146,7 +144,7 @@ const getDate = (value: any) =>
 
 export const validateRule = (
   condition: boolean,
-  content: JSX.Element | string
+  content: JSX.Element | string,
 ) => {
   return (
     <div>
@@ -170,7 +168,7 @@ export const UserAdd = (props: UserProps) => {
 
   const [state, dispatch] = useAutoSaveReducer<UserForm>(
     user_create_reducer,
-    initialState
+    initialState,
   );
   const [isLoading, setIsLoading] = useState(false);
   const [states, setStates] = useState<StateObj[]>([]);
@@ -229,15 +227,15 @@ export const UserAdd = (props: UserProps) => {
   const userTypes = authUser.is_superuser
     ? [...USER_TYPE_OPTIONS]
     : authUser.user_type === "StaffReadOnly"
-    ? readOnlyUsers.slice(0, 1)
-    : authUser.user_type === "DistrictReadOnlyAdmin"
-    ? readOnlyUsers.slice(0, 2)
-    : authUser.user_type === "StateReadOnlyAdmin"
-    ? readOnlyUsers.slice(0, 3)
-    : authUser.user_type === "Pharmacist"
-    ? USER_TYPE_OPTIONS.slice(0, 1)
-    : // Exception to allow Staff to Create Doctors
-      defaultAllowedUserTypes;
+      ? readOnlyUsers.slice(0, 1)
+      : authUser.user_type === "DistrictReadOnlyAdmin"
+        ? readOnlyUsers.slice(0, 2)
+        : authUser.user_type === "StateReadOnlyAdmin"
+          ? readOnlyUsers.slice(0, 3)
+          : authUser.user_type === "Pharmacist"
+            ? USER_TYPE_OPTIONS.slice(0, 1)
+            : // Exception to allow Staff to Create Doctors
+              defaultAllowedUserTypes;
 
   // TODO: refactor lines 227 through 248 to be more readable. This is messy.
   if (authUser.user_type === "Nurse" || authUser.user_type === "Staff") {
@@ -279,7 +277,7 @@ export const UserAdd = (props: UserProps) => {
           setLocalBodies(result.data);
         }
       },
-    }
+    },
   );
 
   const { loading: isStateLoading } = useQuery(routes.statesList, {
@@ -328,7 +326,7 @@ export const UserAdd = (props: UserProps) => {
     setSelectedFacility(selected as FacilityModel[]);
     const form = { ...state.form };
     form.facilities = selected
-      ? (selected as FacilityModel[]).map((i) => i.id ?? -1)
+      ? (selected as FacilityModel[]).map((i) => i.id!)
       : [];
     dispatch({ type: "set_form", form });
   };
@@ -471,7 +469,12 @@ export const UserAdd = (props: UserProps) => {
           return;
         case "date_of_birth":
           if (!state.form[field]) {
-            errors[field] = "Please enter date in YYYY/MM/DD format";
+            errors[field] = "Please enter date in DD/MM/YYYY format";
+            invalidForm = true;
+          } else if (
+            dayjs(state.form[field]).isAfter(dayjs().subtract(1, "year"))
+          ) {
+            errors[field] = "Enter a valid date of birth";
             invalidForm = true;
           }
           return;
@@ -539,11 +542,10 @@ export const UserAdd = (props: UserProps) => {
                 ? ""
                 : state.form.phone_number
               : state.form.alt_phone_number === "+91"
-              ? ""
-              : state.form.alt_phone_number
+                ? ""
+                : state.form.alt_phone_number,
           ) ?? "",
         date_of_birth: dateQueryString(state.form.date_of_birth),
-        age: Number(dayjs().diff(state.form.date_of_birth, "years", false)),
         doctor_qualification:
           state.form.user_type === "Doctor"
             ? state.form.doctor_qualification
@@ -553,7 +555,7 @@ export const UserAdd = (props: UserProps) => {
             ? dayjs()
                 .subtract(
                   parseInt(state.form.doctor_experience_commenced_on ?? "0"),
-                  "years"
+                  "years",
                 )
                 .format("YYYY-MM-DD")
             : undefined,
@@ -765,25 +767,25 @@ export const UserAdd = (props: UserProps) => {
                   <div>
                     {validateRule(
                       usernameInput.length >= 4 && usernameInput.length <= 16,
-                      "Username should be 4-16 characters long"
+                      "Username should be 4-16 characters long",
                     )}
                   </div>
                   <div>
                     {validateRule(
                       /^[a-z0-9._-]*$/.test(usernameInput),
-                      "Username can only contain lowercase letters, numbers, and . _ -"
+                      "Username can only contain lowercase letters, numbers, and . _ -",
                     )}
                   </div>
                   <div>
                     {validateRule(
                       /^[a-z0-9].*[a-z0-9]$/i.test(usernameInput),
-                      "Username must start and end with a letter or number"
+                      "Username must start and end with a letter or number",
                     )}
                   </div>
                   <div>
                     {validateRule(
                       !/(?:[._-]{2,})/.test(usernameInput),
-                      "Username can't contain consecutive special characters . _ -"
+                      "Username can't contain consecutive special characters . _ -",
                     )}
                   </div>
                 </div>
@@ -815,19 +817,19 @@ export const UserAdd = (props: UserProps) => {
                 <div className="text-small pl-2 text-gray-500">
                   {validateRule(
                     state.form.password?.length >= 8,
-                    "Password should be atleast 8 characters long"
+                    "Password should be atleast 8 characters long",
                   )}
                   {validateRule(
                     state.form.password !== state.form.password.toUpperCase(),
-                    "Password should contain at least 1 lowercase letter"
+                    "Password should contain at least 1 lowercase letter",
                   )}
                   {validateRule(
                     state.form.password !== state.form.password.toLowerCase(),
-                    "Password should contain at least 1 uppercase letter"
+                    "Password should contain at least 1 uppercase letter",
                   )}
                   {validateRule(
                     /\d/.test(state.form.password),
-                    "Password should contain at least 1 number"
+                    "Password should contain at least 1 number",
                   )}
                 </div>
               )}
@@ -847,7 +849,7 @@ export const UserAdd = (props: UserProps) => {
                 state.form.c_password.length > 0 &&
                 validateRule(
                   state.form.c_password === state.form.password,
-                  "Confirm password should match the entered password"
+                  "Confirm password should match the entered password",
                 )}
             </div>
             <TextFormField

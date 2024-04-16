@@ -31,7 +31,7 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import SearchInput from "../Form/SearchInput";
 import SortDropdownMenu from "../Common/SortDropdown";
 import SwitchTabs from "../Common/components/SwitchTabs";
-import { formatAge, parsePhoneNumber } from "../../Utils/utils.js";
+import { formatPatientAge, parsePhoneNumber } from "../../Utils/utils.js";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page.js";
@@ -103,7 +103,7 @@ export const PatientManager = () => {
   });
   const authUser = useAuthUser();
   const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
-  const [showDialog, setShowDialog] = useState(false);
+  const [showDialog, setShowDialog] = useState<"create" | "list-discharged">();
   const [showDoctors, setShowDoctors] = useState(false);
   const [showDoctorConnect, setShowDoctorConnect] = useState(false);
   const [phone_number, setPhoneNumber] = useState("");
@@ -364,7 +364,7 @@ export const PatientManager = () => {
     let category_name;
     if (qParams.category) {
       category_name = PATIENT_CATEGORIES.find(
-        (item: any) => qParams.category === item.id
+        (item: any) => qParams.category === item.id,
       )?.text;
 
       return String(category_name);
@@ -401,12 +401,14 @@ export const PatientManager = () => {
         external_id: qParams.last_consultation_current_bed__location,
       },
       prefetch: !!qParams.last_consultation_current_bed__location,
-    }
+    },
   );
 
   const { data: permittedFacilities } = useQuery(
     routes.getPermittedFacilities,
-    {}
+    {
+      query: { limit: 1 },
+    },
   );
 
   const LastAdmittedToTypeBadges = () => {
@@ -478,7 +480,7 @@ export const PatientManager = () => {
             </span>
           </div>
           <div className="flex flex-col items-start gap-4 md:flex-row">
-            <div className="h-20 w-full min-w-[5rem] rounded-lg border border-gray-300 bg-gray-50 md:w-20">
+            <div className="h-20 w-full min-w-20 rounded-lg border border-gray-300 bg-gray-50 md:w-20">
               {patient?.last_consultation?.current_bed &&
               patient?.last_consultation?.discharge_date === null ? (
                 <div className="tooltip flex h-full flex-col items-center justify-center">
@@ -503,14 +505,17 @@ export const PatientManager = () => {
               ) : patient.last_consultation?.suggestion === "DC" ? (
                 <div className="flex h-full flex-col items-center justify-center">
                   <div className="tooltip">
-                    <CareIcon className="care-l-estate text-3xl text-gray-500" />
+                    <CareIcon
+                      icon="l-estate"
+                      className="text-3xl text-gray-500"
+                    />
                     <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-sm font-medium">
                       Domiciliary Care
                     </span>
                   </div>
                 </div>
               ) : (
-                <div className="flex min-h-[5rem] items-center justify-center">
+                <div className="flex min-h-20 items-center justify-center">
                   <CareIcon
                     icon="l-user-injured"
                     className="text-3xl text-gray-500"
@@ -526,7 +531,7 @@ export const PatientManager = () => {
                 >
                   <span className="text-xl capitalize">{patient.name}</span>
                   <span className="text-gray-800">
-                    {formatAge(patient.age, patient.date_of_birth, true)}
+                    {formatPatientAge(patient, true)}
                   </span>
                 </div>
               </div>
@@ -639,7 +644,7 @@ export const PatientManager = () => {
                       !patient.is_active
                     ) &&
                     dayjs(patient.last_consultation?.modified_date).isBefore(
-                      new Date().getTime() - 24 * 60 * 60 * 1000
+                      new Date().getTime() - 24 * 60 * 60 * 1000,
                     ) && (
                       <span className="relative inline-flex">
                         <Chip
@@ -667,7 +672,7 @@ export const PatientManager = () => {
                       (resp) =>
                         resp.text ===
                         patient.last_consultation?.last_daily_round
-                          ?.ventilator_interface
+                          ?.ventilator_interface,
                     )?.id
                   }
                 </div>
@@ -723,6 +728,9 @@ export const PatientManager = () => {
     };
   };
 
+  const onlyAccessibleFacility =
+    permittedFacilities?.count === 1 ? permittedFacilities.results[0] : null;
+
   return (
     <Page
       title={t("Patients")}
@@ -736,15 +744,13 @@ export const PatientManager = () => {
               onClick={() => {
                 if (qParams.facility)
                   navigate(`/facility/${qParams.facility}/patient`);
-                else if (permittedFacilities?.results.length === 1)
-                  navigate(
-                    `/facility/${permittedFacilities?.results[0].id}/patient`
-                  );
-                else setShowDialog(true);
+                else if (onlyAccessibleFacility)
+                  navigate(`/facility/${onlyAccessibleFacility.id}/patient`);
+                else setShowDialog("create");
               }}
               className="w-full lg:w-fit"
             >
-              <CareIcon className="care-l-plus text-lg" />
+              <CareIcon icon="l-plus" className="text-lg" />
               <p id="add-patient-div" className="lg:my-[2px]">
                 Add Patient Details
               </p>
@@ -755,8 +761,28 @@ export const PatientManager = () => {
               tab1="Live"
               tab2="Discharged"
               onClickTab1={() => updateQuery({ is_active: "True" })}
-              onClickTab2={() => updateQuery({ is_active: "False" })}
-              isTab2Active={tabValue ? true : false}
+              onClickTab2={() => {
+                // Navigate to dedicated discharged list page if filtered by a facility or user has access only to one facility.
+                const id = qParams.facility || onlyAccessibleFacility?.id;
+                if (id) {
+                  navigate(`facility/${id}/discharged-patients`);
+                  return;
+                }
+
+                if (
+                  authUser.user_type === "StateAdmin" ||
+                  authUser.user_type === "StateReadOnlyAdmin"
+                ) {
+                  updateQuery({ is_active: "False" });
+                  return;
+                }
+
+                Notification.Warn({
+                  msg: "Facility needs to be selected to view discharged patients.",
+                });
+                setShowDialog("list-discharged");
+              }}
+              isTab2Active={!!tabValue}
             />
             {showDoctorConnect && (
               <ButtonV2
@@ -770,7 +796,7 @@ export const PatientManager = () => {
                   setShowDoctors(true);
                 }}
               >
-                <CareIcon className="care-l-phone text-lg" />
+                <CareIcon icon="l-phone" className="text-lg" />
                 <p className="lg:my-[2px]">Doctor Connect</p>
               </ButtonV2>
             )}
@@ -800,7 +826,7 @@ export const PatientManager = () => {
                   }}
                   className="mr-5 w-full lg:w-fit"
                 >
-                  <CareIcon className="care-l-export" />
+                  <CareIcon icon="l-export" />
                   <span className="lg:my-[3px]">Export</span>
                 </ButtonV2>
               ) : (
@@ -808,16 +834,8 @@ export const PatientManager = () => {
                   disabled={!isExportAllowed}
                   exportItems={[
                     {
-                      label:
-                        tabValue === 0
-                          ? "Live patients"
-                          : "Discharged patients",
+                      label: "Export Live patients",
                       action: exportPatients(true),
-                      parse: preventDuplicatePatientsDuetoPolicyId,
-                    },
-                    {
-                      label: "All patients",
-                      action: exportPatients(false),
                       parse: preventDuplicatePatientsDuetoPolicyId,
                     },
                   ]}
@@ -835,12 +853,21 @@ export const PatientManager = () => {
       }
     >
       <FacilitiesSelectDialogue
-        show={showDialog}
+        show={!!showDialog}
         setSelected={(e) => setSelectedFacility(e)}
         selectedFacility={selectedFacility}
-        handleOk={() => navigate(`facility/${selectedFacility.id}/patient`)}
+        handleOk={() => {
+          switch (showDialog) {
+            case "create":
+              navigate(`facility/${selectedFacility.id}/patient`);
+              break;
+            case "list-discharged":
+              navigate(`facility/${selectedFacility.id}/discharged-patients`);
+              break;
+          }
+        }}
         handleCancel={() => {
-          setShowDialog(false);
+          setShowDialog(undefined);
           setSelectedFacility({ name: "" });
         }}
       />
@@ -919,12 +946,12 @@ export const PatientManager = () => {
             badge("Is Antenatal", "is_antenatal"),
             badge(
               "Is Medico-Legal Case",
-              "last_consultation_medico_legal_case"
+              "last_consultation_medico_legal_case",
             ),
             value(
               "Facility",
               "facility",
-              qParams.facility ? facilityData?.name || "" : ""
+              qParams.facility ? facilityData?.name || "" : "",
             ),
             value(
               "Location",
@@ -932,13 +959,13 @@ export const PatientManager = () => {
               qParams.last_consultation_current_bed__location
                 ? facilityAssetLocationData?.name ||
                     qParams.last_consultation_current_bed__locations
-                : ""
+                : "",
             ),
             badge("Facility Type", "facility_type"),
             value(
               "District",
               "district",
-              qParams.district ? districtData?.name || "" : ""
+              qParams.district ? districtData?.name || "" : "",
             ),
             ordering(),
             value("Category", "category", getTheCategoryFromId()),
@@ -947,12 +974,12 @@ export const PatientManager = () => {
               "Respiratory Support",
               "ventilator_interface",
               qParams.ventilator_interface &&
-                t(`RESPIRATORY_SUPPORT_${qParams.ventilator_interface}`)
+                t(`RESPIRATORY_SUPPORT_${qParams.ventilator_interface}`),
             ),
             value(
               "Gender",
               "gender",
-              parseOptionId(GENDER_TYPES, qParams.gender) || ""
+              parseOptionId(GENDER_TYPES, qParams.gender) || "",
             ),
             {
               name: "Admitted to",
@@ -970,15 +997,15 @@ export const PatientManager = () => {
               value(
                 DIAGNOSES_FILTER_LABELS[key],
                 key,
-                getDiagnosisFilterValue(key).join(", ")
-              )
+                getDiagnosisFilterValue(key).join(", "),
+              ),
             ),
             badge("Declared Status", "is_declared_positive"),
             ...dateRange("Result", "date_of_result"),
             ...dateRange("Declared positive", "date_declared_positive"),
             ...dateRange(
               "Symptoms onset",
-              "last_consultation_symptoms_onset_date"
+              "last_consultation_symptoms_onset_date",
             ),
             ...dateRange("Last vaccinated", "last_vaccinated_date"),
             {
@@ -990,8 +1017,8 @@ export const PatientManager = () => {
               "last_consultation__new_discharge_reason",
               parseOptionId(
                 DISCHARGE_REASONS,
-                qParams.last_consultation__new_discharge_reason
-              ) || ""
+                qParams.last_consultation__new_discharge_reason,
+              ) || "",
             ),
           ]}
           children={

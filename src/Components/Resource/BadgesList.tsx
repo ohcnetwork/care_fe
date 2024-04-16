@@ -17,7 +17,7 @@ export default function BadgesList(props: any) {
 
   const getDescShiftingFilterOrder = (ordering: any) => {
     const foundItem = SHIFTING_FILTER_ORDER.find(
-      (item) => item.text === ordering
+      (item) => item.text === ordering,
     );
     return foundItem ? foundItem.desc : "";
   };
@@ -28,7 +28,7 @@ export default function BadgesList(props: any) {
         value(
           "Ordering",
           "ordering",
-          getDescShiftingFilterOrder(appliedFilters.ordering)
+          getDescShiftingFilterOrder(appliedFilters.ordering),
         ),
         badge("Status", "status"),
         badge("Title", "title"),
@@ -41,21 +41,23 @@ export default function BadgesList(props: any) {
         value(
           "Origin facility",
           "origin_facility",
-          appliedFilters.origin_facility ? originFacility?.data?.name || "" : ""
+          appliedFilters.origin_facility
+            ? originFacility?.data?.name || ""
+            : "",
         ),
         value(
           "Approving facility",
           "approving_facility",
           appliedFilters.approving_facility
             ? approvingFacility?.data?.name || ""
-            : ""
+            : "",
         ),
         value(
           "Assigned facility",
           "assigned_facility",
           appliedFilters.assigned_facility
             ? assignedFacility?.data?.name || ""
-            : ""
+            : "",
         ),
       ]}
     />

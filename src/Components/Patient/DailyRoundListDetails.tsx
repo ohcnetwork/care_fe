@@ -24,7 +24,7 @@ export const DailyRoundListDetails = (props: any) => {
     onResponse: ({ res, data }) => {
       if (res && data) {
         const currentHealth = currentHealthChoices.find(
-          (i) => i.text === data.current_health
+          (i) => i.text === data.current_health,
         );
 
         const tdata: DailyRoundsModel = {
@@ -58,7 +58,10 @@ export const DailyRoundListDetails = (props: any) => {
       title={`Consultation Update #${id}`}
       backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`}
     >
-      <div className="mt-4 h-full rounded-lg border bg-white p-4 text-black shadow hover:border-primary-500">
+      <div
+        className="mt-4 h-full rounded-lg border bg-white p-4 text-black shadow hover:border-primary-500"
+        id="consultation-preview"
+      >
         <div className="flex justify-between">
           <div className="max-w-md">
             <div>
@@ -171,7 +174,7 @@ export const DailyRoundListDetails = (props: any) => {
             </span>
             {dailyRoundListDetailsData.consciousness_level
               ? CONSCIOUSNESS_LEVEL.find(
-                  (i) => i.id === dailyRoundListDetailsData.consciousness_level
+                  (i) => i.id === dailyRoundListDetailsData.consciousness_level,
                 )?.text
               : "-"}
           </div>

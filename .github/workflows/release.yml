@@ -1,0 +1,59 @@
+name: Create Release on Branch Push
+
+on:
+  push:
+    branches:
+      - production
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Release on Push
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Necessary to fetch all tags
+
+      - name: Calculate next tag
+        id: calc_tag
+        run: |
+          YEAR=$(date +"%y")
+          WEEK=$(date +"%V")
+          LAST_TAG=$(git tag -l "v$YEAR.$WEEK.*" | sort -V | tail -n1)
+          LAST_TAG=$(echo "$LAST_TAG" | tr -d '\r' | sed 's/[[:space:]]*$//')
+          echo "Last Tag: $LAST_TAG"
+          if [[ $LAST_TAG == "" ]]; then
+            MINOR=0
+          else
+            MINOR=$(echo $LAST_TAG | awk -F '.' '{print $NF}')
+            echo "Minor Version: $MINOR"
+            MINOR=$((MINOR + 1))
+          fi
+          TAG="v$YEAR.$WEEK.$MINOR"
+          echo "TAG=$TAG" >> $GITHUB_ENV
+          echo "Next Tag: $TAG"
+
+      - name: Configure git
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+      - name: Create and push tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git tag -a "$TAG" -m "Release $TAG"
+          git push origin "$TAG"
+
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$TAG" \
+              --repo="$GITHUB_REPOSITORY" \
+              --title="$TAG" \
+              --generate-notes \
+              --draft
