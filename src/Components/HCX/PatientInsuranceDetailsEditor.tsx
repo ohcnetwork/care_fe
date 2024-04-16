@@ -67,14 +67,14 @@ export default function PatientInsuranceDetailsEditor({
           : dispatch(HCXActions.policies.create(policy)));
 
         const eligibilityCheckRes = await dispatch(
-          HCXActions.checkEligibility(policyRes.data.id)
+          HCXActions.checkEligibility(policyRes.data.id),
         );
         if (eligibilityCheckRes.status === 200) {
           Notifications.Success({ msg: "Checking Policy Eligibility..." });
         } else {
           Notifications.Error({ msg: "Something Went Wrong..." });
         }
-      })
+      }),
     );
     setIsUpdating(false);
     onSubmitted?.();

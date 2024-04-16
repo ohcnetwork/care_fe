@@ -207,7 +207,7 @@ export interface InventoryItemsModel {
     {
       id: number;
       name: string;
-    }
+    },
   ];
 }
 

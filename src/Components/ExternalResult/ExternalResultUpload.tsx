@@ -31,8 +31,8 @@ export default function ExternalResultUpload() {
             result.address.split(",").pop()?.trim() !==
               user.state_object.name) ||
           (user.user_type !== "StateAdmin" &&
-            result.district !== user.district_object.name)
-      ).length
+            result.district !== user.district_object.name),
+      ).length,
     );
   };
   const { t } = useTranslation();
@@ -77,7 +77,7 @@ export default function ExternalResultUpload() {
                         data.address.split(",").pop()?.trim() !==
                           user.state_object.name) ||
                       (user.user_type !== "StateAdmin" &&
-                        data.district !== user.district_object.name)
+                        data.district !== user.district_object.name),
                   )
                 : csvData,
             },

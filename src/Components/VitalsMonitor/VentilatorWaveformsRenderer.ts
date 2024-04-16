@@ -189,7 +189,7 @@ class VentilatorVitalsRenderer {
       cursor.x - deltaRows * size.width,
       1 + transform(channel.options.highLimit) + (deltaRows * size.height) / 3,
       10,
-      size.height / 3 + 5
+      size.height / 3 + 5,
     );
   }
 

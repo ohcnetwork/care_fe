@@ -21,7 +21,7 @@ export default function KeyboardShortcut(props: Props) {
       <span
         className={classNames(
           "tooltip-text flex items-center gap-0.5 text-xs",
-          props.tooltipClassName || "tooltip-bottom"
+          props.tooltipClassName || "tooltip-bottom",
         )}
       >
         <span className="px-1 font-bold">{props.helpText}</span>

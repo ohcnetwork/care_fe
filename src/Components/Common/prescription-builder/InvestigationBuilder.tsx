@@ -29,7 +29,7 @@ export interface InvestigationBuilderProps<T> {
 }
 
 export default function InvestigationBuilder(
-  props: InvestigationBuilderProps<InvestigationType>
+  props: InvestigationBuilderProps<InvestigationType>,
 ) {
   const { investigations, setInvestigations } = props;
   const [investigationsList, setInvestigationsList] = useState<string[]>([]);
@@ -54,8 +54,8 @@ export default function InvestigationBuilder(
   const setItem = (object: InvestigationType, i: number) => {
     setInvestigations(
       investigations.map((investigation, index) =>
-        index === i ? object : investigation
-      )
+        index === i ? object : investigation,
+      ),
     );
   };
 
@@ -73,7 +73,7 @@ export default function InvestigationBuilder(
       additionalStrings = [
         ...additionalStrings,
         ...(investigation[1] as string[]).map(
-          (i: any) => i + " -- ( " + investigation[0] + " )"
+          (i: any) => i + " -- ( " + investigation[0] + " )",
         ),
       ];
     });
@@ -88,7 +88,7 @@ export default function InvestigationBuilder(
         (investigation) =>
           `${investigation.name} -- ${investigation.groups
             .map((group) => ` ( ${group.name} ) `)
-            .join(", ")}`
+            .join(", ")}`,
       ) ?? []
     );
   };
@@ -107,7 +107,7 @@ export default function InvestigationBuilder(
               ...investigation,
               frequency,
             },
-            i
+            i,
           );
         };
 
@@ -117,7 +117,7 @@ export default function InvestigationBuilder(
               ...investigation,
               type,
             },
-            i
+            i,
           );
         };
 
@@ -137,7 +137,7 @@ export default function InvestigationBuilder(
                 className="flex h-full items-center justify-center gap-1.5 rounded-md bg-red-500 px-3 py-1 text-sm text-gray-100 transition hover:bg-red-600"
                 onClick={() =>
                   setInvestigations(
-                    investigations.filter((investigation, index) => i != index)
+                    investigations.filter((investigation, index) => i != index),
                   )
                 }
               >
@@ -184,7 +184,7 @@ export default function InvestigationBuilder(
                             ...investigation,
                             repetitive: e.currentTarget.checked,
                           },
-                          i
+                          i,
                         );
                       }}
                     />
@@ -218,7 +218,7 @@ export default function InvestigationBuilder(
                               ...investigation,
                               time: e.currentTarget.value,
                             },
-                            i
+                            i,
                           );
                         }}
                         onFocus={() => setActiveIdx(i)}
@@ -240,7 +240,7 @@ export default function InvestigationBuilder(
                           ...investigation,
                           notes: e.currentTarget.value,
                         },
-                        i
+                        i,
                       );
                     }}
                     onFocus={() => setActiveIdx(i)}

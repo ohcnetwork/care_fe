@@ -98,7 +98,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
     },
     {
       ignoreInputFields: false,
-    }
+    },
   );
 
   return (

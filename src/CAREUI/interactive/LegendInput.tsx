@@ -97,7 +97,7 @@ export default function LegendInput(props: InputProps) {
               (focused || ref.current?.value) &&
                 props.size === "small" &&
                 "-top-[7px]",
-              props.error && "text-red-500"
+              props.error && "text-red-500",
             )}
           >
             {props.legend}
@@ -134,7 +134,7 @@ export default function LegendInput(props: InputProps) {
             props.size === "large" && "px-5 py-4 text-lg",
             props.type === "PASSWORD" && "pr-10",
             props.error && "border-red-500",
-            props.className
+            props.className,
           )}
         />
         {props.type === "PASSWORD" && (
