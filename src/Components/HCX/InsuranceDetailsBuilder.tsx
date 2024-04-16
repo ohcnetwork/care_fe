@@ -24,8 +24,8 @@ export default function InsuranceDetailsBuilder(props: Props) {
     return (event: FieldChangeEvent<unknown>) => {
       field.handleChange(
         (props.value || [])?.map((obj, i) =>
-          i === index ? { ...obj, [event.name]: event.value } : obj
-        )
+          i === index ? { ...obj, [event.name]: event.value } : obj,
+        ),
       );
     };
   };
@@ -34,8 +34,8 @@ export default function InsuranceDetailsBuilder(props: Props) {
     return (diffs: object) => {
       field.handleChange(
         (props.value || [])?.map((obj, i) =>
-          i === index ? { ...obj, ...diffs } : obj
-        )
+          i === index ? { ...obj, ...diffs } : obj,
+        ),
       );
     };
   };
@@ -48,7 +48,7 @@ export default function InsuranceDetailsBuilder(props: Props) {
             dispatch(HCXActions.policies.delete(obj.id));
           }
           return i !== index;
-        })
+        }),
       );
     };
   };
@@ -114,7 +114,7 @@ const InsuranceDetailEditCard = ({
           "p-2",
           gridView
             ? "grid grid-cols-1 gap-x-8 gap-y-2 md:grid-cols-2"
-            : "flex flex-col gap-2"
+            : "flex flex-col gap-2",
         )}
       >
         <TextFormField

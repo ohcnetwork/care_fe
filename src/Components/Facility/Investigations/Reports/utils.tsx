@@ -91,7 +91,7 @@ export const getColorIndex = _.memoize(
       const result = 3 + Math.round(Math.abs(value - avg) / buckets);
       return Math.abs(result);
     }
-  }
+  },
 );
 
 export const safe = [

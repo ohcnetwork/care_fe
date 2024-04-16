@@ -40,7 +40,7 @@ const Beds = (props: BedsProps) => {
   const { facilityId, consultationId, discharged } = props;
   const [bed, setBed] = useState<BedModel>({});
   const [startDate, setStartDate] = useState<string>(
-    dayjs().format("YYYY-MM-DDTHH:mm")
+    dayjs().format("YYYY-MM-DDTHH:mm"),
   );
   const [assets, setAssets] = useState<any[]>([]);
   const [consultationBeds, setConsultationBeds] = useState<CurrentBed[]>([]);

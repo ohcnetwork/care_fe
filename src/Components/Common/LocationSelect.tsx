@@ -28,7 +28,7 @@ export const LocationSelect = (props: LocationSelectProps) => {
         facility_external_id: props.facilityId,
       },
       prefetch: props.facilityId !== undefined,
-    }
+    },
   );
 
   return props.multiple ? (
