@@ -34,7 +34,7 @@ export default function EventsList() {
                         .split("_")
                         .map(
                           (text) =>
-                            text[0].toUpperCase() + text.toLowerCase().slice(1)
+                            text[0].toUpperCase() + text.toLowerCase().slice(1),
                         )
                         .join(" ") + " Event"
                     }
@@ -48,7 +48,7 @@ export default function EventsList() {
                   >
                     {(() => {
                       const values = Object.entries(item.value).filter(
-                        ([_, value]) => value !== null && value !== undefined
+                        ([_, value]) => value !== null && value !== undefined,
                       );
 
                       if (values.length === 0) {

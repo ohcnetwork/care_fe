@@ -59,7 +59,7 @@ const VirtualNursingAssistantLogUpdateCard = (props: Props) => {
   const diff: Partial<ReturnType<typeof extractVirtualNursingAssistantFields>> =
     getDeepDiff(
       extractVirtualNursingAssistantFields(props.round),
-      extractVirtualNursingAssistantFields(props.previousRound)
+      extractVirtualNursingAssistantFields(props.previousRound),
     );
 
   const diffKeys = Object.keys(diff);

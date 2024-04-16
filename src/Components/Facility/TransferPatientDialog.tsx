@@ -24,7 +24,7 @@ const initForm = {
 
 const initError = Object.assign(
   {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
 );
 
 const initialState = {
@@ -141,7 +141,7 @@ const TransferPatientDialog = (props: Props) => {
           data && data.facility_object && data.facility_object.id;
         if (newFacilityId) {
           navigate(
-            `/facility/${newFacilityId}/patient/${data.patient}/consultation`
+            `/facility/${newFacilityId}/patient/${data.patient}/consultation`,
           );
         } else {
           navigate("/facility");

@@ -41,23 +41,23 @@ export default function MedicineAdministrationTableRow({
         prescription: prescription.id,
         administered_date_after: formatDateTime(
           props.intervals[0].start,
-          "YYYY-MM-DD"
+          "YYYY-MM-DD",
         ),
         administered_date_before: formatDateTime(
           props.intervals[props.intervals.length - 1].end,
-          "YYYY-MM-DD"
+          "YYYY-MM-DD",
         ),
         archived: false,
       },
       key: `${prescription.last_administration?.administered_date}`,
-    }
+    },
   );
 
   return (
     <tr
       className={classNames(
         "group transition-all duration-200 ease-in-out",
-        loading ? "bg-gray-300" : "bg-white hover:bg-primary-100"
+        loading ? "bg-gray-300" : "bg-white hover:bg-primary-100",
       )}
     >
       {showDiscontinue && (
@@ -143,7 +143,7 @@ export default function MedicineAdministrationTableRow({
           title={`${t("edit")} ${t(
             prescription.dosage_type === "PRN"
               ? "prn_prescription"
-              : "prescription_medication"
+              : "prescription_medication",
           )}: ${
             prescription.medicine_object?.name ?? prescription.medicine_old
           }`}
@@ -175,7 +175,7 @@ export default function MedicineAdministrationTableRow({
             <span
               className={classNames(
                 "text-sm font-semibold",
-                prescription.discontinued ? "text-gray-700" : "text-gray-900"
+                prescription.discontinued ? "text-gray-700" : "text-gray-900",
               )}
             >
               {prescription.medicine_object?.name ?? prescription.medicine_old}

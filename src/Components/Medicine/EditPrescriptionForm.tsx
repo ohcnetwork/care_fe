@@ -26,7 +26,7 @@ interface Props {
 const handleSubmit = async (
   consultation_external_id: string,
   oldObj: Prescription,
-  { discontinued_reason, ...newObj }: Prescription
+  { discontinued_reason, ...newObj }: Prescription,
 ) => {
   const discontinue = await request(MedicineRoutes.discontinuePrescription, {
     pathParams: {
