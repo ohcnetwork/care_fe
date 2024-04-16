@@ -83,7 +83,7 @@ const initForm: EditForm = {
 
 const initError: ErrorForm = Object.assign(
   {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
+  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
 );
 
 const initialState: State = {
@@ -130,13 +130,15 @@ export default function UserProfile() {
     new_password_2: "",
   });
 
-  const [changePasswordErrors] = useState<{
+  const [changePasswordErrors, setChangePasswordErrors] = useState<{
     old_password: string;
     password_confirmation: string;
   }>({
     old_password: "",
     password_confirmation: "",
   });
+
+  const [newPasswordError, setNewPasswordError] = useState<string>("");
 
   const [showEdit, setShowEdit] = useState<boolean | false>(false);
 
@@ -161,7 +163,7 @@ export default function UserProfile() {
         doctor_qualification: result.data.doctor_qualification,
         doctor_experience_commenced_on: dayjs().diff(
           dayjs(result.data.doctor_experience_commenced_on),
-          "years",
+          "years"
         ),
         doctor_medical_council_registration:
           result.data.doctor_medical_council_registration,
@@ -178,8 +180,47 @@ export default function UserProfile() {
     routes.userListSkill,
     {
       pathParams: { username: authUser.username },
-    },
+    }
   );
+
+  const setNewPasswordErrorCallFun = (value: string) => {
+    if (value == "") {
+      setNewPasswordError("");
+      return;
+    }
+    setNewPasswordError(
+      [
+        value?.length >= 8
+          ? ""
+          : "Password should be at least 8 characters long",
+        value !== value.toUpperCase()
+          ? ""
+          : "Password should contain at least 1 lowercase letter",
+        value !== value.toLowerCase()
+          ? ""
+          : "Password should contain at least 1 uppercase letter",
+        /\d/.test(value) ? "" : "Password should contain at least 1 number",
+      ]
+        .filter(Boolean)
+        .join("\n") // Join only the non-empty error messages
+    );
+  };
+
+  const changePasswordErrorsCallFun = (value: string) => {
+    if (value === "" || value === changePasswordForm.new_password_1) {
+      setChangePasswordErrors((prev) => ({
+        ...prev,
+        password_confirmation: "",
+      }));
+      return;
+    } else {
+      setChangePasswordErrors((prev) => ({
+        ...prev,
+        password_confirmation:
+          "Confirm password should match the new password!",
+      }));
+    }
+  };
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -341,9 +382,9 @@ export default function UserProfile() {
                 .subtract(
                   parseInt(
                     (states.form.doctor_experience_commenced_on as string) ??
-                      "0",
+                      "0"
                   ),
-                  "years",
+                  "years"
                 )
                 .format("YYYY-MM-DD")
             : undefined,
@@ -403,7 +444,13 @@ export default function UserProfile() {
       changePasswordForm.new_password_1 != changePasswordForm.new_password_2
     ) {
       Notification.Error({
-        msg: "Passwords are different in the new and the confirmation column.",
+        msg: "Passwords are different in new password and confirmation password column.",
+      });
+    } else if (
+      changePasswordForm.new_password_1 == changePasswordForm.old_password
+    ) {
+      Notification.Error({
+        msg: "New password is same as old password, Please enter a different new password.",
       });
     } else {
       const form: UpdatePasswordForm = {
@@ -411,14 +458,23 @@ export default function UserProfile() {
         username: authUser.username,
         new_password: changePasswordForm.new_password_1,
       };
-      const { res, data } = await request(routes.updatePassword, {
+      const { res, data, error } = await request(routes.updatePassword, {
         body: form,
       });
       if (res?.ok && data?.message === "Password updated successfully") {
         Notification.Success({
           msg: "Password changed!",
         });
-      } else {
+      } else if (
+        !(
+          Array.isArray(error?.old_password) &&
+          error.old_password.some((password: string) =>
+            password.includes(
+              "Wrong password entered. Please check your password."
+            )
+          )
+        )
+      ) {
         Notification.Error({
           msg: "There was some error. Please try again in some time.",
         });
@@ -726,7 +782,7 @@ export default function UserProfile() {
                             />
                             <TextFormField
                               {...fieldProps(
-                                "doctor_medical_council_registration",
+                                "doctor_medical_council_registration"
                               )}
                               required
                               className="col-span-6 sm:col-span-3"
@@ -781,13 +837,14 @@ export default function UserProfile() {
                           type="password"
                           value={changePasswordForm.new_password_1}
                           className="col-span-6 sm:col-span-3"
-                          onChange={(e) =>
+                          onChange={(e) => {
                             setChangePasswordForm({
                               ...changePasswordForm,
                               new_password_1: e.value,
-                            })
-                          }
-                          error=""
+                            });
+                            setNewPasswordErrorCallFun(e.value);
+                          }}
+                          error={newPasswordError}
                           required
                         />
                         <TextFormField
@@ -796,12 +853,13 @@ export default function UserProfile() {
                           className="col-span-6 sm:col-span-3"
                           type="password"
                           value={changePasswordForm.new_password_2}
-                          onChange={(e) =>
+                          onChange={(e) => {
                             setChangePasswordForm({
                               ...changePasswordForm,
                               new_password_2: e.value,
-                            })
-                          }
+                            });
+                            changePasswordErrorsCallFun(e.value);
+                          }}
                           error={changePasswordErrors.password_confirmation}
                         />
                       </div>
@@ -867,7 +925,7 @@ export default function UserProfile() {
                     icon="l-sync"
                     className={classNames(
                       "text-2xl",
-                      updateStatus.isChecking && "animate-spin",
+                      updateStatus.isChecking && "animate-spin"
                     )}
                   />
                   {updateStatus.isChecking

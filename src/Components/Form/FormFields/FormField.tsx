@@ -18,7 +18,7 @@ export const FieldLabel = (props: LabelProps) => {
       className={classNames(
         "block text-base font-normal text-gray-900",
         !props.noPadding && "mb-2",
-        props.className,
+        props.className
       )}
       htmlFor={props.htmlFor}
     >
@@ -38,7 +38,7 @@ export const FieldErrorText = ({ error, className }: ErrorProps) => {
       className={classNames(
         "error-text ml-1 mt-2 text-xs font-medium tracking-wide text-danger-500 transition-opacity duration-300",
         error ? "opacity-100" : "opacity-0",
-        className,
+        className
       )}
     >
       {error}
@@ -71,7 +71,19 @@ const FormField = ({
         )}
       </div>
       <div className={field?.className}>{children}</div>
-      <FieldErrorText error={field?.error} className={field?.errorClassName} />
+      {field?.error && field?.error?.split("\n").length > 1 ? (
+        field?.error?.split("\n").map((err) => (
+          <>
+            <FieldErrorText error={err} className={field?.errorClassName} />
+            <br />
+          </>
+        ))
+      ) : (
+        <FieldErrorText
+          error={field?.error}
+          className={field?.errorClassName}
+        />
+      )}
     </div>
   );
 };
