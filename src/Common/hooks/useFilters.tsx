@@ -39,7 +39,7 @@ export default function useFilters({
 
   const setQueryParams = (
     query: QueryParam,
-    options?: setQueryParamsOptions
+    options?: setQueryParamsOptions,
   ) => {
     query = FiltersCache.utils.clean(query);
     _setQueryParams(query, options);
@@ -142,7 +142,7 @@ export default function useFilters({
         falseLabel?: string;
         trueValue?: string;
         falseValue?: string;
-      }
+      },
     ) {
       const {
         trueLabel = "Yes",
@@ -222,7 +222,7 @@ export default function useFilters({
         className={classNames(
           "flex w-full justify-center",
           totalCount > limit ? "visible" : "invisible",
-          !noMargin && "mt-4"
+          !noMargin && "mt-4",
         )}
       >
         <PaginationComponent

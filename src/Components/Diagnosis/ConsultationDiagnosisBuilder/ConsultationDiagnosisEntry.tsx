@@ -50,7 +50,7 @@ export default function ConsultationDiagnosisEntry(props: Props) {
           id: value.id,
         },
         body: value,
-      }
+      },
     );
     setDisabled(false);
 
@@ -61,7 +61,7 @@ export default function ConsultationDiagnosisEntry(props: Props) {
 
   const object = props.value;
   const isActive = ActiveConditionVerificationStatuses.includes(
-    object.verification_status as (typeof ActiveConditionVerificationStatuses)[number]
+    object.verification_status as (typeof ActiveConditionVerificationStatuses)[number],
   );
 
   return (
@@ -71,7 +71,7 @@ export default function ConsultationDiagnosisEntry(props: Props) {
       <div
         className={classNames(
           "cui-input-base relative flex w-full flex-col gap-2 md:flex-row",
-          object.is_principal && "border-primary-500"
+          object.is_principal && "border-primary-500",
         )}
       >
         <span
@@ -79,7 +79,7 @@ export default function ConsultationDiagnosisEntry(props: Props) {
             object.is_principal
               ? "font-semibold text-primary-500"
               : "font-normal",
-            !isActive && "text-gray-500 line-through"
+            !isActive && "text-gray-500 line-through",
           )}
         >
           {object.diagnosis_object?.label}

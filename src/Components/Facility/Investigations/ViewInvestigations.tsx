@@ -61,7 +61,7 @@ export default function ViewInvestigations(props: {
                 <button
                   onClick={() =>
                     navigate(
-                      `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigation/${investigationSession.session_external_id}`
+                      `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigation/${investigationSession.session_external_id}`,
                     )
                   }
                   className="btn btn-default"

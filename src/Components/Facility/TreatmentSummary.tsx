@@ -129,7 +129,7 @@ const TreatmentSummary = (props: any) => {
                               </td>
                             </tr>
                           );
-                        }
+                        },
                       )
                     ) : (
                       <tr>
@@ -222,7 +222,7 @@ const TreatmentSummary = (props: any) => {
                                 {formatDate(
                                   value["session_object"][
                                     "session_created_date"
-                                  ]
+                                  ],
                                 )}
                               </td>
                               <td className="border border-gray-800 text-center">
@@ -244,7 +244,7 @@ const TreatmentSummary = (props: any) => {
                               </td>
                             </tr>
                           );
-                        }
+                        },
                       )
                     ) : (
                       <tr>
@@ -297,7 +297,7 @@ const TreatmentSummary = (props: any) => {
                       <tr>
                         <td className="border border-gray-800 text-center">
                           {formatDateTime(
-                            consultationData.last_daily_round.modified_date
+                            consultationData.last_daily_round.modified_date,
                           )}
                         </td>
                         <td className="border border-gray-800 text-center">

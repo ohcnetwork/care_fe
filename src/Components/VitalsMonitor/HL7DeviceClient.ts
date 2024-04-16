@@ -23,7 +23,7 @@ const WAVEFORM_KEY_MAP: Record<HL7VitalsWaveformData["wave-name"], EventName> =
 
     // Maps each ECG wave name to the  event "ecg-waveform"
     ...(Object.fromEntries(
-      ECG_WAVENAME_KEYS.map((key) => [key, "ecg-waveform"])
+      ECG_WAVENAME_KEYS.map((key) => [key, "ecg-waveform"]),
     ) as Record<EcgWaveName, EventName>),
   };
 

@@ -46,11 +46,11 @@ export default function InventoryList(props: any) {
         key={inventoryItem.id}
         className={classNames(
           "cursor-pointer hover:bg-gray-200",
-          inventoryItem.is_low ? "bg-red-100" : "bg-white"
+          inventoryItem.is_low ? "bg-red-100" : "bg-white",
         )}
         onClick={() =>
           navigate(
-            `/facility/${facilityId}/inventory/${inventoryItem.item_object?.id}`
+            `/facility/${facilityId}/inventory/${inventoryItem.item_object?.id}`,
           )
         }
       >

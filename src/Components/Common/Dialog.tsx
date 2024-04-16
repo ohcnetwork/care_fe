@@ -54,7 +54,7 @@ const DialogModal = (props: DialogProps) => {
                   className={classNames(
                     className,
                     fixedWidth && "w-full max-w-md",
-                    "transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+                    "transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all",
                   )}
                 >
                   <Dialog.Title

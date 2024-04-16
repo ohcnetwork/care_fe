@@ -28,7 +28,7 @@ const OtpFormField = ({ length = 6, ...props }: TextAreaFormFieldProps) => {
 
               let value = "";
               Object.values(inputs.current).forEach(
-                (el) => (value += el?.value)
+                (el) => (value += el?.value),
               );
               props.onChange(value);
             }}

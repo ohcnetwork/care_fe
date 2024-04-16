@@ -20,7 +20,7 @@ import { useRef, useEffect, useState, MutableRefObject } from "react";
  * ```
  */
 export default function useVisibility<Element extends HTMLElement>(
-  offset = 0
+  offset = 0,
 ): [boolean, MutableRefObject<Element | undefined>] {
   const [isVisible, setIsVisible] = useState(false);
   const currentElement = useRef<Element>();
@@ -35,9 +35,10 @@ export default function useVisibility<Element extends HTMLElement>(
   };
 
   useEffect(() => {
+    onScroll();
     document.addEventListener("scroll", onScroll, true);
     return () => document.removeEventListener("scroll", onScroll, true);
-  });
+  }, [currentElement.current]);
 
   return [isVisible, currentElement];
 }
