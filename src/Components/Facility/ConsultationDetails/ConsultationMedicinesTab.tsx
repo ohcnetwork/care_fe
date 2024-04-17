@@ -99,7 +99,8 @@ const MedicinePrescriptionSummary = ({ consultation }: any) => {
         title={<p>{showMedicineModal.name} Prescription Logs</p>}
         show={showMedicineModal.open}
         onClose={closeMedicineModal}
-        className=""
+        fixedWidth={false}
+        className="md:w-3/4"
       >
         <div className="w-full">
           <ConsultationMedicineLogs
