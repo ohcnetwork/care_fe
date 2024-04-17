@@ -403,7 +403,7 @@ export default function PatientInfoCard(props: {
                           <div>
                             {consultation.suggestion === "DC"
                               ? "Commenced on: "
-                              : "Admitted on: "}{" "}
+                              : "Admitted on: "}
                             {formatDateTime(consultation?.encounter_date)}
                           </div>
                         )}
