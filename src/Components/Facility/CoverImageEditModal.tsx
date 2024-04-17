@@ -60,7 +60,7 @@ const CoverImageEditModal = ({
     setFacingMode((prevState: any) =>
       prevState === FACING_MODE_USER
         ? FACING_MODE_ENVIRONMENT
-        : FACING_MODE_USER,
+        : FACING_MODE_USER
     );
   }, []);
 
@@ -133,7 +133,7 @@ const CoverImageEditModal = ({
           msg: "Network Failure. Please check your internet connectivity.",
         });
         setIsUploading(false);
-      },
+      }
     );
 
     await sleep(1000);
@@ -288,17 +288,7 @@ const CoverImageEditModal = ({
                   onClick={handleDelete}
                   disabled={isDeleting}
                 >
-                  {isDeleting ? (
-                    <CareIcon
-                      icon="l-spinner"
-                      className="animate-spin text-lg"
-                    />
-                  ) : (
-                    <CareIcon icon="l-save" className="text-lg" />
-                  )}
-                  <span>
-                    {isDeleting ? `${t("Deleting")}...` : `${t("delete")}`}
-                  </span>
+                  {t("delete")}
                 </ButtonV2>
               )}
               <ButtonV2
