@@ -1902,7 +1902,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 <CollapseV2
                                   opened={
                                     String(
-                                      field("is_declared_positive").value
+                                      field("is_declared_positive").value,
                                     ) === "true"
                                   }
                                   className="mt-4"
