@@ -30,7 +30,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
   const setItem = (object: ProcedureType, i: number) => {
     setProcedures(
-      procedures.map((procedure, index) => (index === i ? object : procedure))
+      procedures.map((procedure, index) => (index === i ? object : procedure)),
     );
   };
 
@@ -55,7 +55,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                     className="flex h-full items-center justify-center gap-2 rounded-md bg-red-500 px-3 py-1 text-sm text-gray-100 transition hover:bg-red-600"
                     onClick={() =>
                       setProcedures(
-                        procedures.filter((procedure, index) => i != index)
+                        procedures.filter((procedure, index) => i != index),
                       )
                     }
                   >
@@ -81,7 +81,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                           ...procedure,
                           procedure: e.currentTarget.value,
                         },
-                        i
+                        i,
                       );
                     }}
                   />
@@ -102,7 +102,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                             ...procedure,
                             repetitive: e.currentTarget.checked,
                           },
-                          i
+                          i,
                         );
                       }}
                     />
@@ -125,7 +125,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                               ...procedure,
                               frequency,
                             },
-                            i
+                            i,
                           );
                         }}
                       />
@@ -148,7 +148,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                               ...procedure,
                               time: e.currentTarget.value,
                             },
-                            i
+                            i,
                           );
                         }}
                       />
@@ -171,7 +171,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                           ...procedure,
                           notes: e.currentTarget.value,
                         },
-                        i
+                        i,
                       );
                     }}
                   />

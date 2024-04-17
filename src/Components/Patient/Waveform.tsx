@@ -29,7 +29,7 @@ export default function Waveform(props: {
   const data = wave.data.split(" ").map(Number);
   const viewable = data.length;
   const [queueData, setQueueData] = useState<number[]>(
-    Array(viewable).fill(null)
+    Array(viewable).fill(null),
   );
   const [refreshData, setRefreshData] = useState<number[]>([]);
   const [lastData, setLastData] = useState<number[]>([]);
