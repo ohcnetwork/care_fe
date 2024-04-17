@@ -34,7 +34,7 @@ const DischargedPatientsList = ({
 
   useEffect(() => {
     updateQuery({ ordering: "-modified_date" });
-  }, [updateQuery]);
+  }, []);
 
   return (
     <Page
