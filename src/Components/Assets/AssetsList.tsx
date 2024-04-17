@@ -117,15 +117,19 @@ const AssetsList = () => {
           query: { qr_code_id: assetId },
         });
         return data?.results[0].id;
+      } else {
+        Notification.Error({
+          msg: t("Oops! The asset ID you entered does not appear to be valid."),
+        });
       }
     } catch (err) {
       console.error(err);
-      Notification.Error({ msg: err });
+      Notification.Error({
+        msg: t("Oops! The asset ID you entered does not appear to be valid."),
+      });
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
-    Notification.Error({
-      msg: t("Oops! The asset ID you entered does not appear to be valid."),
-    });
   };
 
   const checkValidAssetId = async (assetId: string) => {
