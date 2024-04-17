@@ -102,12 +102,10 @@ const MedicinePrescriptionSummary = ({ consultation }: any) => {
         fixedWidth={false}
         className="md:w-3/4"
       >
-        <div className="w-full">
-          <ConsultationMedicineLogs
-            consultationId={consultation}
-            medicineId={showMedicineModal.medicineId}
-          />
-        </div>
+        <ConsultationMedicineLogs
+          consultationId={consultation}
+          medicineId={showMedicineModal.medicineId}
+        />
       </DialogModal>
     </div>
   );
@@ -130,24 +128,44 @@ export default function ConsultationMedicineLogs(props: any) {
   const calculateChanges = (prescriptions: Prescription[]) => {
     const changes = [];
 
-    // first prescription
-    const message = `Details: Base Dosage: ${
-      prescriptions[0].base_dosage ?? "Not specified"
-    }, Route: ${prescriptions[0].route ?? "Not specified"}, Dosage Type: ${
-      prescriptions[0].dosage_type ?? "Not specified"
-    }, Target Dosage: ${
-      prescriptions[0].target_dosage ?? "Not specified"
-    }, Instruction on Titration: ${
-      prescriptions[0].instruction_on_titration ?? "Not specified"
-    }, Frequency: ${prescriptions[0].frequency ?? "Not specified"}, Days: ${
-      prescriptions[0].days ?? "Not specified"
-    }, Indicator: ${
-      prescriptions[0].indicator ?? "Not specified"
-    }, Max Dosage: ${
-      prescriptions[0].max_dosage ?? "Not specified"
-    }, Min Hours Between Doses: ${
-      prescriptions[0].min_hours_between_doses ?? "Not specified"
-    }`;
+    const message = `Details: ${
+      prescriptions[0].base_dosage != null
+        ? `Base Dosage: ${prescriptions[0].base_dosage} mg, `
+        : ""
+    }${
+      prescriptions[0].route != null ? `Route: ${prescriptions[0].route}, ` : ""
+    }${
+      prescriptions[0].dosage_type != null
+        ? `Dosage Type: ${prescriptions[0].dosage_type}, `
+        : ""
+    }${
+      prescriptions[0].target_dosage != null
+        ? `Target Dosage: ${prescriptions[0].target_dosage} mg, `
+        : ""
+    }${
+      prescriptions[0].instruction_on_titration != null
+        ? `Instruction on Titration: ${prescriptions[0].instruction_on_titration}, `
+        : ""
+    }${
+      prescriptions[0].frequency != null
+        ? `Frequency: ${prescriptions[0].frequency}, `
+        : ""
+    }${
+      prescriptions[0].days != null ? `Days: ${prescriptions[0].days}, ` : ""
+    }${
+      prescriptions[0].indicator != null
+        ? `Indicator: ${prescriptions[0].indicator}, `
+        : ""
+    }${
+      prescriptions[0].max_dosage != null
+        ? `Max Dosage: ${prescriptions[0].max_dosage} mg, `
+        : ""
+    }${
+      prescriptions[0].min_hours_between_doses != null
+        ? `Min Hours Between Doses: ${prescriptions[0].min_hours_between_doses}, `
+        : ""
+    }`.replace(/, $/, ""); // Remove trailing comma and space if any
+
     changes.push({
       prescriptionId: prescriptions[0].id,
       changeMessage: message,
@@ -270,25 +288,48 @@ export default function ConsultationMedicineLogs(props: any) {
         });
       } else {
         // If no changes, just list out the details of the prescription
-        const message = `Details: Base Dosage: ${
-          currentPrescription.base_dosage ?? "Not specified"
-        }, Route: ${
-          currentPrescription.route ?? "Not specified"
-        }, Dosage Type: ${
-          currentPrescription.dosage_type ?? "Not specified"
-        }, Target Dosage: ${
-          currentPrescription.target_dosage ?? "Not specified"
-        }, Instruction on Titration: ${
-          currentPrescription.instruction_on_titration ?? "Not specified"
-        }, Frequency: ${
-          currentPrescription.frequency ?? "Not specified"
-        }, Days: ${currentPrescription.days ?? "Not specified"}, Indicator: ${
-          currentPrescription.indicator ?? "Not specified"
-        }, Max Dosage: ${
-          currentPrescription.max_dosage ?? "Not specified"
-        }, Min Hours Between Doses: ${
-          currentPrescription.min_hours_between_doses ?? "Not specified"
-        }`;
+        const message = `Details: ${
+          currentPrescription.base_dosage != null
+            ? `Base Dosage: ${currentPrescription.base_dosage} mg, `
+            : ""
+        }${
+          currentPrescription.route != null
+            ? `Route: ${currentPrescription.route}, `
+            : ""
+        }${
+          currentPrescription.dosage_type != null
+            ? `Dosage Type: ${currentPrescription.dosage_type}, `
+            : ""
+        }${
+          currentPrescription.target_dosage != null
+            ? `Target Dosage: ${currentPrescription.target_dosage} mg, `
+            : ""
+        }${
+          currentPrescription.instruction_on_titration != null
+            ? `Instruction on Titration: ${currentPrescription.instruction_on_titration}, `
+            : ""
+        }${
+          currentPrescription.frequency != null
+            ? `Frequency: ${currentPrescription.frequency}, `
+            : ""
+        }${
+          currentPrescription.days != null
+            ? `Days: ${currentPrescription.days}, `
+            : ""
+        }${
+          currentPrescription.indicator != null
+            ? `Indicator: ${currentPrescription.indicator}, `
+            : ""
+        }${
+          currentPrescription.max_dosage != null
+            ? `Max Dosage: ${currentPrescription.max_dosage} mg, `
+            : ""
+        }${
+          currentPrescription.min_hours_between_doses != null
+            ? `Min Hours Between Doses: ${currentPrescription.min_hours_between_doses}, `
+            : ""
+        }`.replace(/, $/, ""); // Remove trailing comma and space if any
+
         changes.push({
           prescriptionId: currentPrescription.id,
           changeMessage: message,
@@ -302,7 +343,7 @@ export default function ConsultationMedicineLogs(props: any) {
   };
 
   return (
-    <div className="w-full">
+    <div>
       <Timeline
         className="rounded-lg bg-white p-2 shadow"
         name={data?.results[0].medicine_object?.name ?? ""}
