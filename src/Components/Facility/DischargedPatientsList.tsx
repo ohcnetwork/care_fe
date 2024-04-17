@@ -7,7 +7,10 @@ import { PatientModel } from "../Patient/models";
 import useQuery from "../../Utils/request/useQuery";
 import { debounce } from "lodash-es";
 import SearchInput from "../Form/SearchInput";
-import { PATIENT_SORT_OPTIONS, GENDER_TYPES } from "../../Common/constants";
+import {
+  DISCHARGED_PATIENT_SORT_OPTIONS,
+  GENDER_TYPES,
+} from "../../Common/constants";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { formatPatientAge } from "../../Utils/utils";
@@ -31,7 +34,7 @@ const DischargedPatientsList = ({
 
   useEffect(() => {
     updateQuery({ ordering: "-modified_date" });
-  }, []);
+  }, [updateQuery]);
 
   return (
     <Page
@@ -49,7 +52,7 @@ const DischargedPatientsList = ({
             onChange={debounce((e) => updateQuery({ name: e.value }))}
           />
           <SortDropdownMenu
-            options={PATIENT_SORT_OPTIONS}
+            options={DISCHARGED_PATIENT_SORT_OPTIONS}
             selected={qParams.ordering}
             onSelect={(e) => updateQuery({ ordering: e.ordering })}
           />
