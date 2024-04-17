@@ -62,6 +62,7 @@ import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
 import SelectMenuV2 from "../Form/SelectMenuV2.js";
+import Checkbox from "../Common/components/CheckBox.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -81,7 +82,7 @@ const medicalHistoryChoices = MEDICAL_HISTORY_CHOICES.reduce(
     ...acc,
     { [`medical_history_${cur.id}`]: "" },
   ],
-  [],
+  []
 );
 const genderTypes = GENDER_TYPES;
 const diseaseStatus = [...DISEASE_STATUS];
@@ -146,7 +147,7 @@ const initForm: any = {
 
 const initError = Object.assign(
   {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
+  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
 );
 
 const initialState = {
@@ -174,7 +175,7 @@ const patientFormReducer = (state = initialState, action: any) => {
 };
 export const parseOccupationFromExt = (occupation: Occupation) => {
   const occupationObject = OCCUPATION_TYPES.find(
-    (item) => item.value === occupation,
+    (item) => item.value === occupation
   );
   return occupationObject?.id;
 };
@@ -219,8 +220,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const [showLinkAbhaNumberModal, setShowLinkAbhaNumberModal] = useState(false);
   const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
   const [insuranceDetails, setInsuranceDetails] = useState<HCXPolicyModel[]>(
-    [],
+    []
   );
+  const [isEmergencyNumberEnabled, setIsEmergencyNumberEnabled] =
+    useState(false);
   const [insuranceDetailsError, setInsuranceDetailsError] =
     useState<FieldError>();
 
@@ -471,14 +474,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               const medicalHistory = MEDICAL_HISTORY_CHOICES.find(
                 (j) =>
                   String(j.text).toLowerCase() ===
-                  String(i.disease).toLowerCase(),
+                  String(i.disease).toLowerCase()
               );
               if (medicalHistory) {
                 formData.medical_history.push(Number(medicalHistory.id));
                 (formData as any)[`medical_history_${medicalHistory.id}`] =
                   i.details;
               }
-            },
+            }
           );
           dispatch({
             type: "set_form",
@@ -495,7 +498,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         setIsLoading(false);
       }
     },
-    [id],
+    [id]
   );
 
   useQuery(routes.listHCXPolicies, {
@@ -513,7 +516,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   });
 
   const { data: stateData, loading: isStateLoading } = useQuery(
-    routes.statesList,
+    routes.statesList
   );
 
   useAbortableEffect(
@@ -522,7 +525,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         fetchData(status);
       }
     },
-    [dispatch, fetchData],
+    [dispatch, fetchData]
   );
 
   const { data: facilityObject } = useQuery(routes.getAnyFacility, {
@@ -805,16 +808,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       permanent_address: formData.sameAddress
         ? formData.address
         : formData.permanent_address
-          ? formData.permanent_address
-          : undefined,
+        ? formData.permanent_address
+        : undefined,
       present_health: formData.present_health
         ? formData.present_health
         : undefined,
       contact_with_confirmed_carrier: JSON.parse(
-        formData.contact_with_confirmed_carrier,
+        formData.contact_with_confirmed_carrier
       ),
       contact_with_suspected_carrier: JSON.parse(
-        formData.contact_with_suspected_carrier,
+        formData.contact_with_suspected_carrier
       ),
       estimated_contact_date:
         (JSON.parse(formData.contact_with_confirmed_carrier) ||
@@ -833,7 +836,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         ? Number(formData.number_of_primary_contacts)
         : undefined,
       number_of_secondary_contacts: Number(
-        formData.number_of_secondary_contacts,
+        formData.number_of_secondary_contacts
       )
         ? Number(formData.number_of_secondary_contacts)
         : undefined,
@@ -887,7 +890,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               },
             });
           }
-        }),
+        })
       );
 
       dispatch({ type: "set_form", form: initForm });
@@ -898,7 +901,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           title: "Patient Added Successfully",
         });
         navigate(
-          `/facility/${facilityId}/patient/${requestData.id}/consultation`,
+          `/facility/${facilityId}/patient/${requestData.id}/consultation`
         );
       } else {
         Notification.Success({
@@ -925,7 +928,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         pincode,
       },
     }: any,
-    field: any,
+    field: any
   ) => {
     const values: any = {};
     if (id) values["abha_number"] = id;
@@ -1008,7 +1011,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         const duplicateList = !id
           ? data.results
           : data.results.filter(
-              (item: DupPatientModel) => item.patient_id !== id,
+              (item: DupPatientModel) => item.patient_id !== id
             );
         if (duplicateList.length) {
           setStatusDialog({
@@ -1231,7 +1234,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               onSuccess={(data: any) => {
                                 if (id) {
                                   navigate(
-                                    `/facility/${facilityId}/patient/${id}`,
+                                    `/facility/${facilityId}/patient/${id}`
                                   );
                                   return;
                                 }
@@ -1303,6 +1306,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               }}
                               types={["mobile", "landline"]}
                             />
+                            <Checkbox
+                              label="Is the phone number an emergency number?"
+                              className="font-bold"
+                              checked={isEmergencyNumberEnabled}
+                              onCheck={(checked) =>
+                                setIsEmergencyNumberEnabled(checked)
+                              }
+                            />
                           </div>
                           <div
                             data-testid="emergency-phone-number"
@@ -1313,6 +1324,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               label="Emergency contact number"
                               required
                               types={["mobile", "landline"]}
+                              disabled={isEmergencyNumberEnabled}
+                              value={
+                                isEmergencyNumberEnabled
+                                  ? field("phone_number").value
+                                  : initForm.emergency_phone_number
+                              }
                             />
                           </div>
                           <div data-testid="name" id="name-div">
@@ -1505,7 +1522,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 field("pincode").onChange(e);
                                 handlePincodeChange(
                                   e,
-                                  field("pincode").onChange,
+                                  field("pincode").onChange
                                 );
                               }}
                             />
@@ -1807,11 +1824,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 opened={
                                   JSON.parse(
                                     field("contact_with_confirmed_carrier")
-                                      .value ?? "{}",
+                                      .value ?? "{}"
                                   ) ||
                                   JSON.parse(
                                     field("contact_with_suspected_carrier")
-                                      .value ?? "{}",
+                                      .value ?? "{}"
                                   )
                                 }
                               >
@@ -1885,7 +1902,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 <CollapseV2
                                   opened={
                                     String(
-                                      field("is_declared_positive").value,
+                                      field("is_declared_positive").value
                                     ) === "true"
                                   }
                                   className="mt-4"
@@ -1979,7 +1996,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 return renderMedicalHistory(
                                   i.id as number,
                                   i.text,
-                                  field,
+                                  field
                                 );
                               })}
                             </div>
