@@ -123,7 +123,9 @@ const AssetsList = () => {
       Notification.Error({ msg: err });
     }
     setIsLoading(false);
-    Notification.Error({ msg: "Invalid Asset Id" });
+    Notification.Error({
+      msg: t("Oops! The asset ID you entered does not appear to be valid."),
+    });
   };
 
   const checkValidAssetId = async (assetId: string) => {
@@ -133,7 +135,7 @@ const AssetsList = () => {
     try {
       if (assetData) {
         navigate(
-          `/facility/${assetData.location_object.facility?.id}/assets/${assetId}`,
+          `/facility/${assetData.location_object.facility?.id}/assets/${assetId}`
         );
       }
     } catch (err) {
@@ -146,7 +148,7 @@ const AssetsList = () => {
   };
 
   const authorizedForImportExport = useIsAuthorized(
-    AuthorizeFor(["DistrictAdmin", "StateAdmin"]),
+    AuthorizeFor(["DistrictAdmin", "StateAdmin"])
   );
 
   if (isScannerActive)
@@ -395,7 +397,7 @@ const AssetsList = () => {
               value(
                 "Facility",
                 "facility",
-                qParams.facility && facilityObject?.name,
+                qParams.facility && facilityObject?.name
               ),
               badge("Name/Serial No./QR ID", "search"),
               value("Asset Class", "asset_class", asset_class ?? ""),
@@ -403,17 +405,17 @@ const AssetsList = () => {
               value(
                 "Location",
                 "location",
-                qParams.location && locationObject?.name,
+                qParams.location && locationObject?.name
               ),
               value(
                 "Warranty AMC End Of Validity Before",
                 "warranty_amc_end_of_validity_before",
-                qParams.warranty_amc_end_of_validity_before ?? "",
+                qParams.warranty_amc_end_of_validity_before ?? ""
               ),
               value(
                 "Warranty AMC End Of Validity After",
                 "warranty_amc_end_of_validity_after",
-                qParams.warranty_amc_end_of_validity_after ?? "",
+                qParams.warranty_amc_end_of_validity_after ?? ""
               ),
             ]}
           />
@@ -473,7 +475,7 @@ const AssetsList = () => {
 };
 
 export const warrantyAmcValidityChip = (
-  warranty_amc_end_of_validity: string,
+  warranty_amc_end_of_validity: string
 ) => {
   if (warranty_amc_end_of_validity === "" || !warranty_amc_end_of_validity)
     return;
@@ -481,8 +483,7 @@ export const warrantyAmcValidityChip = (
   const warrantyAmcEndDate = new Date(warranty_amc_end_of_validity);
 
   const days = Math.ceil(
-    Math.abs(Number(warrantyAmcEndDate) - Number(today)) /
-      (1000 * 60 * 60 * 24),
+    Math.abs(Number(warrantyAmcEndDate) - Number(today)) / (1000 * 60 * 60 * 24)
   );
 
   if (warrantyAmcEndDate < today) {
