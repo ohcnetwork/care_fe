@@ -123,7 +123,7 @@ const AssetsList = () => {
         });
       }
     } catch (err) {
-      console.error(err);
+      console.log(err);
       Notification.Error({
         msg: t("Oops! The asset ID you entered does not appear to be valid."),
       });
