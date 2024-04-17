@@ -31,8 +31,6 @@ import useAuthUser from "../../Common/hooks/useAuthUser";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
-import FilePreviewDialog from "../Common/FilePreviewDialog";
-import uploadFile from "../../Utils/request/uploadFile";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -194,7 +192,7 @@ export const FileUpload = (props: FileUploadProps) => {
     setFacingMode((prevState: any) =>
       prevState === FACING_MODE_USER
         ? FACING_MODE_ENVIRONMENT
-        : FACING_MODE_USER,
+        : FACING_MODE_USER
     );
   }, []);
   const initialState = {
@@ -289,29 +287,6 @@ export const FileUpload = (props: FileUploadProps) => {
     CLAIM: "Supporting Info",
   };
 
-  const triggerDownload = async (url: string, filename: string) => {
-    try {
-      Notification.Success({ msg: "Downloading file..." });
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Network response was not ok.");
-
-      const data = await response.blob();
-      const blobUrl = window.URL.createObjectURL(data);
-
-      const a = document.createElement("a");
-      a.href = blobUrl;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-
-      // Clean up
-      window.URL.revokeObjectURL(blobUrl);
-      document.body.removeChild(a);
-    } catch (err) {
-      Notification.Error({ msg: "Failed to download file" });
-    }
-  };
-
   const handleClose = () => {
     setDownloadURL("");
     setPreviewImage(null);
@@ -356,8 +331,8 @@ export const FileUpload = (props: FileUploadProps) => {
       prefetch_download_urls(unarchivedQuery.data.results);
       setuploadedUnarchievedFiles(
         unarchivedQuery.data.results?.filter(
-          (file) => file.upload_completed || file.file_category === "AUDIO",
-        ),
+          (file) => file.upload_completed || file.file_category === "AUDIO"
+        )
       );
       setTotalUnarchievedFilesCount(unarchivedQuery.data.count);
     }
@@ -412,7 +387,7 @@ export const FileUpload = (props: FileUploadProps) => {
   // Store signed urls for non previewable files
   const prefetch_download_urls = async (files: FileUploadModel[]) => {
     const unsupportedFiles = files.filter(
-      (x) => !previewExtensions.includes(x.extension ?? ""),
+      (x) => !previewExtensions.includes(x.extension ?? "")
     );
     const query = { file_type: type, associating_id: getAssociatedId() };
     const urls = await Promise.all(
@@ -423,7 +398,7 @@ export const FileUpload = (props: FileUploadProps) => {
           pathParams: { id: id },
         });
         return [id, data?.read_signed_url];
-      }),
+      })
     );
     seturl(Object.fromEntries(urls));
   };
@@ -585,23 +560,271 @@ export const FileUpload = (props: FileUploadProps) => {
   };
 
   const renderFileUpload = (item: FileUploadModel) => {
-    const isPreviewSupported = previewExtensions.includes(item.extension ?? "");
     return (
-      <div
-        className={"mt-4 rounded-lg border bg-white p-4 shadow "}
-        id="file-div"
-        key={item.id}
-      >
-        {!item.is_archived ? (
-          <>
-            {item.file_category === "AUDIO" ? (
+      <>
+        <div
+          className="mt-4 rounded-lg border bg-white p-4 shadow"
+          key={item.id}
+        >
+          {!item.is_archived ? (
+            <>
+              {item.file_category === "AUDIO" ? (
+                <div className="flex flex-wrap justify-between space-y-2">
+                  <div className="flex flex-wrap justify-between space-x-2">
+                    <div>
+                      <CareIcon
+                        icon="l-music"
+                        className="m-3 text-6xl text-primary-500"
+                      />
+                    </div>
+                    <div>
+                      <div>
+                        <span className="font-semibold leading-relaxed">
+                          File Name:{" "}
+                        </span>{" "}
+                        {item.name}
+                      </div>
+                      <div>
+                        <span className="font-semibold leading-relaxed">
+                          Created By:
+                        </span>{" "}
+                        {item.uploaded_by ? item.uploaded_by.username : null}
+                      </div>
+                      {item.created_date && (
+                        <RecordMeta
+                          prefix={
+                            <span className="font-semibold leading-relaxed">
+                              {t("created")}:
+                            </span>
+                          }
+                          time={item.created_date}
+                        />
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center">
+                    {item.id ? (
+                      Object.keys(url).length > 0 ? (
+                        <div className="flex flex-wrap">
+                          <audio
+                            className="m-auto max-h-full max-w-full object-contain"
+                            src={url[item.id]}
+                            controls
+                            preload="auto"
+                            controlsList="nodownload"
+                          />
+                        </div>
+                      ) : (
+                        <CircularProgress />
+                      )
+                    ) : (
+                      <div>File Not found</div>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap items-center">
+                    {item.id ? (
+                      Object.keys(url).length > 0 && (
+                        <div className="flex flex-wrap">
+                          <a
+                            href={url[item.id]}
+                            download={item.name}
+                            className="Button button-size-default button-shape-square button-primary-default m-1 flex w-full justify-center gap-2 outline-offset-1 hover:text-white focus:bg-primary-500 sm:w-auto"
+                          >
+                            <CareIcon className="care-l-arrow-circle-down text-lg" />{" "}
+                            DOWNLOAD
+                          </a>
+                          {item?.uploaded_by?.username === authUser.username ||
+                          authUser.user_type === "DistrictAdmin" ||
+                          authUser.user_type === "StateAdmin" ? (
+                            <>
+                              <ButtonV2
+                                onClick={() => {
+                                  setModalDetails({
+                                    name: item.name,
+                                    id: item.id,
+                                  });
+                                  setEditFileName(item?.name);
+                                  setModalOpenForEdit(true);
+                                }}
+                                className="m-1 w-full sm:w-auto"
+                              >
+                                <CareIcon className="care-l-pen text-lg" />
+                                EDIT FILE NAME
+                              </ButtonV2>
+                            </>
+                          ) : (
+                            <></>
+                          )}
+                          {item?.uploaded_by?.username === authUser.username ||
+                          authUser.user_type === "DistrictAdmin" ||
+                          authUser.user_type === "StateAdmin" ? (
+                            <>
+                              <ButtonV2
+                                onClick={() => {
+                                  setArchiveReason("");
+                                  setModalDetails({
+                                    name: item.name,
+                                    id: item.id,
+                                  });
+                                  setModalOpenForArchive(true);
+                                }}
+                                className="m-1 w-full sm:w-auto"
+                              >
+                                <CareIcon className="care-l-archive text-lg" />
+                                ARCHIVE
+                              </ButtonV2>
+                            </>
+                          ) : (
+                            <></>
+                          )}
+                        </div>
+                      )
+                    ) : (
+                      <div>File Not found</div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-wrap justify-between space-y-2">
+                  <div className="flex flex-wrap justify-between space-x-2">
+                    <div>
+                      <CareIcon
+                        icon={getIconClassName(item?.extension)}
+                        className={"m-3 text-6xl text-primary-500"}
+                      />
+                    </div>
+                    <div>
+                      <div>
+                        <span className="font-semibold leading-relaxed">
+                          File Name:{" "}
+                        </span>{" "}
+                        {item.name}
+                      </div>
+                      {sortFileState != "DISCHARGE_SUMMARY" && (
+                        <div>
+                          <span className="font-semibold leading-relaxed">
+                            Created By:
+                          </span>{" "}
+                          {item.uploaded_by ? item.uploaded_by.username : null}
+                        </div>
+                      )}
+                      {item.created_date && (
+                        <RecordMeta
+                          prefix={
+                            <span className="font-semibold leading-relaxed">
+                              {t("created")}:
+                            </span>
+                          }
+                          time={item.created_date}
+                        />
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center">
+                    <ButtonV2
+                      onClick={() => {
+                        loadFile(item.id!);
+                      }}
+                      className="m-1 w-full sm:w-auto"
+                    >
+                      {" "}
+                      <CareIcon className="text-lg" icon="l-eye" />
+                      PREVIEW
+                    </ButtonV2>
+                    {item?.uploaded_by?.username === authUser.username ||
+                    authUser.user_type === "DistrictAdmin" ||
+                    authUser.user_type === "StateAdmin" ? (
+                      <>
+                        {" "}
+                        <ButtonV2
+                          onClick={() => {
+                            setModalDetails({ name: item.name, id: item.id });
+                            setEditFileName(item?.name);
+                            setModalOpenForEdit(true);
+                          }}
+                          className="m-1 w-full sm:w-auto"
+                        >
+                          <CareIcon className="care-l-pen text-lg" />
+                          EDIT FILE NAME
+                        </ButtonV2>
+                      </>
+                    ) : (
+                      <></>
+                    )}
+                    {sortFileState != "DISCHARGE_SUMMARY" &&
+                    (item?.uploaded_by?.username === authUser.username ||
+                      authUser.user_type === "DistrictAdmin" ||
+                      authUser.user_type === "StateAdmin") ? (
+                      <>
+                        <ButtonV2
+                          onClick={() => {
+                            setArchiveReason("");
+                            setModalDetails({ name: item.name, id: item.id });
+                            setModalOpenForArchive(true);
+                          }}
+                          className="m-1 w-full sm:w-auto"
+                        >
+                          <CareIcon className="care-l-archive text-lg" />
+                          ARCHIVE
+                        </ButtonV2>
+                      </>
+                    ) : (
+                      <></>
+                    )}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
               <div className="flex flex-wrap justify-between space-y-2">
                 <div className="flex flex-wrap justify-between space-x-2">
                   <div>
-                    <CareIcon
-                      icon="l-music"
-                      className="m-3 text-6xl text-primary-500"
-                    />
+                    {item.file_category === "AUDIO" ? (
+                      <div className="relative">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="absolute bottom-1 right-1 h-6 w-6 text-red-600"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+
+                        <CareIcon
+                          icon="l-music"
+                          className="text-6xl text-gray-500"
+                        />
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="absolute bottom-1 right-1 h-6 w-6 text-red-600"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+
+                        <CareIcon
+                          icon={getIconClassName(item?.extension)}
+                          className="text-6xl text-gray-500"
+                        />
+                      </div>
+                    )}
                   </div>
                   <div>
                     <div>
@@ -609,7 +832,6 @@ export const FileUpload = (props: FileUploadProps) => {
                         File Name:{" "}
                       </span>{" "}
                       {item.name}
-                      {item.extension}
                     </div>
                     <div>
                       <span className="font-semibold leading-relaxed">
@@ -629,307 +851,36 @@ export const FileUpload = (props: FileUploadProps) => {
                     )}
                   </div>
                 </div>
-                <div className="flex items-center">
-                  {item.id ? (
-                    Object.keys(url).length > 0 ? (
-                      <div className="flex flex-wrap">
-                        <audio
-                          className="m-auto max-h-full max-w-full object-contain"
-                          src={url[item.id]}
-                          controls
-                          preload="auto"
-                          controlsList="nodownload"
-                        />
-                      </div>
-                    ) : (
-                      <CircularProgress />
-                    )
-                  ) : (
-                    <div>File Not found</div>
-                  )}
-                </div>
                 <div className="flex flex-wrap items-center">
-                  {item.id ? (
-                    Object.keys(url).length > 0 && (
-                      <div className="flex flex-wrap">
-                        <ButtonV2
-                          onClick={() => {
-                            triggerDownload(
-                              url[item.id!],
-                              `${item.name}${item.extension}`,
-                            );
-                          }}
-                          className="m-1 w-full sm:w-auto"
-                        >
-                          <CareIcon
-                            icon="l-arrow-circle-down"
-                            className="text-lg"
-                          />{" "}
-                          DOWNLOAD
-                        </ButtonV2>
-                        {item?.uploaded_by?.username === authUser.username ||
-                        authUser.user_type === "DistrictAdmin" ||
-                        authUser.user_type === "StateAdmin" ? (
-                          <>
-                            <ButtonV2
-                              onClick={() => {
-                                setModalDetails({
-                                  name: item.name,
-                                  id: item.id,
-                                });
-                                setEditFileName(item?.name);
-                                setModalOpenForEdit(true);
-                              }}
-                              className="m-1 w-full sm:w-auto"
-                            >
-                              <CareIcon icon="l-pen" className="text-lg" />
-                              RENAME
-                            </ButtonV2>
-                          </>
-                        ) : (
-                          <></>
-                        )}
-                        {item?.uploaded_by?.username === authUser.username ||
-                        authUser.user_type === "DistrictAdmin" ||
-                        authUser.user_type === "StateAdmin" ? (
-                          <>
-                            <ButtonV2
-                              onClick={() => {
-                                setArchiveReason("");
-                                setModalDetails({
-                                  name: item.name,
-                                  id: item.id,
-                                });
-                                setModalOpenForArchive(true);
-                              }}
-                              className="m-1 w-full sm:w-auto"
-                            >
-                              <CareIcon icon="l-archive" className="text-lg" />
-                              ARCHIVE
-                            </ButtonV2>
-                          </>
-                        ) : (
-                          <></>
-                        )}
-                      </div>
-                    )
-                  ) : (
-                    <div>File Not found</div>
-                  )}
+                  <ButtonV2
+                    variant="secondary"
+                    className="m-1 w-full sm:w-auto"
+                  >
+                    {" "}
+                    <CareIcon className="care-l-eye-slash text-lg" /> FILE
+                    ARCHIVED
+                  </ButtonV2>
+                  <ButtonV2
+                    onClick={() => {
+                      setModalDetails({
+                        name: item.name,
+                        reason: item.archive_reason,
+                        userArchived: item.archived_by?.username,
+                        archiveTime: item.archived_datetime,
+                      });
+                      setModalOpenForMoreDetails(true);
+                    }}
+                    className="m-1 w-full sm:w-auto"
+                  >
+                    <CareIcon className="care-l-question-circle text-lg" />
+                    MORE DETAILS
+                  </ButtonV2>
                 </div>
               </div>
-            ) : (
-              <div className="flex flex-wrap justify-between space-y-2">
-                <div className="flex flex-wrap justify-between space-x-2">
-                  <div>
-                    <CareIcon
-                      icon={getIconClassName(item?.extension)}
-                      className={"m-3 text-6xl text-primary-500"}
-                    />
-                  </div>
-                  <div>
-                    <div>
-                      <span className="font-semibold leading-relaxed">
-                        File Name:{" "}
-                      </span>{" "}
-                      {item.name}
-                      {item.extension}
-                    </div>
-                    {sortFileState != "DISCHARGE_SUMMARY" && (
-                      <div>
-                        <span className="font-semibold leading-relaxed">
-                          Created By:
-                        </span>{" "}
-                        {item.uploaded_by ? item.uploaded_by.username : null}
-                      </div>
-                    )}
-                    {item.created_date && (
-                      <RecordMeta
-                        prefix={
-                          <span className="font-semibold leading-relaxed">
-                            {t("created")}:
-                          </span>
-                        }
-                        time={item.created_date}
-                      />
-                    )}
-                  </div>
-                </div>
-                <div className="flex flex-wrap items-center">
-                  {isPreviewSupported ? (
-                    <ButtonV2
-                      onClick={() => {
-                        loadFile(item.id!);
-                      }}
-                      className="m-1 w-full sm:w-auto"
-                    >
-                      {" "}
-                      <CareIcon className="text-lg" icon="l-eye" />
-                      PREVIEW
-                    </ButtonV2>
-                  ) : (
-                    <ButtonV2
-                      className="m-1 w-full sm:w-auto"
-                      id="download-file"
-                      onClick={() => {
-                        triggerDownload(
-                          url[item.id!],
-                          `${item.name}${item.extension}`,
-                        );
-                      }}
-                    >
-                      <CareIcon
-                        className="text-lg"
-                        icon="l-arrow-circle-down"
-                      />{" "}
-                      DOWNLOAD
-                    </ButtonV2>
-                  )}
-                  {item?.uploaded_by?.username === authUser.username ||
-                  authUser.user_type === "DistrictAdmin" ||
-                  authUser.user_type === "StateAdmin" ? (
-                    <>
-                      {" "}
-                      <ButtonV2
-                        onClick={() => {
-                          setModalDetails({ name: item.name, id: item.id });
-                          setEditFileName(item?.name);
-                          setModalOpenForEdit(true);
-                        }}
-                        className="m-1 w-full sm:w-auto"
-                      >
-                        <CareIcon icon="l-pen" className="text-lg" />
-                        RENAME
-                      </ButtonV2>
-                    </>
-                  ) : (
-                    <></>
-                  )}
-                  {sortFileState != "DISCHARGE_SUMMARY" &&
-                  (item?.uploaded_by?.username === authUser.username ||
-                    authUser.user_type === "DistrictAdmin" ||
-                    authUser.user_type === "StateAdmin") ? (
-                    <>
-                      <ButtonV2
-                        onClick={() => {
-                          setArchiveReason("");
-                          setModalDetails({ name: item.name, id: item.id });
-                          setModalOpenForArchive(true);
-                        }}
-                        className="m-1 w-full sm:w-auto"
-                      >
-                        <CareIcon icon="l-archive" className="text-lg" />
-                        ARCHIVE
-                      </ButtonV2>
-                    </>
-                  ) : (
-                    <></>
-                  )}
-                </div>
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="flex flex-wrap justify-between space-y-2">
-            <div className="flex flex-wrap justify-between space-x-2">
-              <div>
-                {item.file_category === "AUDIO" ? (
-                  <div className="relative">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="absolute bottom-1 right-1 h-6 w-6 text-red-600"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-
-                    <CareIcon
-                      icon="l-music"
-                      className="text-6xl text-gray-500"
-                    />
-                  </div>
-                ) : (
-                  <div className="relative">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="absolute bottom-1 right-1 h-6 w-6 text-red-600"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-
-                    <CareIcon
-                      icon={getIconClassName(item?.extension)}
-                      className="text-6xl text-gray-500"
-                    />
-                  </div>
-                )}
-              </div>
-              <div>
-                <div>
-                  <span className="font-semibold leading-relaxed">
-                    File Name:{" "}
-                  </span>{" "}
-                  {item.name}
-                  {item.extension}
-                </div>
-                <div>
-                  <span className="font-semibold leading-relaxed">
-                    Created By:
-                  </span>{" "}
-                  {item.uploaded_by ? item.uploaded_by.username : null}
-                </div>
-                {item.created_date && (
-                  <RecordMeta
-                    prefix={
-                      <span className="font-semibold leading-relaxed">
-                        {t("created")}:
-                      </span>
-                    }
-                    time={item.created_date}
-                  />
-                )}
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center">
-              <ButtonV2 variant="secondary" className="m-1 w-full sm:w-auto">
-                {" "}
-                <CareIcon icon="l-eye-slash" className="text-lg" /> FILE
-                ARCHIVED
-              </ButtonV2>
-              <ButtonV2
-                onClick={() => {
-                  setModalDetails({
-                    name: item.name,
-                    reason: item.archive_reason,
-                    userArchived: item.archived_by?.username,
-                    archiveTime: item.archived_datetime,
-                  });
-                  setModalOpenForMoreDetails(true);
-                }}
-                className="m-1 w-full sm:w-auto"
-              >
-                <CareIcon icon="l-question-circle" className="text-lg" />
-                MORE DETAILS
-              </ButtonV2>
-            </div>
-          </div>
-        )}
-      </div>
+            </>
+          )}
+        </div>
+      </>
     );
   };
 
@@ -949,7 +900,7 @@ export const FileUpload = (props: FileUploadProps) => {
     const fileName = f.name;
     setFile(e.target.files[0]);
     setUploadFileName(
-      fileName.substring(0, fileName.lastIndexOf(".")) || fileName,
+      fileName.substring(0, fileName.lastIndexOf(".")) || fileName
     );
 
     const ext: string = fileName.split(".")[1];
@@ -1006,7 +957,7 @@ export const FileUpload = (props: FileUploadProps) => {
           });
           setUploadStarted(false);
           reject();
-        },
+        }
       );
     });
   };
@@ -1107,7 +1058,7 @@ export const FileUpload = (props: FileUploadProps) => {
       setUploadPercent,
       () => {
         setAudioUploadStarted(false);
-      },
+      }
     );
   };
 
@@ -1664,7 +1615,7 @@ export const FileUpload = (props: FileUploadProps) => {
           <>
             {uploadedUnarchievedFiles?.length > 0 ? (
               uploadedUnarchievedFiles.map((item: FileUploadModel) =>
-                renderFileUpload(item),
+                renderFileUpload(item)
               )
             ) : (
               <div className="mt-4 rounded-lg border bg-white p-4 shadow">
@@ -1689,7 +1640,7 @@ export const FileUpload = (props: FileUploadProps) => {
           <>
             {uploadedArchievedFiles?.length > 0 ? (
               uploadedArchievedFiles.map((item: FileUploadModel) =>
-                renderFileUpload(item),
+                renderFileUpload(item)
               )
             ) : (
               <div className="mt-4 rounded-lg border bg-white p-4 shadow">
@@ -1715,7 +1666,7 @@ export const FileUpload = (props: FileUploadProps) => {
             <>
               {uploadedDischargeSummaryFiles.length > 0 ? (
                 uploadedDischargeSummaryFiles.map((item: FileUploadModel) =>
-                  renderFileUpload(item),
+                  renderFileUpload(item)
                 )
               ) : (
                 <div className="mt-4 rounded-lg border bg-white p-4 shadow">

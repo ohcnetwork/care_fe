@@ -279,7 +279,7 @@ export const FacilityHome = (props: any) => {
             <div className="mt-10 flex items-center gap-3">
               <div>
                 {facilityData?.features?.some((feature) =>
-                  FACILITY_FEATURE_TYPES.some((f) => f.id === feature),
+                  FACILITY_FEATURE_TYPES.some((f) => f.id === feature)
                 ) && (
                   <h1 className="text-lg font-semibold">Available features</h1>
                 )}
@@ -295,16 +295,16 @@ export const FacilityHome = (props: any) => {
                           size="large"
                           text={
                             FACILITY_FEATURE_TYPES.filter(
-                              (f) => f.id === feature,
+                              (f) => f.id === feature
                             )[0]?.name
                           }
                           startIcon={
                             FACILITY_FEATURE_TYPES.filter(
-                              (f) => f.id === feature,
+                              (f) => f.id === feature
                             )[0]?.icon
                           }
                         />
-                      ),
+                      )
                   )}
                 </div>
               </div>
@@ -440,7 +440,7 @@ export const FacilityHome = (props: any) => {
                   navigate(`/facility/${facilityId}/discharged-patients`)
                 }
               >
-                <CareIcon icon="l-user-injured" className="text-lg" />
+                <CareIcon className="care-l-user-injured text-lg" />
                 <span>View Discharged Patients</span>
               </ButtonV2>
             </div>

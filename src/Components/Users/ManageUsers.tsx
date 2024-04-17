@@ -1,7 +1,10 @@
 import dayjs from "dayjs";
 import { navigate } from "raviger";
-import { lazy, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { lazy, useState } from "react";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import ButtonV2, { Submit } from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import ConfirmHomeFacilityUpdateDialog from "./ConfirmHomeFacilityUpdateDialog";
 import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
@@ -109,7 +112,7 @@ export default function ManageUsers() {
     {
       prefetch: !!qParams.district,
       pathParams: { id: qParams.district },
-    },
+    }
   );
 
   const addUser = (
@@ -223,7 +226,7 @@ export default function ManageUsers() {
                           aria-label="Online"
                           className={classNames(
                             "inline-block h-2 w-2 shrink-0 rounded-full",
-                            cur_online ? "bg-primary-400" : "bg-gray-300",
+                            cur_online ? "bg-primary-400" : "bg-gray-300"
                           )}
                         ></span>
                         <span className="pl-2">
@@ -301,7 +304,7 @@ export default function ManageUsers() {
                               {dayjs().diff(
                                 user.doctor_experience_commenced_on,
                                 "years",
-                                false,
+                                false
                               )}{" "}
                               years
                             </span>
@@ -408,7 +411,7 @@ export default function ManageUsers() {
                     </ButtonV2>
                   </div>
                   {["DistrictAdmin", "StateAdmin"].includes(
-                    authUser.user_type,
+                    authUser.user_type
                   ) && (
                     <div className="flex-col md:flex-row">
                       <ButtonV2
@@ -544,7 +547,7 @@ export default function ManageUsers() {
             value(
               "District",
               "district",
-              qParams.district ? districtData?.name || "" : "",
+              qParams.district ? districtData?.name || "" : ""
             ),
           ]}
         />
@@ -788,70 +791,67 @@ export function UserFacilities(props: { user: any }) {
                 {t("linked_facilities")}
               </div>
               <div className="flex flex-col">
-                {userFacilities.results.map(
-                  (facility: FacilityModel, i: number) => {
-                    if (user?.home_facility_object?.id === facility.id) {
-                      // skip if it's a home facility
-                      return null;
-                    }
-                    return (
-                      <div
-                        id={`facility_${i}`}
-                        key={`facility_${i}`}
-                        className={classNames(
-                          "relative rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg",
-                        )}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span>{facility.name}</span>
-                          <div className="flex items-center gap-2">
-                            <button
-                              className="tooltip text-lg hover:text-primary-500"
-                              id="home-facility-icon"
-                              onClick={() => {
-                                if (user?.home_facility_object) {
-                                  // has previous home facility
-                                  setReplaceHomeFacility({
-                                    show: true,
-                                    userName: username,
-                                    previousFacility:
-                                      user?.home_facility_object,
-                                    newFacility: facility,
-                                  });
-                                } else {
-                                  // no previous home facility
-                                  updateHomeFacility(username, facility);
-                                }
-                              }}
-                            >
-                              <CareIcon icon="l-estate" />
-                              <span className="tooltip-text tooltip-left">
-                                Set as home facility
-                              </span>
-                            </button>
-                            <button
-                              id="unlink-facility-button"
-                              className="tooltip text-lg text-red-600"
-                              onClick={() =>
-                                setUnlinkFacilityData({
+                {userFacilities.map((facility: any, i: number) => {
+                  if (user?.home_facility_object?.id === facility.id) {
+                    // skip if it's a home facility
+                    return null;
+                  }
+                  return (
+                    <div
+                      id={`facility_${i}`}
+                      key={`facility_${i}`}
+                      className={classNames(
+                        "relative rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg"
+                      )}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span>{facility.name}</span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            className="tooltip text-lg hover:text-primary-500"
+                            id="home-facility-icon"
+                            onClick={() => {
+                              if (user?.home_facility_object) {
+                                // has previous home facility
+                                setReplaceHomeFacility({
                                   show: true,
-                                  facility: facility,
                                   userName: username,
-                                  isHomeFacility: false,
-                                })
+                                  previousFacility: user?.home_facility_object,
+                                  newFacility: facility,
+                                });
+                              } else {
+                                // no previous home facility
+                                updateHomeFacility(username, facility);
                               }
-                            >
-                              <CareIcon icon="l-link-broken" />
-                              <span className="tooltip-text tooltip-left">
-                                Unlink Facility
-                              </span>
-                            </button>
-                          </div>
+                            }}
+                          >
+                            <CareIcon className="care-l-estate" />
+                            <span className="tooltip-text tooltip-left">
+                              Set as home facility
+                            </span>
+                          </button>
+                          <button
+                            id="unlink-facility-button"
+                            className="tooltip text-lg text-red-600"
+                            onClick={() =>
+                              setUnlinkFacilityData({
+                                show: true,
+                                facility: facility,
+                                userName: username,
+                                isHomeFacility: false,
+                              })
+                            }
+                          >
+                            <CareIcon className="care-l-link-broken" />
+                            <span className="tooltip-text tooltip-left">
+                              Unlink Facility
+                            </span>
+                          </button>
                         </div>
                       </div>
-                    );
-                  },
-                )}
+                    </div>
+                  );
+                })}
               </div>
               {totalCount > limit && (
                 <div className="mt-4 flex w-full justify-center">
@@ -892,7 +892,7 @@ export function UserFacilities(props: { user: any }) {
           handleOk={() => {
             updateHomeFacility(
               replaceHomeFacility.userName,
-              replaceHomeFacility.newFacility,
+              replaceHomeFacility.newFacility
             );
             setReplaceHomeFacility({
               show: false,
