@@ -1903,7 +1903,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   opened={
                                     String(
                                       field("is_declared_positive").value
-                                    ) === "true",
+                                    ) === "true"
                                   }
                                   className="mt-4"
                                 >
