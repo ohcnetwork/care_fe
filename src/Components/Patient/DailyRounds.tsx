@@ -294,9 +294,14 @@ export const DailyRounds = (props: any) => {
         setIsLoading(false);
 
         if (obj) {
+          const roundsType = obj.rounds_type
+            ? obj.rounds_type.charAt(0).toUpperCase() +
+              obj.rounds_type.slice(1).toLowerCase() +
+              " Log"
+            : "Consultation";
           dispatch({ type: "set_form", form: initForm });
           Notification.Success({
-            msg: "Consultation Updates details updated successfully",
+            msg: `${roundsType} Updates details updated successfully`,
           });
           if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
             navigate(
@@ -315,10 +320,14 @@ export const DailyRounds = (props: any) => {
         });
         setIsLoading(false);
         if (obj) {
+          const roundsType = obj.rounds_type
+            ? obj.rounds_type.charAt(0).toUpperCase() +
+              obj.rounds_type.slice(1).toLowerCase() +
+              " Log"
+            : "Consultation";
           dispatch({ type: "set_form", form: initForm });
-
           Notification.Success({
-            msg: "Consultation Updates details created successfully",
+            msg: `${roundsType} Updates details created successfully`,
           });
           if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
             if (data.clone_last) {
