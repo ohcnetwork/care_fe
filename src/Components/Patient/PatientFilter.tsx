@@ -100,6 +100,7 @@ export default function PatientFilter(props: any) {
     diagnoses_provisional: filter.diagnoses_provisional || null,
     diagnoses_unconfirmed: filter.diagnoses_unconfirmed || null,
     diagnoses_differential: filter.diagnoses_differential || null,
+    review_missed: filter.review_missed || null,
   });
 
   useQuery(routes.getAnyFacility, {
@@ -203,6 +204,7 @@ export default function PatientFilter(props: any) {
       diagnoses_provisional,
       diagnoses_unconfirmed,
       diagnoses_differential,
+      review_missed,
     } = filterState;
     const data = {
       district: district || "",
@@ -270,6 +272,7 @@ export default function PatientFilter(props: any) {
       diagnoses_provisional: diagnoses_provisional || "",
       diagnoses_unconfirmed: diagnoses_unconfirmed || "",
       diagnoses_differential: diagnoses_differential || "",
+      review_missed: review_missed || "",
     };
     onChange(data);
   };
@@ -434,6 +437,18 @@ export default function PatientFilter(props: any) {
               value={filterState.is_antenatal}
               onChange={(v) =>
                 setFilterState({ ...filterState, is_antenatal: v })
+              }
+            />
+          </div>
+          <div className="w-full flex-none">
+            <FieldLabel className="text-sm">Review Missed</FieldLabel>
+            <SelectMenuV2
+              placeholder="Show all"
+              options={["true", "false"]}
+              optionLabel={(o) => (o === "true" ? "Yes" : "No")}
+              value={filterState.review_missed}
+              onChange={(v) =>
+                setFilterState({ ...filterState, review_missed: v })
               }
             />
           </div>

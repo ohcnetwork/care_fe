@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import * as Notify from "./Notifications";
 
 const useSegmentedRecording = () => {
-  const [audioURL, setAudioURL] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [recorder, setRecorder] = useState<MediaRecorder | null>(null);
   const [audioBlobs, setAudioBlobs] = useState<Blob[]>([]);
@@ -10,6 +9,12 @@ const useSegmentedRecording = () => {
 
   const bufferInterval = 1 * 1000;
   const splitSizeLimit = 20 * 1000000; // 20MB
+
+  useEffect(() => {
+    if (!isRecording && recorder && audioBlobs.length > 0) {
+      setRecorder(null);
+    }
+  }, [isRecording, recorder, audioBlobs]);
 
   useEffect(() => {
     if (recorder === null) {
@@ -37,6 +42,9 @@ const useSegmentedRecording = () => {
     } else {
       if (restart) {
         setIsRecording(true);
+      } else {
+        recorder?.stream?.getTracks()?.forEach((i) => i?.stop());
+        recorder.stop();
       }
       recorder.state === "recording" && recorder.stop();
     }
@@ -96,12 +104,10 @@ const useSegmentedRecording = () => {
   };
 
   const resetRecording = () => {
-    setAudioURL("");
     setAudioBlobs([]);
   };
 
   return {
-    audioURL,
     isRecording,
     startRecording,
     stopRecording,

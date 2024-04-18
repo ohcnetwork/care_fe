@@ -151,9 +151,11 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
           >
             <CareIcon
               icon="l-cloud-times"
-              className="mb-2 animate-pulse text-4xl"
+              className="mb-2 animate-pulse text-4xl md:mr-36 "
             />
-            <span className="font-bold">No incoming data from HL7 Monitor</span>
+            <span className="font-bold md:mr-36">
+              No incoming data from HL7 Monitor
+            </span>
           </div>
           <div
             className={classNames("relative", !isOnline && "hidden")}
