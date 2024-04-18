@@ -17,6 +17,7 @@ import useConfig from "../../Common/hooks/useConfig.js";
 import dayjs from "../../Utils/dayjs.js";
 import {
   classNames,
+  daysUntilToday,
   formatDate,
   formatDateTime,
   formatPatientAge,
@@ -468,11 +469,34 @@ export default function PatientInfoCard(props: {
           className="col-span-2 flex w-full flex-col items-center justify-center gap-2 px-4 py-1 lg:col-span-1 2xl:flex-row"
           id="consultation-buttons"
         >
+          {patient.last_consultation &&
+            patient.last_consultation?.suggestion === "A" && (
+              <div className="flex flex-col items-center">
+                <div className="col-span-1 flex w-full justify-center bg-white px-4 lg:flex-row">
+                  <div
+                    className={
+                      "flex h-7 w-7 items-center justify-center rounded-full border-2"
+                    }
+                  >
+                    <span className="text-sm font-semibold">
+                      {daysUntilToday(
+                        patient.last_consultation?.encounter_date,
+                      )}
+                    </span>
+                  </div>
+                </div>
+                <span className="mt-1 text-xs font-medium text-gray-700">
+                  IP Days
+                </span>
+              </div>
+            )}
+
           {consultation?.last_daily_round && (
             <div className="col-span-1 flex w-full justify-center bg-white px-4 lg:flex-row">
               <Mews dailyRound={consultation?.last_daily_round} />
             </div>
           )}
+
           {!!consultation?.discharge_date && (
             <div className="flex min-w-max flex-col items-center justify-center">
               <div className="text-sm font-normal leading-5 text-gray-500">

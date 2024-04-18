@@ -31,7 +31,11 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import SearchInput from "../Form/SearchInput";
 import SortDropdownMenu from "../Common/SortDropdown";
 import SwitchTabs from "../Common/components/SwitchTabs";
-import { formatPatientAge, parsePhoneNumber } from "../../Utils/utils.js";
+import {
+  daysUntilToday,
+  formatPatientAge,
+  parsePhoneNumber,
+} from "../../Utils/utils.js";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page.js";
@@ -583,6 +587,15 @@ export const PatientManager = () => {
                       text="Readmission"
                     />
                   )}
+                  {patient.last_consultation &&
+                    patient.last_consultation?.suggestion === "A" && (
+                      <Chip
+                        size="small"
+                        variant="primary"
+                        startIcon="l-clock-three"
+                        text={`${daysUntilToday(patient.last_consultation?.encounter_date)}`}
+                      />
+                    )}
                   {patient.disease_status === "POSITIVE" && (
                     <Chip
                       size="small"
