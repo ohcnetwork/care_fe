@@ -748,7 +748,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     const data = {
       abha_number: state.form.abha_number,
       phone_number: parsePhoneNumber(formData.phone_number),
-      emergency_phone_number: parsePhoneNumber(formData.emergency_phone_number),
+      emergency_phone_number: isEmergencyNumberEnabled
+        ? parsePhoneNumber(formData.phone_number)
+        : parsePhoneNumber(formData.emergency_phone_number),
       date_of_birth:
         ageInputType === "date_of_birth"
           ? dateQueryString(formData.date_of_birth)
@@ -1328,7 +1330,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               value={
                                 isEmergencyNumberEnabled
                                   ? field("phone_number").value
-                                  : initForm.emergency_phone_number
+                                  : field("emergency_phone_number").value
                               }
                             />
                           </div>
