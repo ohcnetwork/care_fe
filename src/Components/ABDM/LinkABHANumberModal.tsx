@@ -17,7 +17,7 @@ import { ABDMError, ABHAQRContent } from "./models";
 
 export const validateRule = (
   condition: boolean,
-  content: JSX.Element | string
+  content: JSX.Element | string,
 ) => {
   return (
     <div>
@@ -113,7 +113,7 @@ export default function LinkABHANumberModal({
 
       <div>
         {["AadhaarVerification", "MobileVerification", "HealthIDCreation"].find(
-          (step) => step === currentStep
+          (step) => step === currentStep,
         ) ? (
           <p
             onClick={() => setCurrentStep("ScanExistingQR")}
@@ -194,12 +194,12 @@ const ScanABHAQRSection = ({
               body: {
                 patientId,
                 hidn: abha?.hidn,
-                phr: abha?.hid,
+                phr: (abha?.phr ?? abha?.hid) as string,
                 name: abha?.name,
                 gender: abha?.gender,
                 dob: abha?.dob.replace(/\//g, "-"),
                 address: abha?.address,
-                "dist name": abha?.district_name,
+                "dist name": abha?.["dist name"] ?? abha?.district_name,
                 "state name": abha?.["state name"],
               },
             });
@@ -278,7 +278,7 @@ const ScanABHAQRSection = ({
                             txnId: txnId,
                             patientId: patientId,
                           },
-                        }
+                        },
                       );
                       response = res;
                       Rdata = data;
@@ -296,7 +296,7 @@ const ScanABHAQRSection = ({
                             txnId: txnId,
                             patientId: patientId,
                           },
-                        }
+                        },
                       );
                       response = res;
                       Rdata = data;
@@ -331,7 +331,7 @@ const ScanABHAQRSection = ({
                   onClick={async () => {
                     const { res, data } = await request(
                       routes.abha.initiateAbdmAuthentication,
-                      { body: { authMethod: method, healthid: qrValue } }
+                      { body: { authMethod: method, healthid: qrValue } },
                     );
 
                     if (res?.status === 200 && data?.txnId) {
@@ -355,16 +355,16 @@ const ScanABHAQRSection = ({
                     body: {
                       healthId: qrValue,
                     },
-                  }
+                  },
                 );
 
                 if (res?.status === 200 && data?.authMethods) {
                   setAuthMethods(
                     data.authMethods?.filter?.((method: string) =>
                       supportedAuthMethods.find(
-                        (supported) => supported === method
-                      )
-                    )
+                        (supported) => supported === method,
+                      ),
+                    ),
                   );
                 }
               }}
@@ -407,7 +407,7 @@ const VerifyAadhaarSection = ({ onVerified }: VerifyAadhaarSectionProps) => {
   const validateAadhaar = () => {
     if (aadhaarNumber.length !== 12 && aadhaarNumber.length !== 16) {
       setAadhaarNumberError(
-        "Should be a 12-digit aadhaar number or 16-digit virtual ID"
+        "Should be a 12-digit aadhaar number or 16-digit virtual ID",
       );
       return false;
     }
@@ -525,7 +525,7 @@ const VerifyAadhaarSection = ({ onVerified }: VerifyAadhaarSectionProps) => {
         <span
           className={classNames(
             "ml-2 text-sm font-medium text-gray-600",
-            !aadhaarNumberError && "-mt-4"
+            !aadhaarNumberError && "-mt-4",
           )}
         >
           Aadhaar number will not be stored by CARE
@@ -841,19 +841,19 @@ const CreateHealthIDSection = ({
         <div className="mb-2 pl-2 text-sm text-gray-500">
           {validateRule(
             healthId.length >= 4,
-            "Should be atleast 4 character long"
+            "Should be atleast 4 character long",
           )}
           {validateRule(
             isNaN(Number(healthId[0])) && healthId[0] !== ".",
-            "Shouldn't start with a number or dot (.)"
+            "Shouldn't start with a number or dot (.)",
           )}
           {validateRule(
             healthId[healthId.length - 1] !== ".",
-            "Shouldn't end with a dot (.)"
+            "Shouldn't end with a dot (.)",
           )}
           {validateRule(
             /^[0-9a-zA-Z.]+$/.test(healthId),
-            "Should only contain letters, numbers and dot (.)"
+            "Should only contain letters, numbers and dot (.)",
           )}
         </div>
       )}

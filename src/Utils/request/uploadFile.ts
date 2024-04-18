@@ -8,7 +8,7 @@ const uploadFile = (
   headers: object,
   onLoad: (xhr: XMLHttpRequest) => void,
   setUploadPercent: Dispatch<SetStateAction<number>> | null,
-  onError: () => void
+  onError: () => void,
 ) => {
   const xhr = new XMLHttpRequest();
   xhr.open(reqMethod, url);

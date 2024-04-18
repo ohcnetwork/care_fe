@@ -78,9 +78,13 @@ const TreatmentSummary = (props: any) => {
               </div>
 
               <div className="col-span-1 px-3 py-2">
-                <b>Date of admission : </b>
+                {consultationData?.suggestion === "DC" ? (
+                  <b>Date of domiciliary care commenced : </b>
+                ) : (
+                  <b>Date of admission : </b>
+                )}
                 <span>
-                  {consultationData?.admitted
+                  {consultationData?.encounter_date
                     ? formatDateTime(consultationData.encounter_date)
                     : " --/--/----"}
                 </span>
@@ -129,7 +133,7 @@ const TreatmentSummary = (props: any) => {
                               </td>
                             </tr>
                           );
-                        }
+                        },
                       )
                     ) : (
                       <tr>
@@ -222,7 +226,7 @@ const TreatmentSummary = (props: any) => {
                                 {formatDate(
                                   value["session_object"][
                                     "session_created_date"
-                                  ]
+                                  ],
                                 )}
                               </td>
                               <td className="border border-gray-800 text-center">
@@ -244,7 +248,7 @@ const TreatmentSummary = (props: any) => {
                               </td>
                             </tr>
                           );
-                        }
+                        },
                       )
                     ) : (
                       <tr>
@@ -297,7 +301,7 @@ const TreatmentSummary = (props: any) => {
                       <tr>
                         <td className="border border-gray-800 text-center">
                           {formatDateTime(
-                            consultationData.last_daily_round.modified_date
+                            consultationData.last_daily_round.modified_date,
                           )}
                         </td>
                         <td className="border border-gray-800 text-center">

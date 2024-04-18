@@ -49,7 +49,7 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
         hasLeading && (props.leadingPadding || "pl-10"),
         hasTrailing && (props.trailingPadding || "pr-10"),
         field.error && "border-danger-500",
-        field.className
+        field.className,
       )}
       disabled={field.disabled}
       type={props.type === "password" ? getPasswordFieldType() : props.type}
@@ -100,7 +100,7 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
       );
     const _trailing =
       trailing === trailingFocused ? (
-        <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+        <div className="relative inset-y-0 right-0 flex items-center pr-3">
           {trailing}
         </div>
       ) : (

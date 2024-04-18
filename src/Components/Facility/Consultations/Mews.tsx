@@ -92,7 +92,7 @@ export const Mews = ({ dailyRound }: { dailyRound: DailyRoundsModel }) => {
           <div className="tooltip flex flex-col items-center">
             <div
               className={`flex h-7 w-7 items-center justify-center rounded-full border-2 ${getBorderColor(
-                Number(data)
+                Number(data),
               )}`}
             >
               <span className="text-sm font-semibold">{data}</span>
@@ -136,7 +136,7 @@ export const Mews = ({ dailyRound }: { dailyRound: DailyRoundsModel }) => {
     "Heart rate": getHeartRateScore(dailyRound.pulse),
     "Systolic BP": getSystolicBPScore(dailyRound.bp?.systolic),
     Temperature: getTempRange(
-      dailyRound.temperature ? parseFloat(dailyRound.temperature) : undefined
+      dailyRound.temperature ? parseFloat(dailyRound.temperature) : undefined,
     ),
     "Level of Consciousness": getLOCRange(dailyRound.consciousness_level),
   };
@@ -148,7 +148,7 @@ export const Mews = ({ dailyRound }: { dailyRound: DailyRoundsModel }) => {
           true,
           Object.entries(scores)
             .filter(([_, value]) => value === undefined)
-            .map(([key]) => key)
+            .map(([key]) => key),
         )}
       </div>
     );
@@ -158,7 +158,7 @@ export const Mews = ({ dailyRound }: { dailyRound: DailyRoundsModel }) => {
     <div>
       {mewsCard(
         false,
-        Object.values(scores as Record<string, number>).reduce((p, v) => p + v)
+        Object.values(scores as Record<string, number>).reduce((p, v) => p + v),
       )}
     </div>
   );

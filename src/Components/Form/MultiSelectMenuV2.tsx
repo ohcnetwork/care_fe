@@ -112,10 +112,10 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                                 e.stopPropagation();
                                 const updatedOptions = selectedOptions.filter(
                                   (selectedOption) =>
-                                    selectedOption.value !== option.value
+                                    selectedOption.value !== option.value,
                                 );
                                 props.onChange(
-                                  updatedOptions.map((o) => o.value) as any
+                                  updatedOptions.map((o) => o.value) as any,
                                 );
                               }}
                             />
@@ -211,6 +211,6 @@ export const dropdownOptionClassNames = ({
     active && "bg-primary-500 text-white",
     !active && selected && "text-primary-500",
     !active && !selected && "text-gray-900",
-    selected ? "font-semibold" : "font-normal"
+    selected ? "font-semibold" : "font-normal",
   );
 };
