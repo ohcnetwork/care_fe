@@ -59,7 +59,7 @@ export const TimelineNode = (props: TimelineNodeProps) => {
       <div
         className={classNames(
           props.isLast ? "h-6" : "-bottom-6",
-          "absolute left-0 top-0 flex w-6 justify-center"
+          "absolute left-0 top-0 flex w-6 justify-center",
         )}
       >
         <div className="w-px bg-gray-300" />
@@ -68,14 +68,14 @@ export const TimelineNode = (props: TimelineNodeProps) => {
       <div
         className={classNames(
           props.className,
-          "group flex w-full flex-col items-start gap-y-1"
+          "group flex w-full flex-col items-start gap-y-1",
         )}
       >
         <div className="relative flex w-full justify-between gap-x-4">
           <div
             className={classNames(
               "flex w-full gap-x-4",
-              props.event.cancelled && "line-through"
+              props.event.cancelled && "line-through",
             )}
           >
             {props.title || (
@@ -131,13 +131,13 @@ export const TimelineNodeTitle = (props: TimelineNodeTitleProps) => {
       <div
         className={classNames(
           props.event.iconWrapperStyle,
-          "relative flex h-6 w-6 flex-none items-center justify-center rounded-full bg-gray-200 transition-all duration-200 ease-in-out group-hover:bg-primary-500"
+          "relative flex h-6 w-6 flex-none items-center justify-center rounded-full bg-gray-200 transition-all duration-200 ease-in-out group-hover:bg-primary-500",
         )}
       >
         <CareIcon
           className={classNames(
             props.event.iconStyle,
-            "text-base text-gray-700 transition-all duration-200 ease-in-out group-hover:text-white"
+            "text-base text-gray-700 transition-all duration-200 ease-in-out group-hover:text-white",
           )}
           aria-hidden="true"
           icon={props.event.icon}
