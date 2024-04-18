@@ -402,7 +402,9 @@ export default function PatientInfoCard(props: {
                       <span className="flex">
                         {consultation?.encounter_date && (
                           <div>
-                            Admission on:{" "}
+                            {consultation.suggestion === "DC"
+                              ? "Commenced on: "
+                              : "Admitted on: "}
                             {formatDateTime(consultation?.encounter_date)}
                           </div>
                         )}
