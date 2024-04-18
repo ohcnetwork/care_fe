@@ -40,8 +40,6 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
     return <span>No bed allocated</span>;
   }
 
-  console.log("pos", preset?.meta);
-
   return (
     <div>
       <PageTitle
