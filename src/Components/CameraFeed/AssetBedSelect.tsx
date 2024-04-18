@@ -28,12 +28,20 @@ export default function AssetBedSelect(props: Props) {
 
   const selected = props.value;
 
+  const label = (obj: AssetBedModel) => {
+    return props.bed
+      ? obj.meta.preset_name
+      : `${obj.bed_object.name}: ${obj.meta.preset_name}`;
+  };
+
+  const options = data?.results.filter(({ meta }) => meta.type !== "boundary");
+
   return (
     <Listbox value={selected} onChange={props.onChange} disabled={loading}>
       <div className="relative">
         <Listbox.Button className="relative w-full cursor-default pr-6 text-right text-xs text-zinc-400 focus:outline-none disabled:cursor-not-allowed disabled:bg-transparent disabled:text-zinc-700 sm:text-sm">
           <span className="block truncate">
-            {selected?.bed_object.name ?? "No Preset"}
+            {selected ? label(selected) : "No Preset"}
           </span>
           <span className="pointer-events-none absolute inset-y-0 right-0 mt-1 flex items-center">
             <CareIcon icon="l-angle-down" className="text-lg text-zinc-500" />
@@ -46,7 +54,7 @@ export default function AssetBedSelect(props: Props) {
           leaveTo="opacity-0"
         >
           <Listbox.Options className="absolute z-20 mt-1 max-h-48 w-full overflow-auto rounded-b-lg bg-zinc-900/75 py-1 text-base shadow-lg ring-1 ring-white/5 backdrop-blur-sm focus:outline-none sm:text-sm md:max-h-60">
-            {data?.results.map((obj) => (
+            {options?.map((obj) => (
               <Listbox.Option
                 key={obj.id}
                 className={({ active }) =>
@@ -63,7 +71,7 @@ export default function AssetBedSelect(props: Props) {
                         selected ? "font-bold text-white" : "font-normal"
                       }`}
                     >
-                      {obj.bed_object.name}: {obj.meta.preset_name}
+                      {label(obj)}
                     </span>
                   </>
                 )}
