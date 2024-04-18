@@ -38,13 +38,13 @@ export default function AssetBedSelect(props: Props) {
         location: qParams.location,
         bed_is_occupied: true,
       },
-    }
+    },
   );
   //Find the patient data for the bed
   const updatedData = data?.results.map((obj) => {
     if (
       patientBedData?.results?.findIndex(
-        (p) => p.bed.id === obj.bed_object.id
+        (p) => p.bed.id === obj.bed_object.id,
       ) !== -1
     ) {
       return {
@@ -52,7 +52,7 @@ export default function AssetBedSelect(props: Props) {
         patient:
           patientBedData?.results[
             patientBedData?.results?.findIndex(
-              (p) => p.bed.id === obj.bed_object.id
+              (p) => p.bed.id === obj.bed_object.id,
             )
           ].patient,
       };
