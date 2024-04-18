@@ -1,55 +1,52 @@
-import { useEffect, useState, useRef, LegacyRef } from "react";
+import { AxiosError } from "axios";
+import { LegacyRef, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import ReactPlayer from "react-player";
 import { useDispatch } from "react-redux";
 import useKeyboardShortcut from "use-keyboard-shortcut";
-import {
-  listAssetBeds,
-  partialUpdateAssetBed,
-  deleteAssetBed,
-} from "../../../Redux/actions";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { getCameraPTZ } from "../../../Common/constants";
+import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
+import useFullscreen from "../../../Common/hooks/useFullscreen";
 import {
   StreamStatus,
   useMSEMediaPlayer,
 } from "../../../Common/hooks/useMSEplayer";
-import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
-import * as Notification from "../../../Utils/Notifications.js";
-import { FeedCameraPTZHelpButton } from "./Feed";
-import { AxiosError } from "axios";
-import { BedSelect } from "../../Common/BedSelect";
-import { BedModel } from "../models";
 import useWindowDimensions from "../../../Common/hooks/useWindowDimensions";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import Page from "../../Common/components/Page";
-import ConfirmDialog from "../../Common/ConfirmDialog";
-import { FieldLabel } from "../../Form/FormFields/FormField";
-import useFullscreen from "../../../Common/hooks/useFullscreen";
-import ReactPlayer from "react-player";
+import { deleteAssetBed, partialUpdateAssetBed } from "../../../Redux/actions";
+import routes from "../../../Redux/api";
+import * as Notification from "../../../Utils/Notifications.js";
+import request from "../../../Utils/request/request";
+import useQuery from "../../../Utils/request/useQuery";
 import { isIOS } from "../../../Utils/utils";
+import { BedSelect } from "../../Common/BedSelect";
+import ConfirmDialog from "../../Common/ConfirmDialog";
+import Page from "../../Common/components/Page";
+import { FieldLabel } from "../../Form/FormFields/FormField";
+import { BedModel, CameraPresetModel } from "../models";
+import { FeedCameraPTZHelpButton } from "./Feed";
 
 const LiveFeed = (props: any) => {
+  const { t } = useTranslation();
   const middlewareHostname = props.middlewareHostname;
   const [presetsPage, setPresetsPage] = useState(0);
   const cameraAsset = props.asset;
   const [presets, setPresets] = useState<any>([]);
-  const [bedPresets, setBedPresets] = useState<any>([]);
   const [showDefaultPresets, setShowDefaultPresets] = useState<boolean>(false);
   const [precision, setPrecision] = useState(1);
   const [streamStatus, setStreamStatus] = useState<StreamStatus>(
-    StreamStatus.Offline,
+    StreamStatus.Offline
   );
   const [videoStartTime, setVideoStartTime] = useState<Date | null>(null);
   const [bed, setBed] = useState<BedModel>({});
-  const [preset, setNewPreset] = useState<string>("");
   const [loading, setLoading] = useState<string | undefined>();
   const dispatch: any = useDispatch();
-  const [page, setPage] = useState({
-    count: 0,
-    limit: 8,
-    offset: 0,
-  });
-  const [toDelete, setToDelete] = useState<any>(null);
-  const [toUpdate, setToUpdate] = useState<any>(null);
+  const [toDelete, setToDelete] = useState<CameraPresetModel>();
+  const [toUpdate, setToUpdate] = useState<CameraPresetModel>();
   const [_isFullscreen, setFullscreen] = useFullscreen();
+
+  const [offset, setOffset] = useState(0);
+  const limit = 8;
 
   const { width } = useWindowDimensions();
   const extremeSmallScreenBreakpoint = 320;
@@ -75,7 +72,7 @@ const LiveFeed = (props: any) => {
   const refreshPresetsHash = props.refreshPresetsHash;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [currentPreset, setCurrentPreset] = useState<any>();
+  const [currentPreset, setCurrentPreset] = useState<CameraPresetModel>();
   const {
     absoluteMove,
     getCameraStatus,
@@ -114,67 +111,64 @@ const LiveFeed = (props: any) => {
     return timeDifference - video.currentTime;
   };
 
-  const getBedPresets = async (id: any) => {
-    const bedAssets = await dispatch(
-      listAssetBeds({
-        asset: id,
-        limit: page.limit,
-        offset: page.offset,
-      }),
-    );
-    setBedPresets(bedAssets?.data?.results);
-    setPage({
-      ...page,
-      count: bedAssets?.data?.count,
-    });
-  };
+  const { data: bedPresets, refetch: refetchBedPresets } = useQuery(
+    routes.getCameraPresets,
+    {
+      query: {
+        limit: limit,
+        offset: offset,
+      },
+      pathParams: {
+        external_id: cameraAsset?.id,
+      },
+    }
+  );
 
-  const deletePreset = async (id: any) => {
+  const deletePreset = async (id: string) => {
     const res = await dispatch(deleteAssetBed(id));
     if (res?.status === 204) {
       Notification.Success({ msg: "Preset deleted successfully" });
-      getBedPresets(cameraAsset.id);
+      refetchBedPresets();
     } else {
       Notification.Error({
         msg: "Error while deleting Preset: " + (res?.data?.detail || ""),
       });
     }
-    setToDelete(null);
+    setToDelete(undefined);
   };
 
-  const updatePreset = async (currentPreset: any) => {
-    const data = {
-      bed_id: bed.id,
-      preset_name: preset,
-    };
-    const response = await dispatch(
-      partialUpdateAssetBed(
-        {
-          asset: currentPreset.asset_object.id,
-          bed: bed.id,
-          meta: {
-            ...currentPreset.meta,
-            ...data,
-          },
-        },
-        currentPreset?.id,
-      ),
-    );
-    if (response && response.status === 200) {
+  const updatePreset = async (currentPreset: CameraPresetModel) => {
+    const resp = await request(routes.partialUpdateAssetBed, {
+      body: {
+        asset: currentPreset?.asset_bed_object.asset?.id,
+        bed: bed.id,
+      },
+      pathParams: {
+        external_id: currentPreset?.asset_bed_object.id || "",
+      },
+    });
+    if (resp && resp.res?.status === 200) {
       Notification.Success({ msg: "Preset Updated" });
     } else {
       Notification.Error({ msg: "Something Went Wrong" });
     }
-    getBedPresets(cameraAsset?.id);
+    refetchBedPresets();
     fetchCameraPresets();
-    setToUpdate(null);
+    setToUpdate(undefined);
   };
 
-  const gotoBedPreset = (preset: any) => {
+  const gotoBedPreset = (preset: CameraPresetModel) => {
     setLoading("Moving");
-    absoluteMove(preset.meta.position, {
-      onSuccess: () => setLoading(undefined),
-    });
+    absoluteMove(
+      {
+        x: preset?.x || 0.0,
+        y: preset?.y || 0.0,
+        zoom: preset?.zoom || 1,
+      },
+      {
+        onSuccess: () => setLoading(undefined),
+      }
+    );
   };
 
   useEffect(() => {
@@ -187,16 +181,16 @@ const LiveFeed = (props: any) => {
   }, []);
 
   useEffect(() => {
-    setNewPreset(toUpdate?.meta?.preset_name);
-    setBed(toUpdate?.bed_object);
-  }, [toUpdate]);
-
-  useEffect(() => {
-    getBedPresets(cameraAsset.id);
-    if (bedPresets?.[0]?.position) {
-      absoluteMove(bedPresets[0]?.position, {});
+    refetchBedPresets();
+    const position = {
+      x: bedPresets?.results[0]?.x || 0.0,
+      y: bedPresets?.results[0]?.y || 0.0,
+      zoom: bedPresets?.results[0]?.zoom || 1,
+    };
+    if (position) {
+      absoluteMove(position, {});
     }
-  }, [page.offset, cameraAsset.id, refreshPresetsHash]);
+  }, [offset, refreshPresetsHash]);
 
   const startStreamFeed = () => {
     startStream({
@@ -216,7 +210,7 @@ const LiveFeed = (props: any) => {
         }));
   };
   useEffect(() => {
-    let tId: any;
+    let tId: NodeJS.Timeout;
     if (streamStatus !== StreamStatus.Playing) {
       setStreamStatus(StreamStatus.Loading);
       tId = setTimeout(() => {
@@ -229,17 +223,10 @@ const LiveFeed = (props: any) => {
     };
   }, [startStream, streamStatus]);
 
-  const handlePagination = (cOffset: number) => {
-    setPage({
-      ...page,
-      offset: cOffset,
-    });
-  };
-
   const cameraPTZActionCBs: { [key: string]: (option: any) => void } = {
     precision: () => {
       setPrecision((precision: number) =>
-        precision === 16 ? 1 : precision * 2,
+        precision === 16 ? 1 : precision * 2
       );
     },
     reset: () => {
@@ -258,25 +245,21 @@ const LiveFeed = (props: any) => {
       getCameraStatus({
         onSuccess: async (data) => {
           console.log({ currentPreset, data });
-          if (currentPreset?.asset_object?.id && data?.position) {
+          if (currentPreset?.asset_bed_object?.asset?.id && data?.position) {
             setLoading(option.loadingLabel);
             console.log("Updating Preset");
             const response = await dispatch(
               partialUpdateAssetBed(
                 {
-                  asset: currentPreset.asset_object.id,
-                  bed: currentPreset.bed_object.id,
-                  meta: {
-                    ...currentPreset.meta,
-                    position: data?.position,
-                  },
+                  asset: currentPreset.asset_bed_object?.asset?.id,
+                  bed: currentPreset.asset_bed_object?.bed?.id,
                 },
-                currentPreset?.id,
-              ),
+                currentPreset?.asset_bed_object?.id || ""
+              )
             );
             if (response && response.status === 200) {
               Notification.Success({ msg: "Preset Updated" });
-              getBedPresets(cameraAsset?.id);
+              refetchBedPresets();
               fetchCameraPresets();
             }
             setLoading(undefined);
@@ -309,39 +292,40 @@ const LiveFeed = (props: any) => {
   }
 
   return (
-    <Page title="Live Feed" hideBack>
+    <Page title={t("live_feed")} hideBack>
       {toDelete && (
         <ConfirmDialog
           show
-          title="Are you sure you want to delete this preset?"
+          title={t("delete_preset")}
           description={
             <span>
               <p>
-                Preset: <strong>{toDelete.meta.preset_name}</strong>
+                {t("preset")} <strong>{toDelete.preset_name}</strong>
               </p>
               <p>
-                Bed: <strong>{toDelete.bed_object.name}</strong>
+                {t("bed")}:{" "}
+                <strong>{toDelete.asset_bed_object?.bed?.name}</strong>
               </p>
             </span>
           }
           action="Delete"
           variant="danger"
-          onClose={() => setToDelete(null)}
-          onConfirm={() => deletePreset(toDelete.id)}
+          onClose={() => setToDelete(undefined)}
+          onConfirm={() => deletePreset(toDelete?.id || "")}
         />
       )}
       {toUpdate && (
         <ConfirmDialog
           show
-          title="Update Preset"
-          description={"Preset: " + toUpdate.meta.preset_name}
+          title={t("update_preset")}
+          description={"Preset: " + toUpdate.preset_name}
           action="Update"
           variant="primary"
-          onClose={() => setToUpdate(null)}
+          onClose={() => setToUpdate(undefined)}
           onConfirm={() => updatePreset(toUpdate)}
         >
           <div className="mt-4 flex flex-col">
-            <FieldLabel required>Bed</FieldLabel>
+            <FieldLabel required>{t("bed")}</FieldLabel>
             <BedSelect
               name="bed"
               setSelected={(selected) => setBed(selected as BedModel)}
@@ -357,7 +341,6 @@ const LiveFeed = (props: any) => {
       <div className="mt-4 flex flex-col">
         <div className="relative mt-4 flex flex-col gap-4 lg:flex-row">
           <div className="flex-1">
-            {/* ADD VIDEO PLAYER HERE */}
             <div className="relative mb-4 aspect-video w-full rounded bg-primary-100 lg:mb-0">
               {isIOS ? (
                 <div className="absolute inset-0">
@@ -412,7 +395,7 @@ const LiveFeed = (props: any) => {
                 calculateVideoLiveDelay() > 3 && (
                   <div className="absolute left-8 top-12 z-10 flex items-center gap-2 rounded-3xl bg-red-400 px-3 py-1.5 text-xs font-semibold text-gray-100">
                     <CareIcon icon="l-wifi-slash" className="h-4 w-4" />
-                    <span>Slow Network Detected</span>
+                    <span>{t("slow_network_detected")}</span>
                   </div>
                 )}
 
@@ -424,39 +407,43 @@ const LiveFeed = (props: any) => {
                   </div>
                 </div>
               )}
-              {/* { streamStatus > 0 && */}
               <div className="absolute bottom-0 right-0 flex h-full w-full items-center justify-center p-4">
                 {streamStatus === StreamStatus.Offline && (
                   <div className="text-center">
                     <p className="font-bold text-black">
-                      STATUS: <span className="text-red-600">OFFLINE</span>
+                      {t("status")}:{" "}
+                      <span className="text-red-600">{t("offline")}</span>
                     </p>
                     <p className="font-semibold text-black">
-                      Feed is currently not live.
+                      {t("feed_is_currently_not_live")}
                     </p>
                     <p className="font-semibold text-black">
-                      Click refresh button to try again.
+                      {t("click_refresh_button_to_try_again")}
                     </p>
                   </div>
                 )}
                 {streamStatus === StreamStatus.Stop && (
                   <div className="text-center">
                     <p className="font-bold text-black">
-                      STATUS: <span className="text-red-600">STOPPED</span>
+                      {t("status")}:{" "}
+                      <span className="text-red-600">STOPPED</span>
                     </p>
-                    <p className="font-semibold text-black">Feed is Stooped.</p>
                     <p className="font-semibold text-black">
-                      Click refresh button to start feed.
+                      {t("feed_is_stopped")}
+                    </p>
+                    <p className="font-semibold text-black">
+                      {t("click_refresh_button_to_start_feed")}
                     </p>
                   </div>
                 )}
                 {streamStatus === StreamStatus.Loading && (
                   <div className="text-center">
                     <p className="font-bold text-black">
-                      STATUS: <span className="text-red-600"> LOADING</span>
+                      {t("status")}:{" "}
+                      <span className="text-red-600"> {t("loading")}</span>
                     </p>
                     <p className="font-semibold text-black">
-                      Fetching latest feed.
+                      {t("fetching_latest_feed")}
                     </p>
                   </div>
                 )}
@@ -513,7 +500,7 @@ const LiveFeed = (props: any) => {
                   setShowDefaultPresets(true);
                 }}
               >
-                Default Presets
+                {t("default_presets")}
               </button>
               <button
                 className={`flex-1 p-4  text-center font-bold  text-gray-700 hover:text-gray-800  ${
@@ -525,7 +512,7 @@ const LiveFeed = (props: any) => {
                   setShowDefaultPresets(false);
                 }}
               >
-                Patient Presets
+                {t("patient_presets")}
               </button>
             </nav>
             <div className="my-2 w-full space-y-4">
@@ -549,7 +536,7 @@ const LiveFeed = (props: any) => {
                                 setLoading(undefined);
                                 console.log("Preset Updated", option);
                               },
-                            },
+                            }
                           );
                         }}
                       >
@@ -559,44 +546,49 @@ const LiveFeed = (props: any) => {
                   </>
                 ) : (
                   <>
-                    {bedPresets?.map((preset: any, index: number) => (
-                      <div className="flex flex-col">
-                        <button
-                          key={preset.id}
-                          className="flex flex-col truncate rounded-t-md border border-white bg-green-100 p-2  text-black hover:bg-green-500 hover:text-white"
-                          onClick={() => {
-                            setLoading("Moving");
-                            gotoBedPreset(preset);
-                            setCurrentPreset(preset);
-                            getBedPresets(cameraAsset?.id);
-                            fetchCameraPresets();
-                          }}
-                        >
-                          <span className="justify-start text-xs font-semibold">
-                            {preset.bed_object.name}
-                          </span>
-                          <span className="mx-auto">
-                            {preset.meta.preset_name
-                              ? preset.meta.preset_name
-                              : `Unnamed Preset ${index + 1}`}
-                          </span>
-                        </button>
-                        <div className="flex">
+                    {bedPresets?.results?.map(
+                      (preset: CameraPresetModel, index: number) => (
+                        <div className="flex flex-col">
                           <button
-                            onClick={() => setToUpdate(preset)}
-                            className="flex w-1/2 items-center justify-center gap-2 bg-green-200 py-1 text-sm text-green-800 hover:bg-green-800 hover:text-green-200 "
+                            key={preset.id}
+                            className="flex flex-col truncate rounded-t-md border border-white bg-green-100 p-2  text-black hover:bg-green-500 hover:text-white"
+                            onClick={() => {
+                              setLoading("Moving");
+                              gotoBedPreset(preset);
+                              setCurrentPreset(preset);
+                              refetchBedPresets();
+                              fetchCameraPresets();
+                            }}
                           >
-                            <CareIcon icon="l-pen" />
+                            <span className="justify-start text-xs font-semibold">
+                              {preset.asset_bed_object.bed?.name}
+                            </span>
+                            <span className="mx-auto">
+                              {preset?.preset_name
+                                ? preset.preset_name
+                                : `Unnamed Preset ${index + 1}`}
+                            </span>
                           </button>
-                          <button
-                            onClick={() => setToDelete(preset)}
-                            className="flex w-1/2 items-center justify-center gap-2 bg-red-200 py-1 text-sm text-red-800 hover:bg-red-800 hover:text-red-200 "
-                          >
-                            <CareIcon icon="l-trash" />
-                          </button>
+                          <div className="flex">
+                            <button
+                              onClick={() => {
+                                setToUpdate(preset);
+                                setBed(preset.asset_bed_object.bed || {});
+                              }}
+                              className="flex w-1/2 items-center justify-center gap-2 bg-green-200 py-1 text-sm text-green-800 hover:bg-green-800 hover:text-green-200 "
+                            >
+                              <CareIcon icon="l-pen" />
+                            </button>
+                            <button
+                              onClick={() => setToDelete(preset)}
+                              className="flex w-1/2 items-center justify-center gap-2 bg-red-200 py-1 text-sm text-red-800 hover:bg-red-800 hover:text-red-200 "
+                            >
+                              <CareIcon icon="l-trash" />
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      )
+                    )}
                   </>
                 )}
               </div>
@@ -626,19 +618,15 @@ const LiveFeed = (props: any) => {
                 <div className="flex flex-row gap-1">
                   <button
                     className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
-                    disabled={page.offset === 0}
-                    onClick={() => {
-                      handlePagination(page.offset - page.limit);
-                    }}
+                    disabled={offset === 0}
+                    onClick={() => setOffset(offset - limit)}
                   >
                     <CareIcon icon="l-arrow-left" className="text-2xl" />
                   </button>
                   <button
                     className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
-                    disabled={page.offset + page.limit >= page.count}
-                    onClick={() => {
-                      handlePagination(page.offset + page.limit);
-                    }}
+                    disabled={offset + limit >= (bedPresets?.count || 0)}
+                    onClick={() => setOffset(offset + limit)}
                   >
                     <CareIcon icon="l-arrow-right" className="text-2xl" />
                   </button>
@@ -648,11 +636,12 @@ const LiveFeed = (props: any) => {
                 <button
                   className="w-full rounded-md border border-white bg-green-100 px-3 py-2 font-semibold text-black hover:bg-green-500 hover:text-white"
                   onClick={() => {
-                    getBedPresets(cameraAsset?.id);
+                    refetchBedPresets();
                     fetchCameraPresets();
                   }}
                 >
-                  <CareIcon icon="l-redo" className="h-4 text-lg" /> Refresh
+                  <CareIcon icon="l-redo" className="h-4 text-lg" />{" "}
+                  {t("refresh")}
                 </button>
               )}
             </div>

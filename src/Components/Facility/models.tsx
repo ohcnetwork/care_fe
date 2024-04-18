@@ -207,7 +207,7 @@ export interface InventoryItemsModel {
     {
       id: number;
       name: string;
-    },
+    }
   ];
 }
 
@@ -238,6 +238,25 @@ export interface BedModel {
   is_occupied?: boolean;
   created_date?: string;
   modified_date?: string;
+}
+
+export interface CameraPresetModel {
+  id?: string;
+  asset_bed_object: {
+    id?: string;
+    asset?: AssetData;
+    bed?: BedModel;
+  };
+  x?: number;
+  y?: number;
+  zoom?: number;
+  preset_name?: string;
+
+  created_date?: string;
+  modified_date?: string;
+
+  created_by?: UserBareMinimum;
+  updated_by?: UserBareMinimum;
 }
 
 export interface CurrentBed {

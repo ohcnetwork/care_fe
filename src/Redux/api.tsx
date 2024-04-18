@@ -41,6 +41,7 @@ import {
 } from "../Components/ExternalResult/models";
 import {
   BedModel,
+  CameraPresetModel,
   CapacityModal,
   ConsultationModel,
   CreateBedBody,
@@ -102,8 +103,8 @@ import { InvestigationSessionType } from "../Components/Facility/Investigations/
 import { Investigation } from "../Components/Facility/Investigations/Reports/types";
 import { HCXPolicyModel } from "../Components/HCX/models";
 import { IComment, IResource } from "../Components/Resource/models";
-import { IShift } from "../Components/Shifting/models";
 import { ScribeModel } from "../Components/Scribe/Scribe";
+import { IShift } from "../Components/Shifting/models";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -462,6 +463,10 @@ const routes = {
   },
   operateAsset: {
     path: "/api/v1/asset/{external_id}/operate_assets/",
+    method: "POST",
+  },
+  addCameraPreset: {
+    path: "/api/v1/assetbed/{external_id}/add_camera_preset/",
     method: "POST",
   },
 
@@ -1264,6 +1269,11 @@ const routes = {
     path: "/api/v1/asset/{external_id}/availability/",
     method: "GET",
     TRes: Type<PaginatedResponse<AvailabilityRecord>>(),
+  },
+  getCameraPresets: {
+    path: "/api/v1/asset/{external_id}/get_presets/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<CameraPresetModel>>(),
   },
 
   // Asset transaction endpoints

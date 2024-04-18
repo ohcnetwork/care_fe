@@ -1,20 +1,20 @@
-import { useEffect, useState } from "react";
-import { AssetData, ResolvedMiddleware } from "../AssetTypes";
-import * as Notification from "../../../Utils/Notifications.js";
-import { BedModel } from "../../Facility/models";
-import { getCameraConfig } from "../../../Utils/transformUtils";
-import CameraConfigure from "../configure/CameraConfigure";
-import Loading from "../../Common/Loading";
-import { checkIfValidIP } from "../../../Common/validation";
-import TextFormField from "../../Form/FormFields/TextFormField";
-import { Submit } from "../../Common/components/ButtonV2";
-import { SyntheticEvent } from "react";
+import { SyntheticEvent, useEffect, useState } from "react";
 import useAuthUser from "../../../Common/hooks/useAuthUser";
+import { checkIfValidIP } from "../../../Common/validation";
+import * as Notification from "../../../Utils/Notifications.js";
+import { getCameraConfig } from "../../../Utils/transformUtils";
+import Loading from "../../Common/Loading";
+import { Submit } from "../../Common/components/ButtonV2";
+import { BedModel } from "../../Facility/models";
+import TextFormField from "../../Form/FormFields/TextFormField";
+import { AssetData, ResolvedMiddleware } from "../AssetTypes";
+import CameraConfigure from "../configure/CameraConfigure";
 
-import request from "../../../Utils/request/request";
 import routes from "../../../Redux/api";
+import request from "../../../Utils/request/request";
 import useQuery from "../../../Utils/request/useQuery";
 
+import { useTranslation } from "react-i18next";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 interface Props {
@@ -25,6 +25,7 @@ interface Props {
 }
 
 const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
   const [assetType, setAssetType] = useState("");
   const [middlewareHostname, setMiddlewareHostname] = useState("");
@@ -40,7 +41,7 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
   const [loadingAddPreset, setLoadingAddPreset] = useState(false);
   const [loadingSetConfiguration, setLoadingSetConfiguration] = useState(false);
   const [refreshPresetsHash, setRefreshPresetsHash] = useState(
-    Number(new Date()),
+    Number(new Date())
   );
   const { data: facility, loading } = useQuery(routes.getPermittedFacility, {
     pathParams: { id: facilityId },
@@ -99,15 +100,13 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
     };
     try {
       setLoadingAddPreset(true);
-
       const response = await fetch(
-        `https://${resolvedMiddleware?.hostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`,
+        `https://${resolvedMiddleware?.hostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
       );
       if (!response.ok) {
         throw new Error("Network error");
       }
       const presetData = await response.json();
-
       const { res } = await request(routes.createAssetBed, {
         body: {
           meta: { ...data, ...presetData },
@@ -145,7 +144,7 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
               name="middleware_hostname"
               label={
                 <div className="flex flex-row gap-1">
-                  <p>Middleware Hostname</p>
+                  <p>{t("middleware_hostname")}</p>
                   {resolvedMiddleware?.source != "asset" && (
                     <div className="tooltip">
                       <CareIcon
@@ -153,7 +152,7 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
                         className="tooltip text-indigo-500 hover:text-indigo-600"
                       />
                       <span className="tooltip-text w-56 whitespace-normal">
-                        Middleware hostname sourced from asset{" "}
+                        {t("middleware_hostname_sourced_from_asset")}{" "}
                         {resolvedMiddleware?.source}
                       </span>
                     </div>
@@ -166,7 +165,7 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
             />
             <TextFormField
               name="camera_address"
-              label="Local IP Address"
+              label={t("local_ip_address")}
               autoComplete="off"
               value={cameraAddress}
               onChange={({ value }) => setCameraAddress(value)}
@@ -174,14 +173,14 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
             />
             <TextFormField
               name="username"
-              label="Username"
+              label={t("username")}
               autoComplete="off"
               value={username}
               onChange={({ value }) => setUsername(value)}
             />
             <TextFormField
               name="password"
-              label="Password"
+              label={t("password")}
               autoComplete="off"
               type="password"
               value={password}
@@ -189,7 +188,7 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
             />
             <TextFormField
               name="stream_uuid"
-              label="Stream UUID"
+              label={t("stream_uuid")}
               autoComplete="off"
               value={streamUuid}
               type="password"
@@ -202,7 +201,7 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
             <Submit
               disabled={loadingSetConfiguration}
               className="w-full md:w-auto"
-              label="Set Configuration"
+              label={t("set_configuration")}
             />
           </div>
         </form>

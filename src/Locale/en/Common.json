@@ -39,6 +39,7 @@
   "modified": "Modified",
   "updated": "Updated",
   "update": "Update",
+  "updating": "Updating",
   "configure": "Configure",
   "assigned_to": "Assigned to",
   "cancel": "Cancel",
@@ -163,5 +164,6 @@
   "clear_all_filters": "Clear All Filters",
   "summary": "Summary",
   "report": "Report",
-  "treating_doctor":"Treating Doctor"
+  "treating_doctor": "Treating Doctor",
+  "refresh": "Refresh"
 }
