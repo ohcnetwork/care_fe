@@ -17,7 +17,6 @@ import { formatPatientAge } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import SwitchTabs from "../Common/components/SwitchTabs";
 import SortDropdownMenu from "../Common/SortDropdown";
-import { useEffect } from "react";
 import useFilters from "../../Common/hooks/useFilters";
 
 const DischargedPatientsList = ({
@@ -31,10 +30,6 @@ const DischargedPatientsList = ({
   });
 
   const { qParams, updateQuery, FilterBadges } = useFilters({});
-
-  useEffect(() => {
-    updateQuery({ ordering: "-modified_date" });
-  }, []);
 
   return (
     <Page
@@ -72,7 +67,7 @@ const DischargedPatientsList = ({
       <PaginatedList
         route={routes.listFacilityDischargedPatients}
         pathParams={{ facility_external_id }}
-        query={qParams}
+        query={{ ordering: "-modified_date", ...qParams }}
       >
         {() => (
           <div className="flex flex-col gap-4 py-4 lg:px-4 lg:py-8">
