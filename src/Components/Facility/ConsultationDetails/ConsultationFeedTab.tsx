@@ -6,10 +6,13 @@ import useQuery from "../../../Utils/request/useQuery";
 import CameraFeed from "../../CameraFeed/CameraFeed";
 import Loading from "../../Common/Loading";
 import AssetBedSelect from "../../CameraFeed/AssetBedSelect";
+import { triggerGoal } from "../../../Integrations/Plausible";
+import useAuthUser from "../../../Common/hooks/useAuthUser";
 
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
 
 export const ConsultationFeedTab = (props: ConsultationTabProps) => {
+  const authUser = useAuthUser();
   const bed = props.consultationData.current_bed?.bed_object;
 
   const [asset, setAsset] = useState<AssetData>();
@@ -51,13 +54,39 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
       {loading || !asset ? (
         <Loading />
       ) : (
-        <CameraFeed asset={asset} silent preset={preset?.meta.position}>
+        <CameraFeed
+          asset={asset}
+          silent
+          preset={preset?.meta.position}
+          onStreamError={() => {
+            triggerGoal("Camera Feed Viewed", {
+              consultationId: props.consultationId,
+              userId: authUser.id,
+              result: "error",
+            });
+          }}
+          onStreamSuccess={() => {
+            triggerGoal("Camera Feed Viewed", {
+              consultationId: props.consultationId,
+              userId: authUser.id,
+              result: "success",
+            });
+          }}
+        >
           <div className="w-64">
             <AssetBedSelect
               asset={asset}
               bed={bed}
               value={preset}
-              onChange={setPreset}
+              onChange={(value) => {
+                triggerGoal("Camera Preset Clicked", {
+                  presetName: preset?.meta?.preset_name,
+                  consultationId: props.consultationId,
+                  userId: authUser.id,
+                  result: "success",
+                });
+                setPreset(value);
+              }}
             />
           </div>
         </CameraFeed>
