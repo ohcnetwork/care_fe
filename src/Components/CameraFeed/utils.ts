@@ -5,7 +5,7 @@ import { isIOS } from "../../Utils/utils";
 
 export const calculateVideoDelay = (
   ref: MutableRefObject<HTMLVideoElement | null>,
-  playedOn?: Date
+  playedOn?: Date,
 ) => {
   const video = ref.current;
 

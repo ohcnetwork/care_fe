@@ -9,7 +9,7 @@ import { ExternalResultImportSchema } from "../../Common/constants";
 import DialogModal from "../Common/Dialog";
 import { IExternalResult } from "./models";
 const ExcelFileDragAndDrop = lazy(
-  () => import("../Common/ExcelFIleDragAndDrop")
+  () => import("../Common/ExcelFIleDragAndDrop"),
 );
 
 interface Props {

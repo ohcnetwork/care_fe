@@ -12,7 +12,7 @@ import routes from "../../Redux/api";
 import { mergeQueryOptions } from "../../Utils/utils";
 
 export default function MedibaseAutocompleteFormField(
-  props: FormFieldBaseProps<MedibaseMedicine>
+  props: FormFieldBaseProps<MedibaseMedicine>,
 ) {
   const field = useFormFieldPropsResolver(props);
 
@@ -51,7 +51,7 @@ export default function MedibaseAutocompleteFormField(
         options={mergeQueryOptions(
           field.value && !query ? [field.value] : [],
           data ?? [],
-          (obj) => obj.id
+          (obj) => obj.id,
         )}
         optionLabel={(option) => option.name.toUpperCase()}
         optionDescription={(option) => <OptionDescription medicine={option} />}

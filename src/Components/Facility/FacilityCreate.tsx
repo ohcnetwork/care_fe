@@ -115,7 +115,7 @@ const initForm: FacilityForm = {
 
 const initError: Record<keyof FacilityForm, string> = Object.assign(
   {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
 );
 
 const initialState = {
@@ -143,7 +143,7 @@ export const FacilityCreate = (props: FacilityProps) => {
 
   const [state, dispatch] = useAutoSaveReducer<FacilityForm>(
     facilityCreateReducer,
-    initialState
+    initialState,
   );
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -193,7 +193,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         id: String(districtId),
       },
       prefetch: !!districtId,
-    }
+    },
   );
 
   const getSteps = (): Step[] => {
@@ -217,8 +217,8 @@ export const FacilityCreate = (props: FacilityProps) => {
           currentStep === 2
             ? "current"
             : currentStep > 2
-            ? "complete"
-            : "upcoming",
+              ? "complete"
+              : "upcoming",
         disabled: createdFacilityId == "",
       },
       {
@@ -240,7 +240,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         id: String(localBodyId),
       },
       prefetch: !!localBodyId,
-    }
+    },
   );
 
   useQuery(routes.getPermittedFacility, {
@@ -294,7 +294,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   });
 
   const { data: stateData, loading: isStateLoading } = useQuery(
-    routes.statesList
+    routes.statesList,
   );
 
   const handleChange = (e: FieldChangeEvent<unknown>) => {
@@ -359,7 +359,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   };
 
   const handleSelectCurrentLocation = (
-    setCenter: (lat: number, lng: number) => void
+    setCenter: (lat: number, lng: number) => void,
   ) => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
@@ -563,7 +563,7 @@ export const FacilityCreate = (props: FacilityProps) => {
           if (res) {
             const removeCurrentBedType = (bedTypeId: number | undefined) => {
               setCapacityData((state) =>
-                state.filter((i) => i.id !== bedTypeId)
+                state.filter((i) => i.id !== bedTypeId),
               );
               setBedCapacityKey((bedCapacityKey) => bedCapacityKey + 1);
             };
@@ -606,7 +606,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         {doctorData.map((data: DoctorModal) => {
           const removeCurrentDoctorData = (doctorId: number | undefined) => {
             setDoctorData((state) =>
-              state.filter((i: DoctorModal) => i.id !== doctorId)
+              state.filter((i: DoctorModal) => i.id !== doctorId),
             );
             setDocCapacityKey((docCapacityKey) => docCapacityKey + 1);
           };

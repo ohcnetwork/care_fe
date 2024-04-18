@@ -37,7 +37,7 @@ interface parseDataProps {
 const validateAndParse = (
   key: string,
   value: any,
-  schema: SingleKeySchema
+  schema: SingleKeySchema,
 ): { [key: string]: { value: any; error?: string } } => {
   try {
     const parsedValue = schema?.parse?.(value) ?? value;
@@ -85,7 +85,7 @@ const validateAndParse = (
 
 const parseDataWithSchema = (
   data: any[],
-  schema: SchemaType
+  schema: SchemaType,
 ): parseDataProps => {
   const errors: ErrorData[] = [];
   const parsedData: ParsedData[] = [];
@@ -175,11 +175,11 @@ const parseDataWithSchema = (
  */
 const schemaParser = (
   dataArray: any[],
-  schema: SchemaType
+  schema: SchemaType,
 ): parseDataProps & { ParsedDataWithOutErrors: ParsedData[] } => {
   const { dataWithErrors, parsedData, errors } = parseDataWithSchema(
     dataArray,
-    schema
+    schema,
   );
 
   const ParsedDataWithOutErrors = parsedData.filter((item, index) => {

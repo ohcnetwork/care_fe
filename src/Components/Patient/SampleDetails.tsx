@@ -28,7 +28,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
           navigate("/not-found");
         }
       },
-    }
+    },
   );
 
   const yesOrNoBadge = (param: any) =>
@@ -40,10 +40,10 @@ export const SampleDetails = ({ id }: DetailRoute) => {
 
   const showPatientCard = (patientData: any) => {
     const patientGender = GENDER_TYPES.find(
-      (i) => i.id === patientData?.gender
+      (i) => i.id === patientData?.gender,
     )?.text;
     const testType = TEST_TYPE_CHOICES.find(
-      (i) => i.id === patientData?.test_type
+      (i) => i.id === patientData?.test_type,
     )?.text;
 
     return (

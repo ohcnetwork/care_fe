@@ -108,7 +108,7 @@ const ButtonV2 = ({
     ghost ? `button-${variant}-ghost` : `button-${variant}-default`,
     border && `button-${variant}-border`,
     shadow && "shadow enabled:hover:shadow-lg",
-    tooltip && "tooltip"
+    tooltip && "tooltip",
   );
 
   if (tooltip) {

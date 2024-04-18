@@ -31,7 +31,7 @@ const useSegmentedRecording = () => {
               msg: "Please grant microphone permission to record audio.",
             });
             setIsRecording(false);
-          }
+          },
         );
       }
       return;

@@ -96,7 +96,7 @@ const NotificationTile = ({
       }}
       className={classNames(
         "relative cursor-pointer rounded px-4 py-5 transition duration-200 ease-in-out hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg lg:px-8",
-        result.read_at && "text-gray-500"
+        result.read_at && "text-gray-500",
       )}
     >
       <div className="flex justify-between">
@@ -136,8 +136,8 @@ const NotificationTile = ({
                 isMarkingAsRead
                   ? "l-spinner"
                   : result.read_at
-                  ? "l-envelope"
-                  : "l-envelope-check"
+                    ? "l-envelope"
+                    : "l-envelope-check"
               }
               className={isMarkingAsRead ? "animate-spin" : ""}
             />
@@ -302,14 +302,14 @@ export default function NotificationsList({
     const p256dh = btoa(
       String.fromCharCode.apply(
         null,
-        new Uint8Array(push.getKey("p256dh") as any) as any
-      )
+        new Uint8Array(push.getKey("p256dh") as any) as any,
+      ),
     );
     const auth = btoa(
       String.fromCharCode.apply(
         null,
-        new Uint8Array(push.getKey("auth") as any) as any
-      )
+        new Uint8Array(push.getKey("auth") as any) as any,
+      ),
     );
 
     const data = {
@@ -337,7 +337,7 @@ export default function NotificationsList({
           pathParams: { id: notification.id },
           body: { read_at: new Date() },
         });
-      })
+      }),
     );
     setReload(!reload);
     setIsMarkingAllAsRead(false);
@@ -354,8 +354,8 @@ export default function NotificationsList({
           setUnreadCount(
             res.data.results?.reduce(
               (acc: number, result: any) => acc + (result.read_at ? 0 : 1),
-              0
-            )
+              0,
+            ),
           );
           setTotalCount(res.data.count);
         }
@@ -380,7 +380,7 @@ export default function NotificationsList({
         {data
           .filter((notification: any) => notification.event != "PUSH_MESSAGE")
           .filter((notification: any) =>
-            showUnread ? notification.read_at === null : true
+            showUnread ? notification.read_at === null : true,
           )
           .map((result: any) => (
             <NotificationTile
