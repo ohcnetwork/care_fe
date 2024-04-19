@@ -465,10 +465,6 @@ const routes = {
     path: "/api/v1/asset/{external_id}/operate_assets/",
     method: "POST",
   },
-  addCameraPreset: {
-    path: "/api/v1/assetbed/{external_id}/add_camera_preset/",
-    method: "POST",
-  },
 
   // Patient Asset Beds (for CNS and Monitoring Hub)
   listPatientAssetBeds: {

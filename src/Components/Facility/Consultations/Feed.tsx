@@ -1,33 +1,35 @@
-import * as Notification from "../../../Utils/Notifications.js";
-import routes from "../../../Redux/api";
-import request from "../../../Utils/request/request";
+import { useEffect, useRef, useState } from "react";
 import {
   CAMERA_STATES,
   CameraPTZ,
   getCameraPTZ,
 } from "../../../Common/constants";
+import { PTZState, useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 import {
   ICameraAssetState,
   StreamStatus,
   useMSEMediaPlayer,
 } from "../../../Common/hooks/useMSEplayer";
-import { PTZState, useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
-import { useEffect, useRef, useState } from "react";
+import routes from "../../../Redux/api";
+import * as Notification from "../../../Utils/Notifications.js";
+import request from "../../../Utils/request/request";
 
-import CareIcon, { IconName } from "../../../CAREUI/icons/CareIcon.js";
-import FeedButton from "./FeedButton";
-import Loading from "../../Common/Loading";
+import { useTranslation } from "react-i18next";
 import ReactPlayer from "react-player";
-import { classNames } from "../../../Utils/utils";
 import { useDispatch } from "react-redux";
-import { useHLSPLayer } from "../../../Common/hooks/useHLSPlayer";
 import useKeyboardShortcut from "use-keyboard-shortcut";
-import useFullscreen from "../../../Common/hooks/useFullscreen.js";
-import { triggerGoal } from "../../../Integrations/Plausible.js";
+import CareIcon, { IconName } from "../../../CAREUI/icons/CareIcon.js";
 import useAuthUser from "../../../Common/hooks/useAuthUser.js";
-import Spinner from "../../Common/Spinner.js";
+import useFullscreen from "../../../Common/hooks/useFullscreen.js";
+import { useHLSPLayer } from "../../../Common/hooks/useHLSPlayer";
+import { triggerGoal } from "../../../Integrations/Plausible.js";
 import useQuery from "../../../Utils/request/useQuery.js";
+import { classNames } from "../../../Utils/utils";
 import { ResolvedMiddleware } from "../../Assets/AssetTypes.js";
+import Loading from "../../Common/Loading";
+import Spinner from "../../Common/Spinner.js";
+import { CameraPresetModel } from "../models";
+import FeedButton from "./FeedButton";
 
 interface IFeedProps {
   facilityId: string;
@@ -37,6 +39,7 @@ interface IFeedProps {
 const PATIENT_DEFAULT_PRESET = "Patient View".trim().toLowerCase();
 
 export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
+  const { t } = useTranslation();
   const dispatch: any = useDispatch();
 
   const videoWrapper = useRef<HTMLDivElement>(null);
@@ -49,7 +52,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   });
 
   const [cameraConfig, setCameraConfig] = useState<any>({});
-  const [bedPresets, setBedPresets] = useState<any>([]);
+  const [bedPresets, setBedPresets] = useState<CameraPresetModel[]>();
   const [bed, setBed] = useState<any>();
   const [precision, setPrecision] = useState(1);
   const [cameraState, setCameraState] = useState<PTZState | null>(null);
@@ -91,43 +94,42 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         const consultationBedId = data.current_bed?.bed_object?.id;
         if (consultationBedId) {
           (async () => {
-            const { res: listAssetBedsRes, data: listAssetBedsData } =
-              await request(routes.listAssetBeds, {
+            const { data: listCameraPresetsData } = await request(
+              routes.getCameraPresets,
+              {
                 query: {
                   bed: consultationBedId,
                 },
-              });
+              }
+            );
             setBed(consultationBedId);
-            const bedAssets: any = {
-              ...listAssetBedsRes,
-              data: {
-                ...listAssetBedsData,
-                results: listAssetBedsData?.results.filter((asset) => {
-                  return asset?.asset_object?.meta?.asset_type === "CAMERA";
-                }),
-              },
-            };
-
-            if (bedAssets?.data?.results?.length) {
+            if (listCameraPresetsData?.results?.length) {
+              const obj = listCameraPresetsData.results[0];
               const { camera_access_key } =
-                bedAssets.data.results[0].asset_object.meta;
+                obj?.asset_bed_object?.asset?.meta || {};
               const config = camera_access_key.split(":");
               setCameraAsset({
-                id: bedAssets.data.results[0].asset_object.id,
+                id: obj.asset_bed_object?.asset?.id || "",
                 accessKey: config[2] || "",
                 middleware_address:
-                  bedAssets.data.results[0].asset_object?.meta
-                    ?.middleware_hostname,
+                  obj.asset_bed_object?.asset?.meta?.middleware_hostname,
                 location_middleware:
-                  bedAssets.data.results[0].asset_object.location_object
-                    ?.middleware_address,
+                  obj.asset_bed_object?.asset?.location_object
+                    ?.middleware_address || "",
               });
               setResolvedMiddleware(
-                bedAssets.data.results[0].asset_object.resolved_middleware,
+                obj.asset_bed_object.asset?.resolved_middleware
               );
-              setCameraConfig(bedAssets.data.results[0].meta);
+              const position = {
+                x: obj.x || 0.0,
+                y: obj.y || 0.0,
+                zoom: obj.zoom || 1,
+              };
+              setCameraConfig({
+                ...position,
+              });
               setCameraState({
-                ...bedAssets.data.results[0].meta.position,
+                ...position,
                 precision: 1,
               });
             }
@@ -140,7 +142,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   // const [position, setPosition] = useState<any>();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [presets, setPresets] = useState<any>([]);
-  const [currentPreset, setCurrentPreset] = useState<any>();
+  const [currentPreset, setCurrentPreset] = useState<CameraPresetModel>();
   // const [showDefaultPresets, setShowDefaultPresets] = useState<boolean>(false);
 
   const [loading, setLoading] = useState<string>(CAMERA_STATES.IDLE);
@@ -158,7 +160,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     return () => clearTimeout(timeout);
   }, [camTimeout]);
   const [streamStatus, setStreamStatus] = useState<StreamStatus>(
-    StreamStatus.Offline,
+    StreamStatus.Offline
   );
 
   const url = !isIOS
@@ -204,10 +206,10 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
 
   const getBedPresets = async (asset: any) => {
     if (asset.id && bed) {
-      const { data: bedAssets } = await request(routes.listAssetBeds, {
+      const { data: cameraPresets } = await request(routes.getCameraPresets, {
         query: { asset: asset.id, bed },
       });
-      setBedPresets(bedAssets?.results);
+      setBedPresets(cameraPresets?.results);
     }
   };
 
@@ -273,42 +275,49 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
       setLoading(CAMERA_STATES.MOVING.GENERIC);
       const preset =
         bedPresets?.find(
-          (preset: any) =>
-            String(preset?.meta?.preset_name).trim().toLowerCase() ===
-            PATIENT_DEFAULT_PRESET,
+          (preset: CameraPresetModel) =>
+            String(preset?.preset_name).trim().toLowerCase() ===
+            PATIENT_DEFAULT_PRESET
         ) || bedPresets?.[0];
 
       if (preset) {
-        absoluteMove(preset?.meta?.position, {
-          onSuccess: () => {
-            setLoading(CAMERA_STATES.IDLE);
-            setCurrentPreset(preset);
+        absoluteMove(
+          {
+            x: preset?.x || 0,
+            y: preset?.y || 0,
+            zoom: preset?.zoom || 1,
           },
-          onError: (err: Record<any, any>) => {
-            setLoading(CAMERA_STATES.IDLE);
-            const responseData = err.data.result;
-            if (responseData.status) {
-              switch (responseData.status) {
-                case "error":
-                  if (responseData.error.code === "EHOSTUNREACH") {
-                    Notification.Error({ msg: "Camera is Offline!" });
-                  } else if (responseData.message) {
-                    Notification.Error({ msg: responseData.message });
-                  }
-                  break;
-                case "fail":
-                  responseData.errors &&
-                    responseData.errors.map((error: any) => {
-                      Notification.Error({ msg: error.message });
-                    });
-                  break;
+          {
+            onSuccess: () => {
+              setLoading(CAMERA_STATES.IDLE);
+              setCurrentPreset(preset);
+            },
+            onError: (err: Record<any, any>) => {
+              setLoading(CAMERA_STATES.IDLE);
+              const responseData = err.data.result;
+              if (responseData.status) {
+                switch (responseData.status) {
+                  case "error":
+                    if (responseData.error.code === "EHOSTUNREACH") {
+                      Notification.Error({ msg: "Camera is Offline!" });
+                    } else if (responseData.message) {
+                      Notification.Error({ msg: responseData.message });
+                    }
+                    break;
+                  case "fail":
+                    responseData.errors &&
+                      responseData.errors.map((error: any) => {
+                        Notification.Error({ msg: error.message });
+                      });
+                    break;
+                }
+              } else {
+                Notification.Error({ msg: "Unable to connect server!" });
               }
-            } else {
-              Notification.Error({ msg: "Unable to connect server!" });
-            }
-            setCurrentPreset(preset);
-          },
-        });
+              setCurrentPreset(preset);
+            },
+          }
+        );
       } else {
         setLoading(CAMERA_STATES.IDLE);
       }
@@ -320,7 +329,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
   } = {
     precision: () => {
       setPrecision((precision: number) =>
-        precision === 16 ? 1 : precision * 2,
+        precision === 16 ? 1 : precision * 2
       );
     },
     reset: () => {
@@ -343,29 +352,31 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         !isFullscreen,
         videoWrapper.current
           ? videoWrapper.current
-          : (liveFeedPlayerRef.current as HTMLElement),
+          : (liveFeedPlayerRef.current as HTMLElement)
       );
     },
     updatePreset: (option) => {
       getCameraStatus({
         onSuccess: async (data) => {
-          if (currentPreset?.asset_object?.id && data?.position) {
+          if (currentPreset?.asset_bed_object?.asset?.id && data?.position) {
             setLoading(option.loadingLabel);
-            const { res, data: assetBedData } = await request(
-              routes.partialUpdateAssetBed,
-              {
-                body: {
-                  asset: currentPreset.asset_object.id,
-                  bed: currentPreset.bed_object.id,
-                  meta: {
-                    ...currentPreset.meta,
-                    position: data?.position,
-                  },
+            console.log("Updating Preset");
+            const { res } = await request(routes.partialUpdateAssetBed, {
+              body: {
+                asset: currentPreset.asset_bed_object?.asset?.id,
+                bed: currentPreset.asset_bed_object?.bed?.id,
+                meta: {
+                  external_id: currentPreset?.id,
+                  x: data?.position?.x,
+                  y: data?.position?.y,
+                  zoom: data?.position?.zoom,
                 },
-                pathParams: { external_id: currentPreset?.id },
               },
-            );
-            if (res && assetBedData && res.status === 200) {
+              pathParams: {
+                external_id: currentPreset?.asset_bed_object?.id || "",
+              },
+            });
+            if (res && res.status === 200) {
               Notification.Success({ msg: "Preset Updated" });
               await getBedPresets(cameraAsset?.id);
               getPresets({});
@@ -405,52 +416,59 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
     <div className="flex h-[calc(100vh-1.5rem)] flex-col px-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-4 px-3">
-          <p className="block text-lg font-medium"> Camera Presets :</p>
+          <p className="block text-lg font-medium">{t("camera_presets")}: </p>
           <div className="flex items-center">
-            {bedPresets?.map((preset: any, index: number) => (
+            {bedPresets?.map((preset: CameraPresetModel, index: number) => (
               <button
                 key={preset.id}
                 onClick={() => {
                   setLoading(CAMERA_STATES.MOVING.GENERIC);
                   // gotoBedPreset(preset);
-                  absoluteMove(preset.meta.position, {
-                    onSuccess: () => {
-                      setLoading(CAMERA_STATES.IDLE);
-                      setCurrentPreset(preset);
-                      console.log(
-                        "onSuccess: Set Preset to " + preset?.meta?.preset_name,
-                      );
-                      triggerGoal("Camera Preset Clicked", {
-                        presetName: preset?.meta?.preset_name,
-                        consultationId,
-                        userId: authUser.id,
-                        result: "success",
-                      });
+                  absoluteMove(
+                    {
+                      x: preset?.x || 0.0,
+                      y: preset?.y || 0.0,
+                      zoom: preset?.zoom || 1,
                     },
-                    onError: () => {
-                      setLoading(CAMERA_STATES.IDLE);
-                      setCurrentPreset(preset);
-                      console.log(
-                        "onError: Set Preset to " + preset?.meta?.preset_name,
-                      );
-                      triggerGoal("Camera Preset Clicked", {
-                        presetName: preset?.meta?.preset_name,
-                        consultationId,
-                        userId: authUser.id,
-                        result: "error",
-                      });
-                    },
-                  });
+                    {
+                      onSuccess: () => {
+                        setLoading(CAMERA_STATES.IDLE);
+                        setCurrentPreset(preset);
+                        console.log(
+                          "onSuccess: Set Preset to " + preset?.preset_name
+                        );
+                        triggerGoal("Camera Preset Clicked", {
+                          presetName: preset?.preset_name,
+                          consultationId,
+                          userId: authUser.id,
+                          result: "success",
+                        });
+                      },
+                      onError: () => {
+                        setLoading(CAMERA_STATES.IDLE);
+                        setCurrentPreset(preset);
+                        console.log(
+                          "onError: Set Preset to " + preset?.preset_name
+                        );
+                        triggerGoal("Camera Preset Clicked", {
+                          presetName: preset?.preset_name,
+                          consultationId,
+                          userId: authUser.id,
+                          result: "error",
+                        });
+                      },
+                    }
+                  );
                   getCameraStatus({});
                 }}
                 className={classNames(
                   "block border border-gray-500 px-4 py-2 first:rounded-l last:rounded-r",
                   currentPreset === preset
                     ? "border-primary-500 bg-primary-500 text-white"
-                    : "bg-transparent",
+                    : "bg-transparent"
                 )}
               >
-                {preset.meta.preset_name || `Preset ${index + 1}`}
+                {preset.preset_name || `Preset ${index + 1}`}
               </button>
             ))}
           </div>
@@ -521,9 +539,12 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           {streamStatus === StreamStatus.Offline && (
             <div className="text-center">
               <p className="font-bold">
-                STATUS: <span className="text-red-600">OFFLINE</span>
+                {t("status")}:{" "}
+                <span className="text-red-600">{t("offline")}</span>
               </p>
-              <p className="font-semibold ">Feed is currently not live.</p>
+              <p className="font-semibold ">
+                {t("feed_is_currently_not_live")}
+              </p>
               <p className="font-semibold ">Trying to connect... </p>
               <p className="mt-2 flex justify-center">
                 <Spinner circle={{ fill: "none" }} />
@@ -533,20 +554,22 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           {streamStatus === StreamStatus.Stop && (
             <div className="text-center">
               <p className="font-bold">
-                STATUS: <span className="text-red-600">STOPPED</span>
+                {t("status")}:{" "}
+                <span className="text-red-600">{t("stopped")}</span>
               </p>
-              <p className="font-semibold ">Feed is Stooped.</p>
+              <p className="font-semibold ">{t("feed_is_stopped")}</p>
               <p className="font-semibold ">
-                Click refresh button to start feed.
+                {t("click_refresh_button_to_start_feed")}
               </p>
             </div>
           )}
           {streamStatus === StreamStatus.Loading && (
             <div className="text-center">
               <p className="font-bold ">
-                STATUS: <span className="text-red-600"> LOADING</span>
+                {t("status")}:{" "}
+                <span className="text-red-600"> {t("loading")}</span>
               </p>
-              <p className="font-semibold ">Fetching latest feed.</p>
+              <p className="font-semibold ">{t("fetching_latest_feed")}</p>
             </div>
           )}
         </div>
@@ -554,7 +577,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           {["fullScreen", "reset", "updatePreset", "zoomIn", "zoomOut"].map(
             (button, index) => {
               const option = cameraPTZ.find(
-                (option) => option.action === button,
+                (option) => option.action === button
               );
               return (
                 <FeedButton
@@ -564,7 +587,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                   clickAction={() => option?.callback()}
                 />
               );
-            },
+            }
           )}
           <div className="hidden pl-3 md:block">
             <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
@@ -581,7 +604,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
           calculateVideoLiveDelay() > 3 && (
             <div className="absolute left-8 top-8 z-10 flex items-center gap-2 rounded-3xl bg-red-400 px-3 py-1.5 text-xs font-semibold text-gray-100">
               <CareIcon icon="l-wifi-slash" className="h-4 w-4" />
-              <span>Slow Network Detected</span>
+              <span>{t("slow_network_detected")}</span>
             </div>
           )}
         <div className="absolute bottom-8 left-8 z-10 grid grid-flow-col grid-rows-3 gap-1">

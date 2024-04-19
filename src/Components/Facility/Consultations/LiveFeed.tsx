@@ -13,7 +13,7 @@ import {
   useMSEMediaPlayer,
 } from "../../../Common/hooks/useMSEplayer";
 import useWindowDimensions from "../../../Common/hooks/useWindowDimensions";
-import { deleteAssetBed, partialUpdateAssetBed } from "../../../Redux/actions";
+import { deleteAssetBed } from "../../../Redux/actions";
 import routes from "../../../Redux/api";
 import * as Notification from "../../../Utils/Notifications.js";
 import request from "../../../Utils/request/request";
@@ -142,6 +142,12 @@ const LiveFeed = (props: any) => {
       body: {
         asset: currentPreset?.asset_bed_object.asset?.id,
         bed: bed.id,
+        meta: {
+          external_id: currentPreset?.id,
+          x: currentPreset?.x,
+          y: currentPreset?.y,
+          zoom: currentPreset?.zoom,
+        },
       },
       pathParams: {
         external_id: currentPreset?.asset_bed_object.id || "",
@@ -244,20 +250,25 @@ const LiveFeed = (props: any) => {
     updatePreset: (option) => {
       getCameraStatus({
         onSuccess: async (data) => {
-          console.log({ currentPreset, data });
           if (currentPreset?.asset_bed_object?.asset?.id && data?.position) {
             setLoading(option.loadingLabel);
             console.log("Updating Preset");
-            const response = await dispatch(
-              partialUpdateAssetBed(
-                {
-                  asset: currentPreset.asset_bed_object?.asset?.id,
-                  bed: currentPreset.asset_bed_object?.bed?.id,
+            const { res } = await request(routes.partialUpdateAssetBed, {
+              body: {
+                asset: currentPreset.asset_bed_object?.asset?.id,
+                bed: currentPreset.asset_bed_object?.bed?.id,
+                meta: {
+                  external_id: currentPreset?.id,
+                  x: data.position.x,
+                  y: data.position.y,
+                  zoom: data.position.zoom,
                 },
-                currentPreset?.asset_bed_object?.id || ""
-              )
-            );
-            if (response && response.status === 200) {
+              },
+              pathParams: {
+                external_id: currentPreset.asset_bed_object?.id || "",
+              },
+            });
+            if (res && res?.status === 200) {
               Notification.Success({ msg: "Preset Updated" });
               refetchBedPresets();
               fetchCameraPresets();

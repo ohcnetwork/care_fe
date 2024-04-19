@@ -5,6 +5,7 @@
   "middleware_hostname_sourced_from_asset": "Middleware hostname sourced from asset",
   "local_ip_address": "Local IP Address",
   "stream_uuid": "Stream UUID",
+  "camera_presets": "Camera Presets",
   "set_configuration": "Set Configuration",
   "show_default_presets": "Show Default Presets",
   "show_patient_presets": "Show Patient Presets",
