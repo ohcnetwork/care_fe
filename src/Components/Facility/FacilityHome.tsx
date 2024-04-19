@@ -106,7 +106,7 @@ export const FacilityHome = (props: any) => {
   const editCoverImageTooltip = hasPermissionToEditCoverImage && (
     <div
       id="facility-coverimage"
-      className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center rounded-t-lg bg-black text-sm text-gray-300 opacity-0 transition-[opacity] hover:opacity-60 md:h-[88px]"
+      className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center rounded-t-lg bg-black text-sm text-gray-300 opacity-0 transition-opacity hover:opacity-60 md:h-[88px]"
     >
       <CareIcon icon="l-pen" className="text-lg" />
       <span className="mt-2">{`${hasCoverImage ? "Edit" : "Upload"}`}</span>
@@ -189,7 +189,7 @@ export const FacilityHome = (props: any) => {
             <div className="flex flex-1 flex-col">
               <div className="flex items-start gap-4">
                 <div
-                  className={`group relative hidden h-[20rem] w-[88px] text-clip rounded transition-all duration-200 ease-in-out md:mr-2 md:flex lg:mr-6 lg:h-[20rem] lg:w-[20rem] ${
+                  className={`group relative hidden h-80 w-[88px] text-clip rounded transition-all duration-200 ease-in-out md:mr-2 md:flex lg:mr-6 lg:h-80 lg:w-80 ${
                     hasPermissionToEditCoverImage && "cursor-pointer"
                   }`}
                   onClick={() =>
@@ -199,7 +199,7 @@ export const FacilityHome = (props: any) => {
                   {hasCoverImage ? (
                     <CoverImage />
                   ) : (
-                    <div className="flex h-[20rem] w-[88px] items-center justify-center rounded-lg bg-gray-200 font-medium text-gray-700 lg:h-[20rem] lg:w-[20rem]">
+                    <div className="flex h-80 w-[88px] items-center justify-center rounded-lg bg-gray-200 font-medium text-gray-700 lg:h-80 lg:w-80">
                       <svg
                         className="h-8 w-8 fill-current text-gray-500"
                         viewBox="0 0 40 32"
@@ -313,7 +313,7 @@ export const FacilityHome = (props: any) => {
               </div>
             </div>
           </div>
-          <div className="flex h-[20rem] flex-col justify-between">
+          <div className="flex h-80 flex-col justify-between">
             <div className="w-full md:w-auto">
               <DropdownMenu
                 id="manage-facility-dropdown"
