@@ -15,7 +15,7 @@ import {
   PhoneNumberType,
 } from "../FieldValidators";
 import CareIcon, { IconName } from "../../../CAREUI/icons/CareIcon";
-import useClickOutside from "../../../Common/hooks/useClickOutside";
+import { Popover } from "@headlessui/react";
 
 const phoneCodes: Record<string, CountryData> = phoneCodesJson;
 
@@ -34,9 +34,7 @@ export default function PhoneNumberFormField(props: Props) {
     name: "India",
     code: "91",
   });
-  const [isOpen, setIsOpen, componentRef] =
-    useClickOutside<HTMLDivElement>(false);
-
+  const [isOpen, setIsOpen] = useState(false);
   const validator = useMemo(
     () => PhoneNumberValidator(props.types),
     [props.types],
@@ -108,47 +106,61 @@ export default function PhoneNumberFormField(props: Props) {
         ),
       }}
     >
-      <div className="relative rounded-md shadow-sm" ref={componentRef}>
-        <div
-          className="absolute inset-y-0 left-0 w-[4.5rem] cursor-pointer p-0.5"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          <span className="flex h-full items-center rounded-md bg-slate-100 pl-4 ">
-            {country?.flag ?? "🇮🇳"}
-          </span>
-          {isOpen ? (
-            <CareIcon
-              icon="l-angle-up"
-              className="absolute right-1 top-1/2 -translate-y-1/2 text-2xl font-bold"
-            />
-          ) : (
-            <CareIcon
-              icon="l-angle-down"
-              className="absolute right-1 top-1/2 -translate-y-1/2 text-2xl font-bold"
-            />
-          )}
-        </div>
-
-        <input
-          type="tel"
-          id={field.id}
-          name={field.name}
-          autoComplete={props.autoComplete ?? "tel"}
-          className={classNames(
-            "cui-input-base h-full pl-20 tracking-widest sm:leading-6 ",
-            field.error && "border-danger-500",
-            field.className,
-          )}
-          maxLength={field.value?.startsWith("1800") ? 11 : 15}
-          placeholder={props.placeholder}
-          value={formatPhoneNumber(field.value, props.types)}
-          onChange={(e) => setValue(e.target.value)}
-          disabled={field.disabled}
-          onBlur={() => setError(validate(field.value, "blur"))}
-        />
-        {isOpen && (
-          <CountryCodesList handleCountryChange={handleCountryChange} />
-        )}
+      <div className="relative rounded-md shadow-sm">
+        <Popover>
+          {({ open }: { open: boolean }) => {
+            // eslint-disable-next-line react-hooks/rules-of-hooks
+            useEffect(() => {
+              setIsOpen(open);
+            }, [open]);
+            return (
+              <>
+                <Popover.Button className="absolute h-full">
+                  <div className="absolute inset-y-0 left-0 m-0.5 flex w-[4.5rem] cursor-pointer items-center justify-around bg-slate-100">
+                    <span className=" rounded-md pl-4">
+                      {country?.flag ?? "🇮🇳"}
+                    </span>
+                    {isOpen ? (
+                      <CareIcon
+                        icon="l-angle-up"
+                        className="text-2xl font-bold"
+                      />
+                    ) : (
+                      <CareIcon
+                        icon="l-angle-down"
+                        className="text-2xl font-bold"
+                      />
+                    )}
+                  </div>
+                </Popover.Button>
+                <input
+                  type="tel"
+                  id={field.id}
+                  name={field.name}
+                  autoComplete={props.autoComplete ?? "tel"}
+                  className={classNames(
+                    "cui-input-base h-full pl-20 tracking-widest sm:leading-6 ",
+                    field.error && "border-danger-500",
+                    field.className,
+                  )}
+                  maxLength={field.value?.startsWith("1800") ? 11 : 15}
+                  placeholder={props.placeholder}
+                  value={formatPhoneNumber(field.value, props.types)}
+                  onChange={(e) => setValue(e.target.value)}
+                  disabled={field.disabled}
+                  onBlur={() => setError(validate(field.value, "blur"))}
+                />
+                {isOpen && (
+                  <Popover.Panel className="w-full">
+                    <CountryCodesList
+                      handleCountryChange={handleCountryChange}
+                    />
+                  </Popover.Panel>
+                )}
+              </>
+            );
+          }}
+        </Popover>
       </div>
     </FormField>
   );
