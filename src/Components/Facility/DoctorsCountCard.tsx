@@ -51,7 +51,7 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
           </div>
           <div>
             <div className="text-sm font-medium text-[#808080]">
-              {specialization?.text} Doctors
+              {specialization?.text}
             </div>
             <h2 className="mt-2 text-xl font-bold">{props.count}</h2>
           </div>
@@ -82,7 +82,7 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
         <ConfirmDialog
           show={openDeleteDialog}
           onClose={handleDeleteClose}
-          title={`Delete ${specialization?.text} doctors`}
+          title={`Delete ${specialization?.text}`}
           description="You will not be able to access this docter specialization type later."
           action="Delete"
           variant="danger"

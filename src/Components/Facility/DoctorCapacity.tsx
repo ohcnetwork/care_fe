@@ -178,7 +178,7 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
         <div className={className}>
           <div>
             <FieldLabel className="mb-2" required={true}>
-              Area of specialization
+              Staff Type
             </FieldLabel>
             <SelectMenuV2
               id="area-of-specialization"

@@ -87,7 +87,7 @@ export const FacilityDoctorList = (props: any) => {
     <section id="facility-doctor-capacity-details">
       <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
         <div className="justify-between md:flex md:pb-2">
-          <div className="mb-2 text-xl font-bold">Doctors List</div>
+          <div className="mb-2 text-xl font-bold">Staff Capacity</div>
           <ButtonV2
             id="facility-add-doctortype"
             className="w-full md:w-auto"
@@ -96,7 +96,7 @@ export const FacilityDoctorList = (props: any) => {
             authorizeFor={NonReadOnlyUsers}
           >
             <CareIcon icon="l-user-md" className="mr-2 text-base text-white" />
-            Add Doctor Types
+            Add Staff Types
           </ButtonV2>
         </div>
         <div className="mt-4" id="facility-totaldoctor-capacity">
@@ -108,7 +108,7 @@ export const FacilityDoctorList = (props: any) => {
         <DialogModal
           show={doctorCapacityModalOpen}
           onClose={() => setDoctorCapacityModalOpen(false)}
-          title="Add Doctor Capacity"
+          title="Add Staff Capacity"
           className="max-w-md md:min-w-[600px]"
         >
           <DoctorCapacity
