@@ -34,7 +34,6 @@ export default function PhoneNumberFormField(props: Props) {
     name: "India",
     code: "91",
   });
-  const [isOpen, setIsOpen] = useState(false);
   const validator = useMemo(
     () => PhoneNumberValidator(props.types),
     [props.types],
@@ -75,7 +74,6 @@ export default function PhoneNumberFormField(props: Props) {
   const handleCountryChange = (value: CountryData): void => {
     setCountry(value);
     setValue(conditionPhoneCode(value.code));
-    setIsOpen(false);
   };
 
   useEffect(() => {
@@ -109,28 +107,17 @@ export default function PhoneNumberFormField(props: Props) {
       <div className="relative rounded-md shadow-sm">
         <Popover>
           {({ open }: { open: boolean }) => {
-            // eslint-disable-next-line react-hooks/rules-of-hooks
-            useEffect(() => {
-              setIsOpen(open);
-            }, [open]);
             return (
               <>
                 <Popover.Button className="absolute h-full">
                   <div className="absolute inset-y-0 left-0 m-0.5 flex w-[4.5rem] cursor-pointer items-center justify-around bg-slate-100">
-                    <span className=" rounded-md pl-4">
+                    <span className="rounded-md pl-4">
                       {country?.flag ?? "🇮🇳"}
                     </span>
-                    {isOpen ? (
-                      <CareIcon
-                        icon="l-angle-up"
-                        className="text-2xl font-bold"
-                      />
-                    ) : (
-                      <CareIcon
-                        icon="l-angle-down"
-                        className="text-2xl font-bold"
-                      />
-                    )}
+                    <CareIcon
+                      icon="l-angle-down"
+                      className={`text-2xl font-bold ${open && "rotate-180"}`}
+                    />
                   </div>
                 </Popover.Button>
                 <input
@@ -150,13 +137,14 @@ export default function PhoneNumberFormField(props: Props) {
                   disabled={field.disabled}
                   onBlur={() => setError(validate(field.value, "blur"))}
                 />
-                {isOpen && (
-                  <Popover.Panel className="w-full">
+                <Popover.Panel className="w-full">
+                  {({ close }) => (
                     <CountryCodesList
                       handleCountryChange={handleCountryChange}
+                      onClose={close}
                     />
-                  </Popover.Panel>
-                )}
+                  )}
+                </Popover.Panel>
               </>
             );
           }}
@@ -208,7 +196,13 @@ const formatPhoneNumber = (value: string, types: PhoneNumberType[]) => {
   return phoneNumber ? formatPhoneNumberUtil(phoneNumber) : value;
 };
 
-const CountryCodesList = ({ handleCountryChange }: any) => {
+const CountryCodesList = ({
+  handleCountryChange,
+  onClose,
+}: {
+  handleCountryChange: (value: CountryData) => void;
+  onClose: () => void;
+}) => {
   const [searchValue, setSearchValue] = useState<string>("");
 
   return (
@@ -246,6 +240,7 @@ const CountryCodesList = ({ handleCountryChange }: any) => {
               className="flex cursor-pointer items-center gap-2 rounded-md p-2 hover:bg-primary-100 hover:text-primary-600"
               onClick={() => {
                 handleCountryChange({ flag, name, code });
+                onClose();
               }}
             >
               <span>{flag}</span>
@@ -261,6 +256,7 @@ const CountryCodesList = ({ handleCountryChange }: any) => {
           className="flex cursor-pointer items-center gap-2 rounded-md p-2 hover:bg-primary-100 hover:text-primary-600"
           onClick={() => {
             handleCountryChange({ flag: "📞", name: "Support", code: "1800" });
+            onClose();
           }}
         >
           <span>📞</span>
@@ -272,6 +268,7 @@ const CountryCodesList = ({ handleCountryChange }: any) => {
           className="flex cursor-pointer items-center gap-2 rounded-md p-2 hover:bg-primary-100 hover:text-primary-600"
           onClick={() => {
             handleCountryChange({ flag: "🌍", name: "Other", code: "+" });
+            onClose();
           }}
         >
           <span>🌍</span>
