@@ -62,18 +62,6 @@ const LogUpdateCardAttribute = <T extends keyof DailyRoundsModel>({
         </div>
       );
 
-    case "rounds_type":
-      return (
-        <div className="flex flex-col items-center gap-2 md:flex-row">
-          <AttributeLabel attributeKey={attributeKey} />
-          <span className="text-sm font-semibold text-gray-700">
-            {(attributeValue as string) === "VENTILATOR"
-              ? "Critical Care"
-              : (attributeValue as string)}
-          </span>
-        </div>
-      );
-
     default:
       return (
         <div className="flex flex-col items-center gap-2 md:flex-row">
