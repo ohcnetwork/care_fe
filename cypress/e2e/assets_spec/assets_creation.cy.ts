@@ -160,10 +160,12 @@ describe("Asset", () => {
     assetPage.interceptAssetCreation();
     assetPage.clickCreateAsset();
     assetPage.verifyAssetCreation();
+
     assetSearchPage.typeSearchKeyword("New Test Asset Vital");
     assetSearchPage.pressEnter();
+
     assetPage.openCreatedAsset();
-    assetPage.configureVitalAsset("Host name", "192.168.1.20");
+    assetPage.configureVitalAsset("Host name", "192.168.1.64");
     assetPage.clickConfigureVital();
   });
 
