@@ -1,6 +1,6 @@
 import * as Notification from "../../Utils/Notifications.js";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import { useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { DupPatientModel } from "./models";
 import { OptionsType } from "../../Common/constants";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
@@ -9,6 +9,8 @@ import request from "../../Utils/request/request.js";
 import routes from "../../Redux/api.js";
 import TextFormField from "../Form/FormFields/TextFormField.js";
 import { FieldChangeEvent } from "../Form/FormFields/Utils.js";
+import dayjs from "dayjs";
+import { PatientModel } from "../Patient/models.js";
 
 interface Props {
   patientList: Array<DupPatientModel>;
@@ -19,6 +21,7 @@ interface Props {
 
 const initForm = {
   patient: "",
+  last_consultation_discharge_date: new Date().toISOString(),
   year_of_birth: null,
 };
 
@@ -55,6 +58,7 @@ const TransferPatientDialog = (props: Props) => {
   const { patientList, handleOk, handleCancel, facilityId } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [state, dispatch] = useReducer(patientFormReducer, initialState);
+  const [selectedPatient, setSelectedPatient] = useState<PatientModel>();
   const patientOptions: Array<OptionsType> = patientList.map((patient) => {
     return {
       id: patient.patient_id as unknown as number,
@@ -62,9 +66,48 @@ const TransferPatientDialog = (props: Props) => {
     };
   });
 
+  useEffect(() => {
+    async function fetchPatient() {
+      if (state.form.patient) {
+        const { res, data } = await request(routes.getPatient, {
+          pathParams: {
+            id: state.form.patient,
+          },
+        });
+        if (res?.status === 200 || res?.status === 202) {
+          setSelectedPatient(data);
+        } else {
+          Notification.Error({ msg: "Failed to fetch patient details" });
+        }
+      }
+    }
+    fetchPatient();
+  }, [state.form.patient]);
+
   const maxYear = new Date().getFullYear();
 
   const handleChange = (e: FieldChangeEvent<unknown>) => {
+    if (e.name === "last_consultation_discharge_date") {
+      if (
+        selectedPatient?.last_consultation?.encounter_date &&
+        !selectedPatient?.last_consultation?.discharge_date
+      ) {
+        if (
+          dayjs(e.value as string).isBefore(
+            dayjs(selectedPatient.last_consultation.encounter_date),
+          )
+        ) {
+          dispatch({
+            type: "set_error",
+            errors: {
+              ...state.errors,
+              last_consultation_discharge_date: `Must be greater than existing encounter date: ${dayjs(selectedPatient.last_consultation.encounter_date).format("DD-MM-YYYY HH:mm")}`,
+            },
+          });
+          return;
+        }
+      }
+    }
     if (
       e.name === "year_of_birth" &&
       parseInt((e.value as string) || "0") > maxYear
@@ -106,6 +149,23 @@ const TransferPatientDialog = (props: Props) => {
             invalidForm = true;
           }
           return;
+        case "last_consultation_discharge_date":
+          if (!state.form[field]) {
+            errors[field] = "This field is required";
+            invalidForm = true;
+          }
+          if (
+            selectedPatient?.last_consultation?.encounter_date &&
+            !selectedPatient?.last_consultation?.discharge_date &&
+            dayjs(state.form[field]).isBefore(
+              dayjs(selectedPatient.last_consultation.encounter_date),
+            )
+          ) {
+            errors[field] =
+              `Must be greater than ${dayjs(selectedPatient.last_consultation.encounter_date).format("DD-MM-YYYY HH:mm")}`;
+            invalidForm = true;
+          }
+          return;
         default:
           return;
       }
@@ -122,6 +182,8 @@ const TransferPatientDialog = (props: Props) => {
         body: {
           facility: facilityId,
           year_of_birth: state.form.year_of_birth,
+          last_consultation_discharge_date:
+            state.form.last_consultation_discharge_date,
         },
         pathParams: {
           id: state.form.patient,
@@ -188,6 +250,17 @@ const TransferPatientDialog = (props: Props) => {
               onChange={handleChange}
               placeholder="Enter year of birth"
               error={state.errors.year_of_birth}
+            />
+            <TextFormField
+              name="last_consultation_discharge_date"
+              className="col-span-2"
+              label="Date and Time of Discharge for existing encounter"
+              type="datetime-local"
+              value={state.form.last_consultation_discharge_date}
+              onChange={handleChange}
+              required
+              max={dayjs().format("YYYY-MM-DDTHH:mm")}
+              error={state.errors.last_consultation_discharge_date}
             />
           </div>
         </div>
