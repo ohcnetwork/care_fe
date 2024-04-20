@@ -68,7 +68,7 @@ const LogUpdateCardAttribute = <T extends keyof DailyRoundsModel>({
           <AttributeLabel attributeKey={attributeKey} />
           <span className="text-sm font-semibold text-gray-700">
             {(attributeValue as string) === "VENTILATOR"
-              ? "Critical Care"
+              ? "CRITICAL CARE"
               : (attributeValue as string)}
           </span>
         </div>
