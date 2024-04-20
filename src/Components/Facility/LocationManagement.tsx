@@ -12,6 +12,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import DialogModal from "../Common/Dialog";
 import Uptime from "../Common/Uptime";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -21,10 +22,12 @@ interface Props {
 
 interface LocationProps extends LocationModel {
   facilityId: string;
+  disabled: boolean;
   setShowDeletePopup: (e: { open: boolean; name: string; id: string }) => void;
 }
 
 export default function LocationManagement({ facilityId }: Props) {
+  const authUser = useAuthUser();
   const [showDeleteFailModal, setShowDeleteFailModal] = useState({
     open: false,
     id: "",
@@ -115,6 +118,13 @@ export default function LocationManagement({ facilityId }: Props) {
                   setShowDeletePopup={setShowDeletePopup}
                   facilityId={facilityId}
                   {...item}
+                  disabled={
+                    ["DistrictAdmin", "StateAdmin"].includes(
+                      authUser.user_type
+                    ) || authUser.is_superuser
+                      ? false
+                      : true
+                  }
                 />
               )}
             </PaginatedList.Items>
@@ -213,6 +223,7 @@ const Location = ({
   created_date,
   modified_date,
   id,
+  disabled,
   setShowDeletePopup,
   facilityId,
 }: LocationProps) => (
@@ -290,6 +301,8 @@ const Location = ({
           variant="secondary"
           border
           className="w-full"
+          tooltip={disabled ? "Contact your admin to delete the location" : ""}
+          disabled={disabled ? true : false}
           onClick={() =>
             setShowDeletePopup({ open: true, name: name ?? "", id: id ?? "" })
           }

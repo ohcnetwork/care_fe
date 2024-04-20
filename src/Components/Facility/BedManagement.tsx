@@ -12,6 +12,7 @@ import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import useFilters from "../../Common/hooks/useFilters";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 const Loading = lazy(() => import("../Common/Loading"));
 
 interface BedManagementProps {
@@ -45,13 +46,17 @@ const BedRow = (props: BedRowProps) => {
     show: boolean;
     name: string;
   }>({ show: false, name: "" });
-
+  const authUser = useAuthUser();
   const handleDelete = (name: string, _id: string) => {
     setBedData({
       show: true,
       name,
     });
   };
+
+  const allowedUser =
+    ["DistrictAdmin", "StateAdmin"].includes(authUser.user_type) ||
+    authUser.is_superuser;
 
   const handleDeleteConfirm = async () => {
     const { res } = await request(routes.deleteFacilityBed, {
@@ -93,7 +98,7 @@ const BedRow = (props: BedRowProps) => {
               {LOCATION_BED_TYPES.find((item) => item.id === bedType) && (
                 <p className="mb-1 inline-flex w-fit items-center rounded-md bg-blue-100 px-2.5 py-0.5 text-sm font-medium capitalize leading-5 text-blue-800">
                   {LOCATION_BED_TYPES.find(
-                    (item) => item.id === bedType,
+                    (item) => item.id === bedType
                   )?.name?.slice(0, 25) + (bedType.length > 25 ? "..." : "")}
                 </p>
               )}
@@ -131,8 +136,14 @@ const BedRow = (props: BedRowProps) => {
             border
             ghost
             className="w-full lg:w-auto"
-            disabled={isOccupied}
-            tooltip={isOccupied ? "Bed is occupied" : undefined}
+            disabled={!allowedUser || isOccupied}
+            tooltip={
+              !allowedUser
+                ? "Contact your admin to delete the bed"
+                : isOccupied
+                ? "Bed is occupied"
+                : undefined
+            }
             tooltipClassName="w-full lg:w-auto"
           >
             <CareIcon icon="l-trash-alt" className="text-lg" />
