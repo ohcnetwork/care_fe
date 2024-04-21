@@ -52,7 +52,6 @@ describe("Patient Discharge based on multiple reason", () => {
       patientDischargeAdvice,
       patientMedicine,
     ]);
-    // verify the medicine administration is blocked
   });
 
   it("Discharge patient with referred reason to a facility", () => {
