@@ -1,6 +1,8 @@
 class PatientDischarge {
   clickDischarge() {
-    cy.clickAndSelectOption("#show-more", "Discharge from CARE");
+    cy.get("#show-more").scrollIntoView();
+    cy.verifyAndClickElement("#show-more", "Manage Patient");
+    cy.verifyAndClickElement("#show-more", "Discharge from CARE");
   }
 
   selectDischargeReason(reason: string) {
