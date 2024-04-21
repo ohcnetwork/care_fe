@@ -170,7 +170,7 @@ const DischargeModal = ({
     setPreDischargeForm((prev) => ({
       ...prev,
       referred_to: selected?.id ?? null,
-      referred_to_external: selected?.name || null,
+      referred_to_external: !selected?.id ? selected?.name : null,
     }));
   };
 
