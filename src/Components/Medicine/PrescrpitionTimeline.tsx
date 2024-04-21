@@ -121,7 +121,9 @@ const MedicineAdministeredNode = ({
         className={classNames(event.cancelled && "opacity-70")}
         titleSuffix={`administered ${
           event.administration.dosage
-        } dose of the medicine at ${formatTime(
+            ? event.administration.dosage + " dose of "
+            : ""
+        }the medicine at ${formatTime(
           event.administration.administered_date
         )}.`}
         actions={

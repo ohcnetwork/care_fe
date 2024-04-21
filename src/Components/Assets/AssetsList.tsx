@@ -125,7 +125,7 @@ const AssetsList = () => {
 
   const checkValidAssetId = async (assetId: string) => {
     const { data: assetData } = await request(routes.getAsset, {
-      pathParams: { id: assetId },
+      pathParams: { external_id: assetId },
     });
     try {
       if (assetData) {

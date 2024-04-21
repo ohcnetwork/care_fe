@@ -46,6 +46,16 @@ const NotificationTile = ({
     setIsMarkingAsRead(false);
   };
 
+  const handleMarkAsUnRead = async () => {
+    setIsMarkingAsRead(true);
+    await request(routes.markNotificationAsUnRead, {
+      pathParams: { id: result.id },
+      body: { read_at: null },
+    });
+    setResult({ ...result, read_at: null });
+    setIsMarkingAsRead(false);
+  };
+
   const resultUrl = (event: string, data: any) => {
     switch (event) {
       case "PATIENT_CREATED":
@@ -107,24 +117,33 @@ const NotificationTile = ({
         </div>
         <div className="flex justify-end gap-2">
           <ButtonV2
-            className={classNames(
-              "bg-white px-2 py-1 font-semibold hover:bg-secondary-300",
-              result.read_at && "invisible"
-            )}
+            className="bg-white px-2 py-1 font-semibold hover:bg-secondary-300"
             variant="secondary"
             border
             ghost
             disabled={isMarkingAsRead}
             onClick={(event) => {
               event.stopPropagation();
-              handleMarkAsRead();
+              if (result.read_at) {
+                handleMarkAsUnRead();
+              } else {
+                handleMarkAsRead();
+              }
             }}
           >
             <CareIcon
-              icon={isMarkingAsRead ? "l-spinner" : "l-envelope-check"}
+              icon={
+                isMarkingAsRead
+                  ? "l-spinner"
+                  : result.read_at
+                  ? "l-envelope"
+                  : "l-envelope-check"
+              }
               className={isMarkingAsRead ? "animate-spin" : ""}
             />
-            <span className="text-xs">{t("mark_as_read")}</span>
+            <span className="text-xs">
+              {result.read_at ? t("mark_as_unread") : t("mark_as_read")}
+            </span>
           </ButtonV2>
           <ButtonV2
             border

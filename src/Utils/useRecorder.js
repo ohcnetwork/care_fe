@@ -1,20 +1,35 @@
 import { useEffect, useState } from "react";
 import { Error } from "./Notifications";
 
-const useRecorder = () => {
+const useRecorder = (handleMicPermission) => {
   const [audioURL, setAudioURL] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [recorder, setRecorder] = useState(null);
   const [newBlob, setNewBlob] = useState(null);
 
   useEffect(() => {
+    if (!isRecording && recorder && audioURL) {
+      setRecorder(null);
+    }
+  }, [isRecording, recorder, audioURL]);
+
+  useEffect(() => {
     // Lazily obtain recorder first time we're recording.
     if (recorder === null) {
       if (isRecording) {
-        requestRecorder().then(setRecorder, () => {
-          Error({ msg: "Please grant microphone permission to record audio." });
-          setIsRecording(false);
-        });
+        requestRecorder().then(
+          (fetchedRecorder) => {
+            setRecorder(fetchedRecorder);
+            handleMicPermission(true);
+          },
+          () => {
+            Error({
+              msg: "Please grant microphone permission to record audio.",
+            });
+            setIsRecording(false);
+            handleMicPermission(false);
+          }
+        );
       }
       return;
     }
@@ -23,6 +38,7 @@ const useRecorder = () => {
     if (isRecording) {
       recorder.start();
     } else {
+      recorder.stream.getTracks().forEach((i) => i.stop());
       recorder.stop();
     }
 

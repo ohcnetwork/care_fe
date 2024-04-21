@@ -58,11 +58,12 @@ describe("Patient", () => {
     cy.verifyNotification("Medicine prescribed");
   });
 
-  it("Upload consultations file ", () => {
-    patientPage.visitPatient("Dummy Patient 5");
-    patientConsultationPage.visitFilesPage();
-    patientConsultationPage.uploadFile();
-    patientConsultationPage.clickUploadFile();
+  it("Discharge a patient", () => {
+    patientPage.visitPatient("Dummy Patient 6");
+    patientConsultationPage.clickDischargePatient();
+    patientConsultationPage.selectDischargeReason("Recovered");
+    patientConsultationPage.addDischargeNotes("Discharge notes");
+    patientConsultationPage.confirmDischarge();
   });
 
   afterEach(() => {
