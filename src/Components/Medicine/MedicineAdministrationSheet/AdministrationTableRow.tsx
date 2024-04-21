@@ -240,6 +240,7 @@ export default function MedicineAdministrationTableRow({
                   interval={{ start, end }}
                   prescription={prescription}
                   refetch={refetch}
+                  readonly={props.readonly}
                 />
               )}
             </td>
