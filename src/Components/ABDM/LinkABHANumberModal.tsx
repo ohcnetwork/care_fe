@@ -194,12 +194,12 @@ const ScanABHAQRSection = ({
               body: {
                 patientId,
                 hidn: abha?.hidn,
-                phr: abha?.hid,
+                phr: (abha?.phr ?? abha?.hid) as string,
                 name: abha?.name,
                 gender: abha?.gender,
                 dob: abha?.dob.replace(/\//g, "-"),
                 address: abha?.address,
-                "dist name": abha?.district_name,
+                "dist name": abha?.["dist name"] ?? abha?.district_name,
                 "state name": abha?.["state name"],
               },
             });
