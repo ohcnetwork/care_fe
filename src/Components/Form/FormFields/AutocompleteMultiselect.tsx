@@ -3,7 +3,7 @@ import {
   MultiSelectOptionChip,
   dropdownOptionClassNames,
 } from "../MultiSelectMenuV2";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { Combobox } from "@headlessui/react";
 import { DropdownTransition } from "../../Common/components/HelperComponents";
@@ -24,7 +24,7 @@ type AutocompleteMultiSelectFormFieldProps<T, V> = FormFieldBaseProps<V[]> & {
 };
 
 const AutocompleteMultiSelectFormField = <T, V>(
-  props: AutocompleteMultiSelectFormFieldProps<T, V>,
+  props: AutocompleteMultiSelectFormFieldProps<T, V>
 ) => {
   const field = useFormFieldPropsResolver(props);
   return (
@@ -67,16 +67,22 @@ type AutocompleteMutliSelectProps<T, V = T> = {
  * customizability.
  */
 export const AutocompleteMutliSelect = <T, V>(
-  props: AutocompleteMutliSelectProps<T, V>,
+  props: AutocompleteMutliSelectProps<T, V>
 ) => {
   const [query, setQuery] = useState(""); // Ensure lower case
+  const comboButtonRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     props.onQuery && props.onQuery(query);
   }, [query]);
-
+  const handleSingleSelect = (o: any) => {
+    if (o.option?.isSingleSelect === true && comboButtonRef.current) {
+      comboButtonRef.current.click();
+    }
+  };
   const options = props.options.map((option) => {
     const label = props.optionLabel(option);
     return {
+      option,
       label,
       description: props.optionDescription && props.optionDescription(option),
       search: label.toLowerCase(),
@@ -111,7 +117,7 @@ export const AutocompleteMutliSelect = <T, V>(
               multiple
               className={classNames(
                 "cui-input-base truncate pr-16",
-                props.error && "border-danger-500",
+                props.error && "border-danger-500"
               )}
               placeholder={
                 value.length
@@ -122,7 +128,10 @@ export const AutocompleteMutliSelect = <T, V>(
               autoComplete="off"
             />
             {!props.disabled && (
-              <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+              <Combobox.Button
+                ref={comboButtonRef}
+                className="absolute inset-y-0 right-0 flex items-center pr-2"
+              >
                 <div className="absolute right-0 top-1 mr-2 flex items-center text-lg text-gray-900">
                   {props.isLoading ? (
                     <CareIcon icon="l-spinner" className="animate-spin" />
@@ -140,7 +149,7 @@ export const AutocompleteMutliSelect = <T, V>(
                   label={v.label}
                   onRemove={() =>
                     props.onChange(
-                      value.map((o) => o.value).filter((o) => o !== v.value),
+                      value.map((o) => o.value).filter((o) => o !== v.value)
                     )
                   }
                 />
@@ -175,6 +184,9 @@ export const AutocompleteMutliSelect = <T, V>(
                       key={`${props.id}-option-${index}`}
                       className={dropdownOptionClassNames}
                       value={option}
+                      onClick={() => {
+                        handleSingleSelect(option);
+                      }}
                     >
                       {({ selected }) => (
                         <>
