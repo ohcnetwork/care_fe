@@ -14,7 +14,7 @@ class PatientDischarge {
   }
 
   typeReferringFacility(facility: string) {
-    cy.searchAndSelectOption("#input[name='referred_to']", facility);
+    cy.searchAndSelectOption("#facility-referredto", facility);
   }
 
   clickClearButton() {
