@@ -165,12 +165,12 @@ const DischargeModal = ({
     }
   };
 
-  const handleFacilitySelect = (selected: FacilityModel) => {
+  const handleFacilitySelect = (selected?: FacilityModel) => {
     setFacility(selected);
     setPreDischargeForm((prev) => ({
       ...prev,
-      referred_to: selected.id ?? null,
-      referred_to_external: !selected.id ? selected.name : null,
+      referred_to: selected?.id ?? null,
+      referred_to_external: !selected?.id ? selected?.name : null,
     }));
   };
 
@@ -215,7 +215,7 @@ const DischargeModal = ({
             <FacilitySelect
               name="referred_to"
               setSelected={(selected) =>
-                handleFacilitySelect(selected as FacilityModel)
+                handleFacilitySelect(selected as FacilityModel | undefined)
               }
               selected={facility ?? null}
               showAll
