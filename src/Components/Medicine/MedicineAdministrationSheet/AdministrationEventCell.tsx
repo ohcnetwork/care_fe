@@ -12,6 +12,7 @@ interface Props {
   interval: { start: Date; end: Date };
   prescription: Prescription;
   refetch: () => void;
+  readonly?: boolean;
 }
 
 export default function AdministrationEventCell({
@@ -19,17 +20,18 @@ export default function AdministrationEventCell({
   interval: { start, end },
   prescription,
   refetch,
+  readonly,
 }: Props) {
   const [showTimeline, setShowTimeline] = useState(false);
   // Check if cell belongs to an administered prescription (including start and excluding end)
   const administered = administrations
     .filter((administration) =>
-      dayjs(administration.administered_date).isBetween(start, end, null, "[)")
+      dayjs(administration.administered_date).isBetween(start, end, null, "[)"),
     )
     .sort(
       (a, b) =>
         new Date(a.administered_date!).getTime() -
-        new Date(b.administered_date!).getTime()
+        new Date(b.administered_date!).getTime(),
     );
 
   const hasComment = administered.some((obj) => !!obj.notes);
@@ -56,6 +58,7 @@ export default function AdministrationEventCell({
             prescription={prescription}
             showPrescriptionDetails
             onRefetch={refetch}
+            readonly={readonly}
           />
         </DialogModal>
         <button
@@ -101,7 +104,7 @@ export default function AdministrationEventCell({
             "text-xl",
             dayjs(prescription.discontinued_date).isBetween(start, end)
               ? "text-danger-700"
-              : "text-gray-400"
+              : "text-gray-400",
           )}
         />
         <span className="tooltip-text tooltip-top -translate-x-1/2 text-xs">

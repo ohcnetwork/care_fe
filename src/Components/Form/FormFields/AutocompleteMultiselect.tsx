@@ -24,7 +24,7 @@ type AutocompleteMultiSelectFormFieldProps<T, V> = FormFieldBaseProps<V[]> & {
 };
 
 const AutocompleteMultiSelectFormField = <T, V>(
-  props: AutocompleteMultiSelectFormFieldProps<T, V>
+  props: AutocompleteMultiSelectFormFieldProps<T, V>,
 ) => {
   const field = useFormFieldPropsResolver(props);
   return (
@@ -66,7 +66,7 @@ type AutocompleteMutliSelectProps<T, V = T> = {
  * customizability.
  */
 export const AutocompleteMutliSelect = <T, V>(
-  props: AutocompleteMutliSelectProps<T, V>
+  props: AutocompleteMutliSelectProps<T, V>,
 ) => {
   const [query, setQuery] = useState(""); // Ensure lower case
   useEffect(() => {
@@ -109,7 +109,7 @@ export const AutocompleteMutliSelect = <T, V>(
               multiple
               className={classNames(
                 "cui-input-base truncate pr-16",
-                props.error && "border-danger-500"
+                props.error && "border-danger-500",
               )}
               placeholder={
                 value.length
@@ -138,7 +138,7 @@ export const AutocompleteMutliSelect = <T, V>(
                   label={v.label}
                   onRemove={() =>
                     props.onChange(
-                      value.map((o) => o.value).filter((o) => o !== v.value)
+                      value.map((o) => o.value).filter((o) => o !== v.value),
                     )
                   }
                 />

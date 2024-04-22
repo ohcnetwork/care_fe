@@ -52,7 +52,7 @@ export function PrescriptionDropdown(props: {
         ref={dropRef}
         className={classNames(
           "absolute left-0 top-[calc(100%+10px)] z-40 max-h-[300px] w-full overflow-auto rounded-md bg-white shadow-lg",
-          !open && "hidden"
+          !open && "hidden",
         )}
       >
         {options.map((option, i) => {

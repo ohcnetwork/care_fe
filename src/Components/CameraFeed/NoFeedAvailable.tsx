@@ -23,7 +23,7 @@ export default function NoFeedAvailable(props: Props) {
     <div
       className={classNames(
         "absolute inset-x-0 inset-y-0 z-[5] flex flex-col items-center justify-center gap-2 text-center",
-        props.className
+        props.className,
       )}
     >
       <CareIcon icon={props.icon} className="text-2xl" />

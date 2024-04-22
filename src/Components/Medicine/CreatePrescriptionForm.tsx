@@ -39,7 +39,7 @@ export default function CreatePrescriptionForm(props: {
           {
             pathParams: { consultation },
             body,
-          }
+          },
         );
         setIsCreating(false);
 
@@ -61,26 +61,27 @@ export default function CreatePrescriptionForm(props: {
             {...field("medicine_object", RequiredFieldValidator())}
             required
           />
-          {props.prescription.dosage_type !== "PRN" && (
-            <CheckBoxFormField
-              label={t("titrate_dosage")}
-              name="Titrate Dosage"
-              value={field("dosage_type").value === "TITRATED"}
-              onChange={(e) => {
-                if (e.value) {
-                  field("dosage_type").onChange({
-                    name: "dosage_type",
-                    value: "TITRATED",
-                  });
-                } else {
-                  field("dosage_type").onChange({
-                    name: "dosage_type",
-                    value: "REGULAR",
-                  });
-                }
-              }}
-            />
-          )}
+          {props.prescription.dosage_type !== "PRN" &&
+            props.prescription.prescription_type !== "DISCHARGE" && (
+              <CheckBoxFormField
+                label={t("titrate_dosage")}
+                name="Titrate Dosage"
+                value={field("dosage_type").value === "TITRATED"}
+                onChange={(e) => {
+                  if (e.value) {
+                    field("dosage_type").onChange({
+                      name: "dosage_type",
+                      value: "TITRATED",
+                    });
+                  } else {
+                    field("dosage_type").onChange({
+                      name: "dosage_type",
+                      value: "REGULAR",
+                    });
+                  }
+                }}
+              />
+            )}
           <div className="flex flex-wrap items-center gap-x-4">
             <SelectFormField
               className="flex-1"
@@ -199,42 +200,42 @@ export const PRESCRIPTION_FREQUENCIES = {
     slots: 1,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
-        dayjs(administration.administered_date).isSame(dayjs(), "day")
+        dayjs(administration.administered_date).isSame(dayjs(), "day"),
       ),
   },
   HS: {
     slots: 1,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
-        dayjs(administration.administered_date).isSame(dayjs(), "day")
+        dayjs(administration.administered_date).isSame(dayjs(), "day"),
       ),
   },
   BD: {
     slots: 2,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
-        dayjs(administration.administered_date).isSame(dayjs(), "day")
+        dayjs(administration.administered_date).isSame(dayjs(), "day"),
       ),
   },
   TID: {
     slots: 3,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
-        dayjs(administration.administered_date).isSame(dayjs(), "day")
+        dayjs(administration.administered_date).isSame(dayjs(), "day"),
       ),
   },
   QID: {
     slots: 4,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
-        dayjs(administration.administered_date).isSame(dayjs(), "day")
+        dayjs(administration.administered_date).isSame(dayjs(), "day"),
       ),
   },
   Q4H: {
     slots: 6,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
-        dayjs(administration.administered_date).isSame(dayjs(), "day")
+        dayjs(administration.administered_date).isSame(dayjs(), "day"),
       ),
   },
   QOD: {
@@ -248,7 +249,7 @@ export const PRESCRIPTION_FREQUENCIES = {
         dayjs(lastAdministration.administered_date).isSame(dayjs(), "day") ||
         dayjs(lastAdministration.administered_date).isSame(
           dayjs().subtract(1, "day"),
-          "day"
+          "day",
         )
       ) {
         return [lastAdministration];
@@ -261,7 +262,7 @@ export const PRESCRIPTION_FREQUENCIES = {
     slots: 1,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
-        dayjs(administration.administered_date).isSame(dayjs(), "week")
+        dayjs(administration.administered_date).isSame(dayjs(), "week"),
       ),
   },
 };

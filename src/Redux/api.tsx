@@ -103,6 +103,7 @@ import { Investigation } from "../Components/Facility/Investigations/Reports/typ
 import { HCXPolicyModel } from "../Components/HCX/models";
 import { IComment, IResource } from "../Components/Resource/models";
 import { IShift } from "../Components/Shifting/models";
+import { ScribeModel } from "../Components/Scribe/Scribe";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -128,6 +129,36 @@ const routes = {
     method: "GET",
     noAuth: true,
     TRes: Type<IConfig>(),
+  },
+
+  createScribe: {
+    path: "/api/care_scribe/scribe/",
+    method: "POST",
+    TReq: Type<ScribeModel>(),
+    TRes: Type<ScribeModel>(),
+  },
+  getScribe: {
+    path: "/api/care_scribe/scribe/{external_id}/",
+    method: "GET",
+    TRes: Type<ScribeModel>(),
+  },
+  updateScribe: {
+    path: "/api/care_scribe/scribe/{external_id}/",
+    method: "PUT",
+    TReq: Type<ScribeModel>(),
+    TRes: Type<ScribeModel>(),
+  },
+  createScribeFileUpload: {
+    path: "/api/care_scribe/scribe_file/",
+    method: "POST",
+    TBody: Type<CreateFileRequest>(),
+    TRes: Type<CreateFileResponse>(),
+  },
+  editScribeFileUpload: {
+    path: "/api/care_scribe/scribe_file/{id}/?file_type={fileType}&associating_id={associatingId}",
+    method: "PATCH",
+    TBody: Type<Partial<FileUploadModel>>(),
+    TRes: Type<FileUploadModel>(),
   },
 
   // Auth Endpoints
@@ -529,6 +560,8 @@ const routes = {
   createConsultation: {
     path: "/api/v1/consultation/",
     method: "POST",
+    TBody: Type<ConsultationModel>(),
+    TRes: Type<ConsultationModel>(),
   },
   getConsultation: {
     path: "/api/v1/consultation/{id}/",
@@ -538,6 +571,8 @@ const routes = {
   updateConsultation: {
     path: "/api/v1/consultation/{id}/",
     method: "PUT",
+    TBody: Type<ConsultationModel>(),
+    TRes: Type<ConsultationModel>(),
   },
   partialUpdateConsultation: {
     path: "/api/v1/consultation/{id}/",
@@ -551,10 +586,14 @@ const routes = {
   },
   createDailyRounds: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/",
+    TBody: Type<DailyRoundsModel>(),
+    TRes: Type<DailyRoundsModel>(),
     method: "POST",
   },
   updateDailyReport: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/{id}/",
+    TBody: Type<DailyRoundsModel>(),
+    TRes: Type<DailyRoundsModel>(),
     method: "PUT",
   },
   updateDailyRound: {
@@ -931,6 +970,8 @@ const routes = {
   dischargePatient: {
     path: "/api/v1/consultation/{id}/discharge_patient/",
     method: "POST",
+    TBody: Type<object>(),
+    TRes: Type<object>(),
   },
   listFacilityDischargedPatients: {
     path: "/api/v1/facility/{facility_external_id}/discharged_patients/",
@@ -1017,6 +1058,11 @@ const routes = {
     TRes: Type<NotificationData>(),
   },
   markNotificationAsRead: {
+    path: "/api/v1/notification/{id}/",
+    method: "PATCH",
+    TRes: Type<NotificationData>(),
+  },
+  markNotificationAsUnRead: {
     path: "/api/v1/notification/{id}/",
     method: "PATCH",
     TRes: Type<NotificationData>(),

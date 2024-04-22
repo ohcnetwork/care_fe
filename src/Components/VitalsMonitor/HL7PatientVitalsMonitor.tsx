@@ -16,7 +16,7 @@ const minutesAgo = (timestamp: string) => {
 
 export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
   const { connect, waveformCanvas, data, isOnline } = useHL7VitalsMonitor(
-    props.config
+    props.config,
   );
   const { bed, asset } = props.patientAssetBed ?? {};
   const authUser = useAuthUser();
@@ -36,7 +36,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
   }, [props.socketUrl]);
 
   const bpWithinMaxPersistence = dayjs(data.bp?.["date-time"]).isAfter(
-    props.patientCurrentBedAssignmentDate
+    props.patientCurrentBedAssignmentDate,
   );
 
   return (
@@ -133,7 +133,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
                 <span className="text-lg font-black md:text-2xl">
                   {data.temperature1?.value && data.temperature2?.value
                     ? Math.abs(
-                        data.temperature1?.value - data.temperature2?.value
+                        data.temperature1?.value - data.temperature2?.value,
                       )
                     : "--"}
                 </span>
@@ -145,15 +145,17 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
           <div
             className={classNames(
               "flex flex-col items-center justify-center gap-1 p-1 text-center font-mono font-medium text-warning-500",
-              isOnline && "hidden"
+              isOnline && "hidden",
             )}
             style={waveformCanvas.size}
           >
             <CareIcon
               icon="l-cloud-times"
-              className="mb-2 animate-pulse text-4xl"
+              className="mb-2 animate-pulse text-4xl md:mr-36 "
             />
-            <span className="font-bold">No incoming data from HL7 Monitor</span>
+            <span className="font-bold md:mr-36">
+              No incoming data from HL7 Monitor
+            </span>
           </div>
           <div
             className={classNames("relative", !isOnline && "hidden")}
