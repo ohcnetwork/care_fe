@@ -11,12 +11,14 @@ describe("Patient Discharge based on multiple reason", () => {
   const patientPrescription = new PatientPrescription();
   const patientDischargeReason1 = "Recovered";
   const patientDischargeReason2 = "Referred";
-  //const patientDischargeReason3 = "Expired";
-  //const patientDischargeReason4 = "LAMA";
+  const patientDischargeReason3 = "Expired";
+  const patientDischargeReason4 = "LAMA";
   const patientDischargeAdvice = "Discharge Advice";
   const patientMedicine = "ZOLE";
   const referringFacility = "Dummy Shifting Center, Ernakulam";
   const referringFreetextFacility = "Aster Mims";
+  const patientDeathCause = "Cause Of Death";
+  const doctorName = "Custom Doctor";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -29,8 +31,67 @@ describe("Patient Discharge based on multiple reason", () => {
     cy.awaitUrl("/patients");
   });
 
-  it("Discharge a recovered patient with all fields", () => {
+  it("Discharge a LAMA patient in the consultation", () => {
+    patientPage.visitPatient("Dummy Patient 18");
+    patientDischarge.clickDischarge();
+    patientDischarge.selectDischargeReason(patientDischargeReason4);
+    cy.submitButton("Confirm Discharge");
+    cy.verifyNotification("Patient Discharged Successfully");
+    cy.closeNotification();
+    // Verify the consultation dashboard reflection
+    cy.verifyContentPresence("#consultation-buttons", ["LAMA"]);
+    // verify the discharge information card
+    cy.verifyContentPresence("#discharge-information", [
+      patientDischargeReason4,
+    ]);
+  });
+
+  it("Discharge a expired patient in the consultation", () => {
+    patientPage.visitPatient("Dummy Patient 17");
+    patientDischarge.clickDischarge();
+    patientDischarge.selectDischargeReason(patientDischargeReason3);
+    patientDischarge.typeDischargeNote(patientDeathCause);
+    patientDischarge.typeDoctorName(doctorName);
+    cy.submitButton("Confirm Discharge");
+    cy.verifyNotification("Patient Discharged Successfully");
+    cy.closeNotification();
+    // Verify the consultation dashboard reflection
+    cy.verifyContentPresence("#consultation-buttons", ["EXPIRED"]);
+    // verify the discharge information card
+    cy.verifyContentPresence("#discharge-information", [
+      patientDischargeReason3,
+      patientDeathCause,
+      doctorName,
+    ]);
+  });
+
+  it("Discharge patient with referred reason to a facility", () => {
     patientPage.visitPatient("Dummy Patient 16");
+    patientDischarge.clickDischarge();
+    patientDischarge.selectDischargeReason(patientDischargeReason2);
+    patientDischarge.typeDischargeNote(patientDischargeAdvice);
+    // select a registrated facility from dropdown and clear
+    patientDischarge.typeReferringFacility(referringFacility);
+    patientDischarge.clickClearButton();
+    // select a non-registered facility and perform the discharge
+    patientDischarge.typeReferringFacility(referringFreetextFacility);
+    cy.wait(2000);
+    cy.submitButton("Confirm Discharge");
+    cy.wait(2000);
+    cy.verifyNotification("Patient Discharged Successfully");
+    cy.closeNotification();
+    // Verify the consultation dashboard reflection
+    cy.verifyContentPresence("#consultation-buttons", ["Referred"]);
+    // Verify the dashboard and discharge information
+    cy.verifyContentPresence("#discharge-information", [
+      patientDischargeReason2,
+      patientDischargeAdvice,
+      referringFreetextFacility,
+    ]);
+  });
+
+  it("Discharge a recovered patient with all relevant fields", () => {
+    patientPage.visitPatient("Dummy Patient 15");
     patientDischarge.clickDischarge();
     patientDischarge.selectDischargeReason(patientDischargeReason1);
     patientDischarge.typeDischargeNote(patientDischargeAdvice);
@@ -50,35 +111,13 @@ describe("Patient Discharge based on multiple reason", () => {
     cy.wait(2000);
     cy.verifyNotification("Patient Discharged Successfully");
     cy.closeNotification();
+    // Verify the consultation dashboard reflection
+    cy.verifyContentPresence("#consultation-buttons", ["Recovered"]);
     // Verify the dashboard and discharge information
     cy.verifyContentPresence("#discharge-information", [
       patientDischargeReason1,
       patientDischargeAdvice,
       patientMedicine,
-    ]);
-  });
-
-  it("Discharge patient with referred reason to a facility", () => {
-    patientPage.visitPatient("Dummy Patient 15");
-    patientDischarge.clickDischarge();
-    patientDischarge.selectDischargeReason(patientDischargeReason2);
-    patientDischarge.typeDischargeNote(patientDischargeAdvice);
-    // select a registrated facility from dropdown and clear
-    patientDischarge.typeReferringFacility(referringFacility);
-    patientDischarge.clickClearButton();
-    // select a non-registered facility and perform the discharge
-    patientDischarge.typeReferringFacility(referringFreetextFacility);
-    cy.wait(3000);
-    patientDischarge.typeDischargeNote(patientDischargeAdvice);
-    cy.submitButton("Confirm Discharge");
-    cy.wait(2000);
-    cy.verifyNotification("Patient Discharged Successfully");
-    cy.closeNotification();
-    // Verify the dashboard and discharge information
-    cy.verifyContentPresence("#discharge-information", [
-      patientDischargeReason2,
-      patientDischargeAdvice,
-      referringFreetextFacility,
     ]);
   });
 

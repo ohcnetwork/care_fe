@@ -20,6 +20,10 @@ class PatientDischarge {
   clickClearButton() {
     cy.get("#clear-button").click();
   }
+
+  typeDoctorName(doctorName: string) {
+    cy.get("#death_confirmed_by").type(doctorName);
+  }
 }
 
 export default PatientDischarge;

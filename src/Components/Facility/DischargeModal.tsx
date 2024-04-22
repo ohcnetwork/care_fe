@@ -211,7 +211,7 @@ const DischargeModal = ({
         {preDischargeForm.new_discharge_reason ===
           DISCHARGE_REASONS.find((i) => i.text == "Referred")?.id && (
           <>
-            <div id="referred_to">
+            <div id="facility-referredto">
               <FieldLabel>Referred to</FieldLabel>
               <FacilitySelect
                 name="referred_to"
