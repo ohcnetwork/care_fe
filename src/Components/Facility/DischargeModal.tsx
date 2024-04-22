@@ -122,8 +122,7 @@ const DischargeModal = ({
 
     if (
       preDischargeForm.new_discharge_reason ==
-        DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id &&
-      !preDischargeForm.discharge_notes.trim()
+      DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
     ) {
       const newErrors: Record<string, FieldError> = {};
 
