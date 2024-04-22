@@ -63,6 +63,9 @@ export default function PatientInfoCard(props: {
 
   const patient = props.patient;
   const consultation = props.consultation;
+  console.log(consultation);
+  console.log(consultation?.treating_physician_object);
+
   const activeShiftingData = props.activeShiftingData;
 
   const [medicoLegalCase, setMedicoLegalCase] = useState(
@@ -456,6 +459,11 @@ export default function PatientInfoCard(props: {
                     {consultation?.treating_physician_object
                       ? `${consultation?.treating_physician_object.first_name} ${consultation?.treating_physician_object.last_name}`
                       : consultation?.deprecated_verified_by}
+                    {consultation?.treating_physician_object && (
+                      <span className="ml-2 text-xs font-semibold text-gray-500">
+                        ({consultation.treating_physician_object.user_type})
+                      </span>
+                    )}
                     <CareIcon
                       icon="l-check"
                       className="ml-2 fill-current text-xl text-green-500"
