@@ -63,8 +63,6 @@ export default function PatientInfoCard(props: {
 
   const patient = props.patient;
   const consultation = props.consultation;
-  console.log(consultation);
-  console.log(consultation?.treating_physician_object);
 
   const activeShiftingData = props.activeShiftingData;
 
