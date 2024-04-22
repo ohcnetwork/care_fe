@@ -32,7 +32,7 @@ describe("Patient Discharge based on multiple reason", () => {
   });
 
   it("Discharge a LAMA patient in the consultation", () => {
-    patientPage.visitPatient("Dummy Patient 18");
+    patientPage.visitPatient("Dummy Patient 12");
     patientDischarge.clickDischarge();
     patientDischarge.selectDischargeReason(patientDischargeReason4);
     cy.submitButton("Confirm Discharge");
@@ -47,7 +47,7 @@ describe("Patient Discharge based on multiple reason", () => {
   });
 
   it("Discharge a expired patient in the consultation", () => {
-    patientPage.visitPatient("Dummy Patient 17");
+    patientPage.visitPatient("Dummy Patient 13");
     patientDischarge.clickDischarge();
     patientDischarge.selectDischargeReason(patientDischargeReason3);
     patientDischarge.typeDischargeNote(patientDeathCause);
