@@ -138,8 +138,6 @@ export default function UserProfile() {
     password_confirmation: "",
   });
 
-  const [newPasswordError, setNewPasswordError] = useState<string>("");
-
   const [showEdit, setShowEdit] = useState<boolean | false>(false);
 
   const {
@@ -183,43 +181,26 @@ export default function UserProfile() {
     },
   );
 
-  const setNewPasswordErrorCallFun = (value: string) => {
-    if (value == "") {
-      setNewPasswordError("");
-      return;
-    }
-    setNewPasswordError(
-      [
-        value.length >= 8
-          ? ""
-          : "Password should be at least 8 characters long",
-        value !== value.toUpperCase()
-          ? ""
-          : "Password should contain at least 1 lowercase letter",
-        value !== value.toLowerCase()
-          ? ""
-          : "Password should contain at least 1 uppercase letter",
-        /\d/.test(value) ? "" : "Password should contain at least 1 number",
-      ]
-        .filter(Boolean)
-        .join("\n"), // Join only the non-empty error messages
-    );
-  };
+  const validateNewPassword = (password: string) => {
+    const errors = [];
 
-  const changePasswordErrorsCallFun = (value: string) => {
-    if (value === "" || value === changePasswordForm.new_password_1) {
-      setChangePasswordErrors((prev) => ({
-        ...prev,
-        password_confirmation: "",
-      }));
-      return;
-    } else {
-      setChangePasswordErrors((prev) => ({
-        ...prev,
-        password_confirmation:
-          "Confirm password should match the new password!",
-      }));
+    if (password.length < 8) {
+      errors.push("Password should be at least 8 characters long");
     }
+
+    if (password === password.toUpperCase()) {
+      errors.push("Password should contain at least 1 lowercase letter");
+    }
+
+    if (password === password.toLowerCase()) {
+      errors.push("Password should contain at least 1 uppercase letter");
+    }
+
+    if (!/\d/.test(password)) {
+      errors.push("Password should contain at least 1 number");
+    }
+
+    return errors.join("\n");
   };
 
   const validateForm = () => {
@@ -447,11 +428,11 @@ export default function UserProfile() {
         msg: "Passwords are different in new password and confirmation password column.",
       });
     } else if (
-      newPasswordError !== "" ||
+      validateNewPassword(changePasswordForm.new_password_1).length ||
       changePasswordErrors.password_confirmation !== ""
     ) {
       Notification.Error({
-        msg: "Entered Password is not valid, please check!",
+        msg: "Entered New Password is not valid, please check!",
       });
     } else if (
       changePasswordForm.new_password_1 === changePasswordForm.old_password
@@ -840,9 +821,10 @@ export default function UserProfile() {
                               ...changePasswordForm,
                               new_password_1: e.value,
                             });
-                            setNewPasswordErrorCallFun(e.value);
                           }}
-                          error={newPasswordError}
+                          error={validateNewPassword(
+                            changePasswordForm.new_password_1,
+                          )}
                           required
                         />
                         <TextFormField
@@ -856,7 +838,17 @@ export default function UserProfile() {
                               ...changePasswordForm,
                               new_password_2: e.value,
                             });
-                            changePasswordErrorsCallFun(e.value);
+                            e.value === "" ||
+                            e.value === changePasswordForm.new_password_1
+                              ? setChangePasswordErrors((prev) => ({
+                                  ...prev,
+                                  password_confirmation: "",
+                                }))
+                              : setChangePasswordErrors((prev) => ({
+                                  ...prev,
+                                  password_confirmation:
+                                    "Confirm password should match the new password!",
+                                }));
                           }}
                           error={changePasswordErrors.password_confirmation}
                         />
