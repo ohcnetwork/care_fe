@@ -18,7 +18,7 @@ import {
   SelectFormField,
 } from "../Form/FormFields/SelectFormField";
 import { Popover, Transition } from "@headlessui/react";
-import { Fragment, lazy, useState } from "react";
+import { Fragment, lazy, useEffect, useState } from "react";
 import Steps, { Step } from "../Common/Steps";
 import {
   getPincodeDetails,
@@ -57,6 +57,7 @@ import request from "../../Utils/request/request.js";
 import routes from "../../Redux/api.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import { RequestResult } from "../../Utils/request/types.js";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -158,6 +159,21 @@ export const FacilityCreate = (props: FacilityProps) => {
   const { goBack } = useAppHistory();
   const headerText = !facilityId ? "Create Facility" : "Update Facility";
   const buttonText = !facilityId ? "Save Facility" : "Update Facility";
+
+  const authUser = useAuthUser();
+  useEffect(() => {
+    if (
+      authUser &&
+      authUser.user_type !== "StateAdmin" &&
+      authUser.user_type !== "DistrictAdmin" &&
+      authUser.user_type !== "DistrictLabAdmin"
+    ) {
+      navigate("/facility");
+      Notification.Error({
+        msg: "You don't have permission to perform this action. Contact the admin",
+      });
+    }
+  }, [authUser]);
 
   const {
     data: districtData,
