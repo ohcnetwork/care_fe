@@ -140,6 +140,7 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
                     refetch();
                     discontinuedPrescriptions.refetch();
                   }}
+                  readonly={readonly || false}
                 />
               )}
             </>
