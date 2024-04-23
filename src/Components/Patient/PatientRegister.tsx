@@ -1382,17 +1382,20 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                       {...field("age")}
                                       errorClassName="hidden"
                                       trailing={
-                                        <p className="absolute right-16 mb-11 text-xs text-gray-700 sm:text-sm">
-                                          <p className="hidden sm:inline min-[768px]:hidden lg:inline">
-                                            {field("age").value !== "" &&
-                                              "Year of Birth:"}
-                                          </p>
-                                          <span className="font-bold">
-                                            {field("age").value !== "" &&
-                                              new Date().getFullYear() -
+                                        field("age").value !== "" && (
+                                          <p className="relative right-4 space-x-1 text-xs text-gray-700 sm:right-14 sm:text-sm md:right-4 lg:right-14">
+                                            <span className="hidden sm:inline md:hidden lg:inline">
+                                              Year of Birth:
+                                            </span>
+                                            <span className="inline sm:hidden md:inline lg:hidden">
+                                              YOB:
+                                            </span>
+                                            <span className="font-bold">
+                                              {new Date().getFullYear() -
                                                 field("age").value}
-                                          </span>
-                                        </p>
+                                            </span>
+                                          </p>
+                                        )
                                       }
                                       placeholder="Enter the age"
                                       className="col-span-6 sm:col-span-3"
