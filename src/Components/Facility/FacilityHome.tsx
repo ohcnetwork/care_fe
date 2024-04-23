@@ -31,6 +31,7 @@ import useSlug from "../../Common/hooks/useSlug.js";
 import { Popover, Transition } from "@headlessui/react";
 import { FieldLabel } from "../Form/FormFields/FormField.js";
 import { LocationSelect } from "../Common/LocationSelect.js";
+import { CameraFeedPermittedUserTypes } from "../../Utils/permissions.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -497,11 +498,9 @@ const LiveMonitoringButton = () => {
   const [location, setLocation] = useState<string>();
   const authUser = useAuthUser();
 
-  const permittedUserTypes = ["StateAdmin", "DistrictAdmin", "Doctor"];
-
   return (
     <Popover className="relative">
-      {permittedUserTypes.includes(authUser.user_type) && (
+      {CameraFeedPermittedUserTypes.includes(authUser.user_type) && (
         <Popover.Button className="mt-2 w-full">
           <ButtonV2
             variant="primary"
