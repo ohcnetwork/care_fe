@@ -61,26 +61,27 @@ export default function CreatePrescriptionForm(props: {
             {...field("medicine_object", RequiredFieldValidator())}
             required
           />
-          {props.prescription.dosage_type !== "PRN" && (
-            <CheckBoxFormField
-              label={t("titrate_dosage")}
-              name="Titrate Dosage"
-              value={field("dosage_type").value === "TITRATED"}
-              onChange={(e) => {
-                if (e.value) {
-                  field("dosage_type").onChange({
-                    name: "dosage_type",
-                    value: "TITRATED",
-                  });
-                } else {
-                  field("dosage_type").onChange({
-                    name: "dosage_type",
-                    value: "REGULAR",
-                  });
-                }
-              }}
-            />
-          )}
+          {props.prescription.dosage_type !== "PRN" &&
+            props.prescription.prescription_type !== "DISCHARGE" && (
+              <CheckBoxFormField
+                label={t("titrate_dosage")}
+                name="Titrate Dosage"
+                value={field("dosage_type").value === "TITRATED"}
+                onChange={(e) => {
+                  if (e.value) {
+                    field("dosage_type").onChange({
+                      name: "dosage_type",
+                      value: "TITRATED",
+                    });
+                  } else {
+                    field("dosage_type").onChange({
+                      name: "dosage_type",
+                      value: "REGULAR",
+                    });
+                  }
+                }}
+              />
+            )}
           <div className="flex flex-wrap items-center gap-x-4">
             <SelectFormField
               className="flex-1"
