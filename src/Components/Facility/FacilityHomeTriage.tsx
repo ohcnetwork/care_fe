@@ -3,6 +3,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import Table from "../Common/components/Table";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 export const FacilityHomeTriage = (props: any) => {
   const triageQuery = useQuery(routes.getTriage, {
@@ -19,14 +20,14 @@ export const FacilityHomeTriage = (props: any) => {
     temp.push(String(triageQuery.data.results[i].entry_date) || "0");
     temp.push(String(triageQuery.data.results[i].num_patients_visited) || "0");
     temp.push(
-      String(triageQuery.data.results[i].num_patients_home_quarantine) || "0"
+      String(triageQuery.data.results[i].num_patients_home_quarantine) || "0",
     );
     temp.push(
-      String(triageQuery.data.results[i].num_patients_isolation) || "0"
+      String(triageQuery.data.results[i].num_patients_isolation) || "0",
     );
     temp.push(String(triageQuery.data.results[i].num_patient_referred) || "0");
     temp.push(
-      String(triageQuery.data.results[i].num_patient_confirmed_positive) || "0"
+      String(triageQuery.data.results[i].num_patient_confirmed_positive) || "0",
     );
     temp.push(
       <ButtonV2
@@ -36,13 +37,13 @@ export const FacilityHomeTriage = (props: any) => {
         border
         onClick={() =>
           navigate(
-            `/facility/${props.facilityId}/triage/${triageQuery.data?.results[i].id}`
+            `/facility/${props.facilityId}/triage/${triageQuery.data?.results[i].id}`,
           )
         }
         authorizeFor={props.NonReadOnlyUsers}
       >
         Edit
-      </ButtonV2>
+      </ButtonV2>,
     );
     stats.push(temp);
   }
@@ -58,7 +59,10 @@ export const FacilityHomeTriage = (props: any) => {
             onClick={() => navigate(`/facility/${props.facilityId}/triage`)}
             authorizeFor={props.NonReadOnlyUsers}
           >
-            <i className="fas fa-notes-medical mr-2 text-white" />
+            <CareIcon
+              icon="l-book-medical"
+              className="mr-2 text-base text-white"
+            />
             Add Triage
           </ButtonV2>
         </div>

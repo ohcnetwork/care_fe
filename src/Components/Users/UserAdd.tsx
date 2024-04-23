@@ -19,6 +19,7 @@ import {
   classNames,
   dateQueryString,
   parsePhoneNumber,
+  scrollTo,
 } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
@@ -39,6 +40,7 @@ import { PhoneNumberValidator } from "../Form/FieldValidators";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import useQuery from "../../Utils/request/useQuery";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -56,7 +58,7 @@ type UserForm = {
   gender: string;
   password: string;
   c_password: string;
-  facilities: Array<number>;
+  facilities: Array<string>;
   home_facility: FacilityModel | null;
   username: string;
   first_name: string;
@@ -65,7 +67,6 @@ type UserForm = {
   phone_number: string;
   alt_phone_number: string;
   phone_number_is_whatsapp: boolean;
-  age: number;
   date_of_birth: Date | null;
   state: number;
   district: number;
@@ -89,7 +90,6 @@ const initForm: UserForm = {
   phone_number: "+91",
   alt_phone_number: "+91",
   phone_number_is_whatsapp: true,
-  age: 0,
   date_of_birth: null,
   state: 0,
   district: 0,
@@ -99,9 +99,16 @@ const initForm: UserForm = {
   doctor_medical_council_registration: undefined,
 };
 
+const STAFF_OR_NURSE_USER = [
+  "Staff",
+  "StaffReadOnly",
+  "Nurse",
+  "NurseReadOnly",
+];
+
 const initError = Object.assign(
   {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
 );
 
 const initialState = {
@@ -137,14 +144,14 @@ const getDate = (value: any) =>
 
 export const validateRule = (
   condition: boolean,
-  content: JSX.Element | string
+  content: JSX.Element | string,
 ) => {
   return (
     <div>
       {condition ? (
-        <i className="fas fa-circle-check text-green-500" />
+        <CareIcon icon="l-check-circle" className="text-xl text-green-500" />
       ) : (
-        <i className="fas fa-circle-xmark text-red-500" />
+        <CareIcon icon="l-times-circle" className="text-xl text-red-500" />
       )}{" "}
       <span
         className={classNames(condition ? "text-primary-500" : "text-red-500")}
@@ -161,7 +168,7 @@ export const UserAdd = (props: UserProps) => {
 
   const [state, dispatch] = useAutoSaveReducer<UserForm>(
     user_create_reducer,
-    initialState
+    initialState,
   );
   const [isLoading, setIsLoading] = useState(false);
   const [states, setStates] = useState<StateObj[]>([]);
@@ -203,11 +210,7 @@ export const UserAdd = (props: UserProps) => {
 
   useEffect(() => {
     setUsernameExists(userExistsEnums.idle);
-    if (
-      usernameInput.length > 1 &&
-      !(state.form.username?.length < 2) &&
-      /[^.@+_-]/.test(state.form.username[state.form.username?.length - 1])
-    ) {
+    if (validateUsername(usernameInput)) {
       const timeout = setTimeout(() => {
         check_username(usernameInput);
       }, 500);
@@ -224,25 +227,29 @@ export const UserAdd = (props: UserProps) => {
   const userTypes = authUser.is_superuser
     ? [...USER_TYPE_OPTIONS]
     : authUser.user_type === "StaffReadOnly"
-    ? readOnlyUsers.slice(0, 1)
-    : authUser.user_type === "DistrictReadOnlyAdmin"
-    ? readOnlyUsers.slice(0, 2)
-    : authUser.user_type === "StateReadOnlyAdmin"
-    ? readOnlyUsers.slice(0, 3)
-    : authUser.user_type === "Pharmacist"
-    ? USER_TYPE_OPTIONS.slice(0, 1)
-    : // Exception to allow Staff to Create Doctors
-      defaultAllowedUserTypes;
+      ? readOnlyUsers.slice(0, 1)
+      : authUser.user_type === "DistrictReadOnlyAdmin"
+        ? readOnlyUsers.slice(0, 2)
+        : authUser.user_type === "StateReadOnlyAdmin"
+          ? readOnlyUsers.slice(0, 3)
+          : authUser.user_type === "Pharmacist"
+            ? USER_TYPE_OPTIONS.slice(0, 1)
+            : // Exception to allow Staff to Create Doctors
+              defaultAllowedUserTypes;
+
+  // TODO: refactor lines 227 through 248 to be more readable. This is messy.
+  if (authUser.user_type === "Nurse" || authUser.user_type === "Staff") {
+    userTypes.push(USER_TYPE_OPTIONS[6]); // Temperorily allows creation of users with elevated permissions due to introduction of new roles.
+  }
 
   const headerText = !userId ? "Add User" : "Update User";
   const buttonText = !userId ? "Save User" : "Update Details";
-  const showLocalbody = !(
-    state.form.user_type === "Pharmacist" ||
-    state.form.user_type === "Volunteer" ||
-    state.form.user_type === "Doctor" ||
-    state.form.user_type === "Staff" ||
-    state.form.user_type === "StaffReadOnly"
-  );
+  const showLocalbody = ![
+    "Pharmacist",
+    "Volunteer",
+    "Doctor",
+    ...STAFF_OR_NURSE_USER,
+  ].includes(state.form.user_type);
 
   const { loading: isDistrictLoading } = useQuery(routes.getDistrictByState, {
     prefetch: !!(selectedStateId > 0),
@@ -270,7 +277,7 @@ export const UserAdd = (props: UserProps) => {
           setLocalBodies(result.data);
         }
       },
-    }
+    },
   );
 
   const { loading: isStateLoading } = useQuery(routes.statesList, {
@@ -319,7 +326,7 @@ export const UserAdd = (props: UserProps) => {
     setSelectedFacility(selected as FacilityModel[]);
     const form = { ...state.form };
     form.facilities = selected
-      ? (selected as FacilityModel[]).map((i) => i.id ?? -1)
+      ? (selected as FacilityModel[]).map((i) => i.id!)
       : [];
     dispatch({ type: "set_form", form });
   };
@@ -332,10 +339,8 @@ export const UserAdd = (props: UserProps) => {
         case "facilities":
           if (
             state.form[field].length === 0 &&
-            (authUser.user_type === "Staff" ||
-              authUser.user_type === "StaffReadOnly") &&
-            (state.form["user_type"] === "Staff" ||
-              state.form["user_type"] === "StaffReadOnly")
+            STAFF_OR_NURSE_USER.includes(authUser.user_type) &&
+            STAFF_OR_NURSE_USER.includes(state.form.user_type)
           ) {
             errors[field] =
               "Please select atleast one of the facilities you are linked to";
@@ -348,8 +353,19 @@ export const UserAdd = (props: UserProps) => {
             invalidForm = true;
           }
           return;
-        case "doctor_qualification":
         case "doctor_experience_commenced_on":
+          if (state.form.user_type === "Doctor" && !state.form[field]) {
+            errors[field] = "Field is required";
+            invalidForm = true;
+          } else if (
+            state.form.user_type === "Doctor" &&
+            Number(state.form.doctor_experience_commenced_on) > 100
+          ) {
+            errors[field] = "Doctor experience should be less than 100 years";
+            invalidForm = true;
+          }
+          return;
+        case "doctor_qualification":
         case "doctor_medical_council_registration":
           if (state.form.user_type === "Doctor" && !state.form[field]) {
             errors[field] = "Field is required";
@@ -382,7 +398,7 @@ export const UserAdd = (props: UserProps) => {
             invalidForm = true;
           } else if (!validateUsername(state.form[field])) {
             errors[field] =
-              "Please enter letters, digits and @ . + - _ only and username should not end with @, ., +, - or _";
+              "Please enter a 4-16 characters long username with lowercase letters, digits and . _ - only and it should not start or end with . _ -";
             invalidForm = true;
           } else if (usernameExists !== userExistsEnums.available) {
             errors[field] = "This username already exists";
@@ -453,7 +469,12 @@ export const UserAdd = (props: UserProps) => {
           return;
         case "date_of_birth":
           if (!state.form[field]) {
-            errors[field] = "Please enter date in YYYY/MM/DD format";
+            errors[field] = "Please enter date in DD/MM/YYYY format";
+            invalidForm = true;
+          } else if (
+            dayjs(state.form[field]).isAfter(dayjs().subtract(1, "year"))
+          ) {
+            errors[field] = "Enter a valid date of birth";
             invalidForm = true;
           }
           return;
@@ -482,6 +503,10 @@ export const UserAdd = (props: UserProps) => {
     });
     if (invalidForm) {
       dispatch({ type: "set_errors", errors });
+      const firstError = Object.keys(errors).find((e) => errors[e]);
+      if (firstError) {
+        scrollTo(firstError);
+      }
       return false;
     }
     dispatch({ type: "set_errors", errors });
@@ -517,11 +542,10 @@ export const UserAdd = (props: UserProps) => {
                 ? ""
                 : state.form.phone_number
               : state.form.alt_phone_number === "+91"
-              ? ""
-              : state.form.alt_phone_number
+                ? ""
+                : state.form.alt_phone_number,
           ) ?? "",
         date_of_birth: dateQueryString(state.form.date_of_birth),
-        age: Number(dayjs().diff(state.form.date_of_birth, "years", false)),
         doctor_qualification:
           state.form.user_type === "Doctor"
             ? state.form.doctor_qualification
@@ -531,7 +555,7 @@ export const UserAdd = (props: UserProps) => {
             ? dayjs()
                 .subtract(
                   parseInt(state.form.doctor_experience_commenced_on ?? "0"),
-                  "years"
+                  "years",
                 )
                 .format("YYYY-MM-DD")
             : undefined,
@@ -584,7 +608,7 @@ export const UserAdd = (props: UserProps) => {
           className="inline-block rounded border border-gray-600 bg-gray-50 px-4 py-2 text-gray-600 transition hover:bg-gray-100"
           target="_blank"
         >
-          <i className="fas fa-info-circle" /> &nbsp;Need Help?
+          <CareIcon icon="l-info-circle" className="text-lg" /> &nbsp;Need Help?
         </Link>
       }
       backUrl="/users"
@@ -706,20 +730,30 @@ export const UserAdd = (props: UserProps) => {
                       <>
                         {usernameExists === userExistsEnums.checking ? (
                           <span>
-                            <i className="fas fa-circle-dot" /> checking...
+                            <CareIcon
+                              icon="l-record-audio"
+                              className="text-xl"
+                            />{" "}
+                            checking...
                           </span>
                         ) : (
                           <>
                             {usernameExists === userExistsEnums.exists ? (
                               <div>
-                                <i className="fas fa-circle-xmark text-red-500" />{" "}
+                                <CareIcon
+                                  icon="l-times-circle"
+                                  className="text-xl text-red-500"
+                                />{" "}
                                 <span className="text-red-500">
                                   Username is not available
                                 </span>
                               </div>
                             ) : (
                               <div>
-                                <i className="fas fa-circle-check text-green-500" />{" "}
+                                <CareIcon
+                                  icon="l-check-circle"
+                                  className="text-xl text-green-500"
+                                />{" "}
                                 <span className="text-primary-500">
                                   Username is available
                                 </span>
@@ -732,16 +766,26 @@ export const UserAdd = (props: UserProps) => {
                   </div>
                   <div>
                     {validateRule(
-                      state.form.username?.length >= 2,
-                      "Username should be atleast 2 characters long"
+                      usernameInput.length >= 4 && usernameInput.length <= 16,
+                      "Username should be 4-16 characters long",
                     )}
                   </div>
                   <div>
                     {validateRule(
-                      /[^.@+_-]/.test(
-                        state.form.username[state.form.username?.length - 1]
-                      ),
-                      "Username can't end with ^ . @ + _ -"
+                      /^[a-z0-9._-]*$/.test(usernameInput),
+                      "Username can only contain lowercase letters, numbers, and . _ -",
+                    )}
+                  </div>
+                  <div>
+                    {validateRule(
+                      /^[a-z0-9].*[a-z0-9]$/i.test(usernameInput),
+                      "Username must start and end with a letter or number",
+                    )}
+                  </div>
+                  <div>
+                    {validateRule(
+                      !/(?:[._-]{2,})/.test(usernameInput),
+                      "Username can't contain consecutive special characters . _ -",
                     )}
                   </div>
                 </div>
@@ -773,19 +817,19 @@ export const UserAdd = (props: UserProps) => {
                 <div className="text-small pl-2 text-gray-500">
                   {validateRule(
                     state.form.password?.length >= 8,
-                    "Password should be atleast 8 characters long"
+                    "Password should be atleast 8 characters long",
                   )}
                   {validateRule(
                     state.form.password !== state.form.password.toUpperCase(),
-                    "Password should contain at least 1 lowercase letter"
+                    "Password should contain at least 1 lowercase letter",
                   )}
                   {validateRule(
                     state.form.password !== state.form.password.toLowerCase(),
-                    "Password should contain at least 1 uppercase letter"
+                    "Password should contain at least 1 uppercase letter",
                   )}
                   {validateRule(
                     /\d/.test(state.form.password),
-                    "Password should contain at least 1 number"
+                    "Password should contain at least 1 number",
                   )}
                 </div>
               )}
@@ -805,7 +849,7 @@ export const UserAdd = (props: UserProps) => {
                 state.form.c_password.length > 0 &&
                 validateRule(
                   state.form.c_password === state.form.password,
-                  "Confirm password should match the entered password"
+                  "Confirm password should match the entered password",
                 )}
             </div>
             <TextFormField

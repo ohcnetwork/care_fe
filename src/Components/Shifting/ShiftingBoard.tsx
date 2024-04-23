@@ -1,5 +1,16 @@
-import { useEffect, useState } from "react";
-import { classNames, formatAge, formatDateTime } from "../../Utils/utils";
+import {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import {
+  classNames,
+  formatDateTime,
+  formatPatientAge,
+} from "../../Utils/utils";
 import { downloadShiftRequests } from "../../Redux/actions";
 import { useDrag, useDrop } from "react-dnd";
 
@@ -17,12 +28,15 @@ import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import { PaginatedResponse } from "../../Utils/request/types";
 import { IShift } from "./models";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 interface boardProps {
   board: string;
   title?: string;
   filterProp: any;
   formatFilter: any;
+  setContainerHeight: Dispatch<SetStateAction<number>>;
+  containerHeight: number;
 }
 
 const reduceLoading = (action: string, current: any) => {
@@ -56,7 +70,7 @@ const ShiftCard = ({ shift, filter }: any) => {
       pathParams: { externalId: shift.external_id },
     });
     navigate(
-      `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`
+      `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`,
     );
   };
   return (
@@ -71,18 +85,14 @@ const ShiftCard = ({ shift, filter }: any) => {
         <div
           className={classNames(
             "flex h-full flex-col justify-between p-4",
-            shift.patient_object.disease_status == "POSITIVE" && "bg-red-50"
+            shift.patient_object.disease_status == "POSITIVE" && "bg-red-50",
           )}
         >
           <div>
             <div className="flex justify-between">
               <div className="mb-2 text-xl font-bold capitalize">
                 {shift.patient_object.name} -{" "}
-                {formatAge(
-                  shift.patient_object?.age,
-                  shift.patient_object?.age.date_of_birth,
-                  true
-                )}
+                {formatPatientAge(shift.patient_object, true)}
               </div>
               <div>
                 {shift.emergency && (
@@ -98,7 +108,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                   title={t("phone_number")}
                   className="flex items-center text-sm font-medium leading-5 text-gray-500"
                 >
-                  <i className="fas fa-mobile mr-2" />
+                  <CareIcon icon="l-mobile-android" className="mr-2 text-xl" />
                   <dd className="break-normal text-sm font-bold leading-5 text-gray-900">
                     {shift.patient_object.phone_number || ""}
                   </dd>
@@ -109,7 +119,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                   title={t("origin_facility")}
                   className="flex items-center text-sm font-medium leading-5 text-gray-500"
                 >
-                  <i className="fas fa-plane-departure mr-2"></i>
+                  <CareIcon icon="l-plane-departure" className="mr-2 text-xl" />
                   <dd className="break-normal text-sm font-bold leading-5 text-gray-900">
                     {(shift.origin_facility_object || {}).name}
                   </dd>
@@ -121,7 +131,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                     title={t("shifting_approving_facility")}
                     className="flex items-center text-sm font-medium leading-5 text-gray-500"
                   >
-                    <i className="fas fa-user-check mr-2"></i>
+                    <CareIcon icon="l-user-check" className="mr-2 text-xl" />
                     <dd className="break-normal text-sm font-bold leading-5 text-gray-900">
                       {(shift.shifting_approving_facility_object || {}).name}
                     </dd>
@@ -133,7 +143,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                   title={t("assigned_facility")}
                   className="flex items-center text-sm font-medium leading-5 text-gray-500"
                 >
-                  <i className="fas fa-plane-arrival mr-2"></i>
+                  <CareIcon icon="l-plane-arrival" className="mr-2 text-xl" />
 
                   <dd className="break-normal text-sm font-bold leading-5 text-gray-900">
                     {shift.assigned_facility_external ||
@@ -153,7 +163,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                       : "rounded bg-red-400 p-1 text-white")
                   }
                 >
-                  <i className="fas fa-stopwatch mr-2"></i>
+                  <CareIcon icon="l-stopwatch" className="mr-2 text-xl" />
                   <dd className="break-normal text-sm font-bold leading-5">
                     {formatDateTime(shift.modified_date) || "--"}
                   </dd>
@@ -165,7 +175,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                   title={t("patient_address")}
                   className="flex items-center text-sm font-medium leading-5 text-gray-500"
                 >
-                  <i className="fas fa-home mr-2"></i>
+                  <CareIcon icon="l-home" className="mr-2 text-xl" />
                   <dd className="break-normal text-sm font-bold leading-5 text-gray-900">
                     {shift.patient_object.address || "--"}
                   </dd>
@@ -178,7 +188,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                     title={t("assigned_to")}
                     className="flex items-center text-sm font-medium leading-5 text-gray-500"
                   >
-                    <i className="fas fa-user mr-2"></i>
+                    <CareIcon icon="l-user" className="mr-2 text-xl" />
                     <dd className="break-normal text-sm font-bold leading-5 text-gray-900">
                       {shift.assigned_to_object.first_name}{" "}
                       {shift.assigned_to_object.last_name} -{" "}
@@ -193,7 +203,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                   title={t("patient_state")}
                   className="flex items-center text-sm font-medium leading-5 text-gray-500"
                 >
-                  <i className="fas fa-thumbtack mr-2"></i>
+                  <CareIcon icon="l-map-marker" className="mr-2 text-xl" />
                   <dd className="text-sm font-bold leading-5 text-gray-900">
                     {shift.patient_object.state_object.name || "--"}
                   </dd>
@@ -207,7 +217,8 @@ const ShiftCard = ({ shift, filter }: any) => {
               onClick={(_) => navigate(`/shifting/${shift.external_id}`)}
               className="btn btn-default mr-2 w-full bg-white"
             >
-              <i className="fas fa-eye mr-2" /> {t("all_details")}
+              <CareIcon icon="l-eye" className="mr-2 text-xl" />{" "}
+              {t("all_details")}
             </button>
           </div>
           {filter === "COMPLETED" && shift.assigned_facility && (
@@ -219,7 +230,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                   !shift.patient_object.allow_transfer ||
                   !(
                     ["DistrictAdmin", "StateAdmin"].includes(
-                      authUser.user_type
+                      authUser.user_type,
                     ) ||
                     authUser.home_facility_object?.id ===
                       shift.assigned_facility
@@ -257,7 +268,10 @@ export default function ShiftingBoard({
   title,
   filterProp,
   formatFilter,
+  setContainerHeight,
+  containerHeight,
 }: boardProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [offset, setOffSet] = useState(0);
   const [isLoading, setIsLoading] = useState({ board: "BOARD", more: false });
   const [{ isOver }, drop] = useDrop(() => ({
@@ -321,7 +335,7 @@ export default function ShiftingBoard({
       setData((prev) =>
         prev
           ? { ...prev, results: [...prev.results, ...newPageData.results] }
-          : newPageData
+          : newPageData,
       );
     }
     setIsLoading((loading) => reduceLoading("COMPLETE", loading));
@@ -336,13 +350,22 @@ export default function ShiftingBoard({
       ));
   };
 
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (container) {
+      const { height } = container.getBoundingClientRect();
+      containerHeight < height && setContainerHeight(height);
+    }
+  }, [containerRef.current, data?.results.length]);
+
   return (
     <div
       ref={drop}
       className={classNames(
-        "mr-2 h-full w-full flex-shrink-0 overflow-y-auto rounded-md bg-gray-200 pb-4 md:w-1/2 lg:w-1/3 xl:w-1/4",
-        isOver && "cursor-move"
+        "mr-2 h-full w-full flex-shrink-0 rounded-md bg-gray-200 pb-4 md:w-1/2 lg:w-1/3 xl:w-1/4",
+        isOver && "cursor-move",
       )}
+      style={{ minHeight: `${containerHeight + 100}px` }}
     >
       <div className="sticky top-0 z-10 rounded bg-gray-200 pt-2">
         <div className="mx-2 flex items-center justify-between rounded bg-white p-4 shadow">
@@ -363,7 +386,7 @@ export default function ShiftingBoard({
           </span>
         </div>
       </div>
-      <div className="mt-2 flex flex-col pb-2 text-sm">
+      <div ref={containerRef} className="mt-2 flex flex-col pb-2 text-sm">
         {isLoading.board ? (
           <div className="m-1">
             <div className="mx-auto w-full max-w-sm rounded-md border border-gray-300 bg-white p-4 shadow">

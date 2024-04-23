@@ -33,7 +33,6 @@
   "asset_location": "Asset Location",
   "asset_type": "Asset Type",
   "asset_class": "Asset Class",
-  "description": "Description",
   "details_about_the_equipment": "Details about the equipment",
   "working_status": "Working Status",
   "why_the_asset_is_not_working": "Why the asset is not working?",
@@ -52,5 +51,7 @@
   "last_serviced_on": "Last Serviced On",
   "notes": "Notes",
   "create_asset": "Create Asset",
-  "create_add_more": "Create & Add More"
+  "create_add_more": "Create & Add More",
+  "discharged_patients": "Discharged Patients",
+  "discharged_patients_empty": "No discharged patients present in this facility"
 }

@@ -14,13 +14,21 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import dayjs from "../../Utils/dayjs";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
+import Page from "../Common/components/Page";
+import SearchInput from "../Form/SearchInput";
 
 const Loading = lazy(() => import("../Common/Loading"));
-const PageTitle = lazy(() => import("../Common/PageTitle"));
 
 export default function ListView() {
-  const { qParams, Pagination, FilterBadges, advancedFilter, resultsPerPage } =
-    useFilters({});
+  const {
+    qParams,
+    Pagination,
+    FilterBadges,
+    advancedFilter,
+    resultsPerPage,
+    updateQuery,
+  } = useFilters({ cacheBlacklist: ["title"] });
+
   const { t } = useTranslation();
 
   const onBoardViewBtnClick = () =>
@@ -69,7 +77,7 @@ export default function ListView() {
                     title="Resource status"
                     className="flex items-center text-sm font-medium leading-5 text-gray-500"
                   >
-                    <i className="fas fa-truck mr-2" />
+                    <CareIcon icon="l-truck" className="mr-2" />
                     <dd className="text-sm font-bold leading-5 text-gray-900">
                       {resource.status}
                     </dd>
@@ -80,7 +88,7 @@ export default function ListView() {
                     title=" Origin facility"
                     className="flex items-center text-sm font-medium leading-5 text-gray-500"
                   >
-                    <i className="fas fa-plane-departure mr-2"></i>
+                    <CareIcon icon="l-plane-departure" className="mr-2" />
                     <dd className="text-sm font-bold leading-5 text-gray-900">
                       {(resource.origin_facility_object || {}).name}
                     </dd>
@@ -91,7 +99,7 @@ export default function ListView() {
                     title="Resource approving facility"
                     className="flex items-center text-sm font-medium leading-5 text-gray-500"
                   >
-                    <i className="fas fa-user-check mr-2"></i>
+                    <CareIcon icon="l-user-check" className="mr-2" />
                     <dd className="text-sm font-bold leading-5 text-gray-900">
                       {(resource.approving_facility_object || {}).name}
                     </dd>
@@ -102,7 +110,7 @@ export default function ListView() {
                     title=" Assigned facility"
                     className="flex items-center text-sm font-medium leading-5 text-gray-500"
                   >
-                    <i className="fas fa-plane-arrival mr-2"></i>
+                    <CareIcon icon="l-plane-arrival" className="m-2" />
 
                     <dd className="text-sm font-bold leading-5 text-gray-900">
                       {(resource.assigned_facility_object || {}).name ||
@@ -123,7 +131,7 @@ export default function ListView() {
                         : "rounded bg-red-400 p-1 text-white")
                     }
                   >
-                    <i className="fas fa-stopwatch mr-2"></i>
+                    <CareIcon icon="l-stopwatch" className="mr-2" />
                     <dd className="text-sm font-bold leading-5">
                       {formatDateTime(resource.modified_date) || "--"}
                     </dd>
@@ -138,7 +146,7 @@ export default function ListView() {
                 onClick={(_) => navigate(`/resource/${resource.id}`)}
                 className="btn btn-default mr-2 w-full bg-white"
               >
-                <i className="fas fa-eye mr-2" /> All Details
+                <CareIcon icon="l-eye" className="mr-2" /> All Details
               </button>
             </div>
           </div>
@@ -148,33 +156,42 @@ export default function ListView() {
   };
 
   return (
-    <div className="flex h-screen flex-col px-2 pb-2">
-      <div className="px-4 md:flex md:items-center md:justify-between">
-        <PageTitle
-          title="Resource"
-          hideBack
-          componentRight={
-            <ExportButton
-              action={() =>
-                downloadResourceRequests({ ...appliedFilters, csv: 1 })
-              }
-              filenamePrefix="resource_requests"
-            />
-          }
-          breadcrumbs={false}
+    <Page
+      title="Resource"
+      hideBack
+      componentRight={
+        <ExportButton
+          action={() => downloadResourceRequests({ ...appliedFilters, csv: 1 })}
+          filenamePrefix="resource_requests"
         />
+      }
+      breadcrumbs={false}
+      options={
+        <>
+          <div className="md:px-4">
+            <SearchInput
+              name="title"
+              value={qParams.title}
+              onChange={(e) => updateQuery({ [e.name]: e.value })}
+              placeholder={t("search_resource")}
+            />
+          </div>
+          <div className="w-32">
+            {/* dummy div to align space as per board view */}
+          </div>
+          <div className="flex w-full flex-col gap-2 lg:w-fit lg:flex-row lg:gap-4">
+            <ButtonV2 className="py-[11px]" onClick={onBoardViewBtnClick}>
+              <CareIcon icon="l-list-ul" className="rotate-90" />
+              {t("board_view")}
+            </ButtonV2>
 
-        <div className="w-32" />
-        <div className="flex w-full flex-col gap-2 lg:w-fit lg:flex-row lg:gap-4">
-          <ButtonV2 className="py-[11px]" onClick={onBoardViewBtnClick}>
-            <CareIcon className="care-l-list-ul rotate-90" />
-            {t("board_view")}
-          </ButtonV2>
-
-          <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
-        </div>
-      </div>
-
+            <AdvancedFilterButton
+              onClick={() => advancedFilter.setShow(true)}
+            />
+          </div>
+        </>
+      }
+    >
       <BadgesList {...{ appliedFilters, FilterBadges }} />
 
       <div className="px-1">
@@ -187,15 +204,21 @@ export default function ListView() {
                 className="text-xs hover:text-blue-800"
                 onClick={() => refetch()}
               >
-                <i className="fa fa-refresh mr-1" aria-hidden="true"></i>
-                Refresh List
+                <CareIcon
+                  icon="l-refresh"
+                  className="mr-1"
+                  aria-hidden="true"
+                />
+                {t("refresh_list")}
               </button>
             </div>
 
             <div className="mb-5 flex flex-wrap md:-mx-4">
               {data?.results && showResourceCardList(data?.results)}
             </div>
-            <Pagination totalCount={data?.count || 0} />
+            <div>
+              <Pagination totalCount={data?.count || 0} />
+            </div>
           </div>
         )}
       </div>
@@ -204,6 +227,6 @@ export default function ListView() {
         showResourceStatus={true}
         key={window.location.search}
       />
-    </div>
+    </Page>
   );
 }

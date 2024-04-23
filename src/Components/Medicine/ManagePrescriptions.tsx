@@ -33,11 +33,11 @@ export default function ManagePrescriptions() {
             onClick={() => goBack()}
             data-testid="return-to-patient-dashboard"
           >
-            <CareIcon className="care-l-angle-left-b text-lg" />
+            <CareIcon icon="l-angle-left-b" className="text-lg" />
             {t("return_to_patient_dashboard")}
           </ButtonV2>
           <span className="text-sm text-primary-500">
-            <CareIcon className="care-l-check text-base" />
+            <CareIcon icon="l-check" className="text-base" />
             <span className="pl-1">{t("all_changes_have_been_saved")}</span>
           </span>
         </div>

@@ -1,4 +1,5 @@
 import { PerformedByModel } from "../HCX/misc";
+import { PRESCRIPTION_ROUTES } from "./CreatePrescriptionForm";
 
 export const DOSAGE_UNITS = [
   "mg",
@@ -16,8 +17,11 @@ interface BasePrescription {
   medicine?: string;
   medicine_object?: MedibaseMedicine;
   medicine_old?: string;
-  route?: "ORAL" | "IV" | "IM" | "SC";
-  dosage: DosageValue;
+  route?: (typeof PRESCRIPTION_ROUTES)[number];
+  dosage_type?: "REGULAR" | "TITRATED" | "PRN";
+  base_dosage?: DosageValue;
+  target_dosage?: DosageValue;
+  instruction_on_titration?: string;
   notes?: string;
   meta?: object;
   readonly prescription_type?: "DISCHARGE" | "REGULAR";
@@ -25,7 +29,7 @@ interface BasePrescription {
   discontinued_reason?: string;
   readonly prescribed_by: PerformedByModel;
   readonly discontinued_date: string;
-  readonly last_administered_on?: string;
+  readonly last_administration?: MedicineAdministrationRecord;
   readonly is_migrated: boolean;
   readonly created_date: string;
   readonly modified_date: string;
@@ -43,7 +47,7 @@ export interface NormalPrescription extends BasePrescription {
     | "QOD"
     | "QWK";
   days?: number;
-  is_prn: false;
+  dosage_type: "REGULAR" | "TITRATED";
   indicator?: undefined;
   max_dosage?: undefined;
   min_hours_between_doses?: undefined;
@@ -53,7 +57,7 @@ export interface PRNPrescription extends BasePrescription {
   indicator: string;
   max_dosage?: DosageValue;
   min_hours_between_doses?: number;
-  is_prn: true;
+  dosage_type: "PRN";
   frequency?: undefined;
   days?: undefined;
 }
@@ -64,6 +68,7 @@ export type MedicineAdministrationRecord = {
   readonly id: string;
   readonly prescription: Prescription;
   notes: string;
+  dosage?: DosageValue;
   administered_date?: string;
   readonly administered_by: PerformedByModel;
   readonly archived_by: PerformedByModel | undefined;

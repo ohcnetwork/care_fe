@@ -21,13 +21,8 @@ export class PatientPage {
   }
 
   selectFacility(facilityName: string) {
-    cy.get("input[name='facilities']")
-      .type(facilityName)
-      .then(() => {
-        cy.get("[role='option']").first().click();
-      });
-    cy.get("button").should("contain", "Select");
-    cy.get("button").get("#submit").click();
+    cy.searchAndSelectOption("input[name='facilities']", facilityName);
+    cy.submitButton("Select");
   }
 
   interceptCreatePatientAPI() {
@@ -38,35 +33,69 @@ export class PatientPage {
     cy.wait("@createPatient").its("response.statusCode").should("eq", 200);
   }
 
-  enterPatientDetails(
-    phoneNumber: string,
-    emergencyPhoneNumber: string,
-    patientName: string,
-    gender: string,
-    address: string,
-    pincode: string,
-    bloodGroup: string,
-    dateOfBirth: string
-  ) {
-    cy.get("#phone_number-div").type(phoneNumber);
-    cy.get("#emergency_phone_number-div").type(emergencyPhoneNumber);
+  verifyPatientNameList(patientName: string) {
+    cy.get("#patient-name-list").contains(patientName);
+  }
+
+  typePatientPhoneNumber(phoneNumber: string) {
+    cy.get("#phone_number-div").click().type(phoneNumber);
+  }
+
+  typePatientEmergencyNumber(phoneNumber: string) {
+    cy.get("#emergency_phone_number-div").click().type(phoneNumber);
+  }
+
+  typePatientDateOfBirth(dateOfBirth: string) {
+    cy.clickAndSelectOption("#patientAge", "DOB");
+    cy.get("#date_of_birth").scrollIntoView();
     cy.get("#date_of_birth").should("be.visible").click();
     cy.get("#date-input").click().type(dateOfBirth);
-    cy.get("[data-testid=name] input").type(patientName);
-    cy.get("[data-testid=Gender] button")
+  }
+
+  typePatientAge(age: string) {
+    cy.clickAndSelectOption("#patientAge", "Age");
+    cy.submitButton("Confirm");
+    cy.get("#age").clear().type(age);
+  }
+
+  typePatientName(patientName: string) {
+    cy.get("[data-testid=name] input").click().type(patientName);
+  }
+
+  typePatientNameList(patientName: string) {
+    cy.get("#name").click().type(patientName);
+  }
+
+  typePatientAddress(address: string) {
+    cy.get("[data-testid=current-address] textarea")
       .click()
-      .then(() => {
-        cy.get("[role='option']").contains(gender).click();
-      });
-    cy.get("[data-testid=current-address] textarea").type(address);
+      .clear()
+      .click()
+      .type(address);
+  }
+
+  clickPermanentAddress() {
     cy.get("[data-testid=permanent-address] input").check();
-    cy.get("#pincode").type(pincode);
-    cy.get("[name=medical_history_check_1]").check();
-    cy.get("[data-testid=blood-group] button")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains(bloodGroup).click();
-      });
+  }
+
+  clickPatientAntenatalStatusYes() {
+    cy.get("#is_antenatal-0").click();
+  }
+
+  clickCancelButton() {
+    cy.get("#cancel").click();
+  }
+
+  selectPatientGender(gender: string) {
+    cy.clickAndSelectOption("[data-testid=Gender] button", gender);
+  }
+
+  selectPatientBloodGroup(bloodgroup: string) {
+    cy.clickAndSelectOption("#blood_group", bloodgroup);
+  }
+
+  selectPatientOccupation(occupation: string) {
+    cy.clickAndSelectOption("#occupation", occupation);
   }
 
   clickCreatePatient() {
@@ -80,40 +109,78 @@ export class PatientPage {
     cy.url().should("include", "/patient");
   }
 
-  saveCreatedPatientUrl() {
+  savePatientUrl() {
     cy.url().then((url) => {
-      cy.log(url);
-      patient_url = url.split("/").slice(0, -1).join("/");
-      cy.log(patient_url);
+      patient_url = url;
     });
   }
 
-  visitCreatedPatient() {
-    cy.awaitUrl(patient_url);
+  visitPatientUrl() {
+    cy.visit(patient_url);
   }
 
-  verifyPatientDetails(
-    age: number,
-    patientName: string,
-    phoneNumber: string,
-    emergencyPhoneNumber: string,
-    yearOfBirth: string,
-    bloodGroup: string
+  visitConsultationPage() {
+    cy.visit(patient_url + "/consultation");
+  }
+
+  clickUpdatePatient() {
+    cy.intercept("PUT", "**/api/v1/patient/**").as("updatePatient");
+    cy.get("button").get("[data-testid=submit-button]").click();
+    cy.wait("@updatePatient").its("response.statusCode").should("eq", 200);
+  }
+
+  verifyPatientUpdated() {
+    cy.url().should("include", "/patient");
+  }
+
+  verifyPatientPhoneNumber(phoneNumber: string) {
+    cy.get("[data-testid=patient-dashboard]").should("contain", phoneNumber);
+  }
+
+  verifyPatientDashboardDetails(
+    gender,
+    age,
+    patientName,
+    phoneNumber,
+    emergencyPhoneNumber,
+    yearOfBirth,
+    bloodGroup,
+    occupation
   ) {
     cy.url().should("include", "/facility/");
-    cy.get("[data-testid=patient-dashboard]").should("contain", age);
-    cy.get("[data-testid=patient-dashboard]").should("contain", patientName);
-    cy.get("[data-testid=patient-dashboard]").should("contain", phoneNumber);
-    cy.get("[data-testid=patient-dashboard]").should(
-      "contain",
-      emergencyPhoneNumber
-    );
-    cy.get("[data-testid=patient-dashboard]").should("contain", yearOfBirth);
-    cy.get("[data-testid=patient-dashboard]").should("contain", bloodGroup);
+    cy.get("[data-testid=patient-dashboard]").then(($dashboard) => {
+      expect($dashboard).to.contain(gender);
+      expect($dashboard).to.contain(age);
+      expect($dashboard).to.contain(patientName);
+      expect($dashboard).to.contain(phoneNumber);
+      expect($dashboard).to.contain(emergencyPhoneNumber);
+      expect($dashboard).to.contain(yearOfBirth);
+      expect($dashboard).to.contain(bloodGroup);
+      expect($dashboard).to.contain(occupation);
+    });
+  }
+
+  verifyPatientLocationDetails(
+    patientAddress,
+    patientPincode,
+    patientState,
+    patientDistrict,
+    patientLocalbody,
+    patientWard
+  ) {
+    cy.get("[data-testid=patient-details]").then(($dashboard) => {
+      cy.url().should("include", "/facility/");
+      expect($dashboard).to.contain(patientAddress);
+      expect($dashboard).to.contain(patientPincode);
+      expect($dashboard).to.contain(patientState);
+      expect($dashboard).to.contain(patientDistrict);
+      expect($dashboard).to.contain(patientLocalbody);
+      expect($dashboard).to.contain(patientWard);
+    });
   }
 
   visitUpdatePatientUrl() {
-    cy.awaitUrl(patient_url + "/update");
+    cy.visit(patient_url + "/update");
   }
 
   interceptFacilities() {

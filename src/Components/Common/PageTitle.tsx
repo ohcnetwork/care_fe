@@ -3,6 +3,7 @@ import Breadcrumbs from "./Breadcrumbs";
 import PageHeadTitle from "./PageHeadTitle";
 import { classNames } from "../../Utils/utils";
 import useAppHistory from "../../Common/hooks/useAppHistory";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 export interface PageTitleProps {
   title: string;
@@ -25,6 +26,7 @@ export interface PageTitleProps {
   };
   focusOnLoad?: boolean;
   isInsidePage?: boolean;
+  changePageMetadata?: boolean;
 }
 
 export default function PageTitle({
@@ -39,6 +41,7 @@ export default function PageTitle({
   justifyContents = "justify-start",
   focusOnLoad = false,
   isInsidePage = false,
+  changePageMetadata = true,
 }: PageTitleProps) {
   const divRef = useRef<any>();
 
@@ -55,7 +58,7 @@ export default function PageTitle({
       ref={divRef}
       className={isInsidePage ? "" : `mb-2 pt-4 md:mb-4 ${className}`}
     >
-      <PageHeadTitle title={title} />
+      {changePageMetadata && <PageHeadTitle title={title} />}
       <div className={classNames("flex items-center", justifyContents)}>
         <div className="flex items-center">
           {!hideBack && (
@@ -65,9 +68,10 @@ export default function PageTitle({
                 goBack(backUrl);
               }}
             >
-              <i className="fas fa-chevron-left mr-1 rounded-md p-2 text-2xl hover:bg-gray-200">
-                {" "}
-              </i>
+              <CareIcon
+                icon="l-angle-left"
+                className="border-box mr-1 rounded-md text-5xl hover:bg-gray-200"
+              />{" "}
             </button>
           )}
           <h2 className="ml-0 text-2xl font-semibold leading-tight">{title}</h2>

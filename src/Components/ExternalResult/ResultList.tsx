@@ -16,9 +16,13 @@ import Page from "../Common/components/Page";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import { parsePhoneNumber } from "../../Utils/utils";
+import useAuthUser from "../../Common/hooks/useAuthUser";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ResultList() {
+  const authUser = useAuthUser();
   const {
     qParams,
     updateQuery,
@@ -26,7 +30,10 @@ export default function ResultList() {
     FilterBadges,
     advancedFilter,
     resultsPerPage,
-  } = useFilters({ limit: 14 });
+  } = useFilters({
+    limit: 14,
+    cacheBlacklist: ["mobile_number", "name"],
+  });
   const [showDialog, setShowDialog] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
@@ -83,7 +90,7 @@ export default function ResultList() {
     const updatedLsgList = dataList.lsgList.filter((x: any) => x.id !== id);
     const lsgParams = updatedLsgList.map((x: any) => x.id);
     const updatedWardList = dataList.wardList.filter(
-      (x: any) => x.local_body_id !== id
+      (x: any) => x.local_body_id !== id,
     );
     const wardParams = updatedWardList.map((x: any) => x.id);
     updateQuery({ [paramKey]: lsgParams, ["wards"]: wardParams });
@@ -108,16 +115,17 @@ export default function ResultList() {
           className="inline-flex h-full items-center rounded-full border bg-white px-3 py-1 text-xs font-medium leading-4 text-gray-600"
         >
           {`${key}: ${value.name}`}
-          <i
-            className="fas fa-times ml-2 cursor-pointer rounded-full px-1 py-0.5 hover:bg-gray-500"
+          <CareIcon
+            icon="l-times"
+            className="ml-2 cursor-pointer rounded-full text-base hover:bg-gray-500"
             onClick={() =>
               paramKey === "local_bodies"
                 ? removeLSGFilter(paramKey, value.id)
                 : paramKey === "wards"
-                ? removeWardFilter(paramKey, value.id)
-                : null
+                  ? removeWardFilter(paramKey, value.id)
+                  : null
             }
-          ></i>
+          />
         </span>
       )
     );
@@ -165,6 +173,10 @@ export default function ResultList() {
           <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
             <ButtonV2
               variant="primary"
+              disabled={
+                authUser.user_type === "Nurse" || authUser.user_type === "Staff"
+              }
+              authorizeFor={NonReadOnlyUsers}
               border
               ghost
               onClick={() => {
@@ -226,23 +238,28 @@ export default function ResultList() {
           <ExportMenu
             label="Import/Export"
             exportItems={[
-              {
-                label: "Import Results",
-                action: () => navigate("/external_results/upload"),
-                options: {
-                  icon: <CareIcon className="care-l-import" />,
-                },
-              },
+              ...(authUser.user_type !== "Nurse" &&
+              authUser.user_type !== "Staff"
+                ? [
+                    {
+                      label: "Import Results",
+                      action: () => navigate("/external_results/upload"),
+                      options: {
+                        icon: <CareIcon icon="l-import" />,
+                      },
+                    },
+                  ]
+                : []),
               {
                 label: "Export Results",
                 action: () =>
                   externalResultList(
                     { ...qParams, csv: true },
-                    "externalResultList"
+                    "externalResultList",
                   ),
                 filePrefix: "external_results",
                 options: {
-                  icon: <CareIcon className="care-l-export" />,
+                  icon: <CareIcon icon="l-export" />,
                 },
               },
             ]}
@@ -302,7 +319,10 @@ export default function ResultList() {
           ]}
         />
 
-        <div className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-t-lg">
+        <div
+          className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-t-lg"
+          id="external-result-table"
+        >
           <table className="min-w-full divide-y divide-gray-200">
             <thead>
               <tr>

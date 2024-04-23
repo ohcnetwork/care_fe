@@ -8,7 +8,7 @@ interface DistrictSelectProps {
   errors: string;
   className?: string;
   multiple?: boolean;
-  selected: string;
+  selected?: string;
   setSelected: (selected: string) => void;
 }
 
@@ -22,7 +22,7 @@ function DistrictSelect(props: DistrictSelectProps) {
       const res = await dispatchAction(getDistrictByName(params));
       return res?.data?.results;
     },
-    [dispatchAction]
+    [dispatchAction],
   );
 
   return (

@@ -21,7 +21,7 @@ const capitalize = (string: string) => {
     .split(" ")
     .reduce(
       (acc, word) => acc + (word[0]?.toUpperCase() || "") + word.slice(1) + " ",
-      ""
+      "",
     )
     .trim();
 };
@@ -55,7 +55,7 @@ export default function Breadcrumbs(props: any) {
           <li>
             <div>
               <Link href="/" className="text-gray-500 hover:text-gray-700">
-                <CareIcon className="care-l-estate mr-1 text-lg" />
+                <CareIcon icon="l-estate" className="mr-1 text-lg" />
                 <span className="sr-only">Home</span>
               </Link>
             </div>
@@ -108,7 +108,7 @@ export default function Breadcrumbs(props: any) {
                   key={crumb.name}
                   className={classNames(
                     "cursor-pointer text-sm font-medium text-gray-500 hover:text-gray-700",
-                    crumb.style
+                    crumb.style,
                   )}
                 >
                   <div className="flex items-center">
@@ -127,7 +127,7 @@ export default function Breadcrumbs(props: any) {
                     >
                       {crumb.name.match(/^\w{8}-(\w{4}-){3}\w{12}$/) ? (
                         <div>
-                          <i className="fas fa-hashtag fa-lg mr-1" />
+                          <span className="mr-1 text-lg">#</span>
                           <span>{crumb.name.slice(0, 13) + "..."}</span>
                         </div>
                       ) : (

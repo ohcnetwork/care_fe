@@ -1,25 +1,25 @@
 import { navigate } from "raviger";
-import { lazy, useCallback, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { GENDER_TYPES, SAMPLE_TEST_STATUS } from "../../Common/constants";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+import { lazy, useEffect, useState } from "react";
+
 import {
-  getConsultationList,
-  listShiftRequests,
-  getPatient,
-  getSampleTestList,
-  patchSample,
-  patchPatient,
-  completeTransfer,
-} from "../../Redux/actions";
+  DISCHARGE_REASONS,
+  GENDER_TYPES,
+  SAMPLE_TEST_STATUS,
+  OCCUPATION_TYPES,
+} from "../../Common/constants";
+
 import * as Notification from "../../Utils/Notifications";
-import Pagination from "../Common/Pagination";
 import { ConsultationCard } from "../Facility/ConsultationCard";
 import { ConsultationModel } from "../Facility/models";
 import { PatientModel, SampleTestModel } from "./models";
 import { SampleTestCard } from "./SampleTestCard";
 import Chip from "../../CAREUI/display/Chip";
-import { classNames, formatAge, formatDateTime } from "../../Utils/utils";
+import {
+  classNames,
+  formatDate,
+  formatDateTime,
+  formatPatientAge,
+} from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
@@ -35,35 +35,22 @@ import useAuthUser from "../../Common/hooks/useAuthUser";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import { InsuranceDetialsCard } from "./InsuranceDetailsCard";
+import request from "../../Utils/request/request";
+import PaginatedList from "../../CAREUI/misc/PaginatedList";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
+export const parseOccupation = (occupation: string | undefined) => {
+  return OCCUPATION_TYPES.find((i) => i.value === occupation)?.text;
+};
+
 export const PatientHome = (props: any) => {
   const { facilityId, id } = props;
-  const dispatch: any = useDispatch();
   const [showShifts, setShowShifts] = useState(false);
   const [isShiftClicked, setIsShiftClicked] = useState(false);
-  const [isShiftDataLoaded, setIsShiftDataLoaded] = useState(false);
   const [patientData, setPatientData] = useState<PatientModel>({});
-  const [consultationListData, setConsultationListData] = useState<
-    Array<ConsultationModel>
-  >([]);
-  const [sampleListData, setSampleListData] = useState<Array<SampleTestModel>>(
-    []
-  );
-  const [activeShiftingData, setActiveShiftingData] = useState<Array<any>>([]);
   const [assignedVolunteerObject, setAssignedVolunteerObject] =
     useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [totalConsultationCount, setTotalConsultationCount] = useState(0);
-  const [currentConsultationPage, setCurrentConsultationPage] = useState(1);
-  const [consultationOffset, setConsultationOffset] = useState(0);
-  const [totalSampleListCount, setTotalSampleListCount] = useState(0);
-  const [currentSampleListPage, setCurrentSampleListPage] = useState(1);
-  const [sampleListOffset, setSampleListOffset] = useState(0);
-  const [isConsultationLoading, setIsConsultationLoading] = useState(false);
-  const [isSampleLoading, setIsSampleLoading] = useState(false);
-  const [sampleFlag, callSampleList] = useState(false);
   const authUser = useAuthUser();
   const { t } = useTranslation();
   const [selectedStatus, setSelectedStatus] = useState<{
@@ -85,13 +72,16 @@ export const PatientHome = (props: any) => {
     setAssignedVolunteerObject(patientData.assigned_to_object);
   }, [patientData.assigned_to_object]);
 
-  const handleTransferComplete = (shift: any) => {
+  const handleTransferComplete = async (shift: any) => {
     setModalFor({ ...modalFor, loading: true });
-    dispatch(completeTransfer({ externalId: modalFor })).then(() => {
-      navigate(
-        `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`
-      );
+    await request(routes.completeTransfer, {
+      pathParams: {
+        id: modalFor.externalId ?? "",
+      },
     });
+    navigate(
+      `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`,
+    );
   };
 
   const { data: insuranceDetials } = useQuery(routes.listHCXPolicies, {
@@ -101,52 +91,28 @@ export const PatientHome = (props: any) => {
     },
   });
 
-  const handleAssignedVolunteer = () => {
-    dispatch(
-      patchPatient(
-        {
-          assigned_to: assignedVolunteerObject
-            ? assignedVolunteerObject.id
-            : null,
-        },
-        { id: patientData.id }
-      )
-    ).then((response: any) => {
-      if ((response || {}).status === 200) {
-        const dummyPatientData = Object.assign({}, patientData);
-        dummyPatientData["assigned_to"] = assignedVolunteerObject;
-        setPatientData(dummyPatientData);
-        if (assignedVolunteerObject)
-          Notification.Success({
-            msg: "Volunteer assigned successfully.",
-          });
-        else
-          Notification.Success({
-            msg: "Volunteer unassigned successfully.",
-          });
-        document.location.reload();
-      }
-    });
-    setOpenAssignVolunteerDialog(false);
-    if (errors["assignedVolunteer"]) delete errors["assignedVolunteer"];
-  };
-
-  const handlePatientTransfer = (value: boolean) => {
+  const handlePatientTransfer = async (value: boolean) => {
     const dummyPatientData = Object.assign({}, patientData);
     dummyPatientData["allow_transfer"] = value;
 
-    dispatch(
-      patchPatient({ allow_transfer: value }, { id: patientData.id })
-    ).then((response: any) => {
-      if ((response || {}).status === 200) {
-        const dummyPatientData = Object.assign({}, patientData);
-        dummyPatientData["allow_transfer"] = value;
-        setPatientData(dummyPatientData);
+    await request(routes.patchPatient, {
+      pathParams: {
+        id: patientData.id as string,
+      },
 
-        Notification.Success({
-          msg: "Transfer status updated.",
-        });
-      }
+      body: { allow_transfer: value },
+
+      onResponse: ({ res }) => {
+        if ((res || {}).status === 200) {
+          const dummyPatientData = Object.assign({}, patientData);
+          dummyPatientData["allow_transfer"] = value;
+          setPatientData(dummyPatientData);
+
+          Notification.Success({
+            msg: "Transfer status updated.",
+          });
+        }
+      },
     });
   };
 
@@ -154,122 +120,58 @@ export const PatientHome = (props: any) => {
     setAssignedVolunteerObject(volunteer.value);
   };
 
-  const limit = 5;
-
-  const fetchpatient = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const patientRes = await dispatch(getPatient({ id }));
-      if (!status.aborted) {
-        if (patientRes && patientRes.data) {
-          setPatientData(patientRes.data);
-        }
-        setIsLoading(false);
-      }
+  const { loading: isLoading, refetch } = useQuery(routes.getPatient, {
+    pathParams: {
+      id,
     },
-    [dispatch, id]
-  );
-
-  const fetchConsultation = useCallback(
-    async (status: statusType) => {
-      setIsConsultationLoading(true);
-      const consultationRes = await dispatch(
-        getConsultationList({ patient: id, limit, offset: consultationOffset })
-      );
-      if (!status.aborted) {
-        if (
-          consultationRes &&
-          consultationRes.data &&
-          consultationRes.data.results
-        ) {
-          setConsultationListData(consultationRes.data.results);
-          setTotalConsultationCount(consultationRes.data.count);
-        }
-        setIsConsultationLoading(false);
+    onResponse: ({ res, data }) => {
+      if (res?.ok && data) {
+        setPatientData(data);
       }
-    },
-    [dispatch, id, consultationOffset]
-  );
-
-  const fetchSampleTest = useCallback(
-    async (status: statusType) => {
-      setIsSampleLoading(true);
-      const sampleRes = await dispatch(
-        getSampleTestList(
-          { limit, offset: sampleListOffset },
-          { patientId: id }
-        )
-      );
-      if (!status.aborted) {
-        if (sampleRes && sampleRes.data && sampleRes.data.results) {
-          setSampleListData(sampleRes.data.results);
-          setTotalSampleListCount(sampleRes.data.count);
-        }
-        setIsSampleLoading(false);
-      }
-    },
-    [dispatch, id, sampleListOffset]
-  );
-
-  const fetchActiveShiftingData = useCallback(
-    async (status: statusType) => {
-      const shiftingRes = isShiftClicked
-        ? await dispatch(listShiftRequests({ patient: id }, "shift-list-call"))
-        : activeShiftingData;
-      setIsShiftDataLoaded(isShiftClicked);
-      if (!status.aborted) {
-        if (shiftingRes && shiftingRes.data && shiftingRes.data.results) {
-          const activeShiftingRes: any[] = shiftingRes.data.results;
-          setActiveShiftingData(activeShiftingRes);
-        }
-      }
-    },
-    [dispatch, id, isShiftClicked]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchpatient(status);
       triggerGoal("Patient Profile Viewed", {
         facilityId: facilityId,
         userId: authUser.id,
       });
     },
-    [dispatch, fetchpatient]
-  );
+  });
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchConsultation(status);
-    },
-    [dispatch, fetchConsultation]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchSampleTest(status);
-    },
-    [dispatch, fetchSampleTest, sampleFlag]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchActiveShiftingData(status);
-    },
-    [dispatch, fetchActiveShiftingData]
-  );
-
-  const handleConsultationPagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentConsultationPage(page);
-    setConsultationOffset(offset);
+  const handleAssignedVolunteer = async () => {
+    const { res, data } = await request(routes.patchPatient, {
+      pathParams: {
+        id: patientData.id as string,
+      },
+      body: {
+        assigned_to: assignedVolunteerObject
+          ? assignedVolunteerObject.id
+          : null,
+      },
+    });
+    if (res?.ok && data) {
+      setPatientData(data);
+      if (assignedVolunteerObject) {
+        Notification.Success({
+          msg: "Volunteer assigned successfully.",
+        });
+      } else {
+        Notification.Success({
+          msg: "Volunteer unassigned successfully.",
+        });
+      }
+      refetch();
+    }
+    setOpenAssignVolunteerDialog(false);
+    if (errors["assignedVolunteer"]) delete errors["assignedVolunteer"];
   };
 
-  const handleSampleListPagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentSampleListPage(page);
-    setSampleListOffset(offset);
-  };
+  const { loading: isShiftDataLoading, data: activeShiftingData } = useQuery(
+    routes.listShiftRequests,
+    {
+      query: {
+        patient: id,
+      },
+      prefetch: isShiftClicked,
+    },
+  );
 
   const confirmApproval = (status: number, sample: any) => {
     setSelectedStatus({ status, sample });
@@ -280,20 +182,25 @@ export const PatientHome = (props: any) => {
     const { status, sample } = selectedStatus;
     const sampleData = {
       id: sample.id,
-      status,
+      status: status.toString(),
       consultation: sample.consultation,
     };
     const statusName = SAMPLE_TEST_STATUS.find((i) => i.id === status)?.desc;
 
-    const res = await dispatch(patchSample(sampleData, { id: sample.id }));
-    if (res && (res.status === 201 || res.status === 200)) {
-      Notification.Success({
-        msg: `Request ${statusName}`,
-      });
-      callSampleList(!sampleFlag);
-    }
-
-    setShowAlertMessage(false);
+    await request(routes.patchSample, {
+      body: sampleData,
+      pathParams: {
+        id: sample.id,
+      },
+      onResponse: ({ res }) => {
+        if (res?.ok) {
+          Notification.Success({
+            msg: `Request ${statusName}`,
+          });
+        }
+        setShowAlertMessage(false);
+      },
+    });
   };
 
   if (isLoading) {
@@ -301,7 +208,7 @@ export const PatientHome = (props: any) => {
   }
 
   const patientGender = GENDER_TYPES.find(
-    (i) => i.id === patientData.gender
+    (i) => i.id === patientData.gender,
   )?.text;
 
   let patientMedHis: any[] = [];
@@ -311,73 +218,21 @@ export const PatientHome = (props: any) => {
     patientData.medical_history.length
   ) {
     const medHis = patientData.medical_history;
-    patientMedHis = medHis.map((item: any, idx: number) => (
-      <div className="sm:col-span-1" key={`med_his_${idx}`}>
-        {item?.disease !== "NO" && (
-          <>
-            <div className="overflow-x-scroll text-sm font-semibold leading-5 text-zinc-400">
-              {item.disease}
-            </div>
-            <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
-              {item.details}
-            </div>
-          </>
-        )}
-      </div>
-    ));
-  }
-
-  let consultationList, sampleList;
-
-  if (isConsultationLoading) {
-    consultationList = <CircularProgress />;
-  } else if (consultationListData.length === 0) {
-    consultationList = (
-      <div>
-        <hr />
-        <div className="flex items-center justify-center border-2 border-solid border-gray-200 p-4 text-xl font-bold text-gray-500">
-          No Data Found
+    patientMedHis = medHis
+      .filter((item) => item.disease !== "NO")
+      .map((item, idx) => (
+        <div className="sm:col-span-1" key={`med_his_${idx}`}>
+          <div className="break-words text-sm font-semibold leading-5 text-zinc-400">
+            {item.disease}
+          </div>
+          <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
+            {item.details}
+          </div>
         </div>
-      </div>
-    );
-  } else if (consultationListData.length > 0) {
-    consultationList = consultationListData.map((itemData, idx) => (
-      <ConsultationCard
-        itemData={itemData}
-        key={idx}
-        isLastConsultation={itemData.id === patientData.last_consultation?.id}
-      />
-    ));
+      ));
   }
 
-  if (isSampleLoading) {
-    sampleList = <CircularProgress />;
-  } else if (sampleListData.length === 0) {
-    sampleList = (
-      <div>
-        <hr />
-        <div className="flex items-center justify-center border-2 border-solid border-gray-200 p-4 text-xl font-bold text-gray-500">
-          No Data Found
-        </div>
-      </div>
-    );
-  } else if (sampleListData.length > 0) {
-    sampleList = (
-      <div className="lg:gap-4">
-        {sampleListData.map((itemData, idx) => (
-          <SampleTestCard
-            itemData={itemData}
-            key={idx}
-            handleApproval={confirmApproval}
-            facilityId={facilityId}
-            patientId={id}
-          />
-        ))}
-      </div>
-    );
-  }
-
-  const isPatientInactive = (patientData: PatientModel, facilityId: number) => {
+  const isPatientInactive = (patientData: PatientModel, facilityId: string) => {
     return (
       !patientData.is_active ||
       !(patientData?.last_consultation?.facility === facilityId)
@@ -434,7 +289,7 @@ export const PatientHome = (props: any) => {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      <i className="fab fa-whatsapp" /> Video Call
+                      <CareIcon icon="l-whatsapp" /> Video Call
                     </a>
                   )}
                 </p>
@@ -458,7 +313,7 @@ export const PatientHome = (props: any) => {
             <div className="mx-auto max-w-screen-xl rounded-lg bg-red-200 p-3 shadow sm:px-6 lg:px-8">
               <div className="text-center">
                 <p className="font-bold text-red-800">
-                  <i className="fas fa-exclamation-triangle mr-2" />
+                  <CareIcon icon="l-exclamation-triangle" className="mr-2" />
                   <span className="inline">
                     You have not created a consultation for the patient in{" "}
                     <strong>{patientData.facility_object?.name || "-"} </strong>
@@ -472,7 +327,7 @@ export const PatientHome = (props: any) => {
                 disabled={!patientData.is_active}
                 onClick={() =>
                   navigate(
-                    `/facility/${patientData?.facility}/patient/${id}/consultation`
+                    `/facility/${patientData?.facility}/patient/${id}/consultation`,
                   )
                 }
               >
@@ -487,12 +342,7 @@ export const PatientHome = (props: any) => {
               <div>
                 <div className="flex flex-row gap-4">
                   <h1 className="flex flex-row pb-3 text-2xl font-bold">
-                    {patientData.name} -{" "}
-                    {formatAge(
-                      patientData.age,
-                      patientData.date_of_birth,
-                      true
-                    )}
+                    {patientData.name} - {formatPatientAge(patientData, true)}
                   </h1>
                   <div className="ml-auto mr-9 flex flex-wrap gap-3">
                     {patientData.is_vaccinated ? (
@@ -559,20 +409,27 @@ export const PatientHome = (props: any) => {
                   </div>
                 </div>
                 <h3 className="text-base font-medium">
-                  <i className="fa-regular fa-hospital mr-2 text-emerald-900" />
+                  <CareIcon
+                    icon="l-hospital"
+                    className="mr-2 text-emerald-900"
+                  />
                   {patientData.facility_object?.name || "-"}
                 </h3>
                 <p className="mb-7 mt-4 text-sm font-medium text-zinc-500">
                   {patientGender} | {patientData.blood_group || "-"}
                 </p>
               </div>
-              <div className="mb-8 mt-2 grid grid-cols-1 items-center gap-x-4 gap-y-2 md:grid-cols-2 md:gap-y-8 lg:grid-cols-3">
+              <div className="mb-8 mt-2 grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-2 md:gap-y-8 lg:grid-cols-4">
                 <div className="sm:col-span-1">
                   <div className="text-sm font-semibold leading-5 text-zinc-400">
-                    Date of Birth
+                    {patientData.date_of_birth
+                      ? "Date of Birth"
+                      : "Year of Birth"}
                   </div>
                   <div className="mt-1 text-sm font-medium leading-5">
-                    {patientData?.date_of_birth}
+                    {patientData.date_of_birth
+                      ? formatDate(patientData.date_of_birth)
+                      : patientData.year_of_birth}
                   </div>
                 </div>
                 <div className="sm:col-span-1">
@@ -595,7 +452,7 @@ export const PatientHome = (props: any) => {
                         className="text-sm font-normal text-sky-600 hover:text-sky-300"
                         rel="noreferrer"
                       >
-                        <i className="fab fa-whatsapp " /> Chat on WhatsApp
+                        <CareIcon icon="l-whatsapp" /> Chat on WhatsApp
                       </a>
                     </div>
                   </div>
@@ -620,7 +477,7 @@ export const PatientHome = (props: any) => {
                         className="text-sm font-normal text-sky-600 hover:text-sky-300"
                         rel="noreferrer"
                       >
-                        <i className="fab fa-whatsapp" /> Chat on WhatsApp
+                        <CareIcon icon="l-whatsapp" /> Chat on WhatsApp
                       </a>
                     </div>
                   </div>
@@ -677,6 +534,14 @@ export const PatientHome = (props: any) => {
                       </div>
                     </div>
                   )}
+                <div className="sm:col-span-1">
+                  <div className="text-sm font-semibold leading-5 text-zinc-400">
+                    Occupation
+                  </div>
+                  <div className="mt-1  text-sm font-medium leading-5 ">
+                    {parseOccupation(patientData.meta_info?.occupation) || "-"}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -698,7 +563,7 @@ export const PatientHome = (props: any) => {
                           : " bg-red-600/5 p-1 text-sm font-normal text-red-600")
                       }
                     >
-                      <i className="text-md fa-regular fa-clock mr-2" />
+                      <CareIcon icon="l-clock" className="text-md mr-2" />
                       <p className="p-1">
                         {(dayjs().isBefore(patientData.review_time)
                           ? "Review before: "
@@ -758,14 +623,16 @@ export const PatientHome = (props: any) => {
                 </div>
               </div>
               <div className="py-2">
-                {patientData.last_consultation?.discharge_reason === "EXP" && (
+                {patientData.last_consultation?.new_discharge_reason ===
+                  DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id && (
                   <div>
                     <ButtonV2
+                      id="death-report"
                       className="mt-6 w-full"
                       name="death_report"
                       onClick={() => navigate(`/death_report/${id}`)}
                     >
-                      <i className="fas fa-file-download mr-2" />
+                      <CareIcon icon="l-file-download" className="mr-2" />
                       Death Report
                     </ButtonV2>
                   </div>
@@ -777,20 +644,20 @@ export const PatientHome = (props: any) => {
                     authorizeFor={NonReadOnlyUsers}
                     onClick={() =>
                       navigate(
-                        `/facility/${patientData?.facility}/patient/${id}/update`
+                        `/facility/${patientData?.facility}/patient/${id}/update`,
                       )
                     }
                   >
-                    <CareIcon className="care-l-edit-alt text-lg" />
+                    <CareIcon icon="l-edit-alt" className="text-lg" />
                     Update Details
                   </ButtonV2>
                 </div>
                 <div>
                   <ButtonV2
+                    id="patient-allow-transfer"
                     className="mt-4 w-full"
                     disabled={
-                      !consultationListData ||
-                      !consultationListData.length ||
+                      !patientData.last_consultation?.id ||
                       !patientData.is_active
                     }
                     onClick={() =>
@@ -798,7 +665,7 @@ export const PatientHome = (props: any) => {
                     }
                     authorizeFor={NonReadOnlyUsers}
                   >
-                    <CareIcon className="care-l-lock text-lg" />
+                    <CareIcon icon="l-lock" className="text-lg" />
                     {patientData.allow_transfer
                       ? "Disable Transfer"
                       : "Allow Transfer"}
@@ -818,22 +685,22 @@ export const PatientHome = (props: any) => {
           >
             <div>Shifting</div>
             {showShifts ? (
-              <CareIcon className="care-l-angle-up text-2xl" />
+              <CareIcon icon="l-angle-up" className="text-2xl" />
             ) : (
-              <CareIcon className="care-l-angle-down text-2xl" />
+              <CareIcon icon="l-angle-down" className="text-2xl" />
             )}
           </div>
           <div
             className={
               showShifts
-                ? activeShiftingData.length
+                ? activeShiftingData?.count || 0
                   ? "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
                   : ""
                 : "hidden"
             }
           >
-            {activeShiftingData.length ? (
-              activeShiftingData.map((shift: any) => (
+            {activeShiftingData?.count ? (
+              activeShiftingData.results.map((shift: any) => (
                 <div key={`shift_${shift.id}`} className="mx-2 ">
                   <div className="h-full overflow-hidden rounded-lg bg-white shadow">
                     <div
@@ -860,7 +727,10 @@ export const PatientHome = (props: any) => {
                               title="Shifting status"
                               className="flex items-center text-sm font-semibold leading-5 text-zinc-400"
                             >
-                              <CareIcon className="care-l-truck mr-2 text-lg" />
+                              <CareIcon
+                                icon="l-truck"
+                                className="mr-2 text-lg"
+                              />
                               <dd className="text-sm font-bold leading-5 text-gray-900">
                                 {shift.status}
                               </dd>
@@ -871,7 +741,10 @@ export const PatientHome = (props: any) => {
                               title=" Origin facility"
                               className="flex items-center text-sm font-semibold leading-5 text-zinc-400"
                             >
-                              <CareIcon className="care-l-plane-fly mr-2 text-lg" />
+                              <CareIcon
+                                icon="l-plane-fly"
+                                className="mr-2 text-lg"
+                              />
                               <dd className="text-sm font-bold leading-5 text-gray-900">
                                 {(shift.origin_facility_object || {})?.name}
                               </dd>
@@ -882,7 +755,10 @@ export const PatientHome = (props: any) => {
                               title="Shifting approving facility"
                               className="flex items-center text-sm font-semibold leading-5 text-zinc-400"
                             >
-                              <CareIcon className="care-l-user-check mr-2 text-lg" />
+                              <CareIcon
+                                icon="l-user-check"
+                                className="mr-2 text-lg"
+                              />
                               <dd className="text-sm font-bold leading-5 text-gray-900">
                                 {
                                   (
@@ -898,7 +774,10 @@ export const PatientHome = (props: any) => {
                               title=" Assigned facility"
                               className="flex items-center text-sm font-semibold leading-5 text-zinc-400"
                             >
-                              <CareIcon className="care-l-plane-arrival mr-2 text-lg" />
+                              <CareIcon
+                                icon="l-plane-arrival"
+                                className="mr-2 text-lg"
+                              />
                               <dd className="text-sm font-bold leading-5 text-gray-900">
                                 {(shift.assigned_facility_object || {})?.name ||
                                   "Yet to be decided"}
@@ -918,7 +797,10 @@ export const PatientHome = (props: any) => {
                                   : "rounded p-1 font-normal text-red-600")
                               }
                             >
-                              <CareIcon className="care-l-stopwatch mr-2 text-lg" />
+                              <CareIcon
+                                icon="l-stopwatch"
+                                className="mr-2 text-lg"
+                              />
                               <dd className="text-sm font-bold leading-5">
                                 {formatDateTime(shift.modified_date) || "--"}
                               </dd>
@@ -934,7 +816,7 @@ export const PatientHome = (props: any) => {
                             navigate(`/shifting/${shift.external_id}`)
                           }
                         >
-                          <CareIcon className="care-l-eye mr-2 text-lg" />
+                          <CareIcon icon="l-eye" className="mr-2 text-lg" />
                           All Details
                         </ButtonV2>
                       </div>
@@ -948,7 +830,7 @@ export const PatientHome = (props: any) => {
                                 !shift.patient_object.allow_transfer ||
                                 !(
                                   ["DistrictAdmin", "StateAdmin"].includes(
-                                    authUser.user_type
+                                    authUser.user_type,
                                   ) ||
                                   authUser.home_facility_object?.id ===
                                     shift.assigned_facility
@@ -979,7 +861,7 @@ export const PatientHome = (props: any) => {
               ))
             ) : (
               <div className=" text-center text-gray-500">
-                {isShiftDataLoaded ? "No Shifting Records!" : "Loading..."}
+                {isShiftDataLoading ? "Loading..." : "No Shifting Records!"}
               </div>
             )}
           </div>
@@ -1061,7 +943,7 @@ export const PatientHome = (props: any) => {
                 !patientData.ongoing_medication &&
                 !(patientData.gender === 2 && patientData.is_antenatal) &&
                 !patientData.medical_history?.some(
-                  (history) => history.disease !== "NO"
+                  (history) => history.disease !== "NO",
                 ) && (
                   <div className="flex w-full items-center justify-center text-xl font-bold text-gray-500">
                     No Medical History Available
@@ -1138,12 +1020,12 @@ export const PatientHome = (props: any) => {
                   "w-full rounded-lg border",
                   isPatientEligibleForNewConsultation(patientData)
                     ? "cursor-pointer border-green-700 hover:bg-primary-400"
-                    : "border-gray-700 text-gray-700 hover:cursor-not-allowed"
+                    : "border-gray-700 text-gray-700 hover:cursor-not-allowed",
                 )}
                 onClick={() =>
                   isPatientEligibleForNewConsultation(patientData) &&
                   navigate(
-                    `/facility/${patientData?.facility}/patient/${id}/consultation`
+                    `/facility/${patientData?.facility}/patient/${id}/consultation`,
                   )
                 }
               >
@@ -1151,18 +1033,21 @@ export const PatientHome = (props: any) => {
                   className={classNames(
                     "h-full space-y-2 rounded-lg bg-white p-4 shadow",
                     isPatientEligibleForNewConsultation(patientData) &&
-                      "hover:bg-gray-200"
+                      "hover:bg-gray-200",
                   )}
                 >
                   <div
                     className={classNames(
                       "text-center",
                       isPatientEligibleForNewConsultation(patientData) &&
-                        "text-green-700"
+                        "text-green-700",
                     )}
                   >
                     <span>
-                      <CareIcon className="care-l-chat-bubble-user text-5xl" />
+                      <CareIcon
+                        icon="l-chat-bubble-user"
+                        className="text-5xl"
+                      />
                     </span>
                   </div>
 
@@ -1180,7 +1065,7 @@ export const PatientHome = (props: any) => {
                 <div className="h-full space-y-2 rounded-lg border border-green-700 bg-white p-4 shadow hover:cursor-pointer hover:bg-gray-200">
                   <div className="text-center text-green-700">
                     <span>
-                      <CareIcon className="care-l-file-search-alt text-5xl" />
+                      <CareIcon icon="l-file-search-alt" className="text-5xl" />
                     </span>
                   </div>
                   <div>
@@ -1194,14 +1079,14 @@ export const PatientHome = (props: any) => {
                 className="w-full"
                 onClick={() =>
                   navigate(
-                    `/facility/${patientData?.facility}/patient/${id}/files/`
+                    `/facility/${patientData?.facility}/patient/${id}/files/`,
                   )
                 }
               >
                 <div className="h-full space-y-2 rounded-lg border border-green-700 bg-white p-4 shadow hover:cursor-pointer hover:bg-gray-200">
                   <div className="text-center text-green-700">
                     <span>
-                      <CareIcon className="care-l-file-upload text-5xl" />
+                      <CareIcon icon="l-file-upload" className="text-5xl" />
                     </span>
                   </div>
                   <div>
@@ -1234,7 +1119,7 @@ export const PatientHome = (props: any) => {
                     }  text-center `}
                   >
                     <span>
-                      <CareIcon className="care-l-ambulance text-5xl" />
+                      <CareIcon icon="l-ambulance" className="text-5xl" />
                     </span>
                   </div>
 
@@ -1255,7 +1140,7 @@ export const PatientHome = (props: any) => {
                 onClick={() => {
                   if (!isPatientInactive(patientData, facilityId)) {
                     navigate(
-                      `/facility/${patientData?.facility}/patient/${id}/sample-test`
+                      `/facility/${patientData?.facility}/patient/${id}/sample-test`,
                     );
                   }
                 }}
@@ -1265,7 +1150,7 @@ export const PatientHome = (props: any) => {
                     "h-full space-y-2 rounded-lg border bg-white p-4 shadow",
                     isPatientInactive(patientData, facilityId)
                       ? " border-gray-700 hover:cursor-not-allowed"
-                      : " border-green-700 hover:cursor-pointer hover:bg-gray-200"
+                      : " border-green-700 hover:cursor-pointer hover:bg-gray-200",
                   )}
                 >
                   <div
@@ -1276,7 +1161,7 @@ export const PatientHome = (props: any) => {
                     } text-center  `}
                   >
                     <span>
-                      <CareIcon className="care-l-medkit text-5xl" />
+                      <CareIcon icon="l-medkit" className="text-5xl" />
                     </span>
                   </div>
                   <div>
@@ -1295,14 +1180,14 @@ export const PatientHome = (props: any) => {
                 className="w-full"
                 onClick={() =>
                   navigate(
-                    `/facility/${patientData?.facility}/patient/${id}/notes`
+                    `/facility/${patientData?.facility}/patient/${id}/notes`,
                   )
                 }
               >
                 <div className="h-full space-y-2 rounded-lg border border-green-700 bg-white p-4 shadow hover:cursor-pointer hover:bg-gray-200">
                   <div className="text-center text-green-700">
                     <span>
-                      <CareIcon className="care-l-clipboard-notes text-5xl" />
+                      <CareIcon icon="l-clipboard-notes" className="text-5xl" />
                     </span>
                   </div>
                   <div>
@@ -1325,7 +1210,7 @@ export const PatientHome = (props: any) => {
                     "h-full space-y-2 rounded-lg border bg-white p-4 shadow",
                     isPatientInactive(patientData, facilityId)
                       ? "border-gray-700 hover:cursor-not-allowed"
-                      : "border-green-700 hover:cursor-pointer hover:bg-gray-200"
+                      : "border-green-700 hover:cursor-pointer hover:bg-gray-200",
                   )}
                 >
                   <div
@@ -1333,11 +1218,11 @@ export const PatientHome = (props: any) => {
                       "text-center",
                       isPatientInactive(patientData, facilityId)
                         ? "text-gray-700"
-                        : "text-green-700"
+                        : "text-green-700",
                     )}
                   >
                     <span>
-                      <CareIcon className="care-l-users-alt text-5xl" />
+                      <CareIcon icon="l-users-alt" className="text-5xl" />
                     </span>
                   </div>
                   <div>
@@ -1346,7 +1231,7 @@ export const PatientHome = (props: any) => {
                         "text-center text-sm font-medium",
                         isPatientInactive(patientData, facilityId)
                           ? "text-gray-700"
-                          : "text-black"
+                          : "text-black",
                       )}
                     >
                       Assign to a volunteer
@@ -1371,12 +1256,12 @@ export const PatientHome = (props: any) => {
                     }
                     onClick={() =>
                       navigate(
-                        `/facility/${patientData?.facility}/patient/${id}/consultation`
+                        `/facility/${patientData?.facility}/patient/${id}/consultation`,
                       )
                     }
                   >
                     <span className="flex w-full items-center justify-start gap-2">
-                      <CareIcon className="care-l-chat-bubble-user text-xl" />
+                      <CareIcon icon="l-chat-bubble-user" className="text-xl" />
                       Add Consultation
                     </span>
                   </ButtonV2>
@@ -1389,7 +1274,7 @@ export const PatientHome = (props: any) => {
                     }
                   >
                     <span className="flex w-full items-center justify-start gap-2">
-                      <CareIcon className="care-l-file-search-alt text-xl" />
+                      <CareIcon icon="l-file-search-alt" className="text-xl" />
                       Investigations Summary
                     </span>
                   </ButtonV2>
@@ -1397,14 +1282,15 @@ export const PatientHome = (props: any) => {
                 <div>
                   <ButtonV2
                     className="w-full"
+                    id="upload-patient-files"
                     onClick={() =>
                       navigate(
-                        `/facility/${patientData?.facility}/patient/${id}/files`
+                        `/facility/${patientData?.facility}/patient/${id}/files`,
                       )
                     }
                   >
                     <span className="flex w-full items-center justify-start gap-2">
-                      <CareIcon className="care-l-file-upload text-xl" />
+                      <CareIcon icon="l-file-upload" className="text-xl" />
                       View/Upload Patient Files
                     </span>
                   </ButtonV2>
@@ -1415,13 +1301,13 @@ export const PatientHome = (props: any) => {
                     disabled={isPatientInactive(patientData, facilityId)}
                     onClick={() =>
                       navigate(
-                        `/facility/${facilityId}/patient/${id}/shift/new`
+                        `/facility/${facilityId}/patient/${id}/shift/new`,
                       )
                     }
                     authorizeFor={NonReadOnlyUsers}
                   >
                     <span className="flex w-full items-center justify-start gap-2">
-                      <CareIcon className="care-l-ambulance text-xl" />
+                      <CareIcon icon="l-ambulance" className="text-xl" />
                       Shift Patient
                     </span>
                   </ButtonV2>
@@ -1432,13 +1318,13 @@ export const PatientHome = (props: any) => {
                     disabled={isPatientInactive(patientData, facilityId)}
                     onClick={() =>
                       navigate(
-                        `/facility/${patientData?.facility}/patient/${id}/sample-test`
+                        `/facility/${patientData?.facility}/patient/${id}/sample-test`,
                       )
                     }
                     authorizeFor={NonReadOnlyUsers}
                   >
                     <span className="flex w-full items-center justify-start gap-2">
-                      <CareIcon className="care-l-medkit text-xl" />
+                      <CareIcon icon="l-medkit" className="text-xl" />
                       Request Sample Test
                     </span>
                   </ButtonV2>
@@ -1448,12 +1334,12 @@ export const PatientHome = (props: any) => {
                     className="w-full"
                     onClick={() =>
                       navigate(
-                        `/facility/${patientData?.facility}/patient/${id}/notes`
+                        `/facility/${patientData?.facility}/patient/${id}/notes`,
                       )
                     }
                   >
                     <span className="flex w-full items-center justify-start gap-2">
-                      <CareIcon className="care-l-clipboard-notes text-xl" />
+                      <CareIcon icon="l-clipboard-notes" className="text-xl" />
                       View Patient Notes
                     </span>
                   </ButtonV2>
@@ -1466,7 +1352,7 @@ export const PatientHome = (props: any) => {
                     authorizeFor={NonReadOnlyUsers}
                   >
                     <span className="flex w-full items-center justify-start gap-2">
-                      <CareIcon className="care-l-users-alt text-xl" />
+                      <CareIcon icon="l-users-alt" className="text-xl" />
                       Assign to a volunteer
                     </span>
                   </ButtonV2>
@@ -1502,34 +1388,67 @@ export const PatientHome = (props: any) => {
         <h2 className="ml-0 mt-9 text-2xl font-semibold leading-tight">
           Consultation History
         </h2>
-        {consultationList}
-        {!isConsultationLoading && totalConsultationCount > limit && (
-          <div className="mt-4 flex w-full justify-center">
-            <Pagination
-              cPage={currentConsultationPage}
-              defaultPerPage={limit}
-              data={{ totalCount: totalConsultationCount }}
-              onChange={handleConsultationPagination}
-            />
-          </div>
-        )}
+
+        <PaginatedList
+          route={routes.getConsultationList}
+          query={{ patient: id }}
+          perPage={5}
+        >
+          {(_) => (
+            <div>
+              <PaginatedList.WhenLoading>
+                <CircularProgress />
+              </PaginatedList.WhenLoading>
+              <PaginatedList.Items<ConsultationModel>>
+                {(item) => (
+                  <ConsultationCard
+                    itemData={item}
+                    isLastConsultation={
+                      item.id == patientData.last_consultation?.id
+                    }
+                    refetch={refetch}
+                  />
+                )}
+              </PaginatedList.Items>
+              <div className="flex w-full items-center justify-center">
+                <PaginatedList.Paginator hideIfSinglePage />
+              </div>
+            </div>
+          )}
+        </PaginatedList>
       </div>
 
       <div>
         <h2 className="my-4 ml-0 text-2xl font-semibold leading-tight">
           Sample Test History
         </h2>
-        {sampleList}
-        {!isSampleLoading && totalSampleListCount > limit && (
-          <div className="mt-4 flex w-full justify-center">
-            <Pagination
-              cPage={currentSampleListPage}
-              defaultPerPage={limit}
-              data={{ totalCount: totalSampleListCount }}
-              onChange={handleSampleListPagination}
-            />
-          </div>
-        )}
+        <PaginatedList
+          route={routes.sampleTestList}
+          pathParams={{ patientId: id }}
+          perPage={5}
+        >
+          {(_, query) => (
+            <div>
+              <PaginatedList.WhenLoading>
+                <CircularProgress />
+              </PaginatedList.WhenLoading>
+              <PaginatedList.Items<SampleTestModel>>
+                {(item) => (
+                  <SampleTestCard
+                    refetch={query.refetch}
+                    itemData={item}
+                    handleApproval={confirmApproval}
+                    facilityId={facilityId}
+                    patientId={id}
+                  />
+                )}
+              </PaginatedList.Items>
+              <div className="flex w-full items-center justify-center">
+                <PaginatedList.Paginator hideIfSinglePage />
+              </div>
+            </div>
+          )}
+        </PaginatedList>
       </div>
     </Page>
   );

@@ -38,13 +38,13 @@ const AssetsList = () => {
     resultsPerPage,
   } = useFilters({
     limit: 18,
+    cacheBlacklist: ["search"],
   });
   const [assets, setAssets] = useState([{} as AssetData]);
   const [isLoading, setIsLoading] = useState(false);
   const [isScannerActive, setIsScannerActive] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [facility, setFacility] = useState<FacilityModel>();
-  const [asset_type, setAssetType] = useState<string>();
   const [status, setStatus] = useState<string>();
   const [asset_class, setAssetClass] = useState<string>();
   const [importAssetModalOpen, setImportAssetModalOpen] = useState(false);
@@ -59,7 +59,6 @@ const AssetsList = () => {
     offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
     search_text: qParams.search || "",
     facility: qParams.facility || "",
-    asset_type: qParams.asset_type || "",
     asset_class: qParams.asset_class || "",
     location: qParams.facility ? qParams.location || "" : "",
     status: qParams.status || "",
@@ -89,10 +88,6 @@ const AssetsList = () => {
     },
     prefetch: !!qParams.facility,
   });
-
-  useEffect(() => {
-    setAssetType(qParams.asset_type);
-  }, [qParams.asset_type]);
 
   useEffect(() => {
     setStatus(qParams.status);
@@ -130,12 +125,12 @@ const AssetsList = () => {
 
   const checkValidAssetId = async (assetId: string) => {
     const { data: assetData } = await request(routes.getAsset, {
-      pathParams: { id: assetId },
+      pathParams: { external_id: assetId },
     });
     try {
       if (assetData) {
         navigate(
-          `/facility/${assetData.location_object.facility.id}/assets/${assetId}`
+          `/facility/${assetData.location_object.facility?.id}/assets/${assetId}`,
         );
       }
     } catch (err) {
@@ -148,7 +143,7 @@ const AssetsList = () => {
   };
 
   const authorizedForImportExport = useIsAuthorized(
-    AuthorizeFor(["DistrictAdmin", "StateAdmin"])
+    AuthorizeFor(["DistrictAdmin", "StateAdmin"]),
   );
 
   if (isScannerActive)
@@ -158,7 +153,8 @@ const AssetsList = () => {
           onClick={() => setIsScannerActive(false)}
           className="btn btn-default mb-2"
         >
-          <i className="fas fa-times mr-2"></i> Close Scanner
+          <CareIcon icon="l-times" className="mr-1 text-lg" />
+          Close Scanner
         </button>
         <QrReader
           delay={300}
@@ -192,7 +188,7 @@ const AssetsList = () => {
         {assets.map((asset: AssetData) => (
           <Link
             key={asset.id}
-            href={`/facility/${asset?.location_object.facility.id}/assets/${asset.id}`}
+            href={`/facility/${asset?.location_object.facility?.id}/assets/${asset.id}`}
             className="h-full text-inherit"
             data-testid="created-asset-list"
           >
@@ -204,13 +200,14 @@ const AssetsList = () => {
                 <p className="flex break-words text-xl font-medium capitalize">
                   <span className="mr-2 text-primary-500">
                     <CareIcon
-                      className={`care-l-${
+                      icon={
                         (
                           (asset.asset_class &&
                             assetClassProps[asset.asset_class]) ||
                           assetClassProps.NONE
                         ).icon
-                      } text-2xl`}
+                      }
+                      className="text-2xl"
                     />
                   </span>
                   <p
@@ -223,11 +220,17 @@ const AssetsList = () => {
               </div>
               <p className="text-sm font-normal">
                 <span className="text-sm font-medium">
-                  <CareIcon className="care-l-location-point mr-1 text-primary-500" />
+                  <CareIcon
+                    icon="l-location-point"
+                    className="mr-1 text-primary-500"
+                  />
                   {asset?.location_object?.name}
                 </span>
                 <span className="ml-2 text-sm font-medium">
-                  <CareIcon className="care-l-hospital mr-1 text-primary-500" />
+                  <CareIcon
+                    icon="l-hospital"
+                    className="mr-1 text-primary-500"
+                  />
                   {asset?.location_object?.facility?.name}
                 </span>
               </p>
@@ -239,6 +242,13 @@ const AssetsList = () => {
                   <Chip variant="danger" startIcon="l-cog" text="Not Working" />
                 )}
                 {warrantyAmcValidityChip(asset.warranty_amc_end_of_validity)}
+                {asset?.latest_status === "Down" && (
+                  <Chip
+                    variant="danger"
+                    startIcon="l-link-broken"
+                    text={asset?.latest_status}
+                  />
+                )}{" "}
               </div>
             </div>
           </Link>
@@ -269,7 +279,10 @@ const AssetsList = () => {
                     label: "Import Assets",
                     options: {
                       icon: (
-                        <CareIcon className="care-l-import import-assets-button" />
+                        <CareIcon
+                          icon="l-import"
+                          className="import-assets-button"
+                        />
                       ),
                       onClick: () => setImportAssetModalOpen(true),
                     },
@@ -286,7 +299,7 @@ const AssetsList = () => {
                     type: "json",
                     filePrefix: `assets_${facility?.name ?? "all"}`,
                     options: {
-                      icon: <CareIcon className="care-l-export" />,
+                      icon: <CareIcon icon="l-export" />,
                       disabled: totalCount === 0 || !authorizedForImportExport,
                       id: "export-json-option",
                     },
@@ -303,7 +316,7 @@ const AssetsList = () => {
                     type: "csv",
                     filePrefix: `assets_${facility?.name ?? "all"}`,
                     options: {
-                      icon: <CareIcon className="care-l-export" />,
+                      icon: <CareIcon icon="l-export" />,
                       disabled: totalCount === 0 || !authorizedForImportExport,
                       id: "export-csv-option",
                     },
@@ -342,7 +355,8 @@ const AssetsList = () => {
               className="w-full py-[11px]"
               onClick={() => setIsScannerActive(true)}
             >
-              <i className="fas fa-search mr-1"></i> Scan Asset QR
+              <CareIcon icon="l-search" className="mr-1 text-base" /> Scan Asset
+              QR
             </ButtonV2>
           </div>
           <div
@@ -360,7 +374,7 @@ const AssetsList = () => {
                 }
               }}
             >
-              <CareIcon className="care-l-plus-circle text-lg" />
+              <CareIcon icon="l-plus-circle" className="text-lg" />
               <span>{t("create_asset")}</span>
             </ButtonV2>
           </div>
@@ -376,26 +390,25 @@ const AssetsList = () => {
               value(
                 "Facility",
                 "facility",
-                qParams.facility && facilityObject?.name
+                qParams.facility && facilityObject?.name,
               ),
               badge("Name/Serial No./QR ID", "search"),
-              value("Asset Type", "asset_type", asset_type ?? ""),
               value("Asset Class", "asset_class", asset_class ?? ""),
               value("Status", "status", status?.replace(/_/g, " ") ?? ""),
               value(
                 "Location",
                 "location",
-                qParams.location && locationObject?.name
+                qParams.location && locationObject?.name,
               ),
               value(
                 "Warranty AMC End Of Validity Before",
                 "warranty_amc_end_of_validity_before",
-                qParams.warranty_amc_end_of_validity_before ?? ""
+                qParams.warranty_amc_end_of_validity_before ?? "",
               ),
               value(
                 "Warranty AMC End Of Validity After",
                 "warranty_amc_end_of_validity_after",
-                qParams.warranty_amc_end_of_validity_after ?? ""
+                qParams.warranty_amc_end_of_validity_after ?? "",
               ),
             ]}
           />
@@ -455,7 +468,7 @@ const AssetsList = () => {
 };
 
 export const warrantyAmcValidityChip = (
-  warranty_amc_end_of_validity: string
+  warranty_amc_end_of_validity: string,
 ) => {
   if (warranty_amc_end_of_validity === "" || !warranty_amc_end_of_validity)
     return;
@@ -463,7 +476,8 @@ export const warrantyAmcValidityChip = (
   const warrantyAmcEndDate = new Date(warranty_amc_end_of_validity);
 
   const days = Math.ceil(
-    Math.abs(Number(warrantyAmcEndDate) - Number(today)) / (1000 * 60 * 60 * 24)
+    Math.abs(Number(warrantyAmcEndDate) - Number(today)) /
+      (1000 * 60 * 60 * 24),
   );
 
   if (warrantyAmcEndDate < today) {

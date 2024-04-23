@@ -20,7 +20,7 @@ interface Props<T extends ConditionVerificationStatus> {
 }
 
 export default function ConditionVerificationStatusMenu<
-  T extends ConditionVerificationStatus
+  T extends ConditionVerificationStatus,
 >(props: Props<T>) {
   const { t } = useTranslation();
 
@@ -30,7 +30,7 @@ export default function ConditionVerificationStatusMenu<
       className={classNames(
         props.className,
         props.value && StatusStyle[props.value].colors,
-        props.value && "border !border-gray-400 bg-white hover:bg-gray-300"
+        props.value && "border !border-gray-400 bg-white hover:bg-gray-300",
       )}
       id="condition-verification-status-menu"
       title={props.value ? t(props.value) : props.placeholder ?? t("add_as")}
@@ -49,7 +49,7 @@ export default function ConditionVerificationStatusMenu<
                 icon="l-coronavirus"
                 className={classNames(
                   "hidden text-lg transition-all duration-200 ease-in-out group-hover:rotate-90 group-hover:text-inherit md:block",
-                  props.value === status ? "text-inherit-500" : "text-gray-500"
+                  props.value === status ? "text-inherit-500" : "text-gray-500",
                 )}
               />
             }
@@ -59,7 +59,7 @@ export default function ConditionVerificationStatusMenu<
             <div className="flex w-full max-w-xs flex-col items-start gap-1 whitespace-nowrap md:whitespace-normal">
               <span className={props.value === status ? "font-medium" : ""}>
                 {InactiveConditionVerificationStatuses.includes(
-                  status as (typeof InactiveConditionVerificationStatuses)[number]
+                  status as (typeof InactiveConditionVerificationStatuses)[number],
                 )
                   ? "Remove as "
                   : ""}

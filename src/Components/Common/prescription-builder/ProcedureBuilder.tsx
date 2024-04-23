@@ -30,7 +30,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
   const setItem = (object: ProcedureType, i: number) => {
     setProcedures(
-      procedures.map((procedure, index) => (index === i ? object : procedure))
+      procedures.map((procedure, index) => (index === i ? object : procedure)),
     );
   };
 
@@ -55,18 +55,19 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                     className="flex h-full items-center justify-center gap-2 rounded-md bg-red-500 px-3 py-1 text-sm text-gray-100 transition hover:bg-red-600"
                     onClick={() =>
                       setProcedures(
-                        procedures.filter((procedure, index) => i != index)
+                        procedures.filter((procedure, index) => i != index),
                       )
                     }
                   >
                     Delete Procedure
-                    <CareIcon className="care-l-trash-alt h-4 w-4" />
+                    <CareIcon icon="l-trash-alt" className="h-4 w-4" />
                   </button>
                 </div>
                 <div className="w-full">
                   Procedure
                   <span className="text-danger-500">{" *"}</span>
                   <input
+                    id="procedure-name"
                     type="text"
                     className="mt-1 block w-full rounded border border-gray-400 bg-gray-100 px-4 py-2 text-sm hover:bg-gray-200 focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-primary-500"
                     placeholder="Procedure"
@@ -80,7 +81,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                           ...procedure,
                           procedure: e.currentTarget.value,
                         },
-                        i
+                        i,
                       );
                     }}
                   />
@@ -101,7 +102,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                             ...procedure,
                             repetitive: e.currentTarget.checked,
                           },
-                          i
+                          i,
                         );
                       }}
                     />
@@ -124,7 +125,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                               ...procedure,
                               frequency,
                             },
-                            i
+                            i,
                           );
                         }}
                       />
@@ -135,6 +136,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                         Time<span className="text-danger-500">{" *"}</span>
                       </div>
                       <input
+                        id="procedure-time"
                         type="datetime-local"
                         className="block w-[calc(100%-5px)] rounded border border-gray-400 bg-gray-100 px-4 py-2 text-sm hover:bg-gray-200 focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-primary-500"
                         value={procedure.time || ""}
@@ -146,7 +148,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                               ...procedure,
                               time: e.currentTarget.value,
                             },
-                            i
+                            i,
                           );
                         }}
                       />
@@ -169,7 +171,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                           ...procedure,
                           notes: e.currentTarget.value,
                         },
-                        i
+                        i,
                       );
                     }}
                   />

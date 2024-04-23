@@ -1,7 +1,6 @@
 import {
   CONSULTATION_TABS,
   GENDER_TYPES,
-  OptionsType,
   SYMPTOM_CHOICES,
 } from "../../../Common/constants";
 import { ConsultationModel } from "../models";
@@ -15,7 +14,6 @@ import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { lazy, useCallback, useState } from "react";
 import DoctorVideoSlideover from "../DoctorVideoSlideover";
 import { make as Link } from "../../Common/components/Link.bs";
-import PatientInfoCard from "../../Patient/PatientInfoCard";
 import { PatientModel } from "../../Patient/models";
 import { formatDateTime, relativeTime } from "../../../Utils/utils";
 
@@ -37,8 +35,10 @@ import { ConsultationDialysisTab } from "./ConsultationDialysisTab";
 import { ConsultationNeurologicalMonitoringTab } from "./ConsultationNeurologicalMonitoringTab";
 import { ConsultationNutritionTab } from "./ConsultationNutritionTab";
 import PatientNotesSlideover from "../PatientNotesSlideover";
-import LegacyDiagnosesList from "../../Diagnosis/LegacyDiagnosesList";
 import { AssetBedModel } from "../../Assets/AssetTypes";
+import PatientInfoCard from "../../Patient/PatientInfoCard";
+import RelativeDateUserMention from "../../Common/RelativeDateUserMention";
+import DiagnosesListAccordion from "../../Diagnosis/DiagnosesListAccordion";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
@@ -77,7 +77,7 @@ export const ConsultationDetails = (props: any) => {
   const [qParams, _] = useQueryParams();
 
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
-    {} as ConsultationModel
+    {} as ConsultationModel,
   );
   const [patientData, setPatientData] = useState<PatientModel>({});
   const [activeShiftingData, setActiveShiftingData] = useState<Array<any>>([]);
@@ -122,7 +122,7 @@ export const ConsultationDetails = (props: any) => {
           }
           if (facilityId != data.facility || patientId != data.patient) {
             navigate(
-              `/facility/${data.facility}/patient/${data.patient}/consultation/${data?.id}`
+              `/facility/${data.facility}/patient/${data.patient}/consultation/${data?.id}`,
             );
           }
           setConsultationData(data);
@@ -130,7 +130,7 @@ export const ConsultationDetails = (props: any) => {
             ? await dispatch(
                 listAssetBeds({
                   bed: data?.current_bed?.bed_object?.id,
-                })
+                }),
               )
             : null;
           const isCameraAttachedRes =
@@ -146,7 +146,7 @@ export const ConsultationDetails = (props: any) => {
             const patientGender = getPatientGender(patientRes.data);
             const patientAddress = getPatientAddress(patientRes.data);
             const patientComorbidities = getPatientComorbidities(
-              patientRes.data
+              patientRes.data,
             );
             const data = {
               ...patientRes.data,
@@ -164,7 +164,7 @@ export const ConsultationDetails = (props: any) => {
 
           // Get shifting data
           const shiftingRes = await dispatch(
-            listShiftRequests({ patient: id }, "shift-list-call")
+            listShiftRequests({ patient: id }, "shift-list-call"),
           );
           if (shiftingRes?.data?.results) {
             const data = shiftingRes.data.results;
@@ -176,7 +176,7 @@ export const ConsultationDetails = (props: any) => {
         setIsLoading(false);
       }
     },
-    [consultationId, dispatch, patientData.is_vaccinated]
+    [consultationId, dispatch, patientData.is_vaccinated],
   );
 
   useAbortableEffect((status: statusType) => {
@@ -227,7 +227,7 @@ export const ConsultationDetails = (props: any) => {
   //             <p>{diagnosis.label}</p>
   //             <div>
   //               <ToolTip text="Principal Diagnosis" position="BOTTOM">
-  //                 <CareIcon className="care-l-stethoscope rounded-lg bg-primary-500  p-1 text-2xl text-white" />
+  //                 <CareIcon icon="l-stethoscope" className="rounded-lg bg-primary-500 p-1 text-2xl text-white"/>
   //               </ToolTip>
   //             </div>
   //           </div>
@@ -272,7 +272,7 @@ export const ConsultationDetails = (props: any) => {
                 name:
                   consultationData.suggestion === "A"
                     ? `Admitted on ${formatDateTime(
-                        consultationData.encounter_date!
+                        consultationData.encounter_date!,
                       )}`
                     : consultationData.suggestion_text,
               },
@@ -280,7 +280,10 @@ export const ConsultationDetails = (props: any) => {
             breadcrumbs={true}
             backUrl="/patients"
           />
-          <div className="flex w-full flex-col min-[1150px]:w-min min-[1150px]:flex-row min-[1150px]:items-center">
+          <div
+            className="flex w-full flex-col min-[1150px]:w-min min-[1150px]:flex-row min-[1150px]:items-center"
+            id="consultationpage-header"
+          >
             {!consultationData.discharge_date && (
               <>
                 <button
@@ -300,7 +303,7 @@ export const ConsultationDetails = (props: any) => {
                 {patientData.last_consultation?.id &&
                   isCameraAttached &&
                   ["DistrictAdmin", "StateAdmin", "Doctor"].includes(
-                    authUser.user_type
+                    authUser.user_type,
                   ) && (
                     <Link
                       href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
@@ -314,6 +317,7 @@ export const ConsultationDetails = (props: any) => {
             <Link
               href={`/facility/${patientData.facility}/patient/${patientData.id}`}
               className="btn btn-primary m-1 w-full hover:text-white"
+              id="patient-details"
             >
               Patient Details
             </Link>
@@ -322,7 +326,7 @@ export const ConsultationDetails = (props: any) => {
               onClick={() =>
                 showPatientNotesPopup
                   ? navigate(
-                      `/facility/${facilityId}/patient/${patientId}/notes`
+                      `/facility/${facilityId}/patient/${patientId}/notes`,
                     )
                   : setShowPatientNotesPopup(true)
               }
@@ -343,7 +347,7 @@ export const ConsultationDetails = (props: any) => {
               showAbhaProfile={qParams["show-abha-profile"] === "true"}
             />
 
-            <div className="flex flex-col justify-between border-t px-4 pt-5 md:flex-row">
+            <div className="flex flex-col justify-between px-4 md:flex-row">
               {consultationData.admitted_to && (
                 <div className="mt-2 rounded-lg border bg-gray-100 p-2 md:mt-0">
                   <div className="border-b-2 py-1">
@@ -361,7 +365,7 @@ export const ConsultationDetails = (props: any) => {
                       {relativeTime(
                         consultationData.discharge_date
                           ? consultationData.discharge_date
-                          : consultationData.encounter_date
+                          : consultationData.encounter_date,
                       )}
                     </div>
                   )}
@@ -374,71 +378,41 @@ export const ConsultationDetails = (props: any) => {
                 </div>
               )}
             </div>
-
-            <div className="flex flex-col-reverse gap-2 px-4 lg:flex-row">
-              <div className="flex h-full w-3/4 flex-col">
-                {/*consultationData.other_symptoms && (
-                  <div className="capitalize">
-                    <span className="font-semibold leading-relaxed">
-                      Other Symptoms:{" "}
-                    </span>
-                    {consultationData.other_symptoms}
-                  </div>
-                )*/}
-
-                <LegacyDiagnosesList
-                  diagnoses={consultationData.diagnoses || []}
-                />
-
-                {(consultationData.treating_physician_object ||
-                  consultationData.deprecated_verified_by) && (
-                  <div className="mt-2 text-sm">
-                    <span className="font-semibold leading-relaxed">
-                      Treating Physician:{" "}
-                    </span>
-                    {consultationData.treating_physician_object
-                      ? `${consultationData.treating_physician_object.first_name} ${consultationData.treating_physician_object.last_name}`
-                      : consultationData.deprecated_verified_by}
-                    <i className="fas fa-check ml-2 fill-current text-lg text-green-500"></i>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="flex flex-col justify-between gap-2 p-4 md:flex-row">
+            <div className="flex flex-col justify-between gap-2 px-4 py-1 md:flex-row">
               <div className="font-base flex flex-col text-xs leading-relaxed text-gray-700">
-                <div>
-                  <span className="text-gray-900">Created: </span>
-                  {consultationData.created_date
-                    ? formatDateTime(consultationData.created_date)
-                    : "--:--"}{" "}
-                  |
+                <div className="flex">
+                  <span className="text-gray-900">Created: </span>&nbsp;
+                  <RelativeDateUserMention
+                    actionDate={consultationData.created_date}
+                    user={consultationData.created_by}
+                    tooltipPosition="right"
+                    withoutSuffix={true}
+                  />
                 </div>
-                {consultationData.created_by && (
-                  <div>
-                    {` ${consultationData.created_by.first_name} ${consultationData.created_by.last_name}  `}
-                    {`@${consultationData.created_by.username} (${consultationData.created_by.user_type})`}
-                  </div>
-                )}
               </div>
               <div className="font-base flex flex-col text-xs leading-relaxed text-gray-700 md:text-right">
-                <div>
-                  <span className="text-gray-900">Last Modified: </span>
-                  {consultationData.modified_date
-                    ? formatDateTime(consultationData.modified_date)
-                    : "--:--"}{" "}
-                  |
+                <div className="flex">
+                  <span className="text-gray-900">Last Modified: </span>&nbsp;
+                  <RelativeDateUserMention
+                    actionDate={consultationData.modified_date}
+                    user={consultationData.last_edited_by}
+                    tooltipPosition="left"
+                    withoutSuffix={true}
+                  />
                 </div>
-                {consultationData.last_edited_by && (
-                  <div>
-                    {` ${consultationData.last_edited_by.first_name} ${consultationData.last_edited_by.last_name}  `}
-                    {`@${consultationData.last_edited_by.username} (${consultationData.last_edited_by.user_type})`}
-                  </div>
-                )}
               </div>
             </div>
           </div>
         </div>
-
+        {!!consultationData.diagnoses?.length && (
+          <div className="col-span-1 mt-2 overflow-hidden rounded-lg bg-white shadow">
+            <div className="px-4 py-2">
+              <DiagnosesListAccordion
+                diagnoses={consultationData.diagnoses ?? []}
+              />
+            </div>
+          </div>
+        )}
         <div className="mt-4 w-full border-b-2 border-gray-200">
           <div className="overflow-x-auto sm:flex sm:items-baseline">
             <div className="mt-4 sm:mt-0">
@@ -446,14 +420,14 @@ export const ConsultationDetails = (props: any) => {
                 className="flex space-x-6 overflow-x-auto pb-2 pl-2 "
                 id="consultation_tab_nav"
               >
-                {CONSULTATION_TABS.map((p: OptionsType) => {
+                {CONSULTATION_TABS.map((p) => {
                   if (p.text === "FEED") {
                     if (
                       isCameraAttached === false || // No camera attached
                       consultationData?.discharge_date || // Discharged
                       !consultationData?.current_bed?.bed_object?.id || // Not admitted to bed
                       !["DistrictAdmin", "StateAdmin", "Doctor"].includes(
-                        authUser.user_type
+                        authUser.user_type,
                       ) // Not admin or doctor
                     )
                       return null; // Hide feed tab

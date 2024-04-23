@@ -1,3 +1,4 @@
+import { IconName } from "../../CAREUI/icons/CareIcon";
 import { BedModel } from "../Facility/models";
 import { PerformedByModel } from "../HCX/misc";
 import { PatientModel } from "../Patient/models";
@@ -9,14 +10,14 @@ export enum AssetLocationType {
 }
 
 export interface AssetLocationObject {
-  id: string;
+  id?: string;
   name: string;
   description: string;
   created_date?: string;
   modified_date?: string;
   location_type: AssetLocationType;
   middleware_address?: string;
-  facility: {
+  facility?: {
     id: string;
     name: string;
   };
@@ -42,25 +43,31 @@ export const AssetStatus = {
   maintenance: "Under Maintenance",
 };
 
-export const assetClassProps = {
+export const assetClassProps: {
+  [key in AssetClass]: {
+    name: string;
+    description?: string;
+    icon: IconName;
+  };
+} = {
   ONVIF: {
     name: "ONVIF Camera",
     description: "",
-    icon: "camera",
+    icon: "l-camera",
   },
   HL7MONITOR: {
     name: "HL7 Vitals Monitor",
     description: "",
-    icon: "monitor-heart-rate",
+    icon: "l-monitor-heart-rate",
   },
   VENTILATOR: {
     name: "Ventilator",
     description: "",
-    icon: "lungs",
+    icon: "l-lungs",
   },
   NONE: {
     name: "N/A",
-    icon: "box",
+    icon: "l-box",
   },
 };
 
@@ -99,13 +106,12 @@ export interface AssetData {
   manufacturer: string;
   warranty_amc_end_of_validity: string;
   resolved_middleware?: ResolvedMiddleware;
+  latest_status: string;
   last_service: AssetService;
   meta?: {
     [key: string]: any;
   };
 }
-
-export type AssetUpdate = Partial<AssetData>;
 
 export interface AssetsResponse {
   count: number;
@@ -114,16 +120,11 @@ export interface AssetsResponse {
   results: AssetData[];
 }
 
-export interface AssetUptimeRecord {
-  id: string;
-  asset: {
-    id: string;
-    name: string;
-  };
+export interface AvailabilityRecord {
+  linked_id: string;
+  linked_model: string;
   status: string;
   timestamp: string;
-  created_date: string;
-  modified_date: string;
 }
 
 export interface AssetTransaction {

@@ -75,7 +75,18 @@ export const ConfigureHealthFacility = (props: any) => {
 
     let response = null;
     let responseData = null;
-    if (state.form.health_facility) {
+    if (state.form.hf_id === state.form.health_facility?.hf_id) {
+      const { res, data } = await request(
+        routes.abha.registerHealthFacilityAsService,
+        {
+          pathParams: {
+            facility_id: facilityId,
+          },
+        },
+      );
+      response = res;
+      responseData = data;
+    } else if (state.form.health_facility) {
       const { res, data } = await request(
         routes.abha.partialUpdateHealthFacility,
         {
@@ -85,43 +96,10 @@ export const ConfigureHealthFacility = (props: any) => {
           body: {
             hf_id: state.form.hf_id,
           },
-        }
+        },
       );
       response = res;
       responseData = data;
-    } else if (state.form.hf_id === state.form.health_facility?.hf_id) {
-      const { res, data } = await request(
-        routes.abha.registerHealthFacilityAsService,
-        {
-          pathParams: {
-            facility_id: facilityId,
-          },
-        }
-      );
-      response = res;
-      responseData = data;
-
-      if (response?.status === 200 && responseData) {
-        if (responseData?.registered) {
-          dispatch({
-            type: "set_form",
-            form: {
-              ...state.form,
-              health_facility: {
-                ...state.form?.health_facility,
-                registered: responseData.registered,
-              },
-            },
-          });
-
-          return;
-        }
-      }
-
-      Notification.Error({
-        msg: "Service registration failed, please try again later",
-      });
-      return;
     } else {
       const { res, data } = await request(routes.abha.createHealthFacility, {
         body: {
@@ -133,17 +111,22 @@ export const ConfigureHealthFacility = (props: any) => {
       responseData = data;
     }
 
-    setIsLoading(false);
-    if (response && responseData) {
+    if (response?.ok && responseData?.registered) {
       Notification.Success({
         msg: "Health Facility config updated successfully",
       });
       navigate(`/facility/${facilityId}`);
     } else {
-      if (responseData)
-        Notification.Error({
-          msg: "Something went wrong: " + (responseData.detail || ""),
+      if (responseData?.registered === false) {
+        Notification.Warn({
+          msg: responseData?.detail || "Health ID registration failed",
         });
+        navigate(`/facility/${facilityId}`);
+      } else {
+        Notification.Error({
+          msg: responseData?.detail || "Health Facility config update failed",
+        });
+      }
     }
     setIsLoading(false);
   };
@@ -173,7 +156,7 @@ export const ConfigureHealthFacility = (props: any) => {
                     "tooltip cursor-pointer text-sm",
                     state.form.health_facility?.registered
                       ? "text-primary-600 hover:text-primary-800"
-                      : "text-warning-600 hover:text-warning-800"
+                      : "text-warning-600 hover:text-warning-800",
                   )}
                 >
                   {state.form.health_facility?.registered ? (

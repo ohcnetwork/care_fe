@@ -1,15 +1,11 @@
-import { useCallback, useReducer, useState } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  updateMinQuantity,
-  getAnyFacility,
-  getMinQuantityOfItem,
-} from "../../Redux/actions";
+import { useReducer, useState } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import ButtonV2 from "../Common/components/ButtonV2";
 import DialogModal from "../Common/Dialog";
 import TextFormField from "../Form/FormFields/TextFormField";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 
 const initForm = {
   id: "",
@@ -42,56 +38,47 @@ export const MinQuantityRequiredModal = (props: any) => {
   const [state, dispatch] = useReducer(inventoryFormReducer, initialState);
   const { facilityId, inventoryId, itemId, show, handleClose, handleUpdate } =
     props;
-  const dispatchAction: any = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
-  const [data, setData] = useState(" ");
-  const [facilityName, setFacilityName] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatchAction(
-        getMinQuantityOfItem(facilityId, inventoryId)
-      );
-      if (!status.aborted) {
-        if (res && res.data) {
-          setData(res.data.item_object.name);
-          const form = { ...state.form, quantity: res.data.min_quantity };
+  const { data: minimumQuantityItemData } = useQuery(
+    routes.getMinQuantityItem,
+    {
+      pathParams: {
+        facilityId,
+        inventoryId,
+      },
+      prefetch: !!facilityId && !!inventoryId,
+      onResponse: async ({ res, data }) => {
+        setIsLoading(true);
+        if (res?.ok && data) {
+          const form = { ...state.form, quantity: data.min_quantity };
           dispatch({ type: "set_form", form });
         }
-        if (facilityId) {
-          const res = await dispatchAction(getAnyFacility(facilityId));
-
-          setFacilityName(res?.data?.name || "");
-        } else {
-          setFacilityName("");
-        }
-
         setIsLoading(false);
-      }
+      },
     },
-    [dispatchAction, facilityId, inventoryId]
   );
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
-  );
+
+  const { data: facilityObject } = useQuery(routes.getAnyFacility, {
+    pathParams: { id: facilityId },
+    prefetch: !!facilityId,
+  });
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setIsLoading(true);
-    const data: any = {
-      min_quantity: Number(state.form.quantity),
-      item: Number(itemId),
-    };
-
-    const res = await dispatchAction(
-      updateMinQuantity(data, { facilityId, inventoryId })
-    );
+    const { res, data } = await request(routes.updateMinQuantity, {
+      pathParams: {
+        facilityId,
+        inventoryId,
+      },
+      body: {
+        min_quantity: Number(state.form.quantity),
+        item: Number(itemId),
+      },
+    });
     setIsLoading(false);
-    if (res && res.data) {
+    if (res?.ok && data) {
       Notification.Success({
         msg: "Minimum quantity updated successfully",
       });
@@ -138,8 +125,9 @@ export const MinQuantityRequiredModal = (props: any) => {
           {" "}
           <div className="mb-4">
             <p className="mt-1 text-sm text-gray-500">
-              Set the minimum quantity for <strong>{data}</strong> in{" "}
-              <strong> {facilityName}</strong>
+              Set the minimum quantity for{" "}
+              <strong>{minimumQuantityItemData?.item_object.name}</strong> in{" "}
+              <strong> {facilityObject?.name}</strong>
             </p>
           </div>
           <div className="mb-4">
@@ -154,7 +142,12 @@ export const MinQuantityRequiredModal = (props: any) => {
             />
           </div>
           <div className="flex justify-end">
-            <ButtonV2 variant="primary" onClick={handleSubmit} className="mr-2">
+            <ButtonV2
+              variant="primary"
+              onClick={handleSubmit}
+              className="mr-2"
+              id="save-update-minimumquanitity"
+            >
               Update
             </ButtonV2>
             <ButtonV2 variant="secondary" onClick={handleClose}>

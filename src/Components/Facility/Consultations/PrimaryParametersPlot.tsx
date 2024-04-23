@@ -17,6 +17,17 @@ interface PrimaryParametersPlotProps {
   consultationId: string;
 }
 
+const sanitizeBPAttribute = (value: number | undefined) => {
+  // Temp. hack until the cleaning of daily rounds as a db migration is done.
+  // TODO: remove once migration is merged.
+
+  if (value == null || value < 0) {
+    return;
+  }
+
+  return value;
+};
+
 export const PrimaryParametersPlot = ({
   consultationId,
 }: PrimaryParametersPlotProps) => {
@@ -27,7 +38,7 @@ export const PrimaryParametersPlot = ({
   useEffect(() => {
     const fetchDailyRounds = async (
       currentPage: number,
-      consultationId: string
+      consultationId: string,
     ) => {
       const { res, data } = await request(routes.dailyRoundsAnalyse, {
         body: {
@@ -77,19 +88,19 @@ export const PrimaryParametersPlot = ({
     {
       name: "diastolic",
       data: Object.values(results)
-        .map((p: any) => p.bp && p.bp.diastolic)
+        .map((p: any) => p.bp && sanitizeBPAttribute(p.bp.diastolic))
         .reverse(),
     },
     {
       name: "systolic",
       data: Object.values(results)
-        .map((p: any) => p.bp && p.bp.systolic)
+        .map((p: any) => p.bp && sanitizeBPAttribute(p.bp.systolic))
         .reverse(),
     },
     {
       name: "mean",
       data: Object.values(results)
-        .map((p: any) => p.bp && p.bp.mean)
+        .map((p: any) => p.bp && sanitizeBPAttribute(p.bp.mean))
         .reverse(),
     },
   ];
@@ -121,7 +132,7 @@ export const PrimaryParametersPlot = ({
       const key: string = dayjs(obj[0]).format("MMMM D, YYYY");
       const lst: Array<any> = Object.prototype.hasOwnProperty.call(
         rhythmValues,
-        key
+        key,
       )
         ? rhythmValues[key]
         : [];
@@ -136,7 +147,7 @@ export const PrimaryParametersPlot = ({
 
   return (
     <div>
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2" id="vital-section">
         <div className="m-2 overflow-x-auto rounded-lg border bg-white px-4 pt-4 shadow md:w-full">
           <StackedLinePlot title="BP" xData={dates} yData={BPData} />
         </div>
@@ -218,9 +229,15 @@ export const PrimaryParametersPlot = ({
                               }`}
                             >
                               {rhythmDetails.rhythm === 5 ? (
-                                <CareIcon className="care-l-check-circle text-xl" />
+                                <CareIcon
+                                  icon="l-check-circle"
+                                  className="text-xl"
+                                />
                               ) : (
-                                <CareIcon className="care-l-times-circle text-xl" />
+                                <CareIcon
+                                  icon="l-times-circle"
+                                  className="text-xl"
+                                />
                               )}
                             </span>
                           </div>
@@ -250,7 +267,7 @@ export const PrimaryParametersPlot = ({
                         </div>
                       </div>
                     </li>
-                  ))
+                  )),
                 )}
               </ul>
             </div>

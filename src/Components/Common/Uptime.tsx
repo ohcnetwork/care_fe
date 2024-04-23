@@ -1,12 +1,10 @@
 import { Popover } from "@headlessui/react";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { listAssetAvailability } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
-import * as Notification from "../../Utils/Notifications.js";
-import { AssetStatus, AssetUptimeRecord } from "../Assets/AssetTypes";
-import { reverse } from "lodash-es";
+import { useEffect, useRef, useState } from "react";
+import { AssetStatus, AvailabilityRecord } from "../Assets/AssetTypes";
 import { classNames } from "../../Utils/utils";
 import dayjs from "../../Utils/dayjs";
+import useQuery from "../../Utils/request/useQuery.js";
+import { PaginatedResponse, QueryRoute } from "../../Utils/request/types";
 
 const STATUS_COLORS = {
   Operational: "bg-green-500",
@@ -24,7 +22,7 @@ const STATUS_COLORS_TEXT = {
 
 const now = dayjs();
 const formatDateBeforeDays = Array.from({ length: 100 }, (_, index) =>
-  now.subtract(index, "days").format("DD MMMM YYYY")
+  now.subtract(index, "days").format("DD MMMM YYYY"),
 );
 
 const uptimeScore: number[] = Array.from({ length: 100 }, () => 0);
@@ -39,7 +37,7 @@ function UptimeInfo({
   records,
   date,
 }: {
-  records: AssetUptimeRecord[];
+  records: AvailabilityRecord[];
   date: string;
 }) {
   const incidents =
@@ -63,12 +61,12 @@ function UptimeInfo({
               <>
                 <span className="my-2 block font-bold">Status Updates</span>
                 <div className="grid grid-cols-1 gap-1 md:grid-cols-4">
-                  {reverse(incidents)?.map((incident, index) => {
+                  {incidents.reverse().map((incident, index) => {
                     const prevIncident = incidents[index - 1];
                     let endTimestamp;
                     let ongoing = false;
 
-                    if (prevIncident?.id) {
+                    if (prevIncident?.linked_id) {
                       endTimestamp = dayjs(prevIncident.timestamp);
                     } else if (dayjs(incident.timestamp).isSame(now, "day")) {
                       endTimestamp = dayjs();
@@ -84,10 +82,10 @@ function UptimeInfo({
                           dayjs
                             .duration(
                               dayjs(endTimestamp).diff(
-                                dayjs(incident.timestamp)
-                              )
+                                dayjs(incident.timestamp),
+                              ),
                             )
-                            .asMinutes()
+                            .asMinutes(),
                         )
                       : "Ongoing";
                     if (
@@ -96,7 +94,7 @@ function UptimeInfo({
                     )
                       totalMinutes += dayjs(endTimestamp).diff(
                         dayjs(incident.timestamp),
-                        "minutes"
+                        "minutes",
                       );
 
                     return (
@@ -143,7 +141,7 @@ function UptimeInfoPopover({
   date,
   numDays,
 }: {
-  records: AssetUptimeRecord[];
+  records: AvailabilityRecord[];
   day: number;
   date: string;
   numDays: number;
@@ -156,8 +154,8 @@ function UptimeInfoPopover({
           day > numDays - 10
             ? "-translate-x-6"
             : day < 10
-            ? "-translate-x-full"
-            : "-translate-x-1/2"
+              ? "-translate-x-full"
+              : "-translate-x-1/2",
         )}
         static
       >
@@ -167,20 +165,28 @@ function UptimeInfoPopover({
   );
 }
 
-export default function Uptime(props: { assetId: string }) {
+export default function Uptime(
+  props: Readonly<{
+    route: QueryRoute<PaginatedResponse<AvailabilityRecord>>;
+    params?: Record<string, string | number>;
+    header?: React.ReactNode;
+    parentClassNames?: string;
+    centerInfoPanel?: boolean;
+  }>,
+) {
   const [summary, setSummary] = useState<{
-    [key: number]: AssetUptimeRecord[];
+    [key: number]: AvailabilityRecord[];
   }>([]);
-  const [availabilityData, setAvailabilityData] = useState<AssetUptimeRecord[]>(
-    []
-  );
-  const [loading, setLoading] = useState(true);
+  const { data, loading } = useQuery(props.route, {
+    pathParams: props.params,
+    onResponse: ({ data }) => setUptimeRecord(data?.results.reverse() ?? []),
+  });
+  const availabilityData = data?.results ?? [];
   const graphElem = useRef<HTMLDivElement>(null);
   const [numDays, setNumDays] = useState(
-    Math.floor((window.innerWidth - 1024) / 20)
+    Math.floor((window.innerWidth - 1024) / 20),
   );
   const [hoveredDay, setHoveredDay] = useState(-1);
-  const dispatch = useDispatch<any>();
 
   const handleResize = () => {
     const containerWidth = graphElem.current?.clientWidth ?? window.innerWidth;
@@ -188,8 +194,10 @@ export default function Uptime(props: { assetId: string }) {
     setNumDays(Math.min(newNumDays, 100));
   };
 
-  const setUptimeRecord = (records: AssetUptimeRecord[]): void => {
-    const recordsByDayBefore: { [key: number]: AssetUptimeRecord[] } = {};
+  const centerInfoPanel = props.centerInfoPanel ?? false;
+
+  const setUptimeRecord = (records: AvailabilityRecord[]): void => {
+    const recordsByDayBefore: { [key: number]: AvailabilityRecord[] } = {};
 
     records.forEach((record) => {
       const timestamp = dayjs(record.timestamp).startOf("day");
@@ -209,10 +217,8 @@ export default function Uptime(props: { assetId: string }) {
         recordsByDayBefore[i] = [];
         if (statusToCarryOver) {
           recordsByDayBefore[i].push({
-            id: "",
-            asset: { id: "", name: "" },
-            created_date: "",
-            modified_date: "",
+            linked_id: "",
+            linked_model: "",
             status: statusToCarryOver,
             timestamp: dayjs()
               .subtract(i, "days")
@@ -223,14 +229,12 @@ export default function Uptime(props: { assetId: string }) {
       } else {
         if (
           recordsByDayBefore[i].filter(
-            (r) => dayjs(r.timestamp).get("hour") < 8
+            (r) => dayjs(r.timestamp).get("hour") < 8,
           ).length === 0
         ) {
           recordsByDayBefore[i].unshift({
-            id: "",
-            asset: { id: "", name: "" },
-            created_date: "",
-            modified_date: "",
+            linked_id: "",
+            linked_model: "",
             status: statusToCarryOver,
             timestamp: dayjs()
               .subtract(i, "days")
@@ -255,7 +259,7 @@ export default function Uptime(props: { assetId: string }) {
         .set("hour", 0)
         .set("minute", 0)
         .set("second", 0),
-      "days"
+      "days",
     );
 
     const days = Math.max(1, Math.min(daysAvailable, displayDays));
@@ -268,25 +272,6 @@ export default function Uptime(props: { assetId: string }) {
     return Math.round((upStatus / (days * 3)) * 100);
   }
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setLoading(false);
-
-    const availabilityData = await dispatch(
-      listAssetAvailability({
-        external_id: props.assetId,
-      })
-    );
-    if (availabilityData?.data) {
-      setAvailabilityData(availabilityData.data.results);
-      setUptimeRecord(reverse(availabilityData.data.results));
-    } else {
-      Notification.Error({
-        msg: "Error fetching availability history",
-      });
-    }
-  }, [dispatch, props.assetId]);
-
   useEffect(() => {
     setTimeout(() => {
       handleResize();
@@ -297,8 +282,7 @@ export default function Uptime(props: { assetId: string }) {
 
   useEffect(() => {
     handleResize();
-    fetchData();
-  }, [props.assetId, fetchData]);
+  }, []);
 
   const getStatusColor = (day: number) => {
     if (summary[day]) {
@@ -306,14 +290,14 @@ export default function Uptime(props: { assetId: string }) {
       const statusColors: (typeof STATUS_COLORS)[keyof typeof STATUS_COLORS][] =
         [];
       let dayUptimeScore = 0;
-      const recordsInPeriodCache: { [key: number]: AssetUptimeRecord[] } = {};
+      const recordsInPeriodCache: { [key: number]: AvailabilityRecord[] } = {};
       for (let i = 0; i < 3; i++) {
         const start = i * 8;
         const end = (i + 1) * 8;
         const recordsInPeriod = dayRecords.filter(
           (record) =>
             dayjs(record.timestamp).hour() >= start &&
-            dayjs(record.timestamp).hour() < end
+            dayjs(record.timestamp).hour() < end,
         );
         recordsInPeriodCache[i] = recordsInPeriod;
         if (recordsInPeriod.length === 0) {
@@ -334,7 +318,7 @@ export default function Uptime(props: { assetId: string }) {
             statusColors.push(
               STATUS_COLORS[
                 previousLatestRecord?.status as keyof typeof STATUS_COLORS
-              ] ?? STATUS_COLORS["Not Monitored"]
+              ] ?? STATUS_COLORS["Not Monitored"],
             );
             recordsInPeriodCache[i] = [previousLatestRecord];
           } else {
@@ -342,19 +326,19 @@ export default function Uptime(props: { assetId: string }) {
           }
         } else if (
           recordsInPeriod.some(
-            (record) => record.status === AssetStatus["down"]
+            (record) => record.status === AssetStatus["down"],
           )
         ) {
           statusColors.push(STATUS_COLORS["Down"]);
         } else if (
           recordsInPeriod.some(
-            (record) => record.status === AssetStatus["maintenance"]
+            (record) => record.status === AssetStatus["maintenance"],
           )
         ) {
           statusColors.push(STATUS_COLORS["Under Maintenance"]);
         } else if (
           recordsInPeriod.some(
-            (record) => record.status === AssetStatus["operational"]
+            (record) => record.status === AssetStatus["operational"],
           )
         ) {
           statusColors.push(STATUS_COLORS["Operational"]);
@@ -382,10 +366,10 @@ export default function Uptime(props: { assetId: string }) {
     );
   } else if (summary) {
     return (
-      <div className="mt-8 flex w-full flex-col bg-white p-4 shadow-sm sm:rounded-lg">
-        <div className="mx-2 w-full">
+      <div className={props.parentClassNames}>
+        <div className="w-full">
           <div className="grid grid-cols-1">
-            <div className="text-xl font-semibold">Availability History</div>
+            {props.header}
             <div>
               <div className="mt-2 overflow-x-clip px-5">
                 <div className="mb-1 mt-2 flex justify-center text-xs text-gray-700 opacity-70">
@@ -428,15 +412,13 @@ export default function Uptime(props: { assetId: string }) {
                             }`}
                           ></div>
                         </span>
-                        {hoveredDay === index && (
-                          <>
-                            <UptimeInfoPopover
-                              records={summary[index]}
-                              day={index}
-                              date={formatDateBeforeDays[index]}
-                              numDays={numDays}
-                            />
-                          </>
+                        {hoveredDay === index && !centerInfoPanel && (
+                          <UptimeInfoPopover
+                            records={summary[index]}
+                            day={index}
+                            date={formatDateBeforeDays[index]}
+                            numDays={numDays}
+                          />
                         )}
                       </>
                     );
@@ -453,7 +435,7 @@ export default function Uptime(props: { assetId: string }) {
               </div>
             </div>
             {hoveredDay !== -1 && (
-              <div className="relative sm:hidden">
+              <div className={`relative ${!centerInfoPanel && "sm:hidden"}`}>
                 <UptimeInfo
                   records={summary[hoveredDay]}
                   date={formatDateBeforeDays[hoveredDay]}

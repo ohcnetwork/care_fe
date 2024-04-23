@@ -1,3 +1,4 @@
+import { Dispatch, SetStateAction } from "react";
 import { LocalStorageKeys } from "../../Common/constants";
 import * as Notification from "../Notifications";
 import { QueryParams, RequestOptions } from "./types";
@@ -5,12 +6,12 @@ import { QueryParams, RequestOptions } from "./types";
 export function makeUrl(
   path: string,
   query?: QueryParams,
-  pathParams?: Record<string, string>
+  pathParams?: Record<string, string | number>,
 ) {
   if (pathParams) {
     path = Object.entries(pathParams).reduce(
-      (acc, [key, value]) => acc.replace(`{${key}}`, value),
-      path
+      (acc, [key, value]) => acc.replace(`{${key}}`, `${value}`),
+      path,
     );
   }
 
@@ -39,10 +40,11 @@ const ensurePathNotMissingReplacements = (path: string) => {
   const missingParams = path.match(/\{.*\}/g);
 
   if (missingParams) {
-    Notification.Error({
-      msg: `Missing path params: ${missingParams.join(", ")}`,
-    });
-    throw new Error(`Missing path params: ${missingParams.join(", ")}`);
+    const msg = `Missing path params: ${missingParams.join(
+      ", ",
+    )}. Path: ${path}`;
+    Notification.Error({ msg });
+    throw new Error(msg);
   }
 };
 
@@ -75,7 +77,7 @@ export function getAuthorizationHeader() {
 
 export function mergeRequestOptions<TData>(
   options: RequestOptions<TData>,
-  overrides: RequestOptions<TData>
+  overrides: RequestOptions<TData>,
 ): RequestOptions<TData> {
   return {
     ...options,
@@ -94,4 +96,14 @@ export function mergeRequestOptions<TData>(
     },
     silent: overrides.silent ?? options.silent,
   };
+}
+
+export function handleUploadPercentage(
+  event: ProgressEvent,
+  setUploadPercent: Dispatch<SetStateAction<number>>,
+) {
+  if (event.lengthComputable) {
+    const percentComplete = Math.round((event.loaded / event.total) * 100);
+    setUploadPercent(percentComplete);
+  }
 }

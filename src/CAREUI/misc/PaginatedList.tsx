@@ -7,7 +7,6 @@ import ButtonV2, {
 import CareIcon from "../icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import Pagination from "../../Components/Common/Pagination";
-import Timeline from "../display/Timeline";
 
 const DEFAULT_PER_PAGE_LIMIT = 14;
 
@@ -36,7 +35,7 @@ interface Props<TItem> extends QueryOptions<PaginatedResponse<TItem>> {
   perPage?: number;
   children: (
     ctx: PaginatedListContext<TItem>,
-    query: ReturnType<typeof useQuery<PaginatedResponse<TItem>>>
+    query: ReturnType<typeof useQuery<PaginatedResponse<TItem>>>,
   ) => JSX.Element | JSX.Element[];
 }
 
@@ -135,21 +134,19 @@ const Items = <TItem extends object>(props: ItemsProps<TItem>) => {
   }
 
   return (
-    <Timeline className="rounded-lg bg-white p-2 shadow" name="log update">
-      <ul className={props.className}>
-        {loading && props.shimmer
-          ? Array.from({ length: props.shimmerCount ?? 8 }).map((_, i) => (
-              <li key={i} className="w-full">
-                {props.shimmer}
-              </li>
-            ))
-          : items.map((item, index, items) => (
-              <li key={index} className="w-full">
-                {props.children(item, items)}
-              </li>
-            ))}
-      </ul>
-    </Timeline>
+    <ul className={props.className}>
+      {loading && props.shimmer
+        ? Array.from({ length: props.shimmerCount ?? 8 }).map((_, i) => (
+            <li key={i} className="w-full">
+              {props.shimmer}
+            </li>
+          ))
+        : items.map((item, index, items) => (
+            <li key={index} className="w-full">
+              {props.children(item, items)}
+            </li>
+          ))}
+    </ul>
   );
 };
 

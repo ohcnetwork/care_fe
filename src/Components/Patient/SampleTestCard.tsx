@@ -1,9 +1,7 @@
 import { navigate } from "raviger";
 import { useState } from "react";
 import { SampleTestModel } from "./models";
-import { useDispatch } from "react-redux";
 import { SAMPLE_TEST_STATUS } from "../../Common/constants";
-import { patchSample } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import UpdateStatusDialog from "./UpdateStatusDialog";
 import _ from "lodash-es";
@@ -11,17 +9,19 @@ import { formatDateTime } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 interface SampleDetailsProps {
   facilityId: number;
   patientId: number;
   itemData: SampleTestModel;
+  refetch: () => void;
   handleApproval: (status: number, sample: SampleTestModel) => void;
 }
 
 export const SampleTestCard = (props: SampleDetailsProps) => {
-  const { itemData, handleApproval, facilityId, patientId } = props;
-  const dispatch: any = useDispatch();
+  const { itemData, handleApproval, facilityId, patientId, refetch } = props;
 
   const [statusDialog, setStatusDialog] = useState<{
     show: boolean;
@@ -31,7 +31,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
   const handleApproval1 = async (
     sample: SampleTestModel,
     status: number,
-    result: number
+    result: number,
   ) => {
     const sampleData: any = {
       id: sample.id,
@@ -43,15 +43,21 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
       sampleData.date_of_result = new Date().toISOString();
     }
     const statusName = SAMPLE_TEST_STATUS.find((i) => i.id === status)?.desc;
-
-    const res = await dispatch(patchSample(sampleData, { id: sample.id }));
-    if (res && (res.status === 201 || res.status === 200)) {
-      window.location.reload();
-      Notification.Success({
-        msg: `Success - ${statusName}`,
-      });
-    }
-    dismissUpdateStatus();
+    await request(routes.patchSample, {
+      pathParams: {
+        id: sample.id!,
+      },
+      body: sampleData,
+      onResponse: ({ res }) => {
+        if (res?.ok) {
+          refetch();
+          Notification.Success({
+            msg: `Success - ${statusName}`,
+          });
+        }
+        dismissUpdateStatus();
+      },
+    });
   };
 
   const showUpdateStatus = (sample: SampleTestModel) => {
@@ -74,14 +80,14 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
         itemData.result === "POSITIVE"
           ? "border-red-500 bg-red-100 hover:border-red-700"
           : itemData.result === "NEGATIVE"
-          ? "border-primary-500 bg-primary-100 hover:border-primary-700"
-          : "bg-white hover:border-primary-500"
+            ? "border-primary-500 bg-primary-100 hover:border-primary-700"
+            : "bg-white hover:border-primary-500"
       } mt-4 block cursor-pointer rounded-lg border bg-white p-4 text-black shadow`}
     >
       <div
         onClick={(_e) =>
           navigate(
-            `/facility/${facilityId}/patient/${patientId}/sample/${itemData.id}`
+            `/facility/${facilityId}/patient/${patientId}/sample/${itemData.id}`,
           )
         }
         className="ml-2 mt-2 grid grid-cols-1 gap-4 md:grid-cols-4"
@@ -132,7 +138,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
           </div>
         </div>
       </div>
-      <div className="m-2 mt-4 flex flex-col justify-between gap-4 md:flex-row">
+      <div className="m-2 mt-4 flex flex-col justify-between md:flex-row lg:gap-4">
         <div className="flex flex-col justify-between gap-4 md:flex-row">
           <div>
             <div className="mb-2 text-sm text-gray-700">
@@ -150,16 +156,17 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          <div className="flex flex-col items-center justify-end text-sm text-gray-700 md:flex-row">
-            Created:{" "}
+          <div className="flex flex-col flex-nowrap items-center justify-end text-sm text-gray-700 md:flex-col md:items-start md:justify-start lg:flex-row lg:items-center">
+            <div className=" font-medium text-black">Created: </div>
+
             <RelativeDateUserMention
               actionDate={itemData.created_date}
               user={itemData.created_by}
               tooltipPosition="left"
             />
           </div>
-          <div className="flex flex-col items-center justify-end text-sm text-gray-700 md:flex-row">
-            Last Modified:{" "}
+          <div className="flex flex-col items-center justify-end text-sm text-gray-700 md:flex-col md:items-start lg:flex-row lg:items-center">
+            <div className=" font-medium text-black">Last Modified: </div>
             <RelativeDateUserMention
               actionDate={itemData.modified_date}
               user={itemData.last_edited_by}

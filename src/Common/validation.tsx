@@ -23,7 +23,7 @@ export const validateEmailAddress = (email: string) => {
 export const getArrayValueByKey = (
   arr: Array<any>,
   attr: string,
-  value: string | number
+  value: string | number,
 ) => {
   for (let i = 0; i < arr.length; i++) {
     if (arr[i][attr] === value) {
@@ -43,7 +43,7 @@ export const validateName = (name: string) => {
 };
 
 export const validateUsername = (username: string) => {
-  const pattern = /^[\w.@+-]+[^.@+_-]$/;
+  const pattern = /^(?!.*[._-]{2})[a-z0-9](?:[a-z0-9._-]{2,14}[a-z0-9])$/s;
   return pattern.test(username);
 };
 

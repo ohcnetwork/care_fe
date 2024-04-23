@@ -22,32 +22,33 @@ export const CreateDiagnosesBuilder = (props: CreateDiagnosesProps) => {
   return (
     <div className={props.className}>
       <div className="flex w-full flex-col items-start rounded-lg border border-gray-400">
-        <div className="flex w-full flex-col gap-2 p-4">
+        <ul className="flex w-full flex-col gap-2 p-4">
           {props.value.map((diagnosis, index) => (
-            <ConsultationDiagnosisEntry
-              key={index}
-              value={diagnosis}
-              onChange={(action) => {
-                if (action.type === "remove") {
-                  props.onChange(props.value.toSpliced(index, 1));
-                }
+            <li key={index} id={`diagnosis-entry-${index}`}>
+              <ConsultationDiagnosisEntry
+                value={diagnosis}
+                onChange={(action) => {
+                  if (action.type === "remove") {
+                    props.onChange([...props.value].splice(index, 1));
+                  }
 
-                if (action.type === "edit") {
-                  const diagnoses = [...props.value];
-                  diagnoses[index] = action.value as CreateDiagnosis;
-                  props.onChange(diagnoses);
-                }
-              }}
-            />
+                  if (action.type === "edit") {
+                    const diagnoses = [...props.value];
+                    diagnoses[index] = action.value as CreateDiagnosis;
+                    props.onChange(diagnoses);
+                  }
+                }}
+              />
+            </li>
           ))}
-        </div>
+        </ul>
 
         {props.value.length === 0 && <NoDiagnosisAdded />}
 
         <div className="w-full rounded-b-lg bg-gray-200 px-4 pt-4">
           <AddICD11Diagnosis
             disallowed={props.value.map(
-              (obj) => obj.diagnosis_object as ICD11DiagnosisModel
+              (obj) => obj.diagnosis_object as ICD11DiagnosisModel,
             )}
             onAdd={async (diagnosis) => {
               props.onChange([...props.value, diagnosis]);
@@ -66,7 +67,7 @@ export const CreateDiagnosesBuilder = (props: CreateDiagnosesProps) => {
               ...d,
               is_principal:
                 d.diagnosis_object?.id === value?.diagnosis_object?.id,
-            }))
+            })),
           );
         }}
       />
@@ -85,31 +86,32 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
   return (
     <div className={props.className}>
       <div className="flex w-full flex-col items-start rounded-lg border border-gray-400">
-        <div className="flex w-full flex-col gap-2 p-4">
+        <ul className="flex w-full flex-col gap-2 p-4">
           {diagnoses.map((diagnosis, index) => (
-            <ConsultationDiagnosisEntry
-              key={index}
-              value={diagnosis}
-              consultationId={consultation}
-              onChange={(action) => {
-                setDiagnoses(
-                  diagnoses.map((diagnose, i) =>
-                    i === index
-                      ? (action.value as ConsultationDiagnosis)
-                      : diagnose
-                  )
-                );
-              }}
-            />
+            <li key={index} id={`diagnosis-entry-${index}`}>
+              <ConsultationDiagnosisEntry
+                value={diagnosis}
+                consultationId={consultation}
+                onChange={(action) => {
+                  setDiagnoses(
+                    diagnoses.map((diagnose, i) =>
+                      i === index
+                        ? (action.value as ConsultationDiagnosis)
+                        : diagnose,
+                    ),
+                  );
+                }}
+              />
+            </li>
           ))}
-        </div>
+        </ul>
 
         {diagnoses.length === 0 && <NoDiagnosisAdded />}
 
         <div className="w-full rounded-b-lg bg-gray-200 px-4 pt-4">
           <AddICD11Diagnosis
             disallowed={diagnoses.map(
-              (obj) => obj.diagnosis_object as ICD11DiagnosisModel
+              (obj) => obj.diagnosis_object as ICD11DiagnosisModel,
             )}
             onAdd={async (diagnosis) => {
               const { res, data, error } = await request(
@@ -117,7 +119,7 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
                 {
                   pathParams: { consultation },
                   body: diagnosis,
-                }
+                },
               );
 
               if (res?.ok && data) {
@@ -148,12 +150,12 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
                   pathParams: { consultation, id: d.id },
                   body: { ...d, is_principal: false },
                 });
-              })
+              }),
           );
 
           if (!value) {
             setDiagnoses((diagnoses) =>
-              diagnoses.map((d) => ({ ...d, is_principal: false }))
+              diagnoses.map((d) => ({ ...d, is_principal: false })),
             );
             return;
           }
@@ -164,14 +166,14 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
             {
               pathParams: { consultation, id: value.id },
               body: { ...value, is_principal: true },
-            }
+            },
           );
 
           if (res?.ok && data) {
             setDiagnoses((diagnoses) =>
               diagnoses.map((d) =>
-                d.id === data.id ? data : { ...d, is_principal: false }
-              )
+                d.id === data.id ? data : { ...d, is_principal: false },
+              ),
             );
           }
 

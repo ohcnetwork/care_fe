@@ -13,16 +13,6 @@ import routes from "../../Redux/api";
 import Loading from "../Common/Loading";
 import { LocalBodyModel, WardModel } from "../Facility/models";
 
-const clearFilterState = {
-  created_date_before: "",
-  created_date_after: "",
-  result_date_before: "",
-  result_date_after: "",
-  sample_collection_date_before: "",
-  sample_collection_date_after: "",
-  srf_id: "",
-};
-
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
 
@@ -98,7 +88,7 @@ export default function ListFilter(props: any) {
   const handleDateRangeChange = (
     startDateId: string,
     endDateId: string,
-    e: any
+    e: any,
   ) => {
     const filterData: any = { ...filterState };
     filterData[startDateId] = e.value.start?.toString();
@@ -144,10 +134,10 @@ export default function ListFilter(props: any) {
       result_date_before: dateQueryString(result_date_before),
       result_date_after: dateQueryString(result_date_after),
       sample_collection_date_after: dateQueryString(
-        sample_collection_date_after
+        sample_collection_date_after,
       ),
       sample_collection_date_before: dateQueryString(
-        sample_collection_date_before
+        sample_collection_date_before,
       ),
       srf_id: srf_id,
     };
@@ -185,11 +175,7 @@ export default function ListFilter(props: any) {
       advancedFilter={props}
       onApply={applyFilter}
       onClear={() => {
-        removeFilters([
-          ...Object.keys(clearFilterState),
-          "wards",
-          "local_bodies",
-        ]);
+        removeFilters();
         closeFilter();
       }}
     >
@@ -255,7 +241,7 @@ export default function ListFilter(props: any) {
           handleDateRangeChange(
             "sample_collection_date_after",
             "sample_collection_date_before",
-            e
+            e,
           )
         }
         label={t("sample_collection_date")}

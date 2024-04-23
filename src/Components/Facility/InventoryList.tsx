@@ -1,65 +1,36 @@
-import { useState, useCallback, useEffect, lazy } from "react";
-
+import { useState, lazy } from "react";
 import { navigate } from "raviger";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getInventorySummary, getAnyFacility } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { classNames } from "../../Utils/utils";
 import Page from "../Common/components/Page";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function InventoryList(props: any) {
   const { facilityId }: any = props;
-  const dispatchAction: any = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
-  const initialInventory: any[] = [];
   let inventoryItem: any = null;
-  const [inventory, setInventory] = useState(initialInventory);
   const [offset, setOffset] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-  const [facilityName, setFacilityName] = useState("");
   const limit = 14;
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatchAction(
-        getInventorySummary(facilityId, { limit, offset })
-      );
-      if (!status.aborted) {
-        if (res?.data) {
-          setInventory(res.data.results);
-          setTotalCount(res.data.count);
-        }
-        setIsLoading(false);
-      }
+  const { data: inventoryData } = useQuery(routes.getInventorySummary, {
+    pathParams: {
+      facility_external_id: facilityId,
     },
-    [dispatchAction, offset, facilityId]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
+    query: {
+      limit,
+      offset,
     },
-    [fetchData]
-  );
+    prefetch: facilityId !== undefined,
+  });
 
-  useEffect(() => {
-    async function fetchFacilityName() {
-      if (facilityId) {
-        const res = await dispatchAction(getAnyFacility(facilityId));
-
-        setFacilityName(res?.data?.name || "");
-      } else {
-        setFacilityName("");
-      }
-    }
-    fetchFacilityName();
-  }, [dispatchAction, facilityId]);
+  const { data: facilityObject } = useQuery(routes.getAnyFacility, {
+    pathParams: { id: facilityId },
+    prefetch: !!facilityId,
+  });
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
@@ -68,17 +39,18 @@ export default function InventoryList(props: any) {
   };
 
   let inventoryList: any = [];
-  if (inventory?.length) {
-    inventoryList = inventory.map((inventoryItem: any) => (
+  if (inventoryData?.results.length) {
+    inventoryList = inventoryData.results.map((inventoryItem: any) => (
       <tr
+        id={`${inventoryItem.item_object?.name.replaceAll(" ", "-")}`}
         key={inventoryItem.id}
         className={classNames(
           "cursor-pointer hover:bg-gray-200",
-          inventoryItem.is_low ? "bg-red-100" : "bg-white"
+          inventoryItem.is_low ? "bg-red-100" : "bg-white",
         )}
         onClick={() =>
           navigate(
-            `/facility/${facilityId}/inventory/${inventoryItem.item_object?.id}`
+            `/facility/${facilityId}/inventory/${inventoryItem.item_object?.id}`,
           )
         }
       >
@@ -100,7 +72,7 @@ export default function InventoryList(props: any) {
         </td>
       </tr>
     ));
-  } else if (inventory && inventory.length === 0) {
+  } else if (inventoryData?.results && inventoryData.results.length === 0) {
     inventoryList = (
       <tr className="bg-white">
         <td colSpan={3} className="border-b border-gray-200 p-5 text-center">
@@ -112,9 +84,9 @@ export default function InventoryList(props: any) {
     );
   }
 
-  if (isLoading || !inventory) {
+  if (!inventoryData?.results) {
     inventoryItem = <Loading />;
-  } else if (inventory) {
+  } else if (inventoryData.results) {
     inventoryItem = (
       <>
         <div className="-mx-4 overflow-x-auto p-4 sm:-mx-8 sm:px-8">
@@ -134,12 +106,12 @@ export default function InventoryList(props: any) {
             </table>
           </div>
         </div>
-        {totalCount > limit && (
+        {inventoryData?.count > limit && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination
               cPage={currentPage}
               defaultPerPage={limit}
-              data={{ totalCount }}
+              data={{ totalCount: inventoryData ? inventoryData.count : 0 }}
               onChange={handlePagination}
             />
           </div>
@@ -152,7 +124,7 @@ export default function InventoryList(props: any) {
     <Page
       title="Inventory Manager"
       className="mx-3 md:mx-8"
-      crumbsReplacements={{ [facilityId]: { name: facilityName } }}
+      crumbsReplacements={{ [facilityId]: { name: facilityObject?.name } }}
       backUrl={`/facility/${facilityId}`}
     >
       <div className="container mx-auto px-4 sm:px-8">
@@ -166,6 +138,7 @@ export default function InventoryList(props: any) {
               Manage Inventory
             </ButtonV2>
             <ButtonV2
+              id="add-minimum-quantity"
               className="w-full"
               href={`/facility/${facilityId}/inventory/min_quantity/list`}
             >

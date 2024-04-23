@@ -1,9 +1,7 @@
 import { navigate } from "raviger";
 
-import { useReducer, useState, useEffect, lazy } from "react";
-import { useDispatch } from "react-redux";
+import { useReducer, useState, lazy } from "react";
 import { SAMPLE_TYPE_CHOICES, ICMR_CATEGORY } from "../../Common/constants";
-import { createSampleTest, getPatient } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { SampleTestModel } from "./models";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
@@ -16,6 +14,9 @@ import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import Page from "../Common/components/Page";
 import { FacilitySelect } from "../Common/FacilitySelect";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm: SampleTestModel = {
@@ -39,7 +40,7 @@ const initForm: SampleTestModel = {
 
 const initError = Object.assign(
   {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
 );
 
 const initialState = {
@@ -68,30 +69,18 @@ const sampleTestFormReducer = (state = initialState, action: any) => {
 
 export const SampleTest = ({ facilityId, patientId }: any) => {
   const { goBack } = useAppHistory();
-  const dispatchAction: any = useDispatch();
   const [state, dispatch] = useReducer(sampleTestFormReducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
-  const [facilityName, setFacilityName] = useState("");
-  const [patientName, setPatientName] = useState("");
 
   const headerText = "Request Sample";
   const buttonText = "Confirm your request to send sample for testing";
 
-  useEffect(() => {
-    async function fetchPatientName() {
-      if (patientId) {
-        const res = await dispatchAction(getPatient({ id: patientId }));
-        if (res.data) {
-          setPatientName(res.data.name);
-          setFacilityName(res.data.facility_object.name);
-        }
-      } else {
-        setPatientName("");
-        setFacilityName("");
-      }
-    }
-    fetchPatientName();
-  }, [dispatchAction, patientId]);
+  const { data } = useQuery(routes.getPatient, {
+    pathParams: {
+      id: patientId,
+    },
+    prefetch: !!patientId,
+  });
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -170,15 +159,23 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
             ? state.form.sample_type_other
             : undefined,
       };
-      const res = await dispatchAction(createSampleTest(data, { patientId }));
-      setIsLoading(false);
-      if (res && res.data) {
-        dispatch({ type: "set_form", form: initForm });
-        Notification.Success({
-          msg: "Sample test created successfully",
-        });
-        navigate(`/facility/${facilityId}/patient/${patientId}`);
-      }
+
+      await request(routes.createSampleTest, {
+        pathParams: {
+          patientId,
+        },
+        body: data,
+        onResponse: ({ res, data }) => {
+          setIsLoading(false);
+          if (res?.ok && data) {
+            dispatch({ type: "set_form", form: initForm });
+            Notification.Success({
+              msg: "Sample test created successfully",
+            });
+            navigate(`/facility/${facilityId}/patient/${patientId}`);
+          }
+        },
+      });
     }
   };
 
@@ -201,8 +198,8 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
     <Page
       title={headerText}
       crumbsReplacements={{
-        [facilityId]: { name: facilityName },
-        [patientId]: { name: patientName },
+        [facilityId]: { name: data?.facility_object?.name || "" },
+        [patientId]: { name: data?.name || "" },
       }}
       backUrl={`/facility/${facilityId}/patient/${patientId}`}
     >
@@ -292,7 +289,7 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
             <TextAreaFormField
               {...field(
                 "atypical_presentation",
-                "Atypical presentation details"
+                "Atypical presentation details",
               )}
               required
             />

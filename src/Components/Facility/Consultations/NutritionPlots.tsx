@@ -21,7 +21,7 @@ export const NutritionPlots = (props: any) => {
   useEffect(() => {
     const fetchDailyRounds = async (
       currentPage: number,
-      consultationId: string
+      consultationId: string,
     ) => {
       const { res, data } = await request(routes.dailyRoundsAnalyse, {
         body: {
@@ -65,7 +65,7 @@ export const NutritionPlots = (props: any) => {
   //IO Balance
   const IOvalues = Object.values(results)
     .map(
-      (p: any) => p["total_intake_calculated"] - p["total_output_calculated"]
+      (p: any) => p["total_intake_calculated"] - p["total_output_calculated"],
     )
     .reverse();
 
@@ -73,8 +73,8 @@ export const NutritionPlots = (props: any) => {
   const infusionList: any = [];
   Object.values(results).map((p: any) =>
     p.infusions.map((x: any) =>
-      infusionList.indexOf(x.name) === -1 ? infusionList.push(x.name) : null
-    )
+      infusionList.indexOf(x.name) === -1 ? infusionList.push(x.name) : null,
+    ),
   );
 
   const infusionsData: any = {};
@@ -83,7 +83,7 @@ export const NutritionPlots = (props: any) => {
       (infusionsData[x] = {
         name: x,
         data: [...Array(Object.keys(results).length).fill(undefined)],
-      })
+      }),
   );
 
   Object.values(results)
@@ -99,8 +99,8 @@ export const NutritionPlots = (props: any) => {
   const IVFluidsList: any = [];
   Object.values(results).map((p: any) =>
     p.iv_fluids.map((x: any) =>
-      IVFluidsList.indexOf(x.name) === -1 ? IVFluidsList.push(x.name) : null
-    )
+      IVFluidsList.indexOf(x.name) === -1 ? IVFluidsList.push(x.name) : null,
+    ),
   );
 
   const IVFluidsData: any = {};
@@ -109,7 +109,7 @@ export const NutritionPlots = (props: any) => {
       (IVFluidsData[x] = {
         name: x,
         data: [...Array(Object.keys(results).length).fill(undefined)],
-      })
+      }),
   );
 
   Object.values(results)
@@ -125,8 +125,8 @@ export const NutritionPlots = (props: any) => {
   const FeedsList: any = [];
   Object.values(results).map((p: any) =>
     p.feeds.map((x: any) =>
-      FeedsList.indexOf(x.name) === -1 ? FeedsList.push(x.name) : null
-    )
+      FeedsList.indexOf(x.name) === -1 ? FeedsList.push(x.name) : null,
+    ),
   );
 
   const FeedsData: any = {};
@@ -135,7 +135,7 @@ export const NutritionPlots = (props: any) => {
       (FeedsData[x] = {
         name: x,
         data: [...Array(Object.keys(results).length).fill(undefined)],
-      })
+      }),
   );
 
   Object.values(results)
@@ -151,8 +151,8 @@ export const NutritionPlots = (props: any) => {
   const OutputList: any = [];
   Object.values(results).map((p: any) =>
     p.output.map((x: any) =>
-      OutputList.indexOf(x.name) === -1 ? OutputList.push(x.name) : null
-    )
+      OutputList.indexOf(x.name) === -1 ? OutputList.push(x.name) : null,
+    ),
   );
 
   const OutputData: any = {};
@@ -161,7 +161,7 @@ export const NutritionPlots = (props: any) => {
       (OutputData[x] = {
         name: x,
         data: [...Array(Object.keys(results).length).fill(undefined)],
-      })
+      }),
   );
 
   Object.values(results)
@@ -182,9 +182,9 @@ export const NutritionPlots = (props: any) => {
         >
           <div> IO Balance Plots</div>
           {showIO ? (
-            <CareIcon className="care-l-angle-up text-2xl font-bold" />
+            <CareIcon icon="l-angle-up" className="text-2xl font-bold" />
           ) : (
-            <CareIcon className="care-l-angle-down text-2xl font-bold" />
+            <CareIcon icon="l-angle-down" className="text-2xl font-bold" />
           )}
         </div>
 
@@ -224,9 +224,9 @@ export const NutritionPlots = (props: any) => {
         >
           <div>Intake</div>
           {showIntake ? (
-            <CareIcon className="care-l-angle-up text-2xl font-bold" />
+            <CareIcon icon="l-angle-up" className="text-2xl font-bold" />
           ) : (
-            <CareIcon className="care-l-angle-down text-2xl font-bold" />
+            <CareIcon icon="l-angle-down" className="text-2xl font-bold" />
           )}
         </div>
         <div className={showIntake ? "grid gap-4 md:grid-cols-2" : "hidden"}>
@@ -331,9 +331,9 @@ export const NutritionPlots = (props: any) => {
         >
           <div> Output</div>
           {showOutput ? (
-            <CareIcon className="care-l-angle-up text-2xl font-bold" />
+            <CareIcon icon="l-angle-up" className="text-2xl font-bold" />
           ) : (
-            <CareIcon className="care-l-angle-down text-2xl font-bold" />
+            <CareIcon icon="l-angle-down" className="text-2xl font-bold" />
           )}
         </div>
         <div

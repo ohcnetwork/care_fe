@@ -1,29 +1,50 @@
-import { useQueryParams } from "raviger";
+import { QueryParam, setQueryParamsOptions, useQueryParams } from "raviger";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import GenericFilterBadge from "../../CAREUI/display/FilterBadge";
 import PaginationComponent from "../../Components/Common/Pagination";
 import useConfig from "./useConfig";
 import { classNames } from "../../Utils/utils";
+import FiltersCache from "../../Utils/FiltersCache";
 
 export type FilterState = Record<string, unknown>;
-export type FilterParamKeys = string | string[];
+
 interface FilterBadgeProps {
   name: string;
   value?: string;
-  paramKey: FilterParamKeys;
+  paramKey: string | string[];
 }
 
 /**
  * A custom hook wrapped around raviger's `useQueryParams` hook to ease handling
  * of pagination and filters.
  */
-export default function useFilters({ limit = 14 }: { limit?: number }) {
+export default function useFilters({
+  limit = 14,
+  cacheBlacklist = [],
+}: {
+  limit?: number;
+  cacheBlacklist?: string[];
+}) {
   const { t } = useTranslation();
   const { kasp_string } = useConfig();
   const hasPagination = limit > 0;
   const [showFilters, setShowFilters] = useState(false);
-  const [qParams, setQueryParams] = useQueryParams();
+  const [qParams, _setQueryParams] = useQueryParams();
+
+  const updateCache = (query: QueryParam) => {
+    const blacklist = FILTERS_CACHE_BLACKLIST.concat(cacheBlacklist);
+    FiltersCache.set(query, blacklist);
+  };
+
+  const setQueryParams = (
+    query: QueryParam,
+    options?: setQueryParamsOptions,
+  ) => {
+    query = FiltersCache.utils.clean(query);
+    _setQueryParams(query, options);
+    updateCache(query);
+  };
 
   const updateQuery = (filter: FilterState) => {
     filter = hasPagination ? { page: 1, limit, ...filter } : filter;
@@ -33,23 +54,29 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
     if (!hasPagination) return;
     setQueryParams(Object.assign({}, qParams, { page }), { replace: true });
   };
-  const removeFilters = (params: string[]) => {
+  const removeFilters = (params?: string[]) => {
+    params ??= Object.keys(qParams);
     setQueryParams(removeFromQuery(qParams, params));
   };
   const removeFilter = (param: string) => removeFilters([param]);
 
-  useEffect(() => updateFiltersCache(qParams), [qParams]);
-
   useEffect(() => {
-    const cache = getFiltersCache();
     const qParamKeys = Object.keys(qParams);
-    const canSkip = Object.keys(cache).every(
-      (key) => qParamKeys.includes(key) && qParams[key] === cache[key]
-    );
-    if (canSkip) return;
-    if (Object.keys(cache).length) {
-      setQueryParams(cache);
+
+    // If we navigate to a path that has query params set on mount,
+    // skip restoring the cache, instead update the cache with new filters.
+    if (qParamKeys.length) {
+      updateCache(qParams);
+      return;
     }
+
+    const cache = FiltersCache.get();
+    if (!cache) {
+      return;
+    }
+
+    // Restore cache
+    setQueryParams(cache);
   }, []);
 
   const FilterBadge = ({ name, value, paramKey }: FilterBadgeProps) => {
@@ -79,7 +106,7 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
   };
 
   const badgeUtils = {
-    badge(name: string, paramKey: FilterParamKeys) {
+    badge(name: string, paramKey: FilterBadgeProps["paramKey"]) {
       return { name, paramKey };
     },
     ordering(name = "Sort by", paramKey = "ordering") {
@@ -89,7 +116,7 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
         value: qParams[paramKey] && t("SortOptions." + qParams[paramKey]),
       };
     },
-    value(name: string, paramKey: FilterParamKeys, value: string) {
+    value(name: string, paramKey: FilterBadgeProps["paramKey"], value: string) {
       return { name, value, paramKey };
     },
     phoneNumber(name = "Phone Number", paramKey = "phone_number") {
@@ -115,7 +142,7 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
         falseLabel?: string;
         trueValue?: string;
         falseValue?: string;
-      }
+      },
     ) {
       const {
         trueLabel = "Yes",
@@ -165,19 +192,16 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
         {compiledBadges.map((props) => (
           <FilterBadge {...props} name={t(props.name)} key={props.name} />
         ))}
-        {activeFilters.length >= 1 && (
+        {children}
+        {(activeFilters.length >= 1 || children) && (
           <button
             id="clear-all-filters"
             className="rounded-full border border-gray-300 bg-white px-2 py-1 text-xs text-gray-600 hover:text-gray-800"
-            onClick={() => {
-              updateFiltersCache({});
-              removeFilters(Object.keys(qParams));
-            }}
+            onClick={() => removeFilters()}
           >
             {t("clear_all_filters")}
           </button>
         )}
-        {children}
       </div>
     );
   };
@@ -198,7 +222,7 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
         className={classNames(
           "flex w-full justify-center",
           totalCount > limit ? "visible" : "invisible",
-          !noMargin && "mt-4"
+          !noMargin && "mt-4",
         )}
       >
         <PaginationComponent
@@ -261,15 +285,3 @@ const removeFromQuery = (query: Record<string, unknown>, params: string[]) => {
 };
 
 const FILTERS_CACHE_BLACKLIST = ["page", "limit", "offset"];
-
-const getFiltersCacheKey = () => `filters--${window.location.pathname}`;
-const getFiltersCache = () => {
-  return JSON.parse(localStorage.getItem(getFiltersCacheKey()) || "{}");
-};
-const updateFiltersCache = (cache: Record<string, unknown>) => {
-  const result = { ...cache };
-  for (const param of FILTERS_CACHE_BLACKLIST) {
-    delete result[param];
-  }
-  localStorage.setItem(getFiltersCacheKey(), JSON.stringify(result));
-};

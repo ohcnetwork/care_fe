@@ -1,5 +1,6 @@
 import { ConsultationModel, PatientCategory } from "../Facility/models";
 import { PerformedByModel } from "../HCX/misc";
+import { OCCUPATION_TYPES } from "../../Common/constants";
 
 export interface FlowModel {
   id?: number;
@@ -48,7 +49,6 @@ export interface PatientModel {
   id?: string;
   action?: number;
   name?: string;
-  age?: number;
   allow_transfer?: boolean;
   discharge?: boolean;
   gender?: number;
@@ -112,6 +112,8 @@ export interface PatientModel {
   number_of_doses?: number;
   last_vaccinated_date?: string;
   date_of_birth?: string;
+  year_of_birth?: number;
+  readonly death_datetime?: string;
   blood_group?: string;
   review_interval?: number;
   review_time?: string;
@@ -127,6 +129,11 @@ export interface PatientModel {
   created_by?: PerformedByModel;
   assigned_to?: { first_name?: string; username?: string; last_name?: string };
   assigned_to_object?: AssignedToObjectModel;
+  occupation?: Occupation;
+  meta_info?: {
+    id: number;
+    occupation: Occupation;
+  };
 
   // ABDM related
   abha_number?: string;
@@ -147,7 +154,7 @@ export interface SampleTestModel {
   is_unusual_course?: boolean;
   sample_type?: string;
   sample_type_other?: string;
-  id?: number;
+  id?: string;
   status?: string;
   result?: string;
   icmr_category?: string;
@@ -276,16 +283,23 @@ export const DailyRoundTypes = [
   "TELEMEDICINE",
 ] as const;
 
+export interface BloodPressure {
+  diastolic?: number;
+  mean?: number;
+  systolic?: number;
+}
+
 export interface DailyRoundsModel {
   ventilator_spo2?: number;
+  ventilator_interface?:
+    | "UNKNOWN"
+    | "OXYGEN_SUPPORT"
+    | "NON_INVASIVE"
+    | "INVASIVE";
   spo2?: string;
   rhythm?: string;
   rhythm_detail?: string;
-  bp?: {
-    diastolic: number;
-    mean: number;
-    systolic: number;
-  };
+  bp?: BloodPressure;
   pulse?: number;
   resp?: number;
   temperature?: string;
@@ -297,11 +311,11 @@ export interface DailyRoundsModel {
   medication_given?: Array<any>;
   additional_symptoms_text?: string;
   current_health?: string;
-  id: string;
+  id?: string;
   other_symptoms?: string;
   admitted_to?: string;
   patient_category?: PatientCategory;
-  output?: DailyRoundsOutput;
+  output?: DailyRoundsOutput[];
   recommend_discharge?: boolean;
   created_date?: string;
   modified_date?: string;
@@ -314,19 +328,11 @@ export interface DailyRoundsModel {
     | "AGITATED_OR_CONFUSED"
     | "ONSET_OF_AGITATION_AND_CONFUSION"
     | "UNKNOWN";
-  rounds_type: (typeof DailyRoundTypes)[number];
+  rounds_type?: (typeof DailyRoundTypes)[number];
   last_updated_by_telemedicine?: boolean;
   created_by_telemedicine?: boolean;
-  created_by?: {
-    first_name?: string;
-    last_name?: string;
-    user_type?: string;
-  };
-  last_edited_by?: {
-    first_name?: string;
-    last_name?: string;
-    user_type?: string;
-  };
+  created_by?: PerformedByModel;
+  last_edited_by?: PerformedByModel;
   bed?: string;
 }
 
@@ -337,16 +343,38 @@ export interface FacilityNameModel {
 
 // File Upload Models
 
+type FileCategory = "UNSPECIFIED" | "XRAY" | "AUDIO" | "IDENTITY_PROOF";
+
+export interface CreateFileRequest {
+  file_type: string | number;
+  file_category: FileCategory;
+  name: string;
+  associating_id: string;
+  original_name: string;
+  mime_type: string;
+}
+
+export interface CreateFileResponse {
+  id: string;
+  file_type: string;
+  file_category: FileCategory;
+  signed_url: string;
+  internal_name: string;
+}
+
 export interface FileUploadModel {
   id?: string;
   name?: string;
   created_date?: string;
   upload_completed?: boolean;
-  uploaded_by?: { username?: string };
-  file_category?: string;
+  uploaded_by?: PerformedByModel;
+  file_category?: FileCategory;
+  read_signed_url?: string;
   is_archived?: boolean;
   archive_reason?: string;
   extension?: string;
-  archived_by?: { username?: string };
+  archived_by?: PerformedByModel;
   archived_datetime?: string;
 }
+
+export type Occupation = (typeof OCCUPATION_TYPES)[number]["value"];

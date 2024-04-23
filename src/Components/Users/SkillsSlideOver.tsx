@@ -24,7 +24,7 @@ export default ({ show, setShow, username }: IProps) => {
   /* added const {t} hook here and relevant text to Common.json to avoid eslint error  */
   const { t } = useTranslation();
   const [selectedSkill, setSelectedSkill] = useState<SkillObjectModel | null>(
-    null
+    null,
   );
   const [isLoading, setIsLoading] = useState(false);
   const [deleteSkill, setDeleteSkill] = useState<SkillModel | null>(null);
@@ -45,6 +45,7 @@ export default ({ show, setShow, username }: IProps) => {
         pathParams: { username },
         body: { skill: skill.id },
       });
+
       if (!res?.ok) {
         Notification.Error({
           msg: "Error while adding skill",
@@ -58,7 +59,7 @@ export default ({ show, setShow, username }: IProps) => {
       setIsLoading(false);
       await refetchUserSkills();
     },
-    [refetchUserSkills]
+    [refetchUserSkills],
   );
 
   const removeSkill = useCallback(
@@ -70,15 +71,19 @@ export default ({ show, setShow, username }: IProps) => {
         Notification.Error({
           msg: "Error while unlinking skill",
         });
+      } else {
+        Notification.Success({
+          msg: "Skill unlinked successfully",
+        });
       }
       setDeleteSkill(null);
       await refetchUserSkills();
     },
-    [refetchUserSkills]
+    [refetchUserSkills],
   );
 
   const authorizeForAddSkill = useIsAuthorized(
-    AuthorizeFor(["DistrictAdmin", "StateAdmin"])
+    AuthorizeFor(["DistrictAdmin", "StateAdmin"]),
   );
 
   const hasSkills = skills?.results?.length || 0 > 0;
@@ -115,19 +120,17 @@ export default ({ show, setShow, username }: IProps) => {
                   multiple={false}
                   name="skill"
                   disabled={!authorizeForAddSkill}
-                  showAll={true}
                   showNOptions={Infinity}
                   selected={selectedSkill}
                   setSelected={setSelectedSkill}
                   errors=""
-                  username={username}
                   userSkills={skills?.results || []}
                 />
                 <ButtonV2
                   id="add-skill-button"
                   disabled={!authorizeForAddSkill}
                   onClick={() => addSkill(username, selectedSkill)}
-                  className="w-6rem"
+                  className="mt-1 h-[45px] w-[74px] text-base"
                 >
                   {t("add")}
                 </ButtonV2>

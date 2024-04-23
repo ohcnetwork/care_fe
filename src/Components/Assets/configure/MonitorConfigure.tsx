@@ -8,6 +8,7 @@ import { FieldLabel } from "../../Form/FormFields/FormField";
 import request from "../../../Utils/request/request";
 import routes from "../../../Redux/api";
 import useQuery from "../../../Utils/request/useQuery";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 const saveLink = async (assetId: string, bedId: string) => {
   await request(routes.createAssetBed, {
@@ -21,7 +22,7 @@ const saveLink = async (assetId: string, bedId: string) => {
 const update_Link = async (
   assetbedId: string,
   assetId: string,
-  bed: BedModel
+  bed: BedModel,
 ) => {
   await request(routes.partialUpdateAssetBed, {
     pathParams: { external_id: assetbedId },
@@ -54,7 +55,7 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
           update_Link(
             assetBed?.results[0].id as string,
             asset.id as string,
-            bed as BedModel
+            bed as BedModel,
           );
         } else {
           saveLink(asset.id as string, bed?.id as string);
@@ -76,7 +77,7 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
           />
         </div>
         <Submit className="mt-6 w-full shrink-0">
-          <i className="fas fa-bed-pulse" />
+          <CareIcon icon="l-bed" className="text-lg" />
           {updateLink ? "Update Bed" : "Save Bed"}
         </Submit>
       </div>

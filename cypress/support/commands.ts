@@ -69,10 +69,8 @@ Cypress.Commands.add("loginByApi", (username, password) => {
 Cypress.Commands.add(
   "awaitUrl",
   (url: string, disableLoginVerification = false) => {
-    cy.intercept(/fontawesome/).as("fontawesome");
     cy.intercept(/currentuser/).as("currentuser");
     cy.visit(url);
-    cy.wait("@fontawesome");
     disableLoginVerification
       ? cy.wait("@currentuser")
       : cy.wait("@currentuser").its("response.statusCode").should("eq", 200);
@@ -80,8 +78,7 @@ Cypress.Commands.add(
 );
 
 Cypress.Commands.add("verifyNotification", (text) => {
-  cy.get(".pnotify-container").should("exist").contains(text);
-  return cy.get(".pnotify-container").contains(text).click({ force: true });
+  return cy.get(".pnotify-container").should("exist").contains(text);
 });
 
 Cypress.on("uncaught:exception", () => {
@@ -112,4 +109,82 @@ Cypress.Commands.add("getAttached", (selector) => {
 
 Cypress.Commands.add("clearAllFilters", () => {
   return cy.get("#clear-all-filters").click();
+});
+
+Cypress.Commands.add("submitButton", (buttonText = "Submit") => {
+  cy.get("button[type='submit']").contains(buttonText).click();
+});
+
+Cypress.Commands.add(
+  "searchAndSelectOption",
+  (element: string, referance: string) => {
+    cy.get(element)
+      .click()
+      .type(referance)
+      .then(() => {
+        cy.get("[role='option']").contains(referance).click();
+      });
+  }
+);
+
+Cypress.Commands.add(
+  "clickAndMultiSelectOption",
+  (selector: string, options: string | string[]) => {
+    const optionArray = Array.isArray(options) ? options : [options];
+    cy.get(selector)
+      .click()
+      .then(() => {
+        optionArray.forEach((options) => {
+          cy.get("[role='option']").contains(options).click();
+        });
+        cy.get(selector).click();
+      });
+  }
+);
+
+Cypress.Commands.add(
+  "clickAndSelectOption",
+  (element: string, reference: string) => {
+    cy.get(element)
+      .click()
+      .then(() => {
+        cy.get("[role='option']").contains(reference).click();
+      });
+  }
+);
+
+Cypress.Commands.add("clickAndTypeDate", (selector: string, date: string) => {
+  cy.get(selector).scrollIntoView();
+  cy.get(selector).click();
+  cy.get("#date-input").click().type(date);
+});
+
+Cypress.Commands.add(
+  "verifyAndClickElement",
+  (element: string, reference: string) => {
+    cy.get(element).scrollIntoView();
+    cy.get(element).contains(reference).should("be.visible").click();
+  }
+);
+
+Cypress.Commands.add("preventPrint", () => {
+  cy.window().then((win) => {
+    cy.stub(win, "print").as("verifyPrevent");
+  });
+});
+
+Cypress.Commands.add("closeNotification", () => {
+  cy.get(".pnotify")
+    .should("exist")
+    .each(($div) => {
+      cy.wrap($div).click();
+    });
+});
+
+Cypress.Commands.add("verifyContentPresence", (selector, texts) => {
+  cy.get(selector).then(($el) => {
+    texts.forEach((text) => {
+      cy.wrap($el).should("contain", text);
+    });
+  });
 });

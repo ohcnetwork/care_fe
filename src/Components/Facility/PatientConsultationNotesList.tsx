@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import CircularProgress from "../Common/components/CircularProgress";
 import routes from "../../Redux/api";
@@ -9,26 +9,25 @@ import request from "../../Utils/request/request";
 
 interface PatientNotesProps {
   state: PatientNoteStateType;
-  setState: any;
-  patientId: string;
-  facilityId: string;
+  setState: Dispatch<SetStateAction<PatientNoteStateType>>;
   reload?: boolean;
-  setReload?: any;
+  setReload?: (value: boolean) => void;
+  disableEdit?: boolean;
 }
 
 const pageSize = RESULTS_PER_PAGE_LIMIT;
 
 const PatientConsultationNotesList = (props: PatientNotesProps) => {
-  const { state, setState, reload, setReload } = props;
+  const { state, setState, reload, setReload, disableEdit } = props;
   const consultationId = useSlug("consultation") ?? "";
 
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchNotes = async () => {
     setIsLoading(true);
-    const { data }: any = await request(routes.getPatientNotes, {
+    const { data } = await request(routes.getPatientNotes, {
       pathParams: {
-        patientId: props.patientId,
+        patientId: props.state.patientId || "",
       },
       query: {
         consultation: consultationId,
@@ -36,21 +35,23 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
       },
     });
 
-    if (state.cPage === 1) {
-      setState((prevState: any) => ({
-        ...prevState,
-        notes: data.results,
-        totalPages: Math.ceil(data.count / pageSize),
-      }));
-    } else {
-      setState((prevState: any) => ({
-        ...prevState,
-        notes: [...prevState.notes, ...data.results],
-        totalPages: Math.ceil(data.count / pageSize),
-      }));
+    if (data) {
+      if (state.cPage === 1) {
+        setState((prevState) => ({
+          ...prevState,
+          notes: data.results,
+          totalPages: Math.ceil(data.count / pageSize),
+        }));
+      } else {
+        setState((prevState) => ({
+          ...prevState,
+          notes: [...prevState.notes, ...data.results],
+          totalPages: Math.ceil(data.count / pageSize),
+        }));
+      }
     }
     setIsLoading(false);
-    setReload(false);
+    setReload?.(false);
   };
 
   useEffect(() => {
@@ -60,16 +61,16 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
   }, [reload]);
 
   useEffect(() => {
-    setReload(true);
+    setReload?.(true);
   }, []);
 
   const handleNext = () => {
     if (state.cPage < state.totalPages) {
-      setState((prevState: any) => ({
+      setState((prevState) => ({
         ...prevState,
         cPage: prevState.cPage + 1,
       }));
-      setReload(true);
+      setReload?.(true);
     }
   };
 
@@ -81,7 +82,14 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
     );
   }
 
-  return <DoctorNote state={state} handleNext={handleNext} />;
+  return (
+    <DoctorNote
+      state={state}
+      handleNext={handleNext}
+      setReload={setReload}
+      disableEdit={disableEdit}
+    />
+  );
 };
 
 export default PatientConsultationNotesList;

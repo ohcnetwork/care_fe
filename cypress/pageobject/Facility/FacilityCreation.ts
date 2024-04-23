@@ -26,7 +26,7 @@ class FacilityPage {
   }
 
   fillFacilityName(name: string) {
-    cy.get("#name").clear().type(name);
+    cy.get("#name").click().clear().click().type(name);
   }
 
   fillPincode(pincode: string) {
@@ -66,8 +66,7 @@ class FacilityPage {
   }
 
   selectBedType(bedType: string) {
-    cy.get("div#bed-type button").click();
-    cy.get("[role='option']").contains(bedType).click();
+    cy.clickAndSelectOption("div#bed-type button", bedType);
   }
 
   isVisibleselectBedType() {
@@ -75,11 +74,11 @@ class FacilityPage {
   }
 
   fillTotalCapacity(capacity: string) {
-    cy.get("input#total-capacity").click().type(capacity);
+    cy.get("input#total-capacity").click().clear().click().type(capacity);
   }
 
   fillCurrentlyOccupied(occupied: string) {
-    cy.get("input#currently-occupied").click().type(occupied);
+    cy.get("input#currently-occupied").click().clear().click().type(occupied);
   }
 
   saveAndExitBedCapacityForm() {
@@ -96,7 +95,7 @@ class FacilityPage {
   }
 
   fillDoctorCount(count: string) {
-    cy.get("input#count").click().type(count);
+    cy.get("input#count").click().clear().click().type(count);
   }
 
   fillOxygenCapacity(capacity: string) {
@@ -289,9 +288,7 @@ class FacilityPage {
   }
 
   confirmDeleteFacility() {
-    cy.intercept("DELETE", "**/api/v1/facility/**").as("deleteFacility");
-    cy.get("#submit").contains("Delete").click();
-    cy.wait("@deleteFacility").its("response.statusCode").should("eq", 403);
+    cy.submitButton("Delete");
   }
 
   selectLocation(location: string) {
@@ -321,6 +318,7 @@ class FacilityPage {
     cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");
     cy.get("[id='facility-details']").first().click();
     cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
+    cy.get("h1.text-3xl.font-bold", { timeout: 10000 }).should("be.visible");
   }
 
   verifyFacilityBadgeContent(expectedText: string) {
@@ -365,10 +363,18 @@ class FacilityPage {
   }
 
   fillInventoryDetails(name: string, status: string, quantity: string) {
+    cy.wait(2000);
     cy.get("div#id").click();
     cy.get("div#id ul li").contains(name).click();
     cy.get("div#isIncoming").click();
     cy.get("div#isIncoming ul li").contains(status).click();
+    cy.get("[name='quantity']").type(quantity);
+  }
+
+  fillInventoryMinimumDetails(name: string, quantity: string) {
+    cy.wait(2000);
+    cy.get("div#id").click();
+    cy.get("div#id ul li").contains(name).click();
     cy.get("[name='quantity']").type(quantity);
   }
 
@@ -378,6 +384,10 @@ class FacilityPage {
     );
     cy.get("button").contains("Add/Update Inventory").click();
     cy.wait("@createInventory").its("response.statusCode").should("eq", 201);
+  }
+
+  clickSetButton() {
+    cy.get("#submit").contains("Set").click();
   }
 
   fillResourceRequestDetails(
@@ -442,6 +452,46 @@ class FacilityPage {
           cy.get("li[role=option]").contains(districtName).click();
         }
       });
+  }
+
+  verifyPpeQuantity(text: string) {
+    cy.get("#PPE").contains(text).should("be.visible");
+  }
+
+  clickPpeQuantity() {
+    cy.get("#PPE").click();
+  }
+
+  clickLastEntry() {
+    cy.get("#delete-last-entry").click();
+  }
+
+  verifyStockInRow(rowId: string, stockText: string) {
+    cy.get(rowId).contains(stockText).should("be.visible");
+  }
+
+  verifyBadgeWithText(badgeClass: string, text: string) {
+    cy.get(badgeClass).contains(text).should("exist");
+  }
+
+  clickAddMinimumQuanitity() {
+    cy.get("#add-minimum-quantity").click();
+  }
+
+  clickUpdateMinimumQuantity() {
+    cy.get("#update-minimum-quantity").first().click();
+  }
+
+  setQuantity(quantity: string) {
+    cy.get("#quantity").click().clear().click().type(quantity);
+  }
+
+  clickSaveUpdateMinimumQuantity() {
+    cy.get("#save-update-minimumquanitity").click();
+  }
+
+  clickSetMinimumQuantity() {
+    cy.get("#set-minimum-quantity").click();
   }
 }
 

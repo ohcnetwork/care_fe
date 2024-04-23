@@ -1,8 +1,7 @@
 import { navigate } from "raviger";
 
 import dayjs from "dayjs";
-import { lazy, useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
+import { lazy, useCallback, useEffect, useState } from "react";
 import {
   CONSCIOUSNESS_LEVEL,
   PATIENT_CATEGORIES,
@@ -11,19 +10,11 @@ import {
   TELEMEDICINE_ACTIONS,
 } from "../../Common/constants";
 import useAppHistory from "../../Common/hooks/useAppHistory";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  createDailyReport,
-  getConsultationDailyRoundsDetails,
-  getDailyReport,
-  getPatient,
-  updateDailyReport,
-} from "../../Redux/actions";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 import * as Notification from "../../Utils/Notifications";
 import { formatDateTime } from "../../Utils/utils";
 import BloodPressureFormField, {
-  meanArterialPressure,
+  BloodPressureValidator,
 } from "../Common/BloodPressureFormField";
 import { SymptomsSelect } from "../Common/SymptomsSelect";
 import TemperatureFormField from "../Common/TemperatureFormField";
@@ -37,6 +28,10 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import PatientCategorySelect from "./PatientCategorySelect";
 import RadioFormField from "../Form/FormFields/RadioFormField";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import { Scribe } from "../Scribe/Scribe";
+import { DAILY_ROUND_FORM_SCRIBE_DATA } from "../Scribe/formDetails";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm: any = {
@@ -63,16 +58,16 @@ const initForm: any = {
   ventilator_spo2: null,
   consciousness_level: "UNKNOWN",
   bp: {
-    systolic: -1,
-    diastolic: -1,
-    mean: -1,
+    systolic: undefined,
+    diastolic: undefined,
+    mean: undefined,
   },
   // bed: null,
 };
 
 const initError = Object.assign(
   {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
 );
 
 const initialState = {
@@ -105,11 +100,10 @@ const DailyRoundsFormReducer = (state = initialState, action: any) => {
 
 export const DailyRounds = (props: any) => {
   const { goBack } = useAppHistory();
-  const dispatchAction: any = useDispatch();
   const { facilityId, patientId, consultationId, id } = props;
   const [state, dispatch] = useAutoSaveReducer<any>(
     DailyRoundsFormReducer,
-    initialState
+    initialState,
   );
   const [isLoading, setIsLoading] = useState(false);
   const [facilityName, setFacilityName] = useState("");
@@ -140,92 +134,70 @@ export const DailyRounds = (props: any) => {
     "consciousness_level",
   ];
 
-  const fetchRoundDetails = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      let formData: any = initialData;
-      if (id) {
-        const res = await dispatchAction(
-          getConsultationDailyRoundsDetails({ consultationId, id })
-        );
+  const fetchRoundDetails = useCallback(async () => {
+    setIsLoading(true);
+    let formData: any = initialData;
+    if (id) {
+      const { data } = await request(routes.getDailyReport, {
+        pathParams: { consultationId, id },
+      });
 
-        if (!status.aborted) {
-          if (res?.data) {
-            const data = {
-              ...res.data,
-              patient_category: res.data.patient_category
-                ? PATIENT_CATEGORIES.find(
-                    (i) => i.text === res.data.patient_category
-                  )?.id ?? ""
-                : "",
-              rhythm:
-                (res.data.rhythm &&
-                  RHYTHM_CHOICES.find((i) => i.text === res.data.rhythm)?.id) ||
-                "0",
-              admitted_to: res.data.admitted_to
-                ? res.data.admitted_to
-                : "Select",
-            };
-            formData = { ...formData, ...data };
-          }
-        }
-      }
-      setIsLoading(false);
-      if (patientId) {
-        const res = await dispatchAction(getPatient({ id: patientId }));
-        if (res.data) {
-          setPatientName(res.data.name);
-          setFacilityName(res.data.facility_object.name);
-          setConsultationSuggestion(res.data.last_consultation?.suggestion);
-          setPreviousReviewInterval(
-            Number(res.data.last_consultation.review_interval)
-          );
-          const getAction =
-            TELEMEDICINE_ACTIONS.find((action) => action.id === res.data.action)
-              ?.text || "NO_ACTION";
-          setPreviousAction(getAction);
-          setInitialData({
-            ...initialData,
-            action: getAction,
-          });
-          formData = { ...formData, ...{ action: getAction } };
-        }
-      } else {
-        setPatientName("");
-        setFacilityName("");
-      }
-      if (consultationId && !id) {
-        const res = await dispatchAction(
-          getDailyReport({ limit: 1, offset: 0 }, { consultationId })
-        );
-        setHasPreviousLog(res.data.count > 0);
+      if (data) {
         formData = {
           ...formData,
-          ...{
-            patient_category: res.data.patient_category
-              ? PATIENT_CATEGORIES.find(
-                  (i) => i.text === res.data.patient_category
-                )?.id ?? ""
-              : "",
-            rhythm:
-              (res.data.rhythm &&
-                RHYTHM_CHOICES.find((i) => i.text === res.data.rhythm)?.id) ||
-              "0",
-            temperature: parseFloat(res.data.temperature),
-          },
+          ...data,
+          patient_category: data.patient_category
+            ? PATIENT_CATEGORIES.find((i) => i.text === data.patient_category)
+                ?.id ?? ""
+            : "",
+          rhythm:
+            (data.rhythm &&
+              RHYTHM_CHOICES.find((i) => i.text === data.rhythm)?.id) ||
+            "0",
+          admitted_to: data.admitted_to ? data.admitted_to : "Select",
         };
       }
-      dispatch({ type: "set_form", form: formData });
-      setInitialData(formData);
-    },
-    [consultationId, id, dispatchAction, patientId]
-  );
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchRoundDetails(status);
-    },
-    [dispatchAction, fetchRoundDetails]
-  );
+    }
+    setIsLoading(false);
+    if (patientId) {
+      const { data } = await request(routes.getPatient, {
+        pathParams: { id: patientId },
+      });
+      if (data) {
+        setPatientName(data.name!);
+        setFacilityName(data.facility_object!.name);
+        setConsultationSuggestion(data.last_consultation?.suggestion);
+        setPreviousReviewInterval(
+          Number(data.last_consultation?.review_interval),
+        );
+        const getAction =
+          TELEMEDICINE_ACTIONS.find((action) => action.id === data.action)
+            ?.text || "NO_ACTION";
+        setPreviousAction(getAction);
+        setInitialData({
+          ...initialData,
+          action: getAction,
+        });
+        formData = { ...formData, ...{ action: getAction } };
+      }
+    } else {
+      setPatientName("");
+      setFacilityName("");
+    }
+    if (consultationId && !id) {
+      const { data } = await request(routes.getDailyReports, {
+        pathParams: { consultationId },
+        query: { limit: 1, offset: 0 },
+      });
+      setHasPreviousLog(!!data?.count);
+    }
+    dispatch({ type: "set_form", form: formData });
+    setInitialData(formData);
+  }, [consultationId, id, patientId]);
+
+  useEffect(() => {
+    fetchRoundDetails();
+  }, [fetchRoundDetails]);
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -247,18 +219,14 @@ export const DailyRounds = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "bp":
-          if (
-            (state.form.bp?.systolic &&
-              state.form.bp?.diastolic &&
-              state.form.bp.systolic !== -1 &&
-              state.form.bp.diastolic === -1) ||
-            (state.form.bp.systolic === -1 && state.form.bp.diastolic !== -1)
-          ) {
-            errors.bp = "Please enter both systolic and diastolic values";
+        case "bp": {
+          const error = BloodPressureValidator(state.form.bp);
+          if (error) {
+            errors.bp = error;
             invalidForm = true;
           }
           return;
+        }
         default:
           return;
       }
@@ -303,27 +271,7 @@ export const DailyRounds = (props: any) => {
         if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
           data = {
             ...data,
-            bp:
-              state.form.bp?.systolic !== -1 && state.form.bp?.diastolic !== -1
-                ? {
-                    systolic: state.form.bp?.systolic
-                      ? Number(state.form.bp?.systolic)
-                      : -1,
-                    diastolic: state.form.bp?.diastolic
-                      ? Number(state.form.bp?.diastolic)
-                      : -1,
-                    mean:
-                      state.form.bp?.systolic && state.form.bp?.diastolic
-                        ? parseFloat(
-                            meanArterialPressure(state.form.bp).toFixed(2)
-                          )
-                        : -1,
-                  }
-                : {
-                    systolic: -1,
-                    diastolic: -1,
-                    mean: -1,
-                  },
+            bp: state.form.bp ?? {},
             pulse: state.form.pulse ?? null,
             resp: state.form.resp ?? null,
             temperature: state.form.temperature ?? null,
@@ -337,60 +285,63 @@ export const DailyRounds = (props: any) => {
         data = baseData;
       }
 
-      let res;
       if (id) {
-        res = await dispatchAction(
-          updateDailyReport(data, { consultationId, id })
-        );
-      } else {
-        res = await dispatchAction(createDailyReport(data, { consultationId }));
-      }
+        const { data: obj } = await request(routes.updateDailyReport, {
+          body: data,
+          pathParams: { consultationId, id },
+        });
 
-      setIsLoading(false);
-      if (res && res.data && (res.status === 201 || res.status === 200)) {
-        dispatch({ type: "set_form", form: initForm });
+        setIsLoading(false);
 
-        if (id) {
+        if (obj) {
+          dispatch({ type: "set_form", form: initForm });
           Notification.Success({
             msg: "Consultation Updates details updated successfully",
           });
           if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
             navigate(
-              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
+              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
             );
           } else {
             navigate(
-              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${res.data.external_id}/update`
+              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${obj.id}/update`,
             );
           }
-        } else {
+        }
+      } else {
+        const { data: obj } = await request(routes.createDailyRounds, {
+          pathParams: { consultationId },
+          body: data,
+        });
+        setIsLoading(false);
+        if (obj) {
+          dispatch({ type: "set_form", form: initForm });
+
           Notification.Success({
             msg: "Consultation Updates details created successfully",
           });
           if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
             if (data.clone_last) {
               navigate(
-                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${res.data.external_id}/update`
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${obj.id}/update`,
               );
             } else {
               navigate(
-                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
               );
             }
           } else {
             if (data.clone_last) {
               navigate(
-                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${res.data.external_id}/update`
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${obj.id}/update`,
               );
             } else {
               navigate(
-                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${res.data.external_id}/update`
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${obj.id}/update`,
               );
             }
           }
         }
-      } else {
-        setIsLoading(false);
       }
     }
   };
@@ -414,7 +365,7 @@ export const DailyRounds = (props: any) => {
 
   const getExpectedReviewTime = () => {
     const nextReviewTime = Number(
-      state.form.review_interval || prevReviewInterval
+      state.form.review_interval || prevReviewInterval,
     );
     if (nextReviewTime > 0)
       return formatDateTime(dayjs().add(nextReviewTime, "minutes").toDate());
@@ -439,6 +390,20 @@ export const DailyRounds = (props: any) => {
       }
       className="mx-auto max-w-4xl"
     >
+      <div className="flex w-full justify-end md:m-4">
+        <Scribe
+          fields={DAILY_ROUND_FORM_SCRIBE_DATA}
+          onFormUpdate={(fields) => {
+            dispatch({
+              type: "set_form",
+              form: { ...state.form, ...fields },
+            });
+            fields.action !== undefined && setPreviousAction(fields.action);
+            fields.review_interval !== undefined &&
+              setPreviousReviewInterval(Number(fields.review_interval));
+          }}
+        />
+      </div>
       <form
         onSubmit={(e) => handleSubmit(e)}
         className="w-full max-w-4xl rounded-lg bg-white px-8 py-5 shadow md:m-4 md:px-16 md:py-11"
@@ -458,7 +423,7 @@ export const DailyRounds = (props: any) => {
               label="Measured at"
               type="datetime-local"
               value={dayjs(state.form.taken_at || undefined).format(
-                "YYYY-MM-DDTHH:mm"
+                "YYYY-MM-DDTHH:mm",
               )}
               max={dayjs().format("YYYY-MM-DDTHH:mm")}
             />
@@ -599,7 +564,7 @@ export const DailyRounds = (props: any) => {
                   label="Respiratory Rate"
                   unit="bpm"
                   start={0}
-                  end={50}
+                  end={150}
                   step={1}
                   thresholds={[
                     {
@@ -685,7 +650,7 @@ export const DailyRounds = (props: any) => {
               state.form.clone_last !== null &&
               !state.form.clone_last &&
               formFields.every(
-                (field: string) => state.form[field] == initialData[field]
+                (field: string) => state.form[field] == initialData[field],
               ) &&
               (state.form.temperature == initialData.temperature ||
                 isNaN(state.form.temperature)) &&

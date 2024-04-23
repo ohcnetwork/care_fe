@@ -28,10 +28,11 @@ export type UserModel = UserBareMinimum & {
   local_body?: number;
   district?: number;
   state?: number;
+  video_connect_link: string;
   phone_number?: string;
   alt_phone_number?: string;
   gender?: GenderType;
-  age?: number;
+  date_of_birth: Date | null | string;
   is_superuser?: boolean;
   verified?: boolean;
   home_facility?: string;
@@ -42,7 +43,7 @@ export type UserModel = UserBareMinimum & {
   doctor_qualification?: string;
   doctor_experience_commenced_on?: string;
   doctor_medical_council_registration?: string;
-  weekly_working_hours?: string;
+  weekly_working_hours?: string | null;
 };
 
 export interface SkillObjectModel {
@@ -62,8 +63,9 @@ export interface UserAssignedModel extends UserBareMinimum {
   state?: number;
   phone_number?: string;
   alt_phone_number?: string;
+  video_connect_link: string;
   gender?: number;
-  age?: number;
+  date_of_birth: Date | null;
   is_superuser?: boolean;
   verified?: boolean;
   home_facility?: string;

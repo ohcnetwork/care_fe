@@ -1,6 +1,7 @@
 import { debounce } from "lodash-es";
 import { useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
+import { mergeQueryOptions } from "../../Utils/utils";
 
 interface IUseAsyncOptionsArgs {
   debounceInterval?: number;
@@ -8,6 +9,9 @@ interface IUseAsyncOptionsArgs {
 }
 
 /**
+ * Deprecated. This is no longer needed as `useQuery` with `mergeQueryOptions`
+ * can be reused for this.
+ *
  * Hook to implement async autocompletes with ease and typesafety.
  *
  * See `DiagnosisSelectFormField` for usage.
@@ -30,7 +34,7 @@ interface IUseAsyncOptionsArgs {
  */
 export function useAsyncOptions<T extends Record<string, unknown>>(
   uniqueKey: keyof T,
-  args?: IUseAsyncOptionsArgs
+  args?: IUseAsyncOptionsArgs,
 ) {
   const dispatch = useDispatch<any>();
   const [queryOptions, setQueryOptions] = useState<T[]>([]);
@@ -43,22 +47,19 @@ export function useAsyncOptions<T extends Record<string, unknown>>(
         const res = await dispatch(action);
         if (res?.data)
           setQueryOptions(
-            args?.queryResponseExtractor?.(res.data) ?? (res.data as T[])
+            args?.queryResponseExtractor?.(res.data) ?? (res.data as T[]),
           );
         setIsLoading(false);
       }, args?.debounceInterval ?? 300),
-    [dispatch, args?.debounceInterval]
+    [dispatch, args?.debounceInterval],
   );
 
   const mergeValueWithQueryOptions = (selected?: T[]) => {
-    if (!selected?.length) return queryOptions;
-
-    return [
-      ...selected,
-      ...queryOptions.filter(
-        (option) => !selected.find((s) => s[uniqueKey] === option[uniqueKey])
-      ),
-    ];
+    return mergeQueryOptions(
+      selected ?? [],
+      queryOptions,
+      (obj) => obj[uniqueKey],
+    );
   };
 
   return {

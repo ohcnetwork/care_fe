@@ -5,7 +5,13 @@ import * as Notification from "../../Utils/Notifications.js";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
 import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
-import { classNames, parsePhoneNumber } from "../../Utils/utils";
+import {
+  classNames,
+  dateQueryString,
+  formatDate,
+  isValidUrl,
+  parsePhoneNumber,
+} from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
@@ -18,29 +24,31 @@ import { PhoneNumberValidator } from "../Form/FieldValidators";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
-
+import DateFormField from "../Form/FormFields/DateFormField";
 const Loading = lazy(() => import("../Common/Loading"));
 
 type EditForm = {
   firstName: string;
   lastName: string;
-  age: string;
+  date_of_birth: Date | null | string;
   gender: GenderType;
   email: string;
+  video_connect_link: string | undefined;
   phoneNumber: string;
   altPhoneNumber: string;
   user_type: string | undefined;
   doctor_qualification: string | undefined;
   doctor_experience_commenced_on: number | string | undefined;
   doctor_medical_council_registration: string | undefined;
-  weekly_working_hours: string | undefined;
+  weekly_working_hours: string | null | undefined;
 };
 type ErrorForm = {
   firstName: string;
   lastName: string;
-  age: string;
+  date_of_birth: string | null;
   gender: string;
   email: string;
+  video_connect_link: string | undefined;
   phoneNumber: string;
   altPhoneNumber: string;
   user_type: string | undefined;
@@ -60,8 +68,9 @@ type Action =
 const initForm: EditForm = {
   firstName: "",
   lastName: "",
-  age: "",
+  date_of_birth: null,
   gender: "Male",
+  video_connect_link: "",
   email: "",
   phoneNumber: "",
   altPhoneNumber: "",
@@ -74,7 +83,7 @@ const initForm: EditForm = {
 
 const initError: ErrorForm = Object.assign(
   {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
 );
 
 const initialState: State = {
@@ -142,16 +151,17 @@ export default function UserProfile() {
       const formData: EditForm = {
         firstName: result.data.first_name,
         lastName: result.data.last_name,
-        age: result.data.age?.toString() || "",
+        date_of_birth: result.data.date_of_birth || null,
         gender: result.data.gender || "Male",
         email: result.data.email,
+        video_connect_link: result.data.video_connect_link,
         phoneNumber: result.data.phone_number?.toString() || "",
         altPhoneNumber: result.data.alt_phone_number?.toString() || "",
         user_type: result.data.user_type,
         doctor_qualification: result.data.doctor_qualification,
         doctor_experience_commenced_on: dayjs().diff(
           dayjs(result.data.doctor_experience_commenced_on),
-          "years"
+          "years",
         ),
         doctor_medical_council_registration:
           result.data.doctor_medical_council_registration,
@@ -168,7 +178,7 @@ export default function UserProfile() {
     routes.userListSkill,
     {
       pathParams: { username: authUser.username },
-    }
+    },
   );
 
   const validateForm = () => {
@@ -184,15 +194,15 @@ export default function UserProfile() {
             invalidForm = true;
           }
           return;
-        case "age":
+        case "date_of_birth":
           if (!states.form[field]) {
-            errors[field] = "This field is required";
+            errors[field] = "Enter a valid date of birth";
             invalidForm = true;
           } else if (
-            Number(states.form[field]) <= 0 ||
-            !/^\d+$/.test(states.form[field])
+            !dayjs(states.form[field]).isValid() ||
+            dayjs(states.form[field]).isAfter(dayjs().subtract(17, "year"))
           ) {
-            errors[field] = "Age must be a number greater than 0";
+            errors[field] = "Enter a valid date of birth";
             invalidForm = true;
           }
           return;
@@ -240,8 +250,21 @@ export default function UserProfile() {
             invalidForm = true;
           }
           return;
-        case "doctor_qualification":
         case "doctor_experience_commenced_on":
+          if (states.form.user_type === "Doctor" && !states.form[field]) {
+            errors[field] = "Field is required";
+            invalidForm = true;
+          } else if (
+            (states.form.user_type === "Doctor" &&
+              Number(states.form.doctor_experience_commenced_on) >= 100) ||
+            Number(states.form.doctor_experience_commenced_on) < 0
+          ) {
+            errors[field] =
+              "Doctor experience should be at least 0 years and less than 100 years.";
+            invalidForm = true;
+          }
+          return;
+        case "doctor_qualification":
         case "doctor_medical_council_registration":
           if (states.form.user_type === "Doctor" && !states.form[field]) {
             errors[field] = "Field is required";
@@ -249,17 +272,23 @@ export default function UserProfile() {
           }
           return;
         case "weekly_working_hours":
-          if (!states.form[field]) {
-            errors[field] = "This field is required";
-            invalidForm = true;
-          } else if (
-            Number(states.form[field]) < 0 ||
-            Number(states.form[field]) > 168 ||
-            !/^\d+$/.test(states.form[field] ?? "")
+          if (
+            states.form[field] &&
+            (Number(states.form[field]) < 0 ||
+              Number(states.form[field]) > 168 ||
+              !/^\d+$/.test(states.form[field] ?? ""))
           ) {
             errors[field] =
               "Average weekly working hours must be a number between 0 and 168";
             invalidForm = true;
+          }
+          return;
+        case "video_connect_link":
+          if (states.form[field]) {
+            if (isValidUrl(states.form[field]) === false) {
+              errors[field] = "Please enter a valid url";
+              invalidForm = true;
+            }
           }
           return;
       }
@@ -274,6 +303,9 @@ export default function UserProfile() {
       form: { ...states.form, [event.name]: event.value },
     });
   };
+
+  const getDate = (value: any) =>
+    value && dayjs(value).isValid() && dayjs(value).toDate();
 
   const fieldProps = (name: string) => {
     return {
@@ -294,10 +326,11 @@ export default function UserProfile() {
         first_name: states.form.firstName,
         last_name: states.form.lastName,
         email: states.form.email,
+        video_connect_link: states.form.video_connect_link,
         phone_number: parsePhoneNumber(states.form.phoneNumber) ?? "",
         alt_phone_number: parsePhoneNumber(states.form.altPhoneNumber) ?? "",
         gender: states.form.gender,
-        age: +states.form.age,
+        date_of_birth: dateQueryString(states.form.date_of_birth),
         doctor_qualification:
           states.form.user_type === "Doctor"
             ? states.form.doctor_qualification
@@ -308,9 +341,9 @@ export default function UserProfile() {
                 .subtract(
                   parseInt(
                     (states.form.doctor_experience_commenced_on as string) ??
-                      "0"
+                      "0",
                   ),
-                  "years"
+                  "years",
                 )
                 .format("YYYY-MM-DD")
             : undefined,
@@ -318,7 +351,11 @@ export default function UserProfile() {
           states.form.user_type === "Doctor"
             ? states.form.doctor_medical_council_registration
             : undefined,
-        weekly_working_hours: states.form.weekly_working_hours,
+        weekly_working_hours:
+          states.form.weekly_working_hours &&
+          states.form.weekly_working_hours !== ""
+            ? states.form.weekly_working_hours
+            : null,
       };
       const { res } = await request(routes.partialUpdateUser, {
         pathParams: { username: authUser.username },
@@ -415,7 +452,7 @@ export default function UserProfile() {
                   {showEdit ? "Cancel" : "Edit User Profile"}
                 </ButtonV2>
                 <ButtonV2 variant="danger" onClick={signOut}>
-                  <CareIcon className="care-l-sign-out-alt" />
+                  <CareIcon icon="l-sign-out-alt" />
                   Sign out
                 </ButtonV2>
               </div>
@@ -492,12 +529,17 @@ export default function UserProfile() {
                       {userData?.last_name || "-"}
                     </dd>
                   </div>
-                  <div className="my-2  sm:col-span-1" id="age-profile-details">
+                  <div
+                    className="my-2  sm:col-span-1"
+                    id="date_of_birth-profile-details"
+                  >
                     <dt className="text-sm font-medium leading-5 text-black">
-                      Age
+                      Date of Birth
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {userData?.age || "-"}
+                      {userData?.date_of_birth
+                        ? formatDate(userData?.date_of_birth)
+                        : "-"}
                     </dd>
                   </div>
                   <div className="my-2  sm:col-span-1">
@@ -505,7 +547,7 @@ export default function UserProfile() {
                       Access Level
                     </dt>
                     <dd className="badge badge-pill mt-1 bg-primary-500 text-sm text-white">
-                      <i className="fa-solid fa-user-check mr-1"></i>{" "}
+                      <CareIcon icon="l-user-check" className="mr-1 text-lg" />{" "}
                       {userData?.user_type || "-"}
                     </dd>
                   </div>
@@ -575,7 +617,29 @@ export default function UserProfile() {
                       Average weekly working hours
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {userData?.weekly_working_hours || "-"}
+                      {userData?.weekly_working_hours ?? "-"}
+                    </dd>
+                  </div>
+                  <div
+                    className="my-2 sm:col-span-2"
+                    id="videoconnectlink-profile-details"
+                  >
+                    <dt className="text-sm font-medium leading-5 text-black">
+                      Video Connect Link
+                    </dt>
+                    <dd className="mt-1 break-words text-sm leading-5 text-gray-900">
+                      {userData?.video_connect_link ? (
+                        <a
+                          className="text-blue-500"
+                          href={userData?.video_connect_link}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {userData?.video_connect_link}
+                        </a>
+                      ) : (
+                        "-"
+                      )}
                     </dd>
                   </div>
                 </dl>
@@ -599,13 +663,14 @@ export default function UserProfile() {
                           label="Last name"
                           className="col-span-6 sm:col-span-3"
                         />
-                        <TextFormField
-                          {...fieldProps("age")}
+                        <DateFormField
+                          {...fieldProps("date_of_birth")}
+                          label="Date of Birth"
                           required
-                          label="Age"
                           className="col-span-6 sm:col-span-3"
-                          type="number"
-                          min={1}
+                          value={getDate(states.form.date_of_birth)}
+                          position="LEFT"
+                          disableFuture={true}
                         />
                         <SelectFormField
                           {...fieldProps("gender")}
@@ -661,7 +726,7 @@ export default function UserProfile() {
                             />
                             <TextFormField
                               {...fieldProps(
-                                "doctor_medical_council_registration"
+                                "doctor_medical_council_registration",
                               )}
                               required
                               className="col-span-6 sm:col-span-3"
@@ -672,12 +737,17 @@ export default function UserProfile() {
                         )}
                         <TextFormField
                           {...fieldProps("weekly_working_hours")}
-                          required
                           label="Average weekly working hours"
                           className="col-span-6 sm:col-span-3"
                           type="number"
                           min={0}
                           max={168}
+                        />
+                        <TextFormField
+                          {...fieldProps("video_connect_link")}
+                          label="Video Conference Link"
+                          className="col-span-6 sm:col-span-6"
+                          type="url"
                         />
                       </div>
                     </div>
@@ -779,7 +849,7 @@ export default function UserProfile() {
             <UpdatableApp silentlyAutoUpdate={false}>
               <ButtonV2 disabled={true}>
                 <div className="flex items-center gap-4">
-                  <CareIcon className="care-l-exclamation text-2xl" />
+                  <CareIcon icon="l-exclamation" className="text-2xl" />
                   Update available
                 </div>
               </ButtonV2>
@@ -794,9 +864,10 @@ export default function UserProfile() {
                 {" "}
                 <div className="flex items-center gap-4">
                   <CareIcon
+                    icon="l-sync"
                     className={classNames(
-                      "care-l-sync text-2xl",
-                      updateStatus.isChecking && "animate-spin"
+                      "text-2xl",
+                      updateStatus.isChecking && "animate-spin",
                     )}
                   />
                   {updateStatus.isChecking

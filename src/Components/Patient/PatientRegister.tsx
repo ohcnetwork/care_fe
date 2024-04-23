@@ -5,22 +5,10 @@ import {
   DISEASE_STATUS,
   GENDER_TYPES,
   MEDICAL_HISTORY_CHOICES,
+  OCCUPATION_TYPES,
   TEST_TYPE,
   VACCINES,
 } from "../../Common/constants";
-import {
-  HCXActions,
-  createPatient,
-  externalResult,
-  getAnyFacility,
-  getDistrictByState,
-  getLocalbodyByDistrict,
-  getPatient,
-  getStates,
-  getWardByLocalBody,
-  searchPatient,
-  updatePatient,
-} from "../../Redux/actions";
 import {
   dateQueryString,
   getPincodeDetails,
@@ -54,7 +42,7 @@ import { HCXPolicyModel } from "../HCX/models";
 import HCXPolicyValidator from "../HCX/validators";
 import InsuranceDetailsBuilder from "../HCX/InsuranceDetailsBuilder";
 import LinkABHANumberModal from "../ABDM/LinkABHANumberModal";
-import { PatientModel } from "./models";
+import { PatientModel, Occupation } from "./models";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
@@ -67,9 +55,13 @@ import { debounce } from "lodash-es";
 
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
 import { validatePincode } from "../../Common/validation";
 import { FormContextValue } from "../Form/FormContext.js";
+import useAuthUser from "../../Common/hooks/useAuthUser.js";
+import useQuery from "../../Utils/request/useQuery.js";
+import routes from "../../Redux/api.js";
+import request from "../../Utils/request/request.js";
+import SelectMenuV2 from "../Form/SelectMenuV2.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -89,17 +81,19 @@ const medicalHistoryChoices = MEDICAL_HISTORY_CHOICES.reduce(
     ...acc,
     { [`medical_history_${cur.id}`]: "" },
   ],
-  []
+  [],
 );
 const genderTypes = GENDER_TYPES;
 const diseaseStatus = [...DISEASE_STATUS];
 const bloodGroups = [...BLOOD_GROUPS];
+const occupationTypes = OCCUPATION_TYPES;
 const testType = [...TEST_TYPE];
 const vaccines = ["Select", ...VACCINES];
 
 const initForm: any = {
   name: "",
   age: "",
+  year_of_birth: "",
   gender: "",
   phone_number: "+91",
   emergency_phone_number: "+91",
@@ -152,7 +146,7 @@ const initForm: any = {
 
 const initError = Object.assign(
   {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
 );
 
 const initialState = {
@@ -178,11 +172,17 @@ const patientFormReducer = (state = initialState, action: any) => {
       return state;
   }
 };
+export const parseOccupationFromExt = (occupation: Occupation) => {
+  const occupationObject = OCCUPATION_TYPES.find(
+    (item) => item.value === occupation,
+  );
+  return occupationObject?.id;
+};
 
 export const PatientRegister = (props: PatientRegisterProps) => {
+  const authUser = useAuthUser();
   const { goBack } = useAppHistory();
   const { gov_data_api_key, enable_hcx, enable_abdm } = useConfig();
-  const dispatchAction: any = useDispatch();
   const { facilityId, id } = props;
   const [state, dispatch] = useReducer(patientFormReducer, initialState);
   const [showAlertMessage, setAlertMessage] = useState({
@@ -200,26 +200,26 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   });
   const [careExtId, setCareExtId] = useState("");
   const [formField, setFormField] = useState<any>();
-  const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
   const [isWardLoading, setIsWardLoading] = useState(false);
-  const [states, setStates] = useState<any[]>([]);
   const [districts, setDistricts] = useState<any[]>([]);
   const [localBody, setLocalBody] = useState<any[]>([]);
   const [ward, setWard] = useState<any[]>([]);
+  const [ageInputType, setAgeInputType] = useState<
+    "date_of_birth" | "age" | "alert_for_age"
+  >("date_of_birth");
   const [statusDialog, setStatusDialog] = useState<{
     show?: boolean;
     transfer?: boolean;
     patientList: Array<DupPatientModel>;
   }>({ patientList: [] });
-  const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const [{ extId }, setQuery] = useQueryParams();
   const [showLinkAbhaNumberModal, setShowLinkAbhaNumberModal] = useState(false);
   const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
   const [insuranceDetails, setInsuranceDetails] = useState<HCXPolicyModel[]>(
-    []
+    [],
   );
   const [insuranceDetailsError, setInsuranceDetailsError] =
     useState<FieldError>();
@@ -227,57 +227,54 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   useEffect(() => {
     if (extId && formField) {
       setCareExtId(extId);
-      fetchExtResultData(null, formField);
+      fetchExtResultData(formField);
     }
   }, [careExtId, formField]);
 
   const headerText = !id ? "Add Details of Patient" : "Update Patient Details";
   const buttonText = !id ? "Add Patient" : "Save Details";
 
-  const fetchDistricts = useCallback(
-    async (id: number) => {
-      if (id > 0) {
-        setIsDistrictLoading(true);
-        const districtList = await dispatchAction(getDistrictByState({ id }));
-        if (districtList) {
-          setDistricts(districtList.data);
-        }
-        setIsDistrictLoading(false);
-        return districtList ? [...districtList.data] : [];
+  const fetchDistricts = useCallback(async (id: number) => {
+    if (id > 0) {
+      setIsDistrictLoading(true);
+      const { res, data } = await request(routes.getDistrictByState, {
+        pathParams: { id },
+      });
+      if (res?.ok && data) {
+        setDistricts(data);
       }
-    },
-    [dispatchAction]
-  );
+      setIsDistrictLoading(false);
+      return data ? [...data] : [];
+    }
+  }, []);
 
-  const fetchLocalBody = useCallback(
-    async (id: string) => {
-      if (Number(id) > 0) {
-        setIsLocalbodyLoading(true);
-        const localBodyList = await dispatchAction(
-          getLocalbodyByDistrict({ id })
-        );
-        setIsLocalbodyLoading(false);
-        setLocalBody(localBodyList.data);
-      } else {
-        setLocalBody([]);
-      }
-    },
-    [dispatchAction]
-  );
+  const fetchLocalBody = useCallback(async (id: string) => {
+    if (Number(id) > 0) {
+      setIsLocalbodyLoading(true);
+      const { data } = await request(routes.getLocalbodyByDistrict, {
+        pathParams: { id },
+      });
+      setIsLocalbodyLoading(false);
+      setLocalBody(data || []);
+    } else {
+      setLocalBody([]);
+    }
+  }, []);
 
-  const fetchWards = useCallback(
-    async (id: string) => {
-      if (Number(id) > 0) {
-        setIsWardLoading(true);
-        const wardList = await dispatchAction(getWardByLocalBody({ id }));
-        setIsWardLoading(false);
-        setWard(wardList.data.results);
-      } else {
-        setWard([]);
+  const fetchWards = useCallback(async (id: string) => {
+    if (Number(id) > 0) {
+      setIsWardLoading(true);
+      const { data } = await request(routes.getWardByLocalBody, {
+        pathParams: { id },
+      });
+      setIsWardLoading(false);
+      if (data) {
+        setWard(data.results);
       }
-    },
-    [dispatchAction]
-  );
+    } else {
+      setWard([]);
+    }
+  }, []);
 
   const parseGenderFromExt = (gender: any, defaultValue: any) => {
     switch (gender.toLowerCase()) {
@@ -292,100 +289,97 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     }
   };
 
-  const fetchExtResultData = async (e: any, field: any) => {
-    if (e) e.preventDefault();
+  const fetchExtResultData = async (field: any) => {
     if (!careExtId) return;
-    const res = await dispatchAction(externalResult({ id: careExtId }));
+    const { res, data } = await request(routes.externalResult, {
+      pathParams: { id: careExtId },
+    });
 
-    if (res?.data) {
+    if (res?.ok && data) {
       field.onChange({
         name: "name",
-        value: res.data.name ? res.data.name : state.form.name,
+        value: data.name ? data.name : state.form.name,
       });
       field.onChange({
         name: "address",
-        value: res.data.address ? res.data.address : state.form.address,
+        value: data.address ? data.address : state.form.address,
       });
       field.onChange({
         name: "permanent_address",
-        value: res.data.permanent_address
-          ? res.data.permanent_address
+        value: data.permanent_address
+          ? data.permanent_address
           : state.form.permanent_address,
       });
       field.onChange({
         name: "gender",
-        value: res.data.gender
-          ? parseGenderFromExt(res.data.gender, state.form.gender)
+        value: data.gender
+          ? parseGenderFromExt(data.gender, state.form.gender)
           : state.form.gender,
       });
       field.onChange({
         name: "test_id",
-        value: res.data.test_id ? res.data.test_id : state.form.test_id,
+        value: data.test_id ? data.test_id : state.form.test_id,
       });
       field.onChange({
         name: "srf_id",
-        value: res.data.srf_id ? res.data.srf_id : state.form.srf_id,
+        value: data.srf_id ? data.srf_id : state.form.srf_id,
       });
       field.onChange({
         name: "state",
-        value: res.data.district_object
-          ? res.data.district_object.state
+        value: data.district_object
+          ? data.district_object.state
           : state.form.state,
       });
       field.onChange({
         name: "district",
-        value: res.data.district ? res.data.district : state.form.district,
+        value: data.district ? data.district : state.form.district,
       });
       field.onChange({
         name: "local_body",
-        value: res.data.local_body
-          ? res.data.local_body
-          : state.form.local_body,
+        value: data.local_body ? data.local_body : state.form.local_body,
       });
       field.onChange({
         name: "ward",
-        value: res.data.ward ? res.data.ward : state.form.ward,
+        value: data.ward ? data.ward : state.form.ward,
       });
       field.onChange({
         name: "village",
-        value: res.data.village ? res.data.village : state.form.village,
+        value: data.village ? data.village : state.form.village,
       });
       field.onChange({
         name: "disease_status",
-        value: res.data.result
-          ? res.data.result.toUpperCase()
+        value: data.result
+          ? data.result.toUpperCase()
           : state.form.disease_status,
       });
       field.onChange({
         name: "test_type",
-        value: res.data.test_type
-          ? res.data.test_type.toUpperCase()
+        value: data.test_type
+          ? data.test_type.toUpperCase()
           : state.form.test_type,
       });
       field.onChange({
         name: "date_of_test",
-        value: res.data.sample_collection_date
-          ? res.data.sample_collection_date
+        value: data.sample_collection_date
+          ? data.sample_collection_date
           : state.form.date_of_test,
       });
       field.onChange({
         name: "date_of_result",
-        value: res.data.result_date
-          ? res.data.result_date
-          : state.form.date_of_result,
+        value: data.result_date ? data.result_date : state.form.date_of_result,
       });
       field.onChange({
         name: "phone_number",
-        value: res.data.mobile_number
-          ? "+91" + res.data.mobile_number
+        value: data.mobile_number
+          ? "+91" + data.mobile_number
           : state.form.phone_number,
       });
 
       Promise.all([
-        fetchDistricts(res.data.district_object.state),
-        fetchLocalBody(res.data.district),
-        fetchWards(res.data.local_body),
-        duplicateCheck(res.data.mobile_number),
+        fetchDistricts(data.district_object.state),
+        fetchLocalBody(String(data.district)),
+        fetchWards(String(data.local_body)), // Convert data.local_body to a string
+        duplicateCheck(data.mobile_number),
       ]);
       setShowImport({
         show: false,
@@ -397,93 +391,103 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatchAction(getPatient({ id }));
+      const { res, data } = await request(routes.getPatient, {
+        pathParams: { id: id ? id : 0 },
+      });
       if (!status.aborted) {
-        if (res?.data) {
-          setFacilityName(res.data.facility_object.name);
-          setPatientName(res.data.name);
-          console.log(res.data);
+        if (res?.ok && data) {
+          setPatientName(data.name || "");
+          if (!data.date_of_birth) {
+            setAgeInputType("age");
+          }
           const formData = {
-            ...res.data,
-            health_id_number: res.data.abha_number_object?.abha_number || "",
-            health_id: res.data.abha_number_object?.health_id || "",
-            nationality: res.data.nationality ? res.data.nationality : "India",
-            gender: res.data.gender ? res.data.gender : "",
-            cluster_name: res.data.cluster_name ? res.data.cluster_name : "",
-            state: res.data.state ? res.data.state : "",
-            district: res.data.district ? res.data.district : "",
-            blood_group: res.data.blood_group
-              ? res.data.blood_group === "UNKNOWN"
+            ...data,
+            age: data.year_of_birth
+              ? new Date().getFullYear() - data.year_of_birth
+              : "",
+            health_id_number: data.abha_number_object?.abha_number || "",
+            health_id: data.abha_number_object?.health_id || "",
+            nationality: data.nationality ? data.nationality : "India",
+            gender: data.gender ? data.gender : undefined,
+            cluster_name: data.cluster_name ? data.cluster_name : "",
+            state: data.state ? data.state : "",
+            district: data.district ? data.district : "",
+            blood_group: data.blood_group
+              ? data.blood_group === "UNKNOWN"
                 ? "UNK"
-                : res.data.blood_group
+                : data.blood_group
               : "",
-            local_body: res.data.local_body ? res.data.local_body : "",
-            ward: res.data.ward_object ? res.data.ward_object.id : undefined,
-            village: res.data.village ? res.data.village : "",
-            medical_history: [],
-            is_antenatal: String(!!res.data.is_antenatal),
-            allergies: res.data.allergies ? res.data.allergies : "",
-            pincode: res.data.pincode ? res.data.pincode : "",
-            ongoing_medication: res.data.ongoing_medication
-              ? res.data.ongoing_medication
-              : "",
-
-            is_declared_positive: res.data.is_declared_positive
-              ? String(res.data.is_declared_positive)
-              : "false",
-            designation_of_health_care_worker: res.data
-              .designation_of_health_care_worker
-              ? res.data.designation_of_health_care_worker
-              : "",
-            instituion_of_health_care_worker: res.data
-              .instituion_of_health_care_worker
-              ? res.data.instituion_of_health_care_worker
+            local_body: data.local_body ? data.local_body : "",
+            ward: data.ward_object ? data.ward_object.id : undefined,
+            village: data.village ? data.village : "",
+            medical_history: [] as number[],
+            is_antenatal: String(!!data.is_antenatal),
+            allergies: data.allergies ? data.allergies : "",
+            pincode: data.pincode ? data.pincode : "",
+            ongoing_medication: data.ongoing_medication
+              ? data.ongoing_medication
               : "",
 
-            number_of_primary_contacts: res.data.number_of_primary_contacts
-              ? res.data.number_of_primary_contacts
-              : "",
-            number_of_secondary_contacts: res.data.number_of_secondary_contacts
-              ? res.data.number_of_secondary_contacts
-              : "",
-            contact_with_confirmed_carrier: res.data
-              .contact_with_confirmed_carrier
-              ? String(res.data.contact_with_confirmed_carrier)
+            is_declared_positive: data.is_declared_positive
+              ? String(data.is_declared_positive)
               : "false",
-            contact_with_suspected_carrier: res.data
-              .contact_with_suspected_carrier
-              ? String(res.data.contact_with_suspected_carrier)
+            designation_of_health_care_worker:
+              data.designation_of_health_care_worker
+                ? data.designation_of_health_care_worker
+                : "",
+            instituion_of_health_care_worker:
+              data.instituion_of_health_care_worker
+                ? data.instituion_of_health_care_worker
+                : "",
+            meta_info: data.meta_info ?? {},
+            occupation: data.meta_info?.occupation
+              ? parseOccupationFromExt(data.meta_info.occupation)
+              : null,
+
+            number_of_primary_contacts: data.number_of_primary_contacts
+              ? data.number_of_primary_contacts
+              : "",
+            number_of_secondary_contacts: data.number_of_secondary_contacts
+              ? data.number_of_secondary_contacts
+              : "",
+            contact_with_confirmed_carrier: data.contact_with_confirmed_carrier
+              ? String(data.contact_with_confirmed_carrier)
               : "false",
-            is_vaccinated: String(res.data.is_vaccinated),
-            number_of_doses: res.data.number_of_doses
-              ? String(res.data.number_of_doses)
+            contact_with_suspected_carrier: data.contact_with_suspected_carrier
+              ? String(data.contact_with_suspected_carrier)
+              : "false",
+            is_vaccinated: String(data.is_vaccinated),
+            number_of_doses: data.number_of_doses
+              ? String(data.number_of_doses)
               : "0",
-            vaccine_name: res.data.vaccine_name ? res.data.vaccine_name : null,
-            last_vaccinated_date: res.data.last_vaccinated_date
-              ? res.data.last_vaccinated_date
+            vaccine_name: data.vaccine_name ? data.vaccine_name : null,
+            last_vaccinated_date: data.last_vaccinated_date
+              ? data.last_vaccinated_date
               : null,
           };
-
-          formData.sameAddress =
-            res.data.address === res.data.permanent_address;
-          res.data.medical_history.forEach((i: any) => {
-            const medicalHistory = MEDICAL_HISTORY_CHOICES.find(
-              (j: any) =>
-                String(j.text).toLowerCase() === String(i.disease).toLowerCase()
-            );
-            if (medicalHistory) {
-              formData.medical_history.push(medicalHistory.id);
-              formData[`medical_history_${medicalHistory.id}`] = i.details;
-            }
-          });
+          formData.sameAddress = data.address === data.permanent_address;
+          (data.medical_history ? data.medical_history : []).forEach(
+            (i: any) => {
+              const medicalHistory = MEDICAL_HISTORY_CHOICES.find(
+                (j) =>
+                  String(j.text).toLowerCase() ===
+                  String(i.disease).toLowerCase(),
+              );
+              if (medicalHistory) {
+                formData.medical_history.push(Number(medicalHistory.id));
+                (formData as any)[`medical_history_${medicalHistory.id}`] =
+                  i.details;
+              }
+            },
+          );
           dispatch({
             type: "set_form",
             form: formData,
           });
           Promise.all([
-            fetchDistricts(res.data.state),
-            fetchLocalBody(res.data.district),
-            fetchWards(res.data.local_body),
+            fetchDistricts(data.state ?? 0),
+            fetchLocalBody(data.district ? String(data.district) : ""),
+            fetchWards(data.local_body ? String(data.local_body) : ""), // Convert data.local_body to string
           ]);
         } else {
           goBack();
@@ -491,37 +495,25 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         setIsLoading(false);
       }
     },
-    [dispatchAction, fetchDistricts, fetchLocalBody, fetchWards, id]
+    [id],
   );
 
-  useEffect(() => {
-    const fetchPatientInsuranceDetails = async () => {
-      if (!id) {
-        setInsuranceDetails([]);
-        return;
-      }
-
-      const res = await dispatchAction(
-        HCXActions.policies.list({ patient: id })
-      );
-      if (res?.data) {
-        setInsuranceDetails(res.data.results);
-      }
-    };
-
-    fetchPatientInsuranceDetails();
-  }, [dispatchAction, id]);
-
-  const fetchStates = useCallback(
-    async (status: statusType) => {
-      setIsStateLoading(true);
-      const statesRes = await dispatchAction(getStates());
-      if (!status.aborted && statesRes.data.results) {
-        setStates(statesRes.data.results);
-      }
-      setIsStateLoading(false);
+  useQuery(routes.listHCXPolicies, {
+    query: {
+      patient: id,
     },
-    [dispatchAction]
+    prefetch: !!id,
+    onResponse: ({ data }) => {
+      if (data) {
+        setInsuranceDetails(data.results);
+      } else {
+        setInsuranceDetails([]);
+      }
+    },
+  });
+
+  const { data: stateData, loading: isStateLoading } = useQuery(
+    routes.statesList,
   );
 
   useAbortableEffect(
@@ -529,23 +521,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       if (id) {
         fetchData(status);
       }
-      fetchStates(status);
     },
-    [dispatch, fetchData]
+    [dispatch, fetchData],
   );
 
-  useEffect(() => {
-    async function fetchFacilityName() {
-      if (facilityId && !id) {
-        const res = await dispatchAction(getAnyFacility(facilityId));
-
-        setFacilityName(res?.data?.name || "");
-      } else {
-        setFacilityName("");
-      }
-    }
-    fetchFacilityName();
-  }, [dispatchAction, facilityId]);
+  const { data: facilityObject } = useQuery(routes.getAnyFacility, {
+    pathParams: { id: facilityId },
+    prefetch: !!facilityId,
+  });
 
   const validateForm = (form: any) => {
     const errors: Partial<Record<keyof any, FieldError>> = {};
@@ -561,9 +544,34 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         case "address":
         case "name":
         case "gender":
-        case "date_of_birth":
           errors[field] = RequiredFieldValidator()(form[field]);
           return;
+        case "age":
+        case "date_of_birth": {
+          const field = ageInputType === "age" ? "age" : "date_of_birth";
+
+          errors[field] = RequiredFieldValidator()(form[field]);
+          if (errors[field]) {
+            return;
+          }
+
+          if (field === "age") {
+            if (form.age < 0) {
+              errors.age = "Age cannot be less than 0";
+              return;
+            }
+
+            form.date_of_birth = null;
+            form.year_of_birth = new Date().getFullYear() - form.age;
+          }
+
+          if (field === "date_of_birth") {
+            form.age = null;
+            form.year_of_birth = null;
+          }
+
+          return;
+        }
         case "permanent_address":
           if (!form.sameAddress) {
             errors[field] = RequiredFieldValidator()(form[field]);
@@ -698,7 +706,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     const pincodeDetails = await getPincodeDetails(e.value, gov_data_api_key);
     if (!pincodeDetails) return;
 
-    const matchedState = states?.find((state) => {
+    const matchedState = stateData?.results?.find((state) => {
       return includesIgnoreCase(state.name, pincodeDetails.statename);
     });
     if (!matchedState) return;
@@ -712,9 +720,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     if (!matchedDistrict) return;
 
     setField({ name: "state", value: matchedState.id });
-    setField({ name: "district", value: matchedDistrict.id });
+    setField({ name: "district", value: matchedDistrict.id.toString() }); // Convert matchedDistrict.id to string
 
-    fetchLocalBody(matchedDistrict.id);
+    fetchLocalBody(matchedDistrict.id.toString()); // Convert matchedDistrict.id to string
     setShowAutoFilledPincode(true);
     setTimeout(() => {
       setShowAutoFilledPincode(false);
@@ -738,7 +746,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       abha_number: state.form.abha_number,
       phone_number: parsePhoneNumber(formData.phone_number),
       emergency_phone_number: parsePhoneNumber(formData.emergency_phone_number),
-      date_of_birth: dateQueryString(formData.date_of_birth),
+      date_of_birth:
+        ageInputType === "date_of_birth"
+          ? dateQueryString(formData.date_of_birth)
+          : null,
+      year_of_birth: ageInputType === "age" ? formData.year_of_birth : null,
       disease_status: formData.disease_status,
       date_of_test: formData.date_of_test ? formData.date_of_test : undefined,
       date_of_result: formData.date_of_result
@@ -784,21 +796,25 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       local_body:
         formData.nationality === "India" ? formData.local_body : undefined,
       ward: formData.ward,
+      meta_info: {
+        ...state.form?.meta_info,
+        occupation: formData.occupation ?? null,
+      },
       village: formData.village,
       address: formData.address ? formData.address : undefined,
       permanent_address: formData.sameAddress
         ? formData.address
         : formData.permanent_address
-        ? formData.permanent_address
-        : undefined,
+          ? formData.permanent_address
+          : undefined,
       present_health: formData.present_health
         ? formData.present_health
         : undefined,
       contact_with_confirmed_carrier: JSON.parse(
-        formData.contact_with_confirmed_carrier
+        formData.contact_with_confirmed_carrier,
       ),
       contact_with_suspected_carrier: JSON.parse(
-        formData.contact_with_suspected_carrier
+        formData.contact_with_suspected_carrier,
       ),
       estimated_contact_date:
         (JSON.parse(formData.contact_with_confirmed_carrier) ||
@@ -817,7 +833,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         ? Number(formData.number_of_primary_contacts)
         : undefined,
       number_of_secondary_contacts: Number(
-        formData.number_of_secondary_contacts
+        formData.number_of_secondary_contacts,
       )
         ? Number(formData.number_of_secondary_contacts)
         : undefined,
@@ -831,49 +847,59 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       medical_history,
       is_active: true,
     };
-    const res = await dispatchAction(
-      id
-        ? updatePatient(data, { id })
-        : createPatient({ ...data, facility: facilityId })
-    );
-    if (res && res.data && res.status != 400) {
+    const { res, data: requestData } = id
+      ? await request(routes.updatePatient, {
+          pathParams: { id },
+          body: data,
+        })
+      : await request(routes.addPatient, {
+          body: { ...data, facility: facilityId },
+        });
+    if (res?.ok && requestData) {
       await Promise.all(
         insuranceDetails.map(async (obj) => {
           const policy = {
             ...obj,
-            patient: res.data.id,
+            patient: requestData.id,
             insurer_id: obj.insurer_id || undefined,
             insurer_name: obj.insurer_name || undefined,
           };
-          const policyRes = await (policy.id
-            ? dispatchAction(
-                HCXActions.policies.update(policy.id, policy as HCXPolicyModel)
-              )
-            : dispatchAction(
-                HCXActions.policies.create(policy as HCXPolicyModel)
-              ));
+          const { data: policyData } = policy.id
+            ? await request(routes.updateHCXPolicy, {
+                pathParams: { external_id: policy.id },
+                body: policy,
+              })
+            : await request(routes.createHCXPolicy, {
+                body: policy,
+              });
 
-          if (enable_hcx) {
-            const eligibilityCheckRes = await dispatchAction(
-              HCXActions.checkEligibility(policyRes.data.id)
-            );
-            if (eligibilityCheckRes.status === 200) {
-              Notification.Success({ msg: "Checking Policy Eligibility..." });
-            } else {
-              Notification.Error({ msg: "Something Went Wrong..." });
-            }
+          if (enable_hcx && policyData?.id) {
+            await request(routes.hcxCheckEligibility, {
+              body: { policy: policyData?.id },
+              onResponse: ({ res }) => {
+                if (res?.ok) {
+                  Notification.Success({
+                    msg: "Checking Policy Eligibility...",
+                  });
+                } else {
+                  Notification.Error({ msg: "Something Went Wrong..." });
+                }
+              },
+            });
           }
-        })
+        }),
       );
 
       dispatch({ type: "set_form", form: initForm });
       if (!id) {
         setAlertMessage({
           show: true,
-          message: `Please note down patient name: ${formData.name} and patient ID: ${res.data.id}`,
+          message: `Please note down patient name: ${formData.name} and patient ID: ${requestData.id}`,
           title: "Patient Added Successfully",
         });
-        navigate(`/facility/${facilityId}/patient/${res.data.id}/consultation`);
+        navigate(
+          `/facility/${facilityId}/patient/${requestData.id}/consultation`,
+        );
       } else {
         Notification.Success({
           msg: "Patient updated successfully",
@@ -899,7 +925,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         pincode,
       },
     }: any,
-    field: any
+    field: any,
   ) => {
     const values: any = {};
     if (id) values["abha_number"] = id;
@@ -953,39 +979,46 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     } else {
       values.splice(values.indexOf(id), 1);
     }
+
+    if (id !== 1 && values.includes(1)) {
+      values.splice(values.indexOf(1), 1);
+    } else if (id === 1) {
+      values.length = 0;
+      values.push(1);
+    }
+
     field("medical_history").onChange({
       name: "medical_history",
       value: values,
     });
   };
 
-  const duplicateCheck = useCallback(
-    debounce(async (phoneNo: string) => {
-      if (
-        phoneNo &&
-        PhoneNumberValidator()(parsePhoneNumber(phoneNo) ?? "") === undefined
-      ) {
-        const query = {
-          phone_number: parsePhoneNumber(phoneNo),
-        };
-        const res = await dispatchAction(searchPatient(query));
-        if (res?.data?.results) {
-          const duplicateList = !id
-            ? res.data.results
-            : res.data.results.filter(
-                (item: DupPatientModel) => item.patient_id !== id
-              );
-          if (duplicateList.length) {
-            setStatusDialog({
-              show: true,
-              patientList: duplicateList,
-            });
-          }
+  const duplicateCheck = debounce(async (phoneNo: string) => {
+    if (
+      phoneNo &&
+      PhoneNumberValidator()(parsePhoneNumber(phoneNo) ?? "") === undefined
+    ) {
+      const query = {
+        phone_number: parsePhoneNumber(phoneNo),
+      };
+      const { res, data } = await request(routes.searchPatient, {
+        query,
+      });
+      if (res?.ok && data?.results) {
+        const duplicateList = !id
+          ? data.results
+          : data.results.filter(
+              (item: DupPatientModel) => item.patient_id !== id,
+            );
+        if (duplicateList.length) {
+          setStatusDialog({
+            show: true,
+            patientList: duplicateList,
+          });
         }
       }
-    }, 300),
-    []
-  );
+    }
+  }, 300);
 
   const handleDialogClose = (action: string) => {
     if (action === "transfer") {
@@ -1069,14 +1102,17 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           }
         }}
         crumbsReplacements={{
-          [facilityId]: { name: facilityName },
+          [facilityId]: { name: facilityObject?.name },
           [id ?? "????"]: { name: patientName },
         }}
       />
       <div className="mt-4">
         <div className="mx-4 my-8 rounded bg-purple-100 p-4 text-xs font-semibold text-purple-800">
           <div className="mx-1 mb-1 flex items-center text-lg font-bold">
-            <CareIcon className=" care-l-info-circle mr-1 text-2xl font-bold" />{" "}
+            <CareIcon
+              icon="l-info-circle"
+              className="mr-1 text-2xl font-bold"
+            />{" "}
             Please enter the correct date of birth for the patient
           </div>
           <p className="text-sm font-normal text-black">
@@ -1115,9 +1151,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   />
                 </div>
                 <button
+                  id="submit-importexternalresult-button"
                   className="btn btn-primary mr-4"
                   onClick={(e) => {
-                    fetchExtResultData(e, showImport?.field?.("name"));
+                    e.preventDefault();
+                    fetchExtResultData(showImport?.field?.("name"));
                   }}
                   disabled={!careExtId}
                 >
@@ -1139,7 +1177,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           )}
           <>
             <div className={`${showImport.show && "hidden"}`}>
-              <Form<PatientModel>
+              <Form<PatientModel & { age?: number }>
                 defaults={id ? state.form : initForm}
                 validate={validateForm}
                 onSubmit={handleSubmit}
@@ -1163,7 +1201,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     <>
                       <div className="mb-2 overflow-visible rounded border border-gray-200 p-4">
                         <ButtonV2
+                          id="import-externalresult-button"
                           className="flex items-center gap-2"
+                          disabled={
+                            authUser.user_type === "Nurse" ||
+                            authUser.user_type === "Staff"
+                          }
                           onClick={(_) => {
                             setShowImport({
                               show: true,
@@ -1172,7 +1215,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             setQuery({ extId: "" }, { replace: true });
                           }}
                         >
-                          <CareIcon className="care-l-import text-lg" />
+                          <CareIcon icon="l-import" className="text-lg" />
                           Import From External Results
                         </ButtonV2>
                       </div>
@@ -1188,7 +1231,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               onSuccess={(data: any) => {
                                 if (id) {
                                   navigate(
-                                    `/facility/${facilityId}/patient/${id}`
+                                    `/facility/${facilityId}/patient/${id}`,
                                   );
                                   return;
                                 }
@@ -1280,18 +1323,116 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               label={"Name"}
                             />
                           </div>
-                          <div
-                            data-testid="date-of-birth"
-                            id="date_of_birth-div"
-                          >
-                            <DateFormField
-                              containerClassName="w-full"
-                              {...field("date_of_birth")}
-                              label="Date of Birth"
-                              required
-                              position="LEFT"
-                              disableFuture
+                          <div>
+                            <FieldLabel required>
+                              {ageInputType === "age" ? "Age" : "Date of Birth"}
+                            </FieldLabel>
+                            <div className="flex w-full items-center gap-2">
+                              <SelectMenuV2
+                                id="patientAge"
+                                className="w-44 lg:w-32"
+                                options={
+                                  [
+                                    {
+                                      value: "date_of_birth",
+                                      text: "DOB",
+                                    },
+                                    { value: "age", text: "Age" },
+                                  ] as const
+                                }
+                                required
+                                optionLabel={(o) => o.text}
+                                optionValue={(o) =>
+                                  o.value === "date_of_birth"
+                                    ? "date_of_birth"
+                                    : "age"
+                                }
+                                value={ageInputType}
+                                onChange={(v) => {
+                                  if (
+                                    v === "age" &&
+                                    ageInputType === "date_of_birth"
+                                  ) {
+                                    setAgeInputType("alert_for_age");
+                                    return;
+                                  }
+                                  setAgeInputType(v);
+                                }}
+                              />
+                              <div className="w-full">
+                                {ageInputType !== "age" ? (
+                                  <div
+                                    data-testid="date-of-birth"
+                                    id="date_of_birth-div"
+                                    className="w-full"
+                                  >
+                                    <DateFormField
+                                      className="w-full"
+                                      containerClassName="w-full"
+                                      {...field("date_of_birth")}
+                                      errorClassName="hidden"
+                                      required
+                                      position="LEFT"
+                                      disableFuture
+                                    />
+                                  </div>
+                                ) : (
+                                  <div id="age-div">
+                                    <TextFormField
+                                      {...field("age")}
+                                      errorClassName="hidden"
+                                      trailing={
+                                        <p className="absolute right-16 mb-11 text-xs text-gray-700 sm:text-sm">
+                                          <p className="hidden sm:inline min-[768px]:hidden lg:inline">
+                                            {field("age").value !== "" &&
+                                              "Year of Birth:"}
+                                          </p>
+                                          <span className="font-bold">
+                                            {field("age").value !== "" &&
+                                              new Date().getFullYear() -
+                                                field("age").value}
+                                          </span>
+                                        </p>
+                                      }
+                                      placeholder="Enter the age"
+                                      className="col-span-6 sm:col-span-3"
+                                      type="number"
+                                      min={0}
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <FieldErrorText
+                              error={
+                                field("age").error ||
+                                field("date_of_birth").error
+                              }
                             />
+                            <div id="age-confirm-dialog">
+                              <ConfirmDialog
+                                title={"Alert!"}
+                                description={
+                                  <div>
+                                    <div>
+                                      While entering a patient's age is an
+                                      option, please note that only the year of
+                                      birth will be captured from this
+                                      information.
+                                    </div>
+                                    <b>
+                                      Recommended only when the patient's date
+                                      of birth is unknown
+                                    </b>
+                                  </div>
+                                }
+                                action="Confirm"
+                                variant="warning"
+                                show={ageInputType == "alert_for_age"}
+                                onClose={() => setAgeInputType("date_of_birth")}
+                                onConfirm={() => setAgeInputType("age")}
+                              />
+                            </div>
                           </div>
                           <div data-testid="Gender" id="gender-div">
                             <SelectFormField
@@ -1364,13 +1505,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 field("pincode").onChange(e);
                                 handlePincodeChange(
                                   e,
-                                  field("pincode").onChange
+                                  field("pincode").onChange,
                                 );
                               }}
                             />
                             {showAutoFilledPincode && (
                               <div>
-                                <i className="fas fa-circle-check mr-2 text-sm text-green-500" />
+                                <CareIcon
+                                  icon="l-check-circle"
+                                  className="mr-2 text-sm text-green-500"
+                                />
                                 <span className="text-sm text-primary-500">
                                   State and District auto-filled from Pincode
                                 </span>
@@ -1404,7 +1548,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     label="State"
                                     required
                                     placeholder="Choose State"
-                                    options={states}
+                                    options={stateData ? stateData.results : []}
                                     optionLabel={(o: any) => o.name}
                                     optionValue={(o: any) => o.id}
                                     onChange={(e: any) => {
@@ -1529,6 +1673,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   />
                                 )}
                               </div>
+                              <SelectFormField
+                                {...field("occupation")}
+                                label="Occupation"
+                                placeholder="Select Occupation"
+                                options={occupationTypes}
+                                optionLabel={(o) => o.text}
+                                optionValue={(o) => o.id}
+                              />
                             </>
                           ) : (
                             <div id="passport_no-div">
@@ -1545,7 +1697,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         <AccordionV2
                           className="mt-2 shadow-none md:mt-0 lg:mt-0"
                           expandIcon={
-                            <CareIcon className="care-l-angle-down text-2xl font-bold" />
+                            <CareIcon
+                              icon="l-angle-down"
+                              className="text-2xl font-bold"
+                            />
                           }
                           title={
                             <h1 className="text-left text-xl font-bold text-purple-500">
@@ -1652,11 +1807,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 opened={
                                   JSON.parse(
                                     field("contact_with_confirmed_carrier")
-                                      .value ?? "{}"
+                                      .value ?? "{}",
                                   ) ||
                                   JSON.parse(
                                     field("contact_with_suspected_carrier")
-                                      .value ?? "{}"
+                                      .value ?? "{}",
                                   )
                                 }
                               >
@@ -1730,7 +1885,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 <CollapseV2
                                   opened={
                                     String(
-                                      field("is_declared_positive").value
+                                      field("is_declared_positive").value,
                                     ) === "true"
                                   }
                                   className="mt-4"
@@ -1824,7 +1979,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 return renderMedicalHistory(
                                   i.id as number,
                                   i.text,
-                                  field
+                                  field,
                                 );
                               })}
                             </div>
@@ -1879,7 +2034,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             }
                             data-testid="add-insurance-button"
                           >
-                            <CareIcon className="care-l-plus text-lg" />
+                            <CareIcon icon="l-plus" className="text-lg" />
                             <span>Add Insurance Details</span>
                           </ButtonV2>
                         </div>

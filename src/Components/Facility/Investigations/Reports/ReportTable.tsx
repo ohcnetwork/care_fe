@@ -2,7 +2,7 @@ import { getColorIndex, rowColor, transformData } from "./utils";
 
 import ButtonV2 from "../../../Common/components/ButtonV2";
 import { InvestigationResponse } from "./types";
-import { formatAge, formatDateTime } from "../../../../Utils/utils";
+import { formatDateTime } from "../../../../Utils/utils";
 import { FC } from "react";
 
 const ReportRow = ({ data, name, min, max }: any) => {
@@ -52,8 +52,7 @@ interface ReportTableProps {
   title?: string;
   patientDetails?: {
     name: string;
-    age: number;
-    date_of_birth: string;
+    age: string;
     hospitalName: string;
   };
   investigationData: InvestigationResponse;
@@ -84,14 +83,7 @@ const ReportTable: FC<ReportTableProps> = ({
         {patientDetails && (
           <div className="flex flex-col gap-1 p-1">
             <p>Name: {patientDetails.name}</p>
-            <p>
-              Age:{" "}
-              {formatAge(
-                patientDetails.age,
-                patientDetails.date_of_birth,
-                true
-              )}
-            </p>
+            <p>Age: {patientDetails.age}</p>
             <p>Hospital: {patientDetails.hospitalName}</p>
           </div>
         )}
@@ -124,9 +116,17 @@ const ReportTable: FC<ReportTableProps> = ({
                   <th
                     scope="col"
                     key={session.session_external_id}
-                    className="bg-[#4B5563] px-6 py-3 text-center text-xs font-semibold uppercase  tracking-wider text-[#F9FAFB]"
+                    className="bg-[#4B5563] px-6 py-3 text-center text-xs  font-semibold tracking-wider text-[#F9FAFB]"
                   >
-                    {formatDateTime(session.session_created_date)}
+                    <div className="flex flex-col items-center justify-center gap-1">
+                      {formatDateTime(session.session_created_date)}
+                      <a
+                        className="max-w-fit font-semibold text-white hover:underline"
+                        href={`/facility/${session.facility_id}/`}
+                      >
+                        {session.facility_name}
+                      </a>
+                    </div>
                   </th>
                 ))}
                 <th

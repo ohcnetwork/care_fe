@@ -42,12 +42,15 @@ export default function AuthUserProvider({ children, unauthorized }: Props) {
         localStorage.setItem(LocalStorageKeys.refreshToken, query.data.refresh);
 
         await refetch();
-        navigate(getRedirectOr("/"));
+
+        if (location.pathname === "/" || location.pathname === "/login") {
+          navigate(getRedirectOr("/"));
+        }
       }
 
       return query;
     },
-    [refetch]
+    [refetch],
   );
 
   const signOut = useCallback(async () => {

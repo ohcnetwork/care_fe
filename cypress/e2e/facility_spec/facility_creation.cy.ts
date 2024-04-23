@@ -1,5 +1,13 @@
 // FacilityCreation
-import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
+import {
+  cy,
+  describe,
+  before,
+  beforeEach,
+  it,
+  afterEach,
+  expect,
+} from "local-cypress";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import FacilityHome from "../../pageobject/Facility/FacilityHome";
@@ -30,7 +38,7 @@ describe("Facility Creation", () => {
   const doctorCapacity = "5";
   const totalDoctor = "10";
   const facilityName = "cypress facility";
-  const facilityName2 = "Dummy Facility 1";
+  const facilityName2 = "Dummy Facility 40";
   const facilityAddress = "cypress address";
   const facilityUpdateAddress = "cypress updated address";
   const facilityNumber = "9898469865";
@@ -38,6 +46,7 @@ describe("Facility Creation", () => {
   const initialTriageValue = "60";
   const modifiedTriageValue = "50";
   const facilityErrorMessage = [
+    "Required",
     "Required",
     "Invalid Pincode",
     "Required",
@@ -115,6 +124,7 @@ describe("Facility Creation", () => {
     facilityPage.submitForm();
     userCreationPage.verifyErrorMessages(facilityErrorMessage);
     facilityPage.fillFacilityName(facilityName);
+    facilityPage.clickUpdateFacilityType("Primary Health Centres");
     facilityPage.clickfacilityfeatureoption();
     facilityFeature.forEach((featureText) => {
       cy.get("[role='option']").contains(featureText).click();
@@ -136,15 +146,18 @@ describe("Facility Creation", () => {
     facilityPage.fillExpectedDTypeCylinderRequirement(oxygenExpected);
     facilityPage.selectLocation("Kochi, Kerala");
     facilityPage.submitForm();
+    cy.closeNotification();
     // create multiple bed capacity and verify card reflection
     facilityPage.selectBedType("Oxygen beds");
     facilityPage.fillTotalCapacity(bedCapacity);
     facilityPage.fillCurrentlyOccupied(bedOccupancy);
     facilityPage.clickbedcapcityaddmore();
+    cy.closeNotification();
     facilityPage.selectBedType("Ordinary Bed");
     facilityPage.fillTotalCapacity(bedCapacity);
     facilityPage.fillCurrentlyOccupied(bedOccupancy);
     facilityPage.clickbedcapcityaddmore();
+    cy.closeNotification();
     facilityPage.getTotalBedCapacity().contains(totalCapacity);
     facilityPage.getTotalBedCapacity().contains(totalOccupancy);
     facilityPage.clickcancelbutton();
@@ -152,9 +165,11 @@ describe("Facility Creation", () => {
     facilityPage.selectAreaOfSpecialization("General Medicine");
     facilityPage.fillDoctorCount(doctorCapacity);
     facilityPage.clickdoctorcapacityaddmore();
+    cy.closeNotification();
     facilityPage.selectAreaOfSpecialization("Pulmonology");
     facilityPage.fillDoctorCount(doctorCapacity);
     facilityPage.clickdoctorcapacityaddmore();
+    cy.closeNotification();
     facilityPage.getTotalDoctorCapacity().contains(doctorCapacity);
     facilityPage.clickcancelbutton();
     facilityPage.verifyfacilitynewurl();
@@ -186,11 +201,18 @@ describe("Facility Creation", () => {
     facilityPage.getFacilityTotalBedCapacity().contains(totalOccupancy);
     facilityPage.getFacilityTotalDoctorCapacity().scrollIntoView();
     facilityPage.getFacilityTotalDoctorCapacity().contains(totalDoctor);
+    // verify the delete functionality
+    cy.get("#manage-facility-dropdown button").scrollIntoView();
+    facilityPage.clickManageFacilityDropdown();
+    facilityPage.clickDeleteFacilityOption();
+    facilityPage.confirmDeleteFacility();
+    cy.verifyNotification("Facility deleted successfully");
   });
 
   it("Create a new facility with single bed and doctor capacity", () => {
     facilityPage.visitCreateFacilityPage();
     facilityPage.fillFacilityName(facilityName);
+    facilityPage.clickUpdateFacilityType("Primary Health Centres");
     facilityPage.fillPincode("682001");
     facilityPage.selectStateOnPincode("Kerala");
     facilityPage.selectDistrictOnPincode("Ernakulam");
@@ -230,6 +252,7 @@ describe("Facility Creation", () => {
   it("Create a new facility with no bed and doctor capacity", () => {
     facilityPage.visitCreateFacilityPage();
     facilityPage.fillFacilityName(facilityName);
+    facilityPage.clickUpdateFacilityType("Primary Health Centres");
     facilityPage.fillPincode("682001");
     facilityPage.selectStateOnPincode("Kerala");
     facilityPage.selectDistrictOnPincode("Ernakulam");
@@ -268,7 +291,7 @@ describe("Facility Creation", () => {
     facilityPage.visitUpdateFacilityPage(facilityUrl1);
     facilityPage.clickManageFacilityDropdown();
     facilityPage.clickUpdateFacilityOption();
-    facilityPage.clickUpdateFacilityType("Govt Hospital");
+    facilityPage.clickUpdateFacilityType("Primary Health Centres");
     facilityPage.fillAddress(facilityUpdateAddress);
     facilityPage.fillOxygenCapacity(oxygenCapacity);
     facilityPage.fillExpectedOxygenRequirement(oxygenExpected);
@@ -295,13 +318,6 @@ describe("Facility Creation", () => {
     facilityPage.fillMiddleWareAddress("dev_middleware.coronasafe.live");
     facilityPage.clickupdateMiddleWare();
     facilityPage.verifySuccessNotification("Facility updated successfully");
-  });
-
-  it("Delete a facility", () => {
-    facilityPage.visitUpdateFacilityPage(facilityUrl1);
-    facilityPage.clickManageFacilityDropdown();
-    facilityPage.clickDeleteFacilityOption();
-    facilityPage.confirmDeleteFacility();
   });
 
   afterEach(() => {

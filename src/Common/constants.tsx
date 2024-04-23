@@ -28,6 +28,8 @@ export type UserRole =
   | "Volunteer"
   | "StaffReadOnly"
   | "Staff"
+  | "NurseReadOnly"
+  | "Nurse"
   | "Doctor"
   | "WardAdmin"
   | "LocalBodyAdmin"
@@ -47,6 +49,8 @@ export const USER_TYPE_OPTIONS: {
   { id: "Volunteer", role: "Volunteer", readOnly: false },
   { id: "StaffReadOnly", role: "Staff", readOnly: true },
   { id: "Staff", role: "Staff", readOnly: false },
+  { id: "NurseReadOnly", role: "Nurse", readOnly: true },
+  { id: "Nurse", role: "Nurse", readOnly: false },
   { id: "Doctor", role: "Doctor", readOnly: false },
   { id: "WardAdmin", role: "Ward Admin", readOnly: false },
   { id: "LocalBodyAdmin", role: "Local Body Admin", readOnly: false },
@@ -102,38 +106,41 @@ export const VEHICLE_TYPES: Array<OptionsType> = [
 
 export const FACILITY_TYPES: Array<OptionsType> = [
   // { id: 1, text: "Educational Inst" },
-  { id: 2, text: "Private Hospital" },
-  { id: 3, text: "Other" },
   // { id: 4, text: "Hostel" },
   // { id: 5, text: "Hotel" },
   // { id: 6, text: "Lodge" },
-  { id: 7, text: "TeleMedicine" },
-  { id: 8, text: "Govt Hospital" },
-  { id: 9, text: "Labs" },
   { id: 800, text: "Primary Health Centres" },
-  { id: 801, text: "24x7 Public Health Centres" },
   { id: 802, text: "Family Health Centres" },
   { id: 803, text: "Community Health Centres" },
-  { id: 820, text: "Urban Primary Health Center" },
-  { id: 830, text: "Taluk Hospitals" },
-  { id: 831, text: "Taluk Headquarters Hospitals" },
   { id: 840, text: "Women and Child Health Centres" },
-  { id: 850, text: "General hospitals" },
+  { id: 830, text: "Taluk Hospitals" },
   { id: 860, text: "District Hospitals" },
   { id: 870, text: "Govt Medical College Hospitals" },
-
-  { id: 900, text: "Co-operative hospitals" },
+  { id: 9, text: "Govt Labs" },
+  { id: 10, text: "Private Labs" },
+  { id: 7, text: "TeleMedicine" },
+  { id: 2, text: "Private Hospital" },
   { id: 910, text: "Autonomous healthcare facility" },
+  { id: 1300, text: "Shifting Centre" },
+  { id: 1500, text: "Request Approving Center" },
+  { id: 1510, text: "Request Fulfilment Center" },
+  { id: 3, text: "Other" },
 
-  { id: 950, text: "Corona Testing Labs" },
-  { id: 1000, text: "Corona Care Centre" },
+  // { id: 8, text: "Govt Hospital" },
+  // { id: 801, text: "24x7 Public Health Centres" },
+  // { id: 820, text: "Urban Primary Health Center" },
+  // { id: 831, text: "Taluk Headquarters Hospitals" },
+  // { id: 850, text: "General hospitals" },
+
+  // { id: 900, text: "Co-operative hospitals" },
+
+  // { id: 950, text: "Corona Testing Labs" },
+  // { id: 1000, text: "Corona Care Centre" },
+
   // { id: 1010, text: "COVID-19 Domiciliary Care Center" },
   // { id: 1100, text: "First Line Treatment Centre" },
   // { id: 1200, text: "Second Line Treatment Center" },
-  { id: 1300, text: "Shifting Centre" },
   // { id: 1400, text: "Covid Management Center" },
-  { id: 1500, text: "Request Approving Center" },
-  { id: 1510, text: "Request Fulfilment Center" },
   // { id: 1600, text: "District War Room" },
 ];
 
@@ -268,7 +275,7 @@ export const REVIEW_AT_CHOICES: Array<OptionsType> = [
 ];
 
 export const SYMPTOM_CHOICES = [
-  { id: 1, text: "ASYMPTOMATIC" },
+  { id: 1, text: "ASYMPTOMATIC", isSingleSelect: true },
   { id: 2, text: "FEVER" },
   { id: 3, text: "SORE THROAT" },
   { id: 4, text: "COUGH" },
@@ -276,7 +283,6 @@ export const SYMPTOM_CHOICES = [
   { id: 6, text: "MYALGIA" },
   { id: 7, text: "ABDOMINAL DISCOMFORT" },
   { id: 8, text: "VOMITING" },
-  { id: 9, text: "OTHERS" },
   { id: 11, text: "SPUTUM" },
   { id: 12, text: "NAUSEA" },
   { id: 13, text: "CHEST PAIN" },
@@ -291,14 +297,25 @@ export const SYMPTOM_CHOICES = [
   { id: 22, text: "HEAD ACHE" },
   { id: 23, text: "BLEEDING" },
   { id: 24, text: "DIZZINESS" },
+  { id: 25, text: "CHILLS" },
+  { id: 26, text: "GENERAL WEAKNESS" },
+  { id: 27, text: "IRRITABILITY" },
+  { id: 28, text: "CONFUSION" },
+  { id: 29, text: "ABDOMINAL PAIN" },
+  { id: 30, text: "JOINT PAIN" },
+  { id: 31, text: "REDNESS OF EYES" },
+  { id: 32, text: "ANOREXIA" },
+  { id: 33, text: "NEW LOSS OF TASTE" },
+  { id: 34, text: "NEW LOSS OF SMELL" },
+  { id: 9, text: "OTHERS" },
 ];
 
 export const DISCHARGE_REASONS = [
-  { id: "REC", text: "Recovered" },
-  { id: "EXP", text: "Expired" },
-  { id: "REF", text: "Referred" },
-  { id: "LAMA", text: "LAMA" },
-];
+  { id: 1, text: "Recovered" },
+  { id: 2, text: "Referred" },
+  { id: 3, text: "Expired" },
+  { id: 4, text: "LAMA" },
+] as const;
 
 export const CONSCIOUSNESS_LEVEL = [
   { id: "UNRESPONSIVE", text: "Unresponsive" },
@@ -418,24 +435,6 @@ export const SAMPLE_FLOW_RULES = {
   RECEIVED_AT_LAB: ["COMPLETED"],
 };
 
-export const ROLE_STATUS_MAP = {
-  Staff: ["SENT_TO_COLLECTON_CENTRE"],
-  DistrictAdmin: [
-    "APPROVED",
-    "DENIED",
-    "SENT_TO_COLLECTON_CENTRE",
-    "RECEIVED_AND_FORWARED",
-  ],
-  StateLabAdmin: [
-    "APPROVED",
-    "DENIED",
-    "SENT_TO_COLLECTON_CENTRE",
-    "RECEIVED_AND_FORWARED",
-    "RECEIVED_AT_LAB",
-    "COMPLETED",
-  ],
-};
-
 export const DISEASE_STATUS = [
   "POSITIVE",
   "SUSPECTED",
@@ -551,77 +550,73 @@ export const DESIGNATION_HEALTH_CARE_WORKER = [
   "OTHERS",
 ];
 
-export const NOTIFICATION_EVENTS = [
-  { id: "MESSAGE", text: "Notice", icon: "fa-regular fa-message" },
+type NotificationEvent = {
+  id: string;
+  text: string;
+  icon: IconName;
+};
+
+export const NOTIFICATION_EVENTS: NotificationEvent[] = [
+  { id: "MESSAGE", text: "Notice", icon: "l-comment-alt-message" },
   {
     id: "PATIENT_CREATED",
     text: "Patient Created",
-    icon: "fa-solid fa-user-plus",
+    icon: "l-user-plus",
   },
   {
     id: "PATIENT_UPDATED",
     text: "Patient Updated",
-    icon: "fa-solid fa-user-pen",
-  },
-  {
-    id: "PATIENT_DELETED",
-    text: "Patient Deleted",
-    icon: "fa-solid fa-user-minus",
+    icon: "l-edit",
   },
   {
     id: "PATIENT_CONSULTATION_CREATED",
     text: "Patient Consultation Created",
-    icon: "fa-solid fa-heart-circle-check",
+    icon: "l-heart",
   },
   {
     id: "PATIENT_CONSULTATION_UPDATED",
     text: "Patient Consultation Updated",
-    icon: "fa-solid fa-heart-circle-plus",
-  },
-  {
-    id: "PATIENT_CONSULTATION_DELETED",
-    text: "Patient Consultation Deleted",
-    icon: "fa-solid fa-heart-circle-minus",
+    icon: "l-heart-medical",
   },
   {
     id: "INVESTIGATION_SESSION_CREATED",
     text: "Investigation Session Created",
-    icon: "fa-solid fa-magnifying-glass",
+    icon: "l-search",
   },
   {
     id: "INVESTIGATION_UPDATED",
     text: "Investigation Updated",
-    icon: "fa-solid fa-magnifying-glass-plus",
+    icon: "l-search-plus",
   },
   {
     id: "PATIENT_FILE_UPLOAD_CREATED",
     text: "Patient File Upload Created",
-    icon: "fa-solid fa-file-medical",
+    icon: "l-file-medical",
   },
   {
     id: "CONSULTATION_FILE_UPLOAD_CREATED",
     text: "Consultation File Upload Created",
-    icon: "fa-solid fa-file-waveform",
+    icon: "l-file-upload",
   },
   {
     id: "PATIENT_CONSULTATION_UPDATE_CREATED",
     text: "Patient Consultation Update Created",
-    icon: "fa-solid fa-file-circle-check",
+    icon: "l-heart",
   },
   {
     id: "PATIENT_CONSULTATION_UPDATE_UPDATED",
     text: "Patient Consultation Update Updated",
-    icon: "fa-solid fa-file-circle-plus",
+    icon: "l-heart-medical",
   },
   {
     id: "SHIFTING_UPDATED",
     text: "Shifting Updated",
-    icon: "fa-solid fa-truck-medical",
+    icon: "l-ambulance",
   },
   {
     id: "PATIENT_NOTE_ADDED",
     text: "Patient Note Added",
-    icon: "fa-solid fa-message",
+    icon: "l-notes",
   },
 ];
 
@@ -697,20 +692,20 @@ export const MOTOR_RESPONSE_SCALE = [
   { value: 2, text: "Abnormal Extension(decerebrate)" },
   { value: 1, text: "No Response" },
 ];
-export const CONSULTATION_TABS: Array<OptionsType> = [
-  { id: 1, text: "UPDATES", desc: "Updates" },
-  { id: 13, text: "FEED", desc: "Feed" },
-  { id: 2, text: "SUMMARY", desc: "Summary" },
-  { id: 3, text: "MEDICINES", desc: "Medicines" },
-  { id: 4, text: "FILES", desc: "Files" },
-  { id: 5, text: "INVESTIGATIONS", desc: "Investigations" },
-  { id: 6, text: "ABG", desc: "ABG" },
-  { id: 7, text: "NURSING", desc: "Nursing" },
-  { id: 8, text: "NEUROLOGICAL_MONITORING", desc: "Neurological Monitoring" },
-  { id: 9, text: "VENTILATOR", desc: "Respiratory Support" },
-  { id: 10, text: "NUTRITION", desc: "Nutrition" },
-  { id: 11, text: "PRESSURE_SORE", desc: "Pressure Sore" },
-  { id: 12, text: "DIALYSIS", desc: "Dialysis" },
+export const CONSULTATION_TABS = [
+  { text: "UPDATES", desc: "Overview" },
+  { text: "FEED", desc: "Feed" },
+  { text: "SUMMARY", desc: "Vitals" },
+  { text: "ABG", desc: "ABG" },
+  { text: "MEDICINES", desc: "Medicines" },
+  { text: "FILES", desc: "Files" },
+  { text: "INVESTIGATIONS", desc: "Investigations" },
+  { text: "NEUROLOGICAL_MONITORING", desc: "Neuro" },
+  { text: "VENTILATOR", desc: "Ventilation" },
+  { text: "NUTRITION", desc: "Nutrition" },
+  { text: "PRESSURE_SORE", desc: "Pressure Sore" },
+  { text: "NURSING", desc: "Nursing" },
+  { text: "DIALYSIS", desc: "Dialysis" },
 ];
 
 export const RHYTHM_CHOICES: Array<OptionsType> = [
@@ -743,11 +738,11 @@ export const CAMERA_TYPE = [
 
 export const GENDER: { [key: number]: string } = GENDER_TYPES.reduce(
   (acc, curr) => ({ ...acc, [curr.id]: curr.text }),
-  {}
+  {},
 );
 
 export type CameraPTZ = {
-  icon?: string;
+  icon?: IconName;
   label: string;
   action: string;
   loadingLabel?: string;
@@ -1018,7 +1013,7 @@ export const XLSXAssetImportSchema = {
           if (!ip) return null;
           const isValid =
             /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
-              ip
+              ip,
             );
 
           if (!isValid) {
@@ -1042,6 +1037,8 @@ export const USER_TYPES_MAP = {
   StaffReadOnly: "Staff",
   Staff: "Staff",
   Doctor: "Doctor",
+  Nurse: "Nurse",
+  NurseReadOnly: "Nurse",
   WardAdmin: "Ward Admin",
   LocalBodyAdmin: "Local Body Admin",
   DistrictLabAdmin: "District Lab Admin",
@@ -1051,7 +1048,7 @@ export const USER_TYPES_MAP = {
   StateReadOnlyAdmin: "State Admin",
   StateAdmin: "State Admin",
   RemoteSpecialist: "Remote Specialist",
-};
+} as const;
 
 export const AREACODES: Record<string, string[]> = {
   CA: [
@@ -1174,4 +1171,31 @@ export const IN_LANDLINE_AREA_CODES = [
   "870",
   "891",
   "4822",
+];
+
+export const CONSENT_TYPE_CHOICES = [
+  { id: 1, text: "Consent for admission" },
+  { id: 2, text: "Patient Code Status" },
+  { id: 3, text: "Consent for procedure" },
+  { id: 4, text: "High risk consent" },
+  { id: 5, text: "Others" },
+];
+
+export const CONSENT_PATIENT_CODE_STATUS_CHOICES = [
+  { id: 1, text: "Do Not Hospitalise (DNH)" },
+  { id: 2, text: "Do Not Resuscitate (DNR)" },
+  { id: 3, text: "Comfort Care Only" },
+  { id: 4, text: "Active treatment (Default)" },
+];
+export const OCCUPATION_TYPES = [
+  { id: 1, text: "Student", value: "STUDENT" },
+  {
+    id: 2,
+    text: "Businessman",
+    value: "BUSINESSMAN",
+  },
+  { id: 3, text: "Healthcare Worker", value: "HEALTH_CARE_WORKER" },
+  { id: 4, text: "Healthcare Lab Worker", value: "HEALTH_CARE_LAB_WORKER" },
+  { id: 5, text: "Animal Handler", value: "ANIMAL_HANDLER" },
+  { id: 6, text: "Others", value: "OTHERS" },
 ];

@@ -39,12 +39,31 @@ export const ExportMenu = ({
 }: ExportMenuProps) => {
   const { isExporting, exportFile } = useExport();
 
+  if (exportItems.length === 1) {
+    const item = exportItems[0];
+
+    return (
+      <ButtonV2
+        disabled={isExporting || disabled}
+        onClick={() =>
+          exportFile(item.action, item.filePrefix, item.type, item.parse)
+        }
+        border
+        ghost
+        className="py-2.5"
+      >
+        <CareIcon icon="l-export" />
+        {isExporting ? "Exporting..." : label}
+      </ButtonV2>
+    );
+  }
+
   return (
     <div key="export-menu" id="export-button">
       <DropdownMenu
         disabled={isExporting || disabled}
         title={isExporting ? "Exporting..." : label}
-        icon={<CareIcon className="care-l-export" />}
+        icon={<CareIcon icon="l-export" />}
         className="tooltip border-primary-500 bg-white text-primary-500 hover:bg-primary-100 enabled:border"
       >
         {exportItems.map((item) => (
@@ -84,9 +103,9 @@ export const ExportButton = ({
         circle
       >
         {isExporting ? (
-          <CareIcon className="care-l-spinner-alt animate-spin" />
+          <CareIcon icon="l-spinner-alt" className="animate-spin" />
         ) : (
-          <CareIcon className="care-l-export" />
+          <CareIcon icon="l-export" />
         )}
         <span className={`tooltip-text ${tooltipClassName}`}>
           {props.tooltip || "Export"}

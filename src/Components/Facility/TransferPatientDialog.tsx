@@ -1,18 +1,14 @@
 import * as Notification from "../../Utils/Notifications.js";
-
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { useReducer, useState } from "react";
-
-import DateFormField from "../Form/FormFields/DateFormField";
 import { DupPatientModel } from "./models";
-import { FieldLabel } from "../Form/FormFields/FormField";
 import { OptionsType } from "../../Common/constants";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { navigate } from "raviger";
-import { transferPatient } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
-import { dateQueryString } from "../../Utils/utils.js";
-import dayjs from "dayjs";
+import request from "../../Utils/request/request.js";
+import routes from "../../Redux/api.js";
+import TextFormField from "../Form/FormFields/TextFormField.js";
+import { FieldChangeEvent } from "../Form/FormFields/Utils.js";
 
 interface Props {
   patientList: Array<DupPatientModel>;
@@ -21,23 +17,20 @@ interface Props {
   facilityId: string;
 }
 
-const initForm: any = {
+const initForm = {
   patient: "",
-  date_of_birth: null,
+  year_of_birth: null,
 };
 
 const initError = Object.assign(
   {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
 );
 
 const initialState = {
   form: { ...initForm },
   errors: { ...initError },
 };
-
-const getDate = (value: any) =>
-  value && dayjs(value).isValid() && dayjs(value).toDate();
 
 const patientFormReducer = (state = initialState, action: any) => {
   switch (action.type) {
@@ -60,7 +53,6 @@ const patientFormReducer = (state = initialState, action: any) => {
 
 const TransferPatientDialog = (props: Props) => {
   const { patientList, handleOk, handleCancel, facilityId } = props;
-  const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [state, dispatch] = useReducer(patientFormReducer, initialState);
   const patientOptions: Array<OptionsType> = patientList.map((patient) => {
@@ -70,18 +62,26 @@ const TransferPatientDialog = (props: Props) => {
     };
   });
 
-  const handleChange = (e: any) => {
-    const form = { ...state.form };
-    form[e.name] = e.value;
-    dispatch({ type: "set_form", form });
-  };
+  const maxYear = new Date().getFullYear();
 
-  const handleDateChange = (e: any) => {
-    if (dayjs(e.value).isValid()) {
-      const form = { ...state.form };
-      form[e.name] = dateQueryString(e.value);
-      dispatch({ type: "set_form", form });
+  const handleChange = (e: FieldChangeEvent<unknown>) => {
+    if (
+      e.name === "year_of_birth" &&
+      parseInt((e.value as string) || "0") > maxYear
+    ) {
+      dispatch({
+        type: "set_error",
+        errors: {
+          ...state.errors,
+          [e.name]: `Cannot be greater than ${maxYear}`,
+        },
+      });
+      return;
     }
+    dispatch({
+      type: "set_form",
+      form: { ...state.form, [e.name]: e.value },
+    });
   };
 
   const validateForm = () => {
@@ -95,9 +95,14 @@ const TransferPatientDialog = (props: Props) => {
             invalidForm = true;
           }
           return;
-        case "date_of_birth":
+        case "year_of_birth":
           if (!state.form[field]) {
-            errors[field] = "Please enter date in YYYY/MM/DD format";
+            errors[field] = "This field is required";
+            invalidForm = true;
+          }
+
+          if (parseInt(state.form[field] || "0") > maxYear) {
+            errors[field] = `Cannot be greater than ${maxYear}`;
             invalidForm = true;
           }
           return;
@@ -109,20 +114,21 @@ const TransferPatientDialog = (props: Props) => {
     return !invalidForm;
   };
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     const validForm = validateForm();
     if (validForm) {
       setIsLoading(true);
-      const data = {
-        date_of_birth: dateQueryString(state.form.date_of_birth),
-        facility: facilityId,
-      };
-      const res = await dispatchAction(
-        transferPatient(data, { id: state.form.patient })
-      );
+      const { res, data } = await request(routes.transferPatient, {
+        body: {
+          facility: facilityId,
+          year_of_birth: state.form.year_of_birth,
+        },
+        pathParams: {
+          id: state.form.patient,
+        },
+      });
       setIsLoading(false);
-      if (res && res.data && res.status === 200) {
+      if (res?.ok && data) {
         dispatch({ type: "set_form", form: initForm });
         handleOk();
 
@@ -132,10 +138,10 @@ const TransferPatientDialog = (props: Props) => {
           msg: `Patient ${patientName} transferred successfully`,
         });
         const newFacilityId =
-          res.data && res.data.facility_object && res.data.facility_object.id;
+          data && data.facility_object && data.facility_object.id;
         if (newFacilityId) {
           navigate(
-            `/facility/${newFacilityId}/patient/${res.data.patient}/consultation`
+            `/facility/${newFacilityId}/patient/${data.patient}/consultation`,
           );
         } else {
           navigate("/facility");
@@ -155,44 +161,46 @@ const TransferPatientDialog = (props: Props) => {
             </p>
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div>
-              <FieldLabel required className="text-sm">
-                Patient
-              </FieldLabel>
-              <SelectFormField
-                id="patient"
-                name="patient"
-                required
-                placeholder="Select patient"
-                options={patientOptions}
-                optionLabel={(patient) => patient.text}
-                optionValue={(patient) => patient.id}
-                value={state.form.patient}
-                onChange={handleChange}
-                error={state.errors.patient}
-              />
-            </div>
-            <div>
-              <DateFormField
-                required
-                name="date_of_birth"
-                label="Date of birth"
-                value={getDate(state.form.date_of_birth)}
-                disableFuture
-                onChange={handleDateChange}
-                position="LEFT"
-                placeholder="Entry Date"
-                error={state.errors.date_of_birth}
-              />
-            </div>
+            <SelectFormField
+              id="patient"
+              name="patient"
+              required
+              label="Patient"
+              labelClassName="text-sm"
+              placeholder="Select patient"
+              options={patientOptions}
+              optionLabel={(patient) => patient.text}
+              optionValue={(patient) => patient.id}
+              value={state.form.patient}
+              onChange={handleChange}
+              error={state.errors.patient}
+            />
+            <TextFormField
+              required
+              type="number"
+              id="year_of_birth"
+              name="year_of_birth"
+              label="Year of birth"
+              labelClassName="text-sm"
+              value={state.form.year_of_birth}
+              min="1900"
+              max={maxYear}
+              onChange={handleChange}
+              placeholder="Enter year of birth"
+              error={state.errors.year_of_birth}
+            />
           </div>
         </div>
       </div>
       <div className="flex flex-col justify-between gap-2 pt-4 md:flex-row">
         <Cancel onClick={handleCancel} disabled={isLoading} />
         <Submit
+          id="submit-transferpatient"
           disabled={isLoading}
-          onClick={handleSubmit}
+          onClick={(e) => {
+            e.preventDefault();
+            handleSubmit();
+          }}
           label="Transfer Suspect / Patient"
         />
       </div>

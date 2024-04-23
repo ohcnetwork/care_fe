@@ -3,7 +3,7 @@ publish = "build/"
 command = "CI='' npm run build"
 
 [build.environment]
-NODE_VERSION = "18"
+NODE_VERSION = "20.12.0"
 NPM_FLAGS = "--legacy-peer-deps"
 NODE_OPTIONS = "--max_old_space_size=4096"
 
@@ -21,6 +21,15 @@ status = 200
 [[headers]]
   for = "/*"
   [headers.values]
-  cache-control = '''
-  max-age=0,
-  no-store'''
+    cache-control = "max-age=0, no-store"
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Content-Security-Policy-Report-Only = '''
+      default-src 'self';
+      script-src 'self' 'nonce-f51b9742' https://plausible.10bedicu.in;
+      style-src 'self' 'unsafe-inline';
+      connect-src 'self' https://plausible.10bedicu.in;
+      img-src 'self' https://cdn.coronasafe.network https://egov-s3-facility-10bedicu.s3.amazonaws.com https://egov-s3-patient-data-10bedicu.s3.amazonaws.com;
+      object-src 'self' https://egov-s3-facility-10bedicu.s3.amazonaws.com https://egov-s3-patient-data-10bedicu.s3.amazonaws.com;
+      report-uri https://csp-logger.ohc.network/
+      '''

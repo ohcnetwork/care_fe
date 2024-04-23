@@ -3,11 +3,12 @@ import { SidebarItem, ShrinkedSidebarItem } from "./SidebarItem";
 import SidebarUserCard from "./SidebarUserCard";
 import NotificationItem from "../../Notifications/NotificationsList";
 import useActiveLink from "../../../Common/hooks/useActiveLink";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
+import CareIcon, { IconName } from "../../../CAREUI/icons/CareIcon";
 import useConfig from "../../../Common/hooks/useConfig";
 import SlideOver from "../../../CAREUI/interactive/SlideOver";
 import { classNames } from "../../../Utils/utils";
 import { Link } from "raviger";
+import useAuthUser from "../../../Common/hooks/useAuthUser";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 
@@ -27,28 +28,40 @@ type StatelessSidebarProps =
       onItemClick: (open: boolean) => void;
     };
 
-const NavItems = [
-  { text: "Facilities", to: "/facility", icon: "care-l-hospital" },
-  { text: "Patients", to: "/patients", icon: "care-l-user-injured" },
-  { text: "Assets", to: "/assets", icon: "care-l-shopping-cart-alt" },
-  { text: "Sample Test", to: "/sample", icon: "care-l-medkit" },
-  { text: "Shifting", to: "/shifting", icon: "care-l-ambulance" },
-  { text: "Resource", to: "/resource", icon: "care-l-heart-medical" },
-  {
-    text: "External Results",
-    to: "/external_results",
-    icon: "care-l-clipboard-notes",
-  },
-  { text: "Users", to: "/users", icon: "care-l-users-alt" },
-  { text: "Notice Board", to: "/notice_board", icon: "care-l-meeting-board" },
-];
-
 const StatelessSidebar = ({
   shrinkable = false,
   shrinked = false,
   setShrinked,
   onItemClick,
 }: StatelessSidebarProps) => {
+  const authUser = useAuthUser();
+
+  const NavItems: {
+    text: string;
+    to: string;
+    icon: IconName;
+  }[] = [
+    { text: "Facilities", to: "/facility", icon: "l-hospital" },
+    { text: "Patients", to: "/patients", icon: "l-user-injured" },
+    { text: "Assets", to: "/assets", icon: "l-shopping-cart-alt" },
+    { text: "Sample Test", to: "/sample", icon: "l-medkit" },
+    { text: "Shifting", to: "/shifting", icon: "l-ambulance" },
+    { text: "Resource", to: "/resource", icon: "l-heart-medical" },
+    ...(!["Nurse", "NurseReadOnly", "Staff", "StaffReadOnly"].includes(
+      authUser.user_type,
+    )
+      ? ([
+          {
+            text: "External Results",
+            to: "/external_results",
+            icon: "l-clipboard-notes",
+          },
+        ] as const)
+      : []),
+    { text: "Users", to: "/users", icon: "l-users-alt" },
+    { text: "Notice Board", to: "/notice_board", icon: "l-meeting-board" },
+  ];
+
   const { main_logo } = useConfig();
   const activeLink = useActiveLink();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
@@ -62,7 +75,7 @@ const StatelessSidebar = ({
   useEffect(() => {
     if (!indicatorRef.current) return;
     const index = NavItems.findIndex((item) => item.to === activeLink);
-    const navItemCount = NavItems.length + 2; // +2 for notification and dashboard
+    const navItemCount = NavItems.length + (dashboard_url ? 2 : 1); // +2 for notification and dashboard
     if (index !== -1) {
       // Haha math go brrrrrrrrr
 
@@ -116,7 +129,7 @@ const StatelessSidebar = ({
             // className="absolute left-2 w-1 hidden md:block bg-primary-400 rounded z-10 transition-all"
             className={classNames(
               "absolute left-2 z-10 block w-1 rounded bg-primary-400 transition-all",
-              activeLink ? "opacity-0 md:opacity-100" : "opacity-0"
+              activeLink ? "opacity-0 md:opacity-100" : "opacity-0",
             )}
           />
           {NavItems.map((i) => {
@@ -125,7 +138,7 @@ const StatelessSidebar = ({
                 ref={i.to === activeLink ? activeLinkRef : undefined}
                 key={i.text}
                 {...i}
-                icon={<CareIcon className={`${i.icon} h-5`} />}
+                icon={<CareIcon icon={i.icon} className="h-5" />}
                 selected={i.to === activeLink}
                 do={() => onItemClick && onItemClick(false)}
                 handleOverflow={handleOverflow}
@@ -138,13 +151,15 @@ const StatelessSidebar = ({
             handleOverflow={handleOverflow}
             onClickCB={() => onItemClick && onItemClick(false)}
           />
-          <Item
-            text="Dashboard"
-            to={dashboard_url}
-            icon={<CareIcon className="care-l-dashboard text-lg" />}
-            external
-            handleOverflow={handleOverflow}
-          />
+          {dashboard_url && (
+            <Item
+              text="Dashboard"
+              to={dashboard_url}
+              icon={<CareIcon icon="l-dashboard" className="text-lg" />}
+              external
+              handleOverflow={handleOverflow}
+            />
+          )}
         </div>
         <div className="hidden md:block md:flex-1" />
 
@@ -213,9 +228,10 @@ const ToggleShrink = ({ shrinked, toggle }: ToggleShrinkProps) => (
     } transition-all duration-200 ease-in-out`}
     onClick={toggle}
   >
-    <i
-      className={`fa-solid fa-chevron-up ${
-        shrinked ? "rotate-90 text-sm" : "-rotate-90 text-base"
+    <CareIcon
+      icon="l-angle-up"
+      className={`text-3xl ${
+        shrinked ? "rotate-90" : "-rotate-90"
       } transition-all delay-150 duration-300 ease-out`}
     />
   </div>

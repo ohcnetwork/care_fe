@@ -1,3 +1,4 @@
+import { AssetClass, AssetData } from "../Assets/AssetTypes";
 import { ChannelOptions, VitalsWaveformBase } from "./types";
 
 /**
@@ -43,7 +44,7 @@ export const lerp = (x0: number, x1: number, y0: number, y1: number) => {
 export const getChannel = (observation: VitalsWaveformBase): ChannelOptions => {
   return {
     samplingRate: parseInt(
-      observation["sampling rate"]?.replace("/sec", "") ?? "-1"
+      observation["sampling rate"]?.replace("/sec", "") ?? "-1",
     ),
     baseline: observation["data-baseline"] ?? 0,
     lowLimit: observation["data-low-limit"] ?? 0,
@@ -63,7 +64,7 @@ const DEFAULT_SCALE = 38 * 11;
  */
 export const getVitalsCanvasSizeAndDuration = (
   ratio = DEFAULT_RATIO,
-  scale = DEFAULT_SCALE
+  scale = DEFAULT_SCALE,
 ) => {
   return {
     size: {
@@ -72,4 +73,20 @@ export const getVitalsCanvasSizeAndDuration = (
     },
     duration: DEFAULT_DURATION * (ratio / DEFAULT_RATIO),
   };
+};
+
+export const getVitalsMonitorSocketUrl = (asset: AssetData) => {
+  if (
+    asset.asset_class !== AssetClass.HL7MONITOR &&
+    asset.asset_class !== AssetClass.VENTILATOR
+  ) {
+    throw "getVitalsMonitorSocketUrl can be invoked only for HL7MONITOR or VENTILATOR assets";
+  }
+
+  const middleware = asset.resolved_middleware?.hostname;
+  const ipAddress = asset.meta?.local_ip_address;
+
+  if (middleware && ipAddress) {
+    return `wss://${middleware}/observations/${ipAddress}`;
+  }
 };

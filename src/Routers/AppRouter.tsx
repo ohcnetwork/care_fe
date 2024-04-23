@@ -25,13 +25,13 @@ import AssetRoutes from "./routes/AssetRoutes";
 import ResourceRoutes from "./routes/ResourceRoutes";
 import ExternalResultRoutes from "./routes/ExternalResultRoutes";
 import { DetailRoute } from "./types";
+import useAuthUser from "../Common/hooks/useAuthUser";
 
 const Routes = {
   "/": () => <Redirect to="/facility" />,
 
   ...AssetRoutes,
   ...ConsultationRoutes,
-  ...ExternalResultRoutes,
   ...FacilityRoutes,
   ...PatientRoutes,
   ...ResourceRoutes,
@@ -49,12 +49,21 @@ const Routes = {
 };
 
 export default function AppRouter() {
+  const authUser = useAuthUser();
   const { main_logo, enable_hcx } = useConfig();
 
   let routes = Routes;
 
   if (enable_hcx) {
     routes = { ...routes, ...HCXRoutes };
+  }
+
+  if (
+    !["Nurse", "NurseReadOnly", "Staff", "StaffReadOnly"].includes(
+      authUser.user_type,
+    )
+  ) {
+    routes = { ...routes, ...ExternalResultRoutes };
   }
 
   useRedirect("/user", "/users");
@@ -77,13 +86,13 @@ export default function AppRouter() {
   }, [path]);
 
   const [shrinked, setShrinked] = useState(
-    localStorage.getItem(SIDEBAR_SHRINK_PREFERENCE_KEY) === "true"
+    localStorage.getItem(SIDEBAR_SHRINK_PREFERENCE_KEY) === "true",
   );
 
   useEffect(() => {
     localStorage.setItem(
       SIDEBAR_SHRINK_PREFERENCE_KEY,
-      shrinked ? "true" : "false"
+      shrinked ? "true" : "false",
     );
   }, [shrinked]);
 

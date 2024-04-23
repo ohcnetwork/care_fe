@@ -24,8 +24,8 @@ export default function InsuranceDetailsBuilder(props: Props) {
     return (event: FieldChangeEvent<unknown>) => {
       field.handleChange(
         (props.value || [])?.map((obj, i) =>
-          i === index ? { ...obj, [event.name]: event.value } : obj
-        )
+          i === index ? { ...obj, [event.name]: event.value } : obj,
+        ),
       );
     };
   };
@@ -34,8 +34,8 @@ export default function InsuranceDetailsBuilder(props: Props) {
     return (diffs: object) => {
       field.handleChange(
         (props.value || [])?.map((obj, i) =>
-          i === index ? { ...obj, ...diffs } : obj
-        )
+          i === index ? { ...obj, ...diffs } : obj,
+        ),
       );
     };
   };
@@ -48,30 +48,34 @@ export default function InsuranceDetailsBuilder(props: Props) {
             dispatch(HCXActions.policies.delete(obj.id));
           }
           return i !== index;
-        })
+        }),
       );
     };
   };
 
   return (
     <FormField field={field}>
-      <div className="flex flex-col gap-3">
+      <ul className="flex flex-col gap-3">
         {props.value?.length === 0 && (
           <span className="py-16 text-center text-gray-500">
             No insurance details added
           </span>
         )}
         {props.value?.map((policy, index) => (
-          <InsuranceDetailEditCard
-            key={index}
-            policy={policy}
-            handleUpdate={handleUpdate(index)}
-            handleUpdates={handleUpdates(index)}
-            handleRemove={handleRemove(index)}
-            gridView={props.gridView}
-          />
+          <li
+            id={`insurance-details-${index}`}
+            key={`insurance-details-${index}`}
+          >
+            <InsuranceDetailEditCard
+              policy={policy}
+              handleUpdate={handleUpdate(index)}
+              handleUpdates={handleUpdates(index)}
+              handleRemove={handleRemove(index)}
+              gridView={props.gridView}
+            />
+          </li>
         ))}
-      </div>
+      </ul>
     </FormField>
   );
 }
@@ -91,7 +95,7 @@ const InsuranceDetailEditCard = ({
 }) => {
   const { enable_hcx } = useConfig();
   const seletedInsurer =
-    policy.insurer_id || policy.insurer_name
+    policy.insurer_id && policy.insurer_name
       ? { code: policy.insurer_id, name: policy.insurer_name }
       : undefined;
 
@@ -101,7 +105,7 @@ const InsuranceDetailEditCard = ({
         <FieldLabel className="my-auto !font-bold">Policy</FieldLabel>
         <ButtonV2 variant="danger" type="button" ghost onClick={handleRemove}>
           Delete
-          <CareIcon className="care-l-trash-alt text-lg" />
+          <CareIcon icon="l-trash-alt" className="text-lg" />
         </ButtonV2>
       </div>
 
@@ -110,7 +114,7 @@ const InsuranceDetailEditCard = ({
           "p-2",
           gridView
             ? "grid grid-cols-1 gap-x-8 gap-y-2 md:grid-cols-2"
-            : "flex flex-col gap-2"
+            : "flex flex-col gap-2",
         )}
       >
         <TextFormField
