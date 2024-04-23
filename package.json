@@ -71,7 +71,7 @@
     "echarts-for-react": "^3.0.2",
     "eslint-mdx": "^3.1.5",
     "events": "^3.3.0",
-    "i18next": "^23.2.7",
+    "i18next": "^23.11.2",
     "i18next-browser-languagedetector": "^7.1.0",
     "lodash-es": "^4.17.21",
     "postcss-loader": "^7.3.3",
