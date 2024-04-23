@@ -29,12 +29,14 @@ interface Props {
   prescription: Prescription;
   showPrescriptionDetails?: boolean;
   onRefetch?: () => void;
+  readonly?: boolean;
 }
 
 export default function PrescrpitionTimeline({
   prescription,
   interval,
   onRefetch,
+  readonly,
 }: Props) {
   const consultation = useSlug("consultation");
   const { data, refetch, loading } = useQuery(
@@ -89,7 +91,7 @@ export default function PrescrpitionTimeline({
                   refetch();
                 }}
                 isLastNode={index === events.length - 1}
-                hideArchive={prescription.discontinued}
+                hideArchive={prescription.discontinued || readonly}
               />
             );
         }

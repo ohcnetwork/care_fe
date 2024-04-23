@@ -1409,10 +1409,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                       {...field("age")}
                                       errorClassName="hidden"
                                       trailing={
-                                        <p className="absolute right-16 text-xs text-gray-700 sm:text-sm">
-                                          <p className="hidden  sm:inline min-[768px]:hidden lg:inline">
+                                        <p className="absolute right-16 mb-11 text-xs text-gray-700 sm:text-sm">
+                                          <p className="hidden sm:inline min-[768px]:hidden lg:inline">
                                             {field("age").value !== "" &&
-                                              "Year_of_Birth:"}
+                                              "Year of Birth:"}
                                           </p>
                                           <span className="font-bold">
                                             {field("age").value !== "" &&
