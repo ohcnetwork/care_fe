@@ -420,7 +420,7 @@ export default function ManageUsers() {
                           setWeeklyHours(user.weekly_working_hours);
                         }}
                       >
-                        <CareIcon icon="l-clock" className="text-xl" /> 
+                        <CareIcon icon="l-clock" className="text-xl" />
                         <p className="whitespace-nowrap md:whitespace-normal">
                           Set Average weekly working hours
                         </p>
