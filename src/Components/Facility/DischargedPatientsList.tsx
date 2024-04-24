@@ -21,7 +21,6 @@ import { useState } from "react";
 import SortDropdownMenu from "../Common/SortDropdown";
 import useFilters from "../../Common/hooks/useFilters";
 
-
 const DischargedPatientsList = ({
   facility_external_id,
 }: {
@@ -32,8 +31,6 @@ const DischargedPatientsList = ({
     pathParams: { id: facility_external_id },
   });
 
-
-  const [search, setSearch] = useQueryParams();
   const [count, setCount] = useState<number | undefined>(undefined);
   const { qParams, updateQuery, FilterBadges } = useFilters({});
 
