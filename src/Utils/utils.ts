@@ -1,11 +1,6 @@
-import {
-  AREACODES,
-  IN_LANDLINE_AREA_CODES,
-  USER_TYPES,
-} from "../Common/constants";
+import { AREACODES, IN_LANDLINE_AREA_CODES } from "../Common/constants";
 import phoneCodesJson from "../Common/static/countryPhoneAndFlags.json";
 import dayjs from "./dayjs";
-import { UserModel } from "../Components/Users/models";
 import { PatientModel } from "../Components/Patient/models";
 
 interface ApacheParams {
@@ -456,29 +451,6 @@ export const formatPatientAge = (obj: PatientModel, abbreviated = false) => {
 export const scrollTo = (id: string | boolean) => {
   const element = document.querySelector(`#${id}`);
   element?.scrollIntoView({ behavior: "smooth", block: "center" });
-};
-
-export const showUserDelete = (authUser: UserModel, targetUser: UserModel) => {
-  // Auth user should be higher in hierarchy than target user
-  if (
-    USER_TYPES.indexOf(authUser.user_type) <=
-    USER_TYPES.indexOf(targetUser.user_type)
-  )
-    return false;
-
-  if (
-    authUser.user_type === "StateAdmin" &&
-    targetUser.state_object?.id === authUser.state
-  )
-    return true;
-
-  if (
-    authUser.user_type === "DistrictAdmin" &&
-    targetUser.district_object?.id === authUser.district
-  )
-    return true;
-
-  return false;
 };
 
 export const compareBy = <T extends object>(key: keyof T) => {
