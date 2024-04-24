@@ -60,6 +60,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     {} as ConsultationModel,
   );
   const [showDischargeModal, setShowDischargeModal] = useState(false);
+  const [dischargeReason, setDischargeReason] = useState<number>();
   const { t } = useTranslation();
 
   const initForm: any = {
@@ -188,6 +189,16 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
 
     if (validForm) {
       if (!discharged && state.form.status === "PATIENT EXPIRED") {
+        setDischargeReason(
+          DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id,
+        );
+        setShowDischargeModal(true);
+        return;
+      }
+      if (!discharged && state.form.status === "COMPLETED") {
+        setDischargeReason(
+          DISCHARGE_REASONS.find((i) => i.text == "Referred")?.id,
+        );
         setShowDischargeModal(true);
         return;
       }
@@ -282,9 +293,8 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         show={showDischargeModal}
         onClose={() => setShowDischargeModal(false)}
         consultationData={consultationData}
-        new_discharge_reason={
-          DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
-        }
+        referred_to={state.form.assigned_facility_object}
+        new_discharge_reason={dischargeReason}
         afterSubmit={() => {
           handleSubmit(true);
         }}

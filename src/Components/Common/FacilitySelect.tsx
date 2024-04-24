@@ -10,6 +10,7 @@ interface FacilitySelectProps {
   errors?: string | undefined;
   className?: string;
   searchAll?: boolean;
+  disabled?: boolean;
   multiple?: boolean;
   facilityType?: number;
   district?: string;
@@ -28,6 +29,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
     selected,
     setSelected,
     searchAll,
+    disabled = false,
     showAll = true,
     showNOptions = 10,
     className = "",
@@ -68,6 +70,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
       name={name}
       multiple={multiple}
       selected={selected}
+      disabled={disabled}
       onChange={setSelected}
       fetchData={facilitySearch}
       showNOptions={showNOptions}
