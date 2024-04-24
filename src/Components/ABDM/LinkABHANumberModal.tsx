@@ -183,7 +183,7 @@ const ScanABHAQRSection = ({
           }
           setQrValue(value);
         }}
-        parse={async (value: string) => {
+        parse={async (value: string | null) => {
           if (!value) return;
           setIsLoading(true);
 
