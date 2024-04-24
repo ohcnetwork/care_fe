@@ -5,6 +5,7 @@ import { BedManagement } from "../../Components/Facility/BedManagement";
 import LocationManagement from "../../Components/Facility/LocationManagement";
 import CentralLiveMonitoring from "../../Components/CameraFeed/CentralLiveMonitoring";
 import { AuthorizeUserRoute } from "../../Utils/AuthorizeFor";
+import { CameraFeedPermittedUserTypes } from "../../Utils/permissions";
 
 export default {
   "/facility/:facilityId/location": ({ facilityId }: any) => (
@@ -38,7 +39,7 @@ export default {
     <AddBedForm facilityId={facilityId} locationId={locationId} bedId={bedId} />
   ),
   "/facility/:facilityId/live-monitoring": (props: any) => (
-    <AuthorizeUserRoute userTypes={["StateAdmin", "DistrictAdmin", "Doctor"]}>
+    <AuthorizeUserRoute userTypes={CameraFeedPermittedUserTypes}>
       <CentralLiveMonitoring {...props} />
     </AuthorizeUserRoute>
   ),
