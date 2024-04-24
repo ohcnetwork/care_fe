@@ -303,6 +303,7 @@ const Location = ({
           className="w-full"
           tooltip={disabled ? "Contact your admin to delete the location" : ""}
           disabled={disabled ? true : false}
+          tooltipClassName=" text-xs w-full lg:w-auto"
           onClick={() =>
             setShowDeletePopup({ open: true, name: name ?? "", id: id ?? "" })
           }

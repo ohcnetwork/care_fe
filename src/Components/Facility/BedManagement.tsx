@@ -144,7 +144,7 @@ const BedRow = (props: BedRowProps) => {
                 ? "Bed is occupied"
                 : undefined
             }
-            tooltipClassName="w-full lg:w-auto"
+            tooltipClassName=" text-xs w-full lg:w-auto"
           >
             <CareIcon icon="l-trash-alt" className="text-lg" />
             Delete
