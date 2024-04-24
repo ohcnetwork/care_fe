@@ -10,9 +10,11 @@ interface Props {
   prescriptions: Prescription[];
   pagination: ReturnType<typeof useRangePagination>;
   onRefetch: () => void;
+  readonly: boolean;
 }
 
 export default function MedicineAdministrationTable({
+  readonly,
   pagination,
   prescriptions,
   onRefetch,
@@ -101,6 +103,7 @@ export default function MedicineAdministrationTable({
               prescription={obj}
               intervals={pagination.slots!}
               refetch={onRefetch}
+              readonly={readonly}
             />
           ))}
         </tbody>

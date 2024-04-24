@@ -1,4 +1,4 @@
-import { Link, navigate, useQueryParams } from "raviger";
+import { Link, navigate } from "raviger";
 import routes from "../../Redux/api";
 import Page from "../Common/components/Page";
 import PaginatedList from "../../CAREUI/misc/PaginatedList";
@@ -7,7 +7,10 @@ import { PatientModel } from "../Patient/models";
 import useQuery from "../../Utils/request/useQuery";
 import { debounce } from "lodash-es";
 import SearchInput from "../Form/SearchInput";
-import { GENDER_TYPES } from "../../Common/constants";
+import {
+  DISCHARGED_PATIENT_SORT_OPTIONS,
+  GENDER_TYPES,
+} from "../../Common/constants";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { formatPatientAge } from "../../Utils/utils";
@@ -15,6 +18,9 @@ import { useTranslation } from "react-i18next";
 import SwitchTabs from "../Common/components/SwitchTabs";
 import Chip from "../../CAREUI/display/Chip";
 import { useState } from "react";
+import SortDropdownMenu from "../Common/SortDropdown";
+import useFilters from "../../Common/hooks/useFilters";
+
 
 const DischargedPatientsList = ({
   facility_external_id,
@@ -26,8 +32,10 @@ const DischargedPatientsList = ({
     pathParams: { id: facility_external_id },
   });
 
+
   const [search, setSearch] = useQueryParams();
   const [count, setCount] = useState<number | undefined>(undefined);
+  const { qParams, updateQuery, FilterBadges } = useFilters({});
 
   return (
     <Page
@@ -51,23 +59,33 @@ const DischargedPatientsList = ({
             className="mr-4 w-full max-w-sm"
             placeholder="Search by patient name"
             name="name"
-            value={search.name}
-            onChange={debounce((e) => setSearch({ [e.name]: e.value }), 300)}
+            value={qParams.name}
+            onChange={debounce((e) => updateQuery({ name: e.value }))}
           />
-          <SwitchTabs
-            tab1="Live"
-            tab2="Discharged"
-            className="mr-4"
-            onClickTab1={() => navigate("/patients")}
-            isTab2Active
-          />
+          <div className="flex flex-col gap-4 md:flex-row">
+            <SwitchTabs
+              tab1="Live"
+              tab2="Discharged"
+              className="mr-4"
+              onClickTab1={() => navigate("/patients")}
+              isTab2Active
+            />
+            <SortDropdownMenu
+              options={DISCHARGED_PATIENT_SORT_OPTIONS}
+              selected={qParams.ordering}
+              onSelect={(e) => updateQuery({ ordering: e.ordering })}
+            />
+          </div>
         </>
       }
     >
+      <div className="col-span-3 mt-6 flex flex-wrap">
+        <FilterBadges badges={({ ordering }) => [ordering()]} />
+      </div>
       <PaginatedList
         route={routes.listFacilityDischargedPatients}
         pathParams={{ facility_external_id }}
-        query={search}
+        query={{ ordering: "-modified_date", ...qParams }}
       >
         {({ data }) => {
           if (count !== data?.count) {
