@@ -249,9 +249,9 @@ const BedActivityIButtonPopover = ({
         leaveFrom="opacity-100 translate-y-0"
         leaveTo="opacity-0 translate-y-1"
       >
-        <Popover.Panel className="absolute z-10 -ml-32 mt-2 w-64 -translate-x-1/2 rounded-lg border border-gray-200 bg-white p-2 shadow-lg">
+        <Popover.Panel className="absolute z-10 -ml-20 mt-2 w-48 -translate-x-1/2 rounded-lg border border-gray-200 bg-gray-100 p-2 shadow">
           <p className="text-xs text-gray-600">
-            {relativeTime(bed?.start_date)}
+            updated {relativeTime(bed?.start_date)}
           </p>
         </Popover.Panel>
       </Transition>
