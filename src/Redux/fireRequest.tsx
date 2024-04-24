@@ -158,9 +158,15 @@ export const fireRequest = (
                 msg: error.response.data.detail,
               });
             } else {
-              Notification.Error({
-                msg: "Something went wrong...!",
-              });
+              if (key === "operateAsset") {
+                Notification.Error({
+                  msg: "Wrong Middleware Hostname...!",
+                });
+              } else {
+                Notification.Error({
+                  msg: "Something went wrong...!",
+                });
+              }
             }
             if (error.response.status === 429) {
               return error.response;
