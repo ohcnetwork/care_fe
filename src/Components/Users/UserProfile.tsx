@@ -449,10 +449,8 @@ export default function UserProfile() {
       const { res, data, error } = await request(routes.updatePassword, {
         body: form,
       });
-      if (res?.ok && data?.message === "Password updated successfully") {
-        Notification.Success({
-          msg: "Password changed!",
-        });
+      if (res?.ok) {
+        Notification.Success({ msg: data?.message });
       } else if (!error) {
         Notification.Error({
           msg: "There was some error. Please try again in some time.",
