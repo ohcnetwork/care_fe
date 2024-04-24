@@ -49,7 +49,7 @@ import RouteToFacilitySelect, {
   RouteToFacility,
 } from "../Common/RouteToFacilitySelect.js";
 import { LocationSelect } from "../Common/LocationSelect.js";
-import { classNames } from "../../Utils/utils.js";
+import { classNames, formatDate } from "../../Utils/utils.js";
 import {
   ConditionVerificationStatuses,
   ConsultationDiagnosis,
@@ -185,7 +185,7 @@ const initForm: FormDetails = {
 
 const initError = Object.assign(
   {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
 );
 
 const isoStringToDate = (isoDate: string) =>
@@ -203,7 +203,7 @@ const fieldRef = formErrorKeys.reduce(
     acc[key] = createRef();
     return acc;
   },
-  {}
+  {},
 );
 
 const consultationFormReducer = (state = initialState, action: FormAction) => {
@@ -245,7 +245,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   const { kasp_enabled, kasp_string } = useConfig();
   const [state, dispatch] = useAutoSaveReducer<FormDetails>(
     consultationFormReducer,
-    initialState
+    initialState,
   );
   const [symptomsFields, setSymptomsFields] = useState([
     {
@@ -264,7 +264,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   const isUpdate = !!id;
 
   const [currentSection, setCurrentSection] = useState<ConsultationFormSection>(
-    "Consultation Details"
+    "Consultation Details",
   );
   const [consultationDetailsVisible, consultationDetailsRef] = useVisibility();
   const [diagnosisVisible, diagnosisRef] = useVisibility(-300);
@@ -276,7 +276,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     number[]
   >([]);
   const [showDeleteConsent, setShowDeleteConsent] = useState<string | null>(
-    null
+    null,
   );
 
   const { min_encounter_date } = useConfig();
@@ -404,7 +404,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         }
 
         if (data) {
-          const formData = {
+          const formData: any = {
             ...data,
             symptoms_onset_date:
               data.symptoms_onset_date &&
@@ -442,9 +442,27 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             diagnoses: data.diagnoses?.sort(
               (a: ConsultationDiagnosis, b: ConsultationDiagnosis) =>
                 ConditionVerificationStatuses.indexOf(a.verification_status) -
-                ConditionVerificationStatuses.indexOf(b.verification_status)
+                ConditionVerificationStatuses.indexOf(b.verification_status),
             ),
           };
+          let fetchedFields: any = [];
+          if (data.symptoms_with_dates?.length) {
+            data.symptoms_with_dates.forEach((tl, idx) => {
+              formData[`date-${idx + 1}`] = isoStringToDate(tl.date);
+              formData[`symptoms-${idx + 1}`] = tl.symptoms;
+              fetchedFields = [
+                ...fetchedFields,
+                {
+                  dateField: `date-${idx + 1}`,
+                  symptomsField: `symptoms-${idx + 1}`,
+                },
+              ];
+            });
+          } else {
+            formData["Asymptomatic"] = true;
+          }
+          console.log(fetchedFields);
+          setSymptomsFields(fetchedFields);
           dispatch({
             type: "set_form",
             form: { ...state.form, ...(formData as unknown as FormDetails) },
@@ -458,7 +476,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           goBack();
         }
       },
-    }
+    },
   );
 
   if (isLoading || loadingPatient || consultationLoading) return <Loading />;
@@ -469,12 +487,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
 
     Object.keys(state.form).forEach((field) => {
       switch (field) {
-        case "symptoms":
-          if (!state.form[field] || !state.form[field].length) {
-            errors[field] = "Please select the symptoms";
-            invalidForm = true;
-          }
-          return;
         case "category":
           if (!state.form[field]) {
             errors[field] = "Please select a category";
@@ -509,12 +521,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             invalidForm = true;
           }
           return;
-        case "symptoms_onset_date":
-          if (hasSymptoms && !state.form[field]) {
-            errors[field] = "Please enter date of onset of the above symptoms";
-            invalidForm = true;
-          }
-          return;
+
         case "encounter_date":
           if (!state.form[field]) {
             errors[field] = "Field is required";
@@ -524,9 +531,8 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             min_encounter_date &&
             dayjs(state.form.encounter_date).isBefore(dayjs(min_encounter_date))
           ) {
-            errors[
-              field
-            ] = `Admission date cannot be before ${min_encounter_date}`;
+            errors[field] =
+              `Admission date cannot be before ${min_encounter_date}`;
             invalidForm = true;
           }
           return;
@@ -597,9 +603,8 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           return;
         case "is_kasp":
           if (!state.form[field]) {
-            errors[
-              field
-            ] = `Please select an option, ${kasp_string} is mandatory`;
+            errors[field] =
+              `Please select an option, ${kasp_string} is mandatory`;
             invalidForm = true;
           }
           return;
@@ -658,6 +663,36 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           return;
       }
     });
+    if (!state.form.Asymptomatic) {
+      const tlLength = symptomsFields.length;
+      console.log(symptomsFields);
+      symptomsFields.forEach((tl, idx) => {
+        const dateFormField: any = tl.dateField;
+        const symptomsFormField: any = tl.symptomsField;
+        if (!state.form[dateFormField]) {
+          errors[dateFormField] = "Please enter the Date";
+          invalidForm = true;
+        }
+        if (!state.form[symptomsFormField]?.length) {
+          errors[symptomsFormField] = "Please select the Symptoms";
+          invalidForm = true;
+        }
+        if (state.form[dateFormField]) {
+          for (let i = 1; i <= tlLength; i++) {
+            const currDateField: any = symptomsFields[i - 1].dateField;
+            console.log(state.form[dateFormField]);
+            if (
+              idx !== i - 1 &&
+              state.form[dateFormField]?.getDate() ===
+                state.form[currDateField]?.getDate()
+            ) {
+              errors[dateFormField] = "Please enter unique Dates";
+              invalidForm = true;
+            }
+          }
+        }
+      });
+    }
     if (invalidForm) {
       dispatch({ type: "set_errors", errors });
       const firstError = Object.keys(errors).find((key) => errors[key]);
@@ -677,13 +712,13 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     id: string,
     cause_of_death: string,
     death_datetime: string,
-    death_confirmed_doctor: string
+    death_confirmed_doctor: string,
   ) => {
     await request(routes.dischargePatient, {
       pathParams: { id },
       body: {
         new_discharge_reason: DISCHARGE_REASONS.find(
-          (i) => i.text === "Expired"
+          (i) => i.text === "Expired",
         )?.id,
         discharge_notes: cause_of_death,
         death_datetime: death_datetime,
@@ -696,12 +731,20 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   const handleSubmit = async (
     e:
       | React.FormEvent<HTMLFormElement>
-      | React.MouseEvent<HTMLButtonElement, MouseEvent>
+      | React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
     e.preventDefault();
     const validated = validateForm();
     if (validated) {
       setIsLoading(true);
+      const symptoms_timeline = symptomsFields.map((fields) => {
+        const DateFormField: any = fields.dateField;
+        const SymptomsFormField: any = fields.symptomsField;
+        return {
+          date: state.form[DateFormField],
+          symptoms: state.form[SymptomsFormField],
+        };
+      });
       const data: any = {
         symptoms: state.form.symptoms,
         other_symptoms: isOtherSymptomsSelected
@@ -710,6 +753,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         symptoms_onset_date: hasSymptoms
           ? state.form.symptoms_onset_date
           : undefined,
+        symptoms_with_dates: !state.form.Asymptomatic ? symptoms_timeline : [],
         suggestion: state.form.suggestion,
         route_to_facility: state.form.route_to_facility,
         admitted: state.form.suggestion === "A",
@@ -778,7 +822,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         {
           pathParams: id ? { id } : undefined,
           body: data,
-        }
+        },
       );
 
       setIsLoading(false);
@@ -790,7 +834,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             obj.id,
             state.form.cause_of_death,
             state.form.death_datetime,
-            state.form.death_confirmed_doctor
+            state.form.death_confirmed_doctor,
           );
         }
 
@@ -801,7 +845,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         });
 
         navigate(
-          `/facility/${facilityId}/patient/${patientId}/consultation/${obj.id}`
+          `/facility/${facilityId}/patient/${patientId}/consultation/${obj.id}`,
         );
 
         if (data.suggestion === "R") {
@@ -809,7 +853,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           return;
         } else if (!id && data.suggestion === "A") {
           navigate(
-            `/facility/${facilityId}/patient/${patientId}/consultation/${obj.id}/prescriptions`
+            `/facility/${facilityId}/patient/${patientId}/consultation/${obj.id}/prescriptions`,
           );
         }
       }
@@ -843,7 +887,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
 
   const sectionTitle = (
     sectionTitle: ConsultationFormSection,
-    required = false
+    required = false,
   ) => {
     const section = sections[sectionTitle];
     return (
@@ -863,7 +907,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   };
 
   const handleReferredToFacilityChange = (
-    selected: FacilityModel | FacilityModel[] | null
+    selected: FacilityModel | FacilityModel[] | null,
   ) => {
     const selectedFacility = selected as FacilityModel;
     setReferredToFacility(selectedFacility);
@@ -881,7 +925,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   };
 
   const handleReferredFromFacilityChange = (
-    selected: FacilityModel | FacilityModel[] | null
+    selected: FacilityModel | FacilityModel[] | null,
   ) => {
     const selectedFacility = selected as FacilityModel;
     setReferredFromFacility(selectedFacility);
@@ -919,7 +963,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   };
 
   const handleConsentTypeChange: FieldChangeEventHandler<number> = async (
-    event
+    event,
   ) => {
     if (!id) return;
     const consentRecords = [...state.form.consent_records];
@@ -953,7 +997,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
       form: {
         ...state.form,
         consent_records: state.form.consent_records.map((cr) =>
-          cr.type === 2 ? { ...cr, patient_code_status: event.value } : cr
+          cr.type === 2 ? { ...cr, patient_code_status: event.value } : cr,
         ),
       },
     });
@@ -963,7 +1007,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     const consent_id = showDeleteConsent;
     if (!consent_id || !id) return;
     const newRecords = state.form.consent_records.map((cr) =>
-      cr.id === consent_id ? { ...cr, deleted: true } : cr
+      cr.id === consent_id ? { ...cr, deleted: true } : cr,
     );
     await request(routes.partialUpdateConsultation, {
       pathParams: { id },
@@ -1113,43 +1157,60 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         label="Asymptomatic"
                       />
                     </div>
-                    <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-5">
                       {!state.form.Asymptomatic && (
                         <div>
                           {symptomsFields.map((tl, idx) => (
-                            <div className="flex flex-row gap-3">
-                              <div className="" ref={fieldRef[tl.dateField]}>
-                                <DateFormField
-                                  required
-                                  disableFuture
-                                  label={idx === 0 ? "Date" : ""}
-                                  {...field(tl.dateField)}
-                                />
+                            <div className="flex flex-col gap-5">
+                              <div className="flex flex-row gap-3">
+                                <div className="" ref={fieldRef[tl.dateField]}>
+                                  <DateFormField
+                                    required
+                                    disableFuture
+                                    label={idx === 0 ? "Date" : ""}
+                                    {...field(tl.dateField)}
+                                  />
+                                </div>
+                                <div
+                                  className="flex-1"
+                                  ref={fieldRef[tl.symptomsField]}
+                                >
+                                  <SymptomsSelect
+                                    required
+                                    label={idx === 0 ? "Symptoms" : ""}
+                                    {...field(tl.symptomsField)}
+                                  />
+                                </div>
+                                {idx !== 0 &&
+                                  idx === symptomsFields.length - 1 && (
+                                    <div className="text-center text-3xl text-gray-600">
+                                      <CareIcon
+                                        className=" cursor-pointer"
+                                        icon="l-times"
+                                        onClick={() => {
+                                          setSymptomsFields((prev) =>
+                                            prev.slice(0, -1),
+                                          );
+                                        }}
+                                      />
+                                    </div>
+                                  )}
                               </div>
-                              <div
-                                className="flex-1"
-                                ref={fieldRef[tl.symptomsField]}
-                              >
-                                <SymptomsSelect
-                                  required
-                                  label={idx === 0 ? "Symptoms" : ""}
-                                  {...field(tl.symptomsField)}
-                                />
-                              </div>
-                              {idx !== 0 &&
-                                idx === symptomsFields.length - 1 && (
-                                  <div className="text-center text-3xl text-gray-600">
-                                    <CareIcon
-                                      className=" cursor-pointer"
-                                      icon="l-times"
-                                      onClick={() => {
-                                        setSymptomsFields((prev) =>
-                                          prev.slice(0, -1)
-                                        );
-                                      }}
-                                    />
-                                  </div>
-                                )}
+                              {state.form[tl.symptomsField as any]?.includes(
+                                9,
+                              ) && (
+                                <div
+                                  className="col-span-6"
+                                  ref={fieldRef["other_symptoms"]}
+                                >
+                                  <TextAreaFormField
+                                    {...field(`other-symptoms-${idx + 1}`)}
+                                    label={`Other symptom details ${formatDate(state.form[tl.dateField as any])}`}
+                                    required
+                                    placeholder="Enter details of other symptoms here"
+                                  />
+                                </div>
+                              )}
                             </div>
                           ))}
                           <div
@@ -1232,7 +1293,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         {Math.sqrt(
                           (Number(state.form.weight) *
                             Number(state.form.height)) /
-                            3600
+                            3600,
                         ).toFixed(2)}
                         m<sup>2</sup>
                       </span>
@@ -1289,7 +1350,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       label="Decision after consultation"
                       {...selectField("suggestion")}
                       options={CONSULTATION_SUGGESTION.filter(
-                        (option) => !("deprecated" in option)
+                        (option) => !("deprecated" in option),
                       )}
                     />
                   </div>
@@ -1358,14 +1419,14 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                   <div
                     className={classNames(
                       "col-span-6",
-                      state.form.route_to_facility === 30 && "xl:col-span-3"
+                      state.form.route_to_facility === 30 && "xl:col-span-3",
                     )}
                     ref={fieldRef["encounter_date"]}
                   >
                     <TextFormField
                       {...field("encounter_date")}
                       required={["A", "DC", "OP"].includes(
-                        state.form.suggestion
+                        state.form.suggestion,
                       )}
                       label={
                         {
@@ -1379,7 +1440,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       }
                       type="datetime-local"
                       value={dayjs(state.form.encounter_date).format(
-                        "YYYY-MM-DDTHH:mm"
+                        "YYYY-MM-DDTHH:mm",
                       )}
                       max={dayjs().format("YYYY-MM-DDTHH:mm")}
                       min={
@@ -1395,7 +1456,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       className={classNames(
                         "col-span-6",
                         ["A", "DC"].includes(state.form.suggestion) &&
-                          "xl:col-span-3"
+                          "xl:col-span-3",
                       )}
                       ref={fieldRef["icu_admission_date"]}
                     >
@@ -1406,7 +1467,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         value={
                           state.form.icu_admission_date &&
                           dayjs(state.form.icu_admission_date).format(
-                            "YYYY-MM-DDTHH:mm"
+                            "YYYY-MM-DDTHH:mm",
                           )
                         }
                       />
@@ -1640,7 +1701,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                           !state.form.consent_records
                             .filter((r) => r.deleted !== true)
                             .map((record) => record.type)
-                            .includes(c.id)
+                            .includes(c.id),
                       )}
                     />
                     <div className="flex flex-col gap-4">
@@ -1659,14 +1720,14 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                                   setCollapsedConsentRecords((prev) =>
                                     prev.includes(record.type)
                                       ? prev.filter((r) => r !== record.type)
-                                      : [...prev, record.type]
+                                      : [...prev, record.type],
                                   )
                                 }
                               >
                                 <CareIcon
                                   icon={
                                     collapsedConsentRecords.includes(
-                                      record.type
+                                      record.type,
                                     )
                                       ? "l-arrow-down"
                                       : "l-arrow-up"
@@ -1675,7 +1736,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                                 />
                                 {
                                   CONSENT_TYPE_CHOICES.find(
-                                    (c) => c.id === record.type
+                                    (c) => c.id === record.type,
                                   )?.text
                                 }
                               </button>

@@ -120,6 +120,9 @@ export const ConsultationDetails = (props: any) => {
               });
             data.symptoms_text = symptoms.join(", ");
           }
+          if (res.data.symptoms_with_dates.length) {
+            data.symptoms_text = "symptoms";
+          }
           if (facilityId != data.facility || patientId != data.patient) {
             navigate(
               `/facility/${data.facility}/patient/${data.patient}/consultation/${data?.id}`,

@@ -71,7 +71,7 @@ export const SymptomsSelect = (props: FormFieldBaseProps<number[]>) => {
     <FormField field={field}>
       <MultiSelectMenuV2
         id={field.id}
-        options={SYMPTOM_CHOICES}
+        options={SYMPTOM_CHOICES.filter((sym) => sym.id !== 1)}
         disabled={props.disabled}
         placeholder="Select symptoms"
         optionLabel={(option) => option.text}

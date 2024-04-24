@@ -373,35 +373,76 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                     <div className="text-sm font-semibold uppercase">
                       Consultation Update
                     </div>
-                    <div className="my-4 flex flex-wrap items-center gap-2">
-                      {props.consultationData.symptoms?.map(
-                        (symptom, index) => (
-                          <Chip
-                            key={index}
-                            text={
-                              SYMPTOM_CHOICES.find(
-                                (choice) => choice.id === symptom,
-                              )?.text ?? "Err. Unknown"
-                            }
-                            size="small"
-                          />
-                        ),
-                      )}
-                    </div>
-                    {props.consultationData.other_symptoms && (
-                      <div className="capitalize">
-                        <div className="text-xs font-semibold">
-                          Other Symptoms:
-                        </div>
-                        {props.consultationData.other_symptoms}
+                    {props.consultationData.symptoms_with_dates?.length ? (
+                      <div className=" my-3 flex flex-col gap-4">
+                        {props.consultationData.symptoms_with_dates.map(
+                          (tl) => (
+                            <div className="flex flex-col gap-4">
+                              <div>
+                                <span className="text-xs font-semibold leading-relaxed text-gray-800">
+                                  from {formatDate(tl.date)}
+                                </span>
+                              </div>
+                              <div className=" flex flex-wrap gap-3">
+                                {tl.symptoms.map((symptom, idx) => (
+                                  <Chip
+                                    key={idx}
+                                    text={
+                                      SYMPTOM_CHOICES.find(
+                                        (choice) => choice.id === symptom,
+                                      )?.text ?? "Err. Unknown"
+                                    }
+                                    size="small"
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          ),
+                        )}
+                        {props.consultationData.other_symptoms && (
+                          <div className="capitalize">
+                            <div className="text-xs font-semibold">
+                              Other Symptoms:
+                            </div>
+                            {props.consultationData.other_symptoms}
+                          </div>
+                        )}
                       </div>
+                    ) : (
+                      <>
+                        <div className="my-4 flex flex-wrap items-center gap-2">
+                          {props.consultationData.symptoms?.map(
+                            (symptom, index) => (
+                              <Chip
+                                key={index}
+                                text={
+                                  SYMPTOM_CHOICES.find(
+                                    (choice) => choice.id === symptom,
+                                  )?.text ?? "Err. Unknown"
+                                }
+                                size="small"
+                              />
+                            ),
+                          )}
+                        </div>
+                        {props.consultationData.other_symptoms && (
+                          <div className="capitalize">
+                            <div className="text-xs font-semibold">
+                              Other Symptoms:
+                            </div>
+                            {props.consultationData.other_symptoms}
+                          </div>
+                        )}
+                        <span className="text-xs font-semibold leading-relaxed text-gray-800">
+                          from{" "}
+                          {props.consultationData.symptoms_onset_date
+                            ? formatDate(
+                                props.consultationData.symptoms_onset_date,
+                              )
+                            : "--/--/----"}
+                        </span>
+                      </>
                     )}
-                    <span className="text-xs font-semibold leading-relaxed text-gray-800">
-                      from{" "}
-                      {props.consultationData.symptoms_onset_date
-                        ? formatDate(props.consultationData.symptoms_onset_date)
-                        : "--/--/----"}
-                    </span>
                   </div>
                 </div>
               </div>

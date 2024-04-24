@@ -101,6 +101,10 @@ export type PatientCategory =
   | "Critical";
 
 export interface ConsultationModel {
+  symptoms_with_dates?: {
+    date: string;
+    symptoms: number[];
+  }[];
   encounter_date: string;
   icu_admission_date?: string;
   admitted?: boolean;
