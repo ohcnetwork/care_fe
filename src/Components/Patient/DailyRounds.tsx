@@ -297,7 +297,7 @@ export const DailyRounds = (props: any) => {
         if (obj) {
           dispatch({ type: "set_form", form: initForm });
           Notification.Success({
-            msg: `${capitalize(obj.rounds_type)} Updates details updated successfully`,
+            msg: `${capitalize(obj.rounds_type)} Log Updates details updated successfully`,
           });
           if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
             navigate(
@@ -318,7 +318,7 @@ export const DailyRounds = (props: any) => {
         if (obj) {
           dispatch({ type: "set_form", form: initForm });
           Notification.Success({
-            msg: `${capitalize(obj.rounds_type)} Updates details created successfully`,
+            msg: `${capitalize(obj.rounds_type)} Log Updates details created successfully`,
           });
           if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
             if (data.clone_last) {
