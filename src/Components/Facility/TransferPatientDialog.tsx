@@ -105,6 +105,14 @@ const TransferPatientDialog = (props: Props) => {
             },
           });
           return;
+        } else {
+          dispatch({
+            type: "set_error",
+            errors: {
+              ...state.errors,
+              last_consultation_discharge_date: "",
+            },
+          });
         }
       }
     }
