@@ -17,6 +17,7 @@ interface BedSelectProps {
   showAll?: boolean;
   showNOptions?: number;
   selected: BedModel | BedModel[] | null;
+  not_occupied_by_hl7_monitor?: boolean;
   setSelected: (selected: BedModel | BedModel[] | null) => void;
 }
 
@@ -33,6 +34,7 @@ export const BedSelect = (props: BedSelectProps) => {
     facility,
     location,
     showNOptions = 20,
+    not_occupied_by_hl7_monitor,
   } = props;
   const { t } = useTranslation();
 
@@ -45,8 +47,8 @@ export const BedSelect = (props: BedSelectProps) => {
         all: searchAll,
         facility,
         location,
+        not_occupied_by_hl7_monitor,
       };
-
       const { data } = await request(routes.listFacilityBeds, { query });
 
       if (unoccupiedOnly) {

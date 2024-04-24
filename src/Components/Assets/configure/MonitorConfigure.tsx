@@ -73,6 +73,7 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
             multiple={false}
             location={asset?.location_object?.id}
             facility={asset?.location_object?.facility?.id}
+            not_occupied_by_hl7_monitor={true}
             className="w-full"
           />
         </div>
