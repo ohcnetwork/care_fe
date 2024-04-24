@@ -46,18 +46,20 @@ const DischargedPatientsList = ({
             value={qParams.name}
             onChange={debounce((e) => updateQuery({ name: e.value }))}
           />
-          <SortDropdownMenu
-            options={DISCHARGED_PATIENT_SORT_OPTIONS}
-            selected={qParams.ordering}
-            onSelect={(e) => updateQuery({ ordering: e.ordering })}
-          />
-          <SwitchTabs
-            tab1="Live"
-            tab2="Discharged"
-            className="mr-4"
-            onClickTab1={() => navigate("/patients")}
-            isTab2Active
-          />
+          <div className="flex flex-col gap-4 md:flex-row">
+            <SwitchTabs
+              tab1="Live"
+              tab2="Discharged"
+              className="mr-4"
+              onClickTab1={() => navigate("/patients")}
+              isTab2Active
+            />
+            <SortDropdownMenu
+              options={DISCHARGED_PATIENT_SORT_OPTIONS}
+              selected={qParams.ordering}
+              onSelect={(e) => updateQuery({ ordering: e.ordering })}
+            />
+          </div>
         </>
       }
     >
