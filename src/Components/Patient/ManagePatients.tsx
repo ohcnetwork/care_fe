@@ -177,7 +177,7 @@ export const PatientManager = () => {
     created_date_after: qParams.created_date_after || undefined,
     modified_date_before: qParams.modified_date_before || undefined,
     modified_date_after: qParams.modified_date_after || undefined,
-    ordering: qParams.ordering || "-modified_date",
+    ordering: qParams.ordering || undefined,
     category: qParams.category || undefined,
     gender: qParams.gender || undefined,
     age_min: qParams.age_min || undefined,
@@ -225,6 +225,7 @@ export const PatientManager = () => {
     diagnoses_provisional: qParams.diagnoses_provisional || undefined,
     diagnoses_unconfirmed: qParams.diagnoses_unconfirmed || undefined,
     diagnoses_differential: qParams.diagnoses_differential || undefined,
+    review_missed: qParams.review_missed || undefined,
   };
 
   useEffect(() => {
@@ -944,6 +945,7 @@ export const PatientManager = () => {
             kasp(),
             badge("COWIN ID", "covin_id"),
             badge("Is Antenatal", "is_antenatal"),
+            badge("Review Missed", "review_missed"),
             badge(
               "Is Medico-Legal Case",
               "last_consultation_medico_legal_case",

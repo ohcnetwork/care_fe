@@ -46,6 +46,7 @@ import { PatientModel, Occupation } from "./models";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import AutocompleteFormField from "../Form/FormFields/Autocomplete.js";
 import Spinner from "../Common/Spinner";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -1382,10 +1383,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                       {...field("age")}
                                       errorClassName="hidden"
                                       trailing={
-                                        <p className="absolute right-16 text-xs text-gray-700 sm:text-sm">
-                                          <p className="hidden  sm:inline min-[768px]:hidden lg:inline">
+                                        <p className="absolute right-16 mb-11 text-xs text-gray-700 sm:text-sm">
+                                          <p className="hidden sm:inline min-[768px]:hidden lg:inline">
                                             {field("age").value !== "" &&
-                                              "Year_of_Birth:"}
+                                              "Year of Birth:"}
                                           </p>
                                           <span className="font-bold">
                                             {field("age").value !== "" &&
@@ -1673,7 +1674,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   />
                                 )}
                               </div>
-                              <SelectFormField
+                              <AutocompleteFormField
                                 {...field("occupation")}
                                 label="Occupation"
                                 placeholder="Select Occupation"
