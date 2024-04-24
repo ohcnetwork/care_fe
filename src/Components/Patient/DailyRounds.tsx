@@ -13,6 +13,7 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 import * as Notification from "../../Utils/Notifications";
 import { formatDateTime } from "../../Utils/utils";
+import { capitalize } from "lodash-es";
 import BloodPressureFormField, {
   BloodPressureValidator,
 } from "../Common/BloodPressureFormField";
@@ -294,14 +295,9 @@ export const DailyRounds = (props: any) => {
         setIsLoading(false);
 
         if (obj) {
-          const roundsType = obj.rounds_type
-            ? obj.rounds_type.charAt(0).toUpperCase() +
-              obj.rounds_type.slice(1).toLowerCase() +
-              " Log"
-            : "Consultation";
           dispatch({ type: "set_form", form: initForm });
           Notification.Success({
-            msg: `${roundsType} Updates details updated successfully`,
+            msg: `${capitalize(obj.rounds_type)} Updates details updated successfully`,
           });
           if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
             navigate(
@@ -320,14 +316,9 @@ export const DailyRounds = (props: any) => {
         });
         setIsLoading(false);
         if (obj) {
-          const roundsType = obj.rounds_type
-            ? obj.rounds_type.charAt(0).toUpperCase() +
-              obj.rounds_type.slice(1).toLowerCase() +
-              " Log"
-            : "Consultation";
           dispatch({ type: "set_form", form: initForm });
           Notification.Success({
-            msg: `${roundsType} Updates details created successfully`,
+            msg: `${capitalize(obj.rounds_type)} Updates details created successfully`,
           });
           if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
             if (data.clone_last) {
