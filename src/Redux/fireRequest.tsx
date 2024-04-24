@@ -160,7 +160,7 @@ export const fireRequest = (
             } else {
               if (key === "operateAsset") {
                 Notification.Error({
-                  msg: "Wrong Middleware Hostname...!",
+                  msg: "Wrong Configuration credentials...!",
                 });
               } else {
                 Notification.Error({
