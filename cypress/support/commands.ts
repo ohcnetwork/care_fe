@@ -141,6 +141,21 @@ Cypress.Commands.add(
       });
   }
 );
+Cypress.Commands.add(
+  "typeAndMultiSelectOption",
+  (selector: string, input: string, options: string | string[]) => {
+    const optionArray = Array.isArray(options) ? options : [options];
+    cy.get(selector)
+      .click()
+      .type(input)
+      .then(() => {
+        optionArray.forEach((options) => {
+          cy.get("[role='option']").contains(options).click();
+        });
+        cy.get(selector).click();
+      });
+  }
+);
 
 Cypress.Commands.add(
   "clickAndSelectOption",
