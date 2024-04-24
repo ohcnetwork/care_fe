@@ -18,6 +18,7 @@ import useQuery from "../../Utils/request/useQuery";
 import { parsePhoneNumber } from "../../Utils/utils";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import ExternalResultImportModal from "./ExternalResultImportModal";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -34,6 +35,7 @@ export default function ResultList() {
     limit: 14,
     cacheBlacklist: ["mobile_number", "name"],
   });
+  const [importModalOpen, setImportModalOpen] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
@@ -243,9 +245,9 @@ export default function ResultList() {
                 ? [
                     {
                       label: "Import Results",
-                      action: () => navigate("/external_results/upload"),
                       options: {
                         icon: <CareIcon icon="l-import" />,
+                        onClick: () => setImportModalOpen(true),
                       },
                     },
                   ]
@@ -266,6 +268,12 @@ export default function ResultList() {
           />
         }
       >
+        {importModalOpen && (
+          <ExternalResultImportModal
+            open={importModalOpen}
+            onClose={() => setImportModalOpen(false)}
+          />
+        )}
         <div className="relative my-4 grid-cols-1 gap-5 px-2 sm:grid-cols-3 md:px-0 lg:grid">
           <CountBlock
             text="Total Results"
