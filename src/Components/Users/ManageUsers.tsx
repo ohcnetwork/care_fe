@@ -71,6 +71,11 @@ export default function ManageUsers() {
   const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen = width <= extremeSmallScreenBreakpoint;
 
+  const { data: homeFacilityData } = useQuery(routes.getAnyFacility, {
+    pathParams: { id: qParams.home_facility },
+    prefetch: !!qParams.home_facility,
+  });
+
   const {
     data: userListData,
     loading: userListLoading,
@@ -88,6 +93,7 @@ export default function ManageUsers() {
       alt_phone_number: qParams.alt_phone_number,
       user_type: qParams.user_type,
       district_id: qParams.district,
+      home_facility: qParams.home_facility,
     },
   });
 
@@ -541,6 +547,11 @@ export default function ManageUsers() {
               "District",
               "district",
               qParams.district ? districtData?.name || "" : "",
+            ),
+            value(
+              "Home Facility",
+              "home_facility",
+              qParams.home_facility ? homeFacilityData?.name || "" : "",
             ),
           ]}
         />
