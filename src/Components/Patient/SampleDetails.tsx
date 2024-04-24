@@ -265,7 +265,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
     );
   };
 
-  if (isLoading) {
+  if (isLoading || !sampleDetails) {
     return <Loading />;
   }
 

@@ -46,6 +46,7 @@ import { PatientModel, Occupation } from "./models";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import AutocompleteFormField from "../Form/FormFields/Autocomplete.js";
 import Spinner from "../Common/Spinner";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -1705,7 +1706,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   />
                                 )}
                               </div>
-                              <SelectFormField
+                              <AutocompleteFormField
                                 {...field("occupation")}
                                 label="Occupation"
                                 placeholder="Select Occupation"
