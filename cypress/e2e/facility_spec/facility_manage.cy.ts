@@ -12,7 +12,7 @@ describe("Facility Manage Functions", () => {
   const facilityMiddleware = "dev-middleware.coronasafe.live";
   const facilityUpdatedMiddleware = "updated.coronasafe.live";
   const facilityMiddlewareSuccessfullNotification =
-    "Facility updated successfully";
+    "Facility middleware updated successfully";
   const facilityHfridUpdateButton = "Link Health Facility";
   const facilityHfridToastNotificationText =
     /Health Facility config updated successfully|Health ID registration failed/;
