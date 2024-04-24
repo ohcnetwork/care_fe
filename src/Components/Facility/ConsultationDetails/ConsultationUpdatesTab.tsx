@@ -202,7 +202,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                   "lg:col-span-2"
                 }`}
               >
-                <div className="px-4 py-5 sm:p-6">
+                <div className="px-4 py-5 sm:p-6" id="discharge-information">
                   <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
                     Discharge Information
                   </h3>
