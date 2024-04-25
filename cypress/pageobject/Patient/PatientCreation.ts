@@ -41,12 +41,7 @@ export class PatientPage {
     cy.get("#phone_number").click().type(phoneNumber);
   }
 
-  clickEmergencyPhoneNumberCheckbox() {
-    cy.get("#emergency_contact_checkbox").check();
-  }
-
   typePatientEmergencyNumber(phoneNumber: string) {
-    cy.get("#emergency_contact_checkbox").should("not.be.checked");
     cy.get("#emergency_phone_number-div").click().type(phoneNumber);
   }
 
