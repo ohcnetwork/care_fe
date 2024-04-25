@@ -18,6 +18,11 @@ enum FilterTypes {
   TELEICU = "TeleICU Hub",
 }
 
+interface DoctorDetails {
+  users: UserAssignedModel[];
+  type: FilterTypes.DOCTOR | FilterTypes.NURSE | FilterTypes.TELEICU;
+}
+
 const isHomeUser = (user: UserAssignedModel, facilityId: string) =>
   user.home_facility_object?.id === facilityId;
 
@@ -27,9 +32,7 @@ export default function DoctorVideoSlideover(props: {
   setShow: (show: boolean) => void;
 }) {
   const { show, facilityId, setShow } = props;
-  const [filteredDoctors, setFilteredDoctors] = useState<UserAssignedModel[]>(
-    [],
-  );
+  const [filteredDoctors, setFilteredDoctors] = useState<DoctorDetails[]>([]);
   const [filter, setFilter] = useState<FilterTypes>(FilterTypes.ALL);
 
   const { data: users, loading } = useQuery(routes.getFacilityUsers, {
@@ -40,30 +43,35 @@ export default function DoctorVideoSlideover(props: {
 
   useEffect(() => {
     const filterDoctors = (users: UserAssignedModel[]) => {
-      return users.filter(
-        (user: UserAssignedModel) =>
-          (user.alt_phone_number || user.video_connect_link) &&
+      const filteredusers = users
+        .filter((user: UserAssignedModel) => {
+          return user.alt_phone_number || user.video_connect_link;
+        })
+        .sort((a: UserAssignedModel, b: UserAssignedModel) => {
+          const aIsHomeUser = isHomeUser(a, facilityId);
+          const bIsHomeUser = isHomeUser(b, facilityId);
+          return aIsHomeUser === bIsHomeUser ? 0 : aIsHomeUser ? -1 : 1;
+        });
+      const Doctors = filteredusers.filter((user: UserAssignedModel) => {
+        return user.user_type === "Doctor" && isHomeUser(user, facilityId);
+      });
+      const Nurses = filteredusers.filter((user: UserAssignedModel) => {
+        return user.user_type === "Nurse" && isHomeUser(user, facilityId);
+      });
+      const TeleICU = filteredusers.filter((user: UserAssignedModel) => {
+        return (
           (user.user_type === "Doctor" || user.user_type === "Nurse") &&
-          (filter === FilterTypes.ALL ||
-            (filter === FilterTypes.DOCTOR &&
-              isHomeUser(user, facilityId) &&
-              user.user_type === "Doctor") ||
-            (filter === FilterTypes.NURSE &&
-              isHomeUser(user, facilityId) &&
-              user.user_type === "Nurse") ||
-            (filter === FilterTypes.TELEICU && !isHomeUser(user, facilityId))),
-      );
+          !isHomeUser(user, facilityId)
+        );
+      });
+      setFilteredDoctors([
+        { users: Doctors, type: FilterTypes.DOCTOR },
+        { users: Nurses, type: FilterTypes.NURSE },
+        { users: TeleICU, type: FilterTypes.TELEICU },
+      ]);
     };
     if (users?.results && !loading) {
-      setFilteredDoctors(
-        filterDoctors(users.results).sort(
-          (a: UserAssignedModel, b: UserAssignedModel) => {
-            const aIsHomeUser = isHomeUser(a, facilityId);
-            const bIsHomeUser = isHomeUser(b, facilityId);
-            return aIsHomeUser === bIsHomeUser ? 0 : aIsHomeUser ? -1 : 1;
-          },
-        ),
-      );
+      filterDoctors(users?.results);
     }
   }, [facilityId, filter, loading, users?.results]);
 
@@ -91,23 +99,38 @@ export default function DoctorVideoSlideover(props: {
           size="md"
         />
       </div>
-      {filteredDoctors.map((doctor, i) => (
-        <div
-          key={i}
-          className="mb-4"
-          id={`doctor-connect-${
-            isHomeUser(doctor, facilityId) ? "home" : "remote"
-          }-${doctor.user_type.toLowerCase()}`}
-        >
-          <ul className="mt-3 max-h-96 list-none" id="options" role="listbox">
-            <UserListItem
-              key={doctor.id}
-              user={doctor}
-              facilityId={facilityId}
-            />
-          </ul>
-        </div>
-      ))}
+      {filteredDoctors.map((doctor) => {
+        return (
+          (filter === FilterTypes.ALL || filter === doctor.type) && (
+            <div>
+              <p className="pt-2">{doctor.type}</p>
+              {doctor.users.map((user, i) => {
+                return (
+                  <div
+                    key={i}
+                    className="mb-4"
+                    id={`doctor-connect-${
+                      isHomeUser(user, facilityId) ? "home" : "remote"
+                    }-${user.user_type.toLowerCase()}`}
+                  >
+                    <ul
+                      className="mt-3 max-h-96 list-none"
+                      id="options"
+                      role="listbox"
+                    >
+                      <UserListItem
+                        key={user.id}
+                        user={user}
+                        facilityId={facilityId}
+                      />
+                    </ul>
+                  </div>
+                );
+              })}
+            </div>
+          )
+        );
+      })}
     </SlideOver>
   );
 }

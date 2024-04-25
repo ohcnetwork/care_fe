@@ -25,7 +25,7 @@ class PatientLogupdate {
   }
 
   typeAdditionalSymptoms(symptoms: string) {
-    cy.clickAndSelectOption("#additional_symptoms", symptoms);
+    cy.searchAndSelectOption("#additional_symptoms", symptoms);
   }
 
   typeSystolic(systolic: string) {
