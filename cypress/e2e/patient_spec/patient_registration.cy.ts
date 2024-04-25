@@ -79,7 +79,6 @@ describe("Patient Creation with consultation", () => {
     patientPage.patientformvisibility();
     // Patient Details page
     patientPage.typePatientPhoneNumber(phone_number);
-    patientPage.clickEmergencyPhoneNumberCheckbox();
     patientPage.typePatientEmergencyNumber(emergency_phone_number);
     patientPage.typePatientAge(age.toString());
     patientPage.typePatientName(patientOneName);
