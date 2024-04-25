@@ -51,11 +51,6 @@ export default function DoctorVideoSlideover(props: {
 
   const annotatedUsers: UserAnnotatedWithGroup[] | undefined = data?.results
     .filter((user) => user.alt_phone_number || user.video_connect_link)
-    .sort((a, b) => {
-      const aIsHomeUser = isHomeUser(a, facilityId);
-      const bIsHomeUser = isHomeUser(b, facilityId);
-      return aIsHomeUser === bIsHomeUser ? 0 : aIsHomeUser ? -1 : 1;
-    })
     .map((user) => ({ ...user, group: getUserGroup(user) }));
 
   return (
