@@ -79,6 +79,7 @@ describe("Patient Creation with consultation", () => {
     patientPage.patientformvisibility();
     // Patient Details page
     patientPage.typePatientPhoneNumber(phone_number);
+    patientPage.clickEmergencyPhoneNumberCheckbox();
     patientPage.typePatientEmergencyNumber(emergency_phone_number);
     patientPage.typePatientAge(age.toString());
     patientPage.typePatientName(patientOneName);
@@ -93,7 +94,7 @@ describe("Patient Creation with consultation", () => {
     // Patient Medical History
     patientMedicalHistory.typePatientPresentHealth(patientOnePresentHealth);
     patientMedicalHistory.typePatientOngoingMedication(
-      patientOneOngoingMedication
+      patientOneOngoingMedication,
     );
     patientMedicalHistory.typeMedicalHistory(2, "Diabetes");
     patientMedicalHistory.typeMedicalHistory(3, "Heart Disease");
@@ -118,7 +119,7 @@ describe("Patient Creation with consultation", () => {
       emergency_phone_number,
       yearOfBirth,
       patientOneBloodGroup,
-      patientOccupation
+      patientOccupation,
     );
     patientMedicalHistory.verifyPatientMedicalDetails(
       patientOnePresentHealth,
@@ -130,7 +131,7 @@ describe("Patient Creation with consultation", () => {
       "Kidney Diseases",
       "Lung Diseases/Asthma",
       "Cancer",
-      "Other"
+      "Other",
     );
     // verify its presence in the patient detail page
     cy.visit("/patients");
@@ -155,43 +156,43 @@ describe("Patient Creation with consultation", () => {
     patientInsurance.typePatientInsuranceDetail(
       patientOneFirstInsuranceId,
       "subscriber_id",
-      patientOneFirstSubscriberId
+      patientOneFirstSubscriberId,
     );
     patientInsurance.typePatientInsuranceDetail(
       patientOneFirstInsuranceId,
       "policy_id",
-      patientOneFirstPolicyId
+      patientOneFirstPolicyId,
     );
     patientInsurance.typePatientInsuranceDetail(
       patientOneFirstInsuranceId,
       "insurer_id",
-      patientOneFirstInsurerId
+      patientOneFirstInsurerId,
     );
     patientInsurance.typePatientInsuranceDetail(
       patientOneFirstInsuranceId,
       "insurer_name",
-      patientOneFirstInsurerName
+      patientOneFirstInsurerName,
     );
     patientInsurance.clickAddInsruanceDetails();
     patientInsurance.typePatientInsuranceDetail(
       patientOneSecondInsuranceId,
       "subscriber_id",
-      patientOneSecondSubscriberId
+      patientOneSecondSubscriberId,
     );
     patientInsurance.typePatientInsuranceDetail(
       patientOneSecondInsuranceId,
       "policy_id",
-      patientOneSecondPolicyId
+      patientOneSecondPolicyId,
     );
     patientInsurance.typePatientInsuranceDetail(
       patientOneSecondInsuranceId,
       "insurer_id",
-      patientOneSecondInsurerId
+      patientOneSecondInsurerId,
     );
     patientInsurance.typePatientInsuranceDetail(
       patientOneSecondInsuranceId,
       "insurer_name",
-      patientOneSecondInsurerName
+      patientOneSecondInsurerName,
     );
     patientPage.clickUpdatePatient();
     cy.wait(3000);
@@ -207,7 +208,7 @@ describe("Patient Creation with consultation", () => {
       emergency_phone_number,
       yearOfBirth,
       patientOneUpdatedBloodGroup,
-      patientOccupation
+      patientOccupation,
     );
     // Verify No medical history
     patientMedicalHistory.verifyNoSymptosPresent("Diabetes");
@@ -220,7 +221,7 @@ describe("Patient Creation with consultation", () => {
       patientOneFirstSubscriberId,
       patientOneFirstPolicyId,
       patientOneFirstInsurerId,
-      patientOneFirstInsurerName
+      patientOneFirstInsurerName,
     );
     patientInsurance.clickPatientInsuranceViewDetail();
     cy.wait(3000);
@@ -228,13 +229,13 @@ describe("Patient Creation with consultation", () => {
       patientOneFirstSubscriberId,
       patientOneFirstPolicyId,
       patientOneFirstInsurerId,
-      patientOneFirstInsurerName
+      patientOneFirstInsurerName,
     );
     patientInsurance.verifyPatientPolicyDetails(
       patientOneSecondSubscriberId,
       patientOneSecondPolicyId,
       patientOneSecondInsurerId,
-      patientOneSecondInsurerName
+      patientOneSecondInsurerName,
     );
   });
 
