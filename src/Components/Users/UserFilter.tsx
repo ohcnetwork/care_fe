@@ -10,6 +10,10 @@ import DistrictAutocompleteFormField from "../Common/DistrictAutocompleteFormFie
 import StateAutocompleteFormField from "../Common/StateAutocompleteFormField";
 import { useTranslation } from "react-i18next";
 import * as Notify from "../../Utils/Notifications";
+import { FacilitySelect } from "../Common/FacilitySelect";
+import { FacilityModel } from "../Facility/models";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 
 const parsePhoneNumberForFilterParam = (phoneNumber: string) => {
   if (!phoneNumber) return "";
@@ -29,6 +33,14 @@ export default function UserFilter(props: any) {
     user_type: filter.user_type || "",
     district: filter.district || "",
     state: filter.state || "",
+    home_facility: filter.home_facility || "",
+    home_facility_ref: null,
+  });
+
+  useQuery(routes.getAnyFacility, {
+    pathParams: { id: filter.home_facility },
+    prefetch: !!filter.home_facility,
+    onResponse: ({ data }) => setFilterState({ home_facility_ref: data }),
   });
 
   const applyFilter = () => {
@@ -40,6 +52,7 @@ export default function UserFilter(props: any) {
       user_type,
       district,
       state,
+      home_facility,
     } = filterState;
     const data = {
       first_name: first_name || "",
@@ -49,6 +62,7 @@ export default function UserFilter(props: any) {
       user_type: user_type || "",
       district: district || "",
       state: district ? state || "" : "",
+      home_facility: home_facility || "",
     };
     if (state && !district) {
       Notify.Warn({
@@ -108,6 +122,23 @@ export default function UserFilter(props: any) {
           optionValue={(o) => o.id}
           value={filterState.user_type}
           onChange={(v) => setFilterState({ ...filterState, user_type: v })}
+        />
+      </div>
+
+      <div className="w-full flex-none">
+        <FieldLabel>Home Facility</FieldLabel>
+        <FacilitySelect
+          name="home_facility"
+          setSelected={(selected) =>
+            setFilterState({
+              ...filterState,
+              home_facility: (selected as FacilityModel)?.id || "",
+              home_facility_ref: selected,
+            })
+          }
+          selected={filterState.home_facility_ref}
+          errors=""
+          multiple={false}
         />
       </div>
 
