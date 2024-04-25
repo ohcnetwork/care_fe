@@ -42,7 +42,7 @@ export class PatientPage {
   }
 
   typePatientEmergencyNumber(phoneNumber: string) {
-    cy.get("#emergency_phone_number-div").click().type(phoneNumber);
+    cy.get("#emergency_phone_number").click().type(phoneNumber);
   }
 
   typePatientDateOfBirth(dateOfBirth: string) {
