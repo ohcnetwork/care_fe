@@ -1,4 +1,4 @@
-import { lazy, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ConsultationTabProps } from "./index";
 import { AssetBedModel, AssetData } from "../../Assets/AssetTypes";
 import routes from "../../../Redux/api";
@@ -8,11 +8,11 @@ import Loading from "../../Common/Loading";
 import AssetBedSelect from "../../CameraFeed/AssetBedSelect";
 import { triggerGoal } from "../../../Integrations/Plausible";
 import useAuthUser from "../../../Common/hooks/useAuthUser";
-
-const PageTitle = lazy(() => import("../../Common/PageTitle"));
+import PageTitle from "../../Common/PageTitle";
 
 export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   const authUser = useAuthUser();
+  const divRef = useRef<any>();
   const bed = props.consultationData.current_bed?.bed_object;
 
   const [asset, setAsset] = useState<AssetData>();
@@ -39,8 +39,18 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
     },
   });
 
-  if (!bed) {
-    return <span>No bed allocated</span>;
+  useEffect(() => {
+    if (divRef.current) {
+      divRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [!!bed, loading, !!asset, divRef.current]);
+
+  if (!bed || !asset) {
+    return <span>No bed/asset linked allocated</span>;
+  }
+
+  if (loading) {
+    return <Loading />;
   }
 
   return (
@@ -49,14 +59,11 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
         title="Camera Feed"
         breadcrumbs={false}
         hideBack={true}
-        focusOnLoad={true}
+        focusOnLoad={false}
       />
-      {loading || !asset ? (
-        <Loading />
-      ) : (
+      <div ref={divRef}>
         <CameraFeed
           asset={asset}
-          silent
           preset={preset?.meta.position}
           onStreamError={() => {
             triggerGoal("Camera Feed Viewed", {
@@ -90,7 +97,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
             />
           </div>
         </CameraFeed>
-      )}
+      </div>
     </div>
   );
 };

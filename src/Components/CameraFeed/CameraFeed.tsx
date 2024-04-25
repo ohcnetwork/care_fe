@@ -90,7 +90,7 @@ export default function CameraFeed(props: Props) {
     <Fullscreen fullscreen={isFullscreen} onExit={() => setFullscreen(false)}>
       <div
         className={classNames(
-          "flex flex-col overflow-clip rounded-xl bg-black",
+          "flex max-h-screen flex-col overflow-clip rounded-xl bg-black",
           props.className,
         )}
       >
