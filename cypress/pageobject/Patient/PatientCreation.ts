@@ -38,7 +38,7 @@ export class PatientPage {
   }
 
   typePatientPhoneNumber(phoneNumber: string) {
-    cy.get("#phone_number-div").click().type(phoneNumber);
+    cy.get("#phone_number").click().type(phoneNumber);
   }
 
   clickEmergencyPhoneNumberCheckbox() {
