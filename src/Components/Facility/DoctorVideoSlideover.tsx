@@ -127,7 +127,11 @@ const UserGroupList = (props: {
         </div>
       )}
 
-      {!users.length && <span>No users</span>}
+      {!users.length && (
+        <span className="flex w-full justify-center py-2 font-bold text-gray-500">
+          No users in this category
+        </span>
+      )}
 
       {!!users.length && (
         <ul className="flex flex-col gap-3" id="options" role="listbox">
