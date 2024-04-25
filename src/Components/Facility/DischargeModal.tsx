@@ -318,6 +318,7 @@ const DischargeModal = ({
           <TextFormField
             name="death_confirmed_by"
             label="Confirmed By"
+            error={errors.death_confirmed_doctor}
             value={preDischargeForm.death_confirmed_doctor ?? ""}
             onChange={(e) => {
               setPreDischargeForm((form) => {
