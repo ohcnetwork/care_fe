@@ -58,7 +58,9 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeRhythm(patientRhythm);
     cy.get("#consciousness_level-2").click();
     cy.submitButton("Save");
-    cy.verifyNotification("Consultation Updates details created successfully");
+    cy.verifyNotification(
+      "Telemedicine Log Updates details created successfully",
+    );
     // verify the copied previous value
     cy.closeNotification();
     patientLogupdate.clickLogupdate();
@@ -71,7 +73,9 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     ]);
     cy.verifyContentPresence("#rhythm_detail", [patientRhythm]);
     cy.submitButton("Continue");
-    cy.verifyNotification("Consultation Updates details updated successfully");
+    cy.verifyNotification(
+      "Telemedicine Log Updates details updated successfully",
+    );
   });
 
   it("Create a new log normal update for a domicilary care patient and edit it", () => {
@@ -96,7 +100,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeRhythm(patientRhythm);
     cy.get("#consciousness_level-2").click();
     cy.submitButton("Save");
-    cy.verifyNotification("Consultation Updates details created successfully");
+    cy.verifyNotification("Normal Log Updates details created successfully");
     cy.closeNotification();
     // edit the card and verify the data.
     patientLogupdate.clickLogupdateCard("#dailyround-entry", patientCategory);
@@ -118,7 +122,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.clickClearButtonInElement("#diastolic");
     patientLogupdate.typeDiastolic(patientModifiedDiastolic);
     cy.submitButton("Continue");
-    cy.verifyNotification("Consultation Updates details updated successfully");
+    cy.verifyNotification("Normal Log Updates details updated successfully");
     patientLogupdate.clickLogupdateCard("#dailyround-entry", patientCategory);
     cy.verifyContentPresence("#consultation-preview", [
       patientModifiedDiastolic,
@@ -148,7 +152,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.get("#consciousness_level-2").click();
     cy.submitButton("Save");
     cy.wait(2000);
-    cy.verifyNotification("Consultation Updates details created successfully");
+    cy.verifyNotification("Normal Log Updates details created successfully");
     // Verify the card content
     cy.get("#basic-information").scrollIntoView();
     cy.verifyContentPresence("#basic-information", [additionalSymptoms]);
