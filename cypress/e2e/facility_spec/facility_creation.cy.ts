@@ -317,7 +317,9 @@ describe("Facility Creation", () => {
     facilityPage.clickConfigureFacilityOption();
     facilityPage.fillMiddleWareAddress("dev_middleware.coronasafe.live");
     facilityPage.clickupdateMiddleWare();
-    facilityPage.verifySuccessNotification("Facility updated successfully");
+    facilityPage.verifySuccessNotification(
+      "Facility middleware updated successfully"
+    );
   });
 
   afterEach(() => {
