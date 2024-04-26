@@ -16,7 +16,7 @@ const UserGroups = {
   ALL: "All",
   DOCTOR: "Doctor",
   NURSE: "Nurse",
-  TELEICU: "TeleICU Doctors",
+  TELEICU: "TeleICU Doctor",
 };
 
 type UserGroup = keyof typeof UserGroups;
