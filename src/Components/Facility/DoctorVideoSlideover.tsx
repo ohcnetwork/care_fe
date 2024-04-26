@@ -16,7 +16,7 @@ const UserGroups = {
   ALL: "All",
   DOCTOR: "Doctor",
   NURSE: "Nurse",
-  TELEICU: "TeleICU Hub",
+  TELEICU: "TeleICU Doctors",
 };
 
 type UserGroup = keyof typeof UserGroups;
@@ -243,11 +243,6 @@ function UserListItem({ user }: { user: UserAnnotatedWithGroup }) {
               <strong>
                 {user.first_name} {user.last_name}
               </strong>
-              {user.group === "TELEICU" && (
-                <span className="ml-2 rounded-full bg-gray-200 px-2 py-1 text-xs font-medium text-gray-600">
-                  {user.user_type}
-                </span>
-              )}
             </span>
             <DoctorConnectButtons
               user={user}
