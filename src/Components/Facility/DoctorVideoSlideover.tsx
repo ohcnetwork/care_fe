@@ -131,7 +131,13 @@ const UserGroupList = (props: {
       {!!users.length && (
         <ul className="flex flex-col gap-3" id="options" role="listbox">
           {users.map((user) => (
-            <li key={user.id} role="option">
+            <li
+              key={user.id}
+              role="option"
+              id={`doctor-connect-${
+                user.group !== "TELEICU" ? "home" : "remote"
+              }-${user.user_type.toLowerCase()}`}
+            >
               <UserListItem user={user} />
             </li>
           ))}
