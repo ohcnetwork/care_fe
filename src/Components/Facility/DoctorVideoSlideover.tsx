@@ -18,6 +18,14 @@ enum FilterTypes {
   TELEICU = "TeleICU Hub",
 }
 
+const courtesyTitle = (user: UserAssignedModel) => {
+  /* TODO: Discuss courtesy title for gender number 2 appropirately */
+  const genderSalutation =
+    user.gender === 0 ? "Mr" : user.gender === 1 ? "Ms" : "Hey";
+  console.log(genderSalutation);
+  return user.user_type === "Doctor" ? "Dr" : genderSalutation;
+};
+
 const isHomeUser = (user: UserAssignedModel, facilityId: string) =>
   user.home_facility_object?.id === facilityId;
 
@@ -128,7 +136,7 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
     e.stopPropagation();
     if (!user.alt_phone_number) return;
     const phoneNumber = user.alt_phone_number;
-    const message = `Hey ${user.first_name} ${user.last_name}, I have a query regarding a patient.\n\nPatient Link: ${window.location.href}`;
+    const message = `${courtesyTitle(user)} ${user.first_name} ${user.last_name}, I have a query regarding a patient.\n\nPatient Link: ${window.location.href}`;
     const encodedMessage = encodeURIComponent(message);
     const whatsappAppURL = `whatsapp://send?phone=${phoneNumber}&text=${encodedMessage}`;
     const whatsappWebURL = `https://web.whatsapp.com/send?phone=${phoneNumber}&text=${encodedMessage}`;
