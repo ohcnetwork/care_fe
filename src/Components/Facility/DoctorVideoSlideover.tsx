@@ -45,13 +45,13 @@ export default function DoctorVideoSlideover(props: {
       if (user.user_type === "Nurse") return "NURSE";
     }
 
-    if (user.user_type === "Doctor" || user.user_type === "Nurse")
-      return "TELEICU";
+    if (user.user_type === "Doctor") return "TELEICU";
   };
 
   const annotatedUsers: UserAnnotatedWithGroup[] | undefined = data?.results
     .filter((user) => user.alt_phone_number || user.video_connect_link)
-    .map((user) => ({ ...user, group: getUserGroup(user) }));
+    .map((user) => ({ ...user, group: getUserGroup(user) }))
+    .filter((user) => !!user.group) as UserAnnotatedWithGroup[];
 
   return (
     <SlideOver
