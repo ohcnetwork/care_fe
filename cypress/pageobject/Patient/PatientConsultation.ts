@@ -9,7 +9,9 @@ export class PatientConsultationPage {
   selectSymptoms(symptoms) {
     cy.clickAndMultiSelectOption("#symptoms", symptoms);
   }
-
+  typeAndMultiSelectSymptoms(input, symptoms) {
+    cy.typeAndMultiSelectOption("#symptoms", input, symptoms);
+  }
   selectSymptomsDate(selector: string, date: string) {
     cy.clickAndTypeDate(selector, date);
   }
