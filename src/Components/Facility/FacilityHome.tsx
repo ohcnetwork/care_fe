@@ -411,7 +411,9 @@ export const FacilityHome = (props: any) => {
                 <CareIcon icon="l-monitor-heart-rate" className="text-lg" />
                 <span>Central Nursing Station</span>
               </ButtonV2>
-              <LiveMonitoringButton />
+              {CameraFeedPermittedUserTypes.includes(authUser.user_type) && (
+                <LiveMonitoringButton />
+              )}
               <ButtonV2
                 variant="primary"
                 ghost
@@ -499,24 +501,21 @@ export const FacilityHome = (props: any) => {
 const LiveMonitoringButton = () => {
   const facilityId = useSlug("facility");
   const [location, setLocation] = useState<string>();
-  const authUser = useAuthUser();
 
   return (
     <Popover className="relative">
-      {CameraFeedPermittedUserTypes.includes(authUser.user_type) && (
-        <Popover.Button className="mt-2 w-full">
-          <ButtonV2
-            variant="primary"
-            ghost
-            border
-            className="w-full"
-            id="facility-detailspage-livemonitoring"
-          >
-            <CareIcon icon="l-video" className="text-lg" />
-            <span>Live Monitoring</span>
-          </ButtonV2>
-        </Popover.Button>
-      )}
+      <Popover.Button className="mt-2 w-full">
+        <ButtonV2
+          variant="primary"
+          ghost
+          border
+          className="w-full"
+          id="facility-detailspage-livemonitoring"
+        >
+          <CareIcon icon="l-video" className="text-lg" />
+          <span>Live Monitoring</span>
+        </ButtonV2>
+      </Popover.Button>
 
       <Transition
         as={Fragment}
