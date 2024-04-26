@@ -74,11 +74,11 @@ const FormField = ({
 
       {field?.error && (
         <ul>
-          {field?.error?.split("\n").length &&
-            field?.error?.split("\n").map((err) => (
-              <li key={err.length}>
+          {(typeof field.error === "string" ? field.error : String(field.error))
+            .split("\n")
+            .map((err, index) => (
+              <li key={index}>
                 <FieldErrorText error={err} className={field?.errorClassName} />
-                <br />
               </li>
             ))}
         </ul>
