@@ -22,7 +22,6 @@ const courtesyTitle = (user: UserAssignedModel) => {
   /* TODO: Discuss courtesy title for gender number 2 appropirately */
   const genderSalutation =
     user.gender === 0 ? "Mr" : user.gender === 1 ? "Ms" : "Hey";
-  console.log(genderSalutation);
   return user.user_type === "Doctor" ? "Dr" : genderSalutation;
 };
 
