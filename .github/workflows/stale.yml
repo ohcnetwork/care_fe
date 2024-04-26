@@ -13,9 +13,9 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           stale-issue-label: "stale"
           stale-pr-label: "stale"
-          stale-issue-message: "Hi, @gigincg, @nihal467, @khavinshankar, @mathew-alex, @aparnacoronasafe, This issue has been automatically marked as stale because it has not had any recent activity."
+          stale-issue-message: "Hi, @coronasafe/care-frontend-maintainers, This issue has been automatically marked as stale because it has not had any recent activity."
           stale-pr-message: "Hi, This pr has been automatically marked as stale because it has not had any recent activity. It will be automatically closed if no further activity occurs for 7 more days. Thank you for your contributions."
-          close-pr-message: "Hi @coronasafe/care-frontend-maintainers, This PR has been automatically closed due to inactivity. Thank you for your contributions. Feel free to re-open the PR."
+          close-pr-message: "Hi, @coronasafe/care-frontend-maintainers, This PR has been automatically closed due to inactivity. Thank you for your contributions. Feel free to re-open the PR."
           exempt-issue-labels: "blocked,waiting for related PR,waiting for back end,help wanted,work-in-progress,In Progress,wishlist,EPIC"
           exempt-pr-labels: "tested,needs testing,need Review,waiting for related PR,waiting for back end,help wanted,blocked,work-in-progress,In Progress"
           days-before-issue-stale: 14
