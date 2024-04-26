@@ -23,7 +23,7 @@ export const validateEmailAddress = (email: string) => {
 export const getArrayValueByKey = (
   arr: Array<any>,
   attr: string,
-  value: string | number
+  value: string | number,
 ) => {
   for (let i = 0; i < arr.length; i++) {
     if (arr[i][attr] === value) {

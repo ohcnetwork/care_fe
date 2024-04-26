@@ -46,6 +46,16 @@ const NotificationTile = ({
     setIsMarkingAsRead(false);
   };
 
+  const handleMarkAsUnRead = async () => {
+    setIsMarkingAsRead(true);
+    await request(routes.markNotificationAsUnRead, {
+      pathParams: { id: result.id },
+      body: { read_at: null },
+    });
+    setResult({ ...result, read_at: null });
+    setIsMarkingAsRead(false);
+  };
+
   const resultUrl = (event: string, data: any) => {
     switch (event) {
       case "PATIENT_CREATED":
@@ -86,7 +96,7 @@ const NotificationTile = ({
       }}
       className={classNames(
         "relative cursor-pointer rounded px-4 py-5 transition duration-200 ease-in-out hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg lg:px-8",
-        result.read_at && "text-gray-500"
+        result.read_at && "text-gray-500",
       )}
     >
       <div className="flex justify-between">
@@ -107,24 +117,33 @@ const NotificationTile = ({
         </div>
         <div className="flex justify-end gap-2">
           <ButtonV2
-            className={classNames(
-              "bg-white px-2 py-1 font-semibold hover:bg-secondary-300",
-              result.read_at && "invisible"
-            )}
+            className="bg-white px-2 py-1 font-semibold hover:bg-secondary-300"
             variant="secondary"
             border
             ghost
             disabled={isMarkingAsRead}
             onClick={(event) => {
               event.stopPropagation();
-              handleMarkAsRead();
+              if (result.read_at) {
+                handleMarkAsUnRead();
+              } else {
+                handleMarkAsRead();
+              }
             }}
           >
             <CareIcon
-              icon={isMarkingAsRead ? "l-spinner" : "l-envelope-check"}
+              icon={
+                isMarkingAsRead
+                  ? "l-spinner"
+                  : result.read_at
+                    ? "l-envelope"
+                    : "l-envelope-check"
+              }
               className={isMarkingAsRead ? "animate-spin" : ""}
             />
-            <span className="text-xs">{t("mark_as_read")}</span>
+            <span className="text-xs">
+              {result.read_at ? t("mark_as_unread") : t("mark_as_read")}
+            </span>
           </ButtonV2>
           <ButtonV2
             border
@@ -283,14 +302,14 @@ export default function NotificationsList({
     const p256dh = btoa(
       String.fromCharCode.apply(
         null,
-        new Uint8Array(push.getKey("p256dh") as any) as any
-      )
+        new Uint8Array(push.getKey("p256dh") as any) as any,
+      ),
     );
     const auth = btoa(
       String.fromCharCode.apply(
         null,
-        new Uint8Array(push.getKey("auth") as any) as any
-      )
+        new Uint8Array(push.getKey("auth") as any) as any,
+      ),
     );
 
     const data = {
@@ -318,7 +337,7 @@ export default function NotificationsList({
           pathParams: { id: notification.id },
           body: { read_at: new Date() },
         });
-      })
+      }),
     );
     setReload(!reload);
     setIsMarkingAllAsRead(false);
@@ -335,8 +354,8 @@ export default function NotificationsList({
           setUnreadCount(
             res.data.results?.reduce(
               (acc: number, result: any) => acc + (result.read_at ? 0 : 1),
-              0
-            )
+              0,
+            ),
           );
           setTotalCount(res.data.count);
         }
@@ -361,7 +380,7 @@ export default function NotificationsList({
         {data
           .filter((notification: any) => notification.event != "PUSH_MESSAGE")
           .filter((notification: any) =>
-            showUnread ? notification.read_at === null : true
+            showUnread ? notification.read_at === null : true,
           )
           .map((result: any) => (
             <NotificationTile

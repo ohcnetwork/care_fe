@@ -79,7 +79,7 @@ const DischargeModal = ({
         ordering: "-modified_date",
         use: "claim",
         consultation: consultationData.id,
-      })
+      }),
     );
 
     if (res?.data?.results?.length > 0) {
@@ -151,8 +151,8 @@ const DischargeModal = ({
           discharge: value,
           discharge_date: dayjs(preDischargeForm.discharge_date).toISOString(),
         },
-        { id: consultationData.id }
-      )
+        { id: consultationData.id },
+      ),
     );
 
     setIsSendingDischargeApi(false);
@@ -165,12 +165,12 @@ const DischargeModal = ({
     }
   };
 
-  const handleFacilitySelect = (selected: FacilityModel) => {
+  const handleFacilitySelect = (selected?: FacilityModel) => {
     setFacility(selected);
     setPreDischargeForm((prev) => ({
       ...prev,
-      referred_to: selected.id ?? null,
-      referred_to_external: !selected.id ? selected.name : null,
+      referred_to: selected?.id ?? null,
+      referred_to_external: !selected?.id ? selected?.name : null,
     }));
   };
 
@@ -211,19 +211,21 @@ const DischargeModal = ({
         {preDischargeForm.new_discharge_reason ===
           DISCHARGE_REASONS.find((i) => i.text == "Referred")?.id && (
           <>
-            <FieldLabel>Referred to</FieldLabel>
-            <FacilitySelect
-              name="referred_to"
-              setSelected={(selected) =>
-                handleFacilitySelect(selected as FacilityModel)
-              }
-              selected={facility ?? null}
-              showAll
-              freeText
-              multiple={false}
-              errors={errors?.referred_to}
-              className="mb-4"
-            />
+            <div id="facility-referredto">
+              <FieldLabel>Referred to</FieldLabel>
+              <FacilitySelect
+                name="referred_to"
+                setSelected={(selected) =>
+                  handleFacilitySelect(selected as FacilityModel | undefined)
+                }
+                selected={facility ?? null}
+                showAll
+                freeText
+                multiple={false}
+                errors={errors?.referred_to}
+                className="mb-4"
+              />
+            </div>
           </>
         )}
         <TextAreaFormField
@@ -279,7 +281,7 @@ const DischargeModal = ({
           }}
           required
           min={dayjs(consultationData?.encounter_date).format(
-            "YYYY-MM-DDTHH:mm"
+            "YYYY-MM-DDTHH:mm",
           )}
           max={dayjs().format("YYYY-MM-DDTHH:mm")}
           error={

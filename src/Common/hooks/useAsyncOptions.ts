@@ -34,7 +34,7 @@ interface IUseAsyncOptionsArgs {
  */
 export function useAsyncOptions<T extends Record<string, unknown>>(
   uniqueKey: keyof T,
-  args?: IUseAsyncOptionsArgs
+  args?: IUseAsyncOptionsArgs,
 ) {
   const dispatch = useDispatch<any>();
   const [queryOptions, setQueryOptions] = useState<T[]>([]);
@@ -47,18 +47,18 @@ export function useAsyncOptions<T extends Record<string, unknown>>(
         const res = await dispatch(action);
         if (res?.data)
           setQueryOptions(
-            args?.queryResponseExtractor?.(res.data) ?? (res.data as T[])
+            args?.queryResponseExtractor?.(res.data) ?? (res.data as T[]),
           );
         setIsLoading(false);
       }, args?.debounceInterval ?? 300),
-    [dispatch, args?.debounceInterval]
+    [dispatch, args?.debounceInterval],
   );
 
   const mergeValueWithQueryOptions = (selected?: T[]) => {
     return mergeQueryOptions(
       selected ?? [],
       queryOptions,
-      (obj) => obj[uniqueKey]
+      (obj) => obj[uniqueKey],
     );
   };
 

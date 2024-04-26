@@ -27,7 +27,7 @@ export default function RangeAutocompleteFormField(props: Props) {
 
     const getThreshold = (value: number) => {
       const threshold = sortedThresholds.findLast(
-        (threshold) => value >= threshold.value
+        (threshold) => value >= threshold.value,
       );
       return threshold;
     };
@@ -52,7 +52,7 @@ export default function RangeAutocompleteFormField(props: Props) {
         <div
           className={classNames(
             "flex space-x-2 text-xs group-hover/option:text-white",
-            threshold?.className
+            threshold?.className,
           )}
         >
           <span>{threshold?.label}</span>

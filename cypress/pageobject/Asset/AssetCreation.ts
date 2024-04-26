@@ -246,7 +246,7 @@ export class AssetPage {
   }
 
   importAssetFile() {
-    cy.get("[data-testid=import-asset-file]")
+    cy.get("[data-testid=import-file]")
       .selectFile("cypress/fixtures/sampleAsset.xlsx", { force: true })
       .wait(100);
   }

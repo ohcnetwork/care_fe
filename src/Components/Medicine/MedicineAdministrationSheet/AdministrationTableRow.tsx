@@ -19,6 +19,7 @@ interface Props {
   prescription: Prescription;
   intervals: { start: Date; end: Date }[];
   refetch: () => void;
+  readonly: boolean;
 }
 
 export default function MedicineAdministrationTableRow({
@@ -41,25 +42,20 @@ export default function MedicineAdministrationTableRow({
         prescription: prescription.id,
         administered_date_after: formatDateTime(
           props.intervals[0].start,
-          "YYYY-MM-DD"
+          "YYYY-MM-DD",
         ),
         administered_date_before: formatDateTime(
           props.intervals[props.intervals.length - 1].end,
-          "YYYY-MM-DD"
+          "YYYY-MM-DD",
         ),
         archived: false,
       },
       key: `${prescription.last_administration?.administered_date}`,
-    }
+    },
   );
 
   return (
-    <tr
-      className={classNames(
-        "group transition-all duration-200 ease-in-out",
-        loading ? "bg-gray-300" : "bg-white hover:bg-primary-100"
-      )}
-    >
+    <>
       {showDiscontinue && (
         <DiscontinuePrescription
           prescription={prescription}
@@ -96,42 +92,46 @@ export default function MedicineAdministrationTableRow({
                 onClick={() => setShowDetails(false)}
                 label={t("close")}
               />
-              <Submit
-                disabled={
-                  prescription.discontinued ||
-                  prescription.prescription_type === "DISCHARGE"
-                }
-                variant="danger"
-                onClick={() => setShowDiscontinue(true)}
-              >
-                <CareIcon icon="l-ban" className="text-lg" />
-                {t("discontinue")}
-              </Submit>
-              <Submit
-                disabled={
-                  prescription.discontinued ||
-                  prescription.prescription_type === "DISCHARGE"
-                }
-                variant="secondary"
-                border
-                onClick={() => {
-                  setShowDetails(false);
-                  setShowEdit(true);
-                }}
-              >
-                <CareIcon icon="l-pen" className="text-lg" />
-                {t("edit")}
-              </Submit>
-              <Submit
-                disabled={
-                  prescription.discontinued ||
-                  prescription.prescription_type === "DISCHARGE"
-                }
-                onClick={() => setShowAdminister(true)}
-              >
-                <CareIcon icon="l-syringe" className="text-lg" />
-                {t("administer")}
-              </Submit>
+              {!props.readonly && (
+                <>
+                  <Submit
+                    disabled={
+                      prescription.discontinued ||
+                      prescription.prescription_type === "DISCHARGE"
+                    }
+                    variant="danger"
+                    onClick={() => setShowDiscontinue(true)}
+                  >
+                    <CareIcon icon="l-ban" className="text-lg" />
+                    {t("discontinue")}
+                  </Submit>
+                  <Submit
+                    disabled={
+                      prescription.discontinued ||
+                      prescription.prescription_type === "DISCHARGE"
+                    }
+                    variant="secondary"
+                    border
+                    onClick={() => {
+                      setShowDetails(false);
+                      setShowEdit(true);
+                    }}
+                  >
+                    <CareIcon icon="l-pen" className="text-lg" />
+                    {t("edit")}
+                  </Submit>
+                  <Submit
+                    disabled={
+                      prescription.discontinued ||
+                      prescription.prescription_type === "DISCHARGE"
+                    }
+                    onClick={() => setShowAdminister(true)}
+                  >
+                    <CareIcon icon="l-syringe" className="text-lg" />
+                    {t("administer")}
+                  </Submit>
+                </>
+              )}
             </div>
           </div>
         </DialogModal>
@@ -143,7 +143,7 @@ export default function MedicineAdministrationTableRow({
           title={`${t("edit")} ${t(
             prescription.dosage_type === "PRN"
               ? "prn_prescription"
-              : "prescription_medication"
+              : "prescription_medication",
           )}: ${
             prescription.medicine_object?.name ?? prescription.medicine_old
           }`}
@@ -166,93 +166,104 @@ export default function MedicineAdministrationTableRow({
           />
         </DialogModal>
       )}
-      <td
-        className="bg-gray-white sticky left-0 z-10 cursor-pointer bg-white py-3 pl-4 text-left transition-all duration-200 ease-in-out group-hover:bg-primary-100"
-        onClick={() => setShowDetails(true)}
+      <tr
+        className={classNames(
+          "group transition-all duration-200 ease-in-out",
+          loading ? "bg-gray-300" : "bg-white hover:bg-primary-100",
+        )}
       >
-        <div className="flex flex-col gap-1 lg:flex-row lg:justify-between lg:gap-2">
-          <div className="flex items-center gap-2">
-            <span
-              className={classNames(
-                "text-sm font-semibold",
-                prescription.discontinued ? "text-gray-700" : "text-gray-900"
-              )}
-            >
-              {prescription.medicine_object?.name ?? prescription.medicine_old}
-            </span>
-
-            {prescription.discontinued && (
-              <span className="hidden rounded-full border border-gray-500 bg-gray-200 px-1.5 text-xs font-medium text-gray-700 lg:block">
-                {t("discontinued")}
-              </span>
-            )}
-
-            {prescription.route && (
-              <span className="hidden rounded-full border border-blue-500 bg-blue-100 px-1.5 text-xs font-medium text-blue-700 lg:block">
-                {t(prescription.route)}
-              </span>
-            )}
-          </div>
-
-          <div className="flex gap-1 text-xs font-semibold text-gray-900 lg:flex-col lg:px-2 lg:text-center">
-            {prescription.dosage_type !== "TITRATED" ? (
-              <p>{prescription.base_dosage}</p>
-            ) : (
-              <p>
-                {prescription.base_dosage} - {prescription.target_dosage}
-              </p>
-            )}
-
-            <p>
-              {prescription.dosage_type !== "PRN"
-                ? t("PRESCRIPTION_FREQUENCY_" + prescription.frequency)
-                : prescription.indicator}
-            </p>
-          </div>
-        </div>
-      </td>
-
-      <td />
-
-      {/* Administration Cells */}
-      {props.intervals.map(({ start, end }, index) => (
-        <>
-          <td key={`event-seperator-${index}`}>
-            <AdministrationEventSeperator date={start} />
-          </td>
-
-          <td key={`event-socket-${index}`} className="text-center">
-            {!data?.results ? (
-              <CareIcon
-                icon="l-spinner"
-                className="animate-spin text-lg text-gray-500"
-              />
-            ) : (
-              <AdministrationEventCell
-                administrations={data.results}
-                interval={{ start, end }}
-                prescription={prescription}
-                refetch={refetch}
-              />
-            )}
-          </td>
-        </>
-      ))}
-      <td />
-
-      {/* Action Buttons */}
-      <td className="space-x-1 pr-2 text-right">
-        <ButtonV2
-          type="button"
-          size="small"
-          disabled={prescription.discontinued}
-          ghost
-          border
-          onClick={() => setShowAdminister(true)}
+        <td
+          className="bg-gray-white sticky left-0 z-10 cursor-pointer bg-white py-3 pl-4 text-left transition-all duration-200 ease-in-out group-hover:bg-primary-100"
+          onClick={() => setShowDetails(true)}
         >
-          {t("administer")}
-        </ButtonV2>
-      </td>
-    </tr>
+          <div className="flex flex-col gap-1 lg:flex-row lg:justify-between lg:gap-2">
+            <div className="flex items-center gap-2">
+              <span
+                className={classNames(
+                  "text-sm font-semibold",
+                  prescription.discontinued ? "text-gray-700" : "text-gray-900",
+                )}
+              >
+                {prescription.medicine_object?.name ??
+                  prescription.medicine_old}
+              </span>
+
+              {prescription.discontinued && (
+                <span className="hidden rounded-full border border-gray-500 bg-gray-200 px-1.5 text-xs font-medium text-gray-700 lg:block">
+                  {t("discontinued")}
+                </span>
+              )}
+
+              {prescription.route && (
+                <span className="hidden rounded-full border border-blue-500 bg-blue-100 px-1.5 text-xs font-medium text-blue-700 lg:block">
+                  {t(prescription.route)}
+                </span>
+              )}
+            </div>
+
+            <div className="flex gap-1 text-xs font-semibold text-gray-900 lg:flex-col lg:px-2 lg:text-center">
+              {prescription.dosage_type !== "TITRATED" ? (
+                <p>{prescription.base_dosage}</p>
+              ) : (
+                <p>
+                  {prescription.base_dosage} - {prescription.target_dosage}
+                </p>
+              )}
+
+              <p>
+                {prescription.dosage_type !== "PRN"
+                  ? t("PRESCRIPTION_FREQUENCY_" + prescription.frequency)
+                  : prescription.indicator}
+              </p>
+            </div>
+          </div>
+        </td>
+
+        <td />
+
+        {/* Administration Cells */}
+        {props.intervals.map(({ start, end }, index) => (
+          <>
+            <td key={`event-seperator-${index}`}>
+              <AdministrationEventSeperator date={start} />
+            </td>
+
+            <td key={`event-socket-${index}`} className="text-center">
+              {!data?.results ? (
+                <CareIcon
+                  icon="l-spinner"
+                  className="animate-spin text-lg text-gray-500"
+                />
+              ) : (
+                <AdministrationEventCell
+                  administrations={data.results}
+                  interval={{ start, end }}
+                  prescription={prescription}
+                  refetch={refetch}
+                  readonly={props.readonly}
+                />
+              )}
+            </td>
+          </>
+        ))}
+        <td />
+
+        {/* Action Buttons */}
+        <td className="space-x-1 pr-2 text-right">
+          {!props.readonly && (
+            <ButtonV2
+              type="button"
+              size="small"
+              disabled={prescription.discontinued}
+              ghost
+              border
+              onClick={() => setShowAdminister(true)}
+            >
+              {t("administer")}
+            </ButtonV2>
+          )}
+        </td>
+      </tr>
+    </>
   );
 }

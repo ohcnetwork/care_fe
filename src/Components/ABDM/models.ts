@@ -123,10 +123,12 @@ export interface ILinkViaQRBody {
 export interface ABHAQRContent {
   address: string;
   distlgd: string;
-  district_name: string;
+  district_name?: string;
   dob: string;
-  gender: "M";
-  hid: string;
+  gender: "M" | "F" | "O";
+  hid?: string;
+  phr?: string;
+  "dist name"?: string;
   hidn: string;
   mobile: string;
   name: string;

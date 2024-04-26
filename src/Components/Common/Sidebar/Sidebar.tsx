@@ -48,7 +48,7 @@ const StatelessSidebar = ({
     { text: "Shifting", to: "/shifting", icon: "l-ambulance" },
     { text: "Resource", to: "/resource", icon: "l-heart-medical" },
     ...(!["Nurse", "NurseReadOnly", "Staff", "StaffReadOnly"].includes(
-      authUser.user_type
+      authUser.user_type,
     )
       ? ([
           {
@@ -129,7 +129,7 @@ const StatelessSidebar = ({
             // className="absolute left-2 w-1 hidden md:block bg-primary-400 rounded z-10 transition-all"
             className={classNames(
               "absolute left-2 z-10 block w-1 rounded bg-primary-400 transition-all",
-              activeLink ? "opacity-0 md:opacity-100" : "opacity-0"
+              activeLink ? "opacity-0 md:opacity-100" : "opacity-0",
             )}
           />
           {NavItems.map((i) => {
