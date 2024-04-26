@@ -192,7 +192,7 @@ export default function ResultList() {
     });
   }
 
-  if (loading) {
+  if (loading || !data) {
     manageResults = (
       <tr className="bg-white">
         <td colSpan={5}>
