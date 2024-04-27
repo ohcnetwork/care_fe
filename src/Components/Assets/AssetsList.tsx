@@ -116,7 +116,14 @@ const AssetsList = () => {
         const { data } = await request(routes.listAssets, {
           query: { qr_code_id: assetId },
         });
-        return data?.results[0].id;
+        if (data?.results.length === 0) {
+          setIsLoading(false);
+          Notification.Error({
+            msg: "You are not authorized to view this asset",
+          });
+        } else {
+          return data?.results[0].id;
+        }
       }
     } catch (err) {
       console.log(err);
