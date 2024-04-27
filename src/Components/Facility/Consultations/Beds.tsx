@@ -244,21 +244,30 @@ const Beds = (props: BedsProps) => {
       <div>
         <h3 className="my-4 text-lg">Previous beds: </h3>
         <div className="overflow-hidden rounded-xl">
-          <div className="grid grid-cols-4 gap-px">
-            <div className="bg-primary-500 py-2 text-center font-bold text-white">
-              Bed
-            </div>
-            <div className="bg-primary-500 py-2 text-center font-bold text-white">
-              Location
-            </div>
-            <div className="bg-primary-500 py-2 text-center font-bold text-white">
-              Start Date
-            </div>
-            <div className="bg-primary-500 py-2 text-center font-bold text-white">
-              End Date
-            </div>
-          </div>
           {consultationBeds.length > 0 ? (
+            <div className="grid grid-cols-4 gap-px">
+              <div className="bg-primary-500 py-2 text-center font-bold text-white">
+                Bed
+              </div>
+              <div className="bg-primary-500 py-2 text-center font-bold text-white">
+                Location
+              </div>
+              <div className="bg-primary-500 py-2 text-center font-bold text-white">
+                Start Date
+              </div>
+              <div className="bg-primary-500 py-2 text-center font-bold text-white">
+                End Date
+              </div>
+            </div>
+          ) : (
+            <div className="flex w-full justify-center border-t border-gray-200 bg-white p-5 text-center text-2xl font-bold text-gray-500">
+              <span className="flex justify-center rounded-lg bg-white p-3 text-gray-700  ">
+                No beds allocated yet
+              </span>
+            </div>
+          )}
+
+          {consultationBeds.length > 0 &&
             consultationBeds.map((bed) => (
               <div className="grid grid-cols-4 gap-px" key={bed?.id}>
                 <div className="break-words bg-primary-100 p-2 text-center">
@@ -292,12 +301,7 @@ const Beds = (props: BedsProps) => {
                   </div>
                 )}
               </div>
-            ))
-          ) : (
-            <div className="bg-primary-100 py-2 text-center">
-              No beds allocated yet
-            </div>
-          )}
+            ))}
         </div>
       </div>
     </div>
