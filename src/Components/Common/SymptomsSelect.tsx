@@ -1,11 +1,11 @@
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { SYMPTOM_CHOICES } from "../../Common/constants";
+import { AutocompleteMutliSelect } from "../Form/FormFields/AutocompleteMultiselect";
 import FormField from "../Form/FormFields/FormField";
 import {
   FormFieldBaseProps,
   useFormFieldPropsResolver,
 } from "../Form/FormFields/Utils";
-import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
 
 const ASYMPTOMATIC_ID = 1;
 
@@ -69,15 +69,15 @@ export const SymptomsSelect = (props: FormFieldBaseProps<number[]>) => {
 
   return (
     <FormField field={field}>
-      <MultiSelectMenuV2
+      <AutocompleteMutliSelect
         id={field.id}
         options={SYMPTOM_CHOICES.filter((sym) => sym.id !== 1)}
         disabled={props.disabled}
         placeholder="Select symptoms"
         optionLabel={(option) => option.text}
         optionValue={(option) => option.id}
+        value={props.value || []}
         optionDescription={getDescription}
-        value={props.value}
         onChange={updateSelection}
       />
     </FormField>

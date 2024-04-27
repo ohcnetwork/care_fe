@@ -39,6 +39,7 @@ import { AssetBedModel } from "../../Assets/AssetTypes";
 import PatientInfoCard from "../../Patient/PatientInfoCard";
 import RelativeDateUserMention from "../../Common/RelativeDateUserMention";
 import DiagnosesListAccordion from "../../Diagnosis/DiagnosesListAccordion";
+import { CameraFeedPermittedUserTypes } from "../../../Utils/permissions";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
@@ -305,9 +306,7 @@ export const ConsultationDetails = (props: any) => {
                 </button>
                 {patientData.last_consultation?.id &&
                   isCameraAttached &&
-                  ["DistrictAdmin", "StateAdmin", "Doctor"].includes(
-                    authUser.user_type,
-                  ) && (
+                  CameraFeedPermittedUserTypes.includes(authUser.user_type) && (
                     <Link
                       href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
                       className="btn btn-primary m-1 w-full hover:text-white"
@@ -429,9 +428,7 @@ export const ConsultationDetails = (props: any) => {
                       isCameraAttached === false || // No camera attached
                       consultationData?.discharge_date || // Discharged
                       !consultationData?.current_bed?.bed_object?.id || // Not admitted to bed
-                      !["DistrictAdmin", "StateAdmin", "Doctor"].includes(
-                        authUser.user_type,
-                      ) // Not admin or doctor
+                      !CameraFeedPermittedUserTypes.includes(authUser.user_type)
                     )
                       return null; // Hide feed tab
                   }
