@@ -24,7 +24,7 @@ jobs:
             const isReadyForTestingComment = context.payload.comment?.body.includes('ready for testing');
             const isChangesRequired = context.payload.review?.state === 'changes_requested';
 
-            if ((isReadyForTestingComment && !isDraft) || (!isDraft && pr.draft_changed) || isChangesRequired) {
+            if ((isReadyForTestingComment && !isDraft) || (!isDraft && pr.draft_changed)) {
               await github.issues.addLabels({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
