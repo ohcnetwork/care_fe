@@ -822,6 +822,7 @@ export const PatientHome = (props: any) => {
                           </div>
                         </dl>
                       </div>
+
                       <div className="mt-2 flex">
                         <ButtonV2
                           className="mr-2 w-full bg-white hover:bg-gray-100"

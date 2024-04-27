@@ -747,11 +747,11 @@ export const PatientManager = () => {
                 else if (
                   !showAllFacilityUsers.includes(authUser.user_type) &&
                   authUser.home_facility_object?.id !== qParams.facility
-                ) {
+                )
                   Notification.Error({
                     msg: "Oops! Non-Home facility users don't have permission to perform this action.",
                   });
-                } else if (
+                else if (
                   !showAllFacilityUsers.includes(authUser.user_type) &&
                   authUser.home_facility_object?.id
                 ) {
