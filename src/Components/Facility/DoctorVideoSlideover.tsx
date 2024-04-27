@@ -1,22 +1,23 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import SlideOver from "../../CAREUI/interactive/SlideOver";
 import { UserAssignedModel } from "../Users/models";
 import { SkillObjectModel } from "../Users/models";
 import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
-import { relativeTime } from "../../Utils/utils";
+import { classNames, relativeTime } from "../../Utils/utils";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { triggerGoal } from "../../Integrations/Plausible";
 import { Warn } from "../../Utils/Notifications";
 import Switch from "../../CAREUI/interactive/Switch";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
+import Loading from "../Common/Loading";
 
-enum FilterTypes {
-  ALL = "All",
-  DOCTOR = "Doctor",
-  NURSE = "Nurse",
-  TELEICU = "TeleICU Hub",
-}
+const UserGroups = {
+  ALL: "All",
+  DOCTOR: "Doctor",
+  NURSE: "Nurse",
+  TELEICU: "TeleICU Doctor",
+};
 
 const courtesyTitle = (user: UserAssignedModel) => {
   /* TODO: Discuss courtesy title for gender number 2 appropirately */
@@ -25,62 +26,39 @@ const courtesyTitle = (user: UserAssignedModel) => {
   return user.user_type === "Doctor" ? "Dr" : genderSalutation;
 };
 
-interface DoctorDetails {
-  users: UserAssignedModel[];
-  type: FilterTypes.DOCTOR | FilterTypes.NURSE | FilterTypes.TELEICU;
-}
+type UserGroup = keyof typeof UserGroups;
+
+type UserAnnotatedWithGroup = UserAssignedModel & { group?: UserGroup };
 
 const isHomeUser = (user: UserAssignedModel, facilityId: string) =>
   user.home_facility_object?.id === facilityId;
-
 export default function DoctorVideoSlideover(props: {
   show: boolean;
   facilityId: string;
   setShow: (show: boolean) => void;
 }) {
   const { show, facilityId, setShow } = props;
-  const [filteredDoctors, setFilteredDoctors] = useState<DoctorDetails[]>([]);
-  const [filter, setFilter] = useState<FilterTypes>(FilterTypes.ALL);
+  const [filter, setFilter] = useState<UserGroup>("ALL");
 
-  const { data: users, loading } = useQuery(routes.getFacilityUsers, {
+  const { data } = useQuery(routes.getFacilityUsers, {
     prefetch: show,
     pathParams: { facility_id: facilityId },
     query: { limit: 50 },
   });
 
-  useEffect(() => {
-    const filterDoctors = (users: UserAssignedModel[]) => {
-      const filteredusers = users
-        .filter((user: UserAssignedModel) => {
-          return user.alt_phone_number || user.video_connect_link;
-        })
-        .sort((a: UserAssignedModel, b: UserAssignedModel) => {
-          const aIsHomeUser = isHomeUser(a, facilityId);
-          const bIsHomeUser = isHomeUser(b, facilityId);
-          return aIsHomeUser === bIsHomeUser ? 0 : aIsHomeUser ? -1 : 1;
-        });
-      const Doctors = filteredusers.filter((user: UserAssignedModel) => {
-        return user.user_type === "Doctor" && isHomeUser(user, facilityId);
-      });
-      const Nurses = filteredusers.filter((user: UserAssignedModel) => {
-        return user.user_type === "Nurse" && isHomeUser(user, facilityId);
-      });
-      const TeleICU = filteredusers.filter((user: UserAssignedModel) => {
-        return (
-          (user.user_type === "Doctor" || user.user_type === "Nurse") &&
-          !isHomeUser(user, facilityId)
-        );
-      });
-      setFilteredDoctors([
-        { users: Doctors, type: FilterTypes.DOCTOR },
-        { users: Nurses, type: FilterTypes.NURSE },
-        { users: TeleICU, type: FilterTypes.TELEICU },
-      ]);
-    };
-    if (users?.results && !loading) {
-      filterDoctors(users?.results);
+  const getUserGroup = (user: UserAssignedModel) => {
+    if (isHomeUser(user, facilityId)) {
+      if (user.user_type === "Doctor") return "DOCTOR";
+      if (user.user_type === "Nurse") return "NURSE";
     }
-  }, [facilityId, filter, loading, users?.results]);
+
+    if (user.user_type === "Doctor") return "TELEICU";
+  };
+
+  const annotatedUsers: UserAnnotatedWithGroup[] | undefined = data?.results
+    .filter((user) => user.alt_phone_number || user.video_connect_link)
+    .map((user) => ({ ...user, group: getUserGroup(user) }))
+    .filter((user) => !!user.group) as UserAnnotatedWithGroup[];
 
   return (
     <SlideOver
@@ -95,52 +73,86 @@ export default function DoctorVideoSlideover(props: {
       </p>
       <div className="flex justify-center" id="doctor-connect-filter-tabs">
         <Switch
-          tabs={
-            Object.values(FilterTypes).reduce(
-              (acc, type) => ({ ...acc, [type]: type }),
-              {},
-            ) as Record<FilterTypes, string>
-          }
+          tabs={UserGroups}
           selected={filter}
           onChange={(tab) => setFilter(tab)}
           size="md"
         />
       </div>
-      {filteredDoctors.map((doctor) => {
-        return (
-          (filter === FilterTypes.ALL || filter === doctor.type) && (
-            <div>
-              <p className="pt-2">{doctor.type}</p>
-              {doctor.users.map((user, i) => {
-                return (
-                  <div
-                    key={i}
-                    className="mb-4"
-                    id={`doctor-connect-${
-                      isHomeUser(user, facilityId) ? "home" : "remote"
-                    }-${user.user_type.toLowerCase()}`}
-                  >
-                    <ul
-                      className="mt-3 max-h-96 list-none"
-                      id="options"
-                      role="listbox"
-                    >
-                      <UserListItem
-                        key={user.id}
-                        user={user}
-                        facilityId={facilityId}
-                      />
-                    </ul>
-                  </div>
-                );
-              })}
-            </div>
-          )
-        );
-      })}
+
+      {!annotatedUsers ? (
+        <Loading />
+      ) : filter === "ALL" ? (
+        <div className="flex flex-col py-2">
+          <UserGroupList
+            group="DOCTOR"
+            users={annotatedUsers}
+            showGroupHeading
+          />
+
+          <UserGroupList
+            group="NURSE"
+            users={annotatedUsers}
+            showGroupHeading
+          />
+
+          <UserGroupList
+            group="TELEICU"
+            users={annotatedUsers}
+            showGroupHeading
+          />
+        </div>
+      ) : (
+        <div className="py-6">
+          <UserGroupList group={filter} users={annotatedUsers} />
+        </div>
+      )}
     </SlideOver>
   );
 }
+
+const UserGroupList = (props: {
+  users: UserAnnotatedWithGroup[];
+  group: UserGroup;
+  showGroupHeading?: boolean;
+}) => {
+  const users = props.users.filter((user) => user.group === props.group);
+
+  return (
+    <div className="py-2">
+      {props.showGroupHeading && (
+        <div className="flex w-full items-center pb-2">
+          <span className="whitespace-nowrap text-lg font-bold">
+            {UserGroups[props.group]}
+          </span>
+          <div className="mx-6 h-1 w-full bg-gray-300" />
+        </div>
+      )}
+
+      {!users.length && (
+        <span className="flex w-full justify-center py-2 font-bold text-gray-500">
+          No users in this category
+        </span>
+      )}
+
+      {!!users.length && (
+        <ul className="flex flex-col gap-3" id="options" role="listbox">
+          {users.map((user) => (
+            <li
+              key={user.id}
+              role="option"
+              id={`doctor-connect-${
+                user.group !== "TELEICU" ? "home" : "remote"
+              }-${user.user_type.toLowerCase()}`}
+            >
+              <UserListItem user={user} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
 
 type MSLaunchURI = (
   uri: string,
@@ -148,9 +160,7 @@ type MSLaunchURI = (
   noHandlerCB?: null | (() => void),
 ) => void;
 
-function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
-  const user = props.user;
-  const facilityId = props.facilityId;
+function UserListItem({ user }: { user: UserAnnotatedWithGroup }) {
   const icon: IconName =
     user.user_type === "Doctor" ? "l-user-md" : "l-user-nurse";
 
@@ -214,17 +224,13 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
   }
 
   return (
-    <li
-      key={user.id}
-      className={
-        "group cursor-default select-none rounded-xl p-3 " +
-        (user.alt_phone_number
+    <div
+      className={classNames(
+        "group cursor-default select-none rounded-xl p-3",
+        user.alt_phone_number
           ? "cursor-pointer border border-gray-400 transition hover:border-green-500 hover:bg-green-50"
-          : "pointer-events-none cursor-not-allowed bg-gray-400 ")
-      }
-      id="option-1"
-      role="option"
-      tabIndex={-1}
+          : "pointer-events-none cursor-not-allowed bg-gray-400",
+      )}
     >
       <a className="flex" onClick={connectOnWhatsApp}>
         <div className="flex flex-none items-center justify-center sm:h-6 sm:w-6 md:h-10 md:w-10">
@@ -239,16 +245,11 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
           }
         </div>
         <div className="ml-4 flex flex-auto flex-col gap-1">
-          <div className="flex justify-between gap-2 text-sm font-medium text-gray-700">
+          <div className="flex justify-between gap-2 text-sm text-gray-700">
             <span>
-              {user.first_name} {user.last_name}
-              <span className="pl-1 font-normal text-gray-700">
-                (
-                {isHomeUser(user, facilityId)
-                  ? user.user_type
-                  : `TeleICU Hub ${user.user_type}`}
-                )
-              </span>
+              <strong>
+                {user.first_name} {user.last_name}
+              </strong>
             </span>
             <DoctorConnectButtons
               user={user}
@@ -296,7 +297,7 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
           </div>
         </div>
       </a>
-    </li>
+    </div>
   );
 }
 
