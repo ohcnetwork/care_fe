@@ -9,6 +9,7 @@ import { make as CriticalCareRecording } from "../../Components/CriticalCareReco
 import { ConsultationDetails } from "../../Components/Facility/ConsultationDetails";
 import TreatmentSummary from "../../Components/Facility/TreatmentSummary";
 import ConsultationDoctorNotes from "../../Components/Facility/ConsultationDoctorNotes";
+import Error404 from "../../Components/ErrorPages/404";
 
 export default {
   "/facility/:facilityId/patient/:patientId/consultation": ({
@@ -21,6 +22,9 @@ export default {
     id,
   }: any) => (
     <ConsultationForm facilityId={facilityId} patientId={patientId} id={id} />
+  ),
+  "/facility/:facilityId/patient/:patientId/consultation/:id/edit": () => (
+    <Error404 />
   ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/files/": ({
     facilityId,
