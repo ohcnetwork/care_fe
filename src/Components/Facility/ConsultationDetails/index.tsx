@@ -40,6 +40,9 @@ import { AssetBedModel } from "../../Assets/AssetTypes";
 import PatientInfoCard from "../../Patient/PatientInfoCard";
 import RelativeDateUserMention from "../../Common/RelativeDateUserMention";
 import DiagnosesListAccordion from "../../Diagnosis/DiagnosesListAccordion";
+import { AbhaNumberModel } from "../../ABDM/types/abha";
+import routes from "../../../Redux/api";
+import request from "../../../Utils/request/request";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
@@ -82,6 +85,7 @@ export const ConsultationDetails = (props: any) => {
     {} as ConsultationModel
   );
   const [patientData, setPatientData] = useState<PatientModel>({});
+  const [abhaNumberData, setAbhaNumberData] = useState<AbhaNumberModel>();
   const [activeShiftingData, setActiveShiftingData] = useState<Array<any>>([]);
   const [isCameraAttached, setIsCameraAttached] = useState(false);
 
@@ -142,6 +146,8 @@ export const ConsultationDetails = (props: any) => {
                 })
               : false;
           setIsCameraAttached(isCameraAttachedRes);
+
+          // Get patient data
           const id = res.data.patient;
           const patientRes = await dispatch(getPatient({ id }));
           if (patientRes?.data) {
@@ -163,6 +169,12 @@ export const ConsultationDetails = (props: any) => {
 
             setPatientData(data);
           }
+
+          // Get abha number data
+          const { data: abhaNumberData } = await request(routes.getAbhaNumber, {
+            pathParams: { abhaNumberId: id ?? "" },
+          });
+          setAbhaNumberData(abhaNumberData);
 
           // Get shifting data
           const shiftingRes = await dispatch(
@@ -342,6 +354,7 @@ export const ConsultationDetails = (props: any) => {
           <div className="size-full rounded-lg border bg-white text-black shadow">
             <PatientInfoCard
               patient={patientData}
+              abhaNumber={abhaNumberData}
               consultation={consultationData}
               fetchPatientData={fetchData}
               consultationId={consultationId}

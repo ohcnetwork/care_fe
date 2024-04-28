@@ -2,7 +2,6 @@ import * as Notification from "../../Utils/Notifications.js";
 
 import ButtonV2 from "../Common/components/ButtonV2";
 import DialogModal from "../Common/Dialog";
-import { PatientModel } from "../Patient/models";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
@@ -22,17 +21,18 @@ import { useMessageListener } from "../../Common/hooks/useMessageListener.js";
 import CircularProgress from "../Common/components/CircularProgress.js";
 import CareIcon from "../../CAREUI/icons/CareIcon.js";
 import { classNames } from "../../Utils/utils.js";
+import { AbhaNumberModel } from "./types/abha.js";
 
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
 
 interface IProps {
-  patient: PatientModel;
+  abha?: AbhaNumberModel;
   show: boolean;
   onClose: () => void;
 }
 
-export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
+export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
   const [idVerificationStatus, setIdVerificationStatus] = useState<
     "pending" | "in-progress" | "verified" | "failed"
   >("pending");
@@ -52,9 +52,7 @@ export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
 
   useMessageListener((data) => {
     if (data.type === "MESSAGE" && data.from === "patients/on_find") {
-      if (
-        data.message?.patient?.id === patient?.abha_number_object?.health_id
-      ) {
+      if (data.message?.patient?.id === abha?.health_id) {
         setIdVerificationStatus("verified");
         setErrors({
           ...errors,
@@ -68,7 +66,7 @@ export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
     <DialogModal title="Fetch Records over ABDM" show={show} onClose={onClose}>
       <div className="flex items-center gap-3">
         <TextFormField
-          value={patient?.abha_number_object?.health_id as string}
+          value={abha?.health_id as string}
           onChange={() => null}
           disabled
           label="Patient Identifier"
@@ -81,7 +79,7 @@ export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
           onClick={async () => {
             const { res } = await request(routes.findPatient, {
               body: {
-                id: patient?.abha_number_object?.health_id,
+                id: abha?.health_id,
               },
               reattempts: 0,
             });
@@ -192,7 +190,7 @@ export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
             setIsMakingConsentRequest(true);
             const res = await dispatch(
               consentActions.create({
-                patient_abha: patient?.abha_number_object?.health_id as string,
+                patient_abha: abha?.health_id as string,
                 hi_types: hiTypes,
                 purpose,
                 from_time: fromDate,
@@ -207,8 +205,8 @@ export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
               });
 
               navigate(
-                `/facility/${patient.facility}/abdm` ??
-                  `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/abdm`
+                `/facility/${abha?.patient_object?.facility}/abdm` ??
+                  `/facility/${abha?.patient_object?.facility}/patient/${abha?.patient_object?.id}/consultation/${abha?.patient_object?.last_consultation?.id}/abdm`
               );
             } else {
               Notification.Error({

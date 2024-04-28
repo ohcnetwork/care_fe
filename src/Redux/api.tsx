@@ -104,6 +104,7 @@ import { Investigation } from "../Components/Facility/Investigations/Reports/typ
 import { HCXPolicyModel } from "../Components/HCX/models";
 import { IComment, IResource } from "../Components/Resource/models";
 import { IShift } from "../Components/Shifting/models";
+import { AbhaNumberModel } from "../Components/ABDM/types/abha";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -1443,6 +1444,12 @@ const routes = {
     method: "POST",
     TRes: Type<unknown>(),
     TBody: Type<{ id: string }>(),
+  },
+
+  getAbhaNumber: {
+    path: "/api/v1/abdm/abha_numbers/{abhaNumberId}/",
+    method: "GET",
+    TRes: Type<AbhaNumberModel>(),
   },
 
   // Prescription endpoints
