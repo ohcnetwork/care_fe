@@ -119,7 +119,7 @@ const AssetsList = () => {
         if (data?.results.length === 0) {
           setIsLoading(false);
           Notification.Error({
-            msg: "You are not authorized to view this asset",
+            msg: "Asset not found !!!",
           });
         } else {
           return data?.results[0].id;
