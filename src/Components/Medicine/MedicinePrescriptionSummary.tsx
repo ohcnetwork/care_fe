@@ -126,7 +126,7 @@ export default function ConsultationMedicineLogs({
   const getDetailsMessage = (prescription: Prescription) => {
     const message = `Details: ${
       prescription.base_dosage != null
-        ? `Base Dosage: ${prescription.base_dosage} mg, `
+        ? `Base Dosage: ${prescription.base_dosage}, `
         : ""
     }${prescription.route != null ? `Route: ${prescription.route}, ` : ""}${
       prescription.dosage_type != null
@@ -134,7 +134,7 @@ export default function ConsultationMedicineLogs({
         : ""
     }${
       prescription.target_dosage != null
-        ? `Target Dosage: ${prescription.target_dosage} mg, `
+        ? `Target Dosage: ${prescription.target_dosage}, `
         : ""
     }${
       prescription.instruction_on_titration != null
@@ -150,13 +150,16 @@ export default function ConsultationMedicineLogs({
         : ""
     }${
       prescription.max_dosage != null
-        ? `Max Dosage: ${prescription.max_dosage} mg, `
+        ? `Max Dosage: ${prescription.max_dosage}, `
         : ""
     }${
       prescription.min_hours_between_doses != null
         ? `Min Hours Between Doses: ${prescription.min_hours_between_doses}, `
         : ""
-    }`.replace(/, $/, "");
+    }${prescription.discontinued ? "Discontinued: Yes, " : ""}`.replace(
+      /, $/,
+      "",
+    );
 
     return message;
   };
@@ -183,7 +186,7 @@ export default function ConsultationMedicineLogs({
       // Check for changes in base dosage
       if (prevPrescription.base_dosage !== currentPrescription.base_dosage) {
         changesForPrescription.push(
-          `Base dosage changed to ${currentPrescription.base_dosage} mg from ${prevPrescription.base_dosage} mg`,
+          `Base dosage changed to ${currentPrescription.base_dosage} from ${prevPrescription.base_dosage}`,
         );
       }
 
@@ -276,6 +279,11 @@ export default function ConsultationMedicineLogs({
             currentPrescription.min_hours_between_doses ?? "Not specified"
           } from ${prevPrescription.min_hours_between_doses ?? "Not specified"}`,
         );
+      }
+
+      // Check if discontinued
+      if (currentPrescription.discontinued && !prevPrescription.discontinued) {
+        changesForPrescription.push("Prescription was discontinued");
       }
 
       // If there are changes, add them to the changes array
