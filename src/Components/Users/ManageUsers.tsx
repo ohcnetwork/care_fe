@@ -14,12 +14,7 @@ import routes from "../../Redux/api.js";
 import * as Notification from "../../Utils/Notifications.js";
 import request from "../../Utils/request/request.js";
 import useQuery from "../../Utils/request/useQuery.js";
-import {
-  classNames,
-  isUserOnline,
-  relativeTime,
-  showUserDelete,
-} from "../../Utils/utils";
+import { classNames, isUserOnline, relativeTime } from "../../Utils/utils";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import Pagination from "../Common/Pagination";
 import UserDetails from "../Common/UserDetails";
@@ -35,6 +30,7 @@ import SkillsSlideOver from "./SkillsSlideOver";
 import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
 import UserFilter from "./UserFilter";
+import { showUserDelete } from "../../Utils/permissions";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -75,6 +71,11 @@ export default function ManageUsers() {
   const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen = width <= extremeSmallScreenBreakpoint;
 
+  const { data: homeFacilityData } = useQuery(routes.getAnyFacility, {
+    pathParams: { id: qParams.home_facility },
+    prefetch: !!qParams.home_facility,
+  });
+
   const {
     data: userListData,
     loading: userListLoading,
@@ -92,6 +93,7 @@ export default function ManageUsers() {
       alt_phone_number: qParams.alt_phone_number,
       user_type: qParams.user_type,
       district_id: qParams.district,
+      home_facility: qParams.home_facility,
     },
   });
 
@@ -546,6 +548,11 @@ export default function ManageUsers() {
               "district",
               qParams.district ? districtData?.name || "" : "",
             ),
+            value(
+              "Home Facility",
+              "home_facility",
+              qParams.home_facility ? homeFacilityData?.name || "" : "",
+            ),
           ]}
         />
       </div>
@@ -564,7 +571,7 @@ export default function ManageUsers() {
   );
 }
 
-function UserFacilities(props: { user: any }) {
+export function UserFacilities(props: { user: any }) {
   const { t } = useTranslation();
   const { user } = props;
   const username = user.username;

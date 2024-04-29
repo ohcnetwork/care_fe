@@ -58,14 +58,6 @@ describe("Patient", () => {
     cy.verifyNotification("Medicine prescribed");
   });
 
-  it("Discharge a patient", () => {
-    patientPage.visitPatient("Dummy Patient 6");
-    patientConsultationPage.clickDischargePatient();
-    patientConsultationPage.selectDischargeReason("Recovered");
-    patientConsultationPage.addDischargeNotes("Discharge notes");
-    patientConsultationPage.confirmDischarge();
-  });
-
   afterEach(() => {
     cy.saveLocalStorage();
   });

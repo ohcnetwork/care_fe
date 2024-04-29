@@ -46,6 +46,7 @@ import { PatientModel, Occupation } from "./models";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import AutocompleteFormField from "../Form/FormFields/Autocomplete.js";
 import Spinner from "../Common/Spinner";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -81,7 +82,7 @@ const medicalHistoryChoices = MEDICAL_HISTORY_CHOICES.reduce(
     ...acc,
     { [`medical_history_${cur.id}`]: "" },
   ],
-  []
+  [],
 );
 const genderTypes = GENDER_TYPES;
 const diseaseStatus = [...DISEASE_STATUS];
@@ -146,7 +147,7 @@ const initForm: any = {
 
 const initError = Object.assign(
   {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
 );
 
 const initialState = {
@@ -174,7 +175,7 @@ const patientFormReducer = (state = initialState, action: any) => {
 };
 export const parseOccupationFromExt = (occupation: Occupation) => {
   const occupationObject = OCCUPATION_TYPES.find(
-    (item) => item.value === occupation
+    (item) => item.value === occupation,
   );
   return occupationObject?.id;
 };
@@ -219,7 +220,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const [showLinkAbhaNumberModal, setShowLinkAbhaNumberModal] = useState(false);
   const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
   const [insuranceDetails, setInsuranceDetails] = useState<HCXPolicyModel[]>(
-    []
+    [],
   );
   const [insuranceDetailsError, setInsuranceDetailsError] =
     useState<FieldError>();
@@ -471,14 +472,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               const medicalHistory = MEDICAL_HISTORY_CHOICES.find(
                 (j) =>
                   String(j.text).toLowerCase() ===
-                  String(i.disease).toLowerCase()
+                  String(i.disease).toLowerCase(),
               );
               if (medicalHistory) {
                 formData.medical_history.push(Number(medicalHistory.id));
                 (formData as any)[`medical_history_${medicalHistory.id}`] =
                   i.details;
               }
-            }
+            },
           );
           dispatch({
             type: "set_form",
@@ -495,7 +496,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         setIsLoading(false);
       }
     },
-    [id]
+    [id],
   );
 
   useQuery(routes.listHCXPolicies, {
@@ -513,7 +514,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   });
 
   const { data: stateData, loading: isStateLoading } = useQuery(
-    routes.statesList
+    routes.statesList,
   );
 
   useAbortableEffect(
@@ -522,7 +523,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         fetchData(status);
       }
     },
-    [dispatch, fetchData]
+    [dispatch, fetchData],
   );
 
   const { data: facilityObject } = useQuery(routes.getAnyFacility, {
@@ -805,16 +806,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       permanent_address: formData.sameAddress
         ? formData.address
         : formData.permanent_address
-        ? formData.permanent_address
-        : undefined,
+          ? formData.permanent_address
+          : undefined,
       present_health: formData.present_health
         ? formData.present_health
         : undefined,
       contact_with_confirmed_carrier: JSON.parse(
-        formData.contact_with_confirmed_carrier
+        formData.contact_with_confirmed_carrier,
       ),
       contact_with_suspected_carrier: JSON.parse(
-        formData.contact_with_suspected_carrier
+        formData.contact_with_suspected_carrier,
       ),
       estimated_contact_date:
         (JSON.parse(formData.contact_with_confirmed_carrier) ||
@@ -833,7 +834,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         ? Number(formData.number_of_primary_contacts)
         : undefined,
       number_of_secondary_contacts: Number(
-        formData.number_of_secondary_contacts
+        formData.number_of_secondary_contacts,
       )
         ? Number(formData.number_of_secondary_contacts)
         : undefined,
@@ -887,7 +888,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               },
             });
           }
-        })
+        }),
       );
 
       dispatch({ type: "set_form", form: initForm });
@@ -898,7 +899,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           title: "Patient Added Successfully",
         });
         navigate(
-          `/facility/${facilityId}/patient/${requestData.id}/consultation`
+          `/facility/${facilityId}/patient/${requestData.id}/consultation`,
         );
       } else {
         Notification.Success({
@@ -925,7 +926,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         pincode,
       },
     }: any,
-    field: any
+    field: any,
   ) => {
     const values: any = {};
     if (id) values["abha_number"] = id;
@@ -1008,7 +1009,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         const duplicateList = !id
           ? data.results
           : data.results.filter(
-              (item: DupPatientModel) => item.patient_id !== id
+              (item: DupPatientModel) => item.patient_id !== id,
             );
         if (duplicateList.length) {
           setStatusDialog({
@@ -1231,7 +1232,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               onSuccess={(data: any) => {
                                 if (id) {
                                   navigate(
-                                    `/facility/${facilityId}/patient/${id}`
+                                    `/facility/${facilityId}/patient/${id}`,
                                   );
                                   return;
                                 }
@@ -1382,16 +1383,21 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                       {...field("age")}
                                       errorClassName="hidden"
                                       trailing={
-                                        <p className="absolute right-16 text-xs text-gray-700 sm:text-sm">
-                                          <p className="hidden  sm:inline min-[768px]:hidden lg:inline">
-                                            {field("age").value !== "" &&
-                                              "Year_of_Birth:"}
-                                          </p>
-                                          <span className="font-bold">
-                                            {field("age").value !== "" &&
-                                              new Date().getFullYear() -
-                                                field("age").value}
-                                          </span>
+                                        <p className="relative right-4 space-x-1 text-xs text-gray-700 sm:right-14 sm:text-sm md:right-4 lg:right-14">
+                                          {field("age").value !== "" && (
+                                            <>
+                                              <span className="hidden sm:inline md:hidden lg:inline">
+                                                Year of Birth:
+                                              </span>
+                                              <span className="inline sm:hidden md:inline lg:hidden">
+                                                YOB:
+                                              </span>
+                                              <span className="font-bold">
+                                                {new Date().getFullYear() -
+                                                  field("age").value}
+                                              </span>
+                                            </>
+                                          )}
                                         </p>
                                       }
                                       placeholder="Enter the age"
@@ -1505,7 +1511,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 field("pincode").onChange(e);
                                 handlePincodeChange(
                                   e,
-                                  field("pincode").onChange
+                                  field("pincode").onChange,
                                 );
                               }}
                             />
@@ -1673,7 +1679,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   />
                                 )}
                               </div>
-                              <SelectFormField
+                              <AutocompleteFormField
                                 {...field("occupation")}
                                 label="Occupation"
                                 placeholder="Select Occupation"
@@ -1807,11 +1813,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 opened={
                                   JSON.parse(
                                     field("contact_with_confirmed_carrier")
-                                      .value ?? "{}"
+                                      .value ?? "{}",
                                   ) ||
                                   JSON.parse(
                                     field("contact_with_suspected_carrier")
-                                      .value ?? "{}"
+                                      .value ?? "{}",
                                   )
                                 }
                               >
@@ -1885,7 +1891,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 <CollapseV2
                                   opened={
                                     String(
-                                      field("is_declared_positive").value
+                                      field("is_declared_positive").value,
                                     ) === "true"
                                   }
                                   className="mt-4"
@@ -1979,7 +1985,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 return renderMedicalHistory(
                                   i.id as number,
                                   i.text,
-                                  field
+                                  field,
                                 );
                               })}
                             </div>

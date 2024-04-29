@@ -18,7 +18,7 @@ import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import { LocationSelect } from "../Common/LocationSelect";
 import Page from "../Common/components/Page";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import QrReader from "react-qr-reader";
+import { Scanner } from "@yudiel/react-qr-scanner";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import SwitchV2 from "../Common/components/Switch";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
@@ -61,7 +61,7 @@ const initError = formErrorKeys.reduce(
     acc[key] = "";
     return acc;
   },
-  {}
+  {},
 );
 
 const fieldRef = formErrorKeys.reduce(
@@ -69,7 +69,7 @@ const fieldRef = formErrorKeys.reduce(
     acc[key] = createRef();
     return acc;
   },
-  {}
+  {},
 );
 
 const initialState = {
@@ -418,15 +418,16 @@ const AssetCreate = (props: AssetProps) => {
           <CareIcon icon="l-times" className="mr-2 text-lg" />
           {t("close_scanner")}
         </button>
-        <QrReader
-          delay={300}
-          onScan={(assetId: any) => (assetId ? parseAssetId(assetId) : null)}
-          onError={(e: any) =>
+        <Scanner
+          onResult={(assetId) => (assetId ? parseAssetId(assetId) : null)}
+          onError={(e) =>
             Notification.Error({
               msg: e.message,
             })
           }
-          style={{ width: "100%" }}
+          options={{
+            delayBetweenScanAttempts: 300,
+          }}
         />
         <h2 className="self-center text-center text-lg">
           {t("scan_asset_qr")}
@@ -840,7 +841,7 @@ const AssetCreate = (props: AssetProps) => {
                             });
                           } else {
                             setLastServicedOn(
-                              dayjs(date.value).format("YYYY-MM-DD")
+                              dayjs(date.value).format("YYYY-MM-DD"),
                             );
                           }
                         }}
@@ -860,7 +861,7 @@ const AssetCreate = (props: AssetProps) => {
                         name="notes"
                         label={t("notes")}
                         placeholder={t(
-                          "Eg. Details on functionality, service, etc."
+                          "Eg. Details on functionality, service, etc.",
                         )}
                         value={notes}
                         onChange={(e) => setNotes(e.value)}
@@ -875,7 +876,7 @@ const AssetCreate = (props: AssetProps) => {
                         navigate(
                           assetId
                             ? `/facility/${facilityId}/assets/${assetId}`
-                            : `/facility/${facilityId}`
+                            : `/facility/${facilityId}`,
                         )
                       }
                     />

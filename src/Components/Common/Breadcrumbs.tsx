@@ -21,7 +21,7 @@ const capitalize = (string: string) => {
     .split(" ")
     .reduce(
       (acc, word) => acc + (word[0]?.toUpperCase() || "") + word.slice(1) + " ",
-      ""
+      "",
     )
     .trim();
 };
@@ -108,7 +108,7 @@ export default function Breadcrumbs(props: any) {
                   key={crumb.name}
                   className={classNames(
                     "cursor-pointer text-sm font-medium text-gray-500 hover:text-gray-700",
-                    crumb.style
+                    crumb.style,
                   )}
                 >
                   <div className="flex items-center">

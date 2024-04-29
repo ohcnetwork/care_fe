@@ -1,4 +1,4 @@
-import QrReader from "react-qr-reader";
+import { Scanner } from "@yudiel/react-qr-scanner";
 import * as Notification from "../../Utils/Notifications.js";
 import { listAssets } from "../../Redux/actions";
 import { assetClassProps, AssetData } from "./AssetTypes";
@@ -125,12 +125,12 @@ const AssetsList = () => {
 
   const checkValidAssetId = async (assetId: string) => {
     const { data: assetData } = await request(routes.getAsset, {
-      pathParams: { id: assetId },
+      pathParams: { external_id: assetId },
     });
     try {
       if (assetData) {
         navigate(
-          `/facility/${assetData.location_object.facility?.id}/assets/${assetId}`
+          `/facility/${assetData.location_object.facility?.id}/assets/${assetId}`,
         );
       }
     } catch (err) {
@@ -143,7 +143,7 @@ const AssetsList = () => {
   };
 
   const authorizedForImportExport = useIsAuthorized(
-    AuthorizeFor(["DistrictAdmin", "StateAdmin"])
+    AuthorizeFor(["DistrictAdmin", "StateAdmin"]),
   );
 
   if (isScannerActive)
@@ -156,20 +156,21 @@ const AssetsList = () => {
           <CareIcon icon="l-times" className="mr-1 text-lg" />
           Close Scanner
         </button>
-        <QrReader
-          delay={300}
-          onScan={async (value: string | null) => {
-            if (value) {
-              const assetId = await getAssetIdFromQR(value);
-              checkValidAssetId(assetId ?? value);
+        <Scanner
+          onResult={async (text) => {
+            if (text) {
+              const assetId = await getAssetIdFromQR(text);
+              checkValidAssetId(assetId ?? text);
             }
           }}
-          onError={(e) =>
+          onError={(e) => {
             Notification.Error({
               msg: e.message,
-            })
-          }
-          style={{ width: "100%" }}
+            });
+          }}
+          options={{
+            delayBetweenScanAttempts: 300,
+          }}
         />
         <h2 className="self-center text-center text-lg">Scan Asset QR!</h2>
       </div>
@@ -390,7 +391,7 @@ const AssetsList = () => {
               value(
                 "Facility",
                 "facility",
-                qParams.facility && facilityObject?.name
+                qParams.facility && facilityObject?.name,
               ),
               badge("Name/Serial No./QR ID", "search"),
               value("Asset Class", "asset_class", asset_class ?? ""),
@@ -398,17 +399,17 @@ const AssetsList = () => {
               value(
                 "Location",
                 "location",
-                qParams.location && locationObject?.name
+                qParams.location && locationObject?.name,
               ),
               value(
                 "Warranty AMC End Of Validity Before",
                 "warranty_amc_end_of_validity_before",
-                qParams.warranty_amc_end_of_validity_before ?? ""
+                qParams.warranty_amc_end_of_validity_before ?? "",
               ),
               value(
                 "Warranty AMC End Of Validity After",
                 "warranty_amc_end_of_validity_after",
-                qParams.warranty_amc_end_of_validity_after ?? ""
+                qParams.warranty_amc_end_of_validity_after ?? "",
               ),
             ]}
           />
@@ -468,7 +469,7 @@ const AssetsList = () => {
 };
 
 export const warrantyAmcValidityChip = (
-  warranty_amc_end_of_validity: string
+  warranty_amc_end_of_validity: string,
 ) => {
   if (warranty_amc_end_of_validity === "" || !warranty_amc_end_of_validity)
     return;
@@ -476,7 +477,8 @@ export const warrantyAmcValidityChip = (
   const warrantyAmcEndDate = new Date(warranty_amc_end_of_validity);
 
   const days = Math.ceil(
-    Math.abs(Number(warrantyAmcEndDate) - Number(today)) / (1000 * 60 * 60 * 24)
+    Math.abs(Number(warrantyAmcEndDate) - Number(today)) /
+      (1000 * 60 * 60 * 24),
   );
 
   if (warrantyAmcEndDate < today) {

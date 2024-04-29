@@ -32,7 +32,7 @@ export default function MedicineAdministration(props: Props) {
   const [shouldAdminister, setShouldAdminister] = useState<boolean[]>([]);
   const [dosages, setDosages] = useState<DosageField[]>([]);
   const [notes, setNotes] = useState<MedicineAdministrationRecord["notes"][]>(
-    []
+    [],
   );
   const [isCustomTime, setIsCustomTime] = useState<boolean[]>([]);
   const [customTime, setCustomTime] = useState<string[]>([]);
@@ -40,9 +40,9 @@ export default function MedicineAdministration(props: Props) {
   const prescriptions = useMemo(
     () =>
       props.prescriptions.filter(
-        (obj) => !obj.discontinued && obj.prescription_type !== "DISCHARGE"
+        (obj) => !obj.discontinued && obj.prescription_type !== "DISCHARGE",
       ),
-    [props.prescriptions]
+    [props.prescriptions],
   );
 
   useEffect(() => {
@@ -51,7 +51,7 @@ export default function MedicineAdministration(props: Props) {
     setNotes(Array(prescriptions.length).fill(""));
     setIsCustomTime(Array(prescriptions.length).fill(false));
     setCustomTime(
-      Array(prescriptions.length).fill(dayjs().format("YYYY-MM-DDTHH:mm"))
+      Array(prescriptions.length).fill(dayjs().format("YYYY-MM-DDTHH:mm")),
     );
   }, [props.prescriptions]);
 
@@ -63,7 +63,7 @@ export default function MedicineAdministration(props: Props) {
         if (prescriptions[i].dosage_type === "TITRATED") {
           const error = AdministrationDosageValidator(
             prescriptions[i].base_dosage,
-            prescriptions[i].target_dosage
+            prescriptions[i].target_dosage,
           )(dosages[i].dosage);
           setDosages((dosages) => {
             const newDosages = [...dosages];
@@ -87,8 +87,8 @@ export default function MedicineAdministration(props: Props) {
         request(MedicineRoutes.administerPrescription, {
           pathParams: { consultation, external_id: prescription.id },
           body,
-        }).then(({ res }) => !!res?.ok)
-      )
+        }).then(({ res }) => !!res?.ok),
+      ),
     );
 
     if (!ok) {
