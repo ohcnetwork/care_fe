@@ -91,7 +91,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
       const newFile = new File([f], `${internal_name}`, { type: f.type });
       const config = {
         headers: {
-          "Content-type": newFile?.type,
+          "Content-type": newFile?.type?.split(";")?.[0],
           "Content-disposition": "inline",
         },
       };
@@ -120,7 +120,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
           name: filename,
           associating_id: associatingId,
           file_category: category,
-          mime_type: audioBlob?.type.split(";")[0],
+          mime_type: audioBlob?.type?.split(";")?.[0],
         },
       })
         .then((response) => {

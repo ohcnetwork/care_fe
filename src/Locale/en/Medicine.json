@@ -2,6 +2,7 @@
   "medicine": "Medicine",
   "route": "Route",
   "dosage": "Dosage",
+  "base_dosage": "Dosage",
   "start_dosage": "Start Dosage",
   "target_dosage": "Target Dosage",
   "instruction_on_titration": "Instruction on titration",
