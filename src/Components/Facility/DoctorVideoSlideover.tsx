@@ -20,9 +20,17 @@ const UserGroups = {
 };
 
 const courtesyTitle = (user: UserAssignedModel) => {
-  /* TODO: Discuss courtesy title for gender number 2 appropirately */
-  const genderSalutation =
-    user.gender === 0 ? "Mr" : user.gender === 1 ? "Ms" : "Hey";
+  let genderSalutation;
+  switch (user.gender) {
+    case 0:
+      genderSalutation = "Mr";
+      break;
+    case 1:
+      genderSalutation = "Ms";
+      break;
+    default:
+      genderSalutation = "Hey";
+  }
   return user.user_type === "Doctor" ? "Dr" : genderSalutation;
 };
 
