@@ -95,7 +95,7 @@ export class PatientPage {
   }
 
   selectPatientOccupation(occupation: string) {
-    cy.clickAndSelectOption("#occupation", occupation);
+    cy.searchAndSelectOption("#occupation", occupation);
   }
 
   clickCreatePatient() {
