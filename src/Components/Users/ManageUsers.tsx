@@ -761,8 +761,8 @@ export function UserFacilities(props: { user: any }) {
           {/* Home Facility section */}
           {user?.home_facility_object && (
             <div className="py-2" id="home-facility">
-              <div className="relative rounded px-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg">
-                <div className="flex items-center justify-between">
+              <div className="relative rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg">
+                <div className="flex items-center justify-between gap-2">
                   <div className="flex content-center items-center justify-center gap-2">
                     <span>{user?.home_facility_object?.name}</span>{" "}
                     <span
