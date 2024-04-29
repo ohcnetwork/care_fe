@@ -109,7 +109,7 @@ export default function ManageUsers() {
     {
       prefetch: !!qParams.district,
       pathParams: { id: qParams.district },
-    }
+    },
   );
 
   const addUser = (
@@ -223,7 +223,7 @@ export default function ManageUsers() {
                           aria-label="Online"
                           className={classNames(
                             "inline-block h-2 w-2 shrink-0 rounded-full",
-                            cur_online ? "bg-primary-400" : "bg-gray-300"
+                            cur_online ? "bg-primary-400" : "bg-gray-300",
                           )}
                         ></span>
                         <span className="pl-2">
@@ -301,7 +301,7 @@ export default function ManageUsers() {
                               {dayjs().diff(
                                 user.doctor_experience_commenced_on,
                                 "years",
-                                false
+                                false,
                               )}{" "}
                               years
                             </span>
@@ -408,7 +408,7 @@ export default function ManageUsers() {
                     </ButtonV2>
                   </div>
                   {["DistrictAdmin", "StateAdmin"].includes(
-                    authUser.user_type
+                    authUser.user_type,
                   ) && (
                     <div className="flex-col md:flex-row">
                       <ButtonV2
@@ -544,7 +544,7 @@ export default function ManageUsers() {
             value(
               "District",
               "district",
-              qParams.district ? districtData?.name || "" : ""
+              qParams.district ? districtData?.name || "" : "",
             ),
           ]}
         />
@@ -580,6 +580,7 @@ function UserFacilities(props: { user: any }) {
     facility?: FacilityModel;
     isHomeFacility: boolean;
   }>({ show: false, userName: "", facility: undefined, isHomeFacility: false });
+  const authUser = useAuthUser();
 
   const [replaceHomeFacility, setReplaceHomeFacility] = useState<{
     show: boolean;
@@ -757,24 +758,28 @@ function UserFacilities(props: { user: any }) {
               <div className="relative rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg">
                 <div className="flex items-center justify-between">
                   <span>{user?.home_facility_object?.name}</span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      className="tooltip text-lg text-red-600"
-                      onClick={() =>
-                        setUnlinkFacilityData({
-                          show: true,
-                          facility: user?.home_facility_object,
-                          userName: username,
-                          isHomeFacility: true,
-                        })
-                      }
-                    >
-                      <CareIcon icon="l-link-broken" />
-                      <span className="tooltip-text tooltip-left">
-                        {t("clear_home_facility")}
-                      </span>
-                    </button>
-                  </div>
+                  {["DistrictAdmin", "StateAdmin"].includes(
+                    authUser.user_type,
+                  ) && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        className="tooltip text-lg text-red-600"
+                        onClick={() =>
+                          setUnlinkFacilityData({
+                            show: true,
+                            facility: user?.home_facility_object,
+                            userName: username,
+                            isHomeFacility: true,
+                          })
+                        }
+                      >
+                        <CareIcon icon="l-link-broken" />
+                        <span className="tooltip-text tooltip-left">
+                          {t("clear_home_facility")}
+                        </span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
               <hr className="my-2 border-gray-300" />
@@ -799,7 +804,7 @@ function UserFacilities(props: { user: any }) {
                         id={`facility_${i}`}
                         key={`facility_${i}`}
                         className={classNames(
-                          "relative rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg"
+                          "relative rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg",
                         )}
                       >
                         <div className="flex items-center justify-between">
@@ -809,18 +814,28 @@ function UserFacilities(props: { user: any }) {
                               className="tooltip text-lg hover:text-primary-500"
                               id="home-facility-icon"
                               onClick={() => {
-                                if (user?.home_facility_object) {
-                                  // has previous home facility
-                                  setReplaceHomeFacility({
-                                    show: true,
-                                    userName: username,
-                                    previousFacility:
-                                      user?.home_facility_object,
-                                    newFacility: facility,
-                                  });
+                                if (
+                                  ["DistrictAdmin", "StateAdmin"].includes(
+                                    authUser.user_type,
+                                  )
+                                ) {
+                                  if (user?.home_facility_object) {
+                                    // has previous home facility
+                                    setReplaceHomeFacility({
+                                      show: true,
+                                      userName: username,
+                                      previousFacility:
+                                        user?.home_facility_object,
+                                      newFacility: facility,
+                                    });
+                                  } else {
+                                    // no previous home facility
+                                    updateHomeFacility(username, facility);
+                                  }
                                 } else {
-                                  // no previous home facility
-                                  updateHomeFacility(username, facility);
+                                  Notification.Error({
+                                    msg: "You don't have permission to perform this action. Please contact the admin",
+                                  });
                                 }
                               }}
                             >
@@ -832,14 +847,24 @@ function UserFacilities(props: { user: any }) {
                             <button
                               id="unlink-facility-button"
                               className="tooltip text-lg text-red-600"
-                              onClick={() =>
-                                setUnlinkFacilityData({
-                                  show: true,
-                                  facility: facility,
-                                  userName: username,
-                                  isHomeFacility: false,
-                                })
-                              }
+                              onClick={() => {
+                                if (
+                                  ["DistrictAdmin", "StateAdmin"].includes(
+                                    authUser.user_type,
+                                  )
+                                ) {
+                                  setUnlinkFacilityData({
+                                    show: true,
+                                    facility: facility,
+                                    userName: username,
+                                    isHomeFacility: false,
+                                  });
+                                } else {
+                                  Notification.Error({
+                                    msg: "You don't have permission to perform this action. Please contact the admin",
+                                  });
+                                }
+                              }}
                             >
                               <CareIcon icon="l-link-broken" />
                               <span className="tooltip-text tooltip-left">
@@ -850,7 +875,7 @@ function UserFacilities(props: { user: any }) {
                         </div>
                       </div>
                     );
-                  }
+                  },
                 )}
               </div>
               {totalCount > limit && (
@@ -892,7 +917,7 @@ function UserFacilities(props: { user: any }) {
           handleOk={() => {
             updateHomeFacility(
               replaceHomeFacility.userName,
-              replaceHomeFacility.newFacility
+              replaceHomeFacility.newFacility,
             );
             setReplaceHomeFacility({
               show: false,
