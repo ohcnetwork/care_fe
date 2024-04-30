@@ -25,6 +25,7 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import DateFormField from "../Form/FormFields/DateFormField";
+import { validateRule } from "./UserAdd";
 const Loading = lazy(() => import("../Common/Loading"));
 
 type EditForm = {
@@ -130,7 +131,7 @@ export default function UserProfile() {
     new_password_2: "",
   });
 
-  const [changePasswordErrors, setChangePasswordErrors] = useState<{
+  const [changePasswordErrors] = useState<{
     old_password: string;
     password_confirmation: string;
   }>({
@@ -139,6 +140,13 @@ export default function UserProfile() {
   });
 
   const [showEdit, setShowEdit] = useState<boolean | false>(false);
+  const [newPasswordInputInFocus, setNewPasswordInputInFocus] =
+    useState<boolean>(false);
+
+  const [
+    newConfirmedPasswordInputInFocus,
+    setNewConfirmedPasswordInputInFocus,
+  ] = useState<boolean>(false);
 
   const {
     data: userData,
@@ -181,25 +189,15 @@ export default function UserProfile() {
   );
 
   const validateNewPassword = (password: string) => {
-    const errors = [];
-
-    if (password.length < 8) {
-      errors.push("Password should be at least 8 characters long");
+    if (
+      password.length < 8 ||
+      !/\d/.test(password) ||
+      password === password.toUpperCase() ||
+      password === password.toLowerCase()
+    ) {
+      return false;
     }
-
-    if (password === password.toUpperCase()) {
-      errors.push("Password should contain at least 1 lowercase letter");
-    }
-
-    if (password === password.toLowerCase()) {
-      errors.push("Password should contain at least 1 uppercase letter");
-    }
-
-    if (!/\d/.test(password)) {
-      errors.push("Password should contain at least 1 number");
-    }
-
-    return errors.join("\n");
+    return true;
   };
 
   const validateForm = () => {
@@ -426,10 +424,7 @@ export default function UserProfile() {
       Notification.Error({
         msg: "Passwords are different in new password and confirmation password column.",
       });
-    } else if (
-      validateNewPassword(changePasswordForm.new_password_1).length ||
-      changePasswordErrors.password_confirmation !== ""
-    ) {
+    } else if (!validateNewPassword(changePasswordForm.new_password_1)) {
       Notification.Error({
         msg: "Entered New Password is not valid, please check!",
       });
@@ -807,48 +802,79 @@ export default function UserProfile() {
                           error={changePasswordErrors.old_password}
                           required
                         />
-                        <TextFormField
-                          name="new_password_1"
-                          label="New Password"
-                          type="password"
-                          value={changePasswordForm.new_password_1}
-                          className="col-span-6 sm:col-span-3"
-                          onChange={(e) => {
-                            setChangePasswordForm({
-                              ...changePasswordForm,
-                              new_password_1: e.value,
-                            });
-                          }}
-                          error={validateNewPassword(
-                            changePasswordForm.new_password_1,
+                        <div className="col-span-6 sm:col-span-3">
+                          <TextFormField
+                            name="new_password_1"
+                            label="New Password"
+                            type="password"
+                            value={changePasswordForm.new_password_1}
+                            className="col-span-6 sm:col-span-3"
+                            onChange={(e) => {
+                              setChangePasswordForm({
+                                ...changePasswordForm,
+                                new_password_1: e.value,
+                              });
+                            }}
+                            // error={validateNewPassword(
+                            //   changePasswordForm.new_password_1,
+                            // )}
+                            required
+                            onFocus={() => setNewPasswordInputInFocus(true)}
+                            onBlur={() => setNewPasswordInputInFocus(false)}
+                          />
+                          {newPasswordInputInFocus && (
+                            <div className="text-small mb-2 pl-2 text-gray-500">
+                              {validateRule(
+                                changePasswordForm.new_password_1?.length >= 8,
+                                "Password should be atleast 8 characters long",
+                              )}
+                              {validateRule(
+                                changePasswordForm.new_password_1 !==
+                                  changePasswordForm.new_password_1.toUpperCase(),
+                                "Password should contain at least 1 lowercase letter",
+                              )}
+                              {validateRule(
+                                changePasswordForm.new_password_1 !==
+                                  changePasswordForm.new_password_1.toLowerCase(),
+                                "Password should contain at least 1 uppercase letter",
+                              )}
+                              {validateRule(
+                                /\d/.test(changePasswordForm.new_password_1),
+                                "Password should contain at least 1 number",
+                              )}
+                            </div>
                           )}
-                          required
-                        />
-                        <TextFormField
-                          name="new_password_2"
-                          label="New Password Confirmation"
-                          className="col-span-6 sm:col-span-3"
-                          type="password"
-                          value={changePasswordForm.new_password_2}
-                          onChange={(e) => {
-                            setChangePasswordForm({
-                              ...changePasswordForm,
-                              new_password_2: e.value,
-                            });
-                            e.value === "" ||
-                            e.value === changePasswordForm.new_password_1
-                              ? setChangePasswordErrors((prev) => ({
-                                  ...prev,
-                                  password_confirmation: "",
-                                }))
-                              : setChangePasswordErrors((prev) => ({
-                                  ...prev,
-                                  password_confirmation:
-                                    "Confirm password should match the new password!",
-                                }));
-                          }}
-                          error={changePasswordErrors.password_confirmation}
-                        />
+                        </div>
+                        <div className="col-span-6 sm:col-span-3">
+                          <TextFormField
+                            name="new_password_2"
+                            label="New Password Confirmation"
+                            className="col-span-6 sm:col-span-3"
+                            type="password"
+                            value={changePasswordForm.new_password_2}
+                            onChange={(e) => {
+                              setChangePasswordForm({
+                                ...changePasswordForm,
+                                new_password_2: e.value,
+                              });
+                            }}
+                            onFocus={() =>
+                              setNewConfirmedPasswordInputInFocus(true)
+                            }
+                            onBlur={() =>
+                              setNewConfirmedPasswordInputInFocus(false)
+                            }
+                          />
+                          {newConfirmedPasswordInputInFocus && (
+                            <div className="text-small mb-2 pl-2 text-gray-500">
+                              {validateRule(
+                                changePasswordForm.new_password_1 ===
+                                  changePasswordForm.new_password_2,
+                                "Confirm password should match the new password",
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">

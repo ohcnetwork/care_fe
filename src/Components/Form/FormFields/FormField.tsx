@@ -71,18 +71,7 @@ const FormField = ({
         )}
       </div>
       <div className={field?.className}>{children}</div>
-      <ul>
-        {(typeof field?.error === "string"
-          ? field.error
-          : String(field?.error ?? "")
-        )
-          .split("\n")
-          .map((err, index) => (
-            <li key={index}>
-              <FieldErrorText error={err} className={field?.errorClassName} />
-            </li>
-          ))}
-      </ul>
+      <FieldErrorText error={field?.error} className={field?.errorClassName} />
     </div>
   );
 };
