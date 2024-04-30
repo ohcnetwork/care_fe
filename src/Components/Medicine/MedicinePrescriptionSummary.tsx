@@ -156,10 +156,11 @@ export default function ConsultationMedicineLogs({
       prescription.min_hours_between_doses != null
         ? `Min Hours Between Doses: ${prescription.min_hours_between_doses}, `
         : ""
-    }${prescription.discontinued ? "Discontinued: Yes, " : ""}`.replace(
-      /, $/,
-      "",
-    );
+    }${prescription.discontinued ? "Discontinued: Yes, " : ""}${
+      prescription.prescription_type
+        ? `Prescription Type: ${prescription.prescription_type}, `
+        : ""
+    }`.replace(/, $/, "");
 
     return message;
   };
@@ -284,6 +285,16 @@ export default function ConsultationMedicineLogs({
       // Check if discontinued
       if (currentPrescription.discontinued && !prevPrescription.discontinued) {
         changesForPrescription.push("Prescription was discontinued");
+      }
+
+      // Check if prescription type is changed
+      if (
+        prevPrescription.prescription_type !==
+        currentPrescription.prescription_type
+      ) {
+        changesForPrescription.push(
+          `Prescription Type changed from ${prevPrescription.prescription_type} to ${currentPrescription.prescription_type}`,
+        );
       }
 
       // If there are changes, add them to the changes array
