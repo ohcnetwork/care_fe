@@ -465,7 +465,7 @@ export default function ManageUsers() {
         open={expandFacilityList}
         setOpen={setExpandFacilityList}
         slideFrom="right"
-        title={t("facilities")}
+        title={t("linked_facilities")}
         dialogClass="md:w-[400px]"
       >
         <UserFacilities user={selectedUser} />
@@ -729,6 +729,7 @@ export function UserFacilities(props: { user: any }) {
           handleOk={handleUnlinkFacilitySubmit}
         />
       )}
+
       <div className="mb-4 flex items-stretch gap-2">
         <FacilitySelect
           multiple={false}
@@ -750,6 +751,8 @@ export function UserFacilities(props: { user: any }) {
           {t("add")}
         </ButtonV2>
       </div>
+      <hr className="my-2 border-gray-300" />
+
       {isLoading || userFacilitiesLoading ? (
         <div className="flex items-center justify-center">
           <CircularProgress />
@@ -758,10 +761,7 @@ export function UserFacilities(props: { user: any }) {
         <div className="flex flex-col">
           {/* Home Facility section */}
           {user?.home_facility_object && (
-            <div className="mt-2" id="home-facility">
-              <div className="mb-2 ml-2 text-lg font-bold">
-                {t("home_facility")}
-              </div>
+            <div className="py-2" id="home-facility">
               <div className="relative rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg">
                 <div className="flex items-center justify-between">
                   <span>{user?.home_facility_object?.name}</span>
@@ -789,16 +789,12 @@ export function UserFacilities(props: { user: any }) {
                   )}
                 </div>
               </div>
-              <hr className="my-2 border-gray-300" />
             </div>
           )}
 
           {/* Linked Facilities section */}
           {!!userFacilities?.results.length && (
-            <div className="mt-2" id="linked-facility-list">
-              <div className="mb-2 ml-2 text-lg font-bold">
-                {t("linked_facilities")}
-              </div>
+            <div id="linked-facility-list">
               <div className="flex flex-col">
                 {userFacilities.results.map(
                   (facility: FacilityModel, i: number) => {
