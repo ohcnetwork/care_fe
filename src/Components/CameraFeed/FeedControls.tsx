@@ -185,16 +185,6 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
           >
             <CareIcon icon="l-redo" />
           </FeedButton>
-          {/* TODO: implement this when this is used in where presets can be saved. */}
-          {/* <FeedButton
-                shortcut={Shortcuts.SavePreset}
-                tooltipClassName="tooltip-left translate-y-2 translate-x-1"
-                helpText="Save current view to preset"
-                onTrigger={() => console.error("Not implemented")}
-                shortcutsDisabled={shortcutsDisabled}
-              >
-                <CareIcon icon="l-save" />
-              </FeedButton> */}
           <FeedButton
             shortcut={Shortcuts.Fullscreen}
             tooltipClassName="tooltip-left translate-y-2 translate-x-1"

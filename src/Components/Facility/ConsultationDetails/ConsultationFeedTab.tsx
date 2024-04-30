@@ -9,17 +9,28 @@ import AssetBedSelect from "../../CameraFeed/AssetBedSelect";
 import { triggerGoal } from "../../../Integrations/Plausible";
 import useAuthUser from "../../../Common/hooks/useAuthUser";
 import PageTitle from "../../Common/PageTitle";
+import useSlug from "../../../Common/hooks/useSlug";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
+import ButtonV2 from "../../Common/components/ButtonV2";
+import useOperateCamera, {
+  PTZPayload,
+} from "../../CameraFeed/useOperateCamera";
+import request from "../../../Utils/request/request";
 
 export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   const authUser = useAuthUser();
-  const divRef = useRef<any>();
+  const facility = useSlug("facility");
   const bed = props.consultationData.current_bed?.bed_object;
 
   const [asset, setAsset] = useState<AssetData>();
   const [preset, setPreset] = useState<AssetBedModel>();
+  const [isUpdatingPreset, setIsUpdatingPreset] = useState(false);
+  const divRef = useRef<any>();
 
-  const { loading } = useQuery(routes.listAssetBeds, {
-    query: { bed: bed?.id },
+  const operate = useOperateCamera(asset?.id ?? "", true);
+
+  const { data, loading, refetch } = useQuery(routes.listAssetBeds, {
+    query: { limit: 100, facility, bed: bed?.id, asset: asset?.id },
     prefetch: !!bed,
     onResponse: ({ data }) => {
       if (!data) {
@@ -38,6 +49,31 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
       }
     },
   });
+
+  const presets = data?.results;
+
+  const handleUpdatePreset = async () => {
+    if (!preset) return;
+
+    setIsUpdatingPreset(true);
+
+    const { data } = await operate({ type: "get_status" });
+    const { position } = (data as { result: { position: PTZPayload } }).result;
+
+    const { data: updated } = await request(routes.partialUpdateAssetBed, {
+      pathParams: { external_id: preset.id },
+      body: {
+        asset: preset.asset_object.id,
+        bed: preset.bed_object.id,
+        meta: { ...preset.meta, position },
+      },
+    });
+
+    await refetch();
+
+    setPreset(updated);
+    setIsUpdatingPreset(false);
+  };
 
   useEffect(() => {
     if (divRef.current) {
@@ -80,21 +116,44 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
             });
           }}
         >
-          <div className="w-64">
-            <AssetBedSelect
-              asset={asset}
-              bed={bed}
-              value={preset}
-              onChange={(value) => {
-                triggerGoal("Camera Preset Clicked", {
-                  presetName: preset?.meta?.preset_name,
-                  consultationId: props.consultationId,
-                  userId: authUser.id,
-                  result: "success",
-                });
-                setPreset(value);
-              }}
-            />
+          <div className="flex w-36 items-center justify-end md:w-64">
+            {presets ? (
+              <>
+                <AssetBedSelect
+                  options={presets}
+                  label={(obj) => obj.meta.preset_name}
+                  value={preset}
+                  onChange={(value) => {
+                    triggerGoal("Camera Preset Clicked", {
+                      presetName: preset?.meta?.preset_name,
+                      consultationId: props.consultationId,
+                      userId: authUser.id,
+                      result: "success",
+                    });
+                    setPreset(value);
+                  }}
+                />
+                {isUpdatingPreset ? (
+                  <CareIcon
+                    icon="l-spinner"
+                    className="animate-spin text-base text-zinc-500 md:mx-2"
+                  />
+                ) : (
+                  <ButtonV2
+                    size="small"
+                    variant="secondary"
+                    ghost
+                    tooltip="Save current position to preset"
+                    tooltipClassName="text-xs -translate-x-20 translate-y-8"
+                    onClick={handleUpdatePreset}
+                  >
+                    <CareIcon icon="l-save" className="text-base" />
+                  </ButtonV2>
+                )}
+              </>
+            ) : (
+              <span>loading presets...</span>
+            )}
           </div>
         </CameraFeed>
       </div>

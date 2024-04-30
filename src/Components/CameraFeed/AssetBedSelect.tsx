@@ -1,43 +1,24 @@
 import { Fragment } from "react";
-import useSlug from "../../Common/hooks/useSlug";
-import routes from "../../Redux/api";
-import useQuery from "../../Utils/request/useQuery";
-import { AssetBedModel, AssetData } from "../Assets/AssetTypes";
-import { BedModel } from "../Facility/models";
+import { AssetBedModel } from "../Assets/AssetTypes";
 import { Listbox, Transition } from "@headlessui/react";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 
 interface Props {
-  asset?: AssetData;
-  bed?: BedModel;
+  options: AssetBedModel[];
   value?: AssetBedModel;
+  label?: (value: AssetBedModel) => string;
   onChange?: (value: AssetBedModel) => void;
 }
 
 export default function AssetBedSelect(props: Props) {
-  const facility = useSlug("facility");
-
-  const { data, loading } = useQuery(routes.listAssetBeds, {
-    query: {
-      limit: 100,
-      facility,
-      asset: props.asset?.id,
-      bed: props.bed?.id,
-    },
-  });
-
   const selected = props.value;
 
-  const label = (obj: AssetBedModel) => {
-    return props.bed
-      ? obj.meta.preset_name
-      : `${obj.bed_object.name}: ${obj.meta.preset_name}`;
-  };
+  const options = props.options.filter(({ meta }) => meta.type !== "boundary");
 
-  const options = data?.results.filter(({ meta }) => meta.type !== "boundary");
+  const label = props.label ?? defaultLabel;
 
   return (
-    <Listbox value={selected} onChange={props.onChange} disabled={loading}>
+    <Listbox value={selected} onChange={props.onChange}>
       <div className="relative">
         <Listbox.Button className="relative w-full cursor-default pr-6 text-right text-xs text-zinc-400 focus:outline-none disabled:cursor-not-allowed disabled:bg-transparent disabled:text-zinc-700 sm:text-sm">
           <span className="block truncate">
@@ -83,3 +64,7 @@ export default function AssetBedSelect(props: Props) {
     </Listbox>
   );
 }
+
+const defaultLabel = ({ bed_object, meta }: AssetBedModel) => {
+  return `${bed_object.name}: ${meta.preset_name}`;
+};
