@@ -815,9 +815,6 @@ export default function UserProfile() {
                                 new_password_1: e.value,
                               });
                             }}
-                            // error={validateNewPassword(
-                            //   changePasswordForm.new_password_1,
-                            // )}
                             required
                             onFocus={() => setNewPasswordInputInFocus(true)}
                             onBlur={() => setNewPasswordInputInFocus(false)}
@@ -865,15 +862,13 @@ export default function UserProfile() {
                               setNewConfirmedPasswordInputInFocus(false)
                             }
                           />
-                          {newConfirmedPasswordInputInFocus && (
-                            <div className="text-small mb-2 pl-2 text-gray-500">
-                              {validateRule(
-                                changePasswordForm.new_password_1 ===
-                                  changePasswordForm.new_password_2,
-                                "Confirm password should match the new password",
-                              )}
-                            </div>
-                          )}
+                          {newConfirmedPasswordInputInFocus &&
+                            changePasswordForm.new_password_2.length > 0 &&
+                            validateRule(
+                              changePasswordForm.new_password_1 ===
+                                changePasswordForm.new_password_2,
+                              "Confirm password should match the new password",
+                            )}
                         </div>
                       </div>
                     </div>
