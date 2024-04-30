@@ -73,12 +73,33 @@ Authenticate to staging API with any of the following credentials
 
 #### 🧪 Run cypress tests
 
-Ensure that the development server is running and then run the cypress tests in either of the ways described below.
+To run cypress tests locally, you'll need to setup the backend to run locally and load dummy data required for cypress to the database. See [docs](https://github.com/coronasafe/care#self-hosting).
+
+Once backend is running locally, you'll have to ensure your local front-end is connected to local backend, by setting the `CARE_API` env.
+
+```env
+#.env
+CARE_API=http://127.0.0.1:9000
+```
+
+Once done, start the development server by running
 
 ```sh
-$ npm run cypress:run        # To run all tests in headless mode.
-$ npm run cypress:run:gui    # To run all tests in headed mode.
-$ npm run cypress:open       # To debug and run tests individually.
+npm run dev
+```
+
+Once development server is running, then run the cypress tests in either of the ways described below.
+
+```sh
+npm run cypress:run        # To run all tests in headless mode.
+```
+
+```sh
+npm run cypress:run:gui    # To run all tests in headed mode.
+```
+
+```sh
+npm run cypress:open       # To debug and run tests individually.
 ```
 
 - Failed test screenshots are saved in `cypress/screenshots`

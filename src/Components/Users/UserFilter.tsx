@@ -148,7 +148,7 @@ export default function UserFilter(props: any) {
         {...field("district")}
         state={filterState.state}
       />
-      <div>
+      <div className="-mb-4">
         <PhoneNumberFormField
           label="Phone Number"
           name="phone_number"
