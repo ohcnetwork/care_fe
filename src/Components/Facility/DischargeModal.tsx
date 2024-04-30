@@ -24,6 +24,7 @@ import CircularProgress from "../Common/components/CircularProgress";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "./models";
 import dayjs from "../../Utils/dayjs";
+import { FieldError } from "../Form/FieldValidators";
 
 interface PreDischargeFormInterface {
   new_discharge_reason: number | null;
@@ -121,15 +122,22 @@ const DischargeModal = ({
 
     if (
       preDischargeForm.new_discharge_reason ==
-        DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id &&
-      !preDischargeForm.discharge_notes.trim()
+      DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
     ) {
-      setErrors({
-        ...errors,
-        discharge_notes: "Please enter the cause of death",
-      });
-      setIsSendingDischargeApi(false);
-      return;
+      const newErrors: Record<string, FieldError> = {};
+
+      if (!preDischargeForm.discharge_notes.trim()) {
+        newErrors["discharge_notes"] = "Please enter the cause of death";
+      }
+      if (!preDischargeForm.death_confirmed_doctor?.trim()) {
+        newErrors["death_confirmed_doctor"] = "Field is required";
+      }
+
+      if (Object.entries(newErrors).length) {
+        setErrors({ ...errors, ...newErrors });
+        setIsSendingDischargeApi(false);
+        return;
+      }
     }
 
     const dischargeDetails = {
@@ -310,6 +318,7 @@ const DischargeModal = ({
           <TextFormField
             name="death_confirmed_by"
             label="Confirmed By"
+            error={errors.death_confirmed_doctor}
             value={preDischargeForm.death_confirmed_doctor ?? ""}
             onChange={(e) => {
               setPreDischargeForm((form) => {
