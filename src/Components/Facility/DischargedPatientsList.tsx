@@ -23,6 +23,7 @@ import CountBlock from "../../CAREUI/display/Count";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { useState } from "react";
+import { parseOptionId } from "../../Common/utils";
 
 const DischargedPatientsList = ({
   facility_external_id,
@@ -172,7 +173,49 @@ const DischargedPatientsList = ({
         </div>
       </div>
       <div className="col-span-3 mt-6 flex flex-wrap">
-        <FilterBadges badges={({ ordering }) => [ordering()]} />
+        <FilterBadges
+          badges={({
+            badge,
+            value,
+            kasp,
+            phoneNumber,
+            dateRange,
+            range,
+            ordering,
+          }) => [
+            phoneNumber("Primary number", "phone_number"),
+            phoneNumber("Emergency number", "emergency_phone_number"),
+            badge("Patient name", "name"),
+            badge("IP/OP number", "patient_no"),
+            ...dateRange("Modified", "modified_date"),
+            ...dateRange("Created", "created_date"),
+            badge("No. of vaccination doses", "number_of_doses"),
+            kasp(),
+            badge("COWIN ID", "covin_id"),
+            badge("Is Antenatal", "is_antenatal"),
+            badge("Review Missed", "review_missed"),
+            badge("Facility Type", "facility_type"),
+            ordering(),
+            badge("Disease Status", "disease_status"),
+            value(
+              "Respiratory Support",
+              "ventilator_interface",
+              qParams.ventilator_interface &&
+                t(`RESPIRATORY_SUPPORT_${qParams.ventilator_interface}`),
+            ),
+            value(
+              "Gender",
+              "gender",
+              parseOptionId(GENDER_TYPES, qParams.gender) || "",
+            ),
+            ...range("Age", "age"),
+            badge("SRF ID", "srf_id"),
+            badge("Declared Status", "is_declared_positive"),
+            ...dateRange("Result", "date_of_result"),
+            ...dateRange("Declared positive", "date_declared_positive"),
+            ...dateRange("Last vaccinated", "last_vaccinated_date"),
+          ]}
+        />
       </div>
       <PaginatedList
         route={routes.listFacilityDischargedPatients}

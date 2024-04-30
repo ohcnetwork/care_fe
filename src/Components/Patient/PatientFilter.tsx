@@ -546,47 +546,55 @@ export default function PatientFilter(props: any) {
             onChange={handleDateRangeChange}
             errorClassName="hidden"
           />
-          <DateRangeFormField
-            labelClassName="text-sm"
-            name="last_consultation_encounter_date"
-            label="Admit Date"
-            value={{
-              start: getDate(
-                filterState.last_consultation_encounter_date_after,
-              ),
-              end: getDate(filterState.last_consultation_encounter_date_before),
-            }}
-            onChange={handleDateRangeChange}
-            errorClassName="hidden"
-          />
-          <DateRangeFormField
-            labelClassName="text-sm"
-            name="last_consultation_discharge_date"
-            label="Discharge Date"
-            value={{
-              start: getDate(
-                filterState.last_consultation_discharge_date_after,
-              ),
-              end: getDate(filterState.last_consultation_discharge_date_before),
-            }}
-            onChange={handleDateRangeChange}
-            errorClassName="hidden"
-          />
-          <DateRangeFormField
-            labelClassName="text-sm"
-            name="last_consultation_symptoms_onset_date"
-            label="Onset of Symptoms Date"
-            value={{
-              start: getDate(
-                filterState.last_consultation_symptoms_onset_date_after,
-              ),
-              end: getDate(
-                filterState.last_consultation_symptoms_onset_date_before,
-              ),
-            }}
-            onChange={handleDateRangeChange}
-            errorClassName="hidden"
-          />
+          {!props.discharged && (
+            <>
+              <DateRangeFormField
+                labelClassName="text-sm"
+                name="last_consultation_encounter_date"
+                label="Admit Date"
+                value={{
+                  start: getDate(
+                    filterState.last_consultation_encounter_date_after,
+                  ),
+                  end: getDate(
+                    filterState.last_consultation_encounter_date_before,
+                  ),
+                }}
+                onChange={handleDateRangeChange}
+                errorClassName="hidden"
+              />
+              <DateRangeFormField
+                labelClassName="text-sm"
+                name="last_consultation_discharge_date"
+                label="Discharge Date"
+                value={{
+                  start: getDate(
+                    filterState.last_consultation_discharge_date_after,
+                  ),
+                  end: getDate(
+                    filterState.last_consultation_discharge_date_before,
+                  ),
+                }}
+                onChange={handleDateRangeChange}
+                errorClassName="hidden"
+              />
+              <DateRangeFormField
+                labelClassName="text-sm"
+                name="last_consultation_symptoms_onset_date"
+                label="Onset of Symptoms Date"
+                value={{
+                  start: getDate(
+                    filterState.last_consultation_symptoms_onset_date_after,
+                  ),
+                  end: getDate(
+                    filterState.last_consultation_symptoms_onset_date_before,
+                  ),
+                }}
+                onChange={handleDateRangeChange}
+                errorClassName="hidden"
+              />
+            </>
+          )}
         </div>
       </AccordionV2>
       {!props.discharged && (
