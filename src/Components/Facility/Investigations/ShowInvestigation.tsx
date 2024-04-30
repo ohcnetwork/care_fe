@@ -156,7 +156,7 @@ export default function ShowInvestigation(props: any) {
       <InvestigationTable
         title={`ID: ${sessionId}`}
         data={state.initialValues}
-        isDischargedPatient={consultation?.discharge_date ? true : false}
+        isDischargedPatient={!!consultation?.discharge_date}
         changedFields={state.changedFields}
         handleValueChange={handleValueChange}
         handleUpdateCancel={handleUpdateCancel}
