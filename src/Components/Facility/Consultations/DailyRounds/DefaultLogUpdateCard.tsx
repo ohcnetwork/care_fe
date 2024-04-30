@@ -49,6 +49,7 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
         </ButtonV2>
         <ButtonV2
           variant="secondary"
+          disabled={props.consultationData?.discharge_date ? true : false}
           border
           ghost
           size="small"

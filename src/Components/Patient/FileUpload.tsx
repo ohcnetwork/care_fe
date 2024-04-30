@@ -258,6 +258,11 @@ export const FileUpload = (props: FileUploadProps) => {
     prefetch: !!patientId,
   });
 
+  const { data: consultation } = useQuery(routes.getConsultation, {
+    pathParams: { id: consultationId },
+    prefetch: !!consultationId,
+  });
+
   const captureImage = () => {
     setPreviewImage(webRef.current.getScreenshot());
     const canvas = webRef.current.getCanvas();
@@ -1526,6 +1531,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     )}
                     <div className="flex flex-col items-center gap-4 md:flex-row md:flex-wrap lg:flex-nowrap">
                       <VoiceRecorder
+                        isDisabled={consultation?.discharge_date ? true : false}
                         createAudioBlob={createAudioBlob}
                         confirmAudioBlobExists={confirmAudioBlobExists}
                         reset={resetRecording}
@@ -1586,7 +1592,9 @@ export const FileUpload = (props: FileUploadProps) => {
                       <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
                         {({ isAuthorized }) =>
                           isAuthorized ? (
-                            <label className="button-size-default button-shape-square button-primary-default inline-flex h-min w-full cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500">
+                            <label
+                              className={`button-size-default button-shape-square inline-flex h-min w-full items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 ${consultation?.discharge_date ? "cursor-not-allowed bg-gray-200 text-gray-500" : "button-primary-default cursor-pointer transition-all duration-200 ease-in-out"}`}
+                            >
                               <CareIcon
                                 icon="l-file-upload-alt"
                                 className="text-lg"
@@ -1599,6 +1607,9 @@ export const FileUpload = (props: FileUploadProps) => {
                                 type="file"
                                 accept="image/*,video/*,audio/*,text/plain,text/csv,application/rtf,application/msword,application/vnd.oasis.opendocument.text,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/pdf"
                                 hidden
+                                disabled={
+                                  consultation?.discharge_date ? true : false
+                                }
                               />
                             </label>
                           ) : (
@@ -1607,6 +1618,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         }
                       </AuthorizedChild>
                       <ButtonV2
+                        disabled={consultation?.discharge_date ? true : false}
                         onClick={() => setModalOpenForCamera(true)}
                         className="w-full"
                       >
