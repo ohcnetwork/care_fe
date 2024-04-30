@@ -5,7 +5,6 @@ import PaginatedList from "../../CAREUI/misc/PaginatedList";
 import Loading from "../Common/Loading";
 import { PatientModel } from "../Patient/models";
 import useQuery from "../../Utils/request/useQuery";
-import { debounce } from "lodash-es";
 import SearchInput from "../Form/SearchInput";
 import {
   DISCHARGED_PATIENT_SORT_OPTIONS,
@@ -18,6 +17,12 @@ import { useTranslation } from "react-i18next";
 import SwitchTabs from "../Common/components/SwitchTabs";
 import SortDropdownMenu from "../Common/SortDropdown";
 import useFilters from "../../Common/hooks/useFilters";
+import PatientFilter from "../Patient/PatientFilter";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import CountBlock from "../../CAREUI/display/Count";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import { useState } from "react";
 
 const DischargedPatientsList = ({
   facility_external_id,
@@ -29,7 +34,66 @@ const DischargedPatientsList = ({
     pathParams: { id: facility_external_id },
   });
 
-  const { qParams, updateQuery, FilterBadges } = useFilters({});
+  const { qParams, updateQuery, advancedFilter, FilterBadges } = useFilters({
+    limit: 12,
+    cacheBlacklist: [
+      "name",
+      "patient_no",
+      "phone_number",
+      "emergency_phone_number",
+    ],
+  });
+
+  const queryField = <T,>(name: string, defaultValue?: T) => {
+    return {
+      name,
+      value: qParams[name] || defaultValue,
+      onChange: (e: FieldChangeEvent<T>) => updateQuery({ [e.name]: e.value }),
+      className: "grow w-full mb-2",
+    };
+  };
+
+  const [phone_number, setPhoneNumber] = useState("");
+  const [phoneNumberError, setPhoneNumberError] = useState("");
+  const [emergency_phone_number, setEmergencyPhoneNumber] = useState("");
+  const [emergencyPhoneNumberError, setEmergencyPhoneNumberError] =
+    useState("");
+  const [count, setCount] = useState(0);
+
+  const setPhoneNum = (phone_number: string) => {
+    setPhoneNumber(phone_number);
+    if (phone_number.length >= 13) {
+      setPhoneNumberError("");
+      updateQuery({ phone_number });
+      return;
+    }
+
+    if (phone_number === "+91" || phone_number === "") {
+      setPhoneNumberError("");
+      qParams.phone_number && updateQuery({ phone_number: null });
+      return;
+    }
+
+    setPhoneNumberError("Enter a valid number");
+  };
+
+  const setEmergencyPhoneNum = (emergency_phone_number: string) => {
+    setEmergencyPhoneNumber(emergency_phone_number);
+    if (emergency_phone_number.length >= 13) {
+      setEmergencyPhoneNumberError("");
+      updateQuery({ emergency_phone_number });
+      return;
+    }
+
+    if (emergency_phone_number === "+91" || emergency_phone_number === "") {
+      setEmergencyPhoneNumberError("");
+      qParams.emergency_phone_number &&
+        updateQuery({ emergency_phone_number: null });
+      return;
+    }
+
+    setEmergencyPhoneNumberError("Enter a valid number");
+  };
 
   return (
     <Page
@@ -39,13 +103,6 @@ const DischargedPatientsList = ({
       }}
       options={
         <>
-          <SearchInput
-            className="mr-4 w-full max-w-sm"
-            placeholder="Search by patient name"
-            name="name"
-            value={qParams.name}
-            onChange={debounce((e) => updateQuery({ name: e.value }))}
-          />
           <div className="flex flex-col gap-4 md:flex-row">
             <SwitchTabs
               tab1="Live"
@@ -53,6 +110,9 @@ const DischargedPatientsList = ({
               className="mr-4"
               onClickTab1={() => navigate("/patients")}
               isTab2Active
+            />
+            <AdvancedFilterButton
+              onClick={() => advancedFilter.setShow(true)}
             />
             <SortDropdownMenu
               options={DISCHARGED_PATIENT_SORT_OPTIONS}
@@ -63,6 +123,54 @@ const DischargedPatientsList = ({
         </>
       }
     >
+      <div className="manualGrid my-4 mb-[-12px] mt-5 grid-cols-1 gap-3 px-2 sm:grid-cols-4 md:px-0">
+        <div className="mt-2 flex h-full flex-col gap-3 xl:flex-row">
+          <div className="flex-1">
+            <CountBlock
+              text="Discharged Patients"
+              count={count}
+              loading={facilityQuery.loading}
+              icon="l-user-injured"
+              className="pb-12"
+            />
+          </div>
+        </div>
+        <div className="col-span-3 w-full">
+          <div className="col-span-2 mt-2">
+            <div className="mt-1 md:flex md:gap-4">
+              <SearchInput
+                label="Search by Patient"
+                placeholder="Enter patient name"
+                {...queryField("name")}
+              />
+              <SearchInput
+                label="Search by IP/OP Number"
+                placeholder="Enter IP/OP Number"
+                secondary
+                {...queryField("patient_no")}
+              />
+            </div>
+            <div className="md:flex md:gap-4">
+              <PhoneNumberFormField
+                label="Search by Primary Number"
+                {...queryField("phone_number", "+91")}
+                value={phone_number}
+                onChange={(e) => setPhoneNum(e.value)}
+                error={phoneNumberError}
+                types={["mobile", "landline"]}
+              />
+              <PhoneNumberFormField
+                label="Search by Emergency Number"
+                {...queryField("emergency_phone_number", "+91")}
+                value={emergency_phone_number}
+                onChange={(e) => setEmergencyPhoneNum(e.value)}
+                error={emergencyPhoneNumberError}
+                types={["mobile", "landline"]}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
       <div className="col-span-3 mt-6 flex flex-wrap">
         <FilterBadges badges={({ ordering }) => [ordering()]} />
       </div>
@@ -70,9 +178,12 @@ const DischargedPatientsList = ({
         route={routes.listFacilityDischargedPatients}
         pathParams={{ facility_external_id }}
         query={{ ordering: "-modified_date", ...qParams }}
+        queryCB={(query) => {
+          setCount(query.data?.count || 0);
+        }}
       >
         {() => (
-          <div className="flex flex-col gap-4 py-4 lg:px-4 lg:py-8">
+          <div className="flex flex-col gap-4">
             <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-gray-200 bg-white p-5 text-center text-2xl font-bold text-gray-500">
               <span>{t("discharged_patients_empty")}</span>
             </PaginatedList.WhenEmpty>
@@ -99,6 +210,11 @@ const DischargedPatientsList = ({
           </div>
         )}
       </PaginatedList>
+      <PatientFilter
+        {...advancedFilter}
+        key={window.location.search}
+        discharged
+      />
     </Page>
   );
 };
