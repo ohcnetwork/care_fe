@@ -24,6 +24,7 @@ interface Props {
   // Controls
   constrolsDisabled?: boolean;
   shortcutsDisabled?: boolean;
+  onMove?: () => void;
 }
 
 export default function CameraFeed(props: Props) {
@@ -180,6 +181,7 @@ export default function CameraFeed(props: Props) {
               setFullscreen={setFullscreen}
               onReset={resetStream}
               onMove={async (data) => {
+                props.onMove?.();
                 setState("moving");
                 const { res } = await operate({ type: "relative_move", data });
                 setTimeout(() => {

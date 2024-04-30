@@ -16,6 +16,7 @@ import useOperateCamera, {
   PTZPayload,
 } from "../../CameraFeed/useOperateCamera";
 import request from "../../../Utils/request/request";
+import { classNames } from "../../../Utils/utils";
 
 export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   const authUser = useAuthUser();
@@ -25,6 +26,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   const [asset, setAsset] = useState<AssetData>();
   const [preset, setPreset] = useState<AssetBedModel>();
   const [isUpdatingPreset, setIsUpdatingPreset] = useState(false);
+  const [hasMoved, setHasMoved] = useState(false);
   const divRef = useRef<any>();
 
   const operate = useOperateCamera(asset?.id ?? "", true);
@@ -72,6 +74,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
     await refetch();
 
     setPreset(updated);
+    setHasMoved(false);
     setIsUpdatingPreset(false);
   };
 
@@ -81,12 +84,12 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
     }
   }, [!!bed, loading, !!asset, divRef.current]);
 
-  if (!bed || !asset) {
-    return <span>No bed/asset linked allocated</span>;
-  }
-
   if (loading) {
     return <Loading />;
+  }
+
+  if (!bed || !asset) {
+    return <span>No bed/asset linked allocated</span>;
   }
 
   return (
@@ -101,6 +104,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
         <CameraFeed
           asset={asset}
           preset={preset?.meta.position}
+          onMove={() => setHasMoved(true)}
           onStreamError={() => {
             triggerGoal("Camera Feed Viewed", {
               consultationId: props.consultationId,
@@ -130,6 +134,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
                       userId: authUser.id,
                       result: "success",
                     });
+                    setHasMoved(false);
                     setPreset(value);
                   }}
                 />
@@ -142,9 +147,18 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
                   <ButtonV2
                     size="small"
                     variant="secondary"
+                    disabled={!hasMoved}
+                    className="disabled:bg-transparent disabled:text-zinc-700"
                     ghost
-                    tooltip="Save current position to preset"
-                    tooltipClassName="text-xs -translate-x-20 translate-y-8"
+                    tooltip={
+                      hasMoved
+                        ? "Save current position to preset"
+                        : "Change camera position to update preset"
+                    }
+                    tooltipClassName={classNames(
+                      "translate-y-8 text-xs",
+                      hasMoved ? "-translate-x-20" : "-translate-x-28",
+                    )}
                     onClick={handleUpdatePreset}
                   >
                     <CareIcon icon="l-save" className="text-base" />
