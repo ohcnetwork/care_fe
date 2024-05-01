@@ -1063,25 +1063,27 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   }
 
   const PatientRegisterAuth = () => {
-    let check = false;
     const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
     if (
       !showAllFacilityUsers.includes(authUser.user_type) &&
       authUser.home_facility_object?.id === facilityId
     ) {
-      check = true;
-    } else if (
+      return true;
+    }
+    if (
       authUser.user_type === "DistrictAdmin" &&
       authUser.district === facilityObject?.district
     ) {
-      check = true;
-    } else if (
+      return true;
+    }
+    if (
       authUser.user_type === "StateAdmin" &&
       authUser.state === facilityObject?.state
     ) {
-      check = true;
+      return true;
     }
-    return check;
+
+    return false;
   };
 
   if (!isLoading && facilityId && facilityObject && !PatientRegisterAuth()) {

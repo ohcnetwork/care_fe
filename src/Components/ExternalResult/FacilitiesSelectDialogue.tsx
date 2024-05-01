@@ -34,12 +34,12 @@ const FacilitiesSelectDialog = (props: Props) => {
         district={
           authUser?.user_type === "DistrictAdmin"
             ? authUser?.district?.toString()
-            : ""
+            : undefined
         }
         state={
           authUser?.user_type === "StateAdmin"
             ? authUser?.state?.toString()
-            : ""
+            : undefined
         }
       />
       <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
