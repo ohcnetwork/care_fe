@@ -19,6 +19,7 @@ import {
   formatDate,
   formatDateTime,
   formatPatientAge,
+  isPostPartum,
 } from "../../../Utils/utils";
 import ReadMore from "../../Common/components/Readmore";
 import DailyRoundsList from "../Consultations/DailyRoundsList";
@@ -26,6 +27,7 @@ import EventsList from "./Events/EventsList";
 import SwitchTabs from "../../Common/components/SwitchTabs";
 import { getVitalsMonitorSocketUrl } from "../../VitalsMonitor/utils";
 import { FileUpload } from "../../Patient/FileUpload";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
 
@@ -319,6 +321,55 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                     )}
                   </div>
                 </div>
+              </div>
+            )}
+            {(props.patientData.is_antenatal ||
+              isPostPartum(props.patientData.date_of_delivery)) && (
+              <div className="rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+                <h3 className="mb-4 text-lg font-semibold leading-relaxed text-gray-900">
+                  Perinatal Status
+                </h3>
+
+                <div className="flex gap-2 pb-2">
+                  {props.patientData.is_antenatal && (
+                    <Chip
+                      variant="custom"
+                      className="border-pink-300 bg-pink-100 text-pink-600"
+                      startIcon="l-baby-carriage"
+                      text="Antenatal"
+                    />
+                  )}
+                  {isPostPartum(props.patientData.date_of_delivery) && (
+                    <Chip
+                      variant="custom"
+                      className="border-pink-300 bg-pink-100 text-pink-600"
+                      startIcon="l-baby-carriage"
+                      text="Post-partum"
+                    />
+                  )}
+                </div>
+
+                {props.patientData.last_menstruation_start_date && (
+                  <p className="space-x-2 p-2 text-sm">
+                    <CareIcon className="text-base" icon="l-calendar-alt" />
+                    <span>Last Menstruation:</span>
+                    <span className="font-semibold">
+                      {formatDate(
+                        props.patientData.last_menstruation_start_date,
+                      )}
+                    </span>
+                  </p>
+                )}
+
+                {props.patientData.date_of_delivery && (
+                  <p className="space-x-2 p-2 text-sm">
+                    <CareIcon className="text-base" icon="l-calendar-alt" />
+                    <span>Date of Delivery:</span>
+                    <span className="font-semibold">
+                      {formatDate(props.patientData.date_of_delivery)}
+                    </span>
+                  </p>
+                )}
               </div>
             )}
             {props.consultationData.symptoms_text && (

@@ -19,6 +19,7 @@ import {
   formatDate,
   formatDateTime,
   formatPatientAge,
+  isPostPartum,
 } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
@@ -378,10 +379,7 @@ export const PatientHome = (props: any) => {
                             text="Antenatal"
                           />
                         )}
-                        {dayjs(patientData.date_of_delivery).diff(
-                          undefined,
-                          "week",
-                        ) <= 6 && (
+                        {isPostPartum(patientData.date_of_delivery) && (
                           <Chip
                             variant="custom"
                             className="border-pink-300 bg-pink-100 text-pink-600"
