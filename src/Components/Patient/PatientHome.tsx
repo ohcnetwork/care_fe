@@ -368,16 +368,29 @@ export const PatientHome = (props: any) => {
                     ) : (
                       <Chip startIcon="l-lock" text="Transfer Blocked" />
                     )}
-                    {patientData.gender === 2 &&
-                      patientData.is_antenatal &&
-                      patientData.is_active && (
-                        <Chip
-                          variant="custom"
-                          className="bg-pink-100 text-pink-800"
-                          startIcon="l-baby-carriage"
-                          text="Antenatal"
-                        />
-                      )}
+                    {patientData.gender === 2 && (
+                      <>
+                        {patientData.is_antenatal && (
+                          <Chip
+                            variant="custom"
+                            className="border-pink-300 bg-pink-100 text-pink-600"
+                            startIcon="l-baby-carriage"
+                            text="Antenatal"
+                          />
+                        )}
+                        {dayjs(patientData.date_of_delivery).diff(
+                          undefined,
+                          "week",
+                        ) <= 6 && (
+                          <Chip
+                            variant="custom"
+                            className="border-pink-300 bg-pink-100 text-pink-600"
+                            startIcon="l-baby-carriage"
+                            text="Post-partum"
+                          />
+                        )}
+                      </>
+                    )}
                     {patientData.contact_with_confirmed_carrier && (
                       <Chip
                         variant="danger"
