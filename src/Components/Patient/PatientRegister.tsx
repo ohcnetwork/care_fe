@@ -1683,21 +1683,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 {...field("occupation")}
                                 label="Occupation"
                                 placeholder="Select Occupation"
-                                options={occupationTypes
-                                  .sort((a, b) => a.text.localeCompare(b.text))
-                                  .filter((obj) => obj.text !== "Others")
-                                  .filter(
-                                    (obj) => obj.text !== "Not Applicable",
-                                  )
-                                  .filter((obj) => obj.text !== "Don't Know")
-                                  .concat(
-                                    { id: 6, text: "Others", value: "OTHERS" },
-                                    {
-                                      id: 32,
-                                      text: "Not Applicable",
-                                      value: "NOT_APPLICABLE",
-                                    },
-                                  )}
+                                options={occupationTypes}
                                 optionLabel={(o) => o.text}
                                 optionValue={(o) => o.id}
                               />
