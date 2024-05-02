@@ -17,7 +17,10 @@ export class UserCreationPage {
       .click()
       .type(value);
   }
-
+  typeIntoElementByIdPostClearDob(elementId: string, value: string) {
+    cy.get("#" + elementId).click();
+    cy.get("#date-input").clear().type(value);
+  }
   clearIntoElementById(elementId: string) {
     cy.get("#" + elementId)
       .click()
@@ -51,7 +54,7 @@ export class UserCreationPage {
   setInputDate(
     dateElementId: string,
     inputElementId: string,
-    dateValue: string
+    dateValue: string,
   ) {
     this.clickElementById(dateElementId);
     this.typeIntoElementById(inputElementId, dateValue);

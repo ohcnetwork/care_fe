@@ -7,15 +7,25 @@ import { BedModel } from "../models";
 import HL7PatientVitalsMonitor from "../../VitalsMonitor/HL7PatientVitalsMonitor";
 import VentilatorPatientVitalsMonitor from "../../VitalsMonitor/VentilatorPatientVitalsMonitor";
 import useVitalsAspectRatioConfig from "../../VitalsMonitor/useVitalsAspectRatioConfig";
-import { DISCHARGE_REASONS, SYMPTOM_CHOICES } from "../../../Common/constants";
+import {
+  CONSENT_PATIENT_CODE_STATUS_CHOICES,
+  CONSENT_TYPE_CHOICES,
+  DISCHARGE_REASONS,
+  SYMPTOM_CHOICES,
+} from "../../../Common/constants";
 import PrescriptionsTable from "../../Medicine/PrescriptionsTable";
 import Chip from "../../../CAREUI/display/Chip";
-import { formatAge, formatDate, formatDateTime } from "../../../Utils/utils";
+import {
+  formatDate,
+  formatDateTime,
+  formatPatientAge,
+} from "../../../Utils/utils";
 import ReadMore from "../../Common/components/Readmore";
 import DailyRoundsList from "../Consultations/DailyRoundsList";
 import EventsList from "./Events/EventsList";
 import SwitchTabs from "../../Common/components/SwitchTabs";
 import { getVitalsMonitorSocketUrl } from "../../VitalsMonitor/utils";
+import { FileUpload } from "../../Patient/FileUpload";
 
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
 
@@ -48,24 +58,24 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
         listAssetBeds({
           facility: props.consultationData.facility as any,
           bed: props.consultationData.current_bed?.bed_object.id,
-        })
+        }),
       );
       const assetBeds = assetBedRes?.data?.results as AssetBedModel[];
 
       const monitorBedData = assetBeds?.find(
-        (i) => i.asset_object?.asset_class === AssetClass.HL7MONITOR
+        (i) => i.asset_object?.asset_class === AssetClass.HL7MONITOR,
       );
 
       setMonitorBedData(monitorBedData);
       if (monitorBedData?.asset_object) {
         setHL7SocketUrl(
-          getVitalsMonitorSocketUrl(monitorBedData?.asset_object)
+          getVitalsMonitorSocketUrl(monitorBedData?.asset_object),
         );
       }
 
       const consultationBedVentilator =
         props.consultationData?.current_bed?.assets_objects?.find(
-          (i) => i.asset_class === AssetClass.VENTILATOR
+          (i) => i.asset_class === AssetClass.VENTILATOR,
         );
 
       let ventilatorBedData;
@@ -76,14 +86,14 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
         } as AssetBedModel;
       } else {
         ventilatorBedData = assetBeds?.find(
-          (i) => i.asset_object.asset_class === AssetClass.VENTILATOR
+          (i) => i.asset_object.asset_class === AssetClass.VENTILATOR,
         );
       }
 
       setVentilatorBedData(ventilatorBedData);
       if (ventilatorBedData?.asset_object) {
         setVentilatorSocketUrl(
-          getVitalsMonitorSocketUrl(ventilatorBedData?.asset_object)
+          getVitalsMonitorSocketUrl(ventilatorBedData?.asset_object),
         );
       }
     };
@@ -111,6 +121,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                     meta: monitorBedData?.asset_object?.meta,
                   }}
                   socketUrl={hl7SocketUrl}
+                  hideHeader={true}
                 />
               </div>
               <div className="min-h-[400px] flex-1">
@@ -122,13 +133,14 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                     meta: ventilatorBedData?.asset_object?.meta,
                   }}
                   socketUrl={ventilatorSocketUrl}
+                  hideHeader={true}
                 />
               </div>
             </div>
           </section>
         )}
       <div className="flex flex-col xl:flex-row">
-        <div className="w-full xl:w-2/3">
+        <div className="w-full xl:w-2/3" id="basic-information">
           <PageTitle
             title="Basic Information"
             hideBack={true}
@@ -157,6 +169,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                             }}
                             socketUrl={hl7SocketUrl}
                             config={vitals.config}
+                            hideHeader={true}
                           />
                         </div>
                       )}
@@ -173,6 +186,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                             }}
                             socketUrl={ventilatorSocketUrl}
                             config={vitals.config}
+                            hideHeader={true}
                           />
                         </div>
                       )}
@@ -188,7 +202,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                   "lg:col-span-2"
                 }`}
               >
-                <div className="px-4 py-5 sm:p-6">
+                <div className="px-4 py-5 sm:p-6" id="discharge-information">
                   <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
                     Discharge Information
                   </h3>
@@ -198,7 +212,8 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                       <span className="font-semibold">
                         {DISCHARGE_REASONS.find(
                           (d) =>
-                            d.id === props.consultationData.new_discharge_reason
+                            d.id ===
+                            props.consultationData.new_discharge_reason,
                         )?.text ?? "--"}
                       </span>
                     </div>
@@ -223,7 +238,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                           <span className="font-semibold">
                             {props.consultationData.discharge_date
                               ? formatDate(
-                                  props.consultationData.discharge_date
+                                  props.consultationData.discharge_date,
                                 )
                               : "--/--/---- --:-- --"}
                           </span>
@@ -260,7 +275,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                           <span className="font-semibold">
                             {props.consultationData.death_datetime
                               ? formatDateTime(
-                                  props.consultationData.death_datetime
+                                  props.consultationData.death_datetime,
                                 )
                               : "--:--"}
                           </span>
@@ -281,7 +296,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                       </div>
                     )}
                     {[2, 4].includes(
-                      props.consultationData.new_discharge_reason ?? 0
+                      props.consultationData.new_discharge_reason ?? 0,
                     ) && (
                       <div className="grid gap-4">
                         <div>
@@ -289,7 +304,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                           <span className="font-semibold">
                             {props.consultationData.discharge_date
                               ? formatDateTime(
-                                  props.consultationData.discharge_date
+                                  props.consultationData.discharge_date,
                                 )
                               : "--/--/---- --:-- --"}
                           </span>
@@ -326,12 +341,12 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                                 key={index}
                                 text={
                                   SYMPTOM_CHOICES.find(
-                                    (choice) => choice.id === symptom
+                                    (choice) => choice.id === symptom,
                                   )?.text ?? "Err. Unknown"
                                 }
                                 size="small"
                               />
-                            )
+                            ),
                           )}
                         </div>
                         {props.consultationData.last_daily_round
@@ -349,7 +364,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         <span className="text-xs font-semibold leading-relaxed text-gray-800">
                           from{" "}
                           {formatDate(
-                            props.consultationData.last_daily_round.taken_at
+                            props.consultationData.last_daily_round.taken_at,
                           )}
                         </span>
                       </>
@@ -365,12 +380,12 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                             key={index}
                             text={
                               SYMPTOM_CHOICES.find(
-                                (choice) => choice.id === symptom
+                                (choice) => choice.id === symptom,
                               )?.text ?? "Err. Unknown"
                             }
                             size="small"
                           />
-                        )
+                        ),
                       )}
                     </div>
                     {props.consultationData.other_symptoms && (
@@ -526,7 +541,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                                 : formatDateTime(String(procedure.time))}
                             </td>
                           </tr>
-                        )
+                        ),
                       )}
                     </tbody>
                   </table>
@@ -544,7 +559,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                     Intubation Date{" - "}
                     <span className="font-semibold">
                       {formatDateTime(
-                        props.consultationData.intubation_start_date
+                        props.consultationData.intubation_start_date,
                       )}
                     </span>
                   </div>
@@ -553,7 +568,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                     <span className="font-semibold">
                       {props.consultationData.intubation_end_date &&
                         formatDateTime(
-                          props.consultationData.intubation_end_date
+                          props.consultationData.intubation_end_date,
                         )}
                     </span>
                   </div>
@@ -603,7 +618,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                           </span>
                         </p>
                       </div>
-                    )
+                    ),
                   )}
                 </div>
               </div>
@@ -625,12 +640,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                   <div>
                     Age {" - "}
                     <span className="font-semibold">
-                      {props.patientData.age !== undefined // 0 is a valid age, so we need to check for undefined
-                        ? formatAge(
-                            props.patientData.age,
-                            props.patientData.date_of_birth
-                          )
-                        : "-"}
+                      {formatPatientAge(props.patientData)}
                     </span>
                   </div>
                   <div id="patient-weight">
@@ -651,7 +661,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                       {Math.sqrt(
                         (Number(props.consultationData.weight) *
                           Number(props.consultationData.height)) /
-                          3600
+                          3600,
                       ).toFixed(2)}{" "}
                       m<sup>2</sup>
                     </span>
@@ -665,6 +675,47 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                 </div>
               </div>
             </div>
+            {(
+              props.consultationData.consent_records?.filter(
+                (record) => record.deleted !== true,
+              ) || []
+            ).length > 0 && (
+              <>
+                <div className="col-span-1 overflow-hidden rounded-lg bg-white p-4 shadow md:col-span-2">
+                  <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                    Consent Records
+                  </h3>
+                  {props.consultationData.consent_records
+                    ?.filter((record) => record.deleted !== true)
+                    ?.map((record, i) => (
+                      <div className="mt-4 border-b" key={i}>
+                        <div className="font-bold">
+                          {
+                            CONSENT_TYPE_CHOICES.find(
+                              (c) => c.id === record.type,
+                            )?.text
+                          }{" "}
+                          {record.patient_code_status &&
+                            `( ${
+                              CONSENT_PATIENT_CODE_STATUS_CHOICES.find(
+                                (c) => c.id === record.patient_code_status,
+                              )?.text
+                            } )`}
+                        </div>
+                        <FileUpload
+                          changePageMetadata={false}
+                          type="CONSENT_RECORD"
+                          hideBack
+                          unspecified
+                          className="w-full"
+                          consentId={record.id}
+                          hideUpload
+                        />
+                      </div>
+                    ))}
+                </div>
+              </>
+            )}
           </div>
         </div>
         <div className="w-full pl-0 md:pl-4 xl:w-1/3">
@@ -673,7 +724,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             tab2={
               <div className="flex items-center justify-center gap-1 text-sm">
                 Events
-                <span className="rounded-lg bg-warning-400 p-[1px] px-1 text-[10px] text-white">
+                <span className="rounded-lg bg-warning-400 p-px px-1 text-[10px] text-white">
                   beta
                 </span>
               </div>

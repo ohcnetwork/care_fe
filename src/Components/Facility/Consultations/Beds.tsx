@@ -13,7 +13,6 @@ import CircularProgress from "../../Common/components/CircularProgress.js";
 import { FieldLabel } from "../../Form/FormFields/FormField";
 import Loading from "../../Common/Loading";
 import TextFormField from "../../Form/FormFields/TextFormField";
-import { formatDateTime } from "../../../Utils/utils";
 import dayjs from "../../../Utils/dayjs";
 import { AssetSelect } from "../../Common/AssetSelect.js";
 import DialogModal from "../../Common/Dialog.js";
@@ -24,6 +23,7 @@ import {
   AssetData,
 } from "../../Assets/AssetTypes.js";
 import Chip from "../../../CAREUI/display/Chip.js";
+import BedActivityTimeline from "./BedActivityTimeline";
 
 interface BedsProps {
   facilityId: string;
@@ -40,7 +40,7 @@ const Beds = (props: BedsProps) => {
   const { facilityId, consultationId, discharged } = props;
   const [bed, setBed] = useState<BedModel>({});
   const [startDate, setStartDate] = useState<string>(
-    dayjs().format("YYYY-MM-DDTHH:mm")
+    dayjs().format("YYYY-MM-DDTHH:mm"),
   );
   const [assets, setAssets] = useState<any[]>([]);
   const [consultationBeds, setConsultationBeds] = useState<CurrentBed[]>([]);
@@ -115,7 +115,7 @@ const Beds = (props: BedsProps) => {
         {showBedDetails?.assets_objects?.map((asset: AssetData) => (
           <Link
             key={asset.id}
-            href={`/facility/${asset?.location_object.facility.id}/assets/${asset.id}`}
+            href={`/facility/${asset?.location_object.facility?.id}/assets/${asset.id}`}
             className="mx-2 text-inherit"
             data-testid="created-asset-list"
           >
@@ -127,13 +127,14 @@ const Beds = (props: BedsProps) => {
                 <p className="flex break-words text-xl font-medium capitalize">
                   <span className="mr-2 text-primary-500">
                     <CareIcon
-                      className={`care-l-${
+                      icon={
                         (
                           (asset.asset_class &&
                             assetClassProps[asset.asset_class]) ||
                           assetClassProps.NONE
                         ).icon
-                      } text-2xl`}
+                      }
+                      className="text-2xl"
                     />
                   </span>
                   <p
@@ -146,11 +147,17 @@ const Beds = (props: BedsProps) => {
               </div>
               <p className="text-sm font-normal">
                 <span className="text-sm font-medium">
-                  <CareIcon className="care-l-location-point mr-1 text-primary-500" />
+                  <CareIcon
+                    icon="l-location-point"
+                    className="mr-1 text-primary-500"
+                  />
                   {asset?.location_object?.name}
                 </span>
                 <span className="ml-2 text-sm font-medium">
-                  <CareIcon className="care-l-hospital mr-1 text-primary-500" />
+                  <CareIcon
+                    icon="l-hospital"
+                    className="mr-1 text-primary-500"
+                  />
                   {asset?.location_object?.facility?.name}
                 </span>
               </p>
@@ -178,14 +185,14 @@ const Beds = (props: BedsProps) => {
               ghost
               onClick={() => props.setState && props.setState(false)}
             >
-              <CareIcon className="care-l-times text-lg" />
+              <CareIcon icon="l-times" className="text-lg" />
             </ButtonV2>
           )}
         </div>
       )}
       {!discharged ? (
         <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-2">
             <div>
               <FieldLabel id="asset-type">Bed</FieldLabel>
               <BedSelect
@@ -207,6 +214,7 @@ const Beds = (props: BedsProps) => {
               onChange={(e) => setStartDate(e.value)}
               max={dayjs().format("YYYY-MM-DDTHH:mm")}
               error=""
+              errorClassName="hidden"
             />
             <div>
               <FieldLabel id="assets-link-label">Link Assets</FieldLabel>
@@ -222,7 +230,7 @@ const Beds = (props: BedsProps) => {
               />
             </div>
           </div>
-          <div className="mt-4 flex flex-row justify-center">
+          <div className="mt-4 flex flex-row justify-end">
             <div>
               <ButtonV2 variant="primary" type="submit">
                 <CareIcon icon="l-bed" className="text-xl" />
@@ -235,63 +243,18 @@ const Beds = (props: BedsProps) => {
         ""
       )}
       <div>
+        <hr className="mt-4 border-t-2" />
         <h3 className="my-4 text-lg">Previous beds: </h3>
-        <div className="overflow-hidden rounded-xl">
-          <div className="grid grid-cols-4 gap-[1px]">
-            <div className="bg-primary-500 py-2 text-center font-bold text-white">
-              Bed
-            </div>
-            <div className="bg-primary-500 py-2 text-center font-bold text-white">
-              Location
-            </div>
-            <div className="bg-primary-500 py-2 text-center font-bold text-white">
-              Start Date
-            </div>
-            <div className="bg-primary-500 py-2 text-center font-bold text-white">
-              End Date
-            </div>
+        {consultationBeds.length > 0 ? (
+          <BedActivityTimeline
+            consultationBeds={consultationBeds}
+            loading={loading}
+          />
+        ) : (
+          <div className="bg-primary-100 py-2 text-center">
+            No beds allocated yet
           </div>
-          {consultationBeds.length > 0 ? (
-            consultationBeds.map((bed) => (
-              <div className="grid grid-cols-4 gap-[1px]" key={bed?.id}>
-                <div className="break-words bg-primary-100 p-2 text-center">
-                  {bed?.bed_object?.name}
-                  {bed?.assets_objects && bed.assets_objects.length > 0 && (
-                    <span
-                      className={
-                        " ml-2 h-6 cursor-pointer rounded-md bg-primary-500 px-2 text-xs font-semibold text-white"
-                      }
-                      onClick={() => setShowBedDetails(bed)}
-                    >
-                      {bed.assets_objects.length}
-                    </span>
-                  )}
-                </div>
-                <div className="bg-primary-100 py-2 text-center">
-                  {bed?.bed_object?.location_object?.name}
-                </div>
-                <div className="break-words bg-primary-100 p-2 text-center">
-                  {formatDateTime(bed?.start_date)}
-                </div>
-                {bed?.end_date ? (
-                  <div className="break-words bg-primary-100 p-2 text-center">
-                    {formatDateTime(bed?.end_date)}
-                  </div>
-                ) : (
-                  <div className="bg-primary-100 p-2 text-center">
-                    <span className="rounded-full border border-yellow-500 bg-yellow-100 px-1 text-sm text-yellow-500 ">
-                      In Use
-                    </span>
-                  </div>
-                )}
-              </div>
-            ))
-          ) : (
-            <div className="bg-primary-100 py-2 text-center">
-              No beds allocated yet
-            </div>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );

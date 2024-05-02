@@ -1,53 +1,52 @@
-import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { getConsultation } from "../../../Redux/actions";
-import ButtonV2 from "../../Common/components/ButtonV2";
-import { InvestigationType } from "../../Common/prescription-builder/InvestigationBuilder";
-import { InvestigationResponse } from "./Reports/types";
+import routes from "../../../Redux/api";
 import dayjs from "../../../Utils/dayjs";
+import useQuery from "../../../Utils/request/useQuery";
+import Loading from "../../Common/Loading";
+import ButtonV2 from "../../Common/components/ButtonV2";
+import { InvestigationResponse } from "./Reports/types";
 
 export default function ViewInvestigationSuggestions(props: {
-  consultationId: any;
+  consultationId: string;
   logUrl?: string;
   investigations?: InvestigationResponse;
 }) {
+  const { t } = useTranslation();
   const {
     consultationId,
     logUrl,
     investigations: previousInvestigations,
   } = props;
-  const dispatch = useDispatch<any>();
 
-  const [investigations, setInvestigations] = useState<
-    InvestigationType[] | null
-  >(null);
+  const { data: investigations, loading } = useQuery(routes.getConsultation, {
+    pathParams: {
+      id: consultationId,
+    },
+  });
 
-  useEffect(() => {
-    getConsultationData();
-  }, [consultationId]);
+  if (loading) {
+    return <Loading />;
+  }
 
-  const getConsultationData = async () => {
-    const res = (await dispatch(getConsultation(consultationId))) as any;
-    setInvestigations(res.data.investigation || []);
-  };
+  console.log("Investigations: ", investigations);
 
   return (
     <div className="mt-5" id="investigation-suggestions">
-      <h3>Investigations Suggested</h3>
+      <h3>{t("investigations_suggested")}</h3>
       <table className="mt-3 hidden w-full rounded-xl bg-white shadow md:table">
         <thead className="bg-gray-200 text-left">
           <tr>
-            <th className="p-4">Investigations</th>
-            <th className="p-4">To be conducted</th>
-            {logUrl && <th className="p-4">Log Report</th>}
+            <th className="p-4">{t("investigations")}</th>
+            <th className="p-4">{t("to_be_conducted")}</th>
+            {logUrl && <th className="p-4">{t("log_report")}</th>}
           </tr>
         </thead>
         <tbody>
-          {Array.isArray(investigations) ? (
-            investigations.map((investigation, index) => {
+          {investigations?.investigation &&
+          Array.isArray(investigations?.investigation) ? (
+            investigations.investigation.map((investigation, index) => {
               let nextFurthestInvestigation: any = undefined;
-
               return (
                 <tr key={index} className="border-b border-b-gray-200">
                   <td className="p-4">
@@ -65,18 +64,19 @@ export default function ViewInvestigationSuggestions(props: {
                                 .split(" -- ")[1]
                                 .split(",")
                                 .map(
-                                  (group) => group.split("( ")[1].split(" )")[0]
+                                  (group) =>
+                                    group.split("( ")[1].split(" )")[0],
                                 ),
                             };
                         const investigated = previousInvestigations?.find(
                           (previousInvestigation) =>
                             previousInvestigation.investigation_object.name ===
-                            investigationType.name
+                            investigationType.name,
                         );
                         const investigatedDate =
                           investigated &&
                           dayjs(
-                            investigated.session_object.session_created_date
+                            investigated.session_object.session_created_date,
                           );
                         const nextInvestigationTime =
                           investigatedDate && investigation.frequency
@@ -84,24 +84,24 @@ export default function ViewInvestigationSuggestions(props: {
                                 dayjs.duration({
                                   hours:
                                     parseInt(
-                                      investigation.frequency.split(" ")[0]
+                                      investigation.frequency.split(" ")[0],
                                     ) /
                                     (investigation.frequency
                                       .split(" ")[1]
                                       .includes("hr")
                                       ? 1
                                       : 60),
-                                })
+                                }),
                               )
                             : investigation.time
-                            ? dayjs(investigation.time)
-                            : undefined;
+                              ? dayjs(investigation.time)
+                              : undefined;
 
                         if (
                           !nextFurthestInvestigation ||
                           (nextInvestigationTime &&
                             nextFurthestInvestigation.isBefore(
-                              nextInvestigationTime
+                              nextInvestigationTime,
                             ))
                         ) {
                           nextFurthestInvestigation = nextInvestigationTime;
@@ -113,7 +113,7 @@ export default function ViewInvestigationSuggestions(props: {
                         console.log(
                           type,
                           nextFurthestInvestigation,
-                          nextInvestigationTime
+                          nextInvestigationTime,
                         );
 
                         return (
@@ -166,7 +166,7 @@ export default function ViewInvestigationSuggestions(props: {
                         >
                           {investigation.frequency && "next"} at{" "}
                           {nextFurthestInvestigation.format(
-                            "hh:mm A on DD/MM/YYYY"
+                            "hh:mm A on DD/MM/YYYY",
                           )}
                         </div>
                       ) : (
@@ -183,7 +183,7 @@ export default function ViewInvestigationSuggestions(props: {
                           investigation.type?.join("_-_")
                         }
                       >
-                        <CareIcon className="care-l-plus" />
+                        <CareIcon icon="l-plus" />
                         <span>Log Report</span>
                       </ButtonV2>
                     </td>
@@ -194,7 +194,7 @@ export default function ViewInvestigationSuggestions(props: {
           ) : (
             <tr>
               <td className="p-4" colSpan={3}>
-                No Investigation Suggestions
+                {t("no_investigation_suggestions")}
               </td>
             </tr>
           )}
@@ -202,7 +202,7 @@ export default function ViewInvestigationSuggestions(props: {
       </table>
       <div className="flex flex-col gap-4 md:hidden">
         {Array.isArray(investigations) ? (
-          investigations.map((investigation, index) => {
+          investigations.investigation?.map((investigation, index) => {
             let nextFurthestInvestigation: any = undefined;
 
             return (
@@ -222,13 +222,13 @@ export default function ViewInvestigationSuggestions(props: {
                             .split(" -- ")[1]
                             .split(",")
                             .map(
-                              (group) => group.split("( ")[1].split(" )")[0]
+                              (group) => group.split("( ")[1].split(" )")[0],
                             ),
                         };
                     const investigated = previousInvestigations?.find(
                       (previousInvestigation) =>
                         previousInvestigation.investigation_object.name ===
-                        investigationType.name
+                        investigationType.name,
                     );
                     const investigatedDate =
                       investigated &&
@@ -239,24 +239,24 @@ export default function ViewInvestigationSuggestions(props: {
                             dayjs.duration({
                               hours:
                                 parseInt(
-                                  investigation.frequency.split(" ")[0]
+                                  investigation.frequency.split(" ")[0],
                                 ) /
                                 (investigation.frequency
                                   .split(" ")[1]
                                   .includes("hr")
                                   ? 1
                                   : 60),
-                            })
+                            }),
                           )
                         : investigation.time
-                        ? dayjs(investigation.time)
-                        : undefined;
+                          ? dayjs(investigation.time)
+                          : undefined;
 
                     if (
                       !nextFurthestInvestigation ||
                       (nextInvestigationTime &&
                         nextFurthestInvestigation.isBefore(
-                          nextInvestigationTime
+                          nextInvestigationTime,
                         ))
                     ) {
                       nextFurthestInvestigation = nextInvestigationTime;
@@ -282,7 +282,7 @@ export default function ViewInvestigationSuggestions(props: {
                       >
                         {investigation.frequency && "next"} at{" "}
                         {nextFurthestInvestigation.format(
-                          "hh:mm A on DD/MM/YYYY"
+                          "hh:mm A on DD/MM/YYYY",
                         )}
                       </div>
                     ) : (
@@ -306,7 +306,7 @@ export default function ViewInvestigationSuggestions(props: {
                       investigation.type?.join("_-_")
                     }
                   >
-                    <CareIcon className="care-l-plus" />
+                    <CareIcon icon="l-plus" />
                     <span>Log Report</span>
                   </ButtonV2>
                 )}
@@ -315,7 +315,7 @@ export default function ViewInvestigationSuggestions(props: {
           })
         ) : (
           <div className="rounded-xl bg-white shadow">
-            No Investigation Suggestions
+            {t("no_investigation_suggestions")}
           </div>
         )}
       </div>

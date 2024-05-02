@@ -8,7 +8,7 @@ import { FormFieldBaseProps } from "../Form/FormFields/Utils";
  * field.
  */
 export default function PatientCategorySelect(
-  props: FormFieldBaseProps<PatientCategoryID>
+  props: FormFieldBaseProps<PatientCategoryID>,
 ) {
   return (
     <SelectFormField
@@ -27,7 +27,7 @@ export default function PatientCategorySelect(
                 Stable: "bg-patient-stable",
                 Moderate: "bg-patient-abnormal",
                 Critical: "bg-patient-critical",
-              }[option.id]
+              }[option.id],
             )}
           />
           <p>{option.text}</p>

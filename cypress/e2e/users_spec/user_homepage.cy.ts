@@ -28,6 +28,7 @@ describe("User Homepage", () => {
     userPage.typeInFirstName("Dev");
     userPage.typeInLastName("Doctor");
     userPage.selectRole("Doctor");
+    userPage.selectState("Kerala");
     userPage.selectDistrict("Ernakulam");
     userPage.typeInPhoneNumber(phone_number);
     userPage.typeInAltPhoneNumber(alt_phone_number);
@@ -38,11 +39,11 @@ describe("User Homepage", () => {
     userPage.verifyDataTestIdText("Last Name", "Last Name: Doctor");
     userPage.verifyDataTestIdText(
       "Phone Number",
-      "Phone Number: +919876543219"
+      "Phone Number: +919876543219",
     );
     userPage.verifyDataTestIdText(
       "WhatsApp no.",
-      "WhatsApp no.: +919876543219"
+      "WhatsApp no.: +919876543219",
     );
     userPage.verifyDataTestIdText("Role", "Role: Doctor");
     userPage.verifyDataTestIdText("District", "District: Ernakulam");

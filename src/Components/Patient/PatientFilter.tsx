@@ -100,6 +100,7 @@ export default function PatientFilter(props: any) {
     diagnoses_provisional: filter.diagnoses_provisional || null,
     diagnoses_unconfirmed: filter.diagnoses_unconfirmed || null,
     diagnoses_differential: filter.diagnoses_differential || null,
+    review_missed: filter.review_missed || null,
   });
 
   useQuery(routes.getAnyFacility, {
@@ -203,6 +204,7 @@ export default function PatientFilter(props: any) {
       diagnoses_provisional,
       diagnoses_unconfirmed,
       diagnoses_differential,
+      review_missed,
     } = filterState;
     const data = {
       district: district || "",
@@ -212,10 +214,10 @@ export default function PatientFilter(props: any) {
         last_consultation_current_bed__location || "",
       facility_type: facility_type || "",
       date_declared_positive_before: dateQueryString(
-        date_declared_positive_before
+        date_declared_positive_before,
       ),
       date_declared_positive_after: dateQueryString(
-        date_declared_positive_after
+        date_declared_positive_after,
       ),
       date_of_result_before: dateQueryString(date_of_result_before),
       date_of_result_after: dateQueryString(date_of_result_after),
@@ -227,16 +229,16 @@ export default function PatientFilter(props: any) {
       last_consultation_medico_legal_case:
         last_consultation_medico_legal_case || "",
       last_consultation_encounter_date_before: dateQueryString(
-        last_consultation_encounter_date_before
+        last_consultation_encounter_date_before,
       ),
       last_consultation_encounter_date_after: dateQueryString(
-        last_consultation_encounter_date_after
+        last_consultation_encounter_date_after,
       ),
       last_consultation_discharge_date_before: dateQueryString(
-        last_consultation_discharge_date_before
+        last_consultation_discharge_date_before,
       ),
       last_consultation_discharge_date_after: dateQueryString(
-        last_consultation_discharge_date_after
+        last_consultation_discharge_date_after,
       ),
       category: category || "",
       gender: gender || "",
@@ -254,10 +256,10 @@ export default function PatientFilter(props: any) {
       is_kasp: is_kasp || "",
       is_declared_positive: is_declared_positive || "",
       last_consultation_symptoms_onset_date_before: dateQueryString(
-        last_consultation_symptoms_onset_date_before
+        last_consultation_symptoms_onset_date_before,
       ),
       last_consultation_symptoms_onset_date_after: dateQueryString(
-        last_consultation_symptoms_onset_date_after
+        last_consultation_symptoms_onset_date_after,
       ),
       last_vaccinated_date_before: dateQueryString(last_vaccinated_date_before),
       last_vaccinated_date_after: dateQueryString(last_vaccinated_date_after),
@@ -270,6 +272,7 @@ export default function PatientFilter(props: any) {
       diagnoses_provisional: diagnoses_provisional || "",
       diagnoses_unconfirmed: diagnoses_unconfirmed || "",
       diagnoses_differential: diagnoses_differential || "",
+      review_missed: review_missed || "",
     };
     onChange(data);
   };
@@ -438,6 +441,18 @@ export default function PatientFilter(props: any) {
             />
           </div>
           <div className="w-full flex-none">
+            <FieldLabel className="text-sm">Review Missed</FieldLabel>
+            <SelectMenuV2
+              placeholder="Show all"
+              options={["true", "false"]}
+              optionLabel={(o) => (o === "true" ? "Yes" : "No")}
+              value={filterState.review_missed}
+              onChange={(v) =>
+                setFilterState({ ...filterState, review_missed: v })
+              }
+            />
+          </div>
+          <div className="w-full flex-none">
             <FieldLabel className="text-sm">Is Medico-Legal Case</FieldLabel>
             <SelectMenuV2
               placeholder="Show all"
@@ -512,7 +527,7 @@ export default function PatientFilter(props: any) {
             label="Admit Date"
             value={{
               start: getDate(
-                filterState.last_consultation_encounter_date_after
+                filterState.last_consultation_encounter_date_after,
               ),
               end: getDate(filterState.last_consultation_encounter_date_before),
             }}
@@ -525,7 +540,7 @@ export default function PatientFilter(props: any) {
             label="Discharge Date"
             value={{
               start: getDate(
-                filterState.last_consultation_discharge_date_after
+                filterState.last_consultation_discharge_date_after,
               ),
               end: getDate(filterState.last_consultation_discharge_date_before),
             }}
@@ -538,10 +553,10 @@ export default function PatientFilter(props: any) {
             label="Onset of Symptoms Date"
             value={{
               start: getDate(
-                filterState.last_consultation_symptoms_onset_date_after
+                filterState.last_consultation_symptoms_onset_date_after,
               ),
               end: getDate(
-                filterState.last_consultation_symptoms_onset_date_before
+                filterState.last_consultation_symptoms_onset_date_before,
               ),
             }}
             onChange={handleDateRangeChange}
@@ -599,7 +614,7 @@ export default function PatientFilter(props: any) {
                 setFilterState({ ...filterState, facility_type: v })
               }
               optionIcon={() => (
-                <CareIcon className="care-l-hospital text-lg" />
+                <CareIcon icon="l-hospital" className="text-lg" />
               )}
             />
           </div>
@@ -675,7 +690,7 @@ export default function PatientFilter(props: any) {
               optionValue={({ id }) => id}
               optionIcon={({ id }) => (
                 <>
-                  <CareIcon className="care-l-syringe mr-2 w-5" />
+                  <CareIcon icon="l-syringe" className="mr-2 w-5" />
                   <span className="font-bold">{id}</span>
                 </>
               )}

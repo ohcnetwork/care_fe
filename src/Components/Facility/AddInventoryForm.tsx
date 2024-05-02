@@ -22,7 +22,7 @@ const initForm = {
 
 const initError = Object.assign(
   {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
 );
 
 const initialState = {
@@ -86,7 +86,7 @@ export const AddInventoryForm = (props: any) => {
   useEffect(() => {
     // set the default units according to the item
     const item = data?.results.find(
-      (item) => item.id === Number(state.form.id)
+      (item) => item.id === Number(state.form.id),
     );
     if (item) {
       dispatch({
@@ -101,7 +101,7 @@ export const AddInventoryForm = (props: any) => {
     const unitName = data?.results[
       Number(unitData.item - 1)
     ].allowed_units?.filter(
-      (u: any) => Number(u.id) === Number(unitData.unit)
+      (u: any) => Number(u.id) === Number(unitData.unit),
     )[0].name;
     if (unitName === "Dozen") {
       return Number(unitData.quantity) * 12;
@@ -119,7 +119,7 @@ export const AddInventoryForm = (props: any) => {
       // get the stock cont of item selected
       const stockBefore = inventory.results.filter(
         (inventoryItem: any) =>
-          Number(inventoryItem.item_object.id) === Number(data.item)
+          Number(inventoryItem.item_object.id) === Number(data.item),
       );
       // if stock count=0
       if (stockBefore.length === 0) {
@@ -159,6 +159,9 @@ export const AddInventoryForm = (props: any) => {
         case "quantity":
           if (!state.form[field]?.length) {
             errors[field] = "Please select a quantity";
+            invalidForm = true;
+          } else if (state.form[field] <= 0) {
+            errors[field] = "Quantity must be more than 0";
             invalidForm = true;
           }
           return;
@@ -208,9 +211,16 @@ export const AddInventoryForm = (props: any) => {
         pathParams: { facilityId },
         onResponse: ({ res, data }) => {
           if (res?.ok && data) {
-            Notification.Success({
-              msg: "Inventory created successfully",
-            });
+            if (data.is_incoming) {
+              Notification.Success({
+                msg: "Inventory created successfully",
+              });
+            } else {
+              Notification.Success({
+                msg: "Inventory use stock updated successfully",
+              });
+            }
+
             goBack();
           }
         },

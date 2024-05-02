@@ -77,7 +77,7 @@ export default function SlideOver({
           <div
             className={classNames(
               "fixed transition-all",
-              backdropBlur && "inset-0 bg-black/75 backdrop-blur-sm"
+              backdropBlur && "inset-0 bg-black/75 backdrop-blur-sm",
             )}
           />
         </Transition.Child>
@@ -94,7 +94,7 @@ export default function SlideOver({
             className={classNames(
               "pointer-events-auto fixed",
               directionClasses[slideFrom].stick,
-              !onlyChild && "md:p-2"
+              !onlyChild && "md:p-2",
             )}
           >
             {onlyChild ? (
@@ -104,7 +104,7 @@ export default function SlideOver({
                 className={classNames(
                   "flex flex-col bg-white md:rounded-xl",
                   directionClasses[slideFrom].proportions,
-                  dialogClass
+                  dialogClass,
                 )}
               >
                 <div className="flex items-center gap-2 p-2 pt-4">
@@ -116,7 +116,7 @@ export default function SlideOver({
                       onCloseClick && onCloseClick();
                     }}
                   >
-                    <CareIcon className="care-l-arrow-left" />
+                    <CareIcon icon="l-arrow-left" />
                   </button>
                   <div className="flex w-full">
                     <h1 className="w-full text-xl font-black">{title}</h1>

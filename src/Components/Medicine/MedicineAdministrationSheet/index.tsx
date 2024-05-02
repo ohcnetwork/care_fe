@@ -27,14 +27,18 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
 
   const [showDiscontinued, setShowDiscontinued] = useState(false);
 
-  const filters = { is_prn, prescription_type: "REGULAR", limit: 100 };
+  const filters = {
+    dosage_type: is_prn ? "PRN" : "REGULAR,TITRATED",
+    prescription_type: "REGULAR",
+    limit: 100,
+  };
 
   const { data, loading, refetch } = useQuery(
     MedicineRoutes.listPrescriptions,
     {
       pathParams: { consultation },
       query: { ...filters, discontinued: false },
-    }
+    },
   );
 
   const discontinuedPrescriptions = useQuery(MedicineRoutes.listPrescriptions, {
@@ -57,13 +61,13 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
   const { activityTimelineBounds, prescriptions } = useMemo(
     () => ({
       prescriptions: prescriptionList.sort(
-        (a, b) => +a.discontinued - +b.discontinued
+        (a, b) => +a.discontinued - +b.discontinued,
       ),
       activityTimelineBounds: prescriptionList
         ? computeActivityBounds(prescriptionList)
         : undefined,
     }),
-    [prescriptionList]
+    [prescriptionList],
   );
 
   const daysPerPage = useBreakpoints({ default: 1, "2xl": 2 });
@@ -79,7 +83,7 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
       <SubHeading
         title={is_prn ? "PRN Prescriptions" : "Prescriptions"}
         lastModified={
-          prescriptions?.[0]?.last_administered_on ??
+          prescriptions?.[0]?.last_administration?.created_date ??
           prescriptions?.[0]?.modified_date
         }
         options={
@@ -136,6 +140,7 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
                     refetch();
                     discontinuedPrescriptions.refetch();
                   }}
+                  readonly={readonly || false}
                 />
               )}
             </>

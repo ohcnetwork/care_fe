@@ -31,7 +31,7 @@ const Pagination = ({
         }
       }
     },
-    [defaultPerPage, cPage]
+    [defaultPerPage, cPage],
   );
 
   const getPageNumbers = () => {
@@ -94,12 +94,12 @@ const Pagination = ({
           tooltip="Previous"
           onClick={() => goToPage(currentPage - 1)}
           disabled={currentPage - 1 <= 0}
-          children={<CareIcon className="care-l-angle-left text-lg" />}
+          children={<CareIcon icon="l-angle-left" className="text-lg" />}
         />
         <NavButton
           id="next-page"
           tooltip="Next"
-          children={<CareIcon className="care-l-angle-right text-lg" />}
+          children={<CareIcon icon="l-angle-right" className="text-lg" />}
           onClick={() => goToPage(currentPage + 1)}
           disabled={currentPage + 1 > totalPage}
         />
@@ -110,7 +110,7 @@ const Pagination = ({
         <NavButton
           id="first-page"
           tooltip="Jump to first page"
-          children={<CareIcon className="care-l-angle-double-left text-lg" />}
+          children={<CareIcon icon="l-angle-double-left" className="text-lg" />}
           onClick={() => goToPage(1)}
           disabled={currentPage === 1}
         />
@@ -119,7 +119,7 @@ const Pagination = ({
           tooltip="Previous"
           onClick={() => goToPage(currentPage - 1)}
           disabled={currentPage - 1 <= 0}
-          children={<CareIcon className="care-l-angle-left text-lg" />}
+          children={<CareIcon icon="l-angle-left" className="text-lg" />}
         />
 
         {pageNumbers.map((page) => (
@@ -137,14 +137,16 @@ const Pagination = ({
         <NavButton
           id="next-pages"
           tooltip="Next"
-          children={<CareIcon className="care-l-angle-right text-lg" />}
+          children={<CareIcon icon="l-angle-right" className="text-lg" />}
           onClick={() => goToPage(currentPage + 1)}
           disabled={currentPage + 1 > totalPage}
         />
         <NavButton
           id="last-page"
           tooltip="Jump to last page"
-          children={<CareIcon className="care-l-angle-double-right text-lg" />}
+          children={
+            <CareIcon icon="l-angle-double-right" className="text-lg" />
+          }
           onClick={() => goToPage(totalPage)}
           disabled={totalPage === 0 || currentPage === totalPage}
         />

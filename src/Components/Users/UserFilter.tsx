@@ -1,4 +1,3 @@
-import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
 import { parsePhoneNumber } from "../../Utils/utils";
 import TextFormField from "../Form/FormFields/TextFormField";
 import SelectMenuV2 from "../Form/SelectMenuV2";
@@ -7,6 +6,12 @@ import { USER_TYPE_OPTIONS } from "../../Common/constants";
 import useMergeState from "../../Common/hooks/useMergeState";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
+import DistrictAutocompleteFormField from "../Common/DistrictAutocompleteFormField";
+import StateAutocompleteFormField from "../Common/StateAutocompleteFormField";
+import { useTranslation } from "react-i18next";
+import * as Notify from "../../Utils/Notifications";
+import { FacilitySelect } from "../Common/FacilitySelect";
+import { FacilityModel } from "../Facility/models";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 
@@ -18,6 +23,7 @@ const parsePhoneNumberForFilterParam = (phoneNumber: string) => {
 };
 
 export default function UserFilter(props: any) {
+  const { t } = useTranslation();
   const { filter, onChange, closeFilter, removeFilters } = props;
   const [filterState, setFilterState] = useMergeState({
     first_name: filter.first_name || "",
@@ -25,16 +31,17 @@ export default function UserFilter(props: any) {
     phone_number: filter.phone_number || "+91",
     alt_phone_number: filter.alt_phone_number || "+91",
     user_type: filter.user_type || "",
-    district_id: filter.district_id || "",
-    district_ref: null,
+    district: filter.district || "",
+    state: filter.state || "",
+    home_facility: filter.home_facility || "",
+    home_facility_ref: null,
   });
 
-  const setDistrict = (selected: any) => {
-    const filterData: any = { ...filterState };
-    filterData["district_ref"] = selected;
-    filterData["district_id"] = (selected || {}).id;
-    setFilterState(filterData);
-  };
+  useQuery(routes.getAnyFacility, {
+    pathParams: { id: filter.home_facility },
+    prefetch: !!filter.home_facility,
+    onResponse: ({ data }) => setFilterState({ home_facility_ref: data }),
+  });
 
   const applyFilter = () => {
     const {
@@ -43,7 +50,9 @@ export default function UserFilter(props: any) {
       phone_number,
       alt_phone_number,
       user_type,
-      district_id,
+      district,
+      state,
+      home_facility,
     } = filterState;
     const data = {
       first_name: first_name || "",
@@ -51,22 +60,31 @@ export default function UserFilter(props: any) {
       phone_number: parsePhoneNumberForFilterParam(phone_number),
       alt_phone_number: parsePhoneNumberForFilterParam(alt_phone_number),
       user_type: user_type || "",
-      district_id: district_id || "",
+      district: district || "",
+      state: district ? state || "" : "",
+      home_facility: home_facility || "",
     };
+    if (state && !district) {
+      Notify.Warn({
+        msg: "District is required when state is selected",
+      });
+      return;
+    }
     onChange(data);
   };
 
-  useQuery(routes.getDistrict, {
-    prefetch: !!filter.district_id,
-    pathParams: { id: filter.district_id },
-    onResponse: (result) => {
-      if (!result || !result.data || !result.res) return;
-      setFilterState({ district_ref: result.data });
-    },
-  });
+  const handleChange = ({ name, value }: any) => {
+    if (name === "state" && !value)
+      setFilterState({ ...filterState, state: value, district: undefined });
+    else setFilterState({ ...filterState, [name]: value });
+  };
 
-  const handleChange = ({ name, value }: any) =>
-    setFilterState({ ...filterState, [name]: value });
+  const field = (name: string) => ({
+    name,
+    label: t(name),
+    value: filterState[name],
+    onChange: handleChange,
+  });
 
   return (
     <FiltersSlideover
@@ -108,15 +126,28 @@ export default function UserFilter(props: any) {
       </div>
 
       <div className="w-full flex-none">
-        <FieldLabel>District</FieldLabel>
-        <DistrictSelect
+        <FieldLabel>Home Facility</FieldLabel>
+        <FacilitySelect
+          name="home_facility"
+          setSelected={(selected) =>
+            setFilterState({
+              ...filterState,
+              home_facility: (selected as FacilityModel)?.id || "",
+              home_facility_ref: selected,
+            })
+          }
+          selected={filterState.home_facility_ref}
+          errors=""
           multiple={false}
-          name="district"
-          selected={filterState.district_ref}
-          setSelected={setDistrict}
-          errors={""}
         />
       </div>
+
+      <StateAutocompleteFormField {...field("state")} errorClassName="hidden" />
+      <DistrictAutocompleteFormField
+        errorClassName="hidden"
+        {...field("district")}
+        state={filterState.state}
+      />
       <div className="-mb-4">
         <PhoneNumberFormField
           label="Phone Number"

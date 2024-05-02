@@ -24,6 +24,7 @@ import CircularProgress from "../Common/components/CircularProgress";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "./models";
 import dayjs from "../../Utils/dayjs";
+import { FieldError } from "../Form/FieldValidators";
 
 interface PreDischargeFormInterface {
   new_discharge_reason: number | null;
@@ -31,7 +32,7 @@ interface PreDischargeFormInterface {
   discharge_date?: string;
   death_datetime?: string;
   death_confirmed_doctor?: string;
-  referred_to?: number | null | undefined;
+  referred_to?: string | null | undefined;
   referred_to_external?: string | null | undefined;
 }
 
@@ -79,7 +80,7 @@ const DischargeModal = ({
         ordering: "-modified_date",
         use: "claim",
         consultation: consultationData.id,
-      })
+      }),
     );
 
     if (res?.data?.results?.length > 0) {
@@ -121,15 +122,22 @@ const DischargeModal = ({
 
     if (
       preDischargeForm.new_discharge_reason ==
-        DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id &&
-      !preDischargeForm.discharge_notes.trim()
+      DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
     ) {
-      setErrors({
-        ...errors,
-        discharge_notes: "Please enter the cause of death",
-      });
-      setIsSendingDischargeApi(false);
-      return;
+      const newErrors: Record<string, FieldError> = {};
+
+      if (!preDischargeForm.discharge_notes.trim()) {
+        newErrors["discharge_notes"] = "Please enter the cause of death";
+      }
+      if (!preDischargeForm.death_confirmed_doctor?.trim()) {
+        newErrors["death_confirmed_doctor"] = "Field is required";
+      }
+
+      if (Object.entries(newErrors).length) {
+        setErrors({ ...errors, ...newErrors });
+        setIsSendingDischargeApi(false);
+        return;
+      }
     }
 
     const dischargeDetails = {
@@ -151,8 +159,8 @@ const DischargeModal = ({
           discharge: value,
           discharge_date: dayjs(preDischargeForm.discharge_date).toISOString(),
         },
-        { id: consultationData.id }
-      )
+        { id: consultationData.id },
+      ),
     );
 
     setIsSendingDischargeApi(false);
@@ -165,14 +173,12 @@ const DischargeModal = ({
     }
   };
 
-  const handleFacilitySelect = (selected: FacilityModel) => {
+  const handleFacilitySelect = (selected?: FacilityModel) => {
     setFacility(selected);
-    const { id, name } = selected || {};
-    const isExternal = id === -1;
     setPreDischargeForm((prev) => ({
       ...prev,
-      referred_to: isExternal ? null : id,
-      referred_to_external: isExternal ? name : null,
+      referred_to: selected?.id ?? null,
+      referred_to_external: !selected?.id ? selected?.name : null,
     }));
   };
 
@@ -182,7 +188,7 @@ const DischargeModal = ({
         <div>
           <p>Discharge patient from CARE</p>
           <span className="mt-1 flex gap-1 text-sm font-medium text-warning-500">
-            <CareIcon className="care-l-exclamation-triangle text-base" />
+            <CareIcon icon="l-exclamation-triangle" className="text-base" />
             <p>Caution: this action is irreversible.</p>
           </span>
         </div>
@@ -213,19 +219,21 @@ const DischargeModal = ({
         {preDischargeForm.new_discharge_reason ===
           DISCHARGE_REASONS.find((i) => i.text == "Referred")?.id && (
           <>
-            <FieldLabel>Referred to</FieldLabel>
-            <FacilitySelect
-              name="referred_to"
-              setSelected={(selected) =>
-                handleFacilitySelect(selected as FacilityModel)
-              }
-              selected={facility ?? null}
-              showAll
-              freeText
-              multiple={false}
-              errors={errors?.referred_to}
-              className="mb-4"
-            />
+            <div id="facility-referredto">
+              <FieldLabel>Referred to</FieldLabel>
+              <FacilitySelect
+                name="referred_to"
+                setSelected={(selected) =>
+                  handleFacilitySelect(selected as FacilityModel | undefined)
+                }
+                selected={facility ?? null}
+                showAll
+                freeText
+                multiple={false}
+                errors={errors?.referred_to}
+                className="mb-4"
+              />
+            </div>
           </>
         )}
         <TextAreaFormField
@@ -281,7 +289,7 @@ const DischargeModal = ({
           }}
           required
           min={dayjs(consultationData?.encounter_date).format(
-            "YYYY-MM-DDTHH:mm"
+            "YYYY-MM-DDTHH:mm",
           )}
           max={dayjs().format("YYYY-MM-DDTHH:mm")}
           error={
@@ -310,6 +318,7 @@ const DischargeModal = ({
           <TextFormField
             name="death_confirmed_by"
             label="Confirmed By"
+            error={errors.death_confirmed_doctor}
             value={preDischargeForm.death_confirmed_doctor ?? ""}
             onChange={(e) => {
               setPreDischargeForm((form) => {

@@ -16,7 +16,7 @@ export default async function request<TData, TBody>(
     onResponse,
     silent,
     reattempts = 3,
-  }: Options<TData, TBody> = {}
+  }: Options<TData, TBody> = {},
 ): Promise<RequestResult<TData>> {
   const signal = controller?.signal;
   const url = makeUrl(path, query, pathParams);
@@ -58,7 +58,7 @@ export default async function request<TData, TBody>(
 
   console.error(
     `Request failed after ${reattempts + 1} attempts`,
-    result.error
+    result.error,
   );
   return result;
 }

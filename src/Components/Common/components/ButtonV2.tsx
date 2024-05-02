@@ -108,7 +108,7 @@ const ButtonV2 = ({
     ghost ? `button-${variant}-ghost` : `button-${variant}-default`,
     border && `button-${variant}-border`,
     shadow && "shadow enabled:hover:shadow-lg",
-    tooltip && "tooltip"
+    tooltip && "tooltip",
   );
 
   if (tooltip) {
@@ -171,7 +171,7 @@ export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
       type="submit"
       children={
         <>
-          <CareIcon className="care-l-check-circle text-lg" />
+          <CareIcon icon="l-check-circle" className="text-lg" />
           <span className="whitespace-pre-wrap">{t(label)}</span>
         </>
       }
@@ -191,8 +191,8 @@ export const Cancel = ({ label = "Cancel", ...props }: CommonButtonProps) => {
       border
       children={
         <>
-          <CareIcon className="care-l-times-circle text-lg" />
-          <span className="whitespace-pre-wrap">{t(label)}</span>
+          <CareIcon icon="l-times-circle" className="text-lg" />
+          {label && <span className="whitespace-pre-wrap">{t(label)}</span>}
         </>
       }
       {...props}
