@@ -46,6 +46,7 @@ import { PatientModel, Occupation } from "./models";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import AutocompleteFormField from "../Form/FormFields/Autocomplete.js";
 import Spinner from "../Common/Spinner";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -1392,16 +1393,21 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                       {...field("age")}
                                       errorClassName="hidden"
                                       trailing={
-                                        <p className="absolute right-16 text-xs text-gray-700 sm:text-sm">
-                                          <p className="hidden  sm:inline min-[768px]:hidden lg:inline">
-                                            {field("age").value !== "" &&
-                                              "Year_of_Birth:"}
-                                          </p>
-                                          <span className="font-bold">
-                                            {field("age").value !== "" &&
-                                              new Date().getFullYear() -
-                                                field("age").value}
-                                          </span>
+                                        <p className="relative right-4 space-x-1 text-xs text-gray-700 sm:right-14 sm:text-sm md:right-4 lg:right-14">
+                                          {field("age").value !== "" && (
+                                            <>
+                                              <span className="hidden sm:inline md:hidden lg:inline">
+                                                Year of Birth:
+                                              </span>
+                                              <span className="inline sm:hidden md:inline lg:hidden">
+                                                YOB:
+                                              </span>
+                                              <span className="font-bold">
+                                                {new Date().getFullYear() -
+                                                  field("age").value}
+                                              </span>
+                                            </>
+                                          )}
                                         </p>
                                       }
                                       placeholder="Enter the age"
@@ -1683,7 +1689,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   />
                                 )}
                               </div>
-                              <SelectFormField
+                              <AutocompleteFormField
                                 {...field("occupation")}
                                 label="Occupation"
                                 placeholder="Select Occupation"
