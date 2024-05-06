@@ -8,7 +8,7 @@ describe("Manage User Profile", () => {
   const userProfilePage = new UserProfilePage();
   const manageUserPage = new ManageUserPage();
 
-  const age = "30";
+  const date_of_birth = "01011999";
   const gender = "Male";
   const email = "test@example.com";
   const phone = "+918899887788";
@@ -32,10 +32,10 @@ describe("Manage User Profile", () => {
     cy.awaitUrl("/user/profile");
   });
 
-  it("Set Age, Gender, Email, Phone and Working Hours for a user and verify its reflection in user profile", () => {
+  it("Set Dob, Gender, Email, Phone and Working Hours for a user and verify its reflection in user profile", () => {
     userProfilePage.clickEditProfileButton();
 
-    userProfilePage.typeAge(age);
+    userProfilePage.typedate_of_birth(date_of_birth);
     userProfilePage.selectGender(gender);
     userProfilePage.typeEmail(email);
     userProfilePage.typePhone(phone);
@@ -49,7 +49,7 @@ describe("Manage User Profile", () => {
 
     cy.verifyNotification("Details updated successfully");
 
-    userProfilePage.assertAge(age);
+    userProfilePage.assertdate_of_birth("01/01/1999");
     userProfilePage.assertGender(gender);
     userProfilePage.assertEmail(email);
     userProfilePage.assertPhone(phone);

@@ -49,7 +49,7 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
         hasLeading && (props.leadingPadding || "pl-10"),
         hasTrailing && (props.trailingPadding || "pr-10"),
         field.error && "border-danger-500",
-        field.className
+        field.className,
       )}
       disabled={field.disabled}
       type={props.type === "password" ? getPasswordFieldType() : props.type}
@@ -76,7 +76,7 @@ const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
           className="z-5 absolute right-0 top-0 flex h-full items-center px-3 text-xl"
           onClick={() => setShowPassword(!showPassword)}
         >
-          <CareIcon className={`care-l-eye${showPassword ? "" : "-slash"}`} />
+          <CareIcon icon={showPassword ? "l-eye" : "l-eye-slash"} />
         </button>
       </div>
     );

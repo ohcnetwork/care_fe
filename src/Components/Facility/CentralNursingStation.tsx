@@ -6,7 +6,6 @@ import Loading from "../Common/Loading";
 import Page from "../Common/components/Page";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { classNames } from "../../Utils/utils";
 import { LocationSelect } from "../Common/LocationSelect";
 import Pagination from "../Common/Pagination";
 import { Popover, Transition } from "@headlessui/react";
@@ -82,7 +81,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
           <Popover className="relative">
             <Popover.Button>
               <ButtonV2 variant="secondary" border>
-                <CareIcon className="care-l-setting text-lg" />
+                <CareIcon icon="l-setting" className="text-lg" />
                 Settings and Filters
               </ButtonV2>
             </Popover.Button>
@@ -138,10 +137,10 @@ export default function CentralNursingStation({ facilityId }: Props) {
                       optionLabel={({ value }) => t("SortOptions." + value)}
                       optionIcon={({ isAscending }) => (
                         <CareIcon
-                          className={
+                          icon={
                             isAscending
-                              ? "care-l-sort-amount-up"
-                              : "care-l-sort-amount-down"
+                              ? "l-sort-amount-up"
+                              : "l-sort-amount-down"
                           }
                         />
                       )}
@@ -153,9 +152,9 @@ export default function CentralNursingStation({ facilityId }: Props) {
                       name="hide_monitors_without_patient"
                       label="Hide Monitors without Patient"
                       value={JSON.parse(
-                        qParams.hide_monitors_without_patient ?? true
+                        qParams.hide_monitors_without_patient ?? true,
                       )}
-                      onChange={(e) => updateQuery({ [e.name]: e.value })}
+                      onChange={(e) => updateQuery({ [e.name]: `${e.value}` })}
                       labelClassName="text-sm"
                       errorClassName="hidden"
                     />
@@ -166,12 +165,12 @@ export default function CentralNursingStation({ facilityId }: Props) {
                       className="tooltip !h-11"
                     >
                       <CareIcon
-                        className={classNames(
+                        icon={
                           isFullscreen
-                            ? "care-l-compress-arrows"
-                            : "care-l-expand-arrows-alt",
-                          "text-lg"
-                        )}
+                            ? "l-compress-arrows"
+                            : "l-expand-arrows-alt"
+                        }
+                        className="text-lg"
                       />
                       {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
                     </ButtonV2>

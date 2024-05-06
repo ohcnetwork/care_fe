@@ -9,6 +9,7 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import { FieldChangeEvent } from "../Form/FormFields/Utils.js";
+import { t } from "i18next";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm = {
@@ -83,7 +84,7 @@ export const FacilityConfigure = (props: IProps) => {
     }
     if (
       state.form.middleware_address.match(
-        /^(?!https?:\/\/)[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*\.[a-zA-Z]{2,}$/
+        /^(?!https?:\/\/)[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*\.[a-zA-Z]{2,}$/,
       ) === null
     ) {
       dispatch({
@@ -109,7 +110,7 @@ export const FacilityConfigure = (props: IProps) => {
     setIsLoading(false);
     if (res?.ok) {
       Notification.Success({
-        msg: "Facility updated successfully",
+        msg: t("update_facility_middleware_success"),
       });
       navigate(`/facility/${facilityId}`);
     } else {

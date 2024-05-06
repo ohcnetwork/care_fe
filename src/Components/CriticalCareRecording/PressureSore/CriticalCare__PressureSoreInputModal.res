@@ -38,13 +38,17 @@ let make = (
   }, [state])
 
   let handleSubmit = e => {
-    updatePart(state)
-    hideModal(e)
     let region = PressureSore.regionToString(state.region)
-    if (state.length > 0.0 && state.width == 0.0) || (state.length == 0.0 && state.width > 0.0) {
+    if(state.length === 0.0 && state.width === 0.0){
+      hideModal(e)
+    }
+    else if (state.length > 0.0 && state.width == 0.0) || (state.length == 0.0 && state.width > 0.0) {
+      hideModal(e)
       Notifications.error({msg: `Please fill in both width and length for ${region} part`})
       setState(prev => {...prev, length: 0.0, width: 0.0})
     } else {
+      updatePart(state)
+      hideModal(e)
       Notifications.success({msg: `${region} part updated`})
     }
   }
@@ -98,7 +102,7 @@ let make = (
                   {str(PressureSore.regionToString(state.region))}
                 </span>
               </div>
-              <div className="flex flex-col sm:flex-row justify-center mt-2">
+              <div className="flex flex-col sm:flex-row justify-center mt-2 grid grid-cols-2 gap-2">
                 <div className="w-full">
                   <label className="block font-medium text-black text-left"> {str("Width")} </label>
                   <input

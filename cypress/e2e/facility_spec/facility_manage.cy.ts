@@ -12,7 +12,7 @@ describe("Facility Manage Functions", () => {
   const facilityMiddleware = "dev-middleware.coronasafe.live";
   const facilityUpdatedMiddleware = "updated.coronasafe.live";
   const facilityMiddlewareSuccessfullNotification =
-    "Facility updated successfully";
+    "Facility middleware updated successfully";
   const facilityHfridUpdateButton = "Link Health Facility";
   const facilityHfridToastNotificationText =
     /Health Facility config updated successfully|Health ID registration failed/;
@@ -141,6 +141,7 @@ describe("Facility Manage Functions", () => {
     facilityManage.verifySuccessMessageVisibilityAndContent(
       "Bed capacity added successfully"
     );
+    cy.closeNotification();
     facilityManage.verifyFacilityBedCapacity(totalCapacity);
     facilityManage.verifyFacilityBedCapacity(currentOccupied);
     // edit a existing bed
@@ -151,6 +152,7 @@ describe("Facility Manage Functions", () => {
     facilityManage.verifySuccessMessageVisibilityAndContent(
       "Bed capacity updated successfully"
     );
+    cy.closeNotification();
     facilityManage.verifyFacilityBedCapacity(totalUpdatedCapacity);
     facilityManage.verifyFacilityBedCapacity(currentUpdatedOccupied);
     // delete a bed

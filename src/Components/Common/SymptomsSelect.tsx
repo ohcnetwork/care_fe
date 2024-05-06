@@ -1,11 +1,11 @@
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { SYMPTOM_CHOICES } from "../../Common/constants";
+import { AutocompleteMutliSelect } from "../Form/FormFields/AutocompleteMultiselect";
 import FormField from "../Form/FormFields/FormField";
 import {
   FormFieldBaseProps,
   useFormFieldPropsResolver,
 } from "../Form/FormFields/Utils";
-import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
 
 const ASYMPTOMATIC_ID = 1;
 
@@ -51,7 +51,7 @@ export const SymptomsSelect = (props: FormFieldBaseProps<number[]>) => {
     if (value.includes(ASYMPTOMATIC_ID) && id !== ASYMPTOMATIC_ID)
       return (
         <div className="items-center">
-          <CareIcon className="care-l-exclamation-triangle mr-2" />
+          <CareIcon icon="l-exclamation-triangle" className="mr-2" />
           <span>
             also unselects <b className="font-medium">Asymptomatic</b>
           </span>
@@ -61,7 +61,7 @@ export const SymptomsSelect = (props: FormFieldBaseProps<number[]>) => {
     if (!value.includes(ASYMPTOMATIC_ID) && id === ASYMPTOMATIC_ID)
       return (
         <span>
-          <CareIcon className="care-l-exclamation-triangle mr-2" />
+          <CareIcon icon="l-exclamation-triangle" className="mr-2" />
           {`also unselects the other ${value.length} option(s)`}
         </span>
       );
@@ -69,15 +69,15 @@ export const SymptomsSelect = (props: FormFieldBaseProps<number[]>) => {
 
   return (
     <FormField field={field}>
-      <MultiSelectMenuV2
+      <AutocompleteMutliSelect
         id={field.id}
         options={SYMPTOM_CHOICES}
         disabled={props.disabled}
         placeholder="Select symptoms"
         optionLabel={(option) => option.text}
         optionValue={(option) => option.id}
+        value={props.value || []}
         optionDescription={getDescription}
-        value={props.value}
         onChange={updateSelection}
       />
     </FormField>

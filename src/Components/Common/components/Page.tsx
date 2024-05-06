@@ -6,6 +6,7 @@ import { SidebarShrinkContext } from "../Sidebar/Sidebar";
 interface PageProps extends PageTitleProps {
   children: React.ReactNode | React.ReactNode[];
   options?: React.ReactNode | React.ReactNode[];
+  changePageMetadata?: boolean;
   className?: string;
   noImplicitPadding?: boolean;
   ref?: RefObject<HTMLDivElement>;
@@ -39,6 +40,7 @@ export default function Page(props: PageProps) {
     <div className={classNames(padding, props.className)} ref={props.ref}>
       <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center md:gap-6">
         <PageTitle
+          changePageMetadata={props.changePageMetadata}
           title={props.title}
           breadcrumbs={props.breadcrumbs}
           backUrl={props.backUrl}

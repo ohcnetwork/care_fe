@@ -14,12 +14,12 @@ interface Props {
 
 const useRangePagination = ({ bounds, perPage, ...props }: Props) => {
   const [currentRange, setCurrentRange] = useState(
-    getInitialBounds(bounds, perPage, props.defaultEnd)
+    getInitialBounds(bounds, perPage, props.defaultEnd),
   );
 
   useEffect(() => {
     setCurrentRange(getInitialBounds(bounds, perPage, props.defaultEnd));
-  }, [bounds, perPage, props.defaultEnd]);
+  }, [JSON.stringify(bounds), perPage, props.defaultEnd]);
 
   const next = () => {
     const { end } = currentRange;
@@ -90,7 +90,7 @@ export default useRangePagination;
 const getInitialBounds = (
   bounds: DateRange,
   perPage: number,
-  defaultEnd?: boolean
+  defaultEnd?: boolean,
 ) => {
   const deltaBounds = bounds.end.valueOf() - bounds.start.valueOf();
 

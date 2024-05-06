@@ -4,8 +4,8 @@ import { classNames } from "../../../Utils/utils";
 export default function SwitchTabs(props: {
   className?: string;
   isTab2Active: boolean;
-  onClickTab1: () => void;
-  onClickTab2: () => void;
+  onClickTab1?: () => void;
+  onClickTab2?: () => void;
   tab1: ReactNode;
   tab2: ReactNode;
 }) {
@@ -13,7 +13,7 @@ export default function SwitchTabs(props: {
     <div
       className={classNames(
         "relative grid w-full grid-cols-2 items-center gap-4 rounded-md bg-primary-500/10 px-4 py-3 lg:w-52",
-        props.className
+        props.className,
       )}
     >
       <div

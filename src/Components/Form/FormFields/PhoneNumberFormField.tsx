@@ -14,7 +14,8 @@ import {
   PhoneNumberValidator,
   PhoneNumberType,
 } from "../FieldValidators";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
+import CareIcon, { IconName } from "../../../CAREUI/icons/CareIcon";
+import { Popover } from "@headlessui/react";
 
 const phoneCodes: Record<string, CountryData> = phoneCodesJson;
 
@@ -33,11 +34,9 @@ export default function PhoneNumberFormField(props: Props) {
     name: "India",
     code: "91",
   });
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-
   const validator = useMemo(
     () => PhoneNumberValidator(props.types),
-    [props.types]
+    [props.types],
   );
 
   const validate = useMemo(
@@ -54,7 +53,7 @@ export default function PhoneNumberFormField(props: Props) {
         return newError;
       }
     },
-    [props.disableValidation]
+    [props.disableValidation],
   );
 
   const setValue = useCallback(
@@ -69,13 +68,12 @@ export default function PhoneNumberFormField(props: Props) {
 
       setError(error);
     },
-    [field, validate]
+    [field, validate],
   );
 
   const handleCountryChange = (value: CountryData): void => {
     setCountry(value);
     setValue(conditionPhoneCode(value.code));
-    setIsOpen(false);
   };
 
   useEffect(() => {
@@ -107,51 +105,61 @@ export default function PhoneNumberFormField(props: Props) {
       }}
     >
       <div className="relative rounded-md shadow-sm">
-        <div
-          className="absolute inset-y-0 left-0 w-[4.5rem] cursor-pointer p-0.5"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          <span className="flex h-full items-center rounded-md bg-slate-100 pl-4 ">
-            {country?.flag ?? "🇮🇳"}
-          </span>
-          {isOpen ? (
-            <CareIcon className="care-l-angle-up absolute right-1 top-1/2 -translate-y-1/2 text-2xl font-bold " />
-          ) : (
-            <CareIcon className="care-l-angle-down absolute right-1 top-1/2 -translate-y-1/2 text-2xl font-bold " />
-          )}
-        </div>
-
-        <input
-          type="tel"
-          id={field.id}
-          name={field.name}
-          autoComplete={props.autoComplete ?? "tel"}
-          className={classNames(
-            "cui-input-base h-full pl-20 tracking-widest sm:leading-6 ",
-            field.error && "border-danger-500",
-            field.className
-          )}
-          maxLength={field.value?.startsWith("1800") ? 11 : 15}
-          placeholder={props.placeholder}
-          value={formatPhoneNumber(field.value, props.types)}
-          onChange={(e) => setValue(e.target.value)}
-          disabled={field.disabled}
-          onBlur={() => setError(validate(field.value, "blur"))}
-        />
-        {isOpen && (
-          <CountryCodesList handleCountryChange={handleCountryChange} />
-        )}
+        <Popover>
+          {({ open }: { open: boolean }) => {
+            return (
+              <>
+                <Popover.Button className="absolute h-full">
+                  <div className="absolute inset-y-0 left-0 m-0.5 flex w-[4.5rem] cursor-pointer items-center justify-around bg-slate-100">
+                    <span className="rounded-md pl-4">
+                      {country?.flag ?? "🇮🇳"}
+                    </span>
+                    <CareIcon
+                      icon="l-angle-down"
+                      className={`text-2xl font-bold ${open && "rotate-180"}`}
+                    />
+                  </div>
+                </Popover.Button>
+                <input
+                  type="tel"
+                  id={field.id}
+                  name={field.name}
+                  autoComplete={props.autoComplete ?? "tel"}
+                  className={classNames(
+                    "cui-input-base h-full pl-20 tracking-widest sm:leading-6 ",
+                    field.error && "border-danger-500",
+                    field.className,
+                  )}
+                  maxLength={field.value?.startsWith("1800") ? 11 : 15}
+                  placeholder={props.placeholder}
+                  value={formatPhoneNumber(field.value, props.types)}
+                  onChange={(e) => setValue(e.target.value)}
+                  disabled={field.disabled}
+                  onBlur={() => setError(validate(field.value, "blur"))}
+                />
+                <Popover.Panel className="w-full">
+                  {({ close }) => (
+                    <CountryCodesList
+                      handleCountryChange={handleCountryChange}
+                      onClose={close}
+                    />
+                  )}
+                </Popover.Panel>
+              </>
+            );
+          }}
+        </Popover>
       </div>
     </FormField>
   );
 }
 
-const phoneNumberTypeIcons: Record<PhoneNumberType, string> = {
-  international_mobile: "globe",
-  indian_mobile: "mobile-android",
-  mobile: "mobile-android",
-  landline: "phone",
-  support: "headset",
+const phoneNumberTypeIcons: Record<PhoneNumberType, IconName> = {
+  international_mobile: "l-globe",
+  indian_mobile: "l-mobile-android",
+  mobile: "l-mobile-android",
+  landline: "l-phone",
+  support: "l-headset",
 };
 
 const PhoneNumberTypesHelp = ({ types }: { types: PhoneNumberType[] }) => (
@@ -159,10 +167,8 @@ const PhoneNumberTypesHelp = ({ types }: { types: PhoneNumberType[] }) => (
     {types.map((type) => (
       <span key={type} className="tooltip mt-1">
         <CareIcon
-          className={classNames(
-            `care-l-${phoneNumberTypeIcons[type]}`,
-            "text-lg text-gray-500"
-          )}
+          icon={phoneNumberTypeIcons[type]}
+          className="text-lg text-gray-500"
         />
         <span className="tooltip-text tooltip-bottom -translate-x-1/2 translate-y-1 text-xs capitalize">
           {type.replace("_", " ")}
@@ -190,7 +196,13 @@ const formatPhoneNumber = (value: string, types: PhoneNumberType[]) => {
   return phoneNumber ? formatPhoneNumberUtil(phoneNumber) : value;
 };
 
-const CountryCodesList = ({ handleCountryChange }: any) => {
+const CountryCodesList = ({
+  handleCountryChange,
+  onClose,
+}: {
+  handleCountryChange: (value: CountryData) => void;
+  onClose: () => void;
+}) => {
   const [searchValue, setSearchValue] = useState<string>("");
 
   return (
@@ -228,6 +240,7 @@ const CountryCodesList = ({ handleCountryChange }: any) => {
               className="flex cursor-pointer items-center gap-2 rounded-md p-2 hover:bg-primary-100 hover:text-primary-600"
               onClick={() => {
                 handleCountryChange({ flag, name, code });
+                onClose();
               }}
             >
               <span>{flag}</span>
@@ -243,6 +256,7 @@ const CountryCodesList = ({ handleCountryChange }: any) => {
           className="flex cursor-pointer items-center gap-2 rounded-md p-2 hover:bg-primary-100 hover:text-primary-600"
           onClick={() => {
             handleCountryChange({ flag: "📞", name: "Support", code: "1800" });
+            onClose();
           }}
         >
           <span>📞</span>
@@ -254,6 +268,7 @@ const CountryCodesList = ({ handleCountryChange }: any) => {
           className="flex cursor-pointer items-center gap-2 rounded-md p-2 hover:bg-primary-100 hover:text-primary-600"
           onClick={() => {
             handleCountryChange({ flag: "🌍", name: "Other", code: "+" });
+            onClose();
           }}
         >
           <span>🌍</span>

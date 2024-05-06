@@ -52,24 +52,24 @@ const DateInputV2: React.FC<Props> = ({
   const [type, setType] = useState<DatePickerType>("date");
   const [year, setYear] = useState(new Date());
   const [displayValue, setDisplayValue] = useState<string>(
-    value ? dayjs(value).format("DDMMYYYY") : ""
+    value ? dayjs(value).format("DDMMYYYY") : "",
   );
 
   const decrement = () => {
     switch (type) {
       case "date":
         setDatePickerHeaderDate((prev) =>
-          dayjs(prev).subtract(1, "month").toDate()
+          dayjs(prev).subtract(1, "month").toDate(),
         );
         break;
       case "month":
         setDatePickerHeaderDate((prev) =>
-          dayjs(prev).subtract(1, "year").toDate()
+          dayjs(prev).subtract(1, "year").toDate(),
         );
         break;
       case "year":
         setDatePickerHeaderDate((prev) =>
-          dayjs(prev).subtract(1, "year").toDate()
+          dayjs(prev).subtract(1, "year").toDate(),
         );
         setYear((prev) => dayjs(prev).subtract(10, "year").toDate());
         break;
@@ -94,13 +94,13 @@ const DateInputV2: React.FC<Props> = ({
   const isSelectedDate = (date: number) => {
     if (value) {
       return dayjs(
-        new Date(value.getFullYear(), value.getMonth(), date)
+        new Date(value.getFullYear(), value.getMonth(), date),
       ).isSame(dayjs(value));
     }
   };
 
   type CloseFunction = (
-    focusableElement?: HTMLElement | MutableRefObject<HTMLElement | null>
+    focusableElement?: HTMLElement | MutableRefObject<HTMLElement | null>,
   ) => void;
 
   const setDateValue = (date: number, close: CloseFunction) => () => {
@@ -110,8 +110,8 @@ const DateInputV2: React.FC<Props> = ({
             new Date(
               datePickerHeaderDate.getFullYear(),
               datePickerHeaderDate.getMonth(),
-              date
-            )
+              date,
+            ),
           );
           close();
           setIsOpen?.(false);
@@ -125,7 +125,7 @@ const DateInputV2: React.FC<Props> = ({
     const daysInMonth = dayjs(date).daysInMonth();
 
     const dayOfWeek = dayjs(
-      new Date(date.getFullYear(), date.getMonth(), 1)
+      new Date(date.getFullYear(), date.getMonth(), 1),
     ).day();
     const blankDaysArray = [];
     for (let i = 1; i <= dayOfWeek; i++) {
@@ -143,7 +143,7 @@ const DateInputV2: React.FC<Props> = ({
 
   const getLastDay = (
     year = datePickerHeaderDate.getFullYear(),
-    month = datePickerHeaderDate.getMonth()
+    month = datePickerHeaderDate.getMonth(),
   ) => {
     return new Date(year, month + 1, 0).getDate();
   };
@@ -151,12 +151,28 @@ const DateInputV2: React.FC<Props> = ({
   const isDateWithinConstraints = (
     day = datePickerHeaderDate.getDate(),
     month = datePickerHeaderDate.getMonth(),
-    year = datePickerHeaderDate.getFullYear()
+    year = datePickerHeaderDate.getFullYear(),
   ) => {
     const date = new Date(year, month, day);
     if (min) if (date < min) return false;
     if (max) if (date > max) return false;
     return true;
+  };
+
+  const isDateWithinLimits = (parsedDate: dayjs.Dayjs): boolean => {
+    if (parsedDate?.isValid()) {
+      if (
+        (max && parsedDate.toDate() > max) ||
+        (min && parsedDate.toDate() < min)
+      ) {
+        Notification.Error({
+          msg: outOfLimitsErrorMessage ?? "Cannot select date out of range",
+        });
+        return false;
+      }
+      return true;
+    }
+    return false;
   };
 
   const isSelectedMonth = (month: number) =>
@@ -170,8 +186,8 @@ const DateInputV2: React.FC<Props> = ({
       new Date(
         datePickerHeaderDate.getFullYear(),
         month,
-        datePickerHeaderDate.getDate()
-      )
+        datePickerHeaderDate.getDate(),
+      ),
     );
     setType("date");
   };
@@ -181,8 +197,8 @@ const DateInputV2: React.FC<Props> = ({
       new Date(
         year,
         datePickerHeaderDate.getMonth(),
-        datePickerHeaderDate.getDate()
-      )
+        datePickerHeaderDate.getDate(),
+      ),
     );
     setType("date");
   };
@@ -233,7 +249,10 @@ const DateInputV2: React.FC<Props> = ({
                   value={value && dayjs(value).format("DD/MM/YYYY")}
                 />
                 <div className="absolute right-0 top-1/2 -translate-y-1/2 p-2">
-                  <CareIcon className="care-l-calendar-alt text-lg text-gray-600" />
+                  <CareIcon
+                    icon="l-calendar-alt"
+                    className="text-lg text-gray-600"
+                  />
                 </div>
               </Popover.Button>
 
@@ -242,7 +261,7 @@ const DateInputV2: React.FC<Props> = ({
                   static
                   className={classNames(
                     "cui-dropdown-base absolute mt-0.5 w-72 divide-y-0 p-4",
-                    getPosition()
+                    getPosition(),
                   )}
                 >
                   <div className="mb-4 flex w-full flex-col items-center justify-between">
@@ -254,14 +273,14 @@ const DateInputV2: React.FC<Props> = ({
                         displayValue.replace(
                           /^(\d{2})(\d{0,2})(\d{0,4}).*/,
                           (_, dd, mm, yyyy) =>
-                            [dd, mm, yyyy].filter(Boolean).join("/")
+                            [dd, mm, yyyy].filter(Boolean).join("/"),
                         ) || ""
                       } // Display the value in DD/MM/YYYY format
                       placeholder={t("DD/MM/YYYY")}
                       onChange={(e) => {
                         setDisplayValue(e.target.value.replaceAll("/", ""));
                         const value = dayjs(e.target.value, "DD/MM/YYYY", true);
-                        if (value.isValid()) {
+                        if (isDateWithinLimits(value)) {
                           onChange(value.toDate());
                           close();
                           setIsOpen?.(false);
@@ -274,13 +293,13 @@ const DateInputV2: React.FC<Props> = ({
                         disabled={
                           !isDateWithinConstraints(
                             getLastDay(),
-                            datePickerHeaderDate.getMonth() - 1
+                            datePickerHeaderDate.getMonth() - 1,
                           )
                         }
                         className="inline-flex aspect-square cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-gray-300"
                         onClick={decrement}
                       >
-                        <CareIcon className="care-l-angle-left-b text-lg" />
+                        <CareIcon icon="l-angle-left-b" className="text-lg" />
                       </button>
 
                       <div className="flex items-center justify-center text-sm">
@@ -313,7 +332,7 @@ const DateInputV2: React.FC<Props> = ({
                         className="inline-flex aspect-square cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-gray-300"
                         onClick={increment}
                       >
-                        <CareIcon className="care-l-angle-right-b text-lg" />
+                        <CareIcon icon="l-angle-right-b" className="text-lg" />
                       </button>
                     </div>
                   </div>
@@ -389,12 +408,16 @@ const DateInputV2: React.FC<Props> = ({
                               "w-1/4 cursor-pointer rounded-lg px-2 py-4 text-center text-sm font-semibold",
                               value && isSelectedMonth(i)
                                 ? "bg-primary-500 text-white"
-                                : "text-gray-700 hover:bg-gray-300"
+                                : "text-gray-700 hover:bg-gray-300",
                             )}
                             onClick={setMonthValue(i)}
                           >
                             {dayjs(
-                              new Date(datePickerHeaderDate.getFullYear(), i, 1)
+                              new Date(
+                                datePickerHeaderDate.getFullYear(),
+                                i,
+                                1,
+                              ),
                             ).format("MMM")}
                           </div>
                         ))}
@@ -414,7 +437,7 @@ const DateInputV2: React.FC<Props> = ({
                                 "w-1/4 cursor-pointer rounded-lg px-2 py-4 text-center text-sm font-semibold",
                                 value && isSelectedYear(y)
                                   ? "bg-primary-500 text-white"
-                                  : "text-gray-700 hover:bg-gray-300"
+                                  : "text-gray-700 hover:bg-gray-300",
                               )}
                               onClick={setYearValue(y)}
                             >

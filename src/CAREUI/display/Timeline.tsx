@@ -1,4 +1,5 @@
 import { createContext, useContext } from "react";
+import { useTranslation } from "react-i18next";
 import { PerformedByModel } from "../../Components/HCX/misc";
 import { classNames, formatName } from "../../Utils/utils";
 import CareIcon, { IconName } from "../icons/CareIcon";
@@ -9,7 +10,9 @@ export interface TimelineEvent<TType = string> {
   timestamp: string;
   by: PerformedByModel | undefined;
   icon: IconName;
-  notes?: string;
+  iconStyle?: string;
+  iconWrapperStyle?: string;
+  notes?: string | React.ReactNode;
   cancelled?: boolean;
 }
 
@@ -23,7 +26,7 @@ const TimelineContext = createContext("");
 
 export default function Timeline({ className, children, name }: TimelineProps) {
   return (
-    <div className={className}>
+    <div className={className} id="list">
       <ol role="list" className="space-y-6">
         <TimelineContext.Provider value={name}>
           {children}
@@ -49,13 +52,14 @@ interface TimelineNodeProps {
 
 export const TimelineNode = (props: TimelineNodeProps) => {
   const name = useContext(TimelineContext);
+  const { t } = useTranslation();
 
   return (
     <li className="relative flex gap-x-4">
       <div
         className={classNames(
           props.isLast ? "h-6" : "-bottom-6",
-          "absolute left-0 top-0 flex w-6 justify-center"
+          "absolute left-0 top-0 flex w-6 justify-center",
         )}
       >
         <div className="w-px bg-gray-300" />
@@ -64,14 +68,14 @@ export const TimelineNode = (props: TimelineNodeProps) => {
       <div
         className={classNames(
           props.className,
-          "group flex w-full flex-col items-start gap-y-1"
+          "group flex w-full flex-col items-start gap-y-1",
         )}
       >
         <div className="relative flex w-full justify-between gap-x-4">
           <div
             className={classNames(
               "flex w-full gap-x-4",
-              props.event.cancelled && "line-through"
+              props.event.cancelled && "line-through",
             )}
           >
             {props.title || (
@@ -80,9 +84,12 @@ export const TimelineNode = (props: TimelineNodeProps) => {
                   <p className="flex-auto py-0.5 text-xs leading-5 text-gray-600 md:w-2/3">
                     {props.event.by && (
                       <span className="font-medium text-gray-900">
-                        {formatName(props.event.by)}{" "}
-                        {props.event.by.user_type &&
-                          `(${props.event.by.user_type}) `}
+                        {props.event.by.username.startsWith("asset")
+                          ? t("virtual_nursing_assistant")
+                          : `${formatName(props.event.by)} ${
+                              props.event.by.user_type &&
+                              `(${props.event.by.user_type})`
+                            }`}{" "}
                       </span>
                     )}
                     {props.titleSuffix
@@ -121,9 +128,17 @@ interface TimelineNodeTitleProps {
 export const TimelineNodeTitle = (props: TimelineNodeTitleProps) => {
   return (
     <>
-      <div className="relative flex h-6 w-6 flex-none items-center justify-center rounded-full bg-gray-200 transition-all duration-200 ease-in-out group-hover:bg-primary-500">
+      <div
+        className={classNames(
+          props.event.iconWrapperStyle,
+          "relative flex h-6 w-6 flex-none items-center justify-center rounded-full bg-gray-200 transition-all duration-200 ease-in-out group-hover:bg-primary-500",
+        )}
+      >
         <CareIcon
-          className="text-base text-gray-700 transition-all duration-200 ease-in-out group-hover:text-white"
+          className={classNames(
+            props.event.iconStyle,
+            "text-base text-gray-700 transition-all duration-200 ease-in-out group-hover:text-white",
+          )}
           aria-hidden="true"
           icon={props.event.icon}
         />

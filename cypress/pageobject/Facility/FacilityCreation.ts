@@ -66,8 +66,7 @@ class FacilityPage {
   }
 
   selectBedType(bedType: string) {
-    cy.get("div#bed-type button").click();
-    cy.get("[role='option']").contains(bedType).click();
+    cy.clickAndSelectOption("div#bed-type button", bedType);
   }
 
   isVisibleselectBedType() {
@@ -364,6 +363,7 @@ class FacilityPage {
   }
 
   fillInventoryDetails(name: string, status: string, quantity: string) {
+    cy.wait(2000);
     cy.get("div#id").click();
     cy.get("div#id ul li").contains(name).click();
     cy.get("div#isIncoming").click();
@@ -372,6 +372,7 @@ class FacilityPage {
   }
 
   fillInventoryMinimumDetails(name: string, quantity: string) {
+    cy.wait(2000);
     cy.get("div#id").click();
     cy.get("div#id ul li").contains(name).click();
     cy.get("[name='quantity']").type(quantity);

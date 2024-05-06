@@ -14,7 +14,7 @@ interface DropdownMenuProps {
   variant?: ButtonVariant;
   size?: ButtonSize;
   icon?: JSX.Element | undefined;
-  children: JSX.Element | JSX.Element[];
+  children: ReactNode | ReactNode[];
   disabled?: boolean | undefined;
   className?: string | undefined;
   itemClassName?: string | undefined;
@@ -39,7 +39,7 @@ export default function DropdownMenu({
           <div
             className={classNames(
               "flex items-center gap-2 whitespace-nowrap",
-              size === "small" ? "h-5" : "h-6"
+              size === "small" ? "h-5" : "h-6",
             )}
           >
             {props.icon}
@@ -92,7 +92,7 @@ export function DropdownItem({
           "m-2 flex items-center justify-start gap-3 rounded border-0 px-4 py-2 text-sm font-normal transition-all duration-200 ease-in-out",
           `dropdown-item-${variant}`,
           isAuthorized ? "pointer-events-auto cursor-pointer" : "!hidden",
-          className
+          className,
         )}
       >
         <i
@@ -105,7 +105,7 @@ export function DropdownItem({
               warning: "text-warning-500",
               danger: "text-danger-500",
               alert: "text-alert-500",
-            }[variant]
+            }[variant],
           )}
         >
           {icon}

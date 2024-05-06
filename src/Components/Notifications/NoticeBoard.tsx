@@ -42,7 +42,7 @@ export const NoticeBoard = () => {
     notices = (
       <div className=" m-auto flex max-w-xs items-center ">
         <div className="my-36">
-          <CareIcon className=" care-l-bell-slash h-auto text-gray-500" />
+          <CareIcon icon="l-bell-slash" className="h-auto text-gray-500" />
           <div className=" m-auto mt-6 text-2xl text-gray-500">
             No Notice Available
           </div>

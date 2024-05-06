@@ -49,7 +49,7 @@ export default function DischargeSummaryModal(props: Props) {
       setGenerating(false);
 
       const res = await dispatch(
-        previewDischargeSummary({ external_id: props.consultation.id })
+        previewDischargeSummary({ external_id: props.consultation.id }),
       );
 
       if (res.status === 200) {
@@ -67,7 +67,7 @@ export default function DischargeSummaryModal(props: Props) {
   const handleRegenDischargeSummary = async () => {
     setDownloading(true);
     const res = await dispatch(
-      generateDischargeSummary({ external_id: props.consultation.id })
+      generateDischargeSummary({ external_id: props.consultation.id }),
     );
     if (res.status === 406) {
       Error({
@@ -85,7 +85,7 @@ export default function DischargeSummaryModal(props: Props) {
   const downloadDischargeSummary = async () => {
     // returns summary or 202 if new create task started
     const res = await dispatch(
-      previewDischargeSummary({ external_id: props.consultation.id })
+      previewDischargeSummary({ external_id: props.consultation.id }),
     );
 
     if (res.status === 202) {
@@ -131,7 +131,7 @@ export default function DischargeSummaryModal(props: Props) {
     }
 
     const res = await dispatch(
-      emailDischargeSummary({ email }, { external_id: props.consultation.id })
+      emailDischargeSummary({ email }, { external_id: props.consultation.id }),
     );
 
     if (res.status === 202) {
@@ -155,7 +155,10 @@ export default function DischargeSummaryModal(props: Props) {
             {t("email_discharge_summary_description")}
           </span>
           <span className="text-sm text-warning-600">
-            <CareIcon className="care-l-exclamation-triangle mr-1 text-base" />
+            <CareIcon
+              icon="l-exclamation-triangle"
+              className="mr-1 text-base"
+            />
             {`${t("disclaimer")}: ${t("generated_summary_caution")}`}
           </span>
         </div>
@@ -178,23 +181,23 @@ export default function DischargeSummaryModal(props: Props) {
           <Cancel onClick={props.onClose} />
           <Submit onClick={handleDownload} disabled={downloading}>
             {downloading ? (
-              <CareIcon className="care-l-spinner animate-spin text-lg" />
+              <CareIcon icon="l-spinner" className="animate-spin text-lg" />
             ) : (
-              <CareIcon className="care-l-file-download-alt text-lg" />
+              <CareIcon icon="l-file-download-alt" className="text-lg" />
             )}
             <span>
               {generating
                 ? t("generating") + "..."
                 : downloading
-                ? t("downloading") + "..."
-                : t("download")}
+                  ? t("downloading") + "..."
+                  : t("download")}
             </span>
           </Submit>
           <Submit onClick={handleEmail} disabled={emailing}>
             {emailing ? (
-              <CareIcon className="care-l-spinner animate-spin text-lg" />
+              <CareIcon icon="l-spinner" className="animate-spin text-lg" />
             ) : (
-              <CareIcon className="care-l-fast-mail text-lg" />
+              <CareIcon icon="l-fast-mail" className="text-lg" />
             )}
             <span>{t("send_email")}</span>
           </Submit>

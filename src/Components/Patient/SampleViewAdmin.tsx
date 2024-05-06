@@ -70,7 +70,7 @@ export default function SampleViewAdmin() {
   const handleApproval = async (
     sample: SampleTestModel,
     status: number,
-    result: number
+    result: number,
   ) => {
     const sampleData: any = {
       id: sample.id,
@@ -125,9 +125,9 @@ export default function SampleViewAdmin() {
           .map((field: string) =>
             new Date(field).toString() === "Invalid Date"
               ? field
-              : formatDateTime(field)
+              : formatDateTime(field),
           )
-          .join(",")
+          .join(","),
       )
       .join("\n");
 
@@ -136,7 +136,7 @@ export default function SampleViewAdmin() {
     sampleList = sampeleData.results.map((item) => {
       const status = String(item.status) as keyof typeof SAMPLE_FLOW_RULES;
       const statusText = SAMPLE_TEST_STATUS.find(
-        (i) => i.text === status
+        (i) => i.text === status,
       )?.desc;
       return (
         <div key={`usr_${item.id}`} className="mt-6 w-full lg:w-1/2 lg:px-4">
@@ -145,8 +145,8 @@ export default function SampleViewAdmin() {
               item.result === "POSITIVE"
                 ? "border-red-700 bg-red-100"
                 : item.result === "NEGATIVE"
-                ? "border-primary-700 bg-primary-100"
-                : "bg-white"
+                  ? "border-primary-700 bg-primary-100"
+                  : "bg-white"
             }`}
           >
             <div className="flex h-full flex-col justify-between px-6 py-4">
@@ -157,7 +157,7 @@ export default function SampleViewAdmin() {
                   </div>
                   <div>
                     {item.sample_type && (
-                      <span className="text-wrap mx-1 truncate rounded-md bg-blue-200 px-2 py-1 text-sm font-bold text-blue-800">
+                      <span className="mx-1 truncate text-wrap rounded-md bg-blue-200 px-2 py-1 text-sm font-bold text-blue-800">
                         Type: {item.sample_type}
                       </span>
                     )}
@@ -199,7 +199,10 @@ export default function SampleViewAdmin() {
                       Contact:{" "}
                     </span>
                     Confirmed carrier
-                    <CareIcon className="care-l-exclamation-triangle text-xl font-bold text-red-500" />
+                    <CareIcon
+                      icon="l-exclamation-triangle"
+                      className="text-xl font-bold text-red-500"
+                    />
                   </div>
                 )}
                 {item.patient_has_suspected_contact &&
@@ -209,7 +212,10 @@ export default function SampleViewAdmin() {
                         Contact:{" "}
                       </span>
                       Suspected carrier
-                      <CareIcon className="care-l-exclamation-triangle text-xl font-bold text-yellow-500" />
+                      <CareIcon
+                        icon="l-exclamation-triangle"
+                        className="text-xl font-bold text-yellow-500"
+                      />
                     </div>
                   )}
                 {item.has_sari && (
@@ -218,14 +224,20 @@ export default function SampleViewAdmin() {
                       SARI:{" "}
                     </span>
                     Severe Acute Respiratory illness
-                    <CareIcon className="care-l-exclamation-triangle text-xl font-bold text-orange-500" />
+                    <CareIcon
+                      icon="l-exclamation-triangle"
+                      className="text-xl font-bold text-orange-500"
+                    />
                   </div>
                 )}
                 {item.has_ari && !item.has_sari && (
                   <div>
                     <span className="font-semibold leading-relaxed">ARI: </span>
                     Acute Respiratory illness
-                    <CareIcon className=" care-l-exclamation-triangle text-xl font-bold text-yellow-500" />
+                    <CareIcon
+                      icon="l-exclamation-triangle"
+                      className="text-xl font-bold text-yellow-500"
+                    />
                   </div>
                 )}
               </div>
@@ -354,26 +366,26 @@ export default function SampleViewAdmin() {
               "Status",
               "status",
               SAMPLE_TEST_STATUS.find(
-                (status) => status.id == qParams.status
-              )?.text.replaceAll("_", " ") || ""
+                (status) => status.id == qParams.status,
+              )?.text.replaceAll("_", " ") || "",
             ),
             value(
               "Result",
               "result",
               SAMPLE_TEST_RESULT.find((result) => result.id == qParams.result)
-                ?.text || ""
+                ?.text || "",
             ),
             value(
               "Sample Test Type",
               "sample_type",
               SAMPLE_TYPE_CHOICES.find(
-                (type) => type.id === qParams.sample_type
-              )?.text || ""
+                (type) => type.id === qParams.sample_type,
+              )?.text || "",
             ),
             value(
               "Facility",
               "facility",
-              qParams.facility ? facilityData?.name || "" : ""
+              qParams.facility ? facilityData?.name || "" : "",
             ),
           ]}
         />

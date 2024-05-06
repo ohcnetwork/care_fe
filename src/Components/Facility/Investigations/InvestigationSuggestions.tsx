@@ -64,18 +64,19 @@ export default function ViewInvestigationSuggestions(props: {
                                 .split(" -- ")[1]
                                 .split(",")
                                 .map(
-                                  (group) => group.split("( ")[1].split(" )")[0]
+                                  (group) =>
+                                    group.split("( ")[1].split(" )")[0],
                                 ),
                             };
                         const investigated = previousInvestigations?.find(
                           (previousInvestigation) =>
                             previousInvestigation.investigation_object.name ===
-                            investigationType.name
+                            investigationType.name,
                         );
                         const investigatedDate =
                           investigated &&
                           dayjs(
-                            investigated.session_object.session_created_date
+                            investigated.session_object.session_created_date,
                           );
                         const nextInvestigationTime =
                           investigatedDate && investigation.frequency
@@ -83,24 +84,24 @@ export default function ViewInvestigationSuggestions(props: {
                                 dayjs.duration({
                                   hours:
                                     parseInt(
-                                      investigation.frequency.split(" ")[0]
+                                      investigation.frequency.split(" ")[0],
                                     ) /
                                     (investigation.frequency
                                       .split(" ")[1]
                                       .includes("hr")
                                       ? 1
                                       : 60),
-                                })
+                                }),
                               )
                             : investigation.time
-                            ? dayjs(investigation.time)
-                            : undefined;
+                              ? dayjs(investigation.time)
+                              : undefined;
 
                         if (
                           !nextFurthestInvestigation ||
                           (nextInvestigationTime &&
                             nextFurthestInvestigation.isBefore(
-                              nextInvestigationTime
+                              nextInvestigationTime,
                             ))
                         ) {
                           nextFurthestInvestigation = nextInvestigationTime;
@@ -112,7 +113,7 @@ export default function ViewInvestigationSuggestions(props: {
                         console.log(
                           type,
                           nextFurthestInvestigation,
-                          nextInvestigationTime
+                          nextInvestigationTime,
                         );
 
                         return (
@@ -165,7 +166,7 @@ export default function ViewInvestigationSuggestions(props: {
                         >
                           {investigation.frequency && "next"} at{" "}
                           {nextFurthestInvestigation.format(
-                            "hh:mm A on DD/MM/YYYY"
+                            "hh:mm A on DD/MM/YYYY",
                           )}
                         </div>
                       ) : (
@@ -182,7 +183,7 @@ export default function ViewInvestigationSuggestions(props: {
                           investigation.type?.join("_-_")
                         }
                       >
-                        <CareIcon className="care-l-plus" />
+                        <CareIcon icon="l-plus" />
                         <span>Log Report</span>
                       </ButtonV2>
                     </td>
@@ -221,13 +222,13 @@ export default function ViewInvestigationSuggestions(props: {
                             .split(" -- ")[1]
                             .split(",")
                             .map(
-                              (group) => group.split("( ")[1].split(" )")[0]
+                              (group) => group.split("( ")[1].split(" )")[0],
                             ),
                         };
                     const investigated = previousInvestigations?.find(
                       (previousInvestigation) =>
                         previousInvestigation.investigation_object.name ===
-                        investigationType.name
+                        investigationType.name,
                     );
                     const investigatedDate =
                       investigated &&
@@ -238,24 +239,24 @@ export default function ViewInvestigationSuggestions(props: {
                             dayjs.duration({
                               hours:
                                 parseInt(
-                                  investigation.frequency.split(" ")[0]
+                                  investigation.frequency.split(" ")[0],
                                 ) /
                                 (investigation.frequency
                                   .split(" ")[1]
                                   .includes("hr")
                                   ? 1
                                   : 60),
-                            })
+                            }),
                           )
                         : investigation.time
-                        ? dayjs(investigation.time)
-                        : undefined;
+                          ? dayjs(investigation.time)
+                          : undefined;
 
                     if (
                       !nextFurthestInvestigation ||
                       (nextInvestigationTime &&
                         nextFurthestInvestigation.isBefore(
-                          nextInvestigationTime
+                          nextInvestigationTime,
                         ))
                     ) {
                       nextFurthestInvestigation = nextInvestigationTime;
@@ -281,7 +282,7 @@ export default function ViewInvestigationSuggestions(props: {
                       >
                         {investigation.frequency && "next"} at{" "}
                         {nextFurthestInvestigation.format(
-                          "hh:mm A on DD/MM/YYYY"
+                          "hh:mm A on DD/MM/YYYY",
                         )}
                       </div>
                     ) : (
@@ -305,7 +306,7 @@ export default function ViewInvestigationSuggestions(props: {
                       investigation.type?.join("_-_")
                     }
                   >
-                    <CareIcon className="care-l-plus" />
+                    <CareIcon icon="l-plus" />
                     <span>Log Report</span>
                   </ButtonV2>
                 )}
