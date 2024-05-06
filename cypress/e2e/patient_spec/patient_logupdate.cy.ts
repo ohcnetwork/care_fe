@@ -154,6 +154,38 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.verifyContentPresence("#basic-information", [additionalSymptoms]);
   });
 
+  it("Create a normal log update to verify MEWS Score Functionality", () => {
+    patientPage.visitPatient(domicilaryPatient);
+    patientConsultationPage.clickEditConsultationButton();
+    patientConsultationPage.selectPatientSuggestion("Domiciliary Care");
+    cy.submitButton("Update Consultation");
+    cy.verifyNotification("Consultation updated successfully");
+    cy.closeNotification();
+    patientLogupdate.clickLogupdate();
+    // Verify the MEWS Score reflection
+    patientLogupdate.selectPatientCategory(patientCategory);
+    patientLogupdate.typeSystolic(patientSystolic);
+    patientLogupdate.typeDiastolic(patientDiastolic);
+    patientLogupdate.typePulse(patientPulse);
+    patientLogupdate.typeTemperature(patientTemperature);
+    patientLogupdate.typeRespiratory(patientRespiratory);
+    cy.get("#consciousness_level-2").click();
+    cy.submitButton("Save");
+    cy.verifyNotification("Consultation Updates details created successfully");
+    cy.closeNotification();
+    cy.verifyContentPresence("#consultation-buttons", ["9"]);
+    // Verify the Incomplete data will give blank info
+    patientLogupdate.clickLogupdate();
+    patientLogupdate.selectPatientCategory(patientCategory);
+    patientLogupdate.typeSystolic(patientSystolic);
+    patientLogupdate.typeDiastolic(patientDiastolic);
+    patientLogupdate.typePulse(patientPulse);
+    cy.submitButton("Save");
+    cy.verifyNotification("Consultation Updates details created successfully");
+    cy.closeNotification();
+    cy.verifyContentPresence("#consultation-buttons", ["-"]);
+  });
+
   afterEach(() => {
     cy.saveLocalStorage();
   });
