@@ -20,18 +20,15 @@ const UserGroups = {
 };
 
 const courtesyTitle = (user: UserAssignedModel) => {
-  let genderSalutation;
-  switch (user.gender) {
-    case 0:
-      genderSalutation = "Mr";
-      break;
-    case 1:
-      genderSalutation = "Ms";
-      break;
-    default:
-      genderSalutation = "Hey";
+  if (user.user_type === "Doctor") {
+    return "Dr." as const;
   }
-  return user.user_type === "Doctor" ? "Dr" : genderSalutation;
+
+  return {
+    1: "Mr.",
+    2: "Ms.",
+    3: "Hey",
+  }[user.gender!];
 };
 
 type UserGroup = keyof typeof UserGroups;
