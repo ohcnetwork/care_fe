@@ -156,5 +156,5 @@ jobs:
         run: |
           COMMIT_SHA=${{ github.sha }}
           JSON='{ "substitutions": { "care_be_tag":"", "care_fe_tag": "'"$COMMIT_SHA"'", "metabase_tag": "" } }'
-          curl --location ${{ secrets.STAGING_GCP_DEPLOY_URL }} \
+          curl --location "${{ secrets.STAGING_GCP_DEPLOY_URL }}" \
             --header 'Content-Type: application/json' --data "$JSON"
