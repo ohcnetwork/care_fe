@@ -421,7 +421,7 @@ export default function ManageUsers() {
                         }}
                       >
                         <CareIcon icon="l-clock" className="text-xl" />
-                        <p className="whitespace-nowrap md:whitespace-normal">
+                        <p className="whitespace-normal md:whitespace-nowrap">
                           Set Average weekly working hours
                         </p>
                       </ButtonV2>
