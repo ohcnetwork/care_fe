@@ -642,7 +642,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           }
           return;
         }
-        case "weight": 
+        case "weight":
         case "height": {
           if (state.form.suggestion !== "DD") {
             const value = state.form[field];
