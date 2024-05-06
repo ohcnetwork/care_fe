@@ -127,7 +127,8 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
             name="note"
             value={noteField}
             onChange={(e) => setNoteField(e.value)}
-            className="grow"
+            className="w-full grow"
+            innerClassName="pr-10"
             errorClassName="hidden"
             placeholder="Type your Note"
             disabled={!patientActive}
