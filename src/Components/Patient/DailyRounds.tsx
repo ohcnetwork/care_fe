@@ -31,6 +31,7 @@ import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { Scribe } from "../Scribe/Scribe";
 import { DAILY_ROUND_FORM_SCRIBE_DATA } from "../Scribe/formDetails";
+import { DailyRoundsModel } from "./models";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm: any = {
@@ -230,13 +231,41 @@ export const DailyRounds = (props: any) => {
     const validForm = validateForm();
     if (validForm) {
       setIsLoading(true);
-      const data = {
+      let data: DailyRoundsModel = {
         rounds_type: state.form.rounds_type,
         patient_category: state.form.patient_category,
         taken_at: state.form.taken_at
           ? state.form.taken_at
           : new Date().toISOString(),
+
+        additional_symptoms: state.form.additional_symptoms,
+        other_symptoms: state.form.additional_symptoms?.includes(9)
+          ? state.form.other_symptoms
+          : undefined,
+        admitted_to:
+          (state.form.admitted === "Select"
+            ? undefined
+            : state.form.admitted_to) || undefined,
+        physical_examination_info: state.form.physical_examination_info,
+        other_details: state.form.other_details,
+        consultation: consultationId,
+        action: prevAction,
+        review_interval: Number(prevReviewInterval),
       };
+
+      if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
+        data = {
+          ...data,
+          bp: state.form.bp ?? {},
+          pulse: state.form.pulse ?? null,
+          resp: state.form.resp ?? null,
+          temperature: state.form.temperature ?? null,
+          rhythm: state.form.rhythm || 0,
+          rhythm_detail: state.form.rhythm_detail,
+          ventilator_spo2: state.form.ventilator_spo2 ?? null,
+          consciousness_level: state.form.consciousness_level,
+        };
+      }
 
       if (id) {
         const { data: obj } = await request(routes.updateDailyReport, {
