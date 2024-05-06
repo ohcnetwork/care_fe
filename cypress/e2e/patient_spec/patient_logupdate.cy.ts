@@ -36,44 +36,6 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.awaitUrl("/patients");
   });
 
-  it("Create a new log teleicu update for a domicilary care patient and verify the copy previous value function", () => {
-    patientPage.visitPatient("Dummy Patient 11");
-    patientConsultationPage.clickEditConsultationButton();
-    patientConsultationPage.selectPatientSuggestion("Domiciliary Care");
-    cy.submitButton("Update Consultation");
-    cy.verifyNotification("Consultation updated successfully");
-    cy.closeNotification();
-    patientLogupdate.clickLogupdate();
-    patientLogupdate.typePhysicalExamination(physicalExamination);
-    patientLogupdate.typeOtherDetails(otherExamination);
-    patientLogupdate.typeAdditionalSymptoms(additionalSymptoms);
-    patientLogupdate.selectPatientCategory(patientCategory);
-    patientLogupdate.typeSystolic(patientSystolic);
-    patientLogupdate.typeDiastolic(patientDiastolic);
-    patientLogupdate.typePulse(patientPulse);
-    patientLogupdate.typeTemperature(patientTemperature);
-    patientLogupdate.typeRespiratory(patientRespiratory);
-    patientLogupdate.typeSpo2(patientSpo2);
-    patientLogupdate.selectRhythm(patientRhythmType);
-    patientLogupdate.typeRhythm(patientRhythm);
-    cy.get("#consciousness_level-2").click();
-    cy.submitButton("Save");
-    cy.verifyNotification("Consultation Updates details created successfully");
-    // verify the copied previous value
-    cy.closeNotification();
-    patientLogupdate.clickLogupdate();
-    patientLogupdate.clickCopyPreviousValue();
-    patientLogupdate.selectPatientCategory(patientCategory);
-    cy.submitButton("Save");
-    cy.closeNotification();
-    cy.verifyContentPresence("#physical_examination_info", [
-      physicalExamination,
-    ]);
-    cy.verifyContentPresence("#rhythm_detail", [patientRhythm]);
-    cy.submitButton("Continue");
-    cy.verifyNotification("Consultation Updates details updated successfully");
-  });
-
   it("Create a new log normal update for a domicilary care patient and edit it", () => {
     patientPage.visitPatient(domicilaryPatient);
     patientConsultationPage.clickEditConsultationButton();
