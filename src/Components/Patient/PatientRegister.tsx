@@ -63,6 +63,7 @@ import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
 import SelectMenuV2 from "../Form/SelectMenuV2.js";
+import Checkbox from "../Common/components/CheckBox.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -222,6 +223,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const [insuranceDetails, setInsuranceDetails] = useState<HCXPolicyModel[]>(
     [],
   );
+  const [isEmergencyNumberEnabled, setIsEmergencyNumberEnabled] =
+    useState(false);
   const [insuranceDetailsError, setInsuranceDetailsError] =
     useState<FieldError>();
 
@@ -467,6 +470,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               : null,
           };
           formData.sameAddress = data.address === data.permanent_address;
+          setIsEmergencyNumberEnabled(
+            data.phone_number === data.emergency_phone_number,
+          );
           (data.medical_history ? data.medical_history : []).forEach(
             (i: any) => {
               const medicalHistory = MEDICAL_HISTORY_CHOICES.find(
@@ -647,6 +653,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         case "blood_group":
           if (!form[field]) {
             errors[field] = "Please select a blood group";
+          }
+          return;
+        case "number_of_primary_contacts":
+          if (form[field] < 0) {
+            errors[field] = "Number of primary contacts cannot be negative";
+          }
+          return;
+        case "number_of_secondary_contacts":
+          if (form[field] < 0) {
+            errors[field] = "Number of secondary contacts cannot be negative";
           }
           return;
 
@@ -1301,8 +1317,34 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               onChange={(event) => {
                                 if (!id) duplicateCheck(event.value);
                                 field("phone_number").onChange(event);
+                                if (isEmergencyNumberEnabled) {
+                                  field("emergency_phone_number").onChange({
+                                    name: field("emergency_phone_number").name,
+                                    value: event.value,
+                                  });
+                                }
                               }}
                               types={["mobile", "landline"]}
+                            />
+                            <Checkbox
+                              label="Is the phone number an emergency number?"
+                              className="font-bold"
+                              id="emergency_contact_checkbox"
+                              checked={isEmergencyNumberEnabled}
+                              onCheck={(checked) => {
+                                setIsEmergencyNumberEnabled(checked);
+                                checked
+                                  ? field("emergency_phone_number").onChange({
+                                      name: field("emergency_phone_number")
+                                        .name,
+                                      value: field("phone_number").value,
+                                    })
+                                  : field("emergency_phone_number").onChange({
+                                      name: field("emergency_phone_number")
+                                        .name,
+                                      value: initForm.emergency_phone_number,
+                                    });
+                              }}
                             />
                           </div>
                           <div
@@ -1314,6 +1356,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               label="Emergency contact number"
                               required
                               types={["mobile", "landline"]}
+                              disabled={isEmergencyNumberEnabled}
                             />
                           </div>
                           <div data-testid="name" id="name-div">

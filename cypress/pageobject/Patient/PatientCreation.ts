@@ -38,11 +38,15 @@ export class PatientPage {
   }
 
   typePatientPhoneNumber(phoneNumber: string) {
-    cy.get("#phone_number-div").click().type(phoneNumber);
+    cy.get("#phone_number").click().type(phoneNumber);
   }
 
   typePatientEmergencyNumber(phoneNumber: string) {
-    cy.get("#emergency_phone_number-div").click().type(phoneNumber);
+    cy.get("#emergency_phone_number").click().type(phoneNumber);
+  }
+
+  checkPhoneNumberIsEmergencyNumber() {
+    cy.get("#emergency_contact_checkbox > div > input").click();
   }
 
   typePatientDateOfBirth(dateOfBirth: string) {
@@ -145,7 +149,7 @@ export class PatientPage {
     emergencyPhoneNumber,
     yearOfBirth,
     bloodGroup,
-    occupation
+    occupation,
   ) {
     cy.url().should("include", "/facility/");
     cy.get("[data-testid=patient-dashboard]").then(($dashboard) => {
@@ -166,7 +170,7 @@ export class PatientPage {
     patientState,
     patientDistrict,
     patientLocalbody,
-    patientWard
+    patientWard,
   ) {
     cy.get("[data-testid=patient-details]").then(($dashboard) => {
       cy.url().should("include", "/facility/");
