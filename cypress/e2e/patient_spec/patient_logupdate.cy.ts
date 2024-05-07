@@ -45,6 +45,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.closeNotification();
     patientLogupdate.clickLogupdate();
     patientLogupdate.typePhysicalExamination(physicalExamination);
+    patientLogupdate.selectRoundType("Telemedicine");
     patientLogupdate.typeOtherDetails(otherExamination);
     patientLogupdate.typeAdditionalSymptoms(additionalSymptoms);
     patientLogupdate.selectPatientCategory(patientCategory);
@@ -58,7 +59,9 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeRhythm(patientRhythm);
     cy.get("#consciousness_level-2").click();
     cy.submitButton("Save");
-    cy.verifyNotification("Consultation Updates details created successfully");
+    cy.verifyNotification(
+      "Telemedicine Log Updates details created successfully",
+    );
     // verify the copied previous value
     cy.closeNotification();
     patientLogupdate.clickLogupdate();
@@ -71,7 +74,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     ]);
     cy.verifyContentPresence("#rhythm_detail", [patientRhythm]);
     cy.submitButton("Continue");
-    cy.verifyNotification("Consultation Updates details updated successfully");
+    cy.verifyNotification("Normal Log Updates details updated successfully");
   });
 
   it("Create a new log normal update for a domicilary care patient and edit it", () => {
@@ -96,7 +99,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeRhythm(patientRhythm);
     cy.get("#consciousness_level-2").click();
     cy.submitButton("Save");
-    cy.verifyNotification("Consultation Updates details created successfully");
+    cy.verifyNotification("Normal Log Updates details created successfully");
     cy.closeNotification();
     // edit the card and verify the data.
     patientLogupdate.clickLogupdateCard("#dailyround-entry", patientCategory);
@@ -118,7 +121,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.clickClearButtonInElement("#diastolic");
     patientLogupdate.typeDiastolic(patientModifiedDiastolic);
     cy.submitButton("Continue");
-    cy.verifyNotification("Consultation Updates details updated successfully");
+    cy.verifyNotification("Normal Log Updates details updated successfully");
     patientLogupdate.clickLogupdateCard("#dailyround-entry", patientCategory);
     cy.verifyContentPresence("#consultation-preview", [
       patientModifiedDiastolic,
@@ -148,7 +151,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.get("#consciousness_level-2").click();
     cy.submitButton("Save");
     cy.wait(2000);
-    cy.verifyNotification("Consultation Updates details created successfully");
+    cy.verifyNotification("Normal Log Updates details created successfully");
     // Verify the card content
     cy.get("#basic-information").scrollIntoView();
     cy.verifyContentPresence("#basic-information", [additionalSymptoms]);
@@ -171,7 +174,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeRespiratory(patientRespiratory);
     cy.get("#consciousness_level-2").click();
     cy.submitButton("Save");
-    cy.verifyNotification("Consultation Updates details created successfully");
+    cy.verifyNotification("Normal Log Updates details created successfully");
     cy.closeNotification();
     cy.verifyContentPresence("#consultation-buttons", ["9"]);
     // Verify the Incomplete data will give blank info
@@ -181,7 +184,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeDiastolic(patientDiastolic);
     patientLogupdate.typePulse(patientPulse);
     cy.submitButton("Save");
-    cy.verifyNotification("Consultation Updates details created successfully");
+    cy.verifyNotification("Normal Log Updates details created successfully");
     cy.closeNotification();
     cy.verifyContentPresence("#consultation-buttons", ["-"]);
   });
