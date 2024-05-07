@@ -215,8 +215,9 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
               name="note"
               value={noteField}
               onChange={(e) => setNoteField(e.value)}
-              className="grow"
+              className="w-full grow"
               errorClassName="hidden"
+              innerClassName="pr-10"
               placeholder="Type your Note"
               disabled={!patientActive}
               onFocus={() => setFocused(true)}
