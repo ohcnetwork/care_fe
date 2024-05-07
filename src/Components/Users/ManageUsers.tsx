@@ -765,6 +765,14 @@ export function UserFacilities(props: { user: any }) {
               <div className="relative rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg">
                 <div className="flex items-center justify-between">
                   <span>{user?.home_facility_object?.name}</span>
+                  <span
+                    className={
+                      "flex items-center justify-center  rounded-xl bg-green-600 px-2 py-0.5 text-sm font-medium text-white"
+                    }
+                  >
+                    <CareIcon icon="l-estate" className="mr-1 pt-px text-lg" />
+                    Home Facility
+                  </span>
                   {["DistrictAdmin", "StateAdmin"].includes(
                     authUser.user_type,
                   ) && (
