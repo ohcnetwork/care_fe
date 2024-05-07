@@ -45,6 +45,10 @@ export class PatientPage {
     cy.get("#emergency_phone_number").click().type(phoneNumber);
   }
 
+  checkPhoneNumberIsEmergencyNumber() {
+    cy.get("#emergency_contact_checkbox > div > input").click();
+  }
+
   typePatientDateOfBirth(dateOfBirth: string) {
     cy.clickAndSelectOption("#patientAge", "DOB");
     cy.get("#date_of_birth").scrollIntoView();

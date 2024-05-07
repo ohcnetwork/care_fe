@@ -2,10 +2,7 @@ import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
-import {
-  generatePhoneNumber,
-  generateEmergencyPhoneNumber,
-} from "../../pageobject/utils/constants";
+import { generatePhoneNumber } from "../../pageobject/utils/constants";
 import PatientTransfer from "../../pageobject/Patient/PatientTransfer";
 import PatientExternal from "../../pageobject/Patient/PatientExternal";
 import PatientInsurance from "../../pageobject/Patient/PatientInsurance";
@@ -27,7 +24,6 @@ describe("Patient Creation with consultation", () => {
   const patientInsurance = new PatientInsurance();
   const patientMedicalHistory = new PatientMedicalHistory();
   const phone_number = generatePhoneNumber();
-  const emergency_phone_number = generateEmergencyPhoneNumber();
   const age = calculateAge();
   const patientFacility = "Dummy Facility 40";
   const patientDateOfBirth = "01012001";
@@ -79,7 +75,7 @@ describe("Patient Creation with consultation", () => {
     patientPage.patientformvisibility();
     // Patient Details page
     patientPage.typePatientPhoneNumber(phone_number);
-    patientPage.typePatientEmergencyNumber(emergency_phone_number);
+    patientPage.checkPhoneNumberIsEmergencyNumber();
     patientPage.typePatientAge(age.toString());
     patientPage.typePatientName(patientOneName);
     patientPage.selectPatientGender(patientOneGender);
@@ -115,7 +111,7 @@ describe("Patient Creation with consultation", () => {
       age,
       patientOneName,
       phone_number,
-      emergency_phone_number,
+      phone_number,
       yearOfBirth,
       patientOneBloodGroup,
       patientOccupation,
@@ -204,7 +200,7 @@ describe("Patient Creation with consultation", () => {
       age,
       patientOneName,
       phone_number,
-      emergency_phone_number,
+      phone_number,
       yearOfBirth,
       patientOneUpdatedBloodGroup,
       patientOccupation,
