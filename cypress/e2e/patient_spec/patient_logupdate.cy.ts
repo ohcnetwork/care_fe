@@ -74,9 +74,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     ]);
     cy.verifyContentPresence("#rhythm_detail", [patientRhythm]);
     cy.submitButton("Continue");
-    cy.verifyNotification(
-      "Telemedicine Log Updates details updated successfully",
-    );
+    cy.verifyNotification("Normal Log Updates details updated successfully");
   });
 
   it("Create a new log normal update for a domicilary care patient and edit it", () => {
