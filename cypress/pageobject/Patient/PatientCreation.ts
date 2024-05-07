@@ -38,11 +38,15 @@ export class PatientPage {
   }
 
   typePatientPhoneNumber(phoneNumber: string) {
-    cy.get("#phone_number-div").click().type(phoneNumber);
+    cy.get("#phone_number").click().type(phoneNumber);
   }
 
   typePatientEmergencyNumber(phoneNumber: string) {
-    cy.get("#emergency_phone_number-div").click().type(phoneNumber);
+    cy.get("#emergency_phone_number").click().type(phoneNumber);
+  }
+
+  checkPhoneNumberIsEmergencyNumber() {
+    cy.get("#emergency_contact_checkbox > div > input").click();
   }
 
   typePatientDateOfBirth(dateOfBirth: string) {

@@ -1414,6 +1414,13 @@ export const PatientHome = (props: any) => {
               <PaginatedList.WhenLoading>
                 <CircularProgress />
               </PaginatedList.WhenLoading>
+              <PaginatedList.WhenEmpty className="py-2">
+                <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
+                  <div className="flex w-full items-center justify-center text-xl font-bold text-gray-500">
+                    No Consultation History Available
+                  </div>
+                </div>
+              </PaginatedList.WhenEmpty>
               <PaginatedList.Items<ConsultationModel>>
                 {(item) => (
                   <ConsultationCard
@@ -1447,6 +1454,13 @@ export const PatientHome = (props: any) => {
               <PaginatedList.WhenLoading>
                 <CircularProgress />
               </PaginatedList.WhenLoading>
+              <PaginatedList.WhenEmpty className="py-2">
+                <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
+                  <div className="flex w-full items-center justify-center text-xl font-bold text-gray-500">
+                    No Sample Test History Available
+                  </div>
+                </div>
+              </PaginatedList.WhenEmpty>
               <PaginatedList.Items<SampleTestModel>>
                 {(item) => (
                   <SampleTestCard
