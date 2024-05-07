@@ -37,7 +37,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
   });
 
   it("Create a new log teleicu update for a domicilary care patient and verify the copy previous value function", () => {
-    patientPage.visitPatient("Dummy Patient 11");
+    patientPage.visitPatient("Dummy Patient 9");
     patientConsultationPage.clickEditConsultationButton();
     patientConsultationPage.selectPatientSuggestion("Domiciliary Care");
     cy.submitButton("Update Consultation");
