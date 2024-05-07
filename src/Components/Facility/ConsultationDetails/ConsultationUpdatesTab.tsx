@@ -19,6 +19,7 @@ import {
   formatDate,
   formatDateTime,
   formatPatientAge,
+  isAntenatal,
   isPostPartum,
 } from "../../../Utils/utils";
 import ReadMore from "../../Common/components/Readmore";
@@ -323,7 +324,8 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                 </div>
               </div>
             )}
-            {(props.patientData.is_antenatal ||
+            {((props.patientData.is_antenatal &&
+              isAntenatal(props.patientData.last_menstruation_start_date)) ||
               isPostPartum(props.patientData.date_of_delivery)) && (
               <div className="rounded-lg bg-white px-4 py-5 shadow sm:p-6">
                 <h3 className="mb-4 text-lg font-semibold leading-relaxed text-gray-900">
@@ -331,14 +333,17 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                 </h3>
 
                 <div className="flex gap-2 pb-2">
-                  {props.patientData.is_antenatal && (
-                    <Chip
-                      variant="custom"
-                      className="border-pink-300 bg-pink-100 text-pink-600"
-                      startIcon="l-baby-carriage"
-                      text="Antenatal"
-                    />
-                  )}
+                  {props.patientData.is_antenatal &&
+                    isAntenatal(
+                      props.patientData.last_menstruation_start_date,
+                    ) && (
+                      <Chip
+                        variant="custom"
+                        className="border-pink-300 bg-pink-100 text-pink-600"
+                        startIcon="l-baby-carriage"
+                        text="Antenatal"
+                      />
+                    )}
                   {isPostPartum(props.patientData.date_of_delivery) && (
                     <Chip
                       variant="custom"

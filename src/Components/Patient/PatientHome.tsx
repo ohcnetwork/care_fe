@@ -19,6 +19,7 @@ import {
   formatDate,
   formatDateTime,
   formatPatientAge,
+  isAntenatal,
   isPostPartum,
 } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -371,14 +372,17 @@ export const PatientHome = (props: any) => {
                     )}
                     {patientData.gender === 2 && (
                       <>
-                        {patientData.is_antenatal && (
-                          <Chip
-                            variant="custom"
-                            className="border-pink-300 bg-pink-100 text-pink-600"
-                            startIcon="l-baby-carriage"
-                            text="Antenatal"
-                          />
-                        )}
+                        {patientData.is_antenatal &&
+                          isAntenatal(
+                            patientData.last_menstruation_start_date,
+                          ) && (
+                            <Chip
+                              variant="custom"
+                              className="border-pink-300 bg-pink-100 text-pink-600"
+                              startIcon="l-baby-carriage"
+                              text="Antenatal"
+                            />
+                          )}
                         {isPostPartum(patientData.date_of_delivery) && (
                           <Chip
                             variant="custom"
