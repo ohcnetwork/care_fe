@@ -102,6 +102,42 @@ export const TriageForm = ({ facilityId, id }: Props) => {
             invalidForm = true;
           }
           return;
+        case "num_patients_visited":
+          if (state.form[field] < 0) {
+            errors[field] =
+              "Number of patients visited must be greater than or equal to 0";
+            invalidForm = true;
+          }
+          return;
+        case "num_patients_home_quarantine":
+          if (state.form[field] < 0) {
+            errors[field] =
+              "Number of patients in Home Qurantine must be greater than or equal to 0";
+            invalidForm = true;
+          }
+          return;
+        case "num_patients_isolation":
+          if (state.form[field] < 0) {
+            errors[field] =
+              "Number of patients in Isolation must be greater than or equal to 0";
+            invalidForm = true;
+          }
+          return;
+        case "num_patient_referred":
+          if (state.form[field] < 0) {
+            errors[field] =
+              "Number of patients referred must be greater than or equal to 0";
+            invalidForm = true;
+          }
+          return;
+        case "num_patient_confirmed_positive":
+          if (state.form[field] < 0) {
+            errors[field] =
+              "Number of patients confirmed positive must be greater than or equal to 0";
+            invalidForm = true;
+          }
+          return;
+
         default:
           return;
       }
