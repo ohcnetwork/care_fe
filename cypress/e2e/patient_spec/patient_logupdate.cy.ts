@@ -45,6 +45,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.closeNotification();
     patientLogupdate.clickLogupdate();
     patientLogupdate.typePhysicalExamination(physicalExamination);
+    patientLogupdate.selectRoundType("Telemedicine");
     patientLogupdate.typeOtherDetails(otherExamination);
     patientLogupdate.typeAdditionalSymptoms(additionalSymptoms);
     patientLogupdate.selectPatientCategory(patientCategory);
@@ -58,7 +59,9 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeRhythm(patientRhythm);
     cy.get("#consciousness_level-2").click();
     cy.submitButton("Save");
-    cy.verifyNotification("Normal Log Updates details created successfully");
+    cy.verifyNotification(
+      "Telemedicine Log Updates details created successfully",
+    );
     // verify the copied previous value
     cy.closeNotification();
     patientLogupdate.clickLogupdate();
@@ -71,7 +74,9 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     ]);
     cy.verifyContentPresence("#rhythm_detail", [patientRhythm]);
     cy.submitButton("Continue");
-    cy.verifyNotification("Normal Log Updates details updated successfully");
+    cy.verifyNotification(
+      "Telemedicine Log Updates details updated successfully",
+    );
   });
 
   it("Create a new log normal update for a domicilary care patient and edit it", () => {
