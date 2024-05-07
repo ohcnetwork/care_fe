@@ -37,7 +37,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
   });
 
   it("Create a new log teleicu update for a domicilary care patient and verify the copy previous value function", () => {
-    patientPage.visitPatient("Dummy Patient 9");
+    patientPage.visitPatient("Dummy Patient 11");
     patientConsultationPage.clickEditConsultationButton();
     patientConsultationPage.selectPatientSuggestion("Domiciliary Care");
     cy.submitButton("Update Consultation");
@@ -176,7 +176,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeRespiratory(patientRespiratory);
     cy.get("#consciousness_level-2").click();
     cy.submitButton("Save");
-    cy.verifyNotification("Consultation Updates details created successfully");
+    cy.verifyNotification("Normal Log Updates details created successfully");
     cy.closeNotification();
     cy.verifyContentPresence("#consultation-buttons", ["9"]);
     // Verify the Incomplete data will give blank info
@@ -186,7 +186,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeDiastolic(patientDiastolic);
     patientLogupdate.typePulse(patientPulse);
     cy.submitButton("Save");
-    cy.verifyNotification("Consultation Updates details created successfully");
+    cy.verifyNotification("Normal Log Updates details created successfully");
     cy.closeNotification();
     cy.verifyContentPresence("#consultation-buttons", ["-"]);
   });
