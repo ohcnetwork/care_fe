@@ -50,6 +50,7 @@ import {
   DistrictModel,
   DoctorModal,
   DupPatientModel,
+  FacilityHubModel,
   FacilityModel,
   FacilityRequest,
   IFacilityNotificationRequest,
@@ -377,6 +378,40 @@ const routes = {
     method: "PATCH",
     TRes: Type<FacilityModel>(),
     TBody: Type<Partial<FacilityModel>>(),
+  },
+
+  getFacilityHubs: {
+    path: "/api/v1/facility/{id}/hubs/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<FacilityHubModel>>(),
+  },
+
+  updateFacilityHubs: {
+    path: "/api/v1/facility/{id}/hubs/{hub_id}/",
+    method: "PATCH",
+    TRes: Type<FacilityHubModel>(),
+    TBody: Type<FacilityHubModel>(),
+  },
+
+  getFacilityHub: {
+    path: "/api/v1/facility/{id}/hubs/{hub_id}/",
+    method: "GET",
+    TRes: Type<FacilityHubModel>(),
+  },
+
+  createFacilityHub: {
+    path: "/api/v1/facility/{id}/hubs/",
+    method: "POST",
+    TRes: Type<FacilityHubModel>(),
+    TBody: Type<
+      Partial<Omit<FacilityHubModel, "hub" | "spoke">> & { hub_id: string }
+    >(),
+  },
+
+  deleteFacilityHub: {
+    path: "/api/v1/facility/{id}/hubs/{hub_id}/",
+    method: "DELETE",
+    TRes: Type<Record<string, never>>(),
   },
 
   deleteFacilityCoverImage: {

@@ -9,7 +9,11 @@ import { InvestigationType } from "../Common/prescription-builder/InvestigationB
 import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
-import { AssignedToObjectModel, DailyRoundsModel } from "../Patient/models";
+import {
+  AssignedToObjectModel,
+  DailyRoundsModel,
+  FacilityNameModel,
+} from "../Patient/models";
 import { UserBareMinimum } from "../Users/models";
 import { ConsentRecord } from "./ConsultationForm";
 
@@ -74,6 +78,12 @@ export interface FacilityModel {
   pincode?: string;
 }
 
+export interface FacilityHubModel {
+  external_id: string;
+  hub: FacilityNameModel;
+  spoke: FacilityNameModel;
+  relationship: unknown;
+}
 export interface CapacityModal {
   id?: number;
   room_type?: number;

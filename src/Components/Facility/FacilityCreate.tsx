@@ -156,6 +156,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [stateId, setStateId] = useState<number>();
   const [districtId, setDistrictId] = useState<number>();
   const [localBodyId, setLocalBodyId] = useState<number>();
+  const [hubFacilities, setHubFacilities] = useState<string[]>([]);
   const { goBack } = useAppHistory();
   const headerText = !facilityId ? "Create Facility" : "Update Facility";
   const buttonText = !facilityId ? "Save Facility" : "Update Facility";
@@ -242,6 +243,34 @@ export const FacilityCreate = (props: FacilityProps) => {
       prefetch: !!localBodyId,
     },
   );
+
+  const facilitiesQuery = useQuery(routes.getAllFacilities);
+  const hubsQuery = useQuery(routes.getFacilityHubs, {
+    pathParams: {
+      id: facilityId!,
+    },
+    prefetch: !!facilityId,
+    onResponse: (res) => {
+      setHubFacilities(res.data?.results.map((d) => d.hub.id) as string[]);
+    },
+  });
+  const createHub = async (hubFacilityId: string) =>
+    await request(routes.createFacilityHub, {
+      body: {
+        hub_id: hubFacilityId,
+      },
+      pathParams: {
+        id: facilityId || "",
+      },
+    });
+  const deleteHub = async (hubFacilityId: string) =>
+    await request(routes.deleteFacilityHub, {
+      pathParams: {
+        id: facilityId || "",
+        hub_id: hubFacilityId,
+      },
+    });
+  const { data: facilities } = facilitiesQuery;
 
   useQuery(routes.getPermittedFacility, {
     pathParams: {
@@ -843,6 +872,40 @@ export const FacilityCreate = (props: FacilityProps) => {
                     label={t("emergency_contact_number")}
                     required
                     types={["mobile", "landline"]}
+                  />
+                  <MultiSelectFormField
+                    {...field("hubs")}
+                    placeholder={t("hubs")}
+                    className={facilitiesQuery.loading ? "animate-pulse" : ""}
+                    disabled={facilitiesQuery.loading || hubsQuery.loading}
+                    options={
+                      facilities?.results.filter((f) => f.id !== facilityId) ||
+                      []
+                    }
+                    optionLabel={(o) => o.name}
+                    optionValue={(o) => o.id}
+                    value={hubFacilities}
+                    onChange={async (event) => {
+                      if (event.value.length > hubFacilities.length) {
+                        await createHub(
+                          event.value[event.value.length - 1] || "",
+                        );
+                      } else if (event.value.length < hubFacilities.length) {
+                        console.log(
+                          hubFacilities.find((x) => !event.value.includes(x)),
+                        );
+                        await deleteHub(
+                          hubsQuery.data?.results.find(
+                            (r) =>
+                              r.hub.id ===
+                              (hubFacilities.find(
+                                (x) => !event.value.includes(x),
+                              ) || ""),
+                          )?.external_id || "",
+                        );
+                      }
+                      setHubFacilities(event.value as string[]);
+                    }}
                   />
                   <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 md:col-span-2 xl:grid-cols-4">
                     <TextFormField
