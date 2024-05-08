@@ -164,8 +164,8 @@ export class PatientPage {
     yearOfBirth,
     bloodGroup,
     occupation,
-    isAntenatal,
-    isPostPartum,
+    isAntenatal = false,
+    isPostPartum = false,
   ) {
     cy.url().should("include", "/facility/");
     cy.get("[data-testid=patient-dashboard]").then(($dashboard) => {
