@@ -35,7 +35,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
   const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
   const [monitorBedData, setMonitorBedData] = useState<AssetBedModel>();
   const [ventilatorBedData, setVentilatorBedData] = useState<AssetBedModel>();
-  const [showEvents, setShowEvents] = useState<boolean>(false);
+  const [showEvents, setShowEvents] = useState(true);
 
   const vitals = useVitalsAspectRatioConfig({
     default: undefined,
