@@ -800,7 +800,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             : null
           : null,
       test_type: formData.test_type,
-      name: formData.name,
+      name: formData.name
+        .split(" ")
+        .map((i: string) => i.charAt(0).toUpperCase() + i.slice(1))
+        .join(" "),
       pincode: formData.pincode ? formData.pincode : undefined,
       gender: Number(formData.gender),
       nationality: formData.nationality,
