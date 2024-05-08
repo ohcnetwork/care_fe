@@ -24,33 +24,12 @@ export interface OptionsType {
   disabled?: boolean;
 }
 
-export type UserRole =
-  | "Pharmacist"
-  | "Volunteer"
-  | "StaffReadOnly"
-  | "Staff"
-  | "NurseReadOnly"
-  | "Nurse"
-  | "Doctor"
-  | "WardAdmin"
-  | "LocalBodyAdmin"
-  | "DistrictLabAdmin"
-  | "DistrictReadOnlyAdmin"
-  | "DistrictAdmin"
-  | "StateLabAdmin"
-  | "StateReadOnlyAdmin"
-  | "StateAdmin";
-
-export const USER_TYPE_OPTIONS: {
-  id: UserRole;
-  role: string;
-  readOnly?: boolean;
-}[] = [
+export const USER_TYPE_OPTIONS = [
   { id: "Pharmacist", role: "Pharmacist", readOnly: false },
   { id: "Volunteer", role: "Volunteer", readOnly: false },
   { id: "StaffReadOnly", role: "Staff", readOnly: true },
   { id: "Staff", role: "Staff", readOnly: false },
-  { id: "NurseReadOnly", role: "Nurse", readOnly: true },
+  // { id: "NurseReadOnly", role: "Nurse", readOnly: true },
   { id: "Nurse", role: "Nurse", readOnly: false },
   { id: "Doctor", role: "Doctor", readOnly: false },
   { id: "WardAdmin", role: "Ward Admin", readOnly: false },
@@ -61,7 +40,9 @@ export const USER_TYPE_OPTIONS: {
   { id: "StateLabAdmin", role: "State Lab Admin", readOnly: false },
   { id: "StateReadOnlyAdmin", role: "State Admin", readOnly: true },
   { id: "StateAdmin", role: "State Admin", readOnly: false },
-];
+] as const;
+
+export type UserRole = (typeof USER_TYPE_OPTIONS)[number]["id"];
 
 export const USER_TYPES = USER_TYPE_OPTIONS.map((o) => o.id);
 
@@ -1273,60 +1254,91 @@ export const CONSENT_PATIENT_CODE_STATUS_CHOICES = [
   { id: 4, text: "Active treatment (Default)" },
 ];
 export const OCCUPATION_TYPES = [
-  { id: 1, text: "Student", value: "STUDENT" },
   {
-    id: 2,
-    text: "Businessman",
-    value: "BUSINESSMAN",
+    id: 27,
+    text: "Aircraft Pilot or Flight Engineer",
+    value: "PILOT_FLIGHT",
   },
-  { id: 3, text: "Healthcare Worker", value: "HEALTH_CARE_WORKER" },
-  { id: 4, text: "Healthcare Lab Worker", value: "HEALTH_CARE_LAB_WORKER" },
   { id: 5, text: "Animal Handler", value: "ANIMAL_HANDLER" },
-  { id: 6, text: "Others", value: "OTHERS" },
-  { id: 7, text: "Healthcare Practitioner", value: "HEALTHCARE_PRACTITIONER" },
-  { id: 8, text: "Paramedics", value: "PARADEMICS" },
   {
     id: 9,
     text: "Business or Finance related Occupations",
     value: "BUSINESS_RELATED",
   },
-  { id: 10, text: "Engineer", value: "ENGINEER" },
-  { id: 11, text: "Teacher", value: "TEACHER" },
-  {
-    id: 12,
-    text: "Other Professional Occupations",
-    value: "OTHER_PROFESSIONAL_OCCUPATIONS",
-  },
-  {
-    id: 13,
-    text: "Office and Administrative Support Occupations",
-    value: "OFFICE_ADMINISTRATIVE",
-  },
+  { id: 2, text: "Businessman", value: "BUSINESSMAN" },
   { id: 14, text: "Chef or Head Cook", value: "CHEF" },
-  {
-    id: 15,
-    text: "Protective Service Occupations",
-    value: "PROTECTIVE_SERVICE",
-  },
-  { id: 16, text: "Hospitality Service Occupations", value: "HOSPITALITY" },
-  { id: 17, text: "Custodial Occupations", value: "CUSTODIAL" },
-  { id: 18, text: "Customer Service Occupations", value: "CUSTOMER_SERVICE" },
-  { id: 19, text: "Sales Supervisor", value: "SALES_SUPERVISOR" },
-  { id: 20, text: "Retail Sales Worker", value: "RETAIL_SALES_WORKER" },
-  { id: 21, text: "Insurance Sales Agent", value: "INSURANCE_SALES_AGENT" },
-  { id: 22, text: "Sales Representative", value: "SALES_REPRESENTATIVE" },
-  { id: 23, text: "Real Estate Sales Agent", value: "REAL_ESTATE" },
   {
     id: 24,
     text: "Construction and Extraction Worker",
     value: "CONSTRUCTION_EXTRACTION",
   },
-  { id: 25, text: "Farming, Fishing and Forestry", value: "AGRI_NATURAL" },
-  { id: 26, text: "Production Occupations", value: "PRODUCTION_OCCUPATION" },
-  { id: 27, text: "Aircraft Pilot or Flight Engineer", value: "PILOT_FLIGHT" },
-  { id: 28, text: "Vehicle Driver", value: "VEHICLE_DRIVER" },
-  { id: 29, text: "Military", value: "MILITARY" },
+  { id: 17, text: "Custodial Occupations", value: "CUSTODIAL" },
+  {
+    id: 18,
+    text: "Customer Service Occupations",
+    value: "CUSTOMER_SERVICE",
+  },
+  { id: 10, text: "Engineer", value: "ENGINEER" },
+  {
+    id: 25,
+    text: "Farming, Fishing and Forestry",
+    value: "AGRI_NATURAL",
+  },
+  {
+    id: 4,
+    text: "Healthcare Lab Worker",
+    value: "HEALTH_CARE_LAB_WORKER",
+  },
+  {
+    id: 7,
+    text: "Healthcare Practitioner",
+    value: "HEALTHCARE_PRACTITIONER",
+  },
+  { id: 3, text: "Healthcare Worker", value: "HEALTH_CARE_WORKER" },
   { id: 30, text: "Homemaker", value: "HOMEMAKER" },
-  { id: 31, text: "Don't Know", value: "UNKNOWN" },
+  {
+    id: 16,
+    text: "Hospitality Service Occupations",
+    value: "HOSPITALITY",
+  },
+  {
+    id: 21,
+    text: "Insurance Sales Agent",
+    value: "INSURANCE_SALES_AGENT",
+  },
+  { id: 29, text: "Military", value: "MILITARY" },
+  {
+    id: 13,
+    text: "Office and Administrative Support Occupations",
+    value: "OFFICE_ADMINISTRATIVE",
+  },
+  {
+    id: 12,
+    text: "Other Professional Occupations",
+    value: "OTHER_PROFESSIONAL_OCCUPATIONS",
+  },
+  { id: 8, text: "Paramedics", value: "PARADEMICS" },
+  {
+    id: 26,
+    text: "Production Occupations",
+    value: "PRODUCTION_OCCUPATION",
+  },
+  {
+    id: 15,
+    text: "Protective Service Occupations",
+    value: "PROTECTIVE_SERVICE",
+  },
+  { id: 23, text: "Real Estate Sales Agent", value: "REAL_ESTATE" },
+  { id: 20, text: "Retail Sales Worker", value: "RETAIL_SALES_WORKER" },
+  {
+    id: 22,
+    text: "Sales Representative",
+    value: "SALES_REPRESENTATIVE",
+  },
+  { id: 19, text: "Sales Supervisor", value: "SALES_SUPERVISOR" },
+  { id: 1, text: "Student", value: "STUDENT" },
+  { id: 11, text: "Teacher", value: "TEACHER" },
+  { id: 28, text: "Vehicle Driver", value: "VEHICLE_DRIVER" },
+  { id: 6, text: "Others", value: "OTHERS" },
   { id: 32, text: "Not Applicable", value: "NOT_APPLICABLE" },
 ];

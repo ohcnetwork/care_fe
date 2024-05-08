@@ -154,7 +154,7 @@ Cypress.Commands.add(
         });
         cy.get(selector).click();
       });
-  }
+  },
 );
 
 Cypress.Commands.add(

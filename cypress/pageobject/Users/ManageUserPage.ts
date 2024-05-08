@@ -85,7 +85,7 @@ export class ManageUserPage {
   verifyProfileWorkingHours(expectedHours: string) {
     cy.get("#averageworkinghour-profile-details").should(
       "contain",
-      expectedHours
+      expectedHours,
     );
   }
 

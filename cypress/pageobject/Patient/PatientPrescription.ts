@@ -51,7 +51,7 @@ export class PatientPrescription {
     cy.wait("@deletePrescription").its("response.statusCode").should("eq", 200);
   }
 
-  visitEditPrescriptionPage() {
+  visitMedicineTab() {
     cy.get("#consultation_tab_nav").scrollIntoView();
     cy.get("#consultation_tab_nav").contains("Medicines").click();
     cy.get("a[href='prescriptions']").first().click();

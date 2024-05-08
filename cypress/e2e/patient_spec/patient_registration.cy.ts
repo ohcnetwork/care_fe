@@ -2,10 +2,7 @@ import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
-import {
-  generatePhoneNumber,
-  generateEmergencyPhoneNumber,
-} from "../../pageobject/utils/constants";
+import { generatePhoneNumber } from "../../pageobject/utils/constants";
 import PatientTransfer from "../../pageobject/Patient/PatientTransfer";
 import PatientExternal from "../../pageobject/Patient/PatientExternal";
 import PatientInsurance from "../../pageobject/Patient/PatientInsurance";
@@ -18,6 +15,20 @@ const calculateAge = () => {
   return currentYear - parseInt(yearOfBirth);
 };
 
+const getRelativeDateString = (deltaDays = 0) => {
+  const date = new Date();
+  if (deltaDays) {
+    date.setDate(date.getDate() + deltaDays);
+  }
+  return date
+    .toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    })
+    .replace("/", "");
+};
+
 describe("Patient Creation with consultation", () => {
   const loginPage = new LoginPage();
   const patientPage = new PatientPage();
@@ -27,10 +38,11 @@ describe("Patient Creation with consultation", () => {
   const patientInsurance = new PatientInsurance();
   const patientMedicalHistory = new PatientMedicalHistory();
   const phone_number = generatePhoneNumber();
-  const emergency_phone_number = generateEmergencyPhoneNumber();
   const age = calculateAge();
   const patientFacility = "Dummy Facility 40";
   const patientDateOfBirth = "01012001";
+  const patientMenstruationStartDate = getRelativeDateString(-10);
+  const patientDateOfDelivery = getRelativeDateString(-20);
   const patientOneName = "Patient With No Consultation";
   const patientOneGender = "Male";
   const patientOneUpdatedGender = "Female";
@@ -79,7 +91,7 @@ describe("Patient Creation with consultation", () => {
     patientPage.patientformvisibility();
     // Patient Details page
     patientPage.typePatientPhoneNumber(phone_number);
-    patientPage.typePatientEmergencyNumber(emergency_phone_number);
+    patientPage.checkPhoneNumberIsEmergencyNumber();
     patientPage.typePatientAge(age.toString());
     patientPage.typePatientName(patientOneName);
     patientPage.selectPatientGender(patientOneGender);
@@ -115,7 +127,7 @@ describe("Patient Creation with consultation", () => {
       age,
       patientOneName,
       phone_number,
-      emergency_phone_number,
+      phone_number,
       yearOfBirth,
       patientOneBloodGroup,
       patientOccupation,
@@ -148,6 +160,9 @@ describe("Patient Creation with consultation", () => {
     patientPage.selectPatientGender(patientOneUpdatedGender);
     patientPage.typePatientDateOfBirth(patientDateOfBirth);
     patientPage.clickPatientAntenatalStatusYes();
+    patientPage.typeLastMenstruationStartDate(patientMenstruationStartDate);
+    patientPage.clickPatientPostPartumStatusYes();
+    patientPage.typeDateOfDelivery(patientDateOfDelivery);
     patientPage.selectPatientBloodGroup(patientOneUpdatedBloodGroup);
     // Edit the patient consultation , select none medical history and multiple health ID
     patientMedicalHistory.clickNoneMedicialHistory();
@@ -204,7 +219,7 @@ describe("Patient Creation with consultation", () => {
       age,
       patientOneName,
       phone_number,
-      emergency_phone_number,
+      phone_number,
       yearOfBirth,
       patientOneUpdatedBloodGroup,
       patientOccupation,
