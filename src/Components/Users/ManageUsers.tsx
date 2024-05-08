@@ -822,16 +822,14 @@ export function UserFacilities(props: { user: any }) {
                       >
                         <div className="flex items-center justify-between">
                           <span>{facility.name}</span>
-                          <div className="flex items-center gap-2">
-                            <button
-                              className="tooltip text-lg hover:text-primary-500"
-                              id="home-facility-icon"
-                              onClick={() => {
-                                if (
-                                  ["DistrictAdmin", "StateAdmin"].includes(
-                                    authUser.user_type,
-                                  )
-                                ) {
+                          {["DistrictAdmin", "StateAdmin"].includes(
+                            authUser.user_type,
+                          ) && (
+                            <div className="flex items-center gap-2">
+                              <button
+                                className="tooltip text-lg hover:text-primary-500"
+                                id="home-facility-icon"
+                                onClick={() => {
                                   if (user?.home_facility_object) {
                                     // has previous home facility
                                     setReplaceHomeFacility({
@@ -845,46 +843,32 @@ export function UserFacilities(props: { user: any }) {
                                     // no previous home facility
                                     updateHomeFacility(username, facility);
                                   }
-                                } else {
-                                  Notification.Error({
-                                    msg: "You don't have permission to perform this action. Please contact the admin",
-                                  });
-                                }
-                              }}
-                            >
-                              <CareIcon icon="l-estate" />
-                              <span className="tooltip-text tooltip-left">
-                                Set as home facility
-                              </span>
-                            </button>
-                            <button
-                              id="unlink-facility-button"
-                              className="tooltip text-lg text-red-600"
-                              onClick={() => {
-                                if (
-                                  ["DistrictAdmin", "StateAdmin"].includes(
-                                    authUser.user_type,
-                                  )
-                                ) {
+                                }}
+                              >
+                                <CareIcon icon="l-estate" />
+                                <span className="tooltip-text tooltip-left">
+                                  Set as home facility
+                                </span>
+                              </button>
+                              <button
+                                id="unlink-facility-button"
+                                className="tooltip text-lg text-red-600"
+                                onClick={() => {
                                   setUnlinkFacilityData({
                                     show: true,
                                     facility: facility,
                                     userName: username,
                                     isHomeFacility: false,
                                   });
-                                } else {
-                                  Notification.Error({
-                                    msg: "You don't have permission to perform this action. Please contact the admin",
-                                  });
-                                }
-                              }}
-                            >
-                              <CareIcon icon="l-link-broken" />
-                              <span className="tooltip-text tooltip-left">
-                                Unlink Facility
-                              </span>
-                            </button>
-                          </div>
+                                }}
+                              >
+                                <CareIcon icon="l-link-broken" />
+                                <span className="tooltip-text tooltip-left">
+                                  Unlink Facility
+                                </span>
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
