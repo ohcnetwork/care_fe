@@ -78,12 +78,26 @@ export class PatientPage {
       .type(address);
   }
 
+  typeLastMenstruationStartDate(date: string) {
+    cy.get("#last_menstruation_start_date").click();
+    cy.get("#date-input").click().type(date);
+  }
+
+  typeDateOfDelivery(date: string) {
+    cy.get("#date_of_delivery").click();
+    cy.get("#date-input").click().type(date);
+  }
+
   clickPermanentAddress() {
     cy.get("[data-testid=permanent-address] input").check();
   }
 
   clickPatientAntenatalStatusYes() {
     cy.get("#is_antenatal-0").click();
+  }
+
+  clickPatientPostPartumStatusYes() {
+    cy.get("#is_postpartum-0").click();
   }
 
   clickCancelButton() {
@@ -150,6 +164,8 @@ export class PatientPage {
     yearOfBirth,
     bloodGroup,
     occupation,
+    isAntenatal,
+    isPostPartum,
   ) {
     cy.url().should("include", "/facility/");
     cy.get("[data-testid=patient-dashboard]").then(($dashboard) => {
@@ -161,6 +177,13 @@ export class PatientPage {
       expect($dashboard).to.contain(yearOfBirth);
       expect($dashboard).to.contain(bloodGroup);
       expect($dashboard).to.contain(occupation);
+
+      if (isAntenatal) {
+        expect($dashboard).to.contain("Antenatal");
+      }
+      if (isPostPartum) {
+        expect($dashboard).to.contain("Post-partum");
+      }
     });
   }
 
