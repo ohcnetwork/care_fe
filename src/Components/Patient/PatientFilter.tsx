@@ -426,7 +426,7 @@ export default function PatientFilter(props: any) {
               }
             />
           </div>
-          <div className="w-full flex-none">
+          {/* <div className="w-full flex-none">
             <FieldLabel className="text-sm">Is Antenatal</FieldLabel>
             <SelectMenuV2
               placeholder="Show all"
@@ -439,7 +439,7 @@ export default function PatientFilter(props: any) {
                 setFilterState({ ...filterState, is_antenatal: v })
               }
             />
-          </div>
+          </div> */}
           <div className="w-full flex-none">
             <FieldLabel className="text-sm">Review Missed</FieldLabel>
             <SelectMenuV2
