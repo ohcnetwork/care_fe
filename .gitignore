@@ -59,5 +59,3 @@ bun.lockb
 # Cypress
 cypress/downloads
 cypress/fixtures/token.json
-
-*storybook.log
