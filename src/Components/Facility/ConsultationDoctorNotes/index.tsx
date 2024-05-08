@@ -112,7 +112,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
 
   return (
     <Page
-      title="Doctor Notes"
+      title="Discussion Notes"
       className="flex h-screen flex-col"
       crumbsReplacements={{
         [facilityId]: { name: facilityName },
