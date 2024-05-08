@@ -1311,3 +1311,8 @@ export const OCCUPATION_TYPES = [
   { id: 31, text: "Don't Know", value: "UNKNOWN" },
   { id: 32, text: "Not Applicable", value: "NOT_APPLICABLE" },
 ];
+
+export const PATIENT_NOTES_THREADS = {
+  Doctors: 10,
+  Nurses: 20,
+} as const;
