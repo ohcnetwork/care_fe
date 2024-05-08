@@ -642,6 +642,18 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           }
           return;
         }
+        case "weight":
+        case "height": {
+          if (state.form.suggestion !== "DD") {
+            const value = state.form[field];
+            if (!value || parseFloat(value) <= 0) {
+              errors[field] = `Please enter a valid ${field}`;
+              invalidForm = true;
+              break;
+            }
+          }
+          return;
+        }
 
         default:
           return;

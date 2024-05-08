@@ -5,6 +5,10 @@ class PatientLogupdate {
     cy.wait(2000);
   }
 
+  selectRoundType(roundType: string) {
+    cy.clickAndSelectOption("#rounds_type", roundType);
+  }
+
   selectBed(bed: string) {
     cy.searchAndSelectOption("input[name='bed']", bed);
     cy.submitButton("Move to bed");
