@@ -59,8 +59,7 @@ export const MedicinePrescriptionSummary = ({
     <div className="pt-6">
       <p className="text-xl font-bold text-gray-700">{t("summary")}</p>
       <div className="flex flex-col gap-2 pt-4">
-        {medicinesList &&
-          medicinesList.length > 0 &&
+        {medicinesList && medicinesList.length > 0 ? (
           medicinesList?.map((med: MedibaseMedicine) => (
             <div
               key={med.id}
@@ -80,7 +79,14 @@ export const MedicinePrescriptionSummary = ({
                 View
               </button>
             </div>
-          ))}
+          ))
+        ) : (
+          <div className="rounded-lg border shadow">
+            <div className="my-16 flex w-full flex-col items-center justify-center gap-4 text-gray-500">
+              <h3 className="text-lg font-medium">{"No Medicine Summary"}</h3>
+            </div>
+          </div>
+        )}
       </div>
 
       <DialogModal
@@ -177,6 +183,15 @@ export default function ConsultationMedicineLogs({
       prescribed_by: prescriptions[0].prescribed_by,
       created_date: prescriptions[0].created_date,
     });
+
+    if (prescriptions[0].discontinued) {
+      changes.push({
+        prescriptionId: prescriptions[0].id,
+        changeMessage: "This prescription has been discontinued",
+        prescribed_by: prescriptions[0].prescribed_by,
+        created_date: prescriptions[0].discontinued_date,
+      });
+    }
 
     for (let i = 1; i < prescriptions.length; i++) {
       const prevPrescription = prescriptions[i - 1];
@@ -315,6 +330,15 @@ export default function ConsultationMedicineLogs({
           changeMessage: message,
           prescribed_by: currentPrescription.prescribed_by,
           created_date: currentPrescription.created_date,
+        });
+      }
+
+      if (currentPrescription.discontinued) {
+        changes.push({
+          prescriptionId: currentPrescription.id,
+          changeMessage: "This prescription has been discontinued",
+          prescribed_by: currentPrescription.prescribed_by,
+          created_date: currentPrescription.discontinued_date,
         });
       }
     }
