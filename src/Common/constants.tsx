@@ -24,33 +24,12 @@ export interface OptionsType {
   disabled?: boolean;
 }
 
-export type UserRole =
-  | "Pharmacist"
-  | "Volunteer"
-  | "StaffReadOnly"
-  | "Staff"
-  | "NurseReadOnly"
-  | "Nurse"
-  | "Doctor"
-  | "WardAdmin"
-  | "LocalBodyAdmin"
-  | "DistrictLabAdmin"
-  | "DistrictReadOnlyAdmin"
-  | "DistrictAdmin"
-  | "StateLabAdmin"
-  | "StateReadOnlyAdmin"
-  | "StateAdmin";
-
-export const USER_TYPE_OPTIONS: {
-  id: UserRole;
-  role: string;
-  readOnly?: boolean;
-}[] = [
+export const USER_TYPE_OPTIONS = [
   { id: "Pharmacist", role: "Pharmacist", readOnly: false },
   { id: "Volunteer", role: "Volunteer", readOnly: false },
   { id: "StaffReadOnly", role: "Staff", readOnly: true },
   { id: "Staff", role: "Staff", readOnly: false },
-  { id: "NurseReadOnly", role: "Nurse", readOnly: true },
+  // { id: "NurseReadOnly", role: "Nurse", readOnly: true },
   { id: "Nurse", role: "Nurse", readOnly: false },
   { id: "Doctor", role: "Doctor", readOnly: false },
   { id: "WardAdmin", role: "Ward Admin", readOnly: false },
@@ -61,7 +40,9 @@ export const USER_TYPE_OPTIONS: {
   { id: "StateLabAdmin", role: "State Lab Admin", readOnly: false },
   { id: "StateReadOnlyAdmin", role: "State Admin", readOnly: true },
   { id: "StateAdmin", role: "State Admin", readOnly: false },
-];
+] as const;
+
+export type UserRole = (typeof USER_TYPE_OPTIONS)[number]["id"];
 
 export const USER_TYPES = USER_TYPE_OPTIONS.map((o) => o.id);
 

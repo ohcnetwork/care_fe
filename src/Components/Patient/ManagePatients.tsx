@@ -577,6 +577,16 @@ export const PatientManager = () => {
                       text="Readmission"
                     />
                   )}
+                  {patient.last_consultation?.suggestion === "A" &&
+                    patient.last_consultation.facility === patient.facility &&
+                    !patient.last_consultation.discharge_date && (
+                      <Chip
+                        size="small"
+                        variant="primary"
+                        startIcon="l-clock-three"
+                        text={`IP Days: ${dayjs().diff(patient.last_consultation.encounter_date, "day")}`}
+                      />
+                    )}
                   {patient.disease_status === "POSITIVE" && (
                     <Chip
                       size="small"
