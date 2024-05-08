@@ -958,14 +958,17 @@ const routes = {
   dischargeSummaryGenerate: {
     path: "/api/v1/consultation/{external_id}/generate_discharge_summary/",
     method: "POST",
+    TRes: Type<never>(),
   },
   dischargeSummaryPreview: {
     path: "/api/v1/consultation/{external_id}/preview_discharge_summary/",
     method: "GET",
+    TRes: Type<{ read_signed_url: string }>(),
   },
   dischargeSummaryEmail: {
     path: "/api/v1/consultation/{external_id}/email_discharge_summary/",
     method: "POST",
+    TRes: Type<never>(),
   },
   dischargePatient: {
     path: "/api/v1/consultation/{id}/discharge_patient/",
