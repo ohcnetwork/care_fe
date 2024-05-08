@@ -140,14 +140,6 @@ export default function UserProfile() {
   });
 
   const [showEdit, setShowEdit] = useState<boolean | false>(false);
-  const [newPasswordInputInFocus, setNewPasswordInputInFocus] =
-    useState<boolean>(false);
-
-  const [
-    newConfirmedPasswordInputInFocus,
-    setNewConfirmedPasswordInputInFocus,
-  ] = useState<boolean>(false);
-
   const {
     data: userData,
     loading: isUserLoading,
@@ -808,7 +800,7 @@ export default function UserProfile() {
                             label="New Password"
                             type="password"
                             value={changePasswordForm.new_password_1}
-                            className="col-span-6 sm:col-span-3"
+                            className="peer col-span-6 sm:col-span-3"
                             onChange={(e) => {
                               setChangePasswordForm({
                                 ...changePasswordForm,
@@ -816,37 +808,33 @@ export default function UserProfile() {
                               });
                             }}
                             required
-                            onFocus={() => setNewPasswordInputInFocus(true)}
-                            onBlur={() => setNewPasswordInputInFocus(false)}
                           />
-                          {newPasswordInputInFocus && (
-                            <div className="text-small mb-2 pl-2 text-gray-500">
-                              {validateRule(
-                                changePasswordForm.new_password_1?.length >= 8,
-                                "Password should be atleast 8 characters long",
-                              )}
-                              {validateRule(
-                                changePasswordForm.new_password_1 !==
-                                  changePasswordForm.new_password_1.toUpperCase(),
-                                "Password should contain at least 1 lowercase letter",
-                              )}
-                              {validateRule(
-                                changePasswordForm.new_password_1 !==
-                                  changePasswordForm.new_password_1.toLowerCase(),
-                                "Password should contain at least 1 uppercase letter",
-                              )}
-                              {validateRule(
-                                /\d/.test(changePasswordForm.new_password_1),
-                                "Password should contain at least 1 number",
-                              )}
-                            </div>
-                          )}
+                          <div className="text-small mb-2 hidden pl-2 text-gray-500 peer-focus-within:block">
+                            {validateRule(
+                              changePasswordForm.new_password_1?.length >= 8,
+                              "Password should be atleast 8 characters long",
+                            )}
+                            {validateRule(
+                              changePasswordForm.new_password_1 !==
+                                changePasswordForm.new_password_1.toUpperCase(),
+                              "Password should contain at least 1 lowercase letter",
+                            )}
+                            {validateRule(
+                              changePasswordForm.new_password_1 !==
+                                changePasswordForm.new_password_1.toLowerCase(),
+                              "Password should contain at least 1 uppercase letter",
+                            )}
+                            {validateRule(
+                              /\d/.test(changePasswordForm.new_password_1),
+                              "Password should contain at least 1 number",
+                            )}
+                          </div>
                         </div>
                         <div className="col-span-6 sm:col-span-3">
                           <TextFormField
                             name="new_password_2"
                             label="New Password Confirmation"
-                            className="col-span-6 sm:col-span-3"
+                            className="peer col-span-6 sm:col-span-3"
                             type="password"
                             value={changePasswordForm.new_password_2}
                             onChange={(e) => {
@@ -855,20 +843,16 @@ export default function UserProfile() {
                                 new_password_2: e.value,
                               });
                             }}
-                            onFocus={() =>
-                              setNewConfirmedPasswordInputInFocus(true)
-                            }
-                            onBlur={() =>
-                              setNewConfirmedPasswordInputInFocus(false)
-                            }
                           />
-                          {newConfirmedPasswordInputInFocus &&
-                            changePasswordForm.new_password_2.length > 0 &&
-                            validateRule(
-                              changePasswordForm.new_password_1 ===
-                                changePasswordForm.new_password_2,
-                              "Confirm password should match the new password",
-                            )}
+                          {changePasswordForm.new_password_2.length > 0 && (
+                            <div className="text-small mb-2 hidden pl-2 text-gray-500 peer-focus-within:block">
+                              {validateRule(
+                                changePasswordForm.new_password_1 ===
+                                  changePasswordForm.new_password_2,
+                                "Confirm password should match the new password",
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
