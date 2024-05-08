@@ -55,6 +55,25 @@ export default function PrescriptionsTable({
         ? DISCHARGE_PRN_TKEYS
         : DISCHARGE_NORMAL_TKEYS;
 
+  // Implementing collapsible view for each prescription entry
+  const [collapsedPrescriptions, setCollapsedPrescriptions] = useState<string[]>([]);
+
+  const toggleCollapse = (id: string) => {
+    setCollapsedPrescriptions((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter((prescriptionId) => prescriptionId !== id);
+      } else {
+        return [...prev, id];
+      }
+    });
+  };
+
+  // Default the view of discontinued prescriptions to collapsed
+  const discontinuedPrescriptions = data?.results.filter((prescription) => prescription.discontinued).map((prescription) => prescription.id) || [];
+  useState(() => {
+    setCollapsedPrescriptions(discontinuedPrescriptions);
+  });
+
   return (
     <div>
       {data?.results && (
@@ -204,6 +223,19 @@ export default function PrescriptionsTable({
                     />
                   ) : (
                     "never"
+                  ),
+                  // Adding a toggle button to expand/collapse the prescription details
+                  actions: (
+                    <button
+                      onClick={() => toggleCollapse(obj.id)}
+                      className="text-primary-600 hover:text-primary-900"
+                    >
+                      {collapsedPrescriptions.includes(obj.id) ? (
+                        <CareIcon icon="l-angle-down" />
+                      ) : (
+                        <CareIcon icon="l-angle-up" />
+                      )}
+                    </button>
                   ),
                 })) || []
               }
