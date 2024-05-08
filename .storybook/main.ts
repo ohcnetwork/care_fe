@@ -7,6 +7,14 @@ const config: StorybookConfig = {
     "@storybook/addon-essentials",
     "@storybook/addon-interactions",
   ],
+  core: {
+    builder: {
+      name: "@storybook/builder-vite",
+      options: {
+        viteConfigPath: "./.storybook/vite.config.mts",
+      },
+    },
+  },
   framework: {
     name: "@storybook/react-vite",
     options: {},
