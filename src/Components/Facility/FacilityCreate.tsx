@@ -873,40 +873,43 @@ export const FacilityCreate = (props: FacilityProps) => {
                     required
                     types={["mobile", "landline"]}
                   />
-                  <MultiSelectFormField
-                    {...field("hubs")}
-                    placeholder={t("hubs")}
-                    className={facilitiesQuery.loading ? "animate-pulse" : ""}
-                    disabled={facilitiesQuery.loading || hubsQuery.loading}
-                    options={
-                      facilities?.results.filter((f) => f.id !== facilityId) ||
-                      []
-                    }
-                    optionLabel={(o) => o.name}
-                    optionValue={(o) => o.id}
-                    value={hubFacilities}
-                    onChange={async (event) => {
-                      if (event.value.length > hubFacilities.length) {
-                        await createHub(
-                          event.value[event.value.length - 1] || "",
-                        );
-                      } else if (event.value.length < hubFacilities.length) {
-                        console.log(
-                          hubFacilities.find((x) => !event.value.includes(x)),
-                        );
-                        await deleteHub(
-                          hubsQuery.data?.results.find(
-                            (r) =>
-                              r.hub.id ===
-                              (hubFacilities.find(
-                                (x) => !event.value.includes(x),
-                              ) || ""),
-                          )?.external_id || "",
-                        );
+                  {facilityId && (
+                    <MultiSelectFormField
+                      {...field("hubs")}
+                      placeholder={t("hubs")}
+                      className={facilitiesQuery.loading ? "animate-pulse" : ""}
+                      disabled={facilitiesQuery.loading || hubsQuery.loading}
+                      options={
+                        facilities?.results.filter(
+                          (f) => f.id !== facilityId,
+                        ) || []
                       }
-                      setHubFacilities(event.value as string[]);
-                    }}
-                  />
+                      optionLabel={(o) => o.name}
+                      optionValue={(o) => o.id}
+                      value={hubFacilities}
+                      onChange={async (event) => {
+                        if (event.value.length > hubFacilities.length) {
+                          await createHub(
+                            event.value[event.value.length - 1] || "",
+                          );
+                        } else if (event.value.length < hubFacilities.length) {
+                          console.log(
+                            hubFacilities.find((x) => !event.value.includes(x)),
+                          );
+                          await deleteHub(
+                            hubsQuery.data?.results.find(
+                              (r) =>
+                                r.hub.id ===
+                                (hubFacilities.find(
+                                  (x) => !event.value.includes(x),
+                                ) || ""),
+                            )?.external_id || "",
+                          );
+                        }
+                        setHubFacilities(event.value as string[]);
+                      }}
+                    />
+                  )}
                   <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 md:col-span-2 xl:grid-cols-4">
                     <TextFormField
                       {...field("oxygen_capacity")}
