@@ -440,9 +440,9 @@ export const properRoundOf = (value: number) => {
 };
 
 export const isPostPartum = (data_of_delivery?: string) => {
-  return dayjs(data_of_delivery).diff(undefined, "week") <= 6;
+  return dayjs().diff(data_of_delivery, "week") <= 6;
 };
 
 export const isAntenatal = (menstruation_start_date?: string) => {
-  return dayjs(menstruation_start_date).diff(undefined, "month") <= 9;
+  return dayjs().diff(menstruation_start_date, "month") <= 9;
 };
