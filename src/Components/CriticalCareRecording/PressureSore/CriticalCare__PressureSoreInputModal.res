@@ -123,7 +123,7 @@ let make = (
               </div>
               {!previewMode
                 ? <>
-                    <div className="flex flex-col sm:flex-row justify-center mt-2">
+                    <div className="mt-2 grid grid-cols-2 gap-2">
                       <div className="w-full">
                         <label className="block font-medium text-black text-left">
                           {str("Width")}
