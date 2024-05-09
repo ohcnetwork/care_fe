@@ -32,17 +32,11 @@ let make = (
   }, [state])
 
   let handleClickOutside = %raw(`
-
     function (event, ref, hideModal) {
-
       if (ref.current && !ref.current.contains(event.target)) {
-
         hideModal(event)
-
       }
-
     }
-
   `)
 
   let getModalPosition = React.useMemo(() => {

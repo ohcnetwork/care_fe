@@ -39,7 +39,7 @@ let make = (
 
   let handleSubmit = e => {
     let region = PressureSore.regionToString(state.region)
-    if state.length === 0.0 && state.width === 0.0 {
+    if (state.length === 0.0 && state.width === 0.0) {
       hideModal(e)
     } else if (
       (state.length > 0.0 && state.width == 0.0) || (state.length == 0.0 && state.width > 0.0)
@@ -55,29 +55,11 @@ let make = (
   }
 
   let handleClickOutside = %raw(`
-
-
-
     function (event, ref, hideModal) {
-
-
-
       if (ref.current && !ref.current.contains(event.target)) {
-
-
-
         hideModal(event)
-
-
-
       }
-
-
-
     }
-
-
-
   `)
 
   let getModalPosition = React.useMemo(() => {
