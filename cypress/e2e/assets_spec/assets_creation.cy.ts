@@ -57,7 +57,7 @@ describe("Asset", () => {
       "Vendor's Name",
       serialNumber,
       "25122021",
-      "Test note for asset creation!"
+      "Test note for asset creation!",
     );
 
     assetPage.clickCreateAddMore();
@@ -80,7 +80,7 @@ describe("Asset", () => {
       "Vendor's Name",
       serialNumber,
       "25122021",
-      "Test note for asset creation!"
+      "Test note for asset creation!",
     );
 
     assetPage.interceptAssetCreation();
@@ -106,7 +106,7 @@ describe("Asset", () => {
       "Customer Support's Name Edited",
       "Vendor's Name Edited",
       "Test note for asset creation edited!",
-      "25122021"
+      "25122021",
     );
 
     assetPage.clickUpdateAsset();
@@ -128,7 +128,7 @@ describe("Asset", () => {
       "192.168.1.64",
       "remote_user",
       "2jCkrCRSeahzKEU",
-      "d5694af2-21e2-4a39-9bad-2fb98d9818bd"
+      "d5694af2-21e2-4a39-9bad-2fb98d9818bd",
     );
     assetPage.clickConfigureAsset();
     assetPage.verifyAssetConfiguration(200);
@@ -155,7 +155,7 @@ describe("Asset", () => {
       "Vendor's Name",
       serialNumber,
       "25122021",
-      "Test note for asset creation!"
+      "Test note for asset creation!",
     );
     assetPage.interceptAssetCreation();
     assetPage.clickCreateAsset();
