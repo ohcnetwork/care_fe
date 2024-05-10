@@ -11,7 +11,7 @@ import request from "../../Utils/request/request";
 
 interface OxygenCapacityProps extends CapacityModal {
   facilityId: string;
-  facilityData: FacilityModel;
+  facilityData?: FacilityModel;
   handleClose: () => void;
   handleUpdate: () => void;
   className?: string;
