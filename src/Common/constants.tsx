@@ -244,6 +244,13 @@ export const getBedTypes = ({
   ];
 };
 
+export const OXYGEN_TYPES: Array<OptionsType> = [
+  { id: 1, text: "Liquid Oxygen" },
+  { id: 2, text: "Type B Cylinders" },
+  { id: 3, text: "Type C Cylinders" },
+  { id: 4, text: "Type D Cylinders" },
+];
+
 export const DOCTOR_SPECIALIZATION: Array<OptionsType> = [
   { id: 1, text: "General Medicine", desc: "bg-doctors-general" },
   { id: 2, text: "Pulmonology", desc: "bg-doctors-pulmonology" },
