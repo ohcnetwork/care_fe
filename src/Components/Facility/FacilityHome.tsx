@@ -15,7 +15,6 @@ import CoverImageEditModal from "./CoverImageEditModal";
 
 import Page from "../Common/components/Page";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
-import Table from "../Common/components/Table";
 
 import { navigate } from "raviger";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
@@ -27,6 +26,7 @@ import useQuery from "../../Utils/request/useQuery.js";
 import { FacilityHomeTriage } from "./FacilityHomeTriage.js";
 import { FacilityDoctorList } from "./FacilityDoctorList.js";
 import { FacilityBedCapacity } from "./FacilityBedCapacity.js";
+import { FacilityOxygenInformation } from "./FacilityOxygenInformation.js";
 import useSlug from "../../Common/hooks/useSlug.js";
 import { Popover, Transition } from "@headlessui/react";
 import { FieldLabel } from "../Form/FormFields/FormField.js";
@@ -52,7 +52,7 @@ export const FacilityHome = (props: any) => {
   const [editCoverImage, setEditCoverImage] = useState(false);
   const [imageKey, setImageKey] = useState(Date.now());
   const authUser = useAuthUser();
-
+  console.log("hell", props);
   useMessageListener((data) => console.log(data));
 
   const {
@@ -69,7 +69,6 @@ export const FacilityHome = (props: any) => {
       }
     },
   });
-
   const handleDeleteClose = () => {
     setOpenDeleteDialog(false);
   };
@@ -455,40 +454,11 @@ export const FacilityHome = (props: any) => {
       </div>
       <FacilityBedCapacity facilityId={facilityId} />
       <FacilityDoctorList facilityId={facilityId} />
-
-      <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
-        <h1 className="mb-6 text-xl font-bold">Oxygen Information</h1>
-        <div
-          className="overflow-x-auto overflow-y-hidden"
-          id="facility-oxygen-info"
-        >
-          <Table
-            headings={[
-              "",
-              "Oxygen capacity",
-              "Type B cylinder",
-              "Type C cylinder",
-              "Type D cylinder",
-            ]}
-            rows={[
-              [
-                "Capacity",
-                String(facilityData?.oxygen_capacity),
-                String(facilityData?.type_b_cylinders),
-                String(facilityData?.type_c_cylinders),
-                String(facilityData?.type_d_cylinders),
-              ],
-              [
-                "Daily Expected Consumption",
-                String(facilityData?.expected_oxygen_requirement),
-                String(facilityData?.expected_type_b_cylinders),
-                String(facilityData?.expected_type_c_cylinders),
-                String(facilityData?.expected_type_d_cylinders),
-              ],
-            ]}
-          />
-        </div>
-      </div>
+      <FacilityOxygenInformation
+        facilityId={facilityId}
+        facilityData={facilityData}
+        facilityFetch={facilityFetch}
+      />
 
       <FacilityHomeTriage
         facilityId={facilityId}
