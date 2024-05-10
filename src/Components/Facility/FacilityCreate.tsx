@@ -251,16 +251,23 @@ export const FacilityCreate = (props: FacilityProps) => {
     },
     prefetch: !!facilityId,
     onResponse: (res) => {
-      setHubFacilities(res.data?.results.map((d) => d.hub.id) as string[]);
+      setHubFacilities(
+        res.data?.results.map((d) => d.hub_object.id) as string[],
+      );
     },
   });
   const createHub = async (hubFacilityId: string) =>
     await request(routes.createFacilityHub, {
       body: {
-        hub_id: hubFacilityId,
+        hub: hubFacilityId,
       },
       pathParams: {
         id: facilityId || "",
+      },
+      onResponse: ({ res }) => {
+        if (res?.ok) {
+          hubsQuery.refetch();
+        }
       },
     });
   const deleteHub = async (hubFacilityId: string) =>
@@ -269,7 +276,13 @@ export const FacilityCreate = (props: FacilityProps) => {
         id: facilityId || "",
         hub_id: hubFacilityId,
       },
+      onResponse: ({ res }) => {
+        if (res?.ok) {
+          hubsQuery.refetch();
+        }
+      },
     });
+
   const { data: facilities } = facilitiesQuery;
 
   useQuery(routes.getPermittedFacility, {
@@ -889,21 +902,16 @@ export const FacilityCreate = (props: FacilityProps) => {
                       value={hubFacilities}
                       onChange={async (event) => {
                         if (event.value.length > hubFacilities.length) {
-                          await createHub(
-                            event.value[event.value.length - 1] || "",
-                          );
+                          createHub(event.value[event.value.length - 1] || "");
                         } else if (event.value.length < hubFacilities.length) {
-                          console.log(
-                            hubFacilities.find((x) => !event.value.includes(x)),
-                          );
-                          await deleteHub(
+                          deleteHub(
                             hubsQuery.data?.results.find(
                               (r) =>
-                                r.hub.id ===
+                                r.hub_object.id ===
                                 (hubFacilities.find(
                                   (x) => !event.value.includes(x),
                                 ) || ""),
-                            )?.external_id || "",
+                            )?.id || "",
                           );
                         }
                         setHubFacilities(event.value as string[]);

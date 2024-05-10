@@ -403,9 +403,7 @@ const routes = {
     path: "/api/v1/facility/{id}/hubs/",
     method: "POST",
     TRes: Type<FacilityHubModel>(),
-    TBody: Type<
-      Partial<Omit<FacilityHubModel, "hub" | "spoke">> & { hub_id: string }
-    >(),
+    TBody: Type<Partial<FacilityHubModel>>(),
   },
 
   deleteFacilityHub: {

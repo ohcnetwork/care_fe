@@ -78,11 +78,16 @@ export interface FacilityModel {
   pincode?: string;
 }
 
+export enum HubRelationship {
+  TELE_ICU_HUB = 1,
+}
+
 export interface FacilityHubModel {
-  external_id: string;
-  hub: FacilityNameModel;
-  spoke: FacilityNameModel;
-  relationship: unknown;
+  id: string;
+  hub?: string;
+  hub_object: FacilityNameModel;
+  spoke_object: FacilityNameModel;
+  relationship: HubRelationship;
 }
 export interface CapacityModal {
   id?: number;
