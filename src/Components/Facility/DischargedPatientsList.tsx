@@ -256,7 +256,7 @@ const DischargedPatientsList = ({
       <PatientFilter
         {...advancedFilter}
         key={window.location.search}
-        discharged
+        dischargePage
       />
     </Page>
   );
