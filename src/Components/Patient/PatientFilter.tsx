@@ -387,25 +387,27 @@ export default function PatientFilter(props: any) {
                   }
                 />
               </div>
-
-              <div className="w-full flex-none" id="discharge-reason-select">
-                <FieldLabel className="text-sm">Discharge Reason</FieldLabel>
-                <SelectMenuV2
-                  id="last_consultation__new_discharge_reason"
-                  placeholder="Select discharge reason"
-                  options={DISCHARGE_REASONS}
-                  value={filterState.last_consultation__new_discharge_reason}
-                  optionValue={(o) => o.id}
-                  optionLabel={(o) => o.text}
-                  onChange={(o) =>
-                    setFilterState({
-                      ...filterState,
-                      last_consultation__new_discharge_reason: o,
-                    })
-                  }
-                />
-              </div>
-
+            </>
+          )}
+          <div className="w-full flex-none" id="discharge-reason-select">
+            <FieldLabel className="text-sm">Discharge Reason</FieldLabel>
+            <SelectMenuV2
+              id="last_consultation__new_discharge_reason"
+              placeholder="Select discharge reason"
+              options={DISCHARGE_REASONS}
+              value={filterState.last_consultation__new_discharge_reason}
+              optionValue={(o) => o.id}
+              optionLabel={(o) => o.text}
+              onChange={(o) =>
+                setFilterState({
+                  ...filterState,
+                  last_consultation__new_discharge_reason: o,
+                })
+              }
+            />
+          </div>
+          {!props.discharged && (
+            <>
               <div className="w-full flex-none">
                 <FieldLabel className="text-sm">Telemedicine</FieldLabel>
                 <SelectMenuV2
@@ -563,21 +565,24 @@ export default function PatientFilter(props: any) {
                 onChange={handleDateRangeChange}
                 errorClassName="hidden"
               />
-              <DateRangeFormField
-                labelClassName="text-sm"
-                name="last_consultation_discharge_date"
-                label="Discharge Date"
-                value={{
-                  start: getDate(
-                    filterState.last_consultation_discharge_date_after,
-                  ),
-                  end: getDate(
-                    filterState.last_consultation_discharge_date_before,
-                  ),
-                }}
-                onChange={handleDateRangeChange}
-                errorClassName="hidden"
-              />
+            </>
+          )}
+
+          <DateRangeFormField
+            labelClassName="text-sm"
+            name="last_consultation_discharge_date"
+            label="Discharge Date"
+            value={{
+              start: getDate(
+                filterState.last_consultation_discharge_date_after,
+              ),
+              end: getDate(filterState.last_consultation_discharge_date_before),
+            }}
+            onChange={handleDateRangeChange}
+            errorClassName="hidden"
+          />
+          {!props.discharged && (
+            <>
               <DateRangeFormField
                 labelClassName="text-sm"
                 name="last_consultation_symptoms_onset_date"
