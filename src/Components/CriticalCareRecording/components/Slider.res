@@ -76,11 +76,11 @@ let make = (
 
   <>
     <section className={"slider-box " ++ className}>
-      <div className=`slider-head flex justify-${title != "" ? "between" : "center"} flex-col sm:flex-row sm:items-center`>
+      <div className=`slider-head flex ${title != "" ? "justify-between" : "justify-center"} flex-col sm:flex-row sm:items-center`>
         <div className="flex items-center">
           <h1 className="m-2"> {title->str} </h1> titleNeighbour
         </div>
-        <div className=`flex flex-col items-${title != "" ? "end" : "center"} mt-2 sm:mt-0`>
+        <div className=`flex flex-col ${title != "" ? "items-end" : "items-center"} mt-2 sm:mt-0`>
           <label htmlFor="measure" style={ReactDOM.Style.make(~color=textColor, ())}>
             {switch value->Belt.Float.fromString {
             | Some(_) => text->str
