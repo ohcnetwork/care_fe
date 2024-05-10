@@ -463,32 +463,6 @@ export const FacilityCreate = (props: FacilityProps) => {
         latitude: state.form.latitude,
         longitude: state.form.longitude,
         phone_number: parsePhoneNumber(state.form.phone_number),
-        oxygen_capacity: state.form.oxygen_capacity
-          ? state.form.oxygen_capacity
-          : 0,
-        type_b_cylinders: state.form.type_b_cylinders
-          ? state.form.type_b_cylinders
-          : 0,
-        type_c_cylinders: state.form.type_c_cylinders
-          ? state.form.type_c_cylinders
-          : 0,
-        type_d_cylinders: state.form.type_d_cylinders
-          ? state.form.type_d_cylinders
-          : 0,
-        expected_oxygen_requirement: state.form.expected_oxygen_requirement
-          ? state.form.expected_oxygen_requirement
-          : 0,
-        expected_type_b_cylinders: state.form.expected_type_b_cylinders
-          ? state.form.expected_type_b_cylinders
-          : 0,
-
-        expected_type_c_cylinders: state.form.expected_type_c_cylinders
-          ? state.form.expected_type_c_cylinders
-          : 0,
-
-        expected_type_d_cylinders: state.form.expected_type_d_cylinders
-          ? state.form.expected_type_d_cylinders
-          : 0,
       };
 
       const { res, data: requestData } = facilityId
@@ -844,79 +818,6 @@ export const FacilityCreate = (props: FacilityProps) => {
                     required
                     types={["mobile", "landline"]}
                   />
-                  <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 md:col-span-2 xl:grid-cols-4">
-                    <TextFormField
-                      {...field("oxygen_capacity")}
-                      type="number"
-                      placeholder="0"
-                      label={t("liquid_oxygen_capacity")}
-                      trailingPadding=" "
-                      trailing={<FieldUnit unit={t("litres")} />}
-                      min={0}
-                    />
-                    <TextFormField
-                      {...field("expected_oxygen_requirement")}
-                      type="number"
-                      placeholder="0"
-                      trailingPadding=" "
-                      trailing={<FieldUnit unit={t("litres_per_day")} />}
-                      label={t("expected_burn_rate")}
-                      min={0}
-                    />
-
-                    <TextFormField
-                      {...field("type_b_cylinders")}
-                      type="number"
-                      placeholder="0"
-                      trailingPadding=" "
-                      trailing={<FieldUnit unit={t("cylinders")} />}
-                      min={0}
-                    />
-                    <TextFormField
-                      {...field("expected_type_b_cylinders")}
-                      type="number"
-                      placeholder="0"
-                      label={t("expected_burn_rate")}
-                      trailingPadding=" "
-                      trailing={<FieldUnit unit={t("cylinders_per_day")} />}
-                      min={0}
-                    />
-                    <TextFormField
-                      {...field("type_c_cylinders")}
-                      type="number"
-                      placeholder="0"
-                      trailingPadding=" "
-                      trailing={<FieldUnit unit={t("cylinders")} />}
-                      min={0}
-                    />
-                    <TextFormField
-                      {...field("expected_type_c_cylinders")}
-                      type="number"
-                      placeholder="0"
-                      trailingPadding=" "
-                      trailing={<FieldUnit unit={t("cylinders_per_day")} />}
-                      label={t("expected_burn_rate")}
-                      min={0}
-                    />
-                    <TextFormField
-                      {...field("type_d_cylinders")}
-                      type="number"
-                      placeholder="0"
-                      trailingPadding=" "
-                      trailing={<FieldUnit unit={t("cylinders")} />}
-                      min={0}
-                    />
-                    <TextFormField
-                      {...field("expected_type_d_cylinders")}
-                      type="number"
-                      placeholder="0"
-                      label={t("expected_burn_rate")}
-                      trailingPadding=" "
-                      trailing={<FieldUnit unit={t("cylinders_per_day")} />}
-                      min={0}
-                    />
-                  </div>
-
                   {kasp_enabled && (
                     <RadioFormField
                       {...field("kasp_empanelled")}
@@ -998,8 +899,4 @@ export const FacilityCreate = (props: FacilityProps) => {
         </Page>
       );
   }
-};
-
-const FieldUnit = ({ unit }: { unit: string }) => {
-  return <p className="mr-8 text-xs text-gray-700">{unit}</p>;
 };
