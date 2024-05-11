@@ -298,6 +298,7 @@ let make = (
       <button
         disabled={state.saving}
         onClick={_ => {
+          // here checking if any asset linked or not before proceeding
           if (
             asset == 0 &&
               (state.ventilator_interface !=

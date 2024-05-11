@@ -34,6 +34,7 @@ export const getAsset = (
   request(routes.listConsultationBeds, {
     query: { consultation: consultationId, limit: 1 },
   }).then(({ data }) => {
+    // here its fetching the ventilator type assets
     const assets = data?.results[0].assets_objects?.filter(
       (asset) => asset.asset_class == "VENTILATOR",
     );
