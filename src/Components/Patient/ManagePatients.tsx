@@ -31,7 +31,11 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import SearchInput from "../Form/SearchInput";
 import SortDropdownMenu from "../Common/SortDropdown";
 import SwitchTabs from "../Common/components/SwitchTabs";
-import { formatPatientAge, parsePhoneNumber } from "../../Utils/utils.js";
+import {
+  formatPatientAge,
+  isAntenatal,
+  parsePhoneNumber,
+} from "../../Utils/utils.js";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page.js";
@@ -105,7 +109,6 @@ export const PatientManager = () => {
   const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
   const [showDialog, setShowDialog] = useState<"create" | "list-discharged">();
   const [showDoctors, setShowDoctors] = useState(false);
-  const [showDoctorConnect, setShowDoctorConnect] = useState(false);
   const [phone_number, setPhoneNumber] = useState("");
   const [phoneNumberError, setPhoneNumberError] = useState("");
   const [emergency_phone_number, setEmergencyPhoneNumber] = useState("");
@@ -177,7 +180,7 @@ export const PatientManager = () => {
     created_date_after: qParams.created_date_after || undefined,
     modified_date_before: qParams.modified_date_before || undefined,
     modified_date_after: qParams.modified_date_after || undefined,
-    ordering: qParams.ordering || "-modified_date",
+    ordering: qParams.ordering || undefined,
     category: qParams.category || undefined,
     gender: qParams.gender || undefined,
     age_min: qParams.age_min || undefined,
@@ -247,12 +250,6 @@ export const PatientManager = () => {
     qParams.diagnoses_unconfirmed,
     qParams.diagnoses_differential,
   ]);
-
-  useEffect(() => {
-    if (params.facility) {
-      setShowDoctorConnect(true);
-    }
-  }, [qParams.facility]);
 
   const date_range_fields = [
     [params.created_date_before, params.created_date_after],
@@ -584,6 +581,16 @@ export const PatientManager = () => {
                       text="Readmission"
                     />
                   )}
+                  {patient.last_consultation?.suggestion === "A" &&
+                    patient.last_consultation.facility === patient.facility &&
+                    !patient.last_consultation.discharge_date && (
+                      <Chip
+                        size="small"
+                        variant="primary"
+                        startIcon="l-clock-three"
+                        text={`IP Days: ${dayjs().diff(patient.last_consultation.encounter_date, "day")}`}
+                      />
+                    )}
                   {patient.disease_status === "POSITIVE" && (
                     <Chip
                       size="small"
@@ -594,6 +601,7 @@ export const PatientManager = () => {
                   )}
                   {patient.gender === 2 &&
                     patient.is_antenatal &&
+                    isAntenatal(patient.last_menstruation_start_date) &&
                     patient.is_active && (
                       <Chip
                         size="small"
@@ -785,7 +793,7 @@ export const PatientManager = () => {
               }}
               isTab2Active={!!tabValue}
             />
-            {showDoctorConnect && (
+            {!!params.facility && (
               <ButtonV2
                 id="doctor-connect-patient-button"
                 onClick={() => {
