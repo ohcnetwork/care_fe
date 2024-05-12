@@ -335,7 +335,7 @@ export const GENDER_TYPES = [
   { id: 1, text: "Male", icon: "M" },
   { id: 2, text: "Female", icon: "F" },
   { id: 3, text: "Transgender", icon: "TRANS" },
-];
+] as const;
 
 export const SAMPLE_TEST_RESULT = [
   { id: 1, text: "POSITIVE" },

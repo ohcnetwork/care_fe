@@ -94,7 +94,7 @@ describe("Facility Creation", () => {
       initialTriageValue,
       initialTriageValue,
       initialTriageValue,
-      initialTriageValue
+      initialTriageValue,
     );
     manageUserPage.clickSubmit();
     // edit the entry and verify reflection
@@ -106,7 +106,7 @@ describe("Facility Creation", () => {
       modifiedTriageValue,
       modifiedTriageValue,
       modifiedTriageValue,
-      modifiedTriageValue
+      modifiedTriageValue,
     );
     manageUserPage.clickSubmit();
     facilityPage.scrollToFacilityTriage();
@@ -318,7 +318,7 @@ describe("Facility Creation", () => {
     facilityPage.fillMiddleWareAddress("dev_middleware.coronasafe.live");
     facilityPage.clickupdateMiddleWare();
     facilityPage.verifySuccessNotification(
-      "Facility middleware updated successfully"
+      "Facility middleware updated successfully",
     );
   });
 
