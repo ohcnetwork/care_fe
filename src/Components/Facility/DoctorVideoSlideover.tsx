@@ -19,6 +19,18 @@ const UserGroups = {
   TELEICU: "TeleICU Doctor",
 };
 
+const courtesyTitle = (user: UserAssignedModel) => {
+  if (user.user_type === "Doctor") {
+    return "Dr." as const;
+  }
+
+  return {
+    1: "Mr.",
+    2: "Ms.",
+    3: "Hey",
+  }[user.gender!];
+};
+
 type UserGroup = keyof typeof UserGroups;
 
 type UserAnnotatedWithGroup = UserAssignedModel & { group?: UserGroup };
@@ -161,7 +173,7 @@ function UserListItem({ user }: { user: UserAnnotatedWithGroup }) {
     e.stopPropagation();
     if (!user.alt_phone_number) return;
     const phoneNumber = user.alt_phone_number;
-    const message = `Hey ${user.first_name} ${user.last_name}, I have a query regarding a patient.\n\nPatient Link: ${window.location.href}`;
+    const message = `${courtesyTitle(user)} ${user.first_name} ${user.last_name}, I have a query regarding a patient.\n\nPatient Link: ${window.location.href}`;
     const encodedMessage = encodeURIComponent(message);
     const whatsappAppURL = `whatsapp://send?phone=${phoneNumber}&text=${encodedMessage}`;
     const whatsappWebURL = `https://web.whatsapp.com/send?phone=${phoneNumber}&text=${encodedMessage}`;

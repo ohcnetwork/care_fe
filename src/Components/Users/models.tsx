@@ -1,4 +1,4 @@
-import { UserRole } from "../../Common/constants";
+import { GENDER_TYPES, UserRole } from "../../Common/constants";
 import { DistrictModel, LocalBodyModel, StateModel } from "../Facility/models";
 
 interface HomeFacilityObjectModel {
@@ -64,7 +64,7 @@ export interface UserAssignedModel extends UserBareMinimum {
   phone_number?: string;
   alt_phone_number?: string;
   video_connect_link: string;
-  gender?: number;
+  gender?: (typeof GENDER_TYPES)[number]["id"];
   date_of_birth: Date | null;
   is_superuser?: boolean;
   verified?: boolean;

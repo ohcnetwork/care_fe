@@ -153,7 +153,7 @@ export default function MedicineAdministrationTableRow({
               <span>{t("edit_caution_note")}</span>
             </div>
           }
-          className="w-full max-w-3xl lg:min-w-[600px]"
+          className="w-full max-w-4xl lg:min-w-[768px]"
         >
           <EditPrescriptionForm
             initial={prescription}

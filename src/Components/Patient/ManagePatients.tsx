@@ -31,7 +31,11 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import SearchInput from "../Form/SearchInput";
 import SortDropdownMenu from "../Common/SortDropdown";
 import SwitchTabs from "../Common/components/SwitchTabs";
-import { formatPatientAge, parsePhoneNumber } from "../../Utils/utils.js";
+import {
+  formatPatientAge,
+  isAntenatal,
+  parsePhoneNumber,
+} from "../../Utils/utils.js";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page.js";
@@ -577,6 +581,16 @@ export const PatientManager = () => {
                       text="Readmission"
                     />
                   )}
+                  {patient.last_consultation?.suggestion === "A" &&
+                    patient.last_consultation.facility === patient.facility &&
+                    !patient.last_consultation.discharge_date && (
+                      <Chip
+                        size="small"
+                        variant="primary"
+                        startIcon="l-clock-three"
+                        text={`IP Days: ${dayjs().diff(patient.last_consultation.encounter_date, "day")}`}
+                      />
+                    )}
                   {patient.disease_status === "POSITIVE" && (
                     <Chip
                       size="small"
@@ -587,6 +601,7 @@ export const PatientManager = () => {
                   )}
                   {patient.gender === 2 &&
                     patient.is_antenatal &&
+                    isAntenatal(patient.last_menstruation_start_date) &&
                     patient.is_active && (
                       <Chip
                         size="small"
