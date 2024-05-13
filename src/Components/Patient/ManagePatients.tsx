@@ -774,6 +774,13 @@ export const PatientManager = () => {
                   );
                 } else if (onlyAccessibleFacility)
                   navigate(`/facility/${onlyAccessibleFacility.id}/patient`);
+                else if (
+                  !showAllFacilityUsers.includes(authUser.user_type) &&
+                  !authUser.home_facility_object?.id
+                )
+                  Notification.Error({
+                    msg: "Oops! No home facility found",
+                  });
                 else setShowDialog("create");
               }}
               className="w-full lg:w-fit"
