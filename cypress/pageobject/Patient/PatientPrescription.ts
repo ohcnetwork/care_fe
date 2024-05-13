@@ -16,6 +16,15 @@ export class PatientPrescription {
     );
   }
 
+  clickTitratedDosage() {
+    cy.get("#titrated-dosage").click();
+  }
+
+  clickAdministerButton() {
+    cy.get("#administer-medicine").should("be.visible");
+    cy.verifyAndClickElement("#administer-medicine", "Administer");
+  }
+
   selectMedicinebox() {
     cy.get(
       "div#medicine_object input[placeholder='Select'][role='combobox']",
@@ -28,6 +37,18 @@ export class PatientPrescription {
 
   enterDosage(doseAmount: string) {
     cy.get("#base_dosage").type(doseAmount, { force: true });
+  }
+
+  enterAdministerDosage(dosage: string) {
+    cy.get("#dosage").type(dosage);
+  }
+
+  enterAdministerNotes(notes: string) {
+    cy.get("#administration_notes").type(notes);
+  }
+
+  enterTargetDosage(targetDosage: string) {
+    cy.get("#target_dosage").type(targetDosage);
   }
 
   selectDosageFrequency(frequency: string) {
