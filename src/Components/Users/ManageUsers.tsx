@@ -412,10 +412,10 @@ export default function ManageUsers() {
                   {["DistrictAdmin", "StateAdmin"].includes(
                     authUser.user_type,
                   ) && (
-                    <div className="flex-col md:flex-row">
+                    <div>
                       <ButtonV2
                         id="avg-workinghour"
-                        className="flex w-full items-center md:w-full"
+                        className="w-full"
                         onClick={() => {
                           setExpandWorkingHours(true);
                           setSelectedUser(user.username);
@@ -423,7 +423,9 @@ export default function ManageUsers() {
                         }}
                       >
                         <CareIcon icon="l-clock" className="text-xl" />
-                        <p>Set Average weekly working hours</p>
+                        <p className="whitespace-normal md:whitespace-nowrap">
+                          Set Average weekly working hours
+                        </p>
                       </ButtonV2>
                     </div>
                   )}
@@ -772,7 +774,7 @@ export function UserFacilities(props: { user: any }) {
                     >
                       <CareIcon
                         icon="l-estate"
-                        className="mr-1 pt-[1px] text-lg"
+                        className="mr-1 pt-px text-lg"
                       />
                       Home Facility
                     </span>

@@ -102,6 +102,17 @@ export const TriageForm = ({ facilityId, id }: Props) => {
             invalidForm = true;
           }
           return;
+        case "num_patients_visited":
+        case "num_patients_home_quarantine":
+        case "num_patients_isolation":
+        case "num_patient_referred":
+        case "num_patient_confirmed_positive":
+          if (state.form[field] != null && state.form[field] < 0) {
+            errors[field] = "Value must be greater than or equal to 0";
+            invalidForm = true;
+          }
+          return;
+
         default:
           return;
       }
