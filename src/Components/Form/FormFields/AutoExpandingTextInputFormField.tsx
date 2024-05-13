@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import TextAreaFormField, { TextAreaFormFieldProps } from "./TextAreaFormField";
 
 type AutoExpandingTextInputFormFieldProps = TextAreaFormFieldProps & {
@@ -9,6 +9,7 @@ const AutoExpandingTextInputFormField = (
   props: AutoExpandingTextInputFormFieldProps,
 ) => {
   const myref = useRef<HTMLTextAreaElement>(null);
+
   useEffect(() => {
     if (myref.current == null) return;
     const text = myref.current.textContent?.split("\n");
@@ -24,7 +25,7 @@ const AutoExpandingTextInputFormField = (
     myref.current.style.cssText = "height:" + height + "px";
   });
 
-  return <TextAreaFormField ref={myref} {...props} className="w-full" />;
+  return <TextAreaFormField ref={myref} {...props} />;
 };
 
 export default AutoExpandingTextInputFormField;

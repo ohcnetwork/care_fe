@@ -55,11 +55,13 @@ let make = (
     }
   })
 
-  let getStatus = (min, minText, max, maxText, val) => {
-    switch (val >= min, val <= max) {
-    | (true, true) => ("Normal", "#059669")
-    | (true, false) => (maxText, "#DC2626")
-    | _ => (minText, "#DC2626")
+  let getLabels = val => {
+    if val < 4 {
+      ("Low", "green")
+    } else if val < 8 {
+      ("Mild", "orange")
+    } else {
+      ("High", "red")
     }
   }
 
@@ -78,7 +80,7 @@ let make = (
           ~top=getModalPosition()["top"],
           (),
         )}
-        className="transform max-w-[350px] rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-fit">
+        className="transform max-w-[350px] rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-fit overflow-hidden">
         <div className="bg-white px-4 pt-2 pb-4 sm:p-6 sm:pb-4">
           <div className="sm:flex sm:items-start">
             <div className="mt-3 text-center sm:mt-0 sm:text-left">
@@ -86,48 +88,67 @@ let make = (
                 <span> {str("Region: ")} </span>
                 <span className="text-black"> {str(Pain.regionToString(state.region))} </span>
               </div>
-              <div className="flex flex-col sm:flex-row justify-center mt-2">
-                <div className="w-full">
-                  <Slider
-                    title={""}
-                    className="px-0 py-5 m-0"
-                    disabled={previewMode}
-                    start={"0"}
-                    end={"5"}
-                    interval={"1"}
-                    step={1.0}
-                    value={Belt.Float.toString(painScale)}
-                    setValue={s => {
-                      let value = s->Belt.Int.fromString
-                      switch value {
-                      | Some(value) => setState(prev => {...prev, scale: value})
-                      | None => setState(prev => {...prev, scale: 0})
-                      }
-                    }}
-                    getLabel={getStatus(2.0, "Low", 4.0, "High")}
-                    hasError={ValidationUtils.isInputInRangeInt(
-                      0,
-                      5,
-                      Belt.Float.toString(painScale)->Belt.Int.fromString,
-                    )}
-                  />
-                  <div className="mt-2">
-                    <label className="block font-medium text-black text-left mb-1">
-                      {str("Description")}
-                    </label>
-                    <textarea
-                      placeholder="Description"
-                      value={state.description}
-                      onChange={e => {
-                        let value = ReactEvent.Form.target(e)["value"]
-                        setState(prev => {...prev, description: value})
-                      }}
-                      className="cui-input-base px-2 py-1"
-                      disabled={previewMode}
-                    />
+              {!previewMode
+                ? <div className="flex flex-col sm:flex-row justify-center mt-2">
+                    <div className="w-full">
+                      <Slider
+                        title={""}
+                        className="px-0 py-5 m-0"
+                        disabled={previewMode}
+                        start={"0"}
+                        end={"10"}
+                        interval={"1"}
+                        step={1.0}
+                        value={Belt.Float.toString(painScale)}
+                        setValue={s => {
+                          let value = s->Belt.Int.fromString
+                          switch value {
+                          | Some(value) => setState(prev => {...prev, scale: value})
+                          | None => setState(prev => {...prev, scale: 0})
+                          }
+                        }}
+                        getLabel={_ => getLabels(Belt.Float.toInt(painScale))}
+                        hasError={ValidationUtils.isInputInRangeInt(
+                          0,
+                          10,
+                          Belt.Float.toString(painScale)->Belt.Int.fromString,
+                        )}
+                      />
+                      <div className="mt-2">
+                        <label className="block font-medium text-black text-left mb-1">
+                          {str("Description")}
+                        </label>
+                        <textarea
+                          placeholder="Description"
+                          value={state.description}
+                          onChange={e => {
+                            let value = ReactEvent.Form.target(e)["value"]
+                            setState(prev => {...prev, description: value})
+                          }}
+                          className="cui-input-base px-2 py-1"
+                          disabled={previewMode}
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                : <div>
+                    <div className="grid grid-cols-1 items-center gap-4 justify-around mt-4">
+                      <div className="flex flex-col items-center text-center">
+                        <div className="text-black font-bold text-xl">
+                          {str(Belt.Float.toString(painScale))}
+                        </div>
+                        <div className="text-sm text-gray-700"> {str("Pain Scale")} </div>
+                      </div>
+                    </div>
+                    {state.description !== ""
+                      ? <div className="mt-4">
+                          <label className="block text-sm text-gray-700 text-left">
+                            {str("Description")}
+                          </label>
+                          <div className="text-black"> {str(state.description)} </div>
+                        </div>
+                      : React.null}
+                  </div>}
             </div>
           </div>
         </div>
@@ -153,7 +174,7 @@ let make = (
               type_="button"
               onClick={hideModal}
               className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-              {str("Cancel")}
+              {str(!previewMode ? "Cancel" : "Close")}
             </button>
           </div>
         </div>

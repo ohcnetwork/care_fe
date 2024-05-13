@@ -22,15 +22,15 @@ export interface TreeShakeCareIconsOptions {
  */
 
 export function treeShakeCareIcons(
-  options: TreeShakeCareIconsOptions = { iconWhitelist: [] }
+  options: TreeShakeCareIconsOptions = { iconWhitelist: [] },
 ): Plugin {
   const rootDir = path.resolve(__dirname, ".."); // update this if moving this code to a different file
   const lineIconNameRegex = /"l-[a-z]+(?:-[a-z]+)*"/g;
   const allUniconPaths = JSON.parse(
     fs.readFileSync(
       path.resolve(rootDir, "src/CAREUI/icons/UniconPaths.json"),
-      "utf8"
-    )
+      "utf8",
+    ),
   );
 
   // Extracts icon names from a given file's content.
@@ -41,7 +41,7 @@ export function treeShakeCareIcons(
     const lineIconNameMatches = fileContent.match(lineIconNameRegex) || [];
 
     const lineIconNames = lineIconNameMatches.map(
-      (lineIconName) => lineIconName.slice(1, -1) // remove quotes
+      (lineIconName) => lineIconName.slice(1, -1), // remove quotes
     );
 
     return lineIconNames;

@@ -9,6 +9,7 @@ import ButtonV2 from "../Common/components/ButtonV2.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
+
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function InventoryLog(props: any) {
@@ -151,6 +152,7 @@ export default function InventoryLog(props: any) {
                 onClick={(_) => flagFacility(inventoryItem.external_id)}
                 disabled={saving}
                 variant="danger"
+                className="mr-2"
               >
                 <span>
                   <CareIcon
@@ -182,9 +184,9 @@ export default function InventoryLog(props: any) {
   } else if (data.results) {
     inventoryItem = (
       <>
-        <div className="-mx-4 overflow-x-auto p-4 sm:-mx-8 sm:px-8">
+        <div className="-mx-4 overflow-x-auto p-4 pb-9 sm:-mx-8 sm:px-8">
           <div className="inline-block min-w-full">
-            <table className="min-w-full overflow-hidden rounded-lg leading-normal shadow">
+            <table className="min-w-full overflow-x-clip rounded-lg leading-normal shadow">
               <thead>
                 <tr>
                   <th className="border-b-2 border-gray-200 bg-primary-400 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
@@ -236,10 +238,12 @@ export default function InventoryLog(props: any) {
               <h4>Item: {data?.results[0].item_object.name}</h4>
               {data?.results && data.results[0].current_stock > 0 && (
                 <div className="tooltip ">
-                  <div className="tooltip-text tooltip-left text-justify text-sm leading-snug">
-                    <b>Deletes the last transaction</b> by creating an
-                    equivalent undo transaction and marks both the transactions
-                    as accident.
+                  <div className="tooltip-text tooltip-left text-justify text-sm leading-snug ">
+                    <b>Deletes the last transaction</b>
+                    <br />
+                    It does by creating an equivalent undo transaction
+                    <br />
+                    and marks both the transactions as accident.
                   </div>
                   <ButtonV2
                     id="delete-last-entry"
