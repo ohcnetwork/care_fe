@@ -746,6 +746,7 @@ export const PatientManager = () => {
                   navigate(`/facility/${onlyAccessibleFacility.id}/patient`);
                 else if (
                   !showAllFacilityUsers.includes(authUser.user_type) &&
+                  qParams.facility &&
                   authUser.home_facility_object?.id !== qParams.facility
                 )
                   Notification.Error({
