@@ -15,6 +15,20 @@ const calculateAge = () => {
   return currentYear - parseInt(yearOfBirth);
 };
 
+const getRelativeDateString = (deltaDays = 0) => {
+  const date = new Date();
+  if (deltaDays) {
+    date.setDate(date.getDate() + deltaDays);
+  }
+  return date
+    .toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    })
+    .replace("/", "");
+};
+
 describe("Patient Creation with consultation", () => {
   const loginPage = new LoginPage();
   const patientPage = new PatientPage();
@@ -27,6 +41,8 @@ describe("Patient Creation with consultation", () => {
   const age = calculateAge();
   const patientFacility = "Dummy Facility 40";
   const patientDateOfBirth = "01012001";
+  const patientMenstruationStartDate = getRelativeDateString(-10);
+  const patientDateOfDelivery = getRelativeDateString(-20);
   const patientOneName = "Patient With No Consultation";
   const patientOneGender = "Male";
   const patientOneUpdatedGender = "Female";
@@ -144,6 +160,9 @@ describe("Patient Creation with consultation", () => {
     patientPage.selectPatientGender(patientOneUpdatedGender);
     patientPage.typePatientDateOfBirth(patientDateOfBirth);
     patientPage.clickPatientAntenatalStatusYes();
+    patientPage.typeLastMenstruationStartDate(patientMenstruationStartDate);
+    patientPage.clickPatientPostPartumStatusYes();
+    patientPage.typeDateOfDelivery(patientDateOfDelivery);
     patientPage.selectPatientBloodGroup(patientOneUpdatedBloodGroup);
     // Edit the patient consultation , select none medical history and multiple health ID
     patientMedicalHistory.clickNoneMedicialHistory();
