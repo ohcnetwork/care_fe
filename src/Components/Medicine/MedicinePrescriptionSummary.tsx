@@ -313,7 +313,7 @@ export default function ConsultationMedicineLogs({
       }
 
       // If there are changes, add them to the changes array
-      if (changesForPrescription.length > 0) {
+      if (changesForPrescription.length > 0 && !prevPrescription.discontinued) {
         const message = `Changes: ${changesForPrescription.join(", ")}`;
         changes.push({
           prescriptionId: currentPrescription.id,
@@ -353,19 +353,23 @@ export default function ConsultationMedicineLogs({
         name={data?.results[0].medicine_object?.name ?? ""}
       >
         {data?.results &&
-          calculateChanges(data?.results).map((changes, index) => (
-            <TimelineNode
-              event={{
-                type: "prescribed",
-                timestamp: changes.created_date,
-                by: changes.prescribed_by,
-                icon: "l-syringe",
-              }}
-              isLast={index == data?.results.length - 1}
-            >
-              <p>{changes?.changeMessage}</p>
-            </TimelineNode>
-          ))}
+          (() => {
+            const changesArray = calculateChanges(data?.results);
+            return changesArray.map((changes, index) => (
+              <TimelineNode
+                key={changes.prescriptionId}
+                event={{
+                  type: "prescribed",
+                  timestamp: changes.created_date,
+                  by: changes.prescribed_by,
+                  icon: "l-syringe",
+                }}
+                isLast={index === changesArray.length - 1}
+              >
+                <p>{changes?.changeMessage}</p>
+              </TimelineNode>
+            ));
+          })()}
       </Timeline>
     </div>
   );
