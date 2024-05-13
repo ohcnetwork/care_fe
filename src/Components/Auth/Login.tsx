@@ -13,6 +13,7 @@ import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import { useAuthContext } from "../../Common/hooks/useAuthUser";
 import FiltersCache from "../../Utils/FiltersCache";
+import { classNames } from "../../Utils/utils";
 
 export const Login = (props: { forgot?: boolean }) => {
   const { signIn } = useAuthContext();
@@ -276,12 +277,10 @@ export const Login = (props: { forgot?: boolean }) => {
 
             <div className="relative flex h-full w-full items-center">
               <div
-                className={
-                  "w-full transition-all " +
-                  (!forgotPassword
-                    ? "visible -translate-x-0 opacity-100"
-                    : "invisible -translate-x-5 opacity-0")
-                }
+                className={classNames(
+                  "w-full transition-all",
+                  forgotPassword && "hidden",
+                )}
               >
                 <div className="mb-8 w-[300px] text-4xl font-black text-primary-600">
                   {t("auth_login_title")}
@@ -353,12 +352,10 @@ export const Login = (props: { forgot?: boolean }) => {
               </div>
 
               <div
-                className={
-                  "absolute w-full transition-all " +
-                  (forgotPassword
-                    ? "visible translate-x-0 opacity-100"
-                    : "invisible translate-x-5 opacity-0")
-                }
+                className={classNames(
+                  "w-full transition-all",
+                  !forgotPassword && "hidden",
+                )}
               >
                 <button
                   onClick={() => {

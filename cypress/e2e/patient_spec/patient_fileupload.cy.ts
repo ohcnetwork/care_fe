@@ -109,9 +109,9 @@ function runTests(testDescription, visitPatientFileUploadSection) {
 
 runTests(
   "Patient File upload in patient details page",
-  patientFileUpload.clickFileUploadIcon
+  patientFileUpload.clickFileUploadIcon,
 );
 runTests(
   "Patient File upload in patient consultation page",
-  patientFileUpload.clickFileTab
+  patientFileUpload.clickFileTab,
 );

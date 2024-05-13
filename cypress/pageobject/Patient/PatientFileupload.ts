@@ -41,7 +41,7 @@ export class PatientFileUpload {
   uploadFile() {
     cy.get("#file_upload_patient").selectFile(
       "cypress/fixtures/sampleAsset.xlsx",
-      { force: true }
+      { force: true },
     );
   }
 
