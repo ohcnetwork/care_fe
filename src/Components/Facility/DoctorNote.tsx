@@ -1,17 +1,19 @@
 import InfiniteScroll from "react-infinite-scroll-component";
 import CircularProgress from "../Common/components/CircularProgress";
 import PatientNoteCard from "./PatientNoteCard";
-import { PatientNoteStateType } from "./models";
+import { PatientNoteStateType, PatientNotesModel } from "./models";
+import DoctorNoteReplyPreviewCard from "./DoctorNoteReplyPreviewCard";
 
 interface DoctorNoteProps {
   state: PatientNoteStateType;
   setReload: any;
   handleNext: () => void;
   disableEdit?: boolean;
+  setReplyTo?: (reply_to: PatientNotesModel | undefined) => void;
 }
 
 const DoctorNote = (props: DoctorNoteProps) => {
-  const { state, handleNext, setReload, disableEdit } = props;
+  const { state, handleNext, setReload, disableEdit, setReplyTo } = props;
 
   return (
     <div
@@ -32,14 +34,19 @@ const DoctorNote = (props: DoctorNoteProps) => {
           dataLength={state.notes.length}
           scrollableTarget="patient-notes-list"
         >
-          {state.notes.map((note) => (
-            <PatientNoteCard
-              note={note}
-              key={note.id}
-              setReload={setReload}
-              disableEdit={disableEdit}
-            />
-          ))}
+          {state.notes.map((note) => {
+            const parentNote = state.notes.find((n) => n.id === note.reply_to);
+            return (
+              <DoctorNoteReplyPreviewCard key={note.id} parentNote={parentNote}>
+                <PatientNoteCard
+                  note={note}
+                  setReload={setReload}
+                  disableEdit={disableEdit}
+                  setReplyTo={setReplyTo}
+                />
+              </DoctorNoteReplyPreviewCard>
+            );
+          })}
         </InfiniteScroll>
       ) : (
         <div className="mt-2 flex h-full items-center justify-center text-2xl font-bold text-gray-500">

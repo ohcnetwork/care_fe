@@ -7,12 +7,13 @@ import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import PatientNotesList from "../Facility/PatientNotesList";
 import Page from "../Common/components/Page";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
-import { PatientNoteStateType } from "../Facility/models";
+import { PatientNoteStateType, PatientNotesModel } from "../Facility/models";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { PATIENT_NOTES_THREADS } from "../../Common/constants.js";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
 import { classNames } from "../../Utils/utils.js";
+import DoctorNoteReplyPreviewCard from "../Facility/DoctorNoteReplyPreviewCard.js";
 
 interface PatientNotesProps {
   patientId: any;
@@ -34,6 +35,9 @@ const PatientNotes = (props: PatientNotesProps) => {
   const [reload, setReload] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
+  const [reply_to, setReplyTo] = useState<PatientNotesModel | undefined>(
+    undefined,
+  );
 
   const initialData: PatientNoteStateType = {
     notes: [],
@@ -55,6 +59,7 @@ const PatientNotes = (props: PatientNotesProps) => {
       body: {
         note: noteField,
         thread,
+        reply_to: reply_to?.id,
       },
     });
     if (res?.status === 201) {
@@ -62,6 +67,7 @@ const PatientNotes = (props: PatientNotesProps) => {
       setNoteField("");
       setReload(!reload);
       setState({ ...state, cPage: 1 });
+      setReplyTo(undefined);
     }
   };
 
@@ -133,31 +139,36 @@ const PatientNotes = (props: PatientNotesProps) => {
           reload={reload}
           setReload={setReload}
           thread={thread}
+          setReplyTo={setReplyTo}
         />
-
-        <div className="relative mx-4 flex items-center">
-          <TextFormField
-            name="note"
-            value={noteField}
-            onChange={(e) => setNoteField(e.value)}
-            className="grow"
-            type="text"
-            errorClassName="hidden"
-            placeholder="Type your Note"
-            disabled={!patientActive}
-          />
-          <ButtonV2
-            onClick={onAddNote}
-            border={false}
-            className="absolute right-2"
-            ghost
-            size="small"
-            disabled={!patientActive}
-            authorizeFor={NonReadOnlyUsers}
-          >
-            <CareIcon icon="l-message" className="text-lg" />
-          </ButtonV2>
-        </div>
+        <DoctorNoteReplyPreviewCard
+          parentNote={reply_to}
+          cancelReply={() => setReplyTo(undefined)}
+        >
+          <div className="relative mx-4 flex items-center">
+            <TextFormField
+              name="note"
+              value={noteField}
+              onChange={(e) => setNoteField(e.value)}
+              className="grow"
+              type="text"
+              errorClassName="hidden"
+              placeholder="Type your Note"
+              disabled={!patientActive}
+            />
+            <ButtonV2
+              onClick={onAddNote}
+              border={false}
+              className="absolute right-2"
+              ghost
+              size="small"
+              disabled={!patientActive}
+              authorizeFor={NonReadOnlyUsers}
+            >
+              <CareIcon icon="l-message" className="text-lg" />
+            </ButtonV2>
+          </div>
+        </DoctorNoteReplyPreviewCard>
       </div>
     </Page>
   );

@@ -517,6 +517,7 @@ export interface PatientNotesModel {
   created_date: string;
   last_edited_by?: BaseUserModel;
   last_edited_date?: string;
+  reply_to?: string;
 }
 
 export interface PatientNoteStateType {
