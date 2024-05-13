@@ -742,11 +742,9 @@ export const PatientManager = () => {
                   showAllFacilityUsers.includes(authUser.user_type)
                 )
                   navigate(`/facility/${qParams.facility}/patient`);
-                else if (onlyAccessibleFacility)
-                  navigate(`/facility/${onlyAccessibleFacility.id}/patient`);
                 else if (
-                  !showAllFacilityUsers.includes(authUser.user_type) &&
                   qParams.facility &&
+                  !showAllFacilityUsers.includes(authUser.user_type) &&
                   authUser.home_facility_object?.id !== qParams.facility
                 )
                   Notification.Error({
@@ -759,7 +757,9 @@ export const PatientManager = () => {
                   navigate(
                     `/facility/${authUser.home_facility_object.id}/patient`,
                   );
-                } else setShowDialog("create");
+                } else if (onlyAccessibleFacility)
+                  navigate(`/facility/${onlyAccessibleFacility.id}/patient`);
+                else setShowDialog("create");
               }}
               className="w-full lg:w-fit"
             >
