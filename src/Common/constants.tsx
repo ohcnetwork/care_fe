@@ -322,8 +322,7 @@ export const CONSCIOUSNESS_LEVEL = [
     id: "ONSET_OF_AGITATION_AND_CONFUSION",
     text: "Onset of Agitation and Confusion",
   },
-  { id: "UNKNOWN", text: "Unknown" },
-];
+] as const;
 
 export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
   { id: 1, text: "CVP catheter " },
@@ -696,11 +695,10 @@ export const CONSULTATION_TABS = [
   { text: "ABDM", desc: "ABDM Records" },
 ];
 
-export const RHYTHM_CHOICES: Array<OptionsType> = [
-  { id: 0, text: "UNKNOWN", desc: "Unknown" },
+export const RHYTHM_CHOICES = [
   { id: 5, text: "REGULAR", desc: "Regular" },
   { id: 10, text: "IRREGULAR", desc: "Irregular" },
-];
+] as const;
 
 export const LOCATION_BED_TYPES: Array<any> = [
   { id: "ISOLATION", name: "Isolation" },

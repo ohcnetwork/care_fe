@@ -1,6 +1,10 @@
 import { ConsultationModel, PatientCategory } from "../Facility/models";
 import { PerformedByModel } from "../HCX/misc";
-import { OCCUPATION_TYPES } from "../../Common/constants";
+import {
+  CONSCIOUSNESS_LEVEL,
+  OCCUPATION_TYPES,
+  RHYTHM_CHOICES,
+} from "../../Common/constants";
 
 export interface FlowModel {
   id?: number;
@@ -299,7 +303,7 @@ export interface DailyRoundsModel {
     | "NON_INVASIVE"
     | "INVASIVE";
   spo2?: string;
-  rhythm?: string;
+  rhythm?: (typeof RHYTHM_CHOICES)[number]["text"];
   rhythm_detail?: string;
   bp?: BloodPressure;
   pulse?: number;
@@ -323,14 +327,7 @@ export interface DailyRoundsModel {
   created_date?: string;
   modified_date?: string;
   taken_at?: string;
-  consciousness_level?:
-    | "UNRESPONSIVE"
-    | "RESPONDS_TO_PAIN"
-    | "RESPONDS_TO_VOICE"
-    | "ALERT"
-    | "AGITATED_OR_CONFUSED"
-    | "ONSET_OF_AGITATION_AND_CONFUSION"
-    | "UNKNOWN";
+  consciousness_level?: (typeof CONSCIOUSNESS_LEVEL)[number]["id"];
   rounds_type?: (typeof DailyRoundTypes)[number];
   last_updated_by_telemedicine?: boolean;
   created_by_telemedicine?: boolean;

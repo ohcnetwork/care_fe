@@ -159,11 +159,11 @@ export const DailyRoundListDetails = (props: any) => {
             <span className="font-semibold leading-relaxed">
               Level Of Consciousness:{" "}
             </span>
-            {dailyRoundListDetailsData.consciousness_level
-              ? CONSCIOUSNESS_LEVEL.find(
-                  (i) => i.id === dailyRoundListDetailsData.consciousness_level,
-                )?.text
-              : "-"}
+            {(dailyRoundListDetailsData.consciousness_level &&
+              CONSCIOUSNESS_LEVEL.find(
+                (i) => i.id === dailyRoundListDetailsData.consciousness_level,
+              )?.text) ||
+              "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">

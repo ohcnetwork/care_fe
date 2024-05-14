@@ -52,10 +52,10 @@ const initForm: any = {
   pulse: null,
   resp: null,
   temperature: null,
-  rhythm: "0",
+  rhythm: undefined,
   rhythm_detail: "",
   ventilator_spo2: null,
-  consciousness_level: "UNKNOWN",
+  consciousness_level: undefined,
   bp: {
     systolic: undefined,
     diastolic: undefined,
@@ -151,7 +151,7 @@ export const DailyRounds = (props: any) => {
           rhythm:
             (data.rhythm &&
               RHYTHM_CHOICES.find((i) => i.text === data.rhythm)?.id) ||
-            "0",
+            null,
           admitted_to: data.admitted_to ? data.admitted_to : "Select",
         };
       }
@@ -260,10 +260,10 @@ export const DailyRounds = (props: any) => {
           pulse: state.form.pulse ?? null,
           resp: state.form.resp ?? null,
           temperature: state.form.temperature ?? null,
-          rhythm: state.form.rhythm || 0,
+          rhythm: state.form.rhythm || undefined,
           rhythm_detail: state.form.rhythm_detail,
           ventilator_spo2: state.form.ventilator_spo2 ?? null,
-          consciousness_level: state.form.consciousness_level,
+          consciousness_level: state.form.consciousness_level || undefined,
         };
       }
 
@@ -572,6 +572,7 @@ export const DailyRounds = (props: any) => {
               <SelectFormField
                 {...field("rhythm")}
                 label="Rhythm"
+                placeholder="Unknown"
                 options={RHYTHM_CHOICES}
                 optionLabel={(option) => option.desc}
                 optionValue={(option) => option.id}
@@ -593,6 +594,7 @@ export const DailyRounds = (props: any) => {
                 }))}
                 optionDisplay={(option) => option.label}
                 optionValue={(option) => option.value}
+                unselectLabel="Unknown"
                 containerClassName="grid gap-1 grid-cols-1"
               />
             </>
