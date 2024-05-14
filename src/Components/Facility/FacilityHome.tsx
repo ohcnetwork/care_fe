@@ -386,7 +386,14 @@ export const FacilityHome = (props: any) => {
                 >
                   View Users
                 </DropdownItem>
-                {hasPermissionToDeleteFacility && (
+                <DropdownItem
+                  id="view-abdm-records"
+                  onClick={() => navigate(`/facility/${facilityId}/abdm`)}
+                  icon={<CareIcon icon="l-file-network" className="text-lg" />}
+                >
+                  View ABDM Records
+                </DropdownItem>
+                {hasPermissionToDeleteFacility ? (
                   <DropdownItem
                     id="delete-facility"
                     variant="danger"
@@ -396,6 +403,8 @@ export const FacilityHome = (props: any) => {
                   >
                     Delete Facility
                   </DropdownItem>
+                ) : (
+                  <></>
                 )}
               </DropdownMenu>
             </div>
