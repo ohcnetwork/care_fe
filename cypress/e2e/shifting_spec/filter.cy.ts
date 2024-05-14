@@ -20,7 +20,7 @@ describe("Shifting section filter", () => {
     shiftingPage.filterByFacility(
       "Dummy Shifting",
       "Dummy Shifting",
-      "District"
+      "District",
     );
 
     shiftingPage.facilityAssignedBadge().should("exist");
@@ -35,7 +35,7 @@ describe("Shifting section filter", () => {
       "POSITIVE",
       "no",
       "MODERATE",
-      "9999999999"
+      "9999999999",
     );
 
     shiftingPage.diseaseStatusBadge().should("exist");

@@ -60,7 +60,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.get("#consciousness_level-2").click();
     cy.submitButton("Save");
     cy.verifyNotification(
-      "Telemedicine Log Updates details created successfully"
+      "Telemedicine Log Updates details created successfully",
     );
     // verify the copied previous value
     cy.closeNotification();

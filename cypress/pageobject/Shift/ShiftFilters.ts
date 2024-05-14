@@ -98,7 +98,7 @@ class ShiftingPage {
   filterByFacility(
     origin_facility: string,
     assigned_facility: string,
-    assigned_to: string
+    assigned_to: string,
   ) {
     this.originFacilityInput().click().type(origin_facility);
     cy.get("[role='option']").contains(origin_facility).click();
@@ -119,7 +119,7 @@ class ShiftingPage {
     disease_status: string,
     is_antenatal: string,
     breathlessness_level: string,
-    patient_phone_number: string
+    patient_phone_number: string,
   ) {
     this.orderingInput().click();
     cy.get("[role='option']").contains(ordering).click();
@@ -148,7 +148,7 @@ class ShiftingPage {
     created_date_start: string,
     created_date_end: string,
     modified_date_start: string,
-    modified_date_end: string
+    modified_date_end: string,
   ) {
     this.createdDateStartInput().click();
     cy.get("[id^='headlessui-popover-panel-'] .care-l-angle-left-b")

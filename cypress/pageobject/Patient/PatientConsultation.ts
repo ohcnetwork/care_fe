@@ -102,7 +102,7 @@ export class PatientConsultationPage {
     cy.get("button").contains("Manage Patient").click();
     cy.verifyAndClickElement(
       "#consultation-buttons",
-      "Edit Consultation Details"
+      "Edit Consultation Details",
     );
     cy.wait(3000);
   }

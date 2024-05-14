@@ -39,7 +39,7 @@ describe("Patient Medicine Administration", () => {
     patientPrescription.selectDosageFrequency("Twice daily");
     cy.submitButton("Submit");
     cy.verifyNotification(
-      "Medicine - This medicine is already prescribed to this patient. Please discontinue the existing prescription to prescribe again."
+      "Medicine - This medicine is already prescribed to this patient. Please discontinue the existing prescription to prescribe again.",
     );
   });
 

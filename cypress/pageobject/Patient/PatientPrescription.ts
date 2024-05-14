@@ -12,13 +12,13 @@ export class PatientPrescription {
   selectMedicine(medicine: string) {
     cy.searchAndSelectOption(
       "div#medicine_object input[placeholder='Select'][role='combobox']",
-      medicine
+      medicine,
     );
   }
 
   selectMedicinebox() {
     cy.get(
-      "div#medicine_object input[placeholder='Select'][role='combobox']"
+      "div#medicine_object input[placeholder='Select'][role='combobox']",
     ).click();
   }
 
@@ -37,14 +37,14 @@ export class PatientPrescription {
   clickReturnToDashboard() {
     cy.verifyAndClickElement(
       "[data-testid='return-to-patient-dashboard']",
-      "Return to Patient Dashboard"
+      "Return to Patient Dashboard",
     );
   }
 
   discontinuePreviousPrescription() {
     cy.intercept(
       "POST",
-      "**/api/v1/consultation/*/prescriptions/*/discontinue/"
+      "**/api/v1/consultation/*/prescriptions/*/discontinue/",
     ).as("deletePrescription");
     cy.get("button").contains("Discontinue").click();
     cy.get("#submit").contains("Discontinue").click();

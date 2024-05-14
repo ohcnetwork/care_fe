@@ -165,7 +165,7 @@ export class PatientPage {
     bloodGroup,
     occupation,
     isAntenatal = false,
-    isPostPartum = false
+    isPostPartum = false,
   ) {
     cy.url().should("include", "/facility/");
     cy.get("[data-testid=patient-dashboard]").then(($dashboard) => {
@@ -193,7 +193,7 @@ export class PatientPage {
     patientState,
     patientDistrict,
     patientLocalbody,
-    patientWard
+    patientWard,
   ) {
     cy.get("[data-testid=patient-details]").then(($dashboard) => {
       cy.url().should("include", "/facility/");

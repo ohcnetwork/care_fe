@@ -47,7 +47,7 @@ describe("Manage User", () => {
     manageUserPage.navigateToProfile();
     userCreationPage.verifyElementContainsText(
       "username-profile-details",
-      usernameforworkinghour
+      usernameforworkinghour,
     );
     manageUserPage.assertSkillInAlreadyLinkedSkills(linkedskill);
   });

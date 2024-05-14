@@ -92,7 +92,7 @@ describe("Location Management Section", () => {
     facilityLocation.selectBedType(bedType);
     assetPage.clickassetupdatebutton();
     facilityLocation.verifyNotification(
-      "Name - Bed with same name already exists in location"
+      "Name - Bed with same name already exists in location",
     );
     facilityHome.verifyAndCloseNotifyModal();
     // edit the created bed
@@ -185,7 +185,7 @@ describe("Location Management Section", () => {
     facilityLocation.deleteLocation("Test Location");
     assetPage.clickassetupdatebutton();
     facilityLocation.verifyNotification(
-      "Location Test Location deleted successfully"
+      "Location Test Location deleted successfully",
     );
     facilityLocation.closeNotification();
   });
@@ -204,7 +204,7 @@ describe("Location Management Section", () => {
     facilityLocation.deleteLocation("Test Location with Beds");
     assetPage.clickassetupdatebutton();
     facilityLocation.verifyNotification(
-      "Cannot delete a Location with associated Beds"
+      "Cannot delete a Location with associated Beds",
     );
     facilityLocation.closeNotification();
 
@@ -219,7 +219,7 @@ describe("Location Management Section", () => {
     facilityLocation.deleteLocation("Test Location with Beds");
     assetPage.clickassetupdatebutton();
     facilityLocation.verifyNotification(
-      "Location Test Location with Beds deleted successfully"
+      "Location Test Location with Beds deleted successfully",
     );
     facilityLocation.closeNotification();
   });
@@ -249,14 +249,14 @@ describe("Location Management Section", () => {
       "Vendor's Name",
       serialNumber,
       "25122021",
-      "Test note for asset creation!"
+      "Test note for asset creation!",
     );
     assetPage.clickassetupdatebutton();
     facilityLocation.loadLocationManagementPage("Dummy Shifting Center");
     facilityLocation.deleteLocation("Test Location with linked Assets");
     assetPage.clickassetupdatebutton();
     facilityLocation.verifyNotification(
-      "Cannot delete a Location with associated Assets"
+      "Cannot delete a Location with associated Assets",
     );
     facilityLocation.closeNotification();
 
@@ -271,7 +271,7 @@ describe("Location Management Section", () => {
     facilityLocation.deleteLocation("Test Location with linked Assets");
     assetPage.clickassetupdatebutton();
     facilityLocation.verifyNotification(
-      "Location Test Location with linked Assets deleted successfully"
+      "Location Test Location with linked Assets deleted successfully",
     );
     facilityLocation.closeNotification();
   });

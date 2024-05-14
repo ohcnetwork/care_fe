@@ -65,7 +65,7 @@ describe("Asset Tab", () => {
       "Dummy Facility 40",
       "ACTIVE",
       "ONVIF Camera",
-      "Camera Loc"
+      "Camera Loc",
     );
     assetFilters.clickadvancefilter();
     assetFilters.clickslideoverbackbutton(); // to verify the back button doesn't clear applied filters
