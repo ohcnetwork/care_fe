@@ -139,7 +139,7 @@ export default function UserProfile() {
     password_confirmation: "",
   });
 
-  const [showEdit, setShowEdit] = useState<boolean | false>(false);
+  const [showEdit, setShowEdit] = useState<boolean>(false);
   const {
     data: userData,
     loading: isUserLoading,
