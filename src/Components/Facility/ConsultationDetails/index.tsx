@@ -330,13 +330,13 @@ export const ConsultationDetails = (props: any) => {
               onClick={() =>
                 showPatientNotesPopup
                   ? navigate(
-                      `/facility/${facilityId}/patient/${patientId}/notes`,
+                      `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/notes`,
                     )
                   : setShowPatientNotesPopup(true)
               }
               className="btn btn-primary m-1 w-full hover:text-white"
             >
-              Doctor&apos;s Notes
+              Discussion Notes
             </Link>
           </div>
         </nav>

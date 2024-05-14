@@ -760,6 +760,9 @@ const routes = {
     path: "/api/v1/patient/{patientId}/notes/",
     method: "POST",
     TRes: Type<PatientNotesModel>(),
+    TBody: Type<
+      Pick<PatientNotesModel, "note" | "thread"> & { consultation?: string }
+    >(),
   },
   updatePatientNote: {
     path: "/api/v1/patient/{patientId}/notes/{noteId}/",
