@@ -9,7 +9,9 @@ export class PatientConsultationPage {
   selectSymptoms(symptoms) {
     cy.clickAndMultiSelectOption("#symptoms", symptoms);
   }
-
+  typeAndMultiSelectSymptoms(input, symptoms) {
+    cy.typeAndMultiSelectOption("#symptoms", input, symptoms);
+  }
   selectSymptomsDate(selector: string, date: string) {
     cy.clickAndTypeDate(selector, date);
   }
@@ -129,31 +131,5 @@ export class PatientConsultationPage {
     cy.intercept("POST", "**/api/v1/patient/*/notes").as("postDoctorNotes");
     cy.get("#add_doctor_note_button").click();
     cy.wait("@postDoctorNotes").its("response.statusCode").should("eq", 201);
-  }
-
-  clickDischargePatient() {
-    cy.get("#show-more").scrollIntoView();
-    cy.get("#show-more").click();
-    cy.contains("p", "Discharge from CARE").click();
-  }
-
-  selectDischargeReason(reason: string) {
-    cy.get("#discharge_reason")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains(reason).click();
-      });
-  }
-
-  addDischargeNotes(notes: string) {
-    cy.get("#discharge_notes").type(notes);
-  }
-
-  confirmDischarge() {
-    cy.intercept("POST", "**/api/v1/consultation/*/discharge_patient/").as(
-      "dischargePatient"
-    );
-    cy.get("#submit").contains("Confirm Discharge").click();
-    cy.wait("@dischargePatient").its("response.statusCode").should("eq", 200);
   }
 }

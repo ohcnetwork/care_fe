@@ -21,7 +21,7 @@ const TableHeads = [
 ];
 
 export default function ABDMFacilityRecords({ facilityId }: IProps) {
-  const { data: consentsResult, loading } = useQuery(routes.listConsents, {
+  const { data: consentsResult, loading } = useQuery(routes.abha.listConsents, {
     query: { facility: facilityId, ordering: "-created_date" },
   });
 

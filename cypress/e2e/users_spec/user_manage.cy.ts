@@ -33,7 +33,7 @@ describe("Manage User", () => {
     cy.awaitUrl("/users");
   });
 
-  it("linking skills for a  users and verify its reflection in profile", () => {
+  it("linking skills for users and verify its reflection in profile", () => {
     // select the district user and select one skill link and verify its profile reflection
     userPage.typeInSearchInput(usernameforworkinghour);
     userPage.checkUsernameText(usernameforworkinghour);

@@ -8,6 +8,12 @@ const useRecorder = (handleMicPermission) => {
   const [newBlob, setNewBlob] = useState(null);
 
   useEffect(() => {
+    if (!isRecording && recorder && audioURL) {
+      setRecorder(null);
+    }
+  }, [isRecording, recorder, audioURL]);
+
+  useEffect(() => {
     // Lazily obtain recorder first time we're recording.
     if (recorder === null) {
       if (isRecording) {
@@ -32,6 +38,7 @@ const useRecorder = (handleMicPermission) => {
     if (isRecording) {
       recorder.start();
     } else {
+      recorder.stream.getTracks().forEach((i) => i.stop());
       recorder.stop();
     }
 

@@ -107,7 +107,7 @@ const AutoCompleteAsync = (props: Props) => {
               <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
                 <div className="absolute right-0 top-1 mr-2 flex items-center text-lg text-secondary-900">
                   {hasSelection && !loading && !required && (
-                    <div className="tooltip">
+                    <div className="tooltip" id="clear-button">
                       <CareIcon
                         icon="l-times-circle"
                         className="mb-[-5px] h-4 w-4 text-gray-800 transition-colors duration-200 ease-in-out hover:text-gray-500"

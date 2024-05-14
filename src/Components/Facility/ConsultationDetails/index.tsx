@@ -43,6 +43,7 @@ import DiagnosesListAccordion from "../../Diagnosis/DiagnosesListAccordion";
 import { AbhaNumberModel } from "../../ABDM/types/abha";
 import routes from "../../../Redux/api";
 import request from "../../../Utils/request/request";
+import { CameraFeedPermittedUserTypes } from "../../../Utils/permissions";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
@@ -171,9 +172,12 @@ export const ConsultationDetails = (props: any) => {
           }
 
           // Get abha number data
-          const { data: abhaNumberData } = await request(routes.getAbhaNumber, {
-            pathParams: { abhaNumberId: id ?? "" },
-          });
+          const { data: abhaNumberData } = await request(
+            routes.abha.getAbhaNumber,
+            {
+              pathParams: { abhaNumberId: id ?? "" },
+            }
+          );
           setAbhaNumberData(abhaNumberData);
 
           // Get shifting data
@@ -316,9 +320,7 @@ export const ConsultationDetails = (props: any) => {
                 </button>
                 {patientData.last_consultation?.id &&
                   isCameraAttached &&
-                  ["DistrictAdmin", "StateAdmin", "Doctor"].includes(
-                    authUser.user_type
-                  ) && (
+                  CameraFeedPermittedUserTypes.includes(authUser.user_type) && (
                     <Link
                       href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
                       className="btn btn-primary m-1 w-full hover:text-white"
@@ -340,13 +342,13 @@ export const ConsultationDetails = (props: any) => {
               onClick={() =>
                 showPatientNotesPopup
                   ? navigate(
-                      `/facility/${facilityId}/patient/${patientId}/notes`
+                      `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/notes`
                     )
                   : setShowPatientNotesPopup(true)
               }
               className="btn btn-primary m-1 w-full hover:text-white"
             >
-              Doctor&apos;s Notes
+              Discussion Notes
             </Link>
           </div>
         </nav>
@@ -441,9 +443,7 @@ export const ConsultationDetails = (props: any) => {
                       isCameraAttached === false || // No camera attached
                       consultationData?.discharge_date || // Discharged
                       !consultationData?.current_bed?.bed_object?.id || // Not admitted to bed
-                      !["DistrictAdmin", "StateAdmin", "Doctor"].includes(
-                        authUser.user_type
-                      ) // Not admin or doctor
+                      !CameraFeedPermittedUserTypes.includes(authUser.user_type)
                     )
                       return null; // Hide feed tab
                   }

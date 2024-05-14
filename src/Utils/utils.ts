@@ -1,11 +1,6 @@
-import {
-  AREACODES,
-  IN_LANDLINE_AREA_CODES,
-  USER_TYPES,
-} from "../Common/constants";
+import { AREACODES, IN_LANDLINE_AREA_CODES } from "../Common/constants";
 import phoneCodesJson from "../Common/static/countryPhoneAndFlags.json";
 import dayjs from "./dayjs";
-import { UserModel } from "../Components/Users/models";
 import { PatientModel } from "../Components/Patient/models";
 
 interface ApacheParams {
@@ -163,56 +158,6 @@ export const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
  */
 export const classNames = (...classes: (string | boolean | undefined)[]) => {
   return classes.filter(Boolean).join(" ");
-};
-
-interface ISchema {
-  [key: string]: {
-    prop: string;
-    oneOf?: string[];
-    parse?: (value: any) => any;
-    type?: any;
-    required?: boolean;
-  };
-}
-
-export const parseCsvFile = async (
-  file: File,
-  schema: ISchema | undefined = undefined
-) => {
-  const parseWithSchema: any = (schema: any, data: any) =>
-    Object.keys(schema).reduce((acc, key) => {
-      if (schema[key]?.oneOf && !schema[key].oneOf.includes(data[key]))
-        throw new Error(`${key} should be one of the ${schema[key].oneOf}`);
-
-      const value =
-        typeof schema[key]?.type === "object"
-          ? parseWithSchema(schema[key]?.type, data)
-          : schema[key]?.parse?.(data[key]) ?? data[key];
-
-      if (schema[key]?.required && (value === undefined || value === null))
-        throw new Error(`${key} is required`);
-
-      return value === undefined || value === null
-        ? acc
-        : {
-            ...acc,
-            [schema[key]?.prop]: value,
-          };
-    }, {});
-
-  const csvData = (await file.text())
-    .trim()
-    .split("\n")
-    .map((row: string) => row.split(","));
-
-  const parsed = csvData
-    .map((row: string[]) =>
-      row.reduce((acc, val, i) => ({ ...acc, [csvData[0][i]]: val }), {})
-    )
-    .splice(1)
-    .map((csvMap: any) => (schema ? parseWithSchema(schema, csvMap) : csvMap));
-
-  return parsed;
 };
 
 export const getPincodeDetails = async (pincode: string, apiKey: string) => {
@@ -458,29 +403,6 @@ export const scrollTo = (id: string | boolean) => {
   element?.scrollIntoView({ behavior: "smooth", block: "center" });
 };
 
-export const showUserDelete = (authUser: UserModel, targetUser: UserModel) => {
-  // Auth user should be higher in hierarchy than target user
-  if (
-    USER_TYPES.indexOf(authUser.user_type) <=
-    USER_TYPES.indexOf(targetUser.user_type)
-  )
-    return false;
-
-  if (
-    authUser.user_type === "StateAdmin" &&
-    targetUser.state_object?.id === authUser.state
-  )
-    return true;
-
-  if (
-    authUser.user_type === "DistrictAdmin" &&
-    targetUser.district_object?.id === authUser.district
-  )
-    return true;
-
-  return false;
-};
-
 export const compareBy = <T extends object>(key: keyof T) => {
   return (a: T, b: T) => {
     return a[key] < b[key] ? -1 : a[key] > b[key] ? 1 : 0;
@@ -515,4 +437,12 @@ export const properRoundOf = (value: number) => {
     return value.toFixed();
   }
   return value.toFixed(2);
+};
+
+export const isPostPartum = (data_of_delivery?: string) => {
+  return dayjs().diff(data_of_delivery, "week") <= 6;
+};
+
+export const isAntenatal = (menstruation_start_date?: string) => {
+  return dayjs().diff(menstruation_start_date, "month") <= 9;
 };

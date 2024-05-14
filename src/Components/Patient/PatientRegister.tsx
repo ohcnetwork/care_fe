@@ -46,6 +46,7 @@ import { PatientModel, Occupation } from "./models";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import AutocompleteFormField from "../Form/FormFields/Autocomplete.js";
 import Spinner from "../Common/Spinner";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -62,6 +63,7 @@ import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
 import SelectMenuV2 from "../Form/SelectMenuV2.js";
+import Checkbox from "../Common/components/CheckBox.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -221,6 +223,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const [insuranceDetails, setInsuranceDetails] = useState<HCXPolicyModel[]>(
     []
   );
+  const [isEmergencyNumberEnabled, setIsEmergencyNumberEnabled] =
+    useState(false);
   const [insuranceDetailsError, setInsuranceDetailsError] =
     useState<FieldError>();
 
@@ -394,9 +398,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       const { res, data } = await request(routes.getPatient, {
         pathParams: { id: id ? id : 0 },
       });
-      const { data: abhaNumberData } = await request(routes.getAbhaNumber, {
-        pathParams: { abhaNumberId: id ?? "" },
-      });
+      const { data: abhaNumberData } = await request(
+        routes.abha.getAbhaNumber,
+        {
+          pathParams: { abhaNumberId: id ?? "" },
+        }
+      );
 
       if (!status.aborted) {
         if (res?.ok && data) {
@@ -426,6 +433,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             village: data.village ? data.village : "",
             medical_history: [] as number[],
             is_antenatal: String(!!data.is_antenatal),
+            last_menstruation_start_date: data.last_menstruation_start_date,
+            date_of_delivery: data.date_of_delivery,
+            is_postpartum: String(!!data.date_of_delivery),
             allergies: data.allergies ? data.allergies : "",
             pincode: data.pincode ? data.pincode : "",
             ongoing_medication: data.ongoing_medication
@@ -470,6 +480,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               : null,
           };
           formData.sameAddress = data.address === data.permanent_address;
+          setIsEmergencyNumberEnabled(
+            data.phone_number === data.emergency_phone_number
+          );
           (data.medical_history ? data.medical_history : []).forEach(
             (i: any) => {
               const medicalHistory = MEDICAL_HISTORY_CHOICES.find(
@@ -549,6 +562,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         case "name":
         case "gender":
           errors[field] = RequiredFieldValidator()(form[field]);
+          return;
+        case "last_menstruation_start_date":
+          if (form.is_antenatal === "true") {
+            errors[field] = RequiredFieldValidator()(form[field]);
+          }
+          return;
+        case "date_of_delivery":
+          if (form.is_postpartum === "true") {
+            errors[field] = RequiredFieldValidator()(form[field]);
+          }
           return;
         case "age":
         case "date_of_birth": {
@@ -650,6 +673,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         case "blood_group":
           if (!form[field]) {
             errors[field] = "Please select a blood group";
+          }
+          return;
+        case "number_of_primary_contacts":
+        case "number_of_secondary_contacts":
+          if (form[field] && form[field] < 0) {
+            errors[field] = "Value cannot be negative";
           }
           return;
 
@@ -792,6 +821,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       gender: Number(formData.gender),
       nationality: formData.nationality,
       is_antenatal: formData.is_antenatal,
+      last_menstruation_start_date:
+        formData.is_antenatal === "true"
+          ? dateQueryString(formData.last_menstruation_start_date)
+          : null,
+      date_of_delivery:
+        formData.is_postpartum === "true"
+          ? dateQueryString(formData.date_of_delivery)
+          : null,
       passport_no:
         formData.nationality !== "India" ? formData.passport_no : undefined,
       state: formData.nationality === "India" ? formData.state : undefined,
@@ -1181,7 +1218,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           )}
           <>
             <div className={`${showImport.show && "hidden"}`}>
-              <Form<PatientModel & { age?: number }>
+              <Form<PatientModel & { age?: number; is_postpartum?: boolean }>
                 defaults={id ? state.form : initForm}
                 validate={validateForm}
                 onSubmit={handleSubmit}
@@ -1304,8 +1341,34 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               onChange={(event) => {
                                 if (!id) duplicateCheck(event.value);
                                 field("phone_number").onChange(event);
+                                if (isEmergencyNumberEnabled) {
+                                  field("emergency_phone_number").onChange({
+                                    name: field("emergency_phone_number").name,
+                                    value: event.value,
+                                  });
+                                }
                               }}
                               types={["mobile", "landline"]}
+                            />
+                            <Checkbox
+                              label="Is the phone number an emergency number?"
+                              className="font-bold"
+                              id="emergency_contact_checkbox"
+                              checked={isEmergencyNumberEnabled}
+                              onCheck={(checked) => {
+                                setIsEmergencyNumberEnabled(checked);
+                                checked
+                                  ? field("emergency_phone_number").onChange({
+                                      name: field("emergency_phone_number")
+                                        .name,
+                                      value: field("phone_number").value,
+                                    })
+                                  : field("emergency_phone_number").onChange({
+                                      name: field("emergency_phone_number")
+                                        .name,
+                                      value: initForm.emergency_phone_number,
+                                    });
+                              }}
                             />
                           </div>
                           <div
@@ -1317,6 +1380,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               label="Emergency contact number"
                               required
                               types={["mobile", "landline"]}
+                              disabled={isEmergencyNumberEnabled}
                             />
                           </div>
                           <div data-testid="name" id="name-div">
@@ -1386,16 +1450,21 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                       {...field("age")}
                                       errorClassName="hidden"
                                       trailing={
-                                        <p className="absolute right-16 text-xs text-gray-700 sm:text-sm">
-                                          <p className="hidden  sm:inline min-[768px]:hidden lg:inline">
-                                            {field("age").value !== "" &&
-                                              "Year_of_Birth:"}
-                                          </p>
-                                          <span className="font-bold">
-                                            {field("age").value !== "" &&
-                                              new Date().getFullYear() -
-                                                field("age").value}
-                                          </span>
+                                        <p className="relative right-4 space-x-1 text-xs text-gray-700 sm:right-14 sm:text-sm md:right-4 lg:right-14">
+                                          {field("age").value !== "" && (
+                                            <>
+                                              <span className="hidden sm:inline md:hidden lg:inline">
+                                                Year of Birth:
+                                              </span>
+                                              <span className="inline sm:hidden md:inline lg:hidden">
+                                                YOB:
+                                              </span>
+                                              <span className="font-bold">
+                                                {new Date().getFullYear() -
+                                                  field("age").value}
+                                              </span>
+                                            </>
+                                          )}
                                         </p>
                                       }
                                       placeholder="Enter the age"
@@ -1444,6 +1513,20 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               required
                               label="Gender"
                               options={genderTypes}
+                              onChange={(e) => {
+                                field("gender").onChange(e);
+                                if (e.value !== "2") {
+                                  field("is_antenatal").onChange({
+                                    name: "is_antenatal",
+                                    value: "false",
+                                  });
+
+                                  field("is_postpartum").onChange({
+                                    name: "is_postpartum",
+                                    value: "false",
+                                  });
+                                }
+                              }}
                               optionLabel={(o: any) => o.text}
                               optionValue={(o: any) => o.id}
                             />
@@ -1455,7 +1538,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               <div id="is_antenatal-div" className="col-span-2">
                                 <RadioFormField
                                   {...field("is_antenatal")}
-                                  label="Is antenatal ?"
+                                  label="Is antenatal?"
                                   aria-label="is_antenatal"
                                   options={[
                                     { label: "Yes", value: "true" },
@@ -1466,6 +1549,49 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 />
                               </div>
                             }
+                          </CollapseV2>
+                          <CollapseV2
+                            opened={field("is_antenatal").value === "true"}
+                          >
+                            {
+                              <div className="col-span-2">
+                                <DateFormField
+                                  containerClassName="w-full"
+                                  {...field("last_menstruation_start_date")}
+                                  label="Last Menstruation Start Date"
+                                  position="LEFT"
+                                  disableFuture
+                                  required
+                                />
+                              </div>
+                            }
+                          </CollapseV2>
+                          <CollapseV2
+                            opened={String(field("gender").value) === "2"}
+                          >
+                            <RadioFormField
+                              {...field("is_postpartum")}
+                              label="Is postpartum? (<6 weeks)"
+                              className="font-bold"
+                              options={[
+                                { label: "Yes", value: "true" },
+                                { label: "No", value: "false" },
+                              ]}
+                              optionDisplay={(option) => option.label}
+                              optionValue={(option) => option.value}
+                            />
+                          </CollapseV2>
+                          <CollapseV2
+                            opened={field("is_postpartum").value === "true"}
+                          >
+                            <DateFormField
+                              containerClassName="w-full"
+                              {...field("date_of_delivery")}
+                              label="Date of Delivery"
+                              position="LEFT"
+                              disableFuture
+                              required
+                            />
                           </CollapseV2>
                           <div data-testid="current-address" id="address-div">
                             <TextAreaFormField
@@ -1677,7 +1803,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   />
                                 )}
                               </div>
-                              <SelectFormField
+                              <AutocompleteFormField
                                 {...field("occupation")}
                                 label="Occupation"
                                 placeholder="Select Occupation"

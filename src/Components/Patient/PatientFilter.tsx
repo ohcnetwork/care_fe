@@ -31,11 +31,13 @@ import DiagnosesFilter, { FILTER_BY_DIAGNOSES_KEYS } from "./DiagnosesFilter";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
 
 export default function PatientFilter(props: any) {
+  const authUser = useAuthUser();
   const { kasp_enabled, kasp_string } = useConfig();
   const { filter, onChange, closeFilter, removeFilters } = props;
 
@@ -100,6 +102,7 @@ export default function PatientFilter(props: any) {
     diagnoses_provisional: filter.diagnoses_provisional || null,
     diagnoses_unconfirmed: filter.diagnoses_unconfirmed || null,
     diagnoses_differential: filter.diagnoses_differential || null,
+    review_missed: filter.review_missed || null,
   });
 
   useQuery(routes.getAnyFacility, {
@@ -203,6 +206,7 @@ export default function PatientFilter(props: any) {
       diagnoses_provisional,
       diagnoses_unconfirmed,
       diagnoses_differential,
+      review_missed,
     } = filterState;
     const data = {
       district: district || "",
@@ -270,6 +274,7 @@ export default function PatientFilter(props: any) {
       diagnoses_provisional: diagnoses_provisional || "",
       diagnoses_unconfirmed: diagnoses_unconfirmed || "",
       diagnoses_differential: diagnoses_differential || "",
+      review_missed: review_missed || "",
     };
     onChange(data);
   };
@@ -374,23 +379,27 @@ export default function PatientFilter(props: any) {
               }
             />
           </div>
-          <div className="w-full flex-none" id="discharge-reason-select">
-            <FieldLabel className="text-sm">Discharge Reason</FieldLabel>
-            <SelectMenuV2
-              id="last_consultation__new_discharge_reason"
-              placeholder="Select discharge reason"
-              options={DISCHARGE_REASONS}
-              value={filterState.last_consultation__new_discharge_reason}
-              optionValue={(o) => o.id}
-              optionLabel={(o) => o.text}
-              onChange={(o) =>
-                setFilterState({
-                  ...filterState,
-                  last_consultation__new_discharge_reason: o,
-                })
-              }
-            />
-          </div>
+          {["StateAdmin", "StateReadOnlyAdmin"].includes(
+            authUser.user_type
+          ) && (
+            <div className="w-full flex-none" id="discharge-reason-select">
+              <FieldLabel className="text-sm">Discharge Reason</FieldLabel>
+              <SelectMenuV2
+                id="last_consultation__new_discharge_reason"
+                placeholder="Select discharge reason"
+                options={DISCHARGE_REASONS}
+                value={filterState.last_consultation__new_discharge_reason}
+                optionValue={(o) => o.id}
+                optionLabel={(o) => o.text}
+                onChange={(o) =>
+                  setFilterState({
+                    ...filterState,
+                    last_consultation__new_discharge_reason: o,
+                  })
+                }
+              />
+            </div>
+          )}
           <div className="w-full flex-none">
             <FieldLabel className="text-sm">Telemedicine</FieldLabel>
             <SelectMenuV2
@@ -423,7 +432,7 @@ export default function PatientFilter(props: any) {
               }
             />
           </div>
-          <div className="w-full flex-none">
+          {/* <div className="w-full flex-none">
             <FieldLabel className="text-sm">Is Antenatal</FieldLabel>
             <SelectMenuV2
               placeholder="Show all"
@@ -434,6 +443,18 @@ export default function PatientFilter(props: any) {
               value={filterState.is_antenatal}
               onChange={(v) =>
                 setFilterState({ ...filterState, is_antenatal: v })
+              }
+            />
+          </div> */}
+          <div className="w-full flex-none">
+            <FieldLabel className="text-sm">Review Missed</FieldLabel>
+            <SelectMenuV2
+              placeholder="Show all"
+              options={["true", "false"]}
+              optionLabel={(o) => (o === "true" ? "Yes" : "No")}
+              value={filterState.review_missed}
+              onChange={(v) =>
+                setFilterState({ ...filterState, review_missed: v })
               }
             />
           </div>

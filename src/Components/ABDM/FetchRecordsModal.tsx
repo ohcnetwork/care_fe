@@ -12,7 +12,6 @@ import {
 import { ABDM_CONSENT_PURPOSE, ABDM_HI_TYPE } from "../../Common/constants.js";
 import DateRangeFormField from "../Form/FormFields/DateRangeFormField.js";
 import dayjs from "dayjs";
-import { consentActions } from "../../Redux/actions.js";
 import { navigate } from "raviger";
 import DateFormField from "../Form/FormFields/DateFormField.js";
 import request from "../../Utils/request/request.js";
@@ -77,7 +76,7 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
 
         <ButtonV2
           onClick={async () => {
-            const { res } = await request(routes.findPatient, {
+            const { res } = await request(routes.abha.findPatient, {
               body: {
                 id: abha?.health_id,
               },
@@ -188,16 +187,16 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
             }
 
             setIsMakingConsentRequest(true);
-            const res = await dispatch(
-              consentActions.create({
+            const res = await dispatch(routes.abha.createConsent, {
+              body: {
                 patient_abha: abha?.health_id as string,
                 hi_types: hiTypes,
                 purpose,
                 from_time: fromDate,
                 to_time: toDate,
                 expiry: expiryDate,
-              })
-            );
+              },
+            });
 
             if (res.status === 201) {
               Notification.Success({

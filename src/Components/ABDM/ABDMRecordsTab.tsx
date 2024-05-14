@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { consentActions } from "../../Redux/actions";
 import { ConsentArtefactModel, ConsentRequestModel } from "./types/consent";
 import dayjs from "dayjs";
 import { ABDM_CONSENT_PURPOSE } from "../../Common/constants";
@@ -10,6 +9,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import Loading from "../Common/Loading";
 import { classNames } from "../../Utils/utils";
 import { Link } from "raviger";
+import routes from "../../Redux/api";
 
 interface IConsentArtefactCardProps {
   artefact: ConsentArtefactModel;
@@ -90,7 +90,9 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
         <div className="flex flex-col items-center">
           <ButtonV2
             onClick={async () => {
-              const res = await dispatch(consentActions.status(consent.id));
+              const res = await dispatch(routes.abha.checkConsentStatus, {
+                pathParams: { id: consent.id },
+              });
 
               if (res.status === 200) {
                 Notification.Success({
@@ -165,12 +167,12 @@ export default function ABDMRecordsTab({ patientId }: IProps) {
   useEffect(() => {
     const fetchRecords = async () => {
       setIsLoading(true);
-      const response = await dispatch(
-        consentActions.list({
+      const response = await dispatch(routes.abha.listConsents, {
+        query: {
           patient: patientId,
           ordering: "-created_date",
-        })
-      );
+        },
+      });
 
       if (response.status === 200 && response?.data?.results) {
         setRecords(response.data.results);

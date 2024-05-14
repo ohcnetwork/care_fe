@@ -49,6 +49,8 @@ export interface PatientModel {
   medical_history_details?: string;
   is_active?: boolean;
   is_antenatal?: boolean;
+  last_menstruation_start_date?: string;
+  date_of_delivery?: string;
   is_migrant_worker?: boolean;
   ward?: string;
   local_body_object?: { id: number; name: string };
@@ -323,7 +325,7 @@ export interface FacilityNameModel {
 type FileCategory = "UNSPECIFIED" | "XRAY" | "AUDIO" | "IDENTITY_PROOF";
 
 export interface CreateFileRequest {
-  file_type: string;
+  file_type: string | number;
   file_category: FileCategory;
   name: string;
   associating_id: string;

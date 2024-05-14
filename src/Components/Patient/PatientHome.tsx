@@ -19,6 +19,8 @@ import {
   formatDate,
   formatDateTime,
   formatPatientAge,
+  isAntenatal,
+  isPostPartum,
 } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
@@ -368,16 +370,29 @@ export const PatientHome = (props: any) => {
                     ) : (
                       <Chip startIcon="l-lock" text="Transfer Blocked" />
                     )}
-                    {patientData.gender === 2 &&
-                      patientData.is_antenatal &&
-                      patientData.is_active && (
-                        <Chip
-                          variant="custom"
-                          className="bg-pink-100 text-pink-800"
-                          startIcon="l-baby-carriage"
-                          text="Antenatal"
-                        />
-                      )}
+                    {patientData.gender === 2 && (
+                      <>
+                        {patientData.is_antenatal &&
+                          isAntenatal(
+                            patientData.last_menstruation_start_date
+                          ) && (
+                            <Chip
+                              variant="custom"
+                              className="border-pink-300 bg-pink-100 text-pink-600"
+                              startIcon="l-baby-carriage"
+                              text="Antenatal"
+                            />
+                          )}
+                        {isPostPartum(patientData.date_of_delivery) && (
+                          <Chip
+                            variant="custom"
+                            className="border-pink-300 bg-pink-100 text-pink-600"
+                            startIcon="l-baby-carriage"
+                            text="Post-partum"
+                          />
+                        )}
+                      </>
+                    )}
                     {patientData.contact_with_confirmed_carrier && (
                       <Chip
                         variant="danger"
@@ -1399,6 +1414,13 @@ export const PatientHome = (props: any) => {
               <PaginatedList.WhenLoading>
                 <CircularProgress />
               </PaginatedList.WhenLoading>
+              <PaginatedList.WhenEmpty className="py-2">
+                <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
+                  <div className="flex w-full items-center justify-center text-xl font-bold text-gray-500">
+                    No Consultation History Available
+                  </div>
+                </div>
+              </PaginatedList.WhenEmpty>
               <PaginatedList.Items<ConsultationModel>>
                 {(item) => (
                   <ConsultationCard
@@ -1432,6 +1454,13 @@ export const PatientHome = (props: any) => {
               <PaginatedList.WhenLoading>
                 <CircularProgress />
               </PaginatedList.WhenLoading>
+              <PaginatedList.WhenEmpty className="py-2">
+                <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
+                  <div className="flex w-full items-center justify-center text-xl font-bold text-gray-500">
+                    No Sample Test History Available
+                  </div>
+                </div>
+              </PaginatedList.WhenEmpty>
               <PaginatedList.Items<SampleTestModel>>
                 {(item) => (
                   <SampleTestCard

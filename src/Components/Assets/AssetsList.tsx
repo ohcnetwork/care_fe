@@ -1,4 +1,4 @@
-import QrReader from "react-qr-reader";
+import { Scanner } from "@yudiel/react-qr-scanner";
 import * as Notification from "../../Utils/Notifications.js";
 import { listAssets } from "../../Redux/actions";
 import { assetClassProps, AssetData } from "./AssetTypes";
@@ -125,7 +125,7 @@ const AssetsList = () => {
 
   const checkValidAssetId = async (assetId: string) => {
     const { data: assetData } = await request(routes.getAsset, {
-      pathParams: { id: assetId },
+      pathParams: { external_id: assetId },
     });
     try {
       if (assetData) {
@@ -156,20 +156,21 @@ const AssetsList = () => {
           <CareIcon icon="l-times" className="mr-1 text-lg" />
           Close Scanner
         </button>
-        <QrReader
-          delay={300}
-          onScan={async (value: string | null) => {
-            if (value) {
-              const assetId = await getAssetIdFromQR(value);
-              checkValidAssetId(assetId ?? value);
+        <Scanner
+          onResult={async (text) => {
+            if (text) {
+              const assetId = await getAssetIdFromQR(text);
+              checkValidAssetId(assetId ?? text);
             }
           }}
-          onError={(e) =>
+          onError={(e) => {
             Notification.Error({
               msg: e.message,
-            })
-          }
-          style={{ width: "100%" }}
+            });
+          }}
+          options={{
+            delayBetweenScanAttempts: 300,
+          }}
         />
         <h2 className="self-center text-center text-lg">Scan Asset QR!</h2>
       </div>

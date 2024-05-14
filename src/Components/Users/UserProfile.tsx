@@ -144,8 +144,7 @@ export default function UserProfile() {
     data: userData,
     loading: isUserLoading,
     refetch: refetchUserData,
-  } = useQuery(routes.getUserDetails, {
-    pathParams: { username: authUser.username },
+  } = useQuery(routes.currentUser, {
     onResponse: (result) => {
       if (!result || !result.res || !result.data) return;
       const formData: EditForm = {
