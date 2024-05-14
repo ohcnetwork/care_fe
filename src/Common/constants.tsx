@@ -5,6 +5,10 @@ import { dateQueryString } from "../Utils/utils";
 import { IconName } from "../CAREUI/icons/CareIcon";
 import { PhoneNumberValidator } from "../Components/Form/FieldValidators";
 import { SchemaType } from "./schemaParser";
+import {
+  ConsentHIType,
+  ConsentPurpose,
+} from "../Components/ABDM/types/consent";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 export const PAGINATION_LIMIT = 36;
@@ -697,6 +701,7 @@ export const CONSULTATION_TABS = [
   { text: "PRESSURE_SORE", desc: "Pressure Sore" },
   { text: "NURSING", desc: "Nursing" },
   { text: "DIALYSIS", desc: "Dialysis" },
+  { text: "ABDM", desc: "ABDM Records" },
 ];
 
 export const RHYTHM_CHOICES: Array<OptionsType> = [
@@ -1097,6 +1102,26 @@ export const ExternalResultImportSchema: SchemaType = {
   Result: { prop: "result", type: "string" },
 };
 
+// ABDM
+export const ABDM_CONSENT_PURPOSE = [
+  { value: "CAREMGT", label: "Care Management" },
+  { value: "BTG", label: "Break The Glass" },
+  { value: "PUBHLTH", label: "Public Health" },
+  { value: "HPAYMT", label: "Healthcare Payment" },
+  { value: "DSRCH", label: "Disease Specific Healthcare Research" },
+  { value: "PATRQT", label: "Self Requested" },
+] as { value: ConsentPurpose; label: string }[];
+
+export const ABDM_HI_TYPE = [
+  { value: "Prescription", label: "Prescription" },
+  { value: "DiagnosticReport", label: "Diagnostic Report" },
+  { value: "OPConsultation", label: "Op Consultation" },
+  { value: "DischargeSummary", label: "Discharge Summary" },
+  { value: "ImmunizationRecord", label: "Immunization Record" },
+  { value: "HealthDocumentRecord", label: "Record Artifact" },
+  { value: "WellnessRecord", label: "Wellness Record" },
+] as { value: ConsentHIType; label: string }[];
+
 export const USER_TYPES_MAP = {
   Pharmacist: "Pharmacist",
   Volunteer: "Volunteer",
@@ -1342,3 +1367,8 @@ export const OCCUPATION_TYPES = [
   { id: 6, text: "Others", value: "OTHERS" },
   { id: 32, text: "Not Applicable", value: "NOT_APPLICABLE" },
 ];
+
+export const PATIENT_NOTES_THREADS = {
+  Doctors: 10,
+  Nurses: 20,
+} as const;
