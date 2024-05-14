@@ -1,5 +1,8 @@
 import { IConfig } from "../Common/hooks/useConfig";
-import { ConsentRequestModel } from "../Components/ABDM/types/consent";
+import {
+  ConsentRequestModel,
+  CreateConsentTBody,
+} from "../Components/ABDM/types/consent";
 import { HealthInformationModel } from "../Components/ABDM/types/health-information";
 import {
   IAadhaarOtp,
@@ -1458,6 +1461,8 @@ const routes = {
     createConsent: {
       path: "/api/v1/abdm/consent/",
       method: "POST",
+      TRes: Type<ConsentRequestModel>(),
+      TBody: Type<CreateConsentTBody>(),
     },
 
     getConsent: {
@@ -1468,6 +1473,7 @@ const routes = {
     checkConsentStatus: {
       path: "/api/v1/abdm/consent/{id}/status/",
       method: "GET",
+      TRes: Type<void>(),
     },
 
     getHealthInformation: {

@@ -61,6 +61,21 @@ export type ConsentModel = {
   modified_date: string;
 };
 
+export type CreateConsentTBody = {
+  patient_abha: string;
+  hi_types: ConsentHIType[];
+  purpose: ConsentPurpose;
+  from_time: Date | string;
+  to_time: Date | string;
+  expiry: Date | string;
+
+  access_mode?: ConsentAccessMode;
+  frequency_unit?: ConsentFrequencyUnit;
+  frequency_value?: number;
+  frequency_repeats?: number;
+  hip?: null | string;
+};
+
 export type ConsentArtefactModel = {
   consent_request: string;
 

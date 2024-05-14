@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
 import { ConsentArtefactModel, ConsentRequestModel } from "./types/consent";
 import dayjs from "dayjs";
 import { ABDM_CONSENT_PURPOSE } from "../../Common/constants";
@@ -10,6 +8,8 @@ import Loading from "../Common/Loading";
 import { classNames } from "../../Utils/utils";
 import { Link } from "raviger";
 import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
+import useQuery from "../../Utils/request/useQuery";
 
 interface IConsentArtefactCardProps {
   artefact: ConsentArtefactModel;
@@ -62,8 +62,6 @@ interface IConsentRequestCardProps {
 }
 
 function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
-  const dispatch = useDispatch<any>();
-
   return (
     <div className="overflow-hidden bg-white shadow sm:rounded-lg">
       <div className="flex flex-col items-center justify-between gap-4 px-4 py-5 sm:flex-row sm:gap-0 sm:px-6">
@@ -90,18 +88,20 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
         <div className="flex flex-col items-center">
           <ButtonV2
             onClick={async () => {
-              const res = await dispatch(routes.abha.checkConsentStatus, {
-                pathParams: { id: consent.id },
-              });
+              const { res, error } = await request(
+                routes.abha.checkConsentStatus,
+                {
+                  pathParams: { id: consent.id },
+                },
+              );
 
-              if (res.status === 200) {
+              if (res?.status === 200) {
                 Notification.Success({
                   msg: "Checking Status!",
                 });
               } else {
                 Notification.Error({
-                  msg:
-                    res?.data?.error?.message ?? "Error while checking status!",
+                  msg: error?.message ?? "Error while checking status!",
                 });
               }
             }}
@@ -159,38 +159,20 @@ interface IProps {
 }
 
 export default function ABDMRecordsTab({ patientId }: IProps) {
-  const [records, setRecords] = useState<ConsentRequestModel[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const { data, loading } = useQuery(routes.abha.listConsents, {
+    query: {
+      patient: patientId,
+      ordering: "-created_date",
+    },
+  });
 
-  const dispatch = useDispatch<any>();
-
-  useEffect(() => {
-    const fetchRecords = async () => {
-      setIsLoading(true);
-      const response = await dispatch(routes.abha.listConsents, {
-        query: {
-          patient: patientId,
-          ordering: "-created_date",
-        },
-      });
-
-      if (response.status === 200 && response?.data?.results) {
-        setRecords(response.data.results);
-      }
-
-      setIsLoading(false);
-    };
-
-    fetchRecords();
-  }, [dispatch, patientId]);
-
-  if (isLoading) {
+  if (loading) {
     <Loading />;
   }
 
   return (
     <div className="mt-6 flex flex-col gap-6">
-      {records.map((record) => {
+      {data?.results.map((record) => {
         return <ConsentRequestCard key={record.id} consent={record} />;
       })}
     </div>
