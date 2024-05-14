@@ -1441,47 +1441,40 @@ const routes = {
       TRes: Type<IHealthFacility>(),
       TBody: Type<IcreateHealthFacilityTBody>(),
     },
-  },
 
-  // ABDM Consent
+    listConsents: {
+      path: "/api/v1/abdm/consent/",
+      method: "GET",
+      TRes: Type<PaginatedResponse<ConsentRequestModel>>(),
+    },
 
-  listConsents: {
-    path: "/api/v1/abdm/consent/",
-    method: "GET",
-    TRes: Type<{
-      results: ConsentRequestModel[];
-      count: number;
-      next: string | null;
-      previous: string | null;
-    }>(),
-  },
+    createConsent: {
+      path: "/api/v1/abdm/consent/",
+      method: "POST",
+    },
 
-  createConsent: {
-    path: "/api/v1/abdm/consent/",
-    method: "POST",
-  },
+    getConsent: {
+      path: "/api/v1/abdm/consent/{id}/",
+      method: "GET",
+    },
 
-  getConsent: {
-    path: "/api/v1/abdm/consent/{id}/",
-    method: "GET",
-  },
+    checkConsentStatus: {
+      path: "/api/v1/abdm/consent/{id}/status/",
+      method: "GET",
+    },
 
-  checkConsentStatus: {
-    path: "/api/v1/abdm/consent/{id}/status/",
-    method: "GET",
-  },
+    getHealthInformation: {
+      path: "/api/v1/abdm/health_information/{artefactId}",
+      method: "GET",
+      TRes: Type<HealthInformationModel>(),
+    },
 
-  getHealthInformation: {
-    path: "/api/v1/abdm/health_information/{artefactId}",
-    method: "GET",
-    TRes: Type<HealthInformationModel>(),
-  },
-
-  findPatient: {
-    path: "/api/v1/abdm/patients/find/",
-    method: "POST",
-    TRes: Type<unknown>(),
-    TBody: Type<{ id: string }>(),
+    findPatient: {
+      path: "/api/v1/abdm/patients/find/",
+      method: "POST",
+      TRes: Type<unknown>(),
+      TBody: Type<{ id: string }>(),
+    },
   },
 
   // Prescription endpoints

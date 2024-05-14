@@ -13,7 +13,6 @@ import {
 import { ABDM_CONSENT_PURPOSE, ABDM_HI_TYPE } from "../../Common/constants.js";
 import DateRangeFormField from "../Form/FormFields/DateRangeFormField.js";
 import dayjs from "dayjs";
-import { consentActions } from "../../Redux/actions.js";
 import { navigate } from "raviger";
 import DateFormField from "../Form/FormFields/DateFormField.js";
 import request from "../../Utils/request/request.js";
@@ -38,13 +37,13 @@ export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
   >("pending");
   const [purpose, setPurpose] = useState<string>("CAREMGT");
   const [fromDate, setFromDate] = useState<Date>(
-    dayjs().subtract(30, "day").toDate()
+    dayjs().subtract(30, "day").toDate(),
   );
   const [toDate, setToDate] = useState<Date>(dayjs().toDate());
   const [isMakingConsentRequest, setIsMakingConsentRequest] = useState(false);
   const [hiTypes, setHiTypes] = useState<string[]>([]);
   const [expiryDate, setExpiryDate] = useState<Date>(
-    dayjs().add(30, "day").toDate()
+    dayjs().add(30, "day").toDate(),
   );
   const [errors, setErrors] = useState<any>({});
 
@@ -79,7 +78,7 @@ export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
 
         <ButtonV2
           onClick={async () => {
-            const { res } = await request(routes.findPatient, {
+            const { res } = await request(routes.abha.findPatient, {
               body: {
                 id: patient?.abha_number_object?.health_id,
               },
@@ -96,7 +95,7 @@ export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
           className={classNames(
             "mt-1.5 !py-3",
             idVerificationStatus === "verified" &&
-              "disabled:cursor-auto disabled:bg-transparent disabled:text-primary-600"
+              "disabled:cursor-auto disabled:bg-transparent disabled:text-primary-600",
           )}
         >
           {idVerificationStatus === "in-progress" && (
@@ -190,16 +189,16 @@ export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
             }
 
             setIsMakingConsentRequest(true);
-            const res = await dispatch(
-              consentActions.create({
+            const res = await dispatch(routes.abha.createConsent, {
+              body: {
                 patient_abha: patient?.abha_number_object?.health_id as string,
                 hi_types: hiTypes,
                 purpose,
                 from_time: fromDate,
                 to_time: toDate,
                 expiry: expiryDate,
-              })
-            );
+              },
+            });
 
             if (res.status === 201) {
               Notification.Success({
@@ -208,7 +207,7 @@ export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
 
               navigate(
                 `/facility/${patient.facility}/abdm` ??
-                  `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/abdm`
+                  `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/abdm`,
               );
             } else {
               Notification.Error({

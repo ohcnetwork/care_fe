@@ -9,7 +9,7 @@ interface IProps {
 }
 
 export default function HealthInformation({ artefactId }: IProps) {
-  const { data, loading, error } = useQuery(routes.getHealthInformation, {
+  const { data, loading, error } = useQuery(routes.abha.getHealthInformation, {
     pathParams: { artefactId },
     silent: true,
   });
@@ -23,7 +23,7 @@ export default function HealthInformation({ artefactId }: IProps) {
       return JSON.parse(data);
     } catch (e) {
       return JSON.parse(
-        data.replace(/"/g, '\\"').replace(/'/g, '"') // eslint-disable-line
+        data.replace(/"/g, '\\"').replace(/'/g, '"'), // eslint-disable-line
       );
     }
   };
