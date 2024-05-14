@@ -49,6 +49,7 @@ let make = (
   let (displayValue, setDisplayValue) = React.useState(() => value)
   let justifyContentClassName = title != "" ? "justify-between" : "justify-center"
   let alignItemClassName = title != "" ? "items-end" : "items-center"
+  let boxWidthClassName = title != "" ? "" : "w-16"
 
   React.useEffect1(() => {
     let (text, color) = getLabel(value->Belt.Float.fromString->Belt.Option.getWithDefault(0.0))
@@ -95,7 +96,7 @@ let make = (
               step={step}
               max={end}
               min={start}
-              className="focus:outline-none focus:bg-white focus:ring-primary-500"
+              className={"focus:outline-none focus:bg-white focus:ring-primary-500 " ++ boxWidthClassName}
               value={displayValue}
               onChange={event =>
                 setValue(
