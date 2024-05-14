@@ -24,7 +24,7 @@ export default function PatientCategorySelect(
               "h-2 w-2 rounded-full",
               {
                 Comfort: "bg-patient-comfort",
-                Stable: "bg-patient-stable",
+                Mild: "bg-patient-stable",
                 Moderate: "bg-patient-abnormal",
                 Critical: "bg-patient-critical",
               }[option.id],

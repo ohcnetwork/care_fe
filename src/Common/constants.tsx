@@ -371,7 +371,7 @@ export const RESPIRATORY_SUPPORT = [
   { id: "NONE", text: "UNKNOWN" },
 ];
 
-export type PatientCategoryID = "Comfort" | "Stable" | "Moderate" | "Critical";
+export type PatientCategoryID = "Comfort" | "Mild" | "Moderate" | "Critical";
 
 export const PATIENT_CATEGORIES: {
   id: PatientCategoryID;
@@ -379,8 +379,8 @@ export const PATIENT_CATEGORIES: {
   twClass: string;
 }[] = [
   { id: "Comfort", text: "Comfort Care", twClass: "patient-comfort" },
-  { id: "Stable", text: "Stable", twClass: "patient-stable" },
-  { id: "Moderate", text: "Abnormal", twClass: "patient-abnormal" },
+  { id: "Mild", text: "Mild", twClass: "patient-mild" },
+  { id: "Moderate", text: "Moderate", twClass: "patient-moderate" },
   { id: "Critical", text: "Critical", twClass: "patient-critical" },
 ];
 
@@ -679,8 +679,8 @@ export const MOTOR_RESPONSE_SCALE = [
   { value: 6, text: "Obeying commands/Normal acrivity" },
   { value: 5, text: "Moves to localized pain" },
   { value: 4, text: "Flexion/Withdrawal from pain" },
-  { value: 3, text: "Abnormal Flexion(decorticate)" },
-  { value: 2, text: "Abnormal Extension(decerebrate)" },
+  { value: 3, text: "Moderate Flexion(decorticate)" },
+  { value: 2, text: "Moderate Extension(decerebrate)" },
   { value: 1, text: "No Response" },
 ];
 export const CONSULTATION_TABS = [
