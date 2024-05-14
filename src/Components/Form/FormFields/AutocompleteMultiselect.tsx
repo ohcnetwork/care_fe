@@ -42,6 +42,7 @@ const AutocompleteMultiSelectFormField = <T, V>(
 export default AutocompleteMultiSelectFormField;
 
 type AutocompleteMutliSelectProps<T, V = T> = {
+  otherLabel?: string;
   id?: string;
   options: T[];
   disabled?: boolean | undefined;
@@ -146,7 +147,11 @@ export const AutocompleteMutliSelect = <T, V>(
             <div className="flex flex-wrap gap-2 p-2">
               {value.map((v) => (
                 <MultiSelectOptionChip
-                  label={v.label}
+                  label={
+                    props.otherLabel && v.label === "OTHERS"
+                      ? `${v.label} (${props.otherLabel.toUpperCase()})`
+                      : v.label
+                  }
                   onRemove={() =>
                     props.onChange(
                       value.map((o) => o.value).filter((o) => o !== v.value),

@@ -7,6 +7,7 @@ import {
   PATIENT_CATEGORIES,
   REVIEW_AT_CHOICES,
   RHYTHM_CHOICES,
+  SYMPTOM_CHOICES,
   TELEMEDICINE_ACTIONS,
 } from "../../Common/constants";
 import useAppHistory from "../../Common/hooks/useAppHistory";
@@ -105,6 +106,7 @@ export const DailyRounds = (props: any) => {
     DailyRoundsFormReducer,
     initialState,
   );
+  const [consultationSymptoms, setConsultationSymptoms] = useState<any>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
@@ -133,7 +135,15 @@ export const DailyRounds = (props: any) => {
     "rhythm_detail",
     "consciousness_level",
   ];
-
+  const fetchConsultationSymptoms = useCallback(async () => {
+    setIsLoading(true);
+    const { data } = await request(routes.getConsultationSymptoms, {
+      pathParams: { consultationId },
+    });
+    console.log(data?.results);
+    setConsultationSymptoms(data?.results);
+    setIsLoading(false);
+  }, [consultationId]);
   const fetchRoundDetails = useCallback(async () => {
     setIsLoading(true);
     let formData: any = initialData;
@@ -141,7 +151,7 @@ export const DailyRounds = (props: any) => {
       const { data } = await request(routes.getDailyReport, {
         pathParams: { consultationId, id },
       });
-
+      console.log(data);
       if (data) {
         formData = {
           ...formData,
@@ -196,8 +206,11 @@ export const DailyRounds = (props: any) => {
   }, [consultationId, id, patientId]);
 
   useEffect(() => {
+    if (!id) {
+      fetchConsultationSymptoms();
+    }
     fetchRoundDetails();
-  }, [fetchRoundDetails]);
+  }, [fetchRoundDetails, fetchConsultationSymptoms]);
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -240,6 +253,11 @@ export const DailyRounds = (props: any) => {
     const validForm = validateForm();
     if (validForm) {
       setIsLoading(true);
+      const symIDs: any = consultationSymptoms.reduce((acc: any, sym: any) => {
+        if (state.form[sym.id]) {
+          return [...acc, sym.id];
+        } else return [...acc];
+      }, []);
       const baseData = {
         clone_last: state.form.clone_last ?? false,
         rounds_type: state.form.rounds_type,
@@ -248,16 +266,27 @@ export const DailyRounds = (props: any) => {
           ? state.form.taken_at
           : new Date().toISOString(),
       };
-
+      const symptoms = state.form.additional_symptoms.map((sym: any) => {
+        const symptom = SYMPTOM_CHOICES.filter((obj) => obj.id === sym);
+        return {
+          symptom: symptom[0].text,
+          other_symptom:
+            sym === 9 ? state.form.other_symptoms.toUpperCase() : "",
+          onset_date: state.form.taken_at || new Date().toISOString(),
+        };
+      });
+      console.log(symptoms);
       let data: any;
 
       if (state.form.clone_last !== true) {
         data = {
           ...baseData,
+          updateSymStatusIDS: symIDs,
           additional_symptoms: state.form.additional_symptoms,
           other_symptoms: state.form.additional_symptoms?.includes(9)
             ? state.form.other_symptoms
             : undefined,
+          add_symptoms_timeline: symptoms,
           admitted_to:
             (state.form.admitted === "Select"
               ? undefined
@@ -455,7 +484,29 @@ export const DailyRounds = (props: any) => {
             />
           </div>
         </div>
-
+        {consultationSymptoms?.length !== 0 && (
+          <div className=" mb-10 border-2 border-gray-400">
+            <div className=" mb-6 ml-3 mt-3">
+              <span className=" text-lg font-semibold">Symptoms Status</span>
+            </div>
+            <div className=" m-3">
+              <div className="flex flex-wrap gap-10">
+                {consultationSymptoms.map((tl: any) => (
+                  <div className=" capitalize">
+                    <CheckBoxFormField
+                      {...field(tl.id)}
+                      label={`${
+                        tl.symptom === "OTHERS"
+                          ? tl.other_symptom.toLowerCase()
+                          : tl.symptom.toLowerCase()
+                      }(${formatDateTime(tl.onset_date)})`}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
         {!id && hasPreviousLog && (
           <CheckBoxFormField
             {...field("clone_last")}
@@ -475,6 +526,7 @@ export const DailyRounds = (props: any) => {
               label="Other Details"
               rows={5}
             />
+
             <SymptomsSelect
               {...field("additional_symptoms")}
               label="Symptoms"

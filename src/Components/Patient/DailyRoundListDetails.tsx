@@ -26,7 +26,7 @@ export const DailyRoundListDetails = (props: any) => {
         const currentHealth = currentHealthChoices.find(
           (i) => i.text === data.current_health,
         );
-
+        console.log(data);
         const tdata: DailyRoundsModel = {
           ...data,
           temperature: Number(data.temperature) ? data.temperature : "",
@@ -37,7 +37,20 @@ export const DailyRoundListDetails = (props: any) => {
             ? currentHealth.desc
             : data.current_health,
         };
-        if (data.additional_symptoms?.length) {
+        if (data.daily_round_symptoms?.length) {
+          const syms = data.daily_round_symptoms.map((sym) => {
+            if (sym.symptom !== "OTHERS") {
+              return `${sym.symptom.toLowerCase()}${sym.cure_date ? `(cured at-${sym.cure_date})` : ""}`;
+            } else return "";
+          });
+          const other_syms = data.daily_round_symptoms.map((sym) => {
+            if (sym.symptom === "OTHERS") {
+              return `${sym.other_symptom.toLowerCase()}${sym.cure_date ? `(cured at-${sym.cure_date})` : ""}`;
+            } else return "";
+          });
+          if (syms.join("")) tdata.additional_symptoms_text = syms.join(", ");
+          if (other_syms.join("")) tdata.other_symptoms = other_syms.join(", ");
+        } else if (data.additional_symptoms?.length) {
           const symptoms = data.additional_symptoms.map((symptom: number) => {
             const option = symptomChoices.find((i) => i.id === symptom);
             return option ? option.text.toLowerCase() : symptom;

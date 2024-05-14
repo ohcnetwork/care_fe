@@ -121,7 +121,7 @@ export const ConsultationDetails = (props: any) => {
               });
             data.symptoms_text = symptoms.join(", ");
           }
-          if (res.data.symptoms_with_dates.length) {
+          if (res.data.symptoms_timeline?.length) {
             data.symptoms_text = "symptoms";
           }
           if (facilityId != data.facility || patientId != data.patient) {
@@ -129,6 +129,8 @@ export const ConsultationDetails = (props: any) => {
               `/facility/${data.facility}/patient/${data.patient}/consultation/${data?.id}`,
             );
           }
+          console.log(data);
+          console.log(consultationId);
           setConsultationData(data);
           const assetRes = data?.current_bed?.bed_object?.id
             ? await dispatch(

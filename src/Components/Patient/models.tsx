@@ -45,6 +45,11 @@ export interface AbhaObject {
 }
 
 export interface PatientModel {
+  daily_round_symptoms?: {
+    symptom: string;
+    other_symptom: string;
+    onset_date: string;
+  }[];
   test_id?: string;
   id?: string;
   action?: number;
@@ -289,7 +294,22 @@ export interface BloodPressure {
   systolic?: number;
 }
 
+export interface ConsultationSymptomsModel {
+  id?: string;
+  created_date?: string;
+  modified_date?: string;
+  symptom?: string;
+  other_symptom?: string;
+  onset_date?: string;
+  cure_date?: string;
+}
 export interface DailyRoundsModel {
+  daily_round_symptoms?: {
+    symptom: string;
+    other_symptom: string;
+    onset_date: string;
+    cure_date: string;
+  }[];
   ventilator_spo2?: number;
   ventilator_interface?:
     | "UNKNOWN"

@@ -22,6 +22,7 @@ export type FormFieldBaseProps<
   T,
   Form extends FormDetails | undefined = undefined,
 > = {
+  otherData?: string;
   label?: React.ReactNode;
   labelSuffix?: React.ReactNode;
   disabled?: boolean;

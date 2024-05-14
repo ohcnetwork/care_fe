@@ -70,6 +70,7 @@ export const SymptomsSelect = (props: FormFieldBaseProps<number[]>) => {
   return (
     <FormField field={field}>
       <AutocompleteMutliSelect
+        otherLabel={props.otherData}
         id={field.id}
         options={SYMPTOM_CHOICES.filter((sym) => sym.id !== 1)}
         disabled={props.disabled}

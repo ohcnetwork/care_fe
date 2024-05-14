@@ -10,8 +10,9 @@ import {
   TELEMEDICINE_ACTIONS,
   CONSENT_TYPE_CHOICES,
   CONSENT_PATIENT_CODE_STATUS_CHOICES,
+  SYMPTOM_CHOICES,
 } from "../../Common/constants";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
+import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import InvestigationBuilder, {
@@ -49,7 +50,7 @@ import RouteToFacilitySelect, {
   RouteToFacility,
 } from "../Common/RouteToFacilitySelect.js";
 import { LocationSelect } from "../Common/LocationSelect.js";
-import { classNames, formatDate } from "../../Utils/utils.js";
+import { classNames } from "../../Utils/utils.js";
 import {
   ConditionVerificationStatuses,
   ConsultationDiagnosis,
@@ -64,6 +65,7 @@ import ConfirmDialog from "../Common/ConfirmDialog.js";
 import request from "../../Utils/request/request.js";
 import routes from "../../Redux/api.js";
 import useQuery from "../../Utils/request/useQuery.js";
+import DialogModal from "../Common/Dialog.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -81,6 +83,7 @@ type FormDetails = {
   Asymptomatic: boolean;
   symptoms: number[];
   other_symptoms: string;
+  other_symptoms_onset?: Date;
   symptoms_onset_date?: Date;
   suggestion: ConsultationSuggestionValue;
   route_to_facility?: RouteToFacility;
@@ -129,12 +132,18 @@ type FormDetails = {
   consent_records: ConsentRecord[];
 } & { [key in `date-${number}`]?: Date } & {
   [key in `symptoms-${number}`]?: number[];
+} & {
+  [key in `otherSymptoms-${number}`]?: string;
 };
 
 const initForm: FormDetails = {
+  ["date-1"]: undefined,
+  ["symptoms-1"]: [],
+  ["otherSymptoms-1"]: "",
   Asymptomatic: false,
   symptoms: [],
   other_symptoms: "",
+  other_symptoms_onset: undefined,
   symptoms_onset_date: undefined,
   suggestion: "A",
   route_to_facility: undefined,
@@ -251,8 +260,10 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     {
       dateField: "date-1",
       symptomsField: "symptoms-1",
+      otherSymptomsField: "otherSymptoms-1",
     },
   ]);
+  const [isDialogOpen, setIsDialogOpen] = useState("");
   const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
   const [referredToFacility, setReferredToFacility] =
     useState<FacilityModel | null>(null);
@@ -364,11 +375,80 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         },
       });
     } else {
+      if (
+        event.name.includes("symptoms") &&
+        [event.value as any][0].slice(-1).includes(9)
+      ) {
+        if (
+          (state.form[event.name as any] &&
+            [event.value as any][0].length >
+              state.form[event.name as any]!.length) ||
+          !state.form[event.name as any]
+        ) {
+          console.log(`otherSymptoms-${event.name.slice(-1)}`);
+          setIsDialogOpen(`otherSymptoms-${event.name.slice(-1)}`);
+        }
+      } else if (
+        event.name.includes("symptoms") &&
+        ![event.value as any].some((value) => value.includes(9))
+      ) {
+        dispatch({
+          type: "set_form",
+          form: {
+            ...state.form,
+            [`otherSymptoms-${event.name.slice(-1)}`]: "",
+            [event.name]: event.value,
+          },
+        });
+        return;
+      }
       dispatch({
         type: "set_form",
         form: { ...state.form, [event.name]: event.value },
       });
     }
+  };
+
+  const otherSymptomsConfirm = (field: any) => {
+    if (!state.form[field]) {
+      dispatch({
+        type: "set_errors",
+        errors: {
+          ...state.errors,
+          [field]: "Please enter Other Symptoms Details",
+        },
+      });
+      return;
+    }
+    dispatch({
+      type: "set_errors",
+      errors: { ...state.errors, [field]: "" },
+    });
+    setIsDialogOpen("");
+  };
+
+  const dialogCancel = (symField: any, otherSymField: any) => {
+    dispatch({
+      type: "set_form",
+      form: {
+        ...state.form,
+        [symField]: state.form[symField]?.filter((val) => val !== 9),
+        [otherSymField]: "",
+      },
+    });
+    console.log(otherSymField);
+    setIsDialogOpen("");
+  };
+
+  const dialogClose = (symField: any) => {
+    dispatch({
+      type: "set_form",
+      form: {
+        ...state.form,
+        [symField]: state.form[symField]?.filter((val) => val !== 9),
+      },
+    });
+    setIsDialogOpen("");
   };
 
   const { loading: consultationLoading, refetch } = useQuery(
@@ -445,24 +525,9 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                 ConditionVerificationStatuses.indexOf(b.verification_status),
             ),
           };
-          let fetchedFields: any = [];
-          if (data.symptoms_with_dates?.length) {
-            data.symptoms_with_dates.forEach((tl, idx) => {
-              formData[`date-${idx + 1}`] = isoStringToDate(tl.date);
-              formData[`symptoms-${idx + 1}`] = tl.symptoms;
-              fetchedFields = [
-                ...fetchedFields,
-                {
-                  dateField: `date-${idx + 1}`,
-                  symptomsField: `symptoms-${idx + 1}`,
-                },
-              ];
-            });
-          } else {
+          if (!data.symptoms_timeline?.length) {
             formData["Asymptomatic"] = true;
           }
-          console.log(fetchedFields);
-          setSymptomsFields(fetchedFields);
           dispatch({
             type: "set_form",
             form: { ...state.form, ...(formData as unknown as FormDetails) },
@@ -737,14 +802,27 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     const validated = validateForm();
     if (validated) {
       setIsLoading(true);
-      const symptoms_timeline = symptomsFields.map((fields) => {
-        const DateFormField: any = fields.dateField;
-        const SymptomsFormField: any = fields.symptomsField;
-        return {
-          date: state.form[DateFormField],
-          symptoms: state.form[SymptomsFormField],
-        };
+      let symptoms_timeline: any = [];
+      symptomsFields.forEach((fields) => {
+        const symptoms: any = state.form[fields.symptomsField as any];
+        const other_symptoms: any =
+          state.form[fields.otherSymptomsField as any]?.toUpperCase();
+        const onset_date: any =
+          state.form[fields.dateField as any]?.toISOString();
+        symptoms.forEach((sym: any) => {
+          const symptom = SYMPTOM_CHOICES.filter((obj) => obj.id === sym);
+          symptoms_timeline = [
+            ...symptoms_timeline,
+            {
+              symptom: symptom[0].text,
+              other_symptom: sym === 9 ? other_symptoms : "",
+              onset_date: onset_date,
+            },
+          ];
+        });
       });
+      console.log(symptoms_timeline);
+      console.log(state.form.create_diagnoses);
       const data: any = {
         symptoms: state.form.symptoms,
         other_symptoms: isOtherSymptomsSelected
@@ -753,7 +831,9 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         symptoms_onset_date: hasSymptoms
           ? state.form.symptoms_onset_date
           : undefined,
-        symptoms_with_dates: !state.form.Asymptomatic ? symptoms_timeline : [],
+        create_symptoms_timeline: !state.form.Asymptomatic
+          ? symptoms_timeline
+          : [],
         suggestion: state.form.suggestion,
         route_to_facility: state.form.route_to_facility,
         admitted: state.form.suggestion === "A",
@@ -1154,14 +1234,16 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                     <div>
                       <CheckBoxFormField
                         {...field("Asymptomatic")}
-                        label="Asymptomatic"
+                        label={
+                          isUpdate ? "No Additional Symptoms" : "Asymptomatic"
+                        }
                       />
                     </div>
                     <div className="flex flex-col gap-5">
                       {!state.form.Asymptomatic && (
                         <div>
                           {symptomsFields.map((tl, idx) => (
-                            <div className="flex flex-col gap-5">
+                            <div className="flex flex-col gap-5" key={idx}>
                               <div className="flex flex-row gap-3">
                                 <div className="" ref={fieldRef[tl.dateField]}>
                                   <DateFormField
@@ -1171,16 +1253,21 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                                     {...field(tl.dateField)}
                                   />
                                 </div>
+
                                 <div
                                   className="flex-1"
                                   ref={fieldRef[tl.symptomsField]}
                                 >
                                   <SymptomsSelect
+                                    otherData={
+                                      state.form[tl.otherSymptomsField as any]
+                                    }
                                     required
                                     label={idx === 0 ? "Symptoms" : ""}
                                     {...field(tl.symptomsField)}
                                   />
                                 </div>
+
                                 {idx !== 0 &&
                                   idx === symptomsFields.length - 1 && (
                                     <div className="text-center text-3xl text-gray-600">
@@ -1196,21 +1283,45 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                                     </div>
                                   )}
                               </div>
-                              {state.form[tl.symptomsField as any]?.includes(
-                                9,
-                              ) && (
-                                <div
-                                  className="col-span-6"
-                                  ref={fieldRef["other_symptoms"]}
-                                >
+                              <DialogModal
+                                title={
+                                  <div className=" text-center">
+                                    Other Symptom
+                                  </div>
+                                }
+                                show={isDialogOpen === tl.otherSymptomsField}
+                                onClose={() => {
+                                  dialogClose(tl.symptomsField);
+                                }}
+                              >
+                                <div className=" flex flex-col gap-3">
                                   <TextAreaFormField
-                                    {...field(`other-symptoms-${idx + 1}`)}
-                                    label={`Other symptom details ${formatDate(state.form[tl.dateField as any])}`}
-                                    required
-                                    placeholder="Enter details of other symptoms here"
+                                    {...field(tl.otherSymptomsField)}
+                                    placeholder="enter other symptom details"
                                   />
+                                  <div className=" flex justify-between">
+                                    <ButtonV2
+                                      onClick={() => {
+                                        otherSymptomsConfirm(
+                                          tl.otherSymptomsField,
+                                        );
+                                      }}
+                                    >
+                                      Confirm
+                                    </ButtonV2>
+                                    <ButtonV2
+                                      onClick={() => {
+                                        dialogCancel(
+                                          tl.symptomsField,
+                                          tl.otherSymptomsField,
+                                        );
+                                      }}
+                                    >
+                                      Cancel
+                                    </ButtonV2>
+                                  </div>
                                 </div>
-                              )}
+                              </DialogModal>
                             </div>
                           ))}
                           <div
@@ -1223,8 +1334,20 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                                   {
                                     dateField: `date-${len + 1}`,
                                     symptomsField: `symptoms-${len + 1}`,
+                                    otherSymptomsField: `otherSymptoms-${len + 1}`,
                                   },
                                 ];
+                              });
+                              dispatch({
+                                type: "set_form",
+                                form: {
+                                  ...state.form,
+                                  [`date-${symptomsFields.length + 1}`]:
+                                    undefined,
+                                  [`symptoms-${symptomsFields.length + 1}`]: [],
+                                  [`otherSymptoms-${symptomsFields.length + 1}`]:
+                                    "",
+                                },
                               });
                             }}
                           >
@@ -1236,19 +1359,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       )}
                     </div>
                   </div>
-                  {isOtherSymptomsSelected && (
-                    <div
-                      className="col-span-6"
-                      ref={fieldRef["other_symptoms"]}
-                    >
-                      <TextAreaFormField
-                        {...field("other_symptoms")}
-                        label="Other symptom details"
-                        required
-                        placeholder="Enter details of other symptoms here"
-                      />
-                    </div>
-                  )}
 
                   {hasSymptoms && (
                     <div

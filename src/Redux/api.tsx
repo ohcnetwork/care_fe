@@ -75,6 +75,7 @@ import {
   PNconfigData,
 } from "../Components/Notifications/models";
 import {
+  ConsultationSymptomsModel,
   CreateFileRequest,
   CreateFileResponse,
   DailyRoundsModel,
@@ -604,6 +605,12 @@ const routes = {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/",
     method: "GET",
     TRes: Type<PaginatedResponse<DailyRoundsModel>>(),
+  },
+
+  getConsultationSymptoms: {
+    path: "/api/v1/consultation/{consultationId}/symptoms/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<ConsultationSymptomsModel>>(),
   },
 
   getEvents: {

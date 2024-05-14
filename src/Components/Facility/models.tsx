@@ -105,6 +105,12 @@ export interface ConsultationModel {
     date: string;
     symptoms: number[];
   }[];
+  symptoms_timeline?: {
+    symptom: string;
+    other_symptom: string;
+    onset_date: string;
+    cure_date: string;
+  }[];
   encounter_date: string;
   icu_admission_date?: string;
   admitted?: boolean;

@@ -331,6 +331,37 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                     <div className="text-sm font-semibold uppercase">
                       Last Daily Update
                     </div>
+                    {props.consultationData.symptoms_timeline?.filter(
+                      (sym) =>
+                        sym.cure_date ===
+                        props.consultationData.last_daily_round?.taken_at,
+                    ).length && (
+                      <div className=" my-4 flex gap-2">
+                        <div>
+                          {props.consultationData.symptoms_timeline
+                            ?.filter(
+                              (sym) =>
+                                sym.cure_date ===
+                                props.consultationData.last_daily_round
+                                  ?.taken_at,
+                            )
+                            .map((sym: any, index: any) => (
+                              <div>
+                                <Chip
+                                  key={index}
+                                  text={
+                                    sym.symptom === "OTHERS"
+                                      ? sym.other_symptom
+                                      : sym.symptom
+                                  }
+                                  size="small"
+                                />
+                              </div>
+                            ))}
+                        </div>
+                        <span className=" font-medium">Marked as Cured</span>
+                      </div>
+                    )}
                     {props.consultationData.last_daily_round
                       ?.additional_symptoms && (
                       <>
@@ -339,6 +370,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                             (symptom: any, index: number) => (
                               <Chip
                                 key={index}
+                                variant="danger"
                                 text={
                                   SYMPTOM_CHOICES.find(
                                     (choice) => choice.id === symptom,
@@ -361,7 +393,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                             }
                           </div>
                         )}
-                        <span className="text-xs font-semibold leading-relaxed text-gray-800">
+                        <span className="text-sm font-semibold leading-relaxed text-gray-800">
                           from{" "}
                           {formatDate(
                             props.consultationData.last_daily_round.taken_at,
@@ -370,35 +402,34 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                       </>
                     )}
                     <hr className="my-4 border border-gray-300" />
-                    <div className="text-sm font-semibold uppercase">
+                    <div className="mb-5 text-sm font-semibold uppercase">
                       Consultation Update
                     </div>
-                    {props.consultationData.symptoms_with_dates?.length ? (
-                      <div className=" my-3 flex flex-col gap-4">
-                        {props.consultationData.symptoms_with_dates.map(
-                          (tl) => (
-                            <div className="flex flex-col gap-4">
-                              <div>
-                                <span className="text-xs font-semibold leading-relaxed text-gray-800">
-                                  from {formatDate(tl.date)}
-                                </span>
-                              </div>
-                              <div className=" flex flex-wrap gap-3">
-                                {tl.symptoms.map((symptom, idx) => (
-                                  <Chip
-                                    key={idx}
-                                    text={
-                                      SYMPTOM_CHOICES.find(
-                                        (choice) => choice.id === symptom,
-                                      )?.text ?? "Err. Unknown"
-                                    }
-                                    size="small"
-                                  />
-                                ))}
-                              </div>
+                    {props.consultationData.symptoms_timeline?.length ? (
+                      <div className=" my-3 flex flex-col gap-6">
+                        {props.consultationData.symptoms_timeline.map((tl) => (
+                          <div className="flex gap-4">
+                            <div className=" capitalize">
+                              <Chip
+                                text={
+                                  tl.symptom === "OTHERS"
+                                    ? tl.other_symptom
+                                    : tl.symptom
+                                }
+                                size="small"
+                                variant={tl.cure_date ? "primary" : "danger"}
+                              />
                             </div>
-                          ),
-                        )}
+                            <div>
+                              <span className="text-sm font-semibold leading-relaxed text-gray-800">
+                                from {formatDate(tl.onset_date)}{" "}
+                                {tl.cure_date
+                                  ? `to ${formatDate(tl.cure_date)}`
+                                  : ""}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
                         {props.consultationData.other_symptoms && (
                           <div className="capitalize">
                             <div className="text-xs font-semibold">
