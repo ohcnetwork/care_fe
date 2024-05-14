@@ -31,7 +31,7 @@ export default function UserAutocompleteFormField(props: Props) {
     home_facility?: string;
     user_type?: string;
     search_text?: string;
-  } = { limit: 5, offset: 0 };
+  } = { limit: 50, offset: 0 };
 
   if (props.showActiveStatus && props.userType) {
     search_filter = { ...search_filter, user_type: props.userType };

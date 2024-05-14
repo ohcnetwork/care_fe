@@ -29,7 +29,7 @@ import CollapseV2 from "../Common/components/CollapseV2";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import DateFormField from "../Form/FormFields/DateFormField";
 import DialogModal from "../Common/Dialog";
-import { DupPatientModel } from "../Facility/models";
+import { DistrictModel, DupPatientModel, WardModel } from "../Facility/models";
 import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
 import {
   FieldError,
@@ -65,6 +65,7 @@ import request from "../../Utils/request/request.js";
 import SelectMenuV2 from "../Form/SelectMenuV2.js";
 import Checkbox from "../Common/components/CheckBox.js";
 import _ from "lodash";
+import { ILocalBodies } from "../ExternalResult/models.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -206,9 +207,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
   const [isWardLoading, setIsWardLoading] = useState(false);
-  const [districts, setDistricts] = useState<any[]>([]);
-  const [localBody, setLocalBody] = useState<any[]>([]);
-  const [ward, setWard] = useState<any[]>([]);
+  const [districts, setDistricts] = useState<DistrictModel[]>([]);
+  const [localBody, setLocalBody] = useState<ILocalBodies[]>([]);
+  const [ward, setWard] = useState<WardModel[]>([]);
   const [ageInputType, setAgeInputType] = useState<
     "date_of_birth" | "age" | "alert_for_age"
   >("date_of_birth");
@@ -427,6 +428,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             village: data.village ? data.village : "",
             medical_history: [] as number[],
             is_antenatal: String(!!data.is_antenatal),
+            last_menstruation_start_date: data.last_menstruation_start_date,
+            date_of_delivery: data.date_of_delivery,
+            is_postpartum: String(!!data.date_of_delivery),
             allergies: data.allergies ? data.allergies : "",
             pincode: data.pincode ? data.pincode : "",
             ongoing_medication: data.ongoing_medication
@@ -554,6 +558,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         case "gender":
           errors[field] = RequiredFieldValidator()(form[field]);
           return;
+        case "last_menstruation_start_date":
+          if (form.is_antenatal === "true") {
+            errors[field] = RequiredFieldValidator()(form[field]);
+          }
+          return;
+        case "date_of_delivery":
+          if (form.is_postpartum === "true") {
+            errors[field] = RequiredFieldValidator()(form[field]);
+          }
+          return;
         case "age":
         case "date_of_birth": {
           const field = ageInputType === "age" ? "age" : "date_of_birth";
@@ -657,13 +671,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           }
           return;
         case "number_of_primary_contacts":
-          if (form[field] < 0) {
-            errors[field] = "Number of primary contacts cannot be negative";
-          }
-          return;
         case "number_of_secondary_contacts":
-          if (form[field] < 0) {
-            errors[field] = "Number of secondary contacts cannot be negative";
+          if (form[field] && form[field] < 0) {
+            errors[field] = "Value cannot be negative";
           }
           return;
 
@@ -806,6 +816,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       gender: Number(formData.gender),
       nationality: formData.nationality,
       is_antenatal: formData.is_antenatal,
+      last_menstruation_start_date:
+        formData.is_antenatal === "true"
+          ? dateQueryString(formData.last_menstruation_start_date)
+          : null,
+      date_of_delivery:
+        formData.is_postpartum === "true"
+          ? dateQueryString(formData.date_of_delivery)
+          : null,
       passport_no:
         formData.nationality !== "India" ? formData.passport_no : undefined,
       state: formData.nationality === "India" ? formData.state : undefined,
@@ -1195,7 +1213,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           )}
           <>
             <div className={`${showImport.show && "hidden"}`}>
-              <Form<PatientModel & { age?: number }>
+              <Form<PatientModel & { age?: number; is_postpartum?: boolean }>
                 defaults={id ? state.form : initForm}
                 validate={validateForm}
                 onSubmit={handleSubmit}
@@ -1490,6 +1508,20 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               required
                               label="Gender"
                               options={genderTypes}
+                              onChange={(e) => {
+                                field("gender").onChange(e);
+                                if (e.value !== "2") {
+                                  field("is_antenatal").onChange({
+                                    name: "is_antenatal",
+                                    value: "false",
+                                  });
+
+                                  field("is_postpartum").onChange({
+                                    name: "is_postpartum",
+                                    value: "false",
+                                  });
+                                }
+                              }}
                               optionLabel={(o: any) => o.text}
                               optionValue={(o: any) => o.id}
                             />
@@ -1501,7 +1533,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               <div id="is_antenatal-div" className="col-span-2">
                                 <RadioFormField
                                   {...field("is_antenatal")}
-                                  label="Is antenatal ?"
+                                  label="Is antenatal?"
                                   aria-label="is_antenatal"
                                   options={[
                                     { label: "Yes", value: "true" },
@@ -1512,6 +1544,49 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 />
                               </div>
                             }
+                          </CollapseV2>
+                          <CollapseV2
+                            opened={field("is_antenatal").value === "true"}
+                          >
+                            {
+                              <div className="col-span-2">
+                                <DateFormField
+                                  containerClassName="w-full"
+                                  {...field("last_menstruation_start_date")}
+                                  label="Last Menstruation Start Date"
+                                  position="LEFT"
+                                  disableFuture
+                                  required
+                                />
+                              </div>
+                            }
+                          </CollapseV2>
+                          <CollapseV2
+                            opened={String(field("gender").value) === "2"}
+                          >
+                            <RadioFormField
+                              {...field("is_postpartum")}
+                              label="Is postpartum? (<6 weeks)"
+                              className="font-bold"
+                              options={[
+                                { label: "Yes", value: "true" },
+                                { label: "No", value: "false" },
+                              ]}
+                              optionDisplay={(option) => option.label}
+                              optionValue={(option) => option.value}
+                            />
+                          </CollapseV2>
+                          <CollapseV2
+                            opened={field("is_postpartum").value === "true"}
+                          >
+                            <DateFormField
+                              containerClassName="w-full"
+                              {...field("date_of_delivery")}
+                              label="Date of Delivery"
+                              position="LEFT"
+                              disableFuture
+                              required
+                            />
                           </CollapseV2>
                           <div data-testid="current-address" id="address-div">
                             <TextAreaFormField
@@ -1676,9 +1751,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     }
                                     disabled={!field("district").value}
                                     options={localBody}
-                                    optionLabel={(o: any) => o.name}
-                                    optionValue={(o: any) => o.id}
-                                    onChange={(e: any) => {
+                                    optionLabel={(o) => o.name}
+                                    optionValue={(o) => o.id}
+                                    onChange={(e) => {
                                       field("local_body").onChange(e);
                                       field("ward").onChange({
                                         name: "ward",

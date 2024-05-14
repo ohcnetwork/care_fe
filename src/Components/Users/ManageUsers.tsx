@@ -774,7 +774,7 @@ export function UserFacilities(props: { user: any }) {
                     >
                       <CareIcon
                         icon="l-estate"
-                        className="mr-1 pt-[1px] text-lg"
+                        className="mr-1 pt-px text-lg"
                       />
                       Home Facility
                     </span>

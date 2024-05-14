@@ -31,11 +31,13 @@ import DiagnosesFilter, { FILTER_BY_DIAGNOSES_KEYS } from "./DiagnosesFilter";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
 
 export default function PatientFilter(props: any) {
+  const authUser = useAuthUser();
   const { kasp_enabled, kasp_string } = useConfig();
   const { filter, onChange, closeFilter, removeFilters } = props;
 
@@ -377,23 +379,27 @@ export default function PatientFilter(props: any) {
               }
             />
           </div>
-          <div className="w-full flex-none" id="discharge-reason-select">
-            <FieldLabel className="text-sm">Discharge Reason</FieldLabel>
-            <SelectMenuV2
-              id="last_consultation__new_discharge_reason"
-              placeholder="Select discharge reason"
-              options={DISCHARGE_REASONS}
-              value={filterState.last_consultation__new_discharge_reason}
-              optionValue={(o) => o.id}
-              optionLabel={(o) => o.text}
-              onChange={(o) =>
-                setFilterState({
-                  ...filterState,
-                  last_consultation__new_discharge_reason: o,
-                })
-              }
-            />
-          </div>
+          {["StateAdmin", "StateReadOnlyAdmin"].includes(
+            authUser.user_type,
+          ) && (
+            <div className="w-full flex-none" id="discharge-reason-select">
+              <FieldLabel className="text-sm">Discharge Reason</FieldLabel>
+              <SelectMenuV2
+                id="last_consultation__new_discharge_reason"
+                placeholder="Select discharge reason"
+                options={DISCHARGE_REASONS}
+                value={filterState.last_consultation__new_discharge_reason}
+                optionValue={(o) => o.id}
+                optionLabel={(o) => o.text}
+                onChange={(o) =>
+                  setFilterState({
+                    ...filterState,
+                    last_consultation__new_discharge_reason: o,
+                  })
+                }
+              />
+            </div>
+          )}
           <div className="w-full flex-none">
             <FieldLabel className="text-sm">Telemedicine</FieldLabel>
             <SelectMenuV2
@@ -433,6 +439,11 @@ export default function PatientFilter(props: any) {
               options={["true", "false"]}
               optionLabel={(o) =>
                 o === "true" ? "Antenatal" : "Non-antenatal"
+              }
+              optionDescription={(o) =>
+                o === "true"
+                  ? "i.e., last menstruation start date is within the last 9 months"
+                  : undefined
               }
               value={filterState.is_antenatal}
               onChange={(v) =>

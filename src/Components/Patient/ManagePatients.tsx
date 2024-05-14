@@ -31,7 +31,11 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import SearchInput from "../Form/SearchInput";
 import SortDropdownMenu from "../Common/SortDropdown";
 import SwitchTabs from "../Common/components/SwitchTabs";
-import { formatPatientAge, parsePhoneNumber } from "../../Utils/utils.js";
+import {
+  formatPatientAge,
+  isAntenatal,
+  parsePhoneNumber,
+} from "../../Utils/utils.js";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page.js";
@@ -218,6 +222,10 @@ export const PatientManager = () => {
     last_consultation_is_telemedicine:
       qParams.last_consultation_is_telemedicine || undefined,
     is_antenatal: qParams.is_antenatal || undefined,
+    last_menstruation_start_date_after:
+      (qParams.is_antenatal === "true" &&
+        dayjs().subtract(9, "month").format("YYYY-MM-DD")) ||
+      undefined,
     ventilator_interface: qParams.ventilator_interface || undefined,
     diagnoses: qParams.diagnoses || undefined,
     diagnoses_confirmed: qParams.diagnoses_confirmed || undefined,
@@ -597,6 +605,7 @@ export const PatientManager = () => {
                   )}
                   {patient.gender === 2 &&
                     patient.is_antenatal &&
+                    isAntenatal(patient.last_menstruation_start_date) &&
                     patient.is_active && (
                       <Chip
                         size="small"

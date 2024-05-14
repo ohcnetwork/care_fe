@@ -1,8 +1,6 @@
-import { lazy, useEffect, useState } from "react";
+import { lazy, useState } from "react";
 import { ConsultationTabProps } from "./index";
 import { AssetBedModel, AssetClass, AssetData } from "../../Assets/AssetTypes";
-import { useDispatch } from "react-redux";
-import { listAssetBeds } from "../../../Redux/actions";
 import { BedModel } from "../models";
 import HL7PatientVitalsMonitor from "../../VitalsMonitor/HL7PatientVitalsMonitor";
 import VentilatorPatientVitalsMonitor from "../../VitalsMonitor/VentilatorPatientVitalsMonitor";
@@ -19,6 +17,8 @@ import {
   formatDate,
   formatDateTime,
   formatPatientAge,
+  isAntenatal,
+  isPostPartum,
 } from "../../../Utils/utils";
 import ReadMore from "../../Common/components/Readmore";
 import DailyRoundsList from "../Consultations/DailyRoundsList";
@@ -26,11 +26,13 @@ import EventsList from "./Events/EventsList";
 import SwitchTabs from "../../Common/components/SwitchTabs";
 import { getVitalsMonitorSocketUrl } from "../../VitalsMonitor/utils";
 import { FileUpload } from "../../Patient/FileUpload";
+import useQuery from "../../../Utils/request/useQuery";
+import routes from "../../../Redux/api";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
 
 export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
-  const dispatch: any = useDispatch();
   const [hl7SocketUrl, setHL7SocketUrl] = useState<string>();
   const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
   const [monitorBedData, setMonitorBedData] = useState<AssetBedModel>();
@@ -46,21 +48,18 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
     "3xl": 23 / 11,
   });
 
-  useEffect(() => {
-    if (
-      !props.consultationData.facility ||
-      !props.consultationData.current_bed?.bed_object.id
-    )
-      return;
-
-    const fetchData = async () => {
-      const assetBedRes = await dispatch(
-        listAssetBeds({
-          facility: props.consultationData.facility as any,
-          bed: props.consultationData.current_bed?.bed_object.id,
-        }),
-      );
-      const assetBeds = assetBedRes?.data?.results as AssetBedModel[];
+  useQuery(routes.listAssetBeds, {
+    prefetch: !!(
+      props.consultationData.facility &&
+      props.consultationData.current_bed?.bed_object.id
+    ),
+    query: {
+      facility: props.consultationData.facility as any,
+      bed: props.consultationData.current_bed?.bed_object.id,
+    },
+    onResponse({ data }) {
+      if (!data) return;
+      const assetBeds = data.results;
 
       const monitorBedData = assetBeds?.find(
         (i) => i.asset_object?.asset_class === AssetClass.HL7MONITOR,
@@ -96,10 +95,8 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
           getVitalsMonitorSocketUrl(ventilatorBedData?.asset_object),
         );
       }
-    };
-
-    fetchData();
-  }, [props.consultationData]);
+    },
+  });
 
   return (
     <div className="flex flex-col gap-2">
@@ -319,6 +316,59 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                     )}
                   </div>
                 </div>
+              </div>
+            )}
+            {((props.patientData.is_antenatal &&
+              isAntenatal(props.patientData.last_menstruation_start_date)) ||
+              isPostPartum(props.patientData.date_of_delivery)) && (
+              <div className="rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+                <h3 className="mb-4 text-lg font-semibold leading-relaxed text-gray-900">
+                  Perinatal Status
+                </h3>
+
+                <div className="flex gap-2 pb-2">
+                  {props.patientData.is_antenatal &&
+                    isAntenatal(
+                      props.patientData.last_menstruation_start_date,
+                    ) && (
+                      <Chip
+                        variant="custom"
+                        className="border-pink-300 bg-pink-100 text-pink-600"
+                        startIcon="l-baby-carriage"
+                        text="Antenatal"
+                      />
+                    )}
+                  {isPostPartum(props.patientData.date_of_delivery) && (
+                    <Chip
+                      variant="custom"
+                      className="border-pink-300 bg-pink-100 text-pink-600"
+                      startIcon="l-baby-carriage"
+                      text="Post-partum"
+                    />
+                  )}
+                </div>
+
+                {props.patientData.last_menstruation_start_date && (
+                  <p className="space-x-2 p-2 text-sm">
+                    <CareIcon className="text-base" icon="l-calendar-alt" />
+                    <span>Last Menstruation:</span>
+                    <span className="font-semibold">
+                      {formatDate(
+                        props.patientData.last_menstruation_start_date,
+                      )}
+                    </span>
+                  </p>
+                )}
+
+                {props.patientData.date_of_delivery && (
+                  <p className="space-x-2 p-2 text-sm">
+                    <CareIcon className="text-base" icon="l-calendar-alt" />
+                    <span>Date of Delivery:</span>
+                    <span className="font-semibold">
+                      {formatDate(props.patientData.date_of_delivery)}
+                    </span>
+                  </p>
+                )}
               </div>
             )}
             {props.consultationData.symptoms_text && (
