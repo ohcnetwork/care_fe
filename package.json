@@ -65,7 +65,7 @@
     "axios": "^1.4.0",
     "browser-image-compression": "^2.0.2",
     "cross-env": "^7.0.3",
-    "date-fns": "^2.30.0",
+    "date-fns": "^3.6.0",
     "date-fns-tz": "^2.0.0",
     "dayjs": "^1.11.10",
     "echarts": "^5.4.2",
