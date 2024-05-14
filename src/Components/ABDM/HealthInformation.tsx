@@ -23,7 +23,7 @@ export default function HealthInformation({ artefactId }: IProps) {
       return JSON.parse(data);
     } catch (e) {
       return JSON.parse(
-        data.replace(/"/g, '\\"').replace(/'/g, '"') // eslint-disable-line
+        data.replace(/"/g, '\\"').replace(/'/g, '"'), // eslint-disable-line
       );
     }
   };

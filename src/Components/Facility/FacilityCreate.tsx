@@ -330,9 +330,9 @@ export const FacilityCreate = (props: FacilityProps) => {
     });
     if (!matchedState) return;
 
-    const newDistrictDataResult: RequestResult<DistrictModel[]> | undefined =
+    const newDistrictDataResult: RequestResult<DistrictModel[]> =
       await districtFetch({ pathParams: { id: String(matchedState.id) } });
-    const fetchedDistricts: DistrictModel[] = newDistrictDataResult?.data || [];
+    const fetchedDistricts: DistrictModel[] = newDistrictDataResult.data || [];
 
     if (!fetchedDistricts) return;
 

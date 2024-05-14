@@ -3,7 +3,7 @@ export class AssetFilters {
     facilityName: string,
     assetStatus: string,
     assetClass: string,
-    assetLocation: string,
+    assetLocation: string
   ) {
     cy.contains("Advanced Filters").click();
     cy.get("input[name='Facilities']")
