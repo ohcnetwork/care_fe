@@ -390,14 +390,6 @@ export const PATIENT_CATEGORIES: {
 
 export const PATIENT_FILTER_CATEGORIES = PATIENT_CATEGORIES;
 
-export const CURRENT_HEALTH_CHANGE = [
-  { id: 0, text: "NO DATA", desc: "" },
-  { id: 3, text: "STATUS QUO", desc: "No Change" },
-  { id: 4, text: "BETTER", desc: "Better" },
-  { id: 2, text: "WORSE", desc: "Worse" },
-  { id: 1, text: "REQUIRES VENTILATOR", desc: "Requires Ventilator" },
-];
-
 export const SAMPLE_TEST_STATUS = [
   { id: 1, text: "REQUEST_SUBMITTED", desc: "Request Submitted" },
   { id: 2, text: "APPROVED", desc: "Approved for Sample Collection" },

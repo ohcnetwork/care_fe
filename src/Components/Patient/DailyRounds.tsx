@@ -41,7 +41,6 @@ const initForm: any = {
   physical_examination_info: "",
   other_details: "",
   patient_category: "",
-  current_health: 0,
   actions: null,
   action: "",
   review_interval: 0,

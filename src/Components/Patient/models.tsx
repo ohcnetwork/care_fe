@@ -314,7 +314,6 @@ export interface DailyRoundsModel {
   additional_symptoms_text?: string;
   action?: string;
   review_interval?: number;
-  current_health?: string;
   id?: string;
   other_symptoms?: string;
   admitted_to?: string;
