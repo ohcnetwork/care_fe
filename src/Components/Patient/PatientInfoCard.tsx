@@ -451,7 +451,7 @@ export default function PatientInfoCard(props: {
                   consultation?.deprecated_verified_by) && (
                   <div className="text-sm" id="treating-physician">
                     <span className="font-semibold leading-relaxed">
-                      Treating Physician:{" "}
+                      {t("treating_doctor")}:{" "}
                     </span>
                     {consultation?.treating_physician_object
                       ? `${consultation?.treating_physician_object.first_name} ${consultation?.treating_physician_object.last_name}`
@@ -470,6 +470,27 @@ export default function PatientInfoCard(props: {
           className="col-span-2 flex w-full flex-col items-center justify-center gap-2 px-4 py-1 lg:col-span-1 2xl:flex-row"
           id="consultation-buttons"
         >
+          {consultation?.suggestion === "A" && (
+            <div className="flex flex-col items-center">
+              <div className="col-span-1 flex w-full justify-center bg-white px-4 lg:flex-row">
+                <div
+                  className={
+                    "flex h-7 w-7 items-center justify-center rounded-full border-2"
+                  }
+                >
+                  <span className="text-sm font-semibold">
+                    {dayjs(consultation.discharge_date || undefined).diff(
+                      consultation.encounter_date,
+                      "day",
+                    )}
+                  </span>
+                </div>
+              </div>
+              <span className="mt-1 text-xs font-medium text-gray-700">
+                IP Days
+              </span>
+            </div>
+          )}
           {consultation?.last_daily_round && (
             <div className="col-span-1 flex w-full justify-center bg-white px-4 lg:flex-row">
               <Mews dailyRound={consultation?.last_daily_round} />

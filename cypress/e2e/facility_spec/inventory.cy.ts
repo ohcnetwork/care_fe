@@ -73,7 +73,7 @@ describe("Inventory Management Section", () => {
         facilityPage.fillInventoryMinimumDetails(inventoryName, "1");
         facilityPage.clickSetButton();
         facilityPage.verifySuccessNotification(
-          "Minimum quantiy updated successfully"
+          "Minimum quantiy updated successfully",
         );
       }
     });

@@ -66,6 +66,7 @@ import request from "../../Utils/request/request.js";
 import routes from "../../Redux/api.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import DialogModal from "../Common/Dialog.js";
+import { t } from "i18next";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -720,6 +721,18 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             errors[field] = "Please fill treating physician";
             invalidForm = true;
             break;
+          }
+          return;
+        }
+        case "weight":
+        case "height": {
+          if (state.form[field] && state.form.suggestion !== "DD") {
+            const value = state.form[field];
+            if (!value || parseFloat(value) <= 0) {
+              errors[field] = `Please enter a valid ${field}`;
+              invalidForm = true;
+              break;
+            }
           }
           return;
         }
@@ -1722,7 +1735,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       >
                         <UserAutocompleteFormField
                           name={"treating_physician"}
-                          label="Treating Physician"
+                          label={t("treating_doctor")}
                           placeholder="Attending Doctors Name and Designation"
                           required
                           value={
