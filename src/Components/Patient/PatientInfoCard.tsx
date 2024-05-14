@@ -468,7 +468,7 @@ export default function PatientInfoCard(props: {
           </div>
         </div>
         <div
-          className="col-span-2 flex w-full flex-col items-center justify-center gap-2 px-4 py-1 lg:col-span-1 2xl:flex-row"
+          className="col-span-2 flex w-full flex-col items-center justify-end gap-2 px-4 py-1 lg:col-span-1 2xl:flex-row"
           id="consultation-buttons"
         >
           {consultation?.suggestion === "A" && (
