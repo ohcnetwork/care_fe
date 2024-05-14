@@ -90,6 +90,7 @@ describe("Facility Manage Functions", () => {
     facilityManage.clickButtonWithText(facilityHfridUpdateButton);
     facilityManage.verifySuccessMessageVisibilityAndContent(
       facilityHfridToastNotificationText,
+      true,
     );
     // update the existing middleware
     facilityPage.clickManageFacilityDropdown();
@@ -98,6 +99,7 @@ describe("Facility Manage Functions", () => {
     facilityManage.clickButtonWithText(facilityHfridUpdateButton);
     facilityManage.verifySuccessMessageVisibilityAndContent(
       facilityHfridToastNotificationText,
+      true,
     );
     // verify its reflection
     facilityPage.clickManageFacilityDropdown();

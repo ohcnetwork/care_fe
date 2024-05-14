@@ -1,5 +1,9 @@
 import { IConfig } from "../Common/hooks/useConfig";
-
+import {
+  ConsentRequestModel,
+  CreateConsentTBody,
+} from "../Components/ABDM/types/consent";
+import { HealthInformationModel } from "../Components/ABDM/types/health-information";
 import {
   IAadhaarOtp,
   IAadhaarOtpTBody,
@@ -1439,6 +1443,43 @@ const routes = {
       method: "POST",
       TRes: Type<IHealthFacility>(),
       TBody: Type<IcreateHealthFacilityTBody>(),
+    },
+
+    listConsents: {
+      path: "/api/v1/abdm/consent/",
+      method: "GET",
+      TRes: Type<PaginatedResponse<ConsentRequestModel>>(),
+    },
+
+    createConsent: {
+      path: "/api/v1/abdm/consent/",
+      method: "POST",
+      TRes: Type<ConsentRequestModel>(),
+      TBody: Type<CreateConsentTBody>(),
+    },
+
+    getConsent: {
+      path: "/api/v1/abdm/consent/{id}/",
+      method: "GET",
+    },
+
+    checkConsentStatus: {
+      path: "/api/v1/abdm/consent/{id}/status/",
+      method: "GET",
+      TRes: Type<void>(),
+    },
+
+    getHealthInformation: {
+      path: "/api/v1/abdm/health_information/{artefactId}",
+      method: "GET",
+      TRes: Type<HealthInformationModel>(),
+    },
+
+    findPatient: {
+      path: "/api/v1/abdm/patients/find/",
+      method: "POST",
+      TRes: Type<unknown>(),
+      TBody: Type<{ id: string }>(),
     },
   },
 
