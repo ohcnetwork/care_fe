@@ -62,6 +62,7 @@ import useAuthUser from "../../Common/hooks/useAuthUser.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
+import Error404 from "../ErrorPages/404";
 import SelectMenuV2 from "../Form/SelectMenuV2.js";
 import Checkbox from "../Common/components/CheckBox.js";
 import _ from "lodash";
@@ -1094,6 +1095,34 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
   if (isLoading) {
     return <Loading />;
+  }
+
+  const PatientRegisterAuth = () => {
+    const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
+    if (
+      !showAllFacilityUsers.includes(authUser.user_type) &&
+      authUser.home_facility_object?.id === facilityId
+    ) {
+      return true;
+    }
+    if (
+      authUser.user_type === "DistrictAdmin" &&
+      authUser.district === facilityObject?.district
+    ) {
+      return true;
+    }
+    if (
+      authUser.user_type === "StateAdmin" &&
+      authUser.state === facilityObject?.state
+    ) {
+      return true;
+    }
+
+    return false;
+  };
+
+  if (!isLoading && facilityId && facilityObject && !PatientRegisterAuth()) {
+    return <Error404 />;
   }
 
   return (

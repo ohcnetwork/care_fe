@@ -755,10 +755,36 @@ export const PatientManager = () => {
             <ButtonV2
               id="add-patient-details"
               onClick={() => {
-                if (qParams.facility)
+                const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
+                if (
+                  qParams.facility &&
+                  showAllFacilityUsers.includes(authUser.user_type)
+                )
                   navigate(`/facility/${qParams.facility}/patient`);
-                else if (onlyAccessibleFacility)
+                else if (
+                  qParams.facility &&
+                  !showAllFacilityUsers.includes(authUser.user_type) &&
+                  authUser.home_facility_object?.id !== qParams.facility
+                )
+                  Notification.Error({
+                    msg: "Oops! Non-Home facility users don't have permission to perform this action.",
+                  });
+                else if (
+                  !showAllFacilityUsers.includes(authUser.user_type) &&
+                  authUser.home_facility_object?.id
+                ) {
+                  navigate(
+                    `/facility/${authUser.home_facility_object.id}/patient`,
+                  );
+                } else if (onlyAccessibleFacility)
                   navigate(`/facility/${onlyAccessibleFacility.id}/patient`);
+                else if (
+                  !showAllFacilityUsers.includes(authUser.user_type) &&
+                  !authUser.home_facility_object?.id
+                )
+                  Notification.Error({
+                    msg: "Oops! No home facility found",
+                  });
                 else setShowDialog("create");
               }}
               className="w-full lg:w-fit"

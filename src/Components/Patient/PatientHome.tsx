@@ -678,11 +678,25 @@ export const PatientHome = (props: any) => {
                     className="mt-4 w-full"
                     disabled={!patientData.is_active}
                     authorizeFor={NonReadOnlyUsers}
-                    onClick={() =>
-                      navigate(
-                        `/facility/${patientData?.facility}/patient/${id}/update`,
-                      )
-                    }
+                    onClick={() => {
+                      const showAllFacilityUsers = [
+                        "DistrictAdmin",
+                        "StateAdmin",
+                      ];
+                      if (
+                        !showAllFacilityUsers.includes(authUser.user_type) &&
+                        authUser.home_facility_object?.id !==
+                          patientData.facility
+                      ) {
+                        Notification.Error({
+                          msg: "Oops! Non-Home facility users don't have permission to perform this action.",
+                        });
+                      } else {
+                        navigate(
+                          `/facility/${patientData?.facility}/patient/${id}/update`,
+                        );
+                      }
+                    }}
                   >
                     <CareIcon icon="l-edit-alt" className="text-lg" />
                     Update Details
@@ -844,6 +858,7 @@ export const PatientHome = (props: any) => {
                           </div>
                         </dl>
                       </div>
+
                       <div className="mt-2 flex">
                         <ButtonV2
                           className="mr-2 w-full bg-white hover:bg-gray-100"
