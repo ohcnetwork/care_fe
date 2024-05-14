@@ -42,6 +42,7 @@ const PRESCRIPTION_COMPARE_FIELDS: (keyof Prescription)[] = [
   "medicine",
   "days",
   "discontinued",
+  "target_dosage",
   "base_dosage",
   "frequency",
   "indicator",
@@ -61,7 +62,7 @@ export const comparePrescriptions = (a: Prescription, b: Prescription) => {
 
 export const AdministrationDosageValidator = (
   base_dosage: Prescription["base_dosage"],
-  target_dosage: Prescription["target_dosage"]
+  target_dosage: Prescription["target_dosage"],
 ) => {
   return (value: Prescription["base_dosage"]) => {
     const getDosageValue = (dosage: string | undefined) => {
@@ -77,11 +78,12 @@ export const AdministrationDosageValidator = (
     if (value?.split(" ")[1] !== base_dosage?.split(" ")[1])
       return "Unit must be the same as start and target dosage's unit";
 
-    if (
-      baseDosage &&
-      targetDosage &&
-      (valueDosage < baseDosage || valueDosage > targetDosage)
-    )
-      return "Dosage should be between start and target dosage";
+    if (baseDosage && targetDosage) {
+      const [min, max] = [baseDosage, targetDosage].sort((a, b) => a - b);
+
+      if (!(min <= valueDosage && valueDosage <= max)) {
+        return "Dosage should be between start and target dosage";
+      }
+    }
   };
 };

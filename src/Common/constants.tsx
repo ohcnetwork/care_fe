@@ -4,6 +4,7 @@ import { SortOption } from "../Components/Common/SortDropdown";
 import { dateQueryString } from "../Utils/utils";
 import { IconName } from "../CAREUI/icons/CareIcon";
 import { PhoneNumberValidator } from "../Components/Form/FieldValidators";
+import { SchemaType } from "./schemaParser";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 export const PAGINATION_LIMIT = 36;
@@ -23,33 +24,12 @@ export interface OptionsType {
   disabled?: boolean;
 }
 
-export type UserRole =
-  | "Pharmacist"
-  | "Volunteer"
-  | "StaffReadOnly"
-  | "Staff"
-  | "NurseReadOnly"
-  | "Nurse"
-  | "Doctor"
-  | "WardAdmin"
-  | "LocalBodyAdmin"
-  | "DistrictLabAdmin"
-  | "DistrictReadOnlyAdmin"
-  | "DistrictAdmin"
-  | "StateLabAdmin"
-  | "StateReadOnlyAdmin"
-  | "StateAdmin";
-
-export const USER_TYPE_OPTIONS: {
-  id: UserRole;
-  role: string;
-  readOnly?: boolean;
-}[] = [
+export const USER_TYPE_OPTIONS = [
   { id: "Pharmacist", role: "Pharmacist", readOnly: false },
   { id: "Volunteer", role: "Volunteer", readOnly: false },
   { id: "StaffReadOnly", role: "Staff", readOnly: true },
   { id: "Staff", role: "Staff", readOnly: false },
-  { id: "NurseReadOnly", role: "Nurse", readOnly: true },
+  // { id: "NurseReadOnly", role: "Nurse", readOnly: true },
   { id: "Nurse", role: "Nurse", readOnly: false },
   { id: "Doctor", role: "Doctor", readOnly: false },
   { id: "WardAdmin", role: "Ward Admin", readOnly: false },
@@ -60,7 +40,9 @@ export const USER_TYPE_OPTIONS: {
   { id: "StateLabAdmin", role: "State Lab Admin", readOnly: false },
   { id: "StateReadOnlyAdmin", role: "State Admin", readOnly: true },
   { id: "StateAdmin", role: "State Admin", readOnly: false },
-];
+] as const;
+
+export type UserRole = (typeof USER_TYPE_OPTIONS)[number]["id"];
 
 export const USER_TYPES = USER_TYPE_OPTIONS.map((o) => o.id);
 
@@ -206,6 +188,15 @@ export const PATIENT_SORT_OPTIONS: SortOption[] = [
   { isAscending: false, value: "-name" },
 ];
 
+export const DISCHARGED_PATIENT_SORT_OPTIONS: SortOption[] = [
+  { isAscending: false, value: "-created_date" },
+  { isAscending: true, value: "created_date" },
+  { isAscending: false, value: "-modified_date" },
+  { isAscending: true, value: "modified_date" },
+  { isAscending: true, value: "name" },
+  { isAscending: false, value: "-name" },
+];
+
 export const getBedTypes = ({
   kasp_enabled,
   kasp_string,
@@ -344,7 +335,7 @@ export const GENDER_TYPES = [
   { id: 1, text: "Male", icon: "M" },
   { id: 2, text: "Female", icon: "F" },
   { id: 3, text: "Transgender", icon: "TRANS" },
-];
+] as const;
 
 export const SAMPLE_TEST_RESULT = [
   { id: 1, text: "POSITIVE" },
@@ -739,7 +730,7 @@ export const CAMERA_TYPE = [
 
 export const GENDER: { [key: number]: string } = GENDER_TYPES.reduce(
   (acc, curr) => ({ ...acc, [curr.id]: curr.text }),
-  {}
+  {},
 );
 
 export type CameraPTZ = {
@@ -895,23 +886,23 @@ export const BLACKLISTED_PATHS: RegExp[] = [
   /\/facility\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/patient\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/consultation\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/dialysis+/i,
 ];
 
-export const XLSXAssetImportSchema = {
-  Name: { prop: "name", type: String },
+export const AssetImportSchema: SchemaType = {
+  Name: { prop: "name", type: "string" },
   Type: {
     prop: "asset_type",
-    type: String,
+    type: "string",
     oneOf: ["INTERNAL", "EXTERNAL"],
     required: true,
   },
   Class: {
     prop: "asset_class",
-    type: String,
+    type: "string",
     oneOf: ["HL7MONITOR", "ONVIF", "VENTILATOR", ""],
   },
-  Description: { prop: "description", type: String },
+  Description: { prop: "description", type: "string" },
   "Working Status": {
     prop: "is_working",
-    type: Boolean,
+    type: "boolean",
     parse: (status: string) => {
       if (status === "WORKING") {
         return true;
@@ -923,18 +914,15 @@ export const XLSXAssetImportSchema = {
     },
     required: true,
   },
-  "Not Working Reason": {
-    prop: "not_working_reason",
-    type: String,
-  },
-  "Serial Number": { prop: "serial_number", type: String },
-  "QR Code ID": { prop: "qr_code_id", type: String },
-  Manufacturer: { prop: "manufacturer", type: String },
-  "Vendor Name": { prop: "vendor_name", type: String },
-  "Support Name": { prop: "support_name", type: String },
+  "Not Working Reason": { prop: "not_working_reason", type: "string" },
+  "Serial Number": { prop: "serial_number", type: "string" },
+  "QR Code ID": { prop: "qr_code_id", type: "string" },
+  Manufacturer: { prop: "manufacturer", type: "string" },
+  "Vendor Name": { prop: "vendor_name", type: "string" },
+  "Support Name": { prop: "support_name", type: "string" },
   "Support Email": {
     prop: "support_email",
-    type: String,
+    type: "string",
     parse: (email: string) => {
       if (!email) return null;
       const isValid = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
@@ -948,7 +936,7 @@ export const XLSXAssetImportSchema = {
   },
   "Support Phone Number": {
     prop: "support_phone",
-    type: String,
+    type: "string",
     parse: (phone: number | string) => {
       phone = String(phone);
       if (phone.length === 10 && !phone.startsWith("1800")) {
@@ -973,63 +961,141 @@ export const XLSXAssetImportSchema = {
   },
   "Warranty End Date": {
     prop: "warranty_amc_end_of_validity",
-    type: String,
+    type: "string",
     parse: (date: string) => {
       if (!date) return null;
-      const parts = date.split("-");
-      const reformattedDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
-      const parsed = new Date(reformattedDateStr);
-
-      if (String(parsed) === "Invalid Date") {
-        throw new Error("Invalid Warranty End Date:" + date);
+      //handles both "YYYY-MM-DD" and long date format eg : Wed Oct 14 2020 05:30:00 GMT+0530 (India Standard Time)
+      if (isNaN(Date.parse(date))) {
+        const parts = date.split("-");
+        if (parts.length !== 3) {
+          throw new Error("Invalid Date Format: " + date);
+        }
+        const reformattedDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+        const parsed = new Date(reformattedDateStr);
+        if (String(parsed) === "Invalid Date") {
+          throw new Error("Invalid Date: " + date);
+        }
+        return dateQueryString(parsed);
+      } else {
+        const parsed = new Date(date);
+        if (String(parsed) === "Invalid Date") {
+          throw new Error("Invalid Date: " + date);
+        }
+        return dateQueryString(parsed);
       }
-
-      return dateQueryString(parsed);
     },
   },
   "Last Service Date": {
     prop: "last_serviced_on",
-    type: String,
+    type: "string",
     parse: (date: string) => {
       if (!date) return null;
-      const parts = date.split("-");
-      const reformattedDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
-      const parsed = new Date(reformattedDateStr);
+      if (isNaN(Date.parse(date))) {
+        const parts = date.split("-");
+        if (parts.length !== 3) {
+          throw new Error("Invalid Date Format: " + date);
+        }
+        const reformattedDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+        const parsed = new Date(reformattedDateStr);
+        if (String(parsed) === "Invalid Date") {
+          throw new Error("Invalid Date: " + date);
+        }
+        return dateQueryString(parsed);
+      } else {
+        const parsed = new Date(date);
+        if (String(parsed) === "Invalid Date") {
+          throw new Error("Invalid Date: " + date);
+        }
+        return dateQueryString(parsed);
+      }
+    },
+  },
+  Notes: { prop: "note", type: "string" },
+  "Config - IP Address": {
+    parent: "meta",
+    prop: "local_ip_address",
+    type: "string",
+    parse: (ip: string) => {
+      if (!ip) return null;
+      const isValid =
+        /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
+          ip,
+        );
 
-      if (String(parsed) === "Invalid Date") {
-        throw new Error("Invalid Last Service Date:" + date);
+      if (!isValid) {
+        throw new Error("Invalid Config IP Address: " + ip);
       }
 
-      return dateQueryString(parsed);
+      return ip;
     },
   },
-  Notes: { prop: "notes", type: String },
-  META: {
-    prop: "meta",
-    type: {
-      "Config - IP Address": {
-        prop: "local_ip_address",
-        type: String,
-        parse: (ip: string) => {
-          if (!ip) return null;
-          const isValid =
-            /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
-              ip
-            );
+  "Config: Camera Access Key": {
+    parent: "meta",
+    prop: "camera_access_key",
+    type: "string",
+  },
+};
 
-          if (!isValid) {
-            throw new Error("Invalid Config IP Address: " + ip);
-          }
-
-          return ip;
-        },
-      },
-      "Config - Camera Access Key": {
-        prop: "camera_access_key",
-        type: String,
-      },
+export const ExternalResultImportSchema: SchemaType = {
+  District: { prop: "district", type: "any" },
+  "SRF ID": { prop: "srf_id", type: "string" },
+  Name: { prop: "name", type: "string" },
+  Age: { prop: "age", type: "number" },
+  "Age in": { prop: "age_in", type: "string" },
+  Gender: { prop: "gender", type: "string" },
+  "Mobile Number": { prop: "mobile_number", type: "any" },
+  Address: { prop: "address", type: "string" },
+  Ward: { prop: "ward", type: "number" },
+  "Local Body": { prop: "local_body", type: "string" },
+  "Local Body Type": { prop: "local_body_type", type: "string" },
+  Source: { prop: "source", type: "string" },
+  "Sample Collection Date": {
+    prop: "sample_collection_date",
+    type: "string",
+    parse: (date: string) => {
+      if (!date) return null;
+      if (isNaN(Date.parse(date))) {
+        const parsed = new Date(date);
+        if (String(parsed) === "Invalid Date") {
+          throw new Error("Invalid Date: " + date);
+        }
+        return dateQueryString(parsed);
+      } else {
+        const parsed = new Date(date);
+        if (String(parsed) === "Invalid Date") {
+          throw new Error("Invalid Date: " + date);
+        }
+        return dateQueryString(parsed);
+      }
     },
   },
+  "Result Date": {
+    prop: "result_date",
+    type: "string",
+    parse: (date: string) => {
+      if (!date) return null;
+      if (isNaN(Date.parse(date))) {
+        const parsed = new Date(date);
+        if (String(parsed) === "Invalid Date") {
+          throw new Error("Invalid Date: " + date);
+        }
+        return dateQueryString(parsed);
+      } else {
+        const parsed = new Date(date);
+        if (String(parsed) === "Invalid Date") {
+          throw new Error("Invalid Date: " + date);
+        }
+        return dateQueryString(parsed);
+      }
+    },
+  },
+  "Test Type": { prop: "test_type", type: "string" },
+  "Lab Name": { prop: "lab_name", type: "string" },
+  "Sample Type": { prop: "sample_type", type: "string" },
+  "Patient Status": { prop: "patient_status", type: "string" },
+  "Is Repeat": { prop: "is_repeat", type: "string" },
+  "Patient Category": { prop: "patient_category", type: "string" },
+  Result: { prop: "result", type: "string" },
 };
 
 // ABDM
@@ -1209,14 +1275,96 @@ export const CONSENT_PATIENT_CODE_STATUS_CHOICES = [
   { id: 4, text: "Active treatment (Default)" },
 ];
 export const OCCUPATION_TYPES = [
-  { id: 1, text: "Student", value: "STUDENT" },
   {
-    id: 2,
-    text: "Businessman",
-    value: "BUSINESSMAN",
+    id: 27,
+    text: "Aircraft Pilot or Flight Engineer",
+    value: "PILOT_FLIGHT",
+  },
+  { id: 5, text: "Animal Handler", value: "ANIMAL_HANDLER" },
+  {
+    id: 9,
+    text: "Business or Finance related Occupations",
+    value: "BUSINESS_RELATED",
+  },
+  { id: 2, text: "Businessman", value: "BUSINESSMAN" },
+  { id: 14, text: "Chef or Head Cook", value: "CHEF" },
+  {
+    id: 24,
+    text: "Construction and Extraction Worker",
+    value: "CONSTRUCTION_EXTRACTION",
+  },
+  { id: 17, text: "Custodial Occupations", value: "CUSTODIAL" },
+  {
+    id: 18,
+    text: "Customer Service Occupations",
+    value: "CUSTOMER_SERVICE",
+  },
+  { id: 10, text: "Engineer", value: "ENGINEER" },
+  {
+    id: 25,
+    text: "Farming, Fishing and Forestry",
+    value: "AGRI_NATURAL",
+  },
+  {
+    id: 4,
+    text: "Healthcare Lab Worker",
+    value: "HEALTH_CARE_LAB_WORKER",
+  },
+  {
+    id: 7,
+    text: "Healthcare Practitioner",
+    value: "HEALTHCARE_PRACTITIONER",
   },
   { id: 3, text: "Healthcare Worker", value: "HEALTH_CARE_WORKER" },
-  { id: 4, text: "Healthcare Lab Worker", value: "HEALTH_CARE_LAB_WORKER" },
-  { id: 5, text: "Animal Handler", value: "ANIMAL_HANDLER" },
+  { id: 30, text: "Homemaker", value: "HOMEMAKER" },
+  {
+    id: 16,
+    text: "Hospitality Service Occupations",
+    value: "HOSPITALITY",
+  },
+  {
+    id: 21,
+    text: "Insurance Sales Agent",
+    value: "INSURANCE_SALES_AGENT",
+  },
+  { id: 29, text: "Military", value: "MILITARY" },
+  {
+    id: 13,
+    text: "Office and Administrative Support Occupations",
+    value: "OFFICE_ADMINISTRATIVE",
+  },
+  {
+    id: 12,
+    text: "Other Professional Occupations",
+    value: "OTHER_PROFESSIONAL_OCCUPATIONS",
+  },
+  { id: 8, text: "Paramedics", value: "PARADEMICS" },
+  {
+    id: 26,
+    text: "Production Occupations",
+    value: "PRODUCTION_OCCUPATION",
+  },
+  {
+    id: 15,
+    text: "Protective Service Occupations",
+    value: "PROTECTIVE_SERVICE",
+  },
+  { id: 23, text: "Real Estate Sales Agent", value: "REAL_ESTATE" },
+  { id: 20, text: "Retail Sales Worker", value: "RETAIL_SALES_WORKER" },
+  {
+    id: 22,
+    text: "Sales Representative",
+    value: "SALES_REPRESENTATIVE",
+  },
+  { id: 19, text: "Sales Supervisor", value: "SALES_SUPERVISOR" },
+  { id: 1, text: "Student", value: "STUDENT" },
+  { id: 11, text: "Teacher", value: "TEACHER" },
+  { id: 28, text: "Vehicle Driver", value: "VEHICLE_DRIVER" },
   { id: 6, text: "Others", value: "OTHERS" },
+  { id: 32, text: "Not Applicable", value: "NOT_APPLICABLE" },
 ];
+
+export const PATIENT_NOTES_THREADS = {
+  Doctors: 10,
+  Nurses: 20,
+} as const;

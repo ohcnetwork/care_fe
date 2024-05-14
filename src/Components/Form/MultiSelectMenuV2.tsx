@@ -111,10 +111,10 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                               onRemove={() => {
                                 const updatedOptions = selectedOptions.filter(
                                   (selectedOption) =>
-                                    selectedOption.value !== option.value
+                                    selectedOption.value !== option.value,
                                 );
                                 props.onChange(
-                                  updatedOptions.map((o) => o.value) as any
+                                  updatedOptions.map((o) => o.value) as any,
                                 );
                               }}
                             />
@@ -180,16 +180,19 @@ interface MultiSelectOptionChipProps {
   onRemove?: () => void;
 }
 
-export const MultiSelectOptionChip = (props: MultiSelectOptionChipProps) => {
+export const MultiSelectOptionChip = ({
+  label,
+  onRemove,
+}: MultiSelectOptionChipProps) => {
   return (
     <span className="flex items-center gap-2 rounded-full border-gray-300 bg-gray-200 px-3 text-xs text-gray-700">
-      <p className="py-1">{props.label}</p>
-      {props.onRemove && (
+      <p className="py-1">{label}</p>
+      {onRemove && (
         <p
           className="cursor-pointer rounded-full hover:bg-white"
           onClick={(e) => {
             e.stopPropagation();
-            props.onRemove?.();
+            onRemove();
           }}
         >
           <CareIcon icon="l-times" className="text-base" />
@@ -213,6 +216,6 @@ export const dropdownOptionClassNames = ({
     active && "bg-primary-500 text-white",
     !active && selected && "text-primary-500",
     !active && !selected && "text-gray-900",
-    selected ? "font-semibold" : "font-normal"
+    selected ? "font-semibold" : "font-normal",
   );
 };

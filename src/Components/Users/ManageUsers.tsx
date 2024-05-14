@@ -14,12 +14,7 @@ import routes from "../../Redux/api.js";
 import * as Notification from "../../Utils/Notifications.js";
 import request from "../../Utils/request/request.js";
 import useQuery from "../../Utils/request/useQuery.js";
-import {
-  classNames,
-  isUserOnline,
-  relativeTime,
-  showUserDelete,
-} from "../../Utils/utils";
+import { classNames, isUserOnline, relativeTime } from "../../Utils/utils";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import Pagination from "../Common/Pagination";
 import UserDetails from "../Common/UserDetails";
@@ -35,6 +30,7 @@ import SkillsSlideOver from "./SkillsSlideOver";
 import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
 import UserFilter from "./UserFilter";
+import { showUserDelete } from "../../Utils/permissions";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -75,6 +71,11 @@ export default function ManageUsers() {
   const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen = width <= extremeSmallScreenBreakpoint;
 
+  const { data: homeFacilityData } = useQuery(routes.getAnyFacility, {
+    pathParams: { id: qParams.home_facility },
+    prefetch: !!qParams.home_facility,
+  });
+
   const {
     data: userListData,
     loading: userListLoading,
@@ -92,6 +93,7 @@ export default function ManageUsers() {
       alt_phone_number: qParams.alt_phone_number,
       user_type: qParams.user_type,
       district_id: qParams.district,
+      home_facility: qParams.home_facility,
     },
   });
 
@@ -109,7 +111,7 @@ export default function ManageUsers() {
     {
       prefetch: !!qParams.district,
       pathParams: { id: qParams.district },
-    }
+    },
   );
 
   const addUser = (
@@ -223,7 +225,7 @@ export default function ManageUsers() {
                           aria-label="Online"
                           className={classNames(
                             "inline-block h-2 w-2 shrink-0 rounded-full",
-                            cur_online ? "bg-primary-400" : "bg-gray-300"
+                            cur_online ? "bg-primary-400" : "bg-gray-300",
                           )}
                         ></span>
                         <span className="pl-2">
@@ -301,7 +303,7 @@ export default function ManageUsers() {
                               {dayjs().diff(
                                 user.doctor_experience_commenced_on,
                                 "years",
-                                false
+                                false,
                               )}{" "}
                               years
                             </span>
@@ -408,12 +410,12 @@ export default function ManageUsers() {
                     </ButtonV2>
                   </div>
                   {["DistrictAdmin", "StateAdmin"].includes(
-                    authUser.user_type
+                    authUser.user_type,
                   ) && (
-                    <div className="flex-col md:flex-row">
+                    <div>
                       <ButtonV2
                         id="avg-workinghour"
-                        className="flex w-full items-center md:w-full"
+                        className="w-full"
                         onClick={() => {
                           setExpandWorkingHours(true);
                           setSelectedUser(user.username);
@@ -421,7 +423,9 @@ export default function ManageUsers() {
                         }}
                       >
                         <CareIcon icon="l-clock" className="text-xl" />
-                        <p>Set Average weekly working hours</p>
+                        <p className="whitespace-normal md:whitespace-nowrap">
+                          Set Average weekly working hours
+                        </p>
                       </ButtonV2>
                     </div>
                   )}
@@ -463,7 +467,7 @@ export default function ManageUsers() {
         open={expandFacilityList}
         setOpen={setExpandFacilityList}
         slideFrom="right"
-        title={t("facilities")}
+        title={t("linked_facilities")}
         dialogClass="md:w-[400px]"
       >
         <UserFacilities user={selectedUser} />
@@ -544,7 +548,12 @@ export default function ManageUsers() {
             value(
               "District",
               "district",
-              qParams.district ? districtData?.name || "" : ""
+              qParams.district ? districtData?.name || "" : "",
+            ),
+            value(
+              "Home Facility",
+              "home_facility",
+              qParams.home_facility ? homeFacilityData?.name || "" : "",
             ),
           ]}
         />
@@ -564,7 +573,7 @@ export default function ManageUsers() {
   );
 }
 
-function UserFacilities(props: { user: any }) {
+export function UserFacilities(props: { user: any }) {
   const { t } = useTranslation();
   const { user } = props;
   const username = user.username;
@@ -721,6 +730,7 @@ function UserFacilities(props: { user: any }) {
           handleOk={handleUnlinkFacilitySubmit}
         />
       )}
+
       <div className="mb-4 flex items-stretch gap-2">
         <FacilitySelect
           multiple={false}
@@ -742,6 +752,8 @@ function UserFacilities(props: { user: any }) {
           {t("add")}
         </ButtonV2>
       </div>
+      <hr className="my-2 border-gray-300" />
+
       {isLoading || userFacilitiesLoading ? (
         <div className="flex items-center justify-center">
           <CircularProgress />
@@ -750,13 +762,23 @@ function UserFacilities(props: { user: any }) {
         <div className="flex flex-col">
           {/* Home Facility section */}
           {user?.home_facility_object && (
-            <div className="mt-2" id="home-facility">
-              <div className="mb-2 ml-2 text-lg font-bold">
-                {t("home_facility")}
-              </div>
+            <div className="py-2" id="home-facility">
               <div className="relative rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg">
-                <div className="flex items-center justify-between">
-                  <span>{user?.home_facility_object?.name}</span>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex content-center items-center justify-center gap-2">
+                    <span>{user?.home_facility_object?.name}</span>{" "}
+                    <span
+                      className={
+                        "flex items-center justify-center  rounded-xl bg-green-600 px-2 py-0.5 text-sm font-medium text-white"
+                      }
+                    >
+                      <CareIcon
+                        icon="l-estate"
+                        className="mr-1 pt-px text-lg"
+                      />
+                      Home Facility
+                    </span>
+                  </div>
                   <div className="flex items-center gap-2">
                     <button
                       className="tooltip text-lg text-red-600"
@@ -777,16 +799,12 @@ function UserFacilities(props: { user: any }) {
                   </div>
                 </div>
               </div>
-              <hr className="my-2 border-gray-300" />
             </div>
           )}
 
           {/* Linked Facilities section */}
           {!!userFacilities?.results.length && (
-            <div className="mt-2" id="linked-facility-list">
-              <div className="mb-2 ml-2 text-lg font-bold">
-                {t("linked_facilities")}
-              </div>
+            <div id="linked-facility-list">
               <div className="flex flex-col">
                 {userFacilities.results.map(
                   (facility: FacilityModel, i: number) => {
@@ -799,7 +817,7 @@ function UserFacilities(props: { user: any }) {
                         id={`facility_${i}`}
                         key={`facility_${i}`}
                         className={classNames(
-                          "relative rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg"
+                          "relative rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg",
                         )}
                       >
                         <div className="flex items-center justify-between">
@@ -850,7 +868,7 @@ function UserFacilities(props: { user: any }) {
                         </div>
                       </div>
                     );
-                  }
+                  },
                 )}
               </div>
               {totalCount > limit && (
@@ -892,7 +910,7 @@ function UserFacilities(props: { user: any }) {
           handleOk={() => {
             updateHomeFacility(
               replaceHomeFacility.userName,
-              replaceHomeFacility.newFacility
+              replaceHomeFacility.newFacility,
             );
             setReplaceHomeFacility({
               show: false,

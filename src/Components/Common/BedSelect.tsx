@@ -51,13 +51,13 @@ export const BedSelect = (props: BedSelectProps) => {
 
       if (unoccupiedOnly) {
         return data?.results?.filter(
-          (bed: BedModel) => bed?.is_occupied === false
+          (bed: BedModel) => bed?.is_occupied === false,
         );
       }
 
       return data?.results;
     },
-    [facility, location, searchAll, unoccupiedOnly]
+    [facility, location, searchAll, unoccupiedOnly],
   );
 
   return (

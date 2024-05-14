@@ -10,9 +10,11 @@ interface Props {
   prescriptions: Prescription[];
   pagination: ReturnType<typeof useRangePagination>;
   onRefetch: () => void;
+  readonly: boolean;
 }
 
 export default function MedicineAdministrationTable({
+  readonly,
   pagination,
   prescriptions,
   onRefetch,
@@ -62,12 +64,12 @@ export default function MedicineAdministrationTable({
                     "leading-none",
                     start.getHours() === 0
                       ? "text-base font-bold text-gray-800"
-                      : "text-sm font-semibold text-gray-700"
+                      : "text-sm font-semibold text-gray-700",
                   )}
                 >
                   {formatDateTime(
                     start,
-                    start.getHours() === 0 ? "DD/MM" : "h a"
+                    start.getHours() === 0 ? "DD/MM" : "h a",
                   )}
                 </th>
                 <th key={`administration-slot-${index}`} className="flex w-6" />
@@ -95,12 +97,14 @@ export default function MedicineAdministrationTable({
         </thead>
 
         <tbody className="divide-y divide-gray-200">
-          {prescriptions.map((obj) => (
+          {prescriptions.map((obj, index) => (
             <MedicineAdministrationTableRow
               key={obj.id}
+              id={index.toString()}
               prescription={obj}
               intervals={pagination.slots!}
               refetch={onRefetch}
+              readonly={readonly}
             />
           ))}
         </tbody>

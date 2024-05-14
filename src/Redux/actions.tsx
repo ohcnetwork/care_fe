@@ -12,7 +12,7 @@ export const getFacilityUsers = (id: string, params?: object) => {
     "getFacilityUsers",
     [],
     { ...params },
-    { facility_id: id }
+    { facility_id: id },
   );
 };
 
@@ -27,7 +27,7 @@ export const partialUpdateAssetBed = (params: object, asset_id: string) =>
     { ...params },
     {
       external_id: asset_id,
-    }
+    },
   );
 
 export const deleteAssetBed = (asset_id: string) =>
@@ -37,7 +37,7 @@ export const deleteAssetBed = (asset_id: string) =>
     {},
     {
       external_id: asset_id,
-    }
+    },
   );
 
 // Download Actions
@@ -90,7 +90,7 @@ export const previewDischargeSummary = (pathParams: object) => {
     {},
     pathParams,
     undefined,
-    true
+    true,
   );
 };
 export const emailDischargeSummary = (params: object, pathParams: object) => {
@@ -134,7 +134,7 @@ export const listAssetService = (params: object, asset_external_id: string) =>
 export const getAssetService = (
   params: object,
   asset_external_id: string,
-  external_id: string
+  external_id: string,
 ) =>
   fireRequest("getAssetService", [], params, {
     asset_external_id,
@@ -143,7 +143,7 @@ export const getAssetService = (
 export const updateAssetService = (
   asset_external_id: string,
   external_id: string,
-  params: object
+  params: object,
 ) =>
   fireRequest("updateAssetService", [], params, {
     asset_external_id,
@@ -177,19 +177,19 @@ export const searchByHealthId = (healthId: string) =>
 
 export const initiateAbdmAuthentication = (
   authMethod: string,
-  healthid: string
+  healthid: string,
 ) => fireRequest("initiateAbdmAuthentication", [], { authMethod, healthid });
 
 export const confirmWithAadhaarOtp = (
   txnId: string,
   otp: string,
-  patientId?: string
+  patientId?: string,
 ) => fireRequest("confirmWithAadhaarOtp", [], { txnId, otp, patientId });
 
 export const confirmWithMobileOtp = (
   txnId: string,
   otp: string,
-  patientId?: string
+  patientId?: string,
 ) => fireRequest("confirmWithMobileOtp", [], { txnId, otp, patientId });
 
 export const linkViaQR = (abha_details: any, patientId?: string) => {
@@ -201,7 +201,7 @@ export const linkViaQR = (abha_details: any, patientId?: string) => {
 
 export const linkCareContext = (
   consultationId: string,
-  data: { name?: string; gender?: "M" | "F" | "O"; dob?: string }
+  data: { name?: string; gender?: "M" | "F" | "O"; dob?: string },
 ) => {
   return fireRequest("linkCareContext", [], {
     consultation: consultationId,
@@ -236,7 +236,7 @@ export const healthFacilityActions = {
       {},
       { facility_id: id },
       undefined,
-      true
+      true,
     );
   },
 
@@ -257,7 +257,7 @@ export const healthFacilityActions = {
       "registerHealthFacilityAsService",
       [],
       {},
-      { facility_id: id }
+      { facility_id: id },
     );
   },
 };
@@ -363,7 +363,7 @@ export const HCXActions = {
           use: "preauthorization",
         },
         {},
-        `listPreAuths-${consultation}`
+        `listPreAuths-${consultation}`,
       );
     },
   },

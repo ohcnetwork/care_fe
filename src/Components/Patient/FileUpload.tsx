@@ -13,7 +13,7 @@ import { VoiceRecorder } from "../../Utils/VoiceRecorder";
 import Pagination from "../Common/Pagination";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import imageCompression from "browser-image-compression";
-import { formatDateTime } from "../../Utils/utils";
+import { classNames, formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import HeadedTabs from "../Common/HeadedTabs";
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
@@ -194,7 +194,7 @@ export const FileUpload = (props: FileUploadProps) => {
     setFacingMode((prevState: any) =>
       prevState === FACING_MODE_USER
         ? FACING_MODE_ENVIRONMENT
-        : FACING_MODE_USER
+        : FACING_MODE_USER,
     );
   }, []);
   const initialState = {
@@ -256,6 +256,11 @@ export const FileUpload = (props: FileUploadProps) => {
   const { data: patient } = useQuery(routes.getPatient, {
     pathParams: { id: patientId },
     prefetch: !!patientId,
+  });
+
+  const { data: consultation } = useQuery(routes.getConsultation, {
+    pathParams: { id: consultationId },
+    prefetch: !!consultationId,
   });
 
   const captureImage = () => {
@@ -356,8 +361,8 @@ export const FileUpload = (props: FileUploadProps) => {
       prefetch_download_urls(unarchivedQuery.data.results);
       setuploadedUnarchievedFiles(
         unarchivedQuery.data.results?.filter(
-          (file) => file.upload_completed || file.file_category === "AUDIO"
-        )
+          (file) => file.upload_completed || file.file_category === "AUDIO",
+        ),
       );
       setTotalUnarchievedFilesCount(unarchivedQuery.data.count);
     }
@@ -412,7 +417,7 @@ export const FileUpload = (props: FileUploadProps) => {
   // Store signed urls for non previewable files
   const prefetch_download_urls = async (files: FileUploadModel[]) => {
     const unsupportedFiles = files.filter(
-      (x) => !previewExtensions.includes(x.extension ?? "")
+      (x) => !previewExtensions.includes(x.extension ?? ""),
     );
     const query = { file_type: type, associating_id: getAssociatedId() };
     const urls = await Promise.all(
@@ -423,7 +428,7 @@ export const FileUpload = (props: FileUploadProps) => {
           pathParams: { id: id },
         });
         return [id, data?.read_signed_url];
-      })
+      }),
     );
     seturl(Object.fromEntries(urls));
   };
@@ -656,7 +661,7 @@ export const FileUpload = (props: FileUploadProps) => {
                           onClick={() => {
                             triggerDownload(
                               url[item.id!],
-                              `${item.name}${item.extension}`
+                              `${item.name}${item.extension}`,
                             );
                           }}
                           className="m-1 w-full sm:w-auto"
@@ -774,7 +779,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       onClick={() => {
                         triggerDownload(
                           url[item.id!],
-                          `${item.name}${item.extension}`
+                          `${item.name}${item.extension}`,
                         );
                       }}
                     >
@@ -949,7 +954,7 @@ export const FileUpload = (props: FileUploadProps) => {
     const fileName = f.name;
     setFile(e.target.files[0]);
     setUploadFileName(
-      fileName.substring(0, fileName.lastIndexOf(".")) || fileName
+      fileName.substring(0, fileName.lastIndexOf(".")) || fileName,
     );
 
     const ext: string = fileName.split(".")[1];
@@ -1006,7 +1011,7 @@ export const FileUpload = (props: FileUploadProps) => {
           });
           setUploadStarted(false);
           reject();
-        }
+        },
       );
     });
   };
@@ -1050,12 +1055,12 @@ export const FileUpload = (props: FileUploadProps) => {
 
     const { data } = await request(routes.createUpload, {
       body: {
-        original_name: name,
+        original_name: name ?? "",
         file_type: type,
         name: filename,
         associating_id: getAssociatedId(),
         file_category: category,
-        mime_type: f?.type,
+        mime_type: f?.type ?? "",
       },
     });
 
@@ -1107,7 +1112,7 @@ export const FileUpload = (props: FileUploadProps) => {
       setUploadPercent,
       () => {
         setAudioUploadStarted(false);
-      }
+      },
     );
   };
 
@@ -1140,7 +1145,7 @@ export const FileUpload = (props: FileUploadProps) => {
         name: filename,
         associating_id: getAssociatedId(),
         file_category: category,
-        mime_type: audioBlob?.type,
+        mime_type: audioBlob?.type ?? "",
       },
     })
       .then(uploadAudiofile)
@@ -1526,6 +1531,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     )}
                     <div className="flex flex-col items-center gap-4 md:flex-row md:flex-wrap lg:flex-nowrap">
                       <VoiceRecorder
+                        isDisabled={!!consultation?.discharge_date}
                         createAudioBlob={createAudioBlob}
                         confirmAudioBlobExists={confirmAudioBlobExists}
                         reset={resetRecording}
@@ -1586,7 +1592,14 @@ export const FileUpload = (props: FileUploadProps) => {
                       <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
                         {({ isAuthorized }) =>
                           isAuthorized ? (
-                            <label className="button-size-default button-shape-square button-primary-default inline-flex h-min w-full cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500">
+                            <label
+                              className={classNames(
+                                consultation?.discharge_date
+                                  ? "cursor-not-allowed bg-gray-200 text-gray-500"
+                                  : "button-primary-default cursor-pointer transition-all duration-200 ease-in-out",
+                                "button-size-default button-shape-square inline-flex h-min w-full items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1",
+                              )}
+                            >
                               <CareIcon
                                 icon="l-file-upload-alt"
                                 className="text-lg"
@@ -1599,6 +1612,7 @@ export const FileUpload = (props: FileUploadProps) => {
                                 type="file"
                                 accept="image/*,video/*,audio/*,text/plain,text/csv,application/rtf,application/msword,application/vnd.oasis.opendocument.text,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/pdf"
                                 hidden
+                                disabled={!!consultation?.discharge_date}
                               />
                             </label>
                           ) : (
@@ -1607,6 +1621,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         }
                       </AuthorizedChild>
                       <ButtonV2
+                        disabled={!!consultation?.discharge_date}
                         onClick={() => setModalOpenForCamera(true)}
                         className="w-full"
                       >
@@ -1664,7 +1679,7 @@ export const FileUpload = (props: FileUploadProps) => {
           <>
             {uploadedUnarchievedFiles?.length > 0 ? (
               uploadedUnarchievedFiles.map((item: FileUploadModel) =>
-                renderFileUpload(item)
+                renderFileUpload(item),
               )
             ) : (
               <div className="mt-4 rounded-lg border bg-white p-4 shadow">
@@ -1689,7 +1704,7 @@ export const FileUpload = (props: FileUploadProps) => {
           <>
             {uploadedArchievedFiles?.length > 0 ? (
               uploadedArchievedFiles.map((item: FileUploadModel) =>
-                renderFileUpload(item)
+                renderFileUpload(item),
               )
             ) : (
               <div className="mt-4 rounded-lg border bg-white p-4 shadow">
@@ -1715,7 +1730,7 @@ export const FileUpload = (props: FileUploadProps) => {
             <>
               {uploadedDischargeSummaryFiles.length > 0 ? (
                 uploadedDischargeSummaryFiles.map((item: FileUploadModel) =>
-                  renderFileUpload(item)
+                  renderFileUpload(item),
                 )
               ) : (
                 <div className="mt-4 rounded-lg border bg-white p-4 shadow">

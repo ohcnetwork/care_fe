@@ -1,6 +1,7 @@
 import {
   ConsultationSuggestionValue,
   DISCHARGE_REASONS,
+  PATIENT_NOTES_THREADS,
   UserRole,
 } from "../../Common/constants";
 import { AssetData, AssetLocationType } from "../Assets/AssetTypes";
@@ -207,7 +208,7 @@ export interface InventoryItemsModel {
     {
       id: number;
       name: string;
-    }
+    },
   ];
 }
 
@@ -512,6 +513,7 @@ export interface PatientNotesModel {
   facility: BaseFacilityModel;
   created_by_object: BaseUserModel;
   user_type?: UserRole | "RemoteSpecialist";
+  thread: (typeof PATIENT_NOTES_THREADS)[keyof typeof PATIENT_NOTES_THREADS];
   created_date: string;
   last_edited_by?: BaseUserModel;
   last_edited_date?: string;

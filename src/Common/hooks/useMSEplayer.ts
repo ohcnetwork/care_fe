@@ -84,7 +84,7 @@ const Utf8ArrayToStr = (array: string | any[] | Uint8Array) => {
         char2 = array[i++];
         char3 = array[i++];
         out += String.fromCharCode(
-          ((c & 0x0f) << 12) | ((char2 & 0x3f) << 6) | ((char3 & 0x3f) << 0)
+          ((c & 0x0f) << 12) | ((char2 & 0x3f) << 6) | ((char3 & 0x3f) << 0),
         );
         break;
     }
@@ -163,7 +163,7 @@ export const useMSEMediaPlayer = ({
                   mimeCodec = Utf8ArrayToStr(decoded_arr);
                 }
                 mseSourceBuffer = mse.addSourceBuffer(
-                  `video/mp4; codecs="${mimeCodec}"`
+                  `video/mp4; codecs="${mimeCodec}"`,
                 );
                 mseSourceBuffer.mode = "segments";
                 if (mseQueue.length > 0 && !mseSourceBuffer.updating) {
@@ -177,7 +177,7 @@ export const useMSEMediaPlayer = ({
               onError && onError(event);
             };
           },
-          false
+          false,
         );
       }
     } catch (e) {

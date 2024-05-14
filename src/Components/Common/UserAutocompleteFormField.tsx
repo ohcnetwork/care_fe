@@ -22,7 +22,7 @@ export default function UserAutocompleteFormField(props: Props) {
   const field = useFormFieldPropsResolver(props as any);
   const { fetchOptions, isLoading, options } = useAsyncOptions<UserModel>(
     "id",
-    { queryResponseExtractor: (data) => data.results }
+    { queryResponseExtractor: (data) => data.results },
   );
 
   let search_filter: {
@@ -31,7 +31,7 @@ export default function UserAutocompleteFormField(props: Props) {
     home_facility?: string;
     user_type?: string;
     search_text?: string;
-  } = { limit: 5, offset: 0 };
+  } = { limit: 50, offset: 0 };
 
   if (props.showActiveStatus && props.userType) {
     search_filter = { ...search_filter, user_type: props.userType };
@@ -80,7 +80,7 @@ export default function UserAutocompleteFormField(props: Props) {
                     ...search_filter,
                     search_text: query,
                   })
-                : getUserList({ ...search_filter, search_text: query })
+                : getUserList({ ...search_filter, search_text: query }),
             )
           }
           isLoading={isLoading}

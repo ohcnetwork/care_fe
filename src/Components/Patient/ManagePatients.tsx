@@ -31,7 +31,11 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import SearchInput from "../Form/SearchInput";
 import SortDropdownMenu from "../Common/SortDropdown";
 import SwitchTabs from "../Common/components/SwitchTabs";
-import { formatPatientAge, parsePhoneNumber } from "../../Utils/utils.js";
+import {
+  formatPatientAge,
+  isAntenatal,
+  parsePhoneNumber,
+} from "../../Utils/utils.js";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page.js";
@@ -105,7 +109,6 @@ export const PatientManager = () => {
   const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
   const [showDialog, setShowDialog] = useState<"create" | "list-discharged">();
   const [showDoctors, setShowDoctors] = useState(false);
-  const [showDoctorConnect, setShowDoctorConnect] = useState(false);
   const [phone_number, setPhoneNumber] = useState("");
   const [phoneNumberError, setPhoneNumberError] = useState("");
   const [emergency_phone_number, setEmergencyPhoneNumber] = useState("");
@@ -177,7 +180,7 @@ export const PatientManager = () => {
     created_date_after: qParams.created_date_after || undefined,
     modified_date_before: qParams.modified_date_before || undefined,
     modified_date_after: qParams.modified_date_after || undefined,
-    ordering: qParams.ordering || "-modified_date",
+    ordering: qParams.ordering || undefined,
     category: qParams.category || undefined,
     gender: qParams.gender || undefined,
     age_min: qParams.age_min || undefined,
@@ -225,6 +228,7 @@ export const PatientManager = () => {
     diagnoses_provisional: qParams.diagnoses_provisional || undefined,
     diagnoses_unconfirmed: qParams.diagnoses_unconfirmed || undefined,
     diagnoses_differential: qParams.diagnoses_differential || undefined,
+    review_missed: qParams.review_missed || undefined,
   };
 
   useEffect(() => {
@@ -246,12 +250,6 @@ export const PatientManager = () => {
     qParams.diagnoses_unconfirmed,
     qParams.diagnoses_differential,
   ]);
-
-  useEffect(() => {
-    if (params.facility) {
-      setShowDoctorConnect(true);
-    }
-  }, [qParams.facility]);
 
   const date_range_fields = [
     [params.created_date_before, params.created_date_after],
@@ -364,7 +362,7 @@ export const PatientManager = () => {
     let category_name;
     if (qParams.category) {
       category_name = PATIENT_CATEGORIES.find(
-        (item: any) => qParams.category === item.id
+        (item: any) => qParams.category === item.id,
       )?.text;
 
       return String(category_name);
@@ -401,14 +399,14 @@ export const PatientManager = () => {
         external_id: qParams.last_consultation_current_bed__location,
       },
       prefetch: !!qParams.last_consultation_current_bed__location,
-    }
+    },
   );
 
   const { data: permittedFacilities } = useQuery(
     routes.getPermittedFacilities,
     {
       query: { limit: 1 },
-    }
+    },
   );
 
   const LastAdmittedToTypeBadges = () => {
@@ -583,6 +581,16 @@ export const PatientManager = () => {
                       text="Readmission"
                     />
                   )}
+                  {patient.last_consultation?.suggestion === "A" &&
+                    patient.last_consultation.facility === patient.facility &&
+                    !patient.last_consultation.discharge_date && (
+                      <Chip
+                        size="small"
+                        variant="primary"
+                        startIcon="l-clock-three"
+                        text={`IP Days: ${dayjs().diff(patient.last_consultation.encounter_date, "day")}`}
+                      />
+                    )}
                   {patient.disease_status === "POSITIVE" && (
                     <Chip
                       size="small"
@@ -593,6 +601,7 @@ export const PatientManager = () => {
                   )}
                   {patient.gender === 2 &&
                     patient.is_antenatal &&
+                    isAntenatal(patient.last_menstruation_start_date) &&
                     patient.is_active && (
                       <Chip
                         size="small"
@@ -644,7 +653,7 @@ export const PatientManager = () => {
                       !patient.is_active
                     ) &&
                     dayjs(patient.last_consultation?.modified_date).isBefore(
-                      new Date().getTime() - 24 * 60 * 60 * 1000
+                      new Date().getTime() - 24 * 60 * 60 * 1000,
                     ) && (
                       <span className="relative inline-flex">
                         <Chip
@@ -672,7 +681,7 @@ export const PatientManager = () => {
                       (resp) =>
                         resp.text ===
                         patient.last_consultation?.last_daily_round
-                          ?.ventilator_interface
+                          ?.ventilator_interface,
                     )?.id
                   }
                 </div>
@@ -784,7 +793,7 @@ export const PatientManager = () => {
               }}
               isTab2Active={!!tabValue}
             />
-            {showDoctorConnect && (
+            {!!params.facility && (
               <ButtonV2
                 id="doctor-connect-patient-button"
                 onClick={() => {
@@ -944,14 +953,15 @@ export const PatientManager = () => {
             kasp(),
             badge("COWIN ID", "covin_id"),
             badge("Is Antenatal", "is_antenatal"),
+            badge("Review Missed", "review_missed"),
             badge(
               "Is Medico-Legal Case",
-              "last_consultation_medico_legal_case"
+              "last_consultation_medico_legal_case",
             ),
             value(
               "Facility",
               "facility",
-              qParams.facility ? facilityData?.name || "" : ""
+              qParams.facility ? facilityData?.name || "" : "",
             ),
             value(
               "Location",
@@ -959,13 +969,13 @@ export const PatientManager = () => {
               qParams.last_consultation_current_bed__location
                 ? facilityAssetLocationData?.name ||
                     qParams.last_consultation_current_bed__locations
-                : ""
+                : "",
             ),
             badge("Facility Type", "facility_type"),
             value(
               "District",
               "district",
-              qParams.district ? districtData?.name || "" : ""
+              qParams.district ? districtData?.name || "" : "",
             ),
             ordering(),
             value("Category", "category", getTheCategoryFromId()),
@@ -974,12 +984,12 @@ export const PatientManager = () => {
               "Respiratory Support",
               "ventilator_interface",
               qParams.ventilator_interface &&
-                t(`RESPIRATORY_SUPPORT_${qParams.ventilator_interface}`)
+                t(`RESPIRATORY_SUPPORT_${qParams.ventilator_interface}`),
             ),
             value(
               "Gender",
               "gender",
-              parseOptionId(GENDER_TYPES, qParams.gender) || ""
+              parseOptionId(GENDER_TYPES, qParams.gender) || "",
             ),
             {
               name: "Admitted to",
@@ -997,15 +1007,15 @@ export const PatientManager = () => {
               value(
                 DIAGNOSES_FILTER_LABELS[key],
                 key,
-                getDiagnosisFilterValue(key).join(", ")
-              )
+                getDiagnosisFilterValue(key).join(", "),
+              ),
             ),
             badge("Declared Status", "is_declared_positive"),
             ...dateRange("Result", "date_of_result"),
             ...dateRange("Declared positive", "date_declared_positive"),
             ...dateRange(
               "Symptoms onset",
-              "last_consultation_symptoms_onset_date"
+              "last_consultation_symptoms_onset_date",
             ),
             ...dateRange("Last vaccinated", "last_vaccinated_date"),
             {
@@ -1017,8 +1027,8 @@ export const PatientManager = () => {
               "last_consultation__new_discharge_reason",
               parseOptionId(
                 DISCHARGE_REASONS,
-                qParams.last_consultation__new_discharge_reason
-              ) || ""
+                qParams.last_consultation__new_discharge_reason,
+              ) || "",
             ),
           ]}
           children={

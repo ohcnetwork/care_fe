@@ -13,6 +13,7 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 import * as Notification from "../../Utils/Notifications";
 import { formatDateTime } from "../../Utils/utils";
+import { capitalize } from "lodash-es";
 import BloodPressureFormField, {
   BloodPressureValidator,
 } from "../Common/BloodPressureFormField";
@@ -30,6 +31,8 @@ import PatientCategorySelect from "./PatientCategorySelect";
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
+import { Scribe } from "../Scribe/Scribe";
+import { DAILY_ROUND_FORM_SCRIBE_DATA } from "../Scribe/formDetails";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm: any = {
@@ -65,7 +68,7 @@ const initForm: any = {
 
 const initError = Object.assign(
   {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
 );
 
 const initialState = {
@@ -101,7 +104,7 @@ export const DailyRounds = (props: any) => {
   const { facilityId, patientId, consultationId, id } = props;
   const [state, dispatch] = useAutoSaveReducer<any>(
     DailyRoundsFormReducer,
-    initialState
+    initialState,
   );
   const [isLoading, setIsLoading] = useState(false);
   const [facilityName, setFacilityName] = useState("");
@@ -166,7 +169,7 @@ export const DailyRounds = (props: any) => {
         setFacilityName(data.facility_object!.name);
         setConsultationSuggestion(data.last_consultation?.suggestion);
         setPreviousReviewInterval(
-          Number(data.last_consultation?.review_interval)
+          Number(data.last_consultation?.review_interval),
         );
         const getAction =
           TELEMEDICINE_ACTIONS.find((action) => action.id === data.action)
@@ -294,15 +297,15 @@ export const DailyRounds = (props: any) => {
         if (obj) {
           dispatch({ type: "set_form", form: initForm });
           Notification.Success({
-            msg: "Consultation Updates details updated successfully",
+            msg: `${obj.rounds_type === "VENTILATOR" ? "Critical Care" : capitalize(obj.rounds_type)} Log Updates details updated successfully`,
           });
           if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
             navigate(
-              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
+              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
             );
           } else {
             navigate(
-              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${obj.id}/update`
+              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${obj.id}/update`,
             );
           }
         }
@@ -314,28 +317,27 @@ export const DailyRounds = (props: any) => {
         setIsLoading(false);
         if (obj) {
           dispatch({ type: "set_form", form: initForm });
-
           Notification.Success({
-            msg: "Consultation Updates details created successfully",
+            msg: `${obj.rounds_type === "VENTILATOR" ? "Critical Care" : capitalize(obj.rounds_type)} Log Updates details created successfully`,
           });
           if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
             if (data.clone_last) {
               navigate(
-                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${obj.id}/update`
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${obj.id}/update`,
               );
             } else {
               navigate(
-                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
               );
             }
           } else {
             if (data.clone_last) {
               navigate(
-                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${obj.id}/update`
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${obj.id}/update`,
               );
             } else {
               navigate(
-                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${obj.id}/update`
+                `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${obj.id}/update`,
               );
             }
           }
@@ -363,7 +365,7 @@ export const DailyRounds = (props: any) => {
 
   const getExpectedReviewTime = () => {
     const nextReviewTime = Number(
-      state.form.review_interval || prevReviewInterval
+      state.form.review_interval || prevReviewInterval,
     );
     if (nextReviewTime > 0)
       return formatDateTime(dayjs().add(nextReviewTime, "minutes").toDate());
@@ -388,6 +390,20 @@ export const DailyRounds = (props: any) => {
       }
       className="mx-auto max-w-4xl"
     >
+      <div className="flex w-full justify-end md:m-4">
+        <Scribe
+          fields={DAILY_ROUND_FORM_SCRIBE_DATA}
+          onFormUpdate={(fields) => {
+            dispatch({
+              type: "set_form",
+              form: { ...state.form, ...fields },
+            });
+            fields.action !== undefined && setPreviousAction(fields.action);
+            fields.review_interval !== undefined &&
+              setPreviousReviewInterval(Number(fields.review_interval));
+          }}
+        />
+      </div>
       <form
         onSubmit={(e) => handleSubmit(e)}
         className="w-full max-w-4xl rounded-lg bg-white px-8 py-5 shadow md:m-4 md:px-16 md:py-11"
@@ -407,7 +423,7 @@ export const DailyRounds = (props: any) => {
               label="Measured at"
               type="datetime-local"
               value={dayjs(state.form.taken_at || undefined).format(
-                "YYYY-MM-DDTHH:mm"
+                "YYYY-MM-DDTHH:mm",
               )}
               max={dayjs().format("YYYY-MM-DDTHH:mm")}
             />
@@ -634,7 +650,7 @@ export const DailyRounds = (props: any) => {
               state.form.clone_last !== null &&
               !state.form.clone_last &&
               formFields.every(
-                (field: string) => state.form[field] == initialData[field]
+                (field: string) => state.form[field] == initialData[field],
               ) &&
               (state.form.temperature == initialData.temperature ||
                 isNaN(state.form.temperature)) &&

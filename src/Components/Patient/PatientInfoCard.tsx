@@ -52,7 +52,7 @@ export default function PatientInfoCard(props: {
   const [open, setOpen] = useState(false);
   const [showLinkABHANumber, setShowLinkABHANumber] = useState(false);
   const [showABHAProfile, setShowABHAProfile] = useState(
-    !!props.showAbhaProfile
+    !!props.showAbhaProfile,
   );
   const [showFetchABDMRecords, setShowFetchABDMRecords] = useState(false);
   const [openDischargeSummaryDialog, setOpenDischargeSummaryDialog] =
@@ -67,7 +67,7 @@ export default function PatientInfoCard(props: {
   const activeShiftingData = props.activeShiftingData;
 
   const [medicoLegalCase, setMedicoLegalCase] = useState(
-    consultation?.medico_legal_case ?? false
+    consultation?.medico_legal_case ?? false,
   );
 
   const category: PatientCategory | undefined =
@@ -79,8 +79,8 @@ export default function PatientInfoCard(props: {
   const bedDialogTitle = consultation?.discharge_date
     ? "Bed History"
     : !consultation?.current_bed
-    ? "Assign Bed"
-    : "Switch Bed";
+      ? "Assign Bed"
+      : "Switch Bed";
 
   const switchMedicoLegalCase = async (value: boolean) => {
     if (!consultation?.id || value === medicoLegalCase) return;
@@ -292,7 +292,7 @@ export default function PatientInfoCard(props: {
                           {" "}
                           {
                             TELEMEDICINE_ACTIONS.find(
-                              (i) => i.id === patient.action
+                              (i) => i.id === patient.action,
                             )?.desc
                           }
                         </span>
@@ -350,7 +350,7 @@ export default function PatientInfoCard(props: {
                       RESPIRATORY_SUPPORT.find(
                         (resp) =>
                           resp.text ===
-                          consultation?.last_daily_round?.ventilator_interface
+                          consultation?.last_daily_round?.ventilator_interface,
                       )?.id ?? "UNKNOWN",
                       consultation?.last_daily_round?.ventilator_interface,
                     ],
@@ -376,7 +376,7 @@ export default function PatientInfoCard(props: {
                             {
                               CONSULTATION_SUGGESTION.find(
                                 (suggestion) =>
-                                  suggestion.id === consultation?.suggestion
+                                  suggestion.id === consultation?.suggestion,
                               )?.text
                             }
                           </b>{" "}
@@ -402,7 +402,9 @@ export default function PatientInfoCard(props: {
                       <span className="flex">
                         {consultation?.encounter_date && (
                           <div>
-                            Admission on:{" "}
+                            {consultation.suggestion === "DC"
+                              ? "Commenced on: "
+                              : "Admitted on: "}
                             {formatDateTime(consultation?.encounter_date)}
                           </div>
                         )}
@@ -423,7 +425,7 @@ export default function PatientInfoCard(props: {
                 {consultation?.diagnoses?.length
                   ? (() => {
                       const principal_diagnosis = consultation.diagnoses.find(
-                        (diagnosis) => diagnosis.is_principal
+                        (diagnosis) => diagnosis.is_principal,
                       );
                       return principal_diagnosis ? (
                         <div
@@ -450,7 +452,7 @@ export default function PatientInfoCard(props: {
                   consultation?.deprecated_verified_by) && (
                   <div className="text-sm" id="treating-physician">
                     <span className="font-semibold leading-relaxed">
-                      Treating Physician:{" "}
+                      {t("treating_doctor")}:{" "}
                     </span>
                     {consultation?.treating_physician_object
                       ? `${consultation?.treating_physician_object.first_name} ${consultation?.treating_physician_object.last_name}`
@@ -469,6 +471,27 @@ export default function PatientInfoCard(props: {
           className="col-span-2 flex w-full flex-col items-center justify-center gap-2 px-4 py-1 lg:col-span-1 2xl:flex-row"
           id="consultation-buttons"
         >
+          {consultation?.suggestion === "A" && (
+            <div className="flex flex-col items-center">
+              <div className="col-span-1 flex w-full justify-center bg-white px-4 lg:flex-row">
+                <div
+                  className={
+                    "flex h-7 w-7 items-center justify-center rounded-full border-2"
+                  }
+                >
+                  <span className="text-sm font-semibold">
+                    {dayjs(consultation.discharge_date || undefined).diff(
+                      consultation.encounter_date,
+                      "day",
+                    )}
+                  </span>
+                </div>
+              </div>
+              <span className="mt-1 text-xs font-medium text-gray-700">
+                IP Days
+              </span>
+            </div>
+          )}
           {consultation?.last_daily_round && (
             <div className="col-span-1 flex w-full justify-center bg-white px-4 lg:flex-row">
               <Mews dailyRound={consultation?.last_daily_round} />
@@ -491,7 +514,8 @@ export default function PatientInfoCard(props: {
                   <span className="text-red-600">EXPIRED</span>
                 ) : (
                   DISCHARGE_REASONS.find(
-                    (reason) => reason.id === consultation?.new_discharge_reason
+                    (reason) =>
+                      reason.id === consultation?.new_discharge_reason,
                   )?.text
                 )}
               </div>
@@ -510,7 +534,7 @@ export default function PatientInfoCard(props: {
                       !(consultation?.facility !== patient.facility) &&
                       !(consultation?.discharge_date ?? !patient.is_active) &&
                       dayjs(consultation?.modified_date).isBefore(
-                        dayjs().subtract(1, "day")
+                        dayjs().subtract(1, "day"),
                       )
                         ? "danger"
                         : "primary"
@@ -541,7 +565,7 @@ export default function PatientInfoCard(props: {
                   {!(consultation?.facility !== patient.facility) &&
                     !(consultation?.discharge_date ?? !patient.is_active) &&
                     dayjs(consultation?.modified_date).isBefore(
-                      dayjs().subtract(1, "day")
+                      dayjs().subtract(1, "day"),
                     ) && (
                       <>
                         <p className="mt-0.5 text-xs text-red-500">
@@ -595,7 +619,7 @@ export default function PatientInfoCard(props: {
                             consultation?.id,
                           ],
                         ]
-                      : []
+                      : [],
                   )
                   .map(
                     (action: any, i) =>
@@ -645,7 +669,7 @@ export default function PatientInfoCard(props: {
                             </>
                           )}
                         </div>
-                      )
+                      ),
                   )}
               </div>
 
@@ -751,7 +775,7 @@ export default function PatientInfoCard(props: {
                                   activeShiftingData[
                                     activeShiftingData.length - 1
                                   ].id
-                                }`
+                                }`,
                               );
                             }}
                           >
@@ -769,7 +793,7 @@ export default function PatientInfoCard(props: {
                             onClick={() => {
                               close();
                               navigate(
-                                `/facility/${patient.facility}/patient/${patient.id}/shift/new`
+                                `/facility/${patient.facility}/patient/${patient.id}/shift/new`,
                               );
                             }}
                           >
@@ -849,14 +873,14 @@ export default function PatientInfoCard(props: {
                     }}
                     className={classNames(
                       medicoLegalCase ? "bg-primary" : "bg-gray-200",
-                      "relative inline-flex h-4 w-8 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none "
+                      "relative inline-flex h-4 w-8 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ",
                     )}
                   >
                     <span
                       aria-hidden="true"
                       className={classNames(
                         medicoLegalCase ? "translate-x-4" : "translate-x-0",
-                        "pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                        "pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
                       )}
                     />
                   </Switch>
