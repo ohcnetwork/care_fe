@@ -35,7 +35,7 @@ const LiveFeed = (props: any) => {
   const [showDefaultPresets, setShowDefaultPresets] = useState<boolean>(false);
   const [precision, setPrecision] = useState(1);
   const [streamStatus, setStreamStatus] = useState<StreamStatus>(
-    StreamStatus.Offline
+    StreamStatus.Offline,
   );
   const [videoStartTime, setVideoStartTime] = useState<Date | null>(null);
   const [bed, setBed] = useState<BedModel>({});
@@ -120,7 +120,7 @@ const LiveFeed = (props: any) => {
         asset: id,
         limit: page.limit,
         offset: page.offset,
-      })
+      }),
     );
     setBedPresets(bedAssets?.data?.results);
     setPage({
@@ -157,8 +157,8 @@ const LiveFeed = (props: any) => {
             ...data,
           },
         },
-        currentPreset?.id
-      )
+        currentPreset?.id,
+      ),
     );
     if (response && response.status === 200) {
       Notification.Success({ msg: "Preset Updated" });
@@ -239,7 +239,7 @@ const LiveFeed = (props: any) => {
   const cameraPTZActionCBs: { [key: string]: (option: any) => void } = {
     precision: () => {
       setPrecision((precision: number) =>
-        precision === 16 ? 1 : precision * 2
+        precision === 16 ? 1 : precision * 2,
       );
     },
     reset: () => {
@@ -270,8 +270,8 @@ const LiveFeed = (props: any) => {
                     position: data?.position,
                   },
                 },
-                currentPreset?.id
-              )
+                currentPreset?.id,
+              ),
             );
             if (response && response.status === 200) {
               Notification.Success({ msg: "Preset Updated" });
@@ -548,7 +548,7 @@ const LiveFeed = (props: any) => {
                                 setLoading(undefined);
                                 console.log("Preset Updated", option);
                               },
-                            }
+                            },
                           );
                         }}
                       >

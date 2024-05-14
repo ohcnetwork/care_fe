@@ -58,7 +58,7 @@ export default function BedActivityTimeline({
       <Timeline
         className={classNames(
           "py-4 md:px-3",
-          loading && "animate-pulse opacity-70"
+          loading && "animate-pulse opacity-70",
         )}
         name="bed-allocation"
       >
@@ -88,7 +88,7 @@ const BedAllocationNode = ({
 }) => {
   const { newlyLinkedAssets, existingAssets, unlinkedAssets } = getAssetDiff(
     prevBed?.assets_objects ?? [],
-    bed.assets_objects ?? []
+    bed.assets_objects ?? [],
   );
   const event: TimelineEvent = {
     type: "allocated",

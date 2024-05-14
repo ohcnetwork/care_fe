@@ -142,7 +142,7 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
                 "flex items-center justify-center rounded-full px-4 py-1.5 text-xs font-medium text-white",
                 consent.consent_artefacts?.length
                   ? "bg-gray-400"
-                  : "bg-gray-600"
+                  : "bg-gray-600",
               )}
             >
               {hiType}

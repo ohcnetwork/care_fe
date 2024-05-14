@@ -131,7 +131,7 @@ export const TriageForm = ({ facilityId, id }: Props) => {
   const isTriageExist = (data: any) => {
     if (
       patientStatsData.filter(
-        (triageData) => triageData.entry_date === data.entry_date
+        (triageData) => triageData.entry_date === data.entry_date,
       ).length === 1
     ) {
       return true;
@@ -147,12 +147,12 @@ export const TriageForm = ({ facilityId, id }: Props) => {
         entry_date: dateQueryString(state.form.entry_date),
         num_patients_visited: Number(state.form.num_patients_visited),
         num_patients_home_quarantine: Number(
-          state.form.num_patients_home_quarantine
+          state.form.num_patients_home_quarantine,
         ),
         num_patients_isolation: Number(state.form.num_patients_isolation),
         num_patient_referred: Number(state.form.num_patient_referred),
         num_patient_confirmed_positive: Number(
-          state.form.num_patient_confirmed_positive
+          state.form.num_patient_confirmed_positive,
         ),
       };
       //proceed if the triage does not exist or proceed has allowed to proceed after seeing the modal or it's a edit feature of the same date

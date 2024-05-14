@@ -124,7 +124,7 @@ const ExcelViewer = ({
                     {fileData
                       .slice(
                         (currentPage - 1) * rowsPerPage,
-                        (currentPage - 1) * rowsPerPage + rowsPerPage
+                        (currentPage - 1) * rowsPerPage + rowsPerPage,
                       )
                       .map((row, rowIndex) => {
                         const currentRowIndex =
@@ -139,12 +139,12 @@ const ExcelViewer = ({
                             {showCheckbox && (
                               <td className="w-5 px-4">
                                 {errors.some(
-                                  (err) => err.index === currentRowIndex
+                                  (err) => err.index === currentRowIndex,
                                 ) ? (
                                   <span
                                     title={`Error in column(s) ${errors
                                       .filter(
-                                        (err) => err.index === currentRowIndex
+                                        (err) => err.index === currentRowIndex,
                                       )
                                       .map((err) => err.key)
                                       .join(", ")}
@@ -159,10 +159,10 @@ const ExcelViewer = ({
                                   <input
                                     type="checkbox"
                                     checked={selectedRows.includes(
-                                      currentRowIndex
+                                      currentRowIndex,
                                     )}
                                     disabled={errors.some(
-                                      (err) => err.index === currentRowIndex
+                                      (err) => err.index === currentRowIndex,
                                     )}
                                     onChange={() => {
                                       if (
@@ -170,8 +170,8 @@ const ExcelViewer = ({
                                       ) {
                                         setSelectedRows(
                                           selectedRows.filter(
-                                            (i) => i !== currentRowIndex
-                                          )
+                                            (i) => i !== currentRowIndex,
+                                          ),
                                         );
                                       } else {
                                         setSelectedRows([
@@ -190,7 +190,7 @@ const ExcelViewer = ({
                                 const error = errors.find(
                                   (err) =>
                                     err.index === currentRowIndex &&
-                                    err.key == key
+                                    err.key == key,
                                 );
 
                                 return (
@@ -209,7 +209,7 @@ const ExcelViewer = ({
                                     </td>
                                   </>
                                 );
-                              }
+                              },
                             )}
                           </tr>
                         );

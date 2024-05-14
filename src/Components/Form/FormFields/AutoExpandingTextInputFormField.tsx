@@ -6,7 +6,7 @@ type AutoExpandingTextInputFormFieldProps = TextAreaFormFieldProps & {
 };
 
 const AutoExpandingTextInputFormField = (
-  props: AutoExpandingTextInputFormFieldProps
+  props: AutoExpandingTextInputFormFieldProps,
 ) => {
   const myref = useRef<HTMLTextAreaElement>(null);
 

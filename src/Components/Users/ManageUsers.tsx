@@ -111,7 +111,7 @@ export default function ManageUsers() {
     {
       prefetch: !!qParams.district,
       pathParams: { id: qParams.district },
-    }
+    },
   );
 
   const addUser = (
@@ -225,7 +225,7 @@ export default function ManageUsers() {
                           aria-label="Online"
                           className={classNames(
                             "inline-block h-2 w-2 shrink-0 rounded-full",
-                            cur_online ? "bg-primary-400" : "bg-gray-300"
+                            cur_online ? "bg-primary-400" : "bg-gray-300",
                           )}
                         ></span>
                         <span className="pl-2">
@@ -303,7 +303,7 @@ export default function ManageUsers() {
                               {dayjs().diff(
                                 user.doctor_experience_commenced_on,
                                 "years",
-                                false
+                                false,
                               )}{" "}
                               years
                             </span>
@@ -410,7 +410,7 @@ export default function ManageUsers() {
                     </ButtonV2>
                   </div>
                   {["DistrictAdmin", "StateAdmin"].includes(
-                    authUser.user_type
+                    authUser.user_type,
                   ) && (
                     <div>
                       <ButtonV2
@@ -548,12 +548,12 @@ export default function ManageUsers() {
             value(
               "District",
               "district",
-              qParams.district ? districtData?.name || "" : ""
+              qParams.district ? districtData?.name || "" : "",
             ),
             value(
               "Home Facility",
               "home_facility",
-              qParams.home_facility ? homeFacilityData?.name || "" : ""
+              qParams.home_facility ? homeFacilityData?.name || "" : "",
             ),
           ]}
         />
@@ -817,7 +817,7 @@ export function UserFacilities(props: { user: any }) {
                         id={`facility_${i}`}
                         key={`facility_${i}`}
                         className={classNames(
-                          "relative rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg"
+                          "relative rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg",
                         )}
                       >
                         <div className="flex items-center justify-between">
@@ -868,7 +868,7 @@ export function UserFacilities(props: { user: any }) {
                         </div>
                       </div>
                     );
-                  }
+                  },
                 )}
               </div>
               {totalCount > limit && (
@@ -910,7 +910,7 @@ export function UserFacilities(props: { user: any }) {
           handleOk={() => {
             updateHomeFacility(
               replaceHomeFacility.userName,
-              replaceHomeFacility.newFacility
+              replaceHomeFacility.newFacility,
             );
             setReplaceHomeFacility({
               show: false,

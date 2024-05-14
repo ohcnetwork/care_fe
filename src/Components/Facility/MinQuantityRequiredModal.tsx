@@ -56,7 +56,7 @@ export const MinQuantityRequiredModal = (props: any) => {
         }
         setIsLoading(false);
       },
-    }
+    },
   );
 
   const { data: facilityObject } = useQuery(routes.getAnyFacility, {

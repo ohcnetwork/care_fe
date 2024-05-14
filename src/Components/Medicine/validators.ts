@@ -62,7 +62,7 @@ export const comparePrescriptions = (a: Prescription, b: Prescription) => {
 
 export const AdministrationDosageValidator = (
   base_dosage: Prescription["base_dosage"],
-  target_dosage: Prescription["target_dosage"]
+  target_dosage: Prescription["target_dosage"],
 ) => {
   return (value: Prescription["base_dosage"]) => {
     const getDosageValue = (dosage: string | undefined) => {

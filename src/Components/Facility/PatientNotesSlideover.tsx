@@ -28,7 +28,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   const [thread, setThread] = useState(
     authUser.user_type === "Nurse"
       ? PATIENT_NOTES_THREADS.Nurses
-      : PATIENT_NOTES_THREADS.Doctors
+      : PATIENT_NOTES_THREADS.Doctors,
   );
   const [show, setShow] = useState(true);
   const [patientActive, setPatientActive] = useState(true);
@@ -76,7 +76,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
 
   const localStorageKey = `patientNotesNoteField_${consultationId}`;
   const [noteField, setNoteField] = useState(
-    localStorage.getItem(localStorageKey) || ""
+    localStorage.getItem(localStorageKey) || "",
   );
 
   const onAddNote = async () => {
@@ -137,7 +137,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
     },
     {
       ignoreInputFields: false,
-    }
+    },
   );
 
   const notesActionIcons = (
@@ -157,7 +157,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
         id="expand_doctor_notes"
         className={classNames(
           "flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100",
-          show && "rotate-180"
+          show && "rotate-180",
         )}
         onClick={() => setShow(!show)}
       >
@@ -188,7 +188,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
         "fixed bottom-0 z-20 sm:right-8",
         show
           ? "right-0 h-screen w-screen sm:h-fit sm:w-[400px]"
-          : "right-8 w-[250px]"
+          : "right-8 w-[250px]",
       )}
     >
       {!show ? (
@@ -213,7 +213,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
                   "flex flex-1 justify-center border-b-4 py-1",
                   thread === current
                     ? "border-primary-500 font-medium text-white"
-                    : "border-primary-800 text-white/70"
+                    : "border-primary-800 text-white/70",
                 )}
                 onClick={() => setThread(current)}
               >

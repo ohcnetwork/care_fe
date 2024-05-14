@@ -70,7 +70,7 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                         <td className="px-3 py-4 text-center text-sm capitalize">
                           {new Date(
                             consent.consent_artefacts?.[0]?.expiry ??
-                              consent.expiry
+                              consent.expiry,
                           ) < new Date()
                             ? "EXPIRED"
                             : consent.consent_artefacts?.[0]?.status ??
@@ -84,7 +84,7 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                         <td className="px-3 py-4 text-center text-sm">
                           {consent.consent_artefacts.length
                             ? formatDateTime(
-                                consent.consent_artefacts[0].created_date
+                                consent.consent_artefacts[0].created_date,
                               )
                             : "-"}
                         </td>
@@ -99,19 +99,19 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                         <td className="px-3 py-4 text-center text-sm">
                           {formatDateTime(
                             consent.consent_artefacts?.[0]?.from_time ??
-                              consent.from_time
+                              consent.from_time,
                           )}{" "}
                           <br />
                           {formatDateTime(
                             consent.consent_artefacts?.[0]?.to_time ??
-                              consent.to_time
+                              consent.to_time,
                           )}
                         </td>
 
                         <td className="px-3 py-4 text-center text-sm">
                           {formatDateTime(
                             consent.consent_artefacts?.[0]?.expiry ??
-                              consent.expiry
+                              consent.expiry,
                           )}
                         </td>
 
@@ -134,7 +134,7 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                               consent.status) === "GRANTED" &&
                             new Date(
                               consent.consent_artefacts?.[0]?.expiry ??
-                                consent.expiry
+                                consent.expiry,
                             ) > new Date() ? (
                               <Link
                                 key={consent.id}

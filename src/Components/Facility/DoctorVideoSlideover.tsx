@@ -162,7 +162,7 @@ const UserGroupList = (props: {
 type MSLaunchURI = (
   uri: string,
   successCB?: null | (() => void),
-  noHandlerCB?: null | (() => void)
+  noHandlerCB?: null | (() => void),
 ) => void;
 
 function UserListItem({ user }: { user: UserAnnotatedWithGroup }) {
@@ -238,7 +238,7 @@ function UserListItem({ user }: { user: UserAnnotatedWithGroup }) {
         "group cursor-default select-none rounded-xl p-3",
         user.alt_phone_number
           ? "cursor-pointer border border-gray-400 transition hover:border-green-500 hover:bg-green-50"
-          : "pointer-events-none cursor-not-allowed bg-gray-400"
+          : "pointer-events-none cursor-not-allowed bg-gray-400",
       )}
     >
       <a className="flex" onClick={connectOnWhatsApp}>
@@ -287,7 +287,7 @@ function UserListItem({ user }: { user: UserAnnotatedWithGroup }) {
                 onClick={async (e) => {
                   e.stopPropagation();
                   await navigator.clipboard.writeText(
-                    user?.alt_phone_number || ""
+                    user?.alt_phone_number || "",
                   );
                 }}
               >

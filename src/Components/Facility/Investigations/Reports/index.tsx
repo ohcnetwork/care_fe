@@ -95,7 +95,7 @@ const InvestigationReports = ({ id }: any) => {
   const [isNextSessionDisabled, setIsNextSessionDisabled] = useState(false);
   const [state, dispatch] = useReducer(
     investigationReportsReducer,
-    initialState
+    initialState,
   );
 
   const {
@@ -111,10 +111,10 @@ const InvestigationReports = ({ id }: any) => {
     async (
       onSuccess: (
         data: PaginatedResponse<Investigation>,
-        pageNo: number
+        pageNo: number,
       ) => void,
       curPage = 1,
-      curSessionPage = 1
+      curSessionPage = 1,
     ) => {
       dispatch({
         type: "set_loading",
@@ -155,7 +155,7 @@ const InvestigationReports = ({ id }: any) => {
         setPage(curPage + 1);
       }
     },
-    [id, investigations, isLoading, selectedInvestigations]
+    [id, investigations, isLoading, selectedInvestigations],
   );
 
   const fetchInvestigation = useCallback(async () => {
@@ -168,8 +168,8 @@ const InvestigationReports = ({ id }: any) => {
       selectedGroup.map((group) =>
         request(routes.listInvestigations, {
           query: { group: group },
-        })
-      )
+        }),
+      ),
     );
 
     const investigationList = _.chain(data)
@@ -205,7 +205,7 @@ const InvestigationReports = ({ id }: any) => {
     routes.getPatient,
     {
       pathParams: { id: id },
-    }
+    },
   );
 
   const handleGroupSelect = ({ value }: FieldChangeEvent<string[]>) => {
@@ -219,7 +219,7 @@ const InvestigationReports = ({ id }: any) => {
   const handleLoadMore = () => {
     const onSuccess = (
       data: PaginatedResponse<Investigation>,
-      pageNo: number
+      pageNo: number,
     ) => {
       if (data.results.length === 0 && pageNo + 1 <= totalPage) {
         fetchInvestigationsData(onSuccess, pageNo + 1, sessionPage);
@@ -254,11 +254,11 @@ const InvestigationReports = ({ id }: any) => {
       };
       fetchInvestigationsData(onSuccess, 1, curSessionPage);
     },
-    [fetchInvestigationsData]
+    [fetchInvestigationsData],
   );
 
   const totalPage = Math.ceil(
-    (selectedInvestigations.length || investigations.length) / RESULT_PER_PAGE
+    (selectedInvestigations.length || investigations.length) / RESULT_PER_PAGE,
   );
 
   const handleSessionPage = (go: "NEXT" | "PREV") => {

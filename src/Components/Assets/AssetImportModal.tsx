@@ -12,7 +12,7 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 const ExcelFileDragAndDrop = lazy(
-  () => import("../Common/ExcelFIleDragAndDrop")
+  () => import("../Common/ExcelFIleDragAndDrop"),
 );
 
 interface Props {
@@ -41,7 +41,7 @@ const AssetImportModal = ({ open, onClose, facility, onUpdate }: Props) => {
   const locations = data?.results || [];
 
   const handleUpload = async (
-    data: (AssetData & { notes?: string; last_serviced_on?: string })[]
+    data: (AssetData & { notes?: string; last_serviced_on?: string })[],
   ) => {
     if (!data) {
       closeModal();

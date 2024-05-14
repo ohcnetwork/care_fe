@@ -17,7 +17,7 @@ export type TextAreaFormFieldProps = FormFieldBaseProps<string> & {
 const TextAreaFormField = forwardRef(
   (
     { rows = 3, ...props }: TextAreaFormFieldProps,
-    ref?: React.Ref<HTMLTextAreaElement>
+    ref?: React.Ref<HTMLTextAreaElement>,
   ) => {
     const field = useFormFieldPropsResolver(props as any);
     return (
@@ -35,14 +35,14 @@ const TextAreaFormField = forwardRef(
           className={classNames(
             "cui-input-base resize-none",
             field.error && "border-danger-500",
-            props.innerClassName
+            props.innerClassName,
           )}
           onFocus={props.onFocus}
           onBlur={props.onBlur}
         />
       </FormField>
     );
-  }
+  },
 );
 
 export default TextAreaFormField;

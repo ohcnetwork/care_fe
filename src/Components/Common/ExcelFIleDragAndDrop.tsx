@@ -88,7 +88,7 @@ export default function ExcelFileDragAndDrop({
     if (fileData.length !== 0) {
       const { errors, parsedData, ParsedDataWithOutErrors } = schemaParser(
         fileData,
-        schema
+        schema,
       );
       setErrors(errors);
       setParsedData(parsedData);

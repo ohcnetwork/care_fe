@@ -194,7 +194,7 @@ export const FileUpload = (props: FileUploadProps) => {
     setFacingMode((prevState: any) =>
       prevState === FACING_MODE_USER
         ? FACING_MODE_ENVIRONMENT
-        : FACING_MODE_USER
+        : FACING_MODE_USER,
     );
   }, []);
   const initialState = {
@@ -361,8 +361,8 @@ export const FileUpload = (props: FileUploadProps) => {
       prefetch_download_urls(unarchivedQuery.data.results);
       setuploadedUnarchievedFiles(
         unarchivedQuery.data.results?.filter(
-          (file) => file.upload_completed || file.file_category === "AUDIO"
-        )
+          (file) => file.upload_completed || file.file_category === "AUDIO",
+        ),
       );
       setTotalUnarchievedFilesCount(unarchivedQuery.data.count);
     }
@@ -417,7 +417,7 @@ export const FileUpload = (props: FileUploadProps) => {
   // Store signed urls for non previewable files
   const prefetch_download_urls = async (files: FileUploadModel[]) => {
     const unsupportedFiles = files.filter(
-      (x) => !previewExtensions.includes(x.extension ?? "")
+      (x) => !previewExtensions.includes(x.extension ?? ""),
     );
     const query = { file_type: type, associating_id: getAssociatedId() };
     const urls = await Promise.all(
@@ -428,7 +428,7 @@ export const FileUpload = (props: FileUploadProps) => {
           pathParams: { id: id },
         });
         return [id, data?.read_signed_url];
-      })
+      }),
     );
     seturl(Object.fromEntries(urls));
   };
@@ -661,7 +661,7 @@ export const FileUpload = (props: FileUploadProps) => {
                           onClick={() => {
                             triggerDownload(
                               url[item.id!],
-                              `${item.name}${item.extension}`
+                              `${item.name}${item.extension}`,
                             );
                           }}
                           className="m-1 w-full sm:w-auto"
@@ -779,7 +779,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       onClick={() => {
                         triggerDownload(
                           url[item.id!],
-                          `${item.name}${item.extension}`
+                          `${item.name}${item.extension}`,
                         );
                       }}
                     >
@@ -954,7 +954,7 @@ export const FileUpload = (props: FileUploadProps) => {
     const fileName = f.name;
     setFile(e.target.files[0]);
     setUploadFileName(
-      fileName.substring(0, fileName.lastIndexOf(".")) || fileName
+      fileName.substring(0, fileName.lastIndexOf(".")) || fileName,
     );
 
     const ext: string = fileName.split(".")[1];
@@ -1010,7 +1010,7 @@ export const FileUpload = (props: FileUploadProps) => {
           });
           setUploadStarted(false);
           reject();
-        }
+        },
       );
     });
   };
@@ -1111,7 +1111,7 @@ export const FileUpload = (props: FileUploadProps) => {
       setUploadPercent,
       () => {
         setAudioUploadStarted(false);
-      }
+      },
     );
   };
 
@@ -1596,7 +1596,7 @@ export const FileUpload = (props: FileUploadProps) => {
                                 consultation?.discharge_date
                                   ? "cursor-not-allowed bg-gray-200 text-gray-500"
                                   : "button-primary-default cursor-pointer transition-all duration-200 ease-in-out",
-                                "button-size-default button-shape-square inline-flex h-min w-full items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1"
+                                "button-size-default button-shape-square inline-flex h-min w-full items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1",
                               )}
                             >
                               <CareIcon
@@ -1678,7 +1678,7 @@ export const FileUpload = (props: FileUploadProps) => {
           <>
             {uploadedUnarchievedFiles?.length > 0 ? (
               uploadedUnarchievedFiles.map((item: FileUploadModel) =>
-                renderFileUpload(item)
+                renderFileUpload(item),
               )
             ) : (
               <div className="mt-4 rounded-lg border bg-white p-4 shadow">
@@ -1703,7 +1703,7 @@ export const FileUpload = (props: FileUploadProps) => {
           <>
             {uploadedArchievedFiles?.length > 0 ? (
               uploadedArchievedFiles.map((item: FileUploadModel) =>
-                renderFileUpload(item)
+                renderFileUpload(item),
               )
             ) : (
               <div className="mt-4 rounded-lg border bg-white p-4 shadow">
@@ -1729,7 +1729,7 @@ export const FileUpload = (props: FileUploadProps) => {
             <>
               {uploadedDischargeSummaryFiles.length > 0 ? (
                 uploadedDischargeSummaryFiles.map((item: FileUploadModel) =>
-                  renderFileUpload(item)
+                  renderFileUpload(item),
                 )
               ) : (
                 <div className="mt-4 rounded-lg border bg-white p-4 shadow">

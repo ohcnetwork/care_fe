@@ -22,7 +22,7 @@ export default function UserAutocompleteFormField(props: Props) {
   const field = useFormFieldPropsResolver(props as any);
   const { fetchOptions, isLoading, options } = useAsyncOptions<UserModel>(
     "id",
-    { queryResponseExtractor: (data) => data.results }
+    { queryResponseExtractor: (data) => data.results },
   );
 
   let search_filter: {
@@ -80,7 +80,7 @@ export default function UserAutocompleteFormField(props: Props) {
                     ...search_filter,
                     search_text: query,
                   })
-                : getUserList({ ...search_filter, search_text: query })
+                : getUserList({ ...search_filter, search_text: query }),
             )
           }
           isLoading={isLoading}

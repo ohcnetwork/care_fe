@@ -10,7 +10,7 @@ type AbortableFunction = (status: statusType) => any;
 
 export const useAbortableEffect = (
   effect: AbortableFunction,
-  dependencies: Array<any>
+  dependencies: Array<any>,
 ) => {
   const status: statusType = {}; // mutable status object
   useEffect(() => {
@@ -32,7 +32,7 @@ export const useAbortableEffect = (
 
 export const parseOptionId: (
   options: readonly OptionsType[],
-  id: string | string[]
+  id: string | string[],
 ) => string = (options, id) => {
   const textArray = options
     .filter((option) => {

@@ -128,24 +128,24 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       {facility.features?.map(
                         (feature: number) =>
                           FACILITY_FEATURE_TYPES.some(
-                            (f) => f.id === feature
+                            (f) => f.id === feature,
                           ) && (
                             <Chip
                               hideBorder
                               key={feature}
                               text={
                                 FACILITY_FEATURE_TYPES.filter(
-                                  (f) => f.id === feature
+                                  (f) => f.id === feature,
                                 )[0]?.name
                               }
                               size="small"
                               startIcon={
                                 FACILITY_FEATURE_TYPES.filter(
-                                  (f) => f.id === feature
+                                  (f) => f.id === feature,
                                 )[0]?.icon
                               }
                             />
-                          )
+                          ),
                       )}
                     </div>
 
@@ -161,7 +161,8 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       className="text-sm font-semibold tracking-wider"
                     >
                       {formatPhoneNumber(
-                        parsePhoneNumber(facility.phone_number as string) ?? "-"
+                        parsePhoneNumber(facility.phone_number as string) ??
+                          "-",
                       )}
                     </a>
                   </div>
@@ -188,7 +189,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                           "mr-2",
                           facility.patient_count / facility.bed_count > 0.85
                             ? "text-white"
-                            : "text-primary-600"
+                            : "text-primary-600",
                         )}
                       />{" "}
                       <dt

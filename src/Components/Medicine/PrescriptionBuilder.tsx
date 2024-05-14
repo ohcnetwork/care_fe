@@ -94,7 +94,7 @@ export default function PrescriptionBuilder({
           onClose={() => setShowCreate(false)}
           show={showCreate}
           title={t(
-            is_prn ? "add_prn_prescription" : "add_prescription_medication"
+            is_prn ? "add_prn_prescription" : "add_prescription_medication",
           )}
           description={
             <div className="mt-2 flex w-full justify-start gap-2 text-warning-500">

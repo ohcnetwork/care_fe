@@ -279,7 +279,7 @@ export const Login = (props: { forgot?: boolean }) => {
               <div
                 className={classNames(
                   "w-full transition-all",
-                  forgotPassword && "hidden"
+                  forgotPassword && "hidden",
                 )}
               >
                 <div className="mb-8 w-[300px] text-4xl font-black text-primary-600">
@@ -354,7 +354,7 @@ export const Login = (props: { forgot?: boolean }) => {
               <div
                 className={classNames(
                   "w-full transition-all",
-                  !forgotPassword && "hidden"
+                  !forgotPassword && "hidden",
                 )}
               >
                 <button

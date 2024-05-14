@@ -29,7 +29,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
   const [thread, setThread] = useState(
     authUser.user_type === "Nurse"
       ? PATIENT_NOTES_THREADS.Nurses
-      : PATIENT_NOTES_THREADS.Doctors
+      : PATIENT_NOTES_THREADS.Doctors,
   );
 
   const [patientActive, setPatientActive] = useState(true);
@@ -107,7 +107,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
     },
     {
       ignoreInputFields: false,
-    }
+    },
   );
 
   return (
@@ -129,7 +129,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
                 "flex flex-1 justify-center border-b-2 py-2",
                 thread === current
                   ? "border-primary-500 font-bold text-gray-800"
-                  : "border-gray-300 text-gray-800"
+                  : "border-gray-300 text-gray-800",
               )}
               onClick={() => setThread(current)}
             >

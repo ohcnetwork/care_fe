@@ -51,7 +51,7 @@ export default function ShowInvestigation(props: any) {
       if (res && res.data) {
         const valueMap = res.data.results.reduce(
           (acc: any, cur: { id: any }) => ({ ...acc, [cur.id]: cur }),
-          {}
+          {},
         );
 
         const changedValues = res.data.results.reduce(
@@ -64,7 +64,7 @@ export default function ShowInvestigation(props: any) {
               notes: cur?.notes || null,
             },
           }),
-          {}
+          {},
         );
 
         dispatch({ type: "set_initial_values", initialValues: valueMap });
@@ -77,7 +77,7 @@ export default function ShowInvestigation(props: any) {
     routes.getPatient,
     {
       pathParams: { id: patientId },
-    }
+    },
   );
 
   const { data: consultation } = useQuery(routes.getConsultation, {
@@ -95,7 +95,8 @@ export default function ShowInvestigation(props: any) {
     const data = Object.values(state.changedFields)
       .filter(
         (field: any) =>
-          field?.initialValue !== (field?.notes || Number(field?.value) || null)
+          field?.initialValue !==
+          (field?.notes || Number(field?.value) || null),
       )
       .map((field: any) => ({
         external_id: field?.id,
@@ -113,7 +114,7 @@ export default function ShowInvestigation(props: any) {
           msg: "Investigation Updated successfully!",
         });
         navigate(
-          `/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}`
+          `/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}`,
         );
       }
       return;

@@ -80,7 +80,7 @@ const DischargeModal = ({
         ordering: "-modified_date",
         use: "claim",
         consultation: consultationData.id,
-      })
+      }),
     );
 
     if (res?.data?.results?.length > 0) {
@@ -159,8 +159,8 @@ const DischargeModal = ({
           discharge: value,
           discharge_date: dayjs(preDischargeForm.discharge_date).toISOString(),
         },
-        { id: consultationData.id }
-      )
+        { id: consultationData.id },
+      ),
     );
 
     setIsSendingDischargeApi(false);
@@ -289,7 +289,7 @@ const DischargeModal = ({
           }}
           required
           min={dayjs(consultationData?.encounter_date).format(
-            "YYYY-MM-DDTHH:mm"
+            "YYYY-MM-DDTHH:mm",
           )}
           max={dayjs().format("YYYY-MM-DDTHH:mm")}
           error={

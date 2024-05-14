@@ -61,24 +61,24 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
         listAssetBeds({
           facility: props.consultationData.facility as any,
           bed: props.consultationData.current_bed?.bed_object.id,
-        })
+        }),
       );
       const assetBeds = assetBedRes?.data?.results as AssetBedModel[];
 
       const monitorBedData = assetBeds?.find(
-        (i) => i.asset_object?.asset_class === AssetClass.HL7MONITOR
+        (i) => i.asset_object?.asset_class === AssetClass.HL7MONITOR,
       );
 
       setMonitorBedData(monitorBedData);
       if (monitorBedData?.asset_object) {
         setHL7SocketUrl(
-          getVitalsMonitorSocketUrl(monitorBedData?.asset_object)
+          getVitalsMonitorSocketUrl(monitorBedData?.asset_object),
         );
       }
 
       const consultationBedVentilator =
         props.consultationData?.current_bed?.assets_objects?.find(
-          (i) => i.asset_class === AssetClass.VENTILATOR
+          (i) => i.asset_class === AssetClass.VENTILATOR,
         );
 
       let ventilatorBedData;
@@ -89,14 +89,14 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
         } as AssetBedModel;
       } else {
         ventilatorBedData = assetBeds?.find(
-          (i) => i.asset_object.asset_class === AssetClass.VENTILATOR
+          (i) => i.asset_object.asset_class === AssetClass.VENTILATOR,
         );
       }
 
       setVentilatorBedData(ventilatorBedData);
       if (ventilatorBedData?.asset_object) {
         setVentilatorSocketUrl(
-          getVitalsMonitorSocketUrl(ventilatorBedData?.asset_object)
+          getVitalsMonitorSocketUrl(ventilatorBedData?.asset_object),
         );
       }
     };
@@ -215,7 +215,8 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                       <span className="font-semibold">
                         {DISCHARGE_REASONS.find(
                           (d) =>
-                            d.id === props.consultationData.new_discharge_reason
+                            d.id ===
+                            props.consultationData.new_discharge_reason,
                         )?.text ?? "--"}
                       </span>
                     </div>
@@ -240,7 +241,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                           <span className="font-semibold">
                             {props.consultationData.discharge_date
                               ? formatDate(
-                                  props.consultationData.discharge_date
+                                  props.consultationData.discharge_date,
                                 )
                               : "--/--/---- --:-- --"}
                           </span>
@@ -277,7 +278,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                           <span className="font-semibold">
                             {props.consultationData.death_datetime
                               ? formatDateTime(
-                                  props.consultationData.death_datetime
+                                  props.consultationData.death_datetime,
                                 )
                               : "--:--"}
                           </span>
@@ -298,7 +299,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                       </div>
                     )}
                     {[2, 4].includes(
-                      props.consultationData.new_discharge_reason ?? 0
+                      props.consultationData.new_discharge_reason ?? 0,
                     ) && (
                       <div className="grid gap-4">
                         <div>
@@ -306,7 +307,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                           <span className="font-semibold">
                             {props.consultationData.discharge_date
                               ? formatDateTime(
-                                  props.consultationData.discharge_date
+                                  props.consultationData.discharge_date,
                                 )
                               : "--/--/---- --:-- --"}
                           </span>
@@ -334,7 +335,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                 <div className="flex gap-2 pb-2">
                   {props.patientData.is_antenatal &&
                     isAntenatal(
-                      props.patientData.last_menstruation_start_date
+                      props.patientData.last_menstruation_start_date,
                     ) && (
                       <Chip
                         variant="custom"
@@ -359,7 +360,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                     <span>Last Menstruation:</span>
                     <span className="font-semibold">
                       {formatDate(
-                        props.patientData.last_menstruation_start_date
+                        props.patientData.last_menstruation_start_date,
                       )}
                     </span>
                   </p>
@@ -396,12 +397,12 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                                 key={index}
                                 text={
                                   SYMPTOM_CHOICES.find(
-                                    (choice) => choice.id === symptom
+                                    (choice) => choice.id === symptom,
                                   )?.text ?? "Err. Unknown"
                                 }
                                 size="small"
                               />
-                            )
+                            ),
                           )}
                         </div>
                         {props.consultationData.last_daily_round
@@ -419,7 +420,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         <span className="text-xs font-semibold leading-relaxed text-gray-800">
                           from{" "}
                           {formatDate(
-                            props.consultationData.last_daily_round.taken_at
+                            props.consultationData.last_daily_round.taken_at,
                           )}
                         </span>
                       </>
@@ -435,12 +436,12 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                             key={index}
                             text={
                               SYMPTOM_CHOICES.find(
-                                (choice) => choice.id === symptom
+                                (choice) => choice.id === symptom,
                               )?.text ?? "Err. Unknown"
                             }
                             size="small"
                           />
-                        )
+                        ),
                       )}
                     </div>
                     {props.consultationData.other_symptoms && (
@@ -596,7 +597,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                                 : formatDateTime(String(procedure.time))}
                             </td>
                           </tr>
-                        )
+                        ),
                       )}
                     </tbody>
                   </table>
@@ -614,7 +615,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                     Intubation Date{" - "}
                     <span className="font-semibold">
                       {formatDateTime(
-                        props.consultationData.intubation_start_date
+                        props.consultationData.intubation_start_date,
                       )}
                     </span>
                   </div>
@@ -623,7 +624,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                     <span className="font-semibold">
                       {props.consultationData.intubation_end_date &&
                         formatDateTime(
-                          props.consultationData.intubation_end_date
+                          props.consultationData.intubation_end_date,
                         )}
                     </span>
                   </div>
@@ -673,7 +674,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                           </span>
                         </p>
                       </div>
-                    )
+                    ),
                   )}
                 </div>
               </div>
@@ -716,7 +717,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                       {Math.sqrt(
                         (Number(props.consultationData.weight) *
                           Number(props.consultationData.height)) /
-                          3600
+                          3600,
                       ).toFixed(2)}{" "}
                       m<sup>2</sup>
                     </span>
@@ -732,7 +733,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             </div>
             {(
               props.consultationData.consent_records?.filter(
-                (record) => record.deleted !== true
+                (record) => record.deleted !== true,
               ) || []
             ).length > 0 && (
               <>
@@ -747,13 +748,13 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         <div className="font-bold">
                           {
                             CONSENT_TYPE_CHOICES.find(
-                              (c) => c.id === record.type
+                              (c) => c.id === record.type,
                             )?.text
                           }{" "}
                           {record.patient_code_status &&
                             `( ${
                               CONSENT_PATIENT_CODE_STATUS_CHOICES.find(
-                                (c) => c.id === record.patient_code_status
+                                (c) => c.id === record.patient_code_status,
                               )?.text
                             } )`}
                         </div>

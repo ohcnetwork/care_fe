@@ -84,7 +84,7 @@ export const FacilityConfigure = (props: IProps) => {
     }
     if (
       state.form.middleware_address.match(
-        /^(?!https?:\/\/)[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*\.[a-zA-Z]{2,}$/
+        /^(?!https?:\/\/)[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*\.[a-zA-Z]{2,}$/,
       ) === null
     ) {
       dispatch({

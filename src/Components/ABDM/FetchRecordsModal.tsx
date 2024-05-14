@@ -37,13 +37,13 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
   >("pending");
   const [purpose, setPurpose] = useState<string>("CAREMGT");
   const [fromDate, setFromDate] = useState<Date>(
-    dayjs().subtract(30, "day").toDate()
+    dayjs().subtract(30, "day").toDate(),
   );
   const [toDate, setToDate] = useState<Date>(dayjs().toDate());
   const [isMakingConsentRequest, setIsMakingConsentRequest] = useState(false);
   const [hiTypes, setHiTypes] = useState<string[]>([]);
   const [expiryDate, setExpiryDate] = useState<Date>(
-    dayjs().add(30, "day").toDate()
+    dayjs().add(30, "day").toDate(),
   );
   const [errors, setErrors] = useState<any>({});
 
@@ -93,7 +93,7 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
           className={classNames(
             "mt-1.5 !py-3",
             idVerificationStatus === "verified" &&
-              "disabled:cursor-auto disabled:bg-transparent disabled:text-primary-600"
+              "disabled:cursor-auto disabled:bg-transparent disabled:text-primary-600",
           )}
         >
           {idVerificationStatus === "in-progress" && (
@@ -205,7 +205,7 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
 
               navigate(
                 `/facility/${abha?.patient_object?.facility}/abdm` ??
-                  `/facility/${abha?.patient_object?.facility}/patient/${abha?.patient_object?.id}/consultation/${abha?.patient_object?.last_consultation?.id}/abdm`
+                  `/facility/${abha?.patient_object?.facility}/patient/${abha?.patient_object?.id}/consultation/${abha?.patient_object?.last_consultation?.id}/abdm`,
               );
             } else {
               Notification.Error({

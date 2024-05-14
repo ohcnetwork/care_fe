@@ -82,7 +82,7 @@ export const ConfigureHealthFacility = (props: any) => {
           pathParams: {
             facility_id: facilityId,
           },
-        }
+        },
       );
       response = res;
       responseData = data;
@@ -96,7 +96,7 @@ export const ConfigureHealthFacility = (props: any) => {
           body: {
             hf_id: state.form.hf_id,
           },
-        }
+        },
       );
       response = res;
       responseData = data;
@@ -156,7 +156,7 @@ export const ConfigureHealthFacility = (props: any) => {
                     "tooltip cursor-pointer text-sm",
                     state.form.health_facility?.registered
                       ? "text-primary-600 hover:text-primary-800"
-                      : "text-warning-600 hover:text-warning-800"
+                      : "text-warning-600 hover:text-warning-800",
                   )}
                 >
                   {state.form.health_facility?.registered ? (

@@ -83,7 +83,7 @@ export const ConsultationDetails = (props: any) => {
   const [qParams, _] = useQueryParams();
 
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
-    {} as ConsultationModel
+    {} as ConsultationModel,
   );
   const [patientData, setPatientData] = useState<PatientModel>({});
   const [abhaNumberData, setAbhaNumberData] = useState<AbhaNumberModel>();
@@ -129,7 +129,7 @@ export const ConsultationDetails = (props: any) => {
           }
           if (facilityId != data.facility || patientId != data.patient) {
             navigate(
-              `/facility/${data.facility}/patient/${data.patient}/consultation/${data?.id}`
+              `/facility/${data.facility}/patient/${data.patient}/consultation/${data?.id}`,
             );
           }
           setConsultationData(data);
@@ -137,7 +137,7 @@ export const ConsultationDetails = (props: any) => {
             ? await dispatch(
                 listAssetBeds({
                   bed: data?.current_bed?.bed_object?.id,
-                })
+                }),
               )
             : null;
           const isCameraAttachedRes =
@@ -155,7 +155,7 @@ export const ConsultationDetails = (props: any) => {
             const patientGender = getPatientGender(patientRes.data);
             const patientAddress = getPatientAddress(patientRes.data);
             const patientComorbidities = getPatientComorbidities(
-              patientRes.data
+              patientRes.data,
             );
             const data = {
               ...patientRes.data,
@@ -176,13 +176,13 @@ export const ConsultationDetails = (props: any) => {
             routes.abha.getAbhaNumber,
             {
               pathParams: { abhaNumberId: id ?? "" },
-            }
+            },
           );
           setAbhaNumberData(abhaNumberData);
 
           // Get shifting data
           const shiftingRes = await dispatch(
-            listShiftRequests({ patient: id }, "shift-list-call")
+            listShiftRequests({ patient: id }, "shift-list-call"),
           );
           if (shiftingRes?.data?.results) {
             const data = shiftingRes.data.results;
@@ -194,7 +194,7 @@ export const ConsultationDetails = (props: any) => {
         setIsLoading(false);
       }
     },
-    [consultationId, dispatch, patientData.is_vaccinated]
+    [consultationId, dispatch, patientData.is_vaccinated],
   );
 
   useAbortableEffect((status: statusType) => {
@@ -290,7 +290,7 @@ export const ConsultationDetails = (props: any) => {
                 name:
                   consultationData.suggestion === "A"
                     ? `Admitted on ${formatDateTime(
-                        consultationData.encounter_date!
+                        consultationData.encounter_date!,
                       )}`
                     : consultationData.suggestion_text,
               },
@@ -342,7 +342,7 @@ export const ConsultationDetails = (props: any) => {
               onClick={() =>
                 showPatientNotesPopup
                   ? navigate(
-                      `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/notes`
+                      `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/notes`,
                     )
                   : setShowPatientNotesPopup(true)
               }
@@ -382,7 +382,7 @@ export const ConsultationDetails = (props: any) => {
                       {relativeTime(
                         consultationData.discharge_date
                           ? consultationData.discharge_date
-                          : consultationData.encounter_date
+                          : consultationData.encounter_date,
                       )}
                     </div>
                   )}

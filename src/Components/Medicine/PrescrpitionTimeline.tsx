@@ -48,7 +48,7 @@ export default function PrescrpitionTimeline({
         administered_date_after: formatDateTime(interval.start, "YYYY-MM-DD"),
         administered_date_before: formatDateTime(interval.end, "YYYY-MM-DD"),
       },
-    }
+    },
   );
 
   const events = data && compileEvents(prescription, data.results, interval);
@@ -65,7 +65,7 @@ export default function PrescrpitionTimeline({
     <Timeline
       className={classNames(
         "py-4 md:px-3",
-        loading && data && "animate-pulse opacity-70"
+        loading && data && "animate-pulse opacity-70",
       )}
       name="prescription"
     >
@@ -126,7 +126,7 @@ const MedicineAdministeredNode = ({
             ? event.administration.dosage + " dose of "
             : ""
         }the medicine at ${formatTime(
-          event.administration.administered_date
+          event.administration.administered_date,
         )}.`}
         actions={
           !event.cancelled &&
@@ -186,7 +186,7 @@ const MedicineAdministeredNode = ({
 const compileEvents = (
   prescription: Prescription,
   administrations: MedicineAdministrationRecord[],
-  interval: { start: Date; end: Date }
+  interval: { start: Date; end: Date },
 ): PrescriptionTimelineEvents[] => {
   const events: PrescriptionTimelineEvents[] = [];
 
@@ -206,7 +206,7 @@ const compileEvents = (
     .sort(
       (a, b) =>
         new Date(a.administered_date!).getTime() -
-        new Date(b.administered_date!).getTime()
+        new Date(b.administered_date!).getTime(),
     )
     .forEach((administration) => {
       events.push({
@@ -224,7 +224,7 @@ const compileEvents = (
     prescription?.discontinued &&
     dayjs(prescription.discontinued_date).isBetween(
       interval.start,
-      interval.end
+      interval.end,
     )
   ) {
     events.push({
