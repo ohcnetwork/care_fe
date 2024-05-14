@@ -343,7 +343,7 @@ export const PatientHome = (props: any) => {
             <div className="flex h-full flex-col justify-between rounded-lg bg-white pb-5 pl-9 pt-11 shadow">
               <div>
                 <div className="flex flex-row gap-4">
-                  <h1 className="flex flex-row pb-3 text-2xl font-bold">
+                  <h1 className="flex flex-row pb-3 text-2xl font-bold capitalize">
                     {patientData.name} - {formatPatientAge(patientData, true)}
                   </h1>
                   <div className="ml-auto mr-9 flex flex-wrap gap-3">

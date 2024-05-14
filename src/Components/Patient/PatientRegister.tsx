@@ -64,6 +64,7 @@ import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
 import SelectMenuV2 from "../Form/SelectMenuV2.js";
 import Checkbox from "../Common/components/CheckBox.js";
+import _ from "lodash";
 import { ILocalBodies } from "../ExternalResult/models.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
@@ -810,7 +811,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             : null
           : null,
       test_type: formData.test_type,
-      name: formData.name,
+      name: _.startCase(_.toLower(formData.name)),
       pincode: formData.pincode ? formData.pincode : undefined,
       gender: Number(formData.gender),
       nationality: formData.nationality,
