@@ -188,7 +188,7 @@ export default function ManageUsers() {
     (userList = userListData.results.map((user: any, idx) => {
       const cur_online = isUserOnline(user);
       return (
-        <div key={`usr_${user.id}`} id={`usr_${idx}`} className="">
+        <div key={`usr_${user.id}`} id={`usr_${idx}`}>
           <div className="relative block h-full overflow-visible rounded-lg bg-white shadow hover:border-primary-500">
             <div className="flex h-full flex-col justify-between @container">
               <div className="px-6 py-4">
@@ -221,7 +221,7 @@ export default function ManageUsers() {
                           aria-label="Online"
                           className={classNames(
                             "inline-block h-2 w-2 shrink-0 rounded-full",
-                            cur_online ? "bg-primary-400" : "bg-gray-300",
+                            cur_online ? "bg-primary-400" : "bg-gray-300"
                           )}
                         ></span>
                         <span className="pl-2">
@@ -299,7 +299,7 @@ export default function ManageUsers() {
                               {dayjs().diff(
                                 user.doctor_experience_commenced_on,
                                 "years",
-                                false,
+                                false
                               )}{" "}
                               years
                             </span>
@@ -406,7 +406,7 @@ export default function ManageUsers() {
                     </ButtonV2>
                   </div>
                   {["DistrictAdmin", "StateAdmin"].includes(
-                    authUser.user_type,
+                    authUser.user_type
                   ) && (
                     <div>
                       <ButtonV2
@@ -534,7 +534,7 @@ export default function ManageUsers() {
         </div>
       </div>
 
-      <div className="">
+      <div>
         <FilterBadges
           badges={({ badge, value, phoneNumber }) => [
             badge("Username", "username"),
@@ -546,18 +546,18 @@ export default function ManageUsers() {
             value(
               "District",
               "district",
-              qParams.district ? districtData?.name || "" : "",
+              qParams.district ? districtData?.name || "" : ""
             ),
             value(
               "Home Facility",
               "home_facility",
-              qParams.home_facility ? homeFacilityData?.name || "" : "",
+              qParams.home_facility ? homeFacilityData?.name || "" : ""
             ),
           ]}
         />
       </div>
 
-      <div className="">
+      <div>
         <div>{manageUsers}</div>
       </div>
       {userData.show && (
