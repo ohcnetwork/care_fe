@@ -591,18 +591,39 @@ export const PatientHome = (props: any) => {
                   <div className="flex justify-between">
                     <div className="w-1/2 border-r-2">
                       <div className="text-sm font-normal leading-5 text-gray-500">
-                        COVID Status
-                      </div>
-                      <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
-                        {patientData.disease_status}
-                      </div>
-                    </div>
-                    <div className="w-1/2">
-                      <div className="text-sm font-normal leading-5 text-gray-500">
                         Status
                       </div>
                       <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
                         {patientData.is_active ? "LIVE" : "DISCHARGED"}
+                      </div>
+                    </div>
+                    <div className="w-1/2">
+                      <div className="text-sm font-normal leading-5 text-gray-500">
+                        Last Discharged Reason
+                      </div>
+                      <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
+                        {patientData.is_active ? (
+                          "-"
+                        ) : !patientData.last_consultation
+                            ?.new_discharge_reason ? (
+                          <span className="text-gray-800">
+                            {patientData?.last_consultation?.suggestion === "OP"
+                              ? "OP file closed"
+                              : "UNKNOWN"}
+                          </span>
+                        ) : patientData.last_consultation
+                            ?.new_discharge_reason ===
+                          DISCHARGE_REASONS.find((i) => i.text == "Expired")
+                            ?.id ? (
+                          <span className="text-red-600">EXPIRED</span>
+                        ) : (
+                          DISCHARGE_REASONS.find(
+                            (reason) =>
+                              reason.id ===
+                              patientData.last_consultation
+                                ?.new_discharge_reason,
+                          )?.text
+                        )}
                       </div>
                     </div>
                   </div>
