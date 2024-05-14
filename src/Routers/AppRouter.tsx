@@ -13,6 +13,8 @@ import {
 import { BLACKLISTED_PATHS } from "../Common/constants";
 import useConfig from "../Common/hooks/useConfig";
 import SessionExpired from "../Components/ErrorPages/SessionExpired";
+import HealthInformation from "../Components/ABDM/HealthInformation";
+import ABDMFacilityRecords from "../Components/ABDM/ABDMFacilityRecords";
 
 import UserRoutes from "./routes/UserRoutes";
 import PatientRoutes from "./routes/PatientRoutes";
@@ -43,6 +45,13 @@ const Routes = {
     <ShowPushNotification id={id} />
   ),
   "/notice_board": () => <NoticeBoard />,
+
+  "/abdm/health-information/:id": ({ id }: { id: string }) => (
+    <HealthInformation artefactId={id} />
+  ),
+  "/facility/:facilityId/abdm": ({ facilityId }: any) => (
+    <ABDMFacilityRecords facilityId={facilityId} />
+  ),
 
   "/session-expired": () => <SessionExpired />,
   "/not-found": () => <Error404 />,
