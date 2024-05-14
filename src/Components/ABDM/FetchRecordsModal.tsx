@@ -4,7 +4,6 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import DialogModal from "../Common/Dialog";
 import { PatientModel } from "../Patient/models";
 import TextFormField from "../Form/FormFields/TextFormField";
-import { useDispatch } from "react-redux";
 import { useState } from "react";
 import {
   MultiSelectFormField,
@@ -21,6 +20,7 @@ import { useMessageListener } from "../../Common/hooks/useMessageListener.js";
 import CircularProgress from "../Common/components/CircularProgress.js";
 import CareIcon from "../../CAREUI/icons/CareIcon.js";
 import { classNames } from "../../Utils/utils.js";
+import { ConsentHIType, ConsentPurpose } from "./types/consent.js";
 
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
@@ -35,19 +35,17 @@ export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
   const [idVerificationStatus, setIdVerificationStatus] = useState<
     "pending" | "in-progress" | "verified" | "failed"
   >("pending");
-  const [purpose, setPurpose] = useState<string>("CAREMGT");
+  const [purpose, setPurpose] = useState<ConsentPurpose>("CAREMGT");
   const [fromDate, setFromDate] = useState<Date>(
     dayjs().subtract(30, "day").toDate(),
   );
   const [toDate, setToDate] = useState<Date>(dayjs().toDate());
   const [isMakingConsentRequest, setIsMakingConsentRequest] = useState(false);
-  const [hiTypes, setHiTypes] = useState<string[]>([]);
+  const [hiTypes, setHiTypes] = useState<ConsentHIType[]>([]);
   const [expiryDate, setExpiryDate] = useState<Date>(
     dayjs().add(30, "day").toDate(),
   );
   const [errors, setErrors] = useState<any>({});
-
-  const dispatch = useDispatch<any>();
 
   useMessageListener((data) => {
     if (data.type === "MESSAGE" && data.from === "patients/on_find") {
@@ -189,7 +187,7 @@ export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
             }
 
             setIsMakingConsentRequest(true);
-            const res = await dispatch(routes.abha.createConsent, {
+            const { res } = await request(routes.abha.createConsent, {
               body: {
                 patient_abha: patient?.abha_number_object?.health_id as string,
                 hi_types: hiTypes,
@@ -200,7 +198,7 @@ export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
               },
             });
 
-            if (res.status === 201) {
+            if (res?.status === 201) {
               Notification.Success({
                 msg: "Consent requested successfully!",
               });

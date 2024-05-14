@@ -5,6 +5,10 @@ import { dateQueryString } from "../Utils/utils";
 import { IconName } from "../CAREUI/icons/CareIcon";
 import { PhoneNumberValidator } from "../Components/Form/FieldValidators";
 import { SchemaType } from "./schemaParser";
+import {
+  ConsentHIType,
+  ConsentPurpose,
+} from "../Components/ABDM/types/consent";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 export const PAGINATION_LIMIT = 36;
@@ -1106,7 +1110,7 @@ export const ABDM_CONSENT_PURPOSE = [
   { value: "HPAYMT", label: "Healthcare Payment" },
   { value: "DSRCH", label: "Disease Specific Healthcare Research" },
   { value: "PATRQT", label: "Self Requested" },
-];
+] as { value: ConsentPurpose; label: string }[];
 
 export const ABDM_HI_TYPE = [
   { value: "Prescription", label: "Prescription" },
@@ -1116,7 +1120,7 @@ export const ABDM_HI_TYPE = [
   { value: "ImmunizationRecord", label: "Immunization Record" },
   { value: "HealthDocumentRecord", label: "Record Artifact" },
   { value: "WellnessRecord", label: "Wellness Record" },
-];
+] as { value: ConsentHIType; label: string }[];
 
 export const USER_TYPES_MAP = {
   Pharmacist: "Pharmacist",
