@@ -92,10 +92,6 @@ export const VentilatorPlot = (props: any) => {
     })
     .filter((p) => p.value !== null);
 
-  useEffect(() => {
-    console.log(bilateral);
-  }, [bilateral]);
-
   return (
     <div>
       <div className="grid-row-1 grid gap-4 md:grid-cols-2">

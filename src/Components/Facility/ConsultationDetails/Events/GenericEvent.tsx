@@ -71,7 +71,6 @@ const formatValue = (value: unknown, key?: string): ReactNode => {
 };
 
 export default function GenericEvent({ values }: IProps) {
-  console.log("value", values);
   return (
     <div className="flex w-full flex-col gap-4 rounded-lg border border-gray-400 p-4 @container">
       {values.map(([key, value]: [string, any]) => (

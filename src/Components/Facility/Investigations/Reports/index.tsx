@@ -107,8 +107,6 @@ const InvestigationReports = ({ id }: any) => {
     selectedInvestigations,
   } = state as InitialState;
 
-  console.log("state", state);
-
   const fetchInvestigationsData = useCallback(
     async (
       onSuccess: (

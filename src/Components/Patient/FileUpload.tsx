@@ -978,7 +978,6 @@ export const FileUpload = (props: FileUploadProps) => {
     const f = file;
     if (!f) return;
     const newFile = new File([f], `${internal_name}`);
-    console.log("filetype: ", newFile.type);
     return new Promise<void>((resolve, reject) => {
       uploadFile(
         url,

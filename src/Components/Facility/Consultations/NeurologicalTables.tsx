@@ -56,7 +56,6 @@ const DataTable = (props: any) => {
 
 const DataDescription = (props: any) => {
   const { title, data } = props;
-  console.log("Data Description", title, data);
 
   return (
     <div>
@@ -282,8 +281,6 @@ export const NeurologicalTable = (props: any) => {
       });
     }
   });
-
-  console.log("locDes", locDescription);
 
   return (
     <div className="mt-2">

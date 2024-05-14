@@ -447,7 +447,6 @@ export const FacilityCreate = (props: FacilityProps) => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const validated = validateForm();
-    console.log(state.form);
     if (validated) {
       setIsLoading(true);
       const data: FacilityRequest = {
