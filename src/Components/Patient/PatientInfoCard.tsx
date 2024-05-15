@@ -114,10 +114,9 @@ export default function PatientInfoCard(props: {
 
     return false;
   };
-  const username =
-    consultation?.treating_physician_object?.username || "bhuvan";
   const { data: skills } = useQuery(routes.userListSkill, {
-    pathParams: { username: username },
+    pathParams: { username: consultation?.treating_physician_object?.username },
+    prefetch: !!consultation?.treating_physician_object?.username
   });
   return (
     <>
