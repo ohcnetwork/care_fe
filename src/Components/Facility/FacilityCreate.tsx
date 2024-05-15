@@ -673,7 +673,7 @@ export const FacilityCreate = (props: FacilityProps) => {
           </div>
           <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
             <div className="justify-between md:flex md:pb-2">
-              <div className="mb-2 text-xl font-bold">{t("doctors_list")}</div>
+              <div className="mb-2 text-xl font-bold">{t("staff_list")}</div>
             </div>
             <div className="mt-4" id="total-doctor-capacity">
               {doctorList}
