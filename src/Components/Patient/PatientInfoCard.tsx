@@ -115,8 +115,10 @@ export default function PatientInfoCard(props: {
     return false;
   };
   const { data: skills } = useQuery(routes.userListSkill, {
-    pathParams: { username: consultation?.treating_physician_object?.username },
-    prefetch: !!consultation?.treating_physician_object?.username
+    pathParams: {
+      username: consultation?.treating_physician_object?.username ?? "",
+    },
+    prefetch: !!consultation?.treating_physician_object?.username,
   });
   return (
     <>
@@ -468,18 +470,23 @@ export default function PatientInfoCard(props: {
                     {skills?.results?.slice(0, 2).map((item, index) => (
                       <div key={index} className="">
                         {index === 1 ? (
-                          <div className="mr-2">{item.skill_object.name}</div>
+                          <span className="mr-2">
+                            ,{item.skill_object.name}
+                          </span>
                         ) : (
-                          <div className="mr-2">{item.skill_object.name},</div>
+                          <span className="mr-2">{item.skill_object.name}</span>
                         )}
                       </div>
                     ))}
                     {skills?.results?.slice(2)?.length ?? 0 > 0 ? (
-                      <div>
-                        and {skills?.results?.length ?? 0 - 2} other skills
-                      </div>
+                      <span>
+                        and {skills?.results?.slice(2)?.length ?? 0 - 2}{" "}
+                        {skills?.results?.length ?? 0 - 2 === 1
+                          ? "other skill."
+                          : "other skills."}
+                      </span>
                     ) : (
-                      <div>.</div>
+                      <span>.</span>
                     )}
                   </div>
                 )}
