@@ -3,7 +3,7 @@ import { DoctorModal } from "./models";
 import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import * as Notification from "../../Utils/Notifications";
 import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
-import { DoctorCapacity } from "./DoctorCapacity";
+import { StaffCapacity } from "./StaffCapacity";
 import DialogModal from "../Common/Dialog";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -17,7 +17,7 @@ interface DoctorsCountProps extends DoctorModal {
   handleUpdate: () => void;
 }
 
-const DoctorsCountCard = (props: DoctorsCountProps) => {
+const StaffCountCard = (props: DoctorsCountProps) => {
   const specialization = DOCTOR_SPECIALIZATION.find((i) => i.id === props.area);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [open, setOpen] = useState(false);
@@ -33,7 +33,7 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
     if (res?.ok) {
       props.removeDoctor(props.id);
       Notification.Success({
-        msg: "Doctor specialization type deleted successfully",
+        msg: "Staff specialization type deleted successfully",
       });
     }
   };
@@ -83,7 +83,7 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
           show={openDeleteDialog}
           onClose={handleDeleteClose}
           title={`Delete ${specialization?.text}`}
-          description="You will not be able to access this docter specialization type later."
+          description="You will not be able to access this specialization type later."
           action="Delete"
           variant="danger"
           onConfirm={handleDeleteSubmit}
@@ -93,9 +93,9 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
         <DialogModal
           show={open}
           onClose={() => setOpen(false)}
-          title="Update Doctor Capacity"
+          title="Update Staff Capacity"
         >
-          <DoctorCapacity
+          <StaffCapacity
             facilityId={props.facilityId}
             handleClose={() => {
               setOpen(false);
@@ -112,4 +112,4 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
   );
 };
 
-export default DoctorsCountCard;
+export default StaffCountCard;

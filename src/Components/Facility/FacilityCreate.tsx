@@ -37,8 +37,8 @@ import { BedCapacity } from "./BedCapacity";
 import BedTypeCard from "./BedTypeCard";
 import Card from "../../CAREUI/display/Card.js";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { DoctorCapacity } from "./DoctorCapacity";
-import DoctorsCountCard from "./DoctorsCountCard";
+import { StaffCapacity } from "./StaffCapacity.js";
+import StaffCountCard from "./StaffCountCard.js";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { FormAction } from "../Form/Utils.js";
 import GLocationPicker from "../Common/GLocationPicker";
@@ -223,7 +223,7 @@ export const FacilityCreate = (props: FacilityProps) => {
       },
       {
         id: 3,
-        name: "Doctor Capacity",
+        name: "Staff Capacity",
         onClick: () => {
           setCurrentStep(3);
         },
@@ -597,7 +597,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   if (!doctorData || !doctorData.length) {
     doctorList = (
       <h5 className="flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-gray-500 shadow">
-        {t("no_doctors")}
+        {t("no_staff")}
       </h5>
     );
   } else {
@@ -612,7 +612,7 @@ export const FacilityCreate = (props: FacilityProps) => {
           };
 
           return (
-            <DoctorsCountCard
+            <StaffCountCard
               facilityId={createdFacilityId || ""}
               key={`bed_${data.id}`}
               handleUpdate={async () => {
@@ -654,7 +654,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         >
           <Steps steps={getSteps()} />
           <div className="mt-3">
-            <DoctorCapacity
+            <StaffCapacity
               key={docCapacityKey}
               className="mx-auto w-full max-w-2xl"
               facilityId={createdFacilityId || ""}

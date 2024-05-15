@@ -53,11 +53,11 @@ describe("Resource Page", () => {
       "Dummy",
       "Test title",
       "10",
-      "Test description"
+      "Test description",
     );
     facilityPage.clickSubmitRequestButton();
     facilityPage.verifySuccessNotification(
-      "Resource request created successfully"
+      "Resource request created successfully",
     );
     facilityPage.verifyresourcenewurl();
     cy.url().then((url) => {
@@ -71,7 +71,7 @@ describe("Resource Page", () => {
     resourcePage.updateStatus("APPROVED");
     resourcePage.clickSubmitButton();
     resourcePage.verifySuccessNotification(
-      "Resource request updated successfully"
+      "Resource request updated successfully",
     );
   });
 

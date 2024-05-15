@@ -114,7 +114,7 @@ describe("Facility Manage Functions", () => {
     facilityPage.fillDoctorCount(doctorCapacity);
     facilityPage.saveAndExitDoctorForm();
     facilityManage.verifySuccessMessageVisibilityAndContent(
-      "Doctor count added successfully",
+      "Staff count added successfully",
     );
     facilityManage.verifyTotalDoctorCapacity(doctorCapacity);
     // edit a existing doctor
@@ -129,7 +129,7 @@ describe("Facility Manage Functions", () => {
     facilityManage.clickDeleteFacilityDoctorCapacity();
     facilityManage.clickButtonWithText("Delete");
     facilityManage.verifySuccessMessageVisibilityAndContent(
-      "Doctor specialization type deleted successfully",
+      "Staff specialization type deleted successfully",
     );
   });
 
