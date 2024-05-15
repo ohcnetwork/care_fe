@@ -183,7 +183,9 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
             <SelectMenuV2
               id="area-of-specialization"
               value={doctorTypes.find((type) => type.id == state.form.area)?.id}
-              options={doctorTypes}
+              options={
+                id ? doctorTypes : doctorTypes.filter((type) => !type.disabled)
+              }
               optionLabel={(option) => option.text}
               optionValue={(option) => option.id}
               requiredError={state.errors.area.length !== 0}
