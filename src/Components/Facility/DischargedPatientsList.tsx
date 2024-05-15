@@ -218,6 +218,7 @@ const DischargedPatientsList = ({
         />
       </div>
       <PaginatedList
+        perPage={18}
         route={routes.listFacilityDischargedPatients}
         pathParams={{ facility_external_id }}
         query={{ ordering: "-modified_date", ...qParams }}
