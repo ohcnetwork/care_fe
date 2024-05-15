@@ -104,7 +104,7 @@ const DischargedPatientsList = ({
       }}
       options={
         <>
-          <div className="flex flex-col gap-4 md:flex-row">
+          <div className="flex flex-col gap-4 lg:flex-row">
             <SwitchTabs
               tab1="Live"
               tab2="Discharged"

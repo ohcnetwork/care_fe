@@ -581,16 +581,18 @@ export default function PatientFilter(props: any) {
         className="rounded-md"
       >
         <div className="space-y-4">
-          <div>
-            <FieldLabel className="text-sm">Facility</FieldLabel>
-            <FacilitySelect
-              multiple={false}
-              name="facility"
-              showAll={false}
-              selected={filterState.facility_ref}
-              setSelected={(obj) => setFilterWithRef("facility", obj)}
-            />
-          </div>
+          {!props.dischargePage && (
+            <div>
+              <FieldLabel className="text-sm">Facility</FieldLabel>
+              <FacilitySelect
+                multiple={false}
+                name="facility"
+                showAll={false}
+                selected={filterState.facility_ref}
+                setSelected={(obj) => setFilterWithRef("facility", obj)}
+              />
+            </div>
+          )}
           {filterState.facility && (
             <div>
               <FieldLabel className="text-sm">Location</FieldLabel>
@@ -609,22 +611,24 @@ export default function PatientFilter(props: any) {
               />
             </div>
           )}
-          <div>
-            <FieldLabel className="text-sm">Facility type</FieldLabel>
-            <SelectMenuV2
-              placeholder="Show all"
-              options={FACILITY_TYPES}
-              optionLabel={(o) => o.text}
-              optionValue={(o) => o.text}
-              value={filterState.facility_type}
-              onChange={(v) =>
-                setFilterState({ ...filterState, facility_type: v })
-              }
-              optionIcon={() => (
-                <CareIcon icon="l-hospital" className="text-lg" />
-              )}
-            />
-          </div>
+          {!props.dischargePage && (
+            <div>
+              <FieldLabel className="text-sm">Facility type</FieldLabel>
+              <SelectMenuV2
+                placeholder="Show all"
+                options={FACILITY_TYPES}
+                optionLabel={(o) => o.text}
+                optionValue={(o) => o.text}
+                value={filterState.facility_type}
+                onChange={(v) =>
+                  setFilterState({ ...filterState, facility_type: v })
+                }
+                optionIcon={() => (
+                  <CareIcon icon="l-hospital" className="text-lg" />
+                )}
+              />
+            </div>
+          )}
           <div>
             <FieldLabel className="text-sm">LSG Body</FieldLabel>
             <div className="">
