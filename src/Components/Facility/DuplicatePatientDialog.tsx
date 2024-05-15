@@ -51,7 +51,9 @@ const DuplicatePatientDialog = (props: Props) => {
                   return (
                     <tr key={i}>
                       <td className={tdClass}>
-                        <div className="font-semibold">{patient.name}</div>
+                        <div className="font-semibold capitalize">
+                          {patient.name}
+                        </div>
                         <div className="break-words text-xs">
                           ID : {patient.patient_id}
                         </div>
