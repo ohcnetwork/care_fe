@@ -9,7 +9,6 @@ import {
 } from "../../Common/constants.js";
 import { ConsultationModel, PatientCategory } from "../Facility/models.js";
 import { Switch, Menu } from "@headlessui/react";
-
 import { Link, navigate } from "raviger";
 import { useState } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon.js";
@@ -38,6 +37,7 @@ import { Mews } from "../Facility/Consultations/Mews.js";
 import DischargeSummaryModal from "../Facility/DischargeSummaryModal.js";
 import DischargeModal from "../Facility/DischargeModal.js";
 import { useTranslation } from "react-i18next";
+import FetchRecordsModal from "../ABDM/FetchRecordsModal.js";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
@@ -54,6 +54,7 @@ export default function PatientInfoCard(props: {
   const [showABHAProfile, setShowABHAProfile] = useState(
     !!props.showAbhaProfile,
   );
+  const [showFetchABDMRecords, setShowFetchABDMRecords] = useState(false);
   const [openDischargeSummaryDialog, setOpenDischargeSummaryDialog] =
     useState(false);
   const [openDischargeDialog, setOpenDischargeDialog] = useState(false);
@@ -217,7 +218,7 @@ export default function PatientInfoCard(props: {
             </div>
             <div className="flex items-center justify-center">
               <div
-                className="mb-2 flex flex-col justify-center text-xl font-semibold lg:hidden"
+                className="mb-2 flex flex-col justify-center text-xl font-semibold capitalize lg:hidden"
                 id="patient-name-consultation"
               >
                 {patient.name}
@@ -262,7 +263,7 @@ export default function PatientInfoCard(props: {
             </div>
             <div className="flex flex-col flex-wrap items-center justify-center lg:items-start lg:justify-normal">
               <div
-                className="mb-2 hidden flex-row text-xl font-semibold lg:flex"
+                className="mb-2 hidden flex-row text-xl font-semibold capitalize lg:flex"
                 id="patient-name-consultation"
               >
                 {patient.name}
@@ -467,7 +468,7 @@ export default function PatientInfoCard(props: {
           </div>
         </div>
         <div
-          className="col-span-2 flex w-full flex-col items-center justify-center gap-2 px-4 py-1 lg:col-span-1 2xl:flex-row"
+          className="col-span-2 flex w-full flex-col items-center justify-end gap-2 px-4 py-1 lg:col-span-1 2xl:flex-row"
           id="consultation-buttons"
         >
           {consultation?.suggestion === "A" && (
@@ -715,6 +716,24 @@ export default function PatientInfoCard(props: {
                               />
                               <span>Link Care Context</span>
                             </div>
+                            <div
+                              className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
+                              onClick={() => {
+                                close();
+                                setShowFetchABDMRecords(true);
+                                triggerGoal("Patient Card Button Clicked", {
+                                  buttonName: "Fetch Records over ABDM",
+                                  consultationId: consultation?.id,
+                                  userId: authUser?.id,
+                                });
+                              }}
+                            >
+                              <CareIcon
+                                icon="l-user-square"
+                                className="text-lg text-primary-500"
+                              />
+                              <span>Fetch Records over ABDM</span>
+                            </div>
                           </>
                         )}
                       </Menu.Item>
@@ -895,6 +914,11 @@ export default function PatientInfoCard(props: {
         patient={patient}
         show={showLinkCareContext}
         onClose={() => setShowLinkCareContext(false)}
+      />
+      <FetchRecordsModal
+        patient={patient}
+        show={showFetchABDMRecords}
+        onClose={() => setShowFetchABDMRecords(false)}
       />
     </>
   );
