@@ -195,10 +195,10 @@ const AssetsList = () => {
           >
             <div
               key={asset.id}
-              className="border-1 h-full w-full cursor-pointer items-center justify-center rounded-lg border border-transparent bg-white p-5 shadow hover:border-primary-500"
+              className="border-1 h-full w-full cursor-pointer items-center justify-center rounded-lg border border-transparent bg-white p-5 shadow hover:border-primary-500 "
             >
-              <div className="md:flex">
-                <p className="flex break-words text-xl font-medium capitalize">
+              <div className="tooltip tooltip-bottom md:flex">
+                <p className="flex overflow-hidden text-xl font-medium capitalize">
                   <span className="mr-2 text-primary-500">
                     <CareIcon
                       icon={
@@ -211,11 +211,9 @@ const AssetsList = () => {
                       className="text-2xl"
                     />
                   </span>
-                  <p
-                    className="w-48 truncate"
-                    data-testid="created-asset-list-name"
-                  >
+                  <p className="truncate" data-testid="created-asset-list-name">
                     {asset.name}
+                    <span className="tooltip-text">{asset.name}</span>
                   </p>
                 </p>
               </div>
