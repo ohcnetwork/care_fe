@@ -89,6 +89,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.verifyNotification("Normal Log Updates details created successfully");
     cy.closeNotification();
     // edit the card and verify the data.
+    cy.contains("Daily Rounds").click();
     patientLogupdate.clickLogupdateCard("#dailyround-entry", patientCategory);
     cy.verifyContentPresence("#consultation-preview", [
       patientCategory,
