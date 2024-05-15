@@ -98,7 +98,7 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
         invalidForm = true;
       }
       if (field === "count" && state.form[field] < 0) {
-        errors[field] = "Doctor count cannot be negative";
+        errors[field] = "Staff count cannot be negative";
         invalidForm = true;
       }
     });

@@ -122,7 +122,7 @@ describe("Facility Manage Functions", () => {
     facilityPage.fillDoctorCount(doctorModifiedCapacity);
     facilityPage.clickdoctorcapacityaddmore();
     facilityManage.verifySuccessMessageVisibilityAndContent(
-      "Doctor count updated successfully",
+      "Staff count updated successfully",
     );
     facilityManage.verifyTotalDoctorCapacity(doctorModifiedCapacity);
     // delete a bed
