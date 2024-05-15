@@ -507,6 +507,14 @@ export interface PatientNotesEditModel {
   note: string;
 }
 
+export interface PaitentNotesReplyModel {
+  id: string;
+  note: string;
+  user_type?: UserRole | "RemoteSpecialist";
+  created_by_object: BaseUserModel;
+  created_date: string;
+}
+
 export interface PatientNotesModel {
   id: string;
   note: string;
@@ -517,7 +525,7 @@ export interface PatientNotesModel {
   created_date: string;
   last_edited_by?: BaseUserModel;
   last_edited_date?: string;
-  reply_to?: string;
+  reply_to?: PaitentNotesReplyModel;
 }
 
 export interface PatientNoteStateType {

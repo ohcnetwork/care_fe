@@ -6,7 +6,7 @@ import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { NonReadOnlyUsers } from "../../../Utils/AuthorizeFor";
 import { useMessageListener } from "../../../Common/hooks/useMessageListener";
 import PatientConsultationNotesList from "../PatientConsultationNotesList.js";
-import { PatientNoteStateType, PatientNotesModel } from "../models.js";
+import { PatientNoteStateType, PaitentNotesReplyModel } from "../models.js";
 import routes from "../../../Redux/api.js";
 import request from "../../../Utils/request/request.js";
 import useQuery from "../../../Utils/request/useQuery.js";
@@ -39,7 +39,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const [focused, setFocused] = useState(false);
-  const [reply_to, setReplyTo] = useState<PatientNotesModel | undefined>(
+  const [reply_to, setReplyTo] = useState<PaitentNotesReplyModel | undefined>(
     undefined,
   );
 

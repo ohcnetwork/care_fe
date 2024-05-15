@@ -34,19 +34,19 @@ const DoctorNote = (props: DoctorNoteProps) => {
           dataLength={state.notes.length}
           scrollableTarget="patient-notes-list"
         >
-          {state.notes.map((note) => {
-            const parentNote = state.notes.find((n) => n.id === note.reply_to);
-            return (
-              <DoctorNoteReplyPreviewCard key={note.id} parentNote={parentNote}>
-                <PatientNoteCard
-                  note={note}
-                  setReload={setReload}
-                  disableEdit={disableEdit}
-                  setReplyTo={setReplyTo}
-                />
-              </DoctorNoteReplyPreviewCard>
-            );
-          })}
+          {state.notes.map((note) => (
+            <DoctorNoteReplyPreviewCard
+              key={note.id}
+              parentNote={note.reply_to}
+            >
+              <PatientNoteCard
+                note={note}
+                setReload={setReload}
+                disableEdit={disableEdit}
+                setReplyTo={setReplyTo}
+              />
+            </DoctorNoteReplyPreviewCard>
+          ))}
         </InfiniteScroll>
       ) : (
         <div className="mt-2 flex h-full items-center justify-center text-2xl font-bold text-gray-500">

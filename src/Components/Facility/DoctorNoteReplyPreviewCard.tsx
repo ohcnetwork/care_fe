@@ -1,10 +1,10 @@
 import React from "react";
-import { PatientNotesModel } from "./models";
+import { PaitentNotesReplyModel } from "./models";
 import { USER_TYPES_MAP } from "../../Common/constants";
 import { formatDateTime, relativeDate } from "../../Utils/utils";
 
 interface Props {
-  parentNote: PatientNotesModel | undefined;
+  parentNote: PaitentNotesReplyModel | undefined;
   children: React.ReactNode;
   cancelReply?: () => void;
 }

@@ -754,8 +754,9 @@ const routes = {
     method: "POST",
     TRes: Type<PatientNotesModel>(),
     TBody: Type<
-      Pick<PatientNotesModel, "note" | "thread" | "reply_to"> & {
+      Pick<PatientNotesModel, "note" | "thread"> & {
         consultation?: string;
+        reply_to?: string;
       }
     >(),
   },

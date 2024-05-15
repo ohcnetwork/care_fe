@@ -9,7 +9,7 @@ import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import PatientConsultationNotesList from "./PatientConsultationNotesList";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
-import { PatientNoteStateType, PatientNotesModel } from "./models";
+import { PatientNoteStateType, PaitentNotesReplyModel } from "./models";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import AutoExpandingTextInputFormField from "../Form/FormFields/AutoExpandingTextInputFormField.js";
 import * as Sentry from "@sentry/browser";
@@ -35,7 +35,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   const [patientActive, setPatientActive] = useState(true);
   const [reload, setReload] = useState(false);
   const [focused, setFocused] = useState(false);
-  const [reply_to, setReplyTo] = useState<PatientNotesModel | undefined>(
+  const [reply_to, setReplyTo] = useState<PaitentNotesReplyModel | undefined>(
     undefined,
   );
 
