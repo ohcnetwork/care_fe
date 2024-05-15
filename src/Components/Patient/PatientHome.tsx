@@ -343,7 +343,7 @@ export const PatientHome = (props: any) => {
             <div className="flex h-full flex-col justify-between rounded-lg bg-white pb-5 pl-9 pt-11 shadow">
               <div>
                 <div className="flex flex-row gap-4">
-                  <h1 className="flex flex-row pb-3 text-2xl font-bold">
+                  <h1 className="flex flex-row pb-3 text-2xl font-bold capitalize">
                     {patientData.name} - {formatPatientAge(patientData, true)}
                   </h1>
                   <div className="ml-auto mr-9 flex flex-wrap gap-3">
@@ -591,18 +591,39 @@ export const PatientHome = (props: any) => {
                   <div className="flex justify-between">
                     <div className="w-1/2 border-r-2">
                       <div className="text-sm font-normal leading-5 text-gray-500">
-                        COVID Status
-                      </div>
-                      <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
-                        {patientData.disease_status}
-                      </div>
-                    </div>
-                    <div className="w-1/2">
-                      <div className="text-sm font-normal leading-5 text-gray-500">
                         Status
                       </div>
                       <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
                         {patientData.is_active ? "LIVE" : "DISCHARGED"}
+                      </div>
+                    </div>
+                    <div className="w-1/2">
+                      <div className="text-sm font-normal leading-5 text-gray-500">
+                        Last Discharged Reason
+                      </div>
+                      <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
+                        {patientData.is_active ? (
+                          "-"
+                        ) : !patientData.last_consultation
+                            ?.new_discharge_reason ? (
+                          <span className="text-gray-800">
+                            {patientData?.last_consultation?.suggestion === "OP"
+                              ? "OP file closed"
+                              : "UNKNOWN"}
+                          </span>
+                        ) : patientData.last_consultation
+                            ?.new_discharge_reason ===
+                          DISCHARGE_REASONS.find((i) => i.text == "Expired")
+                            ?.id ? (
+                          <span className="text-red-600">EXPIRED</span>
+                        ) : (
+                          DISCHARGE_REASONS.find(
+                            (reason) =>
+                              reason.id ===
+                              patientData.last_consultation
+                                ?.new_discharge_reason,
+                          )?.text
+                        )}
                       </div>
                     </div>
                   </div>
@@ -657,11 +678,25 @@ export const PatientHome = (props: any) => {
                     className="mt-4 w-full"
                     disabled={!patientData.is_active}
                     authorizeFor={NonReadOnlyUsers}
-                    onClick={() =>
-                      navigate(
-                        `/facility/${patientData?.facility}/patient/${id}/update`,
-                      )
-                    }
+                    onClick={() => {
+                      const showAllFacilityUsers = [
+                        "DistrictAdmin",
+                        "StateAdmin",
+                      ];
+                      if (
+                        !showAllFacilityUsers.includes(authUser.user_type) &&
+                        authUser.home_facility_object?.id !==
+                          patientData.facility
+                      ) {
+                        Notification.Error({
+                          msg: "Oops! Non-Home facility users don't have permission to perform this action.",
+                        });
+                      } else {
+                        navigate(
+                          `/facility/${patientData?.facility}/patient/${id}/update`,
+                        );
+                      }
+                    }}
                   >
                     <CareIcon icon="l-edit-alt" className="text-lg" />
                     Update Details
@@ -823,6 +858,7 @@ export const PatientHome = (props: any) => {
                           </div>
                         </dl>
                       </div>
+
                       <div className="mt-2 flex">
                         <ButtonV2
                           className="mr-2 w-full bg-white hover:bg-gray-100"
