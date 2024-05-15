@@ -177,13 +177,13 @@ export const StaffCapacity = (props: DoctorCapacityProps) => {
       ) : (
         <div className={className}>
           <div>
-            <FieldLabel className="mb-2" required={true}>
+            <FieldLabel className="mb-2" required>
               Staff Type
             </FieldLabel>
             <SelectMenuV2
               id="area-of-specialization"
               value={doctorTypes.find((type) => type.id == state.form.area)?.id}
-              options={doctorTypes.filter((type) => !type.disabled)}
+              options={doctorTypes}
               optionLabel={(option) => option.text}
               optionValue={(option) => option.id}
               requiredError={state.errors.area.length !== 0}
