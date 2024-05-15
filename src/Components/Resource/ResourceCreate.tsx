@@ -147,7 +147,7 @@ export default function ResourceCreate(props: resourceProps) {
     return !isInvalidForm;
   };
 
-  const handleChange = (e: FieldChangeEvent<string>) => {
+  const handleChange = (e: FieldChangeEvent<string | null>) => {
     const form = { ...state.form };
     const { name, value } = e;
     form[name] = value;

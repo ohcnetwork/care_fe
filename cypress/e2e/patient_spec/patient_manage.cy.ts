@@ -35,7 +35,7 @@ describe("Patient", () => {
   // });
   // commented out the shifting request, as logic need to be re-visited
 
-  it("Post doctor notes for an already created patient", () => {
+  it("Post discussion notes for an already created patient", () => {
     patientPage.visitPatient("Dummy Patient 3");
     patientConsultationPage.visitDoctorNotesPage();
     patientConsultationPage.addDoctorsNotes("Test Doctor Notes");
