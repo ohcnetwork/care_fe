@@ -21,13 +21,8 @@ export class PatientPage {
   }
 
   selectFacility(facilityName: string) {
-    cy.get("input[name='facilities']")
-      .type(facilityName)
-      .then(() => {
-        cy.get("[role='option']").contains(facilityName).click();
-      });
-    cy.get("button").should("contain", "Select");
-    cy.get("button").get("#submit").click();
+    cy.searchAndSelectOption("input[name='facilities']", facilityName);
+    cy.submitButton("Select");
   }
 
   interceptCreatePatientAPI() {
@@ -43,17 +38,28 @@ export class PatientPage {
   }
 
   typePatientPhoneNumber(phoneNumber: string) {
-    cy.get("#phone_number-div").click().type(phoneNumber);
+    cy.get("#phone_number").click().type(phoneNumber);
   }
 
   typePatientEmergencyNumber(phoneNumber: string) {
-    cy.get("#emergency_phone_number-div").click().type(phoneNumber);
+    cy.get("#emergency_phone_number").click().type(phoneNumber);
+  }
+
+  checkPhoneNumberIsEmergencyNumber() {
+    cy.get("#emergency_contact_checkbox > div > input").click();
   }
 
   typePatientDateOfBirth(dateOfBirth: string) {
+    cy.clickAndSelectOption("#patientAge", "DOB");
     cy.get("#date_of_birth").scrollIntoView();
     cy.get("#date_of_birth").should("be.visible").click();
     cy.get("#date-input").click().type(dateOfBirth);
+  }
+
+  typePatientAge(age: string) {
+    cy.clickAndSelectOption("#patientAge", "Age");
+    cy.submitButton("Confirm");
+    cy.get("#age").clear().type(age);
   }
 
   typePatientName(patientName: string) {
@@ -72,6 +78,16 @@ export class PatientPage {
       .type(address);
   }
 
+  typeLastMenstruationStartDate(date: string) {
+    cy.get("#last_menstruation_start_date").click();
+    cy.get("#date-input").click().type(date);
+  }
+
+  typeDateOfDelivery(date: string) {
+    cy.get("#date_of_delivery").click();
+    cy.get("#date-input").click().type(date);
+  }
+
   clickPermanentAddress() {
     cy.get("[data-testid=permanent-address] input").check();
   }
@@ -80,24 +96,24 @@ export class PatientPage {
     cy.get("#is_antenatal-0").click();
   }
 
+  clickPatientPostPartumStatusYes() {
+    cy.get("#is_postpartum-0").click();
+  }
+
   clickCancelButton() {
     cy.get("#cancel").click();
   }
 
   selectPatientGender(gender: string) {
-    cy.get("[data-testid=Gender] button")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains(gender).click();
-      });
+    cy.clickAndSelectOption("[data-testid=Gender] button", gender);
   }
 
   selectPatientBloodGroup(bloodgroup: string) {
-    cy.get("#blood_group")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains(bloodgroup).click();
-      });
+    cy.clickAndSelectOption("#blood_group", bloodgroup);
+  }
+
+  selectPatientOccupation(occupation: string) {
+    cy.searchAndSelectOption("#occupation", occupation);
   }
 
   clickCreatePatient() {
@@ -146,7 +162,10 @@ export class PatientPage {
     phoneNumber,
     emergencyPhoneNumber,
     yearOfBirth,
-    bloodGroup
+    bloodGroup,
+    occupation,
+    isAntenatal = false,
+    isPostPartum = false,
   ) {
     cy.url().should("include", "/facility/");
     cy.get("[data-testid=patient-dashboard]").then(($dashboard) => {
@@ -157,6 +176,14 @@ export class PatientPage {
       expect($dashboard).to.contain(emergencyPhoneNumber);
       expect($dashboard).to.contain(yearOfBirth);
       expect($dashboard).to.contain(bloodGroup);
+      expect($dashboard).to.contain(occupation);
+
+      if (isAntenatal) {
+        expect($dashboard).to.contain("Antenatal");
+      }
+      if (isPostPartum) {
+        expect($dashboard).to.contain("Post-partum");
+      }
     });
   }
 
@@ -166,7 +193,7 @@ export class PatientPage {
     patientState,
     patientDistrict,
     patientLocalbody,
-    patientWard
+    patientWard,
   ) {
     cy.get("[data-testid=patient-details]").then(($dashboard) => {
       cy.url().should("include", "/facility/");

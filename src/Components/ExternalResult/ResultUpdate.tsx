@@ -24,7 +24,7 @@ const initForm = {
 
 const initError = Object.assign(
   {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
 );
 
 const initialState = {
@@ -121,7 +121,7 @@ export default function UpdateResult(props: any) {
         setWard(initialLocalbodies);
       }
     },
-    [props.id]
+    [props.id],
   );
 
   const validateForm = () => {

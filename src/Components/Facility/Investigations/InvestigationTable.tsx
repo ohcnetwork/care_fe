@@ -10,7 +10,7 @@ const TestRow = ({ data, i, onChange, showForm, value, isChanged }: any) => {
     <tr
       className={classNames(
         i % 2 == 0 ? "bg-gray-50" : "bg-white",
-        isChanged && "!bg-primary-300"
+        isChanged && "!bg-primary-300",
       )}
       x-description="Even row"
     >
@@ -64,6 +64,7 @@ const TestRow = ({ data, i, onChange, showForm, value, isChanged }: any) => {
 export const InvestigationTable = ({
   title,
   data,
+  isDischargedPatient,
   handleValueChange,
   changedFields,
   handleUpdateCancel,
@@ -94,6 +95,7 @@ export const InvestigationTable = ({
             Print Report
           </ButtonV2>
           <ButtonV2
+            disabled={isDischargedPatient}
             variant="primary"
             className="my-2 mr-2"
             onClick={() => {
@@ -101,7 +103,7 @@ export const InvestigationTable = ({
               setShowForm((prev) => !prev);
             }}
           >
-            {!showForm && <CareIcon className="care-l-edit mr-2" />}
+            {!showForm && <CareIcon icon="l-edit" className="mr-2" />}
             {showForm ? "Cancel" : "Update Details"}
           </ButtonV2>
           {showForm && (
@@ -137,7 +139,7 @@ export const InvestigationTable = ({
                     >
                       {heading}
                     </th>
-                  )
+                  ),
                 )}
               </tr>
             </thead>

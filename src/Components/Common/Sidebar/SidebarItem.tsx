@@ -24,7 +24,7 @@ type SidebarItemBaseProps = SidebarItemProps & {
 const SidebarItemBase = forwardRef(
   (
     { shrinked, external, ...props }: SidebarItemBaseProps,
-    ref: Ref<HTMLAnchorElement>
+    ref: Ref<HTMLAnchorElement>,
   ) => {
     const { t } = useTranslation();
     const { resetHistory } = useAppHistory();
@@ -66,7 +66,7 @@ const SidebarItemBase = forwardRef(
             {t(props.text)}
           </span>
           {external && !shrinked && (
-            <CareIcon className="care-l-external-link-alt text-lg" />
+            <CareIcon icon="l-external-link-alt" className="text-lg" />
           )}
         </div>
 
@@ -74,7 +74,7 @@ const SidebarItemBase = forwardRef(
           <span
             className={`absolute flex items-center justify-center bg-primary-500 font-semibold text-white ${
               shrinked
-                ? "right-3 top-0.5 h-4 w-5 rounded-md text-[9px]"
+                ? "right-3 top-0.5 h-4 w-5 rounded-md text-xs"
                 : "inset-y-0 right-4 my-auto h-6 rounded-md px-2 text-xs"
             } z-10 animate-pulse transition-all duration-200 ease-in-out`}
           >
@@ -83,17 +83,17 @@ const SidebarItemBase = forwardRef(
         )}
       </Link>
     );
-  }
+  },
 );
 
 export const SidebarItem = forwardRef(
   (props: SidebarItemProps, ref: Ref<HTMLAnchorElement>) => (
     <SidebarItemBase {...props} ref={ref} />
-  )
+  ),
 );
 
 export const ShrinkedSidebarItem = forwardRef(
   (props: SidebarItemProps, ref: Ref<HTMLAnchorElement>) => (
     <SidebarItemBase shrinked ref={ref} {...props} />
-  )
+  ),
 );

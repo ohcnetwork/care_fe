@@ -19,11 +19,11 @@ export const ConsultationInvestigationsTab = (props: ConsultationTabProps) => {
             disabled={!props.patientData.is_active}
             onClick={() =>
               navigate(
-                `/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}/investigation/`
+                `/facility/${props.facilityId}/patient/${props.patientId}/consultation/${props.consultationId}/investigation/`,
               )
             }
           >
-            <CareIcon className="care-l-plus" />
+            <CareIcon icon="l-plus" />
             <span>{t("log_lab_results")}</span>
           </ButtonV2>
         </div>

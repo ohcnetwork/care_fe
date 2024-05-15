@@ -59,7 +59,8 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
 
   const showChevronIcon = props.showChevronIcon ?? true;
 
-  const placeholder = props.placeholder ?? "Select";
+  const placeholder =
+    valueOptions?.length > 0 ? props.placeholder ?? "Select" : "No options";
   const defaultOption = {
     label: placeholder,
     selectedLabel: <p className="font-normal text-gray-600">{placeholder}</p>,
@@ -77,7 +78,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
   return (
     <div className={props.className} id={props.id}>
       <Listbox
-        disabled={props.disabled}
+        disabled={props.disabled || valueOptions?.length === 0}
         value={value}
         onChange={(selection: any) => props.onChange(selection.value)}
       >
@@ -101,19 +102,22 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                         {value.icon}
                       </div>
                     )}
-                    <p className="ml-2.5 break-all text-sm font-medium">
+                    <p className="ml-2.5 whitespace-pre-wrap text-start text-sm font-medium">
                       {value.selectedLabel}
                     </p>
                   </div>
                   {showChevronIcon && (
-                    <CareIcon className="care-l-angle-down -mb-0.5 text-lg text-gray-900" />
+                    <CareIcon
+                      icon="l-angle-down"
+                      className="-mb-0.5 text-lg text-gray-900"
+                    />
                   )}
                 </div>
               </Listbox.Button>
               <div
                 className={classNames(
                   "absolute z-10 w-full",
-                  props.position === "above" ? "bottom-0 mb-12" : "top-0 mt-12"
+                  props.position === "above" ? "bottom-0 mb-12" : "top-0 mt-12",
                 )}
               >
                 <DropdownTransition show={open}>
@@ -132,7 +136,10 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                               {props.optionIcon
                                 ? option.icon
                                 : selected && (
-                                    <CareIcon className="care-l-check text-lg" />
+                                    <CareIcon
+                                      icon="l-check"
+                                      className="text-lg"
+                                    />
                                   )}
                             </div>
                             {option.description && (

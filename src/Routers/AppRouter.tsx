@@ -13,6 +13,8 @@ import {
 import { BLACKLISTED_PATHS } from "../Common/constants";
 import useConfig from "../Common/hooks/useConfig";
 import SessionExpired from "../Components/ErrorPages/SessionExpired";
+import HealthInformation from "../Components/ABDM/HealthInformation";
+import ABDMFacilityRecords from "../Components/ABDM/ABDMFacilityRecords";
 
 import UserRoutes from "./routes/UserRoutes";
 import PatientRoutes from "./routes/PatientRoutes";
@@ -44,6 +46,13 @@ const Routes = {
   ),
   "/notice_board": () => <NoticeBoard />,
 
+  "/abdm/health-information/:id": ({ id }: { id: string }) => (
+    <HealthInformation artefactId={id} />
+  ),
+  "/facility/:facilityId/abdm": ({ facilityId }: any) => (
+    <ABDMFacilityRecords facilityId={facilityId} />
+  ),
+
   "/session-expired": () => <SessionExpired />,
   "/not-found": () => <Error404 />,
 };
@@ -60,7 +69,7 @@ export default function AppRouter() {
 
   if (
     !["Nurse", "NurseReadOnly", "Staff", "StaffReadOnly"].includes(
-      authUser.user_type
+      authUser.user_type,
     )
   ) {
     routes = { ...routes, ...ExternalResultRoutes };
@@ -86,13 +95,13 @@ export default function AppRouter() {
   }, [path]);
 
   const [shrinked, setShrinked] = useState(
-    localStorage.getItem(SIDEBAR_SHRINK_PREFERENCE_KEY) === "true"
+    localStorage.getItem(SIDEBAR_SHRINK_PREFERENCE_KEY) === "true",
   );
 
   useEffect(() => {
     localStorage.setItem(
       SIDEBAR_SHRINK_PREFERENCE_KEY,
-      shrinked ? "true" : "false"
+      shrinked ? "true" : "false",
     );
   }, [shrinked]);
 

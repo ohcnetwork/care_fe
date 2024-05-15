@@ -29,7 +29,7 @@ export default function Waveform(props: {
   const data = wave.data.split(" ").map(Number);
   const viewable = data.length;
   const [queueData, setQueueData] = useState<number[]>(
-    Array(viewable).fill(null)
+    Array(viewable).fill(null),
   );
   const [refreshData, setRefreshData] = useState<number[]>([]);
   const [lastData, setLastData] = useState<number[]>([]);
@@ -126,7 +126,7 @@ export default function Waveform(props: {
       />
       <div className="absolute bottom-0 right-5 w-full md:w-[70%]">
         {props.metrics && (
-          <div className="flex flex-row flex-wrap justify-end gap-2 text-[10px] text-gray-400">
+          <div className="flex flex-row flex-wrap justify-end gap-2 text-xs text-gray-400">
             <div>Lowest: {Math.min(...queueData.slice(0, viewable))}</div>
             <div>Highest: {Math.max(...queueData.slice(0, viewable))}</div>
             <div>Stream Length: {data.length}</div>

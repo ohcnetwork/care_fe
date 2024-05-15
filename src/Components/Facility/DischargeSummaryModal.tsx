@@ -9,15 +9,11 @@ import {
   MultiValidator,
   RequiredFieldValidator,
 } from "../Form/FieldValidators";
-import { useDispatch } from "react-redux";
-import {
-  emailDischargeSummary,
-  generateDischargeSummary,
-} from "../../Redux/actions";
 import { Error, Success } from "../../Utils/Notifications";
-import { previewDischargeSummary } from "../../Redux/actions";
 import { useTranslation } from "react-i18next";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 interface Props {
   show: boolean;
@@ -27,7 +23,6 @@ interface Props {
 
 export default function DischargeSummaryModal(props: Props) {
   const { t } = useTranslation();
-  const dispatch = useDispatch<any>();
   const [email, setEmail] = useState<string>("");
   const [emailError, setEmailError] = useState<string>("");
   const [emailing, setEmailing] = useState(false);
@@ -48,12 +43,12 @@ export default function DischargeSummaryModal(props: Props) {
     setTimeout(async () => {
       setGenerating(false);
 
-      const res = await dispatch(
-        previewDischargeSummary({ external_id: props.consultation.id })
-      );
+      const { res, data } = await request(routes.dischargeSummaryPreview, {
+        pathParams: { external_id: props.consultation.id },
+      });
 
-      if (res.status === 200) {
-        popup(res.data.read_signed_url);
+      if (res?.status === 200 && data) {
+        popup(data.read_signed_url);
         return;
       }
 
@@ -66,13 +61,13 @@ export default function DischargeSummaryModal(props: Props) {
 
   const handleRegenDischargeSummary = async () => {
     setDownloading(true);
-    const res = await dispatch(
-      generateDischargeSummary({ external_id: props.consultation.id })
-    );
-    if (res.status === 406) {
+    const { res, error } = await request(routes.dischargeSummaryGenerate, {
+      pathParams: { external_id: props.consultation.id },
+    });
+    if (res?.status === 406) {
       Error({
         msg:
-          res.data?.message ||
+          error?.message ||
           t("discharge_summary_not_ready") + " " + t("try_again_later"),
       });
       setDownloading(false);
@@ -84,18 +79,18 @@ export default function DischargeSummaryModal(props: Props) {
 
   const downloadDischargeSummary = async () => {
     // returns summary or 202 if new create task started
-    const res = await dispatch(
-      previewDischargeSummary({ external_id: props.consultation.id })
-    );
+    const { res, data } = await request(routes.dischargeSummaryPreview, {
+      pathParams: { external_id: props.consultation.id },
+    });
 
-    if (res.status === 202) {
+    if (res?.status === 202) {
       // wait for the automatic task to finish
       waitForDischargeSummary();
       return;
     }
 
-    if (res.status === 200) {
-      popup(res.data.read_signed_url);
+    if (res?.status === 200 && data) {
+      popup(data.read_signed_url);
       return;
     }
 
@@ -130,11 +125,11 @@ export default function DischargeSummaryModal(props: Props) {
       return;
     }
 
-    const res = await dispatch(
-      emailDischargeSummary({ email }, { external_id: props.consultation.id })
-    );
+    const { res } = await request(routes.dischargeSummaryEmail, {
+      pathParams: { external_id: props.consultation.id },
+    });
 
-    if (res.status === 202) {
+    if (res?.status === 202) {
       Success({ msg: t("email_success") });
       props.onClose();
     }
@@ -155,7 +150,10 @@ export default function DischargeSummaryModal(props: Props) {
             {t("email_discharge_summary_description")}
           </span>
           <span className="text-sm text-warning-600">
-            <CareIcon className="care-l-exclamation-triangle mr-1 text-base" />
+            <CareIcon
+              icon="l-exclamation-triangle"
+              className="mr-1 text-base"
+            />
             {`${t("disclaimer")}: ${t("generated_summary_caution")}`}
           </span>
         </div>
@@ -178,23 +176,23 @@ export default function DischargeSummaryModal(props: Props) {
           <Cancel onClick={props.onClose} />
           <Submit onClick={handleDownload} disabled={downloading}>
             {downloading ? (
-              <CareIcon className="care-l-spinner animate-spin text-lg" />
+              <CareIcon icon="l-spinner" className="animate-spin text-lg" />
             ) : (
-              <CareIcon className="care-l-file-download-alt text-lg" />
+              <CareIcon icon="l-file-download-alt" className="text-lg" />
             )}
             <span>
               {generating
                 ? t("generating") + "..."
                 : downloading
-                ? t("downloading") + "..."
-                : t("download")}
+                  ? t("downloading") + "..."
+                  : t("download")}
             </span>
           </Submit>
           <Submit onClick={handleEmail} disabled={emailing}>
             {emailing ? (
-              <CareIcon className="care-l-spinner animate-spin text-lg" />
+              <CareIcon icon="l-spinner" className="animate-spin text-lg" />
             ) : (
-              <CareIcon className="care-l-fast-mail text-lg" />
+              <CareIcon icon="l-fast-mail" className="text-lg" />
             )}
             <span>{t("send_email")}</span>
           </Submit>

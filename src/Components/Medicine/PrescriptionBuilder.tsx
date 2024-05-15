@@ -31,7 +31,11 @@ export default function PrescriptionBuilder({
 
   const { data, refetch } = useQuery(MedicineRoutes.listPrescriptions, {
     pathParams: { consultation },
-    query: { is_prn, prescription_type, limit: 100 },
+    query: {
+      dosage_type: is_prn ? "PRN" : "REGULAR,TITRATED",
+      prescription_type,
+      limit: 100,
+    },
   });
 
   return (
@@ -79,7 +83,7 @@ export default function PrescriptionBuilder({
         disabled={disabled}
       >
         <div className="flex w-full justify-start gap-2">
-          <CareIcon className="care-l-plus text-lg" />
+          <CareIcon icon="l-plus" className="text-lg" />
           <span className="font-bold">
             {t(is_prn ? "add_prn_prescription" : "add_prescription_medication")}
           </span>
@@ -90,15 +94,15 @@ export default function PrescriptionBuilder({
           onClose={() => setShowCreate(false)}
           show={showCreate}
           title={t(
-            is_prn ? "add_prn_prescription" : "add_prescription_medication"
+            is_prn ? "add_prn_prescription" : "add_prescription_medication",
           )}
           description={
             <div className="mt-2 flex w-full justify-start gap-2 text-warning-500">
-              <CareIcon className="care-l-exclamation-triangle text-base" />
+              <CareIcon icon="l-exclamation-triangle" className="text-base" />
               <span>{t("modification_caution_note")}</span>
             </div>
           }
-          className="w-full max-w-3xl lg:min-w-[600px]"
+          className="w-full max-w-4xl lg:min-w-[768px]"
         >
           <CreatePrescriptionForm
             prescription={
@@ -118,5 +122,7 @@ export default function PrescriptionBuilder({
   );
 }
 
-const DefaultPrescription: Partial<NormalPrescription> = { is_prn: false };
-const DefaultPRNPrescription: Partial<PRNPrescription> = { is_prn: true };
+const DefaultPrescription: Partial<NormalPrescription> = {
+  dosage_type: "REGULAR",
+};
+const DefaultPRNPrescription: Partial<PRNPrescription> = { dosage_type: "PRN" };

@@ -24,7 +24,7 @@ export default function HeadedTabs(props: headedTabsProps) {
           defaultValue={tabs[0].value}
           onChange={(e) => {
             handleChange(
-              tabs.filter((tab) => tab.name === e.target.value)[0].value
+              tabs.filter((tab) => tab.name === e.target.value)[0].value,
             );
           }}
         >
@@ -42,6 +42,7 @@ export default function HeadedTabs(props: headedTabsProps) {
             {tabs.map((tab) => (
               <div
                 key={tab.name}
+                id={tab.name.split(" ").join("-").toLowerCase()}
                 className={`${
                   tab.value === currentTabState
                     ? "border-primary-500 text-primary-600"

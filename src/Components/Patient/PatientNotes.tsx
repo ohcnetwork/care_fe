@@ -10,6 +10,9 @@ import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import { PatientNoteStateType } from "../Facility/models";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
+import { PATIENT_NOTES_THREADS } from "../../Common/constants.js";
+import useAuthUser from "../../Common/hooks/useAuthUser.js";
+import { classNames } from "../../Utils/utils.js";
 
 interface PatientNotesProps {
   patientId: any;
@@ -18,6 +21,13 @@ interface PatientNotesProps {
 
 const PatientNotes = (props: PatientNotesProps) => {
   const { patientId, facilityId } = props;
+
+  const authUser = useAuthUser();
+  const [thread, setThread] = useState(
+    authUser.user_type === "Nurse"
+      ? PATIENT_NOTES_THREADS.Nurses
+      : PATIENT_NOTES_THREADS.Doctors,
+  );
 
   const [patientActive, setPatientActive] = useState(true);
   const [noteField, setNoteField] = useState("");
@@ -33,9 +43,6 @@ const PatientNotes = (props: PatientNotesProps) => {
   const [state, setState] = useState(initialData);
 
   const onAddNote = async () => {
-    const payload = {
-      note: noteField,
-    };
     if (!/\S+/.test(noteField)) {
       Notification.Error({
         msg: "Note Should Contain At Least 1 Character",
@@ -45,7 +52,10 @@ const PatientNotes = (props: PatientNotesProps) => {
 
     const { res } = await request(routes.addPatientNote, {
       pathParams: { patientId: patientId },
-      body: payload,
+      body: {
+        note: noteField,
+        thread,
+      },
     });
     if (res?.status === 201) {
       Notification.Success({ msg: "Note added successfully" });
@@ -93,7 +103,28 @@ const PatientNotes = (props: PatientNotesProps) => {
       }}
       backUrl={`/facility/${facilityId}/patient/${patientId}`}
     >
-      <div className="mx-3 my-2 flex grow flex-col rounded-lg bg-white p-2 sm:mx-10 sm:my-5 sm:p-5">
+      <div className="relative mx-3 my-2 flex grow flex-col rounded-lg border border-gray-300 bg-white p-2 sm:mx-10 sm:my-5 sm:p-5">
+        <div className="absolute inset-x-0 top-0 flex bg-gray-200 text-sm shadow-md">
+          {Object.values(PATIENT_NOTES_THREADS).map((current) => (
+            <button
+              key={current}
+              className={classNames(
+                "flex flex-1 justify-center border-b-2 py-2",
+                thread === current
+                  ? "border-primary-500 font-bold text-gray-800"
+                  : "border-gray-300 text-gray-800",
+              )}
+              onClick={() => setThread(current)}
+            >
+              {
+                {
+                  10: "Doctor's Discussions",
+                  20: "Nurse's Discussions",
+                }[current]
+              }
+            </button>
+          ))}
+        </div>
         <PatientNotesList
           state={state}
           setState={setState}
@@ -101,6 +132,7 @@ const PatientNotes = (props: PatientNotesProps) => {
           facilityId={facilityId}
           reload={reload}
           setReload={setReload}
+          thread={thread}
         />
 
         <div className="relative mx-4 flex items-center">
@@ -123,7 +155,7 @@ const PatientNotes = (props: PatientNotesProps) => {
             disabled={!patientActive}
             authorizeFor={NonReadOnlyUsers}
           >
-            <CareIcon className="care-l-message text-lg" />
+            <CareIcon icon="l-message" className="text-lg" />
           </ButtonV2>
         </div>
       </div>

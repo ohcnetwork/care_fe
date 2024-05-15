@@ -7,11 +7,11 @@
   "View Facility": "View Facility",
   "no_duplicate_facility": "You should not create duplicate facilities",
   "no_facilities": "No Facilities found",
-  "no_doctors": "No Doctors found",
+  "no_staff": "No staff found",
   "no_bed_types_found": "No Bed Types found",
   "total_beds": "Total Beds",
   "create_facility": "Create a new facility",
-  "doctors_list": "Doctors List",
+  "staff_list": "Staff List",
   "bed_capacity": "Bed Capacity",
   "cylinders": "Cylinders",
   "cylinders_per_day": "Cylinders/day",
@@ -51,5 +51,8 @@
   "last_serviced_on": "Last Serviced On",
   "notes": "Notes",
   "create_asset": "Create Asset",
-  "create_add_more": "Create & Add More"
+  "create_add_more": "Create & Add More",
+  "discharged_patients": "Discharged Patients",
+  "discharged_patients_empty": "No discharged patients present in this facility",
+  "update_facility_middleware_success": "Facility middleware updated successfully"
 }

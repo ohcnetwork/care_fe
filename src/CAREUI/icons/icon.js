@@ -18,7 +18,7 @@ const createSvg = (className) => {
   const el = document.createElementNS(xmlns, "svg");
   el.setAttribute(
     "class",
-    className.replace("care", "care-svg-icon__baseline")
+    className.replace("care", "care-svg-icon__baseline"),
   );
   el.setAttribute("role", "img");
   el.setAttribute("xmlns", xmlns);

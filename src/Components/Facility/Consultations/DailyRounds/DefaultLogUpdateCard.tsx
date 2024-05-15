@@ -15,10 +15,13 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
   const { t } = useTranslation();
 
   return (
-    <div className="flex w-full flex-col gap-4 rounded-lg border border-gray-400 p-4 @container">
+    <div
+      className="flex w-full flex-col gap-4 rounded-lg border border-gray-400 p-4 @container"
+      id="dailyround-entry"
+    >
       <LogUpdateCardAttribute
-        attributeKey={"Round Type" as any}
-        attributeValue={t(round.rounds_type)}
+        attributeKey={"rounds_type"}
+        attributeValue={round.rounds_type}
       />
       <LogUpdateCardAttribute
         attributeKey="patient_category"
@@ -41,18 +44,19 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
           className="w-full"
           onClick={props.onViewDetails}
         >
-          <CareIcon className="care-l-eye text-lg" />
+          <CareIcon icon="l-eye" className="text-lg" />
           <span>{t("view_details")}</span>
         </ButtonV2>
         <ButtonV2
           variant="secondary"
+          disabled={!!props.consultationData?.discharge_date}
           border
           ghost
           size="small"
           className="w-full"
           onClick={props.onUpdateLog}
         >
-          <CareIcon className="care-l-pen text-lg" />
+          <CareIcon icon="l-pen" className="text-lg" />
           <span>{t("update_log")}</span>
         </ButtonV2>
       </div>

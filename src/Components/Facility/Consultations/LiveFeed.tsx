@@ -35,7 +35,7 @@ const LiveFeed = (props: any) => {
   const [showDefaultPresets, setShowDefaultPresets] = useState<boolean>(false);
   const [precision, setPrecision] = useState(1);
   const [streamStatus, setStreamStatus] = useState<StreamStatus>(
-    StreamStatus.Offline
+    StreamStatus.Offline,
   );
   const [videoStartTime, setVideoStartTime] = useState<Date | null>(null);
   const [bed, setBed] = useState<BedModel>({});
@@ -120,7 +120,7 @@ const LiveFeed = (props: any) => {
         asset: id,
         limit: page.limit,
         offset: page.offset,
-      })
+      }),
     );
     setBedPresets(bedAssets?.data?.results);
     setPage({
@@ -157,8 +157,8 @@ const LiveFeed = (props: any) => {
             ...data,
           },
         },
-        currentPreset?.id
-      )
+        currentPreset?.id,
+      ),
     );
     if (response && response.status === 200) {
       Notification.Success({ msg: "Preset Updated" });
@@ -239,7 +239,7 @@ const LiveFeed = (props: any) => {
   const cameraPTZActionCBs: { [key: string]: (option: any) => void } = {
     precision: () => {
       setPrecision((precision: number) =>
-        precision === 16 ? 1 : precision * 2
+        precision === 16 ? 1 : precision * 2,
       );
     },
     reset: () => {
@@ -271,8 +271,8 @@ const LiveFeed = (props: any) => {
                     position: data?.position,
                   },
                 },
-                currentPreset?.id
-              )
+                currentPreset?.id,
+              ),
             );
             if (response && response.status === 200) {
               Notification.Success({ msg: "Preset Updated" });
@@ -411,7 +411,7 @@ const LiveFeed = (props: any) => {
               {streamStatus === StreamStatus.Playing &&
                 calculateVideoLiveDelay() > 3 && (
                   <div className="absolute left-8 top-12 z-10 flex items-center gap-2 rounded-3xl bg-red-400 px-3 py-1.5 text-xs font-semibold text-gray-100">
-                    <CareIcon className="care-l-wifi-slash h-4 w-4" />
+                    <CareIcon icon="l-wifi-slash" className="h-4 w-4" />
                     <span>Slow Network Detected</span>
                   </div>
                 )}
@@ -485,7 +485,7 @@ const LiveFeed = (props: any) => {
                   >
                     <span className="sr-only">{option.label}</span>
                     {option.icon ? (
-                      <CareIcon className={`care-${option.icon}`} />
+                      <CareIcon icon={option.icon} />
                     ) : (
                       <span className="flex h-full w-8 items-center justify-center px-2 font-bold">
                         {option.value}x
@@ -549,7 +549,7 @@ const LiveFeed = (props: any) => {
                                 setLoading(undefined);
                                 console.log("Preset Updated", option);
                               },
-                            }
+                            },
                           );
                         }}
                       >
@@ -652,7 +652,7 @@ const LiveFeed = (props: any) => {
                     fetchCameraPresets();
                   }}
                 >
-                  <CareIcon className="care-l-redo h-4 text-lg" /> Refresh
+                  <CareIcon icon="l-redo" className="h-4 text-lg" /> Refresh
                 </button>
               )}
             </div>

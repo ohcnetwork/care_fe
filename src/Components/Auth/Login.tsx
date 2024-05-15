@@ -13,6 +13,7 @@ import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import { useAuthContext } from "../../Common/hooks/useAuthUser";
 import FiltersCache from "../../Utils/FiltersCache";
+import { classNames } from "../../Utils/utils";
 
 export const Login = (props: { forgot?: boolean }) => {
   const { signIn } = useAuthContext();
@@ -68,18 +69,19 @@ export const Login = (props: { forgot?: boolean }) => {
       ) {
         if (!form[key].match(/\w/)) {
           hasError = true;
-          err[key] = t("field_required");
+          err[key] = "field_required";
         }
       }
       if (!form[key]) {
         hasError = true;
-        err[key] = t("field_required");
+        err[key] = "field_required";
       }
     });
     if (hasError) {
       setErrors(err);
       return false;
     }
+
     return form;
   };
 
@@ -92,6 +94,7 @@ export const Login = (props: { forgot?: boolean }) => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+
     setLoading(true);
     FiltersCache.invaldiateAll();
     const validated = validateData();
@@ -111,12 +114,12 @@ export const Login = (props: { forgot?: boolean }) => {
     if (typeof form.username === "string") {
       if (!form.username.match(/\w/)) {
         hasError = true;
-        err.username = t("field_required");
+        err.username = "field_required";
       }
     }
     if (!form.username) {
       hasError = true;
-      err.username = t("field_required");
+      err.username = "field_required";
     }
 
     if (hasError) {
@@ -216,7 +219,7 @@ export const Login = (props: { forgot?: boolean }) => {
                   alt="Logo of Digital Public Goods Alliance"
                 />
               </a>
-              <div className="ml-2 h-8 w-[1px] rounded-full bg-white/50" />
+              <div className="ml-2 h-8 w-px rounded-full bg-white/50" />
               <a
                 href={coronasafe_url}
                 rel="noopener noreferrer"
@@ -262,7 +265,7 @@ export const Login = (props: { forgot?: boolean }) => {
                     className="h-14 rounded-lg py-3"
                     alt="state logo"
                   />
-                  <div className="mx-4 h-8 w-[1px] rounded-full bg-gray-600" />
+                  <div className="mx-4 h-8 w-px rounded-full bg-gray-600" />
                 </>
               )}
               <img
@@ -274,12 +277,10 @@ export const Login = (props: { forgot?: boolean }) => {
 
             <div className="relative flex h-full w-full items-center">
               <div
-                className={
-                  "w-full transition-all " +
-                  (!forgotPassword
-                    ? "visible -translate-x-0 opacity-100"
-                    : "invisible -translate-x-5 opacity-0")
-                }
+                className={classNames(
+                  "w-full transition-all",
+                  forgotPassword && "hidden",
+                )}
               >
                 <div className="mb-8 w-[300px] text-4xl font-black text-primary-600">
                   {t("auth_login_title")}
@@ -351,12 +352,10 @@ export const Login = (props: { forgot?: boolean }) => {
               </div>
 
               <div
-                className={
-                  "absolute w-full transition-all " +
-                  (forgotPassword
-                    ? "visible translate-x-0 opacity-100"
-                    : "invisible translate-x-5 opacity-0")
-                }
+                className={classNames(
+                  "w-full transition-all",
+                  !forgotPassword && "hidden",
+                )}
               >
                 <button
                   onClick={() => {
@@ -366,7 +365,7 @@ export const Login = (props: { forgot?: boolean }) => {
                   className="mb-4 text-sm text-primary-400 hover:text-primary-500"
                 >
                   <div className="flex justify-center">
-                    <CareIcon className="care-l-arrow-left text-lg" />
+                    <CareIcon icon="l-arrow-left" className="text-lg" />
                     <span>{t("back_to_login")}</span>
                   </div>
                 </button>

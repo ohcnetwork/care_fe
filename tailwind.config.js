@@ -70,16 +70,14 @@ module.exports = {
             fore: gray[800],
           },
         },
-        doctors: {
-          general: "#D79B00",
-          critical: "#C81E1E",
-          paediatrics: "#453C52",
-          other: "#03543F",
-          pulmonology: "#000080",
-        },
       },
       padding: {
         "1/5": "20%",
+      },
+      scale: {
+        25: "0.25",
+        175: "1.75",
+        200: "2",
       },
     },
   },

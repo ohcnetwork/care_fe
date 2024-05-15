@@ -5,7 +5,13 @@ import * as Notification from "../../Utils/Notifications.js";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
 import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
-import { classNames, isValidUrl, parsePhoneNumber } from "../../Utils/utils";
+import {
+  classNames,
+  dateQueryString,
+  formatDate,
+  isValidUrl,
+  parsePhoneNumber,
+} from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
@@ -18,13 +24,14 @@ import { PhoneNumberValidator } from "../Form/FieldValidators";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
-
+import DateFormField from "../Form/FormFields/DateFormField";
+import { validateRule } from "./UserAdd";
 const Loading = lazy(() => import("../Common/Loading"));
 
 type EditForm = {
   firstName: string;
   lastName: string;
-  age: string;
+  date_of_birth: Date | null | string;
   gender: GenderType;
   email: string;
   video_connect_link: string | undefined;
@@ -34,12 +41,12 @@ type EditForm = {
   doctor_qualification: string | undefined;
   doctor_experience_commenced_on: number | string | undefined;
   doctor_medical_council_registration: string | undefined;
-  weekly_working_hours: string | null;
+  weekly_working_hours: string | null | undefined;
 };
 type ErrorForm = {
   firstName: string;
   lastName: string;
-  age: string;
+  date_of_birth: string | null;
   gender: string;
   email: string;
   video_connect_link: string | undefined;
@@ -62,7 +69,7 @@ type Action =
 const initForm: EditForm = {
   firstName: "",
   lastName: "",
-  age: "",
+  date_of_birth: null,
   gender: "Male",
   video_connect_link: "",
   email: "",
@@ -77,7 +84,7 @@ const initForm: EditForm = {
 
 const initError: ErrorForm = Object.assign(
   {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
 );
 
 const initialState: State = {
@@ -132,20 +139,18 @@ export default function UserProfile() {
     password_confirmation: "",
   });
 
-  const [showEdit, setShowEdit] = useState<boolean | false>(false);
-
+  const [showEdit, setShowEdit] = useState<boolean>(false);
   const {
     data: userData,
     loading: isUserLoading,
     refetch: refetchUserData,
-  } = useQuery(routes.getUserDetails, {
-    pathParams: { username: authUser.username },
+  } = useQuery(routes.currentUser, {
     onResponse: (result) => {
       if (!result || !result.res || !result.data) return;
       const formData: EditForm = {
         firstName: result.data.first_name,
         lastName: result.data.last_name,
-        age: result.data.age?.toString() || "",
+        date_of_birth: result.data.date_of_birth || null,
         gender: result.data.gender || "Male",
         email: result.data.email,
         video_connect_link: result.data.video_connect_link,
@@ -155,7 +160,7 @@ export default function UserProfile() {
         doctor_qualification: result.data.doctor_qualification,
         doctor_experience_commenced_on: dayjs().diff(
           dayjs(result.data.doctor_experience_commenced_on),
-          "years"
+          "years",
         ),
         doctor_medical_council_registration:
           result.data.doctor_medical_council_registration,
@@ -172,8 +177,20 @@ export default function UserProfile() {
     routes.userListSkill,
     {
       pathParams: { username: authUser.username },
-    }
+    },
   );
+
+  const validateNewPassword = (password: string) => {
+    if (
+      password.length < 8 ||
+      !/\d/.test(password) ||
+      password === password.toUpperCase() ||
+      password === password.toLowerCase()
+    ) {
+      return false;
+    }
+    return true;
+  };
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -188,15 +205,15 @@ export default function UserProfile() {
             invalidForm = true;
           }
           return;
-        case "age":
+        case "date_of_birth":
           if (!states.form[field]) {
-            errors[field] = "This field is required";
+            errors[field] = "Enter a valid date of birth";
             invalidForm = true;
           } else if (
-            Number(states.form[field]) <= 0 ||
-            !/^\d+$/.test(states.form[field])
+            !dayjs(states.form[field]).isValid() ||
+            dayjs(states.form[field]).isAfter(dayjs().subtract(17, "year"))
           ) {
-            errors[field] = "Age must be a number greater than 0";
+            errors[field] = "Enter a valid date of birth";
             invalidForm = true;
           }
           return;
@@ -249,10 +266,12 @@ export default function UserProfile() {
             errors[field] = "Field is required";
             invalidForm = true;
           } else if (
-            states.form.user_type === "Doctor" &&
-            Number(states.form.doctor_experience_commenced_on) > 100
+            (states.form.user_type === "Doctor" &&
+              Number(states.form.doctor_experience_commenced_on) >= 100) ||
+            Number(states.form.doctor_experience_commenced_on) < 0
           ) {
-            errors[field] = "Doctor experience should be less than 100 years";
+            errors[field] =
+              "Doctor experience should be at least 0 years and less than 100 years.";
             invalidForm = true;
           }
           return;
@@ -296,6 +315,9 @@ export default function UserProfile() {
     });
   };
 
+  const getDate = (value: any) =>
+    value && dayjs(value).isValid() && dayjs(value).toDate();
+
   const fieldProps = (name: string) => {
     return {
       name,
@@ -319,7 +341,7 @@ export default function UserProfile() {
         phone_number: parsePhoneNumber(states.form.phoneNumber) ?? "",
         alt_phone_number: parsePhoneNumber(states.form.altPhoneNumber) ?? "",
         gender: states.form.gender,
-        age: +states.form.age,
+        date_of_birth: dateQueryString(states.form.date_of_birth),
         doctor_qualification:
           states.form.user_type === "Doctor"
             ? states.form.doctor_qualification
@@ -330,9 +352,9 @@ export default function UserProfile() {
                 .subtract(
                   parseInt(
                     (states.form.doctor_experience_commenced_on as string) ??
-                      "0"
+                      "0",
                   ),
-                  "years"
+                  "years",
                 )
                 .format("YYYY-MM-DD")
             : undefined,
@@ -389,10 +411,20 @@ export default function UserProfile() {
     e.preventDefault();
     //validating form
     if (
-      changePasswordForm.new_password_1 != changePasswordForm.new_password_2
+      changePasswordForm.new_password_1 !== changePasswordForm.new_password_2
     ) {
       Notification.Error({
-        msg: "Passwords are different in the new and the confirmation column.",
+        msg: "Passwords are different in new password and confirmation password column.",
+      });
+    } else if (!validateNewPassword(changePasswordForm.new_password_1)) {
+      Notification.Error({
+        msg: "Entered New Password is not valid, please check!",
+      });
+    } else if (
+      changePasswordForm.new_password_1 === changePasswordForm.old_password
+    ) {
+      Notification.Error({
+        msg: "New password is same as old password, Please enter a different new password.",
       });
     } else {
       const form: UpdatePasswordForm = {
@@ -400,14 +432,12 @@ export default function UserProfile() {
         username: authUser.username,
         new_password: changePasswordForm.new_password_1,
       };
-      const { res, data } = await request(routes.updatePassword, {
+      const { res, data, error } = await request(routes.updatePassword, {
         body: form,
       });
-      if (res?.ok && data?.message === "Password updated successfully") {
-        Notification.Success({
-          msg: "Password changed!",
-        });
-      } else {
+      if (res?.ok) {
+        Notification.Success({ msg: data?.message });
+      } else if (!error) {
         Notification.Error({
           msg: "There was some error. Please try again in some time.",
         });
@@ -441,7 +471,7 @@ export default function UserProfile() {
                   {showEdit ? "Cancel" : "Edit User Profile"}
                 </ButtonV2>
                 <ButtonV2 variant="danger" onClick={signOut}>
-                  <CareIcon className="care-l-sign-out-alt" />
+                  <CareIcon icon="l-sign-out-alt" />
                   Sign out
                 </ButtonV2>
               </div>
@@ -518,12 +548,17 @@ export default function UserProfile() {
                       {userData?.last_name || "-"}
                     </dd>
                   </div>
-                  <div className="my-2  sm:col-span-1" id="age-profile-details">
+                  <div
+                    className="my-2  sm:col-span-1"
+                    id="date_of_birth-profile-details"
+                  >
                     <dt className="text-sm font-medium leading-5 text-black">
-                      Age
+                      Date of Birth
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
-                      {userData?.age || "-"}
+                      {userData?.date_of_birth
+                        ? formatDate(userData?.date_of_birth)
+                        : "-"}
                     </dd>
                   </div>
                   <div className="my-2  sm:col-span-1">
@@ -647,13 +682,14 @@ export default function UserProfile() {
                           label="Last name"
                           className="col-span-6 sm:col-span-3"
                         />
-                        <TextFormField
-                          {...fieldProps("age")}
+                        <DateFormField
+                          {...fieldProps("date_of_birth")}
+                          label="Date of Birth"
                           required
-                          label="Age"
                           className="col-span-6 sm:col-span-3"
-                          type="number"
-                          min={1}
+                          value={getDate(states.form.date_of_birth)}
+                          position="LEFT"
+                          disableFuture={true}
                         />
                         <SelectFormField
                           {...fieldProps("gender")}
@@ -709,7 +745,7 @@ export default function UserProfile() {
                             />
                             <TextFormField
                               {...fieldProps(
-                                "doctor_medical_council_registration"
+                                "doctor_medical_council_registration",
                               )}
                               required
                               className="col-span-6 sm:col-span-3"
@@ -758,35 +794,66 @@ export default function UserProfile() {
                           error={changePasswordErrors.old_password}
                           required
                         />
-                        <TextFormField
-                          name="new_password_1"
-                          label="New Password"
-                          type="password"
-                          value={changePasswordForm.new_password_1}
-                          className="col-span-6 sm:col-span-3"
-                          onChange={(e) =>
-                            setChangePasswordForm({
-                              ...changePasswordForm,
-                              new_password_1: e.value,
-                            })
-                          }
-                          error=""
-                          required
-                        />
-                        <TextFormField
-                          name="new_password_2"
-                          label="New Password Confirmation"
-                          className="col-span-6 sm:col-span-3"
-                          type="password"
-                          value={changePasswordForm.new_password_2}
-                          onChange={(e) =>
-                            setChangePasswordForm({
-                              ...changePasswordForm,
-                              new_password_2: e.value,
-                            })
-                          }
-                          error={changePasswordErrors.password_confirmation}
-                        />
+                        <div className="col-span-6 sm:col-span-3">
+                          <TextFormField
+                            name="new_password_1"
+                            label="New Password"
+                            type="password"
+                            value={changePasswordForm.new_password_1}
+                            className="peer col-span-6 sm:col-span-3"
+                            onChange={(e) => {
+                              setChangePasswordForm({
+                                ...changePasswordForm,
+                                new_password_1: e.value,
+                              });
+                            }}
+                            required
+                          />
+                          <div className="text-small mb-2 hidden pl-2 text-gray-500 peer-focus-within:block">
+                            {validateRule(
+                              changePasswordForm.new_password_1?.length >= 8,
+                              "Password should be atleast 8 characters long",
+                            )}
+                            {validateRule(
+                              changePasswordForm.new_password_1 !==
+                                changePasswordForm.new_password_1.toUpperCase(),
+                              "Password should contain at least 1 lowercase letter",
+                            )}
+                            {validateRule(
+                              changePasswordForm.new_password_1 !==
+                                changePasswordForm.new_password_1.toLowerCase(),
+                              "Password should contain at least 1 uppercase letter",
+                            )}
+                            {validateRule(
+                              /\d/.test(changePasswordForm.new_password_1),
+                              "Password should contain at least 1 number",
+                            )}
+                          </div>
+                        </div>
+                        <div className="col-span-6 sm:col-span-3">
+                          <TextFormField
+                            name="new_password_2"
+                            label="New Password Confirmation"
+                            className="peer col-span-6 sm:col-span-3"
+                            type="password"
+                            value={changePasswordForm.new_password_2}
+                            onChange={(e) => {
+                              setChangePasswordForm({
+                                ...changePasswordForm,
+                                new_password_2: e.value,
+                              });
+                            }}
+                          />
+                          {changePasswordForm.new_password_2.length > 0 && (
+                            <div className="text-small mb-2 hidden pl-2 text-gray-500 peer-focus-within:block">
+                              {validateRule(
+                                changePasswordForm.new_password_1 ===
+                                  changePasswordForm.new_password_2,
+                                "Confirm password should match the new password",
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
@@ -832,7 +899,7 @@ export default function UserProfile() {
             <UpdatableApp silentlyAutoUpdate={false}>
               <ButtonV2 disabled={true}>
                 <div className="flex items-center gap-4">
-                  <CareIcon className="care-l-exclamation text-2xl" />
+                  <CareIcon icon="l-exclamation" className="text-2xl" />
                   Update available
                 </div>
               </ButtonV2>
@@ -847,9 +914,10 @@ export default function UserProfile() {
                 {" "}
                 <div className="flex items-center gap-4">
                   <CareIcon
+                    icon="l-sync"
                     className={classNames(
-                      "care-l-sync text-2xl",
-                      updateStatus.isChecking && "animate-spin"
+                      "text-2xl",
+                      updateStatus.isChecking && "animate-spin",
                     )}
                   />
                   {updateStatus.isChecking
