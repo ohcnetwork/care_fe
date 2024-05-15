@@ -110,7 +110,7 @@ describe("Facility Manage Functions", () => {
   it("Modify doctor capacity in Facility detail page", () => {
     // Add a doctor capacity
     facilityManage.clickFacilityAddDoctorTypeButton();
-    facilityPage.selectAreaOfSpecialization("General Medicine");
+    facilityPage.selectAreaOfSpecialization("Pulmonology");
     facilityPage.fillDoctorCount(doctorCapacity);
     facilityPage.saveAndExitDoctorForm();
     facilityManage.verifySuccessMessageVisibilityAndContent(
