@@ -231,7 +231,7 @@ export const getBedTypes = ({
 
 export const DOCTOR_SPECIALIZATION: Array<OptionsType> = [
   { id: 1, text: "General Medicine", desc: "bg-doctors-general" },
-  { id: 2, text: "Pulmonology Doctors", desc: "bg-doctors-general" },
+  { id: 2, text: "Pulmonology", desc: "bg-doctors-general" },
   { id: 3, text: "Intensivist", desc: "bg-doctors-general" },
   { id: 4, text: "Pediatrician", desc: "bg-doctors-general" },
   { id: 6, text: "Anesthesiologist", desc: "bg-doctors-general" },
