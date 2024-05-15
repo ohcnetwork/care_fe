@@ -38,6 +38,7 @@ import { Mews } from "../Facility/Consultations/Mews.js";
 import DischargeSummaryModal from "../Facility/DischargeSummaryModal.js";
 import DischargeModal from "../Facility/DischargeModal.js";
 import { useTranslation } from "react-i18next";
+import useQuery from "../../Utils/request/useQuery.js";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
@@ -112,7 +113,11 @@ export default function PatientInfoCard(props: {
 
     return false;
   };
-
+  const username =
+    consultation?.treating_physician_object?.username || "bhuvan";
+  const { data: skills } = useQuery(routes.userListSkill, {
+    pathParams: { username: username },
+  });
   return (
     <>
       <DialogModal
@@ -449,7 +454,7 @@ export default function PatientInfoCard(props: {
                   : null}
                 {(consultation?.treating_physician_object ||
                   consultation?.deprecated_verified_by) && (
-                  <div className="text-sm" id="treating-physician">
+                  <div className="flex text-sm" id="treating-physician">
                     <span className="font-semibold leading-relaxed">
                       {t("treating_doctor")}:{" "}
                     </span>
@@ -460,6 +465,22 @@ export default function PatientInfoCard(props: {
                       icon="l-check"
                       className="ml-2 fill-current text-xl text-green-500"
                     />
+                    {skills?.results?.slice(0, 2).map((item, index) => (
+                      <div key={index} className="">
+                        {index === 1 ? (
+                          <div className="mr-2">{item.skill_object.name}</div>
+                        ) : (
+                          <div className="mr-2">{item.skill_object.name},</div>
+                        )}
+                      </div>
+                    ))}
+                    {skills?.results?.slice(2)?.length ?? 0 > 0 ? (
+                      <div>
+                        and {skills?.results?.length ?? 0 - 2} other skills
+                      </div>
+                    ) : (
+                      <div>.</div>
+                    )}
                   </div>
                 )}
               </div>
