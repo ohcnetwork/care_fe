@@ -121,7 +121,7 @@ const CoverImageEditModal = ({
           Success({ msg: "Cover image updated." });
         } else {
           Notification.Error({
-            msg: "Something went wrong!",
+            msg: "Oops! Facility cover image is too large. Please use a smaller size image.",
           });
           setIsUploading(false);
         }
