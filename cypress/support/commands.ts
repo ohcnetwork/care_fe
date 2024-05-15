@@ -62,7 +62,7 @@ Cypress.Commands.add("loginByApi", (username, password) => {
       } else {
         cy.refreshApiLogin(username, password);
       }
-    }
+    },
   );
 });
 
@@ -74,7 +74,7 @@ Cypress.Commands.add(
     disableLoginVerification
       ? cy.wait("@currentuser")
       : cy.wait("@currentuser").its("response.statusCode").should("eq", 200);
-  }
+  },
 );
 
 Cypress.Commands.add("verifyNotification", (text) => {
@@ -124,7 +124,7 @@ Cypress.Commands.add(
       .then(() => {
         cy.get("[role='option']").contains(referance).click();
       });
-  }
+  },
 );
 
 Cypress.Commands.add(
@@ -139,7 +139,22 @@ Cypress.Commands.add(
         });
         cy.get(selector).click();
       });
-  }
+  },
+);
+Cypress.Commands.add(
+  "typeAndMultiSelectOption",
+  (selector: string, input: string, options: string | string[]) => {
+    const optionArray = Array.isArray(options) ? options : [options];
+    cy.get(selector)
+      .click()
+      .type(input)
+      .then(() => {
+        optionArray.forEach((options) => {
+          cy.get("[role='option']").contains(options).click();
+        });
+        cy.get(selector).click();
+      });
+  },
 );
 
 Cypress.Commands.add(
@@ -150,7 +165,7 @@ Cypress.Commands.add(
       .then(() => {
         cy.get("[role='option']").contains(reference).click();
       });
-  }
+  },
 );
 
 Cypress.Commands.add("clickAndTypeDate", (selector: string, date: string) => {
@@ -164,7 +179,7 @@ Cypress.Commands.add(
   (element: string, reference: string) => {
     cy.get(element).scrollIntoView();
     cy.get(element).contains(reference).should("be.visible").click();
-  }
+  },
 );
 
 Cypress.Commands.add("preventPrint", () => {

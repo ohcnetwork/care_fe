@@ -31,6 +31,7 @@ import useSlug from "../../Common/hooks/useSlug.js";
 import { Popover, Transition } from "@headlessui/react";
 import { FieldLabel } from "../Form/FormFields/FormField.js";
 import { LocationSelect } from "../Common/LocationSelect.js";
+import { CameraFeedPermittedUserTypes } from "../../Utils/permissions.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -106,7 +107,7 @@ export const FacilityHome = (props: any) => {
   const editCoverImageTooltip = hasPermissionToEditCoverImage && (
     <div
       id="facility-coverimage"
-      className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center bg-black text-sm text-gray-300 opacity-0 transition-opacity hover:opacity-60 md:h-[88px]"
+      className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center rounded-t-lg bg-black text-sm text-gray-300 opacity-0 transition-opacity hover:opacity-60 md:h-[88px]"
     >
       <CareIcon icon="l-pen" className="text-lg" />
       <span className="mt-2">{`${hasCoverImage ? "Edit" : "Upload"}`}</span>
@@ -117,7 +118,7 @@ export const FacilityHome = (props: any) => {
     <img
       src={`${facilityData?.read_cover_image_url}?imgKey=${imageKey}`}
       alt={facilityData?.name}
-      className="h-full w-full object-cover"
+      className="h-full w-full rounded-lg object-cover"
     />
   );
 
@@ -186,10 +187,10 @@ export const FacilityHome = (props: any) => {
       >
         <div className="justify-between gap-2 lg:flex">
           <div className="flex-col justify-between md:flex">
-            <div className="flex flex-1 flex-col gap-10">
-              <div className="flex items-center gap-4">
+            <div className="flex flex-1 flex-col">
+              <div className="flex items-start gap-4">
                 <div
-                  className={`group relative hidden h-[88px] w-[88px] text-clip rounded transition-all duration-200 ease-in-out md:flex ${
+                  className={`group relative hidden h-80 w-[88px] text-clip rounded transition-all duration-200 ease-in-out md:mr-2 md:flex lg:mr-6 lg:h-80 lg:w-80 ${
                     hasPermissionToEditCoverImage && "cursor-pointer"
                   }`}
                   onClick={() =>
@@ -199,7 +200,7 @@ export const FacilityHome = (props: any) => {
                   {hasCoverImage ? (
                     <CoverImage />
                   ) : (
-                    <div className="flex h-[88px] w-full items-center justify-center bg-gray-200 font-medium text-gray-700">
+                    <div className="flex h-80 w-[88px] items-center justify-center rounded-lg bg-gray-200 font-medium text-gray-700 lg:h-80 lg:w-80">
                       <svg
                         className="h-8 w-8 fill-current text-gray-500"
                         viewBox="0 0 40 32"
@@ -211,21 +212,21 @@ export const FacilityHome = (props: any) => {
                   )}
                   {editCoverImageTooltip}
                 </div>
-                <div id="facility-name">
-                  <h1 className="text-3xl font-bold">{facilityData?.name}</h1>
-                  {facilityData?.modified_date && (
-                    <RecordMeta
-                      className="mt-1 text-sm text-gray-700"
-                      prefix={t("updated")}
-                      time={facilityData?.modified_date}
-                    />
-                  )}
-                </div>
-              </div>
-              <div className="flex flex-1 items-center">
-                <div className="mb-6 grid w-full gap-4 sm:grid-cols-2 md:mb-0 lg:grid-cols-2">
+                <div className="mb-6 grid gap-4 md:mb-0">
                   <div className="flex-col justify-between md:flex lg:flex-1 ">
-                    <div className="mb-10" id="address-details-view">
+                    <div className="mb-4" id="facility-name">
+                      <h1 className="text-3xl font-bold">
+                        {facilityData?.name}
+                      </h1>
+                      {facilityData?.modified_date && (
+                        <RecordMeta
+                          className="mt-1 text-sm text-gray-700"
+                          prefix={t("updated")}
+                          time={facilityData?.modified_date}
+                        />
+                      )}
+                    </div>
+                    <div className="mb-4" id="address-details-view">
                       <h1 className="text-base font-semibold text-[#B9B9B9]">
                         Address
                       </h1>
@@ -234,47 +235,50 @@ export const FacilityHome = (props: any) => {
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <div id="phone-number-view">
+                    <div className="flex-col md:flex lg:flex-1">
+                      <div className="mb-4">
                         <h1 className="text-base font-semibold text-[#B9B9B9]">
-                          Phone Number
+                          Local Body
                         </h1>
-                        <ContactLink tel={String(facilityData?.phone_number)} />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex-col md:flex lg:flex-1">
-                    <div className="mb-10">
-                      <h1 className="text-base font-semibold text-[#B9B9B9]">
-                        Local Body
-                      </h1>
-                      <p className="w-2/3 text-base font-medium md:w-full">
-                        {facilityData?.local_body_object?.name}
-                      </p>
-                    </div>
-                    <div className="flex flex-col flex-wrap gap-10 md:flex-row">
-                      <div>
-                        <h1 className="text-base font-semibold text-[#B9B9B9]">
-                          Ward
-                        </h1>
-                        <p className="text-base font-medium">
-                          {facilityData?.ward_object?.number +
-                            ", " +
-                            facilityData?.ward_object?.name}
+                        <p className="w-2/3 text-base font-medium md:w-full">
+                          {facilityData?.local_body_object?.name}
                         </p>
                       </div>
-                      <div>
-                        <h1 className="text-base font-semibold text-[#B9B9B9]">
-                          District
-                        </h1>
-                        <p className="text-base font-medium">
-                          {facilityData?.district_object?.name}
-                        </p>
+                      <div className="mb-4 flex flex-col flex-wrap gap-4 md:flex-row">
+                        <div>
+                          <h1 className="text-base font-semibold text-[#B9B9B9]">
+                            Ward
+                          </h1>
+                          <p className="text-base font-medium">
+                            {facilityData?.ward_object?.number +
+                              ", " +
+                              facilityData?.ward_object?.name}
+                          </p>
+                        </div>
+                        <div>
+                          <h1 className="text-base font-semibold text-[#B9B9B9]">
+                            District
+                          </h1>
+                          <p className="text-base font-medium">
+                            {facilityData?.district_object?.name}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div id="phone-number-view">
+                          <h1 className="text-base font-semibold text-[#B9B9B9]">
+                            Phone Number
+                          </h1>
+                          <ContactLink
+                            tel={String(facilityData?.phone_number)}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+              <div className="flex flex-1 items-center"></div>
             </div>
             <div className="mt-10 flex items-center gap-3">
               <div>
@@ -310,7 +314,7 @@ export const FacilityHome = (props: any) => {
               </div>
             </div>
           </div>
-          <div className="mt-4 flex flex-col justify-between">
+          <div className="flex h-80 flex-col justify-between">
             <div className="w-full md:w-auto">
               <DropdownMenu
                 id="manage-facility-dropdown"
@@ -382,7 +386,14 @@ export const FacilityHome = (props: any) => {
                 >
                   View Users
                 </DropdownItem>
-                {hasPermissionToDeleteFacility && (
+                <DropdownItem
+                  id="view-abdm-records"
+                  onClick={() => navigate(`/facility/${facilityId}/abdm`)}
+                  icon={<CareIcon icon="l-file-network" className="text-lg" />}
+                >
+                  View ABDM Records
+                </DropdownItem>
+                {hasPermissionToDeleteFacility ? (
                   <DropdownItem
                     id="delete-facility"
                     variant="danger"
@@ -392,6 +403,8 @@ export const FacilityHome = (props: any) => {
                   >
                     Delete Facility
                   </DropdownItem>
+                ) : (
+                  <></>
                 )}
               </DropdownMenu>
             </div>
@@ -407,7 +420,9 @@ export const FacilityHome = (props: any) => {
                 <CareIcon icon="l-monitor-heart-rate" className="text-lg" />
                 <span>Central Nursing Station</span>
               </ButtonV2>
-              <LiveMonitoringButton />
+              {CameraFeedPermittedUserTypes.includes(authUser.user_type) && (
+                <LiveMonitoringButton />
+              )}
               <ButtonV2
                 variant="primary"
                 ghost
@@ -447,6 +462,8 @@ export const FacilityHome = (props: any) => {
           </div>
         </div>
       </div>
+      <FacilityBedCapacity facilityId={facilityId} />
+      <FacilityDoctorList facilityId={facilityId} />
 
       <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
         <h1 className="mb-6 text-xl font-bold">Oxygen Information</h1>
@@ -482,8 +499,6 @@ export const FacilityHome = (props: any) => {
         </div>
       </div>
 
-      <FacilityBedCapacity facilityId={facilityId} />
-      <FacilityDoctorList facilityId={facilityId} />
       <FacilityHomeTriage
         facilityId={facilityId}
         NonReadOnlyUsers={NonReadOnlyUsers}
@@ -495,26 +510,21 @@ export const FacilityHome = (props: any) => {
 const LiveMonitoringButton = () => {
   const facilityId = useSlug("facility");
   const [location, setLocation] = useState<string>();
-  const authUser = useAuthUser();
-
-  const permittedUserTypes = ["StateAdmin", "DistrictAdmin", "Doctor"];
 
   return (
     <Popover className="relative">
-      {permittedUserTypes.includes(authUser.user_type) && (
-        <Popover.Button className="mt-2 w-full">
-          <ButtonV2
-            variant="primary"
-            ghost
-            border
-            className="w-full"
-            id="facility-detailspage-livemonitoring"
-          >
-            <CareIcon icon="l-video" className="text-lg" />
-            <span>Live Monitoring</span>
-          </ButtonV2>
-        </Popover.Button>
-      )}
+      <Popover.Button className="mt-2 w-full">
+        <ButtonV2
+          variant="primary"
+          ghost
+          border
+          className="w-full"
+          id="facility-detailspage-livemonitoring"
+        >
+          <CareIcon icon="l-video" className="text-lg" />
+          <span>Live Monitoring</span>
+        </ButtonV2>
+      </Popover.Button>
 
       <Transition
         as={Fragment}

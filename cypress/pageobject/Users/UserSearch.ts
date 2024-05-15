@@ -116,7 +116,7 @@ export class UserPage {
 
       alreadylinkedusersviews.forEach((expectedContent) => {
         const index = userViews.findIndex((actualContent) =>
-          actualContent.includes(expectedContent)
+          actualContent.includes(expectedContent),
         );
         if (index !== -1) {
           userViews.splice(index, 1); // Remove the matched element

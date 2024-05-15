@@ -33,12 +33,14 @@ import { ConsultationVentilatorTab } from "./ConsultationVentilatorTab";
 import { ConsultationPressureSoreTab } from "./ConsultationPressureSoreTab";
 import { ConsultationDialysisTab } from "./ConsultationDialysisTab";
 import { ConsultationNeurologicalMonitoringTab } from "./ConsultationNeurologicalMonitoringTab";
+import ABDMRecordsTab from "../../ABDM/ABDMRecordsTab";
 import { ConsultationNutritionTab } from "./ConsultationNutritionTab";
 import PatientNotesSlideover from "../PatientNotesSlideover";
 import { AssetBedModel } from "../../Assets/AssetTypes";
 import PatientInfoCard from "../../Patient/PatientInfoCard";
 import RelativeDateUserMention from "../../Common/RelativeDateUserMention";
 import DiagnosesListAccordion from "../../Diagnosis/DiagnosesListAccordion";
+import { CameraFeedPermittedUserTypes } from "../../../Utils/permissions";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
@@ -66,6 +68,7 @@ const TABS = {
   NUTRITION: ConsultationNutritionTab,
   PRESSURE_SORE: ConsultationPressureSoreTab,
   DIALYSIS: ConsultationDialysisTab,
+  ABDM: ABDMRecordsTab,
 };
 
 export const ConsultationDetails = (props: any) => {
@@ -302,9 +305,7 @@ export const ConsultationDetails = (props: any) => {
                 </button>
                 {patientData.last_consultation?.id &&
                   isCameraAttached &&
-                  ["DistrictAdmin", "StateAdmin", "Doctor"].includes(
-                    authUser.user_type,
-                  ) && (
+                  CameraFeedPermittedUserTypes.includes(authUser.user_type) && (
                     <Link
                       href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
                       className="btn btn-primary m-1 w-full hover:text-white"
@@ -326,18 +327,18 @@ export const ConsultationDetails = (props: any) => {
               onClick={() =>
                 showPatientNotesPopup
                   ? navigate(
-                      `/facility/${facilityId}/patient/${patientId}/notes`,
+                      `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/notes`,
                     )
                   : setShowPatientNotesPopup(true)
               }
               className="btn btn-primary m-1 w-full hover:text-white"
             >
-              Doctor&apos;s Notes
+              Discussion Notes
             </Link>
           </div>
         </nav>
         <div className="mt-2 flex w-full flex-col md:flex-row">
-          <div className="h-full w-full rounded-lg border bg-white text-black shadow">
+          <div className="size-full rounded-lg border bg-white text-black shadow">
             <PatientInfoCard
               patient={patientData}
               consultation={consultationData}
@@ -426,9 +427,7 @@ export const ConsultationDetails = (props: any) => {
                       isCameraAttached === false || // No camera attached
                       consultationData?.discharge_date || // Discharged
                       !consultationData?.current_bed?.bed_object?.id || // Not admitted to bed
-                      !["DistrictAdmin", "StateAdmin", "Doctor"].includes(
-                        authUser.user_type,
-                      ) // Not admin or doctor
+                      !CameraFeedPermittedUserTypes.includes(authUser.user_type)
                     )
                       return null; // Hide feed tab
                   }

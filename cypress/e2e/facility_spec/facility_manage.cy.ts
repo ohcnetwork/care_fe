@@ -12,7 +12,7 @@ describe("Facility Manage Functions", () => {
   const facilityMiddleware = "dev-middleware.coronasafe.live";
   const facilityUpdatedMiddleware = "updated.coronasafe.live";
   const facilityMiddlewareSuccessfullNotification =
-    "Facility updated successfully";
+    "Facility middleware updated successfully";
   const facilityHfridUpdateButton = "Link Health Facility";
   const facilityHfridToastNotificationText =
     /Health Facility config updated successfully|Health ID registration failed/;
@@ -53,13 +53,13 @@ describe("Facility Manage Functions", () => {
     // verify mandatory field error message
     facilityManage.clickButtonWithText(facilityMiddlewareUpdateButton);
     facilityManage.checkErrorMessageVisibility(
-      "Middleware Address is required"
+      "Middleware Address is required",
     );
     // add middleware and verify the notification
     facilityManage.typeMiddlewareAddress(facilityMiddleware);
     facilityManage.clickButtonWithText(facilityMiddlewareUpdateButton);
     facilityManage.verifySuccessMessageVisibilityAndContent(
-      facilityMiddlewareSuccessfullNotification
+      facilityMiddlewareSuccessfullNotification,
     );
     // update the existing middleware
     facilityPage.clickManageFacilityDropdown();
@@ -68,7 +68,7 @@ describe("Facility Manage Functions", () => {
     facilityManage.typeMiddlewareAddress(facilityUpdatedMiddleware);
     facilityManage.clickButtonWithText(facilityMiddlewareUpdateButton);
     facilityManage.verifySuccessMessageVisibilityAndContent(
-      facilityMiddlewareSuccessfullNotification
+      facilityMiddlewareSuccessfullNotification,
     );
     // verify the updated middleware
     facilityPage.clickManageFacilityDropdown();
@@ -83,13 +83,14 @@ describe("Facility Manage Functions", () => {
     facilityManage.clearHfrId();
     facilityManage.clickButtonWithText(facilityHfridUpdateButton);
     facilityManage.checkErrorMessageVisibility(
-      "Health Facility Id is required"
+      "Health Facility Id is required",
     );
     // add facility health ID and verify notification
     facilityManage.typeHfrId(facilityHfrId);
     facilityManage.clickButtonWithText(facilityHfridUpdateButton);
     facilityManage.verifySuccessMessageVisibilityAndContent(
-      facilityHfridToastNotificationText
+      facilityHfridToastNotificationText,
+      true,
     );
     // update the existing middleware
     facilityPage.clickManageFacilityDropdown();
@@ -97,7 +98,8 @@ describe("Facility Manage Functions", () => {
     facilityManage.typeHfrId(facilityUpdatedHfrId);
     facilityManage.clickButtonWithText(facilityHfridUpdateButton);
     facilityManage.verifySuccessMessageVisibilityAndContent(
-      facilityHfridToastNotificationText
+      facilityHfridToastNotificationText,
+      true,
     );
     // verify its reflection
     facilityPage.clickManageFacilityDropdown();
@@ -112,7 +114,7 @@ describe("Facility Manage Functions", () => {
     facilityPage.fillDoctorCount(doctorCapacity);
     facilityPage.saveAndExitDoctorForm();
     facilityManage.verifySuccessMessageVisibilityAndContent(
-      "Doctor count added successfully"
+      "Doctor count added successfully",
     );
     facilityManage.verifyTotalDoctorCapacity(doctorCapacity);
     // edit a existing doctor
@@ -120,14 +122,14 @@ describe("Facility Manage Functions", () => {
     facilityPage.fillDoctorCount(doctorModifiedCapacity);
     facilityPage.clickdoctorcapacityaddmore();
     facilityManage.verifySuccessMessageVisibilityAndContent(
-      "Doctor count updated successfully"
+      "Doctor count updated successfully",
     );
     facilityManage.verifyTotalDoctorCapacity(doctorModifiedCapacity);
     // delete a bed
     facilityManage.clickDeleteFacilityDoctorCapacity();
     facilityManage.clickButtonWithText("Delete");
     facilityManage.verifySuccessMessageVisibilityAndContent(
-      "Doctor specialization type deleted successfully"
+      "Doctor specialization type deleted successfully",
     );
   });
 
@@ -139,7 +141,7 @@ describe("Facility Manage Functions", () => {
     facilityPage.fillCurrentlyOccupied(currentOccupied);
     facilityPage.saveAndExitBedCapacityForm();
     facilityManage.verifySuccessMessageVisibilityAndContent(
-      "Bed capacity added successfully"
+      "Bed capacity added successfully",
     );
     cy.closeNotification();
     facilityManage.verifyFacilityBedCapacity(totalCapacity);
@@ -150,7 +152,7 @@ describe("Facility Manage Functions", () => {
     facilityPage.fillCurrentlyOccupied(currentUpdatedOccupied);
     facilityPage.clickbedcapcityaddmore();
     facilityManage.verifySuccessMessageVisibilityAndContent(
-      "Bed capacity updated successfully"
+      "Bed capacity updated successfully",
     );
     cy.closeNotification();
     facilityManage.verifyFacilityBedCapacity(totalUpdatedCapacity);
@@ -159,7 +161,7 @@ describe("Facility Manage Functions", () => {
     facilityManage.clickDeleteFacilityBedCapacity();
     facilityManage.clickButtonWithText("Delete");
     facilityManage.verifySuccessMessageVisibilityAndContent(
-      "Bed type deleted successfully"
+      "Bed type deleted successfully",
     );
   });
 

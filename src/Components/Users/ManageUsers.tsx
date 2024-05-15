@@ -14,12 +14,7 @@ import routes from "../../Redux/api.js";
 import * as Notification from "../../Utils/Notifications.js";
 import request from "../../Utils/request/request.js";
 import useQuery from "../../Utils/request/useQuery.js";
-import {
-  classNames,
-  isUserOnline,
-  relativeTime,
-  showUserDelete,
-} from "../../Utils/utils";
+import { classNames, isUserOnline, relativeTime } from "../../Utils/utils";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import Pagination from "../Common/Pagination";
 import UserDetails from "../Common/UserDetails";
@@ -35,6 +30,7 @@ import SkillsSlideOver from "./SkillsSlideOver";
 import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
 import UserFilter from "./UserFilter";
+import { showUserDelete } from "../../Utils/permissions";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -75,6 +71,11 @@ export default function ManageUsers() {
   const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen = width <= extremeSmallScreenBreakpoint;
 
+  const { data: homeFacilityData } = useQuery(routes.getAnyFacility, {
+    pathParams: { id: qParams.home_facility },
+    prefetch: !!qParams.home_facility,
+  });
+
   const {
     data: userListData,
     loading: userListLoading,
@@ -92,6 +93,7 @@ export default function ManageUsers() {
       alt_phone_number: qParams.alt_phone_number,
       user_type: qParams.user_type,
       district_id: qParams.district,
+      home_facility: qParams.home_facility,
     },
   });
 
@@ -186,11 +188,7 @@ export default function ManageUsers() {
     (userList = userListData.results.map((user: any, idx) => {
       const cur_online = isUserOnline(user);
       return (
-        <div
-          key={`usr_${user.id}`}
-          id={`usr_${idx}`}
-          className=" mt-6 w-full md:px-4 lg:w-1/2 xl:w-1/3"
-        >
+        <div key={`usr_${user.id}`} id={`usr_${idx}`}>
           <div className="relative block h-full overflow-visible rounded-lg bg-white shadow hover:border-primary-500">
             <div className="flex h-full flex-col justify-between @container">
               <div className="px-6 py-4">
@@ -410,10 +408,10 @@ export default function ManageUsers() {
                   {["DistrictAdmin", "StateAdmin"].includes(
                     authUser.user_type,
                   ) && (
-                    <div className="flex-col md:flex-row">
+                    <div>
                       <ButtonV2
                         id="avg-workinghour"
-                        className="flex w-full items-center md:w-full"
+                        className="w-full"
                         onClick={() => {
                           setExpandWorkingHours(true);
                           setSelectedUser(user.username);
@@ -421,7 +419,9 @@ export default function ManageUsers() {
                         }}
                       >
                         <CareIcon icon="l-clock" className="text-xl" />
-                        <p>Set Average weekly working hours</p>
+                        <p className="whitespace-normal md:whitespace-nowrap">
+                          Set Average weekly working hours
+                        </p>
                       </ButtonV2>
                     </div>
                   )}
@@ -438,7 +438,9 @@ export default function ManageUsers() {
   } else if (userListData?.results.length) {
     manageUsers = (
       <div>
-        <div className="flex flex-wrap md:-mx-4">{userList}</div>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+          {userList}
+        </div>
         <Pagination totalCount={userListData.count} />
       </div>
     );
@@ -463,7 +465,7 @@ export default function ManageUsers() {
         open={expandFacilityList}
         setOpen={setExpandFacilityList}
         slideFrom="right"
-        title={t("facilities")}
+        title={t("linked_facilities")}
         dialogClass="md:w-[400px]"
       >
         <UserFacilities user={selectedUser} />
@@ -503,7 +505,7 @@ export default function ManageUsers() {
         </div>
       </SlideOverCustom>
 
-      <div className="m-4 mt-5 grid grid-cols-1 sm:grid-cols-3 md:gap-5 md:px-2">
+      <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 md:gap-5">
         <CountBlock
           text="Total Users"
           count={userListData?.count || 0}
@@ -532,7 +534,7 @@ export default function ManageUsers() {
         </div>
       </div>
 
-      <div className="pb-2 pl-6">
+      <div>
         <FilterBadges
           badges={({ badge, value, phoneNumber }) => [
             badge("Username", "username"),
@@ -546,11 +548,16 @@ export default function ManageUsers() {
               "district",
               qParams.district ? districtData?.name || "" : "",
             ),
+            value(
+              "Home Facility",
+              "home_facility",
+              qParams.home_facility ? homeFacilityData?.name || "" : "",
+            ),
           ]}
         />
       </div>
 
-      <div className="px-3 md:px-6">
+      <div>
         <div>{manageUsers}</div>
       </div>
       {userData.show && (
@@ -721,6 +728,7 @@ export function UserFacilities(props: { user: any }) {
           handleOk={handleUnlinkFacilitySubmit}
         />
       )}
+
       <div className="mb-4 flex items-stretch gap-2">
         <FacilitySelect
           multiple={false}
@@ -742,6 +750,8 @@ export function UserFacilities(props: { user: any }) {
           {t("add")}
         </ButtonV2>
       </div>
+      <hr className="my-2 border-gray-300" />
+
       {isLoading || userFacilitiesLoading ? (
         <div className="flex items-center justify-center">
           <CircularProgress />
@@ -750,13 +760,23 @@ export function UserFacilities(props: { user: any }) {
         <div className="flex flex-col">
           {/* Home Facility section */}
           {user?.home_facility_object && (
-            <div className="mt-2" id="home-facility">
-              <div className="mb-2 ml-2 text-lg font-bold">
-                {t("home_facility")}
-              </div>
+            <div className="py-2" id="home-facility">
               <div className="relative rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg">
-                <div className="flex items-center justify-between">
-                  <span>{user?.home_facility_object?.name}</span>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex content-center items-center justify-center gap-2">
+                    <span>{user?.home_facility_object?.name}</span>{" "}
+                    <span
+                      className={
+                        "flex items-center justify-center  rounded-xl bg-green-600 px-2 py-0.5 text-sm font-medium text-white"
+                      }
+                    >
+                      <CareIcon
+                        icon="l-estate"
+                        className="mr-1 pt-px text-lg"
+                      />
+                      Home Facility
+                    </span>
+                  </div>
                   <div className="flex items-center gap-2">
                     <button
                       className="tooltip text-lg text-red-600"
@@ -777,16 +797,12 @@ export function UserFacilities(props: { user: any }) {
                   </div>
                 </div>
               </div>
-              <hr className="my-2 border-gray-300" />
             </div>
           )}
 
           {/* Linked Facilities section */}
           {!!userFacilities?.results.length && (
-            <div className="mt-2" id="linked-facility-list">
-              <div className="mb-2 ml-2 text-lg font-bold">
-                {t("linked_facilities")}
-              </div>
+            <div id="linked-facility-list">
               <div className="flex flex-col">
                 {userFacilities.results.map(
                   (facility: FacilityModel, i: number) => {
