@@ -39,6 +39,7 @@ import DischargeModal from "../Facility/DischargeModal.js";
 import { useTranslation } from "react-i18next";
 import useQuery from "../../Utils/request/useQuery.js";
 import FetchRecordsModal from "../ABDM/FetchRecordsModal.js";
+import { SkillModel } from "../Users/models.js";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
@@ -120,6 +121,20 @@ export default function PatientInfoCard(props: {
     },
     prefetch: !!consultation?.treating_physician_object?.username,
   });
+  const getSkillsDescription = (skills: SkillModel[]) => {
+    if (skills.length === 1) {
+      return skills[0].skill_object.name;
+    }
+    if (skills.length === 2) {
+      return skills.map((s) => s.skill_object.name).join(" and ");
+    }
+    return (
+      skills
+        .slice(0, 2)
+        .map((s) => s.skill_object.name)
+        .join(", ") + ` and ${skills.length - 2} more`
+    );
+  };
   return (
     <>
       <DialogModal
@@ -467,27 +482,7 @@ export default function PatientInfoCard(props: {
                       icon="l-check"
                       className="ml-2 fill-current text-xl text-green-500"
                     />
-                    {skills?.results?.slice(0, 2).map((item, index) => (
-                      <div key={index} className="">
-                        {index === 1 ? (
-                          <span className="mr-2">
-                            ,{item.skill_object.name}
-                          </span>
-                        ) : (
-                          <span className="mr-2">{item.skill_object.name}</span>
-                        )}
-                      </div>
-                    ))}
-                    {skills?.results?.slice(2)?.length ?? 0 > 0 ? (
-                      <span>
-                        and {skills?.results?.slice(2)?.length ?? 0 - 2}{" "}
-                        {skills?.results?.length ?? 0 - 2 === 1
-                          ? "other skill."
-                          : "other skills."}
-                      </span>
-                    ) : (
-                      <span>.</span>
-                    )}
+                    {skills && getSkillsDescription(skills.results)}
                   </div>
                 )}
               </div>
