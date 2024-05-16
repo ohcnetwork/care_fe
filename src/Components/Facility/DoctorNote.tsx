@@ -37,7 +37,7 @@ const DoctorNote = (props: DoctorNoteProps) => {
           {state.notes.map((note) => (
             <DoctorNoteReplyPreviewCard
               key={note.id}
-              parentNote={note.reply_to}
+              parentNote={note.reply_to_object}
             >
               <PatientNoteCard
                 note={note}
