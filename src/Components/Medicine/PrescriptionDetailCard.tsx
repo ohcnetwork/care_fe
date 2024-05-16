@@ -5,6 +5,7 @@ import ReadMore from "../Common/components/Readmore";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { useTranslation } from "react-i18next";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
+import { useState } from "react";
 
 export default function PrescriptionDetailCard({
   prescription,
@@ -16,8 +17,15 @@ export default function PrescriptionDetailCard({
   onDiscontinueClick?: () => void;
   onAdministerClick?: () => void;
   selected?: boolean;
+  showPrescription?: boolean;
 }) {
   const { t } = useTranslation();
+  const [showPrescription, setShowPrescription] = useState(
+    props.showPrescription,
+  );
+  const handleShow = () => {
+    setShowPrescription(!showPrescription);
+  };
   return (
     <div
       className={classNames(
@@ -28,7 +36,7 @@ export default function PrescriptionDetailCard({
         prescription.discontinued && "bg-gray-200 opacity-80",
       )}
     >
-      <div className="flex flex-1 flex-col">
+      <div className="flex flex-1 flex-col" onClick={handleShow}>
         <div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -85,114 +93,114 @@ export default function PrescriptionDetailCard({
               )}
           </div>
         </div>
-
-        <div className="mt-4 grid grid-cols-10 items-center gap-2">
-          <Detail
-            className={
-              prescription.dosage_type === "TITRATED"
-                ? "col-span-10"
-                : "col-span-10 md:col-span-4"
-            }
-            label={t("medicine")}
-          >
-            {prescription.medicine_object?.name ?? prescription.medicine_old}
-          </Detail>
-          <Detail
-            className="col-span-10 break-all sm:col-span-4"
-            label={t("route")}
-          >
-            {prescription.route &&
-              t("PRESCRIPTION_ROUTE_" + prescription.route)}
-          </Detail>
-          {prescription.dosage_type === "TITRATED" ? (
-            <>
+        {showPrescription && (
+          <div className="mt-4 grid grid-cols-10 items-center gap-2">
+            <Detail
+              className={
+                prescription.dosage_type === "TITRATED"
+                  ? "col-span-10"
+                  : "col-span-10 md:col-span-4"
+              }
+              label={t("medicine")}
+            >
+              {prescription.medicine_object?.name ?? prescription.medicine_old}
+            </Detail>
+            <Detail
+              className="col-span-10 break-all sm:col-span-4"
+              label={t("route")}
+            >
+              {prescription.route &&
+                t("PRESCRIPTION_ROUTE_" + prescription.route)}
+            </Detail>
+            {prescription.dosage_type === "TITRATED" ? (
+              <>
+                <Detail
+                  className="col-span-5 sm:col-span-3"
+                  label={t("start_dosage")}
+                >
+                  {prescription.base_dosage}
+                </Detail>
+                <Detail
+                  className="col-span-5 sm:col-span-3"
+                  label={t("target_dosage")}
+                >
+                  {prescription.target_dosage}
+                </Detail>
+              </>
+            ) : (
               <Detail
-                className="col-span-5 sm:col-span-3"
-                label={t("start_dosage")}
+                className="col-span-10 sm:col-span-6 md:col-span-2"
+                label={t("dosage")}
               >
                 {prescription.base_dosage}
               </Detail>
+            )}
+
+            {prescription.dosage_type === "PRN" ? (
+              <>
+                <Detail
+                  className="col-span-10 md:col-span-6"
+                  label={t("indicator")}
+                >
+                  {prescription.indicator}
+                </Detail>
+                <Detail
+                  className="col-span-10 md:col-span-2"
+                  label={t("max_dosage_24_hrs")}
+                >
+                  {prescription.max_dosage}
+                </Detail>
+                <Detail
+                  className="col-span-10 md:col-span-2"
+                  label={t("min_time_bw_doses")}
+                >
+                  {prescription.min_hours_between_doses &&
+                    prescription.min_hours_between_doses + " hrs."}
+                </Detail>
+              </>
+            ) : (
+              <>
+                <Detail className="col-span-5" label={t("frequency")}>
+                  {prescription.frequency &&
+                    t(
+                      "PRESCRIPTION_FREQUENCY_" +
+                        prescription.frequency.toUpperCase(),
+                    )}
+                </Detail>
+                <Detail className="col-span-5" label={t("days")}>
+                  {prescription.days}
+                </Detail>
+              </>
+            )}
+
+            {prescription.instruction_on_titration && (
               <Detail
-                className="col-span-5 sm:col-span-3"
-                label={t("target_dosage")}
+                className="col-span-10"
+                label={t("instruction_on_titration")}
               >
-                {prescription.target_dosage}
+                <ReadMore
+                  text={prescription.instruction_on_titration}
+                  minChars={120}
+                />
               </Detail>
-            </>
-          ) : (
-            <Detail
-              className="col-span-10 sm:col-span-6 md:col-span-2"
-              label={t("dosage")}
-            >
-              {prescription.base_dosage}
-            </Detail>
-          )}
+            )}
 
-          {prescription.dosage_type === "PRN" ? (
-            <>
+            {prescription.notes && (
+              <Detail className="col-span-10" label={t("notes")}>
+                <ReadMore text={prescription.notes} minChars={120} />
+              </Detail>
+            )}
+
+            {prescription.discontinued && (
               <Detail
-                className="col-span-10 md:col-span-6"
-                label={t("indicator")}
+                className="col-span-10"
+                label={t("reason_for_discontinuation")}
               >
-                {prescription.indicator}
+                {prescription.discontinued_reason}
               </Detail>
-              <Detail
-                className="col-span-10 md:col-span-2"
-                label={t("max_dosage_24_hrs")}
-              >
-                {prescription.max_dosage}
-              </Detail>
-              <Detail
-                className="col-span-10 md:col-span-2"
-                label={t("min_time_bw_doses")}
-              >
-                {prescription.min_hours_between_doses &&
-                  prescription.min_hours_between_doses + " hrs."}
-              </Detail>
-            </>
-          ) : (
-            <>
-              <Detail className="col-span-5" label={t("frequency")}>
-                {prescription.frequency &&
-                  t(
-                    "PRESCRIPTION_FREQUENCY_" +
-                      prescription.frequency.toUpperCase(),
-                  )}
-              </Detail>
-              <Detail className="col-span-5" label={t("days")}>
-                {prescription.days}
-              </Detail>
-            </>
-          )}
-
-          {prescription.instruction_on_titration && (
-            <Detail
-              className="col-span-10"
-              label={t("instruction_on_titration")}
-            >
-              <ReadMore
-                text={prescription.instruction_on_titration}
-                minChars={120}
-              />
-            </Detail>
-          )}
-
-          {prescription.notes && (
-            <Detail className="col-span-10" label={t("notes")}>
-              <ReadMore text={prescription.notes} minChars={120} />
-            </Detail>
-          )}
-
-          {prescription.discontinued && (
-            <Detail
-              className="col-span-10"
-              label={t("reason_for_discontinuation")}
-            >
-              {prescription.discontinued_reason}
-            </Detail>
-          )}
-        </div>
-
+            )}
+          </div>
+        )}
         <div className="flex flex-col gap-1 text-xs text-gray-600 md:mt-3 md:flex-row md:items-center">
           <span className="flex gap-1 font-medium">
             Prescribed

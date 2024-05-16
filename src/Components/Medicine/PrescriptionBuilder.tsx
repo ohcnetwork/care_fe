@@ -69,6 +69,7 @@ export default function PrescriptionBuilder({
           <PrescriptionDetailCard
             key={index}
             prescription={obj}
+            showPrescription={obj.discontinued ? false : true}
             onDiscontinueClick={() => setShowDiscontinueFor(obj)}
             onAdministerClick={() => setShowAdministerFor(obj)}
             readonly={disabled}
