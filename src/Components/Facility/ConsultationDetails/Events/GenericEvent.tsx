@@ -43,7 +43,7 @@ const formatValue = (value: unknown, key?: string): ReactNode => {
         return `No ${key?.replaceAll(/_/g, " ")}`;
       }
 
-      return value.map((v) => formatValue(v, key)).join(", ");
+      return value.map((v) => formatValue(v, key));
     }
 
     if (value instanceof Date) {
