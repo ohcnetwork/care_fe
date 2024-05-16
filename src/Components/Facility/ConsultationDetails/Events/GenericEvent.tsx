@@ -50,16 +50,20 @@ const formatValue = (value: unknown, key?: string): ReactNode => {
       return value.toLocaleString();
     }
 
-    if (Object.entries(value).length === 0) {
+    const entries = Object.entries(value).filter(
+      ([_, value]) => value != null && value !== "",
+    );
+
+    if (entries.length === 0) {
       return `No ${key?.replaceAll(/_/g, " ")}`;
     }
 
-    return Object.entries(value).map(([key, value]) => (
+    return entries.map(([key, value]) => (
       <div className="flex flex-col items-center gap-2 md:flex-row">
         <span className="text-xs uppercase text-gray-700">
           {key.replaceAll(/_/g, " ")}
         </span>
-        <span className="text-sm font-semibold text-gray-700">
+        <span className="text-sm font-semibold capitalize text-gray-700">
           {formatValue(value, key)}
         </span>
       </div>
