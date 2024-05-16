@@ -17,7 +17,7 @@ const formatValue = (value: unknown, key?: string): ReactNode => {
   }
 
   if (typeof value === "number") {
-    return value;
+    return value % 1 ? value.toFixed(2) : value;
   }
 
   if (typeof value === "string") {
