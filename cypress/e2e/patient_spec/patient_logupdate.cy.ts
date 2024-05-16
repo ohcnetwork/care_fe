@@ -110,6 +110,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeDiastolic(patientModifiedDiastolic);
     cy.submitButton("Continue");
     cy.verifyNotification("Normal Log Updates details updated successfully");
+    cy.contains("Daily Rounds").click();
     patientLogupdate.clickLogupdateCard("#dailyround-entry", patientCategory);
     cy.verifyContentPresence("#consultation-preview", [
       patientModifiedDiastolic,
