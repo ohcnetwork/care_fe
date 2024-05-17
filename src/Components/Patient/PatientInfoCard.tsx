@@ -41,6 +41,24 @@ import useQuery from "../../Utils/request/useQuery.js";
 import FetchRecordsModal from "../ABDM/FetchRecordsModal.js";
 import { SkillModel } from "../Users/models.js";
 
+const formatSkills = (arr: SkillModel[]) => {
+  const skills = arr.map((skill) => skill.skill_object.name);
+
+  if (skills.length === 1) {
+    return skills[0];
+  }
+
+  if (skills.length === 2) {
+    return `${skills[0]} and ${skills[1]}`;
+  }
+
+  if (skills.length === 3) {
+    return `${skills[0]}, ${skills[1]} and ${skills[2]}`;
+  }
+
+  return `${skills[0]}, ${skills[1]} and ${skills.length - 2} other skills...`;
+};
+
 export default function PatientInfoCard(props: {
   patient: PatientModel;
   consultation?: ConsultationModel;
@@ -115,26 +133,13 @@ export default function PatientInfoCard(props: {
 
     return false;
   };
-  const { data: skills } = useQuery(routes.userListSkill, {
+  const skillsQuery = useQuery(routes.userListSkill, {
     pathParams: {
       username: consultation?.treating_physician_object?.username ?? "",
     },
     prefetch: !!consultation?.treating_physician_object?.username,
   });
-  const getSkillsDescription = (skills: SkillModel[]) => {
-    if (skills.length === 1) {
-      return skills[0].skill_object.name;
-    }
-    if (skills.length === 2) {
-      return skills.map((s) => s.skill_object.name).join(" and ");
-    }
-    return (
-      skills
-        .slice(0, 2)
-        .map((s) => s.skill_object.name)
-        .join(", ") + ` and ${skills.length - 2} more`
-    );
-  };
+
   return (
     <>
       <DialogModal
@@ -471,7 +476,7 @@ export default function PatientInfoCard(props: {
                   : null}
                 {(consultation?.treating_physician_object ||
                   consultation?.deprecated_verified_by) && (
-                  <div className="flex text-sm" id="treating-physician">
+                  <span className="space-x-1 text-sm" id="treating-physician">
                     <span className="font-semibold leading-relaxed">
                       {t("treating_doctor")}:{" "}
                     </span>
@@ -480,10 +485,19 @@ export default function PatientInfoCard(props: {
                       : consultation?.deprecated_verified_by}
                     <CareIcon
                       icon="l-check"
-                      className="ml-2 fill-current text-xl text-green-500"
+                      className="fill-current text-xl text-green-500"
                     />
-                    {skills && getSkillsDescription(skills.results)}
-                  </div>
+                    <br className="md:hidden" />
+                    <span className="tooltip text-xs text-gray-800">
+                      {skillsQuery.data &&
+                        formatSkills(skillsQuery.data?.results)}
+                      <ul className="tooltip-text tooltip-bottom flex flex-col text-xs font-medium">
+                        {skillsQuery.data?.results.map((skill) => (
+                          <li>{skill.skill_object.name}</li>
+                        ))}
+                      </ul>
+                    </span>
+                  </span>
                 )}
               </div>
             </div>
