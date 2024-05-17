@@ -491,11 +491,13 @@ export default function PatientInfoCard(props: {
                     <span className="tooltip text-xs text-gray-800">
                       {skillsQuery.data &&
                         formatSkills(skillsQuery.data?.results)}
-                      <ul className="tooltip-text tooltip-bottom flex flex-col text-xs font-medium">
-                        {skillsQuery.data?.results.map((skill) => (
-                          <li>{skill.skill_object.name}</li>
-                        ))}
-                      </ul>
+                      {(skillsQuery.data?.results?.length || 0) > 3 && (
+                        <ul className="tooltip-text tooltip-bottom flex flex-col text-xs font-medium">
+                          {skillsQuery.data?.results.map((skill) => (
+                            <li>{skill.skill_object.name}</li>
+                          ))}
+                        </ul>
+                      )}
                     </span>
                   </span>
                 )}
