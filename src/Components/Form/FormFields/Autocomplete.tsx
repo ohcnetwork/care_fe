@@ -209,7 +209,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                   className={dropdownOptionClassNames}
                   value={option}
                 >
-                  {({ active }) => (
+                  {({ focus }) => (
                     <div className="flex flex-col">
                       <div className="flex justify-between">
                         <span>{option.label}</span>
@@ -219,7 +219,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                         <div
                           className={classNames(
                             "text-sm",
-                            active ? "text-primary-200" : "text-gray-700",
+                            focus ? "text-primary-200" : "text-gray-700",
                           )}
                         >
                           {option.description}

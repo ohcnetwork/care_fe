@@ -49,9 +49,9 @@ export default function AssetBedSelect(props: Props) {
             {data?.results.map((obj) => (
               <Listbox.Option
                 key={obj.id}
-                className={({ active }) =>
+                className={({ focus }) =>
                   `relative cursor-default select-none px-2 py-1 ${
-                    active ? "bg-zinc-700 text-white" : "text-zinc-400"
+                    focus ? "bg-zinc-700 text-white" : "text-zinc-400"
                   }`
                 }
                 value={obj}

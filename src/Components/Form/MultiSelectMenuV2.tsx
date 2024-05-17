@@ -139,7 +139,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                       value={option}
                       onClick={() => handleSingleSelect(option)}
                     >
-                      {({ active }) => (
+                      {({ focus }) => (
                         <div className="flex flex-col gap-2">
                           <div className="flex justify-between">
                             {option.label}
@@ -153,7 +153,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                           {option.description && (
                             <p
                               className={`font-normal ${
-                                active ? "text-primary-200" : "text-gray-700"
+                                focus ? "text-primary-200" : "text-gray-700"
                               }`}
                             >
                               {option.description}
