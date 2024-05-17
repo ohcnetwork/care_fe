@@ -55,14 +55,21 @@ export default function PrescriptionDetailCard({
                   props.selected ? "text-black" : "text-gray-700",
                 )}
               >
-                {prescription.prescription_type === "DISCHARGE" &&
-                  `${t("discharge")} `}
-                {t(
-                  prescription.dosage_type === "PRN"
-                    ? "prn_prescription"
-                    : "prescription",
+                {isCollapsed ? (
+                  prescription.medicine_object?.name ??
+                  prescription.medicine_old
+                ) : (
+                  <>
+                    {prescription.prescription_type === "DISCHARGE" &&
+                      `${t("discharge")} `}
+                    {t(
+                      prescription.dosage_type === "PRN"
+                        ? "prn_prescription"
+                        : "prescription",
+                    )}
+                    {` #${prescription.id?.slice(-5)}`}
+                  </>
                 )}
-                {` #${prescription.id?.slice(-5)}`}
               </h3>
               {prescription.discontinued && (
                 <span className="rounded-full bg-gray-700 px-2 py-1 text-xs font-semibold uppercase text-white">
