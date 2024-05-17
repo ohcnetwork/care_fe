@@ -80,6 +80,11 @@ export default function ShowInvestigation(props: any) {
     },
   );
 
+  const { data: consultation } = useQuery(routes.getConsultation, {
+    pathParams: { id: consultationId },
+    prefetch: !!consultationId,
+  });
+
   const handleValueChange = (value: any, name: string) => {
     const changedFields = { ...state.changedFields };
     set(changedFields, name, value);
@@ -151,6 +156,7 @@ export default function ShowInvestigation(props: any) {
       <InvestigationTable
         title={`ID: ${sessionId}`}
         data={state.initialValues}
+        isDischargedPatient={!!consultation?.discharge_date}
         changedFields={state.changedFields}
         handleValueChange={handleValueChange}
         handleUpdateCancel={handleUpdateCancel}
