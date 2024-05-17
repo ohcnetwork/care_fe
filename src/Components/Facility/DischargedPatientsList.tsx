@@ -1,4 +1,4 @@
-import { Link, navigate, useQueryParams } from "raviger";
+import { Link, navigate } from "raviger";
 import routes from "../../Redux/api";
 import Page from "../Common/components/Page";
 import PaginatedList from "../../CAREUI/misc/PaginatedList";
@@ -56,14 +56,15 @@ const DischargedPatientsList = ({
     ],
   });
 
-  const [urlParams] = useQueryParams();
-
   useEffect(() => {
-    if (!urlParams.phone_number) {
-      //setPhoneNumber("+91");
+    if (!qParams.phone_number && phone_number.length >= 13) {
+      setPhoneNumber("+91");
     }
-    if (!urlParams.emergency_phone_number) {
-      //setEmergencyPhoneNumber("+91");
+    if (
+      !qParams.emergency_phone_number &&
+      emergency_phone_number.length >= 13
+    ) {
+      setEmergencyPhoneNumber("+91");
     }
   }, [qParams]);
 
