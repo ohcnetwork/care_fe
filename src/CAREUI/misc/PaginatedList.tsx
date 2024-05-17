@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 import { PaginatedResponse, QueryRoute } from "../../Utils/request/types";
 import useQuery, { QueryOptions } from "../../Utils/request/useQuery";
 import ButtonV2, {
@@ -33,9 +33,6 @@ function useContextualized<TItem>() {
 interface Props<TItem> extends QueryOptions<PaginatedResponse<TItem>> {
   route: QueryRoute<PaginatedResponse<TItem>>;
   perPage?: number;
-  queryCB?: (
-    query: ReturnType<typeof useQuery<PaginatedResponse<TItem>>>,
-  ) => void;
   children: (
     ctx: PaginatedListContext<TItem>,
     query: ReturnType<typeof useQuery<PaginatedResponse<TItem>>>,
@@ -46,7 +43,6 @@ export default function PaginatedList<TItem extends object>({
   children,
   route,
   perPage = DEFAULT_PER_PAGE_LIMIT,
-  queryCB,
   ...queryOptions
 }: Props<TItem>) {
   const [currentPage, setPage] = useState(1);
@@ -60,12 +56,6 @@ export default function PaginatedList<TItem extends object>({
   });
 
   const items = query.data?.results ?? [];
-
-  useEffect(() => {
-    if (queryCB) {
-      queryCB(query);
-    }
-  }, [query]);
 
   return (
     <context.Provider
