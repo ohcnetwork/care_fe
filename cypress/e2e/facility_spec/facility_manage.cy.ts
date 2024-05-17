@@ -90,6 +90,7 @@ describe("Facility Manage Functions", () => {
     facilityManage.clickButtonWithText(facilityHfridUpdateButton);
     facilityManage.verifySuccessMessageVisibilityAndContent(
       facilityHfridToastNotificationText,
+      true,
     );
     // update the existing middleware
     facilityPage.clickManageFacilityDropdown();
@@ -98,6 +99,7 @@ describe("Facility Manage Functions", () => {
     facilityManage.clickButtonWithText(facilityHfridUpdateButton);
     facilityManage.verifySuccessMessageVisibilityAndContent(
       facilityHfridToastNotificationText,
+      true,
     );
     // verify its reflection
     facilityPage.clickManageFacilityDropdown();
@@ -108,11 +110,11 @@ describe("Facility Manage Functions", () => {
   it("Modify doctor capacity in Facility detail page", () => {
     // Add a doctor capacity
     facilityManage.clickFacilityAddDoctorTypeButton();
-    facilityPage.selectAreaOfSpecialization("General Medicine");
+    facilityPage.selectAreaOfSpecialization("Pulmonology");
     facilityPage.fillDoctorCount(doctorCapacity);
     facilityPage.saveAndExitDoctorForm();
     facilityManage.verifySuccessMessageVisibilityAndContent(
-      "Doctor count added successfully",
+      "Staff count added successfully",
     );
     facilityManage.verifyTotalDoctorCapacity(doctorCapacity);
     // edit a existing doctor
@@ -120,14 +122,14 @@ describe("Facility Manage Functions", () => {
     facilityPage.fillDoctorCount(doctorModifiedCapacity);
     facilityPage.clickdoctorcapacityaddmore();
     facilityManage.verifySuccessMessageVisibilityAndContent(
-      "Doctor count updated successfully",
+      "Staff count updated successfully",
     );
     facilityManage.verifyTotalDoctorCapacity(doctorModifiedCapacity);
     // delete a bed
     facilityManage.clickDeleteFacilityDoctorCapacity();
     facilityManage.clickButtonWithText("Delete");
     facilityManage.verifySuccessMessageVisibilityAndContent(
-      "Doctor specialization type deleted successfully",
+      "Staff specialization type deleted successfully",
     );
   });
 
