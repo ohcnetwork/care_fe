@@ -4,7 +4,6 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import { Fragment } from "react";
 import { classNames } from "../../Utils/utils";
 import CareIcon from "../icons/CareIcon";
 
@@ -63,7 +62,7 @@ export default function SlideOver({
   };
 
   return (
-    <Transition show={open} as={Fragment}>
+    <Transition show={open}>
       <Dialog
         as="div"
         className="relative z-30"
@@ -71,7 +70,6 @@ export default function SlideOver({
         onClose={closeOnBackdropClick ? setOpen : () => {}}
       >
         <TransitionChild
-          as={Fragment}
           enter="ease-in-out duration-500"
           enterFrom="opacity-0"
           enterTo="opacity-100"
@@ -87,7 +85,6 @@ export default function SlideOver({
           />
         </TransitionChild>
         <TransitionChild
-          as={Fragment}
           enter="transition-all"
           enterFrom={directionClasses[slideFrom].animateStart + " opacity-0"}
           enterTo={directionClasses[slideFrom].animateEnd + " opacity-100"}

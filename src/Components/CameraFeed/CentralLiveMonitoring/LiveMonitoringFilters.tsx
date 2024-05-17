@@ -9,7 +9,6 @@ import { FieldLabel } from "../../Form/FormFields/FormField";
 import { LocationSelect } from "../../Common/LocationSelect";
 import Pagination from "../../Common/Pagination";
 import useFilters from "../../../Common/hooks/useFilters";
-import { Fragment } from "react";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import useSlug from "../../../Common/hooks/useSlug";
 
@@ -36,7 +35,6 @@ const LiveMonitoringFilters = (props: Props) => {
           </ButtonV2>
         </PopoverButton>
         <Transition
-          as={Fragment}
           enter="transition ease-out duration-200"
           enterFrom="opacity-0 translate-y-1"
           enterTo="opacity-100 translate-y-0"

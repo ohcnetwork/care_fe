@@ -1,4 +1,3 @@
-import { Fragment } from "react";
 import useSlug from "../../Common/hooks/useSlug";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
@@ -46,14 +45,17 @@ export default function AssetBedSelect(props: Props) {
           </span>
         </ListboxButton>
         <Transition
-          as={Fragment}
           leave="transition ease-in duration-100"
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <ListboxOptions className="absolute z-20 mt-1 max-h-48 w-full overflow-auto rounded-b-lg bg-zinc-900/75 py-1 text-base shadow-lg ring-1 ring-white/5 backdrop-blur-sm focus:outline-none sm:text-sm md:max-h-60">
+          <ListboxOptions
+            as="ul"
+            className="absolute z-20 mt-1 max-h-48 w-full overflow-auto rounded-b-lg bg-zinc-900/75 py-1 text-base shadow-lg ring-1 ring-white/5 backdrop-blur-sm focus:outline-none sm:text-sm md:max-h-60"
+          >
             {data?.results.map((obj) => (
               <ListboxOption
+                as="li"
                 key={obj.id}
                 className={({ focus }) =>
                   `relative cursor-default select-none px-2 py-1 ${

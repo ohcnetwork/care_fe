@@ -134,9 +134,13 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                 </ListboxButton>
               </div>
               <DropdownTransition show={open}>
-                <ListboxOptions className="cui-dropdown-base absolute top-full">
+                <ListboxOptions
+                  as="ul"
+                  className="cui-dropdown-base absolute top-full"
+                >
                   {options.map((option, index) => (
                     <ListboxOption
+                      as="li"
                       id={`${props.id}-option-${index}`}
                       key={index}
                       className={dropdownOptionClassNames}

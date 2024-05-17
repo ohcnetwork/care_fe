@@ -164,13 +164,17 @@ export const AutocompleteMutliSelect = <T, V>(
           )}
 
           <DropdownTransition>
-            <ComboboxOptions className="cui-dropdown-base absolute top-12 z-10 mt-0.5">
+            <ComboboxOptions
+              as="ul"
+              className="cui-dropdown-base absolute top-12 z-10 mt-0.5"
+            >
               {props.isLoading ? (
                 <Searching />
               ) : filteredOptions.length ? (
                 <>
                   {props.selectAll && (
                     <ComboboxOption
+                      as="li"
                       id={`${props.id}-option-select-all`}
                       key={`${props.id}-option-select-all`}
                       className={dropdownOptionClassNames}
@@ -186,6 +190,7 @@ export const AutocompleteMutliSelect = <T, V>(
                   )}
                   {filteredOptions.map((option, index) => (
                     <ComboboxOption
+                      as="li"
                       id={`${props.id}-option-${index}`}
                       key={`${props.id}-option-${index}`}
                       className={dropdownOptionClassNames}

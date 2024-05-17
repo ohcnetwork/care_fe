@@ -140,7 +140,10 @@ const AutoCompleteAsync = (props: Props) => {
             )}
           </div>
           <DropdownTransition>
-            <ComboboxOptions className="cui-dropdown-base absolute top-12 z-10 text-sm">
+            <ComboboxOptions
+              as="ul"
+              className="cui-dropdown-base absolute top-12 z-10 text-sm"
+            >
               {data?.length === 0 ? (
                 <div className="relative cursor-default select-none px-4 py-2 text-gray-700">
                   {query !== ""
@@ -150,6 +153,7 @@ const AutoCompleteAsync = (props: Props) => {
               ) : (
                 data?.map((item: any) => (
                   <ComboboxOption
+                    as="li"
                     key={item.id}
                     className={dropdownOptionClassNames}
                     value={item}

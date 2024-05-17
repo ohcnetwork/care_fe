@@ -200,7 +200,10 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
           </div>
 
           <DropdownTransition>
-            <ComboboxOptions className="cui-dropdown-base absolute z-10 mt-0.5 origin-top-right">
+            <ComboboxOptions
+              as="ul"
+              className="cui-dropdown-base absolute z-10 mt-0.5 origin-top-right"
+            >
               {filteredOptions.length === 0 && (
                 <div className="p-2 text-sm text-gray-500">
                   No options found
@@ -208,6 +211,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
               )}
               {filteredOptions.map((option, index) => (
                 <ComboboxOption
+                  as="li"
                   id={`${props.id}-option-${option.label}-value-${index}`}
                   key={`${props.id}-option-${option.label}-value-${index}`}
                   className={dropdownOptionClassNames}
