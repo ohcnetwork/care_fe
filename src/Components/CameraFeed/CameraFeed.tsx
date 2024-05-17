@@ -52,7 +52,7 @@ export default function CameraFeed(props: Props) {
     if (props.preset) {
       move(props.preset);
     }
-  }, [JSON.stringify(props.preset)]);
+  }, [props.preset]);
 
   // Get camera presets (only if onCameraPresetsObtained is provided)
   useEffect(() => {
