@@ -7,25 +7,26 @@ import { useTranslation } from "react-i18next";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { useState } from "react";
 
-export default function PrescriptionDetailCard({
-  prescription,
-  ...props
-}: {
+interface Props {
   prescription: Prescription;
   readonly?: boolean;
   children?: React.ReactNode;
   onDiscontinueClick?: () => void;
   onAdministerClick?: () => void;
   selected?: boolean;
-  showPrescription?: boolean;
-}) {
+  collapsible?: boolean;
+}
+
+export default function PrescriptionDetailCard({
+  prescription,
+  collapsible = false,
+  ...props
+}: Props) {
   const { t } = useTranslation();
-  const [showPrescription, setShowPrescription] = useState(
-    props.showPrescription,
+  const [isCollapsed, setIsCollapsed] = useState(
+    collapsible && prescription.discontinued,
   );
-  const handleShow = () => {
-    setShowPrescription(!showPrescription);
-  };
+
   return (
     <div
       className={classNames(
@@ -34,9 +35,17 @@ export default function PrescriptionDetailCard({
           ? "border-primary-500"
           : "border-spacing-2 border-dashed border-gray-500",
         prescription.discontinued && "bg-gray-200 opacity-80",
+        collapsible && "cursor-pointer hover:border-gray-900",
       )}
     >
-      <div className="flex flex-1 flex-col" onClick={handleShow}>
+      <div
+        className="flex flex-1 flex-col"
+        onClick={() => {
+          if (collapsible) {
+            setIsCollapsed(!isCollapsed);
+          }
+        }}
+      >
         <div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -67,7 +76,10 @@ export default function PrescriptionDetailCard({
                 <div className="flex flex-col-reverse items-end gap-2 sm:flex-row">
                   <ButtonV2
                     disabled={prescription.discontinued}
-                    onClick={props.onAdministerClick}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      props.onAdministerClick?.();
+                    }}
                     type="button"
                     size="small"
                     variant="secondary"
@@ -84,7 +96,10 @@ export default function PrescriptionDetailCard({
                     variant="danger"
                     ghost
                     border
-                    onClick={props.onDiscontinueClick}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      props.onDiscontinueClick?.();
+                    }}
                   >
                     <CareIcon icon="l-ban" className="text-base" />
                     {t("discontinue")}
@@ -93,7 +108,7 @@ export default function PrescriptionDetailCard({
               )}
           </div>
         </div>
-        {showPrescription && (
+        {!isCollapsed && (
           <div className="mt-4 grid grid-cols-10 items-center gap-2">
             <Detail
               className={
