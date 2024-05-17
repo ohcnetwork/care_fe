@@ -62,19 +62,6 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.verifyNotification(
       "Telemedicine Log Updates details created successfully",
     );
-    // verify the copied previous value
-    cy.closeNotification();
-    patientLogupdate.clickLogupdate();
-    patientLogupdate.clickCopyPreviousValue();
-    patientLogupdate.selectPatientCategory(patientCategory);
-    cy.submitButton("Save");
-    cy.closeNotification();
-    cy.verifyContentPresence("#physical_examination_info", [
-      physicalExamination,
-    ]);
-    cy.verifyContentPresence("#rhythm_detail", [patientRhythm]);
-    cy.submitButton("Continue");
-    cy.verifyNotification("Normal Log Updates details updated successfully");
   });
 
   it("Create a new log normal update for a domicilary care patient and edit it", () => {

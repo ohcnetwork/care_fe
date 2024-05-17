@@ -3,7 +3,7 @@ import { DoctorModal } from "./models";
 import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import * as Notification from "../../Utils/Notifications";
 import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
-import { DoctorCapacity } from "./DoctorCapacity";
+import { StaffCapacity } from "./StaffCapacity";
 import DialogModal from "../Common/Dialog";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -17,7 +17,7 @@ interface DoctorsCountProps extends DoctorModal {
   handleUpdate: () => void;
 }
 
-const DoctorsCountCard = (props: DoctorsCountProps) => {
+const StaffCountCard = (props: DoctorsCountProps) => {
   const specialization = DOCTOR_SPECIALIZATION.find((i) => i.id === props.area);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [open, setOpen] = useState(false);
@@ -33,7 +33,7 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
     if (res?.ok) {
       props.removeDoctor(props.id);
       Notification.Success({
-        msg: "Doctor specialization type deleted successfully",
+        msg: "Staff specialization type deleted successfully",
       });
     }
   };
@@ -46,12 +46,12 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
     <div className="w-full">
       <div className="flex h-full flex-col rounded-sm border border-[#D2D6DC] shadow-sm">
         <div className="flex flex-1 items-center justify-start gap-3 px-4 py-6">
-          <div className={`rounded-full p-4 ${specialization?.desc}`}>
+          <div className="rounded-full bg-yellow-500 p-4">
             <DoctorIcon className="h-5 w-5 fill-current text-white" />
           </div>
           <div>
             <div className="text-sm font-medium text-[#808080]">
-              {specialization?.text} Doctors
+              {specialization?.text}
             </div>
             <h2 className="mt-2 text-xl font-bold">{props.count}</h2>
           </div>
@@ -82,8 +82,8 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
         <ConfirmDialog
           show={openDeleteDialog}
           onClose={handleDeleteClose}
-          title={`Delete ${specialization?.text} doctors`}
-          description="You will not be able to access this docter specialization type later."
+          title={`Delete ${specialization?.text}`}
+          description="You will not be able to access this specialization type later."
           action="Delete"
           variant="danger"
           onConfirm={handleDeleteSubmit}
@@ -93,9 +93,9 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
         <DialogModal
           show={open}
           onClose={() => setOpen(false)}
-          title="Update Doctor Capacity"
+          title="Update Staff Capacity"
         >
-          <DoctorCapacity
+          <StaffCapacity
             facilityId={props.facilityId}
             handleClose={() => {
               setOpen(false);
@@ -112,4 +112,4 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
   );
 };
 
-export default DoctorsCountCard;
+export default StaffCountCard;
