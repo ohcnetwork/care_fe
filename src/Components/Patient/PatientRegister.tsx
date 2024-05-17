@@ -2,6 +2,7 @@ import * as Notification from "../../Utils/Notifications.js";
 
 import {
   BLOOD_GROUPS,
+  CANCER_HISTORY_CHOICES,
   DISEASE_STATUS,
   GENDER_TYPES,
   MEDICAL_HISTORY_CHOICES,
@@ -79,6 +80,7 @@ interface medicalHistoryModel {
   id?: number;
   disease: string | number;
   details: string;
+  extra_info?: object;
 }
 
 const medicalHistoryChoices = MEDICAL_HISTORY_CHOICES.reduce(
@@ -765,10 +767,29 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       const medData = MEDICAL_HISTORY_CHOICES.find((i) => i.id === id);
       if (medData) {
         const details = formData[`medical_history_${medData.id}`];
-        medical_history.push({
-          disease: medData.text,
-          details: details ? details : "",
-        });
+        if (medData.id === 11) {
+          medical_history.push({
+            disease: medData.text,
+            details: details ? details : "",
+            extra_info: {
+              tb_status: formData["tb_status"] ?? "",
+              tb_duration: formData["tb_duration"] ?? "",
+            },
+          });
+        } else if (medData.id === 13) {
+          medical_history.push({
+            disease: medData.text,
+            details: details ? details : "",
+            extra_info: {
+              cancer_type: formData["cancer_type"] ?? "",
+            },
+          });
+        } else {
+          medical_history.push({
+            disease: medData.text,
+            details: details ? details : "",
+          });
+        }
       }
     });
     const data = {
@@ -1080,6 +1101,40 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             label={id !== 1 ? title : "NONE"}
           />
         </div>
+        {/* TB */}
+        {id === 11 && (field("medical_history").value ?? []).includes(id) && (
+          <div>
+            <SelectFormField
+              {...field("tb_status")}
+              position="above"
+              label=""
+              required
+              options={["Active", "Old"]}
+              optionLabel={(o: any) => o}
+              optionValue={(o: any) => o}
+            />
+            <TextFormField
+              {...field("tb_duration")}
+              placeholder="Duration"
+              min={0}
+              type={"number"}
+            />
+          </div>
+        )}
+        {/* Cancer */}
+        {id === 13 && (field("medical_history").value ?? []).includes(id) && (
+          <div className="mx-4">
+            <SelectFormField
+              {...field("cancer_type")}
+              position="above"
+              label=""
+              required
+              options={CANCER_HISTORY_CHOICES.map((i) => i.text)}
+              optionLabel={(o: any) => o}
+              optionValue={(o: any) => o}
+            />
+          </div>
+        )}
         {id !== 1 && (field("medical_history").value ?? []).includes(id) && (
           <div className="mx-4">
             <TextAreaFormField

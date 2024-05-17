@@ -20,6 +20,7 @@ export const LocalStorageKeys = {
   accessToken: "care_access_token",
   refreshToken: "care_refresh_token",
 };
+
 export interface OptionsType {
   id: number | string;
   text: string;
@@ -286,15 +287,38 @@ export const DOCTOR_SPECIALIZATION: Array<OptionsType> = [
   { id: 5, text: "Others" },
 ];
 
+export const CANCER_HISTORY_CHOICES: Array<OptionsType> = [
+  { id: 1, text: "Breast" },
+  { id: 2, text: "Lung" },
+  { id: 3, text: "Skin" },
+  { id: 4, text: "Colorectal" },
+  { id: 5, text: "Uterus" },
+  { id: 6, text: "Leukaemia" },
+  { id: 7, text: "Bladder" },
+  { id: 8, text: "Prostate" },
+  { id: 9, text: "Melanoma" },
+  { id: 10, text: "Lymphoma" },
+  { id: 11, text: "Brain" },
+  { id: 12, text: "Liver" },
+  { id: 13, text: "Thyroid" },
+  { id: 14, text: "Others" },
+];
+
 export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
   { id: 1, text: "NO" },
   { id: 2, text: "Diabetes" },
   { id: 3, text: "Heart Disease" },
   { id: 4, text: "HyperTension" },
-  { id: 5, text: "Kidney Diseases" },
-  { id: 6, text: "Lung Diseases/Asthma" },
-  { id: 7, text: "Cancer" },
-  { id: 8, text: "OTHER" },
+  { id: 5, text: "Chronic Renal Disease" },
+  { id: 6, text: "Asthma" },
+  { id: 7, text: "COPD" },
+  { id: 8, text: "Bronchitis" },
+  { id: 9, text: "Chronic Neurological Or Neuromuscular Disease" },
+  { id: 10, text: "Immunocompromised Condition" },
+  { id: 11, text: "TB" },
+  { id: 12, text: "Other Chronic Lung Diseases" },
+  { id: 13, text: "Cancer" },
+  { id: 14, text: "OTHER" },
 ];
 
 export const REVIEW_AT_CHOICES: Array<OptionsType> = [
