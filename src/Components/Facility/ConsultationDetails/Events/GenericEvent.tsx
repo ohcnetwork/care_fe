@@ -83,7 +83,7 @@ export default function GenericEvent(props: IProps) {
   return (
     <div className="flex w-full flex-col gap-4 rounded-lg border border-gray-400 p-4 @container">
       {Object.entries(props.values).map(([key, value]) => (
-        <div className="flex w-full flex-col items-start  gap-2">
+        <div className="flex w-full flex-col items-start gap-2">
           <span className="text-xs uppercase text-gray-700">
             {key.replaceAll(/_/g, " ")}
           </span>
