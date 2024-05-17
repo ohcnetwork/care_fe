@@ -5,6 +5,7 @@ import PaginatedList from "../../CAREUI/misc/PaginatedList";
 import Loading from "../Common/Loading";
 import { PatientModel } from "../Patient/models";
 import useQuery from "../../Utils/request/useQuery";
+import { debounce } from "lodash-es";
 import SearchInput from "../Form/SearchInput";
 import {
   ADMITTED_TO,
@@ -218,16 +219,20 @@ const DischargedPatientsList = ({
       }}
       options={
         <>
-          <div className="flex flex-col gap-4 lg:flex-row">
+          <SearchInput
+            className="mr-4 w-full max-w-sm"
+            placeholder="Search by patient name"
+            name="name"
+            value={qParams.name}
+            onChange={debounce((e) => updateQuery({ name: e.value }))}
+          />
+          <div className="flex flex-col gap-4 md:flex-row">
             <SwitchTabs
               tab1="Live"
               tab2="Discharged"
               className="mr-4"
               onClickTab1={() => navigate("/patients")}
               isTab2Active
-            />
-            <AdvancedFilterButton
-              onClick={() => advancedFilter.setShow(true)}
             />
             <SortDropdownMenu
               options={DISCHARGED_PATIENT_SORT_OPTIONS}
@@ -238,54 +243,6 @@ const DischargedPatientsList = ({
         </>
       }
     >
-      <div className="manualGrid my-4 mb-[-12px] mt-5 grid-cols-1 gap-3 px-2 sm:grid-cols-4 md:px-0">
-        <div className="mt-2 flex h-full flex-col gap-3 xl:flex-row">
-          <div className="flex-1">
-            <CountBlock
-              text="Discharged Patients"
-              count={count}
-              loading={facilityQuery.loading}
-              icon="l-user-injured"
-              className="pb-12"
-            />
-          </div>
-        </div>
-        <div className="col-span-3 w-full">
-          <div className="col-span-2 mt-2">
-            <div className="mt-1 md:flex md:gap-4">
-              <SearchInput
-                label="Search by Patient"
-                placeholder="Enter patient name"
-                {...queryField("name")}
-              />
-              <SearchInput
-                label="Search by IP/OP Number"
-                placeholder="Enter IP/OP Number"
-                secondary
-                {...queryField("patient_no")}
-              />
-            </div>
-            <div className="md:flex md:gap-4">
-              <PhoneNumberFormField
-                label="Search by Primary Number"
-                {...queryField("phone_number", "+91")}
-                value={phone_number}
-                onChange={(e) => setPhoneNum(e.value)}
-                error={phoneNumberError}
-                types={["mobile", "landline"]}
-              />
-              <PhoneNumberFormField
-                label="Search by Emergency Number"
-                {...queryField("emergency_phone_number", "+91")}
-                value={emergency_phone_number}
-                onChange={(e) => setEmergencyPhoneNum(e.value)}
-                error={emergencyPhoneNumberError}
-                types={["mobile", "landline"]}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
       <div className="col-span-3 mt-6 flex flex-wrap">
         <FilterBadges
           badges={({
@@ -297,92 +254,92 @@ const DischargedPatientsList = ({
             range,
             ordering,
           }) => [
-            phoneNumber("Primary number", "phone_number"),
-            phoneNumber("Emergency number", "emergency_phone_number"),
-            badge("Patient name", "name"),
-            badge("IP/OP number", "patient_no"),
-            ...dateRange("Modified", "modified_date"),
-            ...dateRange("Created", "created_date"),
-            ...dateRange("Admitted", "last_consultation_encounter_date"),
-            ...dateRange("Discharged", "last_consultation_discharge_date"),
-            // Admitted to type badges
-            badge("No. of vaccination doses", "number_of_doses"),
-            kasp(),
-            badge("COWIN ID", "covin_id"),
-            badge("Is Antenatal", "is_antenatal"),
-            badge("Review Missed", "review_missed"),
-            badge(
-              "Is Medico-Legal Case",
-              "last_consultation_medico_legal_case",
-            ),
-            value(
-              "Location",
-              "last_consultation_current_bed__location",
-              qParams.last_consultation_current_bed__location
-                ? facilityAssetLocationData?.name ||
-                    qParams.last_consultation_current_bed__locations
-                : "",
-            ),
-            badge("Facility Type", "facility_type"),
-            value(
-              "District",
-              "district",
-              qParams.district ? districtData?.name || "" : "",
-            ),
-            ordering(),
-            value("Category", "category", getTheCategoryFromId()),
-            badge("Disease Status", "disease_status"),
-            value(
-              "Respiratory Support",
-              "ventilator_interface",
-              qParams.ventilator_interface &&
-                t(`RESPIRATORY_SUPPORT_${qParams.ventilator_interface}`),
-            ),
-            value(
-              "Gender",
-              "gender",
-              parseOptionId(GENDER_TYPES, qParams.gender) || "",
-            ),
-            {
-              name: "Admitted to",
-              value: ADMITTED_TO[qParams.last_consultation_admitted_to],
-              paramKey: "last_consultation_admitted_to",
-            },
-            ...range("Age", "age"),
-            badge("SRF ID", "srf_id"),
-            {
-              name: "LSG Body",
-              value: qParams.lsgBody ? LocalBodyData?.name || "" : "",
-              paramKey: "lsgBody",
-            },
-            ...FILTER_BY_DIAGNOSES_KEYS.map((key) =>
-              value(
-                DIAGNOSES_FILTER_LABELS[key],
-                key,
-                getDiagnosisFilterValue(key).join(", "),
+              phoneNumber("Primary number", "phone_number"),
+              phoneNumber("Emergency number", "emergency_phone_number"),
+              badge("Patient name", "name"),
+              badge("IP/OP number", "patient_no"),
+              ...dateRange("Modified", "modified_date"),
+              ...dateRange("Created", "created_date"),
+              ...dateRange("Admitted", "last_consultation_encounter_date"),
+              ...dateRange("Discharged", "last_consultation_discharge_date"),
+              // Admitted to type badges
+              badge("No. of vaccination doses", "number_of_doses"),
+              kasp(),
+              badge("COWIN ID", "covin_id"),
+              badge("Is Antenatal", "is_antenatal"),
+              badge("Review Missed", "review_missed"),
+              badge(
+                "Is Medico-Legal Case",
+                "last_consultation_medico_legal_case",
               ),
-            ),
-            badge("Declared Status", "is_declared_positive"),
-            ...dateRange("Result", "date_of_result"),
-            ...dateRange("Declared positive", "date_declared_positive"),
-            ...dateRange(
-              "Symptoms onset",
-              "last_consultation_symptoms_onset_date",
-            ),
-            ...dateRange("Last vaccinated", "last_vaccinated_date"),
-            {
-              name: "Telemedicine",
-              paramKey: "last_consultation_is_telemedicine",
-            },
-            value(
-              "Discharge Reason",
-              "last_consultation__new_discharge_reason",
-              parseOptionId(
-                DISCHARGE_REASONS,
-                qParams.last_consultation__new_discharge_reason,
-              ) || "",
-            ),
-          ]}
+              value(
+                "Location",
+                "last_consultation_current_bed__location",
+                qParams.last_consultation_current_bed__location
+                  ? facilityAssetLocationData?.name ||
+                  qParams.last_consultation_current_bed__locations
+                  : "",
+              ),
+              badge("Facility Type", "facility_type"),
+              value(
+                "District",
+                "district",
+                qParams.district ? districtData?.name || "" : "",
+              ),
+              ordering(),
+              value("Category", "category", getTheCategoryFromId()),
+              badge("Disease Status", "disease_status"),
+              value(
+                "Respiratory Support",
+                "ventilator_interface",
+                qParams.ventilator_interface &&
+                t(`RESPIRATORY_SUPPORT_${qParams.ventilator_interface}`),
+              ),
+              value(
+                "Gender",
+                "gender",
+                parseOptionId(GENDER_TYPES, qParams.gender) || "",
+              ),
+              {
+                name: "Admitted to",
+                value: ADMITTED_TO[qParams.last_consultation_admitted_to],
+                paramKey: "last_consultation_admitted_to",
+              },
+              ...range("Age", "age"),
+              badge("SRF ID", "srf_id"),
+              {
+                name: "LSG Body",
+                value: qParams.lsgBody ? LocalBodyData?.name || "" : "",
+                paramKey: "lsgBody",
+              },
+              ...FILTER_BY_DIAGNOSES_KEYS.map((key) =>
+                value(
+                  DIAGNOSES_FILTER_LABELS[key],
+                  key,
+                  getDiagnosisFilterValue(key).join(", "),
+                ),
+              ),
+              badge("Declared Status", "is_declared_positive"),
+              ...dateRange("Result", "date_of_result"),
+              ...dateRange("Declared positive", "date_declared_positive"),
+              ...dateRange(
+                "Symptoms onset",
+                "last_consultation_symptoms_onset_date",
+              ),
+              ...dateRange("Last vaccinated", "last_vaccinated_date"),
+              {
+                name: "Telemedicine",
+                paramKey: "last_consultation_is_telemedicine",
+              },
+              value(
+                "Discharge Reason",
+                "last_consultation__new_discharge_reason",
+                parseOptionId(
+                  DISCHARGE_REASONS,
+                  qParams.last_consultation__new_discharge_reason,
+                ) || "",
+              ),
+            ]}
           children={
             qParams.last_consultation_admitted_bed_type_list &&
             LastAdmittedToTypeBadges()
@@ -390,7 +347,6 @@ const DischargedPatientsList = ({
         />
       </div>
       <PaginatedList
-        perPage={12}
         route={routes.listFacilityDischargedPatients}
         pathParams={{ facility_external_id }}
         query={{ ordering: "-modified_date", ...qParams }}
@@ -400,7 +356,7 @@ const DischargedPatientsList = ({
         }}
       >
         {() => (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 py-4 lg:px-4 lg:py-8">
             <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-gray-200 bg-white p-5 text-center text-2xl font-bold text-gray-500">
               <span>{t("discharged_patients_empty")}</span>
             </PaginatedList.WhenEmpty>
@@ -427,11 +383,6 @@ const DischargedPatientsList = ({
           </div>
         )}
       </PaginatedList>
-      <PatientFilter
-        {...advancedFilter}
-        key={window.location.search}
-        dischargePage
-      />
     </Page>
   );
 };
