@@ -170,6 +170,17 @@ export default function ABDMRecordsTab({ patientId }: IProps) {
     <Loading />;
   }
 
+  if (!data?.results.length) {
+    return (
+      <div className="mt-12 flex flex-col items-center justify-center gap-2.5">
+        <p className="font-semibold text-gray-600">No Records found</p>
+        <p className="text-sm text-gray-600">
+          Raise a consent request to fetch patient records over ABDM
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-6 flex flex-col gap-6">
       {data?.results.map((record) => {
