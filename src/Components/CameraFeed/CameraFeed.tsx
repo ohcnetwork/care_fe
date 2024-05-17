@@ -52,7 +52,7 @@ export default function CameraFeed(props: Props) {
     if (props.preset) {
       move(props.preset);
     }
-  }, [props.preset]);
+  }, [JSON.stringify(props.preset)]);
 
   // Get camera presets (only if onCameraPresetsObtained is provided)
   useEffect(() => {
@@ -77,7 +77,7 @@ export default function CameraFeed(props: Props) {
       },
       onError: props.onStreamError,
     });
-  }, [player.initializeStream, props.onStreamSuccess, props.onStreamError]);
+  }, [player.initializeStream]);
 
   // Start stream on mount
   useEffect(() => initializeStream(), [initializeStream]);

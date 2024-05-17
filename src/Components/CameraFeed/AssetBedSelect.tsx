@@ -19,7 +19,7 @@ export default function AssetBedSelect(props: Props) {
 
   return (
     <Listbox value={selected} onChange={props.onChange}>
-      <div className="relative">
+      <div className="relative flex-1">
         <Listbox.Button className="relative w-full cursor-default pr-6 text-right text-xs text-zinc-400 focus:outline-none disabled:cursor-not-allowed disabled:bg-transparent disabled:text-zinc-700 sm:text-sm">
           <span className="block truncate">
             {selected ? label(selected) : "No Preset"}
