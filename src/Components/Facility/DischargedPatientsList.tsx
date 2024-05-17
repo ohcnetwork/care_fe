@@ -1,4 +1,4 @@
-import { Link, navigate } from "raviger";
+import { Link, navigate, useQueryParams } from "raviger";
 import routes from "../../Redux/api";
 import Page from "../Common/components/Page";
 import PaginatedList from "../../CAREUI/misc/PaginatedList";
@@ -7,8 +7,11 @@ import { PatientModel } from "../Patient/models";
 import useQuery from "../../Utils/request/useQuery";
 import SearchInput from "../Form/SearchInput";
 import {
+  ADMITTED_TO,
   DISCHARGED_PATIENT_SORT_OPTIONS,
+  DISCHARGE_REASONS,
   GENDER_TYPES,
+  PATIENT_CATEGORIES,
 } from "../../Common/constants";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
@@ -22,8 +25,16 @@ import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover"
 import CountBlock from "../../CAREUI/display/Count";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { parseOptionId } from "../../Common/utils";
+import {
+  DIAGNOSES_FILTER_LABELS,
+  DiagnosesFilterKey,
+  FILTER_BY_DIAGNOSES_KEYS,
+} from "../Patient/DiagnosesFilter";
+import { getDiagnosesByIds } from "../Diagnosis/utils";
+import { ICD11DiagnosisModel } from "./models";
+import FilterBadge from "../../CAREUI/display/FilterBadge";
 
 const DischargedPatientsList = ({
   facility_external_id,
@@ -45,6 +56,109 @@ const DischargedPatientsList = ({
     ],
   });
 
+  const [urlParams] = useQueryParams();
+
+  useEffect(() => {
+    if (!urlParams.phone_number) {
+      //setPhoneNumber("+91");
+    }
+    if (!urlParams.emergency_phone_number) {
+      //setEmergencyPhoneNumber("+91");
+    }
+  }, [qParams]);
+
+  const { data: districtData } = useQuery(routes.getDistrict, {
+    pathParams: {
+      id: qParams.district,
+    },
+    prefetch: !!Number(qParams.district),
+  });
+
+  const { data: LocalBodyData } = useQuery(routes.getLocalBody, {
+    pathParams: {
+      id: qParams.lsgBody,
+    },
+    prefetch: !!Number(qParams.lsgBody),
+  });
+
+  const { data: facilityAssetLocationData } = useQuery(
+    routes.getFacilityAssetLocation,
+    {
+      pathParams: {
+        facility_external_id: qParams.facility,
+        external_id: qParams.last_consultation_current_bed__location,
+      },
+      prefetch: !!qParams.last_consultation_current_bed__location,
+    },
+  );
+
+  const getTheCategoryFromId = () => {
+    let category_name;
+    if (qParams.category) {
+      category_name = PATIENT_CATEGORIES.find(
+        (item: any) => qParams.category === item.id,
+      )?.text;
+
+      return String(category_name);
+    } else {
+      return "";
+    }
+  };
+
+  const getDiagnosisFilterValue = (key: DiagnosesFilterKey) => {
+    const ids: string[] = (qParams[key] ?? "").split(",");
+    return ids.map((id) => diagnoses.find((obj) => obj.id == id)?.label ?? id);
+  };
+
+  useEffect(() => {
+    const ids: string[] = [];
+    FILTER_BY_DIAGNOSES_KEYS.forEach((key) => {
+      ids.push(...(qParams[key] ?? "").split(",").filter(Boolean));
+    });
+    const existing = diagnoses.filter(({ id }) => ids.includes(id));
+    const objIds = existing.map((o) => o.id);
+    const diagnosesToBeFetched = ids.filter((id) => !objIds.includes(id));
+    getDiagnosesByIds(diagnosesToBeFetched).then((data) => {
+      const retrieved = data.filter(Boolean) as ICD11DiagnosisModel[];
+      setDiagnoses([...existing, ...retrieved]);
+    });
+  }, [
+    qParams.diagnoses,
+    qParams.diagnoses_confirmed,
+    qParams.diagnoses_provisional,
+    qParams.diagnoses_unconfirmed,
+    qParams.diagnoses_differential,
+  ]);
+
+  const LastAdmittedToTypeBadges = () => {
+    const badge = (key: string, value: any, id: string) => {
+      return (
+        value && (
+          <FilterBadge
+            name={key}
+            value={value}
+            onRemove={() => {
+              const lcat = qParams.last_consultation_admitted_bed_type_list
+                .split(",")
+                .filter((x: string) => x != id)
+                .join(",");
+              updateQuery({
+                ...qParams,
+                last_consultation_admitted_bed_type_list: lcat,
+              });
+            }}
+          />
+        )
+      );
+    };
+    return qParams.last_consultation_admitted_bed_type_list
+      .split(",")
+      .map((id: string) => {
+        const text = ADMITTED_TO.find((obj) => obj.id == id)?.text;
+        return badge("Bed Type", text, id);
+      });
+  };
+
   const queryField = <T,>(name: string, defaultValue?: T) => {
     return {
       name,
@@ -53,7 +167,7 @@ const DischargedPatientsList = ({
       className: "grow w-full mb-2",
     };
   };
-
+  const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
   const [phone_number, setPhoneNumber] = useState("");
   const [phoneNumberError, setPhoneNumberError] = useState("");
   const [emergency_phone_number, setEmergencyPhoneNumber] = useState("");
@@ -189,13 +303,34 @@ const DischargedPatientsList = ({
             badge("IP/OP number", "patient_no"),
             ...dateRange("Modified", "modified_date"),
             ...dateRange("Created", "created_date"),
+            ...dateRange("Admitted", "last_consultation_encounter_date"),
+            ...dateRange("Discharged", "last_consultation_discharge_date"),
+            // Admitted to type badges
             badge("No. of vaccination doses", "number_of_doses"),
             kasp(),
             badge("COWIN ID", "covin_id"),
             badge("Is Antenatal", "is_antenatal"),
             badge("Review Missed", "review_missed"),
+            badge(
+              "Is Medico-Legal Case",
+              "last_consultation_medico_legal_case",
+            ),
+            value(
+              "Location",
+              "last_consultation_current_bed__location",
+              qParams.last_consultation_current_bed__location
+                ? facilityAssetLocationData?.name ||
+                    qParams.last_consultation_current_bed__locations
+                : "",
+            ),
             badge("Facility Type", "facility_type"),
+            value(
+              "District",
+              "district",
+              qParams.district ? districtData?.name || "" : "",
+            ),
             ordering(),
+            value("Category", "category", getTheCategoryFromId()),
             badge("Disease Status", "disease_status"),
             value(
               "Respiratory Support",
@@ -208,13 +343,50 @@ const DischargedPatientsList = ({
               "gender",
               parseOptionId(GENDER_TYPES, qParams.gender) || "",
             ),
+            {
+              name: "Admitted to",
+              value: ADMITTED_TO[qParams.last_consultation_admitted_to],
+              paramKey: "last_consultation_admitted_to",
+            },
             ...range("Age", "age"),
             badge("SRF ID", "srf_id"),
+            {
+              name: "LSG Body",
+              value: qParams.lsgBody ? LocalBodyData?.name || "" : "",
+              paramKey: "lsgBody",
+            },
+            ...FILTER_BY_DIAGNOSES_KEYS.map((key) =>
+              value(
+                DIAGNOSES_FILTER_LABELS[key],
+                key,
+                getDiagnosisFilterValue(key).join(", "),
+              ),
+            ),
             badge("Declared Status", "is_declared_positive"),
             ...dateRange("Result", "date_of_result"),
             ...dateRange("Declared positive", "date_declared_positive"),
+            ...dateRange(
+              "Symptoms onset",
+              "last_consultation_symptoms_onset_date",
+            ),
             ...dateRange("Last vaccinated", "last_vaccinated_date"),
+            {
+              name: "Telemedicine",
+              paramKey: "last_consultation_is_telemedicine",
+            },
+            value(
+              "Discharge Reason",
+              "last_consultation__new_discharge_reason",
+              parseOptionId(
+                DISCHARGE_REASONS,
+                qParams.last_consultation__new_discharge_reason,
+              ) || "",
+            ),
           ]}
+          children={
+            qParams.last_consultation_admitted_bed_type_list &&
+            LastAdmittedToTypeBadges()
+          }
         />
       </div>
       <PaginatedList
@@ -224,6 +396,7 @@ const DischargedPatientsList = ({
         query={{ ordering: "-modified_date", ...qParams }}
         queryCB={(query) => {
           setCount(query.data?.count || 0);
+          console.log(query.data?.count);
         }}
       >
         {() => (
