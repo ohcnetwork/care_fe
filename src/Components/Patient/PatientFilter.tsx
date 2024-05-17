@@ -379,9 +379,10 @@ export default function PatientFilter(props: any) {
               }
             />
           </div>
-          {["StateAdmin", "StateReadOnlyAdmin"].includes(
-            authUser.user_type,
-          ) && (
+          {(props.dischargePage ||
+            ["StateAdmin", "StateReadOnlyAdmin"].includes(
+              authUser.user_type,
+            )) && (
             <div className="w-full flex-none" id="discharge-reason-select">
               <FieldLabel className="text-sm">Discharge Reason</FieldLabel>
               <SelectMenuV2
@@ -432,7 +433,7 @@ export default function PatientFilter(props: any) {
               }
             />
           </div>
-          <div className="w-full flex-none">
+          {/* <div className="w-full flex-none">
             <FieldLabel className="text-sm">Is Antenatal</FieldLabel>
             <SelectMenuV2
               placeholder="Show all"
@@ -440,17 +441,12 @@ export default function PatientFilter(props: any) {
               optionLabel={(o) =>
                 o === "true" ? "Antenatal" : "Non-antenatal"
               }
-              optionDescription={(o) =>
-                o === "true"
-                  ? "i.e., last menstruation start date is within the last 9 months"
-                  : undefined
-              }
               value={filterState.is_antenatal}
               onChange={(v) =>
                 setFilterState({ ...filterState, is_antenatal: v })
               }
             />
-          </div>
+          </div> */}
           <div className="w-full flex-none">
             <FieldLabel className="text-sm">Review Missed</FieldLabel>
             <SelectMenuV2
@@ -585,16 +581,18 @@ export default function PatientFilter(props: any) {
         className="rounded-md"
       >
         <div className="space-y-4">
-          <div>
-            <FieldLabel className="text-sm">Facility</FieldLabel>
-            <FacilitySelect
-              multiple={false}
-              name="facility"
-              showAll={false}
-              selected={filterState.facility_ref}
-              setSelected={(obj) => setFilterWithRef("facility", obj)}
-            />
-          </div>
+          {!props.dischargePage && (
+            <div>
+              <FieldLabel className="text-sm">Facility</FieldLabel>
+              <FacilitySelect
+                multiple={false}
+                name="facility"
+                showAll={false}
+                selected={filterState.facility_ref}
+                setSelected={(obj) => setFilterWithRef("facility", obj)}
+              />
+            </div>
+          )}
           {filterState.facility && (
             <div>
               <FieldLabel className="text-sm">Location</FieldLabel>
@@ -613,22 +611,24 @@ export default function PatientFilter(props: any) {
               />
             </div>
           )}
-          <div>
-            <FieldLabel className="text-sm">Facility type</FieldLabel>
-            <SelectMenuV2
-              placeholder="Show all"
-              options={FACILITY_TYPES}
-              optionLabel={(o) => o.text}
-              optionValue={(o) => o.text}
-              value={filterState.facility_type}
-              onChange={(v) =>
-                setFilterState({ ...filterState, facility_type: v })
-              }
-              optionIcon={() => (
-                <CareIcon icon="l-hospital" className="text-lg" />
-              )}
-            />
-          </div>
+          {!props.dischargePage && (
+            <div>
+              <FieldLabel className="text-sm">Facility type</FieldLabel>
+              <SelectMenuV2
+                placeholder="Show all"
+                options={FACILITY_TYPES}
+                optionLabel={(o) => o.text}
+                optionValue={(o) => o.text}
+                value={filterState.facility_type}
+                onChange={(v) =>
+                  setFilterState({ ...filterState, facility_type: v })
+                }
+                optionIcon={() => (
+                  <CareIcon icon="l-hospital" className="text-lg" />
+                )}
+              />
+            </div>
+          )}
           <div>
             <FieldLabel className="text-sm">LSG Body</FieldLabel>
             <div className="">
