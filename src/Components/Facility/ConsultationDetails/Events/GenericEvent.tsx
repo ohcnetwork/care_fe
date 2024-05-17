@@ -43,7 +43,13 @@ const formatValue = (value: unknown, key?: string): ReactNode => {
         return `No ${key?.replaceAll(/_/g, " ")}`;
       }
 
-      return value.map((v) => formatValue(v, key));
+      return (
+        <ul className="list-disc space-y-2 pl-4">
+          {value.map((v) => (
+            <li>{formatValue(v, key)}</li>
+          ))}
+        </ul>
+      );
     }
 
     if (value instanceof Date) {
@@ -77,7 +83,7 @@ export default function GenericEvent(props: IProps) {
   return (
     <div className="flex w-full flex-col gap-4 rounded-lg border border-gray-400 p-4 @container">
       {Object.entries(props.values).map(([key, value]) => (
-        <div className="flex w-full flex-col items-center gap-2 md:flex-row">
+        <div className="flex w-full flex-col items-start  gap-2">
           <span className="text-xs uppercase text-gray-700">
             {key.replaceAll(/_/g, " ")}
           </span>
