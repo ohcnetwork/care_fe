@@ -84,9 +84,5 @@ class PatientLogupdate {
     cy.get("#consultation_tab_nav").scrollIntoView();
     cy.verifyAndClickElement("#consultation_tab_nav", "Vitals");
   }
-
-  clickCopyPreviousValue() {
-    cy.get("#clone_last").click();
-  }
 }
 export default PatientLogupdate;

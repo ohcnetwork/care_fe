@@ -29,7 +29,7 @@ import CollapseV2 from "../Common/components/CollapseV2";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import DateFormField from "../Form/FormFields/DateFormField";
 import DialogModal from "../Common/Dialog";
-import { DupPatientModel } from "../Facility/models";
+import { DistrictModel, DupPatientModel, WardModel } from "../Facility/models";
 import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
 import {
   FieldError,
@@ -62,8 +62,11 @@ import useAuthUser from "../../Common/hooks/useAuthUser.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
+import Error404 from "../ErrorPages/404";
 import SelectMenuV2 from "../Form/SelectMenuV2.js";
 import Checkbox from "../Common/components/CheckBox.js";
+import _ from "lodash";
+import { ILocalBodies } from "../ExternalResult/models.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -205,9 +208,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
   const [isWardLoading, setIsWardLoading] = useState(false);
-  const [districts, setDistricts] = useState<any[]>([]);
-  const [localBody, setLocalBody] = useState<any[]>([]);
-  const [ward, setWard] = useState<any[]>([]);
+  const [districts, setDistricts] = useState<DistrictModel[]>([]);
+  const [localBody, setLocalBody] = useState<ILocalBodies[]>([]);
+  const [ward, setWard] = useState<WardModel[]>([]);
   const [ageInputType, setAgeInputType] = useState<
     "date_of_birth" | "age" | "alert_for_age"
   >("date_of_birth");
@@ -809,7 +812,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             : null
           : null,
       test_type: formData.test_type,
-      name: formData.name,
+      name: _.startCase(_.toLower(formData.name)),
       pincode: formData.pincode ? formData.pincode : undefined,
       gender: Number(formData.gender),
       nationality: formData.nationality,
@@ -1092,6 +1095,34 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
   if (isLoading) {
     return <Loading />;
+  }
+
+  const PatientRegisterAuth = () => {
+    const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
+    if (
+      !showAllFacilityUsers.includes(authUser.user_type) &&
+      authUser.home_facility_object?.id === facilityId
+    ) {
+      return true;
+    }
+    if (
+      authUser.user_type === "DistrictAdmin" &&
+      authUser.district === facilityObject?.district
+    ) {
+      return true;
+    }
+    if (
+      authUser.user_type === "StateAdmin" &&
+      authUser.state === facilityObject?.state
+    ) {
+      return true;
+    }
+
+    return false;
+  };
+
+  if (!isLoading && facilityId && facilityObject && !PatientRegisterAuth()) {
+    return <Error404 />;
   }
 
   return (
@@ -1749,9 +1780,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     }
                                     disabled={!field("district").value}
                                     options={localBody}
-                                    optionLabel={(o: any) => o.name}
-                                    optionValue={(o: any) => o.id}
-                                    onChange={(e: any) => {
+                                    optionLabel={(o) => o.name}
+                                    optionValue={(o) => o.id}
+                                    onChange={(e) => {
                                       field("local_body").onChange(e);
                                       field("ward").onChange({
                                         name: "ward",

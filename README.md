@@ -34,7 +34,7 @@
 #### Install the required dependencies
 
 ```sh
-npm install --legacy-peer-deps
+npm install
 ```
 
 #### 🏃 Run the app in development mode

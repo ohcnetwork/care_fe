@@ -1,8 +1,6 @@
-import { lazy, useEffect, useState } from "react";
+import { lazy, useState } from "react";
 import { ConsultationTabProps } from "./index";
 import { AssetBedModel, AssetClass, AssetData } from "../../Assets/AssetTypes";
-import { useDispatch } from "react-redux";
-import { listAssetBeds } from "../../../Redux/actions";
 import { BedModel } from "../models";
 import HL7PatientVitalsMonitor from "../../VitalsMonitor/HL7PatientVitalsMonitor";
 import VentilatorPatientVitalsMonitor from "../../VitalsMonitor/VentilatorPatientVitalsMonitor";
@@ -28,17 +26,18 @@ import EventsList from "./Events/EventsList";
 import SwitchTabs from "../../Common/components/SwitchTabs";
 import { getVitalsMonitorSocketUrl } from "../../VitalsMonitor/utils";
 import { FileUpload } from "../../Patient/FileUpload";
+import useQuery from "../../../Utils/request/useQuery";
+import routes from "../../../Redux/api";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
 
 export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
-  const dispatch: any = useDispatch();
   const [hl7SocketUrl, setHL7SocketUrl] = useState<string>();
   const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
   const [monitorBedData, setMonitorBedData] = useState<AssetBedModel>();
   const [ventilatorBedData, setVentilatorBedData] = useState<AssetBedModel>();
-  const [showEvents, setShowEvents] = useState<boolean>(false);
+  const [showEvents, setShowEvents] = useState(true);
 
   const vitals = useVitalsAspectRatioConfig({
     default: undefined,
@@ -49,21 +48,18 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
     "3xl": 23 / 11,
   });
 
-  useEffect(() => {
-    if (
-      !props.consultationData.facility ||
-      !props.consultationData.current_bed?.bed_object.id
-    )
-      return;
-
-    const fetchData = async () => {
-      const assetBedRes = await dispatch(
-        listAssetBeds({
-          facility: props.consultationData.facility as any,
-          bed: props.consultationData.current_bed?.bed_object.id,
-        }),
-      );
-      const assetBeds = assetBedRes?.data?.results as AssetBedModel[];
+  useQuery(routes.listAssetBeds, {
+    prefetch: !!(
+      props.consultationData.facility &&
+      props.consultationData.current_bed?.bed_object.id
+    ),
+    query: {
+      facility: props.consultationData.facility as any,
+      bed: props.consultationData.current_bed?.bed_object.id,
+    },
+    onResponse({ data }) {
+      if (!data) return;
+      const assetBeds = data.results;
 
       const monitorBedData = assetBeds?.find(
         (i) => i.asset_object?.asset_class === AssetClass.HL7MONITOR,
@@ -99,10 +95,8 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
           getVitalsMonitorSocketUrl(ventilatorBedData?.asset_object),
         );
       }
-    };
-
-    fetchData();
-  }, [props.consultationData]);
+    },
+  });
 
   return (
     <div className="flex flex-col gap-2">
@@ -780,7 +774,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             tab2={
               <div className="flex items-center justify-center gap-1 text-sm">
                 Events
-                <span className="rounded-lg bg-warning-400 p-px px-1 text-[10px] text-white">
+                <span className="rounded-lg bg-warning-400 p-px px-1 text-xs text-white">
                   beta
                 </span>
               </div>
