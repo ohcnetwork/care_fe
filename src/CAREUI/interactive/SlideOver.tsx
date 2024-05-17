@@ -1,4 +1,9 @@
-import { Dialog, Transition } from "@headlessui/react";
+import {
+  Dialog,
+  DialogPanel,
+  Transition,
+  TransitionChild,
+} from "@headlessui/react";
 import { Fragment } from "react";
 import { classNames } from "../../Utils/utils";
 import CareIcon from "../icons/CareIcon";
@@ -58,14 +63,14 @@ export default function SlideOver({
   };
 
   return (
-    <Transition.Root show={open} as={Fragment}>
+    <Transition show={open} as={Fragment}>
       <Dialog
         as="div"
         className="relative z-30"
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         onClose={closeOnBackdropClick ? setOpen : () => {}}
       >
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-in-out duration-500"
           enterFrom="opacity-0"
@@ -80,8 +85,8 @@ export default function SlideOver({
               backdropBlur && "inset-0 bg-black/75 backdrop-blur-sm",
             )}
           />
-        </Transition.Child>
-        <Transition.Child
+        </TransitionChild>
+        <TransitionChild
           as={Fragment}
           enter="transition-all"
           enterFrom={directionClasses[slideFrom].animateStart + " opacity-0"}
@@ -90,7 +95,7 @@ export default function SlideOver({
           leaveFrom={directionClasses[slideFrom].animateEnd + " opacity-100"}
           leaveTo={directionClasses[slideFrom].animateStart + " opacity-0"}
         >
-          <Dialog.Panel
+          <DialogPanel
             className={classNames(
               "pointer-events-auto fixed",
               directionClasses[slideFrom].stick,
@@ -125,9 +130,9 @@ export default function SlideOver({
                 <div className="flex-1 overflow-auto p-4">{children}</div>
               </div>
             )}
-          </Dialog.Panel>
-        </Transition.Child>
+          </DialogPanel>
+        </TransitionChild>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 }

@@ -1,4 +1,10 @@
-import { Dialog, Transition } from "@headlessui/react";
+import {
+  Dialog,
+  DialogPanel,
+  DialogTitle,
+  Transition,
+  TransitionChild,
+} from "@headlessui/react";
 import { classNames } from "../../Utils/utils";
 import { Fragment } from "react";
 
@@ -27,7 +33,7 @@ const DialogModal = (props: DialogProps) => {
     <div>
       <Transition appear show={show} as={Fragment}>
         <Dialog as="div" className="relative z-30" onClose={onClose}>
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter="ease-out duration-300"
             enterFrom="opacity-0"
@@ -37,11 +43,11 @@ const DialogModal = (props: DialogProps) => {
             leaveTo="opacity-0"
           >
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-all" />
-          </Transition.Child>
+          </TransitionChild>
 
           <div className="fixed inset-0 overflow-y-auto">
             <div className="flex min-h-full items-center justify-center p-4 text-center">
-              <Transition.Child
+              <TransitionChild
                 as={Fragment}
                 enter="ease-out duration-300"
                 enterFrom="opacity-0 scale-95"
@@ -50,14 +56,14 @@ const DialogModal = (props: DialogProps) => {
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel
+                <DialogPanel
                   className={classNames(
                     className,
                     fixedWidth && "w-full max-w-md",
                     "transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all",
                   )}
                 >
-                  <Dialog.Title
+                  <DialogTitle
                     as="h4"
                     className="flex w-full flex-col text-lg font-medium leading-6 text-gray-900"
                   >
@@ -68,10 +74,10 @@ const DialogModal = (props: DialogProps) => {
                       </p>
                     </div>
                     {props.titleAction}
-                  </Dialog.Title>
+                  </DialogTitle>
                   {children}
-                </Dialog.Panel>
-              </Transition.Child>
+                </DialogPanel>
+              </TransitionChild>
             </div>
           </div>
         </Dialog>

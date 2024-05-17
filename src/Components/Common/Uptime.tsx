@@ -1,4 +1,4 @@
-import { Popover } from "@headlessui/react";
+import { Popover, PopoverPanel } from "@headlessui/react";
 import { useEffect, useRef, useState } from "react";
 import { AssetStatus, AvailabilityRecord } from "../Assets/AssetTypes";
 import { classNames } from "../../Utils/utils";
@@ -148,7 +148,7 @@ function UptimeInfoPopover({
 }) {
   return (
     <Popover className="relative mt-10 hidden sm:block">
-      <Popover.Panel
+      <PopoverPanel
         className={classNames(
           "absolute z-50 w-64 px-4 sm:px-0 lg:w-96",
           day > numDays - 10
@@ -160,7 +160,7 @@ function UptimeInfoPopover({
         static
       >
         <UptimeInfo records={records} date={date} />
-      </Popover.Panel>
+      </PopoverPanel>
     </Popover>
   );
 }

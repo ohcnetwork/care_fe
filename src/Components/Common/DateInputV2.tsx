@@ -1,7 +1,7 @@
 import { MutableRefObject, useEffect, useState } from "react";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { Popover } from "@headlessui/react";
+import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import { classNames } from "../../Utils/utils";
 import dayjs from "../../Utils/dayjs";
 import * as Notification from "../../Utils/Notifications.js";
@@ -45,7 +45,7 @@ const DateInputV2: React.FC<Props> = ({
   max,
   outOfLimitsErrorMessage,
   onChange,
-  position,
+  position = "CENTER",
   disabled,
   placeholder,
   isOpen,
@@ -248,7 +248,7 @@ const DateInputV2: React.FC<Props> = ({
         <Popover className="relative">
           {({ open, close }) => (
             <div>
-              <Popover.Button disabled={disabled} className="w-full">
+              <PopoverButton disabled={disabled} className="w-full">
                 <input type="hidden" name="date" />
                 <input
                   id={id}
@@ -266,10 +266,10 @@ const DateInputV2: React.FC<Props> = ({
                     className="text-lg text-gray-600"
                   />
                 </div>
-              </Popover.Button>
+              </PopoverButton>
 
               {(open || isOpen) && (
-                <Popover.Panel
+                <PopoverPanel
                   static
                   className={classNames(
                     "cui-dropdown-base absolute my-0.5 w-72 divide-y-0 rounded p-4",
@@ -474,7 +474,7 @@ const DateInputV2: React.FC<Props> = ({
                       )}
                     </div>
                   </div>
-                </Popover.Panel>
+                </PopoverPanel>
               )}
             </div>
           )}
@@ -482,10 +482,6 @@ const DateInputV2: React.FC<Props> = ({
       </div>
     </div>
   );
-};
-
-DateInputV2.defaultProps = {
-  position: "CENTER",
 };
 
 export default DateInputV2;

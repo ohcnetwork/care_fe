@@ -15,7 +15,7 @@ import {
   PhoneNumberType,
 } from "../FieldValidators";
 import CareIcon, { IconName } from "../../../CAREUI/icons/CareIcon";
-import { Popover } from "@headlessui/react";
+import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 
 const phoneCodes: Record<string, CountryData> = phoneCodesJson;
 
@@ -109,7 +109,7 @@ export default function PhoneNumberFormField(props: Props) {
           {({ open }: { open: boolean }) => {
             return (
               <>
-                <Popover.Button className="absolute h-full">
+                <PopoverButton className="absolute h-full">
                   <div className="absolute inset-y-0 left-0 m-0.5 flex w-[4.5rem] cursor-pointer items-center justify-around bg-slate-100">
                     <span className="rounded-md pl-4">
                       {country?.flag ?? "🇮🇳"}
@@ -119,7 +119,7 @@ export default function PhoneNumberFormField(props: Props) {
                       className={`text-2xl font-bold ${open && "rotate-180"}`}
                     />
                   </div>
-                </Popover.Button>
+                </PopoverButton>
                 <input
                   type="tel"
                   id={field.id}
@@ -137,14 +137,14 @@ export default function PhoneNumberFormField(props: Props) {
                   disabled={field.disabled}
                   onBlur={() => setError(validate(field.value, "blur"))}
                 />
-                <Popover.Panel className="w-full">
+                <PopoverPanel className="w-full">
                   {({ close }) => (
                     <CountryCodesList
                       handleCountryChange={handleCountryChange}
                       onClose={close}
                     />
                   )}
-                </Popover.Panel>
+                </PopoverPanel>
               </>
             );
           }}

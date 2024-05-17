@@ -8,7 +8,12 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { LocationSelect } from "../Common/LocationSelect";
 import Pagination from "../Common/Pagination";
-import { Popover, Transition } from "@headlessui/react";
+import {
+  Popover,
+  PopoverButton,
+  PopoverPanel,
+  Transition,
+} from "@headlessui/react";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { useTranslation } from "react-i18next";
@@ -79,12 +84,12 @@ export default function CentralNursingStation({ facilityId }: Props) {
       options={
         <div className="flex flex-row-reverse items-center gap-4 md:flex-row">
           <Popover className="relative">
-            <Popover.Button>
+            <PopoverButton>
               <ButtonV2 variant="secondary" border>
                 <CareIcon icon="l-setting" className="text-lg" />
                 Settings and Filters
               </ButtonV2>
-            </Popover.Button>
+            </PopoverButton>
             <Transition
               as={Fragment}
               enter="transition ease-out duration-200"
@@ -94,7 +99,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
               leaveFrom="opacity-100 translate-y-0"
               leaveTo="opacity-0 translate-y-1"
             >
-              <Popover.Panel className="absolute z-30 mt-1 w-80 -translate-x-1/3 px-4 sm:px-0 md:w-96 md:-translate-x-1/2 lg:max-w-3xl">
+              <PopoverPanel className="absolute z-30 mt-1 w-80 -translate-x-1/3 px-4 sm:px-0 md:w-96 md:-translate-x-1/2 lg:max-w-3xl">
                 <div className="rounded-lg shadow-lg ring-1 ring-gray-400">
                   <div className="rounded-t-lg bg-gray-100 px-6 py-4">
                     <div className="flow-root rounded-md">
@@ -176,7 +181,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
                     </ButtonV2>
                   </div>
                 </div>
-              </Popover.Panel>
+              </PopoverPanel>
             </Transition>
           </Popover>
 

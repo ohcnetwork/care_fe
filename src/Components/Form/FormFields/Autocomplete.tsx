@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { Combobox } from "@headlessui/react";
+import {
+  Combobox,
+  ComboboxButton,
+  ComboboxInput,
+  ComboboxOption,
+  ComboboxOptions,
+} from "@headlessui/react";
 import { DropdownTransition } from "../../Common/components/HelperComponents";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { dropdownOptionClassNames } from "../MultiSelectMenuV2";
@@ -136,8 +142,6 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
       ? options.filter((o) => o.search.includes(query))
       : options;
 
-  console.log(value, "combobox");
-
   return (
     <div
       className={
@@ -154,7 +158,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
       >
         <div className="relative">
           <div className="flex">
-            <Combobox.Input
+            <ComboboxInput
               className="cui-input-base truncate pr-16"
               placeholder={props.placeholder ?? "Select"}
               displayValue={(value: any) =>
@@ -165,7 +169,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
               autoComplete="off"
             />
             {!props.disabled && (
-              <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+              <ComboboxButton className="absolute inset-y-0 right-0 flex items-center pr-2">
                 <div className="absolute right-0 top-1 mr-2 flex h-full items-center gap-1 pb-2 text-lg text-gray-900">
                   <span>{value?.icon}</span>
 
@@ -191,19 +195,19 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                     <CareIcon icon="l-angle-down" />
                   )}
                 </div>
-              </Combobox.Button>
+              </ComboboxButton>
             )}
           </div>
 
           <DropdownTransition>
-            <Combobox.Options className="cui-dropdown-base absolute z-10 mt-0.5 origin-top-right">
+            <ComboboxOptions className="cui-dropdown-base absolute z-10 mt-0.5 origin-top-right">
               {filteredOptions.length === 0 && (
                 <div className="p-2 text-sm text-gray-500">
                   No options found
                 </div>
               )}
               {filteredOptions.map((option, index) => (
-                <Combobox.Option
+                <ComboboxOption
                   id={`${props.id}-option-${option.label}-value-${index}`}
                   key={`${props.id}-option-${option.label}-value-${index}`}
                   className={dropdownOptionClassNames}
@@ -227,9 +231,9 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                       )}
                     </div>
                   )}
-                </Combobox.Option>
+                </ComboboxOption>
               ))}
-            </Combobox.Options>
+            </ComboboxOptions>
           </DropdownTransition>
         </div>
       </Combobox>

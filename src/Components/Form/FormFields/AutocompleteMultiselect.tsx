@@ -5,7 +5,13 @@ import {
 } from "../MultiSelectMenuV2";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { Combobox } from "@headlessui/react";
+import {
+  Combobox,
+  ComboboxButton,
+  ComboboxInput,
+  ComboboxOption,
+  ComboboxOptions,
+} from "@headlessui/react";
 import { DropdownTransition } from "../../Common/components/HelperComponents";
 import FormField from "./FormField";
 import { classNames } from "../../../Utils/utils";
@@ -113,7 +119,7 @@ export const AutocompleteMutliSelect = <T, V>(
       >
         <div className="relative">
           <div className="flex">
-            <Combobox.Input
+            <ComboboxInput
               multiple
               className={classNames(
                 "cui-input-base truncate pr-16",
@@ -128,7 +134,7 @@ export const AutocompleteMutliSelect = <T, V>(
               autoComplete="off"
             />
             {!props.disabled && (
-              <Combobox.Button
+              <ComboboxButton
                 ref={comboButtonRef}
                 className="absolute inset-y-0 right-0 flex items-center pr-2"
               >
@@ -139,7 +145,7 @@ export const AutocompleteMutliSelect = <T, V>(
                     <CareIcon icon="l-angle-down" className="-mb-1.5" />
                   )}
                 </div>
-              </Combobox.Button>
+              </ComboboxButton>
             )}
           </div>
           {value.length !== 0 && (
@@ -158,13 +164,13 @@ export const AutocompleteMutliSelect = <T, V>(
           )}
 
           <DropdownTransition>
-            <Combobox.Options className="cui-dropdown-base absolute top-12 z-10 mt-0.5">
+            <ComboboxOptions className="cui-dropdown-base absolute top-12 z-10 mt-0.5">
               {props.isLoading ? (
                 <Searching />
               ) : filteredOptions.length ? (
                 <>
                   {props.selectAll && (
-                    <Combobox.Option
+                    <ComboboxOption
                       id={`${props.id}-option-select-all`}
                       key={`${props.id}-option-select-all`}
                       className={dropdownOptionClassNames}
@@ -176,10 +182,10 @@ export const AutocompleteMutliSelect = <T, V>(
                           <CareIcon icon="l-check" className="text-lg" />
                         )}
                       </div>
-                    </Combobox.Option>
+                    </ComboboxOption>
                   )}
                   {filteredOptions.map((option, index) => (
-                    <Combobox.Option
+                    <ComboboxOption
                       id={`${props.id}-option-${index}`}
                       key={`${props.id}-option-${index}`}
                       className={dropdownOptionClassNames}
@@ -207,7 +213,7 @@ export const AutocompleteMutliSelect = <T, V>(
                           )}
                         </>
                       )}
-                    </Combobox.Option>
+                    </ComboboxOption>
                   ))}
                 </>
               ) : (
@@ -216,7 +222,7 @@ export const AutocompleteMutliSelect = <T, V>(
                   {query ? "No results" : "Type to search"}
                 </span>
               )}
-            </Combobox.Options>
+            </ComboboxOptions>
           </DropdownTransition>
         </div>
       </Combobox>

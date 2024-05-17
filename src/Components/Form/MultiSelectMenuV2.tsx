@@ -1,6 +1,12 @@
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { DropdownTransition } from "../Common/components/HelperComponents";
-import { Listbox } from "@headlessui/react";
+import {
+  Label,
+  Listbox,
+  ListboxButton,
+  ListboxOption,
+  ListboxOptions,
+} from "@headlessui/react";
 import { classNames } from "../../Utils/utils";
 import { ReactNode, useRef } from "react";
 
@@ -87,12 +93,10 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
       >
         {({ open }) => (
           <>
-            <Listbox.Label className="sr-only !relative">
-              {props.placeholder}
-            </Listbox.Label>
+            <Label className="sr-only !relative">{props.placeholder}</Label>
             <div className="relative">
               <div>
-                <Listbox.Button
+                <ListboxButton
                   className="cui-input-base flex w-full rounded"
                   ref={buttonRef}
                 >
@@ -127,12 +131,12 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                       className="-mb-0.5 text-lg text-gray-900"
                     />
                   </div>
-                </Listbox.Button>
+                </ListboxButton>
               </div>
               <DropdownTransition show={open}>
-                <Listbox.Options className="cui-dropdown-base absolute top-full">
+                <ListboxOptions className="cui-dropdown-base absolute top-full">
                   {options.map((option, index) => (
-                    <Listbox.Option
+                    <ListboxOption
                       id={`${props.id}-option-${index}`}
                       key={index}
                       className={dropdownOptionClassNames}
@@ -161,9 +165,9 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                           )}
                         </div>
                       )}
-                    </Listbox.Option>
+                    </ListboxOption>
                   ))}
-                </Listbox.Options>
+                </ListboxOptions>
               </DropdownTransition>
             </div>
           </>

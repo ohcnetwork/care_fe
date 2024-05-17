@@ -8,7 +8,7 @@ import {
   TELEMEDICINE_ACTIONS,
 } from "../../Common/constants.js";
 import { ConsultationModel, PatientCategory } from "../Facility/models.js";
-import { Switch, Menu } from "@headlessui/react";
+import { Switch, MenuItem, SwitchGroup, Label } from "@headlessui/react";
 import { Link, navigate } from "raviger";
 import { useState } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon.js";
@@ -677,7 +677,7 @@ export default function PatientInfoCard(props: {
                 {enable_abdm &&
                   (patient.abha_number ? (
                     <>
-                      <Menu.Item>
+                      <MenuItem>
                         {({ close }) => (
                           <>
                             <div
@@ -736,10 +736,10 @@ export default function PatientInfoCard(props: {
                             </div>
                           </>
                         )}
-                      </Menu.Item>
+                      </MenuItem>
                     </>
                   ) : (
-                    <Menu.Item>
+                    <MenuItem>
                       {({ close }) => (
                         <div
                           className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
@@ -757,12 +757,12 @@ export default function PatientInfoCard(props: {
                           </span>
                         </div>
                       )}
-                    </Menu.Item>
+                    </MenuItem>
                   ))}
               </div>
               <div>
                 {!consultation?.discharge_date && (
-                  <Menu.Item>
+                  <MenuItem>
                     {({ close }) => (
                       <>
                         {hasActiveShiftingRequest() ? (
@@ -808,9 +808,9 @@ export default function PatientInfoCard(props: {
                         )}
                       </>
                     )}
-                  </Menu.Item>
+                  </MenuItem>
                 )}
-                <Menu.Item>
+                <MenuItem>
                   {({ close }) => (
                     <div
                       className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
@@ -828,8 +828,8 @@ export default function PatientInfoCard(props: {
                       </span>
                     </div>
                   )}
-                </Menu.Item>
-                <Menu.Item>
+                </MenuItem>
+                <MenuItem>
                   {({ close }) => (
                     <div
                       className={`dropdown-item-primary pointer-events-auto ${
@@ -856,10 +856,10 @@ export default function PatientInfoCard(props: {
                       </span>
                     </div>
                   )}
-                </Menu.Item>
+                </MenuItem>
               </div>
               <div className="px-4 py-2">
-                <Switch.Group as="div" className="flex items-center">
+                <SwitchGroup as="div" className="flex items-center">
                   <Switch
                     checked={medicoLegalCase}
                     onChange={(checked) => {
@@ -884,12 +884,12 @@ export default function PatientInfoCard(props: {
                       )}
                     />
                   </Switch>
-                  <Switch.Label as="span" className="ml-3 text-sm">
+                  <Label as="span" className="ml-3 text-sm">
                     <span className="font-medium text-gray-900">
                       Medico-Legal Case
                     </span>{" "}
-                  </Switch.Label>
-                </Switch.Group>
+                  </Label>
+                </SwitchGroup>
               </div>
             </DropdownMenu>
           </div>
