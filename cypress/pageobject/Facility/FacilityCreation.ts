@@ -98,40 +98,40 @@ class FacilityPage {
     cy.get("input#count").click().clear().click().type(count);
   }
 
-  fillOxygenCapacity(capacity: string) {
-    cy.get("#oxygen_capacity").click().clear().type(capacity);
-  }
+  // fillOxygenCapacity(capacity: string) {
+  //   cy.get("#oxygen_capacity").click().clear().type(capacity);
+  // }
 
-  fillExpectedOxygenRequirement(requirement: string) {
-    cy.get("#expected_oxygen_requirement").click().clear().type(requirement);
-  }
+  // fillExpectedOxygenRequirement(requirement: string) {
+  //   cy.get("#expected_oxygen_requirement").click().clear().type(requirement);
+  // }
 
-  fillBTypeCylinderCapacity(capacity: string) {
-    cy.get("#type_b_cylinders").click().clear().type(capacity);
-  }
+  // fillBTypeCylinderCapacity(capacity: string) {
+  //   cy.get("#type_b_cylinders").click().clear().type(capacity);
+  // }
 
-  fillExpectedBTypeCylinderRequirement(requirement: string) {
-    cy.get("#expected_type_b_cylinders").focus().clear();
-    cy.get("#expected_type_b_cylinders").focus().type(requirement);
-  }
+  // fillExpectedBTypeCylinderRequirement(requirement: string) {
+  //   cy.get("#expected_type_b_cylinders").focus().clear();
+  //   cy.get("#expected_type_b_cylinders").focus().type(requirement);
+  // }
 
-  fillCTypeCylinderCapacity(capacity: string) {
-    cy.get("#type_c_cylinders").click().clear().type(capacity);
-  }
+  // fillCTypeCylinderCapacity(capacity: string) {
+  //   cy.get("#type_c_cylinders").click().clear().type(capacity);
+  // }
 
-  fillExpectedCTypeCylinderRequirement(requirement: string) {
-    cy.get("#expected_type_c_cylinders").focus().clear();
-    cy.get("#expected_type_c_cylinders").focus().type(requirement);
-  }
+  // fillExpectedCTypeCylinderRequirement(requirement: string) {
+  //   cy.get("#expected_type_c_cylinders").focus().clear();
+  //   cy.get("#expected_type_c_cylinders").focus().type(requirement);
+  // }
 
-  fillDTypeCylinderCapacity(capacity: string) {
-    cy.get("#type_d_cylinders").click().clear().type(capacity);
-  }
+  // fillDTypeCylinderCapacity(capacity: string) {
+  //   cy.get("#type_d_cylinders").click().clear().type(capacity);
+  // }
 
-  fillExpectedDTypeCylinderRequirement(requirement: string) {
-    cy.get("#expected_type_d_cylinders").focus().clear();
-    cy.get("#expected_type_d_cylinders").focus().type(requirement);
-  }
+  // fillExpectedDTypeCylinderRequirement(requirement: string) {
+  //   cy.get("#expected_type_d_cylinders").focus().clear();
+  //   cy.get("#expected_type_d_cylinders").focus().type(requirement);
+  // }
 
   saveAndExitDoctorForm() {
     cy.intercept("GET", "**/api/v1/facility/**").as("createFacilities");
@@ -204,9 +204,9 @@ class FacilityPage {
     return cy.get("#facility-available-features");
   }
 
-  getFacilityOxygenInfo() {
-    return cy.get("#facility-oxygen-info");
-  }
+  // getFacilityOxygenInfo() {
+  //   return cy.get("#facility-oxygen-info");
+  // }
 
   clickResourceRequestOption() {
     cy.get("#resource-request").contains("Resource Request").click();

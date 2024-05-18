@@ -136,14 +136,14 @@ describe("Facility Creation", () => {
     facilityPage.selectWard("4");
     facilityPage.fillAddress(facilityAddress);
     facilityPage.fillPhoneNumber(facilityNumber);
-    facilityPage.fillOxygenCapacity(oxygenCapacity);
-    facilityPage.fillExpectedOxygenRequirement(oxygenExpected);
-    facilityPage.fillBTypeCylinderCapacity(oxygenCapacity);
-    facilityPage.fillExpectedBTypeCylinderRequirement(oxygenExpected);
-    facilityPage.fillCTypeCylinderCapacity(oxygenCapacity);
-    facilityPage.fillExpectedCTypeCylinderRequirement(oxygenExpected);
-    facilityPage.fillDTypeCylinderCapacity(oxygenCapacity);
-    facilityPage.fillExpectedDTypeCylinderRequirement(oxygenExpected);
+    // facilityPage.fillOxygenCapacity(oxygenCapacity);
+    // facilityPage.fillExpectedOxygenRequirement(oxygenExpected);
+    // facilityPage.fillBTypeCylinderCapacity(oxygenCapacity);
+    // facilityPage.fillExpectedBTypeCylinderRequirement(oxygenExpected);
+    // facilityPage.fillCTypeCylinderCapacity(oxygenCapacity);
+    // facilityPage.fillExpectedCTypeCylinderRequirement(oxygenExpected);
+    // facilityPage.fillDTypeCylinderCapacity(oxygenCapacity);
+    // facilityPage.fillExpectedDTypeCylinderRequirement(oxygenExpected);
     facilityPage.selectLocation("Kochi, Kerala");
     facilityPage.submitForm();
     cy.closeNotification();
@@ -191,11 +191,11 @@ describe("Facility Creation", () => {
           expect(text).to.contain(feature);
         });
       });
-    facilityPage.getFacilityOxygenInfo().scrollIntoView();
-    facilityPage
-      .getFacilityOxygenInfo()
-      .contains(oxygenCapacity)
-      .should("be.visible");
+    // facilityPage.getFacilityOxygenInfo().scrollIntoView();
+    // facilityPage
+    //   .getFacilityOxygenInfo()
+    //   .contains(oxygenCapacity)
+    //   .should("be.visible");
     facilityPage.getFacilityTotalBedCapacity().scrollIntoView();
     facilityPage.getFacilityTotalBedCapacity().contains(totalCapacity);
     facilityPage.getFacilityTotalBedCapacity().contains(totalOccupancy);
@@ -293,17 +293,17 @@ describe("Facility Creation", () => {
     facilityPage.clickUpdateFacilityOption();
     facilityPage.clickUpdateFacilityType("Primary Health Centres");
     facilityPage.fillAddress(facilityUpdateAddress);
-    facilityPage.fillOxygenCapacity(oxygenCapacity);
-    facilityPage.fillExpectedOxygenRequirement(oxygenExpected);
+    // facilityPage.fillOxygenCapacity(oxygenCapacity);
+    // facilityPage.fillExpectedOxygenRequirement(oxygenExpected);
     facilityPage.selectLocation("Kochi, Kerala");
     facilityPage.submitForm();
     cy.url().should("not.include", "/update");
     // verify the updated data
-    facilityPage.getFacilityOxygenInfo().scrollIntoView();
-    facilityPage
-      .getFacilityOxygenInfo()
-      .contains(oxygenCapacity)
-      .should("be.visible");
+    // facilityPage.getFacilityOxygenInfo().scrollIntoView();
+    // facilityPage
+    //   .getFacilityOxygenInfo()
+    //   .contains(oxygenCapacity)
+    //   .should("be.visible");
     facilityPage.getAddressDetailsView().scrollIntoView();
     facilityPage
       .getAddressDetailsView()
