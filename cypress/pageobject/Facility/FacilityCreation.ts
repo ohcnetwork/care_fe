@@ -69,6 +69,10 @@ class FacilityPage {
     cy.clickAndSelectOption("div#bed-type button", bedType);
   }
 
+  selectOxygenType(oxygenType: string) {
+    cy.clickAndSelectOption("div#oxygen-type button", oxygenType);
+  }
+
   isVisibleselectBedType() {
     cy.get("div#bed-type button").should("be.visible");
   }
@@ -98,40 +102,20 @@ class FacilityPage {
     cy.get("input#count").click().clear().click().type(count);
   }
 
-  // fillOxygenCapacity(capacity: string) {
-  //   cy.get("#oxygen_capacity").click().clear().type(capacity);
-  // }
+  fillTotalOxygenCapacity(capacity: string) {
+    cy.get("input#total-oxygen-capacity")
+      .click()
+      .clear()
+      .click()
+      .type(capacity);
+  }
 
-  // fillExpectedOxygenRequirement(requirement: string) {
-  //   cy.get("#expected_oxygen_requirement").click().clear().type(requirement);
-  // }
-
-  // fillBTypeCylinderCapacity(capacity: string) {
-  //   cy.get("#type_b_cylinders").click().clear().type(capacity);
-  // }
-
-  // fillExpectedBTypeCylinderRequirement(requirement: string) {
-  //   cy.get("#expected_type_b_cylinders").focus().clear();
-  //   cy.get("#expected_type_b_cylinders").focus().type(requirement);
-  // }
-
-  // fillCTypeCylinderCapacity(capacity: string) {
-  //   cy.get("#type_c_cylinders").click().clear().type(capacity);
-  // }
-
-  // fillExpectedCTypeCylinderRequirement(requirement: string) {
-  //   cy.get("#expected_type_c_cylinders").focus().clear();
-  //   cy.get("#expected_type_c_cylinders").focus().type(requirement);
-  // }
-
-  // fillDTypeCylinderCapacity(capacity: string) {
-  //   cy.get("#type_d_cylinders").click().clear().type(capacity);
-  // }
-
-  // fillExpectedDTypeCylinderRequirement(requirement: string) {
-  //   cy.get("#expected_type_d_cylinders").focus().clear();
-  //   cy.get("#expected_type_d_cylinders").focus().type(requirement);
-  // }
+  fillExpectedBurnRate(burnrate: string) {
+    cy.get("input#expected-burn-rate").click().clear().click().type(burnrate);
+  }
+  saveAndExitOxygenCapacityForm() {
+    cy.get("button#oxygen-capacity-save-and-exit").click();
+  }
 
   saveAndExitDoctorForm() {
     cy.intercept("GET", "**/api/v1/facility/**").as("createFacilities");
@@ -274,7 +258,9 @@ class FacilityPage {
   clickdoctorcapacityaddmore() {
     cy.get("#doctor-save").click();
   }
-
+  clickoxygencapcityaddmore() {
+    cy.get("#oxygen-capacity-save").click();
+  }
   clickcancelbutton() {
     cy.get("#cancel").click();
   }

@@ -241,7 +241,7 @@ export const OxygenDetails = (props: OxygenCapacityProps) => {
           <div className="flex flex-col gap-7 md:flex-row">
             <TextFormField
               className="w-full"
-              id="total-capacity"
+              id="total-oxygen-capacity"
               name="totalCapacity"
               label="Total Capacity"
               required

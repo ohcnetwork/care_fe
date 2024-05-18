@@ -24,6 +24,10 @@ describe("Facility Manage Functions", () => {
   const currentOccupied = "80";
   const totalUpdatedCapacity = "120";
   const currentUpdatedOccupied = "100";
+  const totalOxygenCapacity = "100";
+  const expectedBurnRate = "80";
+  const totalUpdatedOxygenCapacity = "120";
+  const updatedExpectedBurnRate = "100";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -160,6 +164,37 @@ describe("Facility Manage Functions", () => {
     facilityManage.clickButtonWithText("Delete");
     facilityManage.verifySuccessMessageVisibilityAndContent(
       "Bed type deleted successfully",
+    );
+  });
+
+  it("Modify oxygen capacity in Facility detail page", () => {
+    facilityManage.clickFacilityAddOxygenTypeButton();
+    facilityPage.selectOxygenType("Liquid Oxygen");
+    facilityPage.fillTotalOxygenCapacity(totalOxygenCapacity);
+    facilityPage.fillExpectedBurnRate(expectedBurnRate);
+    facilityPage.saveAndExitOxygenCapacityForm();
+    facilityManage.verifySuccessMessageVisibilityAndContent(
+      "Oxygen capacity added successfully",
+    );
+    cy.closeNotification();
+    facilityManage.verifyFacilityOxygenCapacity(totalOxygenCapacity);
+    facilityManage.verifyFacilityOxygenCapacity(expectedBurnRate);
+    // edit a existing bed
+    facilityManage.clickEditFacilityOxygenCapacity();
+    facilityPage.fillTotalOxygenCapacity(totalUpdatedOxygenCapacity);
+    facilityPage.fillExpectedBurnRate(updatedExpectedBurnRate);
+    facilityPage.clickoxygencapcityaddmore();
+    facilityManage.verifySuccessMessageVisibilityAndContent(
+      "Oxygen capacity updated successfully",
+    );
+    cy.closeNotification();
+    facilityManage.verifyFacilityOxygenCapacity(totalUpdatedOxygenCapacity);
+    facilityManage.verifyFacilityOxygenCapacity(updatedExpectedBurnRate);
+    // delete a bed
+    facilityManage.clickDeleteFacilityOxygenCapacity();
+    facilityManage.clickButtonWithText("Delete");
+    facilityManage.verifySuccessMessageVisibilityAndContent(
+      "Oxygen type deleted successfully",
     );
   });
 

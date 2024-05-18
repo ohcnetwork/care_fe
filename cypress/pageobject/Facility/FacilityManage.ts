@@ -92,5 +92,22 @@ class FacilityManage {
     cy.get("#facility-add-bedtype").scrollIntoView();
     cy.get("#facility-add-bedtype").click();
   }
+
+  verifyFacilityOxygenCapacity(expectedCapacity) {
+    cy.get("#facility-oxygen-capacity-details").contains(expectedCapacity);
+  }
+
+  clickEditFacilityOxygenCapacity() {
+    cy.get("#edit-facility-oxygencapacity").click();
+  }
+
+  clickDeleteFacilityOxygenCapacity() {
+    cy.get("#delete-facility-oxygencapacity").click();
+  }
+
+  clickFacilityAddOxygenTypeButton() {
+    cy.get("#facility-add-oxygentype").scrollIntoView();
+    cy.get("#facility-add-oxygentype").click();
+  }
 }
 export default FacilityManage;

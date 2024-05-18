@@ -125,7 +125,7 @@ export const OxygenTypeCard: React.FC<OxygenTypeCardProps> = ({
             </div>
             <div className="flex items-stretch justify-end gap-4 self-stretch">
               <ButtonV2
-                id="edit-facility-bedcapacity"
+                id="edit-facility-oxygencapacity"
                 onClick={() => {
                   setSelectedId(oxygen_type || 0);
                   setOpen(true);
@@ -140,7 +140,7 @@ export const OxygenTypeCard: React.FC<OxygenTypeCardProps> = ({
               </ButtonV2>
 
               <ButtonV2
-                id="delete-facility-bedcapacity"
+                id="delete-facility-oxygencapacity"
                 onClick={() => setOpenDeleteDialog(true)}
                 authorizeFor={NonReadOnlyUsers}
                 className=" tooltip bg-opacity/10 flex aspect-square h-7 w-7 flex-col items-center justify-center rounded bg-red-100 px-4 py-0 hover:bg-red-200"

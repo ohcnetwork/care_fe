@@ -103,14 +103,14 @@ export const FacilityOxygenInformation = ({
   }
 
   return (
-    <section id="facility-oxygen-information">
+    <section id="facility-oxygen-capacity-details">
       <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
         <div className="justify-between md:flex md:pb-2">
           <div className="mb-2 text-xl font-semibold">
             Oxygen Supply and Consumption{" "}
           </div>
           <ButtonV2
-            id="facility-add-oxygen"
+            id="facility-add-oxygentype"
             className="w-full md:w-auto"
             onClick={() => setOxygenDetailsModalOpen(true)}
             authorizeFor={NonReadOnlyUsers}
