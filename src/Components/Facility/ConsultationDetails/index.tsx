@@ -33,6 +33,7 @@ import { ConsultationVentilatorTab } from "./ConsultationVentilatorTab";
 import { ConsultationPressureSoreTab } from "./ConsultationPressureSoreTab";
 import { ConsultationDialysisTab } from "./ConsultationDialysisTab";
 import { ConsultationNeurologicalMonitoringTab } from "./ConsultationNeurologicalMonitoringTab";
+import ABDMRecordsTab from "../../ABDM/ABDMRecordsTab";
 import { ConsultationNutritionTab } from "./ConsultationNutritionTab";
 import PatientNotesSlideover from "../PatientNotesSlideover";
 import { AssetBedModel } from "../../Assets/AssetTypes";
@@ -67,6 +68,7 @@ const TABS = {
   NUTRITION: ConsultationNutritionTab,
   PRESSURE_SORE: ConsultationPressureSoreTab,
   DIALYSIS: ConsultationDialysisTab,
+  ABDM: ABDMRecordsTab,
 };
 
 export const ConsultationDetails = (props: any) => {
@@ -325,18 +327,18 @@ export const ConsultationDetails = (props: any) => {
               onClick={() =>
                 showPatientNotesPopup
                   ? navigate(
-                      `/facility/${facilityId}/patient/${patientId}/notes`,
+                      `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/notes`,
                     )
                   : setShowPatientNotesPopup(true)
               }
               className="btn btn-primary m-1 w-full hover:text-white"
             >
-              Doctor&apos;s Notes
+              Discussion Notes
             </Link>
           </div>
         </nav>
         <div className="mt-2 flex w-full flex-col md:flex-row">
-          <div className="h-full w-full rounded-lg border bg-white text-black shadow">
+          <div className="size-full rounded-lg border bg-white text-black shadow">
             <PatientInfoCard
               patient={patientData}
               consultation={consultationData}
@@ -429,6 +431,11 @@ export const ConsultationDetails = (props: any) => {
                     )
                       return null; // Hide feed tab
                   }
+
+                  if (p.text === "ABDM" && !patientData.abha_number) {
+                    return null;
+                  }
+
                   return (
                     <Link
                       key={p.text}
