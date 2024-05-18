@@ -24,7 +24,6 @@ import request from "../../Utils/request/request.js";
 import routes from "../../Redux/api.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import { FacilityHomeTriage } from "./FacilityHomeTriage.js";
-import { FacilityDoctorList } from "./FacilityDoctorList.js";
 import { FacilityBedCapacity } from "./FacilityBedCapacity.js";
 import { FacilityOxygenInformation } from "./FacilityOxygenInformation.js";
 import useSlug from "../../Common/hooks/useSlug.js";
@@ -32,6 +31,7 @@ import { Popover, Transition } from "@headlessui/react";
 import { FieldLabel } from "../Form/FormFields/FormField.js";
 import { LocationSelect } from "../Common/LocationSelect.js";
 import { CameraFeedPermittedUserTypes } from "../../Utils/permissions.js";
+import { FacilityStaffList } from "./FacilityStaffList.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -385,7 +385,14 @@ export const FacilityHome = (props: any) => {
                 >
                   View Users
                 </DropdownItem>
-                {hasPermissionToDeleteFacility && (
+                <DropdownItem
+                  id="view-abdm-records"
+                  onClick={() => navigate(`/facility/${facilityId}/abdm`)}
+                  icon={<CareIcon icon="l-file-network" className="text-lg" />}
+                >
+                  View ABDM Records
+                </DropdownItem>
+                {hasPermissionToDeleteFacility ? (
                   <DropdownItem
                     id="delete-facility"
                     variant="danger"
@@ -395,6 +402,8 @@ export const FacilityHome = (props: any) => {
                   >
                     Delete Facility
                   </DropdownItem>
+                ) : (
+                  <></>
                 )}
               </DropdownMenu>
             </div>
@@ -453,13 +462,12 @@ export const FacilityHome = (props: any) => {
         </div>
       </div>
       <FacilityBedCapacity facilityId={facilityId} />
-      <FacilityDoctorList facilityId={facilityId} />
+      <FacilityStaffList facilityId={facilityId} />
       <FacilityOxygenInformation
         facilityId={facilityId}
         facilityData={facilityData}
         facilityFetch={facilityFetch}
       />
-
       <FacilityHomeTriage
         facilityId={facilityId}
         NonReadOnlyUsers={NonReadOnlyUsers}
