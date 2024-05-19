@@ -1,6 +1,6 @@
 import { lazy, useState } from "react";
 import ButtonV2, { Cancel } from "../Common/components/ButtonV2";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import Page from "../Common/components/Page";
 import routes from "../../Redux/api";
@@ -119,9 +119,7 @@ export default function LocationManagement({ facilityId }: Props) {
                   facilityId={facilityId}
                   {...item}
                   disabled={
-                    ["DistrictAdmin", "StateAdmin"].includes(
-                      authUser.user_type
-                    ) || authUser.is_superuser
+                    ["DistrictAdmin", "StateAdmin"].includes(authUser.user_type)
                       ? false
                       : true
                   }
@@ -297,17 +295,16 @@ const Location = ({
       </div>
       <div className="w-full md:w-1/2">
         <ButtonV2
+          authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
           id="delete-location-button"
           variant="secondary"
           border
           className="w-full"
           tooltip={disabled ? "Contact your admin to delete the location" : ""}
-          disabled={disabled ? true : false}
           tooltipClassName=" text-xs w-full lg:w-auto"
           onClick={() =>
             setShowDeletePopup({ open: true, name: name ?? "", id: id ?? "" })
           }
-          authorizeFor={NonReadOnlyUsers}
         >
           <CareIcon icon="l-trash" className="text-lg" />
           Delete

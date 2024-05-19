@@ -5,7 +5,7 @@ import { ReactElement } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
 import BedDeleteDialog from "./BedDeleteDialog";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import Page from "../Common/components/Page";
 import request from "../../Utils/request/request";
@@ -54,9 +54,9 @@ const BedRow = (props: BedRowProps) => {
     });
   };
 
-  const allowedUser =
-    ["DistrictAdmin", "StateAdmin"].includes(authUser.user_type) ||
-    authUser.is_superuser;
+  const allowedUser = ["DistrictAdmin", "StateAdmin"].includes(
+    authUser.user_type,
+  );
 
   const handleDeleteConfirm = async () => {
     const { res } = await request(routes.deleteFacilityBed, {
@@ -98,7 +98,7 @@ const BedRow = (props: BedRowProps) => {
               {LOCATION_BED_TYPES.find((item) => item.id === bedType) && (
                 <p className="mb-1 inline-flex w-fit items-center rounded-md bg-blue-100 px-2.5 py-0.5 text-sm font-medium capitalize leading-5 text-blue-800">
                   {LOCATION_BED_TYPES.find(
-                    (item) => item.id === bedType
+                    (item) => item.id === bedType,
                   )?.name?.slice(0, 25) + (bedType.length > 25 ? "..." : "")}
                 </p>
               )}
@@ -131,18 +131,17 @@ const BedRow = (props: BedRowProps) => {
           <ButtonV2
             id="delete-bed-button"
             onClick={() => handleDelete(name, id)}
-            authorizeFor={NonReadOnlyUsers}
+            authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
             variant="danger"
             border
             ghost
             className="w-full lg:w-auto"
-            disabled={!allowedUser || isOccupied}
             tooltip={
               !allowedUser
                 ? "Contact your admin to delete the bed"
                 : isOccupied
-                ? "Bed is occupied"
-                : undefined
+                  ? "Bed is occupied"
+                  : undefined
             }
             tooltipClassName=" text-xs w-full lg:w-auto"
           >
