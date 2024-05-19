@@ -62,7 +62,7 @@ export default class UserProfilePage {
   assertdate_of_birth(date_of_birth: string) {
     cy.get("#date_of_birth-profile-details").should(
       "contain.text",
-      date_of_birth
+      date_of_birth,
     );
   }
 
@@ -85,7 +85,7 @@ export default class UserProfilePage {
   assertWorkingHours(workinghours: string) {
     cy.get("#averageworkinghour-profile-details").should(
       "contain.text",
-      workinghours
+      workinghours,
     );
   }
 }

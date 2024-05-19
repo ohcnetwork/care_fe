@@ -162,5 +162,6 @@
   "DD/MM/YYYY": "DD/MM/YYYY",
   "clear_all_filters": "Clear All Filters",
   "summary": "Summary",
-  "report": "Report"
+  "report": "Report",
+  "treating_doctor":"Treating Doctor"
 }

@@ -9,7 +9,7 @@ RUN if [ "$(uname -m)" = "aarch64" ] || [ "$(uname -m)" = "arm64" ]; then apt-ge
 
 COPY package.json package-lock.json ./
 
-RUN npm install --legacy-peer-deps
+RUN npm install
 
 COPY . .
 

@@ -1,9 +1,5 @@
 import { lazy, useState } from "react";
-import {
-  CONSCIOUSNESS_LEVEL,
-  CURRENT_HEALTH_CHANGE,
-  SYMPTOM_CHOICES,
-} from "../../Common/constants";
+import { CONSCIOUSNESS_LEVEL, SYMPTOM_CHOICES } from "../../Common/constants";
 import { DailyRoundsModel } from "./models";
 import Page from "../Common/components/Page";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -12,7 +8,6 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 const Loading = lazy(() => import("../Common/Loading"));
 const symptomChoices = [...SYMPTOM_CHOICES];
-const currentHealthChoices = [...CURRENT_HEALTH_CHANGE];
 
 export const DailyRoundListDetails = (props: any) => {
   const { facilityId, patientId, consultationId, id } = props;
@@ -23,19 +18,11 @@ export const DailyRoundListDetails = (props: any) => {
     pathParams: { consultationId, id },
     onResponse: ({ res, data }) => {
       if (res && data) {
-        const currentHealth = currentHealthChoices.find(
-          (i) => i.text === data.current_health,
-        );
-
         const tdata: DailyRoundsModel = {
           ...data,
           temperature: Number(data.temperature) ? data.temperature : "",
           additional_symptoms_text: "",
           medication_given: data.medication_given ?? [],
-
-          current_health: currentHealth
-            ? currentHealth.desc
-            : data.current_health,
         };
         if (data.additional_symptoms?.length) {
           const symptoms = data.additional_symptoms.map((symptom: number) => {
@@ -172,11 +159,11 @@ export const DailyRoundListDetails = (props: any) => {
             <span className="font-semibold leading-relaxed">
               Level Of Consciousness:{" "}
             </span>
-            {dailyRoundListDetailsData.consciousness_level
-              ? CONSCIOUSNESS_LEVEL.find(
-                  (i) => i.id === dailyRoundListDetailsData.consciousness_level,
-                )?.text
-              : "-"}
+            {(dailyRoundListDetailsData.consciousness_level &&
+              CONSCIOUSNESS_LEVEL.find(
+                (i) => i.id === dailyRoundListDetailsData.consciousness_level,
+              )?.text) ||
+              "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">

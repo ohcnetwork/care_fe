@@ -1,5 +1,9 @@
 import { IConfig } from "../Common/hooks/useConfig";
-
+import {
+  ConsentRequestModel,
+  CreateConsentTBody,
+} from "../Components/ABDM/types/consent";
+import { HealthInformationModel } from "../Components/ABDM/types/health-information";
 import {
   IAadhaarOtp,
   IAadhaarOtpTBody,
@@ -178,7 +182,7 @@ const routes = {
   },
 
   token_verify: {
-    path: "/api/v1/auth/token/verify",
+    path: "/api/v1/auth/token/verify/",
     method: "POST",
   },
 
@@ -283,7 +287,7 @@ const routes = {
   },
 
   updateUser: {
-    path: "/api/v1/users",
+    path: "/api/v1/users/",
     method: "PUT",
   },
 
@@ -342,7 +346,7 @@ const routes = {
   },
 
   getAllFacilities: {
-    path: "/api/v1/getallfacilities",
+    path: "/api/v1/getallfacilities/",
     TRes: Type<PaginatedResponse<FacilityModel>>(),
   },
 
@@ -707,7 +711,7 @@ const routes = {
   // Patient
 
   searchPatient: {
-    path: "/api/v1/patient/search",
+    path: "/api/v1/patient/search/",
     TRes: Type<PaginatedResponse<DupPatientModel>>(),
   },
   patientList: {
@@ -753,6 +757,9 @@ const routes = {
     path: "/api/v1/patient/{patientId}/notes/",
     method: "POST",
     TRes: Type<PatientNotesModel>(),
+    TBody: Type<
+      Pick<PatientNotesModel, "note" | "thread"> & { consultation?: string }
+    >(),
   },
   updatePatientNote: {
     path: "/api/v1/patient/{patientId}/notes/{noteId}/",
@@ -942,7 +949,7 @@ const routes = {
     TRes: Type<PaginatedResponse<InventorySummaryResponse>>(),
   },
   getItemName: {
-    path: "/api/v1/items",
+    path: "/api/v1/items/",
     method: "GET",
   },
   flagInventoryItem: {
@@ -958,14 +965,17 @@ const routes = {
   dischargeSummaryGenerate: {
     path: "/api/v1/consultation/{external_id}/generate_discharge_summary/",
     method: "POST",
+    TRes: Type<never>(),
   },
   dischargeSummaryPreview: {
-    path: "/api/v1/consultation/{external_id}/preview_discharge_summary",
+    path: "/api/v1/consultation/{external_id}/preview_discharge_summary/",
     method: "GET",
+    TRes: Type<{ read_signed_url: string }>(),
   },
   dischargeSummaryEmail: {
     path: "/api/v1/consultation/{external_id}/email_discharge_summary/",
     method: "POST",
+    TRes: Type<never>(),
   },
   dischargePatient: {
     path: "/api/v1/consultation/{id}/discharge_patient/",
@@ -992,7 +1002,7 @@ const routes = {
     TRes: Type<UserModel>(),
   },
   updateUserDetails: {
-    path: "/api/v1/users",
+    path: "/api/v1/users/",
     method: "PUT",
   },
 
@@ -1058,6 +1068,11 @@ const routes = {
     TRes: Type<NotificationData>(),
   },
   markNotificationAsRead: {
+    path: "/api/v1/notification/{id}/",
+    method: "PATCH",
+    TRes: Type<NotificationData>(),
+  },
+  markNotificationAsUnRead: {
     path: "/api/v1/notification/{id}/",
     method: "PATCH",
     TRes: Type<NotificationData>(),
@@ -1180,7 +1195,7 @@ const routes = {
     TBody: Type<Partial<IResource>>(),
   },
   deleteResourceRecord: {
-    path: "/api/v1/resource/{id}",
+    path: "/api/v1/resource/{id}/",
     method: "DELETE",
     TRes: Type<{
       detail?: string;
@@ -1269,7 +1284,7 @@ const routes = {
     TRes: Type<PaginatedResponse<AssetTransaction>>(),
   },
   getAssetTransaction: {
-    path: "/api/v1/asset_transaction/{id}",
+    path: "/api/v1/asset_transaction/{id}/",
     method: "GET",
   },
 
@@ -1281,7 +1296,7 @@ const routes = {
     TRes: Type<PaginatedResponse<AssetService>>(),
   },
   getAssetService: {
-    path: "/api/v1/asset/{asset_external_id}/service_records/{external_id}",
+    path: "/api/v1/asset/{asset_external_id}/service_records/{external_id}/",
     method: "GET",
   },
   updateAssetService: {
@@ -1431,6 +1446,43 @@ const routes = {
       method: "POST",
       TRes: Type<IHealthFacility>(),
       TBody: Type<IcreateHealthFacilityTBody>(),
+    },
+
+    listConsents: {
+      path: "/api/v1/abdm/consent/",
+      method: "GET",
+      TRes: Type<PaginatedResponse<ConsentRequestModel>>(),
+    },
+
+    createConsent: {
+      path: "/api/v1/abdm/consent/",
+      method: "POST",
+      TRes: Type<ConsentRequestModel>(),
+      TBody: Type<CreateConsentTBody>(),
+    },
+
+    getConsent: {
+      path: "/api/v1/abdm/consent/{id}/",
+      method: "GET",
+    },
+
+    checkConsentStatus: {
+      path: "/api/v1/abdm/consent/{id}/status/",
+      method: "GET",
+      TRes: Type<void>(),
+    },
+
+    getHealthInformation: {
+      path: "/api/v1/abdm/health_information/{artefactId}",
+      method: "GET",
+      TRes: Type<HealthInformationModel>(),
+    },
+
+    findPatient: {
+      path: "/api/v1/abdm/patients/find/",
+      method: "POST",
+      TRes: Type<unknown>(),
+      TBody: Type<{ id: string }>(),
     },
   },
 
