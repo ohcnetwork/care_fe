@@ -26,6 +26,7 @@ describe("Patient Medicine Administration", () => {
   it("Add a new titrated medicine for a patient | Individual Administeration |", () => {
     patientPage.visitPatient("Dummy Patient 5");
     patientPrescription.visitMedicineTab();
+    patientPrescription.visitEditPrescription();
     patientPrescription.clickAddPrescription();
     patientPrescription.interceptMedibase();
     patientPrescription.selectMedicinebox();
@@ -54,7 +55,7 @@ describe("Patient Medicine Administration", () => {
     // Go to medicine tab and administer it again
     patientPrescription.visitMedicineTab();
     cy.verifyAndClickElement("#0", medicineName);
-    cy.submitButton("Administer Medicine");
+    cy.submitButton("Administer");
     patientPrescription.enterAdministerDosage(medicineBaseDosage);
     cy.submitButton("Administer Medicine");
     cy.verifyNotification("Medicine(s) administered");
@@ -63,6 +64,7 @@ describe("Patient Medicine Administration", () => {
   it("Add a new medicine for a patient and verify the duplicate medicine validation", () => {
     patientPage.visitPatient("Dummy Patient 4");
     patientPrescription.visitMedicineTab();
+    patientPrescription.visitEditPrescription();
     patientPrescription.clickAddPrescription();
     patientPrescription.interceptMedibase();
     patientPrescription.selectMedicinebox();

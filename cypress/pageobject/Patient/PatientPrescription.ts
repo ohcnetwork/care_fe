@@ -1,8 +1,10 @@
 export class PatientPrescription {
   clickAddPrescription() {
-    cy.contains("button", "Add Prescription Medication")
-      .should("be.visible")
-      .click();
+    cy.get("#add-prescription").scrollIntoView();
+    cy.verifyAndClickElement(
+      "#add-prescription",
+      "Add Prescription Medication",
+    );
   }
 
   interceptMedibase() {
@@ -48,7 +50,7 @@ export class PatientPrescription {
   }
 
   enterTargetDosage(targetDosage: string) {
-    cy.get("#target_dosage").type(targetDosage);
+    cy.get("#target_dosage").type(targetDosage, { force: true });
   }
 
   selectDosageFrequency(frequency: string) {
@@ -75,7 +77,10 @@ export class PatientPrescription {
   visitMedicineTab() {
     cy.get("#consultation_tab_nav").scrollIntoView();
     cy.get("#consultation_tab_nav").contains("Medicines").click();
-    cy.get("a[href='prescriptions']").first().click();
+  }
+
+  visitEditPrescription() {
+    cy.get("#edit-prescription").click();
   }
 }
 export default PatientPrescription;
