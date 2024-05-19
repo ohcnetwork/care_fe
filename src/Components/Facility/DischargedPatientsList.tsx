@@ -112,7 +112,9 @@ const PatientListItem = ({ patient }: { patient: PatientModel }) => {
         <CareIcon icon="l-user-injured" className="text-3xl text-gray-800" />
       </div>
       <div className="ml-5 flex flex-col">
-        <h2 className="text-lg font-bold text-black">{patient.name}</h2>
+        <h2 className="text-lg font-bold capitalize text-black">
+          {patient.name}
+        </h2>
         <span className="text-sm font-medium text-gray-800">
           {GENDER_TYPES.find((g) => g.id === patient.gender)?.text} -{" "}
           {formatPatientAge(patient)}
