@@ -64,6 +64,7 @@ export default function CreatePrescriptionForm(props: {
           {props.prescription.dosage_type !== "PRN" &&
             props.prescription.prescription_type !== "DISCHARGE" && (
               <CheckBoxFormField
+                id="titrated-dosage"
                 label={t("titrate_dosage")}
                 name="Titrate Dosage"
                 value={field("dosage_type").value === "TITRATED"}
@@ -92,7 +93,7 @@ export default function CreatePrescriptionForm(props: {
               optionValue={(key) => key}
             />
             {field("dosage_type").value === "TITRATED" ? (
-              <div className="flex w-full gap-4">
+              <div className="flex w-full flex-[2] gap-4">
                 <DosageFormField
                   className="flex-1"
                   label={t("start_dosage")}

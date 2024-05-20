@@ -5,6 +5,10 @@ class PatientLogupdate {
     cy.wait(2000);
   }
 
+  selectRoundType(roundType: string) {
+    cy.clickAndSelectOption("#rounds_type", roundType);
+  }
+
   selectBed(bed: string) {
     cy.searchAndSelectOption("input[name='bed']", bed);
     cy.submitButton("Move to bed");
@@ -79,10 +83,6 @@ class PatientLogupdate {
   clickVitals() {
     cy.get("#consultation_tab_nav").scrollIntoView();
     cy.verifyAndClickElement("#consultation_tab_nav", "Vitals");
-  }
-
-  clickCopyPreviousValue() {
-    cy.get("#clone_last").click();
   }
 }
 export default PatientLogupdate;

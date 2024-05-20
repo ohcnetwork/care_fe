@@ -25,13 +25,13 @@ import request from "../../Utils/request/request.js";
 import routes from "../../Redux/api.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import { FacilityHomeTriage } from "./FacilityHomeTriage.js";
-import { FacilityDoctorList } from "./FacilityDoctorList.js";
 import { FacilityBedCapacity } from "./FacilityBedCapacity.js";
 import useSlug from "../../Common/hooks/useSlug.js";
 import { Popover, Transition } from "@headlessui/react";
 import { FieldLabel } from "../Form/FormFields/FormField.js";
 import { LocationSelect } from "../Common/LocationSelect.js";
 import { CameraFeedPermittedUserTypes } from "../../Utils/permissions.js";
+import { FacilityStaffList } from "./FacilityStaffList.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -386,7 +386,14 @@ export const FacilityHome = (props: any) => {
                 >
                   View Users
                 </DropdownItem>
-                {hasPermissionToDeleteFacility && (
+                <DropdownItem
+                  id="view-abdm-records"
+                  onClick={() => navigate(`/facility/${facilityId}/abdm`)}
+                  icon={<CareIcon icon="l-file-network" className="text-lg" />}
+                >
+                  View ABDM Records
+                </DropdownItem>
+                {hasPermissionToDeleteFacility ? (
                   <DropdownItem
                     id="delete-facility"
                     variant="danger"
@@ -396,6 +403,8 @@ export const FacilityHome = (props: any) => {
                   >
                     Delete Facility
                   </DropdownItem>
+                ) : (
+                  <></>
                 )}
               </DropdownMenu>
             </div>
@@ -411,7 +420,9 @@ export const FacilityHome = (props: any) => {
                 <CareIcon icon="l-monitor-heart-rate" className="text-lg" />
                 <span>Central Nursing Station</span>
               </ButtonV2>
-              <LiveMonitoringButton />
+              {CameraFeedPermittedUserTypes.includes(authUser.user_type) && (
+                <LiveMonitoringButton />
+              )}
               <ButtonV2
                 variant="primary"
                 ghost
@@ -452,7 +463,7 @@ export const FacilityHome = (props: any) => {
         </div>
       </div>
       <FacilityBedCapacity facilityId={facilityId} />
-      <FacilityDoctorList facilityId={facilityId} />
+      <FacilityStaffList facilityId={facilityId} />
 
       <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
         <h1 className="mb-6 text-xl font-bold">Oxygen Information</h1>
@@ -499,24 +510,21 @@ export const FacilityHome = (props: any) => {
 const LiveMonitoringButton = () => {
   const facilityId = useSlug("facility");
   const [location, setLocation] = useState<string>();
-  const authUser = useAuthUser();
 
   return (
     <Popover className="relative">
-      {CameraFeedPermittedUserTypes.includes(authUser.user_type) && (
-        <Popover.Button className="mt-2 w-full">
-          <ButtonV2
-            variant="primary"
-            ghost
-            border
-            className="w-full"
-            id="facility-detailspage-livemonitoring"
-          >
-            <CareIcon icon="l-video" className="text-lg" />
-            <span>Live Monitoring</span>
-          </ButtonV2>
-        </Popover.Button>
-      )}
+      <Popover.Button className="mt-2 w-full">
+        <ButtonV2
+          variant="primary"
+          ghost
+          border
+          className="w-full"
+          id="facility-detailspage-livemonitoring"
+        >
+          <CareIcon icon="l-video" className="text-lg" />
+          <span>Live Monitoring</span>
+        </ButtonV2>
+      </Popover.Button>
 
       <Transition
         as={Fragment}

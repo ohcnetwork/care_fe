@@ -1,7 +1,7 @@
 import { Plugin } from "vite";
 import * as fs from "fs";
 import * as path from "path";
-import * as glob from "glob";
+import { globSync } from "glob";
 
 /**
  * Interface defining options for the treeShakeUniconPathsPlugin.
@@ -22,15 +22,15 @@ export interface TreeShakeCareIconsOptions {
  */
 
 export function treeShakeCareIcons(
-  options: TreeShakeCareIconsOptions = { iconWhitelist: [] }
+  options: TreeShakeCareIconsOptions = { iconWhitelist: [] },
 ): Plugin {
   const rootDir = path.resolve(__dirname, ".."); // update this if moving this code to a different file
   const lineIconNameRegex = /"l-[a-z]+(?:-[a-z]+)*"/g;
   const allUniconPaths = JSON.parse(
     fs.readFileSync(
       path.resolve(rootDir, "src/CAREUI/icons/UniconPaths.json"),
-      "utf8"
-    )
+      "utf8",
+    ),
   );
 
   // Extracts icon names from a given file's content.
@@ -41,14 +41,14 @@ export function treeShakeCareIcons(
     const lineIconNameMatches = fileContent.match(lineIconNameRegex) || [];
 
     const lineIconNames = lineIconNameMatches.map(
-      (lineIconName) => lineIconName.slice(1, -1) // remove quotes
+      (lineIconName) => lineIconName.slice(1, -1), // remove quotes
     );
 
     return lineIconNames;
   }
   // Finds all used icon names within the project's source files (`.tsx` or `.res` extensions).
   function getAllUsedIconNames() {
-    const files = glob.sync(path.resolve(rootDir, "src/**/*.{tsx,res}"));
+    const files = globSync(path.resolve(rootDir, "src/**/*.{tsx,res}"));
     const usedIconsArray: string[] = [];
 
     files.forEach((file) => {

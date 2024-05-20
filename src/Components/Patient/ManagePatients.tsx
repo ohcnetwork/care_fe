@@ -31,7 +31,11 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import SearchInput from "../Form/SearchInput";
 import SortDropdownMenu from "../Common/SortDropdown";
 import SwitchTabs from "../Common/components/SwitchTabs";
-import { formatPatientAge, parsePhoneNumber } from "../../Utils/utils.js";
+import {
+  formatPatientAge,
+  isAntenatal,
+  parsePhoneNumber,
+} from "../../Utils/utils.js";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page.js";
@@ -105,7 +109,6 @@ export const PatientManager = () => {
   const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
   const [showDialog, setShowDialog] = useState<"create" | "list-discharged">();
   const [showDoctors, setShowDoctors] = useState(false);
-  const [showDoctorConnect, setShowDoctorConnect] = useState(false);
   const [phone_number, setPhoneNumber] = useState("");
   const [phoneNumberError, setPhoneNumberError] = useState("");
   const [emergency_phone_number, setEmergencyPhoneNumber] = useState("");
@@ -219,6 +222,10 @@ export const PatientManager = () => {
     last_consultation_is_telemedicine:
       qParams.last_consultation_is_telemedicine || undefined,
     is_antenatal: qParams.is_antenatal || undefined,
+    last_menstruation_start_date_after:
+      (qParams.is_antenatal === "true" &&
+        dayjs().subtract(9, "month").format("YYYY-MM-DD")) ||
+      undefined,
     ventilator_interface: qParams.ventilator_interface || undefined,
     diagnoses: qParams.diagnoses || undefined,
     diagnoses_confirmed: qParams.diagnoses_confirmed || undefined,
@@ -247,12 +254,6 @@ export const PatientManager = () => {
     qParams.diagnoses_unconfirmed,
     qParams.diagnoses_differential,
   ]);
-
-  useEffect(() => {
-    if (params.facility) {
-      setShowDoctorConnect(true);
-    }
-  }, [qParams.facility]);
 
   const date_range_fields = [
     [params.created_date_before, params.created_date_after],
@@ -584,6 +585,16 @@ export const PatientManager = () => {
                       text="Readmission"
                     />
                   )}
+                  {patient.last_consultation?.suggestion === "A" &&
+                    patient.last_consultation.facility === patient.facility &&
+                    !patient.last_consultation.discharge_date && (
+                      <Chip
+                        size="small"
+                        variant="primary"
+                        startIcon="l-clock-three"
+                        text={`IP Days: ${dayjs().diff(patient.last_consultation.encounter_date, "day")}`}
+                      />
+                    )}
                   {patient.disease_status === "POSITIVE" && (
                     <Chip
                       size="small"
@@ -594,6 +605,7 @@ export const PatientManager = () => {
                   )}
                   {patient.gender === 2 &&
                     patient.is_antenatal &&
+                    isAntenatal(patient.last_menstruation_start_date) &&
                     patient.is_active && (
                       <Chip
                         size="small"
@@ -743,10 +755,36 @@ export const PatientManager = () => {
             <ButtonV2
               id="add-patient-details"
               onClick={() => {
-                if (qParams.facility)
+                const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
+                if (
+                  qParams.facility &&
+                  showAllFacilityUsers.includes(authUser.user_type)
+                )
                   navigate(`/facility/${qParams.facility}/patient`);
-                else if (onlyAccessibleFacility)
+                else if (
+                  qParams.facility &&
+                  !showAllFacilityUsers.includes(authUser.user_type) &&
+                  authUser.home_facility_object?.id !== qParams.facility
+                )
+                  Notification.Error({
+                    msg: "Oops! Non-Home facility users don't have permission to perform this action.",
+                  });
+                else if (
+                  !showAllFacilityUsers.includes(authUser.user_type) &&
+                  authUser.home_facility_object?.id
+                ) {
+                  navigate(
+                    `/facility/${authUser.home_facility_object.id}/patient`,
+                  );
+                } else if (onlyAccessibleFacility)
                   navigate(`/facility/${onlyAccessibleFacility.id}/patient`);
+                else if (
+                  !showAllFacilityUsers.includes(authUser.user_type) &&
+                  !authUser.home_facility_object?.id
+                )
+                  Notification.Error({
+                    msg: "Oops! No home facility found",
+                  });
                 else setShowDialog("create");
               }}
               className="w-full lg:w-fit"
@@ -785,7 +823,7 @@ export const PatientManager = () => {
               }}
               isTab2Active={!!tabValue}
             />
-            {showDoctorConnect && (
+            {!!params.facility && (
               <ButtonV2
                 id="doctor-connect-patient-button"
                 onClick={() => {

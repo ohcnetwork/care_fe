@@ -20,6 +20,7 @@ interface Props {
   intervals: { start: Date; end: Date }[];
   refetch: () => void;
   readonly: boolean;
+  id: string;
 }
 
 export default function MedicineAdministrationTableRow({
@@ -153,7 +154,7 @@ export default function MedicineAdministrationTableRow({
               <span>{t("edit_caution_note")}</span>
             </div>
           }
-          className="w-full max-w-3xl lg:min-w-[600px]"
+          className="w-full max-w-4xl lg:min-w-[768px]"
         >
           <EditPrescriptionForm
             initial={prescription}
@@ -171,6 +172,7 @@ export default function MedicineAdministrationTableRow({
           "group transition-all duration-200 ease-in-out",
           loading ? "bg-gray-300" : "bg-white hover:bg-primary-100",
         )}
+        id={props.id}
       >
         <td
           className="bg-gray-white sticky left-0 z-10 cursor-pointer bg-white py-3 pl-4 text-left transition-all duration-200 ease-in-out group-hover:bg-primary-100"

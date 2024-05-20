@@ -438,3 +438,11 @@ export const properRoundOf = (value: number) => {
   }
   return value.toFixed(2);
 };
+
+export const isPostPartum = (data_of_delivery?: string) => {
+  return dayjs().diff(data_of_delivery, "week") <= 6;
+};
+
+export const isAntenatal = (menstruation_start_date?: string) => {
+  return dayjs().diff(menstruation_start_date, "month") <= 9;
+};
