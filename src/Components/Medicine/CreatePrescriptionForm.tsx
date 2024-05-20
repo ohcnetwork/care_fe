@@ -64,6 +64,7 @@ export default function CreatePrescriptionForm(props: {
           {props.prescription.dosage_type !== "PRN" &&
             props.prescription.prescription_type !== "DISCHARGE" && (
               <CheckBoxFormField
+                id="titrated-dosage"
                 label={t("titrate_dosage")}
                 name="Titrate Dosage"
                 value={field("dosage_type").value === "TITRATED"}

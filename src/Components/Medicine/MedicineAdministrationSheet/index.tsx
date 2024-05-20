@@ -91,6 +91,7 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
           !!data?.results && (
             <>
               <ButtonV2
+                id="edit-prescription"
                 variant="secondary"
                 border
                 href="prescriptions"
