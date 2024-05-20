@@ -67,7 +67,8 @@ export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
 
   return (
     <DialogModal
-      className="!max-w-xl"
+      className="max-w-xl"
+      fixedWidth={false}
       title="Fetch Records over ABDM"
       show={show}
       onClose={onClose}
