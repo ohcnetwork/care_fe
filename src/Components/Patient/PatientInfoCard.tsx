@@ -220,7 +220,7 @@ export default function PatientInfoCard(props: {
             </div>
             <div className="flex items-center justify-center">
               <div
-                className="mb-2 flex flex-col justify-center text-xl font-semibold lg:hidden"
+                className="mb-2 flex flex-col justify-center text-xl font-semibold capitalize lg:hidden"
                 id="patient-name-consultation"
               >
                 {patient.name}
@@ -265,7 +265,7 @@ export default function PatientInfoCard(props: {
             </div>
             <div className="flex flex-col flex-wrap items-center justify-center lg:items-start lg:justify-normal">
               <div
-                className="mb-2 hidden flex-row text-xl font-semibold lg:flex"
+                className="mb-2 hidden flex-row text-xl font-semibold capitalize lg:flex"
                 id="patient-name-consultation"
               >
                 {patient.name}
@@ -470,7 +470,7 @@ export default function PatientInfoCard(props: {
           </div>
         </div>
         <div
-          className="col-span-2 flex w-full flex-col items-center justify-center gap-2 px-4 py-1 lg:col-span-1 2xl:flex-row"
+          className="col-span-2 flex w-full flex-col items-center justify-end gap-2 px-4 py-1 lg:col-span-1 2xl:flex-row"
           id="consultation-buttons"
         >
           {consultation?.suggestion === "A" && (

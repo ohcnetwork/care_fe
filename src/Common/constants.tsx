@@ -230,11 +230,60 @@ export const getBedTypes = ({
 };
 
 export const DOCTOR_SPECIALIZATION: Array<OptionsType> = [
-  { id: 1, text: "General Medicine", desc: "bg-doctors-general" },
-  { id: 2, text: "Pulmonology", desc: "bg-doctors-pulmonology" },
-  { id: 3, text: "Critical Care", desc: "bg-doctors-critical" },
-  { id: 4, text: "Paediatrics", desc: "bg-doctors-paediatrics" },
-  { id: 5, text: "Other Speciality", desc: "bg-doctors-other" },
+  { id: 1, text: "General Medicine" },
+  { id: 2, text: "Pulmonology" },
+  { id: 3, text: "Intensivist" },
+  { id: 4, text: "Pediatrician" },
+  { id: 6, text: "Anesthesiologist" },
+  { id: 7, text: "Cardiac Surgeon" },
+  { id: 8, text: "Cardiologist" },
+  { id: 9, text: "Dentist" },
+  { id: 10, text: "Dermatologist" },
+  { id: 11, text: "Diabetologist" },
+  { id: 12, text: "Emergency Medicine Physician" },
+  { id: 13, text: "Endocrinologist" },
+  { id: 14, text: "Family Physician" },
+  { id: 15, text: "Gastroenterologist" },
+  { id: 16, text: "General Surgeon" },
+  { id: 17, text: "Geriatrician" },
+  { id: 18, text: "Hematologist" },
+  { id: 29, text: "Immunologist" },
+  { id: 20, text: "Infectious Disease Specialist" },
+  { id: 21, text: "MBBS doctor" },
+  { id: 22, text: "Medical Officer" },
+  { id: 23, text: "Nephrologist" },
+  { id: 24, text: "Neuro Surgeon" },
+  { id: 25, text: "Neurologist" },
+  { id: 26, text: "Obstetrician and Gynecologist" },
+  { id: 27, text: "Oncologist" },
+  { id: 28, text: "Oncology Surgeon" },
+  { id: 29, text: "Ophthalmologist" },
+  {
+    id: 30,
+    text: "Oral and Maxillofacial Surgeon",
+  },
+  { id: 31, text: "Orthopedic" },
+  { id: 32, text: "Orthopedic Surgeon" },
+  { id: 33, text: "Otolaryngologist (ENT)" },
+  { id: 34, text: "Palliative care Physician" },
+  { id: 35, text: "Pathologist" },
+  { id: 36, text: "Pediatric Surgeon" },
+  { id: 37, text: "Physician" },
+  { id: 38, text: "Plastic Surgeon" },
+  { id: 39, text: "Psychiatrist" },
+  { id: 40, text: "Pulmonologist" },
+  { id: 41, text: "Radio technician" },
+  { id: 42, text: "Radiologist" },
+  { id: 43, text: "Rheumatologist" },
+  { id: 44, text: "Sports Medicine Specialist" },
+  { id: 45, text: "Thoraco-Vascular Surgeon" },
+  {
+    id: 46,
+    text: "Transfusion Medicine Specialist",
+  },
+  { id: 47, text: "Urologist" },
+  { id: 48, text: "Nurse" },
+  { id: 5, text: "Others" },
 ];
 
 export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
@@ -322,8 +371,7 @@ export const CONSCIOUSNESS_LEVEL = [
     id: "ONSET_OF_AGITATION_AND_CONFUSION",
     text: "Onset of Agitation and Confusion",
   },
-  { id: "UNKNOWN", text: "Unknown" },
-];
+] as const;
 
 export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
   { id: 1, text: "CVP catheter " },
@@ -389,14 +437,6 @@ export const PATIENT_CATEGORIES: {
 ];
 
 export const PATIENT_FILTER_CATEGORIES = PATIENT_CATEGORIES;
-
-export const CURRENT_HEALTH_CHANGE = [
-  { id: 0, text: "NO DATA", desc: "" },
-  { id: 3, text: "STATUS QUO", desc: "No Change" },
-  { id: 4, text: "BETTER", desc: "Better" },
-  { id: 2, text: "WORSE", desc: "Worse" },
-  { id: 1, text: "REQUIRES VENTILATOR", desc: "Requires Ventilator" },
-];
 
 export const SAMPLE_TEST_STATUS = [
   { id: 1, text: "REQUEST_SUBMITTED", desc: "Request Submitted" },
@@ -704,11 +744,10 @@ export const CONSULTATION_TABS = [
   { text: "ABDM", desc: "ABDM Records" },
 ];
 
-export const RHYTHM_CHOICES: Array<OptionsType> = [
-  { id: 0, text: "UNKNOWN", desc: "Unknown" },
+export const RHYTHM_CHOICES = [
   { id: 5, text: "REGULAR", desc: "Regular" },
   { id: 10, text: "IRREGULAR", desc: "Irregular" },
-];
+] as const;
 
 export const LOCATION_BED_TYPES: Array<any> = [
   { id: "ISOLATION", name: "Isolation" },
