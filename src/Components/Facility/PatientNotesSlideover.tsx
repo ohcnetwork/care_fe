@@ -12,10 +12,10 @@ import routes from "../../Redux/api";
 import { PatientNoteStateType, PaitentNotesReplyModel } from "./models";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import AutoExpandingTextInputFormField from "../Form/FormFields/AutoExpandingTextInputFormField.js";
-import * as Sentry from "@sentry/browser";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { PATIENT_NOTES_THREADS } from "../../Common/constants.js";
 import DoctorNoteReplyPreviewCard from "./DoctorNoteReplyPreviewCard.js";
+import useNotificationSubscriptionState from "../../Common/hooks/useNotificationSubscriptionState.js";
 
 interface PatientNotesProps {
   patientId: string;
@@ -26,6 +26,7 @@ interface PatientNotesProps {
 
 export default function PatientNotesSlideover(props: PatientNotesProps) {
   const authUser = useAuthUser();
+  const notificationSubscriptionState = useNotificationSubscriptionState();
   const [thread, setThread] = useState(
     authUser.user_type === "Nurse"
       ? PATIENT_NOTES_THREADS.Nurses
@@ -39,32 +40,17 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
     undefined,
   );
 
-  const { username } = useAuthUser();
-
-  const intialSubscriptionState = async () => {
-    try {
-      const res = await request(routes.getUserPnconfig, {
-        pathParams: { username },
-      });
-      const reg = await navigator.serviceWorker.ready;
-      const subscription = await reg.pushManager.getSubscription();
-      if (!subscription && !res.data?.pf_endpoint) {
-        Notification.Warn({
-          msg: "Please subscribe to notifications to get live updates on discussion notes.",
-        });
-      } else if (subscription?.endpoint !== res.data?.pf_endpoint) {
-        Notification.Warn({
-          msg: "Please subscribe to notifications on this device to get live updates on discussion notes.",
-        });
-      }
-    } catch (error) {
-      Sentry.captureException(error);
-    }
-  };
-
   useEffect(() => {
-    intialSubscriptionState();
-  }, []);
+    if (notificationSubscriptionState === "unsubscribed") {
+      Notification.Warn({
+        msg: "Please subscribe to notifications to get live updates on discussion notes.",
+      });
+    } else if (notificationSubscriptionState === "subscribed_on_other_device") {
+      Notification.Warn({
+        msg: "Please subscribe to notifications on this device to get live updates on discussion notes.",
+      });
+    }
+  }, [notificationSubscriptionState]);
 
   const initialData: PatientNoteStateType = {
     notes: [],
