@@ -4,6 +4,9 @@ import useQuery from "../../Utils/request/useQuery";
 import { formatDateTime } from "../../Utils/utils";
 import Loading from "../Common/Loading";
 import Page from "../Common/components/Page";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import ButtonV2 from "../Common/components/ButtonV2";
+import { useState } from "react";
 
 interface IProps {
   facilityId: string;
@@ -21,8 +24,10 @@ const TableHeads = [
 ];
 
 export default function ABDMFacilityRecords({ facilityId }: IProps) {
+  const [key, setKey] = useState(0);
   const { data: consentsResult, loading } = useQuery(routes.abha.listConsents, {
     query: { facility: facilityId, ordering: "-created_date" },
+    key: key.toString(),
   });
 
   if (loading) {
@@ -53,6 +58,15 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                         scope="col"
                         className="sticky right-0 top-0 py-3.5 pl-3 pr-4 sm:pr-6"
                       >
+                        <ButtonV2
+                          onClick={async () => {
+                            setKey((prev) => prev + 1);
+                          }}
+                          ghost
+                          className="max-w-2xl text-sm text-gray-700 hover:text-gray-900"
+                        >
+                          <CareIcon icon="l-refresh" /> Refresh
+                        </ButtonV2>
                         <span className="sr-only">View</span>
                       </th>
                     </tr>
