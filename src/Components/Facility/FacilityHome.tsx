@@ -24,13 +24,13 @@ import request from "../../Utils/request/request.js";
 import routes from "../../Redux/api.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import { FacilityHomeTriage } from "./FacilityHomeTriage.js";
-import { FacilityDoctorList } from "./FacilityDoctorList.js";
 import { FacilityBedCapacity } from "./FacilityBedCapacity.js";
 import useSlug from "../../Common/hooks/useSlug.js";
 import { Popover, Transition } from "@headlessui/react";
 import { FieldLabel } from "../Form/FormFields/FormField.js";
 import { LocationSelect } from "../Common/LocationSelect.js";
 import { CameraFeedPermittedUserTypes } from "../../Utils/permissions.js";
+import { FacilityStaffList } from "./FacilityStaffList.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -460,7 +460,7 @@ export const FacilityHome = (props: any) => {
         </div>
       </div>
       <FacilityBedCapacity facilityId={facilityId} />
-      <FacilityDoctorList facilityId={facilityId} />
+      <FacilityStaffList facilityId={facilityId} />
 
       <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
         <h1 className="mb-6 text-xl font-bold">Oxygen Information</h1>

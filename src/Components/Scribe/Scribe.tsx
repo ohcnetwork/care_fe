@@ -22,7 +22,7 @@ export interface Field {
   type: string;
   example: string;
   default: string;
-  options?: FieldOption[];
+  options?: readonly FieldOption[];
 }
 
 export type ScribeModel = {

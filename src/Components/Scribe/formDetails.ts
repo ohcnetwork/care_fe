@@ -60,15 +60,6 @@ export const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     })),
   },
   {
-    friendlyName: "Current Health",
-    id: "current_health",
-    type: "number",
-    example: "0",
-    default: "0",
-    description:
-      "An integer to represent the current health status of the patient. 0 represents no health issues.",
-  },
-  {
     friendlyName: "Actions",
     id: "actions",
     type: "null",
