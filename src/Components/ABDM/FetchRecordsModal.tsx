@@ -66,13 +66,19 @@ export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
   });
 
   return (
-    <DialogModal title="Fetch Records over ABDM" show={show} onClose={onClose}>
+    <DialogModal
+      className="!max-w-xl"
+      title="Fetch Records over ABDM"
+      show={show}
+      onClose={onClose}
+    >
       {["unsubscribed", "subscribed_on_other_device"].includes(
         notificationSubscriptionState,
       ) && (
-        <p className="my-4 text-sm text-danger-600">
-          <CareIcon icon="l-ban" className="h-4 w-4" /> Notifications needs to
-          be enabled on this device to verify the patient.
+        <p className="my-4 text-sm text-warning-600">
+          <CareIcon icon="l-exclamation-triangle" className="h-4 w-4" />{" "}
+          Notifications needs to be enabled on this device to verify the
+          patient.
         </p>
       )}
 
