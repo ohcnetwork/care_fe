@@ -448,7 +448,7 @@ export const ConsultationDetails = (props: any) => {
                       return null; // Hide feed tab
                   }
 
-                  if (p.text === "ABDM" && !patientData.abha_number) {
+                  if (p.text === "ABDM" && !abhaNumberData?.abha_number) {
                     return null;
                   }
 
