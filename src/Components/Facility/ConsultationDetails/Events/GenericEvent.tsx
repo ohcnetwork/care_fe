@@ -1,14 +1,13 @@
 import type { ReactNode } from "react";
 interface IProps {
-  values: Record<string, any>;
+  values: Record<string, unknown>;
 }
 
 /**
  * object - array, date
  */
-
 const formatValue = (value: unknown, key?: string): ReactNode => {
-  if (value === undefined || value === null) {
+  if (value == null) {
     return "N/A";
   }
 
@@ -17,11 +16,11 @@ const formatValue = (value: unknown, key?: string): ReactNode => {
   }
 
   if (typeof value === "number") {
-    return value;
+    return value % 1 ? value.toFixed(2) : value;
   }
 
   if (typeof value === "string") {
-    const trimmed = value.trim();
+    const trimmed = value.trim().replaceAll(/_/g, " ");
 
     if (trimmed === "") {
       return "Empty";
@@ -41,26 +40,36 @@ const formatValue = (value: unknown, key?: string): ReactNode => {
   if (typeof value === "object") {
     if (Array.isArray(value)) {
       if (value.length === 0) {
-        return `No ${key?.replace(/_/g, " ")}`;
+        return `No ${key?.replaceAll(/_/g, " ")}`;
       }
 
-      return value.map((v) => formatValue(v, key)).join(", ");
+      return (
+        <ul className="list-disc space-y-2 pl-4">
+          {value.map((v) => (
+            <li>{formatValue(v, key)}</li>
+          ))}
+        </ul>
+      );
     }
 
     if (value instanceof Date) {
       return value.toLocaleString();
     }
 
-    if (Object.entries(value).length === 0) {
-      return `No ${key?.replace(/_/g, " ")}`;
+    const entries = Object.entries(value).filter(
+      ([_, value]) => value != null && value !== "",
+    );
+
+    if (entries.length === 0) {
+      return `No ${key?.replaceAll(/_/g, " ")}`;
     }
 
-    return Object.entries(value).map(([key, value]) => (
+    return entries.map(([key, value]) => (
       <div className="flex flex-col items-center gap-2 md:flex-row">
         <span className="text-xs uppercase text-gray-700">
-          {key.replace(/_/g, " ")}
+          {key.replaceAll(/_/g, " ")}
         </span>
-        <span className="text-sm font-semibold text-gray-700">
+        <span className="text-sm font-semibold capitalize text-gray-700">
           {formatValue(value, key)}
         </span>
       </div>
@@ -70,14 +79,13 @@ const formatValue = (value: unknown, key?: string): ReactNode => {
   return JSON.stringify(value);
 };
 
-export default function GenericEvent({ values }: IProps) {
-  console.log("value", values);
+export default function GenericEvent(props: IProps) {
   return (
     <div className="flex w-full flex-col gap-4 rounded-lg border border-gray-400 p-4 @container">
-      {values.map(([key, value]: [string, any]) => (
-        <div className="flex w-full flex-col items-center gap-2 md:flex-row">
+      {Object.entries(props.values).map(([key, value]) => (
+        <div className="flex w-full flex-col items-start gap-2">
           <span className="text-xs uppercase text-gray-700">
-            {key.replace(/_/g, " ")}
+            {key.replaceAll(/_/g, " ")}
           </span>
           <span className="break-all text-sm font-semibold text-gray-700">
             {formatValue(value, key)}
