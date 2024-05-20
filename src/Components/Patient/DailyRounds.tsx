@@ -35,8 +35,15 @@ import { DAILY_ROUND_FORM_SCRIBE_DATA } from "../Scribe/formDetails";
 import { DailyRoundsModel } from "./models";
 import { fetchEventTypeByName } from "../Facility/ConsultationDetails/Events/types";
 import InvestigationBuilder from "../Common/prescription-builder/InvestigationBuilder";
-import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
+import { FieldErrorText } from "../Form/FormFields/FormField";
 import { error } from "@pnotify/core";
+import { useTranslation } from "react-i18next";
+import PrescriptionBuilder from "../Medicine/PrescriptionBuilder";
+import { EditDiagnosesBuilder } from "../Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder";
+import {
+  ConditionVerificationStatuses,
+  ConsultationDiagnosis,
+} from "../Diagnosis/types";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm: any = {
@@ -104,6 +111,7 @@ const DailyRoundsFormReducer = (state = initialState, action: any) => {
 };
 
 export const DailyRounds = (props: any) => {
+  const { t } = useTranslation();
   const { goBack } = useAppHistory();
   const { facilityId, patientId, consultationId, id } = props;
   const [state, dispatch] = useAutoSaveReducer<any>(
@@ -120,6 +128,7 @@ export const DailyRounds = (props: any) => {
     ...initForm,
     action: "",
   });
+  const [diagnoses, setDiagnoses] = useState<ConsultationDiagnosis[]>();
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id ? "Save" : "Continue";
 
@@ -173,6 +182,13 @@ export const DailyRounds = (props: any) => {
         setPatientName(data.name!);
         setFacilityName(data.facility_object!.name);
         setConsultationSuggestion(data.last_consultation?.suggestion);
+        setDiagnoses(
+          data.last_consultation?.diagnoses?.sort(
+            (a: ConsultationDiagnosis, b: ConsultationDiagnosis) =>
+              ConditionVerificationStatuses.indexOf(a.verification_status) -
+              ConditionVerificationStatuses.indexOf(b.verification_status),
+          ),
+        );
         setPreviousReviewInterval(
           Number(data.last_consultation?.review_interval),
         );
@@ -522,29 +538,6 @@ export const DailyRounds = (props: any) => {
             </div>
           )}
 
-          {state.form.rounds_type === "DOCTORS_LOG" && (
-            <>
-              <div className="md:col-span-2">
-                <FieldLabel>Investigations Suggestions</FieldLabel>
-                <InvestigationBuilder
-                  investigations={state.form.investigations}
-                  setInvestigations={(investigations) => {
-                    handleFormFieldChange({
-                      name: "investigations",
-                      value: investigations,
-                    });
-
-                    handleFormFieldChange({
-                      name: "investigations_dirty",
-                      value: true,
-                    });
-                  }}
-                />
-                <FieldErrorText error={state.errors.investigation} />
-              </div>
-            </>
-          )}
-
           {state.form.rounds_type !== "DOCTORS_LOG" && (
             <>
               <SelectFormField
@@ -695,6 +688,57 @@ export const DailyRounds = (props: any) => {
                 unselectLabel="Unknown"
                 containerClassName="grid gap-1 grid-cols-1"
               />
+            </>
+          )}
+
+          {state.form.rounds_type === "DOCTORS_LOG" && (
+            <>
+              <div className="flex flex-col gap-10 divide-y-2 divide-dashed divide-gray-600 border-t-2 border-dashed border-gray-600 pt-6 md:col-span-2">
+                <div>
+                  <h3 className="my-4 text-lg font-semibold">
+                    {t("investigations")}
+                  </h3>
+                  <InvestigationBuilder
+                    investigations={state.form.investigations}
+                    setInvestigations={(investigations) => {
+                      handleFormFieldChange({
+                        name: "investigations",
+                        value: investigations,
+                      });
+                      handleFormFieldChange({
+                        name: "investigations_dirty",
+                        value: true,
+                      });
+                    }}
+                  />
+                  <FieldErrorText error={state.errors.investigation} />
+                </div>
+                <div>
+                  <h3 className="mb-4 mt-8 text-lg font-semibold">
+                    {t("prescription_medications")}
+                  </h3>
+                  <PrescriptionBuilder />
+                </div>
+                <div>
+                  <h3 className="mb-4 mt-8 text-lg font-semibold">
+                    {t("prn_prescriptions")}
+                  </h3>
+                  <PrescriptionBuilder is_prn />
+                </div>
+                <div>
+                  <h3 className="mb-4 mt-8 text-lg font-semibold">
+                    {t("diagnosis")}
+                  </h3>
+                  {/*  */}
+                  {diagnoses ? (
+                    <EditDiagnosesBuilder value={diagnoses} />
+                  ) : (
+                    <div className="flex animate-pulse justify-center py-4 text-center font-medium text-gray-800">
+                      Fetching existing diagnosis of patient...
+                    </div>
+                  )}
+                </div>
+              </div>
             </>
           )}
         </div>
