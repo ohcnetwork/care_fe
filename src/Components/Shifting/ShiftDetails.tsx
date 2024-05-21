@@ -85,10 +85,6 @@ export default function ShiftDetails(props: { id: string }) {
 
   const copyContent = (data: any) => {
     let formattedText =
-      t("disease_status") +
-      ": *" +
-      data?.patient_object?.disease_status +
-      "* \n" +
       t("name") +
       ":" +
       data?.patient_object?.name +
@@ -150,14 +146,6 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="badge badge-pill badge-primary">{t("yes")}</span>
             </div>
           )}
-          <div>
-            <span className="font-semibold leading-relaxed">
-              {t("disease_status")}{" "}
-            </span>
-            <span className="badge badge-pill badge-warning">
-              {patientData?.disease_status}
-            </span>
-          </div>
           <div>
             <span className="font-semibold leading-relaxed">
               {t("test_type")}:{" "}

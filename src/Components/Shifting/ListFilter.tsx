@@ -1,6 +1,5 @@
 import {
   BREATHLESSNESS_LEVEL,
-  DISEASE_STATUS,
   SHIFTING_FILTER_ORDER,
 } from "../../Common/constants";
 import { DateRange } from "../Common/DateRangeInputV2";
@@ -60,7 +59,6 @@ export default function ListFilter(props: any) {
     status: filter.status || null,
     assigned_user_ref: null,
     assigned_to: filter.assigned_to || "",
-    disease_status: filter.disease_status || "",
 
     is_antenatal: filter.is_antenatal || "",
     breathlessness_level: filter.breathlessness_level || "",
@@ -155,7 +153,6 @@ export default function ListFilter(props: any) {
       is_kasp,
       status,
       assigned_to,
-      disease_status,
       is_antenatal,
       breathlessness_level,
     } = filterState;
@@ -177,7 +174,6 @@ export default function ListFilter(props: any) {
       is_kasp: is_kasp || "",
       status: status || "",
       assigned_to: assigned_to || "",
-      disease_status: disease_status || "",
       is_antenatal: is_antenatal || "",
       breathlessness_level: breathlessness_level || "",
     };
@@ -334,19 +330,6 @@ export default function ListFilter(props: any) {
         label={t("is_upshift_case")}
         value={filterState.is_up_shift}
         options={["yes", "no"]}
-        optionLabel={(option) => option}
-        optionValue={(option) => option}
-        onChange={(option) => handleFormFieldChange(option)}
-        errorClassName="hidden"
-      />
-
-      <SelectFormField
-        name="disease_status"
-        id="disease-status"
-        placeholder="Show all"
-        label={t("disease_status")}
-        value={filterState.disease_status}
-        options={DISEASE_STATUS}
         optionLabel={(option) => option}
         optionValue={(option) => option}
         onChange={(option) => handleFormFieldChange(option)}
