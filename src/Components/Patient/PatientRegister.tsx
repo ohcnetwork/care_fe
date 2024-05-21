@@ -974,7 +974,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             <SelectFormField
               {...field("tb_status")}
               position="above"
-              label=""
+              placeholder={"Status"}
               required
               options={["Active", "Old"]}
               optionLabel={(o: any) => o}
@@ -994,8 +994,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             <SelectFormField
               {...field("cancer_type")}
               position="above"
-              label=""
               required
+              placeholder={"Cancer Type"}
               options={CANCER_HISTORY_CHOICES.map((i) => i.text)}
               optionLabel={(o: any) => o}
               optionValue={(o: any) => o}
