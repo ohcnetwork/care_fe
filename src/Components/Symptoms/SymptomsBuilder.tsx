@@ -36,39 +36,11 @@ export const CreateSymptomsBuilder = (props: {
 
           return (
             <li key={index} id={`symptom-${index}`}>
-              <div className="flex items-center gap-2">
-                <DateFormField
-                  className="w-36"
-                  name="onset_date"
-                  value={new Date(obj.onset_date)}
-                  disableFuture
-                  onChange={handleUpdate}
-                  errorClassName="hidden"
-                />
-                <div className="w-full">
-                  <SymptomText value={obj} />
-                </div>
-                <DateFormField
-                  className="w-36"
-                  name="cure_date"
-                  placeholder="Date of cure"
-                  value={obj.cure_date ? new Date(obj.cure_date) : undefined}
-                  disableFuture
-                  onChange={handleUpdate}
-                  position="CENTER"
-                  errorClassName="hidden"
-                />
-                <ButtonV2
-                  type="button"
-                  className="p-3"
-                  variant="danger"
-                  ghost
-                  border
-                  onClick={handleRemove}
-                >
-                  <CareIcon icon="l-trash" className="text-lg" />
-                </ButtonV2>
-              </div>
+              <SymptomEntry
+                value={obj}
+                onChange={handleUpdate}
+                onRemove={handleRemove}
+              />
             </li>
           );
         })}
@@ -127,52 +99,14 @@ export const ConsultationSymptomsBuilder = () => {
             setIsProcessing(false);
           };
 
-          const disabled =
-            isProcessing ||
-            symptom.clinical_impression_status === "entered-in-error";
-
           return (
             <li key={symptom.id}>
-              <div className="flex items-center gap-2">
-                <DateFormField
-                  className="w-36"
-                  name="onset_date"
-                  value={new Date(symptom.onset_date)}
-                  disableFuture
-                  disabled={disabled}
-                  onChange={handleUpdate}
-                  errorClassName="hidden"
-                />
-                <div className="w-full">
-                  <SymptomText value={symptom} />
-                </div>
-                <DateFormField
-                  className="w-36"
-                  name="cure_date"
-                  value={
-                    symptom.cure_date ? new Date(symptom.cure_date) : undefined
-                  }
-                  disableFuture
-                  position="CENTER"
-                  placeholder="Date of cure"
-                  disabled={disabled}
-                  onChange={handleUpdate}
-                  errorClassName="hidden"
-                />
-                <ButtonV2
-                  type="button"
-                  variant="danger"
-                  className="p-3"
-                  ghost
-                  border
-                  onClick={() => handleMarkAsEnteredInError()}
-                  disabled={disabled}
-                  tooltip="Mark as entered in error"
-                  tooltipClassName="tooltip-bottom -translate-x-2/3 translate-y-1 text-xs"
-                >
-                  <CareIcon icon="l-trash" className="text-lg" />
-                </ButtonV2>
-              </div>
+              <SymptomEntry
+                value={symptom}
+                disabled={isProcessing}
+                onChange={handleUpdate}
+                onRemove={handleMarkAsEnteredInError}
+              />
             </li>
           );
         })}
@@ -187,6 +121,57 @@ export const ConsultationSymptomsBuilder = () => {
           onAdd={() => refetch()}
         />
       </div>
+    </div>
+  );
+};
+
+const SymptomEntry = (props: {
+  disabled?: boolean;
+  value: Writable<ConsultationSymptom> | ConsultationSymptom;
+  onChange: (event: FieldChangeEvent<unknown>) => void;
+  onRemove: () => void;
+}) => {
+  const symptom = props.value;
+  const disabled =
+    props.disabled || symptom.clinical_impression_status === "entered-in-error";
+  return (
+    <div className="flex items-center gap-2">
+      <DateFormField
+        className="w-36"
+        name="onset_date"
+        value={new Date(symptom.onset_date)}
+        disableFuture
+        disabled={disabled}
+        onChange={props.onChange}
+        errorClassName="hidden"
+      />
+      <div className="w-full">
+        <SymptomText value={symptom} />
+      </div>
+      <DateFormField
+        className="w-36"
+        name="cure_date"
+        value={symptom.cure_date ? new Date(symptom.cure_date) : undefined}
+        disableFuture
+        position="CENTER"
+        placeholder="Date of cure"
+        disabled={disabled}
+        onChange={props.onChange}
+        errorClassName="hidden"
+      />
+      <ButtonV2
+        type="button"
+        variant="danger"
+        className="p-3"
+        ghost
+        border
+        onClick={props.onRemove}
+        disabled={disabled}
+        tooltip="Mark as entered in error"
+        tooltipClassName="tooltip-bottom -translate-x-2/3 translate-y-1 text-xs"
+      >
+        <CareIcon icon="l-trash" className="text-lg" />
+      </ButtonV2>
     </div>
   );
 };
