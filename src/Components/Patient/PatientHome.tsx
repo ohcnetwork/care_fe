@@ -347,18 +347,12 @@ export const PatientHome = (props: any) => {
                     {patientData.name} - {formatPatientAge(patientData, true)}
                   </h1>
                   <div className="ml-auto mr-9 flex flex-wrap gap-3">
-                    {patientData.is_vaccinated ? (
+                    {patientData.is_vaccinated && (
                       <Chip
                         variant="custom"
                         className="bg-blue-100 text-blue-800"
                         startIcon="l-syringe"
                         text="Vaccinated"
-                      />
-                    ) : (
-                      <Chip
-                        variant="warning"
-                        startIcon="l-exclamation-triangle"
-                        text="Not Vaccinated"
                       />
                     )}
                     {patientData.allow_transfer ? (
