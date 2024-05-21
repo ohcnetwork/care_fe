@@ -62,6 +62,7 @@ export default function AdministrationEventCell({
           />
         </DialogModal>
         <button
+          id="administration-symbol"
           className="scale-100 transition-transform duration-200 ease-in-out hover:scale-110"
           onClick={() => setShowTimeline(true)}
         >
