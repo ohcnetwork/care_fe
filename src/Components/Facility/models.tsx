@@ -11,7 +11,7 @@ import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 import { AssignedToObjectModel, DailyRoundsModel } from "../Patient/models";
-import { ConsultationSymptom } from "../Symptoms/types";
+import { EncounterSymptom } from "../Symptoms/types";
 import { UserBareMinimum } from "../Users/models";
 import { ConsentRecord } from "./ConsultationForm";
 
@@ -139,12 +139,12 @@ export interface ConsultationModel {
   kasp_enabled_date?: string;
   readonly diagnoses?: ConsultationDiagnosis[];
   create_diagnoses?: CreateDiagnosis[]; // Used for bulk creating diagnoses upon consultation creation
+  readonly symptoms?: EncounterSymptom[];
+  create_symptoms?: CreateDiagnosis[]; // Used for bulk creating symptoms upon consultation creation
   deprecated_verified_by?: string;
-  treating_physician?: UserBareMinimum["id"];
+  readonly treating_physician?: UserBareMinimum["id"];
   treating_physician_object?: UserBareMinimum;
   suggestion_text?: string;
-  readonly symptoms?: ConsultationSymptom[];
-  create_symptoms?: CreateDiagnosis[]; // Used for bulk creating symptoms upon consultation creation
   consultation_notes?: string;
   is_telemedicine?: boolean;
   procedure?: ProcedureType[];

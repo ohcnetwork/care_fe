@@ -64,9 +64,9 @@ import routes from "../../Redux/api.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import { t } from "i18next";
 import { Writable } from "../../Utils/types.js";
-import { ConsultationSymptom } from "../Symptoms/types.js";
+import { EncounterSymptom } from "../Symptoms/types.js";
 import {
-  ConsultationSymptomsBuilder,
+  EncounterSymptomsBuilder,
   CreateSymptomsBuilder,
 } from "../Symptoms/SymptomsBuilder.js";
 
@@ -103,8 +103,8 @@ type FormDetails = {
   treating_physician_object: UserModel | null;
   create_diagnoses: CreateDiagnosis[];
   diagnoses: ConsultationDiagnosis[];
-  symptoms: ConsultationSymptom[];
-  create_symptoms: Writable<ConsultationSymptom>[];
+  symptoms: EncounterSymptom[];
+  create_symptoms: Writable<EncounterSymptom>[];
   is_kasp: BooleanStrings;
   kasp_enabled_date: null;
   examination_details: string;
@@ -1086,7 +1086,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                     <div className="mb-4 flex flex-col gap-4">
                       <FieldLabel>Symptoms</FieldLabel>
                       {isUpdate ? (
-                        <ConsultationSymptomsBuilder />
+                        <EncounterSymptomsBuilder />
                       ) : (
                         <CreateSymptomsBuilder
                           value={state.form.create_symptoms}

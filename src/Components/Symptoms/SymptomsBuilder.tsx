@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Writable } from "../../Utils/types";
 import {
-  ConsultationSymptom,
+  EncounterSymptom,
   OTHER_SYMPTOM_CHOICE,
   SYMPTOM_CHOICES,
 } from "./types";
@@ -18,8 +18,8 @@ import SymptomsApi from "./api";
 import request from "../../Utils/request/request";
 
 export const CreateSymptomsBuilder = (props: {
-  value: Writable<ConsultationSymptom>[];
-  onChange: (value: Writable<ConsultationSymptom>[]) => void;
+  value: Writable<EncounterSymptom>[];
+  onChange: (value: Writable<EncounterSymptom>[]) => void;
 }) => {
   return (
     <div className="flex w-full flex-col items-start rounded-lg border border-gray-400">
@@ -58,7 +58,7 @@ export const CreateSymptomsBuilder = (props: {
   );
 };
 
-export const ConsultationSymptomsBuilder = () => {
+export const EncounterSymptomsBuilder = () => {
   const consultationId = useSlug("consultation");
 
   const [isProcessing, setIsProcessing] = useState(false);
@@ -127,7 +127,7 @@ export const ConsultationSymptomsBuilder = () => {
 
 const SymptomEntry = (props: {
   disabled?: boolean;
-  value: Writable<ConsultationSymptom> | ConsultationSymptom;
+  value: Writable<EncounterSymptom> | EncounterSymptom;
   onChange: (event: FieldChangeEvent<unknown>) => void;
   onRemove: () => void;
 }) => {
@@ -178,14 +178,12 @@ const SymptomEntry = (props: {
 
 const AddSymptom = (props: {
   disabled?: boolean;
-  existing: (Writable<ConsultationSymptom> | ConsultationSymptom)[];
-  onAdd?: (value: Writable<ConsultationSymptom>[]) => void;
+  existing: (Writable<EncounterSymptom> | EncounterSymptom)[];
+  onAdd?: (value: Writable<EncounterSymptom>[]) => void;
   consultationId?: string;
 }) => {
   const [processing, setProcessing] = useState(false);
-  const [selected, setSelected] = useState<ConsultationSymptom["symptom"][]>(
-    [],
-  );
+  const [selected, setSelected] = useState<EncounterSymptom["symptom"][]>([]);
   const [otherSymptom, setOtherSymptom] = useState("");
   const [onsetDate, setOnsetDate] = useState<Date>();
 
@@ -299,7 +297,7 @@ const NoSymptomsAdded = () => {
 };
 
 const SymptomText = (props: {
-  value: Writable<ConsultationSymptom> | ConsultationSymptom;
+  value: Writable<EncounterSymptom> | EncounterSymptom;
 }) => {
   const symptom =
     SYMPTOM_CHOICES.find(({ id }) => props.value.symptom === id) ||

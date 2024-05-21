@@ -9,7 +9,6 @@ import {
   CONSENT_PATIENT_CODE_STATUS_CHOICES,
   CONSENT_TYPE_CHOICES,
   DISCHARGE_REASONS,
-  SYMPTOM_CHOICES,
 } from "../../../Common/constants";
 import PrescriptionsTable from "../../Medicine/PrescriptionsTable";
 import Chip from "../../../CAREUI/display/Chip";
@@ -371,7 +370,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                 )}
               </div>
             )}
-            {props.consultationData.symptoms_text && (
+            {/* {props.consultationData.symptoms_text && (
               <div className="overflow-hidden rounded-lg bg-white shadow">
                 <div className="px-4 py-5 sm:p-6">
                   <h3 className="mb-4 text-lg font-semibold leading-relaxed text-gray-900">
@@ -455,7 +454,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                   </div>
                 </div>
               </div>
-            )}
+            )} */}
 
             {props.consultationData.history_of_present_illness && (
               <div className="overflow-hidden rounded-lg bg-white shadow">

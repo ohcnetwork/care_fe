@@ -32,7 +32,7 @@ import routes from "../../Redux/api";
 import { Scribe } from "../Scribe/Scribe";
 import { DAILY_ROUND_FORM_SCRIBE_DATA } from "../Scribe/formDetails";
 import { DailyRoundsModel } from "./models";
-import { ConsultationSymptomsBuilder } from "../Symptoms/SymptomsBuilder";
+import { EncounterSymptomsBuilder } from "../Symptoms/SymptomsBuilder";
 import { FieldLabel } from "../Form/FormFields/FormField";
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -423,7 +423,7 @@ export const DailyRounds = (props: any) => {
 
           <div className="pb-6 md:col-span-2">
             <FieldLabel>Symptoms</FieldLabel>
-            <ConsultationSymptomsBuilder />
+            <EncounterSymptomsBuilder />
           </div>
 
           <SelectFormField

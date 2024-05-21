@@ -42,7 +42,7 @@ type ClinicalImpressionStatus =
   | "completed"
   | "entered-in-error";
 
-export interface ConsultationSymptom extends BaseModel {
+export interface EncounterSymptom extends BaseModel {
   symptom: (typeof SYMPTOM_CHOICES)[number]["id"];
   other_symptom?: string | null;
   onset_date: string;

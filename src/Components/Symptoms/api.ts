@@ -1,40 +1,40 @@
 import { Type } from "../../Redux/api";
 import { PaginatedResponse } from "../../Utils/request/types";
 import { WritableOnly } from "../../Utils/types";
-import { ConsultationSymptom } from "./types";
+import { EncounterSymptom } from "./types";
 
 const SymptomsApi = {
   list: {
     method: "GET",
     path: "/api/v1/consultation/{consultationId}/symptoms/",
-    TRes: Type<PaginatedResponse<ConsultationSymptom>>(),
+    TRes: Type<PaginatedResponse<EncounterSymptom>>(),
   },
 
   add: {
     path: "/api/v1/consultation/{consultationId}/symptoms/",
     method: "POST",
-    TRes: Type<ConsultationSymptom>(),
-    TBody: Type<WritableOnly<ConsultationSymptom>>(),
+    TRes: Type<EncounterSymptom>(),
+    TBody: Type<WritableOnly<EncounterSymptom>>(),
   },
 
   retrieve: {
     method: "GET",
     path: "/api/v1/consultation/{consultationId}/symptoms/{external_id}/",
-    TRes: Type<ConsultationSymptom>(),
+    TRes: Type<EncounterSymptom>(),
   },
 
   update: {
     method: "PUT",
     path: "/api/v1/consultation/{consultationId}/symptoms/{external_id}/",
-    TBody: Type<WritableOnly<ConsultationSymptom>>(),
-    TRes: Type<ConsultationSymptom>(),
+    TBody: Type<WritableOnly<EncounterSymptom>>(),
+    TRes: Type<EncounterSymptom>(),
   },
 
   partialUpdate: {
     method: "PATCH",
     path: "/api/v1/consultation/{consultationId}/symptoms/{external_id}/",
-    TBody: Type<Partial<WritableOnly<ConsultationSymptom>>>(),
-    TRes: Type<ConsultationSymptom>(),
+    TBody: Type<Partial<WritableOnly<EncounterSymptom>>>(),
+    TRes: Type<EncounterSymptom>(),
   },
 
   markAsEnteredInError: {
