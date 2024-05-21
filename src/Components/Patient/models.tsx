@@ -318,7 +318,6 @@ export interface DailyRoundsModel {
   action?: string;
   review_interval?: number;
   id?: string;
-  other_symptoms?: string;
   admitted_to?: string;
   patient_category?: PatientCategory;
   output?: DailyRoundsOutput[];

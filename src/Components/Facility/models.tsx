@@ -121,7 +121,6 @@ export interface ConsultationModel {
   facility_name?: string;
   id: string;
   modified_date?: string;
-  other_symptoms?: string;
   patient: string;
   treatment_plan?: string;
   referred_to?: FacilityModel["id"];

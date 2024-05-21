@@ -235,7 +235,7 @@ const AddSymptom = (props: {
       />
       <div className="flex w-full flex-col gap-2">
         <AutocompleteMultiSelectFormField
-          id="symptoms-search"
+          id="additional_symptoms"
           name="symptom"
           // label="Symptoms"
           // labelClassName="text-sm"
@@ -253,6 +253,7 @@ const AddSymptom = (props: {
         />
         {selected.includes(OTHER_SYMPTOM_CHOICE.id) && (
           <TextAreaFormField
+            id="other_symptoms"
             label="Other symptom details"
             labelClassName="text-sm"
             name="other_symptom"

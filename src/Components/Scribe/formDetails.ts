@@ -3,9 +3,9 @@ import {
   PATIENT_CATEGORIES,
   REVIEW_AT_CHOICES,
   RHYTHM_CHOICES,
-  SYMPTOM_CHOICES,
   TELEMEDICINE_ACTIONS,
 } from "../../Common/constants";
+import { SYMPTOM_CHOICES } from "../Symptoms/types";
 import { Field } from "./Scribe";
 
 export const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
