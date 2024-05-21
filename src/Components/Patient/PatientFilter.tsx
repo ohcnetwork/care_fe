@@ -362,25 +362,27 @@ export default function PatientFilter(props: any) {
               />
             </div>
           </div>
-          <div className="w-full flex-none" id="bed-type-select">
-            <FieldLabel className="text-sm">
-              {props.dischargePage && "Last "}Admitted to (Bed Types)
-            </FieldLabel>
-            <MultiSelectMenuV2
-              id="last_consultation_admitted_bed_type_list"
-              placeholder="Select bed types"
-              options={ADMITTED_TO}
-              value={filterState.last_consultation_admitted_bed_type_list}
-              optionValue={(o) => o.id}
-              optionLabel={(o) => o.text}
-              onChange={(o) =>
-                setFilterState({
-                  ...filterState,
-                  last_consultation_admitted_bed_type_list: o,
-                })
-              }
-            />
-          </div>
+          {props.dischargePage || (
+            <div className="w-full flex-none" id="bed-type-select">
+              <FieldLabel className="text-sm">
+                {props.dischargePage && "Last "}Admitted to (Bed Types)
+              </FieldLabel>
+              <MultiSelectMenuV2
+                id="last_consultation_admitted_bed_type_list"
+                placeholder="Select bed types"
+                options={ADMITTED_TO}
+                value={filterState.last_consultation_admitted_bed_type_list}
+                optionValue={(o) => o.id}
+                optionLabel={(o) => o.text}
+                onChange={(o) =>
+                  setFilterState({
+                    ...filterState,
+                    last_consultation_admitted_bed_type_list: o,
+                  })
+                }
+              />
+            </div>
+          )}
           {(props.dischargePage ||
             ["StateAdmin", "StateReadOnlyAdmin"].includes(
               authUser.user_type,
