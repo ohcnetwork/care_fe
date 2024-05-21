@@ -12,6 +12,7 @@ interface Props {
   interval: { start: Date; end: Date };
   prescription: Prescription;
   refetch: () => void;
+  readonly?: boolean;
 }
 
 export default function AdministrationEventCell({
@@ -19,6 +20,7 @@ export default function AdministrationEventCell({
   interval: { start, end },
   prescription,
   refetch,
+  readonly,
 }: Props) {
   const [showTimeline, setShowTimeline] = useState(false);
   // Check if cell belongs to an administered prescription (including start and excluding end)
@@ -56,9 +58,11 @@ export default function AdministrationEventCell({
             prescription={prescription}
             showPrescriptionDetails
             onRefetch={refetch}
+            readonly={readonly}
           />
         </DialogModal>
         <button
+          id="administration-symbol"
           className="scale-100 transition-transform duration-200 ease-in-out hover:scale-110"
           onClick={() => setShowTimeline(true)}
         >

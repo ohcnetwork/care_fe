@@ -1,71 +1,69 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import SlideOver from "../../CAREUI/interactive/SlideOver";
 import { UserAssignedModel } from "../Users/models";
 import { SkillObjectModel } from "../Users/models";
 import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
-import { relativeTime } from "../../Utils/utils";
+import { classNames, relativeTime } from "../../Utils/utils";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { triggerGoal } from "../../Integrations/Plausible";
 import { Warn } from "../../Utils/Notifications";
 import Switch from "../../CAREUI/interactive/Switch";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
+import Loading from "../Common/Loading";
 
-enum FilterTypes {
-  ALL = "All",
-  DOCTOR = "Doctor",
-  NURSE = "Nurse",
-  TELEICU = "TeleICU Hub",
-}
+const UserGroups = {
+  ALL: "All",
+  DOCTOR: "Doctor",
+  NURSE: "Nurse",
+  TELEICU: "TeleICU Doctor",
+};
+
+const courtesyTitle = (user: UserAssignedModel) => {
+  if (user.user_type === "Doctor") {
+    return "Dr." as const;
+  }
+
+  return {
+    1: "Mr.",
+    2: "Ms.",
+    3: "Hey",
+  }[user.gender!];
+};
+
+type UserGroup = keyof typeof UserGroups;
+
+type UserAnnotatedWithGroup = UserAssignedModel & { group?: UserGroup };
 
 const isHomeUser = (user: UserAssignedModel, facilityId: string) =>
   user.home_facility_object?.id === facilityId;
-
 export default function DoctorVideoSlideover(props: {
   show: boolean;
   facilityId: string;
   setShow: (show: boolean) => void;
 }) {
   const { show, facilityId, setShow } = props;
-  const [filteredDoctors, setFilteredDoctors] = useState<UserAssignedModel[]>(
-    [],
-  );
-  const [filter, setFilter] = useState<FilterTypes>(FilterTypes.ALL);
+  const [filter, setFilter] = useState<UserGroup>("ALL");
 
-  const { data: users, loading } = useQuery(routes.getFacilityUsers, {
+  const { data } = useQuery(routes.getFacilityUsers, {
     prefetch: show,
     pathParams: { facility_id: facilityId },
     query: { limit: 50 },
   });
 
-  useEffect(() => {
-    const filterDoctors = (users: UserAssignedModel[]) => {
-      return users.filter(
-        (user: UserAssignedModel) =>
-          (user.alt_phone_number || user.video_connect_link) &&
-          (user.user_type === "Doctor" || user.user_type === "Nurse") &&
-          (filter === FilterTypes.ALL ||
-            (filter === FilterTypes.DOCTOR &&
-              isHomeUser(user, facilityId) &&
-              user.user_type === "Doctor") ||
-            (filter === FilterTypes.NURSE &&
-              isHomeUser(user, facilityId) &&
-              user.user_type === "Nurse") ||
-            (filter === FilterTypes.TELEICU && !isHomeUser(user, facilityId))),
-      );
-    };
-    if (users?.results && !loading) {
-      setFilteredDoctors(
-        filterDoctors(users.results).sort(
-          (a: UserAssignedModel, b: UserAssignedModel) => {
-            const aIsHomeUser = isHomeUser(a, facilityId);
-            const bIsHomeUser = isHomeUser(b, facilityId);
-            return aIsHomeUser === bIsHomeUser ? 0 : aIsHomeUser ? -1 : 1;
-          },
-        ),
-      );
+  const getUserGroup = (user: UserAssignedModel) => {
+    if (isHomeUser(user, facilityId)) {
+      if (user.user_type === "Doctor") return "DOCTOR";
+      if (user.user_type === "Nurse") return "NURSE";
     }
-  }, [facilityId, filter, loading, users?.results]);
+
+    if (user.user_type === "Doctor") return "TELEICU";
+  };
+
+  const annotatedUsers: UserAnnotatedWithGroup[] | undefined = data?.results
+    .filter((user) => user.alt_phone_number || user.video_connect_link)
+    .map((user) => ({ ...user, group: getUserGroup(user) }))
+    .filter((user) => !!user.group) as UserAnnotatedWithGroup[];
 
   return (
     <SlideOver
@@ -80,37 +78,86 @@ export default function DoctorVideoSlideover(props: {
       </p>
       <div className="flex justify-center" id="doctor-connect-filter-tabs">
         <Switch
-          tabs={
-            Object.values(FilterTypes).reduce(
-              (acc, type) => ({ ...acc, [type]: type }),
-              {},
-            ) as Record<FilterTypes, string>
-          }
+          tabs={UserGroups}
           selected={filter}
           onChange={(tab) => setFilter(tab)}
           size="md"
         />
       </div>
-      {filteredDoctors.map((doctor, i) => (
-        <div
-          key={i}
-          className="mb-4"
-          id={`doctor-connect-${
-            isHomeUser(doctor, facilityId) ? "home" : "remote"
-          }-${doctor.user_type.toLowerCase()}`}
-        >
-          <ul className="mt-3 max-h-96 list-none" id="options" role="listbox">
-            <UserListItem
-              key={doctor.id}
-              user={doctor}
-              facilityId={facilityId}
-            />
-          </ul>
+
+      {!annotatedUsers ? (
+        <Loading />
+      ) : filter === "ALL" ? (
+        <div className="flex flex-col py-2">
+          <UserGroupList
+            group="DOCTOR"
+            users={annotatedUsers}
+            showGroupHeading
+          />
+
+          <UserGroupList
+            group="NURSE"
+            users={annotatedUsers}
+            showGroupHeading
+          />
+
+          <UserGroupList
+            group="TELEICU"
+            users={annotatedUsers}
+            showGroupHeading
+          />
         </div>
-      ))}
+      ) : (
+        <div className="py-6">
+          <UserGroupList group={filter} users={annotatedUsers} />
+        </div>
+      )}
     </SlideOver>
   );
 }
+
+const UserGroupList = (props: {
+  users: UserAnnotatedWithGroup[];
+  group: UserGroup;
+  showGroupHeading?: boolean;
+}) => {
+  const users = props.users.filter((user) => user.group === props.group);
+
+  return (
+    <div className="py-2">
+      {props.showGroupHeading && (
+        <div className="flex w-full items-center pb-2">
+          <span className="whitespace-nowrap text-lg font-bold">
+            {UserGroups[props.group]}
+          </span>
+          <div className="mx-6 h-1 w-full bg-gray-300" />
+        </div>
+      )}
+
+      {!users.length && (
+        <span className="flex w-full justify-center py-2 font-bold text-gray-500">
+          No users in this category
+        </span>
+      )}
+
+      {!!users.length && (
+        <ul className="flex flex-col gap-3" id="options" role="listbox">
+          {users.map((user) => (
+            <li
+              key={user.id}
+              role="option"
+              id={`doctor-connect-${
+                user.group !== "TELEICU" ? "home" : "remote"
+              }-${user.user_type.toLowerCase()}`}
+            >
+              <UserListItem user={user} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
 
 type MSLaunchURI = (
   uri: string,
@@ -118,9 +165,7 @@ type MSLaunchURI = (
   noHandlerCB?: null | (() => void),
 ) => void;
 
-function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
-  const user = props.user;
-  const facilityId = props.facilityId;
+function UserListItem({ user }: { user: UserAnnotatedWithGroup }) {
   const icon: IconName =
     user.user_type === "Doctor" ? "l-user-md" : "l-user-nurse";
 
@@ -128,7 +173,7 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
     e.stopPropagation();
     if (!user.alt_phone_number) return;
     const phoneNumber = user.alt_phone_number;
-    const message = `Hey ${user.first_name} ${user.last_name}, I have a query regarding a patient.\n\nPatient Link: ${window.location.href}`;
+    const message = `${courtesyTitle(user)} ${user.first_name} ${user.last_name}, I have a query regarding a patient.\n\nPatient Link: ${window.location.href}`;
     const encodedMessage = encodeURIComponent(message);
     const whatsappAppURL = `whatsapp://send?phone=${phoneNumber}&text=${encodedMessage}`;
     const whatsappWebURL = `https://web.whatsapp.com/send?phone=${phoneNumber}&text=${encodedMessage}`;
@@ -184,17 +229,13 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
   }
 
   return (
-    <li
-      key={user.id}
-      className={
-        "group cursor-default select-none rounded-xl p-3 " +
-        (user.alt_phone_number
+    <div
+      className={classNames(
+        "group cursor-default select-none rounded-xl p-3",
+        user.alt_phone_number
           ? "cursor-pointer border border-gray-400 transition hover:border-green-500 hover:bg-green-50"
-          : "pointer-events-none cursor-not-allowed bg-gray-400 ")
-      }
-      id="option-1"
-      role="option"
-      tabIndex={-1}
+          : "pointer-events-none cursor-not-allowed bg-gray-400",
+      )}
     >
       <a className="flex" onClick={connectOnWhatsApp}>
         <div className="flex flex-none items-center justify-center sm:h-6 sm:w-6 md:h-10 md:w-10">
@@ -209,16 +250,11 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
           }
         </div>
         <div className="ml-4 flex flex-auto flex-col gap-1">
-          <div className="flex justify-between gap-2 text-sm font-medium text-gray-700">
+          <div className="flex justify-between gap-2 text-sm text-gray-700">
             <span>
-              {user.first_name} {user.last_name}
-              <span className="pl-1 font-normal text-gray-700">
-                (
-                {isHomeUser(user, facilityId)
-                  ? user.user_type
-                  : `TeleICU Hub ${user.user_type}`}
-                )
-              </span>
+              <strong>
+                {user.first_name} {user.last_name}
+              </strong>
             </span>
             <DoctorConnectButtons
               user={user}
@@ -266,7 +302,7 @@ function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
           </div>
         </div>
       </a>
-    </li>
+    </div>
   );
 }
 

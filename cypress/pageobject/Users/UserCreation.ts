@@ -54,7 +54,7 @@ export class UserCreationPage {
   setInputDate(
     dateElementId: string,
     inputElementId: string,
-    dateValue: string
+    dateValue: string,
   ) {
     this.clickElementById(dateElementId);
     this.typeIntoElementById(inputElementId, dateValue);

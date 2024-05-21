@@ -2,14 +2,14 @@ import * as Notification from "../../Utils/Notifications.js";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import DialogModal from "./Dialog";
-import QrReader from "react-qr-reader";
 import TextFormField from "../Form/FormFields/TextFormField.js";
 import { useState } from "react";
+import { Scanner } from "@yudiel/react-qr-scanner";
 
 interface IQRScannerModalProps {
   show: boolean;
   onClose: () => void;
-  onScan: (scannedValue: any) => any;
+  onScan: (scannedValue: string | null) => void;
   description?: string;
   disabled?: boolean;
 }
@@ -32,15 +32,16 @@ const QRScannerModal = ({
         <h2 className="mb-4 self-center text-center text-lg">
           {description || "Scan QR code!"}
         </h2>
-        <QrReader
-          delay={300}
-          onScan={onScan}
-          onError={(e: any) =>
+        <Scanner
+          onResult={onScan}
+          onError={(e) =>
             Notification.Error({
               msg: e.message,
             })
           }
-          style={{ width: "100%" }}
+          options={{
+            delayBetweenScanAttempts: 300,
+          }}
         />
       </div>
     </DialogModal>
@@ -50,7 +51,7 @@ const QRScannerModal = ({
 interface IProps {
   value: string;
   onChange: (value: string) => void;
-  parse?: (scannedValue: any) => any;
+  parse?: (scannedValue: string | null) => void;
   className?: string;
   error?: string;
   label?: string;
@@ -92,8 +93,8 @@ const QRScanner = ({
         show={showScanner}
         disabled={disabled}
         onClose={() => setShowScanner(false)}
-        onScan={async (scannedValue: any) => {
-          const parsedValue = (await parse?.(scannedValue)) ?? null;
+        onScan={async (scannedValue) => {
+          const parsedValue = parse?.(scannedValue) ?? null;
           if (parsedValue) {
             onChange(parsedValue);
             setShowScanner(false);
