@@ -102,6 +102,7 @@ export interface PatientModel {
   nationality?: string;
   passport_no?: string;
   date_of_test?: string;
+  date_of_result?: string; // keeping this to avoid errors in Death report
   covin_id?: string;
   is_vaccinated?: boolean;
   vaccine_name?: string;
