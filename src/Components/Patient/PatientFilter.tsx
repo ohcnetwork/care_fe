@@ -50,8 +50,6 @@ export default function PatientFilter(props: any) {
     district_ref: null,
     date_declared_positive_before: filter.date_declared_positive_before || null,
     date_declared_positive_after: filter.date_declared_positive_after || null,
-    date_of_result_before: filter.date_of_result_before || null,
-    date_of_result_after: filter.date_of_result_after || null,
     created_date_before: filter.created_date_before || null,
     created_date_after: filter.created_date_after || null,
     modified_date_before: filter.modified_date_before || null,
@@ -60,7 +58,6 @@ export default function PatientFilter(props: any) {
     gender: filter.gender || null,
     age_min: filter.age_min || null,
     age_max: filter.age_max || null,
-    date_of_result: filter.date_of_result || null,
     date_declared_positive: filter.date_declared_positive || null,
     last_consultation_medico_legal_case:
       filter.last_consultation_medico_legal_case || null,
@@ -166,8 +163,6 @@ export default function PatientFilter(props: any) {
       lsgBody,
       date_declared_positive_before,
       date_declared_positive_after,
-      date_of_result_before,
-      date_of_result_after,
       created_date_before,
       created_date_after,
       modified_date_before,
@@ -176,7 +171,6 @@ export default function PatientFilter(props: any) {
       gender,
       age_min,
       age_max,
-      date_of_result,
       last_consultation_medico_legal_case,
       last_consultation_encounter_date_before,
       last_consultation_encounter_date_after,
@@ -216,13 +210,10 @@ export default function PatientFilter(props: any) {
       date_declared_positive_after: dateQueryString(
         date_declared_positive_after,
       ),
-      date_of_result_before: dateQueryString(date_of_result_before),
-      date_of_result_after: dateQueryString(date_of_result_after),
       created_date_before: dateQueryString(created_date_before),
       created_date_after: dateQueryString(created_date_after),
       modified_date_before: dateQueryString(modified_date_before),
       modified_date_after: dateQueryString(modified_date_after),
-      date_of_result: dateQueryString(date_of_result),
       last_consultation_medico_legal_case:
         last_consultation_medico_legal_case || "",
       last_consultation_encounter_date_before: dateQueryString(
@@ -719,17 +710,6 @@ export default function PatientFilter(props: any) {
             />
           </div>
 
-          <DateRangeFormField
-            labelClassName="text-sm"
-            name="date_of_result"
-            label="Date of result of COVID Test"
-            value={{
-              start: getDate(filterState.date_of_result_after),
-              end: getDate(filterState.date_of_result_before),
-            }}
-            onChange={handleDateRangeChange}
-            errorClassName="hidden"
-          />
           <DateRangeFormField
             labelClassName="text-sm"
             name="date_declared_positive"

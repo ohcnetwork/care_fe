@@ -188,8 +188,6 @@ export const PatientManager = () => {
       qParams.date_declared_positive_before || undefined,
     date_declared_positive_after:
       qParams.date_declared_positive_after || undefined,
-    date_of_result_before: qParams.date_of_result_before || undefined,
-    date_of_result_after: qParams.date_of_result_after || undefined,
     last_consultation_medico_legal_case:
       qParams.last_consultation_medico_legal_case || undefined,
     last_consultation_encounter_date_before:
@@ -257,7 +255,6 @@ export const PatientManager = () => {
     [params.created_date_before, params.created_date_after],
     [params.modified_date_before, params.modified_date_after],
     [params.date_declared_positive_before, params.date_declared_positive_after],
-    [params.date_of_result_before, params.date_of_result_after],
     [params.last_vaccinated_date_before, params.last_vaccinated_date_after],
     [
       params.last_consultation_encounter_date_before,
@@ -1021,7 +1018,6 @@ export const PatientManager = () => {
               ),
             ),
             badge("Declared Status", "is_declared_positive"),
-            ...dateRange("Result", "date_of_result"),
             ...dateRange("Declared positive", "date_declared_positive"),
             ...dateRange(
               "Symptoms onset",
