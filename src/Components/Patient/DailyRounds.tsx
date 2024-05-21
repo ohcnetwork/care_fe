@@ -384,7 +384,7 @@ export const DailyRounds = (props: any) => {
               msg: "Doctors log update created successfully",
             });
             navigate(
-              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/prescriptions`,
+              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
             );
           } else {
             Notification.Success({
@@ -400,10 +400,16 @@ export const DailyRounds = (props: any) => {
   };
 
   const handleFormFieldChange = (event: FieldChangeEvent<unknown>) => {
-    dispatch({
-      type: "set_form",
-      form: { ...state.form, [event.name]: event.value },
-    });
+    const form = {
+      ...state.form,
+      [event.name]: event.value,
+    };
+
+    if (event.name === "investigations") {
+      form["investigations_dirty"] = true;
+    }
+
+    dispatch({ type: "set_form", form });
   };
 
   const field = (name: string) => {
