@@ -68,7 +68,12 @@ export const EncounterSymptomsBuilder = () => {
   });
 
   if (!data) {
-    return <span>TODO: add a nice loader here...</span>;
+    return (
+      <div className="flex w-full animate-pulse justify-center gap-2 rounded-lg bg-gray-200 py-8 text-center font-medium text-gray-700">
+        <CareIcon icon="l-spinner-alt" className="animate-spin text-lg" />
+        <span>Fetching symptom records...</span>
+      </div>
+    );
   }
 
   return (
@@ -145,10 +150,25 @@ const SymptomEntry = (props: {
         onChange={props.onChange}
         errorClassName="hidden"
       />
-      <div className="w-full">
-        <span className="cui-input-base font-medium">
+      <div
+        className={classNames(
+          "cui-input-base w-full font-medium",
+          disabled && "bg-gray-200",
+        )}
+      >
+        <span
+          className={classNames(
+            symptom.clinical_impression_status === "entered-in-error" &&
+              "line-through decoration-red-500 decoration-2",
+          )}
+        >
           <SymptomText value={symptom} />
         </span>
+        {symptom.clinical_impression_status === "entered-in-error" && (
+          <span className="pl-2 text-red-500 no-underline">
+            Entered in Error
+          </span>
+        )}
       </div>
       <DateFormField
         className="w-36"
@@ -227,8 +247,6 @@ const AddSymptom = (props: {
       <DateFormField
         className="w-36"
         name="onset_date"
-        // label="Date of onset"
-        // labelClassName="text-sm"
         placeholder="Date of onset"
         value={onsetDate}
         onChange={({ value }) => setOnsetDate(value)}
@@ -237,8 +255,6 @@ const AddSymptom = (props: {
         <AutocompleteMultiSelectFormField
           id="additional_symptoms"
           name="symptom"
-          // label="Symptoms"
-          // labelClassName="text-sm"
           className="w-full"
           disabled={props.disabled || processing}
           placeholder="Search for symptoms"
@@ -267,7 +283,9 @@ const AddSymptom = (props: {
       <ButtonV2
         type="button"
         className="py-3"
-        disabled={!hasSymptoms || !otherSymptomValid || !onsetDate}
+        disabled={
+          processing || !hasSymptoms || !otherSymptomValid || !onsetDate
+        }
         tooltip={
           !hasSymptoms
             ? "No symptoms selected to be added"
@@ -284,7 +302,14 @@ const AddSymptom = (props: {
           setProcessing(false);
         }}
       >
-        Add Symptom(s)
+        {processing ? (
+          <>
+            <CareIcon icon="l-spinner-alt" className="animate-spin text-lg" />
+            <span>Adding...</span>
+          </>
+        ) : (
+          <span>Add Symptom(s)</span>
+        )}
       </ButtonV2>
     </div>
   );
