@@ -16,6 +16,8 @@ import useSlug from "../../Common/hooks/useSlug";
 import useQuery from "../../Utils/request/useQuery";
 import SymptomsApi from "./api";
 import request from "../../Utils/request/request";
+import { Success } from "../../Utils/Notifications";
+import { sortByOnsetDate } from "./utils";
 
 export const CreateSymptomsBuilder = (props: {
   value: Writable<EncounterSymptom>[];
@@ -58,7 +60,7 @@ export const CreateSymptomsBuilder = (props: {
   );
 };
 
-export const EncounterSymptomsBuilder = () => {
+export const EncounterSymptomsBuilder = (props: { showAll?: boolean }) => {
   const consultationId = useSlug("consultation");
 
   const [isProcessing, setIsProcessing] = useState(false);
@@ -76,6 +78,13 @@ export const EncounterSymptomsBuilder = () => {
     );
   }
 
+  let items = sortByOnsetDate(data.results);
+  if (!props.showAll) {
+    items = items.filter(
+      (i) => i.clinical_impression_status !== "entered-in-error",
+    );
+  }
+
   return (
     <div className="flex w-full flex-col items-start rounded-lg border border-gray-400">
       <ul
@@ -84,7 +93,7 @@ export const EncounterSymptomsBuilder = () => {
           (loading || isProcessing) && "pointer-events-none animate-pulse",
         )}
       >
-        {data.results.map((symptom) => {
+        {items.map((symptom) => {
           const handleUpdate = async (event: FieldChangeEvent<unknown>) => {
             setIsProcessing(true);
             await request(SymptomsApi.partialUpdate, {
@@ -224,11 +233,17 @@ const AddSymptom = (props: {
     });
 
     if (props.consultationId) {
-      for (const object of objects) {
-        await request(SymptomsApi.add, {
-          body: object,
-          pathParams: { consultationId: props.consultationId },
-        });
+      const responses = await Promise.all(
+        objects.map((body) =>
+          request(SymptomsApi.add, {
+            body,
+            pathParams: { consultationId: props.consultationId! },
+          }),
+        ),
+      );
+
+      if (responses.every(({ res }) => !!res?.ok)) {
+        Success({ msg: "Symptoms records updated successfully" });
       }
     }
     props.onAdd?.(objects);
