@@ -393,20 +393,6 @@ export const PatientHome = (props: any) => {
                         )}
                       </>
                     )}
-                    {patientData.contact_with_confirmed_carrier && (
-                      <Chip
-                        variant="danger"
-                        startIcon="l-exclamation-triangle"
-                        text="Contact with confirmed carrier"
-                      />
-                    )}
-                    {patientData.contact_with_suspected_carrier && (
-                      <Chip
-                        variant="warning"
-                        startIcon="l-exclamation-triangle"
-                        text="Contact with suspected carrier"
-                      />
-                    )}
                     {patientData.past_travel && (
                       <Chip
                         variant="warning"

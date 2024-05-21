@@ -375,7 +375,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             health_id: data.abha_number_object?.health_id || "",
             nationality: data.nationality ? data.nationality : "India",
             gender: data.gender ? data.gender : undefined,
-            cluster_name: data.cluster_name ? data.cluster_name : "",
             state: data.state ? data.state : "",
             district: data.district ? data.district : "",
             blood_group: data.blood_group
