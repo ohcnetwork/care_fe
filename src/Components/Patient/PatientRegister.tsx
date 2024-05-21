@@ -3,7 +3,6 @@ import * as Notification from "../../Utils/Notifications.js";
 import {
   BLOOD_GROUPS,
   CANCER_HISTORY_CHOICES,
-  DISEASE_STATUS,
   GENDER_TYPES,
   MEDICAL_HISTORY_CHOICES,
   OCCUPATION_TYPES,
