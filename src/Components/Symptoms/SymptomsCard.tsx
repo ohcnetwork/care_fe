@@ -33,9 +33,12 @@ const EncounterSymptomsCard = () => {
         Symptoms
       </h3>
 
-      <SymptomsSection title="Active" symptoms={records["in-progress"]} />
-      <div className="my-4 w-full border-t-2 border-dashed border-gray-400" />
-      <SymptomsSection title="Cured" symptoms={records["completed"]} />
+      <div className="grid grid-cols-2 divide-x-2 divide-dashed divide-gray-400">
+        <SymptomsSection title="Active" symptoms={records["in-progress"]} />
+        <div className="pl-6">
+          <SymptomsSection title="Cured" symptoms={records["completed"]} />
+        </div>
+      </div>
     </div>
   );
 };
@@ -45,7 +48,7 @@ const SymptomsSection = (props: {
   symptoms: EncounterSymptom[];
 }) => {
   return (
-    <>
+    <div>
       <h4 className="text-base font-semibold leading-relaxed text-gray-900">
         {props.title}
       </h4>
@@ -68,13 +71,13 @@ const SymptomsSection = (props: {
             </div>
           </li>
         ))}
-        {!props.symptoms.length && (
-          <div className="flex w-full justify-center gap-2 text-center font-medium text-gray-700">
-            No symptoms
-          </div>
-        )}
       </ul>
-    </>
+      {!props.symptoms.length && (
+        <div className="flex h-full w-full gap-2 font-medium text-gray-700">
+          No symptoms
+        </div>
+      )}
+    </div>
   );
 };
 

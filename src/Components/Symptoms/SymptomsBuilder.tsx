@@ -48,7 +48,11 @@ export const CreateSymptomsBuilder = (props: {
         })}
       </ul>
 
-      {props.value.length === 0 && <NoSymptomsAdded />}
+      {props.value.length === 0 && (
+        <div className="flex w-full justify-center gap-2 pb-8 text-center font-medium text-gray-700">
+          No symptoms added
+        </div>
+      )}
 
       <div className="w-full rounded-b-lg border-t-2 border-dashed border-gray-400 bg-gray-100 p-4">
         <AddSymptom
@@ -126,7 +130,11 @@ export const EncounterSymptomsBuilder = (props: { showAll?: boolean }) => {
         })}
       </ul>
 
-      {data.results.length === 0 && <NoSymptomsAdded />}
+      {items.length === 0 && (
+        <div className="flex w-full justify-center gap-2 pb-8 text-center font-medium text-gray-700">
+          Patient is Asymptomatic
+        </div>
+      )}
 
       <div className="w-full rounded-b-lg border-t-2 border-dashed border-gray-400 bg-gray-100 p-4">
         <AddSymptom
@@ -186,6 +194,7 @@ const SymptomEntry = (props: {
         disableFuture
         position="CENTER"
         placeholder="Date of cure"
+        min={new Date(symptom.onset_date)}
         disabled={disabled}
         onChange={props.onChange}
         errorClassName="hidden"
@@ -263,6 +272,7 @@ const AddSymptom = (props: {
         className="w-36"
         name="onset_date"
         placeholder="Date of onset"
+        disableFuture
         value={onsetDate}
         onChange={({ value }) => setOnsetDate(value)}
       />
@@ -326,14 +336,6 @@ const AddSymptom = (props: {
           <span>Add Symptom(s)</span>
         )}
       </ButtonV2>
-    </div>
-  );
-};
-
-const NoSymptomsAdded = () => {
-  return (
-    <div className="flex w-full justify-center gap-2 pb-8 text-center font-medium text-gray-700">
-      Patient is Asymptomatic
     </div>
   );
 };

@@ -83,6 +83,7 @@ export type ConsentRecord = {
 };
 
 type FormDetails = {
+  is_asymptomatic: boolean;
   suggestion: ConsultationSuggestionValue;
   route_to_facility?: RouteToFacility;
   patient: string;
@@ -133,6 +134,7 @@ type FormDetails = {
 };
 
 const initForm: FormDetails = {
+  is_asymptomatic: false,
   create_symptoms: [],
   symptoms: [],
   suggestion: "A",
@@ -352,12 +354,21 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           consultation_notes: "Patient declared dead",
         },
       });
-    } else {
+      return;
+    }
+
+    if (event.name === "is_asymptomatic" && event.value === true) {
       dispatch({
         type: "set_form",
-        form: { ...state.form, [event.name]: event.value },
+        form: { ...state.form, [event.name]: event.value, create_symptoms: [] },
       });
+      return;
     }
+
+    dispatch({
+      type: "set_form",
+      form: { ...state.form, [event.name]: event.value },
+    });
   };
 
   const { loading: consultationLoading, refetch } = useQuery(
@@ -500,6 +511,17 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         case "cause_of_death":
           if (state.form.suggestion === "DD" && !state.form[field]) {
             errors[field] = "Please enter cause of death";
+            invalidForm = true;
+          }
+          return;
+        case "create_symptoms":
+          if (
+            !isUpdate &&
+            !state.form.is_asymptomatic &&
+            state.form[field].length === 0
+          ) {
+            errors[field] =
+              "Symptoms needs to be added as the patient is symptomatic";
             invalidForm = true;
           }
           return;
@@ -1081,25 +1103,45 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                   <div
                     className="col-span-6"
                     id="symptoms"
-                    ref={fieldRef["symptoms"]}
+                    ref={fieldRef["create_symptoms"]}
                   >
                     <div className="mb-4 flex flex-col gap-4">
-                      <FieldLabel>Symptoms</FieldLabel>
-                      {isUpdate ? (
-                        <EncounterSymptomsBuilder />
-                      ) : (
-                        <CreateSymptomsBuilder
-                          value={state.form.create_symptoms}
-                          onChange={(symptoms) => {
-                            handleFormFieldChange({
-                              name: "create_symptoms",
-                              value: symptoms,
-                            });
-                          }}
+                      <FieldLabel required>Symptoms</FieldLabel>
+
+                      {!isUpdate && (
+                        <CheckBoxFormField
+                          className="-mt-2 ml-1"
+                          {...field("is_asymptomatic")}
+                          value={state.form.is_asymptomatic}
+                          label="Is the patient Asymptomatic?"
+                          errorClassName="hidden"
                         />
                       )}
+
+                      <div
+                        className={classNames(
+                          state.form.is_asymptomatic &&
+                            "pointer-events-none opacity-50",
+                        )}
+                      >
+                        {isUpdate ? (
+                          <EncounterSymptomsBuilder />
+                        ) : (
+                          <CreateSymptomsBuilder
+                            value={state.form.create_symptoms}
+                            onChange={(symptoms) => {
+                              handleFormFieldChange({
+                                name: "create_symptoms",
+                                value: symptoms,
+                              });
+                            }}
+                          />
+                        )}
+                        <FieldErrorText error={state.errors.create_symptoms} />
+                      </div>
                     </div>
                   </div>
+
                   <div
                     className="col-span-6"
                     ref={fieldRef["history_of_present_illness"]}

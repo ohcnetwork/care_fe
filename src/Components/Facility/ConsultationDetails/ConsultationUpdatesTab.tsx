@@ -372,7 +372,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
               </div>
             )}
 
-            <div className="rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+            <div className="rounded-lg bg-white px-4 py-5 shadow sm:p-6 md:col-span-2">
               <EncounterSymptomsCard />
             </div>
 
