@@ -400,10 +400,11 @@ export const DailyRounds = (props: any) => {
   };
 
   const handleFormFieldChange = (event: FieldChangeEvent<unknown>) => {
-    dispatch({
-      type: "set_form",
-      form: { ...state.form, [event.name]: event.value },
-    });
+    let form = { ...state.form, [event.name]: event.value };
+    if (event.name === "investigations") {
+      form = { ...form, investigations_dirty: true };
+    }
+    dispatch({ type: "set_form", form });
   };
 
   const field = (name: string) => {
