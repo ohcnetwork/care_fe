@@ -11,6 +11,7 @@ import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 import { AssignedToObjectModel, DailyRoundsModel } from "../Patient/models";
+import { ConsultationSymptom } from "../Symptoms/types";
 import { UserBareMinimum } from "../Users/models";
 import { ConsentRecord } from "./ConsultationForm";
 
@@ -143,9 +144,8 @@ export interface ConsultationModel {
   treating_physician?: UserBareMinimum["id"];
   treating_physician_object?: UserBareMinimum;
   suggestion_text?: string;
-  symptoms?: Array<number>;
-  symptoms_text?: string;
-  symptoms_onset_date?: string;
+  readonly symptoms?: ConsultationSymptom[];
+  create_symptoms?: CreateDiagnosis[]; // Used for bulk creating symptoms upon consultation creation
   consultation_notes?: string;
   is_telemedicine?: boolean;
   procedure?: ProcedureType[];
