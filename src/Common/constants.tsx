@@ -494,13 +494,6 @@ export const SAMPLE_FLOW_RULES = {
   RECEIVED_AT_LAB: ["COMPLETED"],
 };
 
-export const DISEASE_STATUS = [
-  "POSITIVE",
-  "SUSPECTED",
-  "NEGATIVE",
-  "RECOVERED",
-];
-
 export const TEST_TYPE = [
   "UNK",
   "ANTIGEN",

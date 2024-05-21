@@ -4,7 +4,6 @@ import {
   GENDER_TYPES,
   SHIFTING_CHOICES_PEACETIME,
   SHIFTING_CHOICES_WARTIME,
-  TEST_TYPE_CHOICES,
 } from "../../Common/constants";
 import { Link, navigate } from "raviger";
 import { lazy, useState } from "react";
@@ -85,10 +84,6 @@ export default function ShiftDetails(props: { id: string }) {
 
   const copyContent = (data: any) => {
     let formattedText =
-      t("disease_status") +
-      ": *" +
-      data?.patient_object?.disease_status +
-      "* \n" +
       t("name") +
       ":" +
       data?.patient_object?.name +
@@ -129,9 +124,6 @@ export default function ShiftDetails(props: { id: string }) {
     const patientGender = GENDER_TYPES.find(
       (i) => i.id === patientData?.gender,
     )?.text;
-    const testType = TEST_TYPE_CHOICES.find(
-      (i) => i.id === patientData?.test_type,
-    )?.text;
 
     return (
       <div className="mr-3 mt-2 h-full rounded-lg border bg-white p-4 text-black shadow md:mr-8">
@@ -150,20 +142,6 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="badge badge-pill badge-primary">{t("yes")}</span>
             </div>
           )}
-          <div>
-            <span className="font-semibold leading-relaxed">
-              {t("disease_status")}{" "}
-            </span>
-            <span className="badge badge-pill badge-warning">
-              {patientData?.disease_status}
-            </span>
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">
-              {t("test_type")}:{" "}
-            </span>
-            {(patientData?.test_type && testType) || "-"}
-          </div>
           <div>
             <span className="font-semibold leading-relaxed">
               {t("facility")}:{" "}
@@ -319,9 +297,6 @@ export default function ShiftDetails(props: { id: string }) {
     const patientGender = GENDER_TYPES.find(
       (i) => i.id === patientData?.gender,
     )?.text;
-    const testType = TEST_TYPE_CHOICES.find(
-      (i) => i.id === patientData?.test_type,
-    )?.text;
 
     return (
       <div id="section-to-print" className="print bg-white ">
@@ -426,12 +401,6 @@ export default function ShiftDetails(props: { id: string }) {
               {(patientData?.date_of_test &&
                 formatDateTime(patientData?.date_of_test)) ||
                 "-"}
-            </div>
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("test_type")}:{" "}
-              </span>
-              {(patientData?.test_type && testType) || "-"}
             </div>
           </div>
 
