@@ -380,6 +380,11 @@ export const ConsultationDetails = (props: any) => {
                     )
                       return null; // Hide feed tab
                   }
+
+                  if (p.text === "ABDM" && !patientData.abha_number) {
+                    return null;
+                  }
+
                   return (
                     <Link
                       key={p.text}
