@@ -3,7 +3,7 @@ import { PatientCategory } from "../Facility/models";
 
 const PatientCategoryBadge = ({ category }: { category?: PatientCategory }) => {
   const categoryClass = category
-    ? PATIENT_CATEGORIES.find((c) => c.text === category)?.twClass
+    ? PATIENT_CATEGORIES.find((c) => c.key === category)?.twClass
     : "patient-unknown";
 
   return (

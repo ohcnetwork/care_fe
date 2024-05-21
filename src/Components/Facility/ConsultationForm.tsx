@@ -407,7 +407,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             admitted: data.admitted ? String(data.admitted) : "false",
             admitted_to: data.admitted_to ? data.admitted_to : "",
             category: data.category
-              ? PATIENT_CATEGORIES.find((i) => i.text === data.category)?.id ??
+              ? PATIENT_CATEGORIES.find((i) => i.key === data.category)?.id ??
                 ""
               : "",
             patient_no: data.patient_no ?? "",

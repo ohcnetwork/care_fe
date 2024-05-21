@@ -92,9 +92,8 @@ export default function PatientInfoCard(props: {
 
   const category: PatientCategory | undefined =
     consultation?.last_daily_round?.patient_category ?? consultation?.category;
-  const categoryClass = category
-    ? PATIENT_CATEGORIES.find((c) => c.text === category)?.twClass
-    : "patient-unknown";
+  const patientCategory = PATIENT_CATEGORIES.find((c) => c.key === category);
+  const categoryClass = patientCategory?.twClass ?? "patient-unknown";
 
   const bedDialogTitle = consultation?.discharge_date
     ? "Bed History"
@@ -227,11 +226,11 @@ export default function PatientInfoCard(props: {
                   </div>
                 )}
               </div>
-              {category && (
+              {patientCategory && (
                 <div
                   className={`w-24 rounded-b py-1 text-center text-xs font-bold ${categoryClass}`}
                 >
-                  {category.toUpperCase()}
+                  {patientCategory.text.toUpperCase()}
                 </div>
               )}
               <ButtonV2

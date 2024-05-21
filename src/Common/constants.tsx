@@ -426,14 +426,30 @@ export const RESPIRATORY_SUPPORT = [
 export type PatientCategoryID = "Comfort" | "Stable" | "Moderate" | "Critical";
 
 export const PATIENT_CATEGORIES: {
-  id: PatientCategoryID;
-  text: PatientCategory;
+  id: PatientCategoryID; // backend database value
+  key: PatientCategory; // backend display text
+  text: string; // frontend display text
   twClass: string;
 }[] = [
-  { id: "Comfort", text: "Comfort Care", twClass: "patient-comfort" },
-  { id: "Stable", text: "Stable", twClass: "patient-stable" },
-  { id: "Moderate", text: "Abnormal", twClass: "patient-abnormal" },
-  { id: "Critical", text: "Critical", twClass: "patient-critical" },
+  {
+    id: "Comfort",
+    key: "Comfort Care",
+    text: "Comfort Care",
+    twClass: "patient-comfort",
+  },
+  { id: "Stable", key: "Stable", text: "Mild", twClass: "patient-stable" },
+  {
+    id: "Moderate",
+    key: "Abnormal",
+    text: "Moderate",
+    twClass: "patient-abnormal",
+  },
+  {
+    id: "Critical",
+    key: "Critical",
+    text: "Critical",
+    twClass: "patient-critical",
+  },
 ];
 
 export const PATIENT_FILTER_CATEGORIES = PATIENT_CATEGORIES;

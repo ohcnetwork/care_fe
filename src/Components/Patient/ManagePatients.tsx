@@ -77,13 +77,6 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-const PatientCategoryDisplayText: Record<PatientCategory, string> = {
-  "Comfort Care": "COMFORT CARE",
-  Stable: "STABLE",
-  Abnormal: "ABNORMAL",
-  Critical: "CRITICAL",
-};
-
 export const PatientManager = () => {
   const { t } = useTranslation();
   const {
@@ -466,9 +459,10 @@ export const PatientManager = () => {
       const category: PatientCategory | undefined =
         patient?.last_consultation?.last_daily_round?.patient_category ??
         patient?.last_consultation?.category;
-      const categoryClass = category
-        ? PATIENT_CATEGORIES.find((c) => c.text === category)?.twClass
-        : "patient-unknown";
+      const patientCategory = PATIENT_CATEGORIES.find(
+        (c) => c.key === category,
+      );
+      const categoryClass = patientCategory?.twClass ?? "patient-unknown";
 
       const children = (
         <div
@@ -478,7 +472,7 @@ export const PatientManager = () => {
             className={`absolute inset-y-0 left-0 flex h-full w-1 items-center rounded-l-lg transition-all duration-200 ease-in-out group-hover:w-5 ${categoryClass}`}
           >
             <span className="absolute -inset-x-32 inset-y-0 flex -rotate-90 items-center justify-center text-center text-xs font-bold uppercase tracking-widest opacity-0 transition-all duration-200 ease-in-out group-hover:opacity-100">
-              {category ? PatientCategoryDisplayText[category] : "UNKNOWN"}
+              {patientCategory?.text.toUpperCase() ?? "UNKNOWN"}
             </span>
           </div>
           <div className="flex flex-col items-start gap-4 md:flex-row">

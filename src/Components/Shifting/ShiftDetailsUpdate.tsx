@@ -262,7 +262,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             ?.patient_category ??
           (d.patient as PatientModel).last_consultation?.category;
         d["patient_category"] =
-          PATIENT_CATEGORIES.find((c) => c.text === patient_category)?.id ?? "";
+          PATIENT_CATEGORIES.find((c) => c.key === patient_category)?.id ?? "";
         dispatch({ type: "set_form", form: d });
         setIsLoading(false);
       }

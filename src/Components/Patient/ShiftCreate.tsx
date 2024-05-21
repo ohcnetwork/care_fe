@@ -118,7 +118,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
           data.last_consultation?.last_daily_round?.patient_category ??
           data.last_consultation?.category;
         setPatientCategory(
-          PATIENT_CATEGORIES.find((c) => c.text === patient_category)?.id,
+          PATIENT_CATEGORIES.find((c) => c.key === patient_category)?.id,
         );
       }
     },

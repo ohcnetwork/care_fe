@@ -145,7 +145,7 @@ export const DailyRounds = (props: any) => {
           ...formData,
           ...data,
           patient_category: data.patient_category
-            ? PATIENT_CATEGORIES.find((i) => i.text === data.patient_category)
+            ? PATIENT_CATEGORIES.find((i) => i.key === data.patient_category)
                 ?.id ?? ""
             : "",
           rhythm:
