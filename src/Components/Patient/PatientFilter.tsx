@@ -4,7 +4,6 @@ import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import {
   ADMITTED_TO,
   DISCHARGE_REASONS,
-  DISEASE_STATUS,
   FACILITY_TYPES,
   GENDER_TYPES,
   PATIENT_FILTER_CATEGORIES,
@@ -59,7 +58,6 @@ export default function PatientFilter(props: any) {
     modified_date_after: filter.modified_date_after || null,
     category: filter.category || null,
     gender: filter.gender || null,
-    disease_status: filter.disease_status || null,
     age_min: filter.age_min || null,
     age_max: filter.age_max || null,
     date_of_result: filter.date_of_result || null,
@@ -82,7 +80,6 @@ export default function PatientFilter(props: any) {
       filter.last_consultation_current_bed__location || "",
     last_consultation__new_discharge_reason:
       filter.last_consultation__new_discharge_reason || null,
-    srf_id: filter.srf_id || null,
     number_of_doses: filter.number_of_doses || null,
     covin_id: filter.covin_id || null,
     is_kasp: filter.is_kasp || null,
@@ -177,7 +174,6 @@ export default function PatientFilter(props: any) {
       modified_date_after,
       category,
       gender,
-      disease_status,
       age_min,
       age_max,
       date_of_result,
@@ -191,7 +187,6 @@ export default function PatientFilter(props: any) {
       last_consultation_current_bed__location,
       number_of_doses,
       covin_id,
-      srf_id,
       is_kasp,
       is_declared_positive,
       last_consultation_symptoms_onset_date_before,
@@ -244,15 +239,12 @@ export default function PatientFilter(props: any) {
       ),
       category: category || "",
       gender: gender || "",
-      disease_status:
-        (disease_status == "Show All" ? "" : disease_status) || "",
       age_min: age_min || "",
       age_max: age_max || "",
       last_consultation_admitted_bed_type_list:
         last_consultation_admitted_bed_type_list || [],
       last_consultation__new_discharge_reason:
         last_consultation__new_discharge_reason || "",
-      srf_id: srf_id || "",
       number_of_doses: number_of_doses || "",
       covin_id: covin_id || "",
       is_kasp: is_kasp || "",
@@ -681,18 +673,6 @@ export default function PatientFilter(props: any) {
           )}
 
           <div className="w-full flex-none">
-            <FieldLabel className="text-sm">COVID Disease status</FieldLabel>
-            <SelectMenuV2
-              placeholder="Show all"
-              options={DISEASE_STATUS}
-              optionLabel={(o) => o}
-              value={filterState.disease_status}
-              onChange={(v) =>
-                setFilterState({ ...filterState, disease_status: v })
-              }
-            />
-          </div>
-          <div className="w-full flex-none">
             <FieldLabel className="text-sm">COVID Vaccinated</FieldLabel>
             <SelectMenuV2
               placeholder="Show all"
@@ -727,17 +707,6 @@ export default function PatientFilter(props: any) {
             />
           </div>
 
-          <div className="w-full flex-none">
-            <TextFormField
-              id="srf_id"
-              name="srf_id"
-              placeholder="Filter by SRF ID"
-              label={<span className="text-sm">SRF ID</span>}
-              value={filterState.srf_id}
-              onChange={handleFormFieldChange}
-              errorClassName="hidden"
-            />
-          </div>
           <div className="w-full flex-none">
             <TextFormField
               id="covin_id"

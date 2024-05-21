@@ -164,7 +164,6 @@ export const PatientManager = () => {
     is_active:
       !qParams.last_consultation__new_discharge_reason &&
       (qParams.is_active || "True"),
-    disease_status: qParams.disease_status || undefined,
     phone_number: qParams.phone_number
       ? parsePhoneNumber(qParams.phone_number)
       : undefined,
@@ -207,7 +206,6 @@ export const PatientManager = () => {
       qParams.last_consultation__new_discharge_reason || undefined,
     last_consultation_current_bed__location:
       qParams.last_consultation_current_bed__location || undefined,
-    srf_id: qParams.srf_id || undefined,
     number_of_doses: qParams.number_of_doses || undefined,
     covin_id: qParams.covin_id || undefined,
     is_kasp: qParams.is_kasp || undefined,
@@ -595,14 +593,6 @@ export const PatientManager = () => {
                         text={`IP Days: ${dayjs().diff(patient.last_consultation.encounter_date, "day")}`}
                       />
                     )}
-                  {patient.disease_status === "POSITIVE" && (
-                    <Chip
-                      size="small"
-                      variant="danger"
-                      startIcon="l-coronavirus"
-                      text="Positive"
-                    />
-                  )}
                   {patient.gender === 2 &&
                     patient.is_antenatal &&
                     isAntenatal(patient.last_menstruation_start_date) &&
@@ -622,14 +612,6 @@ export const PatientManager = () => {
                       className="bg-blue-100 text-blue-600"
                       startIcon="l-user-md"
                       text="Medical Worker"
-                    />
-                  )}
-                  {patient.disease_status === "EXPIRED" && (
-                    <Chip
-                      size="small"
-                      variant="warning"
-                      startIcon="l-exclamation-triangle"
-                      text="Patient Expired"
                     />
                   )}
                   {(!patient.last_consultation ||
@@ -1009,7 +991,6 @@ export const PatientManager = () => {
             ),
             ordering(),
             value("Category", "category", getTheCategoryFromId()),
-            badge("Disease Status", "disease_status"),
             value(
               "Respiratory Support",
               "ventilator_interface",
@@ -1027,7 +1008,6 @@ export const PatientManager = () => {
               paramKey: "last_consultation_admitted_to",
             },
             ...range("Age", "age"),
-            badge("SRF ID", "srf_id"),
             {
               name: "LSG Body",
               value: qParams.lsgBody ? LocalBodyData?.name || "" : "",
