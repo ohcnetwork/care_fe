@@ -27,10 +27,6 @@ class ShiftingPage {
     return cy.get("#is-up-shift");
   }
 
-  diseaseStatusInput() {
-    return cy.get("#disease-status");
-  }
-
   isAntenatalInput() {
     return cy.get("#is-antenatal");
   }
@@ -61,10 +57,6 @@ class ShiftingPage {
 
   currentFacilityBadge() {
     return cy.get("[data-testid='Current facility']");
-  }
-
-  diseaseStatusBadge() {
-    return cy.get("[data-testid='Disease status']");
   }
 
   orderingBadge() {
