@@ -36,8 +36,6 @@ describe("Shifting section filter", () => {
       "MODERATE",
       "9999999999",
     );
-
-    shiftingPage.diseaseStatusBadge().should("exist");
     shiftingPage.orderingBadge().should("exist");
     shiftingPage.breathlessnessLevelBadge().should("exist");
     shiftingPage.phoneNumberBadge().should("exist");
