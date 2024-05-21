@@ -146,7 +146,9 @@ const SymptomEntry = (props: {
         errorClassName="hidden"
       />
       <div className="w-full">
-        <SymptomText value={symptom} />
+        <span className="cui-input-base font-medium">
+          <SymptomText value={symptom} />
+        </span>
       </div>
       <DateFormField
         className="w-36"
@@ -296,7 +298,7 @@ const NoSymptomsAdded = () => {
   );
 };
 
-const SymptomText = (props: {
+export const SymptomText = (props: {
   value: Writable<EncounterSymptom> | EncounterSymptom;
 }) => {
   const symptom =
@@ -305,16 +307,18 @@ const SymptomText = (props: {
 
   const isOtherSymptom = symptom.id === OTHER_SYMPTOM_CHOICE.id;
 
-  return (
-    <span className="cui-input-base font-medium">
-      {isOtherSymptom ? (
-        <>
-          <span className="font-normal">Other: </span>
-          <span>{props.value.other_symptom}</span>
-        </>
-      ) : (
-        symptom.text
-      )}
-    </span>
+  return isOtherSymptom ? (
+    <>
+      <span className="font-normal">Other: </span>
+      <span
+        className={classNames(
+          !props.value.other_symptom?.trim() && "italic text-gray-700",
+        )}
+      >
+        {props.value.other_symptom || "Not specified"}
+      </span>
+    </>
+  ) : (
+    symptom.text
   );
 };
