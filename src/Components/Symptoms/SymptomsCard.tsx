@@ -5,17 +5,24 @@ import { SymptomText } from "./SymptomsBuilder";
 import SymptomsApi from "./api";
 import { type EncounterSymptom } from "./types";
 import { groupAndSortSymptoms } from "./utils";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 // TODO: switch to list from events as timeline view instead once filter event by event type name is done
 const EncounterSymptomsCard = () => {
   const consultationId = useSlug("consultation");
-  const { data, loading } = useQuery(SymptomsApi.list, {
+
+  const { data } = useQuery(SymptomsApi.list, {
     pathParams: { consultationId },
     query: { limit: 100 },
   });
 
-  if (!data || loading) {
-    return <span>TODO: loader here tooooooo</span>;
+  if (!data) {
+    return (
+      <div className="flex w-full animate-pulse justify-center gap-2 rounded-lg bg-gray-200 py-8 text-center font-medium text-gray-700">
+        <CareIcon icon="l-spinner-alt" className="animate-spin text-lg" />
+        <span>Fetching symptom records...</span>
+      </div>
+    );
   }
 
   const records = groupAndSortSymptoms(data.results);
