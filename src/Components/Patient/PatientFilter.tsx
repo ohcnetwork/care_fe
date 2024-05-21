@@ -363,7 +363,9 @@ export default function PatientFilter(props: any) {
             </div>
           </div>
           <div className="w-full flex-none" id="bed-type-select">
-            <FieldLabel className="text-sm">Admitted to (Bed Types)</FieldLabel>
+            <FieldLabel className="text-sm">
+              {props.dischargePage && "Last "}Admitted to (Bed Types)
+            </FieldLabel>
             <MultiSelectMenuV2
               id="last_consultation_admitted_bed_type_list"
               placeholder="Select bed types"
@@ -448,16 +450,20 @@ export default function PatientFilter(props: any) {
             />
           </div> */}
           <div className="w-full flex-none">
-            <FieldLabel className="text-sm">Review Missed</FieldLabel>
-            <SelectMenuV2
-              placeholder="Show all"
-              options={["true", "false"]}
-              optionLabel={(o) => (o === "true" ? "Yes" : "No")}
-              value={filterState.review_missed}
-              onChange={(v) =>
-                setFilterState({ ...filterState, review_missed: v })
-              }
-            />
+            {props.dischargePage || (
+              <>
+                <FieldLabel className="text-sm">Review Missed</FieldLabel>
+                <SelectMenuV2
+                  placeholder="Show all"
+                  options={["true", "false"]}
+                  optionLabel={(o) => (o === "true" ? "Yes" : "No")}
+                  value={filterState.review_missed}
+                  onChange={(v) =>
+                    setFilterState({ ...filterState, review_missed: v })
+                  }
+                />
+              </>
+            )}
           </div>
           <div className="w-full flex-none">
             <FieldLabel className="text-sm">Is Medico-Legal Case</FieldLabel>
