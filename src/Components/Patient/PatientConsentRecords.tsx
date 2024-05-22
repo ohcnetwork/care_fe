@@ -73,17 +73,6 @@ export default function PatientConsentRecords(props: {
     null,
   );
 
-  const handleConsentPCSChange = (type: number) => {
-    if (!consentRecords) return;
-    const randomId = "consent-" + new Date().getTime().toString();
-    setConsentRecords([
-      ...consentRecords.map((cr) =>
-        cr.type === 2 && !cr.deleted ? { ...cr, deleted: true } : cr,
-      ),
-      { type: 2, patient_code_status: type, id: randomId },
-    ]);
-  };
-
   const handleDeleteConsent = async () => {
     const consent_id = showDeleteConsent;
     if (!consent_id || !consultationId || !consentRecords) return;
@@ -155,17 +144,19 @@ export default function PatientConsentRecords(props: {
     });
   };
 
-  const handleUpload = async () => {
+  const handleUpload = async (diffPCS?: ConsentRecord) => {
     if (newConsent.type === 0) return;
     const consentTypeExists = consentRecords?.find(
       (record) => record.type === newConsent.type && record.deleted !== true,
     );
-    if (consentTypeExists) {
+    if (consentTypeExists && !diffPCS) {
       await fileUpload.handleFileUpload(consentTypeExists.id);
     } else {
       const randomId = "consent-" + new Date().getTime().toString();
       const newRecords = [
-        ...consentRecords!,
+        ...(consentRecords?.map((r) =>
+          r.id === diffPCS?.id ? { ...r, deleted: true } : r,
+        ) || []),
         {
           id: randomId,
           type: newConsent.type,
@@ -177,8 +168,8 @@ export default function PatientConsentRecords(props: {
         pathParams: { id: consultationId },
         body: { consent_records: newRecords },
       });
-      setConsentRecords(newRecords);
       await fileUpload.handleFileUpload(randomId);
+      setConsentRecords(newRecords);
     }
 
     refetch();
@@ -245,17 +236,20 @@ export default function PatientConsentRecords(props: {
         onClose={() => setShowPCSChangeModal(null)}
         onConfirm={() => {
           if (showPCSChangeModal !== null) {
-            setNewConsent({
-              ...newConsent,
-              patient_code_status: showPCSChangeModal,
-            });
-            handleConsentPCSChange(showPCSChangeModal);
+            handleUpload(
+              consentRecords?.find(
+                (record) =>
+                  record.type === 2 &&
+                  !record.deleted &&
+                  record.patient_code_status !== showPCSChangeModal,
+              ),
+            );
           }
           setShowPCSChangeModal(null);
         }}
         action="Change Patient Code Status"
         variant="danger"
-        description={`Consent records exist with the "${CONSENT_PATIENT_CODE_STATUS_CHOICES.find((c) => consentRecords?.find((c) => c.type === 2 && !c.deleted)?.patient_code_status === c.id)?.text}" patient code status. Changing this will archive the existing records. Are you sure you want to proceed?`}
+        description={`Consent records exist with the "${CONSENT_PATIENT_CODE_STATUS_CHOICES.find((c) => consentRecords?.find((c) => c.type === 2 && !c.deleted)?.patient_code_status === c.id)?.text}" patient code status. Adding a new record for a different type will archive the existing records. Are you sure you want to proceed?`}
         title="Archive Previous Records"
         className="w-auto"
       />
@@ -276,21 +270,10 @@ export default function PatientConsentRecords(props: {
             <SelectFormField
               {...selectField("consent_type")}
               onChange={(e) => {
-                if (
-                  consentRecords?.find(
-                    (record) =>
-                      record.type === newConsent.type &&
-                      record.patient_code_status !== e.value &&
-                      record.deleted !== true,
-                  )
-                ) {
-                  setShowPCSChangeModal(e.value);
-                } else {
-                  setNewConsent({
-                    ...newConsent,
-                    patient_code_status: e.value,
-                  });
-                }
+                setNewConsent({
+                  ...newConsent,
+                  patient_code_status: e.value,
+                });
               }}
               label="Patient Code Status"
               value={newConsent.patient_code_status}
@@ -308,7 +291,20 @@ export default function PatientConsentRecords(props: {
             {fileUpload.file ? (
               <>
                 <ButtonV2
-                  onClick={handleUpload}
+                  onClick={() => {
+                    const diffPCS = consentRecords?.find(
+                      (record) =>
+                        record.type === 2 &&
+                        record.patient_code_status !==
+                          newConsent.patient_code_status &&
+                        record.deleted !== true,
+                    );
+                    if (diffPCS) {
+                      setShowPCSChangeModal(newConsent.patient_code_status);
+                    } else {
+                      handleUpload();
+                    }
+                  }}
                   loading={!!fileUpload.progress}
                   className="flex-1"
                 >
