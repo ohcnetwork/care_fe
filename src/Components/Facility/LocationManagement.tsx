@@ -1,6 +1,6 @@
 import { lazy, useState } from "react";
 import ButtonV2, { Cancel } from "../Common/components/ButtonV2";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import Page from "../Common/components/Page";
 import routes from "../../Redux/api";
@@ -12,6 +12,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import DialogModal from "../Common/Dialog";
 import Uptime from "../Common/Uptime";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -21,10 +22,12 @@ interface Props {
 
 interface LocationProps extends LocationModel {
   facilityId: string;
+  disabled: boolean;
   setShowDeletePopup: (e: { open: boolean; name: string; id: string }) => void;
 }
 
 export default function LocationManagement({ facilityId }: Props) {
+  const authUser = useAuthUser();
   const [showDeleteFailModal, setShowDeleteFailModal] = useState({
     open: false,
     id: "",
@@ -115,6 +118,11 @@ export default function LocationManagement({ facilityId }: Props) {
                   setShowDeletePopup={setShowDeletePopup}
                   facilityId={facilityId}
                   {...item}
+                  disabled={
+                    ["DistrictAdmin", "StateAdmin"].includes(authUser.user_type)
+                      ? false
+                      : true
+                  }
                 />
               )}
             </PaginatedList.Items>
@@ -213,6 +221,7 @@ const Location = ({
   created_date,
   modified_date,
   id,
+  disabled,
   setShowDeletePopup,
   facilityId,
 }: LocationProps) => (
@@ -286,14 +295,16 @@ const Location = ({
       </div>
       <div className="w-full md:w-1/2">
         <ButtonV2
+          authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
           id="delete-location-button"
           variant="secondary"
           border
           className="w-full"
+          tooltip={disabled ? "Contact your admin to delete the location" : ""}
+          tooltipClassName=" text-xs w-full lg:w-auto"
           onClick={() =>
             setShowDeletePopup({ open: true, name: name ?? "", id: id ?? "" })
           }
-          authorizeFor={NonReadOnlyUsers}
         >
           <CareIcon icon="l-trash" className="text-lg" />
           Delete
