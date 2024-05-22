@@ -202,15 +202,17 @@ const SymptomEntry = (props: {
       <ButtonV2
         type="button"
         variant="danger"
-        className="p-3"
+        className="p-1"
+        size="small"
+        circle
         ghost
         border
         onClick={props.onRemove}
         disabled={disabled}
         tooltip="Mark as entered in error"
-        tooltipClassName="tooltip-bottom -translate-x-2/3 translate-y-1 text-xs"
+        tooltipClassName="tooltip-bottom -translate-x-2/3 md:-translate-x-1/2 translate-y-1 text-xs"
       >
-        <CareIcon icon="l-trash" className="text-lg" />
+        <CareIcon icon="l-times" className="text-lg" />
       </ButtonV2>
     </div>
   );
