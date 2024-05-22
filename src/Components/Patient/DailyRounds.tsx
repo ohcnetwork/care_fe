@@ -757,7 +757,8 @@ export const DailyRounds = (props: any) => {
               ) &&
               (state.form.temperature == initialData.temperature ||
                 isNaN(state.form.temperature)) &&
-              state.form.rounds_type !== "VENTILATOR"
+              state.form.rounds_type !== "VENTILATOR" &&
+              state.form.rounds_type !== "DOCTORS_LOG"
             }
             onClick={(e) => handleSubmit(e)}
             label={buttonText}
