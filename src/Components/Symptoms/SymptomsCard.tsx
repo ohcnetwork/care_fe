@@ -28,7 +28,7 @@ const EncounterSymptomsCard = () => {
   const records = groupAndSortSymptoms(data.results);
 
   return (
-    <div>
+    <div id="encounter-symptoms">
       <h3 className="mb-2 text-lg font-semibold leading-relaxed text-gray-900">
         Symptoms
       </h3>
