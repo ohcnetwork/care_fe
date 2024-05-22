@@ -49,7 +49,6 @@ export interface AbhaObject {
 }
 
 export interface PatientModel {
-  test_id?: string;
   id?: string;
   action?: number;
   name?: string;
@@ -87,19 +86,14 @@ export interface PatientModel {
   sameAddress?: boolean;
   village?: string;
   pincode?: number;
-  contact_with_confirmed_carrier?: boolean;
-  contact_with_suspected_carrier?: boolean;
   is_medical_worker?: boolean;
   designation_of_health_care_worker?: string;
   instituion_of_health_care_worker?: string;
   frontline_worker?: string;
-  estimated_contact_date?: string;
   past_travel?: boolean;
   ongoing_medication?: string;
   countries_travelled?: Array<string>;
   transit_details?: string;
-  number_of_primary_contacts?: number;
-  number_of_secondary_contacts?: number;
   present_health?: string;
   has_SARI?: boolean;
   local_body?: number;
@@ -107,11 +101,8 @@ export interface PatientModel {
   state?: number;
   nationality?: string;
   passport_no?: string;
-  disease_status?: string;
-  test_type?: string;
   date_of_test?: string;
-  date_of_result?: string;
-  srf_id?: string;
+  date_of_result?: string; // keeping this to avoid errors in Death report
   covin_id?: string;
   is_vaccinated?: boolean;
   vaccine_name?: string;
@@ -124,7 +115,6 @@ export interface PatientModel {
   review_interval?: number;
   review_time?: string;
   date_of_return?: string;
-  cluster_name?: string;
   number_of_aged_dependents?: number;
   number_of_chronic_diseased_dependents?: number;
   will_donate_blood?: boolean;
