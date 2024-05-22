@@ -572,7 +572,7 @@ export const PatientHome = (props: any) => {
                     0 && (
                     <div
                       className={
-                        "mb-6 mt-6 inline-flex w-full items-center justify-center rounded-md border p-3 text-xs font-semibold leading-4 shadow-sm lg:mt-0 " +
+                        "mb-6 inline-flex w-full items-center justify-center rounded-md border p-3 text-xs font-semibold leading-4 shadow-sm lg:mt-0 " +
                         (dayjs().isBefore(patientData.review_time)
                           ? " bg-gray-100"
                           : " bg-red-600/5 p-1 text-sm font-normal text-red-600")
@@ -587,6 +587,15 @@ export const PatientHome = (props: any) => {
                       </p>
                     </div>
                   )}
+                {(
+                  patientData.last_consultation?.consent_records?.filter(
+                    (c) => !c.deleted,
+                  ) || []
+                ).length < 1 && (
+                  <div className="mb-6 inline-flex w-full items-center justify-center rounded-md border bg-red-600/5 p-1 text-sm font-normal leading-4 text-red-600 shadow-sm lg:mt-0">
+                    Consent Records Missing
+                  </div>
+                )}
                 <div className="mb-6 rounded-sm bg-white p-2 text-center shadow">
                   <div className="flex justify-between">
                     <div className="w-1/2 border-r-2">
