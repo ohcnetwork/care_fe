@@ -48,7 +48,6 @@ export default function BadgesList(props: any) {
         badge(t("patient_name"), "patient_name"),
         ...dateRange(t("created"), "created_date"),
         ...dateRange(t("modified"), "modified_date"),
-        badge(t("disease_status"), "disease_status"),
         badge(t("breathlessness_level"), "breathlessness_level"),
         value(
           t("assigned_to"),

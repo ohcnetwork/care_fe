@@ -25,7 +25,7 @@ export default function FeedNetworkSignal(props: Props) {
       if (-5 > delay || delay > 5) {
         props.onReset();
       }
-    }, 500);
+    }, 1000);
 
     return () => {
       clearInterval(interval);
