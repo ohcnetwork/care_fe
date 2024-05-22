@@ -29,6 +29,14 @@ export interface AssignedToObjectModel {
   user_type: string;
 }
 
+export interface MedicalHistoryModel {
+  disease: string | number;
+  details: string;
+  type?: string;
+  duration?: number;
+  status?: string;
+}
+
 export interface AbhaObject {
   id: number;
   created_date: string;
@@ -61,7 +69,7 @@ export interface PatientModel {
   phone_number?: string;
   emergency_phone_number?: string;
   allergies?: string;
-  medical_history?: Array<{ disease: string | number; details: string }>;
+  medical_history?: Array<MedicalHistoryModel>;
   facility_object?: {
     id: number;
     name: string;

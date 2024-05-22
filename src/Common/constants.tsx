@@ -315,10 +315,11 @@ export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
   { id: 8, text: "Bronchitis" },
   { id: 9, text: "Chronic Neurological Or Neuromuscular Disease" },
   { id: 10, text: "Immunocompromised Condition" },
-  { id: 11, text: "TB" },
-  { id: 12, text: "Other Chronic Lung Diseases" },
-  { id: 13, text: "Cancer" },
-  { id: 14, text: "OTHER" },
+  { id: 11, text: "Liver Disease" },
+  { id: 12, text: "TB" },
+  { id: 13, text: "Other Chronic Lung Diseases" },
+  { id: 14, text: "Cancer" },
+  { id: 15, text: "OTHER" },
 ];
 
 export const REVIEW_AT_CHOICES: Array<OptionsType> = [

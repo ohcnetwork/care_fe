@@ -78,7 +78,9 @@ interface medicalHistoryModel {
   id?: number;
   disease: string | number;
   details: string;
-  extra_info?: object;
+  duration?: number;
+  status?: string;
+  type?: string;
 }
 
 const medicalHistoryChoices = MEDICAL_HISTORY_CHOICES.reduce(
@@ -437,6 +439,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 formData.medical_history.push(Number(medicalHistory.id));
                 (formData as any)[`medical_history_${medicalHistory.id}`] =
                   i.details;
+                if (medicalHistory.id === 12) {
+                  (formData as any)["tb_status"] = i.status;
+                  (formData as any)["tb_duration"] = i.duration;
+                } else if (medicalHistory.id === 14) {
+                  (formData as any)["cancer_type"] = i.type;
+                }
               }
             },
           );
@@ -667,22 +675,18 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       const medData = MEDICAL_HISTORY_CHOICES.find((i) => i.id === id);
       if (medData) {
         const details = formData[`medical_history_${medData.id}`];
-        if (medData.id === 11) {
+        if (medData.id === 12) {
           medical_history.push({
             disease: medData.text,
             details: details ? details : "",
-            extra_info: {
-              tb_status: formData["tb_status"] ?? "",
-              tb_duration: formData["tb_duration"] ?? "",
-            },
+            status: formData["tb_status"] ?? undefined,
+            duration: Number(formData["tb_duration"]) ?? undefined,
           });
-        } else if (medData.id === 13) {
+        } else if (medData.id === 14) {
           medical_history.push({
             disease: medData.text,
             details: details ? details : "",
-            extra_info: {
-              cancer_type: formData["cancer_type"] ?? "",
-            },
+            type: formData["cancer_type"] ?? undefined,
           });
         } else {
           medical_history.push({
@@ -958,6 +962,17 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const renderMedicalHistory = (id: number, title: string, field: any) => {
     const checkboxField = `medical_history_check_${id}`;
     const textField = `medical_history_${id}`;
+    const filteredCancerHistoryChoices = CANCER_HISTORY_CHOICES.filter((i) => {
+      const gender = field("gender").value;
+      if (gender === 1) {
+        return i.id !== 1 && i.id !== 5;
+      } else if (gender === 2) {
+        return i.id !== 8;
+      } else {
+        return true;
+      }
+    }).map((i) => i.text);
+
     return (
       <div key={textField}>
         <div>
@@ -969,13 +984,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           />
         </div>
         {/* TB */}
-        {id === 11 && (field("medical_history").value ?? []).includes(id) && (
+        {id === 12 && (field("medical_history").value ?? []).includes(id) && (
           <div>
             <SelectFormField
               {...field("tb_status")}
               position="above"
               placeholder={"Status"}
-              required
               options={["Active", "Old"]}
               optionLabel={(o: any) => o}
               optionValue={(o: any) => o}
@@ -989,16 +1003,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           </div>
         )}
         {/* Cancer */}
-        {id === 13 && (field("medical_history").value ?? []).includes(id) && (
+        {id === 14 && (field("medical_history").value ?? []).includes(id) && (
           <div className="mx-4">
             <SelectFormField
               {...field("cancer_type")}
               position="above"
-              required
-              placeholder={"Cancer Type"}
-              options={CANCER_HISTORY_CHOICES.map((i) => i.text)}
-              optionLabel={(o: any) => o}
-              optionValue={(o: any) => o}
+              placeholder="Cancer Type"
+              options={filteredCancerHistoryChoices}
+              optionLabel={(o) => o}
+              optionValue={(o) => o}
             />
           </div>
         )}

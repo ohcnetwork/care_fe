@@ -226,6 +226,16 @@ export const PatientHome = (props: any) => {
         <div className="sm:col-span-1" key={`med_his_${idx}`}>
           <div className="break-words text-sm font-semibold leading-5 text-zinc-400">
             {item.disease}
+            {item.disease === "Cancer" && item.type && (
+              <span className="text-sm font-semibold leading-5 text-zinc-400">
+                {` [ ${item.type} ]`}
+              </span>
+            )}
+            {item.disease === "TB" && (item.duration || item.status) && (
+              <span className="text-sm font-semibold leading-5 text-zinc-400">
+                {` [ ${item.status} - ${item.duration} ]`}
+              </span>
+            )}
           </div>
           <div className="mt-1 whitespace-normal break-words text-sm font-medium leading-5">
             {item.details}
