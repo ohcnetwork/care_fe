@@ -96,12 +96,7 @@ export interface OptionsType {
   disabled?: boolean;
 }
 
-export type PatientCategory =
-  | "Comfort Care"
-  | "Stable"
-  | "Abnormal"
-  | "Critical";
-
+export type PatientCategory = "Comfort Care" | "Mild" | "Moderate" | "Critical";
 
 export type ConsentRecord = {
   id: string;
@@ -441,15 +436,15 @@ export type VentilatorPlotRes = {
 export interface DailyRoundsBody {
   page?: number;
   fields:
-  | ABGPlotsFields[]
-  | DialysisPlotsFields[]
-  | NeurologicalTablesFields[]
-  | NursingPlotFields[]
-  | NutritionPlotsFields[]
-  | PainDiagramsFields[]
-  | PressureSoreDiagramsFields[]
-  | PrimaryParametersPlotFields[]
-  | VentilatorPlotFields[];
+    | ABGPlotsFields[]
+    | DialysisPlotsFields[]
+    | NeurologicalTablesFields[]
+    | NursingPlotFields[]
+    | NutritionPlotsFields[]
+    | PainDiagramsFields[]
+    | PressureSoreDiagramsFields[]
+    | PrimaryParametersPlotFields[]
+    | VentilatorPlotFields[];
 }
 
 export interface DailyRoundsRes {
@@ -457,15 +452,15 @@ export interface DailyRoundsRes {
   page_size: number;
   results: {
     [date: string]:
-    | PressureSoreDiagramsRes
-    | ABGPlotsRes
-    | DialysisPlotsRes
-    | NeurologicalTablesRes
-    | NursingPlotRes
-    | NutritionPlotsRes
-    | PainDiagramsRes
-    | PrimaryParametersPlotRes
-    | VentilatorPlotRes;
+      | PressureSoreDiagramsRes
+      | ABGPlotsRes
+      | DialysisPlotsRes
+      | NeurologicalTablesRes
+      | NursingPlotRes
+      | NutritionPlotsRes
+      | PainDiagramsRes
+      | PrimaryParametersPlotRes
+      | VentilatorPlotRes;
   };
 }
 

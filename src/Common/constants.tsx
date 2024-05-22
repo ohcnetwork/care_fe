@@ -431,8 +431,8 @@ export const PATIENT_CATEGORIES: {
   twClass: string;
 }[] = [
   { id: "Comfort", text: "Comfort Care", twClass: "patient-comfort" },
-  { id: "Stable", text: "Stable", twClass: "patient-stable" },
-  { id: "Moderate", text: "Abnormal", twClass: "patient-abnormal" },
+  { id: "Stable", text: "Mild", twClass: "patient-stable" },
+  { id: "Moderate", text: "Moderate", twClass: "patient-abnormal" },
   { id: "Critical", text: "Critical", twClass: "patient-critical" },
 ];
 
@@ -469,13 +469,6 @@ export const SAMPLE_FLOW_RULES = {
   RECEIVED_AND_FORWARED: ["RECEIVED_AT_LAB", "COMPLETED"],
   RECEIVED_AT_LAB: ["COMPLETED"],
 };
-
-export const DISEASE_STATUS = [
-  "POSITIVE",
-  "SUSPECTED",
-  "NEGATIVE",
-  "RECOVERED",
-];
 
 export const TEST_TYPE = [
   "UNK",

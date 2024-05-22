@@ -1,6 +1,6 @@
 import * as Notification from "../../Utils/Notifications.js";
 
-import { BedModel, FacilityModel } from "./models";
+import { BedModel, ConsentRecord, FacilityModel } from "./models";
 import {
   CONSULTATION_SUGGESTION,
   DISCHARGE_REASONS,
@@ -57,8 +57,6 @@ import {
   CreateDiagnosesBuilder,
   EditDiagnosesBuilder,
 } from "../Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder.js";
-import { FileUpload } from "../Patient/FileUpload.js";
-import ConfirmDialog from "../Common/ConfirmDialog.js";
 import request from "../../Utils/request/request.js";
 import routes from "../../Redux/api.js";
 import useQuery from "../../Utils/request/useQuery.js";
@@ -117,6 +115,7 @@ type FormDetails = {
   death_confirmed_doctor: string;
   InvestigationAdvice: InvestigationType[];
   procedures: ProcedureType[];
+  consent_records: ConsentRecord[];
 };
 
 const initForm: FormDetails = {
@@ -167,6 +166,7 @@ const initForm: FormDetails = {
   death_confirmed_doctor: "",
   InvestigationAdvice: [],
   procedures: [],
+  consent_records: [],
 };
 
 const initError = Object.assign(
@@ -251,7 +251,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   const [bedStatusVisible, bedStatusRef] = useVisibility(-300);
 
   const [disabledFields, setDisabledFields] = useState<string[]>([]);
-
 
   const { min_encounter_date } = useConfig();
 
@@ -351,7 +350,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             (Array.isArray(data.investigation) && data.investigation) || [],
         });
         handleFormFieldChange({
-          name: "procedures",
+          name: "procedure",
           value: (Array.isArray(data.procedure) && data.procedure) || [],
         });
         if (data.suggestion === "R") {
@@ -384,7 +383,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             admitted_to: data.admitted_to ? data.admitted_to : "",
             category: data.category
               ? PATIENT_CATEGORIES.find((i) => i.text === data.category)?.id ??
-              ""
+                ""
               : "",
             patient_no: data.patient_no ?? "",
             OPconsultation: data.consultation_notes,
@@ -569,7 +568,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           }
           return;
         case "procedure": {
-          for (const p of state.form.procedures) {
+          for (const p of state.form.procedure) {
             if (!p.procedure?.replace(/\s/g, "").length) {
               errors[field] = "Procedure field can not be empty";
               invalidForm = true;
@@ -701,7 +700,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         create_diagnoses: isUpdate ? undefined : state.form.create_diagnoses,
         treating_physician: state.form.treating_physician,
         investigation: state.form.InvestigationAdvice,
-        procedure: state.form.procedures,
+        procedure: state.form.procedure,
         patient: patientId,
         facility: facilityId,
         referred_to:
@@ -714,12 +713,12 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             : undefined,
         referred_from_facility:
           state.form.route_to_facility === 20 &&
-            !state.form.referred_from_facility_external
+          !state.form.referred_from_facility_external
             ? state.form.referred_from_facility
             : undefined,
         referred_from_facility_external:
           state.form.route_to_facility === 20 &&
-            !state.form.referred_from_facility
+          !state.form.referred_from_facility
             ? state.form.referred_from_facility_external
             : undefined,
         referred_by_external:
@@ -913,18 +912,16 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
       <div className="top-0 mt-5 flex grow-0 sm:mx-12">
         <div className="fixed hidden h-full w-72 flex-col xl:flex">
           {Object.keys(sections).map((sectionTitle) => {
-            if (
-              !isUpdate &&
-              ["Bed Status"].includes(sectionTitle)
-            ) {
+            if (!isUpdate && ["Bed Status"].includes(sectionTitle)) {
               return null;
             }
             const isCurrent = currentSection === sectionTitle;
             const section = sections[sectionTitle as ConsultationFormSection];
             return (
               <button
-                className={`flex w-full items-center justify-start gap-3 rounded-l-lg px-5 py-3 font-medium ${isCurrent ? "bg-white text-primary-500" : "bg-transparent"
-                  } transition-all duration-100 ease-in hover:bg-white hover:tracking-wider`}
+                className={`flex w-full items-center justify-start gap-3 rounded-l-lg px-5 py-3 font-medium ${
+                  isCurrent ? "bg-white text-primary-500" : "bg-transparent"
+                } transition-all duration-100 ease-in hover:bg-white hover:tracking-wider`}
                 onClick={() => {
                   section.ref.current?.scrollIntoView({
                     behavior: "smooth",
@@ -1087,7 +1084,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         {Math.sqrt(
                           (Number(state.form.weight) *
                             Number(state.form.height)) /
-                          3600,
+                            3600,
                         ).toFixed(2)}
                         m<sup>2</sup>
                       </span>
@@ -1250,7 +1247,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       className={classNames(
                         "col-span-6",
                         ["A", "DC"].includes(state.form.suggestion) &&
-                        "xl:col-span-3",
+                          "xl:col-span-3",
                       )}
                       ref={fieldRef["icu_admission_date"]}
                     >
@@ -1349,11 +1346,11 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       >
                         <FieldLabel>Procedures</FieldLabel>
                         <ProcedureBuilder
-                          procedures={state.form.procedures}
-                          setProcedures={(procedures) => {
+                          procedures={state.form.procedure}
+                          setProcedures={(procedure) => {
                             handleFormFieldChange({
-                              name: "procedures",
-                              value: procedures,
+                              name: "procedure",
+                              value: procedure,
                             });
                           }}
                         />
