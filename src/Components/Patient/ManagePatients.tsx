@@ -77,13 +77,6 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-const PatientCategoryDisplayText: Record<PatientCategory, string> = {
-  "Comfort Care": "COMFORT CARE",
-  Stable: "STABLE",
-  Abnormal: "ABNORMAL",
-  Critical: "CRITICAL",
-};
-
 export const PatientManager = () => {
   const { t } = useTranslation();
   const {
@@ -473,7 +466,7 @@ export const PatientManager = () => {
             className={`absolute inset-y-0 left-0 flex h-full w-1 items-center rounded-l-lg transition-all duration-200 ease-in-out group-hover:w-5 ${categoryClass}`}
           >
             <span className="absolute -inset-x-32 inset-y-0 flex -rotate-90 items-center justify-center text-center text-xs font-bold uppercase tracking-widest opacity-0 transition-all duration-200 ease-in-out group-hover:opacity-100">
-              {category ? PatientCategoryDisplayText[category] : "UNKNOWN"}
+              {category || "UNKNOWN"}
             </span>
           </div>
           <div className="flex flex-col items-start gap-4 md:flex-row">
