@@ -87,6 +87,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
               helpText="Up"
               shortcut={Shortcuts.MoveUp}
               shortcutsDisabled={shortcutsDisabled}
+              tooltipClassName="-translate-y-20 md:translate-y-0"
             >
               <CareIcon icon="l-triangle" className="rotate-0" />
             </FeedButton>
@@ -102,6 +103,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
               helpText="Left"
               shortcut={Shortcuts.MoveLeft}
               shortcutsDisabled={shortcutsDisabled}
+              tooltipClassName="-translate-y-20 -translate-x-1 md:translate-x-0 md:translate-y-0"
             >
               <CareIcon icon="l-triangle" className="-rotate-90" />
             </FeedButton>
@@ -114,6 +116,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
               shortcut={Shortcuts.TogglePrecision}
               className="font-bold"
               shortcutsDisabled={shortcutsDisabled}
+              tooltipClassName="-translate-y-20 -translate-x-20 md:translate-x-0 md:translate-y-0"
             >
               {precision}x
             </FeedButton>
@@ -125,6 +128,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
               helpText="Right"
               shortcut={Shortcuts.MoveRight}
               shortcutsDisabled={shortcutsDisabled}
+              tooltipClassName="-translate-y-20 -translate-x-2 md:translate-x-0 md:translate-y-0"
             >
               <CareIcon icon="l-triangle" className="rotate-90" />
             </FeedButton>
@@ -142,7 +146,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
               helpText="Down"
               shortcut={Shortcuts.MoveDown}
               shortcutsDisabled={shortcutsDisabled}
-              tooltipClassName="tooltip-top"
+              tooltipClassName="-translate-y-20 -translate-x-2 md:-translate-x-14"
             >
               <CareIcon icon="l-triangle" className="rotate-180" />
             </FeedButton>
