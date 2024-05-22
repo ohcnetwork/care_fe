@@ -274,6 +274,7 @@ export interface DailyRoundsOutput {
 
 export const DailyRoundTypes = [
   "NORMAL",
+  "DOCTORS_LOG",
   "VENTILATOR",
   "AUTOMATED",
   "TELEMEDICINE",
