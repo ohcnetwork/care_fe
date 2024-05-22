@@ -37,7 +37,11 @@ export const CreateSymptomsBuilder = (props: {
           };
 
           return (
-            <li key={index} id={`symptom-${index}`}>
+            <li
+              key={index}
+              id={`symptom-${index}`}
+              className="border-b-2 border-dashed border-gray-400 py-4 last:border-b-0 last:pb-0 md:border-b-0 md:py-2"
+            >
               <SymptomEntry
                 value={obj}
                 onChange={handleUpdate}
@@ -118,7 +122,10 @@ export const EncounterSymptomsBuilder = (props: { showAll?: boolean }) => {
           };
 
           return (
-            <li key={symptom.id}>
+            <li
+              key={symptom.id}
+              className="border-b-2 border-dashed border-gray-400 py-4 last:border-b-0 last:pb-0 md:border-b-0 md:py-2"
+            >
               <SymptomEntry
                 value={symptom}
                 disabled={isProcessing}
@@ -157,7 +164,7 @@ const SymptomEntry = (props: {
   const disabled =
     props.disabled || symptom.clinical_impression_status === "entered-in-error";
   return (
-    <div className="grid grid-cols-6 items-center gap-2 border-b-2 border-dashed border-gray-400 py-4 md:grid-cols-5 md:border-b-0 md:py-2">
+    <div className="grid grid-cols-6 items-center gap-2 md:grid-cols-5">
       <DateFormField
         className="col-span-3 w-full md:col-span-1"
         name="onset_date"
