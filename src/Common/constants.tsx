@@ -395,8 +395,8 @@ export const PATIENT_CATEGORIES: {
   twClass: string;
 }[] = [
   { id: "Comfort", text: "Comfort Care", twClass: "patient-comfort" },
-  { id: "Stable", text: "Stable", twClass: "patient-stable" },
-  { id: "Moderate", text: "Abnormal", twClass: "patient-abnormal" },
+  { id: "Stable", text: "Mild", twClass: "patient-stable" },
+  { id: "Moderate", text: "Moderate", twClass: "patient-abnormal" },
   { id: "Critical", text: "Critical", twClass: "patient-critical" },
 ];
 
