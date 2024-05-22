@@ -93,7 +93,7 @@ export const EncounterSymptomsBuilder = (props: { showAll?: boolean }) => {
     <div className="flex w-full flex-col items-start rounded-lg border border-gray-400">
       <ul
         className={classNames(
-          "flex w-full flex-col gap-2 p-4",
+          "flex w-full flex-col p-4",
           (loading || isProcessing) && "pointer-events-none animate-pulse",
         )}
       >
@@ -157,9 +157,9 @@ const SymptomEntry = (props: {
   const disabled =
     props.disabled || symptom.clinical_impression_status === "entered-in-error";
   return (
-    <div className="flex items-center gap-2">
+    <div className="grid grid-cols-6 items-center gap-2 border-b-2 border-dashed border-gray-400 py-4 md:grid-cols-5 md:border-b-0 md:py-2">
       <DateFormField
-        className="w-36"
+        className="col-span-3 w-full md:col-span-1"
         name="onset_date"
         value={new Date(symptom.onset_date)}
         disableFuture
@@ -167,28 +167,8 @@ const SymptomEntry = (props: {
         onChange={props.onChange}
         errorClassName="hidden"
       />
-      <div
-        className={classNames(
-          "cui-input-base w-full font-medium",
-          disabled && "bg-gray-200",
-        )}
-      >
-        <span
-          className={classNames(
-            symptom.clinical_impression_status === "entered-in-error" &&
-              "line-through decoration-red-500 decoration-2",
-          )}
-        >
-          <SymptomText value={symptom} />
-        </span>
-        {symptom.clinical_impression_status === "entered-in-error" && (
-          <span className="pl-2 text-red-500 no-underline">
-            Entered in Error
-          </span>
-        )}
-      </div>
       <DateFormField
-        className="w-36"
+        className="col-span-3 w-full md:col-span-1"
         name="cure_date"
         value={symptom.cure_date ? new Date(symptom.cure_date) : undefined}
         disableFuture
@@ -199,21 +179,44 @@ const SymptomEntry = (props: {
         onChange={props.onChange}
         errorClassName="hidden"
       />
-      <ButtonV2
-        type="button"
-        variant="danger"
-        className="p-1"
-        size="small"
-        circle
-        ghost
-        border
-        onClick={props.onRemove}
-        disabled={disabled}
-        tooltip="Mark as entered in error"
-        tooltipClassName="tooltip-bottom -translate-x-2/3 md:-translate-x-1/2 translate-y-1 text-xs"
-      >
-        <CareIcon icon="l-times" className="text-lg" />
-      </ButtonV2>
+      <div className="col-span-6 flex items-center gap-2 md:col-span-3">
+        <div
+          className={classNames(
+            "cui-input-base w-full font-medium",
+            disabled && "bg-gray-200",
+          )}
+        >
+          <span
+            className={classNames(
+              "whitespace-pre-wrap",
+              symptom.clinical_impression_status === "entered-in-error" &&
+                "line-through decoration-red-500 decoration-2",
+            )}
+          >
+            <SymptomText value={symptom} />
+          </span>
+          {symptom.clinical_impression_status === "entered-in-error" && (
+            <span className="pl-2 text-red-500 no-underline">
+              Entered in Error
+            </span>
+          )}
+        </div>
+        <ButtonV2
+          type="button"
+          variant="danger"
+          className="p-1"
+          size="small"
+          circle
+          ghost
+          border
+          onClick={props.onRemove}
+          disabled={disabled}
+          tooltip="Mark as entered in error"
+          tooltipClassName="tooltip-bottom -translate-x-2/3 md:-translate-x-1/2 translate-y-1 text-xs"
+        >
+          <CareIcon icon="l-times" className="text-base md:text-lg" />
+        </ButtonV2>
+      </div>
     </div>
   );
 };
