@@ -169,7 +169,10 @@ const AssetsList = () => {
           onResult={async (text) => {
             if (text) {
               const assetId = await getAssetIdFromQR(text);
-              checkValidAssetId(assetId ?? text);
+
+              if (assetId !== undefined) {
+                checkValidAssetId(assetId);
+              }
             }
           }}
           onError={(e) => {
