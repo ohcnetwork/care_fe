@@ -5,6 +5,7 @@ import ReadMore from "../Common/components/Readmore";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { useTranslation } from "react-i18next";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
+import { AuthorizedForConsultationRelatedActions } from "../../CAREUI/misc/AuthorizedChild";
 
 export default function PrescriptionDetailCard({
   prescription,
@@ -56,33 +57,35 @@ export default function PrescriptionDetailCard({
 
             {!props.readonly &&
               prescription.prescription_type !== "DISCHARGE" && (
-                <div className="flex flex-col-reverse items-end gap-2 sm:flex-row">
-                  <ButtonV2
-                    id="administer-medicine"
-                    disabled={prescription.discontinued}
-                    onClick={props.onAdministerClick}
-                    type="button"
-                    size="small"
-                    variant="secondary"
-                    ghost
-                    border
-                  >
-                    <CareIcon icon="l-syringe" className="text-base" />
-                    {t("administer")}
-                  </ButtonV2>
-                  <ButtonV2
-                    disabled={prescription.discontinued}
-                    type="button"
-                    size="small"
-                    variant="danger"
-                    ghost
-                    border
-                    onClick={props.onDiscontinueClick}
-                  >
-                    <CareIcon icon="l-ban" className="text-base" />
-                    {t("discontinue")}
-                  </ButtonV2>
-                </div>
+                <AuthorizedForConsultationRelatedActions>
+                  <div className="flex flex-col-reverse items-end gap-2 sm:flex-row">
+                    <ButtonV2
+                      id="administer-medicine"
+                      disabled={prescription.discontinued}
+                      onClick={props.onAdministerClick}
+                      type="button"
+                      size="small"
+                      variant="secondary"
+                      ghost
+                      border
+                    >
+                      <CareIcon icon="l-syringe" className="text-base" />
+                      {t("administer")}
+                    </ButtonV2>
+                    <ButtonV2
+                      disabled={prescription.discontinued}
+                      type="button"
+                      size="small"
+                      variant="danger"
+                      ghost
+                      border
+                      onClick={props.onDiscontinueClick}
+                    >
+                      <CareIcon icon="l-ban" className="text-base" />
+                      {t("discontinue")}
+                    </ButtonV2>
+                  </div>
+                </AuthorizedForConsultationRelatedActions>
               )}
           </div>
         </div>

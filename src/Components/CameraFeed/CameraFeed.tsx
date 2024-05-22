@@ -24,6 +24,7 @@ interface Props {
   // Controls
   constrolsDisabled?: boolean;
   shortcutsDisabled?: boolean;
+  onMove?: () => void;
 }
 
 export default function CameraFeed(props: Props) {
@@ -76,7 +77,7 @@ export default function CameraFeed(props: Props) {
       },
       onError: props.onStreamError,
     });
-  }, [player.initializeStream, props.onStreamSuccess, props.onStreamError]);
+  }, [player.initializeStream]);
 
   // Start stream on mount
   useEffect(() => initializeStream(), [initializeStream]);
@@ -90,7 +91,7 @@ export default function CameraFeed(props: Props) {
     <Fullscreen fullscreen={isFullscreen} onExit={() => setFullscreen(false)}>
       <div
         className={classNames(
-          "flex flex-col overflow-clip rounded-xl bg-black",
+          "flex max-h-screen flex-col overflow-clip rounded-xl bg-black",
           props.className,
         )}
       >
@@ -180,6 +181,7 @@ export default function CameraFeed(props: Props) {
               setFullscreen={setFullscreen}
               onReset={resetStream}
               onMove={async (data) => {
+                props.onMove?.();
                 setState("moving");
                 const { res } = await operate({ type: "relative_move", data });
                 setTimeout(() => {
