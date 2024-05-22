@@ -82,12 +82,7 @@ const ShiftCard = ({ shift, filter }: any) => {
           cursor: isDragging ? "grabbing" : "grab",
         }}
       >
-        <div
-          className={classNames(
-            "flex h-full flex-col justify-between p-4",
-            shift.patient_object.disease_status == "POSITIVE" && "bg-red-50",
-          )}
-        >
+        <div className="flex h-full flex-col justify-between p-4">
           <div>
             <div className="flex justify-between">
               <div className="mb-2 text-xl font-bold capitalize">
@@ -316,7 +311,6 @@ export default function ShiftingBoard({
     filterProp.ordering,
     filterProp.is_kasp,
     filterProp.assigned_to,
-    filterProp.disease_status,
     filterProp.is_antenatal,
     filterProp.breathlessness_level,
   ]);
