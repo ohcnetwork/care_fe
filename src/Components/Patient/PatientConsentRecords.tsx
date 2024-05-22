@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   CONSENT_PATIENT_CODE_STATUS_CHOICES,
   CONSENT_TYPE_CHOICES,
@@ -18,6 +18,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import useFileUpload from "../../Utils/useFileUpload";
 import PatientConsentRecordBlockGroup from "./PatientConsentRecordBlock";
 import FilePreviewDialog from "../Common/FilePreviewDialog";
+import SwitchTabs from "../Common/components/SwitchTabs";
 
 export default function PatientConsentRecords(props: {
   facilityId: string;
@@ -26,6 +27,7 @@ export default function PatientConsentRecords(props: {
 }) {
   const { facilityId, patientId, consultationId } = props;
   const [downloadURL, setDownloadURL] = useState<string>();
+  const [showArchived, setShowArchived] = useState(false);
   const [showPCSChangeModal, setShowPCSChangeModal] = useState<number | null>(
     null,
   );
@@ -73,11 +75,13 @@ export default function PatientConsentRecords(props: {
 
   const handleConsentPCSChange = (type: number) => {
     if (!consentRecords) return;
-    setConsentRecords(
-      consentRecords.map((cr) =>
-        cr.type === 2 ? { ...cr, patient_code_status: type } : cr,
+    const randomId = "consent-" + new Date().getTime().toString();
+    setConsentRecords([
+      ...consentRecords.map((cr) =>
+        cr.type === 2 && !cr.deleted ? { ...cr, deleted: true } : cr,
       ),
-    );
+      { type: 2, patient_code_status: type, id: randomId },
+    ]);
   };
 
   const handleDeleteConsent = async () => {
@@ -86,10 +90,6 @@ export default function PatientConsentRecords(props: {
     const newRecords = consentRecords.map((cr) =>
       cr.id === consent_id ? { ...cr, deleted: true } : cr,
     );
-    await request(routes.partialUpdateConsultation, {
-      pathParams: { id: consultationId },
-      body: { consent_records: newRecords },
-    });
     setConsentRecords(newRecords);
     setShowDeleteConsent(null);
   };
@@ -184,6 +184,22 @@ export default function PatientConsentRecords(props: {
     refetch();
   };
 
+  useEffect(() => {
+    const timeout = setTimeout(async () => {
+      if (consentRecords) {
+        await request(routes.partialUpdateConsultation, {
+          pathParams: { id: consultationId },
+          body: { consent_records: consentRecords },
+        });
+      }
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, [consentRecords]);
+
+  const tabConsents = consentRecords?.filter((record) =>
+    showArchived ? record.deleted === true : !record.deleted,
+  );
+
   return (
     <Page
       title={"Patient Consent Records"}
@@ -216,10 +232,12 @@ export default function PatientConsentRecords(props: {
         show={showDeleteConsent !== null}
         onClose={() => setShowDeleteConsent(null)}
         onConfirm={handleDeleteConsent}
-        action="Delete"
+        action="Archive"
         variant="danger"
-        description={"Are you sure you want to delete this consent record?"}
-        title="Delete Consent"
+        description={
+          "Are you sure you want to archive this consent record? You can find it in the archive section."
+        }
+        title="Archive Consent"
         className="w-auto"
       />
       <ConfirmDialog
@@ -237,8 +255,8 @@ export default function PatientConsentRecords(props: {
         }}
         action="Change Patient Code Status"
         variant="danger"
-        description={`Consent records exist with the "${CONSENT_PATIENT_CODE_STATUS_CHOICES.find((c) => consentRecords?.find((c) => c.type === 2 && !c.deleted)?.patient_code_status === c.id)?.text}" patient code status. Changing this will change the existing records. Are you sure you want to proceed?`}
-        title="Change Previous Records"
+        description={`Consent records exist with the "${CONSENT_PATIENT_CODE_STATUS_CHOICES.find((c) => consentRecords?.find((c) => c.type === 2 && !c.deleted)?.patient_code_status === c.id)?.text}" patient code status. Changing this will archive the existing records. Are you sure you want to proceed?`}
+        title="Archive Previous Records"
         className="w-auto"
       />
       <div className="mt-8 flex flex-col gap-4 md:flex-row-reverse">
@@ -262,7 +280,8 @@ export default function PatientConsentRecords(props: {
                   consentRecords?.find(
                     (record) =>
                       record.type === newConsent.type &&
-                      record.patient_code_status !== e.value,
+                      record.patient_code_status !== e.value &&
+                      record.deleted !== true,
                   )
                 ) {
                   setShowPCSChangeModal(e.value);
@@ -319,18 +338,29 @@ export default function PatientConsentRecords(props: {
           </div>
         </div>
         <div className="flex-1">
+          <SwitchTabs
+            tab1="Files"
+            tab2="Archived"
+            className="mb-4"
+            onClickTab1={() => setShowArchived(false)}
+            onClickTab2={() => setShowArchived(true)}
+            isTab2Active={showArchived}
+          />
+          {tabConsents?.length === 0 && (
+            <div className="flex h-32 items-center justify-center text-gray-500">
+              No records found
+            </div>
+          )}
           <div className="flex flex-col gap-4">
-            {consentRecords
-              ?.filter((record) => record.deleted !== true)
-              .map((record, index) => (
-                <PatientConsentRecordBlockGroup
-                  key={index}
-                  consentRecord={record}
-                  previewFile={previewFile}
-                  onDelete={(record) => setShowDeleteConsent(record.id)}
-                  refreshTrigger={consultation}
-                />
-              ))}
+            {tabConsents?.map((record, index) => (
+              <PatientConsentRecordBlockGroup
+                key={index}
+                consentRecord={record}
+                previewFile={previewFile}
+                onDelete={(record) => setShowDeleteConsent(record.id)}
+                refreshTrigger={consultation}
+              />
+            ))}
           </div>
         </div>
       </div>

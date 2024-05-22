@@ -98,7 +98,7 @@ export default function useFileUpload(
       const myFile = new File([blob], `capture.${extension}`, {
         type: blob.type,
       });
-      setUploadFileName("capture");
+      setUploadFileName(uploadFileName || "capture");
       setFile(myFile);
     });
   };
@@ -111,7 +111,9 @@ export default function useFileUpload(
     const fileName = f.name;
     setFile(e.target.files[0]);
     setUploadFileName(
-      fileName.substring(0, fileName.lastIndexOf(".")) || fileName,
+      uploadFileName ||
+        fileName.substring(0, fileName.lastIndexOf(".")) ||
+        fileName,
     );
 
     const ext: string = fileName.split(".")[1];

@@ -39,29 +39,44 @@ export default function PatientConsentRecordBlockGroup(props: {
   }, [props.refreshTrigger]);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div
+      className={`flex flex-col gap-2 ${(filesQuery.data?.results.length || 0) < 1 && "hidden"}`}
+    >
       <div className="flex items-center justify-between">
-        <h4>
-          {consent?.text} {consentPCS?.text && `(${consentPCS.text})`}
-        </h4>
-        <button
-          className="text-red-500 hover:text-red-600"
-          onClick={() => props.onDelete(consentRecord)}
-        >
-          <CareIcon icon="l-trash" />
-        </button>
+        <div>
+          <h4>
+            {consent?.text} {consentPCS?.text && `(${consentPCS.text})`}
+          </h4>
+          {consentRecord.deleted && (
+            <div>
+              <div className="text-sm">
+                <CareIcon icon="l-archive" className="mr-1" />
+                Archived
+              </div>
+            </div>
+          )}
+        </div>
+        {!consentRecord.deleted && (
+          <button
+            className="text-red-500 hover:text-red-600"
+            onClick={() => props.onDelete(consentRecord)}
+          >
+            <CareIcon icon="l-archive" className="mr-1" />
+            Archive
+          </button>
+        )}
       </div>
 
       {filesQuery?.data?.results.map((file: FileUploadModel, i: number) => (
         <div
           key={i}
-          className="flex items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-2 transition-all hover:bg-gray-100"
+          className={`flex items-center justify-between rounded-lg border border-gray-300 ${consentRecord.deleted ? "text-gray-600" : "bg-white"}  px-4 py-2 transition-all hover:bg-gray-100`}
         >
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 ">
             <div>
               <CareIcon icon="l-file" className="text-5xl text-gray-600" />
             </div>
-            <div>
+            <div className="min-w-[40%] break-all">
               <div className="">
                 {file.name}
                 {file.extension} {file.is_archived && "(Archived)"}
@@ -71,7 +86,7 @@ export default function PatientConsentRecordBlockGroup(props: {
               </div>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex shrink-0 gap-2">
             <ButtonV2
               onClick={() => previewFile(file.id || "", consentRecord.id)}
               className=""
