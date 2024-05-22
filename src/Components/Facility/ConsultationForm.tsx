@@ -25,7 +25,6 @@ import { BedSelect } from "../Common/BedSelect";
 import Beds from "./Consultations/Beds";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import DateFormField from "../Form/FormFields/DateFormField";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
   FieldChangeEvent,
@@ -34,7 +33,6 @@ import {
 import { FormAction } from "../Form/Utils";
 import PatientCategorySelect from "../Patient/PatientCategorySelect";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { SymptomsSelect } from "../Common/SymptomsSelect";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
@@ -65,6 +63,12 @@ import request from "../../Utils/request/request.js";
 import routes from "../../Redux/api.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import { t } from "i18next";
+import { Writable } from "../../Utils/types.js";
+import { EncounterSymptom } from "../Symptoms/types.js";
+import {
+  EncounterSymptomsBuilder,
+  CreateSymptomsBuilder,
+} from "../Symptoms/SymptomsBuilder.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -79,9 +83,7 @@ export type ConsentRecord = {
 };
 
 type FormDetails = {
-  symptoms: number[];
-  other_symptoms: string;
-  symptoms_onset_date?: Date;
+  is_asymptomatic: boolean;
   suggestion: ConsultationSuggestionValue;
   route_to_facility?: RouteToFacility;
   patient: string;
@@ -102,6 +104,8 @@ type FormDetails = {
   treating_physician_object: UserModel | null;
   create_diagnoses: CreateDiagnosis[];
   diagnoses: ConsultationDiagnosis[];
+  symptoms: EncounterSymptom[];
+  create_symptoms: Writable<EncounterSymptom>[];
   is_kasp: BooleanStrings;
   kasp_enabled_date: null;
   examination_details: string;
@@ -129,9 +133,9 @@ type FormDetails = {
 };
 
 const initForm: FormDetails = {
+  is_asymptomatic: false,
+  create_symptoms: [],
   symptoms: [],
-  other_symptoms: "",
-  symptoms_onset_date: undefined,
   suggestion: "A",
   route_to_facility: undefined,
   patient: "",
@@ -338,10 +342,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     });
   }, []);
 
-  const hasSymptoms =
-    !!state.form.symptoms.length && !state.form.symptoms.includes(1);
-  const isOtherSymptomsSelected = state.form.symptoms.includes(9);
-
   const handleFormFieldChange: FieldChangeEventHandler<unknown> = (event) => {
     if (event.name === "suggestion" && event.value === "DD") {
       dispatch({
@@ -352,12 +352,21 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           consultation_notes: "Patient declared dead",
         },
       });
-    } else {
+      return;
+    }
+
+    if (event.name === "is_asymptomatic" && event.value === true) {
       dispatch({
         type: "set_form",
-        form: { ...state.form, [event.name]: event.value },
+        form: { ...state.form, [event.name]: event.value, create_symptoms: [] },
       });
+      return;
     }
+
+    dispatch({
+      type: "set_form",
+      form: { ...state.form, [event.name]: event.value },
+    });
   };
 
   const { loading: consultationLoading, refetch } = useQuery(
@@ -395,9 +404,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         if (data) {
           const formData = {
             ...data,
-            symptoms_onset_date:
-              data.symptoms_onset_date &&
-              isoStringToDate(data.symptoms_onset_date),
             encounter_date: isoStringToDate(data.encounter_date),
             icu_admission_date:
               data.icu_admission_date &&
@@ -458,12 +464,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
 
     Object.keys(state.form).forEach((field) => {
       switch (field) {
-        case "symptoms":
-          if (!state.form[field] || !state.form[field].length) {
-            errors[field] = "Please select the symptoms";
-            invalidForm = true;
-          }
-          return;
         case "category":
           if (!state.form[field]) {
             errors[field] = "Please select a category";
@@ -492,18 +492,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             invalidForm = true;
           }
           return;
-        case "other_symptoms":
-          if (isOtherSymptomsSelected && !state.form[field]) {
-            errors[field] = "Please enter the other symptom details";
-            invalidForm = true;
-          }
-          return;
-        case "symptoms_onset_date":
-          if (hasSymptoms && !state.form[field]) {
-            errors[field] = "Please enter date of onset of the above symptoms";
-            invalidForm = true;
-          }
-          return;
         case "encounter_date":
           if (!state.form[field]) {
             errors[field] = "Field is required";
@@ -521,6 +509,17 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         case "cause_of_death":
           if (state.form.suggestion === "DD" && !state.form[field]) {
             errors[field] = "Please enter cause of death";
+            invalidForm = true;
+          }
+          return;
+        case "create_symptoms":
+          if (
+            !isUpdate &&
+            !state.form.is_asymptomatic &&
+            state.form[field].length === 0
+          ) {
+            errors[field] =
+              "Symptoms needs to be added as the patient is symptomatic";
             invalidForm = true;
           }
           return;
@@ -702,13 +701,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
     if (validated) {
       setIsLoading(true);
       const data: any = {
-        symptoms: state.form.symptoms,
-        other_symptoms: isOtherSymptomsSelected
-          ? state.form.other_symptoms
-          : undefined,
-        symptoms_onset_date: hasSymptoms
-          ? state.form.symptoms_onset_date
-          : undefined,
         suggestion: state.form.suggestion,
         route_to_facility: state.form.route_to_facility,
         admitted: state.form.suggestion === "A",
@@ -721,6 +713,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         treatment_plan: state.form.treatment_plan,
         discharge_date: state.form.discharge_date,
         create_diagnoses: isUpdate ? undefined : state.form.create_diagnoses,
+        create_symptoms: isUpdate ? undefined : state.form.create_symptoms,
         treating_physician: state.form.treating_physician,
         investigation: state.form.InvestigationAdvice,
         procedure: state.form.procedure,
@@ -1105,41 +1098,48 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                     </div>
                   )}
 
-                  <div className="col-span-6" ref={fieldRef["symptoms"]}>
-                    <SymptomsSelect
-                      required
-                      label="Symptoms"
-                      {...field("symptoms")}
-                    />
-                  </div>
-                  {isOtherSymptomsSelected && (
-                    <div
-                      className="col-span-6"
-                      ref={fieldRef["other_symptoms"]}
-                    >
-                      <TextAreaFormField
-                        {...field("other_symptoms")}
-                        label="Other symptom details"
-                        required
-                        placeholder="Enter details of other symptoms here"
-                      />
-                    </div>
-                  )}
+                  <div
+                    className="col-span-6"
+                    id="symptoms"
+                    ref={fieldRef["create_symptoms"]}
+                  >
+                    <div className="mb-4 flex flex-col gap-4">
+                      <FieldLabel required>Symptoms</FieldLabel>
 
-                  {hasSymptoms && (
-                    <div
-                      className="col-span-6"
-                      ref={fieldRef["symptoms_onset_date"]}
-                    >
-                      <DateFormField
-                        {...field("symptoms_onset_date")}
-                        disableFuture
-                        required
-                        label="Date of onset of the symptoms"
-                        position="LEFT"
-                      />
+                      {!isUpdate && (
+                        <CheckBoxFormField
+                          className="-mt-2 ml-1"
+                          {...field("is_asymptomatic")}
+                          value={state.form.is_asymptomatic}
+                          label="Is the patient Asymptomatic?"
+                          errorClassName="hidden"
+                        />
+                      )}
+
+                      <div
+                        className={classNames(
+                          state.form.is_asymptomatic &&
+                            "pointer-events-none opacity-50",
+                        )}
+                      >
+                        {isUpdate ? (
+                          <EncounterSymptomsBuilder />
+                        ) : (
+                          <CreateSymptomsBuilder
+                            value={state.form.create_symptoms}
+                            onChange={(symptoms) => {
+                              handleFormFieldChange({
+                                name: "create_symptoms",
+                                value: symptoms,
+                              });
+                            }}
+                          />
+                        )}
+                        <FieldErrorText error={state.errors.create_symptoms} />
+                      </div>
                     </div>
-                  )}
+                  </div>
+
                   <div
                     className="col-span-6"
                     ref={fieldRef["history_of_present_illness"]}
