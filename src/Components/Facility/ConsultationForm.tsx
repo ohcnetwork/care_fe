@@ -129,7 +129,6 @@ type FormDetails = {
   death_datetime: string;
   death_confirmed_doctor: string;
   InvestigationAdvice: InvestigationType[];
-  procedures: ProcedureType[];
   consent_records: ConsentRecord[];
 };
 
@@ -180,7 +179,6 @@ const initForm: FormDetails = {
   death_datetime: "",
   death_confirmed_doctor: "",
   InvestigationAdvice: [],
-  procedures: [],
   consent_records: [],
 };
 
@@ -384,7 +382,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             (Array.isArray(data.investigation) && data.investigation) || [],
         });
         handleFormFieldChange({
-          name: "procedures",
+          name: "procedure",
           value: (Array.isArray(data.procedure) && data.procedure) || [],
         });
         if (data.suggestion === "R") {
@@ -592,7 +590,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           }
           return;
         case "procedure": {
-          for (const p of state.form.procedures) {
+          for (const p of state.form.procedure) {
             if (!p.procedure?.replace(/\s/g, "").length) {
               errors[field] = "Procedure field can not be empty";
               invalidForm = true;
@@ -718,7 +716,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         create_symptoms: isUpdate ? undefined : state.form.create_symptoms,
         treating_physician: state.form.treating_physician,
         investigation: state.form.InvestigationAdvice,
-        procedure: state.form.procedures,
+        procedure: state.form.procedure,
         patient: patientId,
         facility: facilityId,
         referred_to:
@@ -1433,11 +1431,11 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       >
                         <FieldLabel>Procedures</FieldLabel>
                         <ProcedureBuilder
-                          procedures={state.form.procedures}
-                          setProcedures={(procedures) => {
+                          procedures={state.form.procedure}
+                          setProcedures={(procedure) => {
                             handleFormFieldChange({
-                              name: "procedures",
-                              value: procedures,
+                              name: "procedure",
+                              value: procedure,
                             });
                           }}
                         />
