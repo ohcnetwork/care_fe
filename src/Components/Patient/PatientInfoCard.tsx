@@ -648,7 +648,7 @@ export default function PatientInfoCard(props: {
                   ],
                   [
                     `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/consent-records`,
-                    "Edit Consent Records",
+                    "Consent Records",
                     "l-file-medical",
                     patient.is_active,
                   ],
