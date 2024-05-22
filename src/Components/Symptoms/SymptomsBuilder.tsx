@@ -272,14 +272,15 @@ const AddSymptom = (props: {
     : true;
 
   return (
-    <div className="flex w-full items-start gap-4">
+    <div className="flex w-full flex-wrap items-start gap-4 md:flex-nowrap">
       <DateFormField
-        className="w-36"
+        className="w-full md:w-36"
         name="onset_date"
         placeholder="Date of onset"
         disableFuture
         value={onsetDate}
         onChange={({ value }) => setOnsetDate(value)}
+        errorClassName="hidden"
       />
       <div className="flex w-full flex-col gap-2">
         <AutocompleteMultiSelectFormField
@@ -312,7 +313,7 @@ const AddSymptom = (props: {
       </div>
       <ButtonV2
         type="button"
-        className="py-3"
+        className="w-full py-3 md:w-auto"
         disabled={
           processing || !hasSymptoms || !otherSymptomValid || !onsetDate
         }
