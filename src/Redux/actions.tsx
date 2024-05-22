@@ -79,22 +79,6 @@ export const getConsultation = (id: string) => {
   return fireRequest("getConsultation", [], {}, { id: id });
 };
 
-export const generateDischargeSummary = (pathParams: object) => {
-  return fireRequest("dischargeSummaryGenerate", [], {}, pathParams);
-};
-export const previewDischargeSummary = (pathParams: object) => {
-  return fireRequest(
-    "dischargeSummaryPreview",
-    [],
-    {},
-    pathParams,
-    undefined,
-    true,
-  );
-};
-export const emailDischargeSummary = (params: object, pathParams: object) => {
-  return fireRequest("dischargeSummaryEmail", [], params, pathParams);
-};
 export const dischargePatient = (params: object, pathParams: object) => {
   return fireRequest("dischargePatient", [], params, pathParams);
 };
