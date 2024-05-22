@@ -1,8 +1,10 @@
 export class PatientPrescription {
   clickAddPrescription() {
-    cy.contains("button", "Add Prescription Medication")
-      .should("be.visible")
-      .click();
+    cy.get("#add-prescription").scrollIntoView();
+    cy.verifyAndClickElement(
+      "#add-prescription",
+      "Add Prescription Medication",
+    );
   }
 
   interceptMedibase() {
@@ -14,6 +16,15 @@ export class PatientPrescription {
       "div#medicine_object input[placeholder='Select'][role='combobox']",
       medicine,
     );
+  }
+
+  clickTitratedDosage() {
+    cy.get("#titrated-dosage").click();
+  }
+
+  clickAdministerButton() {
+    cy.get("#administer-medicine").should("be.visible");
+    cy.verifyAndClickElement("#administer-medicine", "Administer");
   }
 
   selectMedicinebox() {
@@ -28,6 +39,18 @@ export class PatientPrescription {
 
   enterDosage(doseAmount: string) {
     cy.get("#base_dosage").type(doseAmount, { force: true });
+  }
+
+  enterAdministerDosage(dosage: string) {
+    cy.get("#dosage").type(dosage);
+  }
+
+  enterAdministerNotes(notes: string) {
+    cy.get("#administration_notes").type(notes);
+  }
+
+  enterTargetDosage(targetDosage: string) {
+    cy.get("#target_dosage").type(targetDosage, { force: true });
   }
 
   selectDosageFrequency(frequency: string) {
@@ -54,7 +77,10 @@ export class PatientPrescription {
   visitMedicineTab() {
     cy.get("#consultation_tab_nav").scrollIntoView();
     cy.get("#consultation_tab_nav").contains("Medicines").click();
-    cy.get("a[href='prescriptions']").first().click();
+  }
+
+  visitEditPrescription() {
+    cy.get("#edit-prescription").click();
   }
 }
 export default PatientPrescription;

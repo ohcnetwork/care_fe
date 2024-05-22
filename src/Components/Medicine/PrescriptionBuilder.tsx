@@ -83,7 +83,7 @@ export default function PrescriptionBuilder({
         className="mt-4 w-full bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900"
         disabled={disabled}
       >
-        <div className="flex w-full justify-start gap-2">
+        <div className="flex w-full justify-start gap-2" id="add-prescription">
           <CareIcon icon="l-plus" className="text-lg" />
           <span className="font-bold">
             {t(is_prn ? "add_prn_prescription" : "add_prescription_medication")}

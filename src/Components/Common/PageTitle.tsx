@@ -47,7 +47,7 @@ export default function PageTitle({
 
   useEffect(() => {
     if (divRef.current && focusOnLoad) {
-      divRef.current.scrollIntoView();
+      divRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [divRef, focusOnLoad]);
 
