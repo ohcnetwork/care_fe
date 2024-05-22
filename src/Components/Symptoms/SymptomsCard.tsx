@@ -33,9 +33,9 @@ const EncounterSymptomsCard = () => {
         Symptoms
       </h3>
 
-      <div className="grid grid-cols-2 divide-x-2 divide-dashed divide-gray-400">
+      <div className="grid gap-4 divide-y-2 divide-dashed divide-gray-400 md:grid-cols-2 md:divide-x-2 md:divide-y-0">
         <SymptomsSection title="Active" symptoms={records["in-progress"]} />
-        <div className="pl-6">
+        <div className="pt-4 md:pl-6 md:pt-0">
           <SymptomsSection title="Cured" symptoms={records["completed"]} />
         </div>
       </div>
