@@ -58,6 +58,7 @@ export default function PrescriptionDetailCard({
               prescription.prescription_type !== "DISCHARGE" && (
                 <div className="flex flex-col-reverse items-end gap-2 sm:flex-row">
                   <ButtonV2
+                    id="administer-medicine"
                     disabled={prescription.discontinued}
                     onClick={props.onAdministerClick}
                     type="button"

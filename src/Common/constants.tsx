@@ -371,8 +371,7 @@ export const CONSCIOUSNESS_LEVEL = [
     id: "ONSET_OF_AGITATION_AND_CONFUSION",
     text: "Onset of Agitation and Confusion",
   },
-  { id: "UNKNOWN", text: "Unknown" },
-];
+] as const;
 
 export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
   { id: 1, text: "CVP catheter " },
@@ -432,20 +431,12 @@ export const PATIENT_CATEGORIES: {
   twClass: string;
 }[] = [
   { id: "Comfort", text: "Comfort Care", twClass: "patient-comfort" },
-  { id: "Stable", text: "Stable", twClass: "patient-stable" },
-  { id: "Moderate", text: "Abnormal", twClass: "patient-abnormal" },
+  { id: "Stable", text: "Mild", twClass: "patient-stable" },
+  { id: "Moderate", text: "Moderate", twClass: "patient-abnormal" },
   { id: "Critical", text: "Critical", twClass: "patient-critical" },
 ];
 
 export const PATIENT_FILTER_CATEGORIES = PATIENT_CATEGORIES;
-
-export const CURRENT_HEALTH_CHANGE = [
-  { id: 0, text: "NO DATA", desc: "" },
-  { id: 3, text: "STATUS QUO", desc: "No Change" },
-  { id: 4, text: "BETTER", desc: "Better" },
-  { id: 2, text: "WORSE", desc: "Worse" },
-  { id: 1, text: "REQUIRES VENTILATOR", desc: "Requires Ventilator" },
-];
 
 export const SAMPLE_TEST_STATUS = [
   { id: 1, text: "REQUEST_SUBMITTED", desc: "Request Submitted" },
@@ -478,13 +469,6 @@ export const SAMPLE_FLOW_RULES = {
   RECEIVED_AND_FORWARED: ["RECEIVED_AT_LAB", "COMPLETED"],
   RECEIVED_AT_LAB: ["COMPLETED"],
 };
-
-export const DISEASE_STATUS = [
-  "POSITIVE",
-  "SUSPECTED",
-  "NEGATIVE",
-  "RECOVERED",
-];
 
 export const TEST_TYPE = [
   "UNK",
@@ -753,11 +737,10 @@ export const CONSULTATION_TABS = [
   { text: "ABDM", desc: "ABDM Records" },
 ];
 
-export const RHYTHM_CHOICES: Array<OptionsType> = [
-  { id: 0, text: "UNKNOWN", desc: "Unknown" },
+export const RHYTHM_CHOICES = [
   { id: 5, text: "REGULAR", desc: "Regular" },
   { id: 10, text: "IRREGULAR", desc: "Irregular" },
-];
+] as const;
 
 export const LOCATION_BED_TYPES: Array<any> = [
   { id: "ISOLATION", name: "Isolation" },

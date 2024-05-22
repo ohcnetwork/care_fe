@@ -78,14 +78,7 @@ export default function ListView() {
     return data.map((shift: any) => (
       <div key={`shift_${shift.id}`} className="mt-6 w-full">
         <div className="h-full overflow-hidden rounded-lg bg-white shadow">
-          <div
-            className={
-              "flex h-full flex-col justify-between p-4 " +
-              (shift.patient_object.disease_status == "POSITIVE"
-                ? "bg-red-50"
-                : "")
-            }
-          >
+          <div className="flex h-full flex-col justify-between p-4">
             <div>
               <div className="flex justify-between">
                 <div className="mb-2 text-xl font-bold capitalize">
