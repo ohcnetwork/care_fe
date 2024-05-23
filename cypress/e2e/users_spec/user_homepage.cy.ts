@@ -32,6 +32,7 @@ describe("User Homepage", () => {
     userPage.selectDistrict("Ernakulam");
     userPage.typeInPhoneNumber(phone_number);
     userPage.typeInAltPhoneNumber(alt_phone_number);
+    userPage.selectHomeFacility("Dummy Facility 40");
     userPage.applyFilter();
     userPage.verifyUrlafteradvancefilter();
     userPage.checkUsernameText(usernameToTest);
