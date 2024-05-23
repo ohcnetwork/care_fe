@@ -87,9 +87,6 @@ export default function CameraFeed(props: Props) {
     setState("loading");
     initializeStream();
   };
-
-  console.log({ isIOS });
-
   return (
     <Fullscreen fullscreen={isFullscreen} onExit={() => setFullscreen(false)}>
       <div
