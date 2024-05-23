@@ -11,14 +11,13 @@ import request from "../../Utils/request/request";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { ExtImage, StateInterface } from "./FileUpload";
 import { formatDateTime } from "../../Utils/utils";
 import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2 from "../Common/components/ButtonV2";
 import useFileUpload from "../../Utils/useFileUpload";
 import PatientConsentRecordBlockGroup from "./PatientConsentRecordBlock";
-import FilePreviewDialog from "../Common/FilePreviewDialog";
 import SwitchTabs from "../Common/components/SwitchTabs";
+import useFileManager from "../../Utils/useFileManager";
 
 export default function PatientConsentRecords(props: {
   facilityId: string;
@@ -26,7 +25,6 @@ export default function PatientConsentRecords(props: {
   consultationId: string;
 }) {
   const { facilityId, patientId, consultationId } = props;
-  const [downloadURL, setDownloadURL] = useState<string>();
   const [showArchived, setShowArchived] = useState(false);
   const [showPCSChangeModal, setShowPCSChangeModal] = useState<number | null>(
     null,
@@ -39,17 +37,10 @@ export default function PatientConsentRecords(props: {
   const fileUpload = useFileUpload({
     type: "CONSENT_RECORD",
   });
-  const [file_state, setFileState] = useState<StateInterface>({
-    open: false,
-    isImage: false,
-    name: "",
-    extension: "",
-    zoom: 4,
-    isZoomInDisabled: false,
-    isZoomOutDisabled: false,
-    rotation: 0,
+
+  const fileManager = useFileManager({
+    type: "CONSENT_RECORD",
   });
-  const [fileUrl, setFileUrl] = useState("");
 
   const { data: patient } = useQuery(routes.getPatient, {
     pathParams: {
@@ -90,58 +81,6 @@ export default function PatientConsentRecords(props: {
       optionLabel: (option: any) => option.text,
       optionDescription: (option: any) => option.desc,
     };
-  };
-
-  const getExtension = (url: string) => {
-    const div1 = url.split("?")[0].split(".");
-    const ext: string = div1[div1.length - 1].toLowerCase();
-    return ext;
-  };
-
-  const downloadFileUrl = (url: string) => {
-    fetch(url)
-      .then((res) => res.blob())
-      .then((blob) => {
-        setDownloadURL(URL.createObjectURL(blob));
-      });
-  };
-
-  const previewFile = async (id: string, consent_id: string) => {
-    setFileUrl("");
-    setFileState({ ...file_state, open: true });
-    const { data } = await request(routes.retrieveUpload, {
-      query: {
-        file_type: "CONSENT_RECORD",
-        associating_id: consent_id,
-      },
-      pathParams: { id },
-    });
-
-    if (!data) return;
-
-    const signedUrl = data.read_signed_url as string;
-    const extension = getExtension(signedUrl);
-
-    setFileState({
-      ...file_state,
-      open: true,
-      name: data.name as string,
-      extension,
-      isImage: ExtImage.includes(extension),
-    });
-    downloadFileUrl(signedUrl);
-    setFileUrl(signedUrl);
-  };
-
-  const handleFilePreviewClose = () => {
-    setDownloadURL("");
-    setFileState({
-      ...file_state,
-      open: false,
-      zoom: 4,
-      isZoomInDisabled: false,
-      isZoomOutDisabled: false,
-    });
   };
 
   const handleUpload = async (diffPCS?: ConsentRecord) => {
@@ -187,8 +126,8 @@ export default function PatientConsentRecords(props: {
     return () => clearTimeout(timeout);
   }, [consentRecords]);
 
-  const tabConsents = consentRecords?.filter((record) =>
-    showArchived ? record.deleted === true : !record.deleted,
+  const tabConsents = consentRecords?.filter(
+    (record) => showArchived || record.deleted !== true,
   );
 
   return (
@@ -208,17 +147,8 @@ export default function PatientConsentRecords(props: {
       }}
       backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/`}
     >
-      <FilePreviewDialog
-        show={file_state.open}
-        fileUrl={fileUrl}
-        file_state={file_state}
-        setFileState={setFileState}
-        downloadURL={downloadURL}
-        onClose={handleFilePreviewClose}
-        fixedWidth={false}
-        className="h-[80vh] w-full md:h-screen"
-      />
       <fileUpload.Dialogues />
+      {fileManager.Dialogues}
       <ConfirmDialog
         show={showDeleteConsent !== null}
         onClose={() => setShowDeleteConsent(null)}
@@ -352,9 +282,11 @@ export default function PatientConsentRecords(props: {
               <PatientConsentRecordBlockGroup
                 key={index}
                 consentRecord={record}
-                previewFile={previewFile}
+                previewFile={fileManager.viewFile}
+                archiveFile={fileManager.archiveFile}
                 onDelete={(record) => setShowDeleteConsent(record.id)}
                 refreshTrigger={consultation}
+                showArchive={showArchived}
               />
             ))}
           </div>
