@@ -15,6 +15,7 @@ import ConfirmDialog from "../Common/ConfirmDialog";
 import request from "../../Utils/request/request";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { AuthorizedForConsultationRelatedActions } from "../../CAREUI/misc/AuthorizedChild";
 
 interface MedicineAdministeredEvent extends TimelineEvent<"administered"> {
   administration: MedicineAdministrationRecord;
@@ -131,15 +132,17 @@ const MedicineAdministeredNode = ({
         actions={
           !event.cancelled &&
           !hideArchive && (
-            <ButtonV2
-              size="small"
-              border
-              ghost
-              variant="secondary"
-              onClick={() => setShowArchiveConfirmation(true)}
-            >
-              Archive
-            </ButtonV2>
+            <AuthorizedForConsultationRelatedActions>
+              <ButtonV2
+                size="small"
+                border
+                ghost
+                variant="secondary"
+                onClick={() => setShowArchiveConfirmation(true)}
+              >
+                Archive
+              </ButtonV2>
+            </AuthorizedForConsultationRelatedActions>
           )
         }
         isLast={isLastNode}

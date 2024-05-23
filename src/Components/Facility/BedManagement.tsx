@@ -5,13 +5,14 @@ import { ReactElement } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
 import BedDeleteDialog from "./BedDeleteDialog";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import Page from "../Common/components/Page";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import useFilters from "../../Common/hooks/useFilters";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 const Loading = lazy(() => import("../Common/Loading"));
 
 interface BedManagementProps {
@@ -45,13 +46,17 @@ const BedRow = (props: BedRowProps) => {
     show: boolean;
     name: string;
   }>({ show: false, name: "" });
-
+  const authUser = useAuthUser();
   const handleDelete = (name: string, _id: string) => {
     setBedData({
       show: true,
       name,
     });
   };
+
+  const allowedUser = ["DistrictAdmin", "StateAdmin"].includes(
+    authUser.user_type,
+  );
 
   const handleDeleteConfirm = async () => {
     const { res } = await request(routes.deleteFacilityBed, {
@@ -126,14 +131,19 @@ const BedRow = (props: BedRowProps) => {
           <ButtonV2
             id="delete-bed-button"
             onClick={() => handleDelete(name, id)}
-            authorizeFor={NonReadOnlyUsers}
+            authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
             variant="danger"
             border
             ghost
             className="w-full lg:w-auto"
-            disabled={isOccupied}
-            tooltip={isOccupied ? "Bed is occupied" : undefined}
-            tooltipClassName="w-full lg:w-auto"
+            tooltip={
+              !allowedUser
+                ? "Contact your admin to delete the bed"
+                : isOccupied
+                  ? "Bed is occupied"
+                  : undefined
+            }
+            tooltipClassName=" text-xs w-full lg:w-auto"
           >
             <CareIcon icon="l-trash-alt" className="text-lg" />
             Delete
