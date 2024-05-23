@@ -40,6 +40,9 @@ export default function PatientConsentRecords(props: {
 
   const fileManager = useFileManager({
     type: "CONSENT_RECORD",
+    onArchive: async () => {
+      refetch();
+    },
   });
 
   const { data: patient } = useQuery(routes.getPatient, {

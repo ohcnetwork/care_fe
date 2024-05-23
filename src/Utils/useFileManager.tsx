@@ -9,9 +9,11 @@ import CareIcon from "../CAREUI/icons/CareIcon";
 import TextAreaFormField from "../Components/Form/FormFields/TextAreaFormField";
 import { Cancel, Submit } from "../Components/Common/components/ButtonV2";
 import { formatDateTime } from "./utils";
+import * as Notification from "./Notifications.js";
 
 export interface FileManagerOptions {
   type: string;
+  onArchive?: () => void;
 }
 
 export interface FileManagerResult {
@@ -111,8 +113,7 @@ export default function useFileManager(
     });
 
     if (res?.ok) {
-      //fetchData();
-      //Notification.Success({ msg: "File archived successfully" });
+      Notification.Success({ msg: "File archived successfully" });
     }
 
     setArchiveDialogueOpen(null);
