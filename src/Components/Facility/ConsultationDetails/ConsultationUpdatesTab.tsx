@@ -249,7 +249,6 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         <div className="overflow-x-auto overflow-y-hidden">
                           <PrescriptionsTable
                             is_prn={false}
-                            readonly
                             prescription_type="DISCHARGE"
                           />
                         </div>
@@ -257,7 +256,6 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         <div className="overflow-x-auto overflow-y-hidden">
                           <PrescriptionsTable
                             is_prn
-                            readonly
                             prescription_type="DISCHARGE"
                           />
                         </div>
