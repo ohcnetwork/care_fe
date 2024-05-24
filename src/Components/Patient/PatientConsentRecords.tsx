@@ -26,6 +26,7 @@ export default function PatientConsentRecords(props: {
 }) {
   const { facilityId, patientId, consultationId } = props;
   const [showArchived, setShowArchived] = useState(false);
+  const [filesFound, setFilesFound] = useState(false);
   const [showPCSChangeModal, setShowPCSChangeModal] = useState<number | null>(
     null,
   );
@@ -132,6 +133,10 @@ export default function PatientConsentRecords(props: {
   const tabConsents = consentRecords?.filter(
     (record) => showArchived || record.deleted !== true,
   );
+
+  useEffect(() => {
+    setFilesFound(false);
+  }, [showArchived]);
 
   return (
     <Page
@@ -275,11 +280,12 @@ export default function PatientConsentRecords(props: {
           </div>
         </div>
         <div className="flex-1">
-          {tabConsents?.length === 0 && (
-            <div className="flex h-32 items-center justify-center text-gray-500">
-              No records found
-            </div>
-          )}
+          {tabConsents?.length === 0 ||
+            (!filesFound && (
+              <div className="flex h-32 items-center justify-center text-gray-500">
+                No records found
+              </div>
+            ))}
           <div className="flex flex-col gap-4">
             {tabConsents?.map((record, index) => (
               <PatientConsentRecordBlockGroup
@@ -290,6 +296,7 @@ export default function PatientConsentRecords(props: {
                 onDelete={(record) => setShowDeleteConsent(record.id)}
                 refreshTrigger={consultation}
                 showArchive={showArchived}
+                onFilesFound={() => setFilesFound(true)}
               />
             ))}
           </div>

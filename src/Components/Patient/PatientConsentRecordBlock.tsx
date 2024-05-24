@@ -10,6 +10,7 @@ import { FileUploadModel } from "./models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { useEffect } from "react";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
 export default function PatientConsentRecordBlockGroup(props: {
   consentRecord: ConsentRecord;
@@ -18,6 +19,7 @@ export default function PatientConsentRecordBlockGroup(props: {
   onDelete: (consentRecord: ConsentRecord) => void;
   refreshTrigger: any;
   showArchive: boolean;
+  onFilesFound: () => void;
 }) {
   const {
     consentRecord,
@@ -26,6 +28,8 @@ export default function PatientConsentRecordBlockGroup(props: {
     refreshTrigger,
     showArchive,
   } = props;
+
+  const authUser = useAuthUser();
 
   const filesQuery = useQuery(routes.viewUpload, {
     query: {
@@ -63,6 +67,12 @@ export default function PatientConsentRecordBlockGroup(props: {
     filesQuery.refetch();
     archivedFilesQuery.refetch();
   }, [refreshTrigger]);
+
+  useEffect(() => {
+    if ((data?.length || 0) > 1) {
+      props.onFilesFound();
+    }
+  }, [data]);
 
   return (
     <div
@@ -124,16 +134,20 @@ export default function PatientConsentRecordBlockGroup(props: {
                 View
               </ButtonV2>
             )}
-            <ButtonV2
-              variant={file.is_archived ? "primary" : "secondary"}
-              onClick={() => archiveFile(file, consentRecord.id)}
-              className=""
-            >
-              <CareIcon
-                icon={file.is_archived ? "l-info-circle" : "l-archive"}
-              />
-              {file.is_archived ? "More Info" : "Archive"}
-            </ButtonV2>
+            {(file?.uploaded_by?.username === authUser.username ||
+              authUser.user_type === "DistrictAdmin" ||
+              authUser.user_type === "StateAdmin") && (
+              <ButtonV2
+                variant={file.is_archived ? "primary" : "secondary"}
+                onClick={() => archiveFile(file, consentRecord.id)}
+                className=""
+              >
+                <CareIcon
+                  icon={file.is_archived ? "l-info-circle" : "l-archive"}
+                />
+                {file.is_archived ? "More Info" : "Archive"}
+              </ButtonV2>
+            )}
           </div>
         </div>
       ))}
