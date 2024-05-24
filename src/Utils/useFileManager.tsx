@@ -25,7 +25,7 @@ export interface FileManagerResult {
 export default function useFileManager(
   options: FileManagerOptions,
 ): FileManagerResult {
-  const { type: fileType } = options;
+  const { type: fileType, onArchive } = options;
 
   const [file_state, setFileState] = useState<StateInterface>({
     open: false,
@@ -118,6 +118,7 @@ export default function useFileManager(
 
     setArchiveDialogueOpen(null);
     setArchiving(false);
+    onArchive && onArchive();
     return res;
   };
 
