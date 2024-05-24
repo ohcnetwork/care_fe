@@ -52,7 +52,6 @@ export const FacilityHome = (props: any) => {
   const [editCoverImage, setEditCoverImage] = useState(false);
   const [imageKey, setImageKey] = useState(Date.now());
   const authUser = useAuthUser();
-  console.log("hell", props);
   useMessageListener((data) => console.log(data));
 
   const {

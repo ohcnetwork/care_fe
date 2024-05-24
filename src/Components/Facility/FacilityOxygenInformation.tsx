@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 import { OXYGEN_TYPES } from "../../Common/constants";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import DialogModal from "../Common/Dialog";
@@ -14,7 +14,7 @@ export const FacilityOxygenInformation = ({
 }: any) => {
   const [oxygenDetailsModalOpen, setOxygenDetailsModalOpen] = useState(false);
 
-  let capacityList: any = null;
+  let capacityList: ReactElement | null = null;
   const totalOxygen =
     facilityData?.oxygen_capacity +
     facilityData?.type_b_cylinders +
@@ -92,9 +92,7 @@ export const FacilityOxygenInformation = ({
             label={OXYGEN_TYPES[3].text}
             used={facilityData?.expected_type_d_cylinders}
             total={facilityData?.type_d_cylinders}
-            handleUpdate={() => {
-              facilityFetch();
-            }}
+            handleUpdate={() => facilityFetch()}
             facilityData={facilityData}
           />
         )}
@@ -136,10 +134,7 @@ export const FacilityOxygenInformation = ({
             facilityId={facilityId}
             facilityData={facilityData}
             handleClose={() => setOxygenDetailsModalOpen(false)}
-            handleUpdate={() => {
-              facilityFetch();
-              return;
-            }}
+            handleUpdate={() => facilityFetch()}
           />
         </DialogModal>
       )}
