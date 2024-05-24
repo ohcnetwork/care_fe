@@ -390,6 +390,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             ward: data.ward_object ? data.ward_object.id : undefined,
             village: data.village ? data.village : "",
             medical_history: [] as number[],
+            tb_status: undefined,
+            tb_duration: undefined,
+            cancer_type: undefined,
             is_antenatal: String(!!data.is_antenatal),
             last_menstruation_start_date: data.last_menstruation_start_date,
             date_of_delivery: data.date_of_delivery,
@@ -439,11 +442,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 formData.medical_history.push(Number(medicalHistory.id));
                 (formData as any)[`medical_history_${medicalHistory.id}`] =
                   i.details;
-                if (medicalHistory.id === 12) {
-                  (formData as any)["tb_status"] = i.status;
-                  (formData as any)["tb_duration"] = i.duration;
+
+                if (medicalHistory.id === 7) {
+                  // Cancer
+                  formData["cancer_type"] = i.type;
                 } else if (medicalHistory.id === 14) {
-                  (formData as any)["cancer_type"] = i.type;
+                  // TB
+                  formData["tb_status"] = i.status;
+                  formData["tb_duration"] = i.duration;
                 }
               }
             },
@@ -675,18 +681,20 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       const medData = MEDICAL_HISTORY_CHOICES.find((i) => i.id === id);
       if (medData) {
         const details = formData[`medical_history_${medData.id}`];
-        if (medData.id === 12) {
+        if (medData.id === 7) {
+          // Cancer
           medical_history.push({
             disease: medData.text,
             details: details ? details : "",
-            status: formData["tb_status"] ?? undefined,
-            duration: Number(formData["tb_duration"]) ?? undefined,
+            type: formData["cancer_type"],
           });
         } else if (medData.id === 14) {
+          // TB
           medical_history.push({
             disease: medData.text,
             details: details ? details : "",
-            type: formData["cancer_type"] ?? undefined,
+            status: formData["tb_status"],
+            duration: Number(formData["tb_duration"]),
           });
         } else {
           medical_history.push({
@@ -964,9 +972,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     const textField = `medical_history_${id}`;
     const filteredCancerHistoryChoices = CANCER_HISTORY_CHOICES.filter((i) => {
       const gender = field("gender").value;
+
       if (gender === 1) {
+        // If male then remove breast and uterus cancer
         return i.id !== 1 && i.id !== 5;
       } else if (gender === 2) {
+        // if female then remove prostate cancer
         return i.id !== 8;
       } else {
         return true;
@@ -983,35 +994,35 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             label={id !== 1 ? title : "NONE"}
           />
         </div>
-        {/* TB */}
-        {id === 12 && (field("medical_history").value ?? []).includes(id) && (
-          <div>
-            <SelectFormField
-              {...field("tb_status")}
-              position="above"
-              placeholder={"Status"}
-              options={["Active", "Old"]}
-              optionLabel={(o: any) => o}
-              optionValue={(o: any) => o}
-            />
-            <TextFormField
-              {...field("tb_duration")}
-              placeholder="Duration"
-              min={0}
-              type={"number"}
-            />
-          </div>
-        )}
         {/* Cancer */}
-        {id === 14 && (field("medical_history").value ?? []).includes(id) && (
+        {id === 7 && (field("medical_history").value ?? []).includes(id) && (
           <div className="mx-4">
             <SelectFormField
               {...field("cancer_type")}
               position="above"
               placeholder="Cancer Type"
               options={filteredCancerHistoryChoices}
-              optionLabel={(o) => o}
-              optionValue={(o) => o}
+              optionLabel={(o: string) => o}
+              optionValue={(o: string) => o}
+            />
+          </div>
+        )}
+        {/* TB */}
+        {id === 14 && (field("medical_history").value ?? []).includes(id) && (
+          <div>
+            <SelectFormField
+              {...field("tb_status")}
+              position="above"
+              placeholder={"Status"}
+              options={["Active", "Old"]}
+              optionLabel={(o: string) => o}
+              optionValue={(o: string) => o}
+            />
+            <TextFormField
+              {...field("tb_duration")}
+              placeholder="Duration"
+              min={0}
+              type={"number"}
             />
           </div>
         )}
