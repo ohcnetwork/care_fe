@@ -115,20 +115,24 @@ export default function PatientConsentRecordBlockGroup(props: {
             </div>
           </div>
           <div className="flex shrink-0 gap-2">
+            {!file.is_archived && (
+              <ButtonV2
+                onClick={() => previewFile(file, consentRecord.id)}
+                className=""
+              >
+                <CareIcon icon="l-eye" />
+                View
+              </ButtonV2>
+            )}
             <ButtonV2
-              onClick={() => previewFile(file, consentRecord.id)}
-              className=""
-            >
-              <CareIcon icon="l-eye" />
-              View
-            </ButtonV2>
-            <ButtonV2
-              variant="secondary"
+              variant={file.is_archived ? "primary" : "secondary"}
               onClick={() => archiveFile(file, consentRecord.id)}
               className=""
             >
-              <CareIcon icon="l-archive" />
-              Archive
+              <CareIcon
+                icon={file.is_archived ? "l-info-circle" : "l-archive"}
+              />
+              {file.is_archived ? "More Info" : "Archive"}
             </ButtonV2>
           </div>
         </div>
