@@ -134,7 +134,8 @@ export default function PatientConsentRecordBlockGroup(props: {
                 View
               </ButtonV2>
             )}
-            {(file?.uploaded_by?.username === authUser.username ||
+            {(file.is_archived ||
+              file?.uploaded_by?.username === authUser.username ||
               authUser.user_type === "DistrictAdmin" ||
               authUser.user_type === "StateAdmin") && (
               <ButtonV2
