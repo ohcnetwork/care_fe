@@ -293,7 +293,7 @@ describe("Patient Consultation in multiple combination", () => {
     );
     // verify the free text in referring facility name
     patientConsultationPage.typeReferringFacility("Life Care Hospital");
-    // Vomiting and Nausea symptoms
+    patientConsultationPage.selectSymptomsDate("01012024");
     patientConsultationPage.typeAndMultiSelectSymptoms("s", [
       "Sore throat",
       "Sputum",
@@ -301,11 +301,6 @@ describe("Patient Consultation in multiple combination", () => {
     patientConsultationPage.clickAddSymptom();
     // Stable category
     patientConsultationPage.selectPatientCategory("Mild");
-    // Date of symptoms
-    patientConsultationPage.selectSymptomsDate(
-      "#symptoms_onset_date",
-      "01012024",
-    );
     // OP Consultation
     patientConsultationPage.selectPatientSuggestion("OP Consultation");
     // one ICD-11 and no principal
@@ -343,6 +338,7 @@ describe("Patient Consultation in multiple combination", () => {
       "Outpatient/Emergency Room",
     );
     // Select the Symptoms - Breathlessness and Bleeding symptoms
+    patientConsultationPage.selectSymptomsDate("01012024");
     patientConsultationPage.typeAndMultiSelectSymptoms("b", [
       "Breathlessness",
       "Bleeding",
@@ -351,10 +347,6 @@ describe("Patient Consultation in multiple combination", () => {
     // Comfort Care category
     patientConsultationPage.selectPatientCategory("Comfort Care");
     // Date of symptoms
-    patientConsultationPage.selectSymptomsDate(
-      "#symptoms_onset_date",
-      "01012024",
-    );
     // Decision after consultation - Referred to Facility
     patientConsultationPage.selectPatientSuggestion(
       "Refer to another Hospital",

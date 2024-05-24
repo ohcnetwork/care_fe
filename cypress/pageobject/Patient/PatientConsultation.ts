@@ -9,8 +9,8 @@ export class PatientConsultationPage {
   typeAndMultiSelectSymptoms(input, symptoms) {
     cy.typeAndMultiSelectOption("#additional_symptoms", input, symptoms);
   }
-  selectSymptomsDate(selector: string, date: string) {
-    cy.clickAndTypeDate(selector, date);
+  selectSymptomsDate(date: string) {
+    cy.clickAndTypeDate("#symptoms_onset_date", date);
   }
   clickAddSymptom() {
     cy.get("#add-symptom").click();
