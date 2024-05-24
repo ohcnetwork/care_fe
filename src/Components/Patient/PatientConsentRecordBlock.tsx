@@ -82,6 +82,7 @@ export default function PatientConsentRecordBlockGroup(props: {
             </div>
           )}
         </div>
+        {/*
         {!consentRecord.deleted && !showArchive && (
           <button
             className="text-red-500 hover:text-red-600"
@@ -91,12 +92,13 @@ export default function PatientConsentRecordBlockGroup(props: {
             Archive
           </button>
         )}
+      */}
       </div>
 
       {data?.map((file: FileUploadModel, i: number) => (
         <div
           key={i}
-          className={`flex items-center justify-between rounded-lg border border-gray-300 ${file.archived_datetime ? "text-gray-600" : "bg-white"}  px-4 py-2 transition-all hover:bg-gray-100`}
+          className={`flex items-center justify-between rounded-lg border border-gray-300 ${showArchive ? "text-gray-600" : "bg-white"}  px-4 py-2 transition-all hover:bg-gray-100`}
         >
           <div className="flex items-center gap-4 ">
             <div>

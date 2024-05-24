@@ -186,6 +186,14 @@ export default function PatientConsentRecords(props: {
         title="Archive Previous Records"
         className="w-auto"
       />
+      <SwitchTabs
+        tab1="Files"
+        tab2="Archived"
+        className="my-4"
+        onClickTab1={() => setShowArchived(false)}
+        onClickTab2={() => setShowArchived(true)}
+        isTab2Active={showArchived}
+      />
       <div className="mt-8 flex flex-col gap-4 md:flex-row-reverse">
         <div className="shrink-0 md:w-[350px]">
           <h4 className="font-black">Add New Record</h4>
@@ -267,14 +275,6 @@ export default function PatientConsentRecords(props: {
           </div>
         </div>
         <div className="flex-1">
-          <SwitchTabs
-            tab1="Files"
-            tab2="Archived"
-            className="mb-4"
-            onClickTab1={() => setShowArchived(false)}
-            onClickTab2={() => setShowArchived(true)}
-            isTab2Active={showArchived}
-          />
           {tabConsents?.length === 0 && (
             <div className="flex h-32 items-center justify-center text-gray-500">
               No records found
