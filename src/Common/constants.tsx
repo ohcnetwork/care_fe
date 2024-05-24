@@ -1308,7 +1308,7 @@ export const CONSENT_PATIENT_CODE_STATUS_CHOICES = [
   { id: 1, text: "Do Not Hospitalise (DNH)" },
   { id: 2, text: "Do Not Resuscitate (DNR)" },
   { id: 3, text: "Comfort Care Only" },
-  { id: 4, text: "Active treatment (Default)" },
+  { id: 4, text: "Active treatment" },
 ];
 export const OCCUPATION_TYPES = [
   {
