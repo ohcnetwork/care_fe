@@ -282,7 +282,7 @@ export const Login = (props: { forgot?: boolean }) => {
                   forgotPassword && "hidden",
                 )}
               >
-                <div className="mb-8 w-[300px] text-4xl font-black text-primary-600">
+                <div className="mb-8 w-[300px] break-all text-4xl font-black text-primary-600">
                   {t("auth_login_title")}
                 </div>
                 <form onSubmit={handleSubmit}>
