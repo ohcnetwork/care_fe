@@ -23,9 +23,14 @@ export default {
   }: any) => (
     <ConsultationForm facilityId={facilityId} patientId={patientId} id={id} />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:id/consent-records": ({ facilityId, patientId, id }: any) => (
-    <PatientConsentRecords facilityId={facilityId} patientId={patientId} consultationId={id} />
-  ),
+  "/facility/:facilityId/patient/:patientId/consultation/:id/consent-records":
+    ({ facilityId, patientId, id }: any) => (
+      <PatientConsentRecords
+        facilityId={facilityId}
+        patientId={patientId}
+        consultationId={id}
+      />
+    ),
   "/facility/:facilityId/patient/:patientId/consultation/:id/files/": ({
     facilityId,
     patientId,
