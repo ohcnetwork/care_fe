@@ -132,13 +132,9 @@ export default function ConsultationMedicineLogs({
   const getDetailsMessage = (prescription: Prescription) => {
     const message = `Details: ${
       prescription.base_dosage != null
-        ? `Base Dosage: ${prescription.base_dosage}, `
+        ? `${prescription.dosage_type === "TITRATED" ? "Start Dosage" : "Dosage"}: ${prescription.base_dosage}, `
         : ""
     }${prescription.route != null ? `Route: ${prescription.route}, ` : ""}${
-      prescription.dosage_type != null
-        ? `Dosage Type: ${prescription.dosage_type}, `
-        : ""
-    }${
       prescription.target_dosage != null
         ? `Target Dosage: ${prescription.target_dosage}, `
         : ""
@@ -163,8 +159,8 @@ export default function ConsultationMedicineLogs({
         ? `Min Hours Between Doses: ${prescription.min_hours_between_doses}, `
         : ""
     }${prescription.discontinued ? "Discontinued: Yes, " : ""}${
-      prescription.prescription_type
-        ? `Prescription Type: ${prescription.prescription_type}, `
+      prescription.dosage_type
+        ? `Prescription Type: ${prescription.dosage_type}, `
         : ""
     }`.replace(/, $/, "");
 
