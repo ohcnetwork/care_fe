@@ -102,7 +102,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                         {value.icon}
                       </div>
                     )}
-                    <p className="ml-2.5 whitespace-nowrap break-all text-sm font-medium">
+                    <p className="ml-2.5 whitespace-pre-wrap text-start text-sm font-medium">
                       {value.selectedLabel}
                     </p>
                   </div>

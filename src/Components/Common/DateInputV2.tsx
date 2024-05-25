@@ -8,7 +8,13 @@ import * as Notification from "../../Utils/Notifications.js";
 import { t } from "i18next";
 
 type DatePickerType = "date" | "month" | "year";
-export type DatePickerPosition = "LEFT" | "RIGHT" | "CENTER";
+export type DatePickerPosition =
+  | "LEFT"
+  | "RIGHT"
+  | "CENTER"
+  | "TOP-LEFT"
+  | "TOP-RIGHT"
+  | "TOP-CENTER";
 
 interface Props {
   id?: string;
@@ -223,6 +229,12 @@ const DateInputV2: React.FC<Props> = ({
         return "right-0 transform translate-x-1/2";
       case "CENTER":
         return "transform -translate-x-1/2";
+      case "TOP-LEFT":
+        return "bottom-full left-full";
+      case "TOP-RIGHT":
+        return "bottom-full right-0";
+      case "TOP-CENTER":
+        return "bottom-full left-1/2 transform -translate-x-1/2";
       default:
         return "left-0";
     }
@@ -260,11 +272,18 @@ const DateInputV2: React.FC<Props> = ({
                 <Popover.Panel
                   static
                   className={classNames(
-                    "cui-dropdown-base absolute mt-0.5 w-72 divide-y-0 p-4",
+                    "cui-dropdown-base absolute my-0.5 w-72 divide-y-0 rounded p-4",
                     getPosition(),
                   )}
                 >
-                  <div className="mb-4 flex w-full flex-col items-center justify-between">
+                  <div
+                    className={classNames(
+                      "flex w-full items-center justify-between gap-y-4",
+                      position?.includes("TOP")
+                        ? "flex-col-reverse"
+                        : "flex-col",
+                    )}
+                  >
                     <input
                       id="date-input"
                       autoFocus
@@ -287,166 +306,174 @@ const DateInputV2: React.FC<Props> = ({
                         }
                       }}
                     />
-                    <div className="mt-4 flex">
-                      <button
-                        type="button"
-                        disabled={
-                          !isDateWithinConstraints(
-                            getLastDay(),
-                            datePickerHeaderDate.getMonth() - 1,
-                          )
-                        }
-                        className="inline-flex aspect-square cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-gray-300"
-                        onClick={decrement}
-                      >
-                        <CareIcon icon="l-angle-left-b" className="text-lg" />
-                      </button>
-
-                      <div className="flex items-center justify-center text-sm">
-                        {type === "date" && (
-                          <div
-                            onClick={showMonthPicker}
-                            className="cursor-pointer rounded px-3 py-1 text-center font-medium text-black hover:bg-gray-300"
-                          >
-                            {dayjs(datePickerHeaderDate).format("MMMM")}
-                          </div>
-                        )}
-                        <div
-                          onClick={showYearPicker}
-                          className="cursor-pointer rounded px-3 py-1 font-medium text-black hover:bg-gray-300"
+                    <div className="flex w-full flex-col items-center justify-between">
+                      <div className="flex">
+                        <button
+                          type="button"
+                          disabled={
+                            !isDateWithinConstraints(
+                              getLastDay(),
+                              datePickerHeaderDate.getMonth() - 1,
+                            )
+                          }
+                          className="inline-flex aspect-square cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-gray-300"
+                          onClick={decrement}
                         >
-                          <p className="text-center">
-                            {type == "year"
-                              ? year.getFullYear()
-                              : dayjs(datePickerHeaderDate).format("YYYY")}
-                          </p>
+                          <CareIcon icon="l-angle-left-b" className="text-lg" />
+                        </button>
+
+                        <div className="flex items-center justify-center text-sm">
+                          {type === "date" && (
+                            <div
+                              onClick={showMonthPicker}
+                              className="cursor-pointer rounded px-3 py-1 text-center font-medium text-black hover:bg-gray-300"
+                            >
+                              {dayjs(datePickerHeaderDate).format("MMMM")}
+                            </div>
+                          )}
+                          <div
+                            onClick={showYearPicker}
+                            className="cursor-pointer rounded px-3 py-1 font-medium text-black hover:bg-gray-300"
+                          >
+                            <p className="text-center">
+                              {type == "year"
+                                ? year.getFullYear()
+                                : dayjs(datePickerHeaderDate).format("YYYY")}
+                            </p>
+                          </div>
                         </div>
+                        <button
+                          type="button"
+                          disabled={
+                            (type === "year" &&
+                              new Date().getFullYear() ===
+                                year.getFullYear()) ||
+                            !isDateWithinConstraints(getLastDay())
+                          }
+                          className="inline-flex aspect-square cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-gray-300"
+                          onClick={increment}
+                        >
+                          <CareIcon
+                            icon="l-angle-right-b"
+                            className="text-lg"
+                          />
+                        </button>
                       </div>
-                      <button
-                        type="button"
-                        disabled={
-                          (type === "year" &&
-                            new Date().getFullYear() === year.getFullYear()) ||
-                          !isDateWithinConstraints(getLastDay())
-                        }
-                        className="inline-flex aspect-square cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-gray-300"
-                        onClick={increment}
-                      >
-                        <CareIcon icon="l-angle-right-b" className="text-lg" />
-                      </button>
+
+                      {type === "date" && (
+                        <>
+                          <div className="flex w-full flex-wrap">
+                            {DAYS.map((day, i) => (
+                              <div
+                                key={day}
+                                id={`day-${i}`}
+                                className="aspect-square w-[14.26%]"
+                              >
+                                <div className="text-center text-sm font-medium text-gray-800">
+                                  {day}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="flex flex-wrap">
+                            {blankDays.map((_, i) => (
+                              <div
+                                key={i}
+                                className="aspect-square w-[14.26%] border border-transparent p-1 text-center text-sm"
+                              />
+                            ))}
+                            {dayCount.map((d, i) => {
+                              const withinConstraints =
+                                isDateWithinConstraints(d);
+                              const selected = value && isSelectedDate(d);
+
+                              const baseClasses =
+                                "flex h-full items-center justify-center rounded text-center text-sm leading-loose transition duration-100 ease-in-out";
+                              let conditionalClasses = "";
+
+                              if (withinConstraints) {
+                                if (selected) {
+                                  conditionalClasses =
+                                    "bg-primary-500 font-bold text-white";
+                                } else {
+                                  conditionalClasses =
+                                    "hover:bg-gray-300 cursor-pointer";
+                                }
+                              } else {
+                                conditionalClasses =
+                                  "!cursor-not-allowed !text-gray-400";
+                              }
+                              return (
+                                <div
+                                  key={i}
+                                  id={`date-${d}`}
+                                  className="aspect-square w-[14.26%]"
+                                >
+                                  <div
+                                    onClick={setDateValue(d, close)}
+                                    className={`${baseClasses} ${conditionalClasses}`}
+                                  >
+                                    {d}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </>
+                      )}
+                      {type === "month" && (
+                        <div className="flex flex-wrap">
+                          {Array(12)
+                            .fill(null)
+                            .map((_, i) => (
+                              <div
+                                key={i}
+                                id={`month-${i}`}
+                                className={classNames(
+                                  "w-1/4 cursor-pointer rounded-lg px-2 py-4 text-center text-sm font-semibold",
+                                  value && isSelectedMonth(i)
+                                    ? "bg-primary-500 text-white"
+                                    : "text-gray-700 hover:bg-gray-300",
+                                )}
+                                onClick={setMonthValue(i)}
+                              >
+                                {dayjs(
+                                  new Date(
+                                    datePickerHeaderDate.getFullYear(),
+                                    i,
+                                    1,
+                                  ),
+                                ).format("MMM")}
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                      {type === "year" && (
+                        <div className="flex flex-wrap">
+                          {Array(12)
+                            .fill(null)
+                            .map((_, i) => {
+                              const y = year.getFullYear() - 11 + i;
+                              return (
+                                <div
+                                  key={i}
+                                  id={`year-${i}`}
+                                  className={classNames(
+                                    "w-1/4 cursor-pointer rounded-lg px-2 py-4 text-center text-sm font-semibold",
+                                    value && isSelectedYear(y)
+                                      ? "bg-primary-500 text-white"
+                                      : "text-gray-700 hover:bg-gray-300",
+                                  )}
+                                  onClick={setYearValue(y)}
+                                >
+                                  {y}
+                                </div>
+                              );
+                            })}
+                        </div>
+                      )}
                     </div>
                   </div>
-                  {type === "date" && (
-                    <>
-                      <div className="mb-3 flex flex-wrap">
-                        {DAYS.map((day, i) => (
-                          <div
-                            key={day}
-                            id={`day-${i}`}
-                            className="aspect-square w-[14.26%]"
-                          >
-                            <div className="text-center text-sm font-medium text-gray-800">
-                              {day}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="flex flex-wrap">
-                        {blankDays.map((_, i) => (
-                          <div
-                            key={i}
-                            className="aspect-square w-[14.26%] border border-transparent p-1 text-center text-sm"
-                          />
-                        ))}
-                        {dayCount.map((d, i) => {
-                          const withinConstraints = isDateWithinConstraints(d);
-                          const selected = value && isSelectedDate(d);
-
-                          const baseClasses =
-                            "flex h-full items-center justify-center rounded text-center text-sm leading-loose transition duration-100 ease-in-out";
-                          let conditionalClasses = "";
-
-                          if (withinConstraints) {
-                            if (selected) {
-                              conditionalClasses =
-                                "bg-primary-500 font-bold text-white";
-                            } else {
-                              conditionalClasses =
-                                "hover:bg-gray-300 cursor-pointer";
-                            }
-                          } else {
-                            conditionalClasses =
-                              "!cursor-not-allowed !text-gray-400";
-                          }
-                          return (
-                            <div
-                              key={i}
-                              id={`date-${d}`}
-                              className="aspect-square w-[14.26%]"
-                            >
-                              <div
-                                onClick={setDateValue(d, close)}
-                                className={`${baseClasses} ${conditionalClasses}`}
-                              >
-                                {d}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </>
-                  )}
-                  {type === "month" && (
-                    <div className="flex flex-wrap">
-                      {Array(12)
-                        .fill(null)
-                        .map((_, i) => (
-                          <div
-                            key={i}
-                            id={`month-${i}`}
-                            className={classNames(
-                              "w-1/4 cursor-pointer rounded-lg px-2 py-4 text-center text-sm font-semibold",
-                              value && isSelectedMonth(i)
-                                ? "bg-primary-500 text-white"
-                                : "text-gray-700 hover:bg-gray-300",
-                            )}
-                            onClick={setMonthValue(i)}
-                          >
-                            {dayjs(
-                              new Date(
-                                datePickerHeaderDate.getFullYear(),
-                                i,
-                                1,
-                              ),
-                            ).format("MMM")}
-                          </div>
-                        ))}
-                    </div>
-                  )}
-                  {type === "year" && (
-                    <div className="flex flex-wrap">
-                      {Array(12)
-                        .fill(null)
-                        .map((_, i) => {
-                          const y = year.getFullYear() - 11 + i;
-                          return (
-                            <div
-                              key={i}
-                              id={`year-${i}`}
-                              className={classNames(
-                                "w-1/4 cursor-pointer rounded-lg px-2 py-4 text-center text-sm font-semibold",
-                                value && isSelectedYear(y)
-                                  ? "bg-primary-500 text-white"
-                                  : "text-gray-700 hover:bg-gray-300",
-                              )}
-                              onClick={setYearValue(y)}
-                            >
-                              {y}
-                            </div>
-                          );
-                        })}
-                    </div>
-                  )}
                 </Popover.Panel>
               )}
             </div>

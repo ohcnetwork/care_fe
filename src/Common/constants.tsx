@@ -5,6 +5,10 @@ import { dateQueryString } from "../Utils/utils";
 import { IconName } from "../CAREUI/icons/CareIcon";
 import { PhoneNumberValidator } from "../Components/Form/FieldValidators";
 import { SchemaType } from "./schemaParser";
+import {
+  ConsentHIType,
+  ConsentPurpose,
+} from "../Components/ABDM/types/consent";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 export const PAGINATION_LIMIT = 36;
@@ -226,11 +230,60 @@ export const getBedTypes = ({
 };
 
 export const DOCTOR_SPECIALIZATION: Array<OptionsType> = [
-  { id: 1, text: "General Medicine", desc: "bg-doctors-general" },
-  { id: 2, text: "Pulmonology", desc: "bg-doctors-pulmonology" },
-  { id: 3, text: "Critical Care", desc: "bg-doctors-critical" },
-  { id: 4, text: "Paediatrics", desc: "bg-doctors-paediatrics" },
-  { id: 5, text: "Other Speciality", desc: "bg-doctors-other" },
+  { id: 1, text: "General Medicine" },
+  { id: 2, text: "Pulmonology" },
+  { id: 3, text: "Intensivist" },
+  { id: 4, text: "Pediatrician" },
+  { id: 6, text: "Anesthesiologist" },
+  { id: 7, text: "Cardiac Surgeon" },
+  { id: 8, text: "Cardiologist" },
+  { id: 9, text: "Dentist" },
+  { id: 10, text: "Dermatologist" },
+  { id: 11, text: "Diabetologist" },
+  { id: 12, text: "Emergency Medicine Physician" },
+  { id: 13, text: "Endocrinologist" },
+  { id: 14, text: "Family Physician" },
+  { id: 15, text: "Gastroenterologist" },
+  { id: 16, text: "General Surgeon" },
+  { id: 17, text: "Geriatrician" },
+  { id: 18, text: "Hematologist" },
+  { id: 29, text: "Immunologist" },
+  { id: 20, text: "Infectious Disease Specialist" },
+  { id: 21, text: "MBBS doctor" },
+  { id: 22, text: "Medical Officer" },
+  { id: 23, text: "Nephrologist" },
+  { id: 24, text: "Neuro Surgeon" },
+  { id: 25, text: "Neurologist" },
+  { id: 26, text: "Obstetrician and Gynecologist" },
+  { id: 27, text: "Oncologist" },
+  { id: 28, text: "Oncology Surgeon" },
+  { id: 29, text: "Ophthalmologist" },
+  {
+    id: 30,
+    text: "Oral and Maxillofacial Surgeon",
+  },
+  { id: 31, text: "Orthopedic" },
+  { id: 32, text: "Orthopedic Surgeon" },
+  { id: 33, text: "Otolaryngologist (ENT)" },
+  { id: 34, text: "Palliative care Physician" },
+  { id: 35, text: "Pathologist" },
+  { id: 36, text: "Pediatric Surgeon" },
+  { id: 37, text: "Physician" },
+  { id: 38, text: "Plastic Surgeon" },
+  { id: 39, text: "Psychiatrist" },
+  { id: 40, text: "Pulmonologist" },
+  { id: 41, text: "Radio technician" },
+  { id: 42, text: "Radiologist" },
+  { id: 43, text: "Rheumatologist" },
+  { id: 44, text: "Sports Medicine Specialist" },
+  { id: 45, text: "Thoraco-Vascular Surgeon" },
+  {
+    id: 46,
+    text: "Transfusion Medicine Specialist",
+  },
+  { id: 47, text: "Urologist" },
+  { id: 48, text: "Nurse" },
+  { id: 5, text: "Others" },
 ];
 
 export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
@@ -318,8 +371,7 @@ export const CONSCIOUSNESS_LEVEL = [
     id: "ONSET_OF_AGITATION_AND_CONFUSION",
     text: "Onset of Agitation and Confusion",
   },
-  { id: "UNKNOWN", text: "Unknown" },
-];
+] as const;
 
 export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
   { id: 1, text: "CVP catheter " },
@@ -379,20 +431,12 @@ export const PATIENT_CATEGORIES: {
   twClass: string;
 }[] = [
   { id: "Comfort", text: "Comfort Care", twClass: "patient-comfort" },
-  { id: "Stable", text: "Stable", twClass: "patient-stable" },
-  { id: "Moderate", text: "Abnormal", twClass: "patient-abnormal" },
+  { id: "Stable", text: "Mild", twClass: "patient-stable" },
+  { id: "Moderate", text: "Moderate", twClass: "patient-abnormal" },
   { id: "Critical", text: "Critical", twClass: "patient-critical" },
 ];
 
 export const PATIENT_FILTER_CATEGORIES = PATIENT_CATEGORIES;
-
-export const CURRENT_HEALTH_CHANGE = [
-  { id: 0, text: "NO DATA", desc: "" },
-  { id: 3, text: "STATUS QUO", desc: "No Change" },
-  { id: 4, text: "BETTER", desc: "Better" },
-  { id: 2, text: "WORSE", desc: "Worse" },
-  { id: 1, text: "REQUIRES VENTILATOR", desc: "Requires Ventilator" },
-];
 
 export const SAMPLE_TEST_STATUS = [
   { id: 1, text: "REQUEST_SUBMITTED", desc: "Request Submitted" },
@@ -425,13 +469,6 @@ export const SAMPLE_FLOW_RULES = {
   RECEIVED_AND_FORWARED: ["RECEIVED_AT_LAB", "COMPLETED"],
   RECEIVED_AT_LAB: ["COMPLETED"],
 };
-
-export const DISEASE_STATUS = [
-  "POSITIVE",
-  "SUSPECTED",
-  "NEGATIVE",
-  "RECOVERED",
-];
 
 export const TEST_TYPE = [
   "UNK",
@@ -697,13 +734,13 @@ export const CONSULTATION_TABS = [
   { text: "PRESSURE_SORE", desc: "Pressure Sore" },
   { text: "NURSING", desc: "Nursing" },
   { text: "DIALYSIS", desc: "Dialysis" },
+  { text: "ABDM", desc: "ABDM Records" },
 ];
 
-export const RHYTHM_CHOICES: Array<OptionsType> = [
-  { id: 0, text: "UNKNOWN", desc: "Unknown" },
+export const RHYTHM_CHOICES = [
   { id: 5, text: "REGULAR", desc: "Regular" },
   { id: 10, text: "IRREGULAR", desc: "Irregular" },
-];
+] as const;
 
 export const LOCATION_BED_TYPES: Array<any> = [
   { id: "ISOLATION", name: "Isolation" },
@@ -1097,6 +1134,26 @@ export const ExternalResultImportSchema: SchemaType = {
   Result: { prop: "result", type: "string" },
 };
 
+// ABDM
+export const ABDM_CONSENT_PURPOSE = [
+  { value: "CAREMGT", label: "Care Management" },
+  { value: "BTG", label: "Break The Glass" },
+  { value: "PUBHLTH", label: "Public Health" },
+  { value: "HPAYMT", label: "Healthcare Payment" },
+  { value: "DSRCH", label: "Disease Specific Healthcare Research" },
+  { value: "PATRQT", label: "Self Requested" },
+] as { value: ConsentPurpose; label: string }[];
+
+export const ABDM_HI_TYPE = [
+  { value: "Prescription", label: "Prescription" },
+  { value: "DiagnosticReport", label: "Diagnostic Report" },
+  { value: "OPConsultation", label: "Op Consultation" },
+  { value: "DischargeSummary", label: "Discharge Summary" },
+  { value: "ImmunizationRecord", label: "Immunization Record" },
+  { value: "HealthDocumentRecord", label: "Record Artifact" },
+  { value: "WellnessRecord", label: "Wellness Record" },
+] as { value: ConsentHIType; label: string }[];
+
 export const USER_TYPES_MAP = {
   Pharmacist: "Pharmacist",
   Volunteer: "Volunteer",
@@ -1251,7 +1308,7 @@ export const CONSENT_PATIENT_CODE_STATUS_CHOICES = [
   { id: 1, text: "Do Not Hospitalise (DNH)" },
   { id: 2, text: "Do Not Resuscitate (DNR)" },
   { id: 3, text: "Comfort Care Only" },
-  { id: 4, text: "Active treatment (Default)" },
+  { id: 4, text: "Active treatment" },
 ];
 export const OCCUPATION_TYPES = [
   {
@@ -1342,3 +1399,8 @@ export const OCCUPATION_TYPES = [
   { id: 6, text: "Others", value: "OTHERS" },
   { id: 32, text: "Not Applicable", value: "NOT_APPLICABLE" },
 ];
+
+export const PATIENT_NOTES_THREADS = {
+  Doctors: 10,
+  Nurses: 20,
+} as const;

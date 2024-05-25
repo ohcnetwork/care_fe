@@ -47,6 +47,9 @@ let make = (
   let (text, setText) = React.useState(() => "Normal")
   let (precision, setPrecision) = React.useState(() => 1)
   let (displayValue, setDisplayValue) = React.useState(() => value)
+  let justifyContentClassName = title != "" ? "justify-between" : "justify-center"
+  let alignItemClassName = title != "" ? "items-end" : "items-center"
+  let boxWidthClassName = title != "" ? "" : "w-16"
 
   React.useEffect1(() => {
     let (text, color) = getLabel(value->Belt.Float.fromString->Belt.Option.getWithDefault(0.0))
@@ -76,11 +79,11 @@ let make = (
 
   <>
     <section className={"slider-box " ++ className}>
-      <div className="slider-head flex justify-between flex-col sm:flex-row sm:items-center">
+      <div className={"slider-head flex flex-col sm:flex-row sm:items-center " ++ justifyContentClassName}>
         <div className="flex items-center">
           <h1 className="m-2"> {title->str} </h1> titleNeighbour
         </div>
-        <div className="flex flex-col items-end mt-2 sm:mt-0">
+        <div className={"flex flex-col mt-2 sm:mt-0 " ++ alignItemClassName}>
           <label htmlFor="measure" style={ReactDOM.Style.make(~color=textColor, ())}>
             {switch value->Belt.Float.fromString {
             | Some(_) => text->str
@@ -93,7 +96,7 @@ let make = (
               step={step}
               max={end}
               min={start}
-              className="focus:outline-none focus:bg-white focus:ring-primary-500"
+              className={"focus:outline-none focus:bg-white focus:ring-primary-500 " ++ boxWidthClassName}
               value={displayValue}
               onChange={event =>
                 setValue(

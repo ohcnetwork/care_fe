@@ -1,6 +1,9 @@
 import {
+  CONSENT_PATIENT_CODE_STATUS_CHOICES,
+  CONSENT_TYPE_CHOICES,
   ConsultationSuggestionValue,
   DISCHARGE_REASONS,
+  PATIENT_NOTES_THREADS,
   UserRole,
 } from "../../Common/constants";
 import { AssetData, AssetLocationType } from "../Assets/AssetTypes";
@@ -11,7 +14,6 @@ import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 import { AssignedToObjectModel, DailyRoundsModel } from "../Patient/models";
 import { UserBareMinimum } from "../Users/models";
-import { ConsentRecord } from "./ConsultationForm";
 
 export interface LocalBodyModel {
   id: number;
@@ -94,11 +96,14 @@ export interface OptionsType {
   disabled?: boolean;
 }
 
-export type PatientCategory =
-  | "Comfort Care"
-  | "Stable"
-  | "Abnormal"
-  | "Critical";
+export type PatientCategory = "Comfort Care" | "Mild" | "Moderate" | "Critical";
+
+export type ConsentRecord = {
+  id: string;
+  type: (typeof CONSENT_TYPE_CHOICES)[number]["id"];
+  patient_code_status?: (typeof CONSENT_PATIENT_CODE_STATUS_CHOICES)[number]["id"];
+  deleted?: boolean;
+};
 
 export interface ConsultationModel {
   encounter_date: string;
@@ -512,6 +517,7 @@ export interface PatientNotesModel {
   facility: BaseFacilityModel;
   created_by_object: BaseUserModel;
   user_type?: UserRole | "RemoteSpecialist";
+  thread: (typeof PATIENT_NOTES_THREADS)[keyof typeof PATIENT_NOTES_THREADS];
   created_date: string;
   last_edited_by?: BaseUserModel;
   last_edited_date?: string;
