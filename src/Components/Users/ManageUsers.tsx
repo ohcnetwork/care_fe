@@ -777,26 +777,27 @@ export function UserFacilities(props: { user: any }) {
                   </span>
                   {["DistrictAdmin", "StateAdmin"].includes(
                     authUser.user_type,
-                  ) && (
-                    <div className="flex items-center gap-2">
-                      <button
-                        className="tooltip text-lg text-red-600"
-                        onClick={() =>
-                          setUnlinkFacilityData({
-                            show: true,
-                            facility: user?.home_facility_object,
-                            userName: username,
-                            isHomeFacility: true,
-                          })
-                        }
-                      >
-                        <CareIcon icon="l-link-broken" />
-                        <span className="tooltip-text tooltip-left">
-                          {t("clear_home_facility")}
-                        </span>
-                      </button>
-                    </div>
-                  )}
+                  ) ||
+                    (username === authUser.username && (
+                      <div className="flex items-center gap-2">
+                        <button
+                          className="tooltip text-lg text-red-600"
+                          onClick={() =>
+                            setUnlinkFacilityData({
+                              show: true,
+                              facility: user?.home_facility_object,
+                              userName: username,
+                              isHomeFacility: true,
+                            })
+                          }
+                        >
+                          <CareIcon icon="l-link-broken" />
+                          <span className="tooltip-text tooltip-left">
+                            {t("clear_home_facility")}
+                          </span>
+                        </button>
+                      </div>
+                    ))}
                 </div>
               </div>
             </div>
@@ -824,51 +825,54 @@ export function UserFacilities(props: { user: any }) {
                           <span>{facility.name}</span>
                           {["DistrictAdmin", "StateAdmin"].includes(
                             authUser.user_type,
-                          ) && (
-                            <div className="flex items-center gap-2">
-                              <button
-                                className="tooltip text-lg hover:text-primary-500"
-                                id="home-facility-icon"
-                                onClick={() => {
-                                  if (user?.home_facility_object) {
-                                    // has previous home facility
-                                    setReplaceHomeFacility({
+                          ) ||
+                            (username === authUser.username && (
+                              <div className="flex items-center gap-2">
+                                {authUser.user_type !== "Nurse" && (
+                                  <button
+                                    className="tooltip text-lg hover:text-primary-500"
+                                    id="home-facility-icon"
+                                    onClick={() => {
+                                      if (user?.home_facility_object) {
+                                        // has previous home facility
+                                        setReplaceHomeFacility({
+                                          show: true,
+                                          userName: username,
+                                          previousFacility:
+                                            user?.home_facility_object,
+                                          newFacility: facility,
+                                        });
+                                      } else {
+                                        // no previous home facility
+                                        updateHomeFacility(username, facility);
+                                      }
+                                    }}
+                                  >
+                                    <CareIcon icon="l-estate" />
+                                    <span className="tooltip-text tooltip-left">
+                                      Set as home facility
+                                    </span>
+                                  </button>
+                                )}
+                                <button
+                                  id="unlink-facility-button"
+                                  className="tooltip text-lg text-red-600"
+                                  onClick={() => {
+                                    setUnlinkFacilityData({
                                       show: true,
+                                      facility: facility,
                                       userName: username,
-                                      previousFacility:
-                                        user?.home_facility_object,
-                                      newFacility: facility,
+                                      isHomeFacility: false,
                                     });
-                                  } else {
-                                    // no previous home facility
-                                    updateHomeFacility(username, facility);
-                                  }
-                                }}
-                              >
-                                <CareIcon icon="l-estate" />
-                                <span className="tooltip-text tooltip-left">
-                                  Set as home facility
-                                </span>
-                              </button>
-                              <button
-                                id="unlink-facility-button"
-                                className="tooltip text-lg text-red-600"
-                                onClick={() => {
-                                  setUnlinkFacilityData({
-                                    show: true,
-                                    facility: facility,
-                                    userName: username,
-                                    isHomeFacility: false,
-                                  });
-                                }}
-                              >
-                                <CareIcon icon="l-link-broken" />
-                                <span className="tooltip-text tooltip-left">
-                                  Unlink Facility
-                                </span>
-                              </button>
-                            </div>
-                          )}
+                                  }}
+                                >
+                                  <CareIcon icon="l-link-broken" />
+                                  <span className="tooltip-text tooltip-left">
+                                    Unlink Facility
+                                  </span>
+                                </button>
+                              </div>
+                            ))}
                         </div>
                       </div>
                     );
