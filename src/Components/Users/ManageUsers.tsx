@@ -447,12 +447,7 @@ export default function ManageUsers() {
   } else if (userListData?.results && userListData?.results.length === 0) {
     manageUsers = (
       <div>
-        <h5 className="my-4 ml-0 "> {t("no_users_found")}</h5>
-        <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
-          <div className="flex w-full items-center justify-center text-xl font-bold text-gray-500">
-            No Users Found
-          </div>
-        </div>
+        <h5 className="py-4 text-xl font-bold"> {t("no_users_found")}</h5>
       </div>
     );
   }
