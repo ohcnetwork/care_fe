@@ -310,7 +310,8 @@ export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
   { id: 3, text: "Heart Disease" },
   { id: 4, text: "HyperTension" },
   { id: 5, text: "Chronic Renal Disease" },
-  { id: 6, text: "Asthma" },
+  { id: 15, text: "Asthma" },
+  { id: 6, text: "Other Chronic Lung Diseases" },
   { id: 7, text: "Cancer" },
   { id: 9, text: "COPD" },
   { id: 10, text: "Bronchitis" },
@@ -318,7 +319,6 @@ export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
   { id: 12, text: "Immunocompromised Condition" },
   { id: 13, text: "Liver Disease" },
   { id: 14, text: "TB" },
-  { id: 15, text: "Other Chronic Lung Diseases" },
   { id: 8, text: "OTHER" },
 ];
 

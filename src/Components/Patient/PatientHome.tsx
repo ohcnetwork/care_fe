@@ -233,7 +233,7 @@ export const PatientHome = (props: any) => {
             )}
             {item.disease === "TB" && (item.duration || item.status) && (
               <span className="text-sm font-semibold leading-5 text-zinc-400">
-                {` [ ${item.status} - ${item.duration} ]`}
+                {` [ ${item.status || ""}${item.status && item.duration ? " - " : ""}${item.duration || ""} ]`}
               </span>
             )}
           </div>

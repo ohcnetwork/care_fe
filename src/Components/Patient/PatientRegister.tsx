@@ -694,7 +694,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             disease: medData.text,
             details: details ? details : "",
             status: formData["tb_status"],
-            duration: Number(formData["tb_duration"]),
+            duration: formData["tb_duration"]
+              ? Number(formData["tb_duration"])
+              : undefined,
           });
         } else {
           medical_history.push({
