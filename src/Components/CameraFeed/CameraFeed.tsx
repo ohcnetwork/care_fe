@@ -10,6 +10,7 @@ import FeedNetworkSignal from "./FeedNetworkSignal";
 import NoFeedAvailable from "./NoFeedAvailable";
 import FeedControls from "./FeedControls";
 import Fullscreen from "../../CAREUI/misc/Fullscreen";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 interface Props {
   children?: React.ReactNode;
@@ -24,6 +25,7 @@ interface Props {
   // Controls
   constrolsDisabled?: boolean;
   shortcutsDisabled?: boolean;
+  onMove?: () => void;
 }
 
 export default function CameraFeed(props: Props) {
@@ -76,7 +78,7 @@ export default function CameraFeed(props: Props) {
       },
       onError: props.onStreamError,
     });
-  }, [player.initializeStream, props.onStreamSuccess, props.onStreamError]);
+  }, [player.initializeStream]);
 
   // Start stream on mount
   useEffect(() => initializeStream(), [initializeStream]);
@@ -90,13 +92,18 @@ export default function CameraFeed(props: Props) {
     <Fullscreen fullscreen={isFullscreen} onExit={() => setFullscreen(false)}>
       <div
         className={classNames(
-          "flex flex-col overflow-clip rounded-xl bg-black",
+          "flex max-h-screen flex-col overflow-clip rounded-xl bg-black",
           props.className,
         )}
       >
         <div className="flex items-center justify-between bg-zinc-900 px-4 py-0.5">
-          <div className="flex items-center gap-1 md:gap-2">
+          {props.children}
+          <div className="flex w-full items-center justify-end gap-1 md:gap-4">
             <span className="text-xs font-semibold text-white md:text-sm">
+              <CareIcon
+                icon="l-video"
+                className="hidden pr-2 text-base text-zinc-400 md:inline-block"
+              />
               {props.asset.name}
             </span>
             <div className={state === "loading" ? "animate-pulse" : ""}>
@@ -108,7 +115,6 @@ export default function CameraFeed(props: Props) {
               />
             </div>
           </div>
-          {props.children}
         </div>
 
         <div className="group relative aspect-video">
@@ -180,6 +186,7 @@ export default function CameraFeed(props: Props) {
               setFullscreen={setFullscreen}
               onReset={resetStream}
               onMove={async (data) => {
+                props.onMove?.();
                 setState("moving");
                 const { res } = await operate({ type: "relative_move", data });
                 setTimeout(() => {

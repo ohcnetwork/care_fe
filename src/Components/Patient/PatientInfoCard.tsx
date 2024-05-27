@@ -37,7 +37,27 @@ import { Mews } from "../Facility/Consultations/Mews.js";
 import DischargeSummaryModal from "../Facility/DischargeSummaryModal.js";
 import DischargeModal from "../Facility/DischargeModal.js";
 import { useTranslation } from "react-i18next";
+import useQuery from "../../Utils/request/useQuery.js";
 import FetchRecordsModal from "../ABDM/FetchRecordsModal.js";
+import { SkillModel } from "../Users/models.js";
+
+const formatSkills = (arr: SkillModel[]) => {
+  const skills = arr.map((skill) => skill.skill_object.name);
+
+  if (skills.length === 1) {
+    return skills[0];
+  }
+
+  if (skills.length === 2) {
+    return `${skills[0]} and ${skills[1]}`;
+  }
+
+  if (skills.length === 3) {
+    return `${skills[0]}, ${skills[1]} and ${skills[2]}`;
+  }
+
+  return `${skills[0]}, ${skills[1]} and ${skills.length - 2} other skills...`;
+};
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
@@ -113,6 +133,12 @@ export default function PatientInfoCard(props: {
 
     return false;
   };
+  const skillsQuery = useQuery(routes.userListSkill, {
+    pathParams: {
+      username: consultation?.treating_physician_object?.username ?? "",
+    },
+    prefetch: !!consultation?.treating_physician_object?.username,
+  });
 
   return (
     <>
@@ -326,6 +352,18 @@ export default function PatientInfoCard(props: {
                         </div>
                       </div>
                     )}
+                  {(
+                    consultation?.consent_records?.filter((c) => !c.deleted) ||
+                    []
+                  ).length < 1 && (
+                    <div>
+                      <div className="inline-flex w-full items-center justify-start rounded border border-gray-500 bg-red-400 p-1 px-3 text-xs font-semibold leading-4">
+                        <span className="font-semibold text-white">
+                          Consent Records Missing
+                        </span>
+                      </div>
+                    </div>
+                  )}
                   {consultation?.suggestion === "DC" && (
                     <div>
                       <div>
@@ -450,7 +488,7 @@ export default function PatientInfoCard(props: {
                   : null}
                 {(consultation?.treating_physician_object ||
                   consultation?.deprecated_verified_by) && (
-                  <div className="text-sm" id="treating-physician">
+                  <span className="space-x-1 text-sm" id="treating-physician">
                     <span className="font-semibold leading-relaxed">
                       {t("treating_doctor")}:{" "}
                     </span>
@@ -459,9 +497,21 @@ export default function PatientInfoCard(props: {
                       : consultation?.deprecated_verified_by}
                     <CareIcon
                       icon="l-check"
-                      className="ml-2 fill-current text-xl text-green-500"
+                      className="fill-current text-xl text-green-500"
                     />
-                  </div>
+                    <br className="md:hidden" />
+                    <span className="tooltip text-xs text-gray-800">
+                      {!!skillsQuery.data?.results?.length &&
+                        formatSkills(skillsQuery.data?.results)}
+                      {(skillsQuery.data?.results?.length || 0) > 3 && (
+                        <ul className="tooltip-text tooltip-bottom flex flex-col text-xs font-medium">
+                          {skillsQuery.data?.results.map((skill) => (
+                            <li>{skill.skill_object.name}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </span>
+                  </span>
                 )}
               </div>
             </div>
@@ -597,6 +647,12 @@ export default function PatientInfoCard(props: {
                       !consultation?.discharge_date,
                   ],
                   [
+                    `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/consent-records`,
+                    "Consent Records",
+                    "l-file-medical",
+                    patient.is_active,
+                  ],
+                  [
                     `/patient/${patient.id}/investigation_reports`,
                     "Investigation Summary",
                     "l-align-alt",
@@ -629,7 +685,10 @@ export default function PatientInfoCard(props: {
                             key={i}
                             className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
                             href={
-                              action[1] !== "Treatment Summary" &&
+                              ![
+                                "Treatment Summary",
+                                "Consent Records",
+                              ].includes(action[1]) &&
                               consultation?.admitted &&
                               !consultation?.current_bed &&
                               i === 1
@@ -638,7 +697,10 @@ export default function PatientInfoCard(props: {
                             }
                             onClick={() => {
                               if (
-                                action[1] !== "Treatment Summary" &&
+                                ![
+                                  "Treatment Summary",
+                                  "Consent Records",
+                                ].includes(action[1]) &&
                                 consultation?.admitted &&
                                 !consultation?.current_bed &&
                                 i === 1

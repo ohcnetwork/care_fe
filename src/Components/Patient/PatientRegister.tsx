@@ -2,11 +2,9 @@ import * as Notification from "../../Utils/Notifications.js";
 
 import {
   BLOOD_GROUPS,
-  DISEASE_STATUS,
   GENDER_TYPES,
   MEDICAL_HISTORY_CHOICES,
   OCCUPATION_TYPES,
-  TEST_TYPE,
   VACCINES,
 } from "../../Common/constants";
 import {
@@ -89,11 +87,9 @@ const medicalHistoryChoices = MEDICAL_HISTORY_CHOICES.reduce(
   [],
 );
 const genderTypes = GENDER_TYPES;
-const diseaseStatus = [...DISEASE_STATUS];
 const bloodGroups = [...BLOOD_GROUPS];
 const occupationTypes = OCCUPATION_TYPES;
-const testType = [...TEST_TYPE];
-const vaccines = ["Select", ...VACCINES];
+const vaccines = [...VACCINES];
 
 const initForm: any = {
   name: "",
@@ -103,7 +99,6 @@ const initForm: any = {
   phone_number: "+91",
   emergency_phone_number: "+91",
   blood_group: "",
-  disease_status: diseaseStatus[2],
   is_declared_positive: "false",
   date_declared_positive: new Date(),
   date_of_birth: null,
@@ -121,25 +116,13 @@ const initForm: any = {
   allergies: "",
   pincode: "",
   present_health: "",
-  contact_with_confirmed_carrier: "false",
-  contact_with_suspected_carrier: "false",
-
-  estimated_contact_date: null,
   date_of_return: null,
-
-  number_of_primary_contacts: "",
-  number_of_secondary_contacts: "",
   is_antenatal: "false",
   date_of_test: null,
-  date_of_result: null,
-  test_id: "",
-  srf_id: "",
-  test_type: testType[0],
   treatment_plan: false,
   ongoing_medication: "",
   designation_of_health_care_worker: "",
   instituion_of_health_care_worker: "",
-  cluster_name: "",
   covin_id: "",
   is_vaccinated: "false",
   number_of_doses: "0",
@@ -324,14 +307,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           : state.form.gender,
       });
       field.onChange({
-        name: "test_id",
-        value: data.test_id ? data.test_id : state.form.test_id,
-      });
-      field.onChange({
-        name: "srf_id",
-        value: data.srf_id ? data.srf_id : state.form.srf_id,
-      });
-      field.onChange({
         name: "state",
         value: data.district_object
           ? data.district_object.state
@@ -354,26 +329,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         value: data.village ? data.village : state.form.village,
       });
       field.onChange({
-        name: "disease_status",
-        value: data.result
-          ? data.result.toUpperCase()
-          : state.form.disease_status,
-      });
-      field.onChange({
-        name: "test_type",
-        value: data.test_type
-          ? data.test_type.toUpperCase()
-          : state.form.test_type,
-      });
-      field.onChange({
         name: "date_of_test",
         value: data.sample_collection_date
           ? data.sample_collection_date
           : state.form.date_of_test,
-      });
-      field.onChange({
-        name: "date_of_result",
-        value: data.result_date ? data.result_date : state.form.date_of_result,
       });
       field.onChange({
         name: "phone_number",
@@ -416,7 +375,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             health_id: data.abha_number_object?.health_id || "",
             nationality: data.nationality ? data.nationality : "India",
             gender: data.gender ? data.gender : undefined,
-            cluster_name: data.cluster_name ? data.cluster_name : "",
             state: data.state ? data.state : "",
             district: data.district ? data.district : "",
             blood_group: data.blood_group
@@ -453,19 +411,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             occupation: data.meta_info?.occupation
               ? parseOccupationFromExt(data.meta_info.occupation)
               : null,
-
-            number_of_primary_contacts: data.number_of_primary_contacts
-              ? data.number_of_primary_contacts
-              : "",
-            number_of_secondary_contacts: data.number_of_secondary_contacts
-              ? data.number_of_secondary_contacts
-              : "",
-            contact_with_confirmed_carrier: data.contact_with_confirmed_carrier
-              ? String(data.contact_with_confirmed_carrier)
-              : "false",
-            contact_with_suspected_carrier: data.contact_with_suspected_carrier
-              ? String(data.contact_with_suspected_carrier)
-              : "false",
             is_vaccinated: String(data.is_vaccinated),
             number_of_doses: data.number_of_doses
               ? String(data.number_of_doses)
@@ -645,39 +590,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             errors[field] = "Please enter valid phone number";
           }
           return;
-
-        case "estimated_contact_date":
-          if (
-            JSON.parse(form.contact_with_confirmed_carrier) ||
-            JSON.parse(form.contact_with_suspected_carrier)
-          ) {
-            if (!form[field]) {
-              errors[field] = "Please enter the estimated date of contact";
-            }
-          }
-          return;
-        case "cluster_name":
-          if (
-            JSON.parse(form.contact_with_confirmed_carrier) ||
-            JSON.parse(form.contact_with_suspected_carrier)
-          ) {
-            if (!form[field]) {
-              errors[field] = "Please enter the name / cluster of the contact";
-            }
-          }
-          return;
         case "blood_group":
           if (!form[field]) {
             errors[field] = "Please select a blood group";
           }
           return;
-        case "number_of_primary_contacts":
-        case "number_of_secondary_contacts":
-          if (form[field] && form[field] < 0) {
-            errors[field] = "Value cannot be negative";
-          }
-          return;
-
         case "is_vaccinated":
           if (form.is_vaccinated === "true") {
             if (form.number_of_doses === "0") {
@@ -691,23 +608,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             if (!form.last_vaccinated_date) {
               errors["last_vaccinated_date"] =
                 "Please enter last vaccinated date";
-            }
-          }
-          return;
-
-        case "date_of_result":
-          if (form[field] < form.date_of_test) {
-            errors[field] =
-              "Date should not be before the date of sample collection";
-          }
-          return;
-        case "disease_status":
-          if (form[field] === "POSITIVE") {
-            if (!form.date_of_test) {
-              errors["date_of_test"] = "Please fill the date of sample testing";
-            }
-            if (!form.date_of_result) {
-              errors["date_of_result"] = "Please fill the date of result";
             }
           }
           return;
@@ -780,18 +680,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           ? dateQueryString(formData.date_of_birth)
           : null,
       year_of_birth: ageInputType === "age" ? formData.year_of_birth : null,
-      disease_status: formData.disease_status,
       date_of_test: formData.date_of_test ? formData.date_of_test : undefined,
-      date_of_result: formData.date_of_result
-        ? formData.date_of_result
-        : undefined,
       date_declared_positive:
         JSON.parse(formData.is_declared_positive) &&
         formData.date_declared_positive
           ? formData.date_declared_positive
           : null,
-      test_id: formData.test_id,
-      srf_id: formData.srf_id,
       covin_id:
         formData.is_vaccinated === "true" ? formData.covin_id : undefined,
       is_vaccinated: formData.is_vaccinated,
@@ -811,7 +705,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             ? formData.last_vaccinated_date
             : null
           : null,
-      test_type: formData.test_type,
       name: _.startCase(_.toLower(formData.name)),
       pincode: formData.pincode ? formData.pincode : undefined,
       gender: Number(formData.gender),
@@ -847,33 +740,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       present_health: formData.present_health
         ? formData.present_health
         : undefined,
-      contact_with_confirmed_carrier: JSON.parse(
-        formData.contact_with_confirmed_carrier,
-      ),
-      contact_with_suspected_carrier: JSON.parse(
-        formData.contact_with_suspected_carrier,
-      ),
-      estimated_contact_date:
-        (JSON.parse(formData.contact_with_confirmed_carrier) ||
-          JSON.parse(formData.contact_with_suspected_carrier)) &&
-        formData.estimated_contact_date
-          ? formData.estimated_contact_date
-          : null,
-      cluster_name:
-        (JSON.parse(formData.contact_with_confirmed_carrier) ||
-          JSON.parse(formData.contact_with_suspected_carrier)) &&
-        formData.cluster_name
-          ? formData.cluster_name
-          : null,
       allergies: formData.allergies,
-      number_of_primary_contacts: Number(formData.number_of_primary_contacts)
-        ? Number(formData.number_of_primary_contacts)
-        : undefined,
-      number_of_secondary_contacts: Number(
-        formData.number_of_secondary_contacts,
-      )
-        ? Number(formData.number_of_secondary_contacts)
-        : undefined,
       ongoing_medication: formData.ongoing_medication,
       is_declared_positive: JSON.parse(formData.is_declared_positive),
       designation_of_health_care_worker:
@@ -1864,37 +1731,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         >
                           <div>
                             <div className="mt-5 grid w-full grid-cols-1 gap-4 sm:grid-cols-3 xl:gap-x-20 xl:gap-y-6">
-                              <div>
+                              <div className="col-span-full">
                                 <RadioFormField
                                   label="Is patient Vaccinated against COVID?"
                                   aria-label="is_vaccinated"
                                   {...field("is_vaccinated")}
-                                  options={[
-                                    { label: "Yes", value: "true" },
-                                    { label: "No", value: "false" },
-                                  ]}
-                                  optionDisplay={(option) => option.label}
-                                  optionValue={(option) => option.value}
-                                />
-                              </div>
-                              <div id="contact_with_confirmed_carrier-div">
-                                <RadioFormField
-                                  {...field("contact_with_confirmed_carrier")}
-                                  label="Contact with confirmed Covid patient?"
-                                  aria-label="contact_with_confirmed_carrier"
-                                  options={[
-                                    { label: "Yes", value: "true" },
-                                    { label: "No", value: "false" },
-                                  ]}
-                                  optionDisplay={(option) => option.label}
-                                  optionValue={(option) => option.value}
-                                />
-                              </div>
-                              <div id="contact_with_suspected_carrier-div">
-                                <RadioFormField
-                                  {...field("contact_with_suspected_carrier")}
-                                  label="Contact with Covid suspect?"
-                                  aria-label="contact_with_suspected_carrier"
                                   options={[
                                     { label: "Yes", value: "true" },
                                     { label: "No", value: "false" },
@@ -1957,73 +1798,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   </div>
                                 }
                               </CollapseV2>
-                              <CollapseV2
-                                opened={
-                                  JSON.parse(
-                                    field("contact_with_confirmed_carrier")
-                                      .value ?? "{}",
-                                  ) ||
-                                  JSON.parse(
-                                    field("contact_with_suspected_carrier")
-                                      .value ?? "{}",
-                                  )
-                                }
-                              >
-                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:gap-x-20 xl:gap-y-6">
-                                  <div id="estimated_contact_date-div">
-                                    <DateFormField
-                                      {...field("estimated_contact_date")}
-                                      id="estimated_contact_date"
-                                      label="Estimate date of contact"
-                                      disableFuture
-                                      required
-                                      position="LEFT"
-                                    />
-                                  </div>
-
-                                  <div id="cluster_name-div">
-                                    <TextFormField
-                                      {...field("cluster_name")}
-                                      id="cluster_name"
-                                      label="Name / Cluster of Contact"
-                                      placeholder="Name / Cluster of Contact"
-                                      required
-                                    />
-                                  </div>
-                                </div>
-                              </CollapseV2>
-                              <div
-                                data-testid="disease-status"
-                                id="disease_status-div"
-                              >
-                                <SelectFormField
-                                  {...field("disease_status")}
-                                  id="disease_status"
-                                  label="COVID Disease Status"
-                                  options={diseaseStatus}
-                                  optionLabel={(o) => o}
-                                  optionValue={(o) => o}
-                                  required
-                                />
-                              </div>
-                              <div id="test_type-div">
-                                <SelectFormField
-                                  {...field("test_type")}
-                                  id="test_type"
-                                  label="COVID Test Type"
-                                  options={testType}
-                                  optionLabel={(o) => o}
-                                  optionValue={(o) => o}
-                                  required
-                                />
-                              </div>
-                              <div id="srf_id-div">
-                                <TextFormField
-                                  {...field("srf_id")}
-                                  id="srf_id"
-                                  label="SRF Id for COVID Test"
-                                />
-                              </div>
+                            </div>
+                            <div className="mt-5 grid w-full grid-cols-1 gap-4 xl:gap-x-20 xl:gap-y-6">
                               <div id="is_declared_positive-div">
                                 <RadioFormField
                                   {...field("is_declared_positive")}
@@ -2054,15 +1830,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   </div>
                                 </CollapseV2>
                               </div>
-                              <div id="test_id-div">
-                                <TextFormField
-                                  {...field("test_id")}
-                                  id="test_id"
-                                  label="COVID Positive ID issued by ICMR"
-                                  type="number"
-                                />
-                              </div>
-
                               <div id="date_of_test-div">
                                 <DateFormField
                                   {...field("date_of_test")}
@@ -2070,32 +1837,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   label="Date of Sample given for COVID Test"
                                   disableFuture
                                   position="LEFT"
-                                />
-                              </div>
-                              <div id="date_of_result-div">
-                                <DateFormField
-                                  {...field("date_of_result")}
-                                  id="date_of_result"
-                                  label="Date of Result for COVID Test"
-                                  disableFuture
-                                  position="LEFT"
-                                />
-                              </div>
-
-                              <div id="number_of_primary_contacts-div">
-                                <TextFormField
-                                  {...field("number_of_primary_contacts")}
-                                  id="number_of_primary_contacts"
-                                  label="Number Of Primary Contacts for COVID"
-                                  type="number"
-                                />
-                              </div>
-                              <div id="number_of_secondary_contacts-div">
-                                <TextFormField
-                                  {...field("number_of_secondary_contacts")}
-                                  id="number_of_secondary_contacts"
-                                  label="Number Of Secondary Contacts for COVID"
-                                  type="number"
                                 />
                               </div>
                             </div>
