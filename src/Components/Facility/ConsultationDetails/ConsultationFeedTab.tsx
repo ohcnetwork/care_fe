@@ -162,7 +162,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
                       icon="l-save"
                       className={classNames(
                         "text-base",
-                        hasMoved ? "text-zinc-200" : "text-zinc-500",
+                        hasMoved ? "text-gray-200" : "text-gray-500",
                       )}
                     />
                   </ButtonV2>
