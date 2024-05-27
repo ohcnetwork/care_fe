@@ -44,7 +44,7 @@ export default function PatientConsentRecordBlockGroup(props: {
       offset: 0,
     },
     onResponse: (response) => {
-      if (consentRecord.deleted && response.data?.results) {
+      if (consentRecord.deleted === true && response.data?.results) {
         const unarchivedFiles = response.data.results;
         for (const file of unarchivedFiles) {
           archiveFile(file, consentRecord.id, {
@@ -52,7 +52,8 @@ export default function PatientConsentRecordBlockGroup(props: {
           });
         }
       }
-      if (response.data?.results?.length === 0) {
+
+      if ((response.data?.results?.length || 0) > 0) {
         props.onFilesFound();
       }
     },
@@ -66,6 +67,12 @@ export default function PatientConsentRecordBlockGroup(props: {
       limit: 100,
       offset: 0,
     },
+    prefetch: showArchive,
+    onResponse: (response) => {
+      if ((response.data?.results?.length || 0) > 0) {
+        props.onFilesFound();
+      }
+    },
   });
 
   const consent = CONSENT_TYPE_CHOICES.find((c) => c.id === consentRecord.type);
@@ -77,12 +84,15 @@ export default function PatientConsentRecordBlockGroup(props: {
     ? archivedFilesQuery.data?.results
     : filesQuery.data?.results;
 
-  const loading = showArchive ? archivedFilesQuery.loading : filesQuery.loading;
+  const loading = archivedFilesQuery.loading || filesQuery.loading;
 
   useEffect(() => {
-    filesQuery.refetch();
-    archivedFilesQuery.refetch();
-  }, [refreshTrigger, showArchive, consentRecord]);
+    if (!showArchive) {
+      filesQuery.refetch();
+    } else {
+      archivedFilesQuery.refetch();
+    }
+  }, [showArchive, refreshTrigger]);
 
   return (
     <div
@@ -114,8 +124,9 @@ export default function PatientConsentRecordBlockGroup(props: {
         )}
       */}
       </div>
-      {loading && <div className="skeleton-animate-alpha h-32 rounded-lg" />}
-      {!loading &&
+      {loading ? (
+        <div className="skeleton-animate-alpha h-32 rounded-lg" />
+      ) : (
         data?.map((file: FileUploadModel, i: number) => (
           <div
             key={i}
@@ -162,7 +173,8 @@ export default function PatientConsentRecordBlockGroup(props: {
               )}
             </div>
           </div>
-        ))}
+        ))
+      )}
     </div>
   );
 }

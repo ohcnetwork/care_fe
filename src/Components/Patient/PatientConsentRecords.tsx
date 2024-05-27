@@ -43,8 +43,6 @@ export default function PatientConsentRecords(props: {
     type: "CONSENT_RECORD",
     onArchive: async () => {
       refetch();
-      setShowArchived(true);
-      setShowArchived(false);
     },
   });
 

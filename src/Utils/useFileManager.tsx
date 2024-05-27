@@ -122,6 +122,7 @@ export default function useFileManager(
 
     setArchiveDialogueOpen(null);
     setArchiving(false);
+    setArchiveReason("");
     onArchive && onArchive();
     return res;
   };
