@@ -142,10 +142,6 @@ export default function PatientConsentRecords(props: {
     setFilesFound(false);
   }, [showArchived]);
 
-  useEffect(() => {
-    console.log(filesFound);
-  }, [filesFound]);
-
   return (
     <Page
       title={"Patient Consent Records"}
@@ -249,6 +245,7 @@ export default function PatientConsentRecords(props: {
                     const diffPCS = consentRecords?.find(
                       (record) =>
                         record.type === 2 &&
+                        newConsent.type === 2 &&
                         record.patient_code_status !==
                           newConsent.patient_code_status &&
                         record.deleted !== true,
