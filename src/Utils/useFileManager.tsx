@@ -18,7 +18,11 @@ export interface FileManagerOptions {
 
 export interface FileManagerResult {
   viewFile: (file: FileUploadModel, associating_id: string) => void;
-  archiveFile: (file: FileUploadModel, associating_id: string) => void;
+  archiveFile: (
+    file: FileUploadModel,
+    associating_id: string,
+    skipPrompt?: { reason: string },
+  ) => void;
   Dialogues: React.ReactNode;
 }
 
@@ -97,7 +101,7 @@ export default function useFileManager(
     }
   };
 
-  const handleFileArchive = async () => {
+  const handleFileArchive = async (archiveFile: typeof archiveDialogueOpen) => {
     if (!validateArchiveReason(archiveReason)) {
       setArchiving(false);
       return;
@@ -106,9 +110,9 @@ export default function useFileManager(
     const { res } = await request(routes.editUpload, {
       body: { is_archived: true, archive_reason: archiveReason },
       pathParams: {
-        id: archiveDialogueOpen?.id || "",
+        id: archiveFile?.id || "",
         fileType,
-        associatingId: archiveDialogueOpen?.associating_id || "",
+        associatingId: archiveFile?.associating_id || "",
       },
     });
 
@@ -122,7 +126,20 @@ export default function useFileManager(
     return res;
   };
 
-  const archiveFile = (file: FileUploadModel, associating_id: string) => {
+  const archiveFile = (
+    file: FileUploadModel,
+    associating_id: string,
+    skipPrompt?: { reason: string },
+  ) => {
+    if (skipPrompt) {
+      setArchiving(true);
+      setArchiveReason(skipPrompt.reason);
+      handleFileArchive({
+        ...file,
+        associating_id,
+      });
+      return;
+    }
     setArchiveDialogueOpen({ ...file, associating_id });
   };
 
@@ -174,7 +191,7 @@ export default function useFileManager(
         <form
           onSubmit={(event: any) => {
             event.preventDefault();
-            handleFileArchive();
+            handleFileArchive(archiveDialogueOpen);
           }}
           className="mx-2 my-4 flex w-full flex-col"
         >

@@ -43,6 +43,8 @@ export default function PatientConsentRecords(props: {
     type: "CONSENT_RECORD",
     onArchive: async () => {
       refetch();
+      setShowArchived(true);
+      setShowArchived(false);
     },
   });
 
@@ -134,13 +136,15 @@ export default function PatientConsentRecords(props: {
     return () => clearTimeout(timeout);
   }, [consentRecords]);
 
-  const tabConsents = consentRecords?.filter(
-    (record) => showArchived || record.deleted !== true,
-  );
+  const tabConsents = consentRecords;
 
   useEffect(() => {
     setFilesFound(false);
   }, [showArchived]);
+
+  useEffect(() => {
+    console.log(filesFound);
+  }, [filesFound]);
 
   return (
     <Page
@@ -284,15 +288,14 @@ export default function PatientConsentRecords(props: {
           </div>
         </div>
         <div className="flex-1">
-          {!loading && (tabConsents?.length === 0 || !filesFound) && (
-            <div className="flex h-32 items-center justify-center text-gray-500">
-              No records found
-            </div>
-          )}
           <div className="flex flex-col gap-4">
-            {loading && (
+            {loading ? (
               <div className="skeleton-animate-alpha h-32 rounded-lg" />
-            )}
+            ) : tabConsents?.length === 0 || !filesFound ? (
+              <div className="flex h-32 items-center justify-center text-gray-500">
+                No records found
+              </div>
+            ) : null}
             {!loading &&
               tabConsents?.map((record, index) => (
                 <PatientConsentRecordBlockGroup

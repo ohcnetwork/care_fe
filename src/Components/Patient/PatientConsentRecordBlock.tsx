@@ -15,7 +15,11 @@ import useAuthUser from "../../Common/hooks/useAuthUser";
 export default function PatientConsentRecordBlockGroup(props: {
   consentRecord: ConsentRecord;
   previewFile: (file: FileUploadModel, file_associating_id: string) => void;
-  archiveFile: (file: FileUploadModel, file_associating_id: string) => void;
+  archiveFile: (
+    file: FileUploadModel,
+    file_associating_id: string,
+    skipPrompt?: { reason: string },
+  ) => void;
   onDelete: (consentRecord: ConsentRecord) => void;
   refreshTrigger: any;
   showArchive: boolean;
@@ -39,6 +43,19 @@ export default function PatientConsentRecordBlockGroup(props: {
       limit: 100,
       offset: 0,
     },
+    onResponse: (response) => {
+      if (consentRecord.deleted && response.data?.results) {
+        const unarchivedFiles = response.data.results;
+        for (const file of unarchivedFiles) {
+          archiveFile(file, consentRecord.id, {
+            reason: "Consent Record Archived",
+          });
+        }
+      }
+      if (response.data?.results?.length === 0) {
+        props.onFilesFound();
+      }
+    },
   });
 
   const archivedFilesQuery = useQuery(routes.viewUpload, {
@@ -57,26 +74,15 @@ export default function PatientConsentRecordBlockGroup(props: {
   );
 
   const data = showArchive
-    ? [
-        ...(archivedFilesQuery.data?.results || []),
-        ...(filesQuery.data?.results || []),
-      ]
+    ? archivedFilesQuery.data?.results
     : filesQuery.data?.results;
 
-  const loading = showArchive
-    ? archivedFilesQuery.loading && filesQuery.loading
-    : filesQuery.loading;
+  const loading = showArchive ? archivedFilesQuery.loading : filesQuery.loading;
 
   useEffect(() => {
     filesQuery.refetch();
     archivedFilesQuery.refetch();
-  }, [refreshTrigger]);
-
-  useEffect(() => {
-    if ((data?.length || 0) > 1) {
-      props.onFilesFound();
-    }
-  }, [data]);
+  }, [refreshTrigger, showArchive, consentRecord]);
 
   return (
     <div
