@@ -137,7 +137,7 @@ export default function PatientConsentRecordBlockGroup(props: {
         data?.map((file: FileUploadModel, i: number) => (
           <div
             key={i}
-            className={`flex items-center justify-between rounded-lg border border-gray-300 ${showArchive ? "text-gray-600" : "bg-white"}  px-4 py-2 transition-all hover:bg-gray-100`}
+            className={`flex flex-col justify-between gap-2 rounded-lg border border-gray-300 md:flex-row md:items-center ${showArchive ? "text-gray-600" : "bg-white"}  px-4 py-2 transition-all hover:bg-gray-100`}
           >
             <div className="flex items-center gap-4 ">
               <div>
@@ -153,7 +153,7 @@ export default function PatientConsentRecordBlockGroup(props: {
                 </div>
               </div>
             </div>
-            <div className="flex shrink-0 gap-2">
+            <div className="flex shrink-0 justify-end gap-2">
               {!file.is_archived && (
                 <ButtonV2
                   onClick={() => previewFile(file, consentRecord.id)}

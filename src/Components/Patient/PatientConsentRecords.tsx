@@ -201,8 +201,8 @@ export default function PatientConsentRecords(props: {
         onClickTab2={() => setShowArchived(true)}
         isTab2Active={showArchived}
       />
-      <div className="mt-8 flex flex-col gap-4 md:flex-row-reverse">
-        <div className="shrink-0 md:w-[350px]">
+      <div className="mt-8 flex flex-col gap-4 lg:flex-row-reverse">
+        <div className="shrink-0 lg:w-[350px]">
           <h4 className="font-black">Add New Record</h4>
           <SelectFormField
             {...selectField("consent_type")}
