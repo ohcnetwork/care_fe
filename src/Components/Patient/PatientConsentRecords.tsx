@@ -280,12 +280,11 @@ export default function PatientConsentRecords(props: {
           </div>
         </div>
         <div className="flex-1">
-          {tabConsents?.length === 0 ||
-            (!filesFound && (
-              <div className="flex h-32 items-center justify-center text-gray-500">
-                No records found
-              </div>
-            ))}
+          {(tabConsents?.length === 0 || !filesFound) && (
+            <div className="flex h-32 items-center justify-center text-gray-500">
+              No records found
+            </div>
+          )}
           <div className="flex flex-col gap-4">
             {tabConsents?.map((record, index) => (
               <PatientConsentRecordBlockGroup
