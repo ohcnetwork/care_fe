@@ -992,7 +992,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
       />
 
       <div className="top-0 mt-5 flex grow-0 sm:mx-12">
-        <div className="fixed hidden h-full w-72 flex-col xl:flex">
+        <div className="fixed hidden w-72 flex-col xl:flex">
           {Object.keys(sections).map((sectionTitle) => {
             if (
               !isUpdate &&
