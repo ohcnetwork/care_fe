@@ -51,7 +51,11 @@ export default function PatientConsentRecords(props: {
       id: patientId,
     },
   });
-  const { data: consultation, refetch } = useQuery(routes.getConsultation, {
+  const {
+    data: consultation,
+    refetch,
+    loading,
+  } = useQuery(routes.getConsultation, {
     pathParams: { id: consultationId! },
     onResponse: (data) => {
       if (data.data && data.data.consent_records) {
@@ -280,25 +284,28 @@ export default function PatientConsentRecords(props: {
           </div>
         </div>
         <div className="flex-1">
-          {tabConsents?.length === 0 ||
-            (!filesFound && (
-              <div className="flex h-32 items-center justify-center text-gray-500">
-                No records found
-              </div>
-            ))}
+          {!loading && (tabConsents?.length === 0 || !filesFound) && (
+            <div className="flex h-32 items-center justify-center text-gray-500">
+              No records found
+            </div>
+          )}
           <div className="flex flex-col gap-4">
-            {tabConsents?.map((record, index) => (
-              <PatientConsentRecordBlockGroup
-                key={index}
-                consentRecord={record}
-                previewFile={fileManager.viewFile}
-                archiveFile={fileManager.archiveFile}
-                onDelete={(record) => setShowDeleteConsent(record.id)}
-                refreshTrigger={consultation}
-                showArchive={showArchived}
-                onFilesFound={() => setFilesFound(true)}
-              />
-            ))}
+            {loading && (
+              <div className="skeleton-animate-alpha h-32 rounded-lg" />
+            )}
+            {!loading &&
+              tabConsents?.map((record, index) => (
+                <PatientConsentRecordBlockGroup
+                  key={index}
+                  consentRecord={record}
+                  previewFile={fileManager.viewFile}
+                  archiveFile={fileManager.archiveFile}
+                  onDelete={(record) => setShowDeleteConsent(record.id)}
+                  refreshTrigger={consultation}
+                  showArchive={showArchived}
+                  onFilesFound={() => setFilesFound(true)}
+                />
+              ))}
           </div>
         </div>
       </div>
