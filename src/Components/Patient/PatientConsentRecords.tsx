@@ -134,7 +134,7 @@ export default function PatientConsentRecords(props: {
     return () => clearTimeout(timeout);
   }, [consentRecords]);
 
-  const tabConsents = consentRecords;
+  const tabConsents = consentRecords?.filter((c) => showArchived || !c.deleted);
 
   useEffect(() => {
     setFilesFound(false);
@@ -194,7 +194,7 @@ export default function PatientConsentRecords(props: {
         className="w-auto"
       />
       <SwitchTabs
-        tab1="Files"
+        tab1="Active"
         tab2="Archived"
         className="my-4"
         onClickTab1={() => setShowArchived(false)}

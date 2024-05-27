@@ -44,14 +44,18 @@ export default function PatientConsentRecordBlockGroup(props: {
       offset: 0,
     },
     onResponse: (response) => {
+      /*
       if (consentRecord.deleted === true && response.data?.results) {
         const unarchivedFiles = response.data.results;
+        console.log("checking for unarchived files on this deleted consent record")
         for (const file of unarchivedFiles) {
+          console.log("archiving file", file)
           archiveFile(file, consentRecord.id, {
             reason: "Consent Record Archived",
           });
         }
       }
+      */
 
       if ((response.data?.results?.length || 0) > 0) {
         props.onFilesFound();
@@ -81,7 +85,10 @@ export default function PatientConsentRecordBlockGroup(props: {
   );
 
   const data = showArchive
-    ? archivedFilesQuery.data?.results
+    ? [
+        ...(archivedFilesQuery.data?.results || []),
+        ...(consentRecord.deleted ? filesQuery.data?.results || [] : []),
+      ]
     : filesQuery.data?.results;
 
   const loading = archivedFilesQuery.loading || filesQuery.loading;
