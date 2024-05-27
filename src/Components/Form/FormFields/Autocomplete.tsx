@@ -71,6 +71,7 @@ type AutocompleteProps<T, V = T> = {
   isLoading?: boolean;
   allowRawInput?: boolean;
   error?: string;
+  noResultsLabel?: string;
 } & (
   | {
       required?: false;
@@ -195,7 +196,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
             <Combobox.Options className="cui-dropdown-base absolute z-10 mt-0.5 origin-top-right">
               {filteredOptions.length === 0 && (
                 <div className="p-2 text-sm text-gray-500">
-                  No options found
+                  {props.noResultsLabel ?? "No options found"}
                 </div>
               )}
               {filteredOptions.map((option, index) => (

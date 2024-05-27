@@ -16,6 +16,7 @@ type Props = FormFieldBaseProps<UserModel> & {
   homeFacility?: string;
   userType?: UserRole;
   showActiveStatus?: boolean;
+  noResultsLabel?: string;
 };
 
 export default function UserAutocompleteFormField(props: Props) {
@@ -83,6 +84,7 @@ export default function UserAutocompleteFormField(props: Props) {
                 : getUserList({ ...search_filter, search_text: query }),
             )
           }
+          noResultsLabel={props.noResultsLabel ?? "No options found"}
           isLoading={isLoading}
         />
       </div>
