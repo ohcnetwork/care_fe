@@ -159,7 +159,7 @@ export default function PatientConsentRecords(props: {
       }}
       backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/`}
     >
-      <fileUpload.Dialogues />
+      {fileUpload.Dialogues}
       {fileManager.Dialogues}
       <ConfirmDialog
         show={showDeleteConsent !== null}
