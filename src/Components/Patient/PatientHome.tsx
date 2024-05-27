@@ -567,15 +567,6 @@ export const PatientHome = (props: any) => {
                       </p>
                     </div>
                   )}
-                {(
-                  patientData.last_consultation?.consent_records?.filter(
-                    (c) => !c.deleted,
-                  ) || []
-                ).length < 1 && (
-                  <div className="mb-6 inline-flex w-full items-center justify-center rounded-md border bg-red-600/5 p-1 text-sm font-normal leading-4 text-red-600 shadow-sm lg:mt-0">
-                    Consent Records Missing
-                  </div>
-                )}
                 <div className="mb-6 rounded-sm bg-white p-2 text-center shadow">
                   <div className="flex justify-between">
                     <div className="w-1/2 border-r-2">
