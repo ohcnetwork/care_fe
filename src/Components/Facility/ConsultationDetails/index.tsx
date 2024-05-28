@@ -176,6 +176,7 @@ export const ConsultationDetails = (props: any) => {
             routes.abha.getAbhaNumber,
             {
               pathParams: { abhaNumberId: id ?? "" },
+              silent: true,
             },
           );
           setAbhaNumberData(abhaNumberData);

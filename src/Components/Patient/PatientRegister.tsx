@@ -364,6 +364,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         routes.abha.getAbhaNumber,
         {
           pathParams: { abhaNumberId: id ?? "" },
+          silent: true,
         },
       );
 
