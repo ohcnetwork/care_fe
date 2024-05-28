@@ -283,6 +283,7 @@ const AddSymptom = (props: {
       <DateFormField
         className="w-full md:w-36"
         name="onset_date"
+        id="symptoms_onset_date"
         placeholder="Date of onset"
         disableFuture
         value={onsetDate}
@@ -319,6 +320,7 @@ const AddSymptom = (props: {
         )}
       </div>
       <ButtonV2
+        id="add-symptom"
         type="button"
         className="w-full py-3 md:w-auto"
         disabled={
