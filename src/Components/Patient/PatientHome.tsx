@@ -552,7 +552,7 @@ export const PatientHome = (props: any) => {
                     0 && (
                     <div
                       className={
-                        "mb-6 mt-6 inline-flex w-full items-center justify-center rounded-md border p-3 text-xs font-semibold leading-4 shadow-sm lg:mt-0 " +
+                        "mb-6 inline-flex w-full items-center justify-center rounded-md border p-3 text-xs font-semibold leading-4 shadow-sm lg:mt-0 " +
                         (dayjs().isBefore(patientData.review_time)
                           ? " bg-gray-100"
                           : " bg-red-600/5 p-1 text-sm font-normal text-red-600")

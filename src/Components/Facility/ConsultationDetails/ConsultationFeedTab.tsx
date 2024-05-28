@@ -120,7 +120,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
             });
           }}
         >
-          <div className="flex w-36 items-center justify-end md:w-64">
+          <div className="flex items-center">
             {presets ? (
               <>
                 <AssetBedSelect
@@ -141,27 +141,30 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
                 {isUpdatingPreset ? (
                   <CareIcon
                     icon="l-spinner"
-                    className="animate-spin text-base text-zinc-500 md:mx-2"
+                    className="animate-spin text-base text-zinc-300 md:mx-2"
                   />
                 ) : (
                   <ButtonV2
                     size="small"
                     variant="secondary"
                     disabled={!hasMoved}
-                    className="disabled:bg-transparent disabled:text-zinc-700"
+                    className="hover:bg-zinc-700 disabled:bg-transparent"
                     ghost
                     tooltip={
                       hasMoved
-                        ? "Save current position to preset"
+                        ? "Save current position to selected preset"
                         : "Change camera position to update preset"
                     }
-                    tooltipClassName={classNames(
-                      "translate-y-8 text-xs",
-                      hasMoved ? "-translate-x-20" : "-translate-x-28",
-                    )}
+                    tooltipClassName="translate-y-8 text-xs"
                     onClick={handleUpdatePreset}
                   >
-                    <CareIcon icon="l-save" className="text-base" />
+                    <CareIcon
+                      icon="l-save"
+                      className={classNames(
+                        "text-base",
+                        hasMoved ? "text-gray-200" : "text-gray-500",
+                      )}
+                    />
                   </ButtonV2>
                 )}
               </>
