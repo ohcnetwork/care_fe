@@ -17,7 +17,6 @@ import { capitalize } from "lodash-es";
 import BloodPressureFormField, {
   BloodPressureValidator,
 } from "../Common/BloodPressureFormField";
-import { SymptomsSelect } from "../Common/SymptomsSelect";
 import TemperatureFormField from "../Common/TemperatureFormField";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
@@ -44,11 +43,11 @@ import {
   ConditionVerificationStatuses,
   ConsultationDiagnosis,
 } from "../Diagnosis/types";
+import { EncounterSymptomsBuilder } from "../Symptoms/SymptomsBuilder";
+import { FieldLabel } from "../Form/FormFields/FormField";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm: any = {
-  additional_symptoms: [],
-  other_symptoms: "",
   physical_examination_info: "",
   other_details: "",
   patient_category: "",
@@ -135,7 +134,6 @@ export const DailyRounds = (props: any) => {
   const formFields = [
     "physical_examination_info",
     "other_details",
-    "additional_symptoms",
     "action",
     "review_interval",
     "bp",
@@ -229,15 +227,6 @@ export const DailyRounds = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "other_symptoms":
-          if (
-            state.form.additional_symptoms?.includes(9) &&
-            !state.form[field]
-          ) {
-            errors[field] = "Please enter the other symptom details";
-            invalidForm = true;
-          }
-          return;
         case "bp": {
           const error = BloodPressureValidator(state.form.bp);
           if (error) {
@@ -311,11 +300,6 @@ export const DailyRounds = (props: any) => {
         taken_at: state.form.taken_at
           ? state.form.taken_at
           : new Date().toISOString(),
-
-        additional_symptoms: state.form.additional_symptoms,
-        other_symptoms: state.form.additional_symptoms?.includes(9)
-          ? state.form.other_symptoms
-          : undefined,
         admitted_to:
           (state.form.admitted === "Select"
             ? undefined
@@ -527,22 +511,11 @@ export const DailyRounds = (props: any) => {
             label="Other Details"
             rows={5}
           />
-          <SymptomsSelect
-            {...field("additional_symptoms")}
-            label="Symptoms"
-            className="md:col-span-2"
-          />
 
-          {state.form.additional_symptoms?.includes(9) && (
-            <div className="md:col-span-2">
-              <TextAreaFormField
-                {...field("other_symptoms")}
-                required
-                label="Other Symptoms Details"
-                placeholder="Enter the other symptoms here"
-              />
-            </div>
-          )}
+          <div className="pb-6 md:col-span-2">
+            <FieldLabel>Symptoms</FieldLabel>
+            <EncounterSymptomsBuilder />
+          </div>
 
           {state.form.rounds_type !== "DOCTORS_LOG" && (
             <>

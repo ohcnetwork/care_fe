@@ -1,8 +1,4 @@
-import {
-  CONSULTATION_TABS,
-  GENDER_TYPES,
-  SYMPTOM_CHOICES,
-} from "../../../Common/constants";
+import { CONSULTATION_TABS, GENDER_TYPES } from "../../../Common/constants";
 import { ConsultationModel } from "../models";
 import {
   getConsultation,
@@ -44,7 +40,6 @@ import { CameraFeedPermittedUserTypes } from "../../../Utils/permissions";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
-const symptomChoices = [...SYMPTOM_CHOICES];
 
 export interface ConsultationTabProps {
   consultationId: string;
@@ -114,15 +109,15 @@ export const ConsultationDetails = (props: any) => {
             ...res.data,
             symptoms_text: "",
           };
-          if (res.data.symptoms?.length) {
-            const symptoms = res.data.symptoms
-              .filter((symptom: number) => symptom !== 9)
-              .map((symptom: number) => {
-                const option = symptomChoices.find((i) => i.id === symptom);
-                return option ? option.text.toLowerCase() : symptom;
-              });
-            data.symptoms_text = symptoms.join(", ");
-          }
+          // if (res.data.symptoms?.length) {
+          //   const symptoms = res.data.symptoms
+          //     .filter((symptom: number) => symptom !== 9)
+          //     .map((symptom: number) => {
+          //       const option = symptomChoices.find((i) => i.id === symptom);
+          //       return option ? option.text.toLowerCase() : symptom;
+          //     });
+          //   data.symptoms_text = symptoms.join(", ");
+          // }
           if (facilityId != data.facility || patientId != data.patient) {
             navigate(
               `/facility/${data.facility}/patient/${data.patient}/consultation/${data?.id}`,
@@ -209,57 +204,6 @@ export const ConsultationDetails = (props: any) => {
     `capitalize min-w-max-content cursor-pointer border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300 font-bold whitespace-nowrap ${
       selected === true ? "border-primary-500 text-primary-600 border-b-2" : ""
     }`;
-
-  // const ShowDiagnosis = ({
-  //   diagnoses = [],
-  //   label = "Diagnosis",
-  //   nshow = 2,
-  // }: {
-  //   diagnoses: ICD11DiagnosisModel[] | undefined;
-  //   label: string;
-  //   nshow?: number;
-  // }) => {
-  //   const [showMore, setShowMore] = useState(false);
-
-  //   return diagnoses.length ? (
-  //     <div className="w-full text-sm">
-  //       <p className="font-semibold leading-relaxed">{label}</p>
-  //       {diagnoses.slice(0, !showMore ? nshow : undefined).map((diagnosis) =>
-  //         diagnosis.id === consultationData.icd11_principal_diagnosis ? (
-  //           <div className="relative flex items-center gap-2">
-  //             <p>{diagnosis.label}</p>
-  //             <div>
-  //               <ToolTip text="Principal Diagnosis" position="BOTTOM">
-  //                 <CareIcon icon="l-stethoscope" className="rounded-lg bg-primary-500 p-1 text-2xl text-white"/>
-  //               </ToolTip>
-  //             </div>
-  //           </div>
-  //         ) : (
-  //           <p>{diagnosis.label}</p>
-  //         )
-  //       )}
-  //       {diagnoses.length > nshow && (
-  //         <>
-  //           {!showMore ? (
-  //             <a
-  //               onClick={() => setShowMore(true)}
-  //               className="cursor-pointer text-sm text-blue-600 hover:text-blue-300"
-  //             >
-  //               show more
-  //             </a>
-  //           ) : (
-  //             <a
-  //               onClick={() => setShowMore(false)}
-  //               className="cursor-pointer text-sm text-blue-600 hover:text-blue-300"
-  //             >
-  //               show less
-  //             </a>
-  //           )}
-  //         </>
-  //       )}
-  //     </div>
-  //   ) : null;
-  // };
 
   return (
     <div>

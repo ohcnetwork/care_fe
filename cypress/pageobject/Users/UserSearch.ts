@@ -78,6 +78,10 @@ export class UserPage {
     cy.get("#alt_phone_number").click().type(altPhone);
   }
 
+  selectHomeFacility(facility: string) {
+    cy.searchAndSelectOption("input[name='home_facility']", facility);
+  }
+
   applyFilter() {
     cy.get("#apply-filter").click();
   }

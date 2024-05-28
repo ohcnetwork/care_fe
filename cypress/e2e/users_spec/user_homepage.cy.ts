@@ -32,6 +32,7 @@ describe("User Homepage", () => {
     userPage.selectDistrict("Ernakulam");
     userPage.typeInPhoneNumber(phone_number);
     userPage.typeInAltPhoneNumber(alt_phone_number);
+    userPage.selectHomeFacility("Dummy Facility 40");
     userPage.applyFilter();
     userPage.verifyUrlafteradvancefilter();
     userPage.checkUsernameText(usernameToTest);
@@ -46,6 +47,10 @@ describe("User Homepage", () => {
       "WhatsApp no.: +919876543219",
     );
     userPage.verifyDataTestIdText("Role", "Role: Doctor");
+    userPage.verifyDataTestIdText(
+      "Home Facility",
+      "Home Facility: Dummy Facility 40",
+    );
     userPage.verifyDataTestIdText("District", "District: Ernakulam");
     userPage.clearFilters();
     userPage.verifyDataTestIdNotVisible("First Name");
@@ -53,6 +58,7 @@ describe("User Homepage", () => {
     userPage.verifyDataTestIdNotVisible("Phone Number");
     userPage.verifyDataTestIdNotVisible("WhatsApp no.");
     userPage.verifyDataTestIdNotVisible("Role");
+    userPage.verifyDataTestIdNotVisible("Home Facility");
     userPage.verifyDataTestIdNotVisible("District");
   });
 
