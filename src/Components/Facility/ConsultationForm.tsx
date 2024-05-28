@@ -1103,7 +1103,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         placeholder="Weight"
                         trailingPadding=" "
                         trailing={
-                          <p className="mr-8 text-sm text-gray-700">
+                          <p className="right-10 text-sm text-gray-700">
                             Weight (kg)
                           </p>
                         }
@@ -1116,7 +1116,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         placeholder="Height"
                         trailingPadding=" "
                         trailing={
-                          <p className="mr-8 text-sm text-gray-700">
+                          <p className="right-10 text-sm text-gray-700">
                             Height (cm)
                           </p>
                         }
