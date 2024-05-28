@@ -409,6 +409,14 @@ export const compareBy = <T extends object>(key: keyof T) => {
   };
 };
 
+export const compareByDateString = <T extends object>(key: keyof T) => {
+  return (a: T, b: T) => {
+    const aV = new Date(a[key] as string);
+    const bV = new Date(b[key] as string);
+    return aV < bV ? -1 : aV > bV ? 1 : 0;
+  };
+};
+
 export const isValidUrl = (url?: string) => {
   try {
     new URL(url ?? "");
