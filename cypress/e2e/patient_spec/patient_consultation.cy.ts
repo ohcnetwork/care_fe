@@ -66,7 +66,7 @@ describe("Patient Consultation in multiple combination", () => {
     );
     patientConsultationPage.typePatientWeight(patientWeight);
     patientConsultationPage.typePatientHeight(patientHeight);
-    patientConsultationPage.selectPatientCategory("Stable");
+    patientConsultationPage.selectPatientCategory("Mild");
     // icd 11 - 4 diagnosis with one principal
     patientConsultationPage.selectPatientDiagnosis(
       diagnosis1,
@@ -236,7 +236,7 @@ describe("Patient Consultation in multiple combination", () => {
     // Asymptomatic
     cy.searchAndSelectOption("#symptoms", "ASYMPTOMATIC");
     // Abnormal category
-    patientConsultationPage.selectPatientCategory("Abnormal");
+    patientConsultationPage.selectPatientCategory("Moderate");
     patientConsultationPage.selectPatientSuggestion("Domiciliary Care");
     // one ICD-11 diagnosis
     patientConsultationPage.selectPatientDiagnosis(
@@ -299,7 +299,7 @@ describe("Patient Consultation in multiple combination", () => {
       "SORE THROAT",
     ]);
     // Stable category
-    patientConsultationPage.selectPatientCategory("Stable");
+    patientConsultationPage.selectPatientCategory("Mild");
     // Date of symptoms
     patientConsultationPage.selectSymptomsDate(
       "#symptoms_onset_date",

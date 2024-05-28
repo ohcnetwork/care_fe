@@ -13,6 +13,7 @@ import useRangePagination from "../../../Common/hooks/useRangePagination";
 import MedicineAdministrationTable from "./AdministrationTable";
 import Loading from "../../Common/Loading";
 import ScrollOverlay from "../../../CAREUI/interactive/ScrollOverlay";
+import { AuthorizedForConsultationRelatedActions } from "../../../CAREUI/misc/AuthorizedChild";
 
 interface Props {
   readonly?: boolean;
@@ -89,8 +90,9 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
         options={
           !readonly &&
           !!data?.results && (
-            <>
+            <AuthorizedForConsultationRelatedActions>
               <ButtonV2
+                id="edit-prescription"
                 variant="secondary"
                 border
                 href="prescriptions"
@@ -106,7 +108,7 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
                 prescriptions={data.results}
                 onDone={() => refetch()}
               />
-            </>
+            </AuthorizedForConsultationRelatedActions>
           )
         }
       />

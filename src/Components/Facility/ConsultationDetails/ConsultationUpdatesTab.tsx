@@ -1,18 +1,11 @@
-import { lazy, useEffect, useState } from "react";
+import { lazy, useState } from "react";
 import { ConsultationTabProps } from "./index";
 import { AssetBedModel, AssetClass, AssetData } from "../../Assets/AssetTypes";
-import { useDispatch } from "react-redux";
-import { listAssetBeds } from "../../../Redux/actions";
 import { BedModel } from "../models";
 import HL7PatientVitalsMonitor from "../../VitalsMonitor/HL7PatientVitalsMonitor";
 import VentilatorPatientVitalsMonitor from "../../VitalsMonitor/VentilatorPatientVitalsMonitor";
 import useVitalsAspectRatioConfig from "../../VitalsMonitor/useVitalsAspectRatioConfig";
-import {
-  CONSENT_PATIENT_CODE_STATUS_CHOICES,
-  CONSENT_TYPE_CHOICES,
-  DISCHARGE_REASONS,
-  SYMPTOM_CHOICES,
-} from "../../../Common/constants";
+import { DISCHARGE_REASONS, SYMPTOM_CHOICES } from "../../../Common/constants";
 import PrescriptionsTable from "../../Medicine/PrescriptionsTable";
 import Chip from "../../../CAREUI/display/Chip";
 import {
@@ -27,18 +20,18 @@ import DailyRoundsList from "../Consultations/DailyRoundsList";
 import EventsList from "./Events/EventsList";
 import SwitchTabs from "../../Common/components/SwitchTabs";
 import { getVitalsMonitorSocketUrl } from "../../VitalsMonitor/utils";
-import { FileUpload } from "../../Patient/FileUpload";
+import useQuery from "../../../Utils/request/useQuery";
+import routes from "../../../Redux/api";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
 
 export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
-  const dispatch: any = useDispatch();
   const [hl7SocketUrl, setHL7SocketUrl] = useState<string>();
   const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
   const [monitorBedData, setMonitorBedData] = useState<AssetBedModel>();
   const [ventilatorBedData, setVentilatorBedData] = useState<AssetBedModel>();
-  const [showEvents, setShowEvents] = useState<boolean>(false);
+  const [showEvents, setShowEvents] = useState(true);
 
   const vitals = useVitalsAspectRatioConfig({
     default: undefined,
@@ -49,21 +42,18 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
     "3xl": 23 / 11,
   });
 
-  useEffect(() => {
-    if (
-      !props.consultationData.facility ||
-      !props.consultationData.current_bed?.bed_object.id
-    )
-      return;
-
-    const fetchData = async () => {
-      const assetBedRes = await dispatch(
-        listAssetBeds({
-          facility: props.consultationData.facility as any,
-          bed: props.consultationData.current_bed?.bed_object.id,
-        }),
-      );
-      const assetBeds = assetBedRes?.data?.results as AssetBedModel[];
+  useQuery(routes.listAssetBeds, {
+    prefetch: !!(
+      props.consultationData.facility &&
+      props.consultationData.current_bed?.bed_object.id
+    ),
+    query: {
+      facility: props.consultationData.facility as any,
+      bed: props.consultationData.current_bed?.bed_object.id,
+    },
+    onResponse({ data }) {
+      if (!data) return;
+      const assetBeds = data.results;
 
       const monitorBedData = assetBeds?.find(
         (i) => i.asset_object?.asset_class === AssetClass.HL7MONITOR,
@@ -99,10 +89,8 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
           getVitalsMonitorSocketUrl(ventilatorBedData?.asset_object),
         );
       }
-    };
-
-    fetchData();
-  }, [props.consultationData]);
+    },
+  });
 
   return (
     <div className="flex flex-col gap-2">
@@ -255,7 +243,6 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         <div className="overflow-x-auto overflow-y-hidden">
                           <PrescriptionsTable
                             is_prn={false}
-                            readonly
                             prescription_type="DISCHARGE"
                           />
                         </div>
@@ -263,7 +250,6 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         <div className="overflow-x-auto overflow-y-hidden">
                           <PrescriptionsTable
                             is_prn
-                            readonly
                             prescription_type="DISCHARGE"
                           />
                         </div>
@@ -731,47 +717,6 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                 </div>
               </div>
             </div>
-            {(
-              props.consultationData.consent_records?.filter(
-                (record) => record.deleted !== true,
-              ) || []
-            ).length > 0 && (
-              <>
-                <div className="col-span-1 overflow-hidden rounded-lg bg-white p-4 shadow md:col-span-2">
-                  <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                    Consent Records
-                  </h3>
-                  {props.consultationData.consent_records
-                    ?.filter((record) => record.deleted !== true)
-                    ?.map((record, i) => (
-                      <div className="mt-4 border-b" key={i}>
-                        <div className="font-bold">
-                          {
-                            CONSENT_TYPE_CHOICES.find(
-                              (c) => c.id === record.type,
-                            )?.text
-                          }{" "}
-                          {record.patient_code_status &&
-                            `( ${
-                              CONSENT_PATIENT_CODE_STATUS_CHOICES.find(
-                                (c) => c.id === record.patient_code_status,
-                              )?.text
-                            } )`}
-                        </div>
-                        <FileUpload
-                          changePageMetadata={false}
-                          type="CONSENT_RECORD"
-                          hideBack
-                          unspecified
-                          className="w-full"
-                          consentId={record.id}
-                          hideUpload
-                        />
-                      </div>
-                    ))}
-                </div>
-              </>
-            )}
           </div>
         </div>
         <div className="w-full pl-0 md:pl-4 xl:w-1/3">
@@ -780,7 +725,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             tab2={
               <div className="flex items-center justify-center gap-1 text-sm">
                 Events
-                <span className="rounded-lg bg-warning-400 p-px px-1 text-[10px] text-white">
+                <span className="rounded-lg bg-warning-400 p-px px-1 text-xs text-white">
                   beta
                 </span>
               </div>

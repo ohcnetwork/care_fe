@@ -188,11 +188,7 @@ export default function ManageUsers() {
     (userList = userListData.results.map((user: any, idx) => {
       const cur_online = isUserOnline(user);
       return (
-        <div
-          key={`usr_${user.id}`}
-          id={`usr_${idx}`}
-          className=" mt-6 w-full md:px-4 lg:w-1/2 xl:w-1/3"
-        >
+        <div key={`usr_${user.id}`} id={`usr_${idx}`}>
           <div className="relative block h-full overflow-visible rounded-lg bg-white shadow hover:border-primary-500">
             <div className="flex h-full flex-col justify-between @container">
               <div className="px-6 py-4">
@@ -442,7 +438,9 @@ export default function ManageUsers() {
   } else if (userListData?.results.length) {
     manageUsers = (
       <div>
-        <div className="flex flex-wrap md:-mx-4">{userList}</div>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+          {userList}
+        </div>
         <Pagination totalCount={userListData.count} />
       </div>
     );
@@ -507,7 +505,7 @@ export default function ManageUsers() {
         </div>
       </SlideOverCustom>
 
-      <div className="m-4 mt-5 grid grid-cols-1 sm:grid-cols-3 md:gap-5 md:px-2">
+      <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 md:gap-5">
         <CountBlock
           text="Total Users"
           count={userListData?.count || 0}
@@ -536,7 +534,7 @@ export default function ManageUsers() {
         </div>
       </div>
 
-      <div className="pb-2 pl-6">
+      <div>
         <FilterBadges
           badges={({ badge, value, phoneNumber }) => [
             badge("Username", "username"),
@@ -559,7 +557,7 @@ export default function ManageUsers() {
         />
       </div>
 
-      <div className="px-3 md:px-6">
+      <div>
         <div>{manageUsers}</div>
       </div>
       {userData.show && (

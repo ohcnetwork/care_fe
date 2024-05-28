@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import useQuery from "../../Utils/request/useQuery";
 import MedicineRoutes from "./routes";
 import useSlug from "../../Common/hooks/useSlug";
+import { AuthorizedForConsultationRelatedActions } from "../../CAREUI/misc/AuthorizedChild";
 
 interface Props {
   prescription_type?: Prescription["prescription_type"];
@@ -65,30 +66,38 @@ export default function PrescriptionBuilder({
         />
       )}
       <div className="flex flex-col gap-3">
-        {data?.results.map((obj, index) => (
+        {data?.results.map((obj) => (
           <PrescriptionDetailCard
-            key={index}
+            key={obj.id}
             prescription={obj}
+            collapsible
             onDiscontinueClick={() => setShowDiscontinueFor(obj)}
             onAdministerClick={() => setShowAdministerFor(obj)}
             readonly={disabled}
           />
         ))}
       </div>
-      <ButtonV2
-        type="button"
-        onClick={() => setShowCreate(true)}
-        variant="secondary"
-        className="mt-4 w-full bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900"
-        disabled={disabled}
-      >
-        <div className="flex w-full justify-start gap-2">
-          <CareIcon icon="l-plus" className="text-lg" />
-          <span className="font-bold">
-            {t(is_prn ? "add_prn_prescription" : "add_prescription_medication")}
-          </span>
-        </div>
-      </ButtonV2>
+      <AuthorizedForConsultationRelatedActions>
+        <ButtonV2
+          type="button"
+          onClick={() => setShowCreate(true)}
+          variant="secondary"
+          className="mt-4 w-full bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900"
+          disabled={disabled}
+        >
+          <div
+            className="flex w-full justify-start gap-2"
+            id="add-prescription"
+          >
+            <CareIcon icon="l-plus" className="text-lg" />
+            <span className="font-bold">
+              {t(
+                is_prn ? "add_prn_prescription" : "add_prescription_medication",
+              )}
+            </span>
+          </div>
+        </ButtonV2>
+      </AuthorizedForConsultationRelatedActions>
       {showCreate && (
         <DialogModal
           onClose={() => setShowCreate(false)}

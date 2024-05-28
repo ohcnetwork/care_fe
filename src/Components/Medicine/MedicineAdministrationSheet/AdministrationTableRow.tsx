@@ -14,6 +14,7 @@ import CareIcon from "../../../CAREUI/icons/CareIcon";
 import EditPrescriptionForm from "../EditPrescriptionForm";
 import AdministrationEventSeperator from "./AdministrationEventSeperator";
 import AdministrationEventCell from "./AdministrationEventCell";
+import { AuthorizedForConsultationRelatedActions } from "../../../CAREUI/misc/AuthorizedChild";
 
 interface Props {
   prescription: Prescription;
@@ -93,46 +94,48 @@ export default function MedicineAdministrationTableRow({
                 onClick={() => setShowDetails(false)}
                 label={t("close")}
               />
-              {!props.readonly && (
-                <>
-                  <Submit
-                    disabled={
-                      prescription.discontinued ||
-                      prescription.prescription_type === "DISCHARGE"
-                    }
-                    variant="danger"
-                    onClick={() => setShowDiscontinue(true)}
-                  >
-                    <CareIcon icon="l-ban" className="text-lg" />
-                    {t("discontinue")}
-                  </Submit>
-                  <Submit
-                    disabled={
-                      prescription.discontinued ||
-                      prescription.prescription_type === "DISCHARGE"
-                    }
-                    variant="secondary"
-                    border
-                    onClick={() => {
-                      setShowDetails(false);
-                      setShowEdit(true);
-                    }}
-                  >
-                    <CareIcon icon="l-pen" className="text-lg" />
-                    {t("edit")}
-                  </Submit>
-                  <Submit
-                    disabled={
-                      prescription.discontinued ||
-                      prescription.prescription_type === "DISCHARGE"
-                    }
-                    onClick={() => setShowAdminister(true)}
-                  >
-                    <CareIcon icon="l-syringe" className="text-lg" />
-                    {t("administer")}
-                  </Submit>
-                </>
-              )}
+              <AuthorizedForConsultationRelatedActions>
+                {!props.readonly && (
+                  <>
+                    <Submit
+                      disabled={
+                        prescription.discontinued ||
+                        prescription.prescription_type === "DISCHARGE"
+                      }
+                      variant="danger"
+                      onClick={() => setShowDiscontinue(true)}
+                    >
+                      <CareIcon icon="l-ban" className="text-lg" />
+                      {t("discontinue")}
+                    </Submit>
+                    <Submit
+                      disabled={
+                        prescription.discontinued ||
+                        prescription.prescription_type === "DISCHARGE"
+                      }
+                      variant="secondary"
+                      border
+                      onClick={() => {
+                        setShowDetails(false);
+                        setShowEdit(true);
+                      }}
+                    >
+                      <CareIcon icon="l-pen" className="text-lg" />
+                      {t("edit")}
+                    </Submit>
+                    <Submit
+                      disabled={
+                        prescription.discontinued ||
+                        prescription.prescription_type === "DISCHARGE"
+                      }
+                      onClick={() => setShowAdminister(true)}
+                    >
+                      <CareIcon icon="l-syringe" className="text-lg" />
+                      {t("administer")}
+                    </Submit>
+                  </>
+                )}
+              </AuthorizedForConsultationRelatedActions>
             </div>
           </div>
         </DialogModal>
@@ -252,18 +255,20 @@ export default function MedicineAdministrationTableRow({
 
         {/* Action Buttons */}
         <td className="space-x-1 pr-2 text-right">
-          {!props.readonly && (
-            <ButtonV2
-              type="button"
-              size="small"
-              disabled={prescription.discontinued}
-              ghost
-              border
-              onClick={() => setShowAdminister(true)}
-            >
-              {t("administer")}
-            </ButtonV2>
-          )}
+          <AuthorizedForConsultationRelatedActions>
+            {!props.readonly && (
+              <ButtonV2
+                type="button"
+                size="small"
+                disabled={prescription.discontinued}
+                ghost
+                border
+                onClick={() => setShowAdminister(true)}
+              >
+                {t("administer")}
+              </ButtonV2>
+            )}
+          </AuthorizedForConsultationRelatedActions>
         </td>
       </tr>
     </>
