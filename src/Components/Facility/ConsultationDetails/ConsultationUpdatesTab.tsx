@@ -5,12 +5,7 @@ import { BedModel } from "../models";
 import HL7PatientVitalsMonitor from "../../VitalsMonitor/HL7PatientVitalsMonitor";
 import VentilatorPatientVitalsMonitor from "../../VitalsMonitor/VentilatorPatientVitalsMonitor";
 import useVitalsAspectRatioConfig from "../../VitalsMonitor/useVitalsAspectRatioConfig";
-import {
-  CONSENT_PATIENT_CODE_STATUS_CHOICES,
-  CONSENT_TYPE_CHOICES,
-  DISCHARGE_REASONS,
-  SYMPTOM_CHOICES,
-} from "../../../Common/constants";
+import { DISCHARGE_REASONS } from "../../../Common/constants";
 import PrescriptionsTable from "../../Medicine/PrescriptionsTable";
 import Chip from "../../../CAREUI/display/Chip";
 import {
