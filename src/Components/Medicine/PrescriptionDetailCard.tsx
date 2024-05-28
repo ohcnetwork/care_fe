@@ -5,19 +5,29 @@ import ReadMore from "../Common/components/Readmore";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { useTranslation } from "react-i18next";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
+import { useState } from "react";
+import { AuthorizedForConsultationRelatedActions } from "../../CAREUI/misc/AuthorizedChild";
 
-export default function PrescriptionDetailCard({
-  prescription,
-  ...props
-}: {
+interface Props {
   prescription: Prescription;
   readonly?: boolean;
   children?: React.ReactNode;
   onDiscontinueClick?: () => void;
   onAdministerClick?: () => void;
   selected?: boolean;
-}) {
+  collapsible?: boolean;
+}
+
+export default function PrescriptionDetailCard({
+  prescription,
+  collapsible = false,
+  ...props
+}: Props) {
   const { t } = useTranslation();
+  const [isCollapsed, setIsCollapsed] = useState(
+    collapsible && prescription.discontinued,
+  );
+
   return (
     <div
       className={classNames(
@@ -26,9 +36,17 @@ export default function PrescriptionDetailCard({
           ? "border-primary-500"
           : "border-spacing-2 border-dashed border-gray-500",
         prescription.discontinued && "bg-gray-200 opacity-80",
+        collapsible && "cursor-pointer hover:border-gray-900",
       )}
     >
-      <div className="flex flex-1 flex-col">
+      <div
+        className="flex flex-1 flex-col"
+        onClick={() => {
+          if (collapsible) {
+            setIsCollapsed(!isCollapsed);
+          }
+        }}
+      >
         <div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -38,14 +56,21 @@ export default function PrescriptionDetailCard({
                   props.selected ? "text-black" : "text-gray-700",
                 )}
               >
-                {prescription.prescription_type === "DISCHARGE" &&
-                  `${t("discharge")} `}
-                {t(
-                  prescription.dosage_type === "PRN"
-                    ? "prn_prescription"
-                    : "prescription",
+                {isCollapsed ? (
+                  prescription.medicine_object?.name ??
+                  prescription.medicine_old
+                ) : (
+                  <>
+                    {prescription.prescription_type === "DISCHARGE" &&
+                      `${t("discharge")} `}
+                    {t(
+                      prescription.dosage_type === "PRN"
+                        ? "prn_prescription"
+                        : "prescription",
+                    )}
+                    {` #${prescription.id?.slice(-5)}`}
+                  </>
                 )}
-                {` #${prescription.id?.slice(-5)}`}
               </h3>
               {prescription.discontinued && (
                 <span className="rounded-full bg-gray-700 px-2 py-1 text-xs font-semibold uppercase text-white">
@@ -56,144 +81,152 @@ export default function PrescriptionDetailCard({
 
             {!props.readonly &&
               prescription.prescription_type !== "DISCHARGE" && (
-                <div className="flex flex-col-reverse items-end gap-2 sm:flex-row">
-                  <ButtonV2
-                    id="administer-medicine"
-                    disabled={prescription.discontinued}
-                    onClick={props.onAdministerClick}
-                    type="button"
-                    size="small"
-                    variant="secondary"
-                    ghost
-                    border
-                  >
-                    <CareIcon icon="l-syringe" className="text-base" />
-                    {t("administer")}
-                  </ButtonV2>
-                  <ButtonV2
-                    disabled={prescription.discontinued}
-                    type="button"
-                    size="small"
-                    variant="danger"
-                    ghost
-                    border
-                    onClick={props.onDiscontinueClick}
-                  >
-                    <CareIcon icon="l-ban" className="text-base" />
-                    {t("discontinue")}
-                  </ButtonV2>
-                </div>
+                <AuthorizedForConsultationRelatedActions>
+                  <div className="flex flex-col-reverse items-end gap-2 sm:flex-row">
+                    <ButtonV2
+                      id="administer-medicine"
+                      disabled={prescription.discontinued}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        props.onAdministerClick?.();
+                      }}
+                      type="button"
+                      size="small"
+                      variant="secondary"
+                      ghost
+                      border
+                    >
+                      <CareIcon icon="l-syringe" className="text-base" />
+                      {t("administer")}
+                    </ButtonV2>
+                    <ButtonV2
+                      disabled={prescription.discontinued}
+                      type="button"
+                      size="small"
+                      variant="danger"
+                      ghost
+                      border
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        props.onDiscontinueClick?.();
+                      }}
+                    >
+                      <CareIcon icon="l-ban" className="text-base" />
+                      {t("discontinue")}
+                    </ButtonV2>
+                  </div>
+                </AuthorizedForConsultationRelatedActions>
               )}
           </div>
         </div>
-
-        <div className="mt-4 grid grid-cols-10 items-center gap-2">
-          <Detail
-            className={
-              prescription.dosage_type === "TITRATED"
-                ? "col-span-10"
-                : "col-span-10 md:col-span-4"
-            }
-            label={t("medicine")}
-          >
-            {prescription.medicine_object?.name ?? prescription.medicine_old}
-          </Detail>
-          <Detail
-            className="col-span-10 break-all sm:col-span-4"
-            label={t("route")}
-          >
-            {prescription.route &&
-              t("PRESCRIPTION_ROUTE_" + prescription.route)}
-          </Detail>
-          {prescription.dosage_type === "TITRATED" ? (
-            <>
+        {!isCollapsed && (
+          <div className="mt-4 grid grid-cols-10 items-center gap-2">
+            <Detail
+              className={
+                prescription.dosage_type === "TITRATED"
+                  ? "col-span-10"
+                  : "col-span-10 md:col-span-4"
+              }
+              label={t("medicine")}
+            >
+              {prescription.medicine_object?.name ?? prescription.medicine_old}
+            </Detail>
+            <Detail
+              className="col-span-10 break-all sm:col-span-4"
+              label={t("route")}
+            >
+              {prescription.route &&
+                t("PRESCRIPTION_ROUTE_" + prescription.route)}
+            </Detail>
+            {prescription.dosage_type === "TITRATED" ? (
+              <>
+                <Detail
+                  className="col-span-5 sm:col-span-3"
+                  label={t("start_dosage")}
+                >
+                  {prescription.base_dosage}
+                </Detail>
+                <Detail
+                  className="col-span-5 sm:col-span-3"
+                  label={t("target_dosage")}
+                >
+                  {prescription.target_dosage}
+                </Detail>
+              </>
+            ) : (
               <Detail
-                className="col-span-5 sm:col-span-3"
-                label={t("start_dosage")}
+                className="col-span-10 sm:col-span-6 md:col-span-2"
+                label={t("dosage")}
               >
                 {prescription.base_dosage}
               </Detail>
+            )}
+
+            {prescription.dosage_type === "PRN" ? (
+              <>
+                <Detail
+                  className="col-span-10 md:col-span-6"
+                  label={t("indicator")}
+                >
+                  {prescription.indicator}
+                </Detail>
+                <Detail
+                  className="col-span-10 md:col-span-2"
+                  label={t("max_dosage_24_hrs")}
+                >
+                  {prescription.max_dosage}
+                </Detail>
+                <Detail
+                  className="col-span-10 md:col-span-2"
+                  label={t("min_time_bw_doses")}
+                >
+                  {prescription.min_hours_between_doses &&
+                    prescription.min_hours_between_doses + " hrs."}
+                </Detail>
+              </>
+            ) : (
+              <>
+                <Detail className="col-span-5" label={t("frequency")}>
+                  {prescription.frequency &&
+                    t(
+                      "PRESCRIPTION_FREQUENCY_" +
+                        prescription.frequency.toUpperCase(),
+                    )}
+                </Detail>
+                <Detail className="col-span-5" label={t("days")}>
+                  {prescription.days}
+                </Detail>
+              </>
+            )}
+
+            {prescription.instruction_on_titration && (
               <Detail
-                className="col-span-5 sm:col-span-3"
-                label={t("target_dosage")}
+                className="col-span-10"
+                label={t("instruction_on_titration")}
               >
-                {prescription.target_dosage}
+                <ReadMore
+                  text={prescription.instruction_on_titration}
+                  minChars={120}
+                />
               </Detail>
-            </>
-          ) : (
-            <Detail
-              className="col-span-10 sm:col-span-6 md:col-span-2"
-              label={t("dosage")}
-            >
-              {prescription.base_dosage}
-            </Detail>
-          )}
+            )}
 
-          {prescription.dosage_type === "PRN" ? (
-            <>
+            {prescription.notes && (
+              <Detail className="col-span-10" label={t("notes")}>
+                <ReadMore text={prescription.notes} minChars={120} />
+              </Detail>
+            )}
+
+            {prescription.discontinued && (
               <Detail
-                className="col-span-10 md:col-span-6"
-                label={t("indicator")}
+                className="col-span-10"
+                label={t("reason_for_discontinuation")}
               >
-                {prescription.indicator}
+                {prescription.discontinued_reason}
               </Detail>
-              <Detail
-                className="col-span-10 md:col-span-2"
-                label={t("max_dosage_24_hrs")}
-              >
-                {prescription.max_dosage}
-              </Detail>
-              <Detail
-                className="col-span-10 md:col-span-2"
-                label={t("min_time_bw_doses")}
-              >
-                {prescription.min_hours_between_doses &&
-                  prescription.min_hours_between_doses + " hrs."}
-              </Detail>
-            </>
-          ) : (
-            <>
-              <Detail className="col-span-5" label={t("frequency")}>
-                {prescription.frequency &&
-                  t(
-                    "PRESCRIPTION_FREQUENCY_" +
-                      prescription.frequency.toUpperCase(),
-                  )}
-              </Detail>
-              <Detail className="col-span-5" label={t("days")}>
-                {prescription.days}
-              </Detail>
-            </>
-          )}
-
-          {prescription.instruction_on_titration && (
-            <Detail
-              className="col-span-10"
-              label={t("instruction_on_titration")}
-            >
-              <ReadMore
-                text={prescription.instruction_on_titration}
-                minChars={120}
-              />
-            </Detail>
-          )}
-
-          {prescription.notes && (
-            <Detail className="col-span-10" label={t("notes")}>
-              <ReadMore text={prescription.notes} minChars={120} />
-            </Detail>
-          )}
-
-          {prescription.discontinued && (
-            <Detail
-              className="col-span-10"
-              label={t("reason_for_discontinuation")}
-            >
-              {prescription.discontinued_reason}
-            </Detail>
-          )}
-        </div>
-
+            )}
+          </div>
+        )}
         <div className="flex flex-col gap-1 text-xs text-gray-600 md:mt-3 md:flex-row md:items-center">
           <span className="flex gap-1 font-medium">
             Prescribed

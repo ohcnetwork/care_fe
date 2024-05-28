@@ -1,4 +1,6 @@
 import {
+  CONSENT_PATIENT_CODE_STATUS_CHOICES,
+  CONSENT_TYPE_CHOICES,
   ConsultationSuggestionValue,
   DISCHARGE_REASONS,
   PATIENT_NOTES_THREADS,
@@ -13,7 +15,6 @@ import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 import { AssignedToObjectModel, DailyRoundsModel } from "../Patient/models";
 import { EncounterSymptom } from "../Symptoms/types";
 import { UserBareMinimum } from "../Users/models";
-import { ConsentRecord } from "./ConsultationForm";
 
 export interface LocalBodyModel {
   id: number;
@@ -97,6 +98,13 @@ export interface OptionsType {
 }
 
 export type PatientCategory = "Comfort Care" | "Mild" | "Moderate" | "Critical";
+
+export type ConsentRecord = {
+  id: string;
+  type: (typeof CONSENT_TYPE_CHOICES)[number]["id"];
+  patient_code_status?: (typeof CONSENT_PATIENT_CODE_STATUS_CHOICES)[number]["id"];
+  deleted?: boolean;
+};
 
 export interface ConsultationModel {
   encounter_date: string;
