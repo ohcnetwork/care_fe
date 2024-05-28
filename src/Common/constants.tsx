@@ -1404,3 +1404,5 @@ export const PATIENT_NOTES_THREADS = {
   Doctors: 10,
   Nurses: 20,
 } as const;
+
+export const RATION_CARD_CATEGORY = ["BPL", "APL", "NO_CARD"] as const;
