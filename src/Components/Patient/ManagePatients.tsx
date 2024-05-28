@@ -181,6 +181,7 @@ export const PatientManager = () => {
       qParams.date_declared_positive_before || undefined,
     date_declared_positive_after:
       qParams.date_declared_positive_after || undefined,
+    ration_card_category: qParams.ration_card_category || undefined,
     last_consultation_medico_legal_case:
       qParams.last_consultation_medico_legal_case || undefined,
     last_consultation_encounter_date_before:
@@ -959,6 +960,13 @@ export const PatientManager = () => {
             badge(
               "Is Medico-Legal Case",
               "last_consultation_medico_legal_case",
+            ),
+            value(
+              "Ration Card Category",
+              "ration_card_category",
+              qParams.ration_card_category
+                ? t(`ration_card__${qParams.ration_card_category}`)
+                : "",
             ),
             value(
               "Facility",
