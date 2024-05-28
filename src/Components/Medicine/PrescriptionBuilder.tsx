@@ -73,6 +73,7 @@ export default function PrescriptionBuilder({
             <PrescriptionDetailCard
               key={index}
               prescription={obj}
+              collapsible
               onDiscontinueClick={() => setShowDiscontinueFor(obj)}
               onAdministerClick={() => setShowAdministerFor(obj)}
               readonly={disabled}

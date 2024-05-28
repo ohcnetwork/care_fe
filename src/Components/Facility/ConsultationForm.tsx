@@ -910,11 +910,16 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
       />
 
       <div className="top-0 mt-5 flex grow-0 sm:mx-12">
-        <div className="fixed hidden h-full w-72 flex-col xl:flex">
+        <div className="fixed hidden w-72 flex-col xl:flex">
           {Object.keys(sections).map((sectionTitle) => {
             if (!isUpdate && ["Bed Status"].includes(sectionTitle)) {
               return null;
             }
+
+            if (isUpdate && sectionTitle === "Bed Status") {
+              return null;
+            }
+
             const isCurrent = currentSection === sectionTitle;
             const section = sections[sectionTitle as ConsultationFormSection];
             return (
@@ -1265,7 +1270,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                     </div>
                   )}
 
-                  {["A", "DC"].includes(state.form.suggestion) && !isUpdate && (
+                  {state.form.suggestion === "A" && !isUpdate && (
                     <div className="col-span-6 mb-6" ref={fieldRef["bed"]}>
                       <FieldLabel>Bed</FieldLabel>
                       <BedSelect
@@ -1481,7 +1486,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                 </div>
               </div>
             </form>
-            {isUpdate && (
+            {state.form.suggestion === "A" && isUpdate && (
               <>
                 <div className="mx-auto mt-4 max-w-4xl rounded bg-white px-11 py-8">
                   {sectionTitle("Bed Status")}
