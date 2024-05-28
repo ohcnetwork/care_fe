@@ -3,9 +3,9 @@ import {
   PATIENT_CATEGORIES,
   REVIEW_AT_CHOICES,
   RHYTHM_CHOICES,
-  SYMPTOM_CHOICES,
   TELEMEDICINE_ACTIONS,
 } from "../../Common/constants";
+import { SYMPTOM_CHOICES } from "../Symptoms/types";
 import { Field } from "./Scribe";
 
 export const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
@@ -58,15 +58,6 @@ export const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
       id: category.id,
       text: category.text,
     })),
-  },
-  {
-    friendlyName: "Current Health",
-    id: "current_health",
-    type: "number",
-    example: "0",
-    default: "0",
-    description:
-      "An integer to represent the current health status of the patient. 0 represents no health issues.",
   },
   {
     friendlyName: "Actions",

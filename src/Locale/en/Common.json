@@ -164,5 +164,8 @@
   "summary": "Summary",
   "report": "Report",
   "treating_doctor": "Treating Doctor",
-  "hubs": "Hub Facilities"
+  "hubs": "Hub Facilities",
+  "ration_card__NO_CARD": "Non-card holder",
+  "ration_card__BPL": "BPL",
+  "ration_card__APL": "APL"
 }

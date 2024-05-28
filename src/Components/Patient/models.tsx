@@ -1,6 +1,11 @@
 import { ConsultationModel, PatientCategory } from "../Facility/models";
 import { PerformedByModel } from "../HCX/misc";
-import { OCCUPATION_TYPES } from "../../Common/constants";
+import {
+  CONSCIOUSNESS_LEVEL,
+  OCCUPATION_TYPES,
+  RATION_CARD_CATEGORY,
+  RHYTHM_CHOICES,
+} from "../../Common/constants";
 
 export interface FlowModel {
   id?: number;
@@ -45,7 +50,6 @@ export interface AbhaObject {
 }
 
 export interface PatientModel {
-  test_id?: string;
   id?: string;
   action?: number;
   name?: string;
@@ -68,6 +72,8 @@ export interface PatientModel {
   medical_history_details?: string;
   is_active?: boolean;
   is_antenatal?: boolean;
+  last_menstruation_start_date?: string;
+  date_of_delivery?: string;
   is_migrant_worker?: boolean;
   ward?: string;
   local_body_object?: { id: number; name: string };
@@ -81,19 +87,14 @@ export interface PatientModel {
   sameAddress?: boolean;
   village?: string;
   pincode?: number;
-  contact_with_confirmed_carrier?: boolean;
-  contact_with_suspected_carrier?: boolean;
   is_medical_worker?: boolean;
   designation_of_health_care_worker?: string;
   instituion_of_health_care_worker?: string;
   frontline_worker?: string;
-  estimated_contact_date?: string;
   past_travel?: boolean;
   ongoing_medication?: string;
   countries_travelled?: Array<string>;
   transit_details?: string;
-  number_of_primary_contacts?: number;
-  number_of_secondary_contacts?: number;
   present_health?: string;
   has_SARI?: boolean;
   local_body?: number;
@@ -101,11 +102,9 @@ export interface PatientModel {
   state?: number;
   nationality?: string;
   passport_no?: string;
-  disease_status?: string;
-  test_type?: string;
+  ration_card_category?: (typeof RATION_CARD_CATEGORY)[number] | null;
   date_of_test?: string;
-  date_of_result?: string;
-  srf_id?: string;
+  date_of_result?: string; // keeping this to avoid errors in Death report
   covin_id?: string;
   is_vaccinated?: boolean;
   vaccine_name?: string;
@@ -118,7 +117,6 @@ export interface PatientModel {
   review_interval?: number;
   review_time?: string;
   date_of_return?: string;
-  cluster_name?: string;
   number_of_aged_dependents?: number;
   number_of_chronic_diseased_dependents?: number;
   will_donate_blood?: boolean;
@@ -278,6 +276,7 @@ export interface DailyRoundsOutput {
 
 export const DailyRoundTypes = [
   "NORMAL",
+  "DOCTORS_LOG",
   "VENTILATOR",
   "AUTOMATED",
   "TELEMEDICINE",
@@ -297,22 +296,19 @@ export interface DailyRoundsModel {
     | "NON_INVASIVE"
     | "INVASIVE";
   spo2?: string;
-  rhythm?: string;
+  rhythm?: (typeof RHYTHM_CHOICES)[number]["text"];
   rhythm_detail?: string;
   bp?: BloodPressure;
   pulse?: number;
   resp?: number;
   temperature?: string;
-  temperature_measured_at?: string;
   physical_examination_info?: string;
   other_details?: string;
   consultation?: number;
-  additional_symptoms?: Array<number>;
   medication_given?: Array<any>;
-  additional_symptoms_text?: string;
-  current_health?: string;
+  action?: string;
+  review_interval?: number;
   id?: string;
-  other_symptoms?: string;
   admitted_to?: string;
   patient_category?: PatientCategory;
   output?: DailyRoundsOutput[];
@@ -320,14 +316,7 @@ export interface DailyRoundsModel {
   created_date?: string;
   modified_date?: string;
   taken_at?: string;
-  consciousness_level?:
-    | "UNRESPONSIVE"
-    | "RESPONDS_TO_PAIN"
-    | "RESPONDS_TO_VOICE"
-    | "ALERT"
-    | "AGITATED_OR_CONFUSED"
-    | "ONSET_OF_AGITATION_AND_CONFUSION"
-    | "UNKNOWN";
+  consciousness_level?: (typeof CONSCIOUSNESS_LEVEL)[number]["id"];
   rounds_type?: (typeof DailyRoundTypes)[number];
   last_updated_by_telemedicine?: boolean;
   created_by_telemedicine?: boolean;
@@ -343,7 +332,7 @@ export interface FacilityNameModel {
 
 // File Upload Models
 
-type FileCategory = "UNSPECIFIED" | "XRAY" | "AUDIO" | "IDENTITY_PROOF";
+export type FileCategory = "UNSPECIFIED" | "XRAY" | "AUDIO" | "IDENTITY_PROOF";
 
 export interface CreateFileRequest {
   file_type: string | number;

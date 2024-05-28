@@ -1,8 +1,4 @@
-import {
-  CONSULTATION_TABS,
-  GENDER_TYPES,
-  SYMPTOM_CHOICES,
-} from "../../../Common/constants";
+import { CONSULTATION_TABS, GENDER_TYPES } from "../../../Common/constants";
 import { ConsultationModel } from "../models";
 import {
   getConsultation,
@@ -33,6 +29,7 @@ import { ConsultationVentilatorTab } from "./ConsultationVentilatorTab";
 import { ConsultationPressureSoreTab } from "./ConsultationPressureSoreTab";
 import { ConsultationDialysisTab } from "./ConsultationDialysisTab";
 import { ConsultationNeurologicalMonitoringTab } from "./ConsultationNeurologicalMonitoringTab";
+import ABDMRecordsTab from "../../ABDM/ABDMRecordsTab";
 import { ConsultationNutritionTab } from "./ConsultationNutritionTab";
 import PatientNotesSlideover from "../PatientNotesSlideover";
 import { AssetBedModel } from "../../Assets/AssetTypes";
@@ -43,7 +40,6 @@ import { CameraFeedPermittedUserTypes } from "../../../Utils/permissions";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
-const symptomChoices = [...SYMPTOM_CHOICES];
 
 export interface ConsultationTabProps {
   consultationId: string;
@@ -67,6 +63,7 @@ const TABS = {
   NUTRITION: ConsultationNutritionTab,
   PRESSURE_SORE: ConsultationPressureSoreTab,
   DIALYSIS: ConsultationDialysisTab,
+  ABDM: ABDMRecordsTab,
 };
 
 export const ConsultationDetails = (props: any) => {
@@ -112,15 +109,15 @@ export const ConsultationDetails = (props: any) => {
             ...res.data,
             symptoms_text: "",
           };
-          if (res.data.symptoms?.length) {
-            const symptoms = res.data.symptoms
-              .filter((symptom: number) => symptom !== 9)
-              .map((symptom: number) => {
-                const option = symptomChoices.find((i) => i.id === symptom);
-                return option ? option.text.toLowerCase() : symptom;
-              });
-            data.symptoms_text = symptoms.join(", ");
-          }
+          // if (res.data.symptoms?.length) {
+          //   const symptoms = res.data.symptoms
+          //     .filter((symptom: number) => symptom !== 9)
+          //     .map((symptom: number) => {
+          //       const option = symptomChoices.find((i) => i.id === symptom);
+          //       return option ? option.text.toLowerCase() : symptom;
+          //     });
+          //   data.symptoms_text = symptoms.join(", ");
+          // }
           if (facilityId != data.facility || patientId != data.patient) {
             navigate(
               `/facility/${data.facility}/patient/${data.patient}/consultation/${data?.id}`,
@@ -208,57 +205,6 @@ export const ConsultationDetails = (props: any) => {
       selected === true ? "border-primary-500 text-primary-600 border-b-2" : ""
     }`;
 
-  // const ShowDiagnosis = ({
-  //   diagnoses = [],
-  //   label = "Diagnosis",
-  //   nshow = 2,
-  // }: {
-  //   diagnoses: ICD11DiagnosisModel[] | undefined;
-  //   label: string;
-  //   nshow?: number;
-  // }) => {
-  //   const [showMore, setShowMore] = useState(false);
-
-  //   return diagnoses.length ? (
-  //     <div className="w-full text-sm">
-  //       <p className="font-semibold leading-relaxed">{label}</p>
-  //       {diagnoses.slice(0, !showMore ? nshow : undefined).map((diagnosis) =>
-  //         diagnosis.id === consultationData.icd11_principal_diagnosis ? (
-  //           <div className="relative flex items-center gap-2">
-  //             <p>{diagnosis.label}</p>
-  //             <div>
-  //               <ToolTip text="Principal Diagnosis" position="BOTTOM">
-  //                 <CareIcon icon="l-stethoscope" className="rounded-lg bg-primary-500 p-1 text-2xl text-white"/>
-  //               </ToolTip>
-  //             </div>
-  //           </div>
-  //         ) : (
-  //           <p>{diagnosis.label}</p>
-  //         )
-  //       )}
-  //       {diagnoses.length > nshow && (
-  //         <>
-  //           {!showMore ? (
-  //             <a
-  //               onClick={() => setShowMore(true)}
-  //               className="cursor-pointer text-sm text-blue-600 hover:text-blue-300"
-  //             >
-  //               show more
-  //             </a>
-  //           ) : (
-  //             <a
-  //               onClick={() => setShowMore(false)}
-  //               className="cursor-pointer text-sm text-blue-600 hover:text-blue-300"
-  //             >
-  //               show less
-  //             </a>
-  //           )}
-  //         </>
-  //       )}
-  //     </div>
-  //   ) : null;
-  // };
-
   return (
     <div>
       <div className="px-2 pb-2">
@@ -325,18 +271,18 @@ export const ConsultationDetails = (props: any) => {
               onClick={() =>
                 showPatientNotesPopup
                   ? navigate(
-                      `/facility/${facilityId}/patient/${patientId}/notes`,
+                      `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/notes`,
                     )
                   : setShowPatientNotesPopup(true)
               }
               className="btn btn-primary m-1 w-full hover:text-white"
             >
-              Doctor&apos;s Notes
+              Discussion Notes
             </Link>
           </div>
         </nav>
         <div className="mt-2 flex w-full flex-col md:flex-row">
-          <div className="h-full w-full rounded-lg border bg-white text-black shadow">
+          <div className="size-full rounded-lg border bg-white text-black shadow">
             <PatientInfoCard
               patient={patientData}
               consultation={consultationData}
@@ -429,6 +375,11 @@ export const ConsultationDetails = (props: any) => {
                     )
                       return null; // Hide feed tab
                   }
+
+                  if (p.text === "ABDM" && !patientData.abha_number) {
+                    return null;
+                  }
+
                   return (
                     <Link
                       key={p.text}

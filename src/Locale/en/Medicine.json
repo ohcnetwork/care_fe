@@ -36,6 +36,7 @@
   "prescription_discontinued": "Prescription discontinued",
   "administration_notes": "Administration Notes",
   "last_administered": "Last administered",
+  "prescription_logs": "Prescription Logs",
   "modification_caution_note": "No modifications possible once added",
   "discontinue_caution_note": "Are you sure you want to discontinue this prescription?",
   "edit_caution_note": "A new prescription will be added to the consultation with the edited details and the current prescription will be discontinued.",

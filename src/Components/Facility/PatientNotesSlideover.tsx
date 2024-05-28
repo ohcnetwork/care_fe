@@ -12,8 +12,9 @@ import routes from "../../Redux/api";
 import { PatientNoteStateType } from "./models";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import AutoExpandingTextInputFormField from "../Form/FormFields/AutoExpandingTextInputFormField.js";
-import * as Sentry from "@sentry/browser";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import { PATIENT_NOTES_THREADS } from "../../Common/constants.js";
+import useNotificationSubscriptionState from "../../Common/hooks/useNotificationSubscriptionState.js";
 
 interface PatientNotesProps {
   patientId: string;
@@ -23,37 +24,29 @@ interface PatientNotesProps {
 }
 
 export default function PatientNotesSlideover(props: PatientNotesProps) {
+  const authUser = useAuthUser();
+  const notificationSubscriptionState = useNotificationSubscriptionState();
+  const [thread, setThread] = useState(
+    authUser.user_type === "Nurse"
+      ? PATIENT_NOTES_THREADS.Nurses
+      : PATIENT_NOTES_THREADS.Doctors,
+  );
   const [show, setShow] = useState(true);
   const [patientActive, setPatientActive] = useState(true);
   const [reload, setReload] = useState(false);
   const [focused, setFocused] = useState(false);
 
-  const { username } = useAuthUser();
-
-  const intialSubscriptionState = async () => {
-    try {
-      const res = await request(routes.getUserPnconfig, {
-        pathParams: { username },
-      });
-      const reg = await navigator.serviceWorker.ready;
-      const subscription = await reg.pushManager.getSubscription();
-      if (!subscription && !res.data?.pf_endpoint) {
-        Notification.Warn({
-          msg: "Please subscribe to notifications to get live updates on doctor notes.",
-        });
-      } else if (subscription?.endpoint !== res.data?.pf_endpoint) {
-        Notification.Warn({
-          msg: "Please subscribe to notifications on this device to get live updates on doctor notes.",
-        });
-      }
-    } catch (error) {
-      Sentry.captureException(error);
-    }
-  };
-
   useEffect(() => {
-    intialSubscriptionState();
-  }, []);
+    if (notificationSubscriptionState === "unsubscribed") {
+      Notification.Warn({
+        msg: "Please subscribe to notifications to get live updates on discussion notes.",
+      });
+    } else if (notificationSubscriptionState === "subscribed_on_other_device") {
+      Notification.Warn({
+        msg: "Please subscribe to notifications on this device to get live updates on discussion notes.",
+      });
+    }
+  }, [notificationSubscriptionState]);
 
   const initialData: PatientNoteStateType = {
     notes: [],
@@ -73,10 +66,6 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   );
 
   const onAddNote = async () => {
-    const payload = {
-      note: noteField,
-      consultation: consultationId,
-    };
     if (!/\S+/.test(noteField)) {
       Notification.Error({
         msg: "Note Should Contain At Least 1 Character",
@@ -85,7 +74,11 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
     }
     const { res } = await request(routes.addPatientNote, {
       pathParams: { patientId: patientId },
-      body: payload,
+      body: {
+        note: noteField,
+        consultation: consultationId,
+        thread,
+      },
     });
     if (res?.status === 201) {
       Notification.Success({ msg: "Note added successfully" });
@@ -189,23 +182,43 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
           className="flex w-full cursor-pointer items-center justify-around rounded-t-md bg-primary-800 p-2 text-white"
           onClick={() => setShow(!show)}
         >
-          <span className="font-semibold">{"Doctor's Notes"}</span>
+          <span className="font-semibold">Discussion Notes</span>
           {notesActionIcons}
         </div>
       ) : (
         <div className="flex h-screen w-full -translate-y-0 flex-col text-clip border-2 border-b-0 border-primary-800 bg-white pb-3 transition-all sm:h-[500px] sm:rounded-t-md ">
-          {/* Doctor Notes Header */}
           <div className="flex w-full items-center justify-between bg-primary-800 p-2 px-4 text-white">
-            <span className="font-semibold">{"Doctor's Notes"}</span>
+            <span className="font-semibold">Discussion Notes</span>
             {notesActionIcons}
           </div>
-          {/* Doctor Notes Body */}
+          <div className="flex bg-primary-800 text-sm">
+            {Object.values(PATIENT_NOTES_THREADS).map((current) => (
+              <button
+                key={current}
+                className={classNames(
+                  "flex flex-1 justify-center border-b-4 py-1",
+                  thread === current
+                    ? "border-primary-500 font-medium text-white"
+                    : "border-primary-800 text-white/70",
+                )}
+                onClick={() => setThread(current)}
+              >
+                {
+                  {
+                    10: "Doctor's Discussions",
+                    20: "Nurse's Discussions",
+                  }[current]
+                }
+              </button>
+            ))}
+          </div>
           <PatientConsultationNotesList
             state={state}
             setState={setState}
             reload={reload}
             setReload={setReload}
             disableEdit={!patientActive}
+            thread={thread}
           />
           <div className="relative mx-4 flex items-center">
             <AutoExpandingTextInputFormField
@@ -215,8 +228,9 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
               name="note"
               value={noteField}
               onChange={(e) => setNoteField(e.value)}
-              className="grow"
+              className="w-full grow"
               errorClassName="hidden"
+              innerClassName="pr-10"
               placeholder="Type your Note"
               disabled={!patientActive}
               onFocus={() => setFocused(true)}

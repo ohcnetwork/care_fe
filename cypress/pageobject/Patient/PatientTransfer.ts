@@ -38,7 +38,7 @@ class PatientTransfer {
           .invoke("text")
           .then((text) => {
             expect(text.trim()).to.match(
-              /^Patient Dummy Patient 10 \(Male\) transferred successfully$/i
+              /^Patient Dummy Patient 10 \(Male\) transferred successfully$/i,
             );
           });
       });
@@ -52,7 +52,7 @@ class PatientTransfer {
           .invoke("text")
           .then((text) => {
             expect(text).to.match(
-              /Patient - Patient transfer cannot be completed because the patient has an active consultation in the same facility/
+              /Patient - Patient transfer cannot be completed because the patient has an active consultation in the same facility/,
             );
           });
       });

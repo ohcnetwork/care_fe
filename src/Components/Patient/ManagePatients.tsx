@@ -31,7 +31,11 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import SearchInput from "../Form/SearchInput";
 import SortDropdownMenu from "../Common/SortDropdown";
 import SwitchTabs from "../Common/components/SwitchTabs";
-import { formatPatientAge, parsePhoneNumber } from "../../Utils/utils.js";
+import {
+  formatPatientAge,
+  isAntenatal,
+  parsePhoneNumber,
+} from "../../Utils/utils.js";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page.js";
@@ -72,13 +76,6 @@ function TabPanel(props: TabPanelProps) {
     </div>
   );
 }
-
-const PatientCategoryDisplayText: Record<PatientCategory, string> = {
-  "Comfort Care": "COMFORT CARE",
-  Stable: "STABLE",
-  Abnormal: "ABNORMAL",
-  Critical: "CRITICAL",
-};
 
 export const PatientManager = () => {
   const { t } = useTranslation();
@@ -160,7 +157,6 @@ export const PatientManager = () => {
     is_active:
       !qParams.last_consultation__new_discharge_reason &&
       (qParams.is_active || "True"),
-    disease_status: qParams.disease_status || undefined,
     phone_number: qParams.phone_number
       ? parsePhoneNumber(qParams.phone_number)
       : undefined,
@@ -185,8 +181,7 @@ export const PatientManager = () => {
       qParams.date_declared_positive_before || undefined,
     date_declared_positive_after:
       qParams.date_declared_positive_after || undefined,
-    date_of_result_before: qParams.date_of_result_before || undefined,
-    date_of_result_after: qParams.date_of_result_after || undefined,
+    ration_card_category: qParams.ration_card_category || undefined,
     last_consultation_medico_legal_case:
       qParams.last_consultation_medico_legal_case || undefined,
     last_consultation_encounter_date_before:
@@ -203,7 +198,6 @@ export const PatientManager = () => {
       qParams.last_consultation__new_discharge_reason || undefined,
     last_consultation_current_bed__location:
       qParams.last_consultation_current_bed__location || undefined,
-    srf_id: qParams.srf_id || undefined,
     number_of_doses: qParams.number_of_doses || undefined,
     covin_id: qParams.covin_id || undefined,
     is_kasp: qParams.is_kasp || undefined,
@@ -218,6 +212,10 @@ export const PatientManager = () => {
     last_consultation_is_telemedicine:
       qParams.last_consultation_is_telemedicine || undefined,
     is_antenatal: qParams.is_antenatal || undefined,
+    last_menstruation_start_date_after:
+      (qParams.is_antenatal === "true" &&
+        dayjs().subtract(9, "month").format("YYYY-MM-DD")) ||
+      undefined,
     ventilator_interface: qParams.ventilator_interface || undefined,
     diagnoses: qParams.diagnoses || undefined,
     diagnoses_confirmed: qParams.diagnoses_confirmed || undefined,
@@ -251,7 +249,6 @@ export const PatientManager = () => {
     [params.created_date_before, params.created_date_after],
     [params.modified_date_before, params.modified_date_after],
     [params.date_declared_positive_before, params.date_declared_positive_after],
-    [params.date_of_result_before, params.date_of_result_after],
     [params.last_vaccinated_date_before, params.last_vaccinated_date_after],
     [
       params.last_consultation_encounter_date_before,
@@ -470,7 +467,7 @@ export const PatientManager = () => {
             className={`absolute inset-y-0 left-0 flex h-full w-1 items-center rounded-l-lg transition-all duration-200 ease-in-out group-hover:w-5 ${categoryClass}`}
           >
             <span className="absolute -inset-x-32 inset-y-0 flex -rotate-90 items-center justify-center text-center text-xs font-bold uppercase tracking-widest opacity-0 transition-all duration-200 ease-in-out group-hover:opacity-100">
-              {category ? PatientCategoryDisplayText[category] : "UNKNOWN"}
+              {category || "UNKNOWN"}
             </span>
           </div>
           <div className="flex flex-col items-start gap-4 md:flex-row">
@@ -577,16 +574,19 @@ export const PatientManager = () => {
                       text="Readmission"
                     />
                   )}
-                  {patient.disease_status === "POSITIVE" && (
-                    <Chip
-                      size="small"
-                      variant="danger"
-                      startIcon="l-coronavirus"
-                      text="Positive"
-                    />
-                  )}
+                  {patient.last_consultation?.suggestion === "A" &&
+                    patient.last_consultation.facility === patient.facility &&
+                    !patient.last_consultation.discharge_date && (
+                      <Chip
+                        size="small"
+                        variant="primary"
+                        startIcon="l-clock-three"
+                        text={`IP Days: ${dayjs().diff(patient.last_consultation.encounter_date, "day")}`}
+                      />
+                    )}
                   {patient.gender === 2 &&
                     patient.is_antenatal &&
+                    isAntenatal(patient.last_menstruation_start_date) &&
                     patient.is_active && (
                       <Chip
                         size="small"
@@ -603,14 +603,6 @@ export const PatientManager = () => {
                       className="bg-blue-100 text-blue-600"
                       startIcon="l-user-md"
                       text="Medical Worker"
-                    />
-                  )}
-                  {patient.disease_status === "EXPIRED" && (
-                    <Chip
-                      size="small"
-                      variant="warning"
-                      startIcon="l-exclamation-triangle"
-                      text="Patient Expired"
                     />
                   )}
                   {(!patient.last_consultation ||
@@ -736,10 +728,36 @@ export const PatientManager = () => {
             <ButtonV2
               id="add-patient-details"
               onClick={() => {
-                if (qParams.facility)
+                const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
+                if (
+                  qParams.facility &&
+                  showAllFacilityUsers.includes(authUser.user_type)
+                )
                   navigate(`/facility/${qParams.facility}/patient`);
-                else if (onlyAccessibleFacility)
+                else if (
+                  qParams.facility &&
+                  !showAllFacilityUsers.includes(authUser.user_type) &&
+                  authUser.home_facility_object?.id !== qParams.facility
+                )
+                  Notification.Error({
+                    msg: "Oops! Non-Home facility users don't have permission to perform this action.",
+                  });
+                else if (
+                  !showAllFacilityUsers.includes(authUser.user_type) &&
+                  authUser.home_facility_object?.id
+                ) {
+                  navigate(
+                    `/facility/${authUser.home_facility_object.id}/patient`,
+                  );
+                } else if (onlyAccessibleFacility)
                   navigate(`/facility/${onlyAccessibleFacility.id}/patient`);
+                else if (
+                  !showAllFacilityUsers.includes(authUser.user_type) &&
+                  !authUser.home_facility_object?.id
+                )
+                  Notification.Error({
+                    msg: "Oops! No home facility found",
+                  });
                 else setShowDialog("create");
               }}
               className="w-full lg:w-fit"
@@ -944,6 +962,13 @@ export const PatientManager = () => {
               "last_consultation_medico_legal_case",
             ),
             value(
+              "Ration Card Category",
+              "ration_card_category",
+              qParams.ration_card_category
+                ? t(`ration_card__${qParams.ration_card_category}`)
+                : "",
+            ),
+            value(
               "Facility",
               "facility",
               qParams.facility ? facilityData?.name || "" : "",
@@ -964,7 +989,6 @@ export const PatientManager = () => {
             ),
             ordering(),
             value("Category", "category", getTheCategoryFromId()),
-            badge("Disease Status", "disease_status"),
             value(
               "Respiratory Support",
               "ventilator_interface",
@@ -982,7 +1006,6 @@ export const PatientManager = () => {
               paramKey: "last_consultation_admitted_to",
             },
             ...range("Age", "age"),
-            badge("SRF ID", "srf_id"),
             {
               name: "LSG Body",
               value: qParams.lsgBody ? LocalBodyData?.name || "" : "",
@@ -996,7 +1019,6 @@ export const PatientManager = () => {
               ),
             ),
             badge("Declared Status", "is_declared_positive"),
-            ...dateRange("Result", "date_of_result"),
             ...dateRange("Declared positive", "date_declared_positive"),
             ...dateRange(
               "Symptoms onset",
