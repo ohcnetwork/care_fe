@@ -329,7 +329,7 @@ export interface FacilityNameModel {
 
 // File Upload Models
 
-type FileCategory = "UNSPECIFIED" | "XRAY" | "AUDIO" | "IDENTITY_PROOF";
+export type FileCategory = "UNSPECIFIED" | "XRAY" | "AUDIO" | "IDENTITY_PROOF";
 
 export interface CreateFileRequest {
   file_type: string | number;

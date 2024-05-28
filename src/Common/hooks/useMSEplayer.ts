@@ -149,7 +149,6 @@ export const useMSEMediaPlayer = ({
             const ws = wsRef.current;
             ws.binaryType = "arraybuffer";
             ws.onopen = function (_event) {
-              console.log("Connected to ws");
               onSuccess && onSuccess(undefined);
             };
             ws.onmessage = function (event) {
