@@ -16,6 +16,7 @@ export default function CameraPresetSelect(props: Props) {
   return (
     <>
       <div className="hidden gap-2 whitespace-nowrap pr-2 md:flex">
+        {/* Desktop View */}
         {props.options
           .slice(0, props.options.length > 5 ? 4 : 5)
           .map((option) => (
@@ -31,20 +32,19 @@ export default function CameraPresetSelect(props: Props) {
               {label(option)}
             </button>
           ))}
-        {/* Desktop View */}
         {props.options.length > 5 && (
-          <ShowMoreDropdown {...props} options={props.options.slice(4)} />
+          <CameraPresetDropdown {...props} options={props.options.slice(4)} />
         )}
       </div>
       <div className="md:hidden">
         {/* Mobile View */}
-        <ShowMoreDropdown {...props} />
+        <CameraPresetDropdown {...props} />
       </div>
     </>
   );
 }
 
-const ShowMoreDropdown = (props: Props) => {
+export const CameraPresetDropdown = (props: Props) => {
   const selected = props.value;
 
   const options = props.options.filter(({ meta }) => meta.type !== "boundary");
@@ -54,9 +54,14 @@ const ShowMoreDropdown = (props: Props) => {
   return (
     <Listbox value={selected} onChange={props.onChange}>
       <div className="relative flex-1">
-        <Listbox.Button className="relative w-full cursor-default pr-6 text-right text-xs text-white focus:outline-none disabled:cursor-not-allowed disabled:bg-transparent disabled:text-zinc-700 sm:text-sm md:pl-2">
-          <span className="block truncate">
-            {selected ? label(selected) : "No Preset"}
+        <Listbox.Button className="relative w-full cursor-default pr-6 text-left text-xs text-white focus:outline-none disabled:cursor-not-allowed disabled:bg-transparent disabled:text-zinc-700 sm:text-sm md:pl-2">
+          <span
+            className={classNames(
+              "block truncate",
+              !selected && "text-gray-500",
+            )}
+          >
+            {selected ? label(selected) : "Select preset"}
           </span>
           <span className="pointer-events-none absolute inset-y-0 right-0 mt-1 flex items-center">
             <CareIcon icon="l-angle-down" className="text-lg text-zinc-500" />
