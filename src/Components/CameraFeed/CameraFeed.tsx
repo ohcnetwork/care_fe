@@ -11,6 +11,7 @@ import NoFeedAvailable from "./NoFeedAvailable";
 import FeedControls from "./FeedControls";
 import Fullscreen from "../../CAREUI/misc/Fullscreen";
 import FeedWatermark from "./FeedWatermark";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 interface Props {
   children?: React.ReactNode;
@@ -96,8 +97,13 @@ export default function CameraFeed(props: Props) {
         )}
       >
         <div className="flex items-center justify-between bg-zinc-900 px-4 py-0.5">
-          <div className="flex items-center gap-1 md:gap-2">
+          {props.children}
+          <div className="flex w-full items-center justify-end gap-1 md:gap-4">
             <span className="text-xs font-semibold text-white md:text-sm">
+              <CareIcon
+                icon="l-video"
+                className="hidden pr-2 text-base text-zinc-400 md:inline-block"
+              />
               {props.asset.name}
             </span>
             <div className={state === "loading" ? "animate-pulse" : ""}>
@@ -109,7 +115,6 @@ export default function CameraFeed(props: Props) {
               />
             </div>
           </div>
-          {props.children}
         </div>
 
         <div className="group relative aspect-video">
