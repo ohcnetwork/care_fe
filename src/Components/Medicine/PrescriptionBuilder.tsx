@@ -71,7 +71,7 @@ export default function PrescriptionBuilder({
           .sort(compareBy("discontinued"))
           ?.map((obj, index) => (
             <PrescriptionDetailCard
-              key={index}
+              key={obj.id}
               prescription={obj}
               collapsible
               onDiscontinueClick={() => setShowDiscontinueFor(obj)}
