@@ -57,7 +57,7 @@ export const header_content_type: URLS = {
 };
 
 // Array of image extensions
-const ExtImage: string[] = [
+export const ExtImage: string[] = [
   "jpeg",
   "jpg",
   "png",
@@ -119,12 +119,13 @@ interface URLS {
   [id: string]: string;
 }
 
-interface ModalDetails {
+export interface ModalDetails {
   name?: string;
   id?: string;
   reason?: string;
   userArchived?: string;
   archiveTime?: any;
+  associatedId?: string;
 }
 
 export interface StateInterface {
