@@ -32,8 +32,6 @@ import routes from "../../Redux/api";
 import { Scribe } from "../Scribe/Scribe";
 import { DAILY_ROUND_FORM_SCRIBE_DATA } from "../Scribe/formDetails";
 import { DailyRoundsModel } from "./models";
-import { EncounterSymptomsBuilder } from "../Symptoms/SymptomsBuilder";
-import { FieldLabel } from "../Form/FormFields/FormField";
 import { fetchEventTypeByName } from "../Facility/ConsultationDetails/Events/types";
 import InvestigationBuilder from "../Common/prescription-builder/InvestigationBuilder";
 import { FieldErrorText } from "../Form/FormFields/FormField";
@@ -45,6 +43,9 @@ import {
   ConditionVerificationStatuses,
   ConsultationDiagnosis,
 } from "../Diagnosis/types";
+import { EncounterSymptomsBuilder } from "../Symptoms/SymptomsBuilder";
+import { FieldLabel } from "../Form/FormFields/FormField";
+
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm: any = {
@@ -730,7 +731,8 @@ export const DailyRounds = (props: any) => {
               ) &&
               (state.form.temperature == initialData.temperature ||
                 isNaN(state.form.temperature)) &&
-              state.form.rounds_type !== "VENTILATOR"
+              state.form.rounds_type !== "VENTILATOR" &&
+              state.form.rounds_type !== "DOCTORS_LOG"
             }
             onClick={(e) => handleSubmit(e)}
             label={buttonText}
