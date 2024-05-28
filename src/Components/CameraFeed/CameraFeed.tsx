@@ -10,6 +10,7 @@ import FeedNetworkSignal from "./FeedNetworkSignal";
 import NoFeedAvailable from "./NoFeedAvailable";
 import FeedControls from "./FeedControls";
 import Fullscreen from "../../CAREUI/misc/Fullscreen";
+import FeedWatermark from "./FeedWatermark";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 
 interface Props {
@@ -87,7 +88,6 @@ export default function CameraFeed(props: Props) {
     setState("loading");
     initializeStream();
   };
-
   return (
     <Fullscreen fullscreen={isFullscreen} onExit={() => setFullscreen(false)}>
       <div
@@ -120,6 +120,7 @@ export default function CameraFeed(props: Props) {
         <div className="group relative aspect-video">
           {/* Notifications */}
           <FeedAlert state={state} />
+          {player.status === "playing" && <FeedWatermark />}
 
           {/* No Feed informations */}
           {state === "host_unreachable" && (
@@ -150,6 +151,7 @@ export default function CameraFeed(props: Props) {
                 url={streamUrl}
                 ref={playerRef.current as LegacyRef<ReactPlayer>}
                 controls={false}
+                pip={false}
                 playsinline
                 playing
                 muted
@@ -167,10 +169,12 @@ export default function CameraFeed(props: Props) {
             </div>
           ) : (
             <video
+              onContextMenu={(e) => e.preventDefault()}
               className="absolute inset-0 w-full"
               id="mse-video"
               autoPlay
               muted
+              disablePictureInPicture
               playsInline
               onPlay={player.onPlayCB}
               onEnded={() => player.setStatus("stop")}
