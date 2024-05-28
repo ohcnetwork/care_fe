@@ -66,10 +66,11 @@ export default function PrescriptionBuilder({
         />
       )}
       <div className="flex flex-col gap-3">
-        {data?.results.map((obj, index) => (
+        {data?.results.map((obj) => (
           <PrescriptionDetailCard
-            key={index}
+            key={obj.id}
             prescription={obj}
+            collapsible
             onDiscontinueClick={() => setShowDiscontinueFor(obj)}
             onAdministerClick={() => setShowAdministerFor(obj)}
             readonly={disabled}

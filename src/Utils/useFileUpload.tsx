@@ -42,7 +42,7 @@ export type FileUploadReturn = {
   handleCameraCapture: () => void;
   handleAudioCapture: () => void;
   handleFileUpload: (associating_id: string) => Promise<void>;
-  Dialogues: () => JSX.Element;
+  Dialogues: JSX.Element;
   UploadButton: (_: FileUploadButtonProps) => JSX.Element;
   fileName: string;
   file: File | null;
@@ -98,7 +98,7 @@ export default function useFileUpload(
       const myFile = new File([blob], `capture.${extension}`, {
         type: blob.type,
       });
-      setUploadFileName(uploadFileName || "capture");
+      setUploadFileName(uploadFileName || "");
       setFile(myFile);
     });
   };
@@ -235,7 +235,7 @@ export default function useFileUpload(
     ? "user"
     : { exact: "environment" };
 
-  const Dialogues = () => (
+  const Dialogues = (
     <DialogModal
       show={cameraModalOpen}
       title={
