@@ -26,6 +26,7 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
 
   const fetchNotes = async () => {
     setIsLoading(true);
+
     const { data } = await request(routes.getPatientNotes, {
       pathParams: {
         patientId: props.state.patientId || "",
@@ -80,7 +81,7 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
     }
   };
 
-  if (isLoading && !state.notes.length) {
+  if (isLoading) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-white">
         <CircularProgress />

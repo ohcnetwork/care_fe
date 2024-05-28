@@ -347,18 +347,12 @@ export const PatientHome = (props: any) => {
                     {patientData.name} - {formatPatientAge(patientData, true)}
                   </h1>
                   <div className="ml-auto mr-9 flex flex-wrap gap-3">
-                    {patientData.is_vaccinated ? (
+                    {patientData.is_vaccinated && (
                       <Chip
                         variant="custom"
                         className="bg-blue-100 text-blue-800"
                         startIcon="l-syringe"
                         text="Vaccinated"
-                      />
-                    ) : (
-                      <Chip
-                        variant="warning"
-                        startIcon="l-exclamation-triangle"
-                        text="Not Vaccinated"
                       />
                     )}
                     {patientData.allow_transfer ? (
@@ -392,20 +386,6 @@ export const PatientHome = (props: any) => {
                           />
                         )}
                       </>
-                    )}
-                    {patientData.contact_with_confirmed_carrier && (
-                      <Chip
-                        variant="danger"
-                        startIcon="l-exclamation-triangle"
-                        text="Contact with confirmed carrier"
-                      />
-                    )}
-                    {patientData.contact_with_suspected_carrier && (
-                      <Chip
-                        variant="warning"
-                        startIcon="l-exclamation-triangle"
-                        text="Contact with suspected carrier"
-                      />
                     )}
                     {patientData.past_travel && (
                       <Chip
@@ -572,7 +552,7 @@ export const PatientHome = (props: any) => {
                     0 && (
                     <div
                       className={
-                        "mb-6 mt-6 inline-flex w-full items-center justify-center rounded-md border p-3 text-xs font-semibold leading-4 shadow-sm lg:mt-0 " +
+                        "mb-6 inline-flex w-full items-center justify-center rounded-md border p-3 text-xs font-semibold leading-4 shadow-sm lg:mt-0 " +
                         (dayjs().isBefore(patientData.review_time)
                           ? " bg-gray-100"
                           : " bg-red-600/5 p-1 text-sm font-normal text-red-600")
@@ -753,14 +733,7 @@ export const PatientHome = (props: any) => {
               activeShiftingData.results.map((shift: any) => (
                 <div key={`shift_${shift.id}`} className="mx-2 ">
                   <div className="h-full overflow-hidden rounded-lg bg-white shadow">
-                    <div
-                      className={
-                        "flex h-full flex-col justify-between p-4 " +
-                        (shift.patient_object.disease_status === "POSITIVE"
-                          ? "bg-red-600/5"
-                          : "")
-                      }
-                    >
+                    <div className="flex h-full flex-col justify-between p-4">
                       <div>
                         <div className="mt-1 flex justify-between">
                           <div>
