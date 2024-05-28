@@ -3,6 +3,7 @@ import { PerformedByModel } from "../HCX/misc";
 import {
   CONSCIOUSNESS_LEVEL,
   OCCUPATION_TYPES,
+  RATION_CARD_CATEGORY,
   RHYTHM_CHOICES,
 } from "../../Common/constants";
 
@@ -101,6 +102,7 @@ export interface PatientModel {
   state?: number;
   nationality?: string;
   passport_no?: string;
+  ration_card_category?: (typeof RATION_CARD_CATEGORY)[number] | null;
   date_of_test?: string;
   date_of_result?: string; // keeping this to avoid errors in Death report
   covin_id?: string;

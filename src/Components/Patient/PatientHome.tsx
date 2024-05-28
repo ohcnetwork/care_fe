@@ -537,6 +537,16 @@ export const PatientHome = (props: any) => {
                     {parseOccupation(patientData.meta_info?.occupation) || "-"}
                   </div>
                 </div>
+                <div className="sm:col-span-1">
+                  <div className="text-sm font-semibold leading-5 text-zinc-400">
+                    Ration Card Category
+                  </div>
+                  <div className="mt-1  text-sm font-medium leading-5 ">
+                    {patientData.ration_card_category
+                      ? t(`ration_card__${patientData.ration_card_category}`)
+                      : "-"}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
