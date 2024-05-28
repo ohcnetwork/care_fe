@@ -234,13 +234,15 @@ export default function PatientInfoCard(props: {
                   {category.toUpperCase()}
                 </div>
               )}
-              <ButtonV2
-                ghost
-                onClick={() => setOpen(true)}
-                className="mt-1 px-[10px] py-1"
-              >
-                {bedDialogTitle}
-              </ButtonV2>
+              {consultation?.admitted && (
+                <ButtonV2
+                  ghost
+                  onClick={() => setOpen(true)}
+                  className="mt-1 px-[10px] py-1"
+                >
+                  {bedDialogTitle}
+                </ButtonV2>
+              )}
             </div>
             <div className="flex items-center justify-center">
               <div
