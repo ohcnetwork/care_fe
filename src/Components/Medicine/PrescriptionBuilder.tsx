@@ -69,7 +69,7 @@ export default function PrescriptionBuilder({
       <div className="flex flex-col gap-3">
         {data?.results
           .sort(compareBy("discontinued"))
-          ?.map((obj, index) => (
+          ?.map((obj) => (
             <PrescriptionDetailCard
               key={obj.id}
               prescription={obj}
