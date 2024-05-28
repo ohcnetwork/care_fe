@@ -299,7 +299,7 @@ export default function PatientInfoCard(props: {
               </div>
               <div className="flex flex-wrap items-center gap-2 text-sm sm:flex-row">
                 <div
-                  className="flex flex-wrap items-center justify-center gap-2 text-sm text-gray-900 sm:flex-row sm:text-sm lg:justify-normal"
+                  className="flex flex-wrap items-center justify-center gap-2 text-sm text-gray-900 sm:flex-row sm:text-sm md:pr-10 lg:justify-normal"
                   id="patient-consultationbadges"
                 >
                   {consultation?.patient_no && (
