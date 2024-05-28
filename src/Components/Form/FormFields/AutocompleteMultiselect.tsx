@@ -84,7 +84,7 @@ export const AutocompleteMutliSelect = <T, V>(
     return {
       option,
       label,
-      description: props.optionDescription && props.optionDescription(option),
+      description: props.optionDescription?.(option),
       search: label.toLowerCase(),
       value: (props.optionValue ? props.optionValue(option) : option) as V,
     };

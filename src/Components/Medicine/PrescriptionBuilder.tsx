@@ -12,6 +12,7 @@ import useQuery from "../../Utils/request/useQuery";
 import MedicineRoutes from "./routes";
 import useSlug from "../../Common/hooks/useSlug";
 import { AuthorizedForConsultationRelatedActions } from "../../CAREUI/misc/AuthorizedChild";
+import { compareBy } from "../../Utils/utils";
 
 interface Props {
   prescription_type?: Prescription["prescription_type"];
@@ -66,15 +67,18 @@ export default function PrescriptionBuilder({
         />
       )}
       <div className="flex flex-col gap-3">
-        {data?.results.map((obj, index) => (
-          <PrescriptionDetailCard
-            key={index}
-            prescription={obj}
-            onDiscontinueClick={() => setShowDiscontinueFor(obj)}
-            onAdministerClick={() => setShowAdministerFor(obj)}
-            readonly={disabled}
-          />
-        ))}
+        {data?.results
+          .sort(compareBy("discontinued"))
+          ?.map((obj) => (
+            <PrescriptionDetailCard
+              key={obj.id}
+              prescription={obj}
+              collapsible
+              onDiscontinueClick={() => setShowDiscontinueFor(obj)}
+              onAdministerClick={() => setShowAdministerFor(obj)}
+              readonly={disabled}
+            />
+          ))}
       </div>
       <AuthorizedForConsultationRelatedActions>
         <ButtonV2

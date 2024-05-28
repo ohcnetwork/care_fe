@@ -51,7 +51,11 @@ export default function PatientConsentRecords(props: {
       id: patientId,
     },
   });
-  const { data: consultation, refetch } = useQuery(routes.getConsultation, {
+  const {
+    data: consultation,
+    refetch,
+    loading,
+  } = useQuery(routes.getConsultation, {
     pathParams: { id: consultationId! },
     onResponse: (data) => {
       if (data.data && data.data.consent_records) {
@@ -130,9 +134,7 @@ export default function PatientConsentRecords(props: {
     return () => clearTimeout(timeout);
   }, [consentRecords]);
 
-  const tabConsents = consentRecords?.filter(
-    (record) => showArchived || record.deleted !== true,
-  );
+  const tabConsents = consentRecords?.filter((c) => showArchived || !c.deleted);
 
   useEffect(() => {
     setFilesFound(false);
@@ -155,7 +157,7 @@ export default function PatientConsentRecords(props: {
       }}
       backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/`}
     >
-      <fileUpload.Dialogues />
+      {fileUpload.Dialogues}
       {fileManager.Dialogues}
       <ConfirmDialog
         show={showDeleteConsent !== null}
@@ -192,15 +194,15 @@ export default function PatientConsentRecords(props: {
         className="w-auto"
       />
       <SwitchTabs
-        tab1="Files"
+        tab1="Active"
         tab2="Archived"
         className="my-4"
         onClickTab1={() => setShowArchived(false)}
         onClickTab2={() => setShowArchived(true)}
         isTab2Active={showArchived}
       />
-      <div className="mt-8 flex flex-col gap-4 md:flex-row-reverse">
-        <div className="shrink-0 md:w-[350px]">
+      <div className="mt-8 flex flex-col gap-4 lg:flex-row-reverse">
+        <div className="shrink-0 lg:w-[350px]">
           <h4 className="font-black">Add New Record</h4>
           <SelectFormField
             {...selectField("consent_type")}
@@ -241,6 +243,7 @@ export default function PatientConsentRecords(props: {
                     const diffPCS = consentRecords?.find(
                       (record) =>
                         record.type === 2 &&
+                        newConsent.type === 2 &&
                         record.patient_code_status !==
                           newConsent.patient_code_status &&
                         record.deleted !== true,
@@ -280,25 +283,27 @@ export default function PatientConsentRecords(props: {
           </div>
         </div>
         <div className="flex-1">
-          {tabConsents?.length === 0 ||
-            (!filesFound && (
+          <div className="flex flex-col gap-4">
+            {loading ? (
+              <div className="skeleton-animate-alpha h-32 rounded-lg" />
+            ) : tabConsents?.length === 0 || !filesFound ? (
               <div className="flex h-32 items-center justify-center text-gray-500">
                 No records found
               </div>
-            ))}
-          <div className="flex flex-col gap-4">
-            {tabConsents?.map((record, index) => (
-              <PatientConsentRecordBlockGroup
-                key={index}
-                consentRecord={record}
-                previewFile={fileManager.viewFile}
-                archiveFile={fileManager.archiveFile}
-                onDelete={(record) => setShowDeleteConsent(record.id)}
-                refreshTrigger={consultation}
-                showArchive={showArchived}
-                onFilesFound={() => setFilesFound(true)}
-              />
-            ))}
+            ) : null}
+            {!loading &&
+              tabConsents?.map((record, index) => (
+                <PatientConsentRecordBlockGroup
+                  key={index}
+                  consentRecord={record}
+                  previewFile={fileManager.viewFile}
+                  archiveFile={fileManager.archiveFile}
+                  onDelete={(record) => setShowDeleteConsent(record.id)}
+                  refreshTrigger={consultation}
+                  showArchive={showArchived}
+                  onFilesFound={() => setFilesFound(true)}
+                />
+              ))}
           </div>
         </div>
       </div>

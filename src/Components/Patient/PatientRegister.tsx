@@ -5,6 +5,7 @@ import {
   GENDER_TYPES,
   MEDICAL_HISTORY_CHOICES,
   OCCUPATION_TYPES,
+  RATION_CARD_CATEGORY,
   VACCINES,
 } from "../../Common/constants";
 import {
@@ -65,6 +66,7 @@ import SelectMenuV2 from "../Form/SelectMenuV2.js";
 import Checkbox from "../Common/components/CheckBox.js";
 import _ from "lodash";
 import { ILocalBodies } from "../ExternalResult/models.js";
+import { useTranslation } from "react-i18next";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -130,6 +132,7 @@ const initForm: any = {
   last_vaccinated_date: null,
   abha_number: null,
   ...medicalHistoryChoices,
+  ration_card_category: null,
 };
 
 const initError = Object.assign(
@@ -169,6 +172,7 @@ export const parseOccupationFromExt = (occupation: Occupation) => {
 
 export const PatientRegister = (props: PatientRegisterProps) => {
   const authUser = useAuthUser();
+  const { t } = useTranslation();
   const { goBack } = useAppHistory();
   const { gov_data_api_key, enable_hcx, enable_abdm } = useConfig();
   const { facilityId, id } = props;
@@ -750,6 +754,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       blood_group: formData.blood_group ? formData.blood_group : undefined,
       medical_history,
       is_active: true,
+      ration_card_category: formData.ration_card_category,
     };
     const { res, data: requestData } = id
       ? await request(routes.updatePatient, {
@@ -1701,6 +1706,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 options={occupationTypes}
                                 optionLabel={(o) => o.text}
                                 optionValue={(o) => o.id}
+                              />
+                              <SelectFormField
+                                {...field("ration_card_category")}
+                                label="Ration Card Category"
+                                placeholder="Select"
+                                options={RATION_CARD_CATEGORY}
+                                optionLabel={(o) => t(`ration_card__${o}`)}
+                                optionValue={(o) => o}
                               />
                             </>
                           ) : (

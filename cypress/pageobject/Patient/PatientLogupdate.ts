@@ -32,6 +32,16 @@ class PatientLogupdate {
     cy.searchAndSelectOption("#additional_symptoms", symptoms);
   }
 
+  typeAndMultiSelectSymptoms(input, symptoms) {
+    cy.typeAndMultiSelectOption("#additional_symptoms", input, symptoms);
+  }
+  selectSymptomsDate(date: string) {
+    cy.clickAndTypeDate("#symptoms_onset_date", date);
+  }
+  clickAddSymptom() {
+    cy.get("#add-symptom").click();
+  }
+
   typeSystolic(systolic: string) {
     cy.searchAndSelectOption("#systolic", systolic);
   }
