@@ -97,7 +97,10 @@ import {
 import { PaginatedResponse } from "../Utils/request/types";
 
 import { ICD11DiagnosisModel } from "../Components/Diagnosis/types";
-import { EventGeneric } from "../Components/Facility/ConsultationDetails/Events/types";
+import {
+  EventGeneric,
+  type Type,
+} from "../Components/Facility/ConsultationDetails/Events/types";
 import {
   InvestigationGroup,
   InvestigationType,
@@ -626,6 +629,14 @@ const routes = {
     method: "POST",
     TBody: Type<DailyRoundsBody>(),
     TRes: Type<DailyRoundsRes>(),
+  },
+
+  // Event Types
+
+  listEventTypes: {
+    path: "/api/v1/event_types/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<Type>>(),
   },
 
   // Hospital Beds
