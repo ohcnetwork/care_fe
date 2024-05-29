@@ -96,7 +96,7 @@ export default function CameraFeed(props: Props) {
           props.className,
         )}
       >
-        <div className="flex items-center justify-between bg-zinc-900 px-4 py-1.5 md:py-3">
+        <div className="flex items-center justify-between bg-zinc-900 px-4 py-1.5 md:py-2">
           {props.children}
           <div className="flex w-full items-center justify-end gap-1 md:gap-4">
             <span className="text-base font-semibold text-white">

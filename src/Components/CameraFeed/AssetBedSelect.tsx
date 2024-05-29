@@ -22,10 +22,10 @@ export default function CameraPresetSelect(props: Props) {
           .map((option) => (
             <button
               className={classNames(
-                "rounded-lg border-2 px-2 py-0.5 text-base transition-all duration-200 ease-in-out hover:bg-zinc-600",
+                "w-40 overflow-hidden text-ellipsis whitespace-nowrap rounded-lg border-2 px-2 py-0.5 text-base transition-all duration-200 ease-in-out hover:bg-zinc-600",
                 props.value?.id === option.id
-                  ? "border-white bg-zinc-100 text-black"
-                  : "border-zinc-700 text-zinc-100",
+                  ? "border-white bg-zinc-100 font-bold text-black"
+                  : "border-zinc-700 font-medium text-zinc-300",
               )}
               onClick={() => props.onChange?.(option)}
             >
@@ -33,7 +33,11 @@ export default function CameraPresetSelect(props: Props) {
             </button>
           ))}
         {props.options.length > 5 && (
-          <CameraPresetDropdown {...props} options={props.options.slice(4)} />
+          <CameraPresetDropdown
+            {...props}
+            options={props.options.slice(4)}
+            value={props.options.slice(4).find((o) => o.id === props.value?.id)}
+          />
         )}
       </div>
       <div className="w-full sm:hidden md:flex lg:hidden">
@@ -54,17 +58,19 @@ export const CameraPresetDropdown = (props: Props) => {
   return (
     <Listbox value={selected} onChange={props.onChange}>
       <div className="relative flex-1">
-        <Listbox.Button className="sm:text-md relative w-20 cursor-default rounded-lg border-2 border-zinc-700 px-2 py-0.5 pr-6 text-left text-base text-white focus:outline-none disabled:cursor-not-allowed disabled:bg-transparent disabled:text-zinc-700 md:w-32 md:pl-2">
-          <span
-            className={classNames(
-              "block truncate",
-              !selected && "text-gray-500",
-            )}
-          >
+        <Listbox.Button
+          className={classNames(
+            "relative w-40 overflow-hidden text-ellipsis whitespace-nowrap rounded-lg border-2 px-2 py-0.5 text-left text-base transition-all duration-200 ease-in-out hover:bg-zinc-600 focus:outline-none disabled:cursor-not-allowed disabled:bg-transparent disabled:text-zinc-700",
+            selected
+              ? "border-white bg-zinc-100 font-bold text-black"
+              : "border-zinc-700 font-medium text-zinc-300",
+          )}
+        >
+          <span className="block truncate">
             {selected ? label(selected) : "Select preset"}
           </span>
-          <span className="pointer-events-none absolute inset-y-0 right-0 mt-1 flex items-center">
-            <CareIcon icon="l-angle-down" className="text-lg text-zinc-500" />
+          <span className="pointer-events-none absolute inset-y-0 right-0 mr-1 mt-1 flex items-center">
+            <CareIcon icon="l-angle-down" className="text-xl text-zinc-400" />
           </span>
         </Listbox.Button>
         <Transition
