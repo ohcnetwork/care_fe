@@ -1345,8 +1345,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     <TextFormField
                                       {...field("age")}
                                       errorClassName="hidden"
+                                      trailingPadding="pr-4"
                                       trailing={
-                                        <p className="relative right-4 space-x-1 text-xs text-gray-700 sm:right-14 sm:text-sm md:right-4 lg:right-14">
+                                        <p className="absolute right-10 space-x-1 whitespace-nowrap text-xs text-gray-700 sm:text-sm">
                                           {field("age").value !== "" && (
                                             <>
                                               <span className="hidden sm:inline md:hidden lg:inline">
@@ -1364,7 +1365,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                         </p>
                                       }
                                       placeholder="Enter the age"
-                                      className="col-span-6 sm:col-span-3"
                                       type="number"
                                       min={0}
                                     />
