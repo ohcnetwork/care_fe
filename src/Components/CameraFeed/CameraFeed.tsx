@@ -170,7 +170,7 @@ export default function CameraFeed(props: Props) {
           ) : (
             <video
               onContextMenu={(e) => e.preventDefault()}
-              className="absolute inset-0 w-full"
+              className="absolute inset-x-0 mx-auto aspect-video max-h-screen w-full"
               id="mse-video"
               autoPlay
               muted
