@@ -96,13 +96,13 @@ export default function CameraFeed(props: Props) {
           props.className,
         )}
       >
-        <div className="flex items-center justify-between bg-zinc-900 px-4 py-0.5">
+        <div className="flex items-center justify-between bg-zinc-900 px-4 py-1.5 md:py-3">
           {props.children}
           <div className="flex w-full items-center justify-end gap-1 md:gap-4">
-            <span className="text-xs font-semibold text-white md:text-sm">
+            <span className="text-base font-semibold text-white">
               <CareIcon
                 icon="l-video"
-                className="hidden pr-2 text-base text-zinc-400 md:inline-block"
+                className="hidden pr-2 text-lg text-zinc-400 md:inline-block"
               />
               {props.asset.name}
             </span>

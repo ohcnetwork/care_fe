@@ -15,17 +15,17 @@ export default function CameraPresetSelect(props: Props) {
   const label = props.label ?? defaultLabel;
   return (
     <>
-      <div className="hidden gap-4 whitespace-nowrap pr-2 md:flex md:gap-2">
+      <div className="hidden gap-4 whitespace-nowrap pr-2 sm:flex md:hidden md:gap-2 lg:flex">
         {/* Desktop View */}
         {props.options
           .slice(0, props.options.length > 5 ? 4 : 5)
           .map((option) => (
             <button
               className={classNames(
-                "rounded-lg border px-2 py-0.5 text-sm font-bold transition-all duration-200 ease-in-out hover:bg-zinc-600",
+                "rounded-lg border-2 px-2 py-0.5 text-base transition-all duration-200 ease-in-out hover:bg-zinc-600",
                 props.value?.id === option.id
                   ? "border-white bg-zinc-100 text-black"
-                  : "border-white/50 text-zinc-100",
+                  : "border-zinc-700 text-zinc-100",
               )}
               onClick={() => props.onChange?.(option)}
             >
@@ -36,7 +36,7 @@ export default function CameraPresetSelect(props: Props) {
           <CameraPresetDropdown {...props} options={props.options.slice(4)} />
         )}
       </div>
-      <div className="w-full md:hidden">
+      <div className="w-full sm:hidden md:flex lg:hidden">
         {/* Mobile View */}
         <CameraPresetDropdown {...props} />
       </div>
@@ -54,7 +54,7 @@ export const CameraPresetDropdown = (props: Props) => {
   return (
     <Listbox value={selected} onChange={props.onChange}>
       <div className="relative flex-1">
-        <Listbox.Button className="sm:text-md relative w-20 cursor-default rounded-lg border border-white/50 px-2 py-0.5 pr-6 text-left text-sm text-white focus:outline-none disabled:cursor-not-allowed disabled:bg-transparent disabled:text-zinc-700 md:w-32 md:pl-2">
+        <Listbox.Button className="sm:text-md relative w-20 cursor-default rounded-lg border-2 border-zinc-700 px-2 py-0.5 pr-6 text-left text-base text-white focus:outline-none disabled:cursor-not-allowed disabled:bg-transparent disabled:text-zinc-700 md:w-32 md:pl-2">
           <span
             className={classNames(
               "block truncate",
@@ -73,7 +73,7 @@ export const CameraPresetDropdown = (props: Props) => {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <Listbox.Options className="absolute z-20 mt-1 max-h-48 w-full overflow-auto rounded-b-lg bg-zinc-900/75 py-1 text-base shadow-lg ring-1 ring-white/5 backdrop-blur-sm focus:outline-none sm:text-sm md:max-h-60">
+          <Listbox.Options className="absolute z-20 mt-1 max-h-48 w-full overflow-auto rounded-b-lg bg-zinc-900/75 py-1 text-base shadow-lg ring-1 ring-white/5 backdrop-blur-sm focus:outline-none md:max-h-60">
             {options?.map((obj) => (
               <Listbox.Option
                 key={obj.id}
