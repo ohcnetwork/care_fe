@@ -22,7 +22,7 @@ export default function CameraPresetSelect(props: Props) {
           .map((option) => (
             <button
               className={classNames(
-                "w-40 overflow-hidden text-ellipsis whitespace-nowrap rounded-lg border-2 px-2 py-0.5 text-base transition-all duration-200 ease-in-out hover:bg-zinc-600",
+                "min-w-16 max-w-40 overflow-hidden text-ellipsis whitespace-nowrap rounded-lg border-2 px-2 py-0.5 text-base transition-all duration-200 ease-in-out hover:bg-zinc-600",
                 props.value?.id === option.id
                   ? "border-white bg-zinc-100 font-bold text-black"
                   : "border-zinc-700 font-medium text-zinc-300",
@@ -60,7 +60,7 @@ export const CameraPresetDropdown = (props: Props) => {
       <div className="relative flex-1">
         <Listbox.Button
           className={classNames(
-            "relative w-40 overflow-hidden text-ellipsis whitespace-nowrap rounded-lg border-2 px-2 py-0.5 text-left text-base transition-all duration-200 ease-in-out hover:bg-zinc-600 focus:outline-none disabled:cursor-not-allowed disabled:bg-transparent disabled:text-zinc-700",
+            "relative min-w-32 max-w-40 overflow-hidden text-ellipsis whitespace-nowrap rounded-lg border-2 px-2 py-0.5 pr-8 text-left text-base transition-all duration-200 ease-in-out hover:bg-zinc-600 focus:outline-none disabled:cursor-not-allowed disabled:bg-transparent disabled:text-zinc-700",
             selected
               ? "border-white bg-zinc-100 font-bold text-black"
               : "border-zinc-700 font-medium text-zinc-300",
@@ -93,7 +93,7 @@ export const CameraPresetDropdown = (props: Props) => {
                 {({ selected }) => (
                   <>
                     <span
-                      className={`block truncate text-xs md:text-sm ${
+                      className={`block truncate text-sm md:text-base ${
                         selected ? "font-bold text-white" : "font-normal"
                       }`}
                     >
