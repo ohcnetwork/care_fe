@@ -411,22 +411,13 @@ export const PatientHome = (props: any) => {
                   {patientData.facility_object?.name || "-"}
                 </h3>
                 <p className="mb-7 mt-4 text-sm font-medium text-zinc-500">
-                  {patientGender} | {patientData.blood_group || "-"}
+                  {patientGender} | {patientData.blood_group || "-"} | Born on{" "}
+                  {patientData.date_of_birth
+                    ? formatDate(patientData.date_of_birth)
+                    : patientData.year_of_birth}
                 </p>
               </div>
               <div className="mb-8 mt-2 grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-2 md:gap-y-8 lg:grid-cols-4">
-                <div className="sm:col-span-1">
-                  <div className="text-sm font-semibold leading-5 text-zinc-400">
-                    {patientData.date_of_birth
-                      ? "Date of Birth"
-                      : "Year of Birth"}
-                  </div>
-                  <div className="mt-1 text-sm font-medium leading-5">
-                    {patientData.date_of_birth
-                      ? formatDate(patientData.date_of_birth)
-                      : patientData.year_of_birth}
-                  </div>
-                </div>
                 <div className="sm:col-span-1">
                   <div className="text-sm font-semibold leading-5 text-zinc-400">
                     Phone
@@ -535,6 +526,16 @@ export const PatientHome = (props: any) => {
                   </div>
                   <div className="mt-1  text-sm font-medium leading-5 ">
                     {parseOccupation(patientData.meta_info?.occupation) || "-"}
+                  </div>
+                </div>
+                <div className="sm:col-span-1">
+                  <div className="text-sm font-semibold leading-5 text-zinc-400">
+                    Ration Card Category
+                  </div>
+                  <div className="mt-1  text-sm font-medium leading-5 ">
+                    {patientData.ration_card_category
+                      ? t(`ration_card__${patientData.ration_card_category}`)
+                      : "-"}
                   </div>
                 </div>
               </div>

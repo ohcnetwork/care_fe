@@ -59,7 +59,7 @@ describe("Patient Consultation in multiple combination", () => {
     patientConsultationPage.selectConsultationStatus(
       "Outpatient/Emergency Room",
     );
-    cy.searchAndSelectOption("#symptoms", "ASYMPTOMATIC");
+    cy.get("#is_asymptomatic").click();
     patientConsultationPage.typePatientIllnessHistory(patientIllnessHistory);
     patientConsultationPage.typePatientExaminationHistory(
       patientExaminationHistory,
@@ -175,7 +175,7 @@ describe("Patient Consultation in multiple combination", () => {
       "Outpatient/Emergency Room",
     );
     // Asymptomatic
-    cy.searchAndSelectOption("#symptoms", "ASYMPTOMATIC");
+    cy.get("#is_asymptomatic").click();
     // CRITICAL category
     patientConsultationPage.selectPatientCategory("Critical");
     patientConsultationPage.selectPatientSuggestion("Declare Death");
@@ -234,7 +234,7 @@ describe("Patient Consultation in multiple combination", () => {
     );
     patientConsultationPage.selectPatientWard("Dummy Location 1");
     // Asymptomatic
-    cy.searchAndSelectOption("#symptoms", "ASYMPTOMATIC");
+    cy.get("#is_asymptomatic").click();
     // Abnormal category
     patientConsultationPage.selectPatientCategory("Moderate");
     patientConsultationPage.selectPatientSuggestion("Domiciliary Care");
@@ -293,18 +293,14 @@ describe("Patient Consultation in multiple combination", () => {
     );
     // verify the free text in referring facility name
     patientConsultationPage.typeReferringFacility("Life Care Hospital");
-    // Vomiting and Nausea symptoms
+    patientConsultationPage.selectSymptomsDate("01012024");
     patientConsultationPage.typeAndMultiSelectSymptoms("s", [
-      "SPUTUM",
-      "SORE THROAT",
+      "Sore throat",
+      "Sputum",
     ]);
+    patientConsultationPage.clickAddSymptom();
     // Stable category
     patientConsultationPage.selectPatientCategory("Mild");
-    // Date of symptoms
-    patientConsultationPage.selectSymptomsDate(
-      "#symptoms_onset_date",
-      "01012024",
-    );
     // OP Consultation
     patientConsultationPage.selectPatientSuggestion("OP Consultation");
     // one ICD-11 and no principal
@@ -341,18 +337,16 @@ describe("Patient Consultation in multiple combination", () => {
     patientConsultationPage.selectConsultationStatus(
       "Outpatient/Emergency Room",
     );
-    // Select the Symptoms - Sore throat and fever symptoms
+    // Select the Symptoms - Breathlessness and Bleeding symptoms
+    patientConsultationPage.selectSymptomsDate("01012024");
     patientConsultationPage.typeAndMultiSelectSymptoms("b", [
-      "BREATHLESSNESS",
-      "BLEEDING",
+      "Breathlessness",
+      "Bleeding",
     ]);
+    patientConsultationPage.clickAddSymptom();
     // Comfort Care category
     patientConsultationPage.selectPatientCategory("Comfort Care");
     // Date of symptoms
-    patientConsultationPage.selectSymptomsDate(
-      "#symptoms_onset_date",
-      "01012024",
-    );
     // Decision after consultation - Referred to Facility
     patientConsultationPage.selectPatientSuggestion(
       "Refer to another Hospital",
