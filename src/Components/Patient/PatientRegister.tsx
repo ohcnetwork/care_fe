@@ -1002,7 +1002,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             <SelectFormField
               {...field("cancer_type")}
               position="above"
-              placeholder="Cancer Type"
+              label="Cancer Type"
+              placeholder="Select Type"
               options={filteredCancerHistoryChoices}
               optionLabel={(o: string) => o}
               optionValue={(o: string) => o}
@@ -1011,18 +1012,20 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         )}
         {/* TB */}
         {id === 14 && (field("medical_history").value ?? []).includes(id) && (
-          <div>
+          <div className="mx-4">
             <SelectFormField
               {...field("tb_status")}
               position="above"
-              placeholder={"Status"}
+              label={"Status"}
+              placeholder="Select Status"
               options={["Active", "Old"]}
               optionLabel={(o: string) => o}
               optionValue={(o: string) => o}
             />
             <TextFormField
               {...field("tb_duration")}
-              placeholder="Duration"
+              label={"Duration ( days )"}
+              placeholder="Type Duration"
               min={0}
               type={"number"}
             />
