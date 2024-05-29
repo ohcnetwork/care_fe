@@ -47,7 +47,7 @@ const Watermark = (props: { children: string; className: string }) => {
   return (
     <span
       ref={ref}
-      className={`absolute z-10 font-bold text-white/30 md:text-2xl ${props.className}`}
+      className={`absolute z-10 font-bold text-white/20 md:text-2xl ${props.className}`}
     >
       {props.children}
     </span>
