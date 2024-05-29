@@ -90,10 +90,6 @@ const LinkCareContextModal = ({
               Notification.Success({
                 msg: "Care Context sucessfully linked!",
               });
-            } else {
-              Notification.Error({
-                msg: "Error in linking Care Context!",
-              });
             }
             setIsLinkingCareContext(false);
             onClose();
