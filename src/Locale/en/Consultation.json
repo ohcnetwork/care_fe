@@ -34,5 +34,6 @@
   "generate_report": "Generate Report",
   "prev_sessions": "Prev Sessions",
   "next_sessions": "Next Sessions",
-  "no_changes": "No changes"
+  "no_changes": "No changes",
+  "encounter_suggestion_edit_disallowed": "Not allowed to switch to this option in edit consultation"
 }

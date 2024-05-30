@@ -1148,6 +1148,14 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       options={CONSULTATION_SUGGESTION.filter(
                         (option) => !("deprecated" in option),
                       )}
+                      optionDisabled={(option) =>
+                        isUpdate && "editDisabled" in option
+                      }
+                      optionDescription={(option) =>
+                        isUpdate && "editDisabled" in option
+                          ? t("encounter_suggestion_edit_disallowed")
+                          : undefined
+                      }
                     />
                   </div>
 
