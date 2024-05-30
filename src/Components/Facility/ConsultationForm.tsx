@@ -1153,7 +1153,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       }
                       optionDescription={(option) =>
                         isUpdate && "editDisabled" in option
-                          ? "Not allowed to switch to this option in edit consultation"
+                          ? t("encounter_suggestion_edit_disallowed")
                           : undefined
                       }
                     />
