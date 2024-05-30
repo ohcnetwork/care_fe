@@ -140,6 +140,24 @@ export default function PatientInfoCard(props: {
     prefetch: !!consultation?.treating_physician_object?.username,
   });
 
+  const { data: consentRecords } = useQuery(routes.listConsents, {
+    pathParams: {
+      consultationId: consultation?.id ?? "",
+    },
+    prefetch: !!consultation?.id,
+  });
+
+  const { data: consentFiles } = useQuery(routes.viewUpload, {
+    query: {
+      file_type: "CONSENT_RECORD",
+      associating_id: consentRecords?.results.map((cr) => cr.id).join(","),
+      limit: 1000,
+      offset: 0,
+      is_archived: false,
+    },
+    prefetch: (consentRecords?.results.length || 0) > 0,
+  });
+
   return (
     <>
       <DialogModal
@@ -354,12 +372,13 @@ export default function PatientInfoCard(props: {
                         </div>
                       </div>
                     )}
-                  {(
-                    consultation?.consent_records?.filter((c) => !c.deleted) ||
-                    []
-                  ).length < 1 && (
+                  {consentRecords?.results.some((c) =>
+                    consentFiles?.results.filter(
+                      (f) => f.associating_id === c.id,
+                    ),
+                  ) && (
                     <div>
-                      <div className="inline-flex w-full items-center justify-start rounded border border-gray-500 bg-red-400 p-1 px-3 text-xs font-semibold leading-4">
+                      <div className="inline-flex w-full items-center justify-start rounded border border-red-600 bg-red-400 p-1 px-3 text-xs font-semibold leading-4">
                         <span className="font-semibold text-white">
                           Consent Records Missing
                         </span>

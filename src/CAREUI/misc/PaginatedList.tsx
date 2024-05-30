@@ -36,6 +36,7 @@ interface Props<TItem> extends QueryOptions<PaginatedResponse<TItem>> {
   queryCB?: (
     query: ReturnType<typeof useQuery<PaginatedResponse<TItem>>>,
   ) => void;
+  refreshTrigger?: any;
   children: (
     ctx: PaginatedListContext<TItem>,
     query: ReturnType<typeof useQuery<PaginatedResponse<TItem>>>,
@@ -47,6 +48,7 @@ export default function PaginatedList<TItem extends object>({
   route,
   perPage = DEFAULT_PER_PAGE_LIMIT,
   queryCB,
+  refreshTrigger,
   ...queryOptions
 }: Props<TItem>) {
   const [currentPage, setPage] = useState(1);
@@ -66,6 +68,10 @@ export default function PaginatedList<TItem extends object>({
       queryCB(query);
     }
   }, [query]);
+
+  useEffect(() => {
+    query.refetch();
+  }, [refreshTrigger]);
 
   return (
     <context.Provider
