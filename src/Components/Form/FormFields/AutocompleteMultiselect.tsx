@@ -192,7 +192,7 @@ export const AutocompleteMutliSelect = <T, V>(
                       }}
                       disabled={option.disabled}
                     >
-                      {({ selected }) => (
+                      {({ active, selected }) => (
                         <>
                           <div className="flex justify-between">
                             {option.label}
@@ -202,9 +202,14 @@ export const AutocompleteMutliSelect = <T, V>(
                           </div>
                           {option.description && (
                             <p
-                              className={`font-normal ${
-                                selected ? "text-primary-200" : "text-gray-700"
-                              }`}
+                              className={classNames(
+                                "text-sm font-normal",
+                                option.disabled
+                                  ? "text-gray-700"
+                                  : active
+                                    ? "text-primary-200"
+                                    : "text-gray-700",
+                              )}
                             >
                               {option.description}
                             </p>

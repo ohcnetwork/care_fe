@@ -220,8 +220,12 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                       {option.description && (
                         <div
                           className={classNames(
-                            "text-sm",
-                            active ? "text-primary-200" : "text-gray-700",
+                            "text-sm font-normal",
+                            option.disabled
+                              ? "text-gray-700"
+                              : active
+                                ? "text-primary-200"
+                                : "text-gray-700",
                           )}
                         >
                           {option.description}
