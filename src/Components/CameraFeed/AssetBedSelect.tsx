@@ -15,7 +15,7 @@ export default function CameraPresetSelect(props: Props) {
   const label = props.label ?? defaultLabel;
   return (
     <>
-      <div className="hidden gap-4 whitespace-nowrap pr-2 sm:flex md:hidden md:gap-2 lg:flex">
+      <div className="hidden gap-4 whitespace-nowrap pr-2 lg:flex lg:gap-2">
         {/* Desktop View */}
         {props.options
           .slice(0, props.options.length > 5 ? 4 : 5)
@@ -40,7 +40,7 @@ export default function CameraPresetSelect(props: Props) {
           />
         )}
       </div>
-      <div className="w-full sm:hidden md:flex lg:hidden">
+      <div className="w-full lg:hidden">
         {/* Mobile View */}
         <CameraPresetDropdown {...props} />
       </div>

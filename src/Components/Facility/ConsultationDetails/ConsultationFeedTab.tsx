@@ -100,7 +100,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
         hideBack={true}
         focusOnLoad={false}
       />
-      <span className="mb-2 flex rounded-lg border border-warning-400 bg-warning-100 px-2 py-1 text-sm font-medium text-warning-700 md:hidden">
+      <span className="mb-2 flex rounded-lg border border-warning-400 bg-warning-100 px-2 py-1 text-sm font-medium text-warning-700 sm:hidden">
         <CareIcon icon="l-exclamation-triangle" className="pr-2 text-base" />
         For better experience, rotate your device.
       </span>
