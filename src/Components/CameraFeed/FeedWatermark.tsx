@@ -8,12 +8,12 @@ export default function FeedWatermark() {
       <Watermark className="left-1/3 top-1/3 -translate-x-1/2 -translate-y-1/2">
         {me.username}
       </Watermark>
-      <Watermark className="right-1/3 top-1/3 -translate-y-1/2 translate-x-1/2">
+      {/* <Watermark className="right-1/3 top-1/3 -translate-y-1/2 translate-x-1/2">
         {me.username}
       </Watermark>
       <Watermark className="bottom-1/3 left-1/3 -translate-x-1/2 translate-y-1/2">
         {me.username}
-      </Watermark>
+      </Watermark> */}
       <Watermark className="bottom-1/3 right-1/3 translate-x-1/2 translate-y-1/2">
         {me.username}
       </Watermark>
@@ -47,7 +47,7 @@ const Watermark = (props: { children: string; className: string }) => {
   return (
     <span
       ref={ref}
-      className={`absolute z-10 text-2xl font-bold text-white/30 ${props.className}`}
+      className={`absolute z-10 font-bold text-white/20 md:text-2xl ${props.className}`}
     >
       {props.children}
     </span>
