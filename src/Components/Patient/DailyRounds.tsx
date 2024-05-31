@@ -675,6 +675,19 @@ export const DailyRounds = (props: any) => {
             <>
               <div className="flex flex-col gap-10 divide-y-2 divide-dashed divide-gray-600 border-t-2 border-dashed border-gray-600 pt-6 md:col-span-2">
                 <div>
+                  <h3 className="mb-4 mt-8 text-lg font-semibold">
+                    {t("diagnosis")}
+                  </h3>
+                  {/*  */}
+                  {diagnoses ? (
+                    <EditDiagnosesBuilder value={diagnoses} />
+                  ) : (
+                    <div className="flex animate-pulse justify-center py-4 text-center font-medium text-gray-800">
+                      Fetching existing diagnosis of patient...
+                    </div>
+                  )}
+                </div>
+                <div>
                   <h3 className="my-4 text-lg font-semibold">
                     {t("investigations")}
                   </h3>
@@ -700,19 +713,6 @@ export const DailyRounds = (props: any) => {
                     {t("prn_prescriptions")}
                   </h3>
                   <PrescriptionBuilder is_prn />
-                </div>
-                <div>
-                  <h3 className="mb-4 mt-8 text-lg font-semibold">
-                    {t("diagnosis")}
-                  </h3>
-                  {/*  */}
-                  {diagnoses ? (
-                    <EditDiagnosesBuilder value={diagnoses} />
-                  ) : (
-                    <div className="flex animate-pulse justify-center py-4 text-center font-medium text-gray-800">
-                      Fetching existing diagnosis of patient...
-                    </div>
-                  )}
                 </div>
               </div>
             </>
