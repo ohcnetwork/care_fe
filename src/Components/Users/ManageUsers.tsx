@@ -449,10 +449,10 @@ export default function ManageUsers() {
       <div>
         <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
           <div className="flex w-full items-center justify-center text-xl font-bold text-gray-500">
-                No Users Found
+            No Users Found
           </div>
         </div>
-      </div> 
+     </div> 
     );
   }
 
