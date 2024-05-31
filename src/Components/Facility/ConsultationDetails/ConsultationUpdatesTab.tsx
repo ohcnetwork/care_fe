@@ -311,59 +311,6 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                 </div>
               </div>
             )}
-            {((props.patientData.is_antenatal &&
-              isAntenatal(props.patientData.last_menstruation_start_date)) ||
-              isPostPartum(props.patientData.date_of_delivery)) && (
-              <div className="rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-                <h3 className="mb-4 text-lg font-semibold leading-relaxed text-gray-900">
-                  Perinatal Status
-                </h3>
-
-                <div className="flex gap-2 pb-2">
-                  {props.patientData.is_antenatal &&
-                    isAntenatal(
-                      props.patientData.last_menstruation_start_date,
-                    ) && (
-                      <Chip
-                        variant="custom"
-                        className="border-pink-300 bg-pink-100 text-pink-600"
-                        startIcon="l-baby-carriage"
-                        text="Antenatal"
-                      />
-                    )}
-                  {isPostPartum(props.patientData.date_of_delivery) && (
-                    <Chip
-                      variant="custom"
-                      className="border-pink-300 bg-pink-100 text-pink-600"
-                      startIcon="l-baby-carriage"
-                      text="Post-partum"
-                    />
-                  )}
-                </div>
-
-                {props.patientData.last_menstruation_start_date && (
-                  <p className="space-x-2 p-2 text-sm">
-                    <CareIcon className="text-base" icon="l-calendar-alt" />
-                    <span>Last Menstruation:</span>
-                    <span className="font-semibold">
-                      {formatDate(
-                        props.patientData.last_menstruation_start_date,
-                      )}
-                    </span>
-                  </p>
-                )}
-
-                {props.patientData.date_of_delivery && (
-                  <p className="space-x-2 p-2 text-sm">
-                    <CareIcon className="text-base" icon="l-calendar-alt" />
-                    <span>Date of Delivery:</span>
-                    <span className="font-semibold">
-                      {formatDate(props.patientData.date_of_delivery)}
-                    </span>
-                  </p>
-                )}
-              </div>
-            )}
 
             <div className="rounded-lg bg-white px-4 py-5 shadow sm:p-6 md:col-span-2">
               <EncounterSymptomsCard />
@@ -637,6 +584,59 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                 </div>
               </div>
             </div>
+            {((props.patientData.is_antenatal &&
+              isAntenatal(props.patientData.last_menstruation_start_date)) ||
+              isPostPartum(props.patientData.date_of_delivery)) && (
+              <div className="mt-4 rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+                <h3 className="mb-4 text-lg font-semibold leading-relaxed text-gray-900">
+                  Perinatal Status
+                </h3>
+
+                <div className="flex gap-2 pb-2">
+                  {props.patientData.is_antenatal &&
+                    isAntenatal(
+                      props.patientData.last_menstruation_start_date,
+                    ) && (
+                      <Chip
+                        variant="custom"
+                        className="border-pink-300 bg-pink-100 text-pink-600"
+                        startIcon="l-baby-carriage"
+                        text="Antenatal"
+                      />
+                    )}
+                  {isPostPartum(props.patientData.date_of_delivery) && (
+                    <Chip
+                      variant="custom"
+                      className="border-pink-300 bg-pink-100 text-pink-600"
+                      startIcon="l-baby-carriage"
+                      text="Post-partum"
+                    />
+                  )}
+                </div>
+
+                {props.patientData.last_menstruation_start_date && (
+                  <p className="space-x-2 p-2 text-sm">
+                    <CareIcon className="text-base" icon="l-calendar-alt" />
+                    <span>Last Menstruation:</span>
+                    <span className="font-semibold">
+                      {formatDate(
+                        props.patientData.last_menstruation_start_date,
+                      )}
+                    </span>
+                  </p>
+                )}
+
+                {props.patientData.date_of_delivery && (
+                  <p className="space-x-2 p-2 text-sm">
+                    <CareIcon className="text-base" icon="l-calendar-alt" />
+                    <span>Date of Delivery:</span>
+                    <span className="font-semibold">
+                      {formatDate(props.patientData.date_of_delivery)}
+                    </span>
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
         <div className="w-full pl-0 md:pl-4 xl:w-1/3">
