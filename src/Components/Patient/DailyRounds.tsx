@@ -502,6 +502,11 @@ export const DailyRounds = (props: any) => {
         </div>
 
         <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
+          <div className="pb-6 md:col-span-2">
+            <FieldLabel>Symptoms</FieldLabel>
+            <EncounterSymptomsBuilder />
+          </div>
+
           <TextAreaFormField
             {...field("physical_examination_info")}
             label="Physical Examination Info"
@@ -512,11 +517,6 @@ export const DailyRounds = (props: any) => {
             label="Other Details"
             rows={5}
           />
-
-          <div className="pb-6 md:col-span-2">
-            <FieldLabel>Symptoms</FieldLabel>
-            <EncounterSymptomsBuilder />
-          </div>
 
           {state.form.rounds_type !== "DOCTORS_LOG" && (
             <>
