@@ -42,11 +42,17 @@ export default function PatientConsentRecords(props: {
 
   const fileUpload = useFileUpload({
     type: "CONSENT_RECORD",
+    allowedExtensions: ["pdf", "jpg", "jpeg", "png"],
   });
 
   const fileManager = useFileManager({
     type: "CONSENT_RECORD",
     onArchive: async () => {
+      refetch();
+      refetchFiles();
+      refetchArchivedFiles();
+    },
+    onEdit: async () => {
       refetch();
       refetchFiles();
       refetchArchivedFiles();
@@ -289,6 +295,7 @@ export default function PatientConsentRecords(props: {
               </>
             )}
           </div>
+          <div className="mt-2 text-sm text-red-500">{fileUpload.error}</div>
         </div>
         <div className="flex-1">
           {consentRecords?.filter(
@@ -323,6 +330,7 @@ export default function PatientConsentRecords(props: {
                     consentRecord={record}
                     previewFile={fileManager.viewFile}
                     archiveFile={fileManager.archiveFile}
+                    editFile={fileManager.editFile}
                     onDelete={(record) => setShowDeleteConsent(record.id)}
                     showArchive={showArchived}
                     files={files?.results.filter(

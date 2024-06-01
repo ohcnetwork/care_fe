@@ -17,11 +17,19 @@ export default function PatientConsentRecordBlockGroup(props: {
     file_associating_id: string,
     skipPrompt?: { reason: string },
   ) => void;
+  editFile: (file: FileUploadModel) => void;
   onDelete: (consentRecord: PatientConsentModel) => void;
   showArchive: boolean;
   files?: FileUploadModel[];
 }) {
-  const { consentRecord, previewFile, archiveFile, files, showArchive } = props;
+  const {
+    consentRecord,
+    previewFile,
+    archiveFile,
+    editFile,
+    files,
+    showArchive,
+  } = props;
 
   const authUser = useAuthUser();
 
@@ -56,12 +64,17 @@ export default function PatientConsentRecordBlockGroup(props: {
                 {file.extension} {file.is_archived && "(Archived)"}
               </div>
               <div className="text-xs text-gray-700">
-                {dayjs(file.created_date).format("DD MMM YYYY, hh:mm A")} by{" "}
-                {file.uploaded_by?.username}
+                {dayjs(
+                  file.is_archived ? file.archived_datetime : file.created_date,
+                ).format("DD MMM YYYY, hh:mm A")}{" "}
+                by{" "}
+                {file.is_archived
+                  ? file.archived_by?.username
+                  : file.uploaded_by?.username}
               </div>
             </div>
           </div>
-          <div className="flex shrink-0 justify-end gap-2">
+          <div className="flex shrink-0 flex-wrap justify-end gap-2">
             {!file.is_archived && (
               <ButtonV2
                 onClick={() => previewFile(file, consentRecord.id)}
@@ -71,6 +84,19 @@ export default function PatientConsentRecordBlockGroup(props: {
                 View
               </ButtonV2>
             )}
+            {!file.is_archived &&
+              (file?.uploaded_by?.username === authUser.username ||
+                authUser.user_type === "DistrictAdmin" ||
+                authUser.user_type === "StateAdmin") && (
+                <ButtonV2
+                  variant={"secondary"}
+                  onClick={() => editFile(file)}
+                  className=""
+                >
+                  <CareIcon icon={"l-pen"} />
+                  Rename
+                </ButtonV2>
+              )}
             {(file.is_archived ||
               file?.uploaded_by?.username === authUser.username ||
               authUser.user_type === "DistrictAdmin" ||

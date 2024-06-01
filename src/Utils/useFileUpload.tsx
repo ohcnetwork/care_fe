@@ -21,14 +21,8 @@ export type FileUploadOptions = {
   type: string;
   category?: FileCategory;
   onUpload?: (file: FileUploadModel) => void;
-} & (
-  | {
-      allowAllExtensions?: boolean;
-    }
-  | {
-      allowedExtensions?: string[];
-    }
-);
+  allowedExtensions?: string[];
+};
 
 export type FileUploadButtonProps = {
   icon?: IconName;
@@ -71,7 +65,12 @@ const ExtImage: string[] = [
 export default function useFileUpload(
   options: FileUploadOptions,
 ): FileUploadReturn {
-  const { type, onUpload, category = "UNSPECIFIED" } = options;
+  const {
+    type,
+    onUpload,
+    category = "UNSPECIFIED",
+    allowedExtensions,
+  } = options;
 
   const [uploadFileName, setUploadFileName] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
@@ -144,6 +143,13 @@ export default function useFileUpload(
     }
     if (f.size > 10e7) {
       setError("Maximum size of files is 100 MB");
+      return false;
+    }
+    const extension = f.name.split(".").pop();
+    if (allowedExtensions && !allowedExtensions.includes(extension || "")) {
+      setError(
+        `Invalid file type ".${extension}" Allowed types: ${allowedExtensions.join(", ")}`,
+      );
       return false;
     }
     return true;
@@ -414,11 +420,9 @@ export default function useFileUpload(
         onChange={onFileChange}
         type="file"
         accept={
-          "allowAllExtensions" in options
-            ? "image/*,video/*,audio/*,text/plain,text/csv,application/rtf,application/msword,application/vnd.oasis.opendocument.text,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/pdf"
-            : "allowedExtensions" in options
-              ? options.allowedExtensions?.join(",")
-              : ""
+          "allowExtensions" in options
+            ? allowedExtensions?.join(",")
+            : "image/*,video/*,audio/*,text/plain,text/csv,application/rtf,application/msword,application/vnd.oasis.opendocument.text,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/pdf"
         }
         hidden
       />
