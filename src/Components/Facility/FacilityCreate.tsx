@@ -900,3 +900,7 @@ export const FacilityCreate = (props: FacilityProps) => {
       );
   }
 };
+
+// const FieldUnit = ({ unit }: { unit: string }) => {
+//   return <p className="absolute right-10 text-xs text-gray-700">{unit}</p>;
+// };

@@ -1,3 +1,5 @@
+import routes from "../../../../Redux/api";
+import request from "../../../../Utils/request/request";
 import { UserBareMinimum } from "../../../Users/models";
 
 export type Type = {
@@ -28,3 +30,19 @@ export type EventGeneric = {
 };
 
 // TODO: Once event types are finalized, define specific types for each event
+
+let cachedEventTypes: Type[] | null = null;
+
+export const fetchEventTypeByName = async (name: Type["name"]) => {
+  if (!cachedEventTypes) {
+    const { data } = await request(routes.listEventTypes, {
+      query: { limit: 100 },
+    });
+
+    if (data?.results) {
+      cachedEventTypes = data.results;
+    }
+  }
+
+  return cachedEventTypes?.find((t) => t.name === name);
+};

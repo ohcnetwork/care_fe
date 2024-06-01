@@ -21,6 +21,7 @@ import CircularProgress from "../Common/components/CircularProgress.js";
 import CareIcon from "../../CAREUI/icons/CareIcon.js";
 import { classNames } from "../../Utils/utils.js";
 import { ConsentHIType, ConsentPurpose } from "./types/consent.js";
+import useNotificationSubscriptionState from "../../Common/hooks/useNotificationSubscriptionState.js";
 
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
@@ -46,6 +47,9 @@ export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
     dayjs().add(30, "day").toDate(),
   );
   const [errors, setErrors] = useState<any>({});
+  const notificationSubscriptionState = useNotificationSubscriptionState([
+    show,
+  ]);
 
   useMessageListener((data) => {
     if (data.type === "MESSAGE" && data.from === "patients/on_find") {
@@ -62,7 +66,23 @@ export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
   });
 
   return (
-    <DialogModal title="Fetch Records over ABDM" show={show} onClose={onClose}>
+    <DialogModal
+      className="max-w-xl"
+      fixedWidth={false}
+      title="Fetch Records over ABDM"
+      show={show}
+      onClose={onClose}
+    >
+      {["unsubscribed", "subscribed_on_other_device"].includes(
+        notificationSubscriptionState,
+      ) && (
+        <p className="my-4 text-sm text-warning-600">
+          <CareIcon icon="l-exclamation-triangle" className="h-4 w-4" />{" "}
+          Notifications needs to be enabled on this device to verify the
+          patient.
+        </p>
+      )}
+
       <div className="flex items-center gap-3">
         <TextFormField
           value={patient?.abha_number_object?.health_id as string}
@@ -89,7 +109,12 @@ export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
           }}
           loading={idVerificationStatus === "in-progress"}
           ghost={idVerificationStatus === "verified"}
-          disabled={idVerificationStatus === "verified"}
+          disabled={
+            idVerificationStatus === "verified" ||
+            ["unsubscribed", "subscribed_on_other_device"].includes(
+              notificationSubscriptionState,
+            )
+          }
           className={classNames(
             "mt-1.5 !py-3",
             idVerificationStatus === "verified" &&
@@ -215,6 +240,7 @@ export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
             setIsMakingConsentRequest(false);
             onClose();
           }}
+          disabled={idVerificationStatus !== "verified"}
           loading={isMakingConsentRequest}
         >
           Request Consent

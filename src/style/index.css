@@ -429,6 +429,12 @@ button:disabled,
     }
 }
 
+.skeleton-animate-alpha {
+    animation: skeletonShimmer 3s infinite linear;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.1) 10%, rgba(0, 0, 0, 0.05) 40%, rgba(0, 0, 0, 0.1) 70%);
+    background-size: 1000px 100%;
+}
+
 
 @media print {
     body * {

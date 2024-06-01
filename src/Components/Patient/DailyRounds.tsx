@@ -17,7 +17,6 @@ import { capitalize } from "lodash-es";
 import BloodPressureFormField, {
   BloodPressureValidator,
 } from "../Common/BloodPressureFormField";
-import { SymptomsSelect } from "../Common/SymptomsSelect";
 import TemperatureFormField from "../Common/TemperatureFormField";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
@@ -33,11 +32,23 @@ import routes from "../../Redux/api";
 import { Scribe } from "../Scribe/Scribe";
 import { DAILY_ROUND_FORM_SCRIBE_DATA } from "../Scribe/formDetails";
 import { DailyRoundsModel } from "./models";
+import { fetchEventTypeByName } from "../Facility/ConsultationDetails/Events/types";
+import InvestigationBuilder from "../Common/prescription-builder/InvestigationBuilder";
+import { FieldErrorText } from "../Form/FormFields/FormField";
+import { error } from "@pnotify/core";
+import { useTranslation } from "react-i18next";
+import PrescriptionBuilder from "../Medicine/PrescriptionBuilder";
+import { EditDiagnosesBuilder } from "../Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder";
+import {
+  ConditionVerificationStatuses,
+  ConsultationDiagnosis,
+} from "../Diagnosis/types";
+import { EncounterSymptomsBuilder } from "../Symptoms/SymptomsBuilder";
+import { FieldLabel } from "../Form/FormFields/FormField";
+
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm: any = {
-  additional_symptoms: [],
-  other_symptoms: "",
   physical_examination_info: "",
   other_details: "",
   patient_category: "",
@@ -48,6 +59,8 @@ const initForm: any = {
   taken_at: null,
   rounds_type: "NORMAL",
   systolic: null,
+  investigations: [],
+  investigations_dirty: false,
   diastolic: null,
   pulse: null,
   resp: null,
@@ -98,6 +111,7 @@ const DailyRoundsFormReducer = (state = initialState, action: any) => {
 };
 
 export const DailyRounds = (props: any) => {
+  const { t } = useTranslation();
   const { goBack } = useAppHistory();
   const { facilityId, patientId, consultationId, id } = props;
   const [state, dispatch] = useAutoSaveReducer<any>(
@@ -114,18 +128,19 @@ export const DailyRounds = (props: any) => {
     ...initForm,
     action: "",
   });
+  const [diagnoses, setDiagnoses] = useState<ConsultationDiagnosis[]>();
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id ? "Save" : "Continue";
 
   const formFields = [
     "physical_examination_info",
     "other_details",
-    "additional_symptoms",
     "action",
     "review_interval",
     "bp",
     "pulse",
     "resp",
+    "investigations",
     "ventilator_spo2",
     "rhythm",
     "rhythm_detail",
@@ -134,6 +149,7 @@ export const DailyRounds = (props: any) => {
 
   const fetchRoundDetails = useCallback(async () => {
     setIsLoading(true);
+    fetchEventTypeByName("");
     let formData: any = initialData;
     if (id) {
       const { data } = await request(routes.getDailyReport, {
@@ -165,6 +181,13 @@ export const DailyRounds = (props: any) => {
         setPatientName(data.name!);
         setFacilityName(data.facility_object!.name);
         setConsultationSuggestion(data.last_consultation?.suggestion);
+        setDiagnoses(
+          data.last_consultation?.diagnoses?.sort(
+            (a: ConsultationDiagnosis, b: ConsultationDiagnosis) =>
+              ConditionVerificationStatuses.indexOf(a.verification_status) -
+              ConditionVerificationStatuses.indexOf(b.verification_status),
+          ),
+        );
         setPreviousReviewInterval(
           Number(data.last_consultation?.review_interval),
         );
@@ -176,7 +199,11 @@ export const DailyRounds = (props: any) => {
           ...initialData,
           action: getAction,
         });
-        formData = { ...formData, ...{ action: getAction } };
+        formData = {
+          ...formData,
+          action: getAction,
+          investigations: data.last_consultation?.investigation ?? [],
+        };
       }
     } else {
       setPatientName("");
@@ -201,20 +228,38 @@ export const DailyRounds = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "other_symptoms":
-          if (
-            state.form.additional_symptoms?.includes(9) &&
-            !state.form[field]
-          ) {
-            errors[field] = "Please enter the other symptom details";
-            invalidForm = true;
-          }
-          return;
         case "bp": {
           const error = BloodPressureValidator(state.form.bp);
           if (error) {
             errors.bp = error;
             invalidForm = true;
+          }
+          return;
+        }
+
+        case "investigations": {
+          for (const investigation of state.form.investigations) {
+            if (!investigation.type?.length) {
+              errors[field] = "Investigation field can not be empty";
+              invalidForm = true;
+              break;
+            }
+            if (
+              investigation.repetitive &&
+              !investigation.frequency?.replace(/\s/g, "").length
+            ) {
+              errors[field] = "Frequency field cannot be empty";
+              invalidForm = true;
+              break;
+            }
+            if (
+              !investigation.repetitive &&
+              !investigation.time?.replace(/\s/g, "").length
+            ) {
+              errors[field] = "Time field cannot be empty";
+              invalidForm = true;
+              break;
+            }
           }
           return;
         }
@@ -231,17 +276,31 @@ export const DailyRounds = (props: any) => {
     const validForm = validateForm();
     if (validForm) {
       setIsLoading(true);
+
+      if (
+        state.form.rounds_type === "DOCTORS_LOG" &&
+        state.form.investigations_dirty
+      ) {
+        const { error: investigationError } = await request(
+          routes.partialUpdateConsultation,
+          {
+            body: { investigation: state.form.investigations },
+            pathParams: { id: consultationId },
+          },
+        );
+
+        if (investigationError) {
+          Notification.Error({ msg: error });
+          return;
+        }
+      }
+
       let data: DailyRoundsModel = {
         rounds_type: state.form.rounds_type,
         patient_category: state.form.patient_category,
         taken_at: state.form.taken_at
           ? state.form.taken_at
           : new Date().toISOString(),
-
-        additional_symptoms: state.form.additional_symptoms,
-        other_symptoms: state.form.additional_symptoms?.includes(9)
-          ? state.form.other_symptoms
-          : undefined,
         admitted_to:
           (state.form.admitted === "Select"
             ? undefined
@@ -278,7 +337,7 @@ export const DailyRounds = (props: any) => {
         if (obj) {
           dispatch({ type: "set_form", form: initForm });
           Notification.Success({
-            msg: `${obj.rounds_type === "VENTILATOR" ? "Critical Care" : capitalize(obj.rounds_type)} Log Updates details updated successfully`,
+            msg: `${obj.rounds_type === "VENTILATOR" ? "Critical Care" : capitalize(obj.rounds_type)} log update details updated successfully`,
           });
           if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
             navigate(
@@ -298,14 +357,24 @@ export const DailyRounds = (props: any) => {
         setIsLoading(false);
         if (obj) {
           dispatch({ type: "set_form", form: initForm });
-          Notification.Success({
-            msg: `${obj.rounds_type === "VENTILATOR" ? "Critical Care" : capitalize(obj.rounds_type)} Log Updates details created successfully`,
-          });
           if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
+            Notification.Success({
+              msg: `${state.form.rounds_type === "NORMAL" ? "Normal" : "Tele-medicine"} log update created successfully`,
+            });
+            navigate(
+              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
+            );
+          } else if (state.form.rounds_type === "DOCTORS_LOG") {
+            Notification.Success({
+              msg: "Doctors log update created successfully",
+            });
             navigate(
               `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
             );
           } else {
+            Notification.Success({
+              msg: "Critical Care log update created successfully",
+            });
             navigate(
               `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${obj.id}/update`,
             );
@@ -316,10 +385,16 @@ export const DailyRounds = (props: any) => {
   };
 
   const handleFormFieldChange = (event: FieldChangeEvent<unknown>) => {
-    dispatch({
-      type: "set_form",
-      form: { ...state.form, [event.name]: event.value },
-    });
+    const form = {
+      ...state.form,
+      [event.name]: event.value,
+    };
+
+    if (event.name === "investigations") {
+      form["investigations_dirty"] = true;
+    }
+
+    dispatch({ type: "set_form", form });
   };
 
   const field = (name: string) => {
@@ -406,6 +481,7 @@ export const DailyRounds = (props: any) => {
               options={[
                 ...[
                   { id: "NORMAL", text: "Normal" },
+                  { id: "DOCTORS_LOG", text: "Doctor's Log Update" },
                   { id: "VENTILATOR", text: "Critical Care" },
                 ],
                 ...(consultationSuggestion == "DC"
@@ -426,6 +502,11 @@ export const DailyRounds = (props: any) => {
         </div>
 
         <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
+          <div className="pb-6 md:col-span-2">
+            <FieldLabel>Symptoms</FieldLabel>
+            <EncounterSymptomsBuilder />
+          </div>
+
           <TextAreaFormField
             {...field("physical_examination_info")}
             label="Physical Examination Info"
@@ -436,51 +517,41 @@ export const DailyRounds = (props: any) => {
             label="Other Details"
             rows={5}
           />
-          <SymptomsSelect
-            {...field("additional_symptoms")}
-            label="Symptoms"
-            className="md:col-span-2"
-          />
 
-          {state.form.additional_symptoms?.includes(9) && (
-            <div className="md:col-span-2">
-              <TextAreaFormField
-                {...field("other_symptoms")}
-                required
-                label="Other Symptoms Details"
-                placeholder="Enter the other symptoms here"
+          {state.form.rounds_type !== "DOCTORS_LOG" && (
+            <>
+              <SelectFormField
+                {...field("action")}
+                label="Action"
+                options={TELEMEDICINE_ACTIONS}
+                optionLabel={(option) => option.desc}
+                optionValue={(option) => option.text}
+                value={prevAction}
+                onChange={(event) => {
+                  handleFormFieldChange(event);
+                  setPreviousAction(event.value);
+                }}
               />
-            </div>
+
+              <SelectFormField
+                {...field("review_interval")}
+                label="Review After"
+                labelSuffix={getExpectedReviewTime()}
+                options={REVIEW_AT_CHOICES}
+                optionLabel={(option) => option.text}
+                optionValue={(option) => option.id}
+                value={prevReviewInterval}
+                onChange={(event) => {
+                  handleFormFieldChange(event);
+                  setPreviousReviewInterval(Number(event.value));
+                }}
+              />
+            </>
           )}
 
-          <SelectFormField
-            {...field("action")}
-            label="Action"
-            options={TELEMEDICINE_ACTIONS}
-            optionLabel={(option) => option.desc}
-            optionValue={(option) => option.text}
-            value={prevAction}
-            onChange={(event) => {
-              handleFormFieldChange(event);
-              setPreviousAction(event.value);
-            }}
-          />
-
-          <SelectFormField
-            {...field("review_interval")}
-            label="Review After"
-            labelSuffix={getExpectedReviewTime()}
-            options={REVIEW_AT_CHOICES}
-            optionLabel={(option) => option.text}
-            optionValue={(option) => option.id}
-            value={prevReviewInterval}
-            onChange={(event) => {
-              handleFormFieldChange(event);
-              setPreviousReviewInterval(Number(event.value));
-            }}
-          />
-
-          {["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type) && (
+          {["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
+            state.form.rounds_type,
+          ) && (
             <>
               <h3 className="mb-6 md:col-span-2">Vitals</h3>
 
@@ -599,6 +670,53 @@ export const DailyRounds = (props: any) => {
               />
             </>
           )}
+
+          {state.form.rounds_type === "DOCTORS_LOG" && (
+            <>
+              <div className="flex flex-col gap-10 divide-y-2 divide-dashed divide-gray-600 border-t-2 border-dashed border-gray-600 pt-6 md:col-span-2">
+                <div>
+                  <h3 className="mb-4 mt-8 text-lg font-semibold">
+                    {t("diagnosis")}
+                  </h3>
+                  {/*  */}
+                  {diagnoses ? (
+                    <EditDiagnosesBuilder value={diagnoses} />
+                  ) : (
+                    <div className="flex animate-pulse justify-center py-4 text-center font-medium text-gray-800">
+                      Fetching existing diagnosis of patient...
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <h3 className="my-4 text-lg font-semibold">
+                    {t("investigations")}
+                  </h3>
+                  <InvestigationBuilder
+                    investigations={state.form.investigations}
+                    setInvestigations={(investigations) => {
+                      handleFormFieldChange({
+                        name: "investigations",
+                        value: investigations,
+                      });
+                    }}
+                  />
+                  <FieldErrorText error={state.errors.investigation} />
+                </div>
+                <div>
+                  <h3 className="mb-4 mt-8 text-lg font-semibold">
+                    {t("prescription_medications")}
+                  </h3>
+                  <PrescriptionBuilder />
+                </div>
+                <div>
+                  <h3 className="mb-4 mt-8 text-lg font-semibold">
+                    {t("prn_prescriptions")}
+                  </h3>
+                  <PrescriptionBuilder is_prn />
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">
@@ -607,11 +725,14 @@ export const DailyRounds = (props: any) => {
             disabled={
               buttonText === "Save" &&
               formFields.every(
-                (field: string) => state.form[field] == initialData[field],
+                (field: string) =>
+                  JSON.stringify(state.form[field]) ===
+                  JSON.stringify(initialData[field]),
               ) &&
               (state.form.temperature == initialData.temperature ||
                 isNaN(state.form.temperature)) &&
-              state.form.rounds_type !== "VENTILATOR"
+              state.form.rounds_type !== "VENTILATOR" &&
+              state.form.rounds_type !== "DOCTORS_LOG"
             }
             onClick={(e) => handleSubmit(e)}
             label={buttonText}

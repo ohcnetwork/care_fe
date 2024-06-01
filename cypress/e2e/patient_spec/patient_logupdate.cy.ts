@@ -10,8 +10,8 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
   const patientPage = new PatientPage();
   const patientLogupdate = new PatientLogupdate();
   const domicilaryPatient = "Dummy Patient 11";
-  const patientCategory = "Abnormal";
-  const additionalSymptoms = "ASYMPTOMATIC";
+  const patientCategory = "Moderate";
+  const additionalSymptoms = "Fever";
   const physicalExamination = "physical examination details";
   const otherExamination = "Other";
   const patientSystolic = "119";
@@ -59,9 +59,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeRhythm(patientRhythm);
     cy.get("#consciousness_level-2").click();
     cy.submitButton("Save");
-    cy.verifyNotification(
-      "Telemedicine Log Updates details created successfully",
-    );
+    cy.verifyNotification("Tele-medicine log update created successfully");
   });
 
   it("Create a new log normal update for a domicilary care patient and edit it", () => {
@@ -86,7 +84,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeRhythm(patientRhythm);
     cy.get("#consciousness_level-2").click();
     cy.submitButton("Save");
-    cy.verifyNotification("Normal Log Updates details created successfully");
+    cy.verifyNotification("Normal log update created successfully");
     cy.closeNotification();
     // edit the card and verify the data.
     cy.contains("Daily Rounds").click();
@@ -109,7 +107,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.clickClearButtonInElement("#diastolic");
     patientLogupdate.typeDiastolic(patientModifiedDiastolic);
     cy.submitButton("Continue");
-    cy.verifyNotification("Normal Log Updates details updated successfully");
+    cy.verifyNotification("Normal log update details updated successfully");
     cy.contains("Daily Rounds").click();
     patientLogupdate.clickLogupdateCard("#dailyround-entry", patientCategory);
     cy.verifyContentPresence("#consultation-preview", [
@@ -127,7 +125,9 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.clickLogupdate();
     patientLogupdate.typePhysicalExamination(physicalExamination);
     patientLogupdate.typeOtherDetails(otherExamination);
-    patientLogupdate.typeAdditionalSymptoms(additionalSymptoms);
+    patientLogupdate.selectSymptomsDate("01012024");
+    patientLogupdate.typeAndMultiSelectSymptoms("fe", ["Fever"]);
+    patientLogupdate.clickAddSymptom();
     patientLogupdate.selectPatientCategory(patientCategory);
     patientLogupdate.typeSystolic(patientSystolic);
     patientLogupdate.typeDiastolic(patientDiastolic);
@@ -140,10 +140,10 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.get("#consciousness_level-2").click();
     cy.submitButton("Save");
     cy.wait(2000);
-    cy.verifyNotification("Normal Log Updates details created successfully");
+    cy.verifyNotification("Normal log update created successfully");
     // Verify the card content
     cy.get("#basic-information").scrollIntoView();
-    cy.verifyContentPresence("#basic-information", [additionalSymptoms]);
+    cy.verifyContentPresence("#encounter-symptoms", [additionalSymptoms]);
   });
 
   it("Create a normal log update to verify MEWS Score Functionality", () => {
@@ -163,7 +163,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeRespiratory(patientRespiratory);
     cy.get("#consciousness_level-2").click();
     cy.submitButton("Save");
-    cy.verifyNotification("Normal Log Updates details created successfully");
+    cy.verifyNotification("Normal log update created successfully");
     cy.closeNotification();
     cy.verifyContentPresence("#consultation-buttons", ["9"]);
     // Verify the Incomplete data will give blank info
@@ -173,7 +173,7 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     patientLogupdate.typeDiastolic(patientDiastolic);
     patientLogupdate.typePulse(patientPulse);
     cy.submitButton("Save");
-    cy.verifyNotification("Normal Log Updates details created successfully");
+    cy.verifyNotification("Normal log update created successfully");
     cy.closeNotification();
     cy.verifyContentPresence("#consultation-buttons", ["-"]);
   });
