@@ -281,7 +281,7 @@ export default function useFileManager(
           <CareIcon icon="l-archive" className="mr-2" />
           This file has been archived and cannot be unarchived.
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="flex flex-col gap-4 md:grid md:grid-cols-2">
           {[
             {
               label: "File Name",
