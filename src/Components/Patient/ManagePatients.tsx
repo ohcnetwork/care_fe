@@ -821,7 +821,7 @@ export const PatientManager = () => {
               selected={qParams.ordering}
               onSelect={updateQuery}
             />
-            <div className="tooltip">
+            <div className="tooltip w-full md:w-auto">
               {!isExportAllowed ? (
                 <ButtonV2
                   onClick={() => {
