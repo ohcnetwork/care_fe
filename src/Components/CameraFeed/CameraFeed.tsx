@@ -4,7 +4,7 @@ import useOperateCamera, { PTZPayload } from "./useOperateCamera";
 import usePlayer from "./usePlayer";
 import { getStreamUrl } from "./utils";
 import ReactPlayer from "react-player";
-import { classNames, isIOS } from "../../Utils/utils";
+import { classNames, isAppleDevice, isIOS } from "../../Utils/utils";
 import FeedAlert, { FeedAlertState } from "./FeedAlert";
 import FeedNetworkSignal from "./FeedNetworkSignal";
 import NoFeedAvailable from "./NoFeedAvailable";
@@ -28,6 +28,7 @@ interface Props {
   constrolsDisabled?: boolean;
   shortcutsDisabled?: boolean;
   onMove?: () => void;
+  onReset?: () => void;
 }
 
 export default function CameraFeed(props: Props) {
@@ -87,6 +88,7 @@ export default function CameraFeed(props: Props) {
 
   const resetStream = () => {
     setState("loading");
+    props.onReset?.();
     initializeStream();
   };
   return (
@@ -108,6 +110,7 @@ export default function CameraFeed(props: Props) {
         className={classNames(
           "flex flex-col overflow-clip rounded-xl bg-black md:max-h-screen",
           props.className,
+          isAppleDevice && isFullscreen && "px-20",
         )}
       >
         <div className="flex items-center justify-between bg-zinc-900 px-4 py-1.5 md:py-2">
@@ -120,14 +123,16 @@ export default function CameraFeed(props: Props) {
               />
               {props.asset.name}
             </span>
-            <div className={state === "loading" ? "animate-pulse" : ""}>
-              <FeedNetworkSignal
-                playerRef={playerRef as any}
-                playedOn={player.playedOn}
-                status={player.status}
-                onReset={resetStream}
-              />
-            </div>
+            {!isIOS && (
+              <div className={state === "loading" ? "animate-pulse" : ""}>
+                <FeedNetworkSignal
+                  playerRef={playerRef as any}
+                  playedOn={player.playedOn}
+                  status={player.status}
+                  onReset={resetStream}
+                />
+              </div>
+            )}
           </div>
         </div>
 
