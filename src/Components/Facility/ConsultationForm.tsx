@@ -244,6 +244,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [patientName, setPatientName] = useState("");
   const [facilityName, setFacilityName] = useState("");
+  const [patientBed, setPatientBed] = useState<BedModel | null>(null);
   const isUpdate = !!id;
 
   const [currentSection, setCurrentSection] = useState<ConsultationFormSection>(
@@ -353,6 +354,8 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
       prefetch: !!(id && ((patientId && patientName) || !patientId)),
       onResponse: ({ data }) => {
         if (!data) return;
+        data.current_bed?.bed_object &&
+          setPatientBed(data.current_bed?.bed_object);
         handleFormFieldChange({
           name: "InvestigationAdvice",
           value:
@@ -1134,6 +1137,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                           </p>
                         )
                       }
+                      hideDescription={patientBed?.bed_type !== "ICU"}
                       required
                       label="Category"
                       {...field("category")}

@@ -5,7 +5,7 @@ import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 
 type OptionCallback<T, R> = (option: T) => R;
 
-type SelectFormFieldProps<T, V = T> = FormFieldBaseProps<V> & {
+export type SelectFormFieldProps<T, V = T> = FormFieldBaseProps<V> & {
   placeholder?: React.ReactNode;
   options: readonly T[];
   position?: "above" | "below";
