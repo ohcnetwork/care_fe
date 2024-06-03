@@ -19,6 +19,7 @@ type SelectMenuProps<T, V = T> = {
   optionDescription?: OptionCallback<T, ReactNode>;
   optionIcon?: OptionCallback<T, ReactNode>;
   optionValue?: OptionCallback<T, V>;
+  optionDisabled?: OptionCallback<T, boolean>;
   showIconWhenSelected?: boolean;
   showChevronIcon?: boolean;
   className?: string;
@@ -51,9 +52,10 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
       selectedLabel: props.optionSelectedLabel
         ? props.optionSelectedLabel(option)
         : label,
-      description: props.optionDescription && props.optionDescription(option),
-      icon: props.optionIcon && props.optionIcon(option),
+      description: props.optionDescription?.(option),
+      icon: props.optionIcon?.(option),
       value: props.optionValue ? props.optionValue(option) : option,
+      disabled: props.optionDisabled?.(option),
     };
   });
 
@@ -67,6 +69,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
     description: undefined,
     icon: undefined,
     value: undefined,
+    disabled: undefined,
   };
 
   const options = props.required
@@ -128,6 +131,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                         key={index}
                         className={dropdownOptionClassNames}
                         value={option}
+                        disabled={option.disabled}
                       >
                         {({ active, selected }) => (
                           <div className="flex flex-col gap-2">
@@ -144,9 +148,14 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                             </div>
                             {option.description && (
                               <p
-                                className={`font-normal ${
-                                  active ? "text-primary-200" : "text-gray-700"
-                                }`}
+                                className={classNames(
+                                  "text-sm font-normal",
+                                  option.disabled
+                                    ? "text-gray-700"
+                                    : active
+                                      ? "text-primary-200"
+                                      : "text-gray-700",
+                                )}
                               >
                                 {option.description}
                               </p>

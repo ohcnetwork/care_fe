@@ -16,7 +16,7 @@ import useOperateCamera, {
   PTZPayload,
 } from "../../CameraFeed/useOperateCamera";
 import request from "../../../Utils/request/request";
-import { classNames } from "../../../Utils/utils";
+import { classNames, isIOS } from "../../../Utils/utils";
 
 export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   const authUser = useAuthUser();
@@ -27,6 +27,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   const [preset, setPreset] = useState<AssetBedModel>();
   const [isUpdatingPreset, setIsUpdatingPreset] = useState(false);
   const [hasMoved, setHasMoved] = useState(false);
+  const [key, setKey] = useState(0);
   const divRef = useRef<any>();
 
   const operate = useOperateCamera(asset?.id ?? "", true);
@@ -100,11 +101,21 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
         hideBack={true}
         focusOnLoad={false}
       />
+      <span className="mb-2 flex rounded-lg border border-warning-400 bg-warning-100 px-2 py-1 text-sm font-medium text-warning-700 sm:hidden">
+        <CareIcon icon="l-exclamation-triangle" className="pr-2 text-base" />
+        For better experience, rotate your device.
+      </span>
       <div ref={divRef}>
         <CameraFeed
+          key={key}
           asset={asset}
           preset={preset?.meta.position}
           onMove={() => setHasMoved(true)}
+          onReset={() => {
+            if (isIOS) {
+              setKey(key + 1);
+            }
+          }}
           onStreamError={() => {
             triggerGoal("Camera Feed Viewed", {
               consultationId: props.consultationId,
@@ -161,7 +172,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
                     <CareIcon
                       icon="l-save"
                       className={classNames(
-                        "text-base",
+                        "text-lg",
                         hasMoved ? "text-gray-200" : "text-gray-500",
                       )}
                     />

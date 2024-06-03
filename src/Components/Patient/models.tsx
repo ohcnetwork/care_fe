@@ -3,6 +3,7 @@ import { PerformedByModel } from "../HCX/misc";
 import {
   CONSCIOUSNESS_LEVEL,
   OCCUPATION_TYPES,
+  RATION_CARD_CATEGORY,
   RHYTHM_CHOICES,
 } from "../../Common/constants";
 
@@ -101,6 +102,7 @@ export interface PatientModel {
   state?: number;
   nationality?: string;
   passport_no?: string;
+  ration_card_category?: (typeof RATION_CARD_CATEGORY)[number] | null;
   date_of_test?: string;
   date_of_result?: string; // keeping this to avoid errors in Death report
   covin_id?: string;
@@ -274,6 +276,7 @@ export interface DailyRoundsOutput {
 
 export const DailyRoundTypes = [
   "NORMAL",
+  "DOCTORS_LOG",
   "VENTILATOR",
   "AUTOMATED",
   "TELEMEDICINE",
@@ -302,13 +305,10 @@ export interface DailyRoundsModel {
   physical_examination_info?: string;
   other_details?: string;
   consultation?: number;
-  additional_symptoms?: Array<number>;
   medication_given?: Array<any>;
-  additional_symptoms_text?: string;
   action?: string;
   review_interval?: number;
   id?: string;
-  other_symptoms?: string;
   admitted_to?: string;
   patient_category?: PatientCategory;
   output?: DailyRoundsOutput[];
