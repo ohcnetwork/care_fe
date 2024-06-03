@@ -12,6 +12,7 @@ import FeedControls from "./FeedControls";
 import Fullscreen from "../../CAREUI/misc/Fullscreen";
 import FeedWatermark from "./FeedWatermark";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { Error } from "../../Utils/Notifications";
 
 interface Props {
   children?: React.ReactNode;
@@ -89,7 +90,20 @@ export default function CameraFeed(props: Props) {
     initializeStream();
   };
   return (
-    <Fullscreen fullscreen={isFullscreen} onExit={() => setFullscreen(false)}>
+    <Fullscreen
+      fullscreen={isFullscreen}
+      onExit={(reason) => {
+        setFullscreen(false);
+
+        if (reason === "DEVICE_UNSUPPORTED") {
+          // iOS webkit allows only video/iframe elements to call full-screen
+          // APIs. But we need to show controls too, not just the video element.
+          Error({
+            msg: "This device does not support viewing this content in full-screen.",
+          });
+        }
+      }}
+    >
       <div
         className={classNames(
           "flex flex-col overflow-clip rounded-xl bg-black md:max-h-screen",
