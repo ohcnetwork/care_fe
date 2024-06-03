@@ -14,6 +14,7 @@ interface FacilitySelectProps {
   multiple?: boolean;
   facilityType?: number;
   district?: string;
+  state?: string;
   showAll?: boolean;
   showNOptions?: number;
   freeText?: boolean;
@@ -35,6 +36,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
     className = "",
     facilityType,
     district,
+    state,
     freeText = false,
     errors = "",
   } = props;
@@ -49,6 +51,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
         facility_type: facilityType,
         exclude_user: exclude_user,
         district,
+        state,
       };
 
       const { data } = await request(

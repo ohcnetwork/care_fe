@@ -1,4 +1,7 @@
+import { ReactNode } from "react";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 import { useIsAuthorized } from "../../Common/hooks/useIsAuthorized";
+import useSlug from "../../Common/hooks/useSlug";
 import { AuthorizedForCB } from "../../Utils/AuthorizeFor";
 
 interface Props {
@@ -12,3 +15,20 @@ const AuthorizedChild = (props: Props) => {
 };
 
 export default AuthorizedChild;
+
+export const AuthorizedForConsultationRelatedActions = (props: {
+  children: ReactNode;
+}) => {
+  const me = useAuthUser();
+  const facilityId = useSlug("facility");
+
+  if (
+    me.home_facility_object?.id === facilityId ||
+    me.user_type === "DistrictAdmin" ||
+    me.user_type === "StateAdmin"
+  ) {
+    return props.children;
+  }
+
+  return null;
+};

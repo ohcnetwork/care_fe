@@ -2,7 +2,7 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import CircularProgress from "../Common/components/CircularProgress";
 import routes from "../../Redux/api";
-import { PatientNoteStateType } from "./models";
+import { PatientNoteStateType, PatientNotesModel } from "./models";
 import useSlug from "../../Common/hooks/useSlug";
 import DoctorNote from "./DoctorNote";
 import request from "../../Utils/request/request";
@@ -13,24 +13,27 @@ interface PatientNotesProps {
   reload?: boolean;
   setReload?: (value: boolean) => void;
   disableEdit?: boolean;
+  thread: PatientNotesModel["thread"];
 }
 
 const pageSize = RESULTS_PER_PAGE_LIMIT;
 
 const PatientConsultationNotesList = (props: PatientNotesProps) => {
-  const { state, setState, reload, setReload, disableEdit } = props;
+  const { state, setState, reload, setReload, disableEdit, thread } = props;
   const consultationId = useSlug("consultation") ?? "";
 
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchNotes = async () => {
     setIsLoading(true);
+
     const { data } = await request(routes.getPatientNotes, {
       pathParams: {
         patientId: props.state.patientId || "",
       },
       query: {
         consultation: consultationId,
+        thread,
         offset: (state.cPage - 1) * RESULTS_PER_PAGE_LIMIT,
       },
     });
@@ -61,6 +64,10 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
   }, [reload]);
 
   useEffect(() => {
+    fetchNotes();
+  }, [thread]);
+
+  useEffect(() => {
     setReload?.(true);
   }, []);
 
@@ -74,9 +81,9 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
     }
   };
 
-  if (isLoading && !state.notes.length) {
+  if (isLoading) {
     return (
-      <div className=" flex h-[400px] w-full items-center justify-center bg-white">
+      <div className="flex h-full w-full items-center justify-center bg-white">
         <CircularProgress />
       </div>
     );

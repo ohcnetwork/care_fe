@@ -1,6 +1,9 @@
 import {
+  CONSENT_PATIENT_CODE_STATUS_CHOICES,
+  CONSENT_TYPE_CHOICES,
   ConsultationSuggestionValue,
   DISCHARGE_REASONS,
+  PATIENT_NOTES_THREADS,
   UserRole,
 } from "../../Common/constants";
 import { AssetData, AssetLocationType } from "../Assets/AssetTypes";
@@ -10,8 +13,8 @@ import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 import { AssignedToObjectModel, DailyRoundsModel } from "../Patient/models";
+import { EncounterSymptom } from "../Symptoms/types";
 import { UserBareMinimum } from "../Users/models";
-import { ConsentRecord } from "./ConsultationForm";
 
 export interface LocalBodyModel {
   id: number;
@@ -94,11 +97,14 @@ export interface OptionsType {
   disabled?: boolean;
 }
 
-export type PatientCategory =
-  | "Comfort Care"
-  | "Stable"
-  | "Abnormal"
-  | "Critical";
+export type PatientCategory = "Comfort Care" | "Mild" | "Moderate" | "Critical";
+
+export type ConsentRecord = {
+  id: string;
+  type: (typeof CONSENT_TYPE_CHOICES)[number]["id"];
+  patient_code_status?: (typeof CONSENT_PATIENT_CODE_STATUS_CHOICES)[number]["id"];
+  deleted?: boolean;
+};
 
 export interface ConsultationModel {
   encounter_date: string;
@@ -119,7 +125,6 @@ export interface ConsultationModel {
   facility_name?: string;
   id: string;
   modified_date?: string;
-  other_symptoms?: string;
   patient: string;
   treatment_plan?: string;
   referred_to?: FacilityModel["id"];
@@ -138,13 +143,12 @@ export interface ConsultationModel {
   kasp_enabled_date?: string;
   readonly diagnoses?: ConsultationDiagnosis[];
   create_diagnoses?: CreateDiagnosis[]; // Used for bulk creating diagnoses upon consultation creation
+  readonly symptoms?: EncounterSymptom[];
+  create_symptoms?: CreateDiagnosis[]; // Used for bulk creating symptoms upon consultation creation
   deprecated_verified_by?: string;
-  treating_physician?: UserBareMinimum["id"];
+  readonly treating_physician?: UserBareMinimum["id"];
   treating_physician_object?: UserBareMinimum;
   suggestion_text?: string;
-  symptoms?: Array<number>;
-  symptoms_text?: string;
-  symptoms_onset_date?: string;
   consultation_notes?: string;
   is_telemedicine?: boolean;
   procedure?: ProcedureType[];
@@ -512,6 +516,7 @@ export interface PatientNotesModel {
   facility: BaseFacilityModel;
   created_by_object: BaseUserModel;
   user_type?: UserRole | "RemoteSpecialist";
+  thread: (typeof PATIENT_NOTES_THREADS)[keyof typeof PATIENT_NOTES_THREADS];
   created_date: string;
   last_edited_by?: BaseUserModel;
   last_edited_date?: string;

@@ -57,32 +57,32 @@ describe("Patient Consultation in multiple combination", () => {
     patientPage.clickCreatePatient();
     patientPage.verifyPatientIsCreated();
     patientConsultationPage.selectConsultationStatus(
-      "Outpatient/Emergency Room"
+      "Outpatient/Emergency Room",
     );
-    cy.searchAndSelectOption("#symptoms", "ASYMPTOMATIC");
+    cy.get("#is_asymptomatic").click();
     patientConsultationPage.typePatientIllnessHistory(patientIllnessHistory);
     patientConsultationPage.typePatientExaminationHistory(
-      patientExaminationHistory
+      patientExaminationHistory,
     );
     patientConsultationPage.typePatientWeight(patientWeight);
     patientConsultationPage.typePatientHeight(patientHeight);
-    patientConsultationPage.selectPatientCategory("Stable");
+    patientConsultationPage.selectPatientCategory("Mild");
     // icd 11 - 4 diagnosis with one principal
     patientConsultationPage.selectPatientDiagnosis(
       diagnosis1,
-      "add-icd11-diagnosis-as-unconfirmed"
+      "add-icd11-diagnosis-as-unconfirmed",
     );
     patientConsultationPage.selectPatientDiagnosis(
       diagnosis2,
-      "add-icd11-diagnosis-as-provisional"
+      "add-icd11-diagnosis-as-provisional",
     );
     patientConsultationPage.selectPatientDiagnosis(
       diagnosis3,
-      "add-icd11-diagnosis-as-differential"
+      "add-icd11-diagnosis-as-differential",
     );
     patientConsultationPage.selectPatientDiagnosis(
       diagnosis4,
-      "add-icd11-diagnosis-as-confirmed"
+      "add-icd11-diagnosis-as-confirmed",
     );
     patientConsultationPage.selectPatientPrincipalDiagnosis(diagnosis4);
     patientTreatmentPlan.clickAddProcedure();
@@ -111,55 +111,55 @@ describe("Patient Consultation in multiple combination", () => {
     // Verify the data's across the dashboard
     patientConsultationPage.verifyTextInConsultation(
       "#patient-consultationbadges",
-      patientIpNumber
+      patientIpNumber,
     );
     patientConsultationPage.verifyTextInConsultation(
       "#diagnoses-view",
-      diagnosis1
+      diagnosis1,
     );
     patientConsultationPage.verifyTextInConsultation(
       "#diagnoses-view",
-      diagnosis2
+      diagnosis2,
     );
     patientConsultationPage.verifyTextInConsultation(
       "#diagnoses-view",
-      diagnosis3
+      diagnosis3,
     );
     patientConsultationPage.verifyTextInConsultation(
       "#diagnoses-view",
-      diagnosis4
+      diagnosis4,
     );
     patientConsultationPage.verifyTextInConsultation(
       "#history-presentillness",
-      patientIllnessHistory
+      patientIllnessHistory,
     );
     patientConsultationPage.verifyTextInConsultation(
       "#examination-details",
-      patientExaminationHistory
+      patientExaminationHistory,
     );
     patientConsultationPage.verifyTextInConsultation(
       "#treatment-summary",
-      patientTreatment
+      patientTreatment,
     );
     patientConsultationPage.verifyTextInConsultation(
       "#general-instructions",
-      generalInstruction
+      generalInstruction,
     );
     patientConsultationPage.verifyTextInConsultation(
       "#consultation-notes",
-      specialInstruction
+      specialInstruction,
     );
     patientConsultationPage.verifyTextInConsultation(
       "#consultation-procedure",
-      procedureName
+      procedureName,
     );
     patientConsultationPage.verifyTextInConsultation(
       "#patient-weight",
-      patientWeight
+      patientWeight,
     );
     patientConsultationPage.verifyTextInConsultation(
       "#patient-height",
-      patientHeight
+      patientHeight,
     );
   });
 
@@ -172,48 +172,48 @@ describe("Patient Consultation in multiple combination", () => {
     patientPage.verifyPatientIsCreated();
     // OP Patient
     patientConsultationPage.selectConsultationStatus(
-      "Outpatient/Emergency Room"
+      "Outpatient/Emergency Room",
     );
     // Asymptomatic
-    cy.searchAndSelectOption("#symptoms", "ASYMPTOMATIC");
+    cy.get("#is_asymptomatic").click();
     // CRITICAL category
     patientConsultationPage.selectPatientCategory("Critical");
     patientConsultationPage.selectPatientSuggestion("Declare Death");
     patientConsultationPage.typeCauseOfDeath("Cause of Death");
     patientConsultationPage.typePatientConsultationDate(
       "#death_datetime",
-      "2024-02-22T12:45"
+      "2024-02-22T12:45",
     );
     patientConsultationPage.typeDeathConfirmedBy(doctorName);
     patientConsultationPage.typePatientConsultationDate(
       "#encounter_date",
-      "2024-02-22T12:30"
+      "2024-02-22T12:30",
     );
     cy.submitButton("Create Consultation");
     cy.verifyNotification(
-      "Create Diagnoses - Atleast one diagnosis is required"
+      "Create Diagnoses - Atleast one diagnosis is required",
     );
     cy.closeNotification();
     patientConsultationPage.selectPatientDiagnosis(
       diagnosis4,
-      "add-icd11-diagnosis-as-confirmed"
+      "add-icd11-diagnosis-as-confirmed",
     );
     cy.submitButton("Create Consultation");
     cy.verifyNotification("Consultation created successfully");
     // verify the data and death report
     patientConsultationPage.verifyTextInConsultation(
       "#consultation-buttons",
-      "EXPIRED"
+      "EXPIRED",
     );
     patientConsultationPage.clickPatientDetails();
     patientDeathReport.clickDeathReport();
     patientDeathReport.verifyDeathReportAutofill(
       "#name",
-      "Patient With Predefined Data"
+      "Patient With Predefined Data",
     );
     patientDeathReport.verifyDeathReportAutofill(
       "#cause_of_death",
-      "Cause of Death"
+      "Cause of Death",
     );
     cy.submitButton("Preview");
     cy.preventPrint();
@@ -230,22 +230,22 @@ describe("Patient Consultation in multiple combination", () => {
     patientPage.verifyPatientIsCreated();
     // Internal Transfer within facility
     patientConsultationPage.selectConsultationStatus(
-      "Internal Transfer within the facility"
+      "Internal Transfer within the facility",
     );
     patientConsultationPage.selectPatientWard("Dummy Location 1");
     // Asymptomatic
-    cy.searchAndSelectOption("#symptoms", "ASYMPTOMATIC");
+    cy.get("#is_asymptomatic").click();
     // Abnormal category
-    patientConsultationPage.selectPatientCategory("Abnormal");
+    patientConsultationPage.selectPatientCategory("Moderate");
     patientConsultationPage.selectPatientSuggestion("Domiciliary Care");
     // one ICD-11 diagnosis
     patientConsultationPage.selectPatientDiagnosis(
       diagnosis4,
-      "add-icd11-diagnosis-as-confirmed"
+      "add-icd11-diagnosis-as-confirmed",
     );
     patientConsultationPage.typePatientConsultationDate(
       "#icu_admission_date",
-      "2024-02-23T12:30"
+      "2024-02-23T12:30",
     );
     // add investigation
     patientInvestigation.clickAddInvestigation();
@@ -266,17 +266,17 @@ describe("Patient Consultation in multiple combination", () => {
     // verify the data reflection -
     patientConsultationPage.verifyTextInConsultation(
       "#patient-infobadges",
-      "Specialist Required"
+      "Specialist Required",
     );
     patientConsultationPage.verifyTextInConsultation(
       "#patient-infobadges",
-      "Domiciliary Care"
+      "Domiciliary Care",
     );
     patientConsultationPage.verifyTextInConsultation("#diagnoses-view", "1A04");
     patientInvestigation.clickInvestigationTab();
     patientConsultationPage.verifyTextInConsultation(
       "#investigation-suggestions",
-      "Vitals"
+      "Vitals",
     );
   });
 
@@ -289,28 +289,24 @@ describe("Patient Consultation in multiple combination", () => {
     patientPage.verifyPatientIsCreated();
     // referred from another facility patient
     patientConsultationPage.selectConsultationStatus(
-      "Referred from another facility"
+      "Referred from another facility",
     );
     // verify the free text in referring facility name
     patientConsultationPage.typeReferringFacility("Life Care Hospital");
-    // Vomiting and Nausea symptoms
+    patientConsultationPage.selectSymptomsDate("01012024");
     patientConsultationPage.typeAndMultiSelectSymptoms("s", [
-      "SPUTUM",
-      "SORE THROAT",
+      "Sore throat",
+      "Sputum",
     ]);
+    patientConsultationPage.clickAddSymptom();
     // Stable category
-    patientConsultationPage.selectPatientCategory("Stable");
-    // Date of symptoms
-    patientConsultationPage.selectSymptomsDate(
-      "#symptoms_onset_date",
-      "01012024"
-    );
+    patientConsultationPage.selectPatientCategory("Mild");
     // OP Consultation
     patientConsultationPage.selectPatientSuggestion("OP Consultation");
     // one ICD-11 and no principal
     patientConsultationPage.selectPatientDiagnosis(
       diagnosis4,
-      "add-icd11-diagnosis-as-confirmed"
+      "add-icd11-diagnosis-as-confirmed",
     );
     // no investigation
     patientTreatmentPlan.typePatientGeneralInstruction(generalInstruction);
@@ -321,11 +317,11 @@ describe("Patient Consultation in multiple combination", () => {
     // verify the Discharge Reason, Diagnosis, treatment physican
     patientConsultationPage.verifyTextInConsultation(
       "#consultation-buttons",
-      "OP file closed"
+      "OP file closed",
     );
     patientConsultationPage.verifyTextInConsultation(
       "#treating-physician",
-      doctorName
+      doctorName,
     );
     patientConsultationPage.verifyTextInConsultation("#diagnoses-view", "1A04");
   });
@@ -339,31 +335,29 @@ describe("Patient Consultation in multiple combination", () => {
     patientPage.verifyPatientIsCreated();
     // Route of Facility - Out Patient
     patientConsultationPage.selectConsultationStatus(
-      "Outpatient/Emergency Room"
+      "Outpatient/Emergency Room",
     );
-    // Select the Symptoms - Sore throat and fever symptoms
+    // Select the Symptoms - Breathlessness and Bleeding symptoms
+    patientConsultationPage.selectSymptomsDate("01012024");
     patientConsultationPage.typeAndMultiSelectSymptoms("b", [
-      "BREATHLESSNESS",
-      "BLEEDING",
+      "Breathlessness",
+      "Bleeding",
     ]);
+    patientConsultationPage.clickAddSymptom();
     // Comfort Care category
     patientConsultationPage.selectPatientCategory("Comfort Care");
     // Date of symptoms
-    patientConsultationPage.selectSymptomsDate(
-      "#symptoms_onset_date",
-      "01012024"
-    );
     // Decision after consultation - Referred to Facility
     patientConsultationPage.selectPatientSuggestion(
-      "Refer to another Hospital"
+      "Refer to another Hospital",
     );
     patientConsultationPage.selectPatientReferance(
-      "Dummy Request Approving Center"
+      "Dummy Request Approving Center",
     );
     // Four ICD-11 and one principal diagnosis
     patientConsultationPage.selectPatientDiagnosis(
       diagnosis4,
-      "add-icd11-diagnosis-as-confirmed"
+      "add-icd11-diagnosis-as-confirmed",
     );
     patientConsultationPage.selectPatientPrincipalDiagnosis(diagnosis4);
     // no investigation for the patient
@@ -386,7 +380,7 @@ describe("Patient Consultation in multiple combination", () => {
     patientConsultationPage.typePatientIllnessHistory("editted");
     patientConsultationPage.selectPatientDiagnosis(
       diagnosis5,
-      "add-icd11-diagnosis-as-unconfirmed"
+      "add-icd11-diagnosis-as-unconfirmed",
     );
     cy.get("#diagnosis-entry-1").within(() => {
       cy.get("#condition-verification-status-menu").click();
@@ -397,7 +391,7 @@ describe("Patient Consultation in multiple combination", () => {
     cy.get("#diagnoses-view").should("not.contain.text", diagnosis5);
     patientConsultationPage.verifyTextInConsultation(
       "#history-presentillness",
-      "editted"
+      "editted",
     );
   });
 
