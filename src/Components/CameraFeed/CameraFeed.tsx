@@ -9,9 +9,9 @@ import FeedAlert, { FeedAlertState } from "./FeedAlert";
 import FeedNetworkSignal from "./FeedNetworkSignal";
 import NoFeedAvailable from "./NoFeedAvailable";
 import FeedControls from "./FeedControls";
-import Fullscreen from "../../CAREUI/misc/Fullscreen";
 import FeedWatermark from "./FeedWatermark";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import useFullscreen from "../../Common/hooks/useFullscreen";
 
 interface Props {
   children?: React.ReactNode;
@@ -30,13 +30,14 @@ interface Props {
 }
 
 export default function CameraFeed(props: Props) {
+  const feedRef = useRef<HTMLElement>(null);
   const playerRef = useRef<HTMLVideoElement | ReactPlayer | null>(null);
   const streamUrl = getStreamUrl(props.asset);
 
   const player = usePlayer(streamUrl, playerRef);
   const operate = useOperateCamera(props.asset.id, props.silent);
 
-  const [isFullscreen, setFullscreen] = useState(false);
+  const [isFullscreen, setFullscreen] = useFullscreen();
   const [state, setState] = useState<FeedAlertState>();
   useEffect(() => setState(player.status), [player.status, setState]);
 
@@ -89,10 +90,10 @@ export default function CameraFeed(props: Props) {
     initializeStream();
   };
   return (
-    <Fullscreen fullscreen={isFullscreen} onExit={() => setFullscreen(false)}>
+    <div ref={feedRef as any}>
       <div
         className={classNames(
-          "flex max-h-screen flex-col overflow-clip rounded-xl bg-black",
+          "flex flex-col overflow-clip rounded-xl bg-black md:max-h-screen",
           props.className,
         )}
       >
@@ -187,7 +188,9 @@ export default function CameraFeed(props: Props) {
             <FeedControls
               shortcutsDisabled={props.shortcutsDisabled}
               isFullscreen={isFullscreen}
-              setFullscreen={setFullscreen}
+              setFullscreen={(value) => {
+                setFullscreen(value, feedRef.current || undefined);
+              }}
               onReset={resetStream}
               onMove={async (data) => {
                 props.onMove?.();
@@ -204,6 +207,6 @@ export default function CameraFeed(props: Props) {
           )}
         </div>
       </div>
-    </Fullscreen>
+    </div>
   );
 }
