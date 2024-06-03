@@ -67,7 +67,7 @@ export const CameraPresetDropdown = (props: Props) => {
           )}
         >
           <span className="block truncate">
-            {selected ? label(selected) : "Select preset"}
+            {selected ? label(selected) : "More preset"}
           </span>
           <span className="pointer-events-none absolute inset-y-0 right-0 mr-1 mt-1 flex items-center">
             <CareIcon icon="l-angle-down" className="text-xl text-zinc-400" />
