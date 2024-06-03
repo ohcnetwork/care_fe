@@ -176,7 +176,7 @@ function UserListItem({ user }: { user: UserAnnotatedWithGroup }) {
     const message = `${courtesyTitle(user)} ${user.first_name} ${user.last_name}, I have a query regarding a patient.\n\nPatient Link: ${window.location.href}`;
     const encodedMessage = encodeURIComponent(message);
     const whatsappAppURL = `whatsapp://send?phone=${phoneNumber}&text=${encodedMessage}`;
-    const whatsappWebURL = `https://web.whatsapp.com/send?phone=${phoneNumber}&text=${encodedMessage}`;
+    const whatsappWebURL = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
 
     const userAgent = navigator.userAgent;
     const isEdge = /edge\/\d+/i.test(userAgent);
