@@ -127,8 +127,7 @@ const DischargeModal = ({
     }
 
     if (
-      discharge_reason ==
-        DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
+      discharge_reason == DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
     ) {
       const newErrors: Record<string, FieldError> = {};
 
