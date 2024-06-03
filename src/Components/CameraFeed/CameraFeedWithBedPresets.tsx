@@ -33,6 +33,7 @@ export default function LocationFeedTile(props: Props) {
             options={data?.results ?? []}
             value={preset}
             onChange={setPreset}
+            placeholder="Select preset"
           />
         )}
       </div>

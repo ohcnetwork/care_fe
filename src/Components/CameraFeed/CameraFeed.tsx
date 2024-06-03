@@ -4,7 +4,7 @@ import useOperateCamera, { PTZPayload } from "./useOperateCamera";
 import usePlayer from "./usePlayer";
 import { getStreamUrl } from "./utils";
 import ReactPlayer from "react-player";
-import { classNames, isIOS } from "../../Utils/utils";
+import { classNames, isAppleDevice, isIOS } from "../../Utils/utils";
 import FeedAlert, { FeedAlertState } from "./FeedAlert";
 import FeedNetworkSignal from "./FeedNetworkSignal";
 import NoFeedAvailable from "./NoFeedAvailable";
@@ -12,6 +12,7 @@ import FeedControls from "./FeedControls";
 import Fullscreen from "../../CAREUI/misc/Fullscreen";
 import FeedWatermark from "./FeedWatermark";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { Error } from "../../Utils/Notifications";
 
 interface Props {
   children?: React.ReactNode;
@@ -27,6 +28,7 @@ interface Props {
   constrolsDisabled?: boolean;
   shortcutsDisabled?: boolean;
   onMove?: () => void;
+  onReset?: () => void;
 }
 
 export default function CameraFeed(props: Props) {
@@ -86,14 +88,29 @@ export default function CameraFeed(props: Props) {
 
   const resetStream = () => {
     setState("loading");
+    props.onReset?.();
     initializeStream();
   };
   return (
-    <Fullscreen fullscreen={isFullscreen} onExit={() => setFullscreen(false)}>
+    <Fullscreen
+      fullscreen={isFullscreen}
+      onExit={(reason) => {
+        setFullscreen(false);
+
+        if (reason === "DEVICE_UNSUPPORTED") {
+          // iOS webkit allows only video/iframe elements to call full-screen
+          // APIs. But we need to show controls too, not just the video element.
+          Error({
+            msg: "This device does not support viewing this content in full-screen.",
+          });
+        }
+      }}
+    >
       <div
         className={classNames(
-          "flex max-h-screen flex-col overflow-clip rounded-xl bg-black",
+          "flex flex-col overflow-clip rounded-xl bg-black md:max-h-screen",
           props.className,
+          isAppleDevice && isFullscreen && "px-20",
         )}
       >
         <div className="flex items-center justify-between bg-zinc-900 px-4 py-1.5 md:py-2">
@@ -106,14 +123,16 @@ export default function CameraFeed(props: Props) {
               />
               {props.asset.name}
             </span>
-            <div className={state === "loading" ? "animate-pulse" : ""}>
-              <FeedNetworkSignal
-                playerRef={playerRef as any}
-                playedOn={player.playedOn}
-                status={player.status}
-                onReset={resetStream}
-              />
-            </div>
+            {!isIOS && (
+              <div className={state === "loading" ? "animate-pulse" : ""}>
+                <FeedNetworkSignal
+                  playerRef={playerRef as any}
+                  playedOn={player.playedOn}
+                  status={player.status}
+                  onReset={resetStream}
+                />
+              </div>
+            )}
           </div>
         </div>
 
