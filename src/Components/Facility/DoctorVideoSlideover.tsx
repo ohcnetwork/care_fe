@@ -172,7 +172,7 @@ function UserListItem({ user }: { user: UserAnnotatedWithGroup }) {
   function connectOnWhatsApp(e: React.MouseEvent<HTMLAnchorElement>) {
     e.stopPropagation();
     if (!user.alt_phone_number) return;
-    const phoneNumber = user.alt_phone_number;
+    const phoneNumber = user.alt_phone_number?.replace(/\D+/g, "");
     const message = `${courtesyTitle(user)} ${user.first_name} ${user.last_name}, I have a query regarding a patient.\n\nPatient Link: ${window.location.href}`;
     const encodedMessage = encodeURIComponent(message);
     const whatsappAppURL = `whatsapp://send?phone=${phoneNumber}&text=${encodedMessage}`;
