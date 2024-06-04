@@ -274,7 +274,7 @@ export default function useFileManager(
           </h1>
         }
         fixedWidth={false}
-        className="md:w-2/4"
+        className="md:w-[700px]"
         onClose={() => setArchiveDialogueOpen(null)}
       >
         <div className="mb-8 text-xs text-gray-700">

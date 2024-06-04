@@ -52,7 +52,7 @@ export default function PatientConsentRecordBlockGroup(props: {
       {files?.map((file: FileUploadModel, i: number) => (
         <div
           key={i}
-          className={`flex flex-col justify-between gap-2 rounded-lg border border-gray-300 md:flex-row md:items-center ${showArchive ? "text-gray-600" : "bg-white"}  px-4 py-2 transition-all hover:bg-gray-100`}
+          className={`flex flex-col justify-between gap-2 rounded-lg border border-gray-300 xl:flex-row xl:items-center ${showArchive ? "text-gray-600" : "bg-white"}  px-4 py-2 transition-all hover:bg-gray-100`}
         >
           <div className="flex items-center gap-4 ">
             <div>
