@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Popover } from "@headlessui/react";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -59,7 +59,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
   const [open, setOpen] = useState(false);
   const [_progress, setProgress] = useState(0);
   const [stage, setStage] = useState("start");
-  const [editableTranscript, setEditableTranscript] = useState("");
+  const [_editableTranscript, setEditableTranscript] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [formFields, setFormFields] = useState<{
@@ -70,6 +70,13 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
   const [isAudioUploading, setIsAudioUploading] = useState(false);
   const [updatedTranscript, setUpdatedTranscript] = useState<string>("");
   const [scribeID, setScribeID] = useState<string>("");
+  const stageRef = useRef(stage);
+
+  useEffect(() => {
+    if (stageRef.current === "cancelled") {
+      setStage("start");
+    }
+  }, [stage]);
 
   const {
     isRecording,
@@ -81,6 +88,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
 
   const uploadAudioData = (response: any, audioBlob: Blob) => {
     return new Promise<void>((resolve, reject) => {
+      if (stageRef.current === "cancelled") resolve();
       const url = response.data.signed_url;
       const internal_name = response.data.internal_name;
       const f = audioBlob;
@@ -109,6 +117,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
 
   const uploadAudio = async (audioBlob: Blob, associatingId: string) => {
     return new Promise((resolve, reject) => {
+      if (stageRef.current === "cancelled") resolve({});
       const category = "AUDIO";
       const name = "audio.mp3";
       const filename = Date.now().toString();
@@ -127,6 +136,8 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
           uploadAudioData(response, audioBlob)
             .then(() => {
               if (!response?.data?.id) throw Error("Error uploading audio");
+
+              if (stageRef.current === "cancelled") resolve({});
               markUploadComplete(response?.data.id, associatingId).then(() => {
                 resolve(response.data);
               });
@@ -145,12 +156,14 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
     startRecording();
     setProgress(25);
     setStage("recording");
+    stageRef.current = "recording";
   };
 
   const handleStopRecordingClick = () => {
     stopRecording();
     setProgress(50);
     setStage("recording-review");
+    stageRef.current = "recording-end";
   };
 
   const handleEditChange = (e: {
@@ -161,6 +174,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
 
   const waitForTranscript = async (externalId: string): Promise<string> => {
     return new Promise((resolve, reject) => {
+      if (stageRef.current === "cancelled") resolve("");
       const interval = setInterval(async () => {
         try {
           const res = await request(routes.getScribe, {
@@ -191,9 +205,29 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
     });
   };
 
+  const reProcessTranscript = async () => {
+    setErrors([]);
+    setEditableTranscript(updatedTranscript);
+    setStage("review");
+    const res = await request(routes.updateScribe, {
+      body: {
+        status: "READY",
+        transcript: updatedTranscript,
+        ai_response: null,
+      },
+      pathParams: {
+        external_id: scribeID,
+      },
+    });
+    if (res.error || !res.data) throw Error("Error updating scribe instance");
+    setStage("review");
+    await handleSubmitTranscript(res.data.external_id);
+  };
+
   const waitForFormData = async (externalId: string): Promise<string> => {
     return new Promise((resolve, reject) => {
       const interval = setInterval(async () => {
+        if (stageRef.current === "cancelled") resolve("");
         try {
           const res = await request(routes.getScribe, {
             pathParams: {
@@ -270,12 +304,14 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
   };
 
   const handleSubmitTranscript = async (external_id: string) => {
+    if (stageRef.current === "cancelled") return;
     setProgress(75);
     setIsGPTProcessing(true);
     try {
       const updatedFieldsResponse = await waitForFormData(external_id);
       setProgress(100);
       const parsedFormData = JSON.parse(updatedFieldsResponse ?? "{}");
+      if (stageRef.current === "cancelled") return;
       setFormFields(parsedFormData);
       onFormUpdate(parsedFormData);
       setStage("final-review");
@@ -286,6 +322,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
   };
 
   const startTranscription = async (scribeID: string) => {
+    if (stageRef.current === "cancelled") return;
     setIsTranscribing(true);
     const errors = [];
     try {
@@ -302,6 +339,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
 
       //poll for transcript
       const transcriptResponse = await waitForTranscript(res.data.external_id);
+      if (stageRef.current === "cancelled") return;
       setEditableTranscript(transcriptResponse);
       setUpdatedTranscript(transcriptResponse);
       setStage("review");
@@ -329,6 +367,10 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
     setFormFields({});
     setEditableTranscript("");
     setUpdatedTranscript("");
+    setIsAudioUploading(false);
+    setScribeID("");
+    setIsHoveringCancelRecord(false);
+    stageRef.current = "cancelled";
   };
 
   const processFormField = (
@@ -485,44 +527,47 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
                         src={URL.createObjectURL(blob)}
                       />
                     ))}
+                  <ButtonV2
+                    onClick={() => {
+                      handleRerecordClick();
+                    }}
+                    className="w-full"
+                  >
+                    Restart Recording
+                  </ButtonV2>
                 </div>
               )}
 
               {(stage === "review" || stage === "final-review") && (
                 <div className="my-2 w-full">
-                  <p className="mb-2 text-sm font-semibold text-gray-600">
-                    Transcript
-                  </p>
+                  <div className="flex justify-between">
+                    <p className="mb-2 text-sm font-semibold text-gray-600">
+                      Transcript
+                    </p>
+                    <p className="mb-2 text-sm italic text-gray-500">
+                      (Edit if needed)
+                    </p>
+                  </div>
                   <textarea
                     className="h-32 w-full rounded-md border border-gray-300 p-2 font-mono text-sm"
                     value={updatedTranscript}
                     onChange={handleEditChange}
                   />
-                  {updatedTranscript !== editableTranscript && (
-                    <ButtonV2
-                      onClick={async () => {
-                        setErrors([]);
-                        setEditableTranscript(updatedTranscript);
-                        setStage("review");
-                        const res = await request(routes.updateScribe, {
-                          body: {
-                            status: "READY",
-                            transcript: updatedTranscript,
-                          },
-                          pathParams: {
-                            external_id: scribeID,
-                          },
-                        });
-                        if (res.error || !res.data)
-                          throw Error("Error updating scribe instance");
-                        setStage("review");
-                        await handleSubmitTranscript(res.data.external_id);
-                      }}
-                      className="my-2 w-full"
-                    >
-                      Process Transcript
-                    </ButtonV2>
-                  )}
+
+                  <ButtonV2
+                    onClick={reProcessTranscript}
+                    className="my-2 w-full"
+                  >
+                    Process Transcript
+                  </ButtonV2>
+                  <ButtonV2
+                    onClick={async () => {
+                      setStage("recording-review");
+                    }}
+                    className="mb-2 w-full"
+                  >
+                    Regenerate Transcript
+                  </ButtonV2>
                   {stage === "review" && (
                     <p className="animate-pulse text-sm text-gray-500">
                       {getStageMessage(stage)}
@@ -568,9 +613,17 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
                       </div>
                     )}
                   {stage === "final-review" && (
-                    <p className="my-2 text-sm text-gray-600">
+                    <p className="mt-2 text-sm text-gray-600">
                       {getStageMessage(stage)}
                     </p>
+                  )}
+                  {stage === "final-review" && !isGPTProcessing && (
+                    <ButtonV2
+                      onClick={reProcessTranscript}
+                      className="mt-2 w-full"
+                    >
+                      Reobtain Form Data
+                    </ButtonV2>
                   )}
                 </div>
               )}
