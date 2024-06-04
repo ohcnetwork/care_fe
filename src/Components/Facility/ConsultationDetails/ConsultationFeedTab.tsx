@@ -16,7 +16,7 @@ import useOperateCamera, {
   PTZPayload,
 } from "../../CameraFeed/useOperateCamera";
 import request from "../../../Utils/request/request";
-import { classNames } from "../../../Utils/utils";
+import { classNames, isIOS } from "../../../Utils/utils";
 
 export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   const authUser = useAuthUser();
@@ -27,6 +27,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   const [preset, setPreset] = useState<AssetBedModel>();
   const [isUpdatingPreset, setIsUpdatingPreset] = useState(false);
   const [hasMoved, setHasMoved] = useState(false);
+  const [key, setKey] = useState(0);
   const divRef = useRef<any>();
 
   const operate = useOperateCamera(asset?.id ?? "", true);
@@ -106,9 +107,15 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
       </span>
       <div ref={divRef}>
         <CameraFeed
+          key={key}
           asset={asset}
           preset={preset?.meta.position}
           onMove={() => setHasMoved(true)}
+          onReset={() => {
+            if (isIOS) {
+              setKey(key + 1);
+            }
+          }}
           onStreamError={() => {
             triggerGoal("Camera Feed Viewed", {
               consultationId: props.consultationId,
