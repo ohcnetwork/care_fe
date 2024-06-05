@@ -502,6 +502,11 @@ export const DailyRounds = (props: any) => {
         </div>
 
         <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
+          <div className="pb-6 md:col-span-2">
+            <FieldLabel>Symptoms</FieldLabel>
+            <EncounterSymptomsBuilder />
+          </div>
+
           <TextAreaFormField
             {...field("physical_examination_info")}
             label="Physical Examination Info"
@@ -512,11 +517,6 @@ export const DailyRounds = (props: any) => {
             label="Other Details"
             rows={5}
           />
-
-          <div className="pb-6 md:col-span-2">
-            <FieldLabel>Symptoms</FieldLabel>
-            <EncounterSymptomsBuilder />
-          </div>
 
           {state.form.rounds_type !== "DOCTORS_LOG" && (
             <>
@@ -675,6 +675,19 @@ export const DailyRounds = (props: any) => {
             <>
               <div className="flex flex-col gap-10 divide-y-2 divide-dashed divide-gray-600 border-t-2 border-dashed border-gray-600 pt-6 md:col-span-2">
                 <div>
+                  <h3 className="mb-4 mt-8 text-lg font-semibold">
+                    {t("diagnosis")}
+                  </h3>
+                  {/*  */}
+                  {diagnoses ? (
+                    <EditDiagnosesBuilder value={diagnoses} />
+                  ) : (
+                    <div className="flex animate-pulse justify-center py-4 text-center font-medium text-gray-800">
+                      Fetching existing diagnosis of patient...
+                    </div>
+                  )}
+                </div>
+                <div>
                   <h3 className="my-4 text-lg font-semibold">
                     {t("investigations")}
                   </h3>
@@ -700,19 +713,6 @@ export const DailyRounds = (props: any) => {
                     {t("prn_prescriptions")}
                   </h3>
                   <PrescriptionBuilder is_prn />
-                </div>
-                <div>
-                  <h3 className="mb-4 mt-8 text-lg font-semibold">
-                    {t("diagnosis")}
-                  </h3>
-                  {/*  */}
-                  {diagnoses ? (
-                    <EditDiagnosesBuilder value={diagnoses} />
-                  ) : (
-                    <div className="flex animate-pulse justify-center py-4 text-center font-medium text-gray-800">
-                      Fetching existing diagnosis of patient...
-                    </div>
-                  )}
                 </div>
               </div>
             </>
