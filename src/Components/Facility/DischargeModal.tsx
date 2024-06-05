@@ -68,14 +68,30 @@ const DischargeModal = ({
       discharge_date,
       death_datetime,
       death_confirmed_doctor: undefined,
-      referred_to_external: null,
-      referred_to: referred_to ? referred_to.id : null,
+      referred_to_external: !referred_to?.id ? referred_to?.name : null,
+      referred_to: referred_to?.id ? referred_to.id : null,
     });
   const [latestClaim, setLatestClaim] = useState<HCXClaimModel>();
   const [isCreateClaimLoading, setIsCreateClaimLoading] = useState(false);
   const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
   const [facility, setFacility] = useState<FacilityModel | null>(referred_to);
   const [errors, setErrors] = useState<any>({});
+
+  useEffect(() => {
+    setPreDischargeForm((prev) => ({
+      ...prev,
+      new_discharge_reason,
+      discharge_notes: referred_to
+        ? "Patient Shifted to another facility."
+        : "",
+      discharge_date,
+      death_datetime,
+      referred_to_external: !referred_to?.id ? referred_to?.name : null,
+      referred_to: referred_to?.id ? referred_to.id : null,
+    }));
+
+    setFacility(referred_to);
+  }, [referred_to, new_discharge_reason, discharge_date, death_datetime]);
 
   const discharge_reason =
     new_discharge_reason ?? preDischargeForm.new_discharge_reason;
