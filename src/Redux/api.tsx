@@ -1286,6 +1286,11 @@ const routes = {
     method: "GET",
     TRes: Type<PaginatedResponse<AvailabilityRecord>>(),
   },
+  listAssetQR: {
+    path: "/api/v1/public/asset_qr/{qr_code_id}/",
+    method: "GET",
+    TRes: Type<AssetData>(),
+  },
 
   // Asset transaction endpoints
 
