@@ -223,7 +223,11 @@ export default function MedicineAdministration(props: Props) {
         </PrescriptionDetailCard>
       ))}
       <div className="flex justify-end">
-        <ButtonV2 onClick={handleSubmit} disabled={!selectedCount}>
+        <ButtonV2
+          id="administer-selected-medicine"
+          onClick={handleSubmit}
+          disabled={!selectedCount}
+        >
           <CareIcon icon="l-syringe" className="text-lg" />
           {t("administer_selected_medicines")}{" "}
           {selectedCount > 0 && `(${selectedCount})`}
