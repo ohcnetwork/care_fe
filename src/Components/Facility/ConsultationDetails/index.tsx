@@ -37,6 +37,7 @@ import PatientInfoCard from "../../Patient/PatientInfoCard";
 import RelativeDateUserMention from "../../Common/RelativeDateUserMention";
 import DiagnosesListAccordion from "../../Diagnosis/DiagnosesListAccordion";
 import { CameraFeedPermittedUserTypes } from "../../../Utils/permissions";
+import Error404 from "../../ErrorPages/404";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
@@ -68,7 +69,10 @@ const TABS = {
 
 export const ConsultationDetails = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
-  const tab = props.tab.toUpperCase() as keyof typeof TABS;
+  let tab = undefined;
+  if (Object.keys(TABS).includes(props.tab.toUpperCase())) {
+    tab = props.tab.toUpperCase() as keyof typeof TABS;
+  }
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [showDoctors, setShowDoctors] = useState(false);
@@ -193,6 +197,10 @@ export const ConsultationDetails = (props: any) => {
     facilityId: consultationData.facility,
     patientData,
   };
+
+  if (!tab) {
+    return <Error404 />;
+  }
 
   const SelectedTab = TABS[tab];
 
