@@ -93,6 +93,12 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   };
 
   let requiredFields: any = {
+    status: {
+      errorText: t("please_select_status"),
+    },
+    patient_category: {
+      errorText: t("please_select_patient_category"),
+    },
     reason: {
       errorText: t("please_enter_a_reason_for_the_shift"),
     },
@@ -109,6 +115,9 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
       },
       preferred_vehicle_choice: {
         errorText: t("please_select_preferred_vehicle_type"),
+      },
+      breathlessness_level: {
+        errorText: t("please_select_breathlessness_level"),
       },
     };
   }
@@ -412,6 +421,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             onChange={handleFormFieldChange}
             label="Patient Category"
             className="md:col-span-2"
+            error={state.errors.patient_category}
           />
 
           {wartime_shifting && (
