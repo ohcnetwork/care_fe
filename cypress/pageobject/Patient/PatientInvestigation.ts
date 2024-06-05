@@ -1,4 +1,3 @@
-import { cy } from "local-cypress";
 class PatientInvestigation {
   clickAddInvestigation() {
     cy.get("#investigation").scrollIntoView();
