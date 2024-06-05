@@ -121,6 +121,7 @@ export const DailyRounds = (props: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
+  const [bedType, setBedType] = useState<string>("");
   const [consultationSuggestion, setConsultationSuggestion] = useState<any>("");
   const [prevReviewInterval, setPreviousReviewInterval] = useState(-1);
   const [prevAction, setPreviousAction] = useState("NO_ACTION");
@@ -180,6 +181,9 @@ export const DailyRounds = (props: any) => {
       if (data) {
         setPatientName(data.name!);
         setFacilityName(data.facility_object!.name);
+        setBedType(
+          data.last_consultation?.current_bed?.bed_object?.bed_type || "",
+        );
         setConsultationSuggestion(data.last_consultation?.suggestion);
         setDiagnoses(
           data.last_consultation?.diagnoses?.sort(
@@ -206,6 +210,7 @@ export const DailyRounds = (props: any) => {
         };
       }
     } else {
+      setBedType("");
       setPatientName("");
       setFacilityName("");
     }
@@ -495,6 +500,7 @@ export const DailyRounds = (props: any) => {
           <div className="w-full md:w-1/3">
             <PatientCategorySelect
               {...field("patient_category")}
+              hideDescription={bedType !== "ICU"}
               required
               label="Category"
             />

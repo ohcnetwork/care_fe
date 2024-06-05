@@ -43,6 +43,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
   const { facilityId, patientId } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [patientCategory, setPatientCategory] = useState<any>();
+  const [bedType, setBedType] = useState("");
   const { t } = useTranslation();
   const { wartime_shifting } = useConfig();
 
@@ -119,6 +120,9 @@ export const ShiftCreate = (props: patientShiftProps) => {
           data.last_consultation?.category;
         setPatientCategory(
           PATIENT_CATEGORIES.find((c) => c.text === patient_category)?.id,
+        );
+        setBedType(
+          data.last_consultation?.current_bed?.bed_object.bed_type || "",
         );
       }
     },
@@ -331,6 +335,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
         <PatientCategorySelect
           required={true}
           {...field("patient_category")}
+          hideDescription={bedType !== "ICU"}
           value={patientCategory}
           onChange={(e) => setPatientCategory(e.value)}
           label="Patient Category"
