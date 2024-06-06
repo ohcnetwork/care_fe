@@ -156,7 +156,7 @@ export default function PatientInfoCard(props: {
       query: {
         file_type: "CONSENT_RECORD",
         associating_id: consentRecords?.results.map((cr) => cr.id).join(","),
-        limit: 1000,
+        limit: 1,
         offset: 0,
         is_archived: false,
       },
