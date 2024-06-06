@@ -1359,7 +1359,11 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       >
                         <FieldLabel>Procedures</FieldLabel>
                         <ProcedureBuilder
-                          procedures={state.form.procedure}
+                          procedures={
+                            Array.isArray(state.form.procedure)
+                              ? state.form.procedure
+                              : []
+                          }
                           setProcedures={(procedure) => {
                             handleFormFieldChange({
                               name: "procedure",

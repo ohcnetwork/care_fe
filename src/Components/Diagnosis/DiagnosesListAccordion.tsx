@@ -4,7 +4,7 @@ import {
   ConsultationDiagnosis,
 } from "./types";
 import { useTranslation } from "react-i18next";
-import { compareBy } from "../../Utils/utils";
+import { classNames, compareBy } from "../../Utils/utils";
 import { useState } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -96,7 +96,14 @@ const DiagnosesOfStatus = ({ diagnoses }: Props) => {
       <ul className="text-sm">
         {diagnoses.map((diagnosis) => (
           <li key={diagnosis.id} className="flex items-center gap-2">
-            <span>{diagnosis.diagnosis_object?.label}</span>
+            <span
+              className={classNames(
+                !diagnosis.diagnosis_object?.label && "italic text-gray-500",
+              )}
+            >
+              {diagnosis.diagnosis_object?.label ||
+                "Unable to resolve ICD-11 diagnosis at the moment"}
+            </span>
           </li>
         ))}
       </ul>
