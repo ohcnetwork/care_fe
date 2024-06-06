@@ -62,6 +62,13 @@ export default function PatientConsentRecordBlockGroup(props: {
       setPatientCodeStatus(consentRecord.patient_code_status);
   }, [consentRecord]);
 
+  // see if the user has permission to edit the file.
+  // only the user who uploaded the file, district admin and state admin can edit the file
+  const hasEditPermission = (file: FileUploadModel) =>
+    file?.uploaded_by?.username === authUser.username ||
+    authUser.user_type === "DistrictAdmin" ||
+    authUser.user_type === "StateAdmin";
+
   return (
     <div
       className={`flex flex-col gap-2 ${(files?.length || 0) < 1 && "hidden"}`}
@@ -97,6 +104,7 @@ export default function PatientConsentRecordBlockGroup(props: {
             onClick={() => {
               handlePCSUpdate(patientCodeStatus);
             }}
+            disabled={patientCodeStatus === consentRecord.patient_code_status}
             className="h-[46px]"
           >
             Update
@@ -138,23 +146,17 @@ export default function PatientConsentRecordBlockGroup(props: {
                 View
               </ButtonV2>
             )}
-            {!file.is_archived &&
-              (file?.uploaded_by?.username === authUser.username ||
-                authUser.user_type === "DistrictAdmin" ||
-                authUser.user_type === "StateAdmin") && (
-                <ButtonV2
-                  variant={"secondary"}
-                  onClick={() => editFile(file)}
-                  className=""
-                >
-                  <CareIcon icon={"l-pen"} />
-                  Rename
-                </ButtonV2>
-              )}
-            {(file.is_archived ||
-              file?.uploaded_by?.username === authUser.username ||
-              authUser.user_type === "DistrictAdmin" ||
-              authUser.user_type === "StateAdmin") && (
+            {!file.is_archived && hasEditPermission(file) && (
+              <ButtonV2
+                variant={"secondary"}
+                onClick={() => editFile(file)}
+                className=""
+              >
+                <CareIcon icon={"l-pen"} />
+                Rename
+              </ButtonV2>
+            )}
+            {(file.is_archived || hasEditPermission(file)) && (
               <ButtonV2
                 variant={file.is_archived ? "primary" : "secondary"}
                 onClick={() => archiveFile(file, consentRecord.id)}

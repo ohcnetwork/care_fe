@@ -16,13 +16,20 @@ import routes from "../Redux/api";
 import uploadFile from "./request/uploadFile";
 import * as Notification from "./Notifications.js";
 import imageCompression from "browser-image-compression";
+import { DEFAULT_ALLOWED_EXTENSIONS } from "../Common/constants";
 
 export type FileUploadOptions = {
   type: string;
   category?: FileCategory;
   onUpload?: (file: FileUploadModel) => void;
-  allowedExtensions?: string[];
-};
+} & (
+  | {
+      allowedExtensions?: string[];
+    }
+  | {
+      allowAllExtensions?: boolean;
+    }
+);
 
 export type FileUploadButtonProps = {
   icon?: IconName;
@@ -65,12 +72,7 @@ const ExtImage: string[] = [
 export default function useFileUpload(
   options: FileUploadOptions,
 ): FileUploadReturn {
-  const {
-    type,
-    onUpload,
-    category = "UNSPECIFIED",
-    allowedExtensions,
-  } = options;
+  const { type, onUpload, category = "UNSPECIFIED" } = options;
 
   const [uploadFileName, setUploadFileName] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
@@ -146,9 +148,12 @@ export default function useFileUpload(
       return false;
     }
     const extension = f.name.split(".").pop();
-    if (allowedExtensions && !allowedExtensions.includes(extension || "")) {
+    if (
+      "allowedExtensions" in options &&
+      !options.allowedExtensions?.includes(extension || "")
+    ) {
       setError(
-        `Invalid file type ".${extension}" Allowed types: ${allowedExtensions.join(", ")}`,
+        `Invalid file type ".${extension}" Allowed types: ${options.allowedExtensions?.join(", ")}`,
       );
       return false;
     }
@@ -420,9 +425,11 @@ export default function useFileUpload(
         onChange={onFileChange}
         type="file"
         accept={
-          "allowExtensions" in options
-            ? allowedExtensions?.join(",")
-            : "image/*,video/*,audio/*,text/plain,text/csv,application/rtf,application/msword,application/vnd.oasis.opendocument.text,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/pdf"
+          "allowedExtensions" in options
+            ? options.allowedExtensions?.join(",")
+            : "allowAllExtensions" in options
+              ? "*"
+              : DEFAULT_ALLOWED_EXTENSIONS.join(",")
         }
         hidden
       />
