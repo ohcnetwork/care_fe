@@ -5,4 +5,11 @@ export default defineConfig({
     loader: "tsx",
     include: [/src\/.*\.[tj]sx?$/, /.storybook\/.*\.[tj]sx?$/],
   },
+  optimizeDeps: {
+    esbuildOptions: {
+      loader: {
+        ".ts": "ts",
+      },
+    },
+  },
 });
