@@ -363,10 +363,10 @@ export const SAMPLE_TEST_RESULT = [
 export const CONSULTATION_SUGGESTION = [
   { id: "HI", text: "Home Isolation", deprecated: true }, // # Deprecated. Preserving option for backward compatibility (use only for readonly operations)
   { id: "A", text: "Admission" },
-  { id: "R", text: "Refer to another Hospital" },
+  { id: "R", text: "Refer to another Hospital", editDisabled: true },
   { id: "OP", text: "OP Consultation" },
   { id: "DC", text: "Domiciliary Care" },
-  { id: "DD", text: "Declare Death" },
+  { id: "DD", text: "Declare Death", editDisabled: true },
 ] as const;
 
 export type ConsultationSuggestionValue =
