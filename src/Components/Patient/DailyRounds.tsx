@@ -32,7 +32,6 @@ import routes from "../../Redux/api";
 import { Scribe } from "../Scribe/Scribe";
 import { DAILY_ROUND_FORM_SCRIBE_DATA } from "../Scribe/formDetails";
 import { DailyRoundsModel } from "./models";
-import { fetchEventTypeByName } from "../Facility/ConsultationDetails/Events/types";
 import InvestigationBuilder from "../Common/prescription-builder/InvestigationBuilder";
 import { FieldErrorText } from "../Form/FormFields/FormField";
 import { error } from "@pnotify/core";
@@ -139,6 +138,7 @@ export const DailyRounds = (props: any) => {
     "review_interval",
     "bp",
     "pulse",
+    "temperature",
     "resp",
     "investigations",
     "ventilator_spo2",
@@ -149,7 +149,6 @@ export const DailyRounds = (props: any) => {
 
   const fetchRoundDetails = useCallback(async () => {
     setIsLoading(true);
-    fetchEventTypeByName("");
     let formData: any = initialData;
     if (id) {
       const { data } = await request(routes.getDailyReport, {
@@ -419,6 +418,26 @@ export const DailyRounds = (props: any) => {
   if (isLoading) {
     return <Loading />;
   }
+
+  const submitButtonDisabled = (() => {
+    if (buttonText !== "Save") {
+      return false;
+    }
+
+    if (["VENTILATOR", "DOCTORS_LOG"].includes(state.form.rounds_type)) {
+      return false;
+    }
+
+    if (
+      formFields.every(
+        (field) =>
+          JSON.stringify(state.form[field]) ===
+          JSON.stringify(initialData[field]),
+      )
+    ) {
+      return true;
+    }
+  })();
 
   return (
     <Page
@@ -722,18 +741,7 @@ export const DailyRounds = (props: any) => {
         <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">
           <Cancel onClick={() => goBack()} />
           <Submit
-            disabled={
-              buttonText === "Save" &&
-              formFields.every(
-                (field: string) =>
-                  JSON.stringify(state.form[field]) ===
-                  JSON.stringify(initialData[field]),
-              ) &&
-              (state.form.temperature == initialData.temperature ||
-                isNaN(state.form.temperature)) &&
-              state.form.rounds_type !== "VENTILATOR" &&
-              state.form.rounds_type !== "DOCTORS_LOG"
-            }
+            disabled={submitButtonDisabled}
             onClick={(e) => handleSubmit(e)}
             label={buttonText}
           />
