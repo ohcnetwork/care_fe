@@ -80,9 +80,11 @@ export default function ConsultationDiagnosisEntry(props: Props) {
               ? "font-semibold text-primary-500"
               : "font-normal",
             !isActive && "text-gray-500 line-through",
+            !object.diagnosis_object?.label && "italic text-gray-500",
           )}
         >
-          {object.diagnosis_object?.label}
+          {object.diagnosis_object?.label ||
+            "Unable to retrieve this ICD-11 diagnosis at the moment"}
         </span>
         <div className="flex items-center justify-end gap-2 sm:flex-row md:absolute md:inset-y-0 md:right-2 md:justify-normal">
           <div className="w-32">

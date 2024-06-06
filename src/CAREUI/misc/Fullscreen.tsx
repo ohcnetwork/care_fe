@@ -5,17 +5,25 @@ interface Props {
   fullscreenClassName?: string;
   children: React.ReactNode;
   fullscreen: boolean;
-  onExit: () => void;
+  onExit: (reason?: "DEVICE_UNSUPPORTED") => void;
 }
 
 export default function Fullscreen(props: Props) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!ref.current) {
+      return;
+    }
+
     if (props.fullscreen) {
-      ref.current?.requestFullscreen();
+      if (ref.current.requestFullscreen) {
+        ref.current.requestFullscreen();
+      } else {
+        props.onExit("DEVICE_UNSUPPORTED");
+      }
     } else {
-      document.exitFullscreen();
+      document.exitFullscreen?.();
     }
   }, [props.fullscreen]);
 
@@ -27,6 +35,7 @@ export default function Fullscreen(props: Props) {
     };
 
     document.addEventListener("fullscreenchange", listener);
+
     return () => {
       document.removeEventListener("fullscreenchange", listener);
     };
