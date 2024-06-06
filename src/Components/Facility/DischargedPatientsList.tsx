@@ -453,6 +453,12 @@ const PatientListItem = ({ patient }: { patient: PatientModel }) => {
           {GENDER_TYPES.find((g) => g.id === patient.gender)?.text} -{" "}
           {formatPatientAge(patient)}
         </span>
+        {patient.last_consultation?.patient_no && (
+          <span className="text-sm font-medium text-gray-800">
+            {patient.last_consultation?.suggestion === "A" ? "IP#: " : "OP#: "}
+            {patient.last_consultation?.patient_no}
+          </span>
+        )}
         <div className="flex-1" />
         <RecordMeta
           className="text-end text-xs text-gray-600"
