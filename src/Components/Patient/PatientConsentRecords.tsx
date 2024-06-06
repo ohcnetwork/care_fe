@@ -34,6 +34,12 @@ export default function PatientConsentRecords(props: {
     patient_code_status: 4,
   });
 
+  const refetchAll = () => {
+    refetch();
+    refetchFiles();
+    refetchArchivedFiles();
+  };
+
   const fileUpload = useFileUpload({
     type: "CONSENT_RECORD",
     allowedExtensions: ["pdf", "jpg", "jpeg", "png"],
@@ -42,14 +48,10 @@ export default function PatientConsentRecords(props: {
   const fileManager = useFileManager({
     type: "CONSENT_RECORD",
     onArchive: async () => {
-      refetch();
-      refetchFiles();
-      refetchArchivedFiles();
+      refetchAll();
     },
     onEdit: async () => {
-      refetch();
-      refetchFiles();
-      refetchArchivedFiles();
+      refetchAll();
     },
   });
 
@@ -243,6 +245,10 @@ export default function PatientConsentRecords(props: {
                     }
                   }}
                   loading={!!fileUpload.progress}
+                  disabled={
+                    newConsent.type === 2 &&
+                    newConsent.patient_code_status === 0
+                  }
                   className="flex-1"
                 >
                   <CareIcon icon="l-check" className="mr-2" />
@@ -289,6 +295,7 @@ export default function PatientConsentRecords(props: {
             {consentRecords?.map((record, index) => (
               <PatientConsentRecordBlockGroup
                 key={index}
+                consultationId={consultationId}
                 consentRecord={record}
                 previewFile={fileManager.viewFile}
                 archiveFile={fileManager.archiveFile}
