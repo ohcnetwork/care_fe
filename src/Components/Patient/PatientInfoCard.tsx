@@ -611,7 +611,11 @@ export default function PatientInfoCard(props: {
                   >
                     <span className="flex w-full items-center justify-center gap-2">
                       <CareIcon icon="l-plus" className="text-xl" />
-                      <p className="font-semibold">Log Update</p>
+                      <p className="font-semibold">
+                        {authUser.user_type === "Doctor"
+                          ? "File Note"
+                          : "Log Update"}
+                      </p>
                     </span>
                   </ButtonV2>
                   {!(consultation?.facility !== patient.facility) &&

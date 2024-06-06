@@ -45,75 +45,78 @@ import {
 } from "../Diagnosis/types";
 import { EncounterSymptomsBuilder } from "../Symptoms/SymptomsBuilder";
 import { FieldLabel } from "../Form/FormFields/FormField";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
-const initForm: any = {
-  physical_examination_info: "",
-  other_details: "",
-  patient_category: "",
-  actions: null,
-  action: "",
-  review_interval: 0,
-  admitted_to: "",
-  taken_at: null,
-  rounds_type: "NORMAL",
-  systolic: null,
-  investigations: [],
-  investigations_dirty: false,
-  diastolic: null,
-  pulse: null,
-  resp: null,
-  temperature: null,
-  rhythm: undefined,
-  rhythm_detail: "",
-  ventilator_spo2: null,
-  consciousness_level: undefined,
-  bp: {
-    systolic: undefined,
-    diastolic: undefined,
-    mean: undefined,
-  },
-  // bed: null,
-};
-
-const initError = Object.assign(
-  {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
-);
-
-const initialState = {
-  form: { ...initForm },
-  errors: { ...initError },
-};
-
-const DailyRoundsFormReducer = (state = initialState, action: any) => {
-  switch (action.type) {
-    case "set_form": {
-      return {
-        ...state,
-        form: action.form,
-      };
-    }
-    case "set_errors": {
-      return {
-        ...state,
-        errors: action.errors,
-      };
-    }
-    case "set_state": {
-      if (action.state) return action.state;
-      return state;
-    }
-    default:
-      return state;
-  }
-};
-
 export const DailyRounds = (props: any) => {
   const { t } = useTranslation();
+  const authUser = useAuthUser();
   const { goBack } = useAppHistory();
   const { facilityId, patientId, consultationId, id } = props;
+
+  const initForm = {
+    physical_examination_info: "",
+    other_details: "",
+    patient_category: "",
+    actions: null,
+    action: "",
+    review_interval: 0,
+    admitted_to: "",
+    taken_at: null,
+    rounds_type: authUser.user_type === "Doctor" ? "DOCTORS_LOG" : "NORMAL",
+    systolic: null,
+    investigations: [],
+    investigations_dirty: false,
+    diastolic: null,
+    pulse: null,
+    resp: null,
+    temperature: null,
+    rhythm: undefined,
+    rhythm_detail: "",
+    ventilator_spo2: null,
+    consciousness_level: undefined,
+    bp: {
+      systolic: undefined,
+      diastolic: undefined,
+      mean: undefined,
+    },
+    // bed: null,
+  };
+
+  const initError = Object.assign(
+    {},
+    ...Object.keys(initForm).map((k) => ({ [k]: "" })),
+  );
+
+  const initialState = {
+    form: { ...initForm },
+    errors: { ...initError },
+  };
+
+  const DailyRoundsFormReducer = (state = initialState, action: any) => {
+    switch (action.type) {
+      case "set_form": {
+        return {
+          ...state,
+          form: action.form,
+        };
+      }
+      case "set_errors": {
+        return {
+          ...state,
+          errors: action.errors,
+        };
+      }
+      case "set_state": {
+        if (action.state) return action.state;
+        return state;
+      }
+      default:
+        return state;
+    }
+  };
+
   const [state, dispatch] = useAutoSaveReducer<any>(
     DailyRoundsFormReducer,
     initialState,
@@ -366,7 +369,7 @@ export const DailyRounds = (props: any) => {
             );
           } else if (state.form.rounds_type === "DOCTORS_LOG") {
             Notification.Success({
-              msg: "Doctors log update created successfully",
+              msg: "Progress Note update created successfully",
             });
             navigate(
               `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
@@ -418,6 +421,21 @@ export const DailyRounds = (props: any) => {
 
   if (isLoading) {
     return <Loading />;
+  }
+
+  const roundTypes = [];
+
+  if (authUser.user_type === "Doctor") {
+    roundTypes.push({ id: "DOCTORS_LOG", text: "Progress Note" });
+  }
+
+  roundTypes.push(
+    { id: "NORMAL", text: "Normal" },
+    { id: "VENTILATOR", text: "Critical Care" },
+  );
+
+  if (consultationSuggestion === "DC") {
+    roundTypes.push({ id: "TELEMEDICINE", text: "Telemedicine" });
   }
 
   return (
@@ -478,16 +496,7 @@ export const DailyRounds = (props: any) => {
               required
               className="w-full"
               label="Round Type"
-              options={[
-                ...[
-                  { id: "NORMAL", text: "Normal" },
-                  { id: "DOCTORS_LOG", text: "Doctor's Log Update" },
-                  { id: "VENTILATOR", text: "Critical Care" },
-                ],
-                ...(consultationSuggestion == "DC"
-                  ? [{ id: "TELEMEDICINE", text: "Telemedicine" }]
-                  : []),
-              ]}
+              options={roundTypes}
               optionLabel={(option) => option.text}
               optionValue={(option) => option.id}
             />
