@@ -7,6 +7,7 @@ import { getCameraConfig } from "../../../Utils/transformUtils";
 import { Submit } from "../../Common/components/ButtonV2";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import Card from "../../../CAREUI/display/Card";
+import { FieldErrorText } from "../../Form/FormFields/FormField";
 
 interface CameraConfigureProps {
   asset: AssetData;
@@ -59,8 +60,14 @@ export default function CameraConfigure(props: CameraConfigureProps) {
                 value={newPreset}
                 className="mt-1"
                 onChange={(e) => setNewPreset(e.value)}
-                error=""
+                errorClassName="hidden"
               />
+              {newPreset.length > 12 && (
+                <FieldErrorText
+                  error="It is advisable to keep preset name below 12 characters"
+                  className="!text-warning-500"
+                />
+              )}
             </div>
           </div>
           <div className="mt-4 flex justify-end">

@@ -1148,6 +1148,14 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       options={CONSULTATION_SUGGESTION.filter(
                         (option) => !("deprecated" in option),
                       )}
+                      optionDisabled={(option) =>
+                        isUpdate && "editDisabled" in option
+                      }
+                      optionDescription={(option) =>
+                        isUpdate && "editDisabled" in option
+                          ? t("encounter_suggestion_edit_disallowed")
+                          : undefined
+                      }
                     />
                   </div>
 
@@ -1351,7 +1359,11 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       >
                         <FieldLabel>Procedures</FieldLabel>
                         <ProcedureBuilder
-                          procedures={state.form.procedure}
+                          procedures={
+                            Array.isArray(state.form.procedure)
+                              ? state.form.procedure
+                              : []
+                          }
                           setProcedures={(procedure) => {
                             handleFormFieldChange({
                               name: "procedure",
