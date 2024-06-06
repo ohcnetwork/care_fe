@@ -17,7 +17,7 @@ import useConfig from "../../Common/hooks/useConfig";
 type Props = FormFieldBaseProps<HCXPolicyModel[]> & { gridView?: boolean };
 
 export default function InsuranceDetailsBuilder(props: Props) {
-  const field = useFormFieldPropsResolver(props as any);
+  const field = useFormFieldPropsResolver(props);
   const dispatch = useDispatch<any>();
 
   const handleUpdate = (index: number) => {

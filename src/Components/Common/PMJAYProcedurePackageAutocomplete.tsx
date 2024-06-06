@@ -17,7 +17,7 @@ type PMJAYPackageItem = {
 type Props = FormFieldBaseProps<PMJAYPackageItem>;
 
 export default function PMJAYProcedurePackageAutocomplete(props: Props) {
-  const field = useFormFieldPropsResolver(props as any);
+  const field = useFormFieldPropsResolver(props);
 
   const { fetchOptions, isLoading, options } =
     useAsyncOptions<PMJAYPackageItem>("code");
