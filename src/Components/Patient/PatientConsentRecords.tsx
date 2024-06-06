@@ -17,13 +17,7 @@ import useFileUpload from "../../Utils/useFileUpload";
 import PatientConsentRecordBlockGroup from "./PatientConsentRecordBlock";
 import SwitchTabs from "../Common/components/SwitchTabs";
 import useFileManager from "../../Utils/useFileManager";
-import PaginatedList from "../../CAREUI/misc/PaginatedList";
 import { PatientConsentModel } from "../Facility/models";
-
-const useRefresh: () => [number, () => void] = () => {
-  const [trigger, setTrigger] = useState(0);
-  return [trigger, () => setTrigger((prev) => prev + 1)];
-};
 
 export default function PatientConsentRecords(props: {
   facilityId: string;
@@ -59,21 +53,23 @@ export default function PatientConsentRecords(props: {
     },
   });
 
-  const [refreshTrigger, refetch] = useRefresh();
-
   const { data: patient } = useQuery(routes.getPatient, {
     pathParams: {
       id: patientId,
     },
   });
 
-  const [showDeleteConsent, setShowDeleteConsent] = useState<string | null>(
-    null,
-  );
+  const { data: consentRecordsData, refetch } = useQuery(routes.listConsents, {
+    pathParams: {
+      consultationId,
+    },
+    query: {
+      limit: 1000,
+      offset: 0,
+    },
+  });
 
-  const [consentRecords, setConsentRecords] = useState<
-    PatientConsentModel[] | null
-  >(null);
+  const consentRecords = consentRecordsData?.results;
 
   const { data: unarchivedFiles, refetch: refetchFiles } = useQuery(
     routes.viewUpload,
@@ -104,16 +100,6 @@ export default function PatientConsentRecords(props: {
   );
 
   const files = showArchived ? archivedFiles : unarchivedFiles;
-
-  const handleDeleteConsent = async () => {
-    const consent_id = showDeleteConsent;
-    if (!consent_id || !consultationId || !consentRecords) return;
-    const newRecords = consentRecords.map((cr) =>
-      cr.id === consent_id ? { ...cr, deleted: true } : cr,
-    );
-    setConsentRecords(newRecords);
-    setShowDeleteConsent(null);
-  };
 
   const selectField = (name: string) => {
     return {
@@ -173,18 +159,6 @@ export default function PatientConsentRecords(props: {
     >
       {fileUpload.Dialogues}
       {fileManager.Dialogues}
-      <ConfirmDialog
-        show={showDeleteConsent !== null}
-        onClose={() => setShowDeleteConsent(null)}
-        onConfirm={handleDeleteConsent}
-        action="Archive"
-        variant="danger"
-        description={
-          "Are you sure you want to archive this consent record? You can find it in the archive section."
-        }
-        title="Archive Consent"
-        className="w-auto"
-      />
       <ConfirmDialog
         show={showPCSChangeModal !== null}
         onClose={() => setShowPCSChangeModal(null)}
@@ -311,36 +285,21 @@ export default function PatientConsentRecords(props: {
               <div className="skeleton-animate-alpha h-32 rounded-lg" />
             )
           )}
-          <PaginatedList
-            perPage={10}
-            route={routes.listConsents}
-            pathParams={{ consultationId }}
-            refreshTrigger={refreshTrigger}
-            queryCB={(query) => {
-              if (query.data) {
-                setConsentRecords(query.data.results);
-              }
-            }}
-          >
-            {(c) => (
-              <div className="flex flex-col gap-4">
-                {c.data?.results.map((record, index) => (
-                  <PatientConsentRecordBlockGroup
-                    key={index}
-                    consentRecord={record}
-                    previewFile={fileManager.viewFile}
-                    archiveFile={fileManager.archiveFile}
-                    editFile={fileManager.editFile}
-                    onDelete={(record) => setShowDeleteConsent(record.id)}
-                    showArchive={showArchived}
-                    files={files?.results.filter(
-                      (f) => f.associating_id === record.id,
-                    )}
-                  />
-                ))}
-              </div>
-            )}
-          </PaginatedList>
+          <div className="flex flex-col gap-4">
+            {consentRecords?.map((record, index) => (
+              <PatientConsentRecordBlockGroup
+                key={index}
+                consentRecord={record}
+                previewFile={fileManager.viewFile}
+                archiveFile={fileManager.archiveFile}
+                editFile={fileManager.editFile}
+                showArchive={showArchived}
+                files={files?.results.filter(
+                  (f) => f.associating_id === record.id,
+                )}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </Page>

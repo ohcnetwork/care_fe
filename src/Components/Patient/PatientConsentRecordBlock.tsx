@@ -18,7 +18,6 @@ export default function PatientConsentRecordBlockGroup(props: {
     skipPrompt?: { reason: string },
   ) => void;
   editFile: (file: FileUploadModel) => void;
-  onDelete: (consentRecord: PatientConsentModel) => void;
   showArchive: boolean;
   files?: FileUploadModel[];
 }) {
