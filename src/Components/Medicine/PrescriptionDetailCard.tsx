@@ -21,6 +21,8 @@ interface Props {
 export default function PrescriptionDetailCard({
   prescription,
   collapsible = false,
+  onAdministerClick,
+  onDiscontinueClick,
   ...props
 }: Props) {
   const { t } = useTranslation();
@@ -83,37 +85,41 @@ export default function PrescriptionDetailCard({
               prescription.prescription_type !== "DISCHARGE" && (
                 <AuthorizedForConsultationRelatedActions>
                   <div className="flex flex-col-reverse items-end gap-2 sm:flex-row">
-                    <ButtonV2
-                      id="administer-medicine"
-                      disabled={prescription.discontinued}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        props.onAdministerClick?.();
-                      }}
-                      type="button"
-                      size="small"
-                      variant="secondary"
-                      ghost
-                      border
-                    >
-                      <CareIcon icon="l-syringe" className="text-base" />
-                      {t("administer")}
-                    </ButtonV2>
-                    <ButtonV2
-                      disabled={prescription.discontinued}
-                      type="button"
-                      size="small"
-                      variant="danger"
-                      ghost
-                      border
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        props.onDiscontinueClick?.();
-                      }}
-                    >
-                      <CareIcon icon="l-ban" className="text-base" />
-                      {t("discontinue")}
-                    </ButtonV2>
+                    {onAdministerClick && (
+                      <ButtonV2
+                        id="administer-medicine"
+                        disabled={prescription.discontinued}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onAdministerClick();
+                        }}
+                        type="button"
+                        size="small"
+                        variant="secondary"
+                        ghost
+                        border
+                      >
+                        <CareIcon icon="l-syringe" className="text-base" />
+                        {t("administer")}
+                      </ButtonV2>
+                    )}
+                    {onDiscontinueClick && (
+                      <ButtonV2
+                        disabled={prescription.discontinued}
+                        type="button"
+                        size="small"
+                        variant="danger"
+                        ghost
+                        border
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDiscontinueClick();
+                        }}
+                      >
+                        <CareIcon icon="l-ban" className="text-base" />
+                        {t("discontinue")}
+                      </ButtonV2>
+                    )}
                   </div>
                 </AuthorizedForConsultationRelatedActions>
               )}

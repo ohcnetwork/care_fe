@@ -46,6 +46,7 @@ import {
 import { EncounterSymptomsBuilder } from "../Symptoms/SymptomsBuilder";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -132,6 +133,8 @@ export const DailyRounds = (props: any) => {
     action: "",
   });
   const [diagnoses, setDiagnoses] = useState<ConsultationDiagnosis[]>();
+  const [showDiscontinuedPrescriptions, setShowDiscontinuedPrescriptions] =
+    useState(false);
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id ? "Save" : "Continue";
 
@@ -712,16 +715,49 @@ export const DailyRounds = (props: any) => {
                   <FieldErrorText error={state.errors.investigation} />
                 </div>
                 <div>
-                  <h3 className="mb-4 mt-8 text-lg font-semibold">
-                    {t("prescription_medications")}
-                  </h3>
-                  <PrescriptionBuilder />
+                  <div className="mb-4 mt-8 flex items-center justify-between ">
+                    <h3 className="text-lg font-semibold">
+                      {t("prescription_medications")}
+                    </h3>
+                    <CheckBoxFormField
+                      label="Include discontinued prescriptions"
+                      name="toggle-discontinued-prescriptions-visibility"
+                      value={showDiscontinuedPrescriptions}
+                      onChange={({ value }) =>
+                        setShowDiscontinuedPrescriptions(value)
+                      }
+                      errorClassName="hidden"
+                    />
+                  </div>
+                  <PrescriptionBuilder
+                    discontinued={
+                      showDiscontinuedPrescriptions ? undefined : false
+                    }
+                    actions={["discontinue"]}
+                  />
                 </div>
                 <div>
-                  <h3 className="mb-4 mt-8 text-lg font-semibold">
-                    {t("prn_prescriptions")}
-                  </h3>
-                  <PrescriptionBuilder is_prn />
+                  <div className="mb-4 mt-8 flex items-center justify-between ">
+                    <h3 className="text-lg font-semibold">
+                      {t("prn_prescriptions")}
+                    </h3>
+                    <CheckBoxFormField
+                      label="Include discontinued prescriptions"
+                      name="toggle-discontinued-prescriptions-visibility"
+                      value={showDiscontinuedPrescriptions}
+                      onChange={({ value }) =>
+                        setShowDiscontinuedPrescriptions(value)
+                      }
+                      errorClassName="hidden"
+                    />
+                  </div>
+                  <PrescriptionBuilder
+                    is_prn
+                    discontinued={
+                      showDiscontinuedPrescriptions ? undefined : false
+                    }
+                    actions={["discontinue"]}
+                  />
                 </div>
               </div>
             </>
