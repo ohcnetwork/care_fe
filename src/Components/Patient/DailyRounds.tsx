@@ -60,6 +60,7 @@ const initForm: any = {
   systolic: null,
   investigations: [],
   investigations_dirty: false,
+  symptoms_dirty: false,
   diastolic: null,
   pulse: null,
   resp: null,
@@ -270,8 +271,7 @@ export const DailyRounds = (props: any) => {
     return !invalidForm;
   };
 
-  const handleSubmit = async (e: React.SyntheticEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     const validForm = validateForm();
     if (validForm) {
       setIsLoading(true);
@@ -428,6 +428,10 @@ export const DailyRounds = (props: any) => {
       return false;
     }
 
+    if (state.form["symptoms_dirty"]) {
+      return false;
+    }
+
     if (
       formFields.every(
         (field) =>
@@ -437,6 +441,8 @@ export const DailyRounds = (props: any) => {
     ) {
       return true;
     }
+
+    return false;
   })();
 
   return (
@@ -467,10 +473,7 @@ export const DailyRounds = (props: any) => {
           }}
         />
       </div>
-      <form
-        onSubmit={(e) => handleSubmit(e)}
-        className="w-full max-w-4xl rounded-lg bg-white px-8 py-5 shadow md:m-4 md:px-16 md:py-11"
-      >
+      <form className="w-full max-w-4xl rounded-lg bg-white px-8 py-5 shadow md:m-4 md:px-16 md:py-11">
         <DraftSection
           handleDraftSelect={(newState) => {
             dispatch({ type: "set_state", state: newState });
@@ -523,7 +526,14 @@ export const DailyRounds = (props: any) => {
         <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
           <div className="pb-6 md:col-span-2">
             <FieldLabel>Symptoms</FieldLabel>
-            <EncounterSymptomsBuilder />
+            <EncounterSymptomsBuilder
+              onChange={() => {
+                handleFormFieldChange({
+                  name: "symptoms_dirty",
+                  value: true,
+                });
+              }}
+            />
           </div>
 
           <TextAreaFormField
@@ -742,7 +752,10 @@ export const DailyRounds = (props: any) => {
           <Cancel onClick={() => goBack()} />
           <Submit
             disabled={submitButtonDisabled}
-            onClick={(e) => handleSubmit(e)}
+            onClick={(e) => {
+              e.preventDefault();
+              handleSubmit();
+            }}
             label={buttonText}
           />
         </div>
