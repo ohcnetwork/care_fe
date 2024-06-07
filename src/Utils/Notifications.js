@@ -70,11 +70,6 @@ export const Success = ({ msg }) => {
 
 /** Error message handler */
 export const Error = ({ msg }) => {
-  // Handle session expiry
-  if (msg === "Authentication credentials were not provided.") {
-    notify("Session expired. Please Login again.", "error");
-    return;
-  }
   notify(msg, "error");
 };
 
