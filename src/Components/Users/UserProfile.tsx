@@ -16,7 +16,12 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { GenderType, SkillModel, UpdatePasswordForm } from "../Users/models";
+import {
+  GenderType,
+  SkillModel,
+  UpdatePasswordForm,
+  UserModel,
+} from "../Users/models";
 import UpdatableApp, { checkForUpdate } from "../Common/UpdatableApp";
 import dayjs from "../../Utils/dayjs";
 import useAuthUser, { useAuthContext } from "../../Common/hooks/useAuthUser";
@@ -26,6 +31,7 @@ import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import DateFormField from "../Form/FormFields/DateFormField";
 import { validateRule } from "./UserAdd";
+import ProfilePicUploadModal from "./ProfilePicUploadModal";
 const Loading = lazy(() => import("../Common/Loading"));
 
 type EditForm = {
@@ -112,6 +118,8 @@ const editFormReducer = (state: State, action: Action) => {
 export default function UserProfile() {
   const { signOut } = useAuthContext();
   const [states, dispatch] = useReducer(editFormReducer, initialState);
+  const [editProfilePic, setEditProfilePic] = useState(false);
+  const [imageKey, setImageKey] = useState(Date.now());
   const [updateStatus, setUpdateStatus] = useState({
     isChecking: false,
     isUpdateAvailable: false,
@@ -452,6 +460,17 @@ export default function UserProfile() {
   };
   return (
     <div>
+      <ProfilePicUploadModal
+        open={editProfilePic}
+        onSave={() =>
+          userData?.read_profile_picture_url
+            ? setImageKey(Date.now())
+            : refetchUserData()
+        }
+        onClose={() => setEditProfilePic(false)}
+        onDelete={() => refetchUserData()}
+        user={userData ?? ({} as UserModel)}
+      />
       <div className="p-10 lg:p-16">
         <div className="lg:grid lg:grid-cols-3 lg:gap-6">
           <div className="lg:col-span-1">
@@ -462,6 +481,34 @@ export default function UserProfile() {
               <p className="my-1 text-sm leading-5 text-gray-600">
                 Local Body, District and State are Non Editable Settings.
               </p>
+              <div className="my-4 flex items-center">
+                <div
+                  className="relative cursor-pointer"
+                  onClick={() => setEditProfilePic(!editProfilePic)}
+                >
+                  <img
+                    className="h-24 w-24 rounded-lg"
+                    src={
+                      userData?.read_profile_picture_url
+                        ? `${userData?.read_profile_picture_url}?imgKey=${imageKey}`
+                        : "/public/images/empty_avatar.jpg"
+                    }
+                    alt=""
+                  />
+                  <div className="absolute inset-0 z-10 flex h-full w-full flex-col items-center justify-center rounded-lg bg-black text-sm text-gray-300 opacity-0 transition-opacity hover:opacity-60">
+                    <CareIcon icon="l-pen" className="text-lg" />
+                    <span className="mt-2">{`${userData?.read_profile_picture_url ? "Edit" : "Upload"}`}</span>
+                  </div>
+                </div>
+                <div className="my-4 ml-4">
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">
+                    {userData?.first_name} {userData?.last_name}
+                  </h3>
+                  <p className="text-sm leading-5 text-gray-500">
+                    @{userData?.username}
+                  </p>
+                </div>
+              </div>
               <div className="flex flex-col gap-2">
                 <ButtonV2
                   onClick={(_) => setShowEdit(!showEdit)}
