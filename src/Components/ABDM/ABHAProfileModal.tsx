@@ -71,7 +71,7 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
       <div
         ref={printRef}
         id="section-to-print"
-        className="print flex gap-4 border-black print:w-full print:border"
+        className="print flex flex-col gap-4 border-black sm:flex-row print:w-full print:border"
       >
         <QRCode
           className="border border-black p-1"
