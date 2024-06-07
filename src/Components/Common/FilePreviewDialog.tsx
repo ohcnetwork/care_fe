@@ -32,6 +32,19 @@ type FilePreviewProps = {
   fixedWidth?: boolean;
 };
 
+const previewExtensions = [
+  ".html",
+  ".htm",
+  ".pdf",
+  ".mp4",
+  ".webm",
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".gif",
+  ".webp",
+];
+
 const FilePreviewDialog = (props: FilePreviewProps) => {
   const { show, onClose, file_state, setFileState, downloadURL, fileUrl } =
     props;
@@ -130,13 +143,21 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   }}
                   pageNumber={page}
                 />
-              ) : (
+              ) : previewExtensions.includes(file_state.extension) ? (
                 <iframe
                   sandbox=""
                   title="Source Files"
                   src={fileUrl}
                   className="h-[75vh] w-full"
                 />
+              ) : (
+                <div className="flex h-full w-full flex-col items-center justify-center">
+                  <CareIcon
+                    icon="l-file"
+                    className="mb-4 text-5xl text-gray-600"
+                  />
+                  Can't preview this file. Try downloading it.
+                </div>
               )}
             </div>
           </div>
