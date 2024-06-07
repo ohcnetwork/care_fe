@@ -68,7 +68,10 @@ export const CreateSymptomsBuilder = (props: {
   );
 };
 
-export const EncounterSymptomsBuilder = (props: { showAll?: boolean }) => {
+export const EncounterSymptomsBuilder = (props: {
+  showAll?: boolean;
+  onChange?: () => void;
+}) => {
   const consultationId = useSlug("consultation");
 
   const [isProcessing, setIsProcessing] = useState(false);
@@ -104,20 +107,26 @@ export const EncounterSymptomsBuilder = (props: { showAll?: boolean }) => {
         {items.map((symptom) => {
           const handleUpdate = async (event: FieldChangeEvent<unknown>) => {
             setIsProcessing(true);
-            await request(SymptomsApi.partialUpdate, {
+            const { res } = await request(SymptomsApi.partialUpdate, {
               pathParams: { consultationId, external_id: symptom.id },
               body: { [event.name]: event.value },
             });
-            await refetch();
+            if (res?.ok) {
+              props.onChange?.();
+              await refetch();
+            }
             setIsProcessing(false);
           };
 
           const handleMarkAsEnteredInError = async () => {
             setIsProcessing(true);
-            await request(SymptomsApi.markAsEnteredInError, {
+            const { res } = await request(SymptomsApi.markAsEnteredInError, {
               pathParams: { consultationId, external_id: symptom.id },
             });
-            await refetch();
+            if (res?.ok) {
+              props.onChange?.();
+              await refetch();
+            }
             setIsProcessing(false);
           };
 
@@ -147,7 +156,10 @@ export const EncounterSymptomsBuilder = (props: { showAll?: boolean }) => {
         <AddSymptom
           existing={data.results}
           consultationId={consultationId}
-          onAdd={() => refetch()}
+          onAdd={() => {
+            props.onChange?.();
+            refetch();
+          }}
         />
       </div>
     </div>
