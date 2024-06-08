@@ -187,13 +187,17 @@ export default function useFilters({
       return acc;
     }, [] as string[]);
 
+    const show = activeFilters.length > 0 || children;
+
     return (
-      <div className="col-span-3 my-2 flex w-full flex-wrap items-center gap-2">
+      <div
+        className={`col-span-3 my-2 flex w-full flex-wrap items-center gap-2 ${show ? "" : "hidden"}`}
+      >
         {compiledBadges.map((props) => (
           <FilterBadge {...props} name={t(props.name)} key={props.name} />
         ))}
         {children}
-        {(activeFilters.length >= 1 || children) && (
+        {show && (
           <button
             id="clear-all-filters"
             className="rounded-full border border-gray-300 bg-white px-2 py-1 text-xs text-gray-600 hover:text-gray-800"

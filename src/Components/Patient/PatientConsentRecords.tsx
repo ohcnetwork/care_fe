@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   CONSENT_PATIENT_CODE_STATUS_CHOICES,
   CONSENT_TYPE_CHOICES,
@@ -34,12 +34,6 @@ export default function PatientConsentRecords(props: {
     patient_code_status: 4,
   });
 
-  const refetchAll = () => {
-    refetch();
-    refetchFiles();
-    refetchArchivedFiles();
-  };
-
   const fileUpload = useFileUpload({
     type: "CONSENT_RECORD",
     allowedExtensions: ["pdf", "jpg", "jpeg", "png"],
@@ -48,10 +42,10 @@ export default function PatientConsentRecords(props: {
   const fileManager = useFileManager({
     type: "CONSENT_RECORD",
     onArchive: async () => {
-      refetchAll();
+      refetch();
     },
     onEdit: async () => {
-      refetchAll();
+      refetch();
     },
   });
 
@@ -72,36 +66,6 @@ export default function PatientConsentRecords(props: {
   });
 
   const consentRecords = consentRecordsData?.results;
-
-  const { data: unarchivedFiles, refetch: refetchFiles } = useQuery(
-    routes.viewUpload,
-    {
-      query: {
-        file_type: "CONSENT_RECORD",
-        associating_id: consentRecords?.map((cr) => cr.id).join(","),
-        limit: 1000,
-        offset: 0,
-        is_archived: false,
-      },
-      prefetch: (consentRecords?.length || 0) > 0 && showArchived,
-    },
-  );
-
-  const { data: archivedFiles, refetch: refetchArchivedFiles } = useQuery(
-    routes.viewUpload,
-    {
-      query: {
-        file_type: "CONSENT_RECORD",
-        associating_id: consentRecords?.map((cr) => cr.id).join(","),
-        limit: 1000,
-        offset: 0,
-        is_archived: true,
-      },
-      prefetch: (consentRecords?.length || 0) > 0 && !showArchived,
-    },
-  );
-
-  const files = showArchived ? archivedFiles : unarchivedFiles;
 
   const selectField = (name: string) => {
     return {
@@ -134,13 +98,6 @@ export default function PatientConsentRecords(props: {
     consentId && (await fileUpload.handleFileUpload(consentId));
     refetch();
   };
-
-  useEffect(() => {
-    if (consentRecords && consentRecords.length > 0) {
-      refetchFiles();
-      refetchArchivedFiles();
-    }
-  }, [consentRecords]);
 
   return (
     <Page
@@ -280,13 +237,15 @@ export default function PatientConsentRecords(props: {
         <div className="flex-1">
           {consentRecords?.filter(
             (r) =>
-              files?.results.filter((f) => f.associating_id === r.id).length,
+              r.files?.filter(
+                (f) =>
+                  f.associating_id === r.id && f.is_archived === showArchived,
+              ).length,
           ).length === 0 ? (
             <div className="flex h-32 items-center justify-center text-gray-500">
               No consent records found
             </div>
           ) : (
-            (!unarchivedFiles || !archivedFiles) &&
             !consentRecords && (
               <div className="skeleton-animate-alpha h-32 rounded-lg" />
             )
@@ -301,8 +260,10 @@ export default function PatientConsentRecords(props: {
                 archiveFile={fileManager.archiveFile}
                 editFile={fileManager.editFile}
                 showArchive={showArchived}
-                files={files?.results.filter(
-                  (f) => f.associating_id === record.id,
+                files={record.files?.filter(
+                  (f) =>
+                    f.associating_id === record.id &&
+                    showArchived === f.is_archived,
                 )}
               />
             ))}

@@ -3,6 +3,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import {
   ADMITTED_TO,
+  CONSENT_TYPE_CHOICES,
   DISCHARGE_REASONS,
   FACILITY_TYPES,
   GENDER_TYPES,
@@ -78,6 +79,7 @@ export default function PatientFilter(props: any) {
       filter.last_consultation_admitted_bed_type_list
         ? filter.last_consultation_admitted_bed_type_list.split(",")
         : [],
+    last_consultation__consent_types: filter.last_consultation__consent_types,
     last_consultation_current_bed__location:
       filter.last_consultation_current_bed__location || "",
     last_consultation__new_discharge_reason:
@@ -183,6 +185,7 @@ export default function PatientFilter(props: any) {
       last_consultation_discharge_date_before,
       last_consultation_discharge_date_after,
       last_consultation_admitted_bed_type_list,
+      last_consultation__consent_types,
       last_consultation__new_discharge_reason,
       last_consultation_current_bed__location,
       number_of_doses,
@@ -241,6 +244,7 @@ export default function PatientFilter(props: any) {
       age_max: age_max || "",
       last_consultation_admitted_bed_type_list:
         last_consultation_admitted_bed_type_list || [],
+      last_consultation__consent_types: last_consultation__consent_types,
       last_consultation__new_discharge_reason:
         last_consultation__new_discharge_reason || "",
       number_of_doses: number_of_doses || "",
@@ -373,6 +377,26 @@ export default function PatientFilter(props: any) {
               />
             </div>
           )}
+          <div className="w-full flex-none" id="consent-type-select">
+            <FieldLabel className="text-sm">Has consent records for</FieldLabel>
+            <MultiSelectMenuV2
+              id="last_consultation__consent_types"
+              placeholder="Select consent types"
+              options={[
+                ...CONSENT_TYPE_CHOICES,
+                { id: "None", text: "No consents" },
+              ]}
+              value={filterState.last_consultation__consent_types}
+              optionValue={(o) => o.id}
+              optionLabel={(o) => o.text}
+              onChange={(o) =>
+                setFilterState({
+                  ...filterState,
+                  last_consultation__consent_types: o,
+                })
+              }
+            />
+          </div>
           {(props.dischargePage ||
             ["StateAdmin", "StateReadOnlyAdmin"].includes(
               authUser.user_type,
