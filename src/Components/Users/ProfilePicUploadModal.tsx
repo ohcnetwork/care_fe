@@ -144,7 +144,7 @@ const ProfilePicUploadModal = ({
 
   const handleDelete = async () => {
     const { res } = await request(routes.deleteProfilePicture, {
-      pathParams: { id: user.id },
+      pathParams: { username: user.username },
     });
     if (res?.ok) {
       Success({ msg: "Profile picture deleted" });

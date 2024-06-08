@@ -487,11 +487,11 @@ export default function UserProfile() {
                   onClick={() => setEditProfilePic(!editProfilePic)}
                 >
                   <img
-                    className="h-24 w-24 rounded-lg"
+                    className="h-24 w-24 rounded-lg object-cover"
                     src={
                       userData?.read_profile_picture_url
                         ? `${userData?.read_profile_picture_url}?imgKey=${imageKey}`
-                        : "/public/images/empty_avatar.jpg"
+                        : "/images/empty_avatar.jpg"
                     }
                     alt=""
                   />
