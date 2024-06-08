@@ -194,9 +194,6 @@ const ProfilePicUploadModal = ({
                     className="h-full w-full object-cover"
                   />
                 </div>
-                <p className="text-center font-medium text-gray-700">
-                  {commonHint}
-                </p>
               </>
             ) : (
               <div
