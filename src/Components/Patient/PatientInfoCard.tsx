@@ -150,20 +150,6 @@ export default function PatientInfoCard(props: {
     },
   );
 
-  const { data: consentFiles, loading: consentFilesLoading } = useQuery(
-    routes.viewUpload,
-    {
-      query: {
-        file_type: "CONSENT_RECORD",
-        associating_id: consentRecords?.results.map((cr) => cr.id).join(","),
-        limit: 1,
-        offset: 0,
-        is_archived: false,
-      },
-      prefetch: (consentRecords?.results.length || 0) > 0,
-    },
-  );
-
   return (
     <>
       <DialogModal
@@ -378,10 +364,12 @@ export default function PatientInfoCard(props: {
                         </div>
                       </div>
                     )}
-                  {!consentFilesLoading &&
-                    !consentRecordsLoading &&
-                    !consentFiles?.results.filter((c) => !c.is_archived)
-                      .length && (
+                  {!consentRecordsLoading &&
+                    !consentRecords?.results.filter(
+                      (c) =>
+                        !c.archived &&
+                        c.files?.filter((f) => !f.is_archived).length,
+                    ).length && (
                       <div>
                         <div className="inline-flex w-full items-center justify-start rounded border border-red-600 bg-red-400 p-1 px-3 text-xs font-semibold leading-4">
                           <span className="font-semibold text-white">
