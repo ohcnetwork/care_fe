@@ -197,10 +197,16 @@ export default function NotificationsList({
 
   const intialSubscriptionState = async () => {
     try {
+      if (!("serviceWorker" in navigator)) {
+        throw new Error("Service Worker is not supported in this browser.");
+      }
       const res = await request(routes.getUserPnconfig, {
         pathParams: { username: username },
       });
       const reg = await navigator.serviceWorker.ready;
+      if (!reg.pushManager) {
+        throw new Error("Push Manager is not available in this service worker.");
+      }
       const subscription = await reg.pushManager.getSubscription();
       if (!subscription && !res.data?.pf_endpoint) {
         setIsSubscribed("NotSubscribed");
@@ -211,6 +217,7 @@ export default function NotificationsList({
       }
     } catch (error) {
       Sentry.captureException(error);
+      setIsSubscribed("Error");
     }
   };
 
