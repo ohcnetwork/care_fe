@@ -64,21 +64,26 @@ export default function InvestigationBuilder(
   }, []);
 
   const loadInvestigations = async () => {
-    const invs = await fetchInvestigations();
-    const groups = await fetchInvestigationGroups();
+    try {
+      const invs = await fetchInvestigations();
+      const groups = await fetchInvestigationGroups();
 
-    let additionalStrings: string[] = [];
-    additionalInvestigations.forEach((investigation) => {
-      additionalStrings.push((investigation[0] as string) + " (GROUP)");
-      additionalStrings = [
-        ...additionalStrings,
-        ...(investigation[1] as string[]).map(
-          (i: any) => i + " -- ( " + investigation[0] + " )",
-        ),
-      ];
-    });
+      let additionalStrings: string[] = [];
+      additionalInvestigations.forEach((investigation) => {
+        additionalStrings.push((investigation[0] as string) + " (GROUP)");
+        additionalStrings = [
+          ...additionalStrings,
+          ...(investigation[1] as string[]).map(
+            (i: any) => i + " -- ( " + investigation[0] + " )",
+          ),
+        ];
+      });
 
-    setInvestigationsList([...groups, ...invs, ...additionalStrings]);
+      setInvestigationsList([...groups, ...invs, ...additionalStrings]);
+    } catch (error) {
+      console.error("Failed to load investigations", error);
+      setInvestigationsList([]);
+    }
   };
 
   const fetchInvestigations = async () => {
