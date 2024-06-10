@@ -1,6 +1,6 @@
 import * as Notification from "../../Utils/Notifications.js";
 
-import { BedModel, ConsentRecord, FacilityModel } from "./models";
+import { BedModel, FacilityModel } from "./models";
 import {
   CONSULTATION_SUGGESTION,
   DISCHARGE_REASONS,
@@ -119,7 +119,6 @@ type FormDetails = {
   death_confirmed_doctor: string;
   InvestigationAdvice: InvestigationType[];
   procedures: ProcedureType[];
-  consent_records: ConsentRecord[];
 };
 
 const initForm: FormDetails = {
@@ -170,7 +169,6 @@ const initForm: FormDetails = {
   death_confirmed_doctor: "",
   InvestigationAdvice: [],
   procedures: [],
-  consent_records: [],
 };
 
 const initError = Object.assign(
@@ -1359,7 +1357,11 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       >
                         <FieldLabel>Procedures</FieldLabel>
                         <ProcedureBuilder
-                          procedures={state.form.procedure}
+                          procedures={
+                            Array.isArray(state.form.procedure)
+                              ? state.form.procedure
+                              : []
+                          }
                           setProcedures={(procedure) => {
                             handleFormFieldChange({
                               name: "procedure",

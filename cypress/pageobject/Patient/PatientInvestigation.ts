@@ -10,7 +10,7 @@ class PatientInvestigation {
   }
 
   selectInvestigation(investigation: string) {
-    cy.get("#search-patient-investigation").click();
+    cy.get("#search-patient-investigation").type(investigation);
     cy.verifyAndClickElement("#investigation-group", investigation);
     cy.verifyAndClickElement("#investigation", "Investigation No. 1");
   }

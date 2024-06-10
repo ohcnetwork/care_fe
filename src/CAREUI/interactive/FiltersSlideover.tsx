@@ -58,7 +58,7 @@ export const AdvancedFilterButton = ({ onClick }: { onClick: () => void }) => {
     <ButtonV2
       ghost
       border
-      className="w-full bg-white sm:w-auto"
+      className="w-full bg-white md:w-auto"
       onClick={onClick}
       id="advanced-filter"
     >

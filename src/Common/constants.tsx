@@ -1370,3 +1370,18 @@ export const PATIENT_NOTES_THREADS = {
 } as const;
 
 export const RATION_CARD_CATEGORY = ["BPL", "APL", "NO_CARD"] as const;
+
+export const DEFAULT_ALLOWED_EXTENSIONS = [
+  "image/*",
+  "video/*",
+  "audio/*",
+  "text/plain",
+  "text/csv",
+  "application/rtf",
+  "application/msword",
+  "application/vnd.oasis.opendocument.text",
+  "application/pdf",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.oasis.opendocument.spreadsheet,application/pdf",
+];
