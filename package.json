@@ -75,7 +75,7 @@
     "hi-profiles": "^1.0.6",
     "glob": "^10.3.15",
     "i18next": "^23.11.4",
-    "i18next-browser-languagedetector": "^7.2.1",
+    "i18next-browser-languagedetector": "^8.0.0",
     "lodash-es": "^4.17.21",
     "postcss-loader": "^7.3.3",
     "qrcode.react": "^3.1.0",
