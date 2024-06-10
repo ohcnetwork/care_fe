@@ -9,6 +9,7 @@ interface FacilitySelectProps {
   exclude_user?: string;
   errors?: string | undefined;
   className?: string;
+  required?: boolean;
   searchAll?: boolean;
   disabled?: boolean;
   multiple?: boolean;
@@ -26,6 +27,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
   const {
     name,
     exclude_user,
+    required,
     multiple,
     selected,
     setSelected,
@@ -71,6 +73,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
   return (
     <AutoCompleteAsync
       name={name}
+      required={required}
       multiple={multiple}
       selected={selected}
       disabled={disabled}

@@ -114,7 +114,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   const [state, dispatch] = useReducer(shiftFormReducer, initialState);
 
   let requiredFields: any = {
-    assigned_facility: {
+    assigned_facility_object: {
       condition: [
         "DESTINATION APPROVED",
         "PATIENT TO BE PICKED UP",
@@ -390,11 +390,17 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               multiple={false}
               freeText
               name="assigned_facility"
+              required={[
+                "DESTINATION APPROVED",
+                "PATIENT TO BE PICKED UP",
+                "TRANSFER IN PROGRESS",
+                "COMPLETED",
+              ].includes(state.form.status)}
               selected={state.form.assigned_facility_object}
               setSelected={(obj) =>
                 setFacility(obj, "assigned_facility_object")
               }
-              errors={state.errors.assigned_facility}
+              errors={state.errors.assigned_facility_object}
             />
           </div>
 
