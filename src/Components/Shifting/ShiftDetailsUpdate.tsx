@@ -92,7 +92,37 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     errors: { ...initError },
   };
 
+  const shiftFormReducer = (state = initialState, action: any) => {
+    switch (action.type) {
+      case "set_form": {
+        return {
+          ...state,
+          form: action.form,
+        };
+      }
+      case "set_error": {
+        return {
+          ...state,
+          errors: action.errors,
+        };
+      }
+      default:
+        return state;
+    }
+  };
+
+  const [state, dispatch] = useReducer(shiftFormReducer, initialState);
+
   let requiredFields: any = {
+    assigned_facility: {
+      condition: [
+        "DESTINATION APPROVED",
+        "PATIENT TO BE PICKED UP",
+        "TRANSFER IN PROGRESS",
+        "COMPLETED",
+      ].includes(state.form.status),
+      errorText: t("please_select_a_facility"),
+    },
     status: {
       errorText: t("please_select_status"),
     },
@@ -122,27 +152,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     };
   }
 
-  const shiftFormReducer = (state = initialState, action: any) => {
-    switch (action.type) {
-      case "set_form": {
-        return {
-          ...state,
-          form: action.form,
-        };
-      }
-      case "set_error": {
-        return {
-          ...state,
-          errors: action.errors,
-        };
-      }
-      default:
-        return state;
-    }
-  };
-
-  const [state, dispatch] = useReducer(shiftFormReducer, initialState);
-
   const { loading: assignedUserLoading } = useQuery(routes.userList, {
     query: { id: state.form.assigned_to },
     prefetch: state.form.assigned_to ? true : false,
@@ -155,9 +164,16 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     const errors = { ...initError };
     let isInvalidForm = false;
     Object.keys(requiredFields).forEach((field) => {
-      if (!state.form[field] || !/\S+/.test(state.form[field])) {
+      if (
+        (!state.form[field] || !/\S+/.test(state.form[field])) &&
+        ("condition" in requiredFields[field]
+          ? requiredFields[field].condition
+          : true)
+      ) {
         errors[field] = requiredFields[field].errorText;
         isInvalidForm = true;
+      } else {
+        errors[field] = "";
       }
     });
 
@@ -360,7 +376,16 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           )}
 
           <div>
-            <FieldLabel>{t("what_facility_assign_the_patient_to")}</FieldLabel>
+            <FieldLabel
+              required={[
+                "DESTINATION APPROVED",
+                "PATIENT TO BE PICKED UP",
+                "TRANSFER IN PROGRESS",
+                "COMPLETED",
+              ].includes(state.form.status)}
+            >
+              {t("what_facility_assign_the_patient_to")}
+            </FieldLabel>
             <FacilitySelect
               multiple={false}
               freeText
