@@ -8,6 +8,7 @@ import {
   SHIFTING_CHOICES_PEACETIME,
   SHIFTING_CHOICES_WARTIME,
   SHIFTING_VEHICLE_CHOICES,
+  USER_TYPES,
 } from "../../Common/constants";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 
@@ -39,6 +40,7 @@ import routes from "../../Redux/api.js";
 import { IShift } from "./models.js";
 import request from "../../Utils/request/request.js";
 import { PatientModel } from "../Patient/models.js";
+import useAuthUser from "../../Common/hooks/useAuthUser.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -48,6 +50,7 @@ interface patientShiftProps {
 
 export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   const { goBack } = useAppHistory();
+  const { user_type, home_facility } = useAuthUser();
 
   const { kasp_full_string, kasp_enabled, wartime_shifting } = useConfig();
 
@@ -338,6 +341,13 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             value={state.form.status}
             optionLabel={(option) => option.text}
             optionValue={(option) => option.text}
+            optionDisabled={(option) =>
+              // disable all options except `Destination Approved` for non-admin destination facility users
+              home_facility === state.form.assigned_facility_object?.id &&
+              USER_TYPES.findIndex((type) => user_type === type) <
+                USER_TYPES.findIndex((type) => type === "DistrictAdmin") &&
+              !["DESTINATION APPROVED"].includes(option.text)
+            }
             optionSelectedLabel={(option) => option.text}
             onChange={handleFormFieldChange}
             className="w-full bg-white md:col-span-1 md:leading-5"
