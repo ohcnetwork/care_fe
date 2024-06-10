@@ -35,6 +35,7 @@ export default function CameraPresetSelect(props: Props) {
         {props.options.length > 5 && (
           <CameraPresetDropdown
             {...props}
+            placeholder="More preset"
             options={props.options.slice(4)}
             value={props.options.slice(4).find((o) => o.id === props.value?.id)}
           />
@@ -42,13 +43,15 @@ export default function CameraPresetSelect(props: Props) {
       </div>
       <div className="w-full lg:hidden">
         {/* Mobile View */}
-        <CameraPresetDropdown {...props} />
+        <CameraPresetDropdown {...props} placeholder="Select preset" />
       </div>
     </>
   );
 }
 
-export const CameraPresetDropdown = (props: Props) => {
+export const CameraPresetDropdown = (
+  props: Props & { placeholder: string },
+) => {
   const selected = props.value;
 
   const options = props.options.filter(({ meta }) => meta.type !== "boundary");
@@ -56,7 +59,11 @@ export const CameraPresetDropdown = (props: Props) => {
   const label = props.label ?? defaultLabel;
 
   return (
-    <Listbox value={selected} onChange={props.onChange}>
+    <Listbox
+      value={selected}
+      onChange={props.onChange}
+      disabled={options.length === 0}
+    >
       <div className="relative flex-1">
         <Listbox.Button
           className={classNames(
@@ -67,7 +74,11 @@ export const CameraPresetDropdown = (props: Props) => {
           )}
         >
           <span className="block truncate">
-            {selected ? label(selected) : "Select preset"}
+            {options.length === 0
+              ? "No presets"
+              : selected
+                ? label(selected)
+                : props.placeholder}
           </span>
           <span className="pointer-events-none absolute inset-y-0 right-0 mr-1 mt-1 flex items-center">
             <CareIcon icon="l-angle-down" className="text-xl text-zinc-400" />
