@@ -152,7 +152,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
     >
       <Combobox
         disabled={props.disabled}
-        value={value ?? props.placeholder ?? "Select"}
+        value={value}
         onChange={(selection: any) => props.onChange(selection.value)}
       >
         <div className="relative">
@@ -160,7 +160,9 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
             <Combobox.Input
               className="cui-input-base truncate pr-16"
               placeholder={props.placeholder ?? "Select"}
-              displayValue={(value: any) => value?.label || ""}
+              displayValue={(value: any) =>
+                value?.label || props.placeholder || "Select"
+              }
               onChange={(event) => setQuery(event.target.value.toLowerCase())}
               onBlur={() => value && setQuery("")}
               autoComplete="off"
