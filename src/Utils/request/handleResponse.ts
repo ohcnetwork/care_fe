@@ -26,10 +26,7 @@ export default function handleResponse(
     }
 
     // Handle session expiry
-    if (
-      error?.detail &&
-      error.detail === "Authentication credentials were not provided."
-    ) {
+    if (error?.detail === "Authentication credentials were not provided.") {
       notify?.Error({ msg: "Session expired. Please Login again." });
       return;
     }
