@@ -32,7 +32,6 @@ import routes from "../../Redux/api";
 import { Scribe } from "../Scribe/Scribe";
 import { DAILY_ROUND_FORM_SCRIBE_DATA } from "../Scribe/formDetails";
 import { DailyRoundsModel } from "./models";
-import { fetchEventTypeByName } from "../Facility/ConsultationDetails/Events/types";
 import InvestigationBuilder from "../Common/prescription-builder/InvestigationBuilder";
 import { FieldErrorText } from "../Form/FormFields/FormField";
 import { error } from "@pnotify/core";
@@ -56,7 +55,7 @@ export const DailyRounds = (props: any) => {
   const { goBack } = useAppHistory();
   const { facilityId, patientId, consultationId, id } = props;
 
-  const initForm = {
+  const initForm: any = {
     physical_examination_info: "",
     other_details: "",
     patient_category: "",
@@ -65,10 +64,11 @@ export const DailyRounds = (props: any) => {
     review_interval: 0,
     admitted_to: "",
     taken_at: null,
-    rounds_type: authUser.user_type === "Doctor" ? "DOCTORS_LOG" : "NORMAL",
+    rounds_type: "NORMAL",
     systolic: null,
     investigations: [],
     investigations_dirty: false,
+    symptoms_dirty: false,
     diastolic: null,
     pulse: null,
     resp: null,
@@ -145,6 +145,7 @@ export const DailyRounds = (props: any) => {
     "review_interval",
     "bp",
     "pulse",
+    "temperature",
     "resp",
     "investigations",
     "ventilator_spo2",
@@ -155,7 +156,6 @@ export const DailyRounds = (props: any) => {
 
   const fetchRoundDetails = useCallback(async () => {
     setIsLoading(true);
-    fetchEventTypeByName("");
     let formData: any = initialData;
     if (id) {
       const { data } = await request(routes.getDailyReport, {
@@ -277,8 +277,7 @@ export const DailyRounds = (props: any) => {
     return !invalidForm;
   };
 
-  const handleSubmit = async (e: React.SyntheticEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     const validForm = validateForm();
     if (validForm) {
       setIsLoading(true);
@@ -440,6 +439,31 @@ export const DailyRounds = (props: any) => {
   if (consultationSuggestion === "DC") {
     roundTypes.push({ id: "TELEMEDICINE", text: "Telemedicine" });
   }
+  const submitButtonDisabled = (() => {
+    if (buttonText !== "Save") {
+      return false;
+    }
+
+    if (["VENTILATOR", "DOCTORS_LOG"].includes(state.form.rounds_type)) {
+      return false;
+    }
+
+    if (state.form["symptoms_dirty"]) {
+      return false;
+    }
+
+    if (
+      formFields.every(
+        (field) =>
+          JSON.stringify(state.form[field]) ===
+          JSON.stringify(initialData[field]),
+      )
+    ) {
+      return true;
+    }
+
+    return false;
+  })();
 
   return (
     <Page
@@ -469,10 +493,7 @@ export const DailyRounds = (props: any) => {
           }}
         />
       </div>
-      <form
-        onSubmit={(e) => handleSubmit(e)}
-        className="w-full max-w-4xl rounded-lg bg-white px-8 py-5 shadow md:m-4 md:px-16 md:py-11"
-      >
+      <form className="w-full max-w-4xl rounded-lg bg-white px-8 py-5 shadow md:m-4 md:px-16 md:py-11">
         <DraftSection
           handleDraftSelect={(newState) => {
             dispatch({ type: "set_state", state: newState });
@@ -516,7 +537,14 @@ export const DailyRounds = (props: any) => {
         <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
           <div className="pb-6 md:col-span-2">
             <FieldLabel>Symptoms</FieldLabel>
-            <EncounterSymptomsBuilder />
+            <EncounterSymptomsBuilder
+              onChange={() => {
+                handleFormFieldChange({
+                  name: "symptoms_dirty",
+                  value: true,
+                });
+              }}
+            />
           </div>
 
           <TextAreaFormField
@@ -767,19 +795,11 @@ export const DailyRounds = (props: any) => {
         <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">
           <Cancel onClick={() => goBack()} />
           <Submit
-            disabled={
-              buttonText === "Save" &&
-              formFields.every(
-                (field: string) =>
-                  JSON.stringify(state.form[field]) ===
-                  JSON.stringify(initialData[field]),
-              ) &&
-              (state.form.temperature == initialData.temperature ||
-                isNaN(state.form.temperature)) &&
-              state.form.rounds_type !== "VENTILATOR" &&
-              state.form.rounds_type !== "DOCTORS_LOG"
-            }
-            onClick={(e) => handleSubmit(e)}
+            disabled={submitButtonDisabled}
+            onClick={(e) => {
+              e.preventDefault();
+              handleSubmit();
+            }}
             label={buttonText}
           />
         </div>
