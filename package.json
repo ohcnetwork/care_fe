@@ -49,7 +49,7 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
-    "@date-io/date-fns": "^2.16.0",
+    "@date-io/date-fns": "^3.0.0",
     "@fontsource/inter": "^5.0.18",
     "@glennsl/bs-json": "^5.0.4",
     "@googlemaps/react-wrapper": "^1.1.35",
