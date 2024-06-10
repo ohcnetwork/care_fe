@@ -427,7 +427,11 @@ export const DailyRounds = (props: any) => {
 
   const roundTypes = [];
 
-  if (authUser.user_type === "Doctor") {
+  if (
+    ["Doctor", "Staff", "DistrictAdmin", "StateAdmin"].includes(
+      authUser.user_type,
+    )
+  ) {
     roundTypes.push({ id: "DOCTORS_LOG", text: "Progress Note" });
   }
 
