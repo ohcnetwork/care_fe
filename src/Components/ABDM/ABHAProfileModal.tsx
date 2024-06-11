@@ -73,19 +73,21 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
         id="section-to-print"
         className="print flex flex-col gap-4 border-black sm:flex-row print:w-full print:border"
       >
-        <QRCode
-          className="border border-black p-1"
-          value={JSON.stringify({
-            hidn: abha?.abha_number,
-            phr: abha?.health_id,
-            name: abha?.name,
-            gender: abha?.gender,
-            dob: abha?.date_of_birth,
-            address: abha?.address,
-            "state name": abha?.state,
-            "dist name": abha?.district,
-          })}
-        />
+        <div className="sm:aspect-square sm:h-52">
+          <QRCode
+            className="border border-black p-1 sm:h-full sm:w-full"
+            value={JSON.stringify({
+              hidn: abha?.abha_number,
+              phr: abha?.health_id,
+              name: abha?.name,
+              gender: abha?.gender,
+              dob: abha?.date_of_birth,
+              address: abha?.address,
+              "state name": abha?.state,
+              "dist name": abha?.district,
+            })}
+          />
+        </div>
         <div className="flex flex-wrap gap-4">
           {[
             {
