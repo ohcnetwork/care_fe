@@ -139,6 +139,29 @@ export default function PatientInfoCard(props: {
     },
     prefetch: !!consultation?.treating_physician_object?.username,
   });
+  const { data: consentRecords, loading: consentRecordsLoading } = useQuery(
+    routes.listConsents,
+    {
+      pathParams: {
+        consultationId: consultation?.id ?? "",
+      },
+      prefetch: !!consultation?.id,
+    },
+  );
+
+  const { data: consentFiles, loading: consentFilesLoading } = useQuery(
+    routes.viewUpload,
+    {
+      query: {
+        file_type: "CONSENT_RECORD",
+        associating_id: consentRecords?.results.map((cr) => cr.id).join(","),
+        limit: 1,
+        offset: 0,
+        is_archived: false,
+      },
+      prefetch: (consentRecords?.results.length || 0) > 0,
+    },
+  );
 
   return (
     <>
@@ -185,9 +208,9 @@ export default function PatientInfoCard(props: {
         </>
       )}
 
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      <section className="flex flex-col lg:flex-row">
         <div
-          className="col-span-2 flex w-full flex-col bg-white px-4 pt-2 lg:flex-row xl:min-w-fit"
+          className="flex w-full flex-col bg-white px-4 pt-2 lg:flex-row"
           id="patient-infobadges"
         >
           {/* Can support for patient picture in the future */}
@@ -234,13 +257,15 @@ export default function PatientInfoCard(props: {
                   {category.toUpperCase()}
                 </div>
               )}
-              <ButtonV2
-                ghost
-                onClick={() => setOpen(true)}
-                className="mt-1 px-[10px] py-1"
-              >
-                {bedDialogTitle}
-              </ButtonV2>
+              {consultation?.admitted && (
+                <ButtonV2
+                  ghost
+                  onClick={() => setOpen(true)}
+                  className="mt-1 px-[10px] py-1"
+                >
+                  {bedDialogTitle}
+                </ButtonV2>
+              )}
             </div>
             <div className="flex items-center justify-center">
               <div
@@ -267,7 +292,7 @@ export default function PatientInfoCard(props: {
               </div>
             </div>
           </div>
-          <div className="flex w-full flex-col items-center gap-4 space-y-2 lg:items-start lg:gap-0 lg:pl-2 xl:w-full">
+          <div className="flex w-full flex-col items-center gap-4 space-y-2 lg:items-start lg:gap-0 lg:pl-2">
             <div className="flex flex-col items-center gap-2 sm:flex-row">
               <Link
                 href={`/facility/${consultation?.facility}`}
@@ -282,7 +307,7 @@ export default function PatientInfoCard(props: {
               </Link>
 
               {medicoLegalCase && (
-                <span className="flex pl-2 capitalize md:col-span-2">
+                <span className="flex pl-2 capitalize">
                   <span className="badge badge-pill badge-danger">MLC</span>
                 </span>
               )}
@@ -299,7 +324,7 @@ export default function PatientInfoCard(props: {
               </div>
               <div className="flex flex-wrap items-center gap-2 text-sm sm:flex-row">
                 <div
-                  className="flex flex-wrap items-center justify-center gap-2 text-sm text-gray-900 sm:flex-row sm:text-sm lg:justify-normal"
+                  className="flex w-full flex-wrap items-center justify-center gap-2 text-sm text-gray-900 sm:flex-row sm:text-sm md:pr-10 lg:justify-normal"
                   id="patient-consultationbadges"
                 >
                   {consultation?.patient_no && (
@@ -349,6 +374,18 @@ export default function PatientInfoCard(props: {
                             ? "Review before: "
                             : "Review Missed: "}
                           {formatDateTime(patient.review_time)}
+                        </div>
+                      </div>
+                    )}
+                  {!consentFilesLoading &&
+                    !consentRecordsLoading &&
+                    !consentFiles?.results.filter((c) => !c.is_archived)
+                      .length && (
+                      <div>
+                        <div className="inline-flex w-full items-center justify-start rounded border border-red-600 bg-red-400 p-1 px-3 text-xs font-semibold leading-4">
+                          <span className="font-semibold text-white">
+                            Consent Records Missing
+                          </span>
                         </div>
                       </div>
                     )}
@@ -506,12 +543,12 @@ export default function PatientInfoCard(props: {
           </div>
         </div>
         <div
-          className="col-span-2 flex w-full flex-col items-center justify-end gap-2 px-4 py-1 lg:col-span-1 2xl:flex-row"
+          className="flex flex-col items-center justify-end gap-4 px-4 py-1 2xl:flex-row"
           id="consultation-buttons"
         >
           {consultation?.suggestion === "A" && (
             <div className="flex flex-col items-center">
-              <div className="col-span-1 flex w-full justify-center bg-white px-4 lg:flex-row">
+              <div className="flex w-full justify-center bg-white px-4 lg:flex-row">
                 <div
                   className={
                     "flex h-7 w-7 items-center justify-center rounded-full border-2"
@@ -531,7 +568,7 @@ export default function PatientInfoCard(props: {
             </div>
           )}
           {consultation?.last_daily_round && (
-            <div className="col-span-1 flex w-full justify-center bg-white px-4 lg:flex-row">
+            <div className="flex w-full justify-center bg-white px-4 lg:flex-row">
               <Mews dailyRound={consultation?.last_daily_round} />
             </div>
           )}
@@ -619,7 +656,7 @@ export default function PatientInfoCard(props: {
             <DropdownMenu
               id="show-more"
               itemClassName="min-w-0 sm:min-w-[225px]"
-              title={"Manage Patient"}
+              title="Manage Patient"
               icon={<CareIcon icon="l-setting" className="text-xl" />}
               className="xl:justify-center"
               containerClassName="w-full lg:w-auto mt-2 2xl:mt-0 flex justify-center z-20"
@@ -633,6 +670,12 @@ export default function PatientInfoCard(props: {
                     patient.is_active &&
                       consultation?.id &&
                       !consultation?.discharge_date,
+                  ],
+                  [
+                    `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/consent-records`,
+                    "Consent Records",
+                    "l-file-medical",
+                    patient.is_active,
                   ],
                   [
                     `/patient/${patient.id}/investigation_reports`,
@@ -667,7 +710,10 @@ export default function PatientInfoCard(props: {
                             key={i}
                             className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
                             href={
-                              action[1] !== "Treatment Summary" &&
+                              ![
+                                "Treatment Summary",
+                                "Consent Records",
+                              ].includes(action[1]) &&
                               consultation?.admitted &&
                               !consultation?.current_bed &&
                               i === 1
@@ -676,7 +722,10 @@ export default function PatientInfoCard(props: {
                             }
                             onClick={() => {
                               if (
-                                action[1] !== "Treatment Summary" &&
+                                ![
+                                  "Treatment Summary",
+                                  "Consent Records",
+                                ].includes(action[1]) &&
                                 consultation?.admitted &&
                                 !consultation?.current_bed &&
                                 i === 1

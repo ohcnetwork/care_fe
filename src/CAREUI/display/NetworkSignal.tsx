@@ -19,7 +19,7 @@ export default function NetworkSignal({ strength, children }: Props) {
   return (
     <div
       className={classNames(
-        "flex items-center", // Strength colors
+        "relative flex items-center", // Strength colors
         strength === 0 && "text-danger-500",
         strength === 1 && "text-danger-500",
         strength === 2 && "text-warning-500",
@@ -49,6 +49,12 @@ export default function NetworkSignal({ strength, children }: Props) {
               )}
             />
           ))
+        )}
+        {!!strength && strength < 2 && (
+          <CareIcon
+            icon="l-exclamation-circle"
+            className="absolute left-0.5 top-0 animate-pulse text-sm text-danger-500"
+          />
         )}
       </div>
       {children}

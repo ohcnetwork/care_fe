@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../../Facility/models";
-import { AssetData } from "../AssetTypes";
+import { AssetClass, AssetData } from "../AssetTypes";
 import * as Notification from "../../../Utils/Notifications.js";
 import { Submit } from "../../Common/components/ButtonV2";
 import { FieldLabel } from "../../Form/FormFields/FormField";
@@ -73,6 +73,7 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
             multiple={false}
             location={asset?.location_object?.id}
             facility={asset?.location_object?.facility?.id}
+            not_occupied_by_asset_type={AssetClass.HL7MONITOR}
             className="w-full"
           />
         </div>

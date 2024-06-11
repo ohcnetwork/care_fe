@@ -1,42 +1,87 @@
 import { Fragment } from "react";
-import useSlug from "../../Common/hooks/useSlug";
-import routes from "../../Redux/api";
-import useQuery from "../../Utils/request/useQuery";
-import { AssetBedModel, AssetData } from "../Assets/AssetTypes";
-import { BedModel } from "../Facility/models";
+import { AssetBedModel } from "../Assets/AssetTypes";
 import { Listbox, Transition } from "@headlessui/react";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { classNames } from "../../Utils/utils";
 
 interface Props {
-  asset?: AssetData;
-  bed?: BedModel;
+  options: AssetBedModel[];
   value?: AssetBedModel;
+  label?: (value: AssetBedModel) => string;
   onChange?: (value: AssetBedModel) => void;
 }
 
-export default function AssetBedSelect(props: Props) {
-  const facility = useSlug("facility");
+export default function CameraPresetSelect(props: Props) {
+  const label = props.label ?? defaultLabel;
+  return (
+    <>
+      <div className="hidden gap-4 whitespace-nowrap pr-2 lg:flex lg:gap-2">
+        {/* Desktop View */}
+        {props.options
+          .slice(0, props.options.length > 5 ? 4 : 5)
+          .map((option) => (
+            <button
+              className={classNames(
+                "min-w-16 max-w-40 overflow-hidden text-ellipsis whitespace-nowrap rounded-lg border-2 px-2 py-0.5 text-base transition-all duration-200 ease-in-out hover:bg-zinc-600",
+                props.value?.id === option.id
+                  ? "border-white bg-zinc-100 font-bold text-black"
+                  : "border-zinc-700 font-medium text-zinc-300",
+              )}
+              onClick={() => props.onChange?.(option)}
+            >
+              {label(option)}
+            </button>
+          ))}
+        {props.options.length > 5 && (
+          <CameraPresetDropdown
+            {...props}
+            placeholder="More preset"
+            options={props.options.slice(4)}
+            value={props.options.slice(4).find((o) => o.id === props.value?.id)}
+          />
+        )}
+      </div>
+      <div className="w-full lg:hidden">
+        {/* Mobile View */}
+        <CameraPresetDropdown {...props} placeholder="Select preset" />
+      </div>
+    </>
+  );
+}
 
-  const { data, loading } = useQuery(routes.listAssetBeds, {
-    query: {
-      limit: 100,
-      facility,
-      asset: props.asset?.id,
-      bed: props.bed?.id,
-    },
-  });
-
+export const CameraPresetDropdown = (
+  props: Props & { placeholder: string },
+) => {
   const selected = props.value;
 
+  const options = props.options.filter(({ meta }) => meta.type !== "boundary");
+
+  const label = props.label ?? defaultLabel;
+
   return (
-    <Listbox value={selected} onChange={props.onChange} disabled={loading}>
-      <div className="relative">
-        <Listbox.Button className="relative w-full cursor-default pr-6 text-right text-xs text-zinc-400 focus:outline-none disabled:cursor-not-allowed disabled:bg-transparent disabled:text-zinc-700 sm:text-sm">
+    <Listbox
+      value={selected}
+      onChange={props.onChange}
+      disabled={options.length === 0}
+    >
+      <div className="relative flex-1">
+        <Listbox.Button
+          className={classNames(
+            "relative min-w-32 max-w-40 overflow-hidden text-ellipsis whitespace-nowrap rounded-lg border-2 px-2 py-0.5 pr-8 text-left text-base transition-all duration-200 ease-in-out hover:bg-zinc-600 focus:outline-none disabled:cursor-not-allowed disabled:bg-transparent disabled:text-zinc-700",
+            selected
+              ? "border-white bg-zinc-100 font-bold text-black"
+              : "border-zinc-700 font-medium text-zinc-300",
+          )}
+        >
           <span className="block truncate">
-            {selected?.bed_object.name ?? "No Preset"}
+            {options.length === 0
+              ? "No presets"
+              : selected
+                ? label(selected)
+                : props.placeholder}
           </span>
-          <span className="pointer-events-none absolute inset-y-0 right-0 mt-1 flex items-center">
-            <CareIcon icon="l-angle-down" className="text-lg text-zinc-500" />
+          <span className="pointer-events-none absolute inset-y-0 right-0 mr-1 mt-1 flex items-center">
+            <CareIcon icon="l-angle-down" className="text-xl text-zinc-400" />
           </span>
         </Listbox.Button>
         <Transition
@@ -45,8 +90,8 @@ export default function AssetBedSelect(props: Props) {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <Listbox.Options className="absolute z-20 mt-1 max-h-48 w-full overflow-auto rounded-b-lg bg-zinc-900/75 py-1 text-base shadow-lg ring-1 ring-white/5 backdrop-blur-sm focus:outline-none sm:text-sm md:max-h-60">
-            {data?.results.map((obj) => (
+          <Listbox.Options className="absolute z-20 mt-1 max-h-48 w-full overflow-auto rounded-b-lg bg-zinc-900/75 py-1 text-base shadow-lg ring-1 ring-white/5 backdrop-blur-sm focus:outline-none md:max-h-60">
+            {options?.map((obj) => (
               <Listbox.Option
                 key={obj.id}
                 className={({ active }) =>
@@ -59,11 +104,11 @@ export default function AssetBedSelect(props: Props) {
                 {({ selected }) => (
                   <>
                     <span
-                      className={`block truncate text-xs md:text-sm ${
+                      className={`block truncate text-sm md:text-base ${
                         selected ? "font-bold text-white" : "font-normal"
                       }`}
                     >
-                      {obj.bed_object.name}: {obj.meta.preset_name}
+                      {label(obj)}
                     </span>
                   </>
                 )}
@@ -74,4 +119,8 @@ export default function AssetBedSelect(props: Props) {
       </div>
     </Listbox>
   );
-}
+};
+
+const defaultLabel = ({ bed_object, meta }: AssetBedModel) => {
+  return `${bed_object.name}: ${meta.preset_name}`;
+};
