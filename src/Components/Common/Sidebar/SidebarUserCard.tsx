@@ -15,8 +15,14 @@ const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
         shrinked ? "mx-auto flex-col" : "mx-5"
       } transition-all duration-200 ease-in-out`}
     >
-      <Link href="/user/profile" className="flex-none py-3">
-        <CareIcon icon="l-user-circle" className="text-3xl text-white" />
+      <Link href="/user/profile">
+        <img
+          src={user.read_profile_picture_url || "/images/empty_avatar.jpg"}
+          alt="profile"
+          className={`h-10 w-10 rounded-full object-cover ${
+            shrinked ? "mb-3" : "mb-2 mt-1"
+          }`}
+        />
       </Link>
       <div className="flex cursor-pointer justify-center" onClick={signOut}>
         <CareIcon
