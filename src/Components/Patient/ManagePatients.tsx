@@ -996,7 +996,8 @@ export const PatientManager = () => {
         <div className="flex w-full items-center gap-4 rounded-lg bg-red-500/10 p-4 text-sm text-red-500">
           <CareIcon icon="l-info-circle" className="text-xl" />
           <p className="font-semibold">
-            {patientsWithNoConsents} patients admitted without consent.&nbsp;
+            {patientsWithNoConsents} patients admitted missing consent
+            records&nbsp;
             <button
               onClick={() =>
                 updateQuery({ last_consultation__consent_types: "None" })
