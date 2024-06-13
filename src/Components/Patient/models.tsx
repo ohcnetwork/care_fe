@@ -362,6 +362,7 @@ export interface CreateFileResponse {
 export interface FileUploadModel {
   id?: string;
   name?: string;
+  associating_id?: string;
   created_date?: string;
   upload_completed?: boolean;
   uploaded_by?: PerformedByModel;

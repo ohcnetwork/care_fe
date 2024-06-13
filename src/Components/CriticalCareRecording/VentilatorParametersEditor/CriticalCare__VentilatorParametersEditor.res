@@ -304,15 +304,11 @@ let make = (
               (state.ventilator_interface !=
                 CriticalCare__VentilatorParameters.decodeVentilatorInterfaceType(
                   ventilatorInterfaceOptions[0].value,
-                ) ||
-              switch state.bilateral_air_entry {
-              | Some(true) => true
-              | _ => false
-              } ||
-              switch (state.etco2) {
-              | Some(intValue) => true
-              | None => false
-              })
+                ) &&
+              state.ventilator_interface !=
+                CriticalCare__VentilatorParameters.decodeVentilatorInterfaceType(
+                  ventilatorInterfaceOptions[3].value,
+                ))
           ) {
             toggleOpen()
           } else {
