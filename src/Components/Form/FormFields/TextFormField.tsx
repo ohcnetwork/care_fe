@@ -27,7 +27,7 @@ export type TextFormFieldProps = FormFieldBaseProps<string> & {
 };
 
 const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
-  const field = useFormFieldPropsResolver(props as any);
+  const field = useFormFieldPropsResolver(props);
   const { leading, trailing } = props;
   const leadingFocused = props.leadingFocused || props.leading;
   const trailingFocused = props.trailingFocused || props.trailing;
