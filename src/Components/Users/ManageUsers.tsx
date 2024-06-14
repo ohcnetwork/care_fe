@@ -591,6 +591,7 @@ export function UserFacilities(props: { user: any }) {
     facility?: FacilityModel;
     isHomeFacility: boolean;
   }>({ show: false, userName: "", facility: undefined, isHomeFacility: false });
+  const authUser = useAuthUser();
 
   const [replaceHomeFacility, setReplaceHomeFacility] = useState<{
     show: boolean;
@@ -766,39 +767,39 @@ export function UserFacilities(props: { user: any }) {
           {user?.home_facility_object && (
             <div className="py-2" id="home-facility">
               <div className="relative rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex content-center items-center justify-center gap-2">
-                    <span>{user?.home_facility_object?.name}</span>{" "}
-                    <span
-                      className={
-                        "flex items-center justify-center  rounded-xl bg-green-600 px-2 py-0.5 text-sm font-medium text-white"
-                      }
-                    >
-                      <CareIcon
-                        icon="l-estate"
-                        className="mr-1 pt-px text-lg"
-                      />
-                      Home Facility
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      className="tooltip text-lg text-red-600"
-                      onClick={() =>
-                        setUnlinkFacilityData({
-                          show: true,
-                          facility: user?.home_facility_object,
-                          userName: username,
-                          isHomeFacility: true,
-                        })
-                      }
-                    >
-                      <CareIcon icon="l-link-broken" />
-                      <span className="tooltip-text tooltip-left">
-                        {t("clear_home_facility")}
-                      </span>
-                    </button>
-                  </div>
+                <div className="flex items-center justify-between">
+                  <span>{user?.home_facility_object?.name}</span>
+                  <span
+                    className={
+                      "flex items-center justify-center  rounded-xl bg-green-600 px-2 py-0.5 text-sm font-medium text-white"
+                    }
+                  >
+                    <CareIcon icon="l-estate" className="mr-1 pt-px text-lg" />
+                    Home Facility
+                  </span>
+                  {(["DistrictAdmin", "StateAdmin"].includes(
+                    authUser.user_type,
+                  ) ||
+                    username === authUser.username) && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        className="tooltip text-lg text-red-600"
+                        onClick={() =>
+                          setUnlinkFacilityData({
+                            show: true,
+                            facility: user?.home_facility_object,
+                            userName: username,
+                            isHomeFacility: true,
+                          })
+                        }
+                      >
+                        <CareIcon icon="l-link-broken" />
+                        <span className="tooltip-text tooltip-left">
+                          {t("clear_home_facility")}
+                        </span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -824,49 +825,56 @@ export function UserFacilities(props: { user: any }) {
                       >
                         <div className="flex items-center justify-between">
                           <span>{facility.name}</span>
-                          <div className="flex items-center gap-2">
-                            <button
-                              className="tooltip text-lg hover:text-primary-500"
-                              id="home-facility-icon"
-                              onClick={() => {
-                                if (user?.home_facility_object) {
-                                  // has previous home facility
-                                  setReplaceHomeFacility({
+                          {(["DistrictAdmin", "StateAdmin"].includes(
+                            authUser.user_type,
+                          ) ||
+                            username === authUser.username) && (
+                            <div className="flex items-center gap-2">
+                              {authUser.user_type !== "Nurse" && (
+                                <button
+                                  className="tooltip text-lg hover:text-primary-500"
+                                  id="home-facility-icon"
+                                  onClick={() => {
+                                    if (user?.home_facility_object) {
+                                      // has previous home facility
+                                      setReplaceHomeFacility({
+                                        show: true,
+                                        userName: username,
+                                        previousFacility:
+                                          user?.home_facility_object,
+                                        newFacility: facility,
+                                      });
+                                    } else {
+                                      // no previous home facility
+                                      updateHomeFacility(username, facility);
+                                    }
+                                  }}
+                                >
+                                  <CareIcon icon="l-estate" />
+                                  <span className="tooltip-text tooltip-left">
+                                    Set as home facility
+                                  </span>
+                                </button>
+                              )}
+                              <button
+                                id="unlink-facility-button"
+                                className="tooltip text-lg text-red-600"
+                                onClick={() => {
+                                  setUnlinkFacilityData({
                                     show: true,
+                                    facility: facility,
                                     userName: username,
-                                    previousFacility:
-                                      user?.home_facility_object,
-                                    newFacility: facility,
+                                    isHomeFacility: false,
                                   });
-                                } else {
-                                  // no previous home facility
-                                  updateHomeFacility(username, facility);
-                                }
-                              }}
-                            >
-                              <CareIcon icon="l-estate" />
-                              <span className="tooltip-text tooltip-left">
-                                Set as home facility
-                              </span>
-                            </button>
-                            <button
-                              id="unlink-facility-button"
-                              className="tooltip text-lg text-red-600"
-                              onClick={() =>
-                                setUnlinkFacilityData({
-                                  show: true,
-                                  facility: facility,
-                                  userName: username,
-                                  isHomeFacility: false,
-                                })
-                              }
-                            >
-                              <CareIcon icon="l-link-broken" />
-                              <span className="tooltip-text tooltip-left">
-                                Unlink Facility
-                              </span>
-                            </button>
-                          </div>
+                                }}
+                              >
+                                <CareIcon icon="l-link-broken" />
+                                <span className="tooltip-text tooltip-left">
+                                  Unlink Facility
+                                </span>
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
