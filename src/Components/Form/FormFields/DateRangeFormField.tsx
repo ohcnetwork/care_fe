@@ -25,7 +25,7 @@ type Props = FormFieldBaseProps<DateRange> & {
  * ```
  */
 const DateRangeFormField = (props: Props) => {
-  const field = useFormFieldPropsResolver(props as any);
+  const field = useFormFieldPropsResolver(props);
   return (
     <FormField field={field}>
       <DateRangeInputV2
