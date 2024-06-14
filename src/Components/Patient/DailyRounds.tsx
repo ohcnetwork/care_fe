@@ -64,7 +64,7 @@ export const DailyRounds = (props: any) => {
     review_interval: 0,
     admitted_to: "",
     taken_at: null,
-    rounds_type: "NORMAL",
+    rounds_type: authUser.user_type === "Doctor" ? "DOCTORS_LOG" : "NORMAL",
     systolic: null,
     investigations: [],
     investigations_dirty: false,
