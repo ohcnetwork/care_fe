@@ -35,6 +35,7 @@ describe("Facility Manage Functions", () => {
     cy.restoreLocalStorage();
     cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/");
+    facilityPage.typeFacilitySearch("Dummy Facility 40");
     facilityPage.visitAlreadyCreatedFacility();
   });
 

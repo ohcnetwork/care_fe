@@ -10,6 +10,11 @@ class FacilityPage {
       .should("eq", 200);
   }
 
+  typeFacilitySearch(facilityName) {
+    cy.get("#search").click().clear();
+    cy.get("#search").click().type(facilityName);
+  }
+
   visitUpdateFacilityPage(url: string) {
     cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");
     cy.visit(url);
