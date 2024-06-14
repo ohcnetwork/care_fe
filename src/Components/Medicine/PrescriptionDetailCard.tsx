@@ -51,7 +51,7 @@ export default function PrescriptionDetailCard({
       >
         <div>
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex w-full items-center justify-between gap-4">
               <h3
                 className={classNames(
                   "text-lg font-bold transition-all duration-200 ease-in-out",
@@ -85,7 +85,7 @@ export default function PrescriptionDetailCard({
               prescription.prescription_type !== "DISCHARGE" && (
                 <AuthorizedForConsultationRelatedActions>
                   <div className="flex flex-col-reverse items-end gap-2 sm:flex-row">
-                    {onAdministerClick && (
+                    {!prescription.discontinued && onAdministerClick && (
                       <ButtonV2
                         id="administer-medicine"
                         disabled={prescription.discontinued}
@@ -103,9 +103,8 @@ export default function PrescriptionDetailCard({
                         {t("administer")}
                       </ButtonV2>
                     )}
-                    {onDiscontinueClick && (
+                    {!prescription.discontinued && onDiscontinueClick && (
                       <ButtonV2
-                        disabled={prescription.discontinued}
                         type="button"
                         size="small"
                         variant="danger"
