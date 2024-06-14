@@ -400,6 +400,7 @@ export const PatientManager = () => {
 
   const { data: patientsWithNoConsentsData } = useQuery(routes.patientList, {
     query: {
+      facility: qParams.facility,
       limit: 1,
       last_consultation__consent_types: "None",
       is_active: "True",
@@ -471,7 +472,7 @@ export const PatientManager = () => {
       .map((id: string) => {
         const text = [
           ...CONSENT_TYPE_CHOICES,
-          { id: "None", text: "None" },
+          { id: "None", text: "No Consents" },
         ].find((obj) => obj.id == id)?.text;
         return badge("Has Consent", text, id);
       });
@@ -992,23 +993,24 @@ export const PatientManager = () => {
           </div>
         </div>
       </div>
-      {!qParams.last_consultation__consent_types && patientsWithNoConsents && (
-        <div className="flex w-full items-center gap-4 rounded-lg bg-red-500/10 p-4 text-sm text-red-500">
-          <CareIcon icon="l-info-circle" className="text-xl" />
-          <p className="font-semibold">
-            {patientsWithNoConsents} patients admitted missing consent
-            records&nbsp;
-            <button
-              onClick={() =>
-                updateQuery({ last_consultation__consent_types: "None" })
-              }
-              className="underline"
-            >
-              Click to view
-            </button>
-          </p>
-        </div>
-      )}
+      {!qParams.last_consultation__consent_types &&
+        (patientsWithNoConsents || 0) > 0 && (
+          <div className="flex w-full items-center gap-4 rounded-lg bg-red-500/10 p-4 text-sm text-red-500">
+            <CareIcon icon="l-info-circle" className="text-xl" />
+            <p className="font-semibold">
+              {patientsWithNoConsents} patients admitted missing consent
+              records&nbsp;
+              <button
+                onClick={() =>
+                  updateQuery({ last_consultation__consent_types: "None" })
+                }
+                className="underline"
+              >
+                Click to view
+              </button>
+            </p>
+          </div>
+        )}
       <div className="col-span-3 flex flex-wrap">
         <FilterBadges
           badges={({

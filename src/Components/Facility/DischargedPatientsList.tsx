@@ -188,7 +188,7 @@ const DischargedPatientsList = ({
       .map((id: string) => {
         const text = [
           ...CONSENT_TYPE_CHOICES,
-          { id: "None", text: "None" },
+          { id: "None", text: "No Consents" },
         ].find((obj) => obj.id == id)?.text;
         return badge("Has Consent", text, id);
       });
