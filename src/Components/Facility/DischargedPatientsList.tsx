@@ -457,7 +457,7 @@ const PatientListItem = ({ patient }: { patient: PatientModel }) => {
           <span className="text-sm font-medium text-gray-800">
             {patient.last_consultation?.suggestion === "A"
               ? "IP No: "
-              : "OP#: "}
+              : "OP No: "}
             {patient.last_consultation?.patient_no}
           </span>
         )}

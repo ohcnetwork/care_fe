@@ -576,7 +576,7 @@ export const PatientManager = () => {
                         <Chip
                           size="small"
                           variant="primary"
-                          text={`${patient.last_consultation?.suggestion === "A" ? "IP No:" : "OP#:"} ${
+                          text={`${patient.last_consultation?.suggestion === "A" ? "IP No:" : "OP No:"} ${
                             patient.last_consultation?.patient_no
                           }`}
                         />
