@@ -400,7 +400,7 @@ export const PatientManager = () => {
 
   const { data: patientsWithNoConsentsData } = useQuery(routes.patientList, {
     query: {
-      facility: qParams.facility,
+      ...qParams,
       limit: 1,
       last_consultation__consent_types: "None",
       is_active: "True",
