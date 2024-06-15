@@ -1029,7 +1029,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             />
             <TextFormField
               {...field("tb_duration")}
-              label={"Duration ( days )"}
+              label={"Duration ( day(s) )"}
               placeholder="Type Duration"
               min={0}
               type={"number"}
