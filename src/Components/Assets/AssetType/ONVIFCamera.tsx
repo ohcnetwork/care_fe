@@ -81,8 +81,6 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
       if (res?.status === 200) {
         Notification.Success({ msg: "Asset Configured Successfully" });
         onUpdated?.();
-      } else {
-        Notification.Error({ msg: "Something went wrong!" });
       }
       setLoadingSetConfiguration(false);
     } else {
