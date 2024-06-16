@@ -11,7 +11,7 @@ import { BloodPressure } from "../Patient/models";
 type Props = FormFieldBaseProps<BloodPressure>;
 
 export default function BloodPressureFormField(props: Props) {
-  const field = useFormFieldPropsResolver(props as any);
+  const field = useFormFieldPropsResolver(props);
 
   const handleChange = (event: FieldChangeEvent<number>) => {
     const value: BloodPressure = {

@@ -554,6 +554,35 @@ export const PatientManager = () => {
               )}
               <div className="flex w-full">
                 <div className="flex flex-row flex-wrap justify-start gap-2">
+                  {!patient.last_consultation ||
+                  patient.last_consultation?.facility !== patient.facility ||
+                  (patient.last_consultation?.discharge_date &&
+                    patient.is_active) ? (
+                    <span className="relative inline-flex">
+                      <Chip
+                        size="small"
+                        variant="danger"
+                        startIcon="l-notes"
+                        text="No Consultation Filed"
+                      />
+                      <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center">
+                        <span className="center absolute inline-flex h-4 w-4 animate-ping rounded-full bg-red-400"></span>
+                        <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
+                      </span>
+                    </span>
+                  ) : (
+                    <>
+                      {patient.last_consultation?.patient_no && (
+                        <Chip
+                          size="small"
+                          variant="primary"
+                          text={`${patient.last_consultation?.suggestion === "A" ? "IP No:" : "OP No:"} ${
+                            patient.last_consultation?.patient_no
+                          }`}
+                        />
+                      )}
+                    </>
+                  )}
                   {patient.review_time &&
                     !patient.last_consultation?.discharge_date &&
                     Number(patient.last_consultation?.review_interval) > 0 &&
@@ -604,23 +633,6 @@ export const PatientManager = () => {
                       startIcon="l-user-md"
                       text="Medical Worker"
                     />
-                  )}
-                  {(!patient.last_consultation ||
-                    patient.last_consultation?.facility !== patient.facility ||
-                    (patient.last_consultation?.discharge_date &&
-                      patient.is_active)) && (
-                    <span className="relative inline-flex">
-                      <Chip
-                        size="small"
-                        variant="danger"
-                        startIcon="l-notes"
-                        text="No Consultation Filed"
-                      />
-                      <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center">
-                        <span className="center absolute inline-flex h-4 w-4 animate-ping rounded-full bg-red-400"></span>
-                        <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
-                      </span>
-                    </span>
                   )}
                   {!(
                     patient.last_consultation?.facility !== patient.facility
