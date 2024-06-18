@@ -902,7 +902,7 @@ export const PatientManager = () => {
             <CountBlock
               text="Total Patients"
               count={data?.count || 0}
-              loading={(!data?.count && data?.count !== 0) || isLoading}
+              loading={isLoading}
               icon="l-user-injured"
               className="pb-12"
             />
