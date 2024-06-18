@@ -86,6 +86,7 @@ import {
   PatientModel,
   SampleReportModel,
   SampleTestModel,
+  VaccinesData,
 } from "../Components/Patient/models";
 import {
   SkillModel,
@@ -1225,6 +1226,13 @@ const routes = {
     method: "POST",
     TRes: Type<IComment>(),
     TBody: Type<Partial<IComment>>(),
+  },
+
+  // Vaccination endpoints
+  getVaccines: {
+    path: "/api/v1/vaccine/names",
+    method: "GET",
+    TRes: Type<PaginatedResponse<VaccinesData>>(),
   },
 
   // Assets endpoints

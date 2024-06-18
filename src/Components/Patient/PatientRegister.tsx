@@ -6,7 +6,6 @@ import {
   MEDICAL_HISTORY_CHOICES,
   OCCUPATION_TYPES,
   RATION_CARD_CATEGORY,
-  VACCINES,
 } from "../../Common/constants";
 import {
   dateQueryString,
@@ -67,6 +66,7 @@ import Checkbox from "../Common/components/CheckBox.js";
 import _ from "lodash";
 import { ILocalBodies } from "../ExternalResult/models.js";
 import { useTranslation } from "react-i18next";
+import { VaccinationDetailsBuilder } from "../VaccinationDetails/VaccinationDetailsBuilder.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -91,7 +91,6 @@ const medicalHistoryChoices = MEDICAL_HISTORY_CHOICES.reduce(
 const genderTypes = GENDER_TYPES;
 const bloodGroups = [...BLOOD_GROUPS];
 const occupationTypes = OCCUPATION_TYPES;
-const vaccines = [...VACCINES];
 
 const initForm: any = {
   name: "",
@@ -130,6 +129,7 @@ const initForm: any = {
   number_of_doses: "0",
   vaccine_name: null,
   last_vaccinated_date: null,
+  create_vaccination_details: [],
   abha_number: null,
   ...medicalHistoryChoices,
   ration_card_category: null,
@@ -217,7 +217,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     useState(false);
   const [insuranceDetailsError, setInsuranceDetailsError] =
     useState<FieldError>();
-
+  const [vaccinesList, setVaccinesList] = useState<any>([]);
+  const [isVaccineLoading, setIsVaccineLoading] = useState(false);
   useEffect(() => {
     if (extId && formField) {
       setCareExtId(extId);
@@ -228,6 +229,19 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const headerText = !id ? "Add Details of Patient" : "Update Patient Details";
   const buttonText = !id ? "Add Patient" : "Save Details";
 
+  const fetchAllVaccines = useCallback(async () => {
+    setIsVaccineLoading(true);
+    const { res, data } = await request(routes.getVaccines);
+    if (res?.ok && data?.results) {
+      setVaccinesList(data.results);
+    }
+    setIsVaccineLoading(false);
+    console.log(data?.results);
+    return data?.results || [];
+  }, []);
+  useEffect(() => {
+    fetchAllVaccines();
+  }, []);
   const fetchDistricts = useCallback(async (id: number) => {
     if (id > 0) {
       setIsDistrictLoading(true);
@@ -415,6 +429,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             occupation: data.meta_info?.occupation
               ? parseOccupationFromExt(data.meta_info.occupation)
               : null,
+            create_vaccination_details: data.vaccination_details?.map(
+              (detail) => {
+                return {
+                  ...detail,
+                  vaccine_name: detail.vaccine_name.name,
+                };
+              },
+            ),
             is_vaccinated: String(data.is_vaccinated),
             number_of_doses: data.number_of_doses
               ? String(data.number_of_doses)
@@ -599,22 +621,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             errors[field] = "Please select a blood group";
           }
           return;
-        case "is_vaccinated":
-          if (form.is_vaccinated === "true") {
-            if (form.number_of_doses === "0") {
-              errors["number_of_doses"] =
-                "Please fill the number of doses taken";
-            }
-            if (form.vaccine_name === null || form.vaccine_name === "Select") {
-              errors["vaccine_name"] = "Please select vaccine name";
-            }
 
-            if (!form.last_vaccinated_date) {
-              errors["last_vaccinated_date"] =
-                "Please enter last vaccinated date";
-            }
-          }
-          return;
         case "medical_history":
           if (!form[field].length) {
             errors[field] = "Please fill the medical history";
@@ -709,6 +716,20 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             ? formData.last_vaccinated_date
             : null
           : null,
+      create_vaccination_details:
+        formData.is_vaccinated === "true"
+          ? formData.create_vaccination_details.map((detail: any) => {
+              const dose_number = Number(detail.number_of_doses);
+              delete detail.number_of_doses;
+              return {
+                ...detail,
+                dose_number: dose_number,
+                last_vaccinated_date: dateQueryString(
+                  detail.last_vaccinated_date,
+                ),
+              };
+            })
+          : [],
       name: _.startCase(_.toLower(formData.name)),
       pincode: formData.pincode ? formData.pincode : undefined,
       gender: Number(formData.gender),
@@ -756,6 +777,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       is_active: true,
       ration_card_category: formData.ration_card_category,
     };
+    console.log(data);
     const { res, data: requestData } = id
       ? await request(routes.updatePatient, {
           pathParams: { id },
@@ -1738,7 +1760,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           }
                           title={
                             <h1 className="text-left text-xl font-bold text-purple-500">
-                              COVID Details
+                              Complete Vaccination Details
                             </h1>
                           }
                         >
@@ -1746,7 +1768,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             <div className="mt-5 grid w-full grid-cols-1 gap-4 sm:grid-cols-3 xl:gap-x-20 xl:gap-y-6">
                               <div className="col-span-full">
                                 <RadioFormField
-                                  label="Is patient Vaccinated against COVID?"
+                                  label="Is patient Vaccinated?"
                                   aria-label="is_vaccinated"
                                   {...field("is_vaccinated")}
                                   options={[
@@ -1758,105 +1780,43 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 />
                               </div>
                             </div>
-                            <div className="mt-5 grid w-full grid-cols-1 gap-4 xl:gap-x-20 xl:gap-y-6">
+                            <div className="mb-5 mt-5 grid w-full grid-cols-1 gap-4 xl:gap-x-20 xl:gap-y-6">
                               <CollapseV2
+                                className=" max-h-fit"
                                 opened={
                                   String(field("is_vaccinated").value) ===
                                   "true"
                                 }
                               >
                                 {
-                                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:gap-x-20 xl:gap-y-6">
-                                    <div id="covin_id-div">
-                                      <TextFormField
-                                        label="COWIN ID"
-                                        {...field("covin_id")}
-                                        type="text"
-                                      />
-                                    </div>
-                                    <div id="number_of_doses-div">
-                                      <RadioFormField
-                                        label="Number of doses"
-                                        {...field("number_of_doses")}
-                                        options={[
-                                          { label: "1", value: "1" },
-                                          { label: "2", value: "2" },
-                                          {
-                                            label:
-                                              "3 (Booster/Precautionary Dose)",
-                                            value: "3",
-                                          },
-                                        ]}
-                                        optionDisplay={(option) => option.label}
-                                        optionValue={(option) => option.value}
-                                      />
-                                    </div>
-                                    <div id="vaccine_name-div">
-                                      <SelectFormField
-                                        {...field("vaccine_name")}
-                                        label="Vaccine Name"
-                                        options={vaccines}
-                                        optionLabel={(o) => o}
-                                        optionValue={(o) => o}
-                                      />
-                                    </div>
-                                    <div id="last_vaccinated_date-div">
-                                      <DateFormField
-                                        {...field("last_vaccinated_date")}
-                                        label="Last Date of Vaccination"
-                                        disableFuture={true}
-                                        position="LEFT"
-                                      />
-                                    </div>
+                                  <div
+                                    id="vaccination_details-div"
+                                    className=" mb-4"
+                                  >
+                                    <VaccinationDetailsBuilder
+                                      vaccineOptions={vaccinesList}
+                                      vaccinesLoading={isVaccineLoading}
+                                      value={
+                                        field("create_vaccination_details")
+                                          .value
+                                      }
+                                      onChange={(details: any) => {
+                                        field(
+                                          "create_vaccination_details",
+                                        ).onChange({
+                                          name: "create_vaccination_details",
+                                          value: details,
+                                        });
+                                      }}
+                                    />
                                   </div>
                                 }
                               </CollapseV2>
                             </div>
-                            <div className="mt-5 grid w-full grid-cols-1 gap-4 xl:gap-x-20 xl:gap-y-6">
-                              <div id="is_declared_positive-div">
-                                <RadioFormField
-                                  {...field("is_declared_positive")}
-                                  label="Is patient declared covid postive by state?"
-                                  aria-label="is_declared_positive"
-                                  options={[
-                                    { label: "Yes", value: "true" },
-                                    { label: "No", value: "false" },
-                                  ]}
-                                  optionDisplay={(option) => option.label}
-                                  optionValue={(option) => option.value}
-                                />
-                                <CollapseV2
-                                  opened={
-                                    String(
-                                      field("is_declared_positive").value,
-                                    ) === "true"
-                                  }
-                                  className="mt-4"
-                                >
-                                  <div id="date_declared_positive-div">
-                                    <DateFormField
-                                      {...field("date_declared_positive")}
-                                      label="Date Patient is Declared Positive for COVID"
-                                      disableFuture
-                                      position="LEFT"
-                                    />
-                                  </div>
-                                </CollapseV2>
-                              </div>
-                              <div id="date_of_test-div">
-                                <DateFormField
-                                  {...field("date_of_test")}
-                                  id="date_of_test"
-                                  label="Date of Sample given for COVID Test"
-                                  disableFuture
-                                  position="LEFT"
-                                />
-                              </div>
-                            </div>
                           </div>
                         </AccordionV2>
                       </div>
-                      <div className="mb-8 overflow-visible rounded border p-4">
+                      <div className="mb-8 mt-5 overflow-visible rounded border p-4">
                         <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
                           Medical History
                         </h1>

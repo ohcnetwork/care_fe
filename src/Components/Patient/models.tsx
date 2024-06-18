@@ -49,7 +49,19 @@ export interface AbhaObject {
   profile_photo: string;
 }
 
+export interface VaccinesData {
+  external_id: string;
+  name: string;
+}
+
 export interface PatientModel {
+  vaccination_details?: {
+    vaccine_name: { id: string; name: string };
+    vaccination_center: string;
+    last_vaccinated_date: string;
+    dose_number: string;
+    batch_number: string;
+  }[];
   id?: string;
   action?: number;
   name?: string;
@@ -105,6 +117,7 @@ export interface PatientModel {
   ration_card_category?: (typeof RATION_CARD_CATEGORY)[number] | null;
   date_of_test?: string;
   date_of_result?: string; // keeping this to avoid errors in Death report
+  create_vaccination_details?: any[];
   covin_id?: string;
   is_vaccinated?: boolean;
   vaccine_name?: string;

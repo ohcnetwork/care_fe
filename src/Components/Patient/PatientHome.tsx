@@ -39,6 +39,8 @@ import routes from "../../Redux/api";
 import { InsuranceDetialsCard } from "./InsuranceDetailsCard";
 import request from "../../Utils/request/request";
 import PaginatedList from "../../CAREUI/misc/PaginatedList";
+import AccordionV2 from "../Common/components/AccordionV2";
+import PatientVaccinationDetails from "./PatientVaccinationDetails";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -130,6 +132,7 @@ export const PatientHome = (props: any) => {
       if (res?.ok && data) {
         setPatientData(data);
       }
+      console.log(data);
       triggerGoal("Patient Profile Viewed", {
         facilityId: facilityId,
         userId: authUser.id,
@@ -706,6 +709,28 @@ export const PatientHome = (props: any) => {
             </div>
           </div>
         </section>
+
+        <section className="mt-5 h-full rounded-lg bg-white px-4 py-6 shadow">
+          <AccordionV2
+            expandIcon={<CareIcon icon="l-angle-down" className="text-2xl" />}
+            title={
+              <div className=" text-lg font-semibold text-gray-900">
+                Vaccination Details
+              </div>
+            }
+          >
+            {patientData.vaccination_details?.length ? (
+              <PatientVaccinationDetails
+                vaccineData={patientData.vaccination_details}
+              />
+            ) : (
+              <div className=" mt-4 text-center text-gray-500">
+                No Vaccination Details!
+              </div>
+            )}
+          </AccordionV2>
+        </section>
+
         <section className=" mt-7 h-full space-y-2 rounded-lg bg-white p-4 text-gray-100 shadow">
           <div
             className="flex cursor-pointer justify-between border-b border-dashed pb-2 text-left text-lg font-semibold text-gray-900"
