@@ -364,7 +364,7 @@ export default function ShiftingBoard({
             />
           </h3>
           <span className="ml-2 rounded-lg bg-primary-500 px-2 text-white">
-            {pages[0]?.count || "..."}
+            {pages[0] ? pages[0].count : "..."}
           </span>
         </div>
       </div>
