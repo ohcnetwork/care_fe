@@ -290,7 +290,7 @@ export const PatientHome = (props: any) => {
                   {patientData?.last_consultation?.assigned_to_object
                     .alt_phone_number && (
                     <a
-                      href={`https://wa.me/${patientData?.last_consultation?.assigned_to_object.alt_phone_number}`}
+                      href={`https://wa.me/${patientData?.last_consultation?.assigned_to_object.alt_phone_number?.replace(/\D+/g, "")}`}
                       target="_blank"
                       rel="noreferrer"
                     >
@@ -436,7 +436,7 @@ export const PatientHome = (props: any) => {
                     </div>
                     <div>
                       <a
-                        href={`https://wa.me/${patientData.phone_number}`}
+                        href={`https://wa.me/${patientData.phone_number?.replace(/\D+/g, "")}`}
                         target="_blank"
                         className="text-sm font-normal text-sky-600 hover:text-sky-300"
                         rel="noreferrer"
@@ -461,7 +461,7 @@ export const PatientHome = (props: any) => {
                     </div>
                     <div>
                       <a
-                        href={`https://wa.me/${patientData.emergency_phone_number}`}
+                        href={`https://wa.me/${patientData.emergency_phone_number?.replace(/\D+/g, "")}`}
                         target="_blank"
                         className="text-sm font-normal text-sky-600 hover:text-sky-300"
                         rel="noreferrer"

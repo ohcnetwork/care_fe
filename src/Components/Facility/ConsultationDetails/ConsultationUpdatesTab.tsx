@@ -5,7 +5,7 @@ import { BedModel } from "../models";
 import HL7PatientVitalsMonitor from "../../VitalsMonitor/HL7PatientVitalsMonitor";
 import VentilatorPatientVitalsMonitor from "../../VitalsMonitor/VentilatorPatientVitalsMonitor";
 import useVitalsAspectRatioConfig from "../../VitalsMonitor/useVitalsAspectRatioConfig";
-import { DISCHARGE_REASONS, SYMPTOM_CHOICES } from "../../../Common/constants";
+import { DISCHARGE_REASONS } from "../../../Common/constants";
 import PrescriptionsTable from "../../Medicine/PrescriptionsTable";
 import Chip from "../../../CAREUI/display/Chip";
 import {
@@ -23,6 +23,7 @@ import { getVitalsMonitorSocketUrl } from "../../VitalsMonitor/utils";
 import useQuery from "../../../Utils/request/useQuery";
 import routes from "../../../Redux/api";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
+import EncounterSymptomsCard from "../../Symptoms/SymptomsCard";
 
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
 
@@ -310,144 +311,10 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                 </div>
               </div>
             )}
-            {((props.patientData.is_antenatal &&
-              isAntenatal(props.patientData.last_menstruation_start_date)) ||
-              isPostPartum(props.patientData.date_of_delivery)) && (
-              <div className="rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-                <h3 className="mb-4 text-lg font-semibold leading-relaxed text-gray-900">
-                  Perinatal Status
-                </h3>
 
-                <div className="flex gap-2 pb-2">
-                  {props.patientData.is_antenatal &&
-                    isAntenatal(
-                      props.patientData.last_menstruation_start_date,
-                    ) && (
-                      <Chip
-                        variant="custom"
-                        className="border-pink-300 bg-pink-100 text-pink-600"
-                        startIcon="l-baby-carriage"
-                        text="Antenatal"
-                      />
-                    )}
-                  {isPostPartum(props.patientData.date_of_delivery) && (
-                    <Chip
-                      variant="custom"
-                      className="border-pink-300 bg-pink-100 text-pink-600"
-                      startIcon="l-baby-carriage"
-                      text="Post-partum"
-                    />
-                  )}
-                </div>
-
-                {props.patientData.last_menstruation_start_date && (
-                  <p className="space-x-2 p-2 text-sm">
-                    <CareIcon className="text-base" icon="l-calendar-alt" />
-                    <span>Last Menstruation:</span>
-                    <span className="font-semibold">
-                      {formatDate(
-                        props.patientData.last_menstruation_start_date,
-                      )}
-                    </span>
-                  </p>
-                )}
-
-                {props.patientData.date_of_delivery && (
-                  <p className="space-x-2 p-2 text-sm">
-                    <CareIcon className="text-base" icon="l-calendar-alt" />
-                    <span>Date of Delivery:</span>
-                    <span className="font-semibold">
-                      {formatDate(props.patientData.date_of_delivery)}
-                    </span>
-                  </p>
-                )}
-              </div>
-            )}
-            {props.consultationData.symptoms_text && (
-              <div className="overflow-hidden rounded-lg bg-white shadow">
-                <div className="px-4 py-5 sm:p-6">
-                  <h3 className="mb-4 text-lg font-semibold leading-relaxed text-gray-900">
-                    Symptoms
-                  </h3>
-                  <div className="">
-                    <div className="text-sm font-semibold uppercase">
-                      Last Daily Update
-                    </div>
-                    {props.consultationData.last_daily_round
-                      ?.additional_symptoms && (
-                      <>
-                        <div className="my-4 flex flex-wrap items-center gap-2">
-                          {props.consultationData.last_daily_round?.additional_symptoms.map(
-                            (symptom: any, index: number) => (
-                              <Chip
-                                key={index}
-                                text={
-                                  SYMPTOM_CHOICES.find(
-                                    (choice) => choice.id === symptom,
-                                  )?.text ?? "Err. Unknown"
-                                }
-                                size="small"
-                              />
-                            ),
-                          )}
-                        </div>
-                        {props.consultationData.last_daily_round
-                          ?.other_symptoms && (
-                          <div className="capitalize">
-                            <div className="text-xs font-semibold">
-                              Other Symptoms:
-                            </div>
-                            {
-                              props.consultationData.last_daily_round
-                                ?.other_symptoms
-                            }
-                          </div>
-                        )}
-                        <span className="text-xs font-semibold leading-relaxed text-gray-800">
-                          from{" "}
-                          {formatDate(
-                            props.consultationData.last_daily_round.taken_at,
-                          )}
-                        </span>
-                      </>
-                    )}
-                    <hr className="my-4 border border-gray-300" />
-                    <div className="text-sm font-semibold uppercase">
-                      Consultation Update
-                    </div>
-                    <div className="my-4 flex flex-wrap items-center gap-2">
-                      {props.consultationData.symptoms?.map(
-                        (symptom, index) => (
-                          <Chip
-                            key={index}
-                            text={
-                              SYMPTOM_CHOICES.find(
-                                (choice) => choice.id === symptom,
-                              )?.text ?? "Err. Unknown"
-                            }
-                            size="small"
-                          />
-                        ),
-                      )}
-                    </div>
-                    {props.consultationData.other_symptoms && (
-                      <div className="capitalize">
-                        <div className="text-xs font-semibold">
-                          Other Symptoms:
-                        </div>
-                        {props.consultationData.other_symptoms}
-                      </div>
-                    )}
-                    <span className="text-xs font-semibold leading-relaxed text-gray-800">
-                      from{" "}
-                      {props.consultationData.symptoms_onset_date
-                        ? formatDate(props.consultationData.symptoms_onset_date)
-                        : "--/--/----"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
+            <div className="rounded-lg bg-white px-4 py-5 shadow sm:p-6 md:col-span-2">
+              <EncounterSymptomsCard />
+            </div>
 
             {props.consultationData.history_of_present_illness && (
               <div className="overflow-hidden rounded-lg bg-white shadow">
@@ -717,6 +584,59 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                 </div>
               </div>
             </div>
+            {((props.patientData.is_antenatal &&
+              isAntenatal(props.patientData.last_menstruation_start_date)) ||
+              isPostPartum(props.patientData.date_of_delivery)) && (
+              <div className="mt-4 rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+                <h3 className="mb-4 text-lg font-semibold leading-relaxed text-gray-900">
+                  Perinatal Status
+                </h3>
+
+                <div className="flex gap-2 pb-2">
+                  {props.patientData.is_antenatal &&
+                    isAntenatal(
+                      props.patientData.last_menstruation_start_date,
+                    ) && (
+                      <Chip
+                        variant="custom"
+                        className="border-pink-300 bg-pink-100 text-pink-600"
+                        startIcon="l-baby-carriage"
+                        text="Antenatal"
+                      />
+                    )}
+                  {isPostPartum(props.patientData.date_of_delivery) && (
+                    <Chip
+                      variant="custom"
+                      className="border-pink-300 bg-pink-100 text-pink-600"
+                      startIcon="l-baby-carriage"
+                      text="Post-partum"
+                    />
+                  )}
+                </div>
+
+                {props.patientData.last_menstruation_start_date && (
+                  <p className="space-x-2 p-2 text-sm">
+                    <CareIcon className="text-base" icon="l-calendar-alt" />
+                    <span>Last Menstruation:</span>
+                    <span className="font-semibold">
+                      {formatDate(
+                        props.patientData.last_menstruation_start_date,
+                      )}
+                    </span>
+                  </p>
+                )}
+
+                {props.patientData.date_of_delivery && (
+                  <p className="space-x-2 p-2 text-sm">
+                    <CareIcon className="text-base" icon="l-calendar-alt" />
+                    <span>Date of Delivery:</span>
+                    <span className="font-semibold">
+                      {formatDate(props.patientData.date_of_delivery)}
+                    </span>
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
         <div className="w-full pl-0 md:pl-4 xl:w-1/3">

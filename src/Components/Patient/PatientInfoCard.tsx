@@ -40,6 +40,7 @@ import { useTranslation } from "react-i18next";
 import useQuery from "../../Utils/request/useQuery.js";
 import FetchRecordsModal from "../ABDM/FetchRecordsModal.js";
 import { SkillModel } from "../Users/models.js";
+import { AuthorizedForConsultationRelatedActions } from "../../CAREUI/misc/AuthorizedChild.js";
 
 const formatSkills = (arr: SkillModel[]) => {
   const skills = arr.map((skill) => skill.skill_object.name);
@@ -139,6 +140,29 @@ export default function PatientInfoCard(props: {
     },
     prefetch: !!consultation?.treating_physician_object?.username,
   });
+  const { data: consentRecords, loading: consentRecordsLoading } = useQuery(
+    routes.listConsents,
+    {
+      pathParams: {
+        consultationId: consultation?.id ?? "",
+      },
+      prefetch: !!consultation?.id,
+    },
+  );
+
+  const { data: consentFiles, loading: consentFilesLoading } = useQuery(
+    routes.viewUpload,
+    {
+      query: {
+        file_type: "CONSENT_RECORD",
+        associating_id: consentRecords?.results.map((cr) => cr.id).join(","),
+        limit: 1,
+        offset: 0,
+        is_archived: false,
+      },
+      prefetch: (consentRecords?.results.length || 0) > 0,
+    },
+  );
 
   return (
     <>
@@ -185,16 +209,16 @@ export default function PatientInfoCard(props: {
         </>
       )}
 
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      <section className="flex flex-col lg:flex-row">
         <div
-          className="col-span-2 flex w-full flex-col bg-white px-4 pt-2 lg:flex-row xl:min-w-fit"
+          className="flex w-full flex-col bg-white px-4 pt-2 lg:flex-row"
           id="patient-infobadges"
         >
           {/* Can support for patient picture in the future */}
           <div className="flex justify-evenly lg:justify-normal">
             <div className="flex flex-col items-start lg:items-center">
               <div
-                className={`w-24 min-w-20 bg-gray-200 ${categoryClass}-profile h-full`}
+                className={`w-24 min-w-20 bg-gray-200 ${categoryClass}-profile h-24`}
               >
                 {consultation?.current_bed &&
                 consultation?.discharge_date === null ? (
@@ -269,7 +293,7 @@ export default function PatientInfoCard(props: {
               </div>
             </div>
           </div>
-          <div className="flex w-full flex-col items-center gap-4 space-y-2 lg:items-start lg:gap-0 lg:pl-2 xl:w-full">
+          <div className="flex w-full flex-col items-center gap-4 space-y-2 lg:items-start lg:gap-0 lg:pl-2">
             <div className="flex flex-col items-center gap-2 sm:flex-row">
               <Link
                 href={`/facility/${consultation?.facility}`}
@@ -284,7 +308,7 @@ export default function PatientInfoCard(props: {
               </Link>
 
               {medicoLegalCase && (
-                <span className="flex pl-2 capitalize md:col-span-2">
+                <span className="flex pl-2 capitalize">
                   <span className="badge badge-pill badge-danger">MLC</span>
                 </span>
               )}
@@ -301,7 +325,7 @@ export default function PatientInfoCard(props: {
               </div>
               <div className="flex flex-wrap items-center gap-2 text-sm sm:flex-row">
                 <div
-                  className="flex flex-wrap items-center justify-center gap-2 text-sm text-gray-900 sm:flex-row sm:text-sm md:pr-10 lg:justify-normal"
+                  className="flex w-full flex-wrap items-center justify-center gap-2 text-sm text-gray-900 sm:flex-row sm:text-sm md:pr-10 lg:justify-normal"
                   id="patient-consultationbadges"
                 >
                   {consultation?.patient_no && (
@@ -354,18 +378,18 @@ export default function PatientInfoCard(props: {
                         </div>
                       </div>
                     )}
-                  {(
-                    consultation?.consent_records?.filter((c) => !c.deleted) ||
-                    []
-                  ).length < 1 && (
-                    <div>
-                      <div className="inline-flex w-full items-center justify-start rounded border border-gray-500 bg-red-400 p-1 px-3 text-xs font-semibold leading-4">
-                        <span className="font-semibold text-white">
-                          Consent Records Missing
-                        </span>
+                  {!consentFilesLoading &&
+                    !consentRecordsLoading &&
+                    !consentFiles?.results.filter((c) => !c.is_archived)
+                      .length && (
+                      <div>
+                        <div className="inline-flex w-full items-center justify-start rounded border border-red-600 bg-red-400 p-1 px-3 text-xs font-semibold leading-4">
+                          <span className="font-semibold text-white">
+                            Consent Records Missing
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                   {consultation?.suggestion === "DC" && (
                     <div>
                       <div>
@@ -520,12 +544,12 @@ export default function PatientInfoCard(props: {
           </div>
         </div>
         <div
-          className="col-span-2 flex w-full flex-col items-center justify-end gap-2 px-4 py-1 lg:col-span-1 2xl:flex-row"
+          className="flex flex-col items-center justify-end gap-4 px-4 py-1 2xl:flex-row"
           id="consultation-buttons"
         >
           {consultation?.suggestion === "A" && (
             <div className="flex flex-col items-center">
-              <div className="col-span-1 flex w-full justify-center bg-white px-4 lg:flex-row">
+              <div className="flex w-full justify-center bg-white px-4 lg:flex-row">
                 <div
                   className={
                     "flex h-7 w-7 items-center justify-center rounded-full border-2"
@@ -545,7 +569,7 @@ export default function PatientInfoCard(props: {
             </div>
           )}
           {consultation?.last_daily_round && (
-            <div className="col-span-1 flex w-full justify-center bg-white px-4 lg:flex-row">
+            <div className="flex w-full justify-center bg-white px-4 lg:flex-row">
               <Mews dailyRound={consultation?.last_daily_round} />
             </div>
           )}
@@ -574,66 +598,72 @@ export default function PatientInfoCard(props: {
             </div>
           )}
           <div className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row">
-            {patient.is_active &&
-              consultation?.id &&
-              !consultation?.discharge_date && (
-                <div
-                  className="h-10 min-h-[40px] w-full min-w-[170px] lg:w-auto"
-                  id="log-update"
-                >
-                  <ButtonV2
-                    variant={
-                      !(consultation?.facility !== patient.facility) &&
+            <AuthorizedForConsultationRelatedActions>
+              {patient.is_active &&
+                consultation?.id &&
+                !consultation?.discharge_date && (
+                  <div
+                    className="h-10 min-h-[40px] w-full min-w-[170px] lg:w-auto"
+                    id="log-update"
+                  >
+                    <ButtonV2
+                      variant={
+                        !(consultation?.facility !== patient.facility) &&
+                        !(consultation?.discharge_date ?? !patient.is_active) &&
+                        dayjs(consultation?.modified_date).isBefore(
+                          dayjs().subtract(1, "day"),
+                        )
+                          ? "danger"
+                          : "primary"
+                      }
+                      href={
+                        consultation?.admitted && !consultation?.current_bed
+                          ? undefined
+                          : `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/daily-rounds`
+                      }
+                      onClick={() => {
+                        if (
+                          consultation?.admitted &&
+                          !consultation?.current_bed
+                        ) {
+                          Notification.Error({
+                            msg: "Please assign a bed to the patient",
+                          });
+                          setOpen(true);
+                        }
+                      }}
+                      className="w-full"
+                    >
+                      <span className="flex w-full items-center justify-center gap-2">
+                        <CareIcon icon="l-plus" className="text-xl" />
+                        <p className="font-semibold">
+                          {authUser.user_type === "Doctor"
+                            ? "File Note"
+                            : "Log Update"}
+                        </p>
+                      </span>
+                    </ButtonV2>
+                    {!(consultation?.facility !== patient.facility) &&
                       !(consultation?.discharge_date ?? !patient.is_active) &&
                       dayjs(consultation?.modified_date).isBefore(
                         dayjs().subtract(1, "day"),
-                      )
-                        ? "danger"
-                        : "primary"
-                    }
-                    href={
-                      consultation?.admitted && !consultation?.current_bed
-                        ? undefined
-                        : `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/daily-rounds`
-                    }
-                    onClick={() => {
-                      if (
-                        consultation?.admitted &&
-                        !consultation?.current_bed
-                      ) {
-                        Notification.Error({
-                          msg: "Please assign a bed to the patient",
-                        });
-                        setOpen(true);
-                      }
-                    }}
-                    className="w-full"
-                  >
-                    <span className="flex w-full items-center justify-center gap-2">
-                      <CareIcon icon="l-plus" className="text-xl" />
-                      <p className="font-semibold">Log Update</p>
-                    </span>
-                  </ButtonV2>
-                  {!(consultation?.facility !== patient.facility) &&
-                    !(consultation?.discharge_date ?? !patient.is_active) &&
-                    dayjs(consultation?.modified_date).isBefore(
-                      dayjs().subtract(1, "day"),
-                    ) && (
-                      <>
-                        <p className="mt-0.5 text-xs text-red-500">
-                          <div className="text-center">
-                            <CareIcon icon="l-exclamation-triangle" /> No update
-                            filed in the last 24 hours
-                          </div>
-                        </p>
-                      </>
-                    )}
-                </div>
-              )}
+                      ) && (
+                        <>
+                          <p className="mt-0.5 text-xs text-red-500">
+                            <div className="text-center">
+                              <CareIcon icon="l-exclamation-triangle" /> No
+                              update filed in the last 24 hours
+                            </div>
+                          </p>
+                        </>
+                      )}
+                  </div>
+                )}
+            </AuthorizedForConsultationRelatedActions>
             <DropdownMenu
               id="show-more"
               itemClassName="min-w-0 sm:min-w-[225px]"
-              title={"Manage Patient"}
+              title="Manage Patient"
               icon={<CareIcon icon="l-setting" className="text-xl" />}
               className="xl:justify-center"
               containerClassName="w-full lg:w-auto mt-2 2xl:mt-0 flex justify-center z-20"

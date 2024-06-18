@@ -289,6 +289,7 @@ export interface DailyRoundsOutput {
 
 export const DailyRoundTypes = [
   "NORMAL",
+  "DOCTORS_LOG",
   "VENTILATOR",
   "AUTOMATED",
   "TELEMEDICINE",
@@ -317,13 +318,10 @@ export interface DailyRoundsModel {
   physical_examination_info?: string;
   other_details?: string;
   consultation?: number;
-  additional_symptoms?: Array<number>;
   medication_given?: Array<any>;
-  additional_symptoms_text?: string;
   action?: string;
   review_interval?: number;
   id?: string;
-  other_symptoms?: string;
   admitted_to?: string;
   patient_category?: PatientCategory;
   output?: DailyRoundsOutput[];
@@ -369,6 +367,7 @@ export interface CreateFileResponse {
 export interface FileUploadModel {
   id?: string;
   name?: string;
+  associating_id?: string;
   created_date?: string;
   upload_completed?: boolean;
   uploaded_by?: PerformedByModel;

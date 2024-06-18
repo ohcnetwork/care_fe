@@ -10,6 +10,11 @@ class FacilityPage {
       .should("eq", 200);
   }
 
+  typeFacilitySearch(facilityName) {
+    cy.get("#search").click().clear();
+    cy.get("#search").click().type(facilityName);
+  }
+
   visitUpdateFacilityPage(url: string) {
     cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");
     cy.visit(url);
@@ -292,8 +297,8 @@ class FacilityPage {
   }
 
   selectLocation(location: string) {
+    cy.intercept("https://maps.googleapis.com/**").as("mapApi");
     cy.get("span > svg.care-svg-icon__baseline.care-l-map-marker").click();
-    cy.intercept("https://maps.googleapis.com/maps/api/mapsjs/*").as("mapApi");
     cy.wait("@mapApi").its("response.statusCode").should("eq", 200);
     cy.get("input#pac-input").type(location).type("{enter}");
     cy.wait(2000);

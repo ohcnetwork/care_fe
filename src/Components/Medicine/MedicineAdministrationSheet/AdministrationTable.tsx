@@ -24,7 +24,7 @@ export default function MedicineAdministrationTable({
   return (
     <div className="overflow-x-auto">
       <table className="w-full whitespace-nowrap">
-        <thead className="sticky top-0 z-20 bg-gray-50 text-xs font-medium text-black">
+        <thead className="sticky top-0 z-10 bg-gray-50 text-xs font-medium text-black">
           <tr>
             <th className="sticky left-0 z-20 bg-gray-50 py-3 pl-4 text-left">
               <div className="flex justify-between gap-2">
@@ -51,7 +51,7 @@ export default function MedicineAdministrationTable({
                 disabled={!pagination.hasPrevious}
                 onClick={pagination.previous}
                 tooltip="Previous 24 hours"
-                tooltipClassName="tooltip-bottom -translate-x-1/2 text-xs"
+                tooltipClassName="tooltip-bottom text-xs"
               >
                 <CareIcon icon="l-angle-left-b" className="text-base" />
               </ButtonV2>

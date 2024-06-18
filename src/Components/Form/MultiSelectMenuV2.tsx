@@ -16,6 +16,7 @@ type Props<T, V = T> = {
   optionDescription?: OptionCallback<T, ReactNode>;
   optionIcon?: OptionCallback<T, ReactNode>;
   optionValue?: OptionCallback<T, V>;
+  optionDisabled?: OptionCallback<T, boolean>;
   className?: string;
   disabled?: boolean;
   renderSelectedOptions?: OptionCallback<T[], ReactNode>;
@@ -42,9 +43,10 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
       option,
       label,
       selectedLabel,
-      description: props.optionDescription && props.optionDescription(option),
-      icon: props.optionIcon && props.optionIcon(option),
+      description: props.optionDescription?.(option),
+      icon: props.optionIcon?.(option),
       value,
+      disabled: props.optionDisabled?.(option),
       isSelected: props.value?.includes(value as any) ?? false,
       displayChip: (
         <div className="rounded-full border border-secondary-400 bg-secondary-100 px-2 text-xs text-gray-900">
@@ -138,6 +140,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                       className={dropdownOptionClassNames}
                       value={option}
                       onClick={() => handleSingleSelect(option)}
+                      disabled={option.disabled}
                     >
                       {({ active }) => (
                         <div className="flex flex-col gap-2">
@@ -152,9 +155,14 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                           </div>
                           {option.description && (
                             <p
-                              className={`font-normal ${
-                                active ? "text-primary-200" : "text-gray-700"
-                              }`}
+                              className={classNames(
+                                "text-sm font-normal",
+                                option.disabled
+                                  ? "text-gray-700"
+                                  : active
+                                    ? "text-primary-200"
+                                    : "text-gray-700",
+                              )}
                             >
                               {option.description}
                             </p>
@@ -205,17 +213,20 @@ export const MultiSelectOptionChip = ({
 interface OptionRenderPropArg {
   active: boolean;
   selected: boolean;
+  disabled: boolean;
 }
 
 export const dropdownOptionClassNames = ({
   active,
   selected,
+  disabled,
 }: OptionRenderPropArg) => {
   return classNames(
     "group/option relative w-full cursor-default select-none p-4 text-sm transition-colors duration-75 ease-in-out",
-    active && "bg-primary-500 text-white",
-    !active && selected && "text-primary-500",
-    !active && !selected && "text-gray-900",
+    !disabled && active && "bg-primary-500 text-white",
+    !disabled && !active && selected && "text-primary-500",
+    !disabled && !active && !selected && "text-gray-900",
+    disabled && "cursor-not-allowed text-gray-800",
     selected ? "font-semibold" : "font-normal",
   );
 };

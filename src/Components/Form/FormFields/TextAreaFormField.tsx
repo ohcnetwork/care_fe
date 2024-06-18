@@ -19,7 +19,7 @@ const TextAreaFormField = forwardRef(
     { rows = 3, ...props }: TextAreaFormFieldProps,
     ref?: React.Ref<HTMLTextAreaElement>,
   ) => {
-    const field = useFormFieldPropsResolver(props as any);
+    const field = useFormFieldPropsResolver(props);
     return (
       <FormField field={field}>
         <textarea
