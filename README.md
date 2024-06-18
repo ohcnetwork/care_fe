@@ -71,6 +71,13 @@ Authenticate to staging API with any of the following credentials
 - Once the code review is done, the PR will be marked with a "Needs Testing" label where it'll be queued for QA testing.
 - Once tested, the PR would be marked with a "Tested" label and would be queued for merge.
 
+### Testing
+
+To ensure the quality of our pull requests, we use a variety of tools:
+
+- **Automated E2E Testing:** We use Cypress for end-to-end testing to automatically verify the functionality and performance of our code.
+- **Manual Real Device Testing:** We use BrowserStack to manually test our code on real devices, ensuring compatibility and functionality across different platforms and browsers.
+
 #### 🧪 Run cypress tests
 
 To run cypress tests locally, you'll need to setup the backend to run locally and load dummy data required for cypress to the database. See [docs](https://github.com/coronasafe/care#self-hosting).
@@ -110,6 +117,7 @@ npm run cypress:open       # To debug and run tests individually.
 - [CARE Documentation](https://docs.coronasafe.network/coronasafe-care-documentation/)
 - [Swagger API Documentation](https://careapi.ohc.network/swagger/)
 - [Storybook component library](https://careui.coronasafe.in/)
+- [Testing Documentation](https://docs.coronasafe.network/care-testing-documentation/)
 
 ## 🚀 Production
 
