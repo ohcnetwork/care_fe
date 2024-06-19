@@ -38,12 +38,7 @@ export class PatientPrescription {
   }
 
   clickAllVisibleAdministration() {
-    cy.get("#should_administer")
-      .children()
-      .filter(":visible")
-      .each(($el) => {
-        cy.wrap($el).click();
-      });
+    cy.get("#should_administer").should("be.visible").click();
   }
 
   selectMedicinebox() {
