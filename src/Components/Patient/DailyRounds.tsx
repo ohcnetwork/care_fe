@@ -342,7 +342,7 @@ export const DailyRounds = (props: any) => {
         if (obj) {
           dispatch({ type: "set_form", form: initForm });
           Notification.Success({
-            msg: `${obj.rounds_type === "VENTILATOR" ? "Critical Care" : obj.rounds_type === "DOCTORS_LOG" ? "Progress Notes" : capitalize(obj.rounds_type)} details updated successfully`,
+            msg: `${obj.rounds_type === "DOCTORS_LOG" ? "Progress Notes" : (obj.rounds_type === "VENTILATOR" ? "Critical Care" : capitalize(obj.rounds_type)) + " log update"} details updated successfully`,
           });
           if (
             ["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
