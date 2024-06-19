@@ -99,12 +99,18 @@ export interface OptionsType {
 
 export type PatientCategory = "Comfort Care" | "Mild" | "Moderate" | "Critical";
 
-export type ConsentRecord = {
+export interface PatientConsentModel {
   id: string;
   type: (typeof CONSENT_TYPE_CHOICES)[number]["id"];
-  patient_code_status?: (typeof CONSENT_PATIENT_CODE_STATUS_CHOICES)[number]["id"];
-  deleted?: boolean;
-};
+  patient_code_status:
+    | (typeof CONSENT_PATIENT_CODE_STATUS_CHOICES)[number]["id"]
+    | null;
+  archived: boolean;
+  archived_by?: UserBareMinimum;
+  archived_date: string;
+  created_date: string;
+  created_by: UserBareMinimum;
+}
 
 export interface ConsultationModel {
   encounter_date: string;
@@ -174,7 +180,6 @@ export interface ConsultationModel {
   is_readmission?: boolean;
   medico_legal_case?: boolean;
   investigation?: InvestigationType[];
-  consent_records?: ConsentRecord[];
 }
 
 export interface PatientStatsModel {

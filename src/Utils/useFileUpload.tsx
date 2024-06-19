@@ -16,6 +16,7 @@ import routes from "../Redux/api";
 import uploadFile from "./request/uploadFile";
 import * as Notification from "./Notifications.js";
 import imageCompression from "browser-image-compression";
+import { DEFAULT_ALLOWED_EXTENSIONS } from "../Common/constants";
 
 export type FileUploadOptions = {
   type: string;
@@ -23,10 +24,10 @@ export type FileUploadOptions = {
   onUpload?: (file: FileUploadModel) => void;
 } & (
   | {
-      allowAllExtensions?: boolean;
+      allowedExtensions?: string[];
     }
   | {
-      allowedExtensions?: string[];
+      allowAllExtensions?: boolean;
     }
 );
 
@@ -144,6 +145,16 @@ export default function useFileUpload(
     }
     if (f.size > 10e7) {
       setError("Maximum size of files is 100 MB");
+      return false;
+    }
+    const extension = f.name.split(".").pop();
+    if (
+      "allowedExtensions" in options &&
+      !options.allowedExtensions?.includes(extension || "")
+    ) {
+      setError(
+        `Invalid file type ".${extension}" Allowed types: ${options.allowedExtensions?.join(", ")}`,
+      );
       return false;
     }
     return true;
@@ -414,11 +425,11 @@ export default function useFileUpload(
         onChange={onFileChange}
         type="file"
         accept={
-          "allowAllExtensions" in options
-            ? "image/*,video/*,audio/*,text/plain,text/csv,application/rtf,application/msword,application/vnd.oasis.opendocument.text,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/pdf"
-            : "allowedExtensions" in options
-              ? options.allowedExtensions?.join(",")
-              : ""
+          "allowedExtensions" in options
+            ? options.allowedExtensions?.join(",")
+            : "allowAllExtensions" in options
+              ? "*"
+              : DEFAULT_ALLOWED_EXTENSIONS.join(",")
         }
         hidden
       />
