@@ -2,7 +2,7 @@ type t = {
   bilateral_air_entry: option<bool>,
   etco2: option<int>,
   physical_examination_info: option<string>,
-  additional_symptoms: array<int>,
+  additional_symptoms: option<array<int>>,
   other_details: option<string>,
   other_symptoms: option<string>,
 }
@@ -21,12 +21,12 @@ let make = (
   ~other_symptoms,
   ~other_details,
 ) => {
-  bilateral_air_entry: bilateral_air_entry,
-  etco2: etco2,
-  physical_examination_info: physical_examination_info,
-  other_details: other_details,
-  additional_symptoms: additional_symptoms,
-  other_symptoms: other_symptoms,
+  bilateral_air_entry,
+  etco2,
+  physical_examination_info,
+  other_details,
+  additional_symptoms,
+  other_symptoms,
 }
 
 let makeFromJs = dailyRound => {
