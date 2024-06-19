@@ -1,3 +1,4 @@
+import { cy } from "local-cypress";
 export class PatientPrescription {
   clickAddPrescription() {
     cy.get("#add-prescription").scrollIntoView();
@@ -5,6 +6,10 @@ export class PatientPrescription {
       "#add-prescription",
       "Add Prescription Medication",
     );
+  }
+
+  clickAddPrnPrescriptionButton() {
+    cy.contains("button", "Add PRN Prescription").click();
   }
 
   interceptMedibase() {
@@ -27,6 +32,15 @@ export class PatientPrescription {
     cy.verifyAndClickElement("#administer-medicine", "Administer");
   }
 
+  clickAdministerBulkMedicine() {
+    cy.get("#bulk-administer").should("be.visible");
+    cy.get("#bulk-administer").click();
+  }
+
+  clickAllVisibleAdministration() {
+    cy.get("#should_administer").should("be.visible").click();
+  }
+
   selectMedicinebox() {
     cy.get(
       "div#medicine_object input[placeholder='Select'][role='combobox']",
@@ -39,6 +53,10 @@ export class PatientPrescription {
 
   enterDosage(doseAmount: string) {
     cy.get("#base_dosage").type(doseAmount, { force: true });
+  }
+
+  enterIndicator(indicator: string) {
+    cy.get("#indicator").type(indicator);
   }
 
   enterAdministerDosage(dosage: string) {
@@ -64,14 +82,9 @@ export class PatientPrescription {
     );
   }
 
-  discontinuePreviousPrescription() {
-    cy.intercept(
-      "POST",
-      "**/api/v1/consultation/*/prescriptions/*/discontinue/",
-    ).as("deletePrescription");
-    cy.get("button").contains("Discontinue").click();
-    cy.get("#submit").contains("Discontinue").click();
-    cy.wait("@deletePrescription").its("response.statusCode").should("eq", 200);
+  clickAdministerSelectedMedicine() {
+    cy.get("#administer-selected-medicine").should("be.visible");
+    cy.get("#administer-selected-medicine").click();
   }
 
   visitMedicineTab() {
