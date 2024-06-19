@@ -1,4 +1,7 @@
-import { FieldError } from "../FieldValidators";
+import { useContext } from "react";
+import { FieldError, FieldValidator } from "../FieldValidators";
+import { FormContext } from "../FormContext";
+import { FormDetails } from "../Utils";
 
 export type FieldChangeEvent<T> = { name: string; value: T };
 export type FieldChangeEventHandler<T> = (event: FieldChangeEvent<T>) => void;
@@ -15,7 +18,10 @@ export type FieldChangeEventHandler<T> = (event: FieldChangeEvent<T>) => void;
  * @template T The type of the field value.
  * @template Form The type of the form details.
  */
-export type FormFieldBaseProps<T> = {
+export type FormFieldBaseProps<
+  T,
+  Form extends FormDetails | undefined = undefined,
+> = {
   label?: React.ReactNode;
   labelSuffix?: React.ReactNode;
   disabled?: boolean;
@@ -23,13 +29,25 @@ export type FormFieldBaseProps<T> = {
   required?: boolean;
   labelClassName?: string;
   errorClassName?: string;
-  name: string;
-  validate?: undefined;
-  id?: string;
-  onChange: FieldChangeEventHandler<T>;
-  value?: T;
-  error?: FieldError;
-};
+} & (Form extends FormDetails
+  ? {
+      context: FormContext<Form>;
+      name: keyof Form;
+      validate?: FieldValidator<Form[keyof Form]>;
+      id: undefined;
+      onChange: undefined;
+      value: undefined;
+      error: undefined;
+    }
+  : {
+      context?: undefined;
+      name: string;
+      validate?: undefined;
+      id?: string;
+      onChange: FieldChangeEventHandler<T>;
+      value?: T;
+      error?: FieldError;
+    });
 
 /**
  * Resolves the props for a form field.
@@ -39,7 +57,31 @@ export type FormFieldBaseProps<T> = {
  * @param props The props for the field.
  * @returns The resolved props along with a handleChange function.
  */
-export const useFormFieldPropsResolver = <T>(props: FormFieldBaseProps<T>) => {
+export const useFormFieldPropsResolver = <
+  T,
+  Form extends FormDetails | undefined = undefined,
+>(
+  props: FormFieldBaseProps<T, Form>,
+) => {
+  if (props.context) {
+    // Voluntarily disabling the rule of hooks here because we want to use the
+    // context hook only if the context is defined. If the context is not
+    // defined, we want to use the props instead.
+    //
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const registerField = useContext(props.context);
+    const fieldProps = registerField(props.name, props.validate);
+
+    const handleChange = (value: T) =>
+      fieldProps.onChange({ name: props.name, value });
+
+    return {
+      ...props,
+      ...fieldProps,
+      handleChange,
+    };
+  }
+
   const handleChange = (value: T) =>
     props.onChange({ name: props.name, value });
 

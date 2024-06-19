@@ -19,7 +19,7 @@ export const keys = Object.keys(ROUTE_TO_FACILITY_OPTIONS).map((key) =>
 type Props = FormFieldBaseProps<keyof typeof ROUTE_TO_FACILITY_OPTIONS>;
 
 export default function RouteToFacilitySelect(props: Props) {
-  const field = useFormFieldPropsResolver(props);
+  const field = useFormFieldPropsResolver(props as any);
 
   return (
     <SelectFormField

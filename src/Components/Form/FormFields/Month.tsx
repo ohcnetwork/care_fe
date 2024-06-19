@@ -24,7 +24,7 @@ const MonthLabels = [
 ];
 
 const MonthFormField = (props: Props) => {
-  const field = useFormFieldPropsResolver(props);
+  const field = useFormFieldPropsResolver(props as any);
 
   const [month, setMonth] = useState(field.value?.getMonth());
   const [year, setYear] = useState(field.value?.getFullYear());

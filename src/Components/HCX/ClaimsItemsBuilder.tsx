@@ -15,7 +15,7 @@ import { HCXItemModel } from "./models";
 type Props = FormFieldBaseProps<HCXItemModel[]>;
 
 export default function ClaimsItemsBuilder(props: Props) {
-  const field = useFormFieldPropsResolver(props);
+  const field = useFormFieldPropsResolver(props as any);
 
   const handleUpdate = (index: number) => {
     return (event: FieldChangeEvent<any>) => {

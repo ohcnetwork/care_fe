@@ -21,8 +21,6 @@ interface Props {
 export default function PrescriptionDetailCard({
   prescription,
   collapsible = false,
-  onAdministerClick,
-  onDiscontinueClick,
   ...props
 }: Props) {
   const { t } = useTranslation();
@@ -51,7 +49,7 @@ export default function PrescriptionDetailCard({
       >
         <div>
           <div className="flex items-center justify-between">
-            <div className="flex w-full items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
               <h3
                 className={classNames(
                   "text-lg font-bold transition-all duration-200 ease-in-out",
@@ -85,40 +83,37 @@ export default function PrescriptionDetailCard({
               prescription.prescription_type !== "DISCHARGE" && (
                 <AuthorizedForConsultationRelatedActions>
                   <div className="flex flex-col-reverse items-end gap-2 sm:flex-row">
-                    {!prescription.discontinued && onAdministerClick && (
-                      <ButtonV2
-                        id="administer-medicine"
-                        disabled={prescription.discontinued}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onAdministerClick();
-                        }}
-                        type="button"
-                        size="small"
-                        variant="secondary"
-                        ghost
-                        border
-                      >
-                        <CareIcon icon="l-syringe" className="text-base" />
-                        {t("administer")}
-                      </ButtonV2>
-                    )}
-                    {!prescription.discontinued && onDiscontinueClick && (
-                      <ButtonV2
-                        type="button"
-                        size="small"
-                        variant="danger"
-                        ghost
-                        border
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDiscontinueClick();
-                        }}
-                      >
-                        <CareIcon icon="l-ban" className="text-base" />
-                        {t("discontinue")}
-                      </ButtonV2>
-                    )}
+                    <ButtonV2
+                      id="administer-medicine"
+                      disabled={prescription.discontinued}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        props.onAdministerClick?.();
+                      }}
+                      type="button"
+                      size="small"
+                      variant="secondary"
+                      ghost
+                      border
+                    >
+                      <CareIcon icon="l-syringe" className="text-base" />
+                      {t("administer")}
+                    </ButtonV2>
+                    <ButtonV2
+                      disabled={prescription.discontinued}
+                      type="button"
+                      size="small"
+                      variant="danger"
+                      ghost
+                      border
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        props.onDiscontinueClick?.();
+                      }}
+                    >
+                      <CareIcon icon="l-ban" className="text-base" />
+                      {t("discontinue")}
+                    </ButtonV2>
                   </div>
                 </AuthorizedForConsultationRelatedActions>
               )}

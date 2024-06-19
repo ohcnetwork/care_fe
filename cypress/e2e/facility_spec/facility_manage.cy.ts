@@ -8,7 +8,6 @@ describe("Facility Manage Functions", () => {
   const loginPage = new LoginPage();
   const facilityManage = new FacilityManage();
   const facilityPage = new FacilityPage();
-  const facilityName = "Dummy Facility 40";
   const facilityMiddlewareUpdateButton = "Update";
   const facilityMiddleware = "dev-middleware.coronasafe.live";
   const facilityUpdatedMiddleware = "updated.coronasafe.live";
@@ -36,8 +35,6 @@ describe("Facility Manage Functions", () => {
     cy.restoreLocalStorage();
     cy.clearLocalStorage(/filters--.+/);
     cy.awaitUrl("/");
-    facilityPage.typeFacilitySearch(facilityName);
-    facilityPage.verifyFacilityBadgeContent(facilityName);
     facilityPage.visitAlreadyCreatedFacility();
   });
 

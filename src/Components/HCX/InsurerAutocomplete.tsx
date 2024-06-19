@@ -17,7 +17,7 @@ type Props = FormFieldBaseProps<InsurerOptionModel> & {
 };
 
 export default function InsurerAutocomplete(props: Props) {
-  const field = useFormFieldPropsResolver(props);
+  const field = useFormFieldPropsResolver(props as any);
   const { fetchOptions, isLoading, options } =
     useAsyncOptions<InsurerOptionModel>("code");
 
@@ -25,8 +25,6 @@ export default function InsurerAutocomplete(props: Props) {
     <FormField field={field}>
       <Autocomplete
         id={field.id}
-        // Voluntarily casting type as true to ignore type errors.
-        required={field.required as true}
         disabled={field.disabled}
         placeholder={props.placeholder}
         value={field.value}

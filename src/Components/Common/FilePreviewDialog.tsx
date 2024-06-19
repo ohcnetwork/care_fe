@@ -130,7 +130,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 <img
                   src={fileUrl}
                   alt="file"
-                  className={`h-full w-full object-contain ${
+                  className={`${
                     zoom_values[file_state.zoom - 1]
                   } ${getRotationClass(file_state.rotation)}`}
                 />

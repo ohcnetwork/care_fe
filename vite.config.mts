@@ -1,4 +1,5 @@
 import { VitePWA } from "vite-plugin-pwa";
+import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import checker from "vite-plugin-checker";
 import { treeShakeCareIcons } from "./plugins/treeShakeCareIcons";
@@ -11,8 +12,7 @@ const cdnUrls =
     "http://localhost:4566",
   ].join(" ");
 
-/** @type {import('vite').UserConfig} */
-export default {
+export default defineConfig({
   envPrefix: "REACT_",
   plugins: [
     react(),
@@ -105,4 +105,4 @@ export default {
       },
     },
   },
-};
+});

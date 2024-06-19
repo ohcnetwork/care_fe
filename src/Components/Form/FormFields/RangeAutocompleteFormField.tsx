@@ -26,8 +26,7 @@ export default function RangeAutocompleteFormField(props: Props) {
     const sortedThresholds = props.thresholds?.sort(compareBy("value")) || [];
 
     const getThreshold = (value: number) => {
-      const reversedThresholds = [...sortedThresholds].reverse();
-      const threshold = reversedThresholds.find(
+      const threshold = sortedThresholds.findLast(
         (threshold) => value >= threshold.value,
       );
       return threshold;

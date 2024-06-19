@@ -27,7 +27,7 @@ interface Props extends FormFieldBaseProps<string> {
 }
 
 export default function PhoneNumberFormField(props: Props) {
-  const field = useFormFieldPropsResolver(props);
+  const field = useFormFieldPropsResolver(props as any);
   const [error, setError] = useState<FieldError | undefined>();
   const [country, setCountry] = useState<CountryData>({
     flag: "🇮🇳",
@@ -183,11 +183,8 @@ const conditionPhoneCode = (code: string) => {
   return code.startsWith("+") ? code : "+" + code;
 };
 
-const formatPhoneNumber = (
-  value: string | undefined,
-  types: PhoneNumberType[],
-) => {
-  if (value == null) {
+const formatPhoneNumber = (value: string, types: PhoneNumberType[]) => {
+  if (value === undefined || value === null) {
     return "+91 ";
   }
 
