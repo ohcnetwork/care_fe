@@ -39,6 +39,17 @@ interface boardProps {
   containerHeight: number;
 }
 
+const reduceLoading = (action: string, current: any) => {
+  switch (action) {
+    case "MORE":
+      return { ...current, more: true };
+    case "BOARD":
+      return { ...current, board: true };
+    case "COMPLETE":
+      return { board: false, more: false };
+  }
+};
+
 const ShiftCard = ({ shift, filter }: any) => {
   const { wartime_shifting } = useConfig();
   const [modalFor, setModalFor] = useState({
@@ -257,8 +268,7 @@ export default function ShiftingBoard({
 }: boardProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [offset, setOffSet] = useState(0);
-  const [pages, setPages] = useState<PaginatedResponse<IShift>[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState({ board: "BOARD", more: false });
   const [{ isOver }, drop] = useDrop(() => ({
     accept: "shift-card",
     drop: (item: any) => {
@@ -268,24 +278,23 @@ export default function ShiftingBoard({
     },
     collect: (monitor) => ({ isOver: !!monitor.isOver() }),
   }));
+  const [data, setData] = useState<PaginatedResponse<IShift>>();
 
-  const query = useQuery(routes.listShiftRequests, {
+  useQuery(routes.listShiftRequests, {
     query: formatFilter({
       ...filterProp,
       status: board,
     }),
     onResponse: ({ res, data: listShiftData }) => {
-      setIsLoading(false);
       if (res?.ok && listShiftData) {
-        setPages((prev) => [...prev, listShiftData]);
+        setData(listShiftData);
       }
+      setIsLoading((loading) => reduceLoading("COMPLETE", loading));
     },
   });
 
   useEffect(() => {
-    setPages([]);
-    setIsLoading(true);
-    query.refetch();
+    setIsLoading((loading) => reduceLoading("BOARD", loading));
   }, [
     filterProp.facility,
     filterProp.origin_facility,
@@ -307,7 +316,7 @@ export default function ShiftingBoard({
   ]);
 
   const handlePagination = async () => {
-    setIsLoading(true);
+    setIsLoading((loading) => reduceLoading("MORE", loading));
     setOffSet(offset + 14);
     const { res, data: newPageData } = await request(routes.listShiftRequests, {
       query: formatFilter({
@@ -317,15 +326,18 @@ export default function ShiftingBoard({
       }),
     });
     if (res?.ok && newPageData) {
-      setPages((prev) => [...prev, newPageData]);
+      setData((prev) =>
+        prev
+          ? { ...prev, results: [...prev.results, ...newPageData.results] }
+          : newPageData,
+      );
     }
-    setIsLoading(false);
+    setIsLoading((loading) => reduceLoading("COMPLETE", loading));
   };
   const { t } = useTranslation();
 
   const patientFilter = (filter: string) => {
-    return pages
-      .flatMap((p) => p.results)
+    return data?.results
       .filter(({ status }) => status === filter)
       .map((shift: any) => (
         <ShiftCard key={`shift_${shift.id}`} shift={shift} filter={filter} />
@@ -338,7 +350,7 @@ export default function ShiftingBoard({
       const { height } = container.getBoundingClientRect();
       containerHeight < height && setContainerHeight(height);
     }
-  }, [containerRef.current, pages.flatMap((p) => p.results).length]);
+  }, [containerRef.current, data?.results.length]);
 
   return (
     <div
@@ -364,17 +376,12 @@ export default function ShiftingBoard({
             />
           </h3>
           <span className="ml-2 rounded-lg bg-primary-500 px-2 text-white">
-            {pages[0] ? pages[0].count : "..."}
+            {data?.count || "0"}
           </span>
         </div>
       </div>
       <div ref={containerRef} className="mt-2 flex flex-col pb-2 text-sm">
-        {pages[0]?.count > 0
-          ? patientFilter(board)
-          : !isLoading && (
-              <p className="mx-auto p-4">{t("no_patients_to_show")}</p>
-            )}
-        {isLoading ? (
+        {isLoading.board ? (
           <div className="m-1">
             <div className="mx-auto w-full max-w-sm rounded-md border border-gray-300 bg-white p-4 shadow">
               <div className="flex animate-pulse space-x-4 ">
@@ -388,13 +395,25 @@ export default function ShiftingBoard({
               </div>
             </div>
           </div>
+        ) : data?.count ?? 0 > 0 ? (
+          patientFilter(board)
         ) : (
-          pages.at(-1)?.next && (
-            <ButtonV2 onClick={(_) => handlePagination()} className="m-2 block">
-              Load More
-            </ButtonV2>
-          )
+          <p className="mx-auto p-4">{t("no_patients_to_show")}</p>
         )}
+        {!isLoading.board &&
+          (data?.count ?? 0) < (data?.results.length || 0) &&
+          (isLoading.more ? (
+            <div className="mx-auto my-4 rounded-md bg-gray-100 p-2 px-4 hover:bg-white">
+              {t("loading")}
+            </div>
+          ) : (
+            <button
+              onClick={(_) => handlePagination()}
+              className="mx-auto my-4 rounded-md bg-gray-100 p-2 px-4 hover:bg-white"
+            >
+              More...
+            </button>
+          ))}
       </div>
     </div>
   );
