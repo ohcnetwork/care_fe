@@ -40,6 +40,7 @@ import { useTranslation } from "react-i18next";
 import useQuery from "../../Utils/request/useQuery.js";
 import FetchRecordsModal from "../ABDM/FetchRecordsModal.js";
 import { SkillModel } from "../Users/models.js";
+import { AuthorizedForConsultationRelatedActions } from "../../CAREUI/misc/AuthorizedChild.js";
 
 const formatSkills = (arr: SkillModel[]) => {
   const skills = arr.map((skill) => skill.skill_object.name);
@@ -139,7 +140,6 @@ export default function PatientInfoCard(props: {
     },
     prefetch: !!consultation?.treating_physician_object?.username,
   });
-
   const { data: consentRecords, loading: consentRecordsLoading } = useQuery(
     routes.listConsents,
     {
@@ -218,7 +218,7 @@ export default function PatientInfoCard(props: {
           <div className="flex justify-evenly lg:justify-normal">
             <div className="flex flex-col items-start lg:items-center">
               <div
-                className={`w-24 min-w-20 bg-gray-200 ${categoryClass}-profile h-full`}
+                className={`w-24 min-w-20 bg-gray-200 ${categoryClass}-profile h-24`}
               >
                 {consultation?.current_bed &&
                 consultation?.discharge_date === null ? (
@@ -598,62 +598,68 @@ export default function PatientInfoCard(props: {
             </div>
           )}
           <div className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row">
-            {patient.is_active &&
-              consultation?.id &&
-              !consultation?.discharge_date && (
-                <div
-                  className="h-10 min-h-[40px] w-full min-w-[170px] lg:w-auto"
-                  id="log-update"
-                >
-                  <ButtonV2
-                    variant={
-                      !(consultation?.facility !== patient.facility) &&
+            <AuthorizedForConsultationRelatedActions>
+              {patient.is_active &&
+                consultation?.id &&
+                !consultation?.discharge_date && (
+                  <div
+                    className="h-10 min-h-[40px] w-full min-w-[170px] lg:w-auto"
+                    id="log-update"
+                  >
+                    <ButtonV2
+                      variant={
+                        !(consultation?.facility !== patient.facility) &&
+                        !(consultation?.discharge_date ?? !patient.is_active) &&
+                        dayjs(consultation?.modified_date).isBefore(
+                          dayjs().subtract(1, "day"),
+                        )
+                          ? "danger"
+                          : "primary"
+                      }
+                      href={
+                        consultation?.admitted && !consultation?.current_bed
+                          ? undefined
+                          : `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/daily-rounds`
+                      }
+                      onClick={() => {
+                        if (
+                          consultation?.admitted &&
+                          !consultation?.current_bed
+                        ) {
+                          Notification.Error({
+                            msg: "Please assign a bed to the patient",
+                          });
+                          setOpen(true);
+                        }
+                      }}
+                      className="w-full"
+                    >
+                      <span className="flex w-full items-center justify-center gap-2">
+                        <CareIcon icon="l-plus" className="text-xl" />
+                        <p className="font-semibold">
+                          {authUser.user_type === "Doctor"
+                            ? "File Note"
+                            : "Log Update"}
+                        </p>
+                      </span>
+                    </ButtonV2>
+                    {!(consultation?.facility !== patient.facility) &&
                       !(consultation?.discharge_date ?? !patient.is_active) &&
                       dayjs(consultation?.modified_date).isBefore(
                         dayjs().subtract(1, "day"),
-                      )
-                        ? "danger"
-                        : "primary"
-                    }
-                    href={
-                      consultation?.admitted && !consultation?.current_bed
-                        ? undefined
-                        : `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/daily-rounds`
-                    }
-                    onClick={() => {
-                      if (
-                        consultation?.admitted &&
-                        !consultation?.current_bed
-                      ) {
-                        Notification.Error({
-                          msg: "Please assign a bed to the patient",
-                        });
-                        setOpen(true);
-                      }
-                    }}
-                    className="w-full"
-                  >
-                    <span className="flex w-full items-center justify-center gap-2">
-                      <CareIcon icon="l-plus" className="text-xl" />
-                      <p className="font-semibold">Log Update</p>
-                    </span>
-                  </ButtonV2>
-                  {!(consultation?.facility !== patient.facility) &&
-                    !(consultation?.discharge_date ?? !patient.is_active) &&
-                    dayjs(consultation?.modified_date).isBefore(
-                      dayjs().subtract(1, "day"),
-                    ) && (
-                      <>
-                        <p className="mt-0.5 text-xs text-red-500">
-                          <div className="text-center">
-                            <CareIcon icon="l-exclamation-triangle" /> No update
-                            filed in the last 24 hours
-                          </div>
-                        </p>
-                      </>
-                    )}
-                </div>
-              )}
+                      ) && (
+                        <>
+                          <p className="mt-0.5 text-xs text-red-500">
+                            <div className="text-center">
+                              <CareIcon icon="l-exclamation-triangle" /> No
+                              update filed in the last 24 hours
+                            </div>
+                          </p>
+                        </>
+                      )}
+                  </div>
+                )}
+            </AuthorizedForConsultationRelatedActions>
             <DropdownMenu
               id="show-more"
               itemClassName="min-w-0 sm:min-w-[225px]"
