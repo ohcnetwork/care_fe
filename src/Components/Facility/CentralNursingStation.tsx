@@ -81,7 +81,15 @@ export default function CentralNursingStation({ facilityId }: Props) {
         <div className="flex flex-row-reverse items-center gap-4 md:flex-row">
           <Popover className="relative">
             <Popover.Button>
-              <ButtonV2 variant="secondary" border>
+              <ButtonV2
+                variant={
+                  qParams.location ||
+                  qParams.hide_monitors_without_patient == "true"
+                    ? "primary"
+                    : "secondary"
+                }
+                border
+              >
                 <CareIcon icon="l-setting" className="text-lg" />
                 Settings and Filters
               </ButtonV2>
@@ -151,9 +159,9 @@ export default function CentralNursingStation({ facilityId }: Props) {
                     />
                     <CheckBoxFormField
                       name="hide_monitors_without_patient"
-                      label="Hide Monitors without Patient"
+                      label="Show Monitors without Patient"
                       value={JSON.parse(
-                        qParams.hide_monitors_without_patient ?? true,
+                        qParams.hide_monitors_without_patient ?? false,
                       )}
                       onChange={(e) => updateQuery({ [e.name]: `${e.value}` })}
                       labelClassName="text-sm"
