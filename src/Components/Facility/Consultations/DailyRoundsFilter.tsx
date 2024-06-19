@@ -71,11 +71,11 @@ export default function DailyRoundsFilter(props: Props) {
                 <SelectFormField
                   {...field("rounds_type")}
                   label={t("Round Type")}
-                  options={DailyRoundTypes.map((f) =>
-                    f === "DOCTORS_LOG" ? "Progress Note" : f,
-                  )}
+                  options={DailyRoundTypes}
                   placeholder={t("show_all")}
-                  optionLabel={(o) => t(o)}
+                  optionLabel={(o) =>
+                    o === "DOCTORS_LOG" ? "Progress Note" : t(o)
+                  }
                   optionValue={(o) => o}
                 />
                 <TextFormField
