@@ -317,11 +317,7 @@ export const DailyRounds = (props: any) => {
         review_interval: Number(prevReviewInterval),
       };
 
-      if (
-        ["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
-          state.form.rounds_type,
-        )
-      ) {
+      if (!["VENTILATOR"].includes(state.form.rounds_type)) {
         data = {
           ...data,
           bp: state.form.bp ?? {},
