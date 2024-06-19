@@ -344,7 +344,11 @@ export const DailyRounds = (props: any) => {
           Notification.Success({
             msg: `${obj.rounds_type === "VENTILATOR" ? "Critical Care" : capitalize(obj.rounds_type)} log update details updated successfully`,
           });
-          if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
+          if (
+            ["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
+              state.form.rounds_type,
+            )
+          ) {
             navigate(
               `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
             );
