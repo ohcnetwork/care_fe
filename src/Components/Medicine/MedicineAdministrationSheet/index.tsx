@@ -150,6 +150,7 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
         </ScrollOverlay>
         {!!discontinuedCount && (
           <ButtonV2
+            id="discontinued-medicine"
             variant="secondary"
             className="group sticky left-0 w-full rounded-b-lg rounded-t-none bg-gray-100"
             disabled={loading || discontinuedPrescriptions.loading}
