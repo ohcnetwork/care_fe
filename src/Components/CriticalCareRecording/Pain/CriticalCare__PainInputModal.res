@@ -134,8 +134,24 @@ let make = (
                 : <div>
                     <div className="grid grid-cols-1 items-center gap-4 justify-around mt-4">
                       <div className="flex flex-col items-center text-center">
-                        <div className="text-black font-bold text-xl">
+                        <div className="text-black font-bold text-xl flex items-center gap-2">
                           {str(Belt.Float.toString(painScale))}
+                          <div
+                            className={"text-sm font-bold text-white px-2 py-1 rounded-lg"}
+                            style={ReactDOMStyle.make(
+                              ~backgroundColor=Js.String2.make(
+                                switch getLabels(Belt.Float.toInt(painScale)) {
+                                | (_, color) => color
+                                },
+                              ),
+                              (),
+                            )}>
+                            {str(
+                              switch getLabels(Belt.Float.toInt(painScale)) {
+                              | (label, _) => label
+                              },
+                            )}
+                          </div>
                         </div>
                         <div className="text-sm text-gray-700"> {str("Pain Scale")} </div>
                       </div>
@@ -159,7 +175,7 @@ let make = (
               ? <button
                   type_="button"
                   onClick={e => {
-                    if (painScale == 0.0) {
+                    if painScale == 0.0 {
                       hideModal(e)
                     } else {
                       updatePart(state)

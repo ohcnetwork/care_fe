@@ -29,7 +29,7 @@ type Props = FormFieldBaseProps<Date> & {
  * ```
  */
 const DateFormField = (props: Props) => {
-  const field = useFormFieldPropsResolver(props as any);
+  const field = useFormFieldPropsResolver(props);
   return (
     <FormField field={field}>
       <DateInputV2

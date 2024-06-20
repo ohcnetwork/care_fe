@@ -106,6 +106,11 @@ export const useMSEMediaPlayer = ({
     if (!mseSourceBuffer.updating) {
       if (mseQueue.length > 0) {
         const packet = mseQueue.shift();
+        // Check if SourceBuffer has been removed before appending buffer
+        if (mseSourceBuffer.removed) {
+          console.error("Attempted to append to a removed SourceBuffer.");
+          return;
+        }
         mseSourceBuffer.appendBuffer(packet);
       } else {
         mseStreamingStarted = false;
@@ -122,6 +127,11 @@ export const useMSEMediaPlayer = ({
 
   const readPacket = (packet: any) => {
     if (!mseStreamingStarted) {
+      // Check if SourceBuffer has been removed before appending buffer
+      if (mseSourceBuffer.removed) {
+        console.error("Attempted to append to a removed SourceBuffer.");
+        return;
+      }
       mseSourceBuffer.appendBuffer(packet);
       mseStreamingStarted = true;
       return;

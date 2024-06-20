@@ -73,7 +73,9 @@ export default function DailyRoundsFilter(props: Props) {
                   label={t("Round Type")}
                   options={DailyRoundTypes}
                   placeholder={t("show_all")}
-                  optionLabel={(o) => t(o)}
+                  optionLabel={(o) =>
+                    o === "DOCTORS_LOG" ? "Progress Note" : t(o)
+                  }
                   optionValue={(o) => o}
                 />
                 <TextFormField
