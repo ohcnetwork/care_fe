@@ -13,7 +13,6 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 import * as Notification from "../../Utils/Notifications";
 import { formatDateTime } from "../../Utils/utils";
-import { capitalize } from "lodash-es";
 import BloodPressureFormField, {
   BloodPressureValidator,
 } from "../Common/BloodPressureFormField";
@@ -342,7 +341,7 @@ export const DailyRounds = (props: any) => {
         if (obj) {
           dispatch({ type: "set_form", form: initForm });
           Notification.Success({
-            msg: `${obj.rounds_type === "DOCTORS_LOG" ? "Progress Notes" : (obj.rounds_type === "VENTILATOR" ? "Critical Care" : capitalize(obj.rounds_type)) + " log update"} details updated successfully`,
+            msg: `${t(obj.rounds_type as string)} updated successfully`,
           });
           if (
             ["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
@@ -366,24 +365,19 @@ export const DailyRounds = (props: any) => {
         setIsLoading(false);
         if (obj) {
           dispatch({ type: "set_form", form: initForm });
-          if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
-            Notification.Success({
-              msg: `${state.form.rounds_type === "NORMAL" ? "Normal" : "Tele-medicine"} log update created successfully`,
-            });
-            navigate(
-              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
-            );
-          } else if (state.form.rounds_type === "DOCTORS_LOG") {
-            Notification.Success({
-              msg: "Progress Note update created successfully",
-            });
+          Notification.Success({
+            msg: `${t(state.form.rounds_type)} log update created successfully`,
+          });
+
+          if (
+            ["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
+              state.form.rounds_type,
+            )
+          ) {
             navigate(
               `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
             );
           } else {
-            Notification.Success({
-              msg: "Critical Care log update created successfully",
-            });
             navigate(
               `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${obj.id}/update`,
             );
@@ -436,16 +430,16 @@ export const DailyRounds = (props: any) => {
       authUser.user_type,
     )
   ) {
-    roundTypes.push({ id: "DOCTORS_LOG", text: "Progress Note" });
+    roundTypes.push({ id: "DOCTORS_LOG", text: t("DOCTORS_LOG") });
   }
 
   roundTypes.push(
-    { id: "NORMAL", text: "Normal" },
-    { id: "VENTILATOR", text: "Critical Care" },
+    { id: "NORMAL", text: t("NORMAL") },
+    { id: "VENTILATOR", text: t("VENTILATOR") },
   );
 
   if (consultationSuggestion === "DC") {
-    roundTypes.push({ id: "TELEMEDICINE", text: "Telemedicine" });
+    roundTypes.push({ id: "TELEMEDICINE", text: t("TELEMEDICINE") });
   }
   const submitButtonDisabled = (() => {
     if (buttonText !== "Save") {
