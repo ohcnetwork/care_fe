@@ -6,22 +6,17 @@ export class PatientConsultationPage {
     cy.clickAndSelectOption("#route_to_facility", status);
   }
 
-  typeAndMultiSelectSymptoms(input, symptoms) {
-    cy.typeAndMultiSelectOption("#additional_symptoms", input, symptoms);
-  }
-  selectSymptomsDate(date: string) {
-    cy.clickAndTypeDate("#symptoms_onset_date", date);
-  }
-  clickAddSymptom() {
-    cy.get("#add-symptom").click();
-  }
-
   verifyConsultationPatientName(patientName: string) {
     cy.get("#patient-name-consultation").should("contain", patientName);
   }
 
   selectPatientCategory(category: string) {
     cy.clickAndSelectOption("#category", category);
+  }
+
+  addPatientSymptoms(symptoms, text, date) {
+    cy.typeAndMultiSelectOption("#patient_symptoms", text, symptoms);
+    cy.clickAndTypeDate("#symptoms_onset_date", date);
   }
 
   selectPatientReferance(referance: string) {

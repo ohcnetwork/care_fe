@@ -11,7 +11,6 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
   const patientLogupdate = new PatientLogupdate();
   const domicilaryPatient = "Dummy Patient 11";
   const patientCategory = "Moderate";
-  const additionalSymptoms = "Fever";
   const physicalExamination = "physical examination details";
   const otherExamination = "Other";
   const patientSystolic = "119";
@@ -36,18 +35,22 @@ describe("Patient Log Update in Normal, Critical and TeleIcu", () => {
     cy.awaitUrl("/patients");
   });
 
-  it("Create a new log teleicu update for a domicilary care patient and verify the copy previous value function", () => {
-    patientPage.visitPatient("Dummy Patient 11");
+  it("Create a doctor log update | Edit the existing log | Verify it's reflection ", () => {
+    patientPage.visitPatient("Dummy Patient 14");
     patientConsultationPage.clickEditConsultationButton();
     patientConsultationPage.selectPatientSuggestion("Domiciliary Care");
     cy.submitButton("Update Consultation");
     cy.verifyNotification("Consultation updated successfully");
     cy.closeNotification();
     patientLogupdate.clickLogupdate();
+    // Create a doctors log update
     patientLogupdate.typePhysicalExamination(physicalExamination);
-    patientLogupdate.selectRoundType("Telemedicine");
     patientLogupdate.typeOtherDetails(otherExamination);
-    patientLogupdate.typeAdditionalSymptoms(additionalSymptoms);
+    patientConsultationPage.addPatientSymptoms(
+      "ss",
+      ["Breathlessness", "Dizziness"],
+      "21062024",
+    );
     patientLogupdate.selectPatientCategory(patientCategory);
     patientLogupdate.typeSystolic(patientSystolic);
     patientLogupdate.typeDiastolic(patientDiastolic);

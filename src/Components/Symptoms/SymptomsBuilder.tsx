@@ -304,7 +304,7 @@ const AddSymptom = (props: {
       />
       <div className="flex w-full flex-col gap-2">
         <AutocompleteMultiSelectFormField
-          id="additional_symptoms"
+          id="patient_symptoms"
           name="symptom"
           className="w-full"
           disabled={props.disabled || processing}
