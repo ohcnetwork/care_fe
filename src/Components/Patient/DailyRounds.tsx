@@ -341,7 +341,7 @@ export const DailyRounds = (props: any) => {
         if (obj) {
           dispatch({ type: "set_form", form: initForm });
           Notification.Success({
-            msg: `${t(obj.rounds_type as string)} updated successfully`,
+            msg: `${t(obj.rounds_type as string)} log updated successfully`,
           });
           if (
             ["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
@@ -366,7 +366,7 @@ export const DailyRounds = (props: any) => {
         if (obj) {
           dispatch({ type: "set_form", form: initForm });
           Notification.Success({
-            msg: `${t(state.form.rounds_type)} log update created successfully`,
+            msg: `${t(state.form.rounds_type)} log created successfully`,
           });
 
           if (
