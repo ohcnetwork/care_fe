@@ -11,7 +11,7 @@ class PatientLogupdate {
 
   selectBed(bed: string) {
     cy.searchAndSelectOption("input[name='bed']", bed);
-    cy.submitButton("Move to bed");
+    cy.submitButton("Update");
     cy.wait(2000);
   }
 
