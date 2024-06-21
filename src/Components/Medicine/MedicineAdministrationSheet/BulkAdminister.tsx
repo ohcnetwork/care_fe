@@ -18,6 +18,7 @@ export default function BulkAdminister({ prescriptions, onDone }: Props) {
   return (
     <>
       <ButtonV2
+        id="bulk-administer"
         ghost
         border
         onClick={() => setShowBulkAdminister(true)}

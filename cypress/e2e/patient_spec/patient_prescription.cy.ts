@@ -1,3 +1,4 @@
+import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 import PatientPrescription from "../../pageobject/Patient/PatientPrescription";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
@@ -5,11 +6,13 @@ import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 const patientPrescription = new PatientPrescription();
 const loginPage = new LoginPage();
 const patientPage = new PatientPage();
-const medicineName = "DOLO";
+const medicineNameOne = "DOLO";
+const medicineNameTwo = "FDEP PLUS";
 const medicineBaseDosage = "4";
 const medicineTargetDosage = "9";
 const medicineFrequency = "Twice daily";
 const medicineAdministerNote = "Medicine Administration Note";
+const medicineIndicator = "Test Indicator";
 
 describe("Patient Medicine Administration", () => {
   before(() => {
@@ -23,6 +26,40 @@ describe("Patient Medicine Administration", () => {
     cy.awaitUrl("/patients");
   });
 
+  it("Add a PRN Prescription medicine | Group Administrate it |", () => {
+    patientPage.visitPatient("Dummy Patient 6");
+    patientPrescription.visitMedicineTab();
+    patientPrescription.visitEditPrescription();
+    // Add First Medicine
+    patientPrescription.clickAddPrnPrescriptionButton();
+    patientPrescription.interceptMedibase();
+    patientPrescription.selectMedicinebox();
+    patientPrescription.selectMedicine(medicineNameOne);
+    patientPrescription.enterDosage(medicineBaseDosage);
+    patientPrescription.enterIndicator(medicineIndicator);
+    cy.submitButton("Submit");
+    cy.verifyNotification("Medicine prescribed");
+    cy.closeNotification();
+    // Add Second Medicine
+    patientPrescription.clickAddPrnPrescriptionButton();
+    patientPrescription.interceptMedibase();
+    patientPrescription.selectMedicinebox();
+    patientPrescription.selectMedicine(medicineNameTwo);
+    patientPrescription.enterDosage(medicineBaseDosage);
+    patientPrescription.enterIndicator(medicineIndicator);
+    cy.submitButton("Submit");
+    cy.verifyNotification("Medicine prescribed");
+    cy.closeNotification();
+    patientPrescription.clickReturnToDashboard();
+    // Group Administer the PRN Medicine
+    patientPrescription.visitMedicineTab();
+    patientPrescription.clickAdministerBulkMedicine();
+    patientPrescription.clickAllVisibleAdministration();
+    patientPrescription.clickAdministerSelectedMedicine();
+    cy.verifyNotification("Medicine(s) administered");
+    cy.closeNotification();
+  });
+
   it("Add a new titrated medicine for a patient | Individual Administeration |", () => {
     patientPage.visitPatient("Dummy Patient 5");
     patientPrescription.visitMedicineTab();
@@ -30,7 +67,7 @@ describe("Patient Medicine Administration", () => {
     patientPrescription.clickAddPrescription();
     patientPrescription.interceptMedibase();
     patientPrescription.selectMedicinebox();
-    patientPrescription.selectMedicine(medicineName);
+    patientPrescription.selectMedicine(medicineNameOne);
     patientPrescription.clickTitratedDosage();
     patientPrescription.enterDosage(medicineBaseDosage);
     patientPrescription.enterTargetDosage(medicineTargetDosage);
@@ -47,14 +84,14 @@ describe("Patient Medicine Administration", () => {
     cy.closeNotification();
     // Verify the Reflection on the Medicine
     cy.verifyContentPresence("#medicine-preview", [
-      medicineName,
+      medicineNameOne,
       medicineBaseDosage,
       medicineTargetDosage,
     ]);
     patientPrescription.clickReturnToDashboard();
     // Go to medicine tab and administer it again
     patientPrescription.visitMedicineTab();
-    cy.verifyAndClickElement("#0", medicineName);
+    cy.verifyAndClickElement("#0", medicineNameOne);
     cy.submitButton("Administer");
     patientPrescription.enterAdministerDosage(medicineBaseDosage);
     cy.submitButton("Administer Medicine");
@@ -68,7 +105,7 @@ describe("Patient Medicine Administration", () => {
     patientPrescription.clickAddPrescription();
     patientPrescription.interceptMedibase();
     patientPrescription.selectMedicinebox();
-    patientPrescription.selectMedicine(medicineName);
+    patientPrescription.selectMedicine(medicineNameOne);
     patientPrescription.enterDosage(medicineBaseDosage);
     patientPrescription.selectDosageFrequency(medicineFrequency);
     cy.submitButton("Submit");
@@ -78,7 +115,7 @@ describe("Patient Medicine Administration", () => {
     patientPrescription.clickAddPrescription();
     patientPrescription.interceptMedibase();
     patientPrescription.selectMedicinebox();
-    patientPrescription.selectMedicine(medicineName);
+    patientPrescription.selectMedicine(medicineNameOne);
     patientPrescription.enterDosage(medicineBaseDosage);
     patientPrescription.selectDosageFrequency(medicineFrequency);
     cy.submitButton("Submit");
