@@ -49,7 +49,6 @@ const Form = <T extends FormDetails>({
 
     if (validate) {
       const errors = omitBy(validate(state.form), isEmpty) as FormErrors<T>;
-
       if (Object.keys(errors).length) {
         dispatch({ type: "set_errors", errors });
 

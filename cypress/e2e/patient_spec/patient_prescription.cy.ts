@@ -26,6 +26,43 @@ describe("Patient Medicine Administration", () => {
     cy.awaitUrl("/patients");
   });
 
+  it("Add a new medicine | Verify the Edit and Discontinue Medicine workflow |", () => {
+    patientPage.visitPatient("Dummy Patient 9");
+    patientPrescription.visitMedicineTab();
+    patientPrescription.visitEditPrescription();
+    // Add a normal Medicine to the patient
+    patientPrescription.clickAddPrescription();
+    patientPrescription.interceptMedibase();
+    patientPrescription.selectMedicinebox();
+    patientPrescription.selectMedicine(medicineNameOne);
+    patientPrescription.enterDosage(medicineBaseDosage);
+    patientPrescription.selectDosageFrequency(medicineFrequency);
+    cy.submitButton("Submit");
+    cy.verifyNotification("Medicine prescribed");
+    cy.closeNotification();
+    // Edit the existing medicine & Verify they are properly moved to discontinue position
+    patientPrescription.clickReturnToDashboard();
+    patientPrescription.visitMedicineTab();
+    cy.verifyAndClickElement("#0", medicineNameOne);
+    cy.verifyContentPresence("#submit", ["Discontinue"]); // To verify the pop-up is open
+    cy.submitButton("Edit");
+    patientPrescription.enterDosage(medicineTargetDosage);
+    cy.submitButton("Submit");
+    cy.verifyNotification("Prescription edited successfully");
+    cy.closeNotification();
+    // Discontinue a medicine & Verify the notification
+    cy.verifyAndClickElement("#0", medicineNameOne);
+    cy.submitButton("Discontinue");
+    patientPrescription.enterDiscontinueReason("Medicine is been discontinued");
+    cy.submitButton("Discontinue");
+    cy.verifyNotification("Prescription discontinued");
+    cy.closeNotification();
+    // verify the discontinue medicine view
+    cy.verifyContentPresence("#discontinued-medicine", [
+      "discontinued prescription(s)",
+    ]);
+  });
+
   it("Add a PRN Prescription medicine | Group Administrate it |", () => {
     patientPage.visitPatient("Dummy Patient 6");
     patientPrescription.visitMedicineTab();
