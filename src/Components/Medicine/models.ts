@@ -2,6 +2,7 @@ import { PerformedByModel } from "../HCX/misc";
 import { PRESCRIPTION_ROUTES } from "./CreatePrescriptionForm";
 
 export const DOSAGE_UNITS = [
+  "msg",
   "mg",
   "g",
   "ml",

@@ -190,6 +190,7 @@ export const PRESCRIPTION_ROUTES = [
   "INTRATHECAL",
   "TRANSDERMAL",
   "RECTAL",
+  "SUBLINGUAL"
 ] as const;
 export const PRESCRIPTION_FREQUENCIES = {
   STAT: {
