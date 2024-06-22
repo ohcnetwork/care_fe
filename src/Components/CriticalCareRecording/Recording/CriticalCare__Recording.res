@@ -240,7 +240,7 @@ let make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
             href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`}>
             <button
               onClick={_ =>
-                Notifications.success({msg: "Critical care log updates are filed successfully"})}
+                Notifications.success({msg: "Detailed Update filed successfully"})}
               className="btn btn-primary w-full mt-6">
               {str("Complete")}
             </button>
