@@ -48,7 +48,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
       asset_class: "HL7MONITOR",
       ordering: qParams.ordering || "bed__name",
       bed_is_occupied:
-        qParams.show_monitors_without_patient === true ? false : true,
+        qParams.show_monitors_without_patient === "true" ? false : true,
     },
   });
 
@@ -83,7 +83,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
               <ButtonV2
                 variant={
                   qParams.location ||
-                  qParams.show_monitors_without_patient == "true"
+                  qParams.show_monitors_without_patient === "true"
                     ? "primary"
                     : "secondary"
                 }
