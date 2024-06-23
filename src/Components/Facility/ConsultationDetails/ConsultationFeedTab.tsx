@@ -180,7 +180,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
                           ? "Save current position to selected preset"
                           : "Change camera position to update preset"
                       }
-                      tooltipClassName="translate-y-3 translate-y-8 text-xs"
+                      tooltipClassName="translate-x-3 translate-y-8 text-xs"
                       onClick={() => setShowPresetSaveConfirmation(true)}
                     >
                       <CareIcon
