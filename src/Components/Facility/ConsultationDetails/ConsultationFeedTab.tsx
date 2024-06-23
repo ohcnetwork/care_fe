@@ -17,6 +17,7 @@ import useOperateCamera, {
 } from "../../CameraFeed/useOperateCamera";
 import request from "../../../Utils/request/request";
 import { classNames, isIOS } from "../../../Utils/utils";
+import ConfirmDialog from "../../Common/ConfirmDialog";
 
 export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   const authUser = useAuthUser();
@@ -25,6 +26,8 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
 
   const [asset, setAsset] = useState<AssetData>();
   const [preset, setPreset] = useState<AssetBedModel>();
+  const [showPresetSaveConfirmation, setShowPresetSaveConfirmation] =
+    useState(false);
   const [isUpdatingPreset, setIsUpdatingPreset] = useState(false);
   const [hasMoved, setHasMoved] = useState(false);
   const [key, setKey] = useState(0);
@@ -77,6 +80,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
     setPreset(updated);
     setHasMoved(false);
     setIsUpdatingPreset(false);
+    setShowPresetSaveConfirmation(false);
   };
 
   useEffect(() => {
@@ -94,97 +98,108 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   }
 
   return (
-    <div>
-      <PageTitle
-        title="Camera Feed"
-        breadcrumbs={false}
-        hideBack={true}
-        focusOnLoad={false}
+    <>
+      <ConfirmDialog
+        title="Update Preset"
+        description="Are you sure you want to update this preset to the current location?"
+        action="Confirm"
+        show={showPresetSaveConfirmation}
+        onClose={() => setShowPresetSaveConfirmation(false)}
+        onConfirm={handleUpdatePreset}
       />
-      <span className="mb-2 flex rounded-lg border border-warning-400 bg-warning-100 px-2 py-1 text-sm font-medium text-warning-700 sm:hidden">
-        <CareIcon icon="l-exclamation-triangle" className="pr-2 text-base" />
-        For better experience, rotate your device.
-      </span>
-      <div ref={divRef}>
-        <CameraFeed
-          key={key}
-          asset={asset}
-          preset={preset?.meta.position}
-          onMove={() => setHasMoved(true)}
-          onReset={() => {
-            if (isIOS) {
-              setKey(key + 1);
-            }
-          }}
-          onStreamError={() => {
-            triggerGoal("Camera Feed Viewed", {
-              consultationId: props.consultationId,
-              userId: authUser.id,
-              result: "error",
-            });
-          }}
-          onStreamSuccess={() => {
-            triggerGoal("Camera Feed Viewed", {
-              consultationId: props.consultationId,
-              userId: authUser.id,
-              result: "success",
-            });
-          }}
-        >
-          <div className="flex items-center">
-            {presets ? (
-              <>
-                <AssetBedSelect
-                  options={presets}
-                  label={(obj) => obj.meta.preset_name}
-                  value={preset}
-                  onChange={(value) => {
-                    triggerGoal("Camera Preset Clicked", {
-                      presetName: preset?.meta?.preset_name,
-                      consultationId: props.consultationId,
-                      userId: authUser.id,
-                      result: "success",
-                    });
-                    setHasMoved(false);
-                    setPreset(value);
-                  }}
-                />
-                {isUpdatingPreset ? (
-                  <CareIcon
-                    icon="l-spinner"
-                    className="animate-spin text-base text-zinc-300 md:mx-2"
+
+      <div>
+        <PageTitle
+          title="Camera Feed"
+          breadcrumbs={false}
+          hideBack={true}
+          focusOnLoad={false}
+        />
+        <span className="mb-2 flex rounded-lg border border-warning-400 bg-warning-100 px-2 py-1 text-sm font-medium text-warning-700 sm:hidden">
+          <CareIcon icon="l-exclamation-triangle" className="pr-2 text-base" />
+          For better experience, rotate your device.
+        </span>
+        <div ref={divRef}>
+          <CameraFeed
+            key={key}
+            asset={asset}
+            preset={preset?.meta.position}
+            onMove={() => setHasMoved(true)}
+            onReset={() => {
+              if (isIOS) {
+                setKey(key + 1);
+              }
+            }}
+            onStreamError={() => {
+              triggerGoal("Camera Feed Viewed", {
+                consultationId: props.consultationId,
+                userId: authUser.id,
+                result: "error",
+              });
+            }}
+            onStreamSuccess={() => {
+              triggerGoal("Camera Feed Viewed", {
+                consultationId: props.consultationId,
+                userId: authUser.id,
+                result: "success",
+              });
+            }}
+          >
+            <div className="flex items-center">
+              {presets ? (
+                <>
+                  <AssetBedSelect
+                    options={presets}
+                    label={(obj) => obj.meta.preset_name}
+                    value={preset}
+                    onChange={(value) => {
+                      triggerGoal("Camera Preset Clicked", {
+                        presetName: preset?.meta?.preset_name,
+                        consultationId: props.consultationId,
+                        userId: authUser.id,
+                        result: "success",
+                      });
+                      setHasMoved(false);
+                      setPreset(value);
+                    }}
                   />
-                ) : (
-                  <ButtonV2
-                    size="small"
-                    variant="secondary"
-                    disabled={!hasMoved}
-                    className="hover:bg-zinc-700 disabled:bg-transparent"
-                    ghost
-                    tooltip={
-                      hasMoved
-                        ? "Save current position to selected preset"
-                        : "Change camera position to update preset"
-                    }
-                    tooltipClassName="translate-y-8 text-xs"
-                    onClick={handleUpdatePreset}
-                  >
+                  {isUpdatingPreset ? (
                     <CareIcon
-                      icon="l-save"
-                      className={classNames(
-                        "text-lg",
-                        hasMoved ? "text-gray-200" : "text-gray-500",
-                      )}
+                      icon="l-spinner"
+                      className="animate-spin text-base text-zinc-300 md:mx-2"
                     />
-                  </ButtonV2>
-                )}
-              </>
-            ) : (
-              <span>loading presets...</span>
-            )}
-          </div>
-        </CameraFeed>
+                  ) : (
+                    <ButtonV2
+                      size="small"
+                      variant="secondary"
+                      disabled={!hasMoved}
+                      className="hover:bg-zinc-700 disabled:bg-transparent"
+                      ghost
+                      tooltip={
+                        hasMoved
+                          ? "Save current position to selected preset"
+                          : "Change camera position to update preset"
+                      }
+                      tooltipClassName="translate-y-8 text-xs"
+                      onClick={() => setShowPresetSaveConfirmation(true)}
+                    >
+                      <CareIcon
+                        icon="l-save"
+                        className={classNames(
+                          "text-lg",
+                          hasMoved ? "text-gray-200" : "text-gray-500",
+                        )}
+                      />
+                    </ButtonV2>
+                  )}
+                </>
+              ) : (
+                <span>loading presets...</span>
+              )}
+            </div>
+          </CameraFeed>
+        </div>
       </div>
-    </div>
+    </>
   );
 };

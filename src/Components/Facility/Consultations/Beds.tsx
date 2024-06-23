@@ -234,7 +234,7 @@ const Beds = (props: BedsProps) => {
             <div>
               <ButtonV2 variant="primary" type="submit">
                 <CareIcon icon="l-bed" className="text-xl" />
-                Move to bed
+                Update
               </ButtonV2>
             </div>
           </div>
