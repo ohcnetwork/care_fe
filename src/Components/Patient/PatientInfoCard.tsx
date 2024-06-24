@@ -140,15 +140,6 @@ export default function PatientInfoCard(props: {
     },
     prefetch: !!consultation?.treating_physician_object?.username,
   });
-  const { data: consentRecords, loading: consentRecordsLoading } = useQuery(
-    routes.listConsents,
-    {
-      pathParams: {
-        consultationId: consultation?.id ?? "",
-      },
-      prefetch: !!consultation?.id,
-    },
-  );
 
   return (
     <>
@@ -364,20 +355,15 @@ export default function PatientInfoCard(props: {
                         </div>
                       </div>
                     )}
-                  {!consentRecordsLoading &&
-                    !consentRecords?.results.filter(
-                      (c) =>
-                        !c.archived &&
-                        c.files?.filter((f) => !f.is_archived).length,
-                    ).length && (
-                      <div>
-                        <div className="inline-flex w-full items-center justify-start rounded border border-red-600 bg-red-400 p-1 px-3 text-xs font-semibold leading-4">
-                          <span className="font-semibold text-white">
-                            Consent Records Missing
-                          </span>
-                        </div>
+                  {consultation?.has_consents || (
+                    <div>
+                      <div className="inline-flex w-full items-center justify-start rounded border border-red-600 bg-red-400 p-1 px-3 text-xs font-semibold leading-4">
+                        <span className="font-semibold text-white">
+                          Consent Records Missing
+                        </span>
                       </div>
-                    )}
+                    </div>
+                  )}
                   {consultation?.suggestion === "DC" && (
                     <div>
                       <div>
