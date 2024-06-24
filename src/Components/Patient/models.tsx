@@ -136,8 +136,6 @@ export interface PatientModel {
   // ABDM related
   abha_number?: string;
   abha_number_object?: AbhaObject;
-
-  has_consents?: boolean;
 }
 
 export interface SampleTestModel {
