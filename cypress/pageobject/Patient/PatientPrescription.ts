@@ -52,11 +52,18 @@ export class PatientPrescription {
   }
 
   enterDosage(doseAmount: string) {
+    cy.get("#base_dosage").clear({ force: true });
+    cy.get("#base_dosage").click({ force: true });
     cy.get("#base_dosage").type(doseAmount, { force: true });
   }
 
   enterIndicator(indicator: string) {
     cy.get("#indicator").type(indicator);
+  }
+
+  enterDiscontinueReason(reason: string) {
+    cy.wait(2000);
+    cy.get("#discontinuedReason").type(reason);
   }
 
   enterAdministerDosage(dosage: string) {
