@@ -14,9 +14,10 @@ export class PatientConsultationPage {
     cy.clickAndSelectOption("#category", category);
   }
 
-  addPatientSymptoms(symptoms, text, date) {
+  addPatientSymptoms(text, symptoms, date) {
     cy.typeAndMultiSelectOption("#patient_symptoms", text, symptoms);
     cy.clickAndTypeDate("#symptoms_onset_date", date);
+    cy.get("#add-symptom").click();
   }
 
   selectPatientReferance(referance: string) {

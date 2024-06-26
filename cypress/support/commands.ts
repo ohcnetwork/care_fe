@@ -142,21 +142,20 @@ Cypress.Commands.add(
       });
   },
 );
-Cypress.Commands.add(
-  "typeAndMultiSelectOption",
-  (selector: string, input: string, options: string | string[]) => {
-    const optionArray = Array.isArray(options) ? options : [options];
-    cy.get(selector)
-      .click()
-      .type(input)
-      .then(() => {
-        optionArray.forEach((options) => {
-          cy.get("[role='option']").contains(options).click();
-        });
-        cy.get(selector).click();
+Cypress.Commands.add("typeAndMultiSelectOption", (selector, input, options) => {
+  const optionArray = Array.isArray(options) ? options : [options];
+  cy.get(selector)
+    .click()
+    .type(input)
+    .then(() => {
+      optionArray.forEach((option, index) => {
+        cy.get("[role='option']").contains(option).click();
+        if (index < optionArray.length - 1) {
+          cy.wait(1000); // Wait for 1 second before selecting the next option
+        }
       });
-  },
-);
+    });
+});
 
 Cypress.Commands.add(
   "clickAndSelectOption",

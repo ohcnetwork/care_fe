@@ -293,12 +293,11 @@ describe("Patient Consultation in multiple combination", () => {
     );
     // verify the free text in referring facility name
     patientConsultationPage.typeReferringFacility("Life Care Hospital");
-    patientConsultationPage.selectSymptomsDate("01012024");
-    patientConsultationPage.typeAndMultiSelectSymptoms("s", [
-      "Sore throat",
-      "Sputum",
-    ]);
-    patientConsultationPage.clickAddSymptom();
+    patientConsultationPage.addPatientSymptoms(
+      "ss",
+      ["Breathlessness", "Dizziness"],
+      "21062024",
+    );
     // Stable category
     patientConsultationPage.selectPatientCategory("Mild");
     // OP Consultation
@@ -338,12 +337,11 @@ describe("Patient Consultation in multiple combination", () => {
       "Outpatient/Emergency Room",
     );
     // Select the Symptoms - Breathlessness and Bleeding symptoms
-    patientConsultationPage.selectSymptomsDate("01012024");
-    patientConsultationPage.typeAndMultiSelectSymptoms("b", [
-      "Breathlessness",
-      "Bleeding",
-    ]);
-    patientConsultationPage.clickAddSymptom();
+    patientConsultationPage.addPatientSymptoms(
+      "ss",
+      ["Breathlessness", "Dizziness"],
+      "21062024",
+    );
     // Comfort Care category
     patientConsultationPage.selectPatientCategory("Comfort Care");
     // Date of symptoms
