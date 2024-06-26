@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import AutoCompleteAsync from "../Form/AutoCompleteAsync";
 import { FacilityModel } from "../Facility/models";
 import request from "../../Utils/request/request";
@@ -22,6 +22,7 @@ interface FacilitySelectProps {
 }
 
 export const FacilitySelect = (props: FacilitySelectProps) => {
+  const [NOptions, setNOptions] = useState(0);
   const {
     name,
     exclude_user,
@@ -30,7 +31,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
     setSelected,
     searchAll,
     showAll = true,
-    showNOptions = 10,
+    showNOptions = NOptions,
     className = "",
     facilityType,
     district,
@@ -61,6 +62,11 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
         data?.results?.push({
           name: text,
         });
+
+      if (data?.count) {
+        setNOptions(data.count);
+      }
+
       return data?.results;
     },
     [searchAll, showAll, facilityType, district, exclude_user, freeText],
