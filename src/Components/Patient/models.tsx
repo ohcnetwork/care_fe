@@ -50,8 +50,16 @@ export interface AbhaObject {
 }
 
 export interface VaccinesData {
-  external_id: string;
+  id: string;
   name: string;
+}
+
+export interface VaccineRegistrationModel {
+  vaccine_name?: string;
+  vaccination_center?: string;
+  last_vaccinated_date?: any;
+  number_of_doses?: string;
+  batch_number?: string;
 }
 
 export interface PatientModel {

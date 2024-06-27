@@ -83,7 +83,7 @@ export default {
     port: 4000,
     proxy: {
       "/api": {
-        target: process.env.CARE_API ?? "https://careapi.ohc.network",
+        target: process.env.CARE_API ?? "http://localhost:9000/",
         changeOrigin: true,
       },
     },

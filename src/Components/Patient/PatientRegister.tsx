@@ -217,8 +217,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     useState(false);
   const [insuranceDetailsError, setInsuranceDetailsError] =
     useState<FieldError>();
-  const [vaccinesList, setVaccinesList] = useState<any>([]);
-  const [isVaccineLoading, setIsVaccineLoading] = useState(false);
+
   useEffect(() => {
     if (extId && formField) {
       setCareExtId(extId);
@@ -229,19 +228,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const headerText = !id ? "Add Details of Patient" : "Update Patient Details";
   const buttonText = !id ? "Add Patient" : "Save Details";
 
-  const fetchAllVaccines = useCallback(async () => {
-    setIsVaccineLoading(true);
-    const { res, data } = await request(routes.getVaccines);
-    if (res?.ok && data?.results) {
-      setVaccinesList(data.results);
-    }
-    setIsVaccineLoading(false);
-    console.log(data?.results);
-    return data?.results || [];
-  }, []);
-  useEffect(() => {
-    fetchAllVaccines();
-  }, []);
   const fetchDistricts = useCallback(async (id: number) => {
     if (id > 0) {
       setIsDistrictLoading(true);
@@ -1794,8 +1780,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     className=" mb-4"
                                   >
                                     <VaccinationDetailsBuilder
-                                      vaccineOptions={vaccinesList}
-                                      vaccinesLoading={isVaccineLoading}
                                       value={
                                         field("create_vaccination_details")
                                           .value

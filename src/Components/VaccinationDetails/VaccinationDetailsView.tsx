@@ -2,7 +2,7 @@ import { formatDate } from "../../Utils/utils";
 
 export const VaccinationDetailsView = (props: any) => {
   return (
-    <div className=" my-4 w-full rounded-lg border border-gray-400">
+    <div className=" my-4 w-full rounded-lg border border-gray-400 p-2">
       <div className="grid grid-cols-2 gap-x-20 gap-y-10 p-4">
         <div className=" flex flex-col gap-2">
           <span>Vaccination Center</span>
@@ -42,12 +42,12 @@ export const VaccinationDetailsView = (props: any) => {
         </div>
         <div className="flex flex-col gap-2">
           <span>Last Date of Vaccination</span>
-        </div>
-        <div
-          className={`${props.fieldsClassName} col-span-2`}
-          id={"last_vaccinated_date_display-div"}
-        >
-          {formatDate(props.detailsObj.last_vaccinated_date)}
+          <div
+            className={`${props.fieldsClassName} col-span-2`}
+            id={"last_vaccinated_date_display-div"}
+          >
+            {formatDate(props.detailsObj.last_vaccinated_date)}
+          </div>
         </div>
       </div>
     </div>

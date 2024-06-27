@@ -3,7 +3,7 @@ import { VaccinationDetailsView } from "./VaccinationDetailsView";
 
 export const VaccinationDetailsEntry = (props: any) => {
   return (
-    <div className=" w-full rounded-lg border border-gray-400 bg-white p-3">
+    <div className=" w-full rounded-lg border border-gray-400 bg-white px-6 py-3">
       <AccordionV2
         title={
           <div>
