@@ -1,7 +1,7 @@
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { formatName } from "../../../Utils/utils";
+import { classNames, formatName } from "../../../Utils/utils";
 import useAuthUser, { useAuthContext } from "../../../Common/hooks/useAuthUser";
 
 const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
@@ -19,9 +19,10 @@ const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
         <img
           src={user.read_profile_picture_url || "/images/empty_avatar.jpg"}
           alt="profile"
-          className={`h-10 w-10 rounded-full object-cover ${
-            shrinked ? "mb-3" : "mb-2 mt-1"
-          }`}
+          className={classNames(
+            "mb-3 h-10 w-10 rounded-full object-cover",
+            shrinked && "mb-2 mt-1",
+          )}
         />
       </Link>
       <div className="flex cursor-pointer justify-center" onClick={signOut}>

@@ -16,12 +16,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import {
-  GenderType,
-  SkillModel,
-  UpdatePasswordForm,
-  UserModel,
-} from "../Users/models";
+import { GenderType, SkillModel, UpdatePasswordForm } from "../Users/models";
 import UpdatableApp, { checkForUpdate } from "../Common/UpdatableApp";
 import dayjs from "../../Utils/dayjs";
 import useAuthUser, { useAuthContext } from "../../Common/hooks/useAuthUser";
@@ -469,7 +464,6 @@ export default function UserProfile() {
         }
         onClose={() => setEditProfilePic(false)}
         onDelete={() => refetchUserData()}
-        user={userData ?? ({} as UserModel)}
       />
       <div className="p-10 lg:p-16">
         <div className="lg:grid lg:grid-cols-3 lg:gap-6">

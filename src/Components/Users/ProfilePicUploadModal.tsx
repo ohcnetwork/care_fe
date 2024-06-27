@@ -7,7 +7,6 @@ import {
 } from "react";
 import { Success } from "../../Utils/Notifications";
 import useDragAndDrop from "../../Utils/useDragAndDrop";
-import { sleep } from "../../Utils/utils";
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import Webcam from "react-webcam";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
@@ -19,54 +18,47 @@ import DialogModal from "../Common/Dialog";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import uploadFile from "../../Utils/request/uploadFile";
-import { UserModel } from "./models";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 interface Props {
   open: boolean;
-  onClose: (() => void) | undefined;
-  onSave?: (() => void) | undefined;
-  onDelete?: (() => void) | undefined;
-  user: UserModel;
+  onClose: () => void;
+  onSave?: () => void;
+  onDelete?: () => void;
 }
 
-const ProfilePicUploadModal = ({
-  open,
-  onClose,
-  onSave,
-  onDelete,
-  user,
-}: Props) => {
-  const [isUploading, setIsUploading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<any>();
+const ProfilePicUploadModal = ({ open, onClose, onSave, onDelete }: Props) => {
+  const user = useAuthUser();
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [selectedFile, setSelectedFile] = useState<File>();
   const [preview, setPreview] = useState<string>();
   const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
-  const webRef = useRef<any>(null);
-  const [previewImage, setPreviewImage] = useState(null);
-  const [isCaptureImgBeingUploaded, setIsCaptureImgBeingUploaded] =
-    useState(false);
+  const webRef = useRef<Webcam>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const FACING_MODE_USER = "user";
   const FACING_MODE_ENVIRONMENT = { exact: "environment" };
-  const [facingMode, setFacingMode] = useState<any>(FACING_MODE_USER);
+  const [uploadPercent, setUploadPercent] = useState(0);
+
+  const [facingMode, setFacingMode] = useState<"front" | "rear">("front");
   const videoConstraints = {
     width: 1280,
     height: 720,
-    facingMode: "user",
+    facingMode:
+      facingMode === "front" ? FACING_MODE_USER : FACING_MODE_ENVIRONMENT,
   };
   const { width } = useWindowDimensions();
   const LaptopScreenBreakpoint = 640;
   const isLaptopScreen = width >= LaptopScreenBreakpoint;
   const { t } = useTranslation();
   const handleSwitchCamera = useCallback(() => {
-    setFacingMode((prevState: any) =>
-      prevState === FACING_MODE_USER
-        ? FACING_MODE_ENVIRONMENT
-        : FACING_MODE_USER,
-    );
+    setFacingMode((prev) => (prev === "front" ? "rear" : "front"));
   }, []);
 
   const captureImage = () => {
+    if (!webRef.current) return;
     setPreviewImage(webRef.current.getScreenshot());
     const canvas = webRef.current.getCanvas();
-    canvas?.toBlob((blob: Blob) => {
+    canvas?.toBlob((blob: Blob | null) => {
+      if (!blob) return;
       const myFile = new File([blob], "image.png", {
         type: blob.type,
       });
@@ -95,10 +87,19 @@ const ProfilePicUploadModal = ({
     setSelectedFile(e.target.files[0]);
   };
 
+  useEffect(() => {
+    if (uploadPercent === 100) {
+      setIsUploading(false);
+      onSave?.();
+      closeModal();
+      setUploadPercent(0);
+    }
+  }, [uploadPercent]);
+
   const handleUpload = async () => {
-    setIsCaptureImgBeingUploaded(true);
+    setIsUploading(true);
     if (!selectedFile) {
-      setIsCaptureImgBeingUploaded(false);
+      setIsUploading(false);
       closeModal();
       return;
     }
@@ -126,7 +127,7 @@ const ProfilePicUploadModal = ({
           setIsUploading(false);
         }
       },
-      null,
+      setUploadPercent,
       () => {
         Notification.Error({
           msg: "Network Failure. Please check your internet connectivity.",
@@ -134,12 +135,6 @@ const ProfilePicUploadModal = ({
         setIsUploading(false);
       },
     );
-
-    await sleep(1000);
-    setIsUploading(false);
-    setIsCaptureImgBeingUploaded(false);
-    onSave && onSave();
-    closeModal();
   };
 
   const handleDelete = async () => {
@@ -299,7 +294,7 @@ const ProfilePicUploadModal = ({
                     screenshotFormat="image/jpeg"
                     width={1280}
                     ref={webRef}
-                    videoConstraints={{ ...videoConstraints, facingMode }}
+                    videoConstraints={videoConstraints}
                   />
                 </>
               ) : (
@@ -349,7 +344,7 @@ const ProfilePicUploadModal = ({
                         {t("retake")}
                       </ButtonV2>
                       <ButtonV2 onClick={handleUpload} className="my-2 w-full">
-                        {isCaptureImgBeingUploaded && (
+                        {isUploading && (
                           <CareIcon
                             icon="l-spinner"
                             className="animate-spin text-lg"
@@ -367,7 +362,6 @@ const ProfilePicUploadModal = ({
                   onClick={() => {
                     setPreviewImage(null);
                     setIsCameraOpen(false);
-                    webRef.current.stopCamera();
                   }}
                   className="border-grey-200 my-2 w-full border-2"
                 >
@@ -410,7 +404,7 @@ const ProfilePicUploadModal = ({
                           {t("retake")}
                         </ButtonV2>
                         <Submit disabled={isUploading} onClick={handleUpload}>
-                          {isCaptureImgBeingUploaded ? (
+                          {isUploading ? (
                             <>
                               <CareIcon
                                 icon="l-spinner"
@@ -432,7 +426,6 @@ const ProfilePicUploadModal = ({
                   onClick={() => {
                     setPreviewImage(null);
                     setIsCameraOpen(false);
-                    webRef.current.stopCamera();
                   }}
                 >
                   {`${t("close")} ${t("camera")}`}
