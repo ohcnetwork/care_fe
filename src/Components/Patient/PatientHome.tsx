@@ -132,7 +132,6 @@ export const PatientHome = (props: any) => {
       if (res?.ok && data) {
         setPatientData(data);
       }
-      console.log(data);
       triggerGoal("Patient Profile Viewed", {
         facilityId: facilityId,
         userId: authUser.id,
@@ -715,7 +714,7 @@ export const PatientHome = (props: any) => {
             expandIcon={<CareIcon icon="l-angle-down" className="text-2xl" />}
             title={
               <div className=" text-lg font-semibold text-gray-900">
-                Vaccination Details
+                {t("vaccination_details")}
               </div>
             }
           >

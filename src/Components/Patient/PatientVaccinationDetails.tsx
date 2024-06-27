@@ -1,3 +1,5 @@
+import { VaccineRegistrationModel } from "./models";
+
 const PatientVaccinationDetails = (props: any) => {
   return (
     <div className=" my-7 overflow-hidden rounded-xl border-2 border-gray-400 shadow-lg">
@@ -17,7 +19,7 @@ const PatientVaccinationDetails = (props: any) => {
           </tr>
         </thead>
         <tbody>
-          {props.vaccineData?.map((detail: any) => (
+          {props.vaccineData?.map((detail: VaccineRegistrationModel) => (
             <tr className="space-x-16">
               <td className="p-4 font-semibold">{detail.vaccine_name.name}</td>
               <td className="p-4 font-semibold">

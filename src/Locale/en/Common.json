@@ -166,5 +166,7 @@
   "treating_doctor": "Treating Doctor",
   "ration_card__NO_CARD": "Non-card holder",
   "ration_card__BPL": "BPL",
-  "ration_card__APL": "APL"
+  "ration_card__APL": "APL",
+  "complete_vaccination_details": "Complete Vaccination Details",
+  "vaccination_details":  "Vaccination Details"
 }

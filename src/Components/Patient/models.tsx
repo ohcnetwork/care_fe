@@ -55,7 +55,7 @@ export interface VaccinesData {
 }
 
 export interface VaccineRegistrationModel {
-  vaccine_name?: string;
+  vaccine_name?: any;
   vaccination_center?: string;
   last_vaccinated_date?: any;
   number_of_doses?: string;

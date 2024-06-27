@@ -763,7 +763,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       is_active: true,
       ration_card_category: formData.ration_card_category,
     };
-    console.log(data);
     const { res, data: requestData } = id
       ? await request(routes.updatePatient, {
           pathParams: { id },
@@ -1746,7 +1745,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           }
                           title={
                             <h1 className="text-left text-xl font-bold text-purple-500">
-                              Complete Vaccination Details
+                              {t("complete_vaccination_details")}
                             </h1>
                           }
                         >
