@@ -86,73 +86,77 @@ const BedRow = (props: BedRowProps) => {
         handleCancel={handleDeleteCancel}
         handleOk={handleDeleteConfirm}
       />
-      <div className="flex h-full w-full flex-col rounded border border-gray-300 bg-white p-6 shadow-sm transition-all duration-200 ease-in-out hover:border-primary-400">
-        <div className="flex w-full items-start justify-between gap-2">
-          <div className="flex items-center gap-3">
-            <p
-              className="inline break-words text-xl capitalize"
-              id="view-bed-name"
-            >
-              {name}
-            </p>
+      <div className="flex h-full w-full flex-col justify-between rounded border border-gray-300 bg-white p-6 shadow-sm transition-all duration-200 ease-in-out hover:border-primary-400">
+        <div>
+          <div className="flex w-full items-start justify-start gap-2">
+            <div className="flex items-center gap-3">
+              <p
+                className="inline break-words text-xl capitalize"
+                id="view-bed-name"
+              >
+                {name}
+              </p>
+            </div>
+            <div id="view-bedbadges" className="flex flex-wrap gap-1">
+              {LOCATION_BED_TYPES.find((item) => item.id === bedType) && (
+                <p className="mb-1 inline-flex w-fit items-center rounded-md bg-blue-100 px-2.5 py-0.5 text-sm font-medium capitalize leading-5 text-blue-800">
+                  {LOCATION_BED_TYPES.find(
+                    (item) => item.id === bedType,
+                  )?.name?.slice(0, 25) + (bedType.length > 25 ? "..." : "")}
+                </p>
+              )}
+              <p
+                className={`${
+                  isOccupied
+                    ? "bg-warning-100 text-warning-600"
+                    : "bg-primary-100 text-primary-600"
+                } mb-1 inline-flex w-fit items-center rounded-md px-2.5 py-0.5 text-sm font-medium capitalize leading-5`}
+              >
+                {isOccupied ? "Occupied" : "Vacant"}
+              </p>
+            </div>
           </div>
+          <p className="mt-4 break-all">{description}</p>
         </div>
-        <div id="view-bedbadges">
-          {LOCATION_BED_TYPES.find((item) => item.id === bedType) && (
-            <p className="mb-1 inline-flex w-fit items-center rounded-md bg-blue-100 px-2.5 py-0.5 text-sm font-medium capitalize leading-5 text-blue-800">
-              {LOCATION_BED_TYPES.find(
-                (item) => item.id === bedType,
-              )?.name?.slice(0, 25) + (bedType.length > 25 ? "..." : "")}
-            </p>
-          )}
-          <p
-            className={`${
-              isOccupied
-                ? "bg-warning-100 text-warning-600"
-                : "bg-primary-100 text-primary-600"
-            } mb-1 inline-flex w-fit items-center rounded-md px-2.5 py-0.5 text-sm font-medium capitalize leading-5 min-[400px]:ml-1`}
-          >
-            {isOccupied ? "Occupied" : "Vacant"}
-          </p>
-        </div>
-        <p className="break-all">{description}</p>
-        <div className="mt-4 flex flex-col justify-between gap-2 lg:flex-row">
-          <ButtonV2
-            id="edit-bed-button"
-            href={`/facility/${facilityId}/location/${locationId}/beds/${id}/update`}
-            authorizeFor={NonReadOnlyUsers}
-            className="w-full lg:w-auto"
-            variant="secondary"
-            border
-            ghost
-          >
-            <CareIcon icon="l-pen" className="text-lg" />
-            Edit
-          </ButtonV2>
-          <ButtonV2
-            id="delete-bed-button"
-            onClick={() => handleDelete(name, id)}
-            authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
-            variant="danger"
-            border
-            ghost
-            className="w-full lg:w-auto"
-            tooltip={
-              !allowedUser
-                ? "Contact your admin to delete the bed"
-                : isOccupied
-                  ? "Bed is occupied"
-                  : undefined
-            }
-            tooltipClassName=" text-xs w-full lg:w-auto"
-          >
-            <CareIcon icon="l-trash-alt" className="text-lg" />
-            Delete
-          </ButtonV2>
-        </div>
-        <div className="mt-3 flex items-center justify-between gap-4 text-sm font-medium text-gray-700">
-          <RecordMeta time={created_date} prefix="Created:" />
-          <RecordMeta time={modified_date} prefix="Modified:" />
+        <div>
+          <div className="mt-4 flex flex-col justify-between gap-2 lg:flex-row">
+            <ButtonV2
+              id="edit-bed-button"
+              href={`/facility/${facilityId}/location/${locationId}/beds/${id}/update`}
+              authorizeFor={NonReadOnlyUsers}
+              className="w-full lg:w-auto"
+              variant="secondary"
+              border
+              ghost
+            >
+              <CareIcon icon="l-pen" className="text-lg" />
+              Edit
+            </ButtonV2>
+            <ButtonV2
+              id="delete-bed-button"
+              onClick={() => handleDelete(name, id)}
+              authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
+              variant="danger"
+              border
+              ghost
+              className="w-full lg:w-auto"
+              tooltip={
+                !allowedUser
+                  ? "Contact your admin to delete the bed"
+                  : isOccupied
+                    ? "Bed is occupied"
+                    : undefined
+              }
+              tooltipClassName=" text-xs w-full lg:w-auto"
+            >
+              <CareIcon icon="l-trash-alt" className="text-lg" />
+              Delete
+            </ButtonV2>
+          </div>
+          <div className="mt-3 flex items-center justify-between gap-4 text-sm font-medium text-gray-700">
+            <RecordMeta time={created_date} prefix="Created:" />
+            <RecordMeta time={modified_date} prefix="Modified:" />
+          </div>
         </div>
       </div>
     </div>
@@ -183,7 +187,7 @@ export const BedManagement = (props: BedManagementProps) => {
 
   if (data?.results.length) {
     BedList = (
-      <div className="my-8 grid  gap-3 lg:mx-8 min-[1100px]:grid-cols-2 min-[1560px]:grid-cols-3">
+      <div className="my-8 grid  gap-3  lg:grid-cols-2 xl:grid-cols-3">
         {data.results.map((bedItem: BedModel) => (
           <BedRow
             id={bedItem.id ?? ""}
