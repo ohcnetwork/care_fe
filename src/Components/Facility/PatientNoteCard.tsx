@@ -11,8 +11,9 @@ import DialogModal from "../Common/Dialog";
 import { t } from "i18next";
 import dayjs from "dayjs";
 import Spinner from "../Common/Spinner";
-import useAuthUser from "../../Common/hooks/useAuthUser";
+// import useAuthUser from "../../Common/hooks/useAuthUser";
 import useSlug from "../../Common/hooks/useSlug";
+import { navigate } from "raviger";
 
 const PatientNoteCard = ({
   note,
@@ -30,7 +31,8 @@ const PatientNoteCard = ({
   const [noteField, setNoteField] = useState(note.note);
   const [showEditHistory, setShowEditHistory] = useState(false);
   const [editHistory, setEditHistory] = useState<PatientNotesEditModel[]>([]);
-  const authUser = useAuthUser();
+  // const authUser = useAuthUser();
+  const currentPath = window.location.pathname;
 
   const fetchEditHistory = async () => {
     const { res, data } = await request(routes.getPatientNoteEditHistory, {
@@ -128,7 +130,7 @@ const PatientNoteCard = ({
           </div>
           <div className="flex gap-2">
             {!disableEdit &&
-              note.created_by_object.id === authUser.id &&
+              // note.created_by_object.id === authUser.id &&
               !isEditing && (
                 <ButtonV2
                   ghost
@@ -184,7 +186,14 @@ const PatientNoteCard = ({
                 </div>
               </div>
             ) : (
-              <div className="text-sm text-gray-700">{noteField}</div>
+              <div
+                onClick={() => {
+                  navigate(`${currentPath}/${note.id}`);
+                }}
+                className="cursor-pointer text-sm text-gray-700"
+              >
+                {noteField}
+              </div>
             )}
           </div>
         }
