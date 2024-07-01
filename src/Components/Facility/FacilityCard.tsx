@@ -13,10 +13,16 @@ import useConfig from "../../Common/hooks/useConfig";
 import { classNames } from "../../Utils/utils";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
+import { getBedTypes } from "../../Common/constants";
+import useQuery from "../../Utils/request/useQuery";
 
 export const FacilityCard = (props: { facility: any; userType: any }) => {
   const { facility, userType } = props;
   const { kasp_string } = useConfig();
+  const config = useConfig();
+  const capacityQuery = useQuery(routes.getCapacity, {
+    pathParams: { facilityId: `${facility.id}` },
+  });
 
   const { t } = useTranslation();
   const [notifyModalFor, setNotifyModalFor] = useState(undefined);
@@ -44,7 +50,22 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
       setNotifyError("Message cannot be empty");
     }
   };
-
+  const fac = { usedICU: 0, VacantICU: 0 };
+  getBedTypes(config).map((x) => {
+    const res = capacityQuery.data?.results.find((data) => {
+      return data.room_type === x.id;
+    });
+    if (
+      res &&
+      res.current_capacity !== undefined &&
+      res.total_capacity !== undefined &&
+      (res.room_type === 20 || res.room_type === 10)
+    ) {
+      fac.VacantICU = fac.VacantICU + res.current_capacity;
+      fac.usedICU = fac.usedICU + res.total_capacity;
+      return <p />;
+    }
+  });
   return (
     <div key={`usr_${facility.id}`} className="w-full">
       <div className="block h-full overflow-hidden rounded-lg bg-white shadow hover:border-primary-500">
@@ -180,8 +201,12 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                           : "button-primary-border bg-primary-100"
                       }`}
                     >
-                      <span className="tooltip-text tooltip-top">
-                        Live Patients / Total beds
+                      <span
+                        className="tooltip-text tooltip-top"
+                        style={{ whiteSpace: "pre-line" }}
+                      >
+                        Total patients marked as admitted in consultation/ Total
+                        no. of registered beds
                       </span>{" "}
                       <CareIcon
                         icon="l-bed"
@@ -201,6 +226,39 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       >
                         Occupancy: {facility.patient_count} /{" "}
                         {facility.bed_count}{" "}
+                      </dt>{" "}
+                    </div>
+                    <div
+                      id="occupany-badge"
+                      className={`tooltip button-size-default ml-auto flex w-fit items-center justify-center rounded-md px-2 ${
+                        fac.usedICU / fac.VacantICU > 0.85
+                          ? "button-danger-border bg-red-500"
+                          : "button-primary-border bg-primary-100"
+                      }`}
+                    >
+                      <span
+                        className="tooltip-text tooltip-top"
+                        style={{ whiteSpace: "pre-line" }}
+                      >
+                        ICU bed type/ Number of ICU beds registered
+                      </span>{" "}
+                      <CareIcon
+                        icon="l-bed"
+                        className={classNames(
+                          "mr-2",
+                          fac.usedICU / fac.VacantICU > 0.85
+                            ? "text-white"
+                            : "text-primary-600",
+                        )}
+                      />{" "}
+                      <dt
+                        className={`text-sm font-semibold ${
+                          fac.usedICU / fac.VacantICU > 0.85
+                            ? "text-white"
+                            : "text-gray-700"
+                        }`}
+                      >
+                        ICU Occupancy: {fac.usedICU} / {fac.VacantICU}{" "}
                       </dt>{" "}
                     </div>
                     <DialogModal
