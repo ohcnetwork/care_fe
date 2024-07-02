@@ -10,12 +10,11 @@ import { formatPhoneNumber, parsePhoneNumber } from "../../Utils/utils";
 import DialogModal from "../Common/Dialog";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import useConfig from "../../Common/hooks/useConfig";
-import { classNames } from "../../Utils/utils";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { getBedTypes } from "../../Common/constants";
 import useQuery from "../../Utils/request/useQuery";
-
+import { Occupany_badge } from "./Facilitybedoccupancybadge";
 export const FacilityCard = (props: { facility: any; userType: any }) => {
   const { facility, userType } = props;
   const { kasp_string } = useConfig();
@@ -28,6 +27,19 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
   const [notifyModalFor, setNotifyModalFor] = useState(undefined);
   const [notifyMessage, setNotifyMessage] = useState("");
   const [notifyError, setNotifyError] = useState("");
+  const icu_occupancy = {
+    usedICU: 0,
+    VacantICU: 0,
+    tooltip: "ICU bed type/ Number of ICU beds registered",
+    badge_title: "ICU Occupancy",
+  };
+  const total_occupancy = {
+    occupied: facility.patient_count,
+    total: facility.total_count,
+    tooltip:
+      "Total patients marked as admitted in consultation/ Total no. of registered bed",
+    badge_title: "Occupancy",
+  };
 
   const handleNotifySubmit = async (id: any) => {
     if (notifyMessage.trim().length >= 1) {
@@ -50,7 +62,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
       setNotifyError("Message cannot be empty");
     }
   };
-  const fac = { usedICU: 0, VacantICU: 0 };
+
   getBedTypes(config).map((x) => {
     const res = capacityQuery.data?.results.find((data) => {
       return data.room_type === x.id;
@@ -61,11 +73,11 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
       res.total_capacity !== undefined &&
       (res.room_type === 20 || res.room_type === 10)
     ) {
-      fac.VacantICU = fac.VacantICU + res.current_capacity;
-      fac.usedICU = fac.usedICU + res.total_capacity;
-      return <p />;
+      icu_occupancy.VacantICU = icu_occupancy.VacantICU + res.current_capacity;
+      icu_occupancy.usedICU = icu_occupancy.usedICU + res.total_capacity;
     }
   });
+
   return (
     <div key={`usr_${facility.id}`} className="w-full">
       <div className="block h-full overflow-hidden rounded-lg bg-white shadow hover:border-primary-500">
@@ -193,74 +205,19 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                 {/* <div className="flex justify-between py-2"> */}
                 <div className="flex w-full flex-wrap justify-between gap-2 py-2">
                   <div className="flex flex-wrap gap-2">
-                    <div
-                      id="occupany-badge"
-                      className={`tooltip button-size-default ml-auto flex w-fit items-center justify-center rounded-md px-2 ${
-                        facility.patient_count / facility.bed_count > 0.85
-                          ? "button-danger-border bg-red-500"
-                          : "button-primary-border bg-primary-100"
-                      }`}
-                    >
-                      <span
-                        className="tooltip-text tooltip-top"
-                        style={{ whiteSpace: "pre-line" }}
-                      >
-                        Total patients marked as admitted in consultation/ Total
-                        no. of registered beds
-                      </span>{" "}
-                      <CareIcon
-                        icon="l-bed"
-                        className={classNames(
-                          "mr-2",
-                          facility.patient_count / facility.bed_count > 0.85
-                            ? "text-white"
-                            : "text-primary-600",
-                        )}
-                      />{" "}
-                      <dt
-                        className={`text-sm font-semibold ${
-                          facility.patient_count / facility.bed_count > 0.85
-                            ? "text-white"
-                            : "text-gray-700"
-                        }`}
-                      >
-                        Occupancy: {facility.patient_count} /{" "}
-                        {facility.bed_count}{" "}
-                      </dt>{" "}
-                    </div>
-                    <div
-                      id="occupany-badge"
-                      className={`tooltip button-size-default ml-auto flex w-fit items-center justify-center rounded-md px-2 ${
-                        fac.usedICU / fac.VacantICU > 0.85
-                          ? "button-danger-border bg-red-500"
-                          : "button-primary-border bg-primary-100"
-                      }`}
-                    >
-                      <span
-                        className="tooltip-text tooltip-top"
-                        style={{ whiteSpace: "pre-line" }}
-                      >
-                        ICU bed type/ Number of ICU beds registered
-                      </span>{" "}
-                      <CareIcon
-                        icon="l-bed"
-                        className={classNames(
-                          "mr-2",
-                          fac.usedICU / fac.VacantICU > 0.85
-                            ? "text-white"
-                            : "text-primary-600",
-                        )}
-                      />{" "}
-                      <dt
-                        className={`text-sm font-semibold ${
-                          fac.usedICU / fac.VacantICU > 0.85
-                            ? "text-white"
-                            : "text-gray-700"
-                        }`}
-                      >
-                        ICU Occupancy: {fac.usedICU} / {fac.VacantICU}{" "}
-                      </dt>{" "}
-                    </div>
+                    <Occupany_badge
+                      occupied={total_occupancy.occupied}
+                      total={total_occupancy.total}
+                      tooltip={total_occupancy.tooltip}
+                      title={total_occupancy.badge_title}
+                    />
+                    <Occupany_badge
+                      occupied={icu_occupancy.usedICU}
+                      total={icu_occupancy.VacantICU}
+                      tooltip={icu_occupancy.tooltip}
+                      title={icu_occupancy.badge_title}
+                    />
+
                     <DialogModal
                       show={notifyModalFor === facility.id}
                       title={
