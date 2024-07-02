@@ -67,6 +67,8 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
       }
       show={show}
       onClose={onClose}
+      className="max-w-[500px]"
+      fixedWidth={false}
     >
       <div
         ref={printRef}
