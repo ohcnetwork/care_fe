@@ -63,7 +63,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
     }
   };
 
-  getBedTypes(config).map((x) => {
+  getBedTypes(config).forEach((x) => {
     const res = capacityQuery.data?.results.find((data) => {
       return data.room_type === x.id;
     });
@@ -77,7 +77,6 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
       icu_occupancy.usedICU = icu_occupancy.usedICU + res.total_capacity;
     }
   });
-
   return (
     <div key={`usr_${facility.id}`} className="w-full">
       <div className="block h-full overflow-hidden rounded-lg bg-white shadow hover:border-primary-500">
