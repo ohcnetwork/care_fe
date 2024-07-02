@@ -27,20 +27,21 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
   const [notifyModalFor, setNotifyModalFor] = useState(undefined);
   const [notifyMessage, setNotifyMessage] = useState("");
   const [notifyError, setNotifyError] = useState("");
-  const icu_occupancy = {
-    usedICU: 0,
-    VacantICU: 0,
-    tooltip: "ICU bed type/ Number of ICU beds registered",
-    badge_title: "ICU Occupancy",
+  const occupancy = {
+    total_occupancy: {
+      occupied: facility.patient_count,
+      total: facility.total_count,
+      tooltip:
+        "Total patients marked as admitted in consultation/ Total no. of registered bed",
+      badge_title: "Occupancy",
+    },
+    icu: {
+      occupied: 0,
+      total: 0,
+      tooltip: "ICU bed type/ Number of ICU beds registered",
+      badge_title: "ICU Occupancy",
+    },
   };
-  const total_occupancy = {
-    occupied: facility.patient_count,
-    total: facility.total_count,
-    tooltip:
-      "Total patients marked as admitted in consultation/ Total no. of registered bed",
-    badge_title: "Occupancy",
-  };
-
   const handleNotifySubmit = async (id: any) => {
     if (notifyMessage.trim().length >= 1) {
       setNotifyError("");
@@ -73,10 +74,22 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
       res.total_capacity !== undefined &&
       (res.room_type === 20 || res.room_type === 10)
     ) {
-      icu_occupancy.VacantICU = icu_occupancy.VacantICU + res.current_capacity;
-      icu_occupancy.usedICU = icu_occupancy.usedICU + res.total_capacity;
+      occupancy.icu.total = occupancy.icu.total + res.current_capacity;
+      occupancy.icu.occupied = occupancy.icu.occupied + res.total_capacity;
     }
   });
+  let Badge: JSX.Element[] = [];
+  Badge = Object.values(occupancy).map((i) => {
+    return (
+      <Occupany_badge
+        title={i.badge_title}
+        tooltip={i.tooltip}
+        occupied={i.occupied}
+        total={i.total}
+      />
+    );
+  });
+
   return (
     <div key={`usr_${facility.id}`} className="w-full">
       <div className="block h-full overflow-hidden rounded-lg bg-white shadow hover:border-primary-500">
@@ -204,19 +217,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                 {/* <div className="flex justify-between py-2"> */}
                 <div className="flex w-full flex-wrap justify-between gap-2 py-2">
                   <div className="flex flex-wrap gap-2">
-                    <Occupany_badge
-                      occupied={total_occupancy.occupied}
-                      total={total_occupancy.total}
-                      tooltip={total_occupancy.tooltip}
-                      title={total_occupancy.badge_title}
-                    />
-                    <Occupany_badge
-                      occupied={icu_occupancy.usedICU}
-                      total={icu_occupancy.VacantICU}
-                      tooltip={icu_occupancy.tooltip}
-                      title={icu_occupancy.badge_title}
-                    />
-
+                    {Badge}
                     <DialogModal
                       show={notifyModalFor === facility.id}
                       title={
