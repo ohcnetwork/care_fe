@@ -35,22 +35,29 @@ const VitalsMonitorHeader = ({ patientAssetBed }: VitalsMonitorHeaderProps) => {
       </div>
       <div className="flex flex-col items-end gap-2 text-xs md:flex-row md:items-center md:text-sm">
         {bed && (
-          <Link
-            className="flex flex-col items-end gap-2 text-gray-500 md:flex-row md:items-center"
-            href={`/facility/${patient?.facility_object?.id}/location/${bed?.location_object?.id}/beds`}
-          >
-            <span className="flex items-center gap-1 hover:text-white">
-              <CareIcon icon="l-bed" className="text-sm md:text-base" />
-              <span>{bed.name}</span>
-            </span>
-            <span className="flex items-center gap-1 hover:text-white">
-              <CareIcon
-                icon="l-location-point"
-                className="text-sm md:text-base"
-              />
-              <span>{bed.location_object?.name}</span>
-            </span>
-          </Link>
+          <>
+            <Link
+              className=" text-gray-500"
+              href={`/facility/${patient?.facility_object?.id}/location/${bed?.location_object?.id}/beds`}
+            >
+              <span className="flex items-center gap-1 hover:text-white">
+                <CareIcon icon="l-bed" className="text-sm md:text-base" />
+                <span>{bed.name}</span>
+              </span>
+            </Link>
+            <Link
+              className=" text-gray-500"
+              href={`/facility/${patient?.facility_object?.id}/location/`}
+            >
+              <span className="flex items-center gap-1 hover:text-white">
+                <CareIcon
+                  icon="l-location-point"
+                  className="text-sm md:text-base"
+                />
+                <span>{bed.location_object?.name}</span>
+              </span>
+            </Link>
+          </>
         )}
       </div>
     </div>
