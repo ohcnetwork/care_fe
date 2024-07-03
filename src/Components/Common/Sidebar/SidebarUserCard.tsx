@@ -20,7 +20,7 @@ const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
           src={user.read_profile_picture_url || "/images/empty_avatar.jpg"}
           alt="profile"
           className={classNames(
-            "mb-3 h-10 w-10 rounded-full object-cover",
+            "mb-3 size-10 rounded-full object-cover",
             shrinked && "mb-2 mt-1",
           )}
         />
