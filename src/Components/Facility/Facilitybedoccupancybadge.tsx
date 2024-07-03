@@ -17,11 +17,7 @@ export const Occupany_badge = (props: {
   return (
     <div
       id="occupany-badge"
-      className={`tooltip button-size-default ml-auto flex w-fit items-center justify-center rounded-md px-2 ${
-        occupied_capacity / total_capacity > 0.85
-          ? "button-danger-border bg-red-500"
-          : "button-primary-border bg-primary-100"
-      }`}
+      className={`tooltip button-size-default ml-auto flex w-fit items-center justify-center rounded-md px-2 ${occupied_capacity / total_capacity > 0.85 ? "button-danger-border bg-red-500" : "button-primary-border bg-primary-100"}`}
     >
       <span
         className="tooltip-text tooltip-top"
@@ -39,11 +35,7 @@ export const Occupany_badge = (props: {
         )}
       />{" "}
       <dt
-        className={`text-sm font-semibold ${
-          occupied_capacity / total_capacity > 0.85
-            ? "text-white"
-            : "text-gray-700"
-        }`}
+        className={`text-sm font-semibold ${occupied_capacity / total_capacity > 0.85 ? "text-white" : "text-gray-700"}`}
       >
         {badge_title}: {occupied_capacity} / {total_capacity}{" "}
       </dt>{" "}
