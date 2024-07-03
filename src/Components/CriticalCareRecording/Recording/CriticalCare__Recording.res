@@ -116,8 +116,6 @@ let updateDailyRound = (send, editor, dailyRound) => {
 let make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
   let (state, send) = React.useReducer(reducer, initialState(dailyRound))
 
-  Js.log(dailyRound.roundsType)
-
   let sections =
     dailyRound.roundsType == VentilatorRound
       ? [
