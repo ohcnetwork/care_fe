@@ -1295,11 +1295,6 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                           </p>
                         )
                       }
-                      hideDescription={
-                        (Array.isArray(bed)
-                          ? bed[0].bed_type
-                          : bed?.bed_type) !== "ICU"
-                      }
                       required
                       label="Category"
                       {...field("category")}

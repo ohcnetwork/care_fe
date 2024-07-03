@@ -399,9 +399,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             required={true}
             name="patient_category"
             value={state.form.patient_category}
-            hideDescription={
-              consultationData.current_bed?.bed_object.bed_type !== "ICU"
-            }
             onChange={handleFormFieldChange}
             label="Patient Category"
             className="md:col-span-2"

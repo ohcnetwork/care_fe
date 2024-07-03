@@ -8,7 +8,7 @@ import { FormFieldBaseProps } from "../Form/FormFields/Utils";
  * field.
  */
 export default function PatientCategorySelect(
-  props: FormFieldBaseProps<PatientCategoryID> & { hideDescription?: boolean },
+  props: FormFieldBaseProps<PatientCategoryID>,
 ) {
   return (
     <SelectFormField
@@ -17,9 +17,7 @@ export default function PatientCategorySelect(
       options={PATIENT_CATEGORIES}
       optionValue={(option) => option.id}
       optionLabel={(option) => option.text}
-      optionDescription={
-        props.hideDescription ? undefined : (option) => option.description
-      }
+      optionDescription={(option) => option.description}
       optionSelectedLabel={(option) => (
         <span className="flex items-center gap-3">
           <div
