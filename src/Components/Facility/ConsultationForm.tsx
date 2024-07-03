@@ -1416,20 +1416,36 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         className="col-span-6"
                         ref={fieldRef["treating_physician"]}
                       >
-                        <UserAutocompleteFormField
-                          name={"treating_physician"}
-                          label={t("treating_doctor")}
-                          placeholder="Attending Doctors Name and Designation"
-                          required
-                          value={
-                            state.form.treating_physician_object ?? undefined
-                          }
-                          onChange={handleDoctorSelect}
-                          showActiveStatus
-                          userType={"Doctor"}
-                          homeFacility={facilityId}
-                          error={state.errors.treating_physician}
-                        />
+                        {state.form.suggestion === "DC" ? (
+                          <UserAutocompleteFormField
+                            name={"treating_physician"}
+                            label={t("treating_doctor")}
+                            placeholder="Attending Doctors Name and Designation"
+                            value={
+                              state.form.treating_physician_object ?? undefined
+                            }
+                            onChange={handleDoctorSelect}
+                            showActiveStatus
+                            userType={"Doctor"}
+                            homeFacility={facilityId}
+                            error={state.errors.treating_physician}
+                          />
+                        ) : (
+                          <UserAutocompleteFormField
+                            name={"treating_physician"}
+                            label={t("treating_doctor")}
+                            placeholder="Attending Doctors Name and Designation"
+                            required
+                            value={
+                              state.form.treating_physician_object ?? undefined
+                            }
+                            onChange={handleDoctorSelect}
+                            showActiveStatus
+                            userType={"Doctor"}
+                            homeFacility={facilityId}
+                            error={state.errors.treating_physician}
+                          />
+                        )}
                       </div>
 
                       <div className="col-span-6 flex flex-col gap-3 md:flex-row">
