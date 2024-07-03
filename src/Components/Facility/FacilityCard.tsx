@@ -74,23 +74,11 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
       res.total_capacity !== undefined &&
       (res.room_type === 20 || res.room_type === 10)
     ) {
-      occupancy.icu.total = occupancy.icu.total + res.current_capacity;
-      occupancy.icu.occupied = occupancy.icu.occupied + res.total_capacity;
+      occupancy.icu.total = occupancy.icu.total + res.total_capacity;
+      occupancy.icu.occupied = occupancy.icu.occupied + res.current_capacity;
     }
   });
   const Badge: JSX.Element[] = [];
-  // Badge = Object.keys(occupancy).map(x => {
-  //   let i : {} = occupancy[x];
-  //   return (
-  //     <Occupany_badge
-  //     key={x}
-  //       title={i.badge_title}
-  //       tooltip={i.tooltip}
-  //       occupied={i.occupied}
-  //       total={i.total}
-  //     />
-  //   );
-  // });
   for (const key in occupancy) {
     const element = occupancy[key as keyof typeof occupancy];
     Badge.push(
