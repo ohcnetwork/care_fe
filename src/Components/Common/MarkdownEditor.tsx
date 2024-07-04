@@ -1,4 +1,4 @@
-import { useRef, useReducer, useEffect, useState } from "react";
+import { useRef, useReducer, useEffect, useState, useCallback } from "react";
 import {
   FaBold,
   FaItalic,
@@ -6,10 +6,14 @@ import {
   FaListUl,
   FaLink,
   FaUnlink,
+  FaStrikethrough,
   FaQuoteRight,
 } from "react-icons/fa";
+import { GoMention } from "react-icons/go";
+// import { MdAttachFile } from "react-icons/md";
 import TurndownService from "turndown";
 import ReactMarkdown from "react-markdown";
+import MentionsDropdown from "./MentionDropdown";
 
 interface RichTextEditorProps {
   markdown?: string;
@@ -19,6 +23,7 @@ interface RichTextEditorProps {
 interface EditorState {
   isBoldActive: boolean;
   isItalicActive: boolean;
+  isStrikethroughActive: boolean;
   isQuoteActive: boolean;
   isUnorderedListActive: boolean;
   isOrderedListActive: boolean;
@@ -27,6 +32,7 @@ interface EditorState {
 type EditorAction =
   | { type: "SET_BOLD_ACTIVE"; payload: boolean }
   | { type: "SET_ITALIC_ACTIVE"; payload: boolean }
+  | { type: "SET_STRIKETHROUGH_ACTIVE"; payload: boolean }
   | { type: "SET_QUOTE_ACTIVE"; payload: boolean }
   | { type: "SET_UNORDERED_LIST_ACTIVE"; payload: boolean }
   | { type: "SET_ORDERED_LIST_ACTIVE"; payload: boolean }
@@ -35,6 +41,7 @@ type EditorAction =
 const initialState: EditorState = {
   isBoldActive: false,
   isItalicActive: false,
+  isStrikethroughActive: false,
   isQuoteActive: false,
   isUnorderedListActive: false,
   isOrderedListActive: false,
@@ -46,6 +53,8 @@ function editorReducer(state: EditorState, action: EditorAction): EditorState {
       return { ...state, isBoldActive: action.payload };
     case "SET_ITALIC_ACTIVE":
       return { ...state, isItalicActive: action.payload };
+    case "SET_STRIKETHROUGH_ACTIVE":
+      return { ...state, isStrikethroughActive: action.payload };
     case "SET_QUOTE_ACTIVE":
       return { ...state, isQuoteActive: action.payload };
     case "SET_UNORDERED_LIST_ACTIVE":
@@ -64,6 +73,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
   const [htmlCode, setHtmlCode] = useState<string>("");
   const [state, dispatch] = useReducer(editorReducer, initialState);
   const editorRef = useRef<HTMLDivElement>(null);
+
+  const [showMentions, setShowMentions] = useState(false);
+  const [mentionPosition, setMentionPosition] = useState({ top: 0, left: 0 });
+  const lastCaretPosition = useRef<Range | null>(null);
 
   useEffect(() => {
     document.addEventListener("selectionchange", handleSelectionChange);
@@ -88,6 +101,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
     const isUnorderedListActive = listNode?.nodeName === "UL" ?? false;
     const isOrderedListActive =
       (listNode && listNode.nodeName === "OL") ?? false;
+    const isStrikethrough =
+      isParentTag(selection.focusNode, "S") ||
+      isParentTag(selection.focusNode, "DEL");
 
     dispatch({
       type: "UPDATE_ALL",
@@ -97,6 +113,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
         isQuoteActive: isQuote,
         isUnorderedListActive,
         isOrderedListActive,
+        isStrikethroughActive: isStrikethrough,
       },
     });
   };
@@ -124,26 +141,17 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
     return null;
   };
 
-  const saveState = () => {
-    const turndownService = new TurndownService();
-    const htmlContent = editorRef.current?.innerHTML || "";
-    const markdownText = turndownService.turndown(htmlContent);
-    setMarkdown(markdownText);
-    setHtmlCode(htmlContent);
-  };
-
-  const applyStyle = (style: "bold" | "italic") => {
+  const applyStyle = (style: "bold" | "italic" | "strikethrough") => {
     const selection = window.getSelection();
     if (!selection || !selection.rangeCount) return;
 
     const range = selection.getRangeAt(0);
 
-    if (state.isQuoteActive && (style === "bold" || style === "italic")) return;
-
-    const tagName = style === "bold" ? "strong" : "em";
-    const tagNode = document.createElement(tagName);
-    tagNode.appendChild(range.extractContents());
-    range.insertNode(tagNode);
+    const tag = style === "bold" ? "strong" : style === "italic" ? "em" : "s";
+    const node = document.createElement(tag);
+    node.appendChild(range.cloneContents());
+    range.deleteContents();
+    range.insertNode(node);
 
     saveState();
   };
@@ -181,17 +189,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
       }
     }
 
-    saveState();
-  };
-
-  const applyHeading = (level: string) => {
-    const selection = window.getSelection();
-    if (!selection || !selection.rangeCount) return;
-
-    const range = selection.getRangeAt(0);
-    const heading = document.createElement(`h${level}`);
-    heading.appendChild(range.extractContents());
-    range.insertNode(heading);
     saveState();
   };
 
@@ -251,6 +248,109 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
     saveState();
   };
 
+  const handleInput = useCallback((event: React.FormEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLDivElement;
+    const text = target.textContent || "";
+    const lastChar = text[text.length - 1];
+
+    if (lastChar === "@") {
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+        setMentionPosition({
+          top: rect.bottom + window.scrollY,
+          left: rect.left + window.scrollX,
+        });
+        setShowMentions(true);
+        lastCaretPosition.current = range.cloneRange();
+      }
+    } else {
+      setShowMentions(false);
+    }
+
+    saveState();
+  }, []);
+
+  const insertMention = (user: { id: string; username: string }) => {
+    if (lastCaretPosition.current) {
+      const range = lastCaretPosition.current;
+      range.setStart(range.startContainer, range.startOffset - 1);
+      range.deleteContents();
+
+      const mentionNode = document.createElement("span");
+      mentionNode.contentEditable = "false";
+      mentionNode.className = "bg-blue-100 px-1 rounded";
+      mentionNode.textContent = `@${user.username}`;
+      mentionNode.setAttribute("data-user-id", user.id);
+
+      range.insertNode(mentionNode);
+
+      const newRange = document.createRange();
+      newRange.setStartAfter(mentionNode);
+      newRange.collapse(true);
+
+      const selection = window.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+      }
+
+      setShowMentions(false);
+      saveState();
+    }
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Backspace") {
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const startContainer = range.startContainer;
+
+        if (
+          startContainer.nodeType === Node.TEXT_NODE &&
+          startContainer.textContent === "@"
+        ) {
+          const parentNode = startContainer.parentNode;
+          if (
+            parentNode &&
+            parentNode.nodeName === "SPAN" &&
+            parentNode instanceof HTMLElement &&
+            parentNode.hasAttribute("data-user-id")
+          ) {
+            event.preventDefault();
+            parentNode.parentNode?.removeChild(parentNode);
+            saveState();
+          }
+        }
+      }
+    }
+  };
+
+  const saveState = () => {
+    const turndownService = new TurndownService();
+    turndownService.addRule("strikethrough", {
+      filter: ["del", "s"],
+      replacement: (content) => `~${content}~`,
+    });
+    turndownService.addRule("mentions", {
+      filter: (node) => {
+        return node.nodeName === "SPAN" && node.hasAttribute("data-user-id");
+      },
+      replacement: (content, node) => {
+        const userId = (node as HTMLElement).getAttribute("data-user-id");
+        const username = content.replace("@", "");
+        return `[mention_user](user_id:${userId}, username:${username})`;
+      },
+    });
+
+    const htmlContent = editorRef.current?.innerHTML || "";
+    const markdownText = turndownService.turndown(htmlContent);
+    setMarkdown(markdownText);
+    setHtmlCode(htmlContent);
+  };
+
   return (
     <div className="mx-auto flex rounded-lg bg-white p-8 shadow-lg">
       <div className="w-1/2 pr-4">
@@ -277,6 +377,17 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
               disabled={state.isQuoteActive}
             >
               <FaItalic className="text-lg" />
+            </button>
+            <button
+              onClick={() => applyStyle("strikethrough")}
+              className={`rounded p-2 ${
+                state.isStrikethroughActive && !state.isQuoteActive
+                  ? "bg-primary-700 text-white"
+                  : "bg-gray-200"
+              }`}
+              disabled={state.isQuoteActive}
+            >
+              <FaStrikethrough className="text-lg" />
             </button>
           </div>
 
@@ -323,30 +434,45 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
             </button>
           </div>
 
-          <select
-            onChange={(e) => applyHeading(e.target.value)}
-            className="rounded bg-gray-200 p-2"
-          >
-            <option value="" defaultChecked>
-              Heading
-            </option>
-            <option value="1">H1</option>
-            <option value="2">H2</option>
-            <option value="3">H3</option>
-            <option value="4">H4</option>
-            <option value="5">H5</option>
-            <option value="6">H6</option>
-          </select>
-
           <div className="mx-2 h-6 border-l border-gray-400"></div>
+
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => {
+                const selection = window.getSelection();
+                if (!selection || !selection.rangeCount) return;
+                const range = selection.getRangeAt(0);
+                const rect = range.getBoundingClientRect();
+                setMentionPosition({
+                  top: rect.bottom + window.scrollY,
+                  left: rect.left + window.scrollX,
+                });
+                setShowMentions(!showMentions);
+              }}
+              className="rounded bg-gray-200 p-2"
+            >
+              <GoMention className="text-lg" />
+            </button>
+            {/* <button className="rounded bg-gray-200 p-2">
+              <MdAttachFile className="text-lg" />
+            </button> */}
+          </div>
         </div>
 
         <div
           ref={editorRef}
           contentEditable
           className="prose min-h-64 border border-gray-300 p-4 focus:outline-none"
-          onInput={saveState}
+          onInput={handleInput}
+          onKeyDown={handleKeyDown}
         ></div>
+
+        {showMentions && (
+          <MentionsDropdown
+            onSelect={insertMention}
+            position={mentionPosition}
+          />
+        )}
       </div>
       <div className="w-1/2 pl-4">
         <div className="mt-4">
