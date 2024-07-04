@@ -62,12 +62,12 @@ const AutoCompleteAsync = (props: Props) => {
     () =>
       debounce(async (query: string) => {
         setLoading(true);
-        const data = await fetchData(query);
+        const data = (await fetchData(query)) || [];
 
         if (showNOptions !== undefined) {
-          setData(data?.slice(0, showNOptions) || []);
+          setData(data.slice(0, showNOptions));
         } else {
-          setData(data || []);
+          setData(data);
         }
         setLoading(false);
       }, debounceTime),
