@@ -43,15 +43,40 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
     const selection = window.getSelection();
     if (!selection || !selection.rangeCount) return;
 
-    setIsBoldActive(document.queryCommandState("bold"));
-    setIsItalicActive(document.queryCommandState("italic"));
-    setIsQuoteActive(
-      selection.focusNode?.parentElement?.tagName === "BLOCKQUOTE",
-    );
+    const isBold = isParentTag(selection.focusNode, "STRONG");
+    const isItalic = isParentTag(selection.focusNode, "EM");
+    const isQuote = isParentTag(selection.focusNode, "BLOCKQUOTE");
+
+    setIsBoldActive(isBold);
+    setIsItalicActive(isItalic);
+    setIsQuoteActive(isQuote);
 
     const listNode = findParentNode(selection.anchorNode, ["UL", "OL"]);
     setIsUnorderedListActive(listNode?.nodeName === "UL" ?? false);
     setIsOrderedListActive((listNode && listNode.nodeName === "OL") ?? false);
+  };
+
+  const isParentTag = (node: Node | null, tagName: string) => {
+    while (node) {
+      if (node.nodeName === tagName) {
+        return true;
+      }
+      node = node.parentNode;
+    }
+    return false;
+  };
+
+  const findParentNode = (
+    node: Node | null,
+    tagNames: string[],
+  ): HTMLElement | null => {
+    while (node && node.parentNode) {
+      node = node.parentNode;
+      if (node && tagNames.includes(node.nodeName)) {
+        return node as HTMLElement;
+      }
+    }
+    return null;
   };
 
   const saveState = () => {
@@ -137,7 +162,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
   };
 
   const applyHeading = (level: string) => {
-    document.execCommand("formatBlock", false, `<h${level}>`);
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    const heading = document.createElement(`h${level}`);
+    heading.appendChild(range.extractContents());
+    range.insertNode(heading);
     saveState();
   };
 
@@ -197,71 +228,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
     saveState();
   };
 
-  const handleLineBreak = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const selection = window.getSelection();
-      if (!selection) return;
-
-      const range = selection.getRangeAt(0);
-      const container = range.startContainer.parentNode as HTMLElement;
-
-      if (container && container.tagName === "LI") {
-        const listNode = container.parentNode as HTMLElement;
-        if (listNode) {
-          const newList = document.createElement(listNode.tagName);
-          const newListItem = document.createElement("li");
-
-          newListItem.appendChild(range.extractContents());
-          newList.appendChild(newListItem);
-          if (listNode.parentNode) {
-            listNode.insertBefore(newListItem, container.nextSibling);
-          }
-
-          range.setStart(newListItem, 0);
-          range.setEnd(newListItem, 0);
-
-          if (
-            container &&
-            container.textContent &&
-            container.textContent.trim() === ""
-          ) {
-            if (listNode.parentNode) {
-              listNode.removeChild(container);
-            }
-          }
-        }
-      } else {
-        if (isUnorderedListActive || isOrderedListActive) {
-          document.execCommand("insertHTML", false, "<br><br>");
-        } else {
-          document.execCommand("insertLineBreak");
-        }
-      }
-
-      saveState();
-    }
-  };
-
   const updatePreview = () => {
     const turndownService = new TurndownService();
     const htmlContent = editorRef.current?.innerHTML || "";
     const markdownText = turndownService.turndown(htmlContent);
     setMarkdown(markdownText);
     setHtmlCode(htmlContent);
-  };
-
-  const findParentNode = (
-    node: Node | null,
-    tagNames: string[],
-  ): HTMLElement | null => {
-    while (node && node.parentNode) {
-      node = node.parentNode;
-      if (node && tagNames.includes(node.nodeName)) {
-        return node as HTMLElement;
-      }
-    }
-    return null;
   };
 
   return (
@@ -367,7 +339,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
           ref={editorRef}
           contentEditable
           className="prose min-h-64 border border-gray-300 p-4 focus:outline-none"
-          onKeyDown={handleLineBreak}
           onInput={updatePreview}
         ></div>
       </div>
