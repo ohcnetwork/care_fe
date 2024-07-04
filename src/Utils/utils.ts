@@ -379,7 +379,7 @@ export const formatPatientAge = (obj: PatientModel, abbreviated = false) => {
 
   const years = end.diff(start, "years");
   if (years) {
-    return `${years}${suffixes.year}`;
+    return `${years} ${suffixes.year}`;
   }
 
   // Skip representing as no. of months/days if we don't know the date of birth
