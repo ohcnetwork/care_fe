@@ -17,7 +17,7 @@ interface Props {
   onChange: (selected: any) => void;
   optionLabel?: (option: any) => string;
   optionLabelChip?: (option: any) => string;
-  showNOptions?: number;
+  showNOptions?: number | undefined;
   multiple?: boolean;
   compareBy?: string;
   debounceTime?: number;
@@ -39,7 +39,7 @@ const AutoCompleteAsync = (props: Props) => {
     onChange,
     optionLabel = (option: any) => option.label,
     optionLabelChip = (option: any) => option.label,
-    showNOptions = 10,
+    showNOptions,
     multiple = false,
     compareBy,
     debounceTime = 300,
@@ -62,7 +62,12 @@ const AutoCompleteAsync = (props: Props) => {
       debounce(async (query: string) => {
         setLoading(true);
         const data = await fetchData(query);
-        setData(data?.slice(0, showNOptions) || []);
+
+        if (showNOptions !== undefined) {
+          setData(data?.slice(0, showNOptions) || []);
+        } else {
+          setData(data || []);
+        }
         setLoading(false);
       }, debounceTime),
     [fetchData, showNOptions, debounceTime],
