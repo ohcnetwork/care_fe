@@ -4,8 +4,6 @@ import {
   FaItalic,
   FaListOl,
   FaListUl,
-  FaUndo,
-  FaRedo,
   FaLink,
   FaUnlink,
   FaQuoteRight,
@@ -66,8 +64,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
   const [htmlCode, setHtmlCode] = useState<string>("");
   const [state, dispatch] = useReducer(editorReducer, initialState);
   const editorRef = useRef<HTMLDivElement>(null);
-  const undoStack = useRef<string[]>([]);
-  const redoStack = useRef<string[]>([]);
 
   useEffect(() => {
     document.addEventListener("selectionchange", handleSelectionChange);
@@ -129,41 +125,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
   };
 
   const saveState = () => {
-    if (editorRef.current) {
-      undoStack.current.push(editorRef.current.innerHTML);
-      redoStack.current = [];
-      updatePreview();
-    }
-  };
-
-  const updatePreview = () => {
     const turndownService = new TurndownService();
     const htmlContent = editorRef.current?.innerHTML || "";
     const markdownText = turndownService.turndown(htmlContent);
     setMarkdown(markdownText);
     setHtmlCode(htmlContent);
-  };
-
-  const undo = () => {
-    if (undoStack.current.length > 0 && editorRef.current) {
-      redoStack.current.push(editorRef.current.innerHTML);
-      const lastState = undoStack.current.pop();
-      if (lastState && editorRef.current) {
-        editorRef.current.innerHTML = lastState;
-        updatePreview();
-      }
-    }
-  };
-
-  const redo = () => {
-    if (redoStack.current.length > 0 && editorRef.current) {
-      undoStack.current.push(editorRef.current.innerHTML);
-      const nextState = redoStack.current.pop();
-      if (nextState && editorRef.current) {
-        editorRef.current.innerHTML = nextState;
-        updatePreview();
-      }
-    }
   };
 
   const applyStyle = (style: "bold" | "italic") => {
@@ -373,22 +339,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
           </select>
 
           <div className="mx-2 h-6 border-l border-gray-400"></div>
-
-          <div className="flex items-center space-x-2">
-            <button onClick={undo} className="rounded bg-gray-200 p-2">
-              <FaUndo className="text-lg" />
-            </button>
-            <button onClick={redo} className="rounded bg-gray-200 p-2">
-              <FaRedo className="text-lg" />
-            </button>
-          </div>
         </div>
 
         <div
           ref={editorRef}
           contentEditable
           className="prose min-h-64 border border-gray-300 p-4 focus:outline-none"
-          onInput={updatePreview}
+          onInput={saveState}
         ></div>
       </div>
       <div className="w-1/2 pl-4">
