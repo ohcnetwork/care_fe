@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import PatientCategoryBadge from "../../../Common/PatientCategoryBadge";
 import {
   BloodPressure,
@@ -15,6 +16,8 @@ const LogUpdateCardAttribute = <T extends keyof DailyRoundsModel>({
   attributeKey,
   attributeValue,
 }: Props<T>) => {
+  const { t } = useTranslation();
+
   switch (attributeKey) {
     // case "id":
     // case "external_id":
@@ -67,11 +70,7 @@ const LogUpdateCardAttribute = <T extends keyof DailyRoundsModel>({
         <div className="flex flex-col items-center gap-2 md:flex-row">
           <AttributeLabel attributeKey={attributeKey} />
           <span className="text-sm font-semibold text-gray-700">
-            {(attributeValue as string) === "VENTILATOR"
-              ? "CRITICAL CARE"
-              : (attributeValue as string) === "DOCTORS_LOG"
-                ? "PROGRESS NOTE"
-                : (attributeValue as string)}
+            {t(attributeValue)}
           </span>
         </div>
       );
