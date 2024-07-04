@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useReducer, useEffect, useState } from "react";
 import {
   FaBold,
   FaItalic,
@@ -18,19 +18,56 @@ interface RichTextEditorProps {
   onChange?: (markdown: string, htmlCode: string) => void;
 }
 
+interface EditorState {
+  isBoldActive: boolean;
+  isItalicActive: boolean;
+  isQuoteActive: boolean;
+  isUnorderedListActive: boolean;
+  isOrderedListActive: boolean;
+}
+
+type EditorAction =
+  | { type: "SET_BOLD_ACTIVE"; payload: boolean }
+  | { type: "SET_ITALIC_ACTIVE"; payload: boolean }
+  | { type: "SET_QUOTE_ACTIVE"; payload: boolean }
+  | { type: "SET_UNORDERED_LIST_ACTIVE"; payload: boolean }
+  | { type: "SET_ORDERED_LIST_ACTIVE"; payload: boolean }
+  | { type: "UPDATE_ALL"; payload: Partial<EditorState> };
+
+const initialState: EditorState = {
+  isBoldActive: false,
+  isItalicActive: false,
+  isQuoteActive: false,
+  isUnorderedListActive: false,
+  isOrderedListActive: false,
+};
+
+function editorReducer(state: EditorState, action: EditorAction): EditorState {
+  switch (action.type) {
+    case "SET_BOLD_ACTIVE":
+      return { ...state, isBoldActive: action.payload };
+    case "SET_ITALIC_ACTIVE":
+      return { ...state, isItalicActive: action.payload };
+    case "SET_QUOTE_ACTIVE":
+      return { ...state, isQuoteActive: action.payload };
+    case "SET_UNORDERED_LIST_ACTIVE":
+      return { ...state, isUnorderedListActive: action.payload };
+    case "SET_ORDERED_LIST_ACTIVE":
+      return { ...state, isOrderedListActive: action.payload };
+    case "UPDATE_ALL":
+      return { ...state, ...action.payload };
+    default:
+      return state;
+  }
+}
+
 const RichTextEditor: React.FC<RichTextEditorProps> = () => {
   const [markdown, setMarkdown] = useState<string>("");
   const [htmlCode, setHtmlCode] = useState<string>("");
+  const [state, dispatch] = useReducer(editorReducer, initialState);
   const editorRef = useRef<HTMLDivElement>(null);
   const undoStack = useRef<string[]>([]);
   const redoStack = useRef<string[]>([]);
-  const [isBoldActive, setIsBoldActive] = useState<boolean>(false);
-  const [isItalicActive, setIsItalicActive] = useState<boolean>(false);
-  const [isQuoteActive, setIsQuoteActive] = useState<boolean>(false);
-  const [isUnorderedListActive, setIsUnorderedListActive] =
-    useState<boolean>(false);
-  const [isOrderedListActive, setIsOrderedListActive] =
-    useState<boolean>(false);
 
   useEffect(() => {
     document.addEventListener("selectionchange", handleSelectionChange);
@@ -43,17 +80,29 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
     const selection = window.getSelection();
     if (!selection || !selection.rangeCount) return;
 
-    const isBold = isParentTag(selection.focusNode, "STRONG");
-    const isItalic = isParentTag(selection.focusNode, "EM");
+    const isBold =
+      isParentTag(selection.focusNode, "STRONG") ||
+      isParentTag(selection.focusNode, "B");
+    const isItalic =
+      isParentTag(selection.focusNode, "EM") ||
+      isParentTag(selection.focusNode, "I");
     const isQuote = isParentTag(selection.focusNode, "BLOCKQUOTE");
 
-    setIsBoldActive(isBold);
-    setIsItalicActive(isItalic);
-    setIsQuoteActive(isQuote);
-
     const listNode = findParentNode(selection.anchorNode, ["UL", "OL"]);
-    setIsUnorderedListActive(listNode?.nodeName === "UL" ?? false);
-    setIsOrderedListActive((listNode && listNode.nodeName === "OL") ?? false);
+    const isUnorderedListActive = listNode?.nodeName === "UL" ?? false;
+    const isOrderedListActive =
+      (listNode && listNode.nodeName === "OL") ?? false;
+
+    dispatch({
+      type: "UPDATE_ALL",
+      payload: {
+        isBoldActive: isBold,
+        isItalicActive: isItalic,
+        isQuoteActive: isQuote,
+        isUnorderedListActive,
+        isOrderedListActive,
+      },
+    });
   };
 
   const isParentTag = (node: Node | null, tagName: string) => {
@@ -87,6 +136,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
     }
   };
 
+  const updatePreview = () => {
+    const turndownService = new TurndownService();
+    const htmlContent = editorRef.current?.innerHTML || "";
+    const markdownText = turndownService.turndown(htmlContent);
+    setMarkdown(markdownText);
+    setHtmlCode(htmlContent);
+  };
+
   const undo = () => {
     if (undoStack.current.length > 0 && editorRef.current) {
       redoStack.current.push(editorRef.current.innerHTML);
@@ -115,7 +172,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
 
     const range = selection.getRangeAt(0);
 
-    if (isQuoteActive && (style === "bold" || style === "italic")) return;
+    if (state.isQuoteActive && (style === "bold" || style === "italic")) return;
 
     const tagName = style === "bold" ? "strong" : "em";
     const tagNode = document.createElement(tagName);
@@ -228,14 +285,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
     saveState();
   };
 
-  const updatePreview = () => {
-    const turndownService = new TurndownService();
-    const htmlContent = editorRef.current?.innerHTML || "";
-    const markdownText = turndownService.turndown(htmlContent);
-    setMarkdown(markdownText);
-    setHtmlCode(htmlContent);
-  };
-
   return (
     <div className="mx-auto flex rounded-lg bg-white p-8 shadow-lg">
       <div className="w-1/2 pr-4">
@@ -244,22 +293,22 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
             <button
               onClick={() => applyStyle("bold")}
               className={`rounded p-2 ${
-                isBoldActive && !isQuoteActive
+                state.isBoldActive && !state.isQuoteActive
                   ? "bg-primary-700 text-white"
                   : "bg-gray-200"
               }`}
-              disabled={isQuoteActive}
+              disabled={state.isQuoteActive}
             >
               <FaBold className="text-lg" />
             </button>
             <button
               onClick={() => applyStyle("italic")}
               className={`rounded p-2 ${
-                isItalicActive && !isQuoteActive
+                state.isItalicActive && !state.isQuoteActive
                   ? "bg-primary-700 text-white"
                   : "bg-gray-200"
               }`}
-              disabled={isQuoteActive}
+              disabled={state.isQuoteActive}
             >
               <FaItalic className="text-lg" />
             </button>
@@ -269,22 +318,22 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
             <button
               onClick={() => toggleList("ul")}
               className={`rounded p-2 ${
-                isUnorderedListActive && !isQuoteActive
+                state.isUnorderedListActive && !state.isQuoteActive
                   ? "bg-primary-700 text-white"
                   : "bg-gray-200"
               }`}
-              disabled={isQuoteActive}
+              disabled={state.isQuoteActive}
             >
               <FaListUl className="text-lg" />
             </button>
             <button
               onClick={() => toggleList("ol")}
               className={`rounded p-2 ${
-                isOrderedListActive && !isQuoteActive
+                state.isOrderedListActive && !state.isQuoteActive
                   ? "bg-primary-700 text-white"
                   : "bg-gray-200"
               }`}
-              disabled={isQuoteActive}
+              disabled={state.isQuoteActive}
             >
               <FaListOl className="text-lg" />
             </button>
@@ -293,7 +342,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
           <button
             onClick={applyQuote}
             className={`rounded p-2 ${
-              isQuoteActive ? "bg-primary-700 text-white" : "bg-gray-200"
+              state.isQuoteActive ? "bg-primary-700 text-white" : "bg-gray-200"
             }`}
           >
             <FaQuoteRight className="text-lg" />
