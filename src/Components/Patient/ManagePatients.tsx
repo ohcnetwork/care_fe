@@ -521,7 +521,7 @@ export const PatientManager = () => {
                   id="patient-name-list"
                 >
                   <span className="text-xl capitalize">{patient.name}</span>
-                  <span className="text-gray-800">
+                  <span className="font-bold text-gray-700">
                     {formatPatientAge(patient, true)}
                   </span>
                 </div>
