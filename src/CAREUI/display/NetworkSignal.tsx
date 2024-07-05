@@ -26,7 +26,7 @@ export default function NetworkSignal({ strength, children }: Props) {
         strength === 3 && "text-primary-500",
       )}
     >
-      <div className="flex items-end gap-0.5 p-2">
+      <div className="flex items-end gap-0.5 p-1.5 md:p-2">
         {strength === undefined ? (
           <CareIcon
             icon="l-exclamation-triangle"
@@ -53,7 +53,7 @@ export default function NetworkSignal({ strength, children }: Props) {
         {!!strength && strength < 2 && (
           <CareIcon
             icon="l-exclamation-circle"
-            className="absolute left-0.5 top-0 animate-pulse text-sm text-danger-500"
+            className="absolute left-0.5 top-0.5 animate-pulse text-xs text-danger-500 md:top-0 md:text-sm"
           />
         )}
       </div>
