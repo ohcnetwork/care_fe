@@ -10,10 +10,18 @@ import {
   FaQuoteRight,
 } from "react-icons/fa";
 import { GoMention } from "react-icons/go";
-// import { MdAttachFile } from "react-icons/md";
+import { MdAttachFile } from "react-icons/md";
 import TurndownService from "turndown";
 import MentionsDropdown from "./MentionDropdown";
 import MarkdownPreview from "./MarkdownPreview";
+import { ExtImage, StateInterface } from "../Patient/FileUpload";
+import imageCompression from "browser-image-compression";
+import { CreateFileResponse, FileUploadModel } from "../Patient/models";
+import uploadFile from "../../Utils/request/uploadFile";
+import * as Notification from "../../Utils/Notifications.js";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import FilePreviewDialog from "./FilePreviewDialog";
 
 interface RichTextEditorProps {
   markdown?: string;
@@ -77,6 +85,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
   const [showMentions, setShowMentions] = useState(false);
   const [mentionPosition, setMentionPosition] = useState({ top: 0, left: 0 });
   const lastCaretPosition = useRef<Range | null>(null);
+
+  const [file, setFile] = useState<File | null>(null);
+  const [uploadFileName, setUploadFileName] = useState("");
 
   useEffect(() => {
     document.addEventListener("selectionchange", handleSelectionChange);
@@ -330,6 +341,32 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
     setHtmlCode(htmlContent);
   };
 
+  const onFileChange = (e: any): any => {
+    if (!e.target.files?.length) {
+      return;
+    }
+    const f = e.target.files[0];
+    const fileName = f.name;
+    setFile(e.target.files[0]);
+    setUploadFileName(
+      fileName.substring(0, fileName.lastIndexOf(".")) || fileName,
+    );
+
+    const ext: string = fileName.split(".")[1];
+
+    if (ExtImage.includes(ext)) {
+      const options = {
+        initialQuality: 0.6,
+        alwaysKeepResolution: true,
+      };
+      imageCompression(f, options).then((compressedFile: File) => {
+        setFile(compressedFile);
+      });
+      return;
+    }
+    setFile(f);
+  };
+
   return (
     <div className="mx-auto flex rounded-lg bg-white p-8 shadow-lg">
       <div className="w-1/2 pr-4">
@@ -432,9 +469,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
             >
               <GoMention className="text-lg" />
             </button>
-            {/* <button className="rounded bg-gray-200 p-2">
+            <button className="rounded bg-gray-200 p-2">
               <MdAttachFile className="text-lg" />
-            </button> */}
+              <input
+                onChange={onFileChange}
+                type="file"
+                accept="image/*,video/*,audio/*,text/plain,text/csv,application/rtf,application/msword,application/vnd.oasis.opendocument.text,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/pdf"
+              />
+            </button>
           </div>
         </div>
 
@@ -444,6 +486,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
           className="prose min-h-64 border border-gray-300 p-4 focus:outline-none"
           onInput={handleInput}
         ></div>
+
+        <FileUpload
+          file={file}
+          setFile={setFile}
+          uploadFileName={uploadFileName}
+          setUploadFileName={setUploadFileName}
+        />
 
         {showMentions && (
           <MentionsDropdown
@@ -475,3 +524,309 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
 };
 
 export default RichTextEditor;
+
+const FileUpload = ({
+  file,
+  setFile,
+  uploadFileName,
+  setUploadFileName,
+}: {
+  file: File | null;
+  setFile: React.Dispatch<React.SetStateAction<File | null>>;
+  uploadFileName: string;
+  setUploadFileName: React.Dispatch<React.SetStateAction<string>>;
+}) => {
+  const [file_state, setFileState] = useState<StateInterface>({
+    open: false,
+    isImage: false,
+    name: "",
+    extension: "",
+    zoom: 4,
+    isZoomInDisabled: false,
+    isZoomOutDisabled: false,
+    rotation: 0,
+  });
+  const [fileUrl, setFileUrl] = useState<string>("");
+  const [downloadURL, setDownloadURL] = useState("");
+  const [uploadStarted, setUploadStarted] = useState(false);
+  const [uploadPercent, setUploadPercent] = useState(0);
+  const [uploadFileError, setUploadFileError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const file_type = "NOTES";
+  const [files, setFiles] = useState<FileUploadModel[]>([]);
+  const [noteId, setNoteId] = useState<string>(
+    "40faecc6-6199-48cd-bc2a-dd9e73b920f9",
+  );
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+
+    const res = await request(routes.viewUpload, {
+      query: {
+        file_type: file_type,
+        associating_id: noteId,
+        is_archived: false,
+        limit: 100,
+        offset: 0,
+      },
+    });
+
+    if (res.data) {
+      setFiles(res.data.results);
+    }
+
+    setIsLoading(false);
+  }, [noteId]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const uploadfile = async (data: CreateFileResponse) => {
+    const url = data.signed_url;
+    const internal_name = data.internal_name;
+    const f = file;
+    if (!f) return;
+    const newFile = new File([f], `${internal_name}`);
+    return new Promise<void>((resolve, reject) => {
+      uploadFile(
+        url,
+        newFile,
+        "PUT",
+        { "Content-Type": file?.type },
+        (xhr: XMLHttpRequest) => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            setUploadStarted(false);
+            setFile(null);
+            setUploadFileName("");
+            fetchData();
+            Notification.Success({
+              msg: "File Uploaded Successfully",
+            });
+            setUploadFileError("");
+            resolve();
+          } else {
+            Notification.Error({
+              msg: "Error Uploading File: " + xhr.statusText,
+            });
+            setUploadStarted(false);
+            reject();
+          }
+        },
+        setUploadPercent,
+        () => {
+          Notification.Error({
+            msg: "Error Uploading File: Network Error",
+          });
+          setUploadStarted(false);
+          reject();
+        },
+      );
+    });
+  };
+
+  const validateFileUpload = () => {
+    const filenameLength = uploadFileName.trim().length;
+    const f = file;
+    if (f === undefined || f === null) {
+      setUploadFileError("Please choose a file to upload");
+      return false;
+    }
+    if (filenameLength === 0) {
+      setUploadFileError("Please give a name !!");
+      return false;
+    }
+    if (f.size > 10e7) {
+      setUploadFileError("Maximum size of files is 100 MB");
+      return false;
+    }
+    return true;
+  };
+  const markUploadComplete = (data: CreateFileResponse) => {
+    return request(routes.editUpload, {
+      body: { upload_completed: true },
+      pathParams: {
+        id: data.id,
+        fileType: file_type,
+        associatingId: noteId,
+      },
+    });
+  };
+
+  const handleUpload = async () => {
+    if (!validateFileUpload()) return;
+    const f = file;
+
+    const category = "UNSPECIFIED";
+    const filename = uploadFileName === "" && f ? f.name : uploadFileName;
+    const name = f?.name;
+    setUploadStarted(true);
+
+    const { data } = await request(routes.createUpload, {
+      body: {
+        original_name: name ?? "",
+        file_type: file_type,
+        name: filename,
+        associating_id: noteId,
+        file_category: category,
+        mime_type: f?.type ?? "",
+      },
+    });
+
+    if (data) {
+      await uploadfile(data);
+      await markUploadComplete(data);
+      await fetchData();
+    }
+  };
+  const getExtension = (url: string) => {
+    const div1 = url.split("?")[0].split(".");
+    const ext: string = div1[div1.length - 1].toLowerCase();
+    return ext;
+  };
+  const downloadFileUrl = (url: string) => {
+    fetch(url)
+      .then((res) => res.blob())
+      .then((blob) => {
+        setDownloadURL(URL.createObjectURL(blob));
+      });
+  };
+
+  const loadFile = async (id: string) => {
+    setFileUrl("");
+    setFileState({ ...file_state, open: true });
+    const { data } = await request(routes.retrieveUpload, {
+      query: {
+        file_type: file_type,
+        associating_id: noteId,
+      },
+      pathParams: { id },
+    });
+
+    if (!data) return;
+
+    const signedUrl = data.read_signed_url as string;
+    const extension = getExtension(signedUrl);
+
+    setFileState({
+      ...file_state,
+      open: true,
+      name: data.name as string,
+      extension,
+      isImage: ExtImage.includes(extension),
+    });
+    downloadFileUrl(signedUrl);
+    setFileUrl(signedUrl);
+  };
+
+  const handleClose = () => {
+    setDownloadURL("");
+    setFileState({
+      ...file_state,
+      open: false,
+      zoom: 4,
+      isZoomInDisabled: false,
+      isZoomOutDisabled: false,
+    });
+  };
+
+  return (
+    <div>
+      <FilePreviewDialog
+        show={file_state.open}
+        fileUrl={fileUrl}
+        file_state={file_state}
+        setFileState={setFileState}
+        downloadURL={downloadURL}
+        onClose={handleClose}
+        fixedWidth={false}
+        className="h-[80vh] w-full md:h-screen"
+      />
+      <div className="mt-4">
+        <div className="my-2 flex items-center gap-4">
+          <h2 className="text-lg font-semibold">Note Id:</h2>
+          <input
+            type="text"
+            placeholder="Note Id"
+            value={noteId}
+            className="w-2/3 border border-gray-300 p-2"
+            onChange={(e) => setNoteId(e.target.value)}
+          />
+        </div>
+        <div className="flex items-center gap-4">
+          <input
+            type="text"
+            placeholder="Enter file name"
+            value={uploadFileName}
+            className="w-2/3 border border-gray-300 p-2"
+            disabled
+          />
+          <button
+            onClick={handleUpload}
+            className="rounded bg-primary-700 p-2 text-white"
+          >
+            {uploadStarted ? "Uploading..." : "Upload"}
+          </button>
+        </div>
+        {uploadFileError && (
+          <p className="mt-2 text-sm text-red-500">{uploadFileError}</p>
+        )}
+        {uploadStarted && (
+          <div className="mt-2">
+            <div className="h-2 w-full rounded bg-gray-200">
+              <div
+                className="h-full rounded bg-primary-700"
+                style={{ width: `${uploadPercent}%` }}
+              ></div>
+            </div>
+            <p className="mt-2 text-xs text-gray-700">
+              {uploadPercent}% uploaded
+            </p>
+          </div>
+        )}
+      </div>
+      <div className="mt-4">
+        <h2 className="mb-2 text-lg font-semibold">Uploaded Files:</h2>
+        <div>
+          {isLoading ? (
+            <p>Loading...</p>
+          ) : (
+            <>
+              <div className="rounded bg-gray-200 p-4">
+                {files.map((file) => (
+                  <div
+                    key={file.id}
+                    className="my-1 flex items-center justify-between gap-2"
+                  >
+                    <p>{file.name}</p>
+                    <button
+                      onClick={() => loadFile(file.id!)}
+                      className="rounded bg-primary-700 p-1 text-white"
+                      disabled={file.is_archived}
+                    >
+                      View
+                    </button>
+                    <button
+                      onClick={() => {
+                        request(routes.deleteUpload, {
+                          pathParams: {
+                            id: file.id!,
+                            fileType: file_type,
+                            associatingId: noteId,
+                          },
+                        }).then(() => fetchData());
+                      }}
+                      className="rounded bg-red-500 p-1 text-white"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};

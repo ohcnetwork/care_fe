@@ -1148,6 +1148,11 @@ const routes = {
     TBody: Type<Partial<FileUploadModel>>(),
     TRes: Type<FileUploadModel>(),
   },
+  deleteUpload: {
+    path: "/api/v1/files/{id}/?file_type={fileType}&associating_id={associatingId}",
+    method: "DELETE",
+    TRes: Type<Record<string, never>>(),
+  },
 
   // Investigation
   listInvestigations: {
