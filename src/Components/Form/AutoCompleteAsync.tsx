@@ -8,6 +8,7 @@ import {
   dropdownOptionClassNames,
 } from "./MultiSelectMenuV2";
 import { useTranslation } from "react-i18next";
+import { classNames } from "../../Utils/utils";
 
 interface Props {
   id?: string;
@@ -86,7 +87,10 @@ const AutoCompleteAsync = (props: Props) => {
             <Combobox.Input
               id={id}
               name={name}
-              className="cui-input-base truncate pr-16"
+              className={classNames(
+                "cui-input-base truncate pr-16",
+                error && "border-danger-500",
+              )}
               placeholder={
                 multiple && hasSelection
                   ? `${selected.length} selected`
@@ -183,7 +187,9 @@ const AutoCompleteAsync = (props: Props) => {
             </div>
           )}
           {error && (
-            <div className="mt-1 text-sm font-medium text-red-500">{error}</div>
+            <div className="mt-1 text-xs font-medium text-danger-500">
+              {error}
+            </div>
           )}
         </div>
       </Combobox>
