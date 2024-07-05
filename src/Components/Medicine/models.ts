@@ -2,13 +2,14 @@ import { PerformedByModel } from "../HCX/misc";
 import { PRESCRIPTION_ROUTES } from "./CreatePrescriptionForm";
 
 export const DOSAGE_UNITS = [
-  "mcg",
   "mg",
   "g",
   "ml",
   "drop(s)",
   "ampule(s)",
   "tsp",
+  "mcg",
+  "unit(s)",
 ] as const;
 
 export type DosageValue = `${number} ${(typeof DOSAGE_UNITS)[number]}`;
