@@ -12,8 +12,8 @@ import {
 import { GoMention } from "react-icons/go";
 // import { MdAttachFile } from "react-icons/md";
 import TurndownService from "turndown";
-import ReactMarkdown from "react-markdown";
 import MentionsDropdown from "./MentionDropdown";
+import MarkdownPreview from "./MarkdownPreview";
 
 interface RichTextEditorProps {
   markdown?: string;
@@ -141,14 +141,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
     return null;
   };
 
-  const applyStyle = (style: "bold" | "italic" | "strikethrough") => {
+  const applyStyle = (style: "b" | "i" | "s") => {
     const selection = window.getSelection();
     if (!selection || !selection.rangeCount) return;
 
     const range = selection.getRangeAt(0);
 
-    const tag = style === "bold" ? "strong" : style === "italic" ? "em" : "s";
-    const node = document.createElement(tag);
+    const node = document.createElement(style);
     node.appendChild(range.cloneContents());
     range.deleteContents();
     range.insertNode(node);
@@ -278,9 +277,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
       range.setStart(range.startContainer, range.startOffset - 1);
       range.deleteContents();
 
-      const mentionNode = document.createElement("span");
+      const mentionNode = document.createElement("a");
       mentionNode.contentEditable = "false";
-      mentionNode.className = "bg-blue-100 px-1 rounded";
+      mentionNode.className =
+        "bg-blue-100 px-1 rounded no-underline text-slate-800 font-normal hover:underline";
       mentionNode.textContent = `@${user.username}`;
       mentionNode.setAttribute("data-user-id", user.id);
 
@@ -301,33 +301,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
     }
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === "Backspace") {
-      const selection = window.getSelection();
-      if (selection && selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        const startContainer = range.startContainer;
-
-        if (
-          startContainer.nodeType === Node.TEXT_NODE &&
-          startContainer.textContent === "@"
-        ) {
-          const parentNode = startContainer.parentNode;
-          if (
-            parentNode &&
-            parentNode.nodeName === "SPAN" &&
-            parentNode instanceof HTMLElement &&
-            parentNode.hasAttribute("data-user-id")
-          ) {
-            event.preventDefault();
-            parentNode.parentNode?.removeChild(parentNode);
-            saveState();
-          }
-        }
-      }
-    }
-  };
-
   const saveState = () => {
     const turndownService = new TurndownService();
     turndownService.addRule("strikethrough", {
@@ -336,12 +309,18 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
     });
     turndownService.addRule("mentions", {
       filter: (node) => {
-        return node.nodeName === "SPAN" && node.hasAttribute("data-user-id");
+        return node.nodeName === "A" && node.hasAttribute("data-user-id");
       },
       replacement: (content, node) => {
         const userId = (node as HTMLElement).getAttribute("data-user-id");
         const username = content.replace("@", "");
-        return `[mention_user](user_id:${userId}, username:${username})`;
+        return `![mention_user](user_id:${userId}, username:${username})`;
+      },
+    });
+    turndownService.addRule("div", {
+      filter: "div",
+      replacement: function (content) {
+        return content + "\n";
       },
     });
 
@@ -357,7 +336,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
         <div className="mb-4 flex flex-wrap items-center gap-4">
           <div className="flex items-center space-x-2">
             <button
-              onClick={() => applyStyle("bold")}
+              onClick={() => applyStyle("b")}
               className={`rounded p-2 ${
                 state.isBoldActive && !state.isQuoteActive
                   ? "bg-primary-700 text-white"
@@ -368,7 +347,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
               <FaBold className="text-lg" />
             </button>
             <button
-              onClick={() => applyStyle("italic")}
+              onClick={() => applyStyle("i")}
               className={`rounded p-2 ${
                 state.isItalicActive && !state.isQuoteActive
                   ? "bg-primary-700 text-white"
@@ -379,7 +358,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
               <FaItalic className="text-lg" />
             </button>
             <button
-              onClick={() => applyStyle("strikethrough")}
+              onClick={() => applyStyle("s")}
               className={`rounded p-2 ${
                 state.isStrikethroughActive && !state.isQuoteActive
                   ? "bg-primary-700 text-white"
@@ -464,7 +443,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
           contentEditable
           className="prose min-h-64 border border-gray-300 p-4 focus:outline-none"
           onInput={handleInput}
-          onKeyDown={handleKeyDown}
         ></div>
 
         {showMentions && (
@@ -477,7 +455,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
       <div className="w-1/2 pl-4">
         <div className="mt-4">
           <h2 className="mb-2 text-lg font-semibold">Markdown Preview:</h2>
-          <ReactMarkdown className="prose">{markdown}</ReactMarkdown>
+          <MarkdownPreview markdown={markdown} />
         </div>
         <div className="mt-4">
           <h2 className="mb-2 text-lg font-semibold">Markdown Output:</h2>
