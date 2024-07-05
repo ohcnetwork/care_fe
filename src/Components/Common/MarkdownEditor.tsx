@@ -8,7 +8,9 @@ import {
   FaUnlink,
   FaStrikethrough,
   FaQuoteRight,
+  FaFile,
 } from "react-icons/fa";
+import { RxCross2 } from "react-icons/rx";
 import { GoMention } from "react-icons/go";
 import { MdAttachFile } from "react-icons/md";
 import TurndownService from "turndown";
@@ -88,6 +90,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
 
   const [file, setFile] = useState<File | null>(null);
   const [uploadFileName, setUploadFileName] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
 
   useEffect(() => {
     document.addEventListener("selectionchange", handleSelectionChange);
@@ -368,10 +375,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
   };
 
   return (
-    <div className="mx-auto flex rounded-lg bg-white p-8 shadow-lg">
+    <div className="mx-auto flex rounded-lg bg-white p-4 shadow-lg">
       <div className="w-1/2 pr-4">
-        <div className="mb-4 flex flex-wrap items-center gap-4">
-          <div className="flex items-center space-x-2">
+        <div className="mb-2 flex items-center justify-between rounded-t-md border border-gray-300 bg-gray-100 p-2">
+          <div className="flex items-center space-x-1">
             <button
               onClick={() => applyStyle("b")}
               className={`rounded p-2 ${
@@ -469,21 +476,26 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
             >
               <GoMention className="text-lg" />
             </button>
-            <button className="rounded bg-gray-200 p-2">
-              <MdAttachFile className="text-lg" />
-              <input
-                onChange={onFileChange}
-                type="file"
-                accept="image/*,video/*,audio/*,text/plain,text/csv,application/rtf,application/msword,application/vnd.oasis.opendocument.text,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/pdf"
-              />
+            <button
+              onClick={triggerFileInput}
+              className="rounded p-1 hover:bg-gray-200"
+            >
+              <MdAttachFile className="text-lg text-gray-700" />
             </button>
+            <input
+              ref={fileInputRef}
+              onChange={onFileChange}
+              type="file"
+              className="hidden"
+              accept="image/*,video/*,audio/*,text/plain,text/csv,application/rtf,application/msword,application/vnd.oasis.opendocument.text,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/pdf"
+            />
           </div>
         </div>
 
         <div
           ref={editorRef}
           contentEditable
-          className="prose min-h-64 border border-gray-300 p-4 focus:outline-none"
+          className="prose min-h-[100px] rounded-b-md border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
           onInput={handleInput}
         ></div>
 
@@ -742,17 +754,46 @@ const FileUpload = ({
         fixedWidth={false}
         className="h-[80vh] w-full md:h-screen"
       />
+      <div className="flex flex-wrap gap-2">
+        {isLoading ? (
+          <p>Loading...</p>
+        ) : (
+          <>
+            {files.map((file) => (
+              <div
+                key={file.id}
+                className="relative mt-2 h-24 w-24 cursor-pointer rounded-md bg-gray-100 shadow-sm hover:bg-gray-200"
+              >
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    request(routes.deleteUpload, {
+                      pathParams: {
+                        id: file.id!,
+                        fileType: file_type,
+                        associatingId: noteId,
+                      },
+                    }).then(() => fetchData());
+                  }}
+                  className="absolute -right-1 -top-1 z-10 rounded-full bg-gray-300 p-1 text-gray-800 hover:bg-gray-400 "
+                >
+                  <RxCross2 size={12} />
+                </button>
+                <div
+                  className="flex h-full w-full flex-col items-center justify-center p-2"
+                  onClick={() => loadFile(file.id!)}
+                >
+                  <FaFile className="mb-2 text-3xl text-gray-400" />
+                  <span className="line-clamp-2 text-center text-xs text-gray-600">
+                    {file.name}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </>
+        )}
+      </div>
       <div className="mt-4">
-        <div className="my-2 flex items-center gap-4">
-          <h2 className="text-lg font-semibold">Note Id:</h2>
-          <input
-            type="text"
-            placeholder="Note Id"
-            value={noteId}
-            className="w-2/3 border border-gray-300 p-2"
-            onChange={(e) => setNoteId(e.target.value)}
-          />
-        </div>
         <div className="flex items-center gap-4">
           <input
             type="text"
@@ -784,47 +825,15 @@ const FileUpload = ({
             </p>
           </div>
         )}
-      </div>
-      <div className="mt-4">
-        <h2 className="mb-2 text-lg font-semibold">Uploaded Files:</h2>
-        <div>
-          {isLoading ? (
-            <p>Loading...</p>
-          ) : (
-            <>
-              <div className="rounded bg-gray-200 p-4">
-                {files.map((file) => (
-                  <div
-                    key={file.id}
-                    className="my-1 flex items-center justify-between gap-2"
-                  >
-                    <p>{file.name}</p>
-                    <button
-                      onClick={() => loadFile(file.id!)}
-                      className="rounded bg-primary-700 p-1 text-white"
-                      disabled={file.is_archived}
-                    >
-                      View
-                    </button>
-                    <button
-                      onClick={() => {
-                        request(routes.deleteUpload, {
-                          pathParams: {
-                            id: file.id!,
-                            fileType: file_type,
-                            associatingId: noteId,
-                          },
-                        }).then(() => fetchData());
-                      }}
-                      className="rounded bg-red-500 p-1 text-white"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
+        <div className="my-2 flex items-center gap-4">
+          <h2 className="text-lg font-semibold">Note Id:</h2>
+          <input
+            type="text"
+            placeholder="Note Id"
+            value={noteId}
+            className="w-2/3 border border-gray-300 p-2"
+            onChange={(e) => setNoteId(e.target.value)}
+          />
         </div>
       </div>
     </div>
