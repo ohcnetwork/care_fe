@@ -490,7 +490,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
               &#8203;
             </span>
 
-            <div className="inline-block w-full max-w-md overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+            <div className="inline-block max-h-[75vh] w-full max-w-md overflow-hidden overflow-y-auto rounded-2xl border-2 border-gray-300 bg-white p-6 text-left align-middle shadow-xl transition-all">
               <div className="flex justify-between">
                 <h3 className="text-lg font-medium leading-6 text-gray-900">
                   Voice AutoFill

@@ -33,16 +33,17 @@ type FilePreviewProps = {
 };
 
 const previewExtensions = [
-  ".html",
-  ".htm",
-  ".pdf",
-  ".mp4",
-  ".webm",
-  ".jpg",
-  ".jpeg",
-  ".png",
-  ".gif",
-  ".webp",
+  "html",
+  "htm",
+  "pdf",
+  "mp4",
+  "mp3",
+  "webm",
+  "jpg",
+  "jpeg",
+  "png",
+  "gif",
+  "webp",
 ];
 
 const FilePreviewDialog = (props: FilePreviewProps) => {
@@ -130,7 +131,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 <img
                   src={fileUrl}
                   alt="file"
-                  className={`${
+                  className={`h-full w-full object-contain ${
                     zoom_values[file_state.zoom - 1]
                   } ${getRotationClass(file_state.rotation)}`}
                 />
