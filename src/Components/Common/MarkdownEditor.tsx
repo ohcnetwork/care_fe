@@ -10,6 +10,8 @@ import {
   FaQuoteRight,
   FaFile,
 } from "react-icons/fa";
+import { FaCamera } from "react-icons/fa6";
+import { AiFillAudio } from "react-icons/ai";
 import { RxCross2 } from "react-icons/rx";
 import { GoMention } from "react-icons/go";
 import { MdAttachFile } from "react-icons/md";
@@ -24,6 +26,12 @@ import * as Notification from "../../Utils/Notifications.js";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import FilePreviewDialog from "./FilePreviewDialog";
+import DialogModal from "./Dialog";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import Webcam from "react-webcam";
+import ButtonV2, { Submit } from "./components/ButtonV2";
+import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
+import useRecorder from "../../Utils/useRecorder";
 
 interface RichTextEditorProps {
   markdown?: string;
@@ -91,6 +99,75 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
   const [file, setFile] = useState<File | null>(null);
   const [uploadFileName, setUploadFileName] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [audioBlob, setAudioBlob] = useState<Blob>();
+  const [audioBlobExists, setAudioBlobExists] = useState(false);
+  const [resetAudioRecording, setAudioResetRecording] = useState(false);
+  const [isMicPermission, setIsMicPermission] = useState(true);
+
+  const [modalOpenForCamera, setModalOpenForCamera] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
+  const webRef = useRef<any>(null);
+  const FACING_MODE_USER = "user";
+  const FACING_MODE_ENVIRONMENT = { exact: "environment" };
+  const [facingMode, setFacingMode] = useState<any>(FACING_MODE_USER);
+  const { width } = useWindowDimensions();
+  const LaptopScreenBreakpoint = 640;
+  const isLaptopScreen = width >= LaptopScreenBreakpoint ? true : false;
+  const videoConstraints = {
+    width: isLaptopScreen ? 1280 : 480,
+    height: isLaptopScreen ? 720 : 720,
+    facingMode: "user",
+  };
+  const handleSwitchCamera = useCallback(() => {
+    setFacingMode((prevState: any) =>
+      prevState === FACING_MODE_USER
+        ? FACING_MODE_ENVIRONMENT
+        : FACING_MODE_USER,
+    );
+  }, []);
+
+  const captureImage = () => {
+    setPreviewImage(webRef.current.getScreenshot());
+    const canvas = webRef.current.getCanvas();
+    canvas?.toBlob((blob: Blob) => {
+      const extension = blob.type.split("/").pop();
+      const myFile = new File([blob], `image.${extension}`, {
+        type: blob.type,
+      });
+      setFile(myFile);
+    });
+  };
+
+  const handleUploadCameraImage = () => {
+    setFile(file);
+    setModalOpenForCamera(false);
+    setUploadFileName("Camera Capture");
+  };
+
+  useEffect(() => {
+    const checkMicPermission = async () => {
+      try {
+        const permissions = await navigator.permissions.query({
+          name: "microphone" as PermissionName,
+        });
+        setIsMicPermission(permissions.state === "granted");
+      } catch (error) {
+        setIsMicPermission(false);
+      }
+    };
+
+    checkMicPermission();
+
+    return () => {
+      setIsMicPermission(true);
+    };
+  }, []);
+
+  const deleteAudioBlob = () => {
+    setAudioBlobExists(false);
+    setAudioResetRecording(true);
+  };
 
   const triggerFileInput = () => {
     fileInputRef.current?.click();
@@ -374,8 +451,189 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
     setFile(f);
   };
 
+  const handleAudioUpload = () => {
+    if (!audioBlob) return;
+    const f = new File([audioBlob], "audio.mp3", {
+      type: audioBlob.type,
+    });
+    setFile(f);
+    setUploadFileName("Audio Recording");
+  };
+
+  const [
+    audioURL,
+    isRecording,
+    startRecording,
+    stopRecording,
+    newBlob,
+    resetRecording,
+  ] = useRecorder(setIsMicPermission);
+  const [time, setTime] = useState(0);
+  useEffect(() => {
+    setAudioBlob(newBlob);
+    let interval: any;
+    if (isRecording) {
+      interval = setInterval(() => {
+        setTime((prevTime) => prevTime + 10);
+      }, 10);
+    } else {
+      clearInterval(interval);
+      setTime(0);
+    }
+    if (resetAudioRecording) {
+      resetRecording();
+      setAudioResetRecording(false);
+    }
+    return () => clearInterval(interval);
+  }, [isRecording, newBlob, resetAudioRecording]);
+
   return (
     <div className="mx-auto flex rounded-lg bg-white p-4 shadow-lg">
+      <DialogModal
+        show={modalOpenForCamera}
+        title={
+          <div className="flex flex-row">
+            <div className="rounded-full bg-primary-100 px-5 py-4">
+              <CareIcon
+                icon="l-camera-change"
+                className="text-lg text-primary-500"
+              />
+            </div>
+            <div className="m-4">
+              <h1 className="text-xl text-black "> Camera</h1>
+            </div>
+          </div>
+        }
+        className="max-w-2xl"
+        onClose={() => setModalOpenForCamera(false)}
+      >
+        <div>
+          {!previewImage ? (
+            <div className="m-3">
+              <Webcam
+                forceScreenshotSourceSize
+                screenshotQuality={1}
+                audio={false}
+                screenshotFormat="image/png"
+                ref={webRef}
+                videoConstraints={{ ...videoConstraints, facingMode }}
+              />
+            </div>
+          ) : (
+            <div className="m-3">
+              <img src={previewImage} />
+            </div>
+          )}
+        </div>
+
+        {/* buttons for mobile screens */}
+        <div className="m-4 flex justify-evenly sm:hidden ">
+          <div>
+            {!previewImage ? (
+              <ButtonV2 onClick={handleSwitchCamera} className="m-2">
+                switch
+              </ButtonV2>
+            ) : (
+              <></>
+            )}
+          </div>
+          <div>
+            {!previewImage ? (
+              <>
+                <div>
+                  <ButtonV2
+                    onClick={() => {
+                      captureImage();
+                    }}
+                    className="m-2"
+                  >
+                    capture
+                  </ButtonV2>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex space-x-2">
+                  <ButtonV2
+                    onClick={() => {
+                      setPreviewImage(null);
+                    }}
+                    className="m-2"
+                  >
+                    retake
+                  </ButtonV2>
+                  <Submit onClick={handleUploadCameraImage} className="m-2">
+                    submit
+                  </Submit>
+                </div>
+              </>
+            )}
+          </div>
+          <div className="sm:flex-1">
+            <ButtonV2
+              variant="secondary"
+              onClick={() => {
+                setPreviewImage(null);
+                setModalOpenForCamera(false);
+              }}
+              className="m-2"
+            >
+              close
+            </ButtonV2>
+          </div>
+        </div>
+        {/* buttons for laptop screens */}
+        <div className={`${isLaptopScreen ? " " : " hidden "}`}>
+          <div className="m-4 flex lg:hidden">
+            <ButtonV2 onClick={handleSwitchCamera}>
+              <CareIcon icon="l-camera-change" className="text-lg" />
+              switch camera
+            </ButtonV2>
+          </div>
+
+          <div className="flex justify-end  gap-2 p-4">
+            <div>
+              {!previewImage ? (
+                <>
+                  <div>
+                    <ButtonV2
+                      onClick={() => {
+                        captureImage();
+                      }}
+                    >
+                      <CareIcon icon="l-capture" className="text-lg" />
+                      capture
+                    </ButtonV2>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex space-x-2">
+                    <ButtonV2
+                      onClick={() => {
+                        setPreviewImage(null);
+                      }}
+                    >
+                      retake
+                    </ButtonV2>
+                    <Submit onClick={handleUploadCameraImage}>submit</Submit>
+                  </div>
+                </>
+              )}
+            </div>
+            <div className="sm:flex-1" />
+            <ButtonV2
+              variant="secondary"
+              onClick={() => {
+                setPreviewImage(null);
+                setModalOpenForCamera(false);
+              }}
+            >
+              close camera
+            </ButtonV2>
+          </div>
+        </div>
+      </DialogModal>
       <div className="w-1/2 pr-4">
         <div className="mb-2 flex items-center justify-between rounded-t-md border border-gray-300 bg-gray-100 p-2">
           <div className="flex items-center space-x-1">
@@ -482,6 +740,18 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
             >
               <MdAttachFile className="text-lg text-gray-700" />
             </button>
+            <button
+              onClick={() => setModalOpenForCamera(true)}
+              className="rounded p-1 hover:bg-gray-200"
+            >
+              <FaCamera className="text-lg text-gray-700" />
+            </button>
+            <button
+              onClick={startRecording}
+              className="rounded p-1 hover:bg-gray-200"
+            >
+              <AiFillAudio className="text-lg text-gray-700" />
+            </button>
             <input
               ref={fileInputRef}
               onChange={onFileChange}
@@ -490,6 +760,90 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
               accept="image/*,video/*,audio/*,text/plain,text/csv,application/rtf,application/msword,application/vnd.oasis.opendocument.text,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/pdf"
             />
           </div>
+        </div>
+
+        <div className="flex w-full flex-col items-center justify-between gap-2 lg:flex-row">
+          {audioBlobExists && (
+            <div className="flex w-full items-center md:w-auto">
+              <ButtonV2
+                variant="danger"
+                className="w-full"
+                onClick={() => {
+                  deleteAudioBlob();
+                }}
+              >
+                <CareIcon icon="l-trash" className="h-4" /> Delete
+              </ButtonV2>
+            </div>
+          )}
+          <div className="flex flex-col items-center gap-4 md:flex-row md:flex-wrap lg:flex-nowrap">
+            <div className="w-full md:w-auto">
+              <div>
+                {isRecording && (
+                  <>
+                    <div className="flex justify-end space-x-2">
+                      <div className="flex bg-gray-100 p-2 text-primary-700">
+                        <CareIcon
+                          icon="l-record-audio"
+                          className="mr-2 animate-pulse"
+                        />
+                        <div className="mx-2">
+                          (
+                          <span>
+                            {("0" + Math.floor((time / 60000) % 60)).slice(-2)}:
+                          </span>
+                          <span>
+                            {("0" + Math.floor((time / 1000) % 60)).slice(-2)}
+                          </span>
+                          )
+                        </div>
+                        recording...
+                      </div>
+                      <ButtonV2
+                        onClick={() => {
+                          stopRecording();
+                          setAudioBlobExists(true);
+                        }}
+                      >
+                        <CareIcon
+                          icon="l-microphone-slash"
+                          className="text-lg"
+                        />
+                        stop
+                      </ButtonV2>
+                    </div>
+                  </>
+                )}
+              </div>
+              {audioURL && audioBlobExists && (
+                <div className="my-4">
+                  <audio
+                    className="m-auto max-h-full max-w-full object-contain"
+                    src={audioURL}
+                    controls
+                  />{" "}
+                </div>
+              )}
+            </div>
+
+            {!audioBlobExists && !isMicPermission && (
+              <span className="text-sm font-medium text-warning-500">
+                <CareIcon
+                  icon="l-exclamation-triangle"
+                  className="mr-1 text-base"
+                />
+                Please allow browser permission before you start speaking
+              </span>
+            )}
+          </div>
+          {audioBlobExists && (
+            <div className="flex w-full items-center md:w-auto">
+              <ButtonV2 onClick={handleAudioUpload} className="w-full">
+                <CareIcon icon="l-cloud-upload" className="text-xl" />
+                Save
+              </ButtonV2>
+            </div>
+          )}
         </div>
 
         <div
@@ -669,7 +1023,7 @@ const FileUpload = ({
     if (!validateFileUpload()) return;
     const f = file;
 
-    const category = "UNSPECIFIED";
+    const category = f?.type.includes("audio") ? "AUDIO" : "UNSPECIFIED";
     const filename = uploadFileName === "" && f ? f.name : uploadFileName;
     const name = f?.name;
     setUploadStarted(true);
@@ -692,9 +1046,8 @@ const FileUpload = ({
     }
   };
   const getExtension = (url: string) => {
-    const div1 = url.split("?")[0].split(".");
-    const ext: string = div1[div1.length - 1].toLowerCase();
-    return ext;
+    const extension = url.split("?")[0].split(".").pop();
+    return extension ?? "";
   };
   const downloadFileUrl = (url: string) => {
     fetch(url)
