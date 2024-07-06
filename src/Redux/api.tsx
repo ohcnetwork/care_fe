@@ -794,6 +794,11 @@ const routes = {
     method: "PUT",
     TRes: Type<PatientNotesModel>(),
   },
+  getPatientNote: {
+    path: "/api/v1/patient/{patientId}/notes/{noteId}/",
+    method: "GET",
+    TRes: Type<PatientNotesModel>(),
+  },
   getPatientNoteEditHistory: {
     path: "/api/v1/patient/{patientId}/notes/{noteId}/edits/",
     method: "GET",

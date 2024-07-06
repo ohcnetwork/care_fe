@@ -10,10 +10,11 @@ interface DoctorNoteProps {
   handleNext: () => void;
   disableEdit?: boolean;
   setReplyTo?: (reply_to: PatientNotesModel | undefined) => void;
+  mode?: "comments" | "replies";
 }
 
 const DoctorNote = (props: DoctorNoteProps) => {
-  const { state, handleNext, setReload, disableEdit, setReplyTo } = props;
+  const { state, handleNext, setReload, disableEdit, setReplyTo, mode } = props;
 
   return (
     <div
@@ -34,19 +35,44 @@ const DoctorNote = (props: DoctorNoteProps) => {
           dataLength={state.notes.length}
           scrollableTarget="patient-notes-list"
         >
-          {state.notes.map((note) => (
-            <DoctorNoteReplyPreviewCard
-              key={note.id}
-              parentNote={note.reply_to_object}
-            >
-              <PatientNoteCard
-                note={note}
-                setReload={setReload}
-                disableEdit={disableEdit}
-                setReplyTo={setReplyTo}
-              />
-            </DoctorNoteReplyPreviewCard>
-          ))}
+          {state.notes.map((note) => {
+            if (mode === "comments") {
+              return (
+                <div className="" key={note.id}>
+                  <PatientNoteCard
+                    note={note}
+                    setReload={setReload}
+                    disableEdit={disableEdit}
+                    setReplyTo={setReplyTo}
+                  />
+                  {note.replies.length > 0 ? (
+                    <div className="mr-4 mt-1 flex items-center justify-end text-sm text-gray-500">
+                      {note.replies.length}{" "}
+                      {note.replies.length > 1 ? "replies" : "reply"}
+                    </div>
+                  ) : (
+                    <div className="mr-4 mt-1 flex items-center justify-end text-sm text-gray-500">
+                      No replies
+                    </div>
+                  )}
+                </div>
+              );
+            } else if (mode === "replies") {
+              return (
+                <DoctorNoteReplyPreviewCard
+                  key={note.id}
+                  parentNote={note.reply_to_object}
+                >
+                  <PatientNoteCard
+                    note={note}
+                    setReload={setReload}
+                    disableEdit={disableEdit}
+                    setReplyTo={setReplyTo}
+                  />
+                </DoctorNoteReplyPreviewCard>
+              );
+            }
+          })}
         </InfiniteScroll>
       ) : (
         <div className="mt-2 flex h-full items-center justify-center text-2xl font-bold text-gray-500">

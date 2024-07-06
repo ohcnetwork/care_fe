@@ -506,6 +506,7 @@ export interface BaseUserModel {
   last_name: string;
   user_type: string;
   last_login: string;
+  read_profile_image_url: string;
 }
 
 export interface PatientNotesEditModel {
@@ -524,6 +525,7 @@ export interface PaitentNotesReplyModel {
 }
 
 export interface PatientNotesModel {
+  count: number;
   id: string;
   note: string;
   facility: BaseFacilityModel;
@@ -534,6 +536,7 @@ export interface PatientNotesModel {
   last_edited_by?: BaseUserModel;
   last_edited_date?: string;
   reply_to_object?: PaitentNotesReplyModel;
+  replies: PaitentNotesReplyModel[];
 }
 
 export interface PatientNoteStateType {

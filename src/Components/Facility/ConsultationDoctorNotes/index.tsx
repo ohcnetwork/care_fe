@@ -16,15 +16,18 @@ import AutoExpandingTextInputFormField from "../../Form/FormFields/AutoExpanding
 import { PATIENT_NOTES_THREADS } from "../../../Common/constants.js";
 import useAuthUser from "../../../Common/hooks/useAuthUser.js";
 import DoctorNoteReplyPreviewCard from "../DoctorNoteReplyPreviewCard.js";
+import Switch from "../../../CAREUI/interactive/Switch.js";
+import PatientNotesDetailedView from "../PatientNotesDetailedView.js";
 
 interface ConsultationDoctorNotesProps {
   patientId: string;
   facilityId: string;
   consultationId: string;
+  noteId?: string;
 }
 
 const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
-  const { patientId, facilityId, consultationId } = props;
+  const { patientId, facilityId, consultationId, noteId } = props;
 
   const authUser = useAuthUser();
   const [thread, setThread] = useState(
@@ -42,6 +45,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
   const [reply_to, setReplyTo] = useState<PaitentNotesReplyModel | undefined>(
     undefined,
   );
+  const [mode, setMode] = useState<"comments" | "replies">("comments");
 
   const initialData: PatientNoteStateType = {
     notes: [],
@@ -116,16 +120,38 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
     },
   );
 
+  if (noteId) {
+    return (
+      <PatientNotesDetailedView
+        patientId={patientId}
+        facilityId={facilityId}
+        consultationId={consultationId}
+        noteId={noteId}
+        thread={thread}
+      />
+    );
+  }
+
   return (
     <Page
       title="Discussion Notes"
-      className="flex h-screen flex-col"
+      className="relative flex h-screen flex-col"
       crumbsReplacements={{
         [facilityId]: { name: facilityName },
         [patientId]: { name: patientName },
       }}
       backUrl={`/facility/${facilityId}/patient/${patientId}`}
     >
+      <div className="absolute right-20 top-20 flex items-center">
+        <Switch
+          tabs={{
+            comments: "Thread View",
+            replies: "Default View",
+          }}
+          selected={mode}
+          onChange={(tab) => setMode(tab)}
+        />
+      </div>
       <div className="relative mx-3 my-2 flex grow flex-col overflow-hidden rounded-lg border border-gray-300 bg-white p-2 sm:mx-10 sm:my-5 sm:p-5">
         <div className="absolute inset-x-0 top-0 flex bg-gray-200 text-sm shadow-md">
           {Object.values(PATIENT_NOTES_THREADS).map((current) => (
@@ -155,6 +181,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
           setReload={setReload}
           thread={thread}
           setReplyTo={setReplyTo}
+          mode={mode}
         />
         <DoctorNoteReplyPreviewCard
           parentNote={reply_to}
