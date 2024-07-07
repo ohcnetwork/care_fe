@@ -1,19 +1,17 @@
-type User = {
-  id: string;
-  username: string;
-};
-
-const users: User[] = [
-  { id: "1", username: "udaysagar" },
-  { id: "2", username: "doctordev" },
-  { id: "3", username: "dev-districtadmin" },
-  { id: "4", username: "staffdev" },
-];
+import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
 
 const MentionsDropdown: React.FC<{
-  onSelect: (user: User) => void;
+  onSelect: (user: any) => void;
   position: { top: number; left: number };
 }> = ({ onSelect, position }) => {
+  const facilityId = "81092ced-8720-44cb-b4c5-3f0ad0540153";
+  const { data } = useQuery(routes.getFacilityUsers, {
+    pathParams: { facility_id: facilityId },
+  });
+
+  const users = data?.results || [];
+
   return (
     <div
       className="absolute z-10 w-64 rounded-md bg-white shadow-lg"
