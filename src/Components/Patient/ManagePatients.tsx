@@ -704,7 +704,7 @@ export const PatientManager = () => {
                         </span>
                       </span>
                     )}
-                  {patient.last_consultation?.has_consents || (
+                  {!!patient.last_consultation?.has_consents.length || (
                     <span className="relative inline-flex">
                       <Chip
                         size="small"

@@ -355,7 +355,7 @@ export default function PatientInfoCard(props: {
                         </div>
                       </div>
                     )}
-                  {consultation?.has_consents || (
+                  {!!consultation?.has_consents?.length || (
                     <div>
                       <div className="inline-flex w-full items-center justify-start rounded border border-red-600 bg-red-400 p-1 px-3 text-xs font-semibold leading-4">
                         <span className="font-semibold text-white">

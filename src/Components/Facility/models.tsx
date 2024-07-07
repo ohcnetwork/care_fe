@@ -185,7 +185,7 @@ export interface ConsultationModel {
   is_readmission?: boolean;
   medico_legal_case?: boolean;
   investigation?: InvestigationType[];
-  has_consents?: boolean;
+  has_consents?: (typeof CONSENT_TYPE_CHOICES)[number]["id"][];
 }
 
 export interface PatientStatsModel {
