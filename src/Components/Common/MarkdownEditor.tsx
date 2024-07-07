@@ -379,6 +379,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
       mentionNode.textContent = `@${user.username}`;
       mentionNode.setAttribute("data-user-id", user.id);
 
+      mentionNode.onmouseover = () => {
+        console.log(user);
+      };
+
       range.insertNode(mentionNode);
 
       const newRange = document.createRange();
