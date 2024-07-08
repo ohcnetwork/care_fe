@@ -165,7 +165,7 @@ const PhoneNumberTypesHelp = (props: { types: PhoneNumberType[] }) => {
       <div className="tooltip-text tooltip-left text-sm">
         Supports only{" "}
         <span className="font-bold lowercase">
-          {humanizeStrings(...props.types.map((item) => t(item)))}
+          {humanizeStrings(props.types.map((item) => t(item)))}
         </span>{" "}
         numbers.
       </div>
