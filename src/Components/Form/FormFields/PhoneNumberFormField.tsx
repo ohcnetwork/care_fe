@@ -7,6 +7,7 @@ import {
   formatPhoneNumber as formatPhoneNumberUtil,
   getCountryCode,
   CountryData,
+  humanizeStrings,
 } from "../../../Utils/utils";
 import phoneCodesJson from "../../../Common/static/countryPhoneAndFlags.json";
 import {
@@ -14,8 +15,9 @@ import {
   PhoneNumberValidator,
   PhoneNumberType,
 } from "../FieldValidators";
-import CareIcon, { IconName } from "../../../CAREUI/icons/CareIcon";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { Popover } from "@headlessui/react";
+import { useTranslation } from "react-i18next";
 
 const phoneCodes: Record<string, CountryData> = phoneCodesJson;
 
@@ -154,29 +156,22 @@ export default function PhoneNumberFormField(props: Props) {
   );
 }
 
-const phoneNumberTypeIcons: Record<PhoneNumberType, IconName> = {
-  international_mobile: "l-globe",
-  indian_mobile: "l-mobile-android",
-  mobile: "l-mobile-android",
-  landline: "l-phone",
-  support: "l-headset",
-};
+const PhoneNumberTypesHelp = (props: { types: PhoneNumberType[] }) => {
+  const { t } = useTranslation();
 
-const PhoneNumberTypesHelp = ({ types }: { types: PhoneNumberType[] }) => (
-  <div className="flex gap-1">
-    {types.map((type) => (
-      <span key={type} className="tooltip mt-1">
-        <CareIcon
-          icon={phoneNumberTypeIcons[type]}
-          className="text-lg text-gray-500"
-        />
-        <span className="tooltip-text tooltip-bottom -translate-x-1/2 translate-y-1 text-xs capitalize">
-          {type.replace("_", " ")}
-        </span>
-      </span>
-    ))}
-  </div>
-);
+  return (
+    <div className="tooltip mt-1 pr-1 text-gray-500">
+      <CareIcon icon="l-question-circle" className="text-lg" />
+      <div className="tooltip-text tooltip-left text-sm">
+        Supports only{" "}
+        <span className="font-bold lowercase">
+          {humanizeStrings(...props.types.map((item) => t(item)))}
+        </span>{" "}
+        numbers.
+      </div>
+    </div>
+  );
+};
 
 const conditionPhoneCode = (code: string) => {
   code = code.split(" ")[0];
