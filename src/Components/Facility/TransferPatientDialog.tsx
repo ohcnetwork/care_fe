@@ -59,6 +59,7 @@ const TransferPatientDialog = (props: Props) => {
     return {
       id: patient.patient_id as unknown as number,
       text: `${patient.name} (${patient.gender})`,
+      disabled: patient.is_expired,
     };
   });
 
@@ -171,6 +172,7 @@ const TransferPatientDialog = (props: Props) => {
               options={patientOptions}
               optionLabel={(patient) => patient.text}
               optionValue={(patient) => patient.id}
+              optionDisabled={(patient) => patient.disabled ?? false}
               value={state.form.patient}
               onChange={handleChange}
               error={state.errors.patient}
