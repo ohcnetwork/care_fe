@@ -1251,7 +1251,8 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                             icon="l-exclamation-triangle"
                             className="pr-2 text-lg"
                           />
-                          Caution: You are creating an encounter for{" "}
+                          {t("caution")}:{" "}
+                          {t("back_dated_encounter_date_caution")}{" "}
                           <strong className="font-bold">
                             {dayjs(state.form.encounter_date).fromNow()}.
                           </strong>
