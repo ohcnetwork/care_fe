@@ -17,7 +17,6 @@ import { GoMention } from "react-icons/go";
 import { MdAttachFile } from "react-icons/md";
 import TurndownService from "turndown";
 import MentionsDropdown from "./MentionDropdown";
-import MarkdownPreview from "./MarkdownPreview";
 import { ExtImage, StateInterface } from "../Patient/FileUpload";
 import imageCompression from "browser-image-compression";
 import { CreateFileResponse, FileUploadModel } from "../Patient/models";
@@ -34,8 +33,8 @@ import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import useRecorder from "../../Utils/useRecorder";
 
 interface RichTextEditorProps {
-  markdown?: string;
-  onChange?: (markdown: string, htmlCode: string) => void;
+  initialMarkdown?: string;
+  onChange: (markdown: string) => void;
 }
 
 interface EditorState {
@@ -86,9 +85,10 @@ function editorReducer(state: EditorState, action: EditorAction): EditorState {
   }
 }
 
-const RichTextEditor: React.FC<RichTextEditorProps> = () => {
-  const [markdown, setMarkdown] = useState<string>("");
-  const [htmlCode, setHtmlCode] = useState<string>("");
+const RichTextEditor: React.FC<RichTextEditorProps> = ({
+  // initialMarkdown = "",
+  onChange,
+}) => {
   const [state, dispatch] = useReducer(editorReducer, initialState);
   const editorRef = useRef<HTMLDivElement>(null);
 
@@ -97,81 +97,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
   const lastCaretPosition = useRef<Range | null>(null);
 
   const [file, setFile] = useState<File | null>(null);
-  const [uploadFileName, setUploadFileName] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [audioBlob, setAudioBlob] = useState<Blob>();
-  const [audioBlobExists, setAudioBlobExists] = useState(false);
-  const [resetAudioRecording, setAudioResetRecording] = useState(false);
-  const [isMicPermission, setIsMicPermission] = useState(true);
-
   const [modalOpenForCamera, setModalOpenForCamera] = useState(false);
-  const [previewImage, setPreviewImage] = useState(null);
-  const webRef = useRef<any>(null);
-  const FACING_MODE_USER = "user";
-  const FACING_MODE_ENVIRONMENT = { exact: "environment" };
-  const [facingMode, setFacingMode] = useState<any>(FACING_MODE_USER);
-  const { width } = useWindowDimensions();
-  const LaptopScreenBreakpoint = 640;
-  const isLaptopScreen = width >= LaptopScreenBreakpoint ? true : false;
-  const videoConstraints = {
-    width: isLaptopScreen ? 1280 : 480,
-    height: isLaptopScreen ? 720 : 720,
-    facingMode: "user",
-  };
-  const handleSwitchCamera = useCallback(() => {
-    setFacingMode((prevState: any) =>
-      prevState === FACING_MODE_USER
-        ? FACING_MODE_ENVIRONMENT
-        : FACING_MODE_USER,
-    );
-  }, []);
-
-  const captureImage = () => {
-    setPreviewImage(webRef.current.getScreenshot());
-    const canvas = webRef.current.getCanvas();
-    canvas?.toBlob((blob: Blob) => {
-      const extension = blob.type.split("/").pop();
-      const myFile = new File([blob], `image.${extension}`, {
-        type: blob.type,
-      });
-      setFile(myFile);
-    });
-  };
-
-  const handleUploadCameraImage = () => {
-    setFile(file);
-    setModalOpenForCamera(false);
-    setUploadFileName("Camera Capture");
-  };
-
-  useEffect(() => {
-    const checkMicPermission = async () => {
-      try {
-        const permissions = await navigator.permissions.query({
-          name: "microphone" as PermissionName,
-        });
-        setIsMicPermission(permissions.state === "granted");
-      } catch (error) {
-        setIsMicPermission(false);
-      }
-    };
-
-    checkMicPermission();
-
-    return () => {
-      setIsMicPermission(true);
-    };
-  }, []);
-
-  const deleteAudioBlob = () => {
-    setAudioBlobExists(false);
-    setAudioResetRecording(true);
-  };
-
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
-  };
+  const [modalOpenForAudio, setModalOpenForAudio] = useState(false);
 
   useEffect(() => {
     document.addEventListener("selectionchange", handleSelectionChange);
@@ -425,8 +354,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
 
     const htmlContent = editorRef.current?.innerHTML || "";
     const markdownText = turndownService.turndown(htmlContent);
-    setMarkdown(markdownText);
-    setHtmlCode(htmlContent);
+    onChange(markdownText);
   };
 
   const onFileChange = (e: any): any => {
@@ -436,9 +364,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
     const f = e.target.files[0];
     const fileName = f.name;
     setFile(e.target.files[0]);
-    setUploadFileName(
-      fileName.substring(0, fileName.lastIndexOf(".")) || fileName,
-    );
 
     const ext: string = fileName.split(".")[1];
 
@@ -455,440 +380,163 @@ const RichTextEditor: React.FC<RichTextEditorProps> = () => {
     setFile(f);
   };
 
-  const handleAudioUpload = () => {
-    if (!audioBlob) return;
-    const f = new File([audioBlob], "audio.mp3", {
-      type: audioBlob.type,
-    });
-    setFile(f);
-    setUploadFileName("Audio Recording");
-  };
-
-  const [
-    audioURL,
-    isRecording,
-    startRecording,
-    stopRecording,
-    newBlob,
-    resetRecording,
-  ] = useRecorder(setIsMicPermission);
-  const [time, setTime] = useState(0);
-  useEffect(() => {
-    setAudioBlob(newBlob);
-    let interval: any;
-    if (isRecording) {
-      interval = setInterval(() => {
-        setTime((prevTime) => prevTime + 10);
-      }, 10);
-    } else {
-      clearInterval(interval);
-      setTime(0);
-    }
-    if (resetAudioRecording) {
-      resetRecording();
-      setAudioResetRecording(false);
-    }
-    return () => clearInterval(interval);
-  }, [isRecording, newBlob, resetAudioRecording]);
-
   return (
-    <div className="mx-auto flex rounded-lg bg-white p-4 shadow-lg">
-      <DialogModal
-        show={modalOpenForCamera}
-        title={
-          <div className="flex flex-row">
-            <div className="rounded-full bg-primary-100 px-5 py-4">
-              <CareIcon
-                icon="l-camera-change"
-                className="text-lg text-primary-500"
-              />
-            </div>
-            <div className="m-4">
-              <h1 className="text-xl text-black "> Camera</h1>
-            </div>
-          </div>
-        }
-        className="max-w-2xl"
+    <div className="max-w-lg bg-white p-4 shadow-lg">
+      {/* camera capture model */}
+      <CameraCaptureModal
+        open={modalOpenForCamera}
         onClose={() => setModalOpenForCamera(false)}
-      >
-        <div>
-          {!previewImage ? (
-            <div className="m-3">
-              <Webcam
-                forceScreenshotSourceSize
-                screenshotQuality={1}
-                audio={false}
-                screenshotFormat="image/png"
-                ref={webRef}
-                videoConstraints={{ ...videoConstraints, facingMode }}
-              />
-            </div>
-          ) : (
-            <div className="m-3">
-              <img src={previewImage} />
-            </div>
-          )}
-        </div>
+        setFile={setFile}
+      />
 
-        {/* buttons for mobile screens */}
-        <div className="m-4 flex justify-evenly sm:hidden ">
-          <div>
-            {!previewImage ? (
-              <ButtonV2 onClick={handleSwitchCamera} className="m-2">
-                switch
-              </ButtonV2>
-            ) : (
-              <></>
-            )}
-          </div>
-          <div>
-            {!previewImage ? (
-              <>
-                <div>
-                  <ButtonV2
-                    onClick={() => {
-                      captureImage();
-                    }}
-                    className="m-2"
-                  >
-                    capture
-                  </ButtonV2>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="flex space-x-2">
-                  <ButtonV2
-                    onClick={() => {
-                      setPreviewImage(null);
-                    }}
-                    className="m-2"
-                  >
-                    retake
-                  </ButtonV2>
-                  <Submit onClick={handleUploadCameraImage} className="m-2">
-                    submit
-                  </Submit>
-                </div>
-              </>
-            )}
-          </div>
-          <div className="sm:flex-1">
-            <ButtonV2
-              variant="secondary"
-              onClick={() => {
-                setPreviewImage(null);
-                setModalOpenForCamera(false);
-              }}
-              className="m-2"
-            >
-              close
-            </ButtonV2>
-          </div>
-        </div>
-        {/* buttons for laptop screens */}
-        <div className={`${isLaptopScreen ? " " : " hidden "}`}>
-          <div className="m-4 flex lg:hidden">
-            <ButtonV2 onClick={handleSwitchCamera}>
-              <CareIcon icon="l-camera-change" className="text-lg" />
-              switch camera
-            </ButtonV2>
-          </div>
+      {/* audio recording */}
+      <AudioRecorder
+        setFile={setFile}
+        modalOpenForAudio={modalOpenForAudio}
+        setModalOpenForAudio={setModalOpenForAudio}
+      />
 
-          <div className="flex justify-end  gap-2 p-4">
-            <div>
-              {!previewImage ? (
-                <>
-                  <div>
-                    <ButtonV2
-                      onClick={() => {
-                        captureImage();
-                      }}
-                    >
-                      <CareIcon icon="l-capture" className="text-lg" />
-                      capture
-                    </ButtonV2>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="flex space-x-2">
-                    <ButtonV2
-                      onClick={() => {
-                        setPreviewImage(null);
-                      }}
-                    >
-                      retake
-                    </ButtonV2>
-                    <Submit onClick={handleUploadCameraImage}>submit</Submit>
-                  </div>
-                </>
-              )}
-            </div>
-            <div className="sm:flex-1" />
-            <ButtonV2
-              variant="secondary"
-              onClick={() => {
-                setPreviewImage(null);
-                setModalOpenForCamera(false);
-              }}
-            >
-              close camera
-            </ButtonV2>
-          </div>
-        </div>
-      </DialogModal>
-      <div className="w-1/2 pr-4">
-        <div className="mb-2 flex items-center justify-between rounded-t-md border border-gray-300 bg-gray-100 p-2">
-          <div className="flex items-center space-x-1">
-            <button
-              onClick={() => applyStyle("b")}
-              className={`rounded p-2 ${
-                state.isBoldActive && !state.isQuoteActive
-                  ? "bg-primary-700 text-white"
-                  : "bg-gray-200"
-              }`}
-              disabled={state.isQuoteActive}
-            >
-              <FaBold className="text-lg" />
-            </button>
-            <button
-              onClick={() => applyStyle("i")}
-              className={`rounded p-2 ${
-                state.isItalicActive && !state.isQuoteActive
-                  ? "bg-primary-700 text-white"
-                  : "bg-gray-200"
-              }`}
-              disabled={state.isQuoteActive}
-            >
-              <FaItalic className="text-lg" />
-            </button>
-            <button
-              onClick={() => applyStyle("s")}
-              className={`rounded p-2 ${
-                state.isStrikethroughActive && !state.isQuoteActive
-                  ? "bg-primary-700 text-white"
-                  : "bg-gray-200"
-              }`}
-              disabled={state.isQuoteActive}
-            >
-              <FaStrikethrough className="text-lg" />
-            </button>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => toggleList("ul")}
-              className={`rounded p-2 ${
-                state.isUnorderedListActive && !state.isQuoteActive
-                  ? "bg-primary-700 text-white"
-                  : "bg-gray-200"
-              }`}
-              disabled={state.isQuoteActive}
-            >
-              <FaListUl className="text-lg" />
-            </button>
-            <button
-              onClick={() => toggleList("ol")}
-              className={`rounded p-2 ${
-                state.isOrderedListActive && !state.isQuoteActive
-                  ? "bg-primary-700 text-white"
-                  : "bg-gray-200"
-              }`}
-              disabled={state.isQuoteActive}
-            >
-              <FaListOl className="text-lg" />
-            </button>
-          </div>
-
+      {/* toolbar */}
+      <div className="mb-2 flex items-center justify-between rounded-t-md border border-gray-300 bg-gray-100 p-2">
+        <div className="flex items-center space-x-1">
           <button
-            onClick={applyQuote}
+            onClick={() => applyStyle("b")}
             className={`rounded p-2 ${
-              state.isQuoteActive ? "bg-primary-700 text-white" : "bg-gray-200"
+              state.isBoldActive && !state.isQuoteActive
+                ? "bg-primary-700 text-white"
+                : "bg-gray-200"
             }`}
+            disabled={state.isQuoteActive}
           >
-            <FaQuoteRight className="text-lg" />
+            <FaBold className="text-lg" />
           </button>
-
-          <div className="flex items-center space-x-2">
-            <button onClick={handleLink} className="rounded bg-gray-200 p-2">
-              <FaLink className="text-lg" />
-            </button>
-            <button onClick={handleUnlink} className="rounded bg-gray-200 p-2">
-              <FaUnlink className="text-lg" />
-            </button>
-          </div>
-
-          <div className="mx-2 h-6 border-l border-gray-400"></div>
-
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => {
-                const selection = window.getSelection();
-                if (!selection || !selection.rangeCount) return;
-                const range = selection.getRangeAt(0);
-                const rect = range.getBoundingClientRect();
-                setMentionPosition({
-                  top: rect.bottom + window.scrollY,
-                  left: rect.left + window.scrollX,
-                });
-                setShowMentions(!showMentions);
-              }}
-              className="rounded bg-gray-200 p-2"
-            >
-              <GoMention className="text-lg" />
-            </button>
-            <button
-              onClick={triggerFileInput}
-              className="rounded p-1 hover:bg-gray-200"
-            >
-              <MdAttachFile className="text-lg text-gray-700" />
-            </button>
-            <button
-              onClick={() => setModalOpenForCamera(true)}
-              className="rounded p-1 hover:bg-gray-200"
-            >
-              <FaCamera className="text-lg text-gray-700" />
-            </button>
-            <button
-              onClick={startRecording}
-              className="rounded p-1 hover:bg-gray-200"
-            >
-              <AiFillAudio className="text-lg text-gray-700" />
-            </button>
-            <input
-              ref={fileInputRef}
-              onChange={onFileChange}
-              type="file"
-              className="hidden"
-              accept="image/*,video/*,audio/*,text/plain,text/csv,application/rtf,application/msword,application/vnd.oasis.opendocument.text,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/pdf"
-            />
-          </div>
+          <button
+            onClick={() => applyStyle("i")}
+            className={`rounded p-2 ${
+              state.isItalicActive && !state.isQuoteActive
+                ? "bg-primary-700 text-white"
+                : "bg-gray-200"
+            }`}
+            disabled={state.isQuoteActive}
+          >
+            <FaItalic className="text-lg" />
+          </button>
+          <button
+            onClick={() => applyStyle("s")}
+            className={`rounded p-2 ${
+              state.isStrikethroughActive && !state.isQuoteActive
+                ? "bg-primary-700 text-white"
+                : "bg-gray-200"
+            }`}
+            disabled={state.isQuoteActive}
+          >
+            <FaStrikethrough className="text-lg" />
+          </button>
         </div>
 
-        <div className="flex w-full flex-col items-center justify-between gap-2 lg:flex-row">
-          {audioBlobExists && (
-            <div className="flex w-full items-center md:w-auto">
-              <ButtonV2
-                variant="danger"
-                className="w-full"
-                onClick={() => {
-                  deleteAudioBlob();
-                }}
-              >
-                <CareIcon icon="l-trash" className="h-4" /> Delete
-              </ButtonV2>
-            </div>
-          )}
-          <div className="flex flex-col items-center gap-4 md:flex-row md:flex-wrap lg:flex-nowrap">
-            <div className="w-full md:w-auto">
-              <div>
-                {isRecording && (
-                  <>
-                    <div className="flex justify-end space-x-2">
-                      <div className="flex bg-gray-100 p-2 text-primary-700">
-                        <CareIcon
-                          icon="l-record-audio"
-                          className="mr-2 animate-pulse"
-                        />
-                        <div className="mx-2">
-                          (
-                          <span>
-                            {("0" + Math.floor((time / 60000) % 60)).slice(-2)}:
-                          </span>
-                          <span>
-                            {("0" + Math.floor((time / 1000) % 60)).slice(-2)}
-                          </span>
-                          )
-                        </div>
-                        recording...
-                      </div>
-                      <ButtonV2
-                        onClick={() => {
-                          stopRecording();
-                          setAudioBlobExists(true);
-                        }}
-                      >
-                        <CareIcon
-                          icon="l-microphone-slash"
-                          className="text-lg"
-                        />
-                        stop
-                      </ButtonV2>
-                    </div>
-                  </>
-                )}
-              </div>
-              {audioURL && audioBlobExists && (
-                <div className="my-4">
-                  <audio
-                    className="m-auto max-h-full max-w-full object-contain"
-                    src={audioURL}
-                    controls
-                  />{" "}
-                </div>
-              )}
-            </div>
-
-            {!audioBlobExists && !isMicPermission && (
-              <span className="text-sm font-medium text-warning-500">
-                <CareIcon
-                  icon="l-exclamation-triangle"
-                  className="mr-1 text-base"
-                />
-                Please allow browser permission before you start speaking
-              </span>
-            )}
-          </div>
-          {audioBlobExists && (
-            <div className="flex w-full items-center md:w-auto">
-              <ButtonV2 onClick={handleAudioUpload} className="w-full">
-                <CareIcon icon="l-cloud-upload" className="text-xl" />
-                Save
-              </ButtonV2>
-            </div>
-          )}
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => toggleList("ul")}
+            className={`rounded p-2 ${
+              state.isUnorderedListActive && !state.isQuoteActive
+                ? "bg-primary-700 text-white"
+                : "bg-gray-200"
+            }`}
+            disabled={state.isQuoteActive}
+          >
+            <FaListUl className="text-lg" />
+          </button>
+          <button
+            onClick={() => toggleList("ol")}
+            className={`rounded p-2 ${
+              state.isOrderedListActive && !state.isQuoteActive
+                ? "bg-primary-700 text-white"
+                : "bg-gray-200"
+            }`}
+            disabled={state.isQuoteActive}
+          >
+            <FaListOl className="text-lg" />
+          </button>
         </div>
 
-        <div
-          ref={editorRef}
-          contentEditable
-          className="prose min-h-[100px] rounded-b-md border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          onInput={handleInput}
-        ></div>
+        <button
+          onClick={applyQuote}
+          className={`rounded p-2 ${
+            state.isQuoteActive ? "bg-primary-700 text-white" : "bg-gray-200"
+          }`}
+        >
+          <FaQuoteRight className="text-lg" />
+        </button>
 
-        <FileUpload
-          file={file}
-          setFile={setFile}
-          uploadFileName={uploadFileName}
-          setUploadFileName={setUploadFileName}
-        />
+        <div className="flex items-center space-x-2">
+          <button onClick={handleLink} className="rounded bg-gray-200 p-2">
+            <FaLink className="text-lg" />
+          </button>
+          <button onClick={handleUnlink} className="rounded bg-gray-200 p-2">
+            <FaUnlink className="text-lg" />
+          </button>
+        </div>
 
-        {showMentions && (
-          <MentionsDropdown
-            onSelect={insertMention}
-            position={mentionPosition}
+        <div className="mx-2 h-6 border-l border-gray-400"></div>
+
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => {
+              const selection = window.getSelection();
+              if (!selection || !selection.rangeCount) return;
+              const range = selection.getRangeAt(0);
+              const rect = range.getBoundingClientRect();
+              setMentionPosition({
+                top: rect.bottom + window.scrollY,
+                left: rect.left + window.scrollX,
+              });
+              setShowMentions(!showMentions);
+            }}
+            className="rounded bg-gray-200 p-2"
+          >
+            <GoMention className="text-lg" />
+          </button>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="rounded p-1 hover:bg-gray-200"
+          >
+            <MdAttachFile className="text-lg text-gray-700" />
+          </button>
+          <button
+            onClick={() => setModalOpenForCamera(true)}
+            className="rounded p-1 hover:bg-gray-200"
+          >
+            <FaCamera className="text-lg text-gray-700" />
+          </button>
+          <button
+            onClick={() => setModalOpenForAudio(true)}
+            className="rounded p-1 hover:bg-gray-200"
+          >
+            <AiFillAudio className="text-lg text-gray-700" />
+          </button>
+          <input
+            ref={fileInputRef}
+            onChange={onFileChange}
+            type="file"
+            className="hidden"
+            accept="image/*,video/*,audio/*,text/plain,text/csv,application/rtf,application/msword,application/vnd.oasis.opendocument.text,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/pdf"
           />
-        )}
-      </div>
-      <div className="w-1/2 pl-4">
-        <div className="mt-4">
-          <h2 className="mb-2 text-lg font-semibold">Markdown Preview:</h2>
-          <MarkdownPreview markdown={markdown} />
-        </div>
-        <div className="mt-4">
-          <h2 className="mb-2 text-lg font-semibold">Markdown Output:</h2>
-          <pre className="border border-gray-300 bg-gray-100 p-4">
-            {markdown}
-          </pre>
-        </div>
-        <div className="mt-4">
-          <h2 className="mb-2 text-lg font-semibold">HTML Code:</h2>
-          <pre className="text-wrap border border-gray-300 bg-gray-100 p-4">
-            {htmlCode}
-          </pre>
         </div>
       </div>
+
+      {/* editor */}
+      <div
+        ref={editorRef}
+        contentEditable
+        className="prose min-h-[100px] rounded-b-md border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        onInput={handleInput}
+      ></div>
+
+      <FileUpload file={file} setFile={setFile} />
+
+      {showMentions && (
+        <MentionsDropdown onSelect={insertMention} position={mentionPosition} />
+      )}
     </div>
   );
 };
@@ -898,13 +546,9 @@ export default RichTextEditor;
 const FileUpload = ({
   file,
   setFile,
-  uploadFileName,
-  setUploadFileName,
 }: {
   file: File | null;
   setFile: React.Dispatch<React.SetStateAction<File | null>>;
-  uploadFileName: string;
-  setUploadFileName: React.Dispatch<React.SetStateAction<string>>;
 }) => {
   const [file_state, setFileState] = useState<StateInterface>({
     open: false,
@@ -968,7 +612,6 @@ const FileUpload = ({
           if (xhr.status >= 200 && xhr.status < 300) {
             setUploadStarted(false);
             setFile(null);
-            setUploadFileName("");
             fetchData();
             Notification.Success({
               msg: "File Uploaded Successfully",
@@ -996,14 +639,9 @@ const FileUpload = ({
   };
 
   const validateFileUpload = () => {
-    const filenameLength = uploadFileName.trim().length;
     const f = file;
     if (f === undefined || f === null) {
       setUploadFileError("Please choose a file to upload");
-      return false;
-    }
-    if (filenameLength === 0) {
-      setUploadFileError("Please give a name !!");
       return false;
     }
     if (f.size > 10e7) {
@@ -1012,6 +650,7 @@ const FileUpload = ({
     }
     return true;
   };
+
   const markUploadComplete = (data: CreateFileResponse) => {
     return request(routes.editUpload, {
       body: { upload_completed: true },
@@ -1026,20 +665,19 @@ const FileUpload = ({
   const handleUpload = async () => {
     if (!validateFileUpload()) return;
     const f = file;
+    if (!f) return;
 
-    const category = f?.type.includes("audio") ? "AUDIO" : "UNSPECIFIED";
-    const filename = uploadFileName === "" && f ? f.name : uploadFileName;
-    const name = f?.name;
+    const category = f.type.includes("audio") ? "AUDIO" : "UNSPECIFIED";
     setUploadStarted(true);
 
     const { data } = await request(routes.createUpload, {
       body: {
-        original_name: name ?? "",
+        original_name: f.name,
         file_type: file_type,
-        name: filename,
+        name: f.name,
         associating_id: noteId,
         file_category: category,
-        mime_type: f?.type ?? "",
+        mime_type: f.type,
       },
     });
 
@@ -1048,7 +686,15 @@ const FileUpload = ({
       await markUploadComplete(data);
       await fetchData();
     }
+    setFile(null);
   };
+
+  useEffect(() => {
+    if (file) {
+      handleUpload();
+    }
+  }, [file]);
+
   const getExtension = (url: string) => {
     const extension = url.split("?")[0].split(".").pop();
     return extension ?? "";
@@ -1151,21 +797,6 @@ const FileUpload = ({
         )}
       </div>
       <div className="mt-4">
-        <div className="flex items-center gap-4">
-          <input
-            type="text"
-            placeholder="Enter file name"
-            value={uploadFileName}
-            className="w-2/3 border border-gray-300 p-2"
-            disabled
-          />
-          <button
-            onClick={handleUpload}
-            className="rounded bg-primary-700 p-2 text-white"
-          >
-            {uploadStarted ? "Uploading..." : "Upload"}
-          </button>
-        </div>
         {uploadFileError && (
           <p className="mt-2 text-sm text-red-500">{uploadFileError}</p>
         )}
@@ -1193,6 +824,368 @@ const FileUpload = ({
           />
         </div>
       </div>
+    </div>
+  );
+};
+
+const CameraCaptureModal = ({
+  open,
+  onClose,
+  setFile,
+}: {
+  open: boolean;
+  onClose: () => void;
+  setFile: React.Dispatch<React.SetStateAction<File | null>>;
+}) => {
+  const [previewImage, setPreviewImage] = useState(null);
+  const webRef = useRef<any>(null);
+  const FACING_MODE_USER = "user";
+  const FACING_MODE_ENVIRONMENT = { exact: "environment" };
+  const { width } = useWindowDimensions();
+  const LaptopScreenBreakpoint = 640;
+
+  const isLaptopScreen = width >= LaptopScreenBreakpoint ? true : false;
+
+  const [facingMode, setFacingMode] = useState<"front" | "rear">("front");
+  const videoConstraints = {
+    width: 1280,
+    height: 720,
+    facingMode:
+      facingMode === "front" ? FACING_MODE_USER : FACING_MODE_ENVIRONMENT,
+  };
+
+  const handleSwitchCamera = useCallback(() => {
+    setFacingMode((prev) => (prev === "front" ? "rear" : "front"));
+  }, []);
+
+  const captureImage = () => {
+    setPreviewImage(webRef.current.getScreenshot());
+    const canvas = webRef.current.getCanvas();
+    canvas?.toBlob((blob: Blob) => {
+      const extension = blob.type.split("/").pop();
+      const myFile = new File([blob], `image.${extension}`, {
+        type: blob.type,
+      });
+      setFile(myFile);
+    });
+  };
+
+  const onUpload = () => {
+    setFile(null);
+    onClose();
+  };
+
+  return (
+    <DialogModal
+      show={open}
+      title={
+        <div className="flex flex-row">
+          <div className="rounded-full bg-primary-100 px-5 py-4">
+            <CareIcon
+              icon="l-camera-change"
+              className="text-lg text-primary-500"
+            />
+          </div>
+          <div className="m-4">
+            <h1 className="text-xl text-black "> Camera</h1>
+          </div>
+        </div>
+      }
+      className="max-w-2xl"
+      onClose={onClose}
+    >
+      <div>
+        {!previewImage ? (
+          <div className="m-3">
+            <Webcam
+              forceScreenshotSourceSize
+              screenshotQuality={1}
+              audio={false}
+              screenshotFormat="image/png"
+              ref={webRef}
+              videoConstraints={videoConstraints}
+            />
+          </div>
+        ) : (
+          <div className="m-3">
+            <img src={previewImage} />
+          </div>
+        )}
+      </div>
+
+      {/* buttons for mobile screens */}
+      <div className="m-4 flex justify-evenly sm:hidden ">
+        <div>
+          {!previewImage ? (
+            <ButtonV2 onClick={handleSwitchCamera} className="m-2">
+              switch
+            </ButtonV2>
+          ) : (
+            <></>
+          )}
+        </div>
+        <div>
+          {!previewImage ? (
+            <>
+              <div>
+                <ButtonV2
+                  onClick={() => {
+                    captureImage();
+                  }}
+                  className="m-2"
+                >
+                  capture
+                </ButtonV2>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex space-x-2">
+                <ButtonV2
+                  onClick={() => {
+                    setPreviewImage(null);
+                  }}
+                  className="m-2"
+                >
+                  retake
+                </ButtonV2>
+                <Submit onClick={onUpload} className="m-2">
+                  submit
+                </Submit>
+              </div>
+            </>
+          )}
+        </div>
+        <div className="sm:flex-1">
+          <ButtonV2
+            variant="secondary"
+            onClick={() => {
+              setPreviewImage(null);
+              onClose();
+            }}
+            className="m-2"
+          >
+            close
+          </ButtonV2>
+        </div>
+      </div>
+      {/* buttons for laptop screens */}
+      <div className={`${isLaptopScreen ? " " : " hidden "}`}>
+        <div className="m-4 flex lg:hidden">
+          <ButtonV2 onClick={handleSwitchCamera}>
+            <CareIcon icon="l-camera-change" className="text-lg" />
+            switch camera
+          </ButtonV2>
+        </div>
+
+        <div className="flex justify-end  gap-2 p-4">
+          <div>
+            {!previewImage ? (
+              <>
+                <div>
+                  <ButtonV2
+                    onClick={() => {
+                      captureImage();
+                    }}
+                  >
+                    <CareIcon icon="l-capture" className="text-lg" />
+                    capture
+                  </ButtonV2>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex space-x-2">
+                  <ButtonV2
+                    onClick={() => {
+                      setPreviewImage(null);
+                    }}
+                  >
+                    retake
+                  </ButtonV2>
+                  <Submit onClick={onUpload}>submit</Submit>
+                </div>
+              </>
+            )}
+          </div>
+          <div className="sm:flex-1" />
+          <ButtonV2
+            variant="secondary"
+            onClick={() => {
+              setPreviewImage(null);
+              onClose();
+            }}
+          >
+            close camera
+          </ButtonV2>
+        </div>
+      </div>
+    </DialogModal>
+  );
+};
+
+const AudioRecorder = ({
+  setFile,
+  modalOpenForAudio,
+  setModalOpenForAudio,
+}: {
+  setFile: React.Dispatch<React.SetStateAction<File | null>>;
+  modalOpenForAudio: boolean;
+  setModalOpenForAudio: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
+  const [audioBlobExists, setAudioBlobExists] = useState(false);
+  const [resetAudioRecording, setAudioResetRecording] = useState(false);
+  const [isMicPermission, setIsMicPermission] = useState(true);
+  const [audioBlob, setAudioBlob] = useState<Blob>();
+
+  const handleAudioUpload = () => {
+    if (!audioBlob) return;
+    const f = new File([audioBlob], "audio.mp3", {
+      type: audioBlob.type,
+    });
+    setFile(f);
+  };
+
+  useEffect(() => {
+    if (modalOpenForAudio) {
+      setAudioBlobExists(false);
+      setAudioResetRecording(true);
+      startRecording();
+    }
+  }, [modalOpenForAudio]);
+
+  const [
+    audioURL,
+    isRecording,
+    startRecording,
+    stopRecording,
+    newBlob,
+    resetRecording,
+  ] = useRecorder(setIsMicPermission);
+  const [time, setTime] = useState(0);
+  useEffect(() => {
+    setAudioBlob(newBlob);
+    let interval: any;
+    if (isRecording) {
+      interval = setInterval(() => {
+        setTime((prevTime) => prevTime + 10);
+      }, 10);
+    } else {
+      clearInterval(interval);
+      setTime(0);
+    }
+    if (resetAudioRecording) {
+      resetRecording();
+      setAudioResetRecording(false);
+    }
+    return () => clearInterval(interval);
+  }, [isRecording, newBlob, resetAudioRecording]);
+
+  useEffect(() => {
+    const checkMicPermission = async () => {
+      try {
+        const permissions = await navigator.permissions.query({
+          name: "microphone" as PermissionName,
+        });
+        setIsMicPermission(permissions.state === "granted");
+      } catch (error) {
+        setIsMicPermission(false);
+      }
+    };
+
+    checkMicPermission();
+
+    return () => {
+      setIsMicPermission(true);
+    };
+  }, []);
+
+  const deleteAudioBlob = () => {
+    setAudioBlobExists(false);
+    setAudioResetRecording(true);
+    setModalOpenForAudio(false);
+  };
+
+  return (
+    <div className="flex w-full flex-col items-center justify-between gap-2 lg:flex-row">
+      {audioBlobExists && (
+        <div className="flex w-full items-center md:w-auto">
+          <ButtonV2
+            variant="danger"
+            className="w-full"
+            onClick={() => {
+              deleteAudioBlob();
+            }}
+          >
+            <CareIcon icon="l-trash" className="h-4" /> Delete
+          </ButtonV2>
+        </div>
+      )}
+      <div className="flex flex-col items-center gap-4 md:flex-row md:flex-wrap lg:flex-nowrap">
+        <div className="w-full md:w-auto">
+          <div>
+            {isRecording && (
+              <>
+                <div className="flex justify-end space-x-2">
+                  <div className="flex bg-gray-100 p-2 text-primary-700">
+                    <CareIcon
+                      icon="l-record-audio"
+                      className="mr-2 animate-pulse"
+                    />
+                    <div className="mx-2">
+                      (
+                      <span>
+                        {("0" + Math.floor((time / 60000) % 60)).slice(-2)}:
+                      </span>
+                      <span>
+                        {("0" + Math.floor((time / 1000) % 60)).slice(-2)}
+                      </span>
+                      )
+                    </div>
+                    recording...
+                  </div>
+                  <ButtonV2
+                    onClick={() => {
+                      stopRecording();
+                      setAudioBlobExists(true);
+                    }}
+                  >
+                    <CareIcon icon="l-microphone-slash" className="text-lg" />
+                    stop
+                  </ButtonV2>
+                </div>
+              </>
+            )}
+          </div>
+          {audioURL && audioBlobExists && (
+            <div className="my-4">
+              <audio
+                className="m-auto max-h-full max-w-full object-contain"
+                src={audioURL}
+                controls
+              />{" "}
+            </div>
+          )}
+        </div>
+
+        {!audioBlobExists && !isMicPermission && (
+          <span className="text-sm font-medium text-warning-500">
+            <CareIcon
+              icon="l-exclamation-triangle"
+              className="mr-1 text-base"
+            />
+            Please allow browser permission before you start speaking
+          </span>
+        )}
+      </div>
+      {audioBlobExists && (
+        <div className="flex w-full items-center md:w-auto">
+          <ButtonV2 onClick={handleAudioUpload} className="w-full">
+            <CareIcon icon="l-cloud-upload" className="text-xl" />
+            Save
+          </ButtonV2>
+        </div>
+      )}
     </div>
   );
 };
