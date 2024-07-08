@@ -74,7 +74,7 @@ const MarkdownPreview: React.FC<{ markdown: string }> = ({ markdown }) => {
 
   return (
     <ReactMarkdown
-      className="prose"
+      className="prose text-sm"
       rehypePlugins={[rehypeRaw]}
       components={{
         a: CustomLink,

@@ -3,7 +3,6 @@ import * as Notification from "../../Utils/Notifications.js";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames, isAppleDevice } from "../../Utils/utils";
-import ButtonV2 from "../Common/components/ButtonV2";
 import { make as Link } from "../Common/components/Link.bs";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import PatientConsultationNotesList from "./PatientConsultationNotesList";
@@ -11,11 +10,12 @@ import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { PatientNoteStateType, PaitentNotesReplyModel } from "./models";
 import useKeyboardShortcut from "use-keyboard-shortcut";
-import AutoExpandingTextInputFormField from "../Form/FormFields/AutoExpandingTextInputFormField.js";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { PATIENT_NOTES_THREADS } from "../../Common/constants.js";
 import DoctorNoteReplyPreviewCard from "./DoctorNoteReplyPreviewCard.js";
 import useNotificationSubscriptionState from "../../Common/hooks/useNotificationSubscriptionState.js";
+import RichTextEditor from "../Common/RichTextEditor.js";
+import AuthorizedChild from "../../CAREUI/misc/AuthorizedChild.js";
 
 interface PatientNotesProps {
   patientId: string;
@@ -35,7 +35,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   const [show, setShow] = useState(true);
   const [patientActive, setPatientActive] = useState(true);
   const [reload, setReload] = useState(false);
-  const [focused, setFocused] = useState(false);
+  // const [focused, setFocused] = useState(false);
   const [reply_to, setReplyTo] = useState<PaitentNotesReplyModel | undefined>(
     undefined,
   );
@@ -123,9 +123,9 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   useKeyboardShortcut(
     [isAppleDevice ? "Meta" : "Shift", "Enter"],
     () => {
-      if (focused) {
-        onAddNote();
-      }
+      // if (focused) {
+      onAddNote();
+      // }
     },
     {
       ignoreInputFields: false,
@@ -227,40 +227,23 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
             thread={thread}
             setReplyTo={setReplyTo}
           />
-          <DoctorNoteReplyPreviewCard
-            parentNote={reply_to}
-            cancelReply={() => setReplyTo(undefined)}
-          >
-            <div className="relative mx-4 flex items-center">
-              <AutoExpandingTextInputFormField
-                id="doctor_notes_textarea"
-                maxHeight={160}
-                rows={1}
-                name="note"
-                value={noteField}
-                onChange={(e) => setNoteField(e.value)}
-                className="w-full grow"
-                errorClassName="hidden"
-                innerClassName="pr-10"
-                placeholder="Type your Note"
-                disabled={!patientActive}
-                onFocus={() => setFocused(true)}
-                onBlur={() => setFocused(false)}
-              />
-              <ButtonV2
-                id="add_doctor_note_button"
-                onClick={onAddNote}
-                border={false}
-                className="absolute right-2"
-                ghost
-                size="small"
-                disabled={!patientActive}
-                authorizeFor={NonReadOnlyUsers}
-              >
-                <CareIcon icon="l-message" className="text-lg" />
-              </ButtonV2>
-            </div>
-          </DoctorNoteReplyPreviewCard>
+          {patientActive && (
+            <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
+              {({ isAuthorized }) => (
+                <DoctorNoteReplyPreviewCard
+                  parentNote={reply_to}
+                  cancelReply={() => setReplyTo(undefined)}
+                >
+                  <RichTextEditor
+                    initialMarkdown={noteField}
+                    onChange={setNoteField}
+                    onAddNote={onAddNote}
+                    isAuthorized={isAuthorized}
+                  />
+                </DoctorNoteReplyPreviewCard>
+              )}
+            </AuthorizedChild>
+          )}
         </div>
       )}
     </div>

@@ -36,6 +36,7 @@ interface RichTextEditorProps {
   initialMarkdown?: string;
   onChange: (markdown: string) => void;
   onAddNote: () => void;
+  isAuthorized?: boolean;
 }
 
 interface EditorState {
@@ -90,6 +91,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   // initialMarkdown = "",
   onChange,
   onAddNote,
+  isAuthorized = true,
 }) => {
   const [state, dispatch] = useReducer(editorReducer, initialState);
   const editorRef = useRef<HTMLDivElement>(null);
@@ -284,8 +286,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         const range = selection.getRangeAt(0);
         const rect = range.getBoundingClientRect();
         setMentionPosition({
-          top: rect.bottom + window.scrollY + 50,
-          left: rect.left + window.scrollX,
+          top: rect.bottom + window.scrollY + 20,
+          left: rect.left + window.scrollX + 10,
         });
         setShowMentions(true);
         lastCaretPosition.current = range.cloneRange();
@@ -383,7 +385,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   };
 
   return (
-    <div className="relative mx-auto">
+    <div className="relative ml-2 mr-4 mt-1">
       {/* camera capture model */}
       <CameraCaptureModal
         open={modalOpenForCamera}
@@ -399,131 +401,139 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       />
 
       {/* toolbar */}
-      <div className="relative flex w-[48vw] items-center rounded-t-md border border-gray-300 bg-gray-100 p-2">
-        <div className="flex items-center space-x-1">
-          <button
-            onClick={() => applyStyle("b")}
-            className={`rounded p-2 ${
-              state.isBoldActive && !state.isQuoteActive
-                ? "bg-primary-700 text-white"
-                : "bg-gray-200"
-            }`}
-            disabled={state.isQuoteActive}
-          >
-            <FaBold className="text-" />
-          </button>
-          <button
-            onClick={() => applyStyle("i")}
-            className={`rounded p-2 ${
-              state.isItalicActive && !state.isQuoteActive
-                ? "bg-primary-700 text-white"
-                : "bg-gray-200"
-            }`}
-            disabled={state.isQuoteActive}
-          >
-            <FaItalic className="text-" />
-          </button>
-          <button
-            onClick={() => applyStyle("s")}
-            className={`rounded p-2 ${
-              state.isStrikethroughActive && !state.isQuoteActive
-                ? "bg-primary-700 text-white"
-                : "bg-gray-200"
-            }`}
-            disabled={state.isQuoteActive}
-          >
-            <FaStrikethrough className="text-" />
-          </button>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={() => toggleList("ul")}
-            className={`rounded p-2 ${
-              state.isUnorderedListActive && !state.isQuoteActive
-                ? "bg-primary-700 text-white"
-                : "bg-gray-200"
-            }`}
-            disabled={state.isQuoteActive}
-          >
-            <FaListUl className="text-" />
-          </button>
-          <button
-            onClick={() => toggleList("ol")}
-            className={`rounded p-2 ${
-              state.isOrderedListActive && !state.isQuoteActive
-                ? "bg-primary-700 text-white"
-                : "bg-gray-200"
-            }`}
-            disabled={state.isQuoteActive}
-          >
-            <FaListOl className="text-" />
-          </button>
-        </div>
+      <div className="flex items-center space-x-2 rounded-t-md border border-gray-300 bg-gray-100 p-1">
+        <button
+          onClick={() => applyStyle("b")}
+          className={`rounded p-1 ${
+            state.isBoldActive && !state.isQuoteActive
+              ? "bg-primary-700 text-white"
+              : "bg-gray-200"
+          }`}
+          disabled={state.isQuoteActive}
+        >
+          <FaBold className="text-sm" />
+        </button>
+        <button
+          onClick={() => applyStyle("i")}
+          className={`rounded p-1 ${
+            state.isItalicActive && !state.isQuoteActive
+              ? "bg-primary-700 text-white"
+              : "bg-gray-200"
+          }`}
+          disabled={state.isQuoteActive}
+        >
+          <FaItalic className="text-sm" />
+        </button>
+        <button
+          onClick={() => applyStyle("s")}
+          className={`rounded p-1 ${
+            state.isStrikethroughActive && !state.isQuoteActive
+              ? "bg-primary-700 text-white"
+              : "bg-gray-200"
+          }`}
+          disabled={state.isQuoteActive}
+        >
+          <FaStrikethrough className="text-sm" />
+        </button>
+        <div className="mx-2 h-6 border-l border-gray-400"></div>
 
         <button
+          onClick={() => toggleList("ul")}
+          className={`rounded p-1 ${
+            state.isUnorderedListActive && !state.isQuoteActive
+              ? "bg-primary-700 text-white"
+              : "bg-gray-200"
+          }`}
+          disabled={state.isQuoteActive}
+        >
+          <FaListUl className="text-sm" />
+        </button>
+        <button
+          onClick={() => toggleList("ol")}
+          className={`rounded p-1 ${
+            state.isOrderedListActive && !state.isQuoteActive
+              ? "bg-primary-700 text-white"
+              : "bg-gray-200"
+          }`}
+          disabled={state.isQuoteActive}
+        >
+          <FaListOl className="text-sm" />
+        </button>
+        <div className="mx-2 h-6 border-l border-gray-400"></div>
+        <button
           onClick={applyQuote}
-          className={`rounded p-2 ${
+          className={`rounded p-1 ${
             state.isQuoteActive ? "bg-primary-700 text-white" : "bg-gray-200"
           }`}
         >
-          <FaQuoteRight className="text-" />
+          <FaQuoteRight className="text-sm" />
         </button>
 
-        <div className="flex items-center space-x-2">
-          <button onClick={handleLink} className="rounded bg-gray-200 p-2">
-            <FaLink className="text-" />
-          </button>
-          <button onClick={handleUnlink} className="rounded bg-gray-200 p-2">
-            <FaUnlink className="text-" />
-          </button>
-        </div>
+        <button onClick={handleLink} className="rounded bg-gray-200 p-2">
+          <FaLink className="text-sm" />
+        </button>
+        <button onClick={handleUnlink} className="rounded bg-gray-200 p-2">
+          <FaUnlink className="text-sm" />
+        </button>
+      </div>
 
+      {/* editor */}
+      <div className="overflow-y-scroll border border-x-gray-300 bg-white p-2 focus:outline-none focus:ring-1 focus:ring-primary-500">
+        <div
+          ref={editorRef}
+          contentEditable
+          className="prose min-h-[50px] max-w-full text-sm outline-none"
+          onInput={handleInput}
+        />
+        <FileUpload file={file} setFile={setFile} />
+      </div>
+
+      {/* toolbar-2 */}
+      <div className="flex items-center space-x-2 rounded-b-md border border-gray-300 bg-gray-100 pl-2 ">
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          className="rounded p-1 hover:bg-gray-200"
+        >
+          <MdAttachFile className="text-sm" />
+        </button>
         <div className="mx-2 h-6 border-l border-gray-400"></div>
+        <button
+          onClick={() => setModalOpenForCamera(true)}
+          className="rounded p-1 hover:bg-gray-200"
+        >
+          <FaCamera className="text-sm" />
+        </button>
+        <button
+          onClick={() => setModalOpenForAudio(true)}
+          className="rounded p-1 hover:bg-gray-200"
+        >
+          <AiFillAudio className="text-sm" />
+        </button>
+        <div className="mx-2 h-6 border-l border-gray-400"></div>
+        <button
+          onClick={() => {
+            const selection = window.getSelection();
+            if (!selection || !selection.rangeCount) return;
+            const range = selection.getRangeAt(0);
+            const rect = range.getBoundingClientRect();
+            setMentionPosition({
+              top: rect.bottom + window.scrollY,
+              left: rect.left + window.scrollX,
+            });
+            setShowMentions(!showMentions);
+          }}
+          className="rounded bg-gray-200 p-1"
+        >
+          <GoMention className="text-sm" />
+        </button>
+        <input
+          ref={fileInputRef}
+          onChange={onFileChange}
+          type="file"
+          className="hidden"
+          accept="image/*,video/*,audio/*,text/plain,text/csv,application/rtf,application/msword,application/vnd.oasis.opendocument.text,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/pdf"
+        />
 
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={() => {
-              const selection = window.getSelection();
-              if (!selection || !selection.rangeCount) return;
-              const range = selection.getRangeAt(0);
-              const rect = range.getBoundingClientRect();
-              setMentionPosition({
-                top: rect.bottom + window.scrollY,
-                left: rect.left + window.scrollX,
-              });
-              setShowMentions(!showMentions);
-            }}
-            className="rounded bg-gray-200 p-2"
-          >
-            <GoMention className="text-" />
-          </button>
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="rounded p-1 hover:bg-gray-200"
-          >
-            <MdAttachFile className="text-lg text-gray-700" />
-          </button>
-          <button
-            onClick={() => setModalOpenForCamera(true)}
-            className="rounded p-1 hover:bg-gray-200"
-          >
-            <FaCamera className="text-lg text-gray-700" />
-          </button>
-          <button
-            onClick={() => setModalOpenForAudio(true)}
-            className="rounded p-1 hover:bg-gray-200"
-          >
-            <AiFillAudio className="text-lg text-gray-700" />
-          </button>
-          <input
-            ref={fileInputRef}
-            onChange={onFileChange}
-            type="file"
-            className="hidden"
-            accept="image/*,video/*,audio/*,text/plain,text/csv,application/rtf,application/msword,application/vnd.oasis.opendocument.text,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/pdf"
-          />
-        </div>
         <div className="grow"></div>
         <Submit
           onClick={() => {
@@ -531,20 +541,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             editorRef.current!.innerHTML = "";
           }}
           className="rounded bg-primary-500 p-2 text-white"
+          disabled={!isAuthorized}
         >
           <CareIcon icon="l-message" className="text-lg" />
         </Submit>
       </div>
-
-      {/* editor */}
-      <div
-        ref={editorRef}
-        contentEditable
-        className="prose relative min-h-[85px] overflow-y-scroll rounded-b-md border border-gray-300 p-3 focus:outline-none focus:ring-1 focus:ring-primary-500"
-        onInput={handleInput}
-      />
-
-      <FileUpload file={file} setFile={setFile} />
 
       {showMentions && (
         <MentionsDropdown
@@ -774,7 +775,7 @@ const FileUpload = ({
         fixedWidth={false}
         className="h-[80vh] w-full md:h-screen"
       />
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-3 ">
         {isLoading ? (
           <p>Loading...</p>
         ) : (
@@ -782,7 +783,7 @@ const FileUpload = ({
             {files.map((file) => (
               <div
                 key={file.id}
-                className="relative mt-2 h-24 w-24 cursor-pointer rounded-md bg-gray-100 shadow-sm hover:bg-gray-200"
+                className="relative mt-1 h-20 w-20 cursor-pointer rounded-md bg-gray-100 shadow-sm hover:bg-gray-200"
               >
                 <button
                   onClick={(e) => {
@@ -813,7 +814,7 @@ const FileUpload = ({
           </>
         )}
       </div>
-      <div className="mt-4">
+      <div className="">
         {uploadFileError && (
           <p className="mt-2 text-sm text-red-500">{uploadFileError}</p>
         )}

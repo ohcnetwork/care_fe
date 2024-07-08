@@ -15,7 +15,7 @@ interface PatientNotesProps {
   disableEdit?: boolean;
   thread: PatientNotesModel["thread"];
   setReplyTo?: (value: PatientNotesModel | undefined) => void;
-  mode?: "comments" | "replies";
+  mode?: "thread-view" | "default-view";
 }
 
 const pageSize = RESULTS_PER_PAGE_LIMIT;
@@ -29,7 +29,7 @@ const PatientConsultationNotesList = (props: PatientNotesProps) => {
     disableEdit,
     thread,
     setReplyTo,
-    mode = "replies",
+    mode = "default-view",
   } = props;
   const consultationId = useSlug("consultation") ?? "";
 

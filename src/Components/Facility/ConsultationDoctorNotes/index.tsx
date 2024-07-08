@@ -46,7 +46,9 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
   const [reply_to, setReplyTo] = useState<PaitentNotesReplyModel | undefined>(
     undefined,
   );
-  const [mode, setMode] = useState<"comments" | "replies">("comments");
+  const [mode, setMode] = useState<"thread-view" | "default-view">(
+    "thread-view",
+  );
 
   const initialData: PatientNoteStateType = {
     notes: [],
@@ -143,17 +145,17 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       }}
       backUrl={`/facility/${facilityId}/patient/${patientId}`}
     >
-      <div className="absolute right-20 top-20 flex items-center">
+      <div className="absolute right-16 top-16 flex items-center">
         <Switch
           tabs={{
-            comments: "Thread View",
-            replies: "Default View",
+            "thread-view": "Thread View",
+            "default-view": "Default View",
           }}
           selected={mode}
           onChange={(tab) => setMode(tab)}
         />
       </div>
-      <div className="relative mx-3 my-2 flex grow flex-col rounded-lg border border-gray-300 bg-white p-2 sm:mx-10 sm:my-5 sm:p-5">
+      <div className="relative mx-3 flex grow flex-col rounded-lg border border-gray-300 bg-white px-2 sm:mx-10 sm:px-5 sm:pt-8">
         <div className="absolute inset-x-0 top-0 flex bg-gray-200 text-sm shadow-md">
           {Object.values(PATIENT_NOTES_THREADS).map((current) => (
             <button
@@ -188,24 +190,11 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
           parentNote={reply_to}
           cancelReply={() => setReplyTo(undefined)}
         >
-          <div className="mx-4 flex items-center">
-            <RichTextEditor
-              initialMarkdown={noteField}
-              onChange={setNoteField}
-              onAddNote={onAddNote}
-            />
-            {/* <ButtonV2
-              onClick={onAddNote}
-              border={false}
-              className="absolute right-2"
-              ghost
-              size="small"
-              disabled={!patientActive}
-              authorizeFor={NonReadOnlyUsers}
-            >
-              <CareIcon icon="l-message" className="text-lg" />
-            </ButtonV2> */}
-          </div>
+          <RichTextEditor
+            initialMarkdown={noteField}
+            onChange={setNoteField}
+            onAddNote={onAddNote}
+          />
         </DoctorNoteReplyPreviewCard>
       </div>
     </Page>

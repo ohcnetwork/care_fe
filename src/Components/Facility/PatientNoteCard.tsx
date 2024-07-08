@@ -75,11 +75,14 @@ const PatientNoteCard = ({
       {" "}
       <div
         className={classNames(
-          "mt-4 flex w-full flex-col rounded-lg border border-gray-300 bg-white p-3 text-gray-800",
+          "mx-2 flex flex-col rounded-lg border border-gray-300 bg-white px-3 py-1 text-gray-800",
           note.user_type === "RemoteSpecialist" && "border-primary-400",
         )}
       >
-        <div className="flex justify-between">
+        <div className="group relative flex items-center gap-2">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-lg font-semibold text-white">
+            {note.created_by_object?.first_name[0]}
+          </div>
           <div>
             <div>
               <span className="text-sm font-semibold text-gray-700">
@@ -92,20 +95,12 @@ const PatientNoteCard = ({
                 </span>
               )}
             </div>
-            <div className="text-xs text-gray-600">
-              <div className="tooltip inline">
-                <span className="tooltip-text tooltip-bottom">
-                  {formatDateTime(note.created_date)}
-                </span>
-                Created {relativeDate(note.created_date, true)}
-              </div>
-            </div>
             {
               // If last edited date is same as created date, then it is not edited
               !dayjs(note.last_edited_date).isSame(
                 note.created_date,
                 "second",
-              ) && (
+              ) ? (
                 <div className="flex">
                   <div
                     className="cursor-pointer text-xs text-gray-600"
@@ -126,10 +121,19 @@ const PatientNoteCard = ({
                     />
                   </div>
                 </div>
+              ) : (
+                <div className="text-xs text-gray-600">
+                  <div className="tooltip inline">
+                    <span className="tooltip-text tooltip-bottom">
+                      {formatDateTime(note.created_date)}
+                    </span>
+                    Created {relativeDate(note.created_date, true)}
+                  </div>
+                </div>
               )
             }
           </div>
-          <div className="flex gap-2">
+          <div className="gap-2-top-4 absolute -top-4 right-0 z-10 flex gap-2 opacity-0 transition-opacity duration-100 group-hover:opacity-100 ">
             {!disableEdit &&
               // note.created_by_object.id === authUser.id &&
               !isEditing && (
@@ -138,8 +142,9 @@ const PatientNoteCard = ({
                   onClick={() => {
                     setIsEditing(true);
                   }}
+                  className="bg-gray-100 p-2"
                 >
-                  <CareIcon icon="l-pen" className="h-5 w-5" />
+                  <CareIcon icon="l-pen" className="h-4 w-4" />
                 </ButtonV2>
               )}
             <ButtonV2
@@ -147,11 +152,13 @@ const PatientNoteCard = ({
               onClick={() => {
                 setReplyTo && setReplyTo(note);
               }}
+              className="bg-gray-100 p-2"
             >
-              <CareIcon icon="l-corner-up-left-alt" className="h-5 w-5" />
+              <CareIcon icon="l-corner-up-left-alt" className="h-4 w-4" />
             </ButtonV2>
           </div>
         </div>
+
         {
           <div className="mt-2">
             {isEditing ? (
@@ -191,9 +198,8 @@ const PatientNoteCard = ({
                 onClick={() => {
                   navigate(`${currentPath}/${note.id}`);
                 }}
-                className="cursor-pointer text-sm text-gray-700"
+                className="cursor-pointer pl-11 text-sm text-gray-700"
               >
-                {/* {noteField} */}
                 <MarkdownPreview markdown={noteField} />
               </div>
             )}
@@ -213,7 +219,7 @@ const PatientNoteCard = ({
                 <strong> {note.id}</strong>
               </p>
             </div>
-            <div className="h-96 overflow-scroll">
+            <div className="h-96 overflow-y-scroll">
               {editHistory.length === 0 && (
                 <div className="flex h-full items-center justify-center">
                   <Spinner />

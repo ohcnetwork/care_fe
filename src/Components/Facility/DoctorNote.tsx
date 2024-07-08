@@ -10,7 +10,7 @@ interface DoctorNoteProps {
   handleNext: () => void;
   disableEdit?: boolean;
   setReplyTo?: (reply_to: PatientNotesModel | undefined) => void;
-  mode?: "comments" | "replies";
+  mode?: "thread-view" | "default-view";
 }
 
 const DoctorNote = (props: DoctorNoteProps) => {
@@ -18,7 +18,7 @@ const DoctorNote = (props: DoctorNoteProps) => {
 
   return (
     <div
-      className="m-2 flex h-[390px] grow flex-col-reverse overflow-auto bg-white"
+      className="mt-4 flex h-[400px] grow flex-col-reverse overflow-auto bg-white"
       id="patient-notes-list"
     >
       {state.notes.length ? (
@@ -30,13 +30,13 @@ const DoctorNote = (props: DoctorNoteProps) => {
               <CircularProgress />
             </div>
           }
-          className="flex h-full flex-col-reverse p-2"
+          className="flex h-full flex-col-reverse overflow-hidden"
           inverse={true}
           dataLength={state.notes.length}
           scrollableTarget="patient-notes-list"
         >
           {state.notes.map((note) => {
-            if (mode === "comments") {
+            if (mode === "thread-view") {
               return (
                 <div className="" key={note.id}>
                   <PatientNoteCard
@@ -48,27 +48,29 @@ const DoctorNote = (props: DoctorNoteProps) => {
                   {note.replies.length > 0 ? (
                     <div className="mr-4 mt-1 flex items-center justify-end text-sm text-gray-500">
                       {note.replies.length}{" "}
-                      {note.replies.length > 1 ? "replies" : "reply"}
+                      {note.replies.length > 1 ? "default-view" : "reply"}
                     </div>
                   ) : (
-                    <div className="mr-4 mt-1 flex items-center justify-end text-sm text-gray-500">
+                    <div className="mr-4 flex items-center justify-end text-sm text-gray-500">
                       No replies
                     </div>
                   )}
                 </div>
               );
-            } else if (mode === "replies") {
+            } else if (mode === "default-view") {
               return (
                 <DoctorNoteReplyPreviewCard
                   key={note.id}
                   parentNote={note.reply_to_object}
                 >
-                  <PatientNoteCard
-                    note={note}
-                    setReload={setReload}
-                    disableEdit={disableEdit}
-                    setReplyTo={setReplyTo}
-                  />
+                  <div className="mt-3">
+                    <PatientNoteCard
+                      note={note}
+                      setReload={setReload}
+                      disableEdit={disableEdit}
+                      setReplyTo={setReplyTo}
+                    />
+                  </div>
                 </DoctorNoteReplyPreviewCard>
               );
             }

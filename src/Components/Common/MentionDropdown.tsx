@@ -28,7 +28,7 @@ const MentionsDropdown: React.FC<{
 
   return (
     <div
-      className="absolute z-10 max-h-36 w-64 overflow-y-scroll rounded-md bg-white shadow-lg"
+      className="absolute z-10 max-h-36 w-64 overflow-y-scroll rounded-md bg-white text-sm shadow-lg"
       style={{ top: dropdownPosition.top, left: dropdownPosition.left }}
     >
       {users.map((user) => (
