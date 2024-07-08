@@ -1,9 +1,9 @@
 import { useState } from "react";
 import * as Notification from "../../../Utils/Notifications.js";
 import Page from "../../Common/components/Page";
-import ButtonV2 from "../../Common/components/ButtonV2";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { NonReadOnlyUsers } from "../../../Utils/AuthorizeFor";
+// import ButtonV2 from "../../Common/components/ButtonV2";
+// import CareIcon from "../../../CAREUI/icons/CareIcon";
+// import { NonReadOnlyUsers } from "../../../Utils/AuthorizeFor";
 import { useMessageListener } from "../../../Common/hooks/useMessageListener";
 import PatientConsultationNotesList from "../PatientConsultationNotesList.js";
 import { PatientNoteStateType, PaitentNotesReplyModel } from "../models.js";
@@ -12,12 +12,13 @@ import request from "../../../Utils/request/request.js";
 import useQuery from "../../../Utils/request/useQuery.js";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import { classNames, isAppleDevice } from "../../../Utils/utils.js";
-import AutoExpandingTextInputFormField from "../../Form/FormFields/AutoExpandingTextInputFormField.js";
+// import AutoExpandingTextInputFormField from "../../Form/FormFields/AutoExpandingTextInputFormField.js";
 import { PATIENT_NOTES_THREADS } from "../../../Common/constants.js";
 import useAuthUser from "../../../Common/hooks/useAuthUser.js";
 import DoctorNoteReplyPreviewCard from "../DoctorNoteReplyPreviewCard.js";
 import Switch from "../../../CAREUI/interactive/Switch.js";
 import PatientNotesDetailedView from "../PatientNotesDetailedView.js";
+import RichTextEditor from "../../Common/RichTextEditor.js";
 
 interface ConsultationDoctorNotesProps {
   patientId: string;
@@ -36,12 +37,12 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       : PATIENT_NOTES_THREADS.Doctors,
   );
 
-  const [patientActive, setPatientActive] = useState(true);
+  // const [patientActive, setPatientActive] = useState(true);
   const [noteField, setNoteField] = useState("");
   const [reload, setReload] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
-  const [focused, setFocused] = useState(false);
+  // const [focused, setFocused] = useState(false);
   const [reply_to, setReplyTo] = useState<PaitentNotesReplyModel | undefined>(
     undefined,
   );
@@ -89,7 +90,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
     pathParams: { id: patientId },
     onResponse: ({ data }) => {
       if (data) {
-        setPatientActive(data.is_active ?? true);
+        // setPatientActive(data.is_active ?? true);
         setPatientName(data.name ?? "");
         setFacilityName(data.facility_object?.name ?? "");
       }
@@ -111,9 +112,9 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
   useKeyboardShortcut(
     [isAppleDevice ? "Meta" : "Shift", "Enter"],
     () => {
-      if (focused) {
-        onAddNote();
-      }
+      // if (focused) {
+      onAddNote();
+      // }
     },
     {
       ignoreInputFields: false,
@@ -152,7 +153,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
           onChange={(tab) => setMode(tab)}
         />
       </div>
-      <div className="relative mx-3 my-2 flex grow flex-col overflow-hidden rounded-lg border border-gray-300 bg-white p-2 sm:mx-10 sm:my-5 sm:p-5">
+      <div className="relative mx-3 my-2 flex grow flex-col rounded-lg border border-gray-300 bg-white p-2 sm:mx-10 sm:my-5 sm:p-5">
         <div className="absolute inset-x-0 top-0 flex bg-gray-200 text-sm shadow-md">
           {Object.values(PATIENT_NOTES_THREADS).map((current) => (
             <button
@@ -187,23 +188,13 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
           parentNote={reply_to}
           cancelReply={() => setReplyTo(undefined)}
         >
-          <div className="relative mx-4 flex items-center">
-            <AutoExpandingTextInputFormField
-              id="doctor_consultation_notes"
-              maxHeight={160}
-              rows={1}
-              name="note"
-              value={noteField}
-              onChange={(e) => setNoteField(e.value)}
-              className="w-full grow"
-              innerClassName="pr-10"
-              errorClassName="hidden"
-              placeholder="Type your Note"
-              disabled={!patientActive}
-              onFocus={() => setFocused(true)}
-              onBlur={() => setFocused(false)}
+          <div className="mx-4 flex items-center">
+            <RichTextEditor
+              initialMarkdown={noteField}
+              onChange={setNoteField}
+              onAddNote={onAddNote}
             />
-            <ButtonV2
+            {/* <ButtonV2
               onClick={onAddNote}
               border={false}
               className="absolute right-2"
@@ -213,7 +204,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
               authorizeFor={NonReadOnlyUsers}
             >
               <CareIcon icon="l-message" className="text-lg" />
-            </ButtonV2>
+            </ButtonV2> */}
           </div>
         </DoctorNoteReplyPreviewCard>
       </div>

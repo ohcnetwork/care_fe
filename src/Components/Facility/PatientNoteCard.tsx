@@ -14,6 +14,7 @@ import Spinner from "../Common/Spinner";
 // import useAuthUser from "../../Common/hooks/useAuthUser";
 import useSlug from "../../Common/hooks/useSlug";
 import { navigate } from "raviger";
+import MarkdownPreview from "../Common/MarkdownPreview";
 
 const PatientNoteCard = ({
   note,
@@ -192,7 +193,8 @@ const PatientNoteCard = ({
                 }}
                 className="cursor-pointer text-sm text-gray-700"
               >
-                {noteField}
+                {/* {noteField} */}
+                <MarkdownPreview markdown={noteField} />
               </div>
             )}
           </div>

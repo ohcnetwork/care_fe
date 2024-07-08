@@ -35,6 +35,7 @@ import useRecorder from "../../Utils/useRecorder";
 interface RichTextEditorProps {
   initialMarkdown?: string;
   onChange: (markdown: string) => void;
+  onAddNote: () => void;
 }
 
 interface EditorState {
@@ -88,6 +89,7 @@ function editorReducer(state: EditorState, action: EditorAction): EditorState {
 const RichTextEditor: React.FC<RichTextEditorProps> = ({
   // initialMarkdown = "",
   onChange,
+  onAddNote,
 }) => {
   const [state, dispatch] = useReducer(editorReducer, initialState);
   const editorRef = useRef<HTMLDivElement>(null);
@@ -278,11 +280,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
     if (lastChar === "@") {
       const selection = window.getSelection();
-      if (selection && selection.rangeCount > 0) {
+      if (selection && selection.rangeCount > 0 && editorRef.current) {
         const range = selection.getRangeAt(0);
         const rect = range.getBoundingClientRect();
         setMentionPosition({
-          top: rect.bottom + window.scrollY,
+          top: rect.bottom + window.scrollY + 50,
           left: rect.left + window.scrollX,
         });
         setShowMentions(true);
@@ -381,7 +383,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   };
 
   return (
-    <div className="max-w-lg bg-white p-4 shadow-lg">
+    <div className="relative mx-auto">
       {/* camera capture model */}
       <CameraCaptureModal
         open={modalOpenForCamera}
@@ -397,7 +399,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       />
 
       {/* toolbar */}
-      <div className="mb-2 flex items-center justify-between rounded-t-md border border-gray-300 bg-gray-100 p-2">
+      <div className="relative flex w-[48vw] items-center rounded-t-md border border-gray-300 bg-gray-100 p-2">
         <div className="flex items-center space-x-1">
           <button
             onClick={() => applyStyle("b")}
@@ -408,7 +410,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             }`}
             disabled={state.isQuoteActive}
           >
-            <FaBold className="text-lg" />
+            <FaBold className="text-" />
           </button>
           <button
             onClick={() => applyStyle("i")}
@@ -419,7 +421,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             }`}
             disabled={state.isQuoteActive}
           >
-            <FaItalic className="text-lg" />
+            <FaItalic className="text-" />
           </button>
           <button
             onClick={() => applyStyle("s")}
@@ -430,7 +432,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             }`}
             disabled={state.isQuoteActive}
           >
-            <FaStrikethrough className="text-lg" />
+            <FaStrikethrough className="text-" />
           </button>
         </div>
 
@@ -444,7 +446,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             }`}
             disabled={state.isQuoteActive}
           >
-            <FaListUl className="text-lg" />
+            <FaListUl className="text-" />
           </button>
           <button
             onClick={() => toggleList("ol")}
@@ -455,7 +457,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             }`}
             disabled={state.isQuoteActive}
           >
-            <FaListOl className="text-lg" />
+            <FaListOl className="text-" />
           </button>
         </div>
 
@@ -465,15 +467,15 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             state.isQuoteActive ? "bg-primary-700 text-white" : "bg-gray-200"
           }`}
         >
-          <FaQuoteRight className="text-lg" />
+          <FaQuoteRight className="text-" />
         </button>
 
         <div className="flex items-center space-x-2">
           <button onClick={handleLink} className="rounded bg-gray-200 p-2">
-            <FaLink className="text-lg" />
+            <FaLink className="text-" />
           </button>
           <button onClick={handleUnlink} className="rounded bg-gray-200 p-2">
-            <FaUnlink className="text-lg" />
+            <FaUnlink className="text-" />
           </button>
         </div>
 
@@ -494,7 +496,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             }}
             className="rounded bg-gray-200 p-2"
           >
-            <GoMention className="text-lg" />
+            <GoMention className="text-" />
           </button>
           <button
             onClick={() => fileInputRef.current?.click()}
@@ -522,20 +524,34 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             accept="image/*,video/*,audio/*,text/plain,text/csv,application/rtf,application/msword,application/vnd.oasis.opendocument.text,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/pdf"
           />
         </div>
+        <div className="grow"></div>
+        <Submit
+          onClick={() => {
+            onAddNote();
+            editorRef.current!.innerHTML = "";
+          }}
+          className="rounded bg-primary-500 p-2 text-white"
+        >
+          <CareIcon icon="l-message" className="text-lg" />
+        </Submit>
       </div>
 
       {/* editor */}
       <div
         ref={editorRef}
         contentEditable
-        className="prose min-h-[100px] rounded-b-md border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="prose relative min-h-[85px] overflow-y-scroll rounded-b-md border border-gray-300 p-3 focus:outline-none focus:ring-1 focus:ring-primary-500"
         onInput={handleInput}
-      ></div>
+      />
 
       <FileUpload file={file} setFile={setFile} />
 
       {showMentions && (
-        <MentionsDropdown onSelect={insertMention} position={mentionPosition} />
+        <MentionsDropdown
+          onSelect={insertMention}
+          position={mentionPosition}
+          editorRef={editorRef}
+        />
       )}
     </div>
   );
@@ -571,6 +587,7 @@ const FileUpload = ({
   const [noteId, setNoteId] = useState<string>(
     "40faecc6-6199-48cd-bc2a-dd9e73b920f9",
   );
+  console.log(setNoteId);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -813,16 +830,6 @@ const FileUpload = ({
             </p>
           </div>
         )}
-        <div className="my-2 flex items-center gap-4">
-          <h2 className="text-lg font-semibold">Note Id:</h2>
-          <input
-            type="text"
-            placeholder="Note Id"
-            value={noteId}
-            className="w-2/3 border border-gray-300 p-2"
-            onChange={(e) => setNoteId(e.target.value)}
-          />
-        </div>
       </div>
     </div>
   );
@@ -1044,6 +1051,7 @@ const AudioRecorder = ({
       type: audioBlob.type,
     });
     setFile(f);
+    audioBlobExists && setAudioBlobExists(false);
   };
 
   useEffect(() => {
@@ -1104,6 +1112,7 @@ const AudioRecorder = ({
     setAudioBlobExists(false);
     setAudioResetRecording(true);
     setModalOpenForAudio(false);
+    setFile(null);
   };
 
   return (

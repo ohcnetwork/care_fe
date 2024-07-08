@@ -56,7 +56,7 @@ const MarkdownPreview: React.FC<{ markdown: string }> = ({ markdown }) => {
     if (props.className?.includes("user-mention")) {
       const username = props["data-username"];
       return (
-        <span className="group relative inline-block">
+        <span className="group relative z-10 inline-block">
           <a
             {...props}
             className="cursor-pointer rounded bg-blue-100 px-1 font-normal text-slate-800 no-underline hover:underline"

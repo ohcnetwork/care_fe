@@ -11,6 +11,7 @@ export default {
     <RichTextEditor
       initialMarkdown={""}
       onChange={(value) => console.log(value)}
+      onAddNote={() => console.log("Add Note")}
     />
   ),
 };
