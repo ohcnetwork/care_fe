@@ -454,3 +454,16 @@ export const isPostPartum = (data_of_delivery?: string) => {
 export const isAntenatal = (menstruation_start_date?: string) => {
   return dayjs().diff(menstruation_start_date, "month") <= 9;
 };
+
+export const humanizeStrings = (...values: readonly string[]) => {
+  if (values.length === 0) {
+    throw "Empty array of strings cannot be humanized. Array must contain one or more elements";
+  }
+
+  if (values.length === 1) {
+    return values[0];
+  }
+
+  const [last, ...items] = [...values].reverse();
+  return `${items.reverse().join(", ")} and ${last}`;
+};
