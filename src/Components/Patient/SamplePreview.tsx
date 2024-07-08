@@ -1,4 +1,4 @@
-import { classNames, formatDateTime } from "../../Utils/utils";
+import { classNames, formatDateTime, humanizeStrings } from "../../Utils/utils";
 
 import { lazy } from "react";
 
@@ -331,7 +331,8 @@ export default function SampleReport(props: ISamplePreviewProps) {
                     {
                       title: "Symptoms",
                       value:
-                        sampleData?.medical_conditions?.symptoms?.join(", "),
+                        sampleData?.medical_conditions?.symptoms &&
+                        humanizeStrings(sampleData.medical_conditions.symptoms),
                     },
                     { title: "First Symptom", value: "............." },
                     {

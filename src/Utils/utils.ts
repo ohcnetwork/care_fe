@@ -454,3 +454,22 @@ export const isPostPartum = (data_of_delivery?: string) => {
 export const isAntenatal = (menstruation_start_date?: string) => {
   return dayjs().diff(menstruation_start_date, "month") <= 9;
 };
+
+/**
+ * A utility method to format an array of string to human readable format.
+ *
+ * @param values Array of strings to be made human readable.
+ * @returns Human readable version of the list of strings
+ */
+export const humanizeStrings = (strings: readonly string[]) => {
+  if (strings.length === 0) {
+    throw "Empty array of strings cannot be humanized. Array must contain one or more elements";
+  }
+
+  if (strings.length === 1) {
+    return strings[0];
+  }
+
+  const [last, ...items] = [...strings].reverse();
+  return `${items.reverse().join(", ")} and ${last}`;
+};

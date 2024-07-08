@@ -15,7 +15,7 @@ import {
 } from "../../Common/constants";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
-import { formatPatientAge } from "../../Utils/utils";
+import { formatPatientAge, humanizeStrings } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import SwitchTabs from "../Common/components/SwitchTabs";
 import SortDropdownMenu from "../Common/SortDropdown";
@@ -360,7 +360,7 @@ const DischargedPatientsList = ({
               value(
                 DIAGNOSES_FILTER_LABELS[key],
                 key,
-                getDiagnosisFilterValue(key).join(", "),
+                humanizeStrings(getDiagnosisFilterValue(key)),
               ),
             ),
             badge("Declared Status", "is_declared_positive"),

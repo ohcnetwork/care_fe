@@ -33,6 +33,7 @@ import SortDropdownMenu from "../Common/SortDropdown";
 import SwitchTabs from "../Common/components/SwitchTabs";
 import {
   formatPatientAge,
+  humanizeStrings,
   isAntenatal,
   parsePhoneNumber,
 } from "../../Utils/utils.js";
@@ -1027,7 +1028,7 @@ export const PatientManager = () => {
               value(
                 DIAGNOSES_FILTER_LABELS[key],
                 key,
-                getDiagnosisFilterValue(key).join(", "),
+                humanizeStrings(getDiagnosisFilterValue(key)),
               ),
             ),
             badge("Declared Status", "is_declared_positive"),

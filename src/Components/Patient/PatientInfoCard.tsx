@@ -19,6 +19,7 @@ import {
   formatDate,
   formatDateTime,
   formatPatientAge,
+  humanizeStrings,
 } from "../../Utils/utils.js";
 import ABHAProfileModal from "../ABDM/ABHAProfileModal.js";
 import LinkABHANumberModal from "../ABDM/LinkABHANumberModal.js";
@@ -45,16 +46,8 @@ import { AuthorizedForConsultationRelatedActions } from "../../CAREUI/misc/Autho
 const formatSkills = (arr: SkillModel[]) => {
   const skills = arr.map((skill) => skill.skill_object.name);
 
-  if (skills.length === 1) {
-    return skills[0];
-  }
-
-  if (skills.length === 2) {
-    return `${skills[0]} and ${skills[1]}`;
-  }
-
-  if (skills.length === 3) {
-    return `${skills[0]}, ${skills[1]} and ${skills[2]}`;
+  if (skills.length <= 3) {
+    return humanizeStrings(skills);
   }
 
   return `${skills[0]}, ${skills[1]} and ${skills.length - 2} other skills...`;

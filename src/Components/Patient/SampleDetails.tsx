@@ -409,7 +409,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
                 <span className="font-semibold leading-relaxed">
                   Countries travelled:{" "}
                 </span>
-                {sampleDetails.patient_travel_history.join(", ")}
+                {sampleDetails.patient_travel_history}
               </div>
             )}
           {sampleDetails?.sample_type && (
