@@ -19,7 +19,7 @@ type Props = FormFieldBaseProps<UserModel> & {
 };
 
 export default function UserAutocompleteFormField(props: Props) {
-  const field = useFormFieldPropsResolver(props as any);
+  const field = useFormFieldPropsResolver(props);
   const { fetchOptions, isLoading, options } = useAsyncOptions<UserModel>(
     "id",
     { queryResponseExtractor: (data) => data.results },
@@ -65,6 +65,8 @@ export default function UserAutocompleteFormField(props: Props) {
         <Autocomplete
           id={field.id}
           disabled={field.disabled}
+          // Voluntarily casting type as true to ignore type errors.
+          required={field.required as true}
           placeholder={props.placeholder}
           value={field.value}
           onChange={field.handleChange}

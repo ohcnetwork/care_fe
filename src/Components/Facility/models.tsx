@@ -13,6 +13,7 @@ import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 import { AssignedToObjectModel, DailyRoundsModel } from "../Patient/models";
+import { EncounterSymptom } from "../Symptoms/types";
 import { UserBareMinimum } from "../Users/models";
 
 export interface LocalBodyModel {
@@ -98,12 +99,18 @@ export interface OptionsType {
 
 export type PatientCategory = "Comfort Care" | "Mild" | "Moderate" | "Critical";
 
-export type ConsentRecord = {
+export interface PatientConsentModel {
   id: string;
   type: (typeof CONSENT_TYPE_CHOICES)[number]["id"];
-  patient_code_status?: (typeof CONSENT_PATIENT_CODE_STATUS_CHOICES)[number]["id"];
-  deleted?: boolean;
-};
+  patient_code_status:
+    | (typeof CONSENT_PATIENT_CODE_STATUS_CHOICES)[number]["id"]
+    | null;
+  archived: boolean;
+  archived_by?: UserBareMinimum;
+  archived_date: string;
+  created_date: string;
+  created_by: UserBareMinimum;
+}
 
 export interface ConsultationModel {
   encounter_date: string;
@@ -124,7 +131,6 @@ export interface ConsultationModel {
   facility_name?: string;
   id: string;
   modified_date?: string;
-  other_symptoms?: string;
   patient: string;
   treatment_plan?: string;
   referred_to?: FacilityModel["id"];
@@ -143,13 +149,12 @@ export interface ConsultationModel {
   kasp_enabled_date?: string;
   readonly diagnoses?: ConsultationDiagnosis[];
   create_diagnoses?: CreateDiagnosis[]; // Used for bulk creating diagnoses upon consultation creation
+  readonly symptoms?: EncounterSymptom[];
+  create_symptoms?: CreateDiagnosis[]; // Used for bulk creating symptoms upon consultation creation
   deprecated_verified_by?: string;
-  treating_physician?: UserBareMinimum["id"];
+  readonly treating_physician?: UserBareMinimum["id"];
   treating_physician_object?: UserBareMinimum;
   suggestion_text?: string;
-  symptoms?: Array<number>;
-  symptoms_text?: string;
-  symptoms_onset_date?: string;
   consultation_notes?: string;
   is_telemedicine?: boolean;
   procedure?: ProcedureType[];
@@ -175,7 +180,6 @@ export interface ConsultationModel {
   is_readmission?: boolean;
   medico_legal_case?: boolean;
   investigation?: InvestigationType[];
-  consent_records?: ConsentRecord[];
 }
 
 export interface PatientStatsModel {

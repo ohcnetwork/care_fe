@@ -228,7 +228,7 @@ const Location = ({
   <div className="flex h-full w-full flex-col rounded border border-gray-300 bg-white p-6 shadow-sm transition-all duration-200 ease-in-out hover:border-primary-400">
     <div className="flex-1">
       <div className="flex w-full items-start justify-between gap-2">
-        <div className="flex items-start gap-3">
+        <div className="flex items-end gap-3">
           <p className="break-all text-xl font-medium" id="view-location-name">
             {name}
           </p>

@@ -181,6 +181,7 @@ export const PatientManager = () => {
       qParams.date_declared_positive_before || undefined,
     date_declared_positive_after:
       qParams.date_declared_positive_after || undefined,
+    ration_card_category: qParams.ration_card_category || undefined,
     last_consultation_medico_legal_case:
       qParams.last_consultation_medico_legal_case || undefined,
     last_consultation_encounter_date_before:
@@ -516,11 +517,11 @@ export const PatientManager = () => {
             <div className="flex w-full flex-col gap-2 pl-2 md:block md:flex-row">
               <div className="flex w-full items-center justify-between gap-2">
                 <div
-                  className="flex flex-wrap gap-2 font-semibold"
+                  className="flex flex-wrap items-end gap-3 font-semibold"
                   id="patient-name-list"
                 >
                   <span className="text-xl capitalize">{patient.name}</span>
-                  <span className="text-gray-800">
+                  <span className="font-bold text-gray-700">
                     {formatPatientAge(patient, true)}
                   </span>
                 </div>
@@ -553,6 +554,35 @@ export const PatientManager = () => {
               )}
               <div className="flex w-full">
                 <div className="flex flex-row flex-wrap justify-start gap-2">
+                  {!patient.last_consultation ||
+                  patient.last_consultation?.facility !== patient.facility ||
+                  (patient.last_consultation?.discharge_date &&
+                    patient.is_active) ? (
+                    <span className="relative inline-flex">
+                      <Chip
+                        size="small"
+                        variant="danger"
+                        startIcon="l-notes"
+                        text="No Consultation Filed"
+                      />
+                      <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center">
+                        <span className="center absolute inline-flex h-4 w-4 animate-ping rounded-full bg-red-400"></span>
+                        <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
+                      </span>
+                    </span>
+                  ) : (
+                    <>
+                      {patient.last_consultation?.patient_no && (
+                        <Chip
+                          size="small"
+                          variant="primary"
+                          text={`${patient.last_consultation?.suggestion === "A" ? "IP No:" : "OP No:"} ${
+                            patient.last_consultation?.patient_no
+                          }`}
+                        />
+                      )}
+                    </>
+                  )}
                   {patient.review_time &&
                     !patient.last_consultation?.discharge_date &&
                     Number(patient.last_consultation?.review_interval) > 0 &&
@@ -603,23 +633,6 @@ export const PatientManager = () => {
                       startIcon="l-user-md"
                       text="Medical Worker"
                     />
-                  )}
-                  {(!patient.last_consultation ||
-                    patient.last_consultation?.facility !== patient.facility ||
-                    (patient.last_consultation?.discharge_date &&
-                      patient.is_active)) && (
-                    <span className="relative inline-flex">
-                      <Chip
-                        size="small"
-                        variant="danger"
-                        startIcon="l-notes"
-                        text="No Consultation Filed"
-                      />
-                      <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center">
-                        <span className="center absolute inline-flex h-4 w-4 animate-ping rounded-full bg-red-400"></span>
-                        <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
-                      </span>
-                    </span>
                   )}
                   {!(
                     patient.last_consultation?.facility !== patient.facility
@@ -820,7 +833,7 @@ export const PatientManager = () => {
               selected={qParams.ordering}
               onSelect={updateQuery}
             />
-            <div className="tooltip">
+            <div className="tooltip w-full md:w-auto">
               {!isExportAllowed ? (
                 <ButtonV2
                   onClick={() => {
@@ -959,6 +972,13 @@ export const PatientManager = () => {
             badge(
               "Is Medico-Legal Case",
               "last_consultation_medico_legal_case",
+            ),
+            value(
+              "Ration Card Category",
+              "ration_card_category",
+              qParams.ration_card_category
+                ? t(`ration_card__${qParams.ration_card_category}`)
+                : "",
             ),
             value(
               "Facility",

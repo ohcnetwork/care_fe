@@ -25,6 +25,7 @@ import { FieldLabel } from "../../Form/FormFields/FormField";
 import useFullscreen from "../../../Common/hooks/useFullscreen";
 import ReactPlayer from "react-player";
 import { isIOS } from "../../../Utils/utils";
+import TextFormField from "../../Form/FormFields/TextFormField";
 
 const LiveFeed = (props: any) => {
   const middlewareHostname = props.middlewareHostname;
@@ -39,7 +40,7 @@ const LiveFeed = (props: any) => {
   );
   const [videoStartTime, setVideoStartTime] = useState<Date | null>(null);
   const [bed, setBed] = useState<BedModel>({});
-  const [preset, setNewPreset] = useState<string>("");
+  const [presetName, setPresetName] = useState("");
   const [loading, setLoading] = useState<string | undefined>();
   const dispatch: any = useDispatch();
   const [page, setPage] = useState({
@@ -145,7 +146,7 @@ const LiveFeed = (props: any) => {
   const updatePreset = async (currentPreset: any) => {
     const data = {
       bed_id: bed.id,
-      preset_name: preset,
+      preset_name: presetName,
     };
     const response = await dispatch(
       partialUpdateAssetBed(
@@ -187,7 +188,7 @@ const LiveFeed = (props: any) => {
   }, []);
 
   useEffect(() => {
-    setNewPreset(toUpdate?.meta?.preset_name);
+    setPresetName(toUpdate?.meta?.preset_name);
     setBed(toUpdate?.bed_object);
   }, [toUpdate]);
 
@@ -333,23 +334,30 @@ const LiveFeed = (props: any) => {
         <ConfirmDialog
           show
           title="Update Preset"
-          description={"Preset: " + toUpdate.meta.preset_name}
           action="Update"
           variant="primary"
           onClose={() => setToUpdate(null)}
           onConfirm={() => updatePreset(toUpdate)}
         >
-          <div className="mt-4 flex flex-col">
-            <FieldLabel required>Bed</FieldLabel>
-            <BedSelect
-              name="bed"
-              setSelected={(selected) => setBed(selected as BedModel)}
-              selected={bed}
-              error=""
-              multiple={false}
-              location={cameraAsset.location_id}
-              facility={cameraAsset.facility_id}
+          <div className="mt-4">
+            <TextFormField
+              name="preset_name"
+              label="Preset Name"
+              value={presetName}
+              onChange={({ value }) => setPresetName(value)}
             />
+            <div className="flex flex-col">
+              <FieldLabel required>Bed</FieldLabel>
+              <BedSelect
+                name="bed"
+                setSelected={(selected) => setBed(selected as BedModel)}
+                selected={bed}
+                error=""
+                multiple={false}
+                location={cameraAsset.location_id}
+                facility={cameraAsset.facility_id}
+              />
+            </div>
           </div>
         </ConfirmDialog>
       )}

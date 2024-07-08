@@ -313,45 +313,13 @@ export const REVIEW_AT_CHOICES: Array<OptionsType> = [
   { id: 36 * 60, text: "36 hr" },
   { id: 2 * 24 * 60, text: "2 days" },
   { id: 3 * 24 * 60, text: "3 days" },
+  { id: 5 * 24 * 60, text: "5 days" },
   { id: 7 * 24 * 60, text: "7 days" },
+  { id: 10 * 24 * 60, text: "10 days" },
   { id: 14 * 24 * 60, text: "2 weeks" },
+  { id: 21 * 24 * 60, text: "3 weeks" },
+  { id: 25 * 24 * 60, text: "25 days" },
   { id: 30 * 24 * 60, text: "1 month" },
-];
-
-export const SYMPTOM_CHOICES = [
-  { id: 1, text: "ASYMPTOMATIC", isSingleSelect: true },
-  { id: 2, text: "FEVER" },
-  { id: 3, text: "SORE THROAT" },
-  { id: 4, text: "COUGH" },
-  { id: 5, text: "BREATHLESSNESS" },
-  { id: 6, text: "MYALGIA" },
-  { id: 7, text: "ABDOMINAL DISCOMFORT" },
-  { id: 8, text: "VOMITING" },
-  { id: 11, text: "SPUTUM" },
-  { id: 12, text: "NAUSEA" },
-  { id: 13, text: "CHEST PAIN" },
-  { id: 14, text: "HEMOPTYSIS" },
-  { id: 15, text: "NASAL DISCHARGE" },
-  { id: 16, text: "BODY ACHE" },
-  { id: 17, text: "DIARRHOEA" },
-  { id: 18, text: "PAIN" },
-  { id: 19, text: "PEDAL EDEMA" },
-  { id: 20, text: "WOUND" },
-  { id: 21, text: "CONSTIPATION" },
-  { id: 22, text: "HEAD ACHE" },
-  { id: 23, text: "BLEEDING" },
-  { id: 24, text: "DIZZINESS" },
-  { id: 25, text: "CHILLS" },
-  { id: 26, text: "GENERAL WEAKNESS" },
-  { id: 27, text: "IRRITABILITY" },
-  { id: 28, text: "CONFUSION" },
-  { id: 29, text: "ABDOMINAL PAIN" },
-  { id: 30, text: "JOINT PAIN" },
-  { id: 31, text: "REDNESS OF EYES" },
-  { id: 32, text: "ANOREXIA" },
-  { id: 33, text: "NEW LOSS OF TASTE" },
-  { id: 34, text: "NEW LOSS OF SMELL" },
-  { id: 9, text: "OTHERS" },
 ];
 
 export const DISCHARGE_REASONS = [
@@ -399,10 +367,10 @@ export const SAMPLE_TEST_RESULT = [
 export const CONSULTATION_SUGGESTION = [
   { id: "HI", text: "Home Isolation", deprecated: true }, // # Deprecated. Preserving option for backward compatibility (use only for readonly operations)
   { id: "A", text: "Admission" },
-  { id: "R", text: "Refer to another Hospital" },
+  { id: "R", text: "Refer to another Hospital", editDisabled: true },
   { id: "OP", text: "OP Consultation" },
   { id: "DC", text: "Domiciliary Care" },
-  { id: "DD", text: "Declare Death" },
+  { id: "DD", text: "Declare Death", editDisabled: true },
 ] as const;
 
 export type ConsultationSuggestionValue =
@@ -1404,3 +1372,20 @@ export const PATIENT_NOTES_THREADS = {
   Doctors: 10,
   Nurses: 20,
 } as const;
+
+export const RATION_CARD_CATEGORY = ["BPL", "APL", "NO_CARD"] as const;
+
+export const DEFAULT_ALLOWED_EXTENSIONS = [
+  "image/*",
+  "video/*",
+  "audio/*",
+  "text/plain",
+  "text/csv",
+  "application/rtf",
+  "application/msword",
+  "application/vnd.oasis.opendocument.text",
+  "application/pdf",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.oasis.opendocument.spreadsheet,application/pdf",
+];

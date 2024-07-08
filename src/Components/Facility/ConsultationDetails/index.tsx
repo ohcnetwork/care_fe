@@ -1,8 +1,4 @@
-import {
-  CONSULTATION_TABS,
-  GENDER_TYPES,
-  SYMPTOM_CHOICES,
-} from "../../../Common/constants";
+import { CONSULTATION_TABS, GENDER_TYPES } from "../../../Common/constants";
 import { ConsultationModel } from "../models";
 import {
   getConsultation,
@@ -44,10 +40,10 @@ import { AbhaNumberModel } from "../../ABDM/types/abha";
 import routes from "../../../Redux/api";
 import request from "../../../Utils/request/request";
 import { CameraFeedPermittedUserTypes } from "../../../Utils/permissions";
+import Error404 from "../../ErrorPages/404";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
-const symptomChoices = [...SYMPTOM_CHOICES];
 
 export interface ConsultationTabProps {
   consultationId: string;
@@ -76,7 +72,10 @@ const TABS = {
 
 export const ConsultationDetails = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
-  const tab = props.tab.toUpperCase() as keyof typeof TABS;
+  let tab = undefined;
+  if (Object.keys(TABS).includes(props.tab.toUpperCase())) {
+    tab = props.tab.toUpperCase() as keyof typeof TABS;
+  }
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [showDoctors, setShowDoctors] = useState(false);
@@ -118,15 +117,15 @@ export const ConsultationDetails = (props: any) => {
             ...res.data,
             symptoms_text: "",
           };
-          if (res.data.symptoms?.length) {
-            const symptoms = res.data.symptoms
-              .filter((symptom: number) => symptom !== 9)
-              .map((symptom: number) => {
-                const option = symptomChoices.find((i) => i.id === symptom);
-                return option ? option.text.toLowerCase() : symptom;
-              });
-            data.symptoms_text = symptoms.join(", ");
-          }
+          // if (res.data.symptoms?.length) {
+          //   const symptoms = res.data.symptoms
+          //     .filter((symptom: number) => symptom !== 9)
+          //     .map((symptom: number) => {
+          //       const option = symptomChoices.find((i) => i.id === symptom);
+          //       return option ? option.text.toLowerCase() : symptom;
+          //     });
+          //   data.symptoms_text = symptoms.join(", ");
+          // }
           if (facilityId != data.facility || patientId != data.patient) {
             navigate(
               `/facility/${data.facility}/patient/${data.patient}/consultation/${data?.id}`,
@@ -214,6 +213,10 @@ export const ConsultationDetails = (props: any) => {
     facilityId: consultationData.facility,
     patientData,
   };
+
+  if (!tab) {
+    return <Error404 />;
+  }
 
   const SelectedTab = TABS[tab];
 

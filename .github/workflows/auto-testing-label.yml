@@ -20,24 +20,37 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const pr = context.payload.pull_request;
-            const isDraft = pr.draft;
-            const isReadyForTestingComment = context.payload.comment?.body.includes('ready for testing');
-            const isChangesRequired = context.payload.review?.state === 'changes_requested';
+            const comment = context.payload.comment;
+            const review = context.payload.review;
 
-            if ((isReadyForTestingComment && !isDraft) || (!isDraft && pr.draft_changed)) {
-              await github.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: pr.number,
-                labels: ['needs testing']
-              });
-            }
+            if (pr) {
+              const isDraft = pr.draft;
+              const isReadyForTestingComment = comment && comment.body.includes('ready for testing');
+              const isChangesRequired = review && review.state === 'changes_requested';
 
-            if (isChangesRequired) {
-              await github.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: pr.number,
-                body: 'Reminder: To add the "needs testing" label, comment "ready for testing" on this PR.'
-              });
+              if ((isReadyForTestingComment && !isDraft) || (!isDraft && pr.draft_changed)) {
+                await github.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  labels: ['needs testing']
+                });
+              }
+
+              if (isChangesRequired) {
+                await github.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  body: 'Reminder: To add the "needs testing" label, comment "ready for testing" on this PR.'
+                });
+                if (pr.labels.some(label => label.name === 'needs testing')) {
+                  await github.issues.removeLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: pr.number,
+                    name: 'needs testing'
+                  });
+                }
+              }
             }

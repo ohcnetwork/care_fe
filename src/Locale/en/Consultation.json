@@ -13,8 +13,9 @@
   "download_discharge_summary": "Download discharge summary",
   "email_discharge_summary_description": "Enter your valid email address to receive the discharge summary",
   "generated_summary_caution": "This is a computer generated summary using the information captured in the CARE system.",
-  "NORMAL": "Normal",
-  "VENTILATOR": "Critical Care",
+  "NORMAL": "Brief Update",
+  "VENTILATOR": "Detailed Update",
+  "DOCTORS_LOG": "Progress Note",
   "AUTOMATED": "Automated",
   "TELEMEDICINE": "Telemedicine",
   "investigations": "Investigations",
@@ -34,5 +35,6 @@
   "generate_report": "Generate Report",
   "prev_sessions": "Prev Sessions",
   "next_sessions": "Next Sessions",
-  "no_changes": "No changes"
+  "no_changes": "No changes",
+  "encounter_suggestion_edit_disallowed": "Not allowed to switch to this option in edit consultation"
 }

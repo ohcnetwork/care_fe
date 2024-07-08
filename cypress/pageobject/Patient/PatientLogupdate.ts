@@ -11,7 +11,7 @@ class PatientLogupdate {
 
   selectBed(bed: string) {
     cy.searchAndSelectOption("input[name='bed']", bed);
-    cy.submitButton("Move to bed");
+    cy.submitButton("Update");
     cy.wait(2000);
   }
 
@@ -30,6 +30,16 @@ class PatientLogupdate {
 
   typeAdditionalSymptoms(symptoms: string) {
     cy.searchAndSelectOption("#additional_symptoms", symptoms);
+  }
+
+  typeAndMultiSelectSymptoms(input, symptoms) {
+    cy.typeAndMultiSelectOption("#additional_symptoms", input, symptoms);
+  }
+  selectSymptomsDate(date: string) {
+    cy.clickAndTypeDate("#symptoms_onset_date", date);
+  }
+  clickAddSymptom() {
+    cy.get("#add-symptom").click();
   }
 
   typeSystolic(systolic: string) {
