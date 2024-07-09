@@ -480,6 +480,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       {/* editor */}
       <div className="overflow-y-scroll border border-x-gray-300 bg-white p-2 focus:outline-none focus:ring-1 focus:ring-primary-500">
         <div
+          id="doctor_notes_textarea"
           ref={editorRef}
           contentEditable
           className="prose min-h-[50px] max-w-full text-sm outline-none"
