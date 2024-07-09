@@ -69,6 +69,10 @@ module.exports = {
             DEFAULT: gray[400],
             fore: gray[800],
           },
+          activelydying: {
+            DEFAULT: colors.red[800],
+            fore: colors.red[100],
+          },
         },
       },
       padding: {

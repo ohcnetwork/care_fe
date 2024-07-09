@@ -712,6 +712,10 @@ button:disabled,
   @apply bg-patient-unknown text-patient-unknown-fore
 }
 
+.patient-activelydying {
+    @apply bg-patient-activelydying text-patient-activelydying-fore
+}
+
 .patient-comfort-ring { 
   @apply ring-patient-comfort
 }
@@ -726,6 +730,9 @@ button:disabled,
 }
 .patient-unknown-ring {
   @apply ring-patient-unknown
+}
+.patient-activelydying-ring {
+    @apply ring-patient-activelydying
 }
 
 .patient-comfort-profile { 
@@ -742,6 +749,9 @@ button:disabled,
 }
 .patient-unknown-profile {
   @apply border border-patient-unknown rounded
+}
+.patient-activelydying-profile {
+    @apply border-2 border-patient-activelydying rounded-t
 }
 
 /* for gmaps search dropdown */

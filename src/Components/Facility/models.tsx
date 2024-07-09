@@ -97,7 +97,12 @@ export interface OptionsType {
   disabled?: boolean;
 }
 
-export type PatientCategory = "Comfort Care" | "Mild" | "Moderate" | "Critical";
+export type PatientCategory =
+  | "Comfort Care"
+  | "Mild"
+  | "Moderate"
+  | "Critical"
+  | "Actively Dying";
 
 export interface PatientConsentModel {
   id: string;

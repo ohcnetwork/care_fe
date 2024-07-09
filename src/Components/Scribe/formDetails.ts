@@ -54,10 +54,12 @@ export const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     example: "Comfort Care",
     default: "",
     description: "A string to categorize the patient.",
-    options: PATIENT_CATEGORIES.map((category) => ({
-      id: category.id,
-      text: category.text,
-    })),
+    options: PATIENT_CATEGORIES.filter((c) => c.id !== "Comfort").map(
+      (category) => ({
+        id: category.id,
+        text: category.text,
+      }),
+    ),
   },
   {
     friendlyName: "Actions",

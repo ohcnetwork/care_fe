@@ -387,7 +387,12 @@ export const RESPIRATORY_SUPPORT = [
   { id: "NONE", text: "UNKNOWN" },
 ];
 
-export type PatientCategoryID = "Comfort" | "Stable" | "Moderate" | "Critical";
+export type PatientCategoryID =
+  | "Comfort"
+  | "Stable"
+  | "Moderate"
+  | "Critical"
+  | "ActivelyDying";
 
 export const PATIENT_CATEGORIES: {
   id: PatientCategoryID;
@@ -418,6 +423,12 @@ export const PATIENT_CATEGORIES: {
     text: "Critical",
     twClass: "patient-critical",
     description: "Immediate: life-threatening",
+  },
+  {
+    id: "ActivelyDying",
+    text: "Actively Dying",
+    twClass: "patient-activelydying",
+    description: "",
   },
 ];
 
