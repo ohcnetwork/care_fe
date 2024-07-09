@@ -564,7 +564,7 @@ export default function PatientInfoCard(props: {
                 </div>
               </div>
               <span className="mt-1 text-xs font-medium text-gray-700">
-                IP Days
+                IP Day No
               </span>
             </div>
           )}
