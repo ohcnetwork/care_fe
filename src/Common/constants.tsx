@@ -401,7 +401,7 @@ export const PATIENT_CATEGORIES: {
   twClass: string;
 }[] = [
   {
-    id: "Comfort",
+    id: "Comfort", // Comfort Care is discontinued
     text: "Comfort Care",
     twClass: "patient-comfort",
     description: "End of life care",

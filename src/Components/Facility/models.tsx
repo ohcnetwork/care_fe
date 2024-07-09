@@ -98,7 +98,7 @@ export interface OptionsType {
 }
 
 export type PatientCategory =
-  | "Comfort Care"
+  | "Comfort Care" // Discontinued
   | "Mild"
   | "Moderate"
   | "Critical"
