@@ -537,6 +537,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
         <div className="grow"></div>
         <Submit
+          id="add_doctor_note_button"
           onClick={() => {
             onAddNote();
             editorRef.current!.innerHTML = "";
