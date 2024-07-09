@@ -9,8 +9,13 @@ interface UserCardProps {
   user: UserModel;
 }
 
+interface CustomLinkProps {
+  className?: string;
+  "data-username"?: string;
+}
+
 const UserCard: React.FC<UserCardProps> = ({ user }) => (
-  <div className="flex w-64 items-center space-x-3 rounded-lg bg-white p-3 shadow-lg">
+  <div className="z-10 flex w-64 items-center space-x-3 rounded-lg bg-gray-200 px-3 pb-3 shadow-lg">
     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-lg font-semibold text-white">
       {user.first_name[0]}
     </div>
@@ -52,24 +57,36 @@ const MarkdownPreview: React.FC<{ markdown: string }> = ({ markdown }) => {
     )
     .replace(/~(.*?)~/g, (_, text) => `<del>${text}</del>`);
 
-  const CustomLink: React.FC<any> = (props) => {
-    if (props.className?.includes("user-mention")) {
+  const CustomLink: React.FC<CustomLinkProps> = (props) => {
+    if (props.className?.includes("user-mention") && props["data-username"]) {
       const username = props["data-username"];
       return (
         <span className="group relative z-10 inline-block">
-          <a
-            {...props}
-            className="cursor-pointer rounded bg-blue-100 px-1 font-normal text-slate-800 no-underline hover:underline"
-          />
+          <span
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+            className="cursor-pointer rounded bg-blue-100 px-1 font-normal text-slate-800 no-underline"
+          >
+            @{username}
+          </span>
           {userCache[username] && (
-            <div className="tooltip-text invisible absolute left-1/2 z-10 mt-1 -translate-x-1/2 opacity-0 transition-opacity duration-300 ease-in-out group-hover:visible group-hover:opacity-100">
+            <div className="tooltip-text invisible absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 opacity-0 transition-opacity duration-300 ease-in-out group-hover:visible group-hover:opacity-100">
               <UserCard user={userCache[username]} />
+              <div className="absolute left-1/2 top-full -translate-x-1/2 border-8 border-solid border-transparent border-t-gray-200"></div>
             </div>
           )}
         </span>
       );
     }
-    return <a {...props} />;
+    return (
+      <a
+        {...props}
+        target="_blank"
+        onClick={(e) => e.stopPropagation()}
+        className="text-blue-500 underline"
+      />
+    );
   };
 
   return (

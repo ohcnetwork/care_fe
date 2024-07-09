@@ -286,7 +286,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         const range = selection.getRangeAt(0);
         const rect = range.getBoundingClientRect();
         setMentionPosition({
-          top: rect.bottom + window.scrollY + 20,
+          top: rect.bottom + window.scrollY + 30,
           left: rect.left + window.scrollX + 10,
         });
         setShowMentions(true);
@@ -404,7 +404,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       <div className="flex items-center space-x-2 rounded-t-md border border-gray-300 bg-gray-100 p-1">
         <button
           onClick={() => applyStyle("b")}
-          className={`rounded p-1 ${
+          className={`tooltip rounded p-1  ${
             state.isBoldActive && !state.isQuoteActive
               ? "bg-primary-700 text-white"
               : "bg-gray-200"
@@ -412,10 +412,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           disabled={state.isQuoteActive}
         >
           <FaBold className="text-sm" />
+          <span className="tooltip-text tooltip-top -translate-x-1/2">
+            Bold
+          </span>
         </button>
         <button
           onClick={() => applyStyle("i")}
-          className={`rounded p-1 ${
+          className={`tooltip rounded p-1 ${
             state.isItalicActive && !state.isQuoteActive
               ? "bg-primary-700 text-white"
               : "bg-gray-200"
@@ -423,10 +426,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           disabled={state.isQuoteActive}
         >
           <FaItalic className="text-sm" />
+          <span className="tooltip-text tooltip-top -translate-x-1/2">
+            Italic
+          </span>
         </button>
         <button
           onClick={() => applyStyle("s")}
-          className={`rounded p-1 ${
+          className={`tooltip rounded p-1 ${
             state.isStrikethroughActive && !state.isQuoteActive
               ? "bg-primary-700 text-white"
               : "bg-gray-200"
@@ -434,12 +440,15 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           disabled={state.isQuoteActive}
         >
           <FaStrikethrough className="text-sm" />
+          <span className="tooltip-text tooltip-top -translate-x-1/2">
+            Strikethrough
+          </span>
         </button>
         <div className="mx-2 h-6 border-l border-gray-400"></div>
 
         <button
           onClick={() => toggleList("ul")}
-          className={`rounded p-1 ${
+          className={`tooltip rounded p-1 ${
             state.isUnorderedListActive && !state.isQuoteActive
               ? "bg-primary-700 text-white"
               : "bg-gray-200"
@@ -447,10 +456,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           disabled={state.isQuoteActive}
         >
           <FaListUl className="text-sm" />
+          <span className="tooltip-text tooltip-top -translate-x-1/2">
+            Unordered List
+          </span>
         </button>
         <button
           onClick={() => toggleList("ol")}
-          className={`rounded p-1 ${
+          className={`tooltip rounded p-1 ${
             state.isOrderedListActive && !state.isQuoteActive
               ? "bg-primary-700 text-white"
               : "bg-gray-200"
@@ -458,22 +470,40 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           disabled={state.isQuoteActive}
         >
           <FaListOl className="text-sm" />
+          <span className="tooltip-text tooltip-top -translate-x-1/2">
+            Ordered List
+          </span>
         </button>
         <div className="mx-2 h-6 border-l border-gray-400"></div>
         <button
           onClick={applyQuote}
-          className={`rounded p-1 ${
+          className={`tooltip rounded p-1 ${
             state.isQuoteActive ? "bg-primary-700 text-white" : "bg-gray-200"
           }`}
         >
           <FaQuoteRight className="text-sm" />
+          <span className="tooltip-text tooltip-top -translate-x-1/2">
+            Quote
+          </span>
         </button>
 
-        <button onClick={handleLink} className="rounded bg-gray-200 p-2">
+        <button
+          onClick={handleLink}
+          className="tooltip rounded bg-gray-200 p-2"
+        >
           <FaLink className="text-sm" />
+          <span className="tooltip-text tooltip-top -translate-x-1/2">
+            Link
+          </span>
         </button>
-        <button onClick={handleUnlink} className="rounded bg-gray-200 p-2">
+        <button
+          onClick={handleUnlink}
+          className="tooltip rounded bg-gray-200 p-2"
+        >
           <FaUnlink className="text-sm" />
+          <span className="tooltip-text tooltip-top -translate-x-1/2">
+            Remove link
+          </span>
         </button>
       </div>
 
@@ -483,7 +513,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           id="doctor_notes_textarea"
           ref={editorRef}
           contentEditable
-          className="prose min-h-[50px] max-w-full text-sm outline-none"
+          className="prose min-h-[50px] max-w-full text-sm outline-none prose-a:text-blue-500"
           onInput={handleInput}
         />
         <FileUpload file={file} setFile={setFile} />
@@ -493,22 +523,31 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       <div className="flex items-center space-x-2 rounded-b-md border border-gray-300 bg-gray-100 pl-2 ">
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="rounded p-1 hover:bg-gray-200"
+          className="tooltip rounded p-1 hover:bg-gray-200"
         >
           <MdAttachFile className="text-sm" />
+          <span className="tooltip-text tooltip-top -translate-x-1/2">
+            Attach File
+          </span>
         </button>
         <div className="mx-2 h-6 border-l border-gray-400"></div>
         <button
           onClick={() => setModalOpenForCamera(true)}
-          className="rounded p-1 hover:bg-gray-200"
+          className="tooltip rounded p-1 hover:bg-gray-200"
         >
           <FaCamera className="text-sm" />
+          <span className="tooltip-text tooltip-top -translate-x-1/2">
+            Camera
+          </span>
         </button>
         <button
           onClick={() => setModalOpenForAudio(true)}
-          className="rounded p-1 hover:bg-gray-200"
+          className="tooltip rounded p-1 hover:bg-gray-200"
         >
           <AiFillAudio className="text-sm" />
+          <span className="tooltip-text tooltip-top -translate-x-1/2">
+            Audio
+          </span>
         </button>
         <div className="mx-2 h-6 border-l border-gray-400"></div>
         <button
@@ -523,9 +562,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             });
             setShowMentions(!showMentions);
           }}
-          className="rounded bg-gray-200 p-1"
+          className="tooltip rounded bg-gray-200 p-1"
         >
           <GoMention className="text-sm" />
+          <span className="tooltip-text tooltip-top -translate-x-1/2">
+            Mention
+          </span>
         </button>
         <input
           ref={fileInputRef}

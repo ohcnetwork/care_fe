@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
+import useSlug from "../../Common/hooks/useSlug";
 
 const MentionsDropdown: React.FC<{
   onSelect: (user: any) => void;
   position: { top: number; left: number };
   editorRef: React.RefObject<HTMLDivElement>;
 }> = ({ onSelect, position, editorRef }) => {
-  const facilityId = "81092ced-8720-44cb-b4c5-3f0ad0540153";
+  const facilityId = useSlug("facility");
   const { data } = useQuery(routes.getFacilityUsers, {
     pathParams: { facility_id: facilityId },
   });
@@ -34,9 +35,12 @@ const MentionsDropdown: React.FC<{
       {users.map((user) => (
         <div
           key={user.id}
-          className="cursor-pointer p-2 hover:bg-gray-100"
+          className="flex cursor-pointer items-center gap-2 p-2 hover:bg-gray-100"
           onClick={() => onSelect(user)}
         >
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white">
+            {user.first_name[0]}
+          </span>
           {user.username}
         </div>
       ))}

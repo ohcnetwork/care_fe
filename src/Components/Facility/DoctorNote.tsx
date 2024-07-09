@@ -38,23 +38,14 @@ const DoctorNote = (props: DoctorNoteProps) => {
           {state.notes.map((note) => {
             if (mode === "thread-view") {
               return (
-                <div className="" key={note.id}>
+                <div className="mt-3">
                   <PatientNoteCard
+                    key={note.id}
                     note={note}
                     setReload={setReload}
                     disableEdit={disableEdit}
                     setReplyTo={setReplyTo}
                   />
-                  {note.replies.length > 0 ? (
-                    <div className="mr-4 mt-1 flex items-center justify-end text-sm text-gray-500">
-                      {note.replies.length}{" "}
-                      {note.replies.length > 1 ? "default-view" : "reply"}
-                    </div>
-                  ) : (
-                    <div className="mr-4 flex items-center justify-end text-sm text-gray-500">
-                      No replies
-                    </div>
-                  )}
                 </div>
               );
             } else if (mode === "default-view") {

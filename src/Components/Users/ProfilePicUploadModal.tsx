@@ -24,9 +24,16 @@ interface Props {
   onClose: () => void;
   onSave?: () => void;
   onDelete?: () => void;
+  onRefetch?: () => void;
 }
 
-const ProfilePicUploadModal = ({ open, onClose, onSave, onDelete }: Props) => {
+const ProfilePicUploadModal = ({
+  open,
+  onClose,
+  onSave,
+  onDelete,
+  onRefetch,
+}: Props) => {
   const user = useAuthUser();
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<File>();
@@ -92,6 +99,7 @@ const ProfilePicUploadModal = ({ open, onClose, onSave, onDelete }: Props) => {
       setIsUploading(false);
       onSave?.();
       closeModal();
+      onRefetch?.();
       setUploadPercent(0);
     }
   }, [uploadPercent]);

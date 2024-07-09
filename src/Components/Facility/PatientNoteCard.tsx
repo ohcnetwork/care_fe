@@ -133,7 +133,7 @@ const PatientNoteCard = ({
               )
             }
           </div>
-          <div className="gap-2-top-4 absolute -top-4 right-0 z-10 flex gap-2 opacity-0 transition-opacity duration-100 group-hover:opacity-100 ">
+          <div className="gap-2-top-4 absolute right-0 top-0 z-10 flex gap-2 opacity-0 transition-opacity duration-100 group-hover:opacity-100 ">
             {!disableEdit &&
               // note.created_by_object.id === authUser.id &&
               !isEditing && (
@@ -201,6 +201,13 @@ const PatientNoteCard = ({
                 className="cursor-pointer pl-11 text-sm text-gray-700"
               >
                 <MarkdownPreview markdown={noteField} />
+                {note.replies.length > 0 && (
+                  <div className="mt-2 flex items-center text-xs text-gray-500">
+                    <CareIcon icon="l-corner-down-right" className="h-3 w-3" />
+                    {note.replies.length}{" "}
+                    {note.replies.length === 1 ? "Reply" : "Replies"}
+                  </div>
+                )}
               </div>
             )}
           </div>

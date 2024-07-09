@@ -47,7 +47,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
     undefined,
   );
   const [mode, setMode] = useState<"thread-view" | "default-view">(
-    "thread-view",
+    "default-view",
   );
 
   const initialData: PatientNoteStateType = {

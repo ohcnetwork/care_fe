@@ -114,7 +114,6 @@ export default function UserProfile() {
   const { signOut } = useAuthContext();
   const [states, dispatch] = useReducer(editFormReducer, initialState);
   const [editProfilePic, setEditProfilePic] = useState(false);
-  const [imageKey, setImageKey] = useState(Date.now());
   const [updateStatus, setUpdateStatus] = useState({
     isChecking: false,
     isUpdateAvailable: false,
@@ -457,13 +456,10 @@ export default function UserProfile() {
     <div>
       <ProfilePicUploadModal
         open={editProfilePic}
-        onSave={() =>
-          userData?.read_profile_picture_url
-            ? setImageKey(Date.now())
-            : refetchUserData()
-        }
+        onSave={() => window.location.reload()}
         onClose={() => setEditProfilePic(false)}
         onDelete={() => refetchUserData()}
+        onRefetch={() => refetchUserData()}
       />
       <div className="p-10 lg:p-16">
         <div className="lg:grid lg:grid-cols-3 lg:gap-6">
@@ -484,7 +480,7 @@ export default function UserProfile() {
                     className="size-24 rounded-lg object-cover"
                     src={
                       userData?.read_profile_picture_url
-                        ? `${userData?.read_profile_picture_url}?imgKey=${imageKey}`
+                        ? `${userData?.read_profile_picture_url}?imgKey=${Date.now()}`
                         : "/images/empty_avatar.jpg"
                     }
                     alt=""
