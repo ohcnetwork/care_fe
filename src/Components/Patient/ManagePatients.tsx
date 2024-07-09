@@ -610,7 +610,7 @@ export const PatientManager = () => {
                         size="small"
                         variant="primary"
                         startIcon="l-clock-three"
-                        text={`IP Days: ${dayjs().diff(patient.last_consultation.encounter_date, "day")}`}
+                        text={`IP Days: ${dayjs().diff(patient.last_consultation.encounter_date, "day") + 1}`}
                       />
                     )}
                   {patient.gender === 2 &&
