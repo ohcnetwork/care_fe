@@ -162,7 +162,7 @@ const PhoneNumberTypesHelp = (props: { types: PhoneNumberType[] }) => {
   return (
     <div className="tooltip mt-1 pr-1 text-gray-500">
       <CareIcon icon="l-question-circle" className="text-lg" />
-      <div className="tooltip-text tooltip-left text-sm">
+      <div className="tooltip-text tooltip-bottom w-64 -translate-x-full whitespace-pre-wrap text-sm">
         Supports only{" "}
         <span className="font-bold lowercase">
           {humanizeStrings(props.types.map((item) => t(item)))}
