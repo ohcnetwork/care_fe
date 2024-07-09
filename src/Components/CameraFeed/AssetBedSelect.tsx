@@ -67,10 +67,10 @@ export const CameraPresetDropdown = (
       <div className="relative flex-1">
         <Listbox.Button
           className={classNames(
-            "relative min-w-32 max-w-40 overflow-hidden text-ellipsis whitespace-nowrap rounded-lg border-2 px-2 py-0.5 pr-8 text-left text-base transition-all duration-200 ease-in-out hover:bg-zinc-600 focus:outline-none disabled:cursor-not-allowed disabled:bg-transparent disabled:text-zinc-700",
+            "relative min-w-32 max-w-40 overflow-hidden text-ellipsis whitespace-nowrap rounded-lg border-2 px-2 py-1 pr-8 text-left text-sm font-medium transition-all duration-200 ease-in-out hover:bg-zinc-600 focus:outline-none disabled:cursor-not-allowed disabled:bg-transparent disabled:text-zinc-700 md:py-0.5 md:text-base",
             selected
-              ? "border-white bg-zinc-100 font-bold text-black"
-              : "border-zinc-700 font-medium text-zinc-300",
+              ? "border-zinc-700 bg-zinc-700/50 text-white md:font-bold"
+              : "border-zinc-700  text-zinc-300",
           )}
         >
           <span className="block truncate">
