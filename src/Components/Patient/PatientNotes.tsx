@@ -35,9 +35,7 @@ const PatientNotes = (props: PatientNotesProps) => {
   const [reload, setReload] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
-  const [reply_to, setReplyTo] = useState<PatientNotesModel | undefined>(
-    undefined,
-  );
+  const [reply_to, setReplyTo] = useState<PatientNotesModel>();
 
   const initialData: PatientNoteStateType = {
     notes: [],

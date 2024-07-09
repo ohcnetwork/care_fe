@@ -27,10 +27,6 @@ const PatientNotesDetailedView = (props: Props) => {
     note: "",
     replies: [],
   });
-  const [reply_to, setReplyTo] = useState<PatientNotesModel | undefined>(
-    undefined,
-  );
-  console.log(reply_to);
 
   const fetchNotes = async () => {
     setIsLoading(true);
@@ -91,7 +87,6 @@ const PatientNotesDetailedView = (props: Props) => {
             <PatientNoteCard
               note={state as PatientNotesModel}
               setReload={setReload}
-              setReplyTo={setReplyTo}
             />
             {
               <div className="mr-4 mt-1 flex items-center justify-end text-sm text-gray-500">
@@ -106,7 +101,6 @@ const PatientNotesDetailedView = (props: Props) => {
                   <PatientNoteCard
                     note={reply as PatientNotesModel}
                     setReload={setReload}
-                    setReplyTo={setReplyTo}
                   />
                 ))}
               </div>
