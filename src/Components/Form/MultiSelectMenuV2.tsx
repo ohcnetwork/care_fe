@@ -158,10 +158,10 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                               className={classNames(
                                 "text-sm font-normal",
                                 option.disabled
-                                  ? "text-gray-700"
+                                  ? "text-gray-500"
                                   : active
                                     ? "text-primary-200"
-                                    : "text-gray-700",
+                                    : "text-gray-500",
                               )}
                             >
                               {option.description}
@@ -226,7 +226,7 @@ export const dropdownOptionClassNames = ({
     !disabled && active && "bg-primary-500 text-white",
     !disabled && !active && selected && "text-primary-500",
     !disabled && !active && !selected && "text-gray-900",
-    disabled && "cursor-not-allowed text-gray-800",
+    disabled && "cursor-not-allowed text-gray-600",
     selected ? "font-semibold" : "font-normal",
   );
 };

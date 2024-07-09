@@ -58,7 +58,11 @@ const TransferPatientDialog = (props: Props) => {
   const patientOptions: Array<OptionsType> = patientList.map((patient) => {
     return {
       id: patient.patient_id as unknown as number,
-      text: `${patient.name} (${patient.gender})`,
+      text: [
+        patient.name,
+        `(${patient.gender})`,
+        patient.is_expired ? "(Expired)" : "",
+      ].join(" "),
       disabled: patient.is_expired,
     };
   });
