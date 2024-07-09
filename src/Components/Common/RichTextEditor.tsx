@@ -174,11 +174,26 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     if (!selection || !selection.rangeCount) return;
 
     const range = selection.getRangeAt(0);
+    const parentNode = range.commonAncestorContainer.parentNode as HTMLElement;
 
-    const node = document.createElement(style);
-    node.appendChild(range.cloneContents());
-    range.deleteContents();
-    range.insertNode(node);
+    if (parentNode.tagName.toLowerCase() === style) {
+      const parent = parentNode.parentNode;
+      while (parentNode.firstChild) {
+        if (parent) {
+          parent.insertBefore(parentNode.firstChild, parentNode);
+        }
+      }
+      if (parent) {
+        parent.removeChild(parentNode);
+      }
+    } else {
+      const node = document.createElement(style);
+      node.appendChild(range.extractContents());
+      range.insertNode(node);
+    }
+
+    selection.removeAllRanges();
+    selection.addRange(range);
 
     saveState();
   };
@@ -193,10 +208,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     if (listNode && listNode.nodeName === listType.toUpperCase()) {
       const parentList = listNode.parentNode;
       Array.from(listNode.childNodes).forEach((item) => {
-        const newListItem = document.createElement("li");
-        newListItem.textContent = item.textContent;
-        if (parentList) {
-          parentList.insertBefore(newListItem, listNode);
+        if (item.nodeName === "LI") {
+          const newItem = document.createElement("p");
+          newItem.appendChild(document.createTextNode(item.textContent || ""));
+          if (parentList) {
+            parentList.insertBefore(newItem, listNode);
+          }
         }
       });
       if (parentList) {
@@ -224,13 +241,25 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     if (!selection || !selection.rangeCount) return;
 
     const range = selection.getRangeAt(0);
-    const blockquote = document.createElement("blockquote");
-    blockquote.appendChild(range.extractContents());
-    range.insertNode(blockquote);
+    const commonAncestor = range.commonAncestorContainer;
+    const blockquote = findParentNode(commonAncestor, ["BLOCKQUOTE"]);
 
-    const br = document.createElement("br");
-    if (blockquote.parentNode) {
-      blockquote.parentNode.insertBefore(br, blockquote.nextSibling);
+    if (blockquote) {
+      const parent = blockquote.parentNode;
+      if (!parent) return;
+      while (blockquote.firstChild) {
+        parent.insertBefore(blockquote.firstChild, blockquote);
+      }
+      parent.removeChild(blockquote);
+    } else {
+      const newBlockquote = document.createElement("blockquote");
+      newBlockquote.appendChild(range.extractContents());
+      range.insertNode(newBlockquote);
+
+      const br = document.createElement("br");
+      if (newBlockquote.parentNode) {
+        newBlockquote.parentNode.insertBefore(br, newBlockquote.nextSibling);
+      }
     }
 
     saveState();
