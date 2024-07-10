@@ -343,11 +343,7 @@ export const DailyRounds = (props: any) => {
           Notification.Success({
             msg: `${t(obj.rounds_type as string)} log updated successfully`,
           });
-          if (
-            ["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
-              state.form.rounds_type,
-            )
-          ) {
+          if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
             navigate(
               `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
             );
@@ -369,11 +365,7 @@ export const DailyRounds = (props: any) => {
             msg: `${t(state.form.rounds_type)} log created successfully`,
           });
 
-          if (
-            ["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
-              state.form.rounds_type,
-            )
-          ) {
+          if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
             navigate(
               `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
             );
