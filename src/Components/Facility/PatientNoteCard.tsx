@@ -20,22 +20,29 @@ const PatientNoteCard = ({
   note,
   setReload,
   disableEdit,
+  allowReply = true,
+  allowThreadView = false,
   setReplyTo,
   mode = "default-view",
 }: {
   note: PatientNotesModel;
   setReload: any;
   disableEdit?: boolean;
+  allowReply?: boolean;
+  allowThreadView?: boolean;
   setReplyTo?: (reply_to: PatientNotesModel | undefined) => void;
   mode?: "thread-view" | "default-view";
 }) => {
-  const patientId = useSlug("patient");
   const [isEditing, setIsEditing] = useState(false);
   const [noteField, setNoteField] = useState(note.note);
   const [showEditHistory, setShowEditHistory] = useState(false);
   const [editHistory, setEditHistory] = useState<PatientNotesEditModel[]>([]);
   // const authUser = useAuthUser();
-  const currentPath = window.location.pathname;
+  const patientId = useSlug("patient");
+  const facilityId = useSlug("facility");
+  const consultationId = useSlug("consultation");
+
+  const currentPath = `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/notes`;
 
   const fetchEditHistory = async () => {
     const { res, data } = await request(routes.getPatientNoteEditHistory, {
@@ -99,6 +106,7 @@ const PatientNoteCard = ({
             </div>
             {
               // If last edited date is same as created date, then it is not edited
+              note.last_edited_date &&
               !dayjs(note.last_edited_date).isSame(
                 note.created_date,
                 "second",
@@ -149,15 +157,17 @@ const PatientNoteCard = ({
                   <CareIcon icon="l-pen" className="h-4 w-4" />
                 </ButtonV2>
               )}
-            <ButtonV2
-              ghost
-              onClick={() => {
-                setReplyTo && setReplyTo(note);
-              }}
-              className="bg-gray-100 p-2"
-            >
-              <CareIcon icon="l-corner-up-left-alt" className="h-4 w-4" />
-            </ButtonV2>
+            {allowReply && (
+              <ButtonV2
+                ghost
+                onClick={() => {
+                  setReplyTo && setReplyTo(note);
+                }}
+                className="bg-gray-100 p-2"
+              >
+                <CareIcon icon="l-corner-up-left-alt" className="h-4 w-4" />
+              </ButtonV2>
+            )}
           </div>
         </div>
 
@@ -198,9 +208,9 @@ const PatientNoteCard = ({
             ) : (
               <div
                 onClick={() => {
-                  navigate(`${currentPath}/${note.id}`);
+                  if (allowThreadView) navigate(`${currentPath}/${note.id}`);
                 }}
-                className="cursor-pointer pl-11 text-sm text-gray-700"
+                className={`pl-11 text-sm text-gray-700 ${allowThreadView && "cursor-pointer"}`}
               >
                 <MarkdownPreview markdown={noteField} />
                 {mode == "thread-view" && note.replies.length > 0 && (

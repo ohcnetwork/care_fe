@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import CircularProgress from "../Common/components/CircularProgress";
 import routes from "../../Redux/api";
-import { PaitentNotesReplyModel, PatientNotesModel } from "./models";
+import { PatientNotesModel } from "./models";
 import request from "../../Utils/request/request";
 import Page from "../Common/components/Page";
 import PatientNoteCard from "./PatientNoteCard";
+import RichTextEditor from "../Common/RichTextEditor";
+import * as Notification from "../../../src/Utils/Notifications";
 
 interface Props {
   patientId: string;
@@ -14,20 +16,39 @@ interface Props {
   thread: PatientNotesModel["thread"];
 }
 
-interface PatientNoteWithReplies {
-  note: string;
-  replies: PaitentNotesReplyModel[];
-}
-
 const PatientNotesDetailedView = (props: Props) => {
   const { patientId, facilityId, consultationId, noteId, thread } = props;
   const [isLoading, setIsLoading] = useState(true);
   const [reload, setReload] = useState(false);
-  const [state, setState] = useState<PatientNoteWithReplies>({
-    note: "",
-    replies: [],
-  });
+  const [state, setState] = useState<PatientNotesModel>();
+  const [noteField, setNoteField] = useState("");
 
+  const onAddNote = async () => {
+    if (!/\S+/.test(noteField)) {
+      Notification.Error({
+        msg: "Note Should Contain At Least 1 Character",
+      });
+      return;
+    }
+
+    const { res } = await request(routes.addPatientNote, {
+      pathParams: {
+        patientId: patientId,
+      },
+      body: {
+        note: noteField,
+        thread,
+        consultation: consultationId,
+        reply_to: noteId,
+      },
+    });
+
+    if (res?.status === 201) {
+      Notification.Success({ msg: "Note added successfully" });
+      setNoteField("");
+      setReload(true);
+    }
+  };
   const fetchNotes = async () => {
     setIsLoading(true);
 
@@ -43,11 +64,7 @@ const PatientNotesDetailedView = (props: Props) => {
     });
 
     if (data) {
-      setState((prevState) => ({
-        ...prevState,
-        note: data.note,
-        replies: data.replies,
-      }));
+      setState(data);
     }
     setIsLoading(false);
     setReload?.(false);
@@ -78,35 +95,42 @@ const PatientNotesDetailedView = (props: Props) => {
   return (
     <Page
       title="Discussion Notes"
-      className="flex h-screen flex-col"
+      className="flex h-full flex-col overflow-hidden"
       backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/notes`}
     >
-      <div className="mx-3 my-2 flex grow flex-col overflow-y-scroll rounded-lg border border-gray-300 bg-white p-2 sm:mx-10 sm:my-5 sm:p-5">
-        {
-          <div>
-            <PatientNoteCard
-              note={state as PatientNotesModel}
-              setReload={setReload}
+      <div className="flex flex-col overflow-y-scroll rounded-lg border border-gray-300 bg-white p-3">
+        {state && (
+          <div className="flex flex-col">
+            <div className="flex-1">
+              <PatientNoteCard note={state} setReload={setReload} />
+              {
+                <div className="mr-4 mt-1 flex items-center justify-end text-sm text-gray-500">
+                  {state.replies.length}{" "}
+                  {state.replies.length > 1 ? "replies" : "reply"}
+                </div>
+              }
+              <h4 className="ml-2">Replies</h4>
+              {
+                <div className="flex flex-col-reverse overflow-y-scroll">
+                  {state.replies.map((reply) => (
+                    <div className="ml-2 mt-3">
+                      <PatientNoteCard
+                        note={reply as PatientNotesModel}
+                        setReload={setReload}
+                        // allowReply={false}
+                      />
+                    </div>
+                  ))}
+                </div>
+              }
+            </div>
+            <RichTextEditor
+              onAddNote={onAddNote}
+              onChange={setNoteField}
+              initialMarkdown={noteField}
             />
-            {
-              <div className="mr-4 mt-1 flex items-center justify-end text-sm text-gray-500">
-                {state.replies.length}{" "}
-                {state.replies.length > 1 ? "replies" : "reply"}
-              </div>
-            }
-            <h4>Replies</h4>
-            {
-              <div className="flex max-h-[300px] flex-col-reverse overflow-y-scroll">
-                {state.replies.map((reply) => (
-                  <PatientNoteCard
-                    note={reply as PatientNotesModel}
-                    setReload={setReload}
-                  />
-                ))}
-              </div>
-            }
           </div>
-        }
+        )}
       </div>
     </Page>
   );
