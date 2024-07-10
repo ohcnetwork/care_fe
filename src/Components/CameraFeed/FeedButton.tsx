@@ -34,7 +34,10 @@ export default function FeedButton(props: Props) {
       shortcut={props.shortcut}
       onTrigger={props.onTrigger}
       helpText={props.helpText}
-      tooltipClassName={props.tooltipClassName}
+      tooltipClassName={classNames(
+        props.tooltipClassName,
+        "hidden lg:inline-flex",
+      )}
     >
       {child}
     </KeyboardShortcut>

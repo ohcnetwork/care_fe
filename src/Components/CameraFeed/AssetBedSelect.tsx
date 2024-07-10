@@ -3,8 +3,10 @@ import { AssetBedModel } from "../Assets/AssetTypes";
 import { Listbox, Transition } from "@headlessui/react";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
+import { dropdownOptionClassNames } from "../Form/MultiSelectMenuV2";
 
 interface Props {
+  disabled?: boolean;
   options: AssetBedModel[];
   value?: AssetBedModel;
   label?: (value: AssetBedModel) => string;
@@ -15,23 +17,31 @@ export default function CameraPresetSelect(props: Props) {
   const label = props.label ?? defaultLabel;
   return (
     <>
-      <div className="hidden gap-4 whitespace-nowrap pr-2 lg:flex lg:gap-2">
-        {/* Desktop View */}
+      {/* Desktop View */}
+      <div className="hidden gap-4 whitespace-nowrap pr-2 lg:flex lg:gap-1.5">
         {props.options
           .slice(0, props.options.length > 5 ? 4 : 5)
-          .map((option) => (
-            <button
-              className={classNames(
-                "min-w-16 max-w-40 overflow-hidden text-ellipsis whitespace-nowrap rounded-lg border-2 px-2 py-0.5 text-base transition-all duration-200 ease-in-out hover:bg-zinc-600",
-                props.value?.id === option.id
-                  ? "border-white bg-zinc-100 font-bold text-black"
-                  : "border-zinc-700 font-medium text-zinc-300",
-              )}
-              onClick={() => props.onChange?.(option)}
-            >
-              {label(option)}
-            </button>
-          ))}
+          .map((option) => {
+            const selected = props.value?.id === option.id;
+
+            return (
+              <button
+                className={classNames(
+                  "flex min-w-16 max-w-40 items-center justify-center gap-1 overflow-hidden text-ellipsis whitespace-nowrap rounded border px-1.5 py-0.5 text-sm font-medium transition-all duration-500 ease-in-out hover:bg-white hover:text-black",
+                  selected ? "border-current" : "border-zinc-500 text-zinc-500",
+                )}
+                onClick={() => props.onChange?.(option)}
+              >
+                {label(option)}
+                {selected && (
+                  <CareIcon
+                    icon="l-check"
+                    className="rounded-full bg-primary-500 text-base text-white"
+                  />
+                )}
+              </button>
+            );
+          })}
         {props.options.length > 5 && (
           <CameraPresetDropdown
             {...props}
@@ -41,8 +51,9 @@ export default function CameraPresetSelect(props: Props) {
           />
         )}
       </div>
+
+      {/* Mobile View */}
       <div className="w-full lg:hidden">
-        {/* Mobile View */}
         <CameraPresetDropdown {...props} placeholder="Select preset" />
       </div>
     </>
@@ -62,16 +73,17 @@ export const CameraPresetDropdown = (
     <Listbox
       value={selected}
       onChange={props.onChange}
-      disabled={options.length === 0}
+      disabled={options.length === 0 || props.disabled}
     >
       <div className="relative flex-1">
         <Listbox.Button
-          className={classNames(
-            "relative min-w-32 max-w-40 overflow-hidden text-ellipsis whitespace-nowrap rounded-lg border-2 px-2 py-1 pr-8 text-left text-sm font-medium transition-all duration-200 ease-in-out hover:bg-zinc-600 focus:outline-none disabled:cursor-not-allowed disabled:bg-transparent disabled:text-zinc-700 md:py-0.5 md:text-base",
-            selected
-              ? "border-zinc-700 bg-zinc-700/50 text-white md:font-bold"
-              : "border-zinc-700  text-zinc-300",
-          )}
+          className={({ open }) =>
+            classNames(
+              "relative flex min-w-40 max-w-56 items-center gap-1 overflow-hidden text-ellipsis whitespace-nowrap rounded border px-1.5 py-1 pr-8 text-left text-sm font-medium transition-all duration-500 ease-in-out",
+              selected ? "border-current" : "border-zinc-300 text-zinc-500",
+              open && "rounded-b-none ring-1 ring-gray-400",
+            )
+          }
         >
           <span className="block truncate">
             {options.length === 0
@@ -80,38 +92,32 @@ export const CameraPresetDropdown = (
                 ? label(selected)
                 : props.placeholder}
           </span>
+          {selected && (
+            <CareIcon
+              icon="l-check"
+              className="absolute inset-y-0 right-7 mt-1.5 rounded-full bg-primary-500 text-base text-white"
+            />
+          )}
           <span className="pointer-events-none absolute inset-y-0 right-0 mr-1 mt-1 flex items-center">
             <CareIcon icon="l-angle-down" className="text-xl text-zinc-400" />
           </span>
         </Listbox.Button>
         <Transition
           as={Fragment}
-          leave="transition ease-in duration-100"
+          leave="transition ease-in duration-300"
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <Listbox.Options className="absolute z-20 mt-1 max-h-48 w-full overflow-auto rounded-b-lg bg-zinc-900/75 py-1 text-base shadow-lg ring-1 ring-white/5 backdrop-blur-sm focus:outline-none md:max-h-60">
+          <Listbox.Options className="absolute z-20 max-h-48 w-full overflow-auto rounded-b-lg bg-white py-1 text-base shadow-lg ring-1 ring-gray-500 focus:outline-none md:max-h-60">
             {options?.map((obj) => (
               <Listbox.Option
                 key={obj.id}
-                className={({ active }) =>
-                  `relative cursor-default select-none px-2 py-1 ${
-                    active ? "bg-zinc-700 text-white" : "text-zinc-400"
-                  }`
+                className={(args) =>
+                  classNames(dropdownOptionClassNames(args), "px-2 py-1.5")
                 }
                 value={obj}
               >
-                {({ selected }) => (
-                  <>
-                    <span
-                      className={`block truncate text-sm md:text-base ${
-                        selected ? "font-bold text-white" : "font-normal"
-                      }`}
-                    >
-                      {label(obj)}
-                    </span>
-                  </>
-                )}
+                <span>{label(obj)}</span>
               </Listbox.Option>
             ))}
           </Listbox.Options>

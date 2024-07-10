@@ -215,7 +215,7 @@ export const ConsultationDetails = (props: any) => {
 
   return (
     <div>
-      <div className="px-2 pb-2">
+      <div>
         <nav className="relative flex flex-wrap items-start justify-between">
           <PageTitle
             title="Patient Dashboard"

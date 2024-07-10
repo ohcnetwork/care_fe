@@ -24,6 +24,7 @@ export default function LocationFeedTile(props: Props) {
       silent
       preset={preset?.meta.position}
       shortcutsDisabled
+      className="overflow-hidden rounded-xl"
     >
       <div className="w-64">
         {loading ? (

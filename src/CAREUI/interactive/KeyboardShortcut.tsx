@@ -25,7 +25,7 @@ export default function KeyboardShortcut(props: Props) {
         )}
       >
         <span className="px-1 font-bold">{props.helpText}</span>
-        <kbd className="hidden items-center px-1.5 font-sans font-medium text-zinc-300 shadow md:inline-flex">
+        <kbd className="hidden items-center px-1.5 font-sans font-medium text-zinc-300 shadow lg:inline-flex">
           {getShortcutKeyDescription(props.shortcut).join(" + ")}
         </kbd>
       </span>

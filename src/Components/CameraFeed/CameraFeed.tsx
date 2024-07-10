@@ -10,7 +10,6 @@ import FeedNetworkSignal from "./FeedNetworkSignal";
 import NoFeedAvailable from "./NoFeedAvailable";
 import FeedControls from "./FeedControls";
 import FeedWatermark from "./FeedWatermark";
-import CareIcon from "../../CAREUI/icons/CareIcon";
 import useFullscreen from "../../Common/hooks/useFullscreen";
 
 interface Props {
@@ -96,23 +95,49 @@ export default function CameraFeed(props: Props) {
     <div ref={playerWrapperRef} className="flex flex-col justify-center">
       <div
         className={classNames(
-          "flex flex-col justify-center overflow-hidden rounded-xl bg-black md:max-h-screen",
+          "flex flex-col justify-center bg-black md:max-h-screen",
           props.className,
           isAppleDevice && isFullscreen && "px-20",
         )}
       >
-        <div className="flex items-center justify-between bg-zinc-900 px-4 pt-1 md:py-2">
-          {props.children}
+        <div
+          className={classNames(
+            isFullscreen ? "hidden lg:flex" : "flex",
+            "items-center justify-between px-4 py-0.5 transition-all duration-500 ease-in-out lg:py-1",
+            (() => {
+              if (player.status !== "playing") {
+                return "bg-zinc-700 text-zinc-400";
+              }
+
+              if (isFullscreen) {
+                return "bg-zinc-900 text-white";
+              }
+
+              return "bg-zinc-100 to-zinc-800";
+            })(),
+          )}
+        >
+          <div
+            className={classNames(
+              player.status !== "playing"
+                ? "pointer-events-none opacity-10"
+                : "opacity-100",
+              "transition-all duration-200 ease-in-out",
+            )}
+          >
+            {props.children}
+          </div>
           <div className="flex w-full flex-col items-end justify-end md:flex-row md:items-center md:gap-4">
-            <span className="text-xs font-semibold text-white md:text-base">
-              <CareIcon
-                icon="l-video"
-                className="hidden pr-2 text-lg text-zinc-400 md:inline-block"
-              />
+            <span className="text-xs font-bold md:text-sm">
               {props.asset.name}
             </span>
             {!isIOS && (
-              <div className={state === "loading" ? "animate-pulse" : ""}>
+              <div
+                className={classNames(
+                  state === "loading" && "animate-pulse",
+                  "-mr-1 -mt-1 scale-90 md:mt-0 md:scale-100",
+                )}
+              >
                 <FeedNetworkSignal
                   playerRef={playerRef as any}
                   playedOn={player.playedOn}
