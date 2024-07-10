@@ -461,9 +461,9 @@ export const isAntenatal = (menstruation_start_date?: string) => {
  * @param values Array of strings to be made human readable.
  * @returns Human readable version of the list of strings
  */
-export const humanizeStrings = (strings: readonly string[]) => {
+export const humanizeStrings = (strings: readonly string[], empty = "") => {
   if (strings.length === 0) {
-    throw "Empty array of strings cannot be humanized. Array must contain one or more elements";
+    return empty;
   }
 
   if (strings.length === 1) {
