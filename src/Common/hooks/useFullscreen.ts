@@ -5,10 +5,7 @@ interface HTMLElementWithFullscreen extends HTMLElement {
   webkitExitFullscreen?: () => void;
 }
 
-export default function useFullscreen(): [
-  boolean,
-  (value: boolean, element?: HTMLElement) => void,
-] {
+export default function useFullscreen() {
   const [isFullscreen, _setIsFullscreen] = useState(
     !!document.fullscreenElement,
   );
@@ -39,12 +36,22 @@ export default function useFullscreen(): [
     else document.exitFullscreen();
   }
 
-  const setFullscreen = (value: boolean, element?: HTMLElement) => {
+  const setFullscreen = (
+    value: boolean,
+    element?: HTMLElement,
+    enterLandscape?: boolean,
+  ) => {
     const fullscreenElement = element ?? document.documentElement;
 
-    if (value) openFullscreen(fullscreenElement);
-    else exitFullscreen(fullscreenElement);
+    if (value) {
+      openFullscreen(fullscreenElement);
+      if (enterLandscape) {
+        (screen.orientation as any)?.lock?.("landscape");
+      }
+    } else {
+      exitFullscreen(fullscreenElement);
+    }
   };
 
-  return [isFullscreen, setFullscreen];
+  return [isFullscreen, setFullscreen] as const;
 }
