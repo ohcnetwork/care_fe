@@ -5,7 +5,6 @@ import {
   FaListOl,
   FaListUl,
   FaLink,
-  FaUnlink,
   FaStrikethrough,
   FaQuoteRight,
   FaFile,
@@ -105,6 +104,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   const [modalOpenForCamera, setModalOpenForCamera] = useState(false);
   const [modalOpenForAudio, setModalOpenForAudio] = useState(false);
+  const [linkDialogState, setLinkDialogState] = useState({
+    showDialog: false,
+    url: "",
+    selectedText: "",
+  });
 
   useEffect(() => {
     document.addEventListener("selectionchange", handleSelectionChange);
@@ -161,10 +165,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     tagNames: string[],
   ): HTMLElement | null => {
     while (node && node.parentNode) {
-      node = node.parentNode;
-      if (node && tagNames.includes(node.nodeName)) {
+      if (
+        node.nodeType === Node.ELEMENT_NODE &&
+        tagNames.includes(node.nodeName)
+      ) {
         return node as HTMLElement;
       }
+      node = node.parentNode;
     }
     return null;
   };
@@ -239,7 +246,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const applyQuote = () => {
     const selection = window.getSelection();
     if (!selection || !selection.rangeCount) return;
-
     const range = selection.getRangeAt(0);
     const commonAncestor = range.commonAncestorContainer;
     const blockquote = findParentNode(commonAncestor, ["BLOCKQUOTE"]);
@@ -247,61 +253,89 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     if (blockquote) {
       const parent = blockquote.parentNode;
       if (!parent) return;
+      const tempDiv = document.createElement("div");
       while (blockquote.firstChild) {
-        parent.insertBefore(blockquote.firstChild, blockquote);
+        tempDiv.appendChild(blockquote.firstChild);
       }
-      parent.removeChild(blockquote);
+      parent.replaceChild(tempDiv, blockquote);
+      while (tempDiv.firstChild) {
+        parent.insertBefore(tempDiv.firstChild, tempDiv);
+      }
+      parent.removeChild(tempDiv);
     } else {
       const newBlockquote = document.createElement("blockquote");
       newBlockquote.appendChild(range.extractContents());
       range.insertNode(newBlockquote);
-
-      const br = document.createElement("br");
-      if (newBlockquote.parentNode) {
-        newBlockquote.parentNode.insertBefore(br, newBlockquote.nextSibling);
+      if (newBlockquote.nextSibling) {
+        const br = document.createElement("br");
+        newBlockquote.parentNode?.insertBefore(br, newBlockquote.nextSibling);
       }
     }
-
+    selection.removeAllRanges();
+    selection.addRange(range);
     saveState();
   };
 
   const handleLink = () => {
-    const userLink = prompt("Enter a URL");
-    if (userLink) {
-      const selection = window.getSelection();
-      if (!selection || !selection.rangeCount) return;
-
-      const range = selection.getRangeAt(0);
-      const anchor = document.createElement("a");
-      anchor.href = userLink.startsWith("http")
-        ? userLink
-        : `http://${userLink}`;
-      anchor.textContent = range.toString();
-
-      range.deleteContents();
-      range.insertNode(anchor);
-      saveState();
-    }
-  };
-
-  const handleUnlink = () => {
     const selection = window.getSelection();
     if (!selection || !selection.rangeCount) return;
 
     const range = selection.getRangeAt(0);
-    const container = range.startContainer.parentNode as HTMLElement;
-    if (container && container.tagName === "A") {
-      const parent = container.parentNode;
-      while (container.firstChild) {
-        if (parent) {
-          parent.insertBefore(container.firstChild, container);
-        }
-      }
-      if (parent) {
-        parent.removeChild(container);
-      }
+    const linkNode = findParentNode(range.commonAncestorContainer, ["A"]);
+
+    const selectedText = range.toString();
+    const url = linkNode ? linkNode.getAttribute("href") || "" : "";
+
+    setLinkDialogState({
+      showDialog: true,
+      url,
+      selectedText,
+    });
+
+    lastCaretPosition.current = range.cloneRange();
+  };
+
+  const handleInsertLink = () => {
+    if (!lastCaretPosition.current) return;
+
+    const range = lastCaretPosition.current;
+    const linkNode = findParentNode(range.commonAncestorContainer, ["A"]);
+
+    if (linkNode) {
+      linkNode.setAttribute("href", linkDialogState.url);
+    } else {
+      const newLink = document.createElement("a");
+      newLink.href = linkDialogState.url;
+      newLink.textContent = linkDialogState.selectedText || linkDialogState.url;
+      range.deleteContents();
+      range.insertNode(newLink);
     }
+
+    setLinkDialogState({ showDialog: false, url: "", selectedText: "" });
     saveState();
+
+    if (editorRef.current) {
+      editorRef.current.focus();
+    }
+  };
+
+  const handleUnlink = () => {
+    if (!lastCaretPosition.current) return;
+
+    const range = lastCaretPosition.current;
+    const linkNode = findParentNode(range.commonAncestorContainer, ["A"]);
+
+    if (linkNode) {
+      const textNode = document.createTextNode(linkNode.textContent || "");
+      linkNode.parentNode?.replaceChild(textNode, linkNode);
+    }
+
+    setLinkDialogState({ showDialog: false, url: "", selectedText: "" });
+    saveState();
+
+    if (editorRef.current) {
+      editorRef.current.focus();
+    }
   };
 
   const handleInput = useCallback((event: React.FormEvent<HTMLDivElement>) => {
@@ -519,15 +553,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             Link
           </span>
         </button>
-        <button
-          onClick={handleUnlink}
-          className="tooltip rounded bg-gray-200 p-2"
-        >
-          <FaUnlink className="text-sm" />
-          <span className="tooltip-text tooltip-top -translate-x-1/2">
-            Remove link
-          </span>
-        </button>
       </div>
 
       {/* editor */}
@@ -623,6 +648,50 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           editorRef={editorRef}
         />
       )}
+      <DialogModal
+        show={linkDialogState.showDialog}
+        title="Insert Link"
+        onClose={() =>
+          setLinkDialogState((prev) => ({ ...prev, showDialog: false }))
+        }
+      >
+        <div className="flex flex-col gap-4">
+          {linkDialogState.selectedText && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Selected Text:
+              </label>
+              <p className="mt-1 text-sm text-gray-900">
+                {linkDialogState.selectedText}
+              </p>
+            </div>
+          )}
+          <div>
+            <label
+              htmlFor="url-input"
+              className="block text-sm font-medium text-gray-700"
+            >
+              URL:
+            </label>
+            <input
+              id="url-input"
+              type="text"
+              placeholder="Enter URL"
+              className="mt-1 block w-full rounded border border-gray-300 p-2"
+              value={linkDialogState.url}
+              onChange={(e) =>
+                setLinkDialogState((prev) => ({ ...prev, url: e.target.value }))
+              }
+            />
+          </div>
+          <div className="flex justify-end gap-4">
+            <ButtonV2 variant="secondary" onClick={handleUnlink}>
+              Remove Link
+            </ButtonV2>
+            <Submit onClick={handleInsertLink}>Apply Link</Submit>
+          </div>
+        </div>
+      </DialogModal>
     </div>
   );
 };
