@@ -145,9 +145,9 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       }}
       backUrl={`/facility/${facilityId}/patient/${patientId}`}
     >
-      <div className="right-16 top-8 mx-2 md:absolute ">
+      <div className="right-16 top-8 mx-2 md:absolute">
         <SwitchTabs
-          className="mt-3 w-full lg:w-full"
+          className="mt-3 w-full gap-8 lg:w-full"
           tab1="Thread View"
           tab2="Default View"
           onClickTab1={() => setMode("thread-view")}

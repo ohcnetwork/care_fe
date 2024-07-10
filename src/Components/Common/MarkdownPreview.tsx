@@ -55,7 +55,7 @@ const MarkdownPreview: React.FC<{ markdown: string }> = ({ markdown }) => {
       (_, userId, username) =>
         `<a class="user-mention" href="/user/profile/${username}" data-user-id="${userId}" data-username="${username}">@${username}</a>`,
     )
-    .replace(/~(.*?)~/g, (_, text) => `<del>${text}</del>`);
+    .replace(/~~(.*?)~~/g, (_, text) => `<del>${text}</del>`);
 
   const CustomLink: React.FC<CustomLinkProps> = (props) => {
     if (props.className?.includes("user-mention") && props["data-username"]) {

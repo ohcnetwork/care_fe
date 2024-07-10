@@ -135,7 +135,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       (listNode && listNode.nodeName === "OL") ?? false;
     const isStrikethrough =
       isParentTag(selection.focusNode, "S") ||
-      isParentTag(selection.focusNode, "DEL");
+      isParentTag(selection.focusNode, "DEL") ||
+      (selection.focusNode?.parentElement &&
+        selection.focusNode.parentElement.classList.contains("line-through"));
 
     dispatch({
       type: "UPDATE_ALL",
@@ -145,7 +147,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         isQuoteActive: isQuote,
         isUnorderedListActive,
         isOrderedListActive,
-        isStrikethroughActive: isStrikethrough,
+        isStrikethroughActive: isStrikethrough ?? false,
       },
     });
   };
@@ -183,18 +185,38 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     const range = selection.getRangeAt(0);
     const parentNode = range.commonAncestorContainer.parentNode as HTMLElement;
 
-    if (parentNode.tagName.toLowerCase() === style) {
+    let styleTag: string;
+    let styleClass: string;
+
+    switch (style) {
+      case "b":
+        styleTag = "STRONG";
+        styleClass = "font-bold";
+        break;
+      case "i":
+        styleTag = "EM";
+        styleClass = "italic";
+        break;
+      case "s":
+        styleTag = "S";
+        styleClass = "line-through";
+        break;
+    }
+
+    if (
+      parentNode.tagName === styleTag ||
+      parentNode.classList.contains(styleClass)
+    ) {
       const parent = parentNode.parentNode;
+      if (!parent) return;
+
       while (parentNode.firstChild) {
-        if (parent) {
-          parent.insertBefore(parentNode.firstChild, parentNode);
-        }
+        parent.insertBefore(parentNode.firstChild, parentNode);
       }
-      if (parent) {
-        parent.removeChild(parentNode);
-      }
+      parent.removeChild(parentNode);
     } else {
-      const node = document.createElement(style);
+      const node = document.createElement(styleTag);
+      node.className = styleClass;
       node.appendChild(range.extractContents());
       range.insertNode(node);
     }
@@ -399,8 +421,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const saveState = () => {
     const turndownService = new TurndownService();
     turndownService.addRule("strikethrough", {
-      filter: ["del", "s"],
-      replacement: (content) => `~${content}~`,
+      filter: ["s", "del"],
+      replacement: (content) => `~~${content}~~`,
     });
     turndownService.addRule("mentions", {
       filter: (node) => {
