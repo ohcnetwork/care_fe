@@ -2,7 +2,7 @@ import React from "react";
 import { PaitentNotesReplyModel } from "./models";
 import { USER_TYPES_MAP } from "../../Common/constants";
 import { formatDateTime, relativeDate } from "../../Utils/utils";
-import MarkdownPreview from "../Common/MarkdownPreview";
+import MarkdownPreview from "../Common/RichTextEditor/MarkdownPreview";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 
 interface Props {

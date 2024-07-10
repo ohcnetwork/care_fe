@@ -16,8 +16,8 @@ import { classNames } from "../../Utils/utils.js";
 import DoctorNoteReplyPreviewCard from "../Facility/DoctorNoteReplyPreviewCard.js";
 
 interface PatientNotesProps {
-  patientId: any;
-  facilityId: any;
+  patientId: string;
+  facilityId: string;
 }
 
 const PatientNotes = (props: PatientNotesProps) => {

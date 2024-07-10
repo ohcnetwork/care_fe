@@ -14,7 +14,7 @@ import useAuthUser from "../../Common/hooks/useAuthUser";
 import { PATIENT_NOTES_THREADS } from "../../Common/constants.js";
 import DoctorNoteReplyPreviewCard from "./DoctorNoteReplyPreviewCard.js";
 import useNotificationSubscriptionState from "../../Common/hooks/useNotificationSubscriptionState.js";
-import RichTextEditor from "../Common/RichTextEditor.js";
+import RichTextEditor from "../Common/RichTextEditor/RichTextEditor";
 import AuthorizedChild from "../../CAREUI/misc/AuthorizedChild.js";
 
 interface PatientNotesProps {

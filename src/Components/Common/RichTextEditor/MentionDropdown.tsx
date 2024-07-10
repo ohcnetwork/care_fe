@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import routes from "../../Redux/api";
-import useQuery from "../../Utils/request/useQuery";
-import useSlug from "../../Common/hooks/useSlug";
+import routes from "../../../Redux/api";
+import useQuery from "../../../Utils/request/useQuery";
+import useSlug from "../../../Common/hooks/useSlug";
 
 const MentionsDropdown: React.FC<{
-  onSelect: (user: any) => void;
+  onSelect: (user: { id: string; username: string }) => void;
   position: { top: number; left: number };
   editorRef: React.RefObject<HTMLDivElement>;
 }> = ({ onSelect, position, editorRef }) => {
@@ -36,7 +36,9 @@ const MentionsDropdown: React.FC<{
         <div
           key={user.id}
           className="flex cursor-pointer items-center gap-2 p-2 hover:bg-gray-100"
-          onClick={() => onSelect(user)}
+          onClick={() =>
+            onSelect({ id: user.id.toString(), username: user.username })
+          }
         >
           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white">
             {user.first_name[0]}

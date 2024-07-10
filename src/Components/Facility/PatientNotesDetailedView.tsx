@@ -5,7 +5,7 @@ import { PatientNotesModel } from "./models";
 import request from "../../Utils/request/request";
 import Page from "../Common/components/Page";
 import PatientNoteCard from "./PatientNoteCard";
-import RichTextEditor from "../Common/RichTextEditor";
+import RichTextEditor from "../Common/RichTextEditor/RichTextEditor";
 import * as Notification from "../../../src/Utils/Notifications";
 
 interface Props {

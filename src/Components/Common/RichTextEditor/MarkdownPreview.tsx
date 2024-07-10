@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
-import { UserModel } from "../Users/models";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
+import { UserModel } from "../../Users/models";
+import useQuery from "../../../Utils/request/useQuery";
+import routes from "../../../Redux/api";
 
 interface UserCardProps {
   user: UserModel;

@@ -14,7 +14,7 @@ import Spinner from "../Common/Spinner";
 // import useAuthUser from "../../Common/hooks/useAuthUser";
 import useSlug from "../../Common/hooks/useSlug";
 import { navigate } from "raviger";
-import MarkdownPreview from "../Common/MarkdownPreview";
+import MarkdownPreview from "../Common/RichTextEditor/MarkdownPreview";
 
 const PatientNoteCard = ({
   note,

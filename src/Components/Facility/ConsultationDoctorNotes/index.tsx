@@ -17,7 +17,7 @@ import { PATIENT_NOTES_THREADS } from "../../../Common/constants.js";
 import useAuthUser from "../../../Common/hooks/useAuthUser.js";
 import DoctorNoteReplyPreviewCard from "../DoctorNoteReplyPreviewCard.js";
 import PatientNotesDetailedView from "../PatientNotesDetailedView.js";
-import RichTextEditor from "../../Common/RichTextEditor.js";
+import RichTextEditor from "../../Common/RichTextEditor/RichTextEditor";
 import SwitchTabs from "../../Common/components/SwitchTabs.js";
 
 interface ConsultationDoctorNotesProps {
