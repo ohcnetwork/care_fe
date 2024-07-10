@@ -108,7 +108,7 @@ const PatientNotes = (props: PatientNotesProps) => {
       backUrl={`/facility/${facilityId}/patient/${patientId}`}
     >
       <div className="relative mx-3 my-2 flex grow flex-col rounded-lg border border-gray-300 bg-white p-2 sm:mx-10 sm:my-5 sm:p-5">
-        <div className="absolute inset-x-0 top-0 flex bg-gray-200 text-sm shadow-md">
+        <div className="absolute inset-x-0 top-0 z-10 flex bg-gray-200 text-sm shadow-md">
           {Object.values(PATIENT_NOTES_THREADS).map((current) => (
             <button
               key={current}

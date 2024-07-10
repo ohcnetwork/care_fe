@@ -21,11 +21,13 @@ const PatientNoteCard = ({
   setReload,
   disableEdit,
   setReplyTo,
+  mode = "default-view",
 }: {
   note: PatientNotesModel;
   setReload: any;
   disableEdit?: boolean;
   setReplyTo?: (reply_to: PatientNotesModel | undefined) => void;
+  mode?: "thread-view" | "default-view";
 }) => {
   const patientId = useSlug("patient");
   const [isEditing, setIsEditing] = useState(false);
@@ -75,7 +77,7 @@ const PatientNoteCard = ({
       {" "}
       <div
         className={classNames(
-          "mx-2 flex flex-col rounded-lg border border-gray-300 bg-white px-3 py-1 text-gray-800",
+          "flex flex-col rounded-lg border border-gray-300 bg-white px-3 py-1 text-gray-800",
           note.user_type === "RemoteSpecialist" && "border-primary-400",
         )}
       >
@@ -201,7 +203,7 @@ const PatientNoteCard = ({
                 className="cursor-pointer pl-11 text-sm text-gray-700"
               >
                 <MarkdownPreview markdown={noteField} />
-                {note.replies.length > 0 && (
+                {mode == "thread-view" && note.replies.length > 0 && (
                   <div className="mt-2 flex items-center text-xs text-gray-500">
                     <CareIcon icon="l-corner-down-right" className="h-3 w-3" />
                     {note.replies.length}{" "}

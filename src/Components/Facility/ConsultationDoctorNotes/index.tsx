@@ -16,9 +16,9 @@ import { classNames, isAppleDevice } from "../../../Utils/utils.js";
 import { PATIENT_NOTES_THREADS } from "../../../Common/constants.js";
 import useAuthUser from "../../../Common/hooks/useAuthUser.js";
 import DoctorNoteReplyPreviewCard from "../DoctorNoteReplyPreviewCard.js";
-import Switch from "../../../CAREUI/interactive/Switch.js";
 import PatientNotesDetailedView from "../PatientNotesDetailedView.js";
 import RichTextEditor from "../../Common/RichTextEditor.js";
+import SwitchTabs from "../../Common/components/SwitchTabs.js";
 
 interface ConsultationDoctorNotesProps {
   patientId: string;
@@ -145,18 +145,18 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       }}
       backUrl={`/facility/${facilityId}/patient/${patientId}`}
     >
-      <div className="absolute right-16 top-16 flex items-center">
-        <Switch
-          tabs={{
-            "thread-view": "Thread View",
-            "default-view": "Default View",
-          }}
-          selected={mode}
-          onChange={(tab) => setMode(tab)}
+      <div className="right-16 top-8 mx-2 md:absolute ">
+        <SwitchTabs
+          className="mt-3 w-full lg:w-full"
+          tab1="Thread View"
+          tab2="Default View"
+          onClickTab1={() => setMode("thread-view")}
+          onClickTab2={() => setMode("default-view")}
+          isTab2Active={mode === "default-view"}
         />
       </div>
       <div className="relative mx-3 flex grow flex-col rounded-lg border border-gray-300 bg-white px-2 sm:mx-10 sm:px-5 sm:pt-8">
-        <div className="absolute inset-x-0 top-0 flex bg-gray-200 text-sm shadow-md">
+        <div className="absolute inset-x-0 top-0 z-10 flex bg-gray-200 text-sm shadow-md">
           {Object.values(PATIENT_NOTES_THREADS).map((current) => (
             <button
               key={current}

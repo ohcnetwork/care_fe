@@ -378,12 +378,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         return `![mention_user](user_id:${userId}, username:${username})`;
       },
     });
-    turndownService.addRule("div", {
-      filter: "div",
-      replacement: function (content) {
-        return content + "\n";
-      },
-    });
 
     const htmlContent = editorRef.current?.innerHTML || "";
     const markdownText = turndownService.turndown(htmlContent);
@@ -414,7 +408,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   };
 
   return (
-    <div className="relative ml-2 mr-4 mt-1">
+    <div className="relative m-2">
       {/* camera capture model */}
       <CameraCaptureModal
         open={modalOpenForCamera}
@@ -542,7 +536,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           id="doctor_notes_textarea"
           ref={editorRef}
           contentEditable
-          className="prose min-h-[50px] max-w-full text-sm outline-none prose-a:text-blue-500"
+          className="prose h-[50px] max-w-full overflow-auto text-sm outline-none prose-a:text-blue-500"
           onInput={handleInput}
         />
         <FileUpload file={file} setFile={setFile} />
@@ -607,17 +601,19 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         />
 
         <div className="grow"></div>
-        <Submit
-          id="add_doctor_note_button"
-          onClick={() => {
-            onAddNote();
-            editorRef.current!.innerHTML = "";
-          }}
-          className="rounded bg-primary-500 p-2 text-white"
-          disabled={!isAuthorized}
-        >
-          <CareIcon icon="l-message" className="text-lg" />
-        </Submit>
+        <div>
+          <Submit
+            id="add_doctor_note_button"
+            onClick={() => {
+              onAddNote();
+              editorRef.current!.innerHTML = "";
+            }}
+            className="flex-none rounded bg-primary-500 p-2 text-white"
+            disabled={!isAuthorized}
+          >
+            <CareIcon icon="l-message" className="text-lg" />
+          </Submit>
+        </div>
       </div>
 
       {showMentions && (
@@ -658,10 +654,7 @@ const FileUpload = ({
   const [isLoading, setIsLoading] = useState(false);
   const file_type = "NOTES";
   const [files, setFiles] = useState<FileUploadModel[]>([]);
-  const [noteId, setNoteId] = useState<string>(
-    "40faecc6-6199-48cd-bc2a-dd9e73b920f9",
-  );
-  console.log(setNoteId);
+  const noteId = "40faecc6-6199-48cd-bc2a-dd9e73b920f9";
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);

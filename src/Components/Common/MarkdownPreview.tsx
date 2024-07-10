@@ -61,7 +61,7 @@ const MarkdownPreview: React.FC<{ markdown: string }> = ({ markdown }) => {
     if (props.className?.includes("user-mention") && props["data-username"]) {
       const username = props["data-username"];
       return (
-        <span className="group relative z-10 inline-block">
+        <span className="group relative inline-block">
           <span
             onClick={(e) => {
               e.stopPropagation();
@@ -71,9 +71,9 @@ const MarkdownPreview: React.FC<{ markdown: string }> = ({ markdown }) => {
             @{username}
           </span>
           {userCache[username] && (
-            <div className="tooltip-text invisible absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 opacity-0 transition-opacity duration-300 ease-in-out group-hover:visible group-hover:opacity-100">
+            <div className="tooltip-text invisible absolute bottom-full z-10 mb-2 opacity-0 transition-opacity duration-300 ease-in-out group-hover:visible group-hover:opacity-100">
               <UserCard user={userCache[username]} />
-              <div className="absolute left-1/2 top-full -translate-x-1/2 border-8 border-solid border-transparent border-t-gray-200"></div>
+              <div className="absolute left-2 top-full border-8 border-solid border-transparent border-t-gray-200 shadow-md"></div>
             </div>
           )}
         </span>
@@ -91,7 +91,7 @@ const MarkdownPreview: React.FC<{ markdown: string }> = ({ markdown }) => {
 
   return (
     <ReactMarkdown
-      className="prose text-sm"
+      className="prose text-sm prose-p:m-0"
       rehypePlugins={[rehypeRaw]}
       components={{
         a: CustomLink,

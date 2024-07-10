@@ -18,7 +18,7 @@ const DoctorNote = (props: DoctorNoteProps) => {
 
   return (
     <div
-      className="mt-4 flex h-[400px] grow flex-col-reverse overflow-auto bg-white"
+      className="ml-2 mt-4 flex h-[400px] grow flex-col-reverse overflow-y-scroll bg-white"
       id="patient-notes-list"
     >
       {state.notes.length ? (
@@ -45,6 +45,7 @@ const DoctorNote = (props: DoctorNoteProps) => {
                     setReload={setReload}
                     disableEdit={disableEdit}
                     setReplyTo={setReplyTo}
+                    mode={mode}
                   />
                 </div>
               );
