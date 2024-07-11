@@ -36,5 +36,6 @@
   "prev_sessions": "Prev Sessions",
   "next_sessions": "Next Sessions",
   "no_changes": "No changes",
-  "encounter_suggestion_edit_disallowed": "Not allowed to switch to this option in edit consultation"
+  "encounter_suggestion_edit_disallowed": "Not allowed to switch to this option in edit consultation",
+  "encounter_duration_confirmation": "The duration of this encounter would be"
 }
