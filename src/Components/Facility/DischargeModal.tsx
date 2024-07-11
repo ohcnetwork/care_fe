@@ -25,6 +25,7 @@ import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "./models";
 import dayjs from "../../Utils/dayjs";
 import { FieldError } from "../Form/FieldValidators";
+import { useTranslation } from "react-i18next";
 
 interface PreDischargeFormInterface {
   new_discharge_reason: number | null;
@@ -57,6 +58,7 @@ const DischargeModal = ({
   discharge_date = dayjs().format("YYYY-MM-DDTHH:mm"),
   death_datetime = dayjs().format("YYYY-MM-DDTHH:mm"),
 }: IProps) => {
+  const { t } = useTranslation();
   const { enable_hcx } = useConfig();
   const dispatch: any = useDispatch();
   const [preDischargeForm, setPreDischargeForm] =
@@ -205,6 +207,19 @@ const DischargeModal = ({
     }));
   };
 
+  const encounterDuration = dayjs
+    .duration(
+      dayjs(
+        preDischargeForm[
+          discharge_reason ===
+          DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
+            ? "death_datetime"
+            : "discharge_date"
+        ],
+      ).diff(consultationData.encounter_date),
+    )
+    .humanize();
+
   return (
     <DialogModal
       title={
@@ -321,7 +336,6 @@ const DischargeModal = ({
               : errors?.discharge_date
           }
         />
-
         {discharge_reason ===
           DISCHARGE_REASONS.find((i) => i.text == "Recovered")?.id && (
           <>
@@ -374,7 +388,13 @@ const DischargeModal = ({
         </div>
       )}
 
-      <div className="flex flex-col gap-2 pt-4 md:flex-row md:justify-end">
+      <div className="py-4">
+        <span className="text-gray-700">
+          {t("encounter_duration_confirmation")}{" "}
+          <strong>{encounterDuration}</strong>.
+        </span>
+      </div>
+      <div className="cui-form-button-group">
         <Cancel onClick={onClose} />
         {isSendingDischargeApi ? (
           <CircularProgress />
