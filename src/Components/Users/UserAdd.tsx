@@ -608,7 +608,8 @@ export const UserAdd = (props: UserProps) => {
           className="inline-block rounded border border-gray-600 bg-gray-50 px-4 py-2 text-gray-600 transition hover:bg-gray-100"
           target="_blank"
         >
-          <CareIcon icon="l-info-circle" className="text-lg" /> &nbsp;Need Help?
+          <CareIcon icon="l-question-circle" className="text-lg" /> &nbsp;Need
+          Help?
         </Link>
       }
       backUrl="/users"
