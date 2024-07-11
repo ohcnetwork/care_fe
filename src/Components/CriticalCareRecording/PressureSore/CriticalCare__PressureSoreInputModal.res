@@ -39,7 +39,7 @@ let make = (
 
   let handleSubmit = e => {
     let region = PressureSore.regionToString(state.region)
-    if (state.length === 0.0 && state.width === 0.0) {
+    if state.length === 0.0 && state.width === 0.0 {
       hideModal(e)
     } else if (
       (state.length > 0.0 && state.width == 0.0) || (state.length == 0.0 && state.width > 0.0)
@@ -198,31 +198,33 @@ let make = (
                           <div className="text-black font-bold text-xl">
                             {str(state.width->Belt.Float.toString)}
                           </div>
-                          <div className="text-sm text-gray-700"> {str("Width")} </div>
+                          <div className="text-sm text-secondary-700"> {str("Width")} </div>
                         </div>
                         <div className="flex flex-col items-center text-center">
                           <div className="text-black font-bold text-xl">
                             {str(state.length->Belt.Float.toString)}
                           </div>
-                          <div className="text-sm text-gray-700"> {str("Length")} </div>
+                          <div className="text-sm text-secondary-700"> {str("Length")} </div>
                         </div>
                         <div className="flex flex-col items-center text-center">
                           <div className="text-black font-bold text-xl">
                             {str(state.exudate_amount->PressureSore.encodeExudateAmount)}
                           </div>
-                          <div className="text-sm text-gray-700"> {str("Exudate Amount")} </div>
+                          <div className="text-sm text-secondary-700">
+                            {str("Exudate Amount")}
+                          </div>
                         </div>
                         <div className="flex flex-col items-center text-center">
                           <div className="text-black font-bold text-xl">
                             {str(state.tissue_type->PressureSore.encodeTissueType)}
                           </div>
-                          <div className="text-sm text-gray-700"> {str("Tissue Type")} </div>
+                          <div className="text-sm text-secondary-700"> {str("Tissue Type")} </div>
                         </div>
                       </div>
                     </div>
                     {state.description !== ""
                       ? <div className="mt-4">
-                          <label className="block text-sm text-gray-700 text-left">
+                          <label className="block text-sm text-secondary-700 text-left">
                             {str("Description")}
                           </label>
                           <div className="text-black"> {str(state.description)} </div>
@@ -233,7 +235,7 @@ let make = (
           </div>
         </div>
         <div
-          className="bg-gray-50 px-4 py-3 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2">
+          className="bg-secondary-50 px-4 py-3 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2">
           <div className="flex gap-2 w-full justify-center sm:justify-start items-center">
             <span> {str("Push Score: ")} </span>
             <span className="text-black"> {str(pushScore->Belt.Float.toString)} </span>
@@ -250,7 +252,7 @@ let make = (
             <button
               type_="button"
               onClick={hideModal}
-              className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+              className="mt-3 inline-flex w-full justify-center rounded-md border border-secondary-300 bg-white px-4 py-2 text-base font-medium text-secondary-700 shadow-sm hover:bg-secondary-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
               {str(!previewMode ? "Cancel" : "Close")}
             </button>
           </div>

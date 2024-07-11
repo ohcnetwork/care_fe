@@ -444,7 +444,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
                   getCameraStatus({});
                 }}
                 className={classNames(
-                  "block border border-gray-500 px-4 py-2 first:rounded-l last:rounded-r",
+                  "block border border-secondary-500 px-4 py-2 first:rounded-l last:rounded-r",
                   currentPreset === preset
                     ? "border-primary-500 bg-primary-500 text-white"
                     : "bg-transparent",
@@ -579,7 +579,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId }) => {
         </div>
         {streamStatus === StreamStatus.Playing &&
           calculateVideoLiveDelay() > 3 && (
-            <div className="absolute left-8 top-8 z-10 flex items-center gap-2 rounded-3xl bg-red-400 px-3 py-1.5 text-xs font-semibold text-gray-100">
+            <div className="absolute left-8 top-8 z-10 flex items-center gap-2 rounded-3xl bg-red-400 px-3 py-1.5 text-xs font-semibold text-secondary-100">
               <CareIcon icon="l-wifi-slash" className="h-4 w-4" />
               <span>Slow Network Detected</span>
             </div>
@@ -656,7 +656,7 @@ export const FeedCameraPTZHelpButton = (props: { cameraPTZ: CameraPTZ[] }) => {
   return (
     <button
       key="option.action"
-      className="tooltip rounded text-2xl text-gray-600"
+      className="tooltip rounded text-2xl text-secondary-600"
     >
       <CareIcon icon="l-question-circle" />
 
@@ -673,7 +673,7 @@ export const FeedCameraPTZHelpButton = (props: { cameraPTZ: CameraPTZ[] }) => {
                   const keyElement = (
                     <div
                       key={index}
-                      className="rounded-md border border-gray-500 p-1.5 font-mono shadow-md"
+                      className="rounded-md border border-secondary-500 p-1.5 font-mono shadow-md"
                     >
                       {isArrowKey ? (
                         <CareIcon icon={option.icon as IconName} />

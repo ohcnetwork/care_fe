@@ -389,7 +389,7 @@ const DischargeModal = ({
       )}
 
       <div className="py-4">
-        <span className="text-gray-700">
+        <span className="text-secondary-700">
           {t("encounter_duration_confirmation")}{" "}
           <strong>{encounterDuration}</strong>.
         </span>

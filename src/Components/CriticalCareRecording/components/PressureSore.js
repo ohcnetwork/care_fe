@@ -203,7 +203,7 @@ export default function PressureSore() {
               className={
                 selected === renderIndex
                   ? "text-blue-500"
-                  : "text-gray-300  hover:text-blue-400"
+                  : "text-secondary-300  hover:text-blue-400"
               }
               fill="currentColor"
               onClick={(_) => setSelected(renderIndex)}

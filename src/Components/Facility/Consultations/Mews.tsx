@@ -60,7 +60,7 @@ const getLOCRange = (value?: DailyRoundsModel["consciousness_level"]) => {
 };
 
 const getBorderColor = (score: number) => {
-  if (score === undefined) return "border-gray-700";
+  if (score === undefined) return "border-secondary-700";
   if (score <= 2) return "border-primary-500";
   if (score <= 3) return "border-yellow-300";
   if (score <= 5) return "border-warning-600";
@@ -76,7 +76,9 @@ export const Mews = ({ dailyRound }: { dailyRound: DailyRoundsModel }) => {
             <div className="border-grey-400 flex h-7 w-7 items-center justify-center rounded-full border-2">
               <span className="text-sm font-semibold">-</span>
             </div>
-            <span className="mt-1 text-xs font-medium text-gray-700">MEWS</span>
+            <span className="mt-1 text-xs font-medium text-secondary-700">
+              MEWS
+            </span>
             <div className="tooltip-text tooltip-bottom w-48 -translate-x-1/2 translate-y-3 whitespace-pre-wrap text-xs font-medium lg:w-64">
               <span className="font-bold">{(data as string[]).join(", ")}</span>{" "}
               data is missing from the last log update.
@@ -97,7 +99,9 @@ export const Mews = ({ dailyRound }: { dailyRound: DailyRoundsModel }) => {
             >
               <span className="text-sm font-semibold">{data}</span>
             </div>
-            <span className="mt-1 text-xs font-medium text-gray-700">MEWS</span>
+            <span className="mt-1 text-xs font-medium text-secondary-700">
+              MEWS
+            </span>
             <div className="tooltip-text tooltip-bottom w-48 -translate-x-1/2 translate-y-3 whitespace-pre-wrap text-xs font-medium lg:w-64">
               <p>
                 Resp. Rate: <span className="font-bold">{dailyRound.resp}</span>

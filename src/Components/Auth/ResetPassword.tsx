@@ -124,7 +124,7 @@ export const ResetPassword = (props: any) => {
                 onBlur={() => setPasswordInputInFocus(false)}
               />
               {passwordInputInFocus && (
-                <div className="text-small mb-2 pl-2 text-gray-500">
+                <div className="text-small mb-2 pl-2 text-secondary-500">
                   {validateRule(
                     form.password?.length >= 8,
                     "Password should be atleast 8 characters long",

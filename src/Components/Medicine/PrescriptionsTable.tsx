@@ -69,11 +69,11 @@ export default function PrescriptionsTable({
         </DialogModal>
       )}
       <div className="mb-2 flex flex-wrap items-center justify-between">
-        <div className="flex items-center font-semibold leading-relaxed text-gray-900">
+        <div className="flex items-center font-semibold leading-relaxed text-secondary-900">
           <span className="mr-3 text-lg">
             {is_prn ? "PRN Prescriptions" : "Prescriptions"}
           </span>
-          <div className="text-gray-600">
+          <div className="text-secondary-600">
             <CareIcon icon="l-history-alt" className="pr-2" />
             <span className="text-xs">
               {lastModified && formatDateTime(lastModified)}
@@ -83,7 +83,7 @@ export default function PrescriptionsTable({
       </div>
       <div className="flex flex-col">
         <div className="-my-2 overflow-x-auto py-2 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-          <div className="inline-block min-w-full overflow-hidden border-b border-gray-200 align-middle shadow sm:rounded-lg">
+          <div className="inline-block min-w-full overflow-hidden border-b border-secondary-200 align-middle shadow sm:rounded-lg">
             <ResponsiveMedicineTable
               onClick={setDetailedViewFor}
               maxWidthColumn={0}
@@ -115,7 +115,7 @@ export default function PrescriptionsTable({
               fieldsToDisplay={[2, 3]}
             />
             {data?.results.length === 0 && (
-              <div className="text-semibold flex items-center justify-center py-2 text-gray-600">
+              <div className="text-semibold flex items-center justify-center py-2 text-secondary-600">
                 {t("no_data_found")}
               </div>
             )}

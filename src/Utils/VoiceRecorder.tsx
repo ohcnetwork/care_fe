@@ -48,7 +48,7 @@ export const VoiceRecorder = (props: any) => {
         {isRecording ? (
           <>
             <div className="flex space-x-2">
-              <div className="bg-gray-100 p-2 text-primary-700">
+              <div className="bg-secondary-100 p-2 text-primary-700">
                 <CareIcon
                   icon="l-record-audio"
                   className="mr-2 animate-pulse"

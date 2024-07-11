@@ -222,7 +222,7 @@ const Map: React.FC<MapProps> = ({
             >
               <CareIcon
                 icon="l-times-circle"
-                className="text-2xl text-gray-800"
+                className="text-2xl text-secondary-800"
               />
             </div>
           </Popover.Button>
@@ -240,7 +240,7 @@ const Map: React.FC<MapProps> = ({
           >
             <CareIcon
               icon="l-user-location"
-              className="text-2xl text-gray-800"
+              className="text-2xl text-secondary-800"
             />
           </div>
         )}
