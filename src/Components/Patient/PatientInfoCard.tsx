@@ -552,12 +552,12 @@ export default function PatientInfoCard(props: {
                     {dayjs(consultation.discharge_date || undefined).diff(
                       consultation.encounter_date,
                       "day",
-                    )}
+                    ) + 1}
                   </span>
                 </div>
               </div>
               <span className="mt-1 text-xs font-medium text-gray-700">
-                IP Days
+                IP Day No
               </span>
             </div>
           )}
