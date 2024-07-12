@@ -98,7 +98,7 @@ const PatientNotesDetailedView = (props: Props) => {
       className="flex h-full flex-col overflow-hidden"
       backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/notes`}
     >
-      <div className="flex flex-col overflow-y-scroll rounded-lg border border-gray-300 bg-white p-3">
+      <div className="flex flex-col overflow-hidden rounded-lg border border-gray-300 bg-white p-3">
         {state && (
           <div className="flex flex-col">
             <div className="flex-1">
@@ -111,7 +111,7 @@ const PatientNotesDetailedView = (props: Props) => {
               }
               <h4 className="ml-2">Replies</h4>
               {
-                <div className="flex flex-col-reverse overflow-y-scroll">
+                <div className="flex flex-col-reverse overflow-x-hidden overflow-y-scroll">
                   {state.replies.map((reply) => (
                     <div className="ml-2 mt-3">
                       <PatientNoteCard
