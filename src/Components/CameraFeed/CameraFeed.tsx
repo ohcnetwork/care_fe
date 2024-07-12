@@ -11,6 +11,7 @@ import NoFeedAvailable from "./NoFeedAvailable";
 import FeedControls from "./FeedControls";
 import FeedWatermark from "./FeedWatermark";
 import useFullscreen from "../../Common/hooks/useFullscreen";
+import useBreakpoints from "../../Common/hooks/useBreakpoints";
 
 interface Props {
   children?: React.ReactNode;
@@ -33,6 +34,7 @@ export default function CameraFeed(props: Props) {
   const playerRef = useRef<HTMLVideoElement | ReactPlayer | null>(null);
   const playerWrapperRef = useRef<HTMLDivElement>(null);
   const streamUrl = getStreamUrl(props.asset);
+  const isMobilePortrait = useBreakpoints({ default: true, md: false });
 
   const player = usePlayer(streamUrl, playerRef);
   const operate = useOperateCamera(props.asset.id, props.silent);
@@ -91,12 +93,62 @@ export default function CameraFeed(props: Props) {
     initializeStream();
   };
 
+  const controls = !props.constrolsDisabled && (
+    <FeedControls
+      shortcutsDisabled={props.shortcutsDisabled}
+      isFullscreen={isFullscreen}
+      setFullscreen={(value) => {
+        if (!value) {
+          setFullscreen(false);
+          return;
+        }
+
+        if (isIOS) {
+          const element = document.querySelector("video");
+          if (!element) {
+            return;
+          }
+          setFullscreen(true, element, true);
+          return;
+        }
+
+        if (!playerRef.current) {
+          return;
+        }
+
+        setFullscreen(
+          true,
+          playerWrapperRef.current || (playerRef.current as HTMLElement),
+          true,
+        );
+      }}
+      onReset={resetStream}
+      onMove={async (data) => {
+        props.onMove?.();
+        setState("moving");
+        const { res } = await operate({ type: "relative_move", data });
+        setTimeout(() => {
+          setState((state) => (state === "moving" ? undefined : state));
+        }, 4000);
+        if (res?.status === 500) {
+          setState("host_unreachable");
+        }
+      }}
+    />
+  );
+
+  const inlineControls = !(isMobilePortrait && !isFullscreen);
+
   return (
-    <div ref={playerWrapperRef} className="flex flex-col justify-center">
+    <div
+      ref={playerWrapperRef}
+      className="flex flex-col justify-center border-y border-zinc-200/50"
+    >
       <div
         className={classNames(
-          "flex flex-col justify-center bg-black md:max-h-screen",
+          "flex flex-col justify-center md:max-h-screen",
           props.className,
+          isFullscreen ? "bg-black" : "bg-zinc-100",
           isAppleDevice && isFullscreen && "px-20",
         )}
       >
@@ -106,7 +158,7 @@ export default function CameraFeed(props: Props) {
             "items-center justify-between px-4 py-0.5 transition-all duration-500 ease-in-out lg:py-1",
             (() => {
               if (player.status !== "playing") {
-                return "bg-zinc-700 text-zinc-400";
+                return "bg-black text-zinc-400";
               }
 
               if (isFullscreen) {
@@ -148,8 +200,7 @@ export default function CameraFeed(props: Props) {
             )}
           </div>
         </div>
-
-        <div className="group relative aspect-video">
+        <div className="group relative aspect-video bg-black">
           {/* Notifications */}
           <FeedAlert state={state} />
           {player.status === "playing" && <FeedWatermark />}
@@ -214,52 +265,20 @@ export default function CameraFeed(props: Props) {
             />
           )}
 
-          {/* Controls */}
-          {!props.constrolsDisabled && player.status === "playing" && (
-            <FeedControls
-              shortcutsDisabled={props.shortcutsDisabled}
-              isFullscreen={isFullscreen}
-              setFullscreen={(value) => {
-                if (!value) {
-                  setFullscreen(false);
-                  return;
-                }
-
-                if (isIOS) {
-                  const element = document.querySelector("video");
-                  if (!element) {
-                    return;
-                  }
-                  setFullscreen(true, element, true);
-                  return;
-                }
-
-                if (!playerRef.current) {
-                  return;
-                }
-
-                setFullscreen(
-                  true,
-                  playerWrapperRef.current ||
-                    (playerRef.current as HTMLElement),
-                  true,
-                );
-              }}
-              onReset={resetStream}
-              onMove={async (data) => {
-                props.onMove?.();
-                setState("moving");
-                const { res } = await operate({ type: "relative_move", data });
-                setTimeout(() => {
-                  setState((state) => (state === "moving" ? undefined : state));
-                }, 4000);
-                if (res?.status === 500) {
-                  setState("host_unreachable");
-                }
-              }}
-            />
-          )}
+          {inlineControls && player.status === "playing" && controls}
         </div>
+        {!inlineControls && (
+          <div
+            className={classNames(
+              "py-4 transition-all duration-500 ease-in-out",
+              player.status !== "playing"
+                ? "pointer-events-none px-6 opacity-30"
+                : "px-12 opacity-100",
+            )}
+          >
+            {controls}
+          </div>
+        )}
       </div>
     </div>
   );

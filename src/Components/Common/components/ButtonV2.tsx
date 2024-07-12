@@ -100,6 +100,8 @@ const ButtonV2 = ({
   tooltipClassName,
   ...props
 }: ButtonProps) => {
+  shadow ??= !ghost;
+
   const className = classNames(
     props.className,
     "inline-flex h-min cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500",
@@ -107,7 +109,7 @@ const ButtonV2 = ({
     `button-shape-${circle ? "circle" : "square"}`,
     ghost ? `button-${variant}-ghost` : `button-${variant}-default`,
     border && `button-${variant}-border`,
-    shadow && "shadow enabled:hover:shadow-lg",
+    shadow && "shadow enabled:hover:shadow-md",
     tooltip && "tooltip",
   );
 
