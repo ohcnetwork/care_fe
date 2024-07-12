@@ -818,13 +818,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           <Submit
             id="add_doctor_note_button"
             onClick={async () => {
+              if (!editorRef.current) return;
               const id = await onAddNote();
               if (!id) return;
               for (const file of tempFiles) {
                 await handleFileUpload(file, id);
               }
               setTempFiles([]);
-              editorRef.current!.innerHTML = "";
+              editorRef.current.innerHTML = "";
             }}
             className="flex-none rounded bg-primary-500 p-2 text-white"
             disabled={!isAuthorized}

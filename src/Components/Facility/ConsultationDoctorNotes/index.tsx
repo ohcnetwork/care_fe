@@ -10,8 +10,7 @@ import { PatientNoteStateType, PaitentNotesReplyModel } from "../models.js";
 import routes from "../../../Redux/api.js";
 import request from "../../../Utils/request/request.js";
 import useQuery from "../../../Utils/request/useQuery.js";
-import useKeyboardShortcut from "use-keyboard-shortcut";
-import { classNames, isAppleDevice } from "../../../Utils/utils.js";
+import { classNames } from "../../../Utils/utils.js";
 // import AutoExpandingTextInputFormField from "../../Form/FormFields/AutoExpandingTextInputFormField.js";
 import { PATIENT_NOTES_THREADS } from "../../../Common/constants.js";
 import useAuthUser from "../../../Common/hooks/useAuthUser.js";
@@ -112,18 +111,6 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       setReload(true);
     }
   });
-
-  useKeyboardShortcut(
-    [isAppleDevice ? "Meta" : "Shift", "Enter"],
-    () => {
-      // if (focused) {
-      onAddNote();
-      // }
-    },
-    {
-      ignoreInputFields: false,
-    },
-  );
 
   if (noteId) {
     return (

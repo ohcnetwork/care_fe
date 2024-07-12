@@ -2,14 +2,13 @@ import { useState, useEffect, Dispatch, SetStateAction } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { classNames, isAppleDevice } from "../../Utils/utils";
+import { classNames } from "../../Utils/utils";
 import { make as Link } from "../Common/components/Link.bs";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import PatientConsultationNotesList from "./PatientConsultationNotesList";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { PatientNoteStateType, PaitentNotesReplyModel } from "./models";
-import useKeyboardShortcut from "use-keyboard-shortcut";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { PATIENT_NOTES_THREADS } from "../../Common/constants.js";
 import DoctorNoteReplyPreviewCard from "./DoctorNoteReplyPreviewCard.js";
@@ -120,18 +119,6 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
     }
     fetchPatientName();
   }, [patientId]);
-
-  useKeyboardShortcut(
-    [isAppleDevice ? "Meta" : "Shift", "Enter"],
-    () => {
-      // if (focused) {
-      onAddNote();
-      // }
-    },
-    {
-      ignoreInputFields: false,
-    },
-  );
 
   const notesActionIcons = (
     <div className="flex gap-1">
