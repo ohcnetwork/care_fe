@@ -12,7 +12,11 @@ import { InvestigationType } from "../Common/prescription-builder/InvestigationB
 import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
-import { AssignedToObjectModel, DailyRoundsModel } from "../Patient/models";
+import {
+  AssignedToObjectModel,
+  DailyRoundsModel,
+  FileUploadModel,
+} from "../Patient/models";
 import { EncounterSymptom } from "../Symptoms/types";
 import { UserBareMinimum } from "../Users/models";
 
@@ -537,6 +541,7 @@ export interface PatientNotesModel {
   last_edited_date?: string;
   reply_to_object?: PaitentNotesReplyModel;
   replies: PaitentNotesReplyModel[];
+  files: FileUploadModel[];
 }
 
 export interface PatientNoteStateType {

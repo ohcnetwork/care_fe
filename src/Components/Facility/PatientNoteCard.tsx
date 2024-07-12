@@ -15,6 +15,8 @@ import Spinner from "../Common/Spinner";
 import useSlug from "../../Common/hooks/useSlug";
 import { navigate } from "raviger";
 import MarkdownPreview from "../Common/RichTextEditor/MarkdownPreview";
+import { ExtImage, StateInterface } from "../Patient/FileUpload";
+import FilePreviewDialog from "../Common/FilePreviewDialog";
 
 const PatientNoteCard = ({
   note,
@@ -43,6 +45,70 @@ const PatientNoteCard = ({
   const consultationId = useSlug("consultation");
 
   const currentPath = `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/notes`;
+
+  const file_type = "NOTES";
+  const [file_state, setFileState] = useState<StateInterface>({
+    open: false,
+    isImage: false,
+    name: "",
+    extension: "",
+    zoom: 4,
+    isZoomInDisabled: false,
+    isZoomOutDisabled: false,
+    rotation: 0,
+  });
+  const [fileUrl, setFileUrl] = useState<string>("");
+  const [downloadURL, setDownloadURL] = useState("");
+
+  const getExtension = (url: string) => {
+    const extension = url.split("?")[0].split(".").pop();
+    return extension ?? "";
+  };
+  const downloadFileUrl = (url: string) => {
+    fetch(url)
+      .then((res) => res.blob())
+      .then((blob) => {
+        setDownloadURL(URL.createObjectURL(blob));
+      });
+  };
+
+  const loadFile = async (id: string, noteId: string) => {
+    setFileUrl("");
+    setFileState({ ...file_state, open: true });
+    const { data } = await request(routes.retrieveUpload, {
+      query: {
+        file_type: file_type,
+        associating_id: noteId,
+      },
+      pathParams: { id },
+    });
+
+    if (!data) return;
+
+    const signedUrl = data.read_signed_url as string;
+    const extension = getExtension(signedUrl);
+
+    setFileState({
+      ...file_state,
+      open: true,
+      name: data.name as string,
+      extension,
+      isImage: ExtImage.includes(extension),
+    });
+    downloadFileUrl(signedUrl);
+    setFileUrl(signedUrl);
+  };
+
+  const handleClose = () => {
+    setDownloadURL("");
+    setFileState({
+      ...file_state,
+      open: false,
+      zoom: 4,
+      isZoomInDisabled: false,
+      isZoomOutDisabled: false,
+    });
+  };
 
   const fetchEditHistory = async () => {
     const { res, data } = await request(routes.getPatientNoteEditHistory, {
@@ -88,6 +154,16 @@ const PatientNoteCard = ({
           note.user_type === "RemoteSpecialist" && "border-primary-400",
         )}
       >
+        <FilePreviewDialog
+          show={file_state.open}
+          fileUrl={fileUrl}
+          file_state={file_state}
+          setFileState={setFileState}
+          downloadURL={downloadURL}
+          onClose={handleClose}
+          fixedWidth={false}
+          className="h-[80vh] w-full md:h-screen"
+        />
         <div className="group relative flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-lg font-semibold text-white">
             {note.created_by_object?.first_name[0]}
@@ -213,6 +289,27 @@ const PatientNoteCard = ({
                 className={`pl-11 text-sm text-gray-700 ${allowThreadView && "cursor-pointer"}`}
               >
                 <MarkdownPreview markdown={noteField} />
+                <div className="flex gap-2">
+                  {note.files.map((file) => (
+                    <div
+                      key={file.id}
+                      className="relative mt-1 h-20 w-20 cursor-pointer rounded-md bg-gray-100 shadow-sm hover:bg-gray-200"
+                    >
+                      <div
+                        className="flex h-full w-full flex-col items-center justify-center p-2"
+                        onClick={() => loadFile(file.id!, note.id)}
+                      >
+                        <CareIcon
+                          icon="l-file"
+                          className="shrink-0 text-2xl text-gray-600"
+                        />
+                        <span className="mt-1 max-h-[2.5em] w-full overflow-hidden text-ellipsis break-words text-center text-xs text-gray-600">
+                          {file.name}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
                 {mode == "thread-view" && note.replies.length > 0 && (
                   <div className="mt-2 flex items-center text-xs text-gray-500">
                     <CareIcon icon="l-corner-down-right" className="h-3 w-3" />

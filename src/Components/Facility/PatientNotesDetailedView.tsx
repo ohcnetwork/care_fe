@@ -31,7 +31,7 @@ const PatientNotesDetailedView = (props: Props) => {
       return;
     }
 
-    const { res } = await request(routes.addPatientNote, {
+    const { res, data } = await request(routes.addPatientNote, {
       pathParams: {
         patientId: patientId,
       },
@@ -48,6 +48,8 @@ const PatientNotesDetailedView = (props: Props) => {
       setNoteField("");
       setReload(true);
     }
+
+    return data?.id;
   };
   const fetchNotes = async () => {
     setIsLoading(true);

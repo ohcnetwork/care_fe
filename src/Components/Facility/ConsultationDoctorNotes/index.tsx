@@ -67,7 +67,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       return;
     }
 
-    const { res } = await request(routes.addPatientNote, {
+    const { res, data } = await request(routes.addPatientNote, {
       pathParams: {
         patientId: patientId,
       },
@@ -86,6 +86,8 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
       setReload(true);
       setReplyTo(undefined);
     }
+
+    return data?.id;
   };
 
   useQuery(routes.getPatient, {

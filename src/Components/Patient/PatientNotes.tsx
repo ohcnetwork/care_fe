@@ -52,7 +52,7 @@ const PatientNotes = (props: PatientNotesProps) => {
       return;
     }
 
-    const { res } = await request(routes.addPatientNote, {
+    const { res, data } = await request(routes.addPatientNote, {
       pathParams: { patientId: patientId },
       body: {
         note: noteField,
@@ -67,6 +67,7 @@ const PatientNotes = (props: PatientNotesProps) => {
       setState({ ...state, cPage: 1 });
       setReplyTo(undefined);
     }
+    return data?.id;
   };
 
   useEffect(() => {

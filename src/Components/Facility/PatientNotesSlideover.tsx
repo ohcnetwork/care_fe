@@ -76,7 +76,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       });
       return;
     }
-    const { res } = await request(routes.addPatientNote, {
+    const { res, data } = await request(routes.addPatientNote, {
       pathParams: { patientId: patientId },
       body: {
         note: noteField,
@@ -92,6 +92,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       setReload(true);
       setReplyTo(undefined);
     }
+    return data?.id;
   };
 
   useMessageListener((data) => {
