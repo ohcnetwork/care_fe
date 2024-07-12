@@ -111,7 +111,7 @@ const editFormReducer = (state: State, action: Action) => {
 };
 
 export default function UserProfile() {
-  const { signOut } = useAuthContext();
+  const { signOut, refetchUser } = useAuthContext();
   const [states, dispatch] = useReducer(editFormReducer, initialState);
   const [editProfilePic, setEditProfilePic] = useState(false);
   const [updateStatus, setUpdateStatus] = useState({
@@ -456,7 +456,7 @@ export default function UserProfile() {
     <div>
       <ProfilePicUploadModal
         open={editProfilePic}
-        onSave={() => window.location.reload()}
+        onSave={() => refetchUser()}
         onClose={() => setEditProfilePic(false)}
         onDelete={() => refetchUserData()}
         onRefetch={() => refetchUserData()}

@@ -7,6 +7,7 @@ type SignInReturnType = RequestResult<JwtTokenObtainPair>;
 
 type AuthContextType = {
   user: UserModel | undefined;
+  refetchUser: () => Promise<void>;
   signIn: (creds: LoginCredentials) => Promise<SignInReturnType>;
   signOut: () => Promise<void>;
 };

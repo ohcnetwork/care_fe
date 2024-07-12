@@ -91,7 +91,7 @@ const PatientNoteCard = ({
     setFileState({
       ...file_state,
       open: true,
-      name: data.name as string,
+      name: data.name?.split(".")[0] ?? "file",
       extension,
       isImage: ExtImage.includes(extension),
     });
@@ -150,7 +150,7 @@ const PatientNoteCard = ({
       {" "}
       <div
         className={classNames(
-          "flex flex-col rounded-lg border border-gray-300 bg-white px-3 py-1 text-gray-800",
+          "group flex flex-col rounded-lg border border-gray-300 bg-white px-3 py-1 text-gray-800",
           note.user_type === "RemoteSpecialist" && "border-primary-400",
         )}
       >
@@ -164,7 +164,7 @@ const PatientNoteCard = ({
           fixedWidth={false}
           className="h-[80vh] w-full md:h-screen"
         />
-        <div className="group relative flex items-center gap-2">
+        <div className="relative flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-lg font-semibold text-white">
             {note.created_by_object?.first_name[0]}
           </div>
@@ -219,7 +219,7 @@ const PatientNoteCard = ({
               )
             }
           </div>
-          <div className="gap-2-top-4 absolute right-0 top-0 z-10 flex gap-2 opacity-0 transition-opacity duration-100 group-hover:opacity-100 ">
+          <div className="right-0 top-0 z-10 flex gap-2 transition-opacity duration-100 group-hover:opacity-100 max-sm:flex-col sm:absolute sm:opacity-0 ">
             {!disableEdit &&
               // note.created_by_object.id === authUser.id &&
               !isEditing && (

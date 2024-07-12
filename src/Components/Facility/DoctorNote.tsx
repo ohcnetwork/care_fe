@@ -18,7 +18,7 @@ const DoctorNote = (props: DoctorNoteProps) => {
 
   return (
     <div
-      className="ml-2 mt-4 flex h-[400px] grow flex-col-reverse overflow-y-scroll bg-white"
+      className="mt-4 flex h-[400px] grow flex-col-reverse overflow-y-scroll bg-white sm:ml-2"
       id="patient-notes-list"
     >
       {state.notes.length ? (

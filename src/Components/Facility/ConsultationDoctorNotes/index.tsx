@@ -144,7 +144,7 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
           isTab2Active={mode === "default-view"}
         />
       </div>
-      <div className="relative mx-3 flex grow flex-col rounded-lg border border-gray-300 bg-white px-2 sm:mx-10 sm:px-5 sm:pt-8">
+      <div className="relative flex grow flex-col rounded-lg border border-gray-300 bg-white px-2 sm:mx-10 sm:px-5 sm:pt-8 md:mx-3">
         <div className="absolute inset-x-0 top-0 z-10 flex bg-gray-200 text-sm shadow-md">
           {Object.values(PATIENT_NOTES_THREADS).map((current) => (
             <button
