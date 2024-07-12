@@ -113,6 +113,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     const isStrikethrough =
       isParentTag(node, "S") ||
       isParentTag(node, "DEL") ||
+      isParentTag(node, "STRIKE") ||
       parentNode?.classList.contains("line-through");
     const isQuote = isParentTag(selection.focusNode, "BLOCKQUOTE");
 
@@ -209,6 +210,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       range.selectNodeContents(node);
       selection.removeAllRanges();
       selection.addRange(range);
+      selection.collapseToEnd();
     }
 
     saveState();
@@ -369,10 +371,46 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   };
 
+  const resetStyling = () => {
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    if (!range.collapsed) return;
+
+    const node = range.startContainer;
+    const offset = range.startOffset;
+
+    if (
+      node.nodeType === Node.TEXT_NODE &&
+      offset === 0 &&
+      node.parentElement
+    ) {
+      const parent = node.parentElement;
+      if (
+        parent.tagName === "B" ||
+        parent.tagName === "EM" ||
+        parent.tagName === "STRIKE" ||
+        parent.classList.contains("font-bold") ||
+        parent.classList.contains("italic") ||
+        parent.classList.contains("line-through")
+      ) {
+        const newTextNode = document.createTextNode("");
+        parent.parentNode?.insertBefore(newTextNode, parent);
+        range.setStart(newTextNode, 0);
+        range.setEnd(newTextNode, 0);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+    }
+  };
+
   const handleInput = useCallback((event: React.FormEvent<HTMLDivElement>) => {
     const target = event.target as HTMLDivElement;
     const text = target.textContent || "";
     const lastChar = text[text.length - 1];
+
+    resetStyling();
 
     if (lastChar === "@") {
       const selection = window.getSelection();
@@ -457,6 +495,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     });
 
     const htmlContent = editorRef.current?.innerHTML || "";
+    console.log(htmlContent);
     const markdownText = turndownService.turndown(htmlContent);
     onChange(markdownText);
   };
