@@ -140,13 +140,10 @@ export default function CameraFeed(props: Props) {
   const inlineControls = !(isMobilePortrait && !isFullscreen);
 
   return (
-    <div
-      ref={playerWrapperRef}
-      className="flex flex-col justify-center border-y border-zinc-200/50"
-    >
+    <div ref={playerWrapperRef} className="flex flex-col justify-center">
       <div
         className={classNames(
-          "flex flex-col justify-center md:max-h-screen",
+          "flex max-h-screen flex-col justify-center",
           props.className,
           isFullscreen ? "bg-black" : "bg-zinc-100",
           isAppleDevice && isFullscreen && "px-20",
