@@ -19,8 +19,10 @@ import { classNames, isIOS } from "../../../Utils/utils";
 import ConfirmDialog from "../../Common/ConfirmDialog";
 import useBreakpoints from "../../../Common/hooks/useBreakpoints";
 import { Warn } from "../../../Utils/Notifications";
+import { useTranslation } from "react-i18next";
 
 export const ConsultationFeedTab = (props: ConsultationTabProps) => {
+  const { t } = useTranslation();
   const authUser = useAuthUser();
   const facility = useSlug("facility");
   const bed = props.consultationData.current_bed?.bed_object;
@@ -39,9 +41,11 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
   useEffect(() => {
     if (suggestOptimalExperience) {
       Warn({
-        msg: isIOS
-          ? "For optimal viewing experience, ensure auto-rotate is enabled in your device settings."
-          : "For optimal viewing experience, consider rotating your device.",
+        msg: t(
+          isIOS
+            ? "feed_optimal_experience_for_apple_phones"
+            : "feed_optimal_experience_for_phones",
+        ),
       });
     }
   }, []);
