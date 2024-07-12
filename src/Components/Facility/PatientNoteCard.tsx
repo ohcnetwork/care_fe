@@ -290,14 +290,14 @@ const PatientNoteCard = ({
               >
                 <MarkdownPreview markdown={noteField} />
                 <div className="flex gap-2">
-                  {note.files.map((file) => (
+                  {note.files.map((file: any) => (
                     <div
                       key={file.id}
                       className="relative mt-1 h-20 w-20 cursor-pointer rounded-md bg-gray-100 shadow-sm hover:bg-gray-200"
                     >
                       <div
                         className="flex h-full w-full flex-col items-center justify-center p-2"
-                        onClick={() => loadFile(file.id!, note.id)}
+                        onClick={() => loadFile(file.external_id, note.id)}
                       >
                         <CareIcon
                           icon="l-file"
