@@ -241,7 +241,7 @@ const FileUpload = ({
                       },
                     }).then(() => fetchData());
                   }}
-                  className="absolute -right-1 -top-1 h-5 w-5 rounded-full bg-gray-300 text-gray-800 hover:bg-gray-400 "
+                  className="absolute -right-1 -top-1 z-10 h-5 w-5 rounded-full bg-gray-300 text-gray-800 hover:bg-gray-400"
                 >
                   <CareIcon
                     icon="l-times-circle"
@@ -252,8 +252,11 @@ const FileUpload = ({
                   className="flex h-full w-full flex-col items-center justify-center p-2"
                   onClick={() => loadFile(file.id!)}
                 >
-                  <CareIcon icon="l-file" className="text-2xl text-gray-600" />
-                  <span className="line-clamp-2 text-center text-xs text-gray-600">
+                  <CareIcon
+                    icon="l-file"
+                    className="shrink-0 text-2xl text-gray-600"
+                  />
+                  <span className="mt-1 max-h-[2.5em] w-full overflow-hidden text-ellipsis break-words text-center text-xs text-gray-600">
                     {file.name}
                   </span>
                 </div>

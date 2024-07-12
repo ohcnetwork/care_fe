@@ -1,6 +1,5 @@
-import {
+import React, {
   useRef,
-  useReducer,
   useEffect,
   useState,
   useCallback,
@@ -36,15 +35,6 @@ interface EditorState {
   isOrderedListActive: boolean;
 }
 
-type EditorAction =
-  | { type: "SET_BOLD_ACTIVE"; payload: boolean }
-  | { type: "SET_ITALIC_ACTIVE"; payload: boolean }
-  | { type: "SET_STRIKETHROUGH_ACTIVE"; payload: boolean }
-  | { type: "SET_QUOTE_ACTIVE"; payload: boolean }
-  | { type: "SET_UNORDERED_LIST_ACTIVE"; payload: boolean }
-  | { type: "SET_ORDERED_LIST_ACTIVE"; payload: boolean }
-  | { type: "UPDATE_ALL"; payload: Partial<EditorState> };
-
 const initialState: EditorState = {
   isBoldActive: false,
   isItalicActive: false,
@@ -54,34 +44,22 @@ const initialState: EditorState = {
   isOrderedListActive: false,
 };
 
-function editorReducer(state: EditorState, action: EditorAction): EditorState {
-  switch (action.type) {
-    case "SET_BOLD_ACTIVE":
-      return { ...state, isBoldActive: action.payload };
-    case "SET_ITALIC_ACTIVE":
-      return { ...state, isItalicActive: action.payload };
-    case "SET_STRIKETHROUGH_ACTIVE":
-      return { ...state, isStrikethroughActive: action.payload };
-    case "SET_QUOTE_ACTIVE":
-      return { ...state, isQuoteActive: action.payload };
-    case "SET_UNORDERED_LIST_ACTIVE":
-      return { ...state, isUnorderedListActive: action.payload };
-    case "SET_ORDERED_LIST_ACTIVE":
-      return { ...state, isOrderedListActive: action.payload };
-    case "UPDATE_ALL":
-      return { ...state, ...action.payload };
-    default:
-      return state;
-  }
-}
-
 const RichTextEditor: React.FC<RichTextEditorProps> = ({
   // initialMarkdown = "",
   onChange,
   onAddNote,
   isAuthorized = true,
 }) => {
-  const [state, dispatch] = useReducer(editorReducer, initialState);
+  const [state, setEditorState] = useState(initialState);
+  const {
+    isBoldActive,
+    isItalicActive,
+    isStrikethroughActive,
+    isQuoteActive,
+    isUnorderedListActive,
+    isOrderedListActive,
+  } = state;
+
   const editorRef = useRef<HTMLDivElement>(null);
 
   const [showMentions, setShowMentions] = useState(false);
@@ -100,9 +78,21 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   });
 
   useEffect(() => {
-    document.addEventListener("selectionchange", handleSelectionChange);
+    handleSelectionChange();
+
+    const editorElement = editorRef.current;
+    if (editorElement) {
+      editorElement.addEventListener("selectstart", handleSelectionChange);
+      editorElement.addEventListener("keyup", handleSelectionChange);
+      editorElement.addEventListener("mouseup", handleSelectionChange);
+    }
+
     return () => {
-      document.removeEventListener("selectionchange", handleSelectionChange);
+      if (editorElement) {
+        editorElement.removeEventListener("selectstart", handleSelectionChange);
+        editorElement.removeEventListener("keyup", handleSelectionChange);
+        editorElement.removeEventListener("mouseup", handleSelectionChange);
+      }
     };
   }, []);
 
@@ -120,24 +110,20 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
     const listNode = findParentNode(selection.anchorNode, ["UL", "OL"]);
     const isUnorderedListActive = listNode?.nodeName === "UL" ?? false;
-    const isOrderedListActive =
-      (listNode && listNode.nodeName === "OL") ?? false;
+    const isOrderedListActive = listNode?.nodeName === "OL" ?? false;
     const isStrikethrough =
       isParentTag(selection.focusNode, "S") ||
       isParentTag(selection.focusNode, "DEL") ||
       (selection.focusNode?.parentElement &&
         selection.focusNode.parentElement.classList.contains("line-through"));
 
-    dispatch({
-      type: "UPDATE_ALL",
-      payload: {
-        isBoldActive: isBold,
-        isItalicActive: isItalic,
-        isQuoteActive: isQuote,
-        isUnorderedListActive,
-        isOrderedListActive,
-        isStrikethroughActive: isStrikethrough ?? false,
-      },
+    setEditorState({
+      isBoldActive: isBold,
+      isItalicActive: isItalic,
+      isQuoteActive: isQuote,
+      isUnorderedListActive,
+      isOrderedListActive,
+      isStrikethroughActive: isStrikethrough ?? false,
     });
   };
 
@@ -167,6 +153,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     return null;
   };
 
+  // Function to apply a specific style (bold, italic, strikethrough) to the selected text
   const applyStyle = (style: "b" | "i" | "s") => {
     const selection = window.getSelection();
     if (!selection || !selection.rangeCount) return;
@@ -210,10 +197,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       range.insertNode(node);
     }
 
+    const newRange = document.createRange();
+    newRange.setStartAfter(parentNode);
+    newRange.collapse(true);
     selection.removeAllRanges();
-    selection.addRange(range);
+    selection.addRange(newRange);
 
     saveState();
+    handleSelectionChange();
   };
 
   const toggleList = (listType: "ul" | "ol") => {
@@ -252,6 +243,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
 
     saveState();
+    handleSelectionChange();
   };
 
   const applyQuote = () => {
@@ -264,11 +256,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     if (blockquote) {
       const parent = blockquote.parentNode;
       if (!parent) return;
+
       const tempDiv = document.createElement("div");
       while (blockquote.firstChild) {
         tempDiv.appendChild(blockquote.firstChild);
       }
       parent.replaceChild(tempDiv, blockquote);
+
       while (tempDiv.firstChild) {
         parent.insertBefore(tempDiv.firstChild, tempDiv);
       }
@@ -277,14 +271,18 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       const newBlockquote = document.createElement("blockquote");
       newBlockquote.appendChild(range.extractContents());
       range.insertNode(newBlockquote);
+
       if (newBlockquote.nextSibling) {
         const br = document.createElement("br");
         newBlockquote.parentNode?.insertBefore(br, newBlockquote.nextSibling);
       }
     }
+
     selection.removeAllRanges();
     selection.addRange(range);
+
     saveState();
+    handleSelectionChange();
   };
 
   const handleLink = () => {
@@ -369,7 +367,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     } else {
       setShowMentions(false);
     }
-
     saveState();
   }, []);
 
@@ -435,7 +432,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
     const f = e.target.files[0];
     const fileName = f.name;
-    setFile(e.target.files[0]);
 
     const ext: string = fileName.split(".")[1];
 
@@ -472,11 +468,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           onClick={() => applyStyle("b")}
           className={classNames(
             "tooltip rounded p-1",
-            state.isBoldActive && !state.isQuoteActive
+            isBoldActive && !isQuoteActive
               ? "bg-primary-700 text-white"
               : "bg-gray-200",
           )}
-          disabled={state.isQuoteActive}
+          disabled={isQuoteActive}
         >
           <CareIcon icon="l-bold" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
@@ -487,11 +483,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           onClick={() => applyStyle("i")}
           className={classNames(
             "tooltip rounded p-1",
-            state.isItalicActive && !state.isQuoteActive
+            isItalicActive && !isQuoteActive
               ? "bg-primary-700 text-white"
               : "bg-gray-200",
           )}
-          disabled={state.isQuoteActive}
+          disabled={isQuoteActive}
         >
           <CareIcon icon="l-italic" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
@@ -502,11 +498,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           onClick={() => applyStyle("s")}
           className={classNames(
             "tooltip rounded p-1",
-            state.isStrikethroughActive && !state.isQuoteActive
+            isStrikethroughActive && !isQuoteActive
               ? "bg-primary-700 text-white"
               : "bg-gray-200",
           )}
-          disabled={state.isQuoteActive}
+          disabled={isQuoteActive}
         >
           <CareIcon icon="l-text-strike-through" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
@@ -519,11 +515,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           onClick={() => toggleList("ul")}
           className={classNames(
             "tooltip rounded p-1",
-            state.isUnorderedListActive && !state.isQuoteActive
+            isUnorderedListActive && !isQuoteActive
               ? "bg-primary-700 text-white"
               : "bg-gray-200",
           )}
-          disabled={state.isQuoteActive}
+          disabled={isQuoteActive}
         >
           <CareIcon icon="l-list-ul" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
@@ -534,11 +530,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           onClick={() => toggleList("ol")}
           className={classNames(
             "tooltip rounded p-1",
-            state.isOrderedListActive && !state.isQuoteActive
+            isOrderedListActive && !isQuoteActive
               ? "bg-primary-700 text-white"
               : "bg-gray-200",
           )}
-          disabled={state.isQuoteActive}
+          disabled={isQuoteActive}
         >
           <CareIcon icon="l-list-ol" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
@@ -550,10 +546,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           onClick={applyQuote}
           className={classNames(
             "tooltip rounded p-1",
-            state.isQuoteActive ? "bg-primary-700 text-white" : "bg-gray-200",
+            isQuoteActive ? "bg-primary-700 text-white" : "bg-gray-200",
           )}
         >
-          <FaQuoteRight className="text-sm" />
+          <FaQuoteRight className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
             Quote
           </span>
@@ -561,9 +557,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
         <button
           onClick={handleLink}
-          className="tooltip rounded bg-gray-200 p-2"
+          className="tooltip rounded bg-gray-200 p-1"
         >
-          <CareIcon icon="l-link" className="text-md" />
+          <CareIcon icon="l-link" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
             Link
           </span>
@@ -627,7 +623,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           }}
           className="tooltip rounded bg-gray-200 p-1"
         >
-          <GoMention className="text-sm" />
+          <GoMention className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
             Mention
           </span>

@@ -20,6 +20,7 @@ const CameraCaptureModal = ({
   const FACING_MODE_ENVIRONMENT = { exact: "environment" };
   const { width } = useWindowDimensions();
   const LaptopScreenBreakpoint = 640;
+  const [capture, setCapture] = useState<File | null>(null);
 
   const isLaptopScreen = width >= LaptopScreenBreakpoint ? true : false;
 
@@ -45,12 +46,12 @@ const CameraCaptureModal = ({
       const myFile = new File([blob], `image.${extension}`, {
         type: blob.type,
       });
-      setFile(myFile);
+      setCapture(myFile);
     });
   };
 
   const onUpload = () => {
-    setFile(null);
+    setFile(capture);
     onClose();
   };
 
