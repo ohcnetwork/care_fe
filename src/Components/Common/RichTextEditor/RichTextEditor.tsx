@@ -5,8 +5,6 @@ import React, {
   useCallback,
   ChangeEvent,
 } from "react";
-import { FaQuoteRight } from "react-icons/fa";
-import { GoMention } from "react-icons/go";
 import TurndownService from "turndown";
 import MentionsDropdown from "./MentionDropdown";
 import { ExtImage } from "../../Patient/FileUpload";
@@ -65,6 +63,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const [showMentions, setShowMentions] = useState(false);
   const [mentionPosition, setMentionPosition] = useState({ top: 0, left: 0 });
   const lastCaretPosition = useRef<Range | null>(null);
+  const [mentionFilter, setMentionFilter] = useState("");
 
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -75,6 +74,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     showDialog: false,
     url: "",
     selectedText: "",
+    linkText: "",
   });
 
   useEffect(() => {
@@ -100,26 +100,29 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     const selection = window.getSelection();
     if (!selection || !selection.rangeCount) return;
 
+    const node = selection.focusNode;
+    const parentNode = node?.parentElement;
     const isBold =
-      isParentTag(selection.focusNode, "STRONG") ||
-      isParentTag(selection.focusNode, "B");
+      isParentTag(node, "STRONG") ||
+      isParentTag(node, "B") ||
+      parentNode?.classList.contains("font-bold");
     const isItalic =
-      isParentTag(selection.focusNode, "EM") ||
-      isParentTag(selection.focusNode, "I");
+      isParentTag(node, "EM") ||
+      isParentTag(node, "I") ||
+      parentNode?.classList.contains("italic");
+    const isStrikethrough =
+      isParentTag(node, "S") ||
+      isParentTag(node, "DEL") ||
+      parentNode?.classList.contains("line-through");
     const isQuote = isParentTag(selection.focusNode, "BLOCKQUOTE");
 
     const listNode = findParentNode(selection.anchorNode, ["UL", "OL"]);
     const isUnorderedListActive = listNode?.nodeName === "UL" ?? false;
     const isOrderedListActive = listNode?.nodeName === "OL" ?? false;
-    const isStrikethrough =
-      isParentTag(selection.focusNode, "S") ||
-      isParentTag(selection.focusNode, "DEL") ||
-      (selection.focusNode?.parentElement &&
-        selection.focusNode.parentElement.classList.contains("line-through"));
 
     setEditorState({
-      isBoldActive: isBold,
-      isItalicActive: isItalic,
+      isBoldActive: isBold ?? false,
+      isItalicActive: isItalic ?? false,
       isQuoteActive: isQuote,
       isUnorderedListActive,
       isOrderedListActive,
@@ -153,7 +156,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     return null;
   };
 
-  // Function to apply a specific style (bold, italic, strikethrough) to the selected text
+  const formatUrl = (url: string) => {
+    if (!/^https?:\/\//i.test(url)) {
+      return `http://${url}`;
+    }
+    return url;
+  };
+
   const applyStyle = (style: "b" | "i" | "s") => {
     const selection = window.getSelection();
     if (!selection || !selection.rangeCount) return;
@@ -186,22 +195,21 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       const parent = parentNode.parentNode;
       if (!parent) return;
 
+      const fragment = document.createDocumentFragment();
       while (parentNode.firstChild) {
-        parent.insertBefore(parentNode.firstChild, parentNode);
+        fragment.appendChild(parentNode.firstChild);
       }
-      parent.removeChild(parentNode);
+      parent.replaceChild(fragment, parentNode);
     } else {
       const node = document.createElement(styleTag);
       node.className = styleClass;
       node.appendChild(range.extractContents());
       range.insertNode(node);
-    }
 
-    const newRange = document.createRange();
-    newRange.setStartAfter(parentNode);
-    newRange.collapse(true);
-    selection.removeAllRanges();
-    selection.addRange(newRange);
+      range.selectNodeContents(node);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
 
     saveState();
     handleSelectionChange();
@@ -294,10 +302,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
     const selectedText = range.toString();
     const url = linkNode ? linkNode.getAttribute("href") || "" : "";
+    const linkText = linkNode ? linkNode.textContent || "" : selectedText;
 
     setLinkDialogState({
       showDialog: true,
       url,
+      linkText,
       selectedText,
     });
 
@@ -312,15 +322,22 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
     if (linkNode) {
       linkNode.setAttribute("href", linkDialogState.url);
+      linkNode.setAttribute("title", linkDialogState.url);
     } else {
       const newLink = document.createElement("a");
-      newLink.href = linkDialogState.url;
-      newLink.textContent = linkDialogState.selectedText || linkDialogState.url;
+      newLink.href = formatUrl(linkDialogState.url);
+      newLink.title = formatUrl(linkDialogState.url);
+      newLink.textContent = linkDialogState.linkText || linkDialogState.url;
       range.deleteContents();
       range.insertNode(newLink);
     }
 
-    setLinkDialogState({ showDialog: false, url: "", selectedText: "" });
+    setLinkDialogState({
+      showDialog: false,
+      url: "",
+      linkText: "",
+      selectedText: "",
+    });
     saveState();
 
     if (editorRef.current) {
@@ -339,7 +356,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       linkNode.parentNode?.replaceChild(textNode, linkNode);
     }
 
-    setLinkDialogState({ showDialog: false, url: "", selectedText: "" });
+    setLinkDialogState({
+      showDialog: false,
+      url: "",
+      selectedText: "",
+      linkText: "",
+    });
     saveState();
 
     if (editorRef.current) {
@@ -363,9 +385,15 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         });
         setShowMentions(true);
         lastCaretPosition.current = range.cloneRange();
+
+        const lastAtSymbolIndex = text.lastIndexOf("@");
+
+        const filterText = text.slice(lastAtSymbolIndex + 1);
+        setMentionFilter(filterText);
       }
     } else {
       setShowMentions(false);
+      setMentionFilter("");
     }
     saveState();
   }, []);
@@ -373,7 +401,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const insertMention = (user: { id: string; username: string }) => {
     if (lastCaretPosition.current) {
       const range = lastCaretPosition.current;
-      range.setStart(range.startContainer, range.startOffset - 1);
+      const textNode = range.startContainer as Text;
+      const startOffset = range.startOffset;
+
+      const atSymbolIndex = textNode.data.lastIndexOf("@", startOffset);
+      if (atSymbolIndex === -1) return;
+
+      range.setStart(textNode, atSymbolIndex);
+      range.setEnd(textNode, startOffset);
       range.deleteContents();
 
       const mentionNode = document.createElement("a");
@@ -549,7 +584,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             isQuoteActive ? "bg-primary-700 text-white" : "bg-gray-200",
           )}
         >
-          <FaQuoteRight className="text-lg" />
+          <CareIcon icon="l-paragraph" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
             Quote
           </span>
@@ -623,7 +658,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           }}
           className="tooltip rounded bg-gray-200 p-1"
         >
-          <GoMention className="text-lg" />
+          <CareIcon icon="l-at" className="text-lg" />
           <span className="tooltip-text tooltip-top -translate-x-1/2">
             Mention
           </span>
@@ -657,6 +692,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           onSelect={insertMention}
           position={mentionPosition}
           editorRef={editorRef}
+          filter={mentionFilter}
         />
       )}
       <DialogModal
@@ -667,16 +703,27 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         }
       >
         <div className="flex flex-col gap-4">
-          {linkDialogState.selectedText && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Selected Text:
-              </label>
-              <p className="mt-1 text-sm text-gray-900">
-                {linkDialogState.selectedText}
-              </p>
-            </div>
-          )}
+          <div>
+            <label
+              htmlFor="link-text-input"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Link Text:
+            </label>
+            <input
+              id="link-text-input"
+              type="text"
+              placeholder="Enter link text"
+              className="mt-1 block w-full rounded border border-gray-300 p-2"
+              value={linkDialogState.linkText}
+              onChange={(e) =>
+                setLinkDialogState((prev) => ({
+                  ...prev,
+                  linkText: e.target.value,
+                }))
+              }
+            />
+          </div>
           <div>
             <label
               htmlFor="url-input"
