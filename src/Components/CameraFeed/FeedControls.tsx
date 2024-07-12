@@ -76,13 +76,11 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
   const inlineControls = useBreakpoints({ default: false, md: true });
 
   const controls = {
-    position: {
-      topLeft: (
+    position: (
+      <>
         <FeedButton onTrigger={move(Actions.UP | Actions.LEFT)}>
           <CareIcon icon="l-triangle" className="-rotate-45" />
         </FeedButton>
-      ),
-      top: (
         <FeedButton
           onTrigger={move(Actions.UP)}
           helpText="Up"
@@ -92,13 +90,9 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
         >
           <CareIcon icon="l-triangle" className="rotate-0" />
         </FeedButton>
-      ),
-      topRight: (
         <FeedButton onTrigger={move(Actions.UP | Actions.RIGHT)}>
           <CareIcon icon="l-triangle" className="rotate-45" />
         </FeedButton>
-      ),
-      left: (
         <FeedButton
           onTrigger={move(Actions.LEFT)}
           helpText="Left"
@@ -108,8 +102,16 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
         >
           <CareIcon icon="l-triangle" className="-rotate-90" />
         </FeedButton>
-      ),
-      right: (
+        <FeedButton
+          onTrigger={togglePrecision}
+          helpText="Toggle Precision"
+          shortcut={Shortcuts.TogglePrecision}
+          className="font-bold"
+          shortcutsDisabled={shortcutsDisabled}
+          tooltipClassName="-translate-y-20 -translate-x-20 md:translate-x-0 md:translate-y-0"
+        >
+          {precision}x
+        </FeedButton>
         <FeedButton
           onTrigger={move(Actions.RIGHT)}
           helpText="Right"
@@ -119,13 +121,9 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
         >
           <CareIcon icon="l-triangle" className="rotate-90" />
         </FeedButton>
-      ),
-      bottomLeft: (
         <FeedButton onTrigger={move(Actions.DOWN | Actions.LEFT)}>
           <CareIcon icon="l-triangle" className="rotate-[-135deg]" />
         </FeedButton>
-      ),
-      bottom: (
         <FeedButton
           onTrigger={move(Actions.DOWN)}
           helpText="Down"
@@ -135,46 +133,32 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
         >
           <CareIcon icon="l-triangle" className="rotate-180" />
         </FeedButton>
-      ),
-      bottomRight: (
         <FeedButton onTrigger={move(Actions.DOWN | Actions.RIGHT)}>
           <CareIcon icon="l-triangle" className="rotate-[135deg]" />
         </FeedButton>
-      ),
-    },
-    precision: (
-      <FeedButton
-        onTrigger={togglePrecision}
-        helpText="Toggle Precision"
-        shortcut={Shortcuts.TogglePrecision}
-        className="font-bold"
-        shortcutsDisabled={shortcutsDisabled}
-        tooltipClassName="-translate-y-20 -translate-x-20 md:translate-x-0 md:translate-y-0"
-      >
-        {precision}x
-      </FeedButton>
+      </>
     ),
-    zoomIn: (
-      <FeedButton
-        shortcut={Shortcuts.ZoomIn}
-        tooltipClassName="tooltip-left translate-y-2 translate-x-1"
-        helpText="Zoom In"
-        onTrigger={move(Actions.ZOOM_IN)}
-        shortcutsDisabled={shortcutsDisabled}
-      >
-        <CareIcon icon="l-search-plus" />
-      </FeedButton>
-    ),
-    zoomOut: (
-      <FeedButton
-        shortcut={Shortcuts.ZoomOut}
-        tooltipClassName="tooltip-left translate-y-2 translate-x-1"
-        helpText="Zoom Out"
-        onTrigger={move(Actions.ZOOM_OUT)}
-        shortcutsDisabled={shortcutsDisabled}
-      >
-        <CareIcon icon="l-search-minus" />
-      </FeedButton>
+    zoom: (
+      <>
+        <FeedButton
+          shortcut={Shortcuts.ZoomIn}
+          tooltipClassName="tooltip-left translate-y-2 translate-x-1"
+          helpText="Zoom In"
+          onTrigger={move(Actions.ZOOM_IN)}
+          shortcutsDisabled={shortcutsDisabled}
+        >
+          <CareIcon icon="l-search-plus" />
+        </FeedButton>
+        <FeedButton
+          shortcut={Shortcuts.ZoomOut}
+          tooltipClassName="tooltip-left translate-y-2 translate-x-1"
+          helpText="Zoom Out"
+          onTrigger={move(Actions.ZOOM_OUT)}
+          shortcutsDisabled={shortcutsDisabled}
+        >
+          <CareIcon icon="l-search-minus" />
+        </FeedButton>
+      </>
     ),
 
     reset: (
@@ -209,22 +193,11 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
     return (
       <div className="text-white opacity-0 transition-all delay-100 duration-200 ease-in-out group-hover:opacity-100 group-hover:delay-0">
         <div className="absolute bottom-0 left-8 transition-all delay-100 duration-200 ease-in-out group-hover:bottom-5 group-hover:delay-0">
-          <div className="grid grid-cols-3 gap-1">
-            <div>{controls.position.topLeft}</div>
-            <div>{controls.position.top}</div>
-            <div>{controls.position.topRight}</div>
-            <div>{controls.position.left}</div>
-            <div>{controls.precision}</div>
-            <div>{controls.position.right}</div>
-            <div>{controls.position.bottomLeft}</div>
-            <div>{controls.position.bottom}</div>
-            <div>{controls.position.bottomRight}</div>
-          </div>
+          <div className="grid grid-cols-3 gap-1">{controls.position}</div>
         </div>
         <div className="absolute  bottom-5 right-0 transition-all delay-100 duration-200 ease-in-out group-hover:right-8 group-hover:delay-0">
           <div className="flex flex-col items-center justify-center gap-1">
-            {controls.zoomIn}
-            {controls.zoomOut}
+            {controls.zoom}
             {controls.reset}
             {controls.fullscreen}
           </div>
@@ -235,21 +208,8 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
 
   return (
     <div className="flex items-center justify-between gap-3">
-      <div className="flex flex-col gap-2">
-        {controls.zoomIn}
-        {controls.zoomOut}
-      </div>
-      <div className="grid grid-cols-3 gap-2">
-        <div>{controls.position.topLeft}</div>
-        <div>{controls.position.top}</div>
-        <div>{controls.position.topRight}</div>
-        <div>{controls.position.left}</div>
-        <div>{controls.precision}</div>
-        <div>{controls.position.right}</div>
-        <div>{controls.position.bottomLeft}</div>
-        <div>{controls.position.bottom}</div>
-        <div>{controls.position.bottomRight}</div>
-      </div>
+      <div className="flex flex-col gap-2">{controls.zoom}</div>
+      <div className="grid grid-cols-3 gap-2">{controls.position}</div>
       <div className="flex flex-col gap-2">
         {controls.reset}
         {controls.fullscreen}
