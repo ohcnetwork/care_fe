@@ -16,7 +16,10 @@ const DoctorNoteReplyPreviewCard = ({
   children,
   cancelReply,
 }: Props) => {
-  return parentNote ? (
+  if (!parentNote) {
+    return children;
+  }
+  return (
     <div className="mt-3 flex flex-col rounded-lg border border-gray-300 bg-gray-200 pt-2 text-gray-800">
       <div className="flex flex-col">
         <div className="flex justify-between pl-3">
@@ -64,8 +67,6 @@ const DoctorNoteReplyPreviewCard = ({
       </div>
       <div>{children}</div>
     </div>
-  ) : (
-    <div>{children}</div>
   );
 };
 
