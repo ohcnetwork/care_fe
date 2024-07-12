@@ -24,7 +24,7 @@ import { CreateFileResponse } from "../../Patient/models";
 interface RichTextEditorProps {
   initialMarkdown?: string;
   onChange: (markdown: string) => void;
-  onAddNote: () => void;
+  onAddNote: () => Promise<string | undefined>;
   isAuthorized?: boolean;
 }
 
@@ -819,6 +819,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             id="add_doctor_note_button"
             onClick={async () => {
               const id = await onAddNote();
+              if (!id) return;
               for (const file of tempFiles) {
                 await handleFileUpload(file, id);
               }

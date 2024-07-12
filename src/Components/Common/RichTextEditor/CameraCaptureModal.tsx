@@ -12,7 +12,7 @@ const CameraCaptureModal = ({
 }: {
   open: boolean;
   onClose: () => void;
-  setFile: React.Dispatch<React.SetStateAction<File | null>>;
+  setFile: (file: File) => void;
 }) => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const webRef = useRef<Webcam>(null);
@@ -51,6 +51,7 @@ const CameraCaptureModal = ({
   };
 
   const onUpload = () => {
+    if (!capture) return;
     setFile(capture);
     onClose();
   };

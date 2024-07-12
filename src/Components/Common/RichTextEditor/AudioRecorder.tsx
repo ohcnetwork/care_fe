@@ -8,7 +8,7 @@ const AudioRecorder = ({
   modalOpenForAudio,
   setModalOpenForAudio,
 }: {
-  setFile: React.Dispatch<React.SetStateAction<File | null>>;
+  setFile: (file: File) => void;
   modalOpenForAudio: boolean;
   setModalOpenForAudio: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
@@ -23,7 +23,7 @@ const AudioRecorder = ({
       type: audioBlob.type,
     });
     setFile(f);
-    audioBlobExists && setAudioBlobExists(false);
+    deleteAudioBlob();
   };
 
   useEffect(() => {
@@ -84,7 +84,6 @@ const AudioRecorder = ({
     setAudioBlobExists(false);
     setAudioResetRecording(true);
     setModalOpenForAudio(false);
-    setFile(null);
   };
 
   return (
