@@ -4,7 +4,7 @@ import useOperateCamera, { PTZPayload } from "./useOperateCamera";
 import usePlayer from "./usePlayer";
 import { getStreamUrl } from "./utils";
 import ReactPlayer from "react-player";
-import { classNames, isAppleDevice, isIOS } from "../../Utils/utils";
+import { classNames, isIOS } from "../../Utils/utils";
 import FeedAlert, { FeedAlertState } from "./FeedAlert";
 import FeedNetworkSignal from "./FeedNetworkSignal";
 import NoFeedAvailable from "./NoFeedAvailable";
@@ -34,7 +34,7 @@ export default function CameraFeed(props: Props) {
   const playerRef = useRef<HTMLVideoElement | ReactPlayer | null>(null);
   const playerWrapperRef = useRef<HTMLDivElement>(null);
   const streamUrl = getStreamUrl(props.asset);
-  const isMobilePortrait = useBreakpoints({ default: true, md: false });
+  const inlineControls = useBreakpoints({ default: false, md: true });
 
   const player = usePlayer(streamUrl, playerRef);
   const operate = useOperateCamera(props.asset.id, props.silent);
@@ -137,8 +137,6 @@ export default function CameraFeed(props: Props) {
     />
   );
 
-  const inlineControls = !(isMobilePortrait && !isFullscreen);
-
   return (
     <div ref={playerWrapperRef} className="flex flex-col justify-center">
       <div
@@ -146,7 +144,7 @@ export default function CameraFeed(props: Props) {
           "flex max-h-screen flex-col justify-center",
           props.className,
           isFullscreen ? "bg-black" : "bg-zinc-100",
-          isAppleDevice && isFullscreen && "px-20",
+          isIOS && isFullscreen && "px-20",
         )}
       >
         <div

@@ -73,8 +73,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
     props.onMove(payload(direction, precision));
   };
 
-  const isMobilePortrait = useBreakpoints({ default: true, md: false });
-  const inlineControls = !(isMobilePortrait && !props.isFullscreen);
+  const inlineControls = useBreakpoints({ default: false, md: true });
 
   const controls = {
     position: {
@@ -209,29 +208,21 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
   if (inlineControls) {
     return (
       <div className="text-white opacity-0 transition-all delay-100 duration-200 ease-in-out group-hover:opacity-100 group-hover:delay-0">
-        <div className="absolute bottom-0 right-6 transition-all delay-100 duration-200 ease-in-out group-hover:bottom-1.5 group-hover:delay-0 md:left-8 md:right-auto md:group-hover:bottom-5">
-          <div className="grid scale-75 grid-cols-5 gap-2.5 md:scale-100 md:grid-cols-3 md:gap-1">
-            <div className="order-none hidden md:order-1 md:block">
-              {controls.position.topLeft}
-            </div>
-            <div className="order-1 md:order-2">{controls.position.top}</div>
-            <div className="order-none hidden md:order-3 md:block">
-              {controls.position.topRight}
-            </div>
-            <div className="order-3 md:order-4">{controls.position.left}</div>
-            <div className="order-last md:order-5">{controls.precision}</div>
-            <div className="order-4 md:order-6">{controls.position.right}</div>
-            <div className="order-none hidden md:order-7 md:block">
-              {controls.position.bottomLeft}
-            </div>
-            <div className="order-2 md:order-8">{controls.position.bottom}</div>
-            <div className="order-none hidden md:order-9 md:block">
-              {controls.position.bottomRight}
-            </div>
+        <div className="absolute bottom-0 left-8 transition-all delay-100 duration-200 ease-in-out group-hover:bottom-5 group-hover:delay-0">
+          <div className="grid grid-cols-3 gap-1">
+            <div>{controls.position.topLeft}</div>
+            <div>{controls.position.top}</div>
+            <div>{controls.position.topRight}</div>
+            <div>{controls.position.left}</div>
+            <div>{controls.precision}</div>
+            <div>{controls.position.right}</div>
+            <div>{controls.position.bottomLeft}</div>
+            <div>{controls.position.bottom}</div>
+            <div>{controls.position.bottomRight}</div>
           </div>
         </div>
-        <div className="absolute -bottom-3 right-0 scale-75 transition-all delay-100 duration-200 ease-in-out group-hover:right-2 group-hover:delay-0 md:bottom-5 md:scale-100 md:group-hover:right-8">
-          <div className="flex flex-col items-center justify-center gap-2.5 md:gap-1">
+        <div className="absolute  bottom-5 right-0 transition-all delay-100 duration-200 ease-in-out group-hover:right-8 group-hover:delay-0">
+          <div className="flex flex-col items-center justify-center gap-1">
             {controls.zoomIn}
             {controls.zoomOut}
             {controls.reset}
