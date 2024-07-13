@@ -517,11 +517,11 @@ export const PatientManager = () => {
             <div className="flex w-full flex-col gap-2 pl-2 md:block md:flex-row">
               <div className="flex w-full items-center justify-between gap-2">
                 <div
-                  className="flex flex-wrap gap-2 font-semibold"
+                  className="flex flex-wrap items-end gap-3 font-semibold"
                   id="patient-name-list"
                 >
                   <span className="text-xl capitalize">{patient.name}</span>
-                  <span className="text-gray-800">
+                  <span className="font-bold text-gray-700">
                     {formatPatientAge(patient, true)}
                   </span>
                 </div>
@@ -610,7 +610,7 @@ export const PatientManager = () => {
                         size="small"
                         variant="primary"
                         startIcon="l-clock-three"
-                        text={`IP Days: ${dayjs().diff(patient.last_consultation.encounter_date, "day")}`}
+                        text={`IP Day No: ${dayjs().diff(patient.last_consultation.encounter_date, "day") + 1}`}
                       />
                     )}
                   {patient.gender === 2 &&

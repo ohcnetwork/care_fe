@@ -48,6 +48,11 @@
   "filter": "Filter",
   "ordering": "Ordering",
   "phone_number": "Phone Number",
+  "international_mobile": "International Mobile",
+  "indian_mobile": "Indian Mobile",
+  "mobile": "Mobile",
+  "landline": "Indian landline",
+  "support": "Support",
   "emergency_contact_number": "Emergency Contact Number",
   "last_modified": "Last Modified",
   "patient_address": "Patient Address",
@@ -167,6 +172,7 @@
   "ration_card__NO_CARD": "Non-card holder",
   "ration_card__BPL": "BPL",
   "ration_card__APL": "APL",
+  "caution": "Caution",
   "complete_vaccination_details": "Complete Vaccination Details",
   "vaccination_details":  "Vaccination Details"
 }
