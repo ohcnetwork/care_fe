@@ -130,14 +130,14 @@ export const HospitalList = () => {
   } else if (permittedData.results && permittedData.results.length === 0) {
     manageFacilities = hasFiltersApplied(qParams) ? (
       <div className="w-full rounded-lg bg-white p-3">
-        <div className="mt-4 flex w-full  justify-center text-2xl font-bold text-gray-600">
+        <div className="mt-4 flex w-full  justify-center text-2xl font-bold text-secondary-600">
           {t("no_facilities")}
         </div>
       </div>
     ) : (
       <div>
         <div
-          className="border-grey-500 mt-4 cursor-pointer whitespace-nowrap rounded-md border bg-white p-16 text-center text-sm font-semibold shadow hover:bg-gray-300"
+          className="border-grey-500 mt-4 cursor-pointer whitespace-nowrap rounded-md border bg-white p-16 text-center text-sm font-semibold shadow hover:bg-secondary-300"
           onClick={() => navigate("/facility/create")}
         >
           <CareIcon icon="l-plus" className="text-3xl" />

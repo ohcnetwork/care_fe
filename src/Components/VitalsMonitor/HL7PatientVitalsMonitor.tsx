@@ -87,7 +87,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
               <span className="flex-1 text-sm font-bold text-orange-500">
                 Mean
               </span>
-              <span className="flex-1 text-xl font-bold text-gray-300">
+              <span className="flex-1 text-xl font-bold text-secondary-300">
                 {bpWithinMaxPersistence ? data.bp?.map.value ?? "--" : "--"}
               </span>
             </div>

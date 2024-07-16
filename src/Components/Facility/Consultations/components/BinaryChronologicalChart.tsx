@@ -22,7 +22,7 @@ export default function BinaryChronologicalChart(props: {
             <li key={i}>
               <div className="relative pb-8">
                 <span
-                  className="absolute left-4 top-4 -ml-px h-full w-0.5 bg-gray-200"
+                  className="absolute left-4 top-4 -ml-px h-full w-0.5 bg-secondary-200"
                   aria-hidden="true"
                 />
                 <div className="relative flex space-x-3">
@@ -52,7 +52,7 @@ export default function BinaryChronologicalChart(props: {
                         <span>{entry.notes}</span>
                       </p>
                     </div>
-                    <div className="whitespace-nowrap text-right text-sm text-gray-500">
+                    <div className="whitespace-nowrap text-right text-sm text-secondary-500">
                       <p>{formatDateTime(entry.timestamp)}</p>
                     </div>
                   </div>

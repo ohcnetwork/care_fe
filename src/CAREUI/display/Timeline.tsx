@@ -62,7 +62,7 @@ export const TimelineNode = (props: TimelineNodeProps) => {
           "absolute left-0 top-0 flex w-6 justify-center",
         )}
       >
-        <div className="w-px bg-gray-300" />
+        <div className="w-px bg-secondary-300" />
       </div>
 
       <div
@@ -81,9 +81,9 @@ export const TimelineNode = (props: TimelineNodeProps) => {
             {props.title || (
               <TimelineNodeTitle event={props.event}>
                 <div className="flex w-full justify-between gap-2">
-                  <p className="flex-auto py-0.5 text-xs leading-5 text-gray-600 md:w-2/3">
+                  <p className="flex-auto py-0.5 text-xs leading-5 text-secondary-600 md:w-2/3">
                     {props.event.by && (
-                      <span className="font-medium text-gray-900">
+                      <span className="font-medium text-secondary-900">
                         {props.event.by.username.startsWith("asset")
                           ? t("virtual_nursing_assistant")
                           : `${formatName(props.event.by)} ${
@@ -101,7 +101,7 @@ export const TimelineNode = (props: TimelineNodeProps) => {
                       <TimelineNodeActions>{props.actions}</TimelineNodeActions>
                     )}
                     <RecordMeta
-                      className="flex-none py-0.5 text-xs leading-5 text-gray-500"
+                      className="flex-none py-0.5 text-xs leading-5 text-secondary-500"
                       time={props.event.timestamp}
                     />
                   </div>
@@ -131,13 +131,13 @@ export const TimelineNodeTitle = (props: TimelineNodeTitleProps) => {
       <div
         className={classNames(
           props.event.iconWrapperStyle,
-          "relative flex h-6 w-6 flex-none items-center justify-center rounded-full bg-gray-200 transition-all duration-200 ease-in-out group-hover:bg-primary-500",
+          "relative flex h-6 w-6 flex-none items-center justify-center rounded-full bg-secondary-200 transition-all duration-200 ease-in-out group-hover:bg-primary-500",
         )}
       >
         <CareIcon
           className={classNames(
             props.event.iconStyle,
-            "text-base text-gray-700 transition-all duration-200 ease-in-out group-hover:text-white",
+            "text-base text-secondary-700 transition-all duration-200 ease-in-out group-hover:text-white",
           )}
           aria-hidden="true"
           icon={props.event.icon}
@@ -171,9 +171,11 @@ export const TimelineNodeNotes = ({
   }
 
   return (
-    <div className="flex w-full items-start gap-2 rounded-md p-3 ring-1 ring-inset ring-gray-200">
-      <CareIcon icon={icon} className="text-lg text-gray-700" />
-      <div className="mt-1 flex-auto text-xs text-gray-700">{children}</div>
+    <div className="flex w-full items-start gap-2 rounded-md p-3 ring-1 ring-inset ring-secondary-200">
+      <CareIcon icon={icon} className="text-lg text-secondary-700" />
+      <div className="mt-1 flex-auto text-xs text-secondary-700">
+        {children}
+      </div>
     </div>
   );
 };

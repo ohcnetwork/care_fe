@@ -43,7 +43,7 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
       }
       title={t("administer_medicine")}
       description={
-        <div className="text-sm font-semibold leading-relaxed text-gray-600">
+        <div className="text-sm font-semibold leading-relaxed text-secondary-600">
           <CareIcon icon="l-history-alt" className="pr-1" /> Last administered
           <span className="whitespace-nowrap pl-2">
             <CareIcon icon="l-clock" />{" "}

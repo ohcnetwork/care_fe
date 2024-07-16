@@ -65,7 +65,9 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
     valueOptions?.length > 0 ? props.placeholder ?? "Select" : "No options";
   const defaultOption = {
     label: placeholder,
-    selectedLabel: <p className="font-normal text-gray-600">{placeholder}</p>,
+    selectedLabel: (
+      <p className="font-normal text-secondary-600">{placeholder}</p>
+    ),
     description: undefined,
     icon: undefined,
     value: undefined,
@@ -101,7 +103,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                 <div className="relative z-0 flex w-full items-center">
                   <div className="relative flex flex-1 items-center focus:z-10">
                     {props.showIconWhenSelected && value?.icon && (
-                      <div className="ml-2 text-sm text-gray-700">
+                      <div className="ml-2 text-sm text-secondary-700">
                         {value.icon}
                       </div>
                     )}
@@ -112,7 +114,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                   {showChevronIcon && (
                     <CareIcon
                       icon="l-angle-down"
-                      className="-mb-0.5 text-lg text-gray-900"
+                      className="-mb-0.5 text-lg text-secondary-900"
                     />
                   )}
                 </div>
@@ -151,10 +153,10 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                                 className={classNames(
                                   "text-sm font-normal",
                                   option.disabled
-                                    ? "text-gray-700"
+                                    ? "text-secondary-700"
                                     : active
                                       ? "text-primary-200"
-                                      : "text-gray-700",
+                                      : "text-secondary-700",
                                 )}
                               >
                                 {option.description}
