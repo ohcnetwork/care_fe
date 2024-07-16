@@ -60,12 +60,10 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
         showAll ? routes.getAllFacilities : routes.getPermittedFacilities,
         { query },
       );
-
       if (freeText)
         data?.results?.push({
           name: text,
         });
-
       return data?.results;
     },
     [searchAll, showAll, facilityType, district, exclude_user, freeText],

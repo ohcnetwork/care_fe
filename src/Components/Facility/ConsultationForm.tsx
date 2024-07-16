@@ -1083,14 +1083,21 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                   <div className="col-span-6">
                     <div className="flex items-center justify-between">
                       <FieldLabel>Body Surface Area</FieldLabel>
-                      <span className="mb-2 text-sm font-medium text-black">
-                        {Math.sqrt(
-                          (Number(state.form.weight) *
-                            Number(state.form.height)) /
-                            3600,
-                        ).toFixed(2)}
-                        m<sup>2</sup>
-                      </span>
+
+                      {state.form.weight === "" || state.form.height === "" ? (
+                        <p className="text-xs font-medium text-warning-500">
+                          Please enter weight and height
+                        </p>
+                      ) : (
+                        <span className="mb-2 text-sm font-medium text-black">
+                          {Math.sqrt(
+                            (Number(state.form.weight) *
+                              Number(state.form.height)) /
+                              3600,
+                          ).toFixed(2)}
+                          m<sup>2</sup>
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex flex-col items-center sm:flex-row sm:gap-3">
