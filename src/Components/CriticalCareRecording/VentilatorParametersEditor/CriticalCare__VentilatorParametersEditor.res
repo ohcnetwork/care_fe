@@ -115,7 +115,7 @@ let makePayload = (state: VentilatorParameters.state) => {
   DictUtils.setOptionalNumber("ventilator_tidal_volume", state.ventilator_tidal_volume, payload)
   DictUtils.setOptionalNumber(
     "ventilator_oxygen_modality_oxygen_rate",
-    state.ventilator_interface === UNKNOWN &&
+    state.ventilator_interface === OXYGEN_SUPPORT &&
       state.ventilator_oxygen_modality !== HIGH_FLOW_NASAL_CANNULA
       ? state.ventilator_oxygen_modality_oxygen_rate
       : None,
