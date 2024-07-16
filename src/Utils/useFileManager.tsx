@@ -224,10 +224,12 @@ export default function useFileManager(
                 className="text-lg text-danger-500"
               />
             </div>
-            <div className="text-grey-200 text-sm">
+            <div>
               <h1 className="text-xl text-black">Archive File</h1>
-              This action is irreversible. Once a file is archived it cannot be
-              unarchived.
+              <span className="text-sm text-secondary-500">
+                This action is irreversible. Once a file is archived it cannot
+                be unarchived.
+              </span>
             </div>
           </div>
         }
