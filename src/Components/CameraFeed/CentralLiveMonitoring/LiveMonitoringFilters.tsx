@@ -7,6 +7,7 @@ import useFilters from "../../../Common/hooks/useFilters";
 import { Fragment } from "react";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import useSlug from "../../../Common/hooks/useSlug";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   perPageLimit: number;
@@ -16,6 +17,7 @@ interface Props {
 }
 
 const LiveMonitoringFilters = (props: Props) => {
+  const { t } = useTranslation();
   const facilityId = useSlug("facility");
   const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
     limit: props.perPageLimit,
@@ -25,9 +27,9 @@ const LiveMonitoringFilters = (props: Props) => {
     <div className="flex flex-row-reverse items-center gap-4 md:flex-row">
       <Popover className="relative">
         <Popover.Button>
-          <ButtonV2 variant="secondary" border>
+          <ButtonV2 variant={qParams.location ? "primary" : "secondary"} border>
             <CareIcon icon="l-setting" className="text-lg" />
-            Settings and Filters
+            {t("settings_and_filters")}
           </ButtonV2>
         </Popover.Button>
         <Transition
@@ -73,37 +75,6 @@ const LiveMonitoringFilters = (props: Props) => {
                     />
                   </div>
                 </div>
-                {/* <CheckBoxFormField
-                  name="in_use_by_consultation"
-                  label="Hide cameras without patient"
-                  value={qParams.in_use_by_consultation === "true"}
-                  onChange={({ name, value }) => {
-                    if (value) {
-                      updateQuery({ [name]: value });
-                    } else {
-                      removeFilter(name);
-                    }
-                  }}
-                  labelClassName="text-sm"
-                  errorClassName="hidden"
-                />
-                <CheckBoxFormField
-                  name="is_working"
-                  label="Camera is Working"
-                  value={
-                    qParams.is_working === "true" ||
-                    qParams.is_working === undefined
-                  }
-                  onChange={({ name, value }) => {
-                    if (value) {
-                      updateQuery({ [name]: value });
-                    } else {
-                      removeFilter(name);
-                    }
-                  }}
-                  labelClassName="text-sm"
-                  errorClassName="hidden"
-                /> */}
                 <ButtonV2
                   variant="secondary"
                   border
