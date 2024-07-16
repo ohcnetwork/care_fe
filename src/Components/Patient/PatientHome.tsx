@@ -649,7 +649,7 @@ export const PatientHome = (props: any) => {
                       name="death_report"
                       onClick={() => navigate(`/death_report/${id}`)}
                     >
-                      <CareIcon icon="l-file-download" className="mr-2" />
+                      <CareIcon icon="l-file-download" className="text-lg" />
                       Death Report
                     </ButtonV2>
                   </div>
