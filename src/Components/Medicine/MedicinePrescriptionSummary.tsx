@@ -6,6 +6,7 @@ import { lazy } from "react";
 import Timeline, { TimelineNode } from "../../CAREUI/display/Timeline";
 import { MedibaseMedicine, Prescription } from "../Medicine/models";
 import { useTranslation } from "react-i18next";
+import { humanizeStrings } from "../../Utils/utils";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -310,7 +311,7 @@ export default function ConsultationMedicineLogs({
 
       // If there are changes, add them to the changes array
       if (changesForPrescription.length > 0 && !prevPrescription.discontinued) {
-        const message = `Changes: ${changesForPrescription.join(", ")}`;
+        const message = `Changes: ${humanizeStrings(changesForPrescription)}`;
         changes.push({
           prescriptionId: currentPrescription.id,
           changeMessage: message,

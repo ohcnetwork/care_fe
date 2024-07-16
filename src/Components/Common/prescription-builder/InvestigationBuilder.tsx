@@ -4,6 +4,7 @@ import { PrescriptionMultiDropdown } from "./PrescriptionMultiselect";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import request from "../../../Utils/request/request";
 import routes from "../../../Redux/api";
+import { humanizeStrings } from "../../../Utils/utils";
 
 export type InvestigationType = {
   type?: string[];
@@ -86,9 +87,9 @@ export default function InvestigationBuilder(
     return (
       data?.results.map(
         (investigation) =>
-          `${investigation.name} -- ${investigation.groups
-            .map((group) => ` ( ${group.name} ) `)
-            .join(", ")}`,
+          `${investigation.name} -- ${humanizeStrings(
+            investigation.groups.map((group) => ` ( ${group.name} ) `),
+          )}`,
       ) ?? []
     );
   };

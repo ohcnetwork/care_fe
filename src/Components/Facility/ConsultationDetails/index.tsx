@@ -11,7 +11,11 @@ import { lazy, useCallback, useState } from "react";
 import DoctorVideoSlideover from "../DoctorVideoSlideover";
 import { make as Link } from "../../Common/components/Link.bs";
 import { PatientModel } from "../../Patient/models";
-import { formatDateTime, relativeTime } from "../../../Utils/utils";
+import {
+  formatDateTime,
+  humanizeStrings,
+  relativeTime,
+} from "../../../Utils/utils";
 
 import { navigate, useQueryParams } from "raviger";
 import { useDispatch } from "react-redux";
@@ -93,8 +97,9 @@ export const ConsultationDetails = (props: any) => {
 
   const getPatientComorbidities = (patientData: any) => {
     if (patientData?.medical_history?.length) {
-      const medHis = patientData.medical_history;
-      return medHis.map((item: any) => item.disease).join(", ");
+      return humanizeStrings(
+        patientData.medical_history.map((item: any) => item.disease),
+      );
     } else {
       return "None";
     }
@@ -113,15 +118,6 @@ export const ConsultationDetails = (props: any) => {
             ...res.data,
             symptoms_text: "",
           };
-          // if (res.data.symptoms?.length) {
-          //   const symptoms = res.data.symptoms
-          //     .filter((symptom: number) => symptom !== 9)
-          //     .map((symptom: number) => {
-          //       const option = symptomChoices.find((i) => i.id === symptom);
-          //       return option ? option.text.toLowerCase() : symptom;
-          //     });
-          //   data.symptoms_text = symptoms.join(", ");
-          // }
           if (facilityId != data.facility || patientId != data.patient) {
             navigate(
               `/facility/${data.facility}/patient/${data.patient}/consultation/${data?.id}`,

@@ -1,5 +1,5 @@
 import { DailyRoundsModel } from "../../Patient/models";
-import { formatDateTime } from "../../../Utils/utils";
+import { formatDateTime, humanizeStrings } from "../../../Utils/utils";
 
 const getRespScore = (value?: number) => {
   if (typeof value !== "number") return;
@@ -80,7 +80,9 @@ export const Mews = ({ dailyRound }: { dailyRound: DailyRoundsModel }) => {
               MEWS
             </span>
             <div className="tooltip-text tooltip-bottom w-48 -translate-x-1/2 translate-y-3 whitespace-pre-wrap text-xs font-medium lg:w-64">
-              <span className="font-bold">{(data as string[]).join(", ")}</span>{" "}
+              <span className="font-bold">
+                {humanizeStrings(data as string[])}
+              </span>{" "}
               data is missing from the last log update.
               <br /> Last Updated: {formatDateTime(dailyRound.modified_date)}
             </div>

@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import GenericFilterBadge from "../../CAREUI/display/FilterBadge";
 import PaginationComponent from "../../Components/Common/Pagination";
 import useConfig from "./useConfig";
-import { classNames } from "../../Utils/utils";
+import { classNames, humanizeStrings } from "../../Utils/utils";
 import FiltersCache from "../../Utils/FiltersCache";
 
 export type FilterState = Record<string, unknown>;
@@ -87,10 +87,7 @@ export default function useFilters({
           name={name}
           value={
             value === undefined
-              ? paramKey
-                  .map((k) => qParams[k])
-                  .filter(Boolean)
-                  .join(", ")
+              ? humanizeStrings(paramKey.map((k) => qParams[k]).filter(Boolean))
               : value
           }
           onRemove={() => removeFilters(paramKey)}
