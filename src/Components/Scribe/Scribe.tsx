@@ -410,7 +410,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
           <button
             onClick={handleStartRecordingClick}
             disabled={isRecording}
-            className="flex items-center justify-center rounded-full border border-black px-2 py-2 font-bold hover:border-red-500 hover:bg-gray-200 hover:text-red-500"
+            className="flex items-center justify-center rounded-full border border-black px-2 py-2 font-bold hover:border-red-500 hover:bg-secondary-200 hover:text-red-500"
           >
             <CareIcon
               icon="l-microphone"
@@ -425,7 +425,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
             disabled={!isRecording}
             onMouseEnter={() => setIsHoveringCancelRecord(true)}
             onMouseLeave={() => setIsHoveringCancelRecord(false)}
-            className="flex animate-pulse items-center justify-center rounded-full border border-red-500 bg-red-100 px-2 py-2 font-bold text-red-500 hover:border-black hover:bg-gray-200 hover:text-black"
+            className="flex animate-pulse items-center justify-center rounded-full border border-red-500 bg-red-100 px-2 py-2 font-bold text-red-500 hover:border-black hover:bg-secondary-200 hover:text-black"
           >
             {isHoveringCancelRecord ? (
               <CareIcon
@@ -490,9 +490,9 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
               &#8203;
             </span>
 
-            <div className="inline-block max-h-[75vh] w-full max-w-md overflow-hidden overflow-y-auto rounded-2xl border-2 border-gray-300 bg-white p-6 text-left align-middle shadow-xl transition-all">
+            <div className="inline-block max-h-[75vh] w-full max-w-md overflow-hidden overflow-y-auto rounded-2xl border-2 border-secondary-300 bg-white p-6 text-left align-middle shadow-xl transition-all">
               <div className="flex justify-between">
-                <h3 className="text-lg font-medium leading-6 text-gray-900">
+                <h3 className="text-lg font-medium leading-6 text-secondary-900">
                   Voice AutoFill
                 </h3>
 
@@ -516,7 +516,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
                 stage === "final-review" ||
                 stage === "recording-review") && (
                 <div className="flex flex-col justify-center gap-4 rounded-md p-2">
-                  <p className="text-sm font-semibold text-gray-600">
+                  <p className="text-sm font-semibold text-secondary-600">
                     Recorded Audio
                   </p>
                   {audioBlobs.length > 0 &&
@@ -541,15 +541,15 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
               {(stage === "review" || stage === "final-review") && (
                 <div className="my-2 w-full">
                   <div className="flex justify-between">
-                    <p className="mb-2 text-sm font-semibold text-gray-600">
+                    <p className="mb-2 text-sm font-semibold text-secondary-600">
                       Transcript
                     </p>
-                    <p className="mb-2 text-sm italic text-gray-500">
+                    <p className="mb-2 text-sm italic text-secondary-500">
                       (Edit if needed)
                     </p>
                   </div>
                   <textarea
-                    className="h-32 w-full rounded-md border border-gray-300 p-2 font-mono text-sm"
+                    className="h-32 w-full rounded-md border border-secondary-300 p-2 font-mono text-sm"
                     value={updatedTranscript}
                     onChange={handleEditChange}
                   />
@@ -569,7 +569,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
                     Regenerate Transcript
                   </ButtonV2>
                   {stage === "review" && (
-                    <p className="animate-pulse text-sm text-gray-500">
+                    <p className="animate-pulse text-sm text-secondary-500">
                       {getStageMessage(stage)}
                     </p>
                   )}
@@ -581,10 +581,10 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
                   {!isGPTProcessing &&
                     Object.keys(formFields ?? {}).length > 0 && (
                       <div className="mt-4">
-                        <p className="mb-2 text-sm font-semibold text-gray-600">
+                        <p className="mb-2 text-sm font-semibold text-secondary-600">
                           Form Data
                         </p>
-                        <div className="max-h-80 divide-y divide-gray-300 overflow-scroll rounded-lg border border-gray-300 text-sm">
+                        <div className="max-h-80 divide-y divide-secondary-300 overflow-scroll rounded-lg border border-secondary-300 text-sm">
                           {Object.keys(formFields ?? {})
                             .filter((field) => formFields?.[field])
                             .map((field) => {
@@ -596,10 +596,10 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
                                   key={field}
                                   className="flex flex-col bg-white px-3 py-1"
                                 >
-                                  <p className="mb-1 font-bold text-gray-600">
+                                  <p className="mb-1 font-bold text-secondary-600">
                                     {fieldDetails?.friendlyName}
                                   </p>
-                                  <p className="text-gray-800">
+                                  <p className="text-secondary-800">
                                     {processFormField(
                                       fieldDetails,
                                       formFields,
@@ -613,7 +613,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
                       </div>
                     )}
                   {stage === "final-review" && (
-                    <p className="mt-2 text-sm text-gray-600">
+                    <p className="mt-2 text-sm text-secondary-600">
                       {getStageMessage(stage)}
                     </p>
                   )}
@@ -634,7 +634,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
                   </p>
                 ))}
                 {!(stage === "review" || stage === "final-review") && (
-                  <p className="animate-pulse text-sm text-gray-500">
+                  <p className="animate-pulse text-sm text-secondary-500">
                     {getStageMessage(stage)}
                   </p>
                 )}

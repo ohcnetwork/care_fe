@@ -96,10 +96,10 @@ export default function CentralNursingStation({ facilityId }: Props) {
               leaveTo="opacity-0 translate-y-1"
             >
               <Popover.Panel className="absolute z-30 mt-1 w-80 -translate-x-1/3 px-4 sm:px-0 md:w-96 md:-translate-x-1/2 lg:max-w-3xl">
-                <div className="rounded-lg shadow-lg ring-1 ring-gray-400">
-                  <div className="rounded-t-lg bg-gray-100 px-6 py-4">
+                <div className="rounded-lg shadow-lg ring-1 ring-secondary-400">
+                  <div className="rounded-t-lg bg-secondary-100 px-6 py-4">
                     <div className="flow-root rounded-md">
-                      <span className="block text-sm text-gray-800">
+                      <span className="block text-sm text-secondary-800">
                         <span className="font-bold ">{totalCount}</span> Vitals
                         Monitor present
                       </span>

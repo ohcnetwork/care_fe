@@ -15,7 +15,7 @@ export default function ManagePrescriptions() {
         className="mx-auto flex w-full max-w-4xl flex-col gap-10 rounded bg-white p-6 transition-all sm:rounded-xl sm:p-12"
         id="medicine-preview"
       >
-        <div className="flex flex-col gap-10 divide-y-2 divide-dashed divide-gray-600">
+        <div className="flex flex-col gap-10 divide-y-2 divide-dashed divide-secondary-600">
           <div>
             <h3 className="mb-4 text-lg font-semibold">
               {t("prescription_medications")}

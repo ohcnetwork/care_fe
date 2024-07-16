@@ -13,7 +13,7 @@ let make = (~show, ~setShow, ~children) =>
           leaveFrom="opacity-100"
           leaveTo="opacity-0">
           <div
-            className="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+            className="absolute inset-0 bg-secondary-500 bg-opacity-75 transition-opacity"
             onClick={_ => setShow(false)}
           />
         </Transition>

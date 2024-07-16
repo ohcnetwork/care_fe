@@ -107,7 +107,7 @@ export default function AppRouter() {
 
   return (
     <SidebarShrinkContext.Provider value={{ shrinked, setShrinked }}>
-      <div className="absolute inset-0 flex h-screen overflow-hidden bg-gray-100 print:overflow-visible">
+      <div className="absolute inset-0 flex h-screen overflow-hidden bg-secondary-100 print:overflow-visible">
         <>
           <div className="block md:hidden">
             <MobileSidebar open={sidebarOpen} setOpen={setSidebarOpen} />{" "}
@@ -121,7 +121,7 @@ export default function AppRouter() {
           <div className="relative z-10 flex h-16 shrink-0 bg-white shadow md:hidden">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="border-r border-gray-200 px-4 text-gray-500 focus:bg-gray-100 focus:text-gray-600 focus:outline-none md:hidden"
+              className="border-r border-secondary-200 px-4 text-secondary-500 focus:bg-secondary-100 focus:text-secondary-600 focus:outline-none md:hidden"
               aria-label="Open sidebar"
             >
               <svg
