@@ -468,7 +468,7 @@ export default function ShiftDetails(props: { id: string }) {
           <div className="mt-20 flex justify-center text-center">
             {t("auto_generated_for_care")}
           </div>
-          <div className="font-xs font-gray-600 text-center font-mono">
+          <div className="font-xs font-secondary-600 text-center font-mono">
             {window.location.origin}/shifting/{data.id}
           </div>
         </div>
@@ -773,10 +773,10 @@ export default function ShiftDetails(props: { id: string }) {
 
               <div className="mt-2 grid rounded-lg bg-white p-2 px-4 text-center shadow lg:grid-cols-2">
                 <div className="border-b-2 pb-2 lg:border-b-0 lg:border-r-2 lg:pb-0">
-                  <div className="text-sm font-medium leading-5 text-gray-500">
+                  <div className="text-sm font-medium leading-5 text-secondary-500">
                     {t("created")}
                   </div>
-                  <div className="mt-1 whitespace-pre text-sm leading-5 text-gray-900">
+                  <div className="mt-1 whitespace-pre text-sm leading-5 text-secondary-900">
                     <RecordMeta
                       time={data?.created_date}
                       user={data?.created_by_object}
@@ -786,10 +786,10 @@ export default function ShiftDetails(props: { id: string }) {
                   </div>
                 </div>
                 <div className="mt-2 lg:mt-0">
-                  <div className="text-sm font-medium leading-5 text-gray-500">
+                  <div className="text-sm font-medium leading-5 text-secondary-500">
                     {t("last_edited")}
                   </div>
-                  <div className="mt-1 whitespace-pre text-sm leading-5 text-gray-900">
+                  <div className="mt-1 whitespace-pre text-sm leading-5 text-secondary-900">
                     <RecordMeta
                       time={data?.modified_date}
                       user={data?.last_edited_by_object}

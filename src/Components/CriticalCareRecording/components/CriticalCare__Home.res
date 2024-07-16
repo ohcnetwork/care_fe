@@ -236,7 +236,7 @@
 //                 //<CriticalCare__RadioButton options={reaction_options} ishorizontal=true/>
 //             </div>
 //         </div>
-//         <div className="my-15 w-full h-1 bg-gray-300"></div>
+//         <div className="my-15 w-full h-1 bg-secondary-300"></div>
 //         <div>
 //             <div className="text-3xl font-bold">{str("Glasgow Coma Scale")}</div>
 //             <div>
@@ -257,7 +257,7 @@
 //             </div>
 //         </div>
 
-//         <div className="my-15 w-full h-1 bg-gray-300"></div>
+//         <div className="my-15 w-full h-1 bg-secondary-300"></div>
 
 //         <div>
 //             <div className="text-3xl font-bold">{str("Limb Response")}</div>
@@ -272,13 +272,13 @@
 //             </div>
 //         </div>
 
-//         <div className="my-15 w-full h-1 bg-gray-300"></div>
+//         <div className="my-15 w-full h-1 bg-secondary-300"></div>
 
 //         <div>
 //             <CriticalCare__DoubleRangeSlider />
 //         </div>
 
-//         <div className="my-15 w-full h-1 bg-gray-300"></div>
+//         <div className="my-15 w-full h-1 bg-secondary-300"></div>
 
 //          <div>
 //             <div className="text-3xl font-bold">{str("Ventillator Parameters")}</div>
@@ -291,14 +291,14 @@
 //             <CriticalCare__NumberInput labels={ventilator_parameters} />
 //         </div>
 
-//         <div className="my-15 w-full h-1 bg-gray-300"></div>
+//         <div className="my-15 w-full h-1 bg-secondary-300"></div>
 
 //          <div>
 //             <div className="text-3xl font-bold">{str("Infusions")}</div>
 //             <CriticalCare__NumberInput labels={infusion_parameters} />
 //         </div>
 
-//         <div className="my-15 w-full h-1 bg-gray-300"></div>
+//         <div className="my-15 w-full h-1 bg-secondary-300"></div>
 
 //          <div>
 //             <div className="text-3xl font-bold">{str("Feed")}</div>
@@ -309,7 +309,7 @@
 //             </div>
 //         </div>
 
-//         <div className="my-15 w-full h-1 bg-gray-300"></div>
+//         <div className="my-15 w-full h-1 bg-secondary-300"></div>
 
 //          <div>
 //             <div className="text-3xl font-bold">{str("Output")}</div>
@@ -324,3 +324,4 @@
 
 //     </div>
 // }
+

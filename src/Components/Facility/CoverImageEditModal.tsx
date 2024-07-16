@@ -195,7 +195,7 @@ const CoverImageEditModal = ({
                     className="h-full w-full object-cover"
                   />
                 </div>
-                <p className="text-center font-medium text-gray-700">
+                <p className="text-center font-medium text-secondary-700">
                   {commonHint}
                 </p>
               </>
@@ -209,7 +209,7 @@ const CoverImageEditModal = ({
                 } ${
                   dragProps.fileDropError !== ""
                     ? "border-red-500"
-                    : "border-gray-500"
+                    : "border-secondary-500"
                 }`}
               >
                 <svg
@@ -222,7 +222,7 @@ const CoverImageEditModal = ({
                   } ${
                     dragProps.fileDropError !== ""
                       ? "text-red-500"
-                      : "text-gray-600"
+                      : "text-secondary-600"
                   }`}
                 >
                   <path d="M28 8H12a4 4 0 0 0-4 4v20m32-12v8m0 0v8a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4v-4m32-4-3.172-3.172a4 4 0 0 0-5.656 0L28 28M8 32l9.172-9.172a4 4 0 0 1 5.656 0L28 28m0 0 4 4m4-24h8m-4-4v8m-12 4h.02" />
@@ -233,14 +233,14 @@ const CoverImageEditModal = ({
                   } ${
                     dragProps.fileDropError !== ""
                       ? "text-red-500"
-                      : "text-gray-700"
+                      : "text-secondary-700"
                   } text-center`}
                 >
                   {dragProps.fileDropError !== ""
                     ? dragProps.fileDropError
                     : `${t("drag_drop_image_to_upload")}`}
                 </p>
-                <p className="mt-4 text-center font-medium text-gray-700">
+                <p className="mt-4 text-center font-medium text-secondary-700">
                   {t("no_cover_photo_uploaded_for_this_facility")}. {commonHint}
                 </p>
               </div>

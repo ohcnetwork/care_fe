@@ -141,13 +141,13 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
       <div className="m-2 mt-4 flex flex-col justify-between md:flex-row lg:gap-4">
         <div className="flex flex-col justify-between gap-4 md:flex-row">
           <div>
-            <div className="mb-2 text-sm text-gray-700">
+            <div className="mb-2 text-sm text-secondary-700">
               <span className="font-medium text-black">Date of Sample:</span>{" "}
               {itemData.date_of_sample
                 ? formatDateTime(itemData.date_of_sample)
                 : "Not Available"}
             </div>
-            <div className="text-sm text-gray-700">
+            <div className="text-sm text-secondary-700">
               <span className="font-medium text-black">Date of Result:</span>{" "}
               {itemData.date_of_result
                 ? formatDateTime(itemData.date_of_result)
@@ -156,7 +156,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          <div className="flex flex-col flex-nowrap items-center justify-end text-sm text-gray-700 md:flex-col md:items-start md:justify-start lg:flex-row lg:items-center">
+          <div className="flex flex-col flex-nowrap items-center justify-end text-sm text-secondary-700 md:flex-col md:items-start md:justify-start lg:flex-row lg:items-center">
             <div className=" font-medium text-black">Created: </div>
 
             <RelativeDateUserMention
@@ -165,7 +165,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
               tooltipPosition="left"
             />
           </div>
-          <div className="flex flex-col items-center justify-end text-sm text-gray-700 md:flex-col md:items-start lg:flex-row lg:items-center">
+          <div className="flex flex-col items-center justify-end text-sm text-secondary-700 md:flex-col md:items-start lg:flex-row lg:items-center">
             <div className=" font-medium text-black">Last Modified: </div>
             <RelativeDateUserMention
               actionDate={itemData.modified_date}
@@ -182,21 +182,21 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
               e.stopPropagation();
               handleApproval(4, itemData);
             }}
-            className="border border-gray-500 bg-white text-black hover:bg-gray-300"
+            className="border border-secondary-500 bg-white text-black hover:bg-secondary-300"
           >
             Send to Collection Centre
           </ButtonV2>
         )}
         <ButtonV2
           onClick={() => showUpdateStatus(itemData)}
-          className="border border-gray-500 bg-white text-black hover:bg-gray-300"
+          className="border border-secondary-500 bg-white text-black hover:bg-secondary-300"
           authorizeFor={NonReadOnlyUsers}
         >
           Update Sample Test Status
         </ButtonV2>
         <ButtonV2
           onClick={(_e) => navigate(`/sample/${itemData.id}`)}
-          className="border border-gray-500 bg-white text-black hover:bg-gray-300"
+          className="border border-secondary-500 bg-white text-black hover:bg-secondary-300"
         >
           Sample Report
         </ButtonV2>
