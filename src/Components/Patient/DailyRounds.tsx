@@ -343,11 +343,7 @@ export const DailyRounds = (props: any) => {
           Notification.Success({
             msg: `${t(obj.rounds_type as string)} log updated successfully`,
           });
-          if (
-            ["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
-              state.form.rounds_type,
-            )
-          ) {
+          if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
             navigate(
               `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
             );
@@ -369,11 +365,7 @@ export const DailyRounds = (props: any) => {
             msg: `${t(state.form.rounds_type)} log created successfully`,
           });
 
-          if (
-            ["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
-              state.form.rounds_type,
-            )
-          ) {
+          if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
             navigate(
               `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
             );
@@ -715,7 +707,7 @@ export const DailyRounds = (props: any) => {
 
           {state.form.rounds_type === "DOCTORS_LOG" && (
             <>
-              <div className="flex flex-col gap-10 divide-y-2 divide-dashed divide-gray-600 border-t-2 border-dashed border-gray-600 pt-6 md:col-span-2">
+              <div className="flex flex-col gap-10 divide-y-2 divide-dashed divide-secondary-600 border-t-2 border-dashed border-secondary-600 pt-6 md:col-span-2">
                 <div>
                   <h3 className="mb-4 mt-8 text-lg font-semibold">
                     {t("diagnosis")}
@@ -724,7 +716,7 @@ export const DailyRounds = (props: any) => {
                   {diagnoses ? (
                     <EditDiagnosesBuilder value={diagnoses} />
                   ) : (
-                    <div className="flex animate-pulse justify-center py-4 text-center font-medium text-gray-800">
+                    <div className="flex animate-pulse justify-center py-4 text-center font-medium text-secondary-800">
                       Fetching existing diagnosis of patient...
                     </div>
                   )}

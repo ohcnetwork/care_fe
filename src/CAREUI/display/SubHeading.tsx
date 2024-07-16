@@ -13,11 +13,11 @@ export default function SubHeading(props: Props) {
   return (
     <div className="flex flex-wrap items-center justify-between py-2">
       <div className="flex items-center">
-        <span className="text-lg font-semibold leading-relaxed text-gray-900">
+        <span className="text-lg font-semibold leading-relaxed text-secondary-900">
           {props.title}
         </span>
         {props.lastModified && (
-          <div className="ml-3 flex flex-row gap-2 text-xs font-medium text-gray-600">
+          <div className="ml-3 flex flex-row gap-2 text-xs font-medium text-secondary-600">
             <CareIcon icon="l-history-alt" className="text-sm" />
             <RecordMeta time={props.lastModified} prefix="Last modified" />
           </div>

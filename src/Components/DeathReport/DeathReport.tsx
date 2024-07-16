@@ -6,7 +6,11 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import DateFormField from "../Form/FormFields/DateFormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { formatDateTime, patientAgeInYears } from "../../Utils/utils";
+import {
+  formatDateTime,
+  humanizeStrings,
+  patientAgeInYears,
+} from "../../Utils/utils";
 import Page from "../Common/components/Page";
 import Form from "../Form/Form";
 import { useTranslation } from "react-i18next";
@@ -89,8 +93,9 @@ export default function PrintDeathReport(props: { id: string }) {
       patientData.medical_history &&
       patientData.medical_history.length
     ) {
-      const medHis = patientData.medical_history;
-      return medHis.map((item: any) => item.disease).join(", ");
+      return humanizeStrings(
+        patientData.medical_history.map((item: any) => item.disease),
+      );
     } else {
       return "None";
     }

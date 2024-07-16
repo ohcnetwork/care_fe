@@ -24,7 +24,7 @@ export const CreateSymptomsBuilder = (props: {
   onChange: (value: Writable<EncounterSymptom>[]) => void;
 }) => {
   return (
-    <div className="flex w-full flex-col items-start rounded-lg border border-gray-400">
+    <div className="flex w-full flex-col items-start rounded-lg border border-secondary-400">
       <ul className="flex w-full flex-col gap-2 p-4">
         {props.value.map((obj, index, arr) => {
           const handleUpdate = (event: FieldChangeEvent<unknown>) => {
@@ -40,7 +40,7 @@ export const CreateSymptomsBuilder = (props: {
             <li
               key={index}
               id={`symptom-${index}`}
-              className="border-b-2 border-dashed border-gray-400 py-4 last:border-b-0 last:pb-0 md:border-b-0 md:py-2"
+              className="border-b-2 border-dashed border-secondary-400 py-4 last:border-b-0 last:pb-0 md:border-b-0 md:py-2"
             >
               <SymptomEntry
                 value={obj}
@@ -53,12 +53,12 @@ export const CreateSymptomsBuilder = (props: {
       </ul>
 
       {props.value.length === 0 && (
-        <div className="flex w-full justify-center gap-2 pb-8 text-center font-medium text-gray-700">
+        <div className="flex w-full justify-center gap-2 pb-8 text-center font-medium text-secondary-700">
           No symptoms added
         </div>
       )}
 
-      <div className="w-full rounded-b-lg border-t-2 border-dashed border-gray-400 bg-gray-100 p-4">
+      <div className="w-full rounded-b-lg border-t-2 border-dashed border-secondary-400 bg-secondary-100 p-4">
         <AddSymptom
           existing={props.value}
           onAdd={(objects) => props.onChange([...props.value, ...objects])}
@@ -82,7 +82,7 @@ export const EncounterSymptomsBuilder = (props: {
 
   if (!data) {
     return (
-      <div className="flex w-full animate-pulse justify-center gap-2 rounded-lg bg-gray-200 py-8 text-center font-medium text-gray-700">
+      <div className="flex w-full animate-pulse justify-center gap-2 rounded-lg bg-secondary-200 py-8 text-center font-medium text-secondary-700">
         <CareIcon icon="l-spinner-alt" className="animate-spin text-lg" />
         <span>Fetching symptom records...</span>
       </div>
@@ -97,7 +97,7 @@ export const EncounterSymptomsBuilder = (props: {
   }
 
   return (
-    <div className="flex w-full flex-col items-start rounded-lg border border-gray-400">
+    <div className="flex w-full flex-col items-start rounded-lg border border-secondary-400">
       <ul
         className={classNames(
           "flex w-full flex-col p-4",
@@ -133,7 +133,7 @@ export const EncounterSymptomsBuilder = (props: {
           return (
             <li
               key={symptom.id}
-              className="border-b-2 border-dashed border-gray-400 py-4 last:border-b-0 last:pb-0 md:border-b-0 md:py-2"
+              className="border-b-2 border-dashed border-secondary-400 py-4 last:border-b-0 last:pb-0 md:border-b-0 md:py-2"
             >
               <SymptomEntry
                 value={symptom}
@@ -147,12 +147,12 @@ export const EncounterSymptomsBuilder = (props: {
       </ul>
 
       {items.length === 0 && (
-        <div className="flex w-full justify-center gap-2 pb-8 text-center font-medium text-gray-700">
+        <div className="flex w-full justify-center gap-2 pb-8 text-center font-medium text-secondary-700">
           Patient is Asymptomatic
         </div>
       )}
 
-      <div className="w-full rounded-b-lg border-t-2 border-dashed border-gray-400 bg-gray-100 p-4">
+      <div className="w-full rounded-b-lg border-t-2 border-dashed border-secondary-400 bg-secondary-100 p-4">
         <AddSymptom
           existing={data.results}
           consultationId={consultationId}
@@ -202,7 +202,7 @@ const SymptomEntry = (props: {
         <div
           className={classNames(
             "cui-input-base w-full font-medium",
-            disabled && "bg-gray-200",
+            disabled && "bg-secondary-200",
           )}
         >
           <span
@@ -381,7 +381,7 @@ export const SymptomText = (props: {
       <span className="font-normal">Other: </span>
       <span
         className={classNames(
-          !props.value.other_symptom?.trim() && "italic text-gray-700",
+          !props.value.other_symptom?.trim() && "italic text-secondary-700",
         )}
       >
         {props.value.other_symptom || "Not specified"}
