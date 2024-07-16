@@ -471,11 +471,11 @@ export const PatientManager = () => {
             </span>
           </div>
           <div className="flex flex-col items-start gap-4 md:flex-row">
-            <div className="h-20 w-full min-w-20 rounded-lg border border-gray-300 bg-gray-50 md:w-20">
+            <div className="bg-secondary-50 h-20 w-full min-w-20 rounded-lg border border-secondary-300 md:w-20">
               {patient?.last_consultation?.current_bed &&
               patient?.last_consultation?.discharge_date === null ? (
                 <div className="tooltip flex h-full flex-col items-center justify-center">
-                  <span className="w-full truncate px-1 text-center text-sm text-gray-900">
+                  <span className="w-full truncate px-1 text-center text-sm text-secondary-900">
                     {
                       patient?.last_consultation?.current_bed?.bed_object
                         ?.location_object?.name
@@ -498,7 +498,7 @@ export const PatientManager = () => {
                   <div className="tooltip">
                     <CareIcon
                       icon="l-estate"
-                      className="text-3xl text-gray-500"
+                      className="text-3xl text-secondary-500"
                     />
                     <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-sm font-medium">
                       Domiciliary Care
@@ -509,7 +509,7 @@ export const PatientManager = () => {
                 <div className="flex min-h-20 items-center justify-center">
                   <CareIcon
                     icon="l-user-injured"
-                    className="text-3xl text-gray-500"
+                    className="text-3xl text-secondary-500"
                   />
                 </div>
               )}
@@ -521,14 +521,14 @@ export const PatientManager = () => {
                   id="patient-name-list"
                 >
                   <span className="text-xl capitalize">{patient.name}</span>
-                  <span className="font-bold text-gray-700">
+                  <span className="font-bold text-secondary-700">
                     {formatPatientAge(patient, true)}
                   </span>
                 </div>
               </div>
 
               {patient.action && patient.action != 10 && (
-                <span className="text-sm font-semibold text-gray-700">
+                <span className="text-sm font-semibold text-secondary-700">
                   {
                     TELEMEDICINE_ACTIONS.find((i) => i.id === patient.action)
                       ?.desc
@@ -539,13 +539,15 @@ export const PatientManager = () => {
               {patient.facility_object && (
                 <div className="mb-2">
                   <div className="flex flex-wrap items-center">
-                    <p className="mr-2 text-sm font-medium text-gray-700">
+                    <p className="mr-2 text-sm font-medium text-secondary-700">
                       {patient.facility_object.name}
                     </p>
                     <RecordMeta
-                      className="text-sm text-gray-900"
+                      className="text-sm text-secondary-900"
                       prefix={
-                        <span className="text-gray-600">{t("updated")}</span>
+                        <span className="text-secondary-600">
+                          {t("updated")}
+                        </span>
                       }
                       time={patient.modified_date}
                     />
@@ -712,7 +714,9 @@ export const PatientManager = () => {
   } else if (data && data.count === 0) {
     managePatients = (
       <div className="col-span-3 w-full rounded-lg bg-white p-2 py-8 pt-4 text-center">
-        <p className="text-2xl font-bold text-gray-600">No Patients Found</p>
+        <p className="text-2xl font-bold text-secondary-600">
+          No Patients Found
+        </p>
       </div>
     );
   }

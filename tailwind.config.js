@@ -43,7 +43,7 @@ module.exports = {
           800: "#03543F",
           900: "#014737",
         },
-        secondary: gray, // equivalent to our custom gray, but will become equivalent to tailwind's gray in tailwind v3.2
+        secondary: gray,
         danger: colors.red,
         warning: colors.amber,
         alert: colors.violet,

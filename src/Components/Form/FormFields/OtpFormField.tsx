@@ -19,7 +19,7 @@ const OtpFormField = ({ length = 6, ...props }: TextAreaFormFieldProps) => {
           <input
             key={i}
             ref={(element) => (inputs.current[i] = element)}
-            className="form-control m-2 h-10 w-10 rounded border border-gray-600 text-center"
+            className="form-control m-2 h-10 w-10 rounded border border-secondary-600 text-center"
             maxLength={1}
             value={props.value[i]}
             onChange={(e) => {

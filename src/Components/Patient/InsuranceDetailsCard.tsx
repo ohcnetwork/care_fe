@@ -13,7 +13,7 @@ export const InsuranceDetialsCard = (props: InsuranceDetails) => {
   return (
     <div className="w-full">
       <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
-        <div className="border-b border-dashed pb-2 text-xl font-bold text-gray-900">
+        <div className="border-b border-dashed pb-2 text-xl font-bold text-secondary-900">
           Policy Details
         </div>
         {data ? (
@@ -60,7 +60,7 @@ export const InsuranceDetialsCard = (props: InsuranceDetails) => {
                         `/facility/${data.patient_object?.facility_object?.id}/patient/${data.patient_object?.id}/insurance`,
                       );
                     }}
-                    className="h-auto whitespace-pre-wrap border border-gray-500 bg-white text-black hover:bg-gray-300"
+                    className="h-auto whitespace-pre-wrap border border-secondary-500 bg-white text-black hover:bg-secondary-300"
                   >
                     View All Details
                   </ButtonV2>
@@ -69,7 +69,7 @@ export const InsuranceDetialsCard = (props: InsuranceDetails) => {
             )}
           </div>
         ) : (
-          <div className="flex w-full items-center justify-center text-xl font-bold text-gray-500">
+          <div className="flex w-full items-center justify-center text-xl font-bold text-secondary-500">
             No Insurance Details Available
           </div>
         )}
