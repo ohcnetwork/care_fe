@@ -157,9 +157,11 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                             <p
                               className={classNames(
                                 "text-sm font-normal",
-                                option.disabled || !active
+                                option.disabled
                                   ? "text-secondary-500"
-                                  : "text-primary-200",
+                                  : active
+                                    ? "text-primary-200"
+                                    : "text-secondary-500",
                               )}
                             >
                               {option.description}
