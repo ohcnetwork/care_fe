@@ -35,7 +35,7 @@ export const FacilityStaffList = (props: any) => {
   let doctorList: any = null;
   if (!doctorQuery.data || !doctorQuery.data.results.length) {
     doctorList = (
-      <h5 className="flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-gray-500 shadow">
+      <h5 className="flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-secondary-500 shadow">
         {t("no_staff")}
       </h5>
     );
