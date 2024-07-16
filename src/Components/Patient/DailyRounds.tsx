@@ -13,7 +13,6 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 import * as Notification from "../../Utils/Notifications";
 import { formatDateTime } from "../../Utils/utils";
-import { capitalize } from "lodash-es";
 import BloodPressureFormField, {
   BloodPressureValidator,
 } from "../Common/BloodPressureFormField";
@@ -44,76 +43,80 @@ import {
 } from "../Diagnosis/types";
 import { EncounterSymptomsBuilder } from "../Symptoms/SymptomsBuilder";
 import { FieldLabel } from "../Form/FormFields/FormField";
+import useAuthUser from "../../Common/hooks/useAuthUser";
+import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
-const initForm: any = {
-  physical_examination_info: "",
-  other_details: "",
-  patient_category: "",
-  actions: null,
-  action: "",
-  review_interval: 0,
-  admitted_to: "",
-  taken_at: null,
-  rounds_type: "NORMAL",
-  systolic: null,
-  investigations: [],
-  investigations_dirty: false,
-  symptoms_dirty: false,
-  diastolic: null,
-  pulse: null,
-  resp: null,
-  temperature: null,
-  rhythm: undefined,
-  rhythm_detail: "",
-  ventilator_spo2: null,
-  consciousness_level: undefined,
-  bp: {
-    systolic: undefined,
-    diastolic: undefined,
-    mean: undefined,
-  },
-  // bed: null,
-};
-
-const initError = Object.assign(
-  {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
-);
-
-const initialState = {
-  form: { ...initForm },
-  errors: { ...initError },
-};
-
-const DailyRoundsFormReducer = (state = initialState, action: any) => {
-  switch (action.type) {
-    case "set_form": {
-      return {
-        ...state,
-        form: action.form,
-      };
-    }
-    case "set_errors": {
-      return {
-        ...state,
-        errors: action.errors,
-      };
-    }
-    case "set_state": {
-      if (action.state) return action.state;
-      return state;
-    }
-    default:
-      return state;
-  }
-};
-
 export const DailyRounds = (props: any) => {
   const { t } = useTranslation();
+  const authUser = useAuthUser();
   const { goBack } = useAppHistory();
   const { facilityId, patientId, consultationId, id } = props;
+
+  const initForm: any = {
+    physical_examination_info: "",
+    other_details: "",
+    patient_category: "",
+    actions: null,
+    action: "",
+    review_interval: 0,
+    admitted_to: "",
+    taken_at: null,
+    rounds_type: authUser.user_type === "Doctor" ? "DOCTORS_LOG" : "NORMAL",
+    systolic: null,
+    investigations: [],
+    investigations_dirty: false,
+    symptoms_dirty: false,
+    diastolic: null,
+    pulse: null,
+    resp: null,
+    temperature: null,
+    rhythm: undefined,
+    rhythm_detail: "",
+    ventilator_spo2: null,
+    consciousness_level: undefined,
+    bp: {
+      systolic: undefined,
+      diastolic: undefined,
+      mean: undefined,
+    },
+    // bed: null,
+  };
+
+  const initError = Object.assign(
+    {},
+    ...Object.keys(initForm).map((k) => ({ [k]: "" })),
+  );
+
+  const initialState = {
+    form: { ...initForm },
+    errors: { ...initError },
+  };
+
+  const DailyRoundsFormReducer = (state = initialState, action: any) => {
+    switch (action.type) {
+      case "set_form": {
+        return {
+          ...state,
+          form: action.form,
+        };
+      }
+      case "set_errors": {
+        return {
+          ...state,
+          errors: action.errors,
+        };
+      }
+      case "set_state": {
+        if (action.state) return action.state;
+        return state;
+      }
+      default:
+        return state;
+    }
+  };
+
   const [state, dispatch] = useAutoSaveReducer<any>(
     DailyRoundsFormReducer,
     initialState,
@@ -129,6 +132,8 @@ export const DailyRounds = (props: any) => {
     action: "",
   });
   const [diagnoses, setDiagnoses] = useState<ConsultationDiagnosis[]>();
+  const [showDiscontinuedPrescriptions, setShowDiscontinuedPrescriptions] =
+    useState(false);
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id ? "Save" : "Continue";
 
@@ -311,7 +316,7 @@ export const DailyRounds = (props: any) => {
         review_interval: Number(prevReviewInterval),
       };
 
-      if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
+      if (!["VENTILATOR"].includes(state.form.rounds_type)) {
         data = {
           ...data,
           bp: state.form.bp ?? {},
@@ -336,7 +341,7 @@ export const DailyRounds = (props: any) => {
         if (obj) {
           dispatch({ type: "set_form", form: initForm });
           Notification.Success({
-            msg: `${obj.rounds_type === "VENTILATOR" ? "Critical Care" : capitalize(obj.rounds_type)} log update details updated successfully`,
+            msg: `${t(obj.rounds_type as string)} log updated successfully`,
           });
           if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
             navigate(
@@ -356,24 +361,15 @@ export const DailyRounds = (props: any) => {
         setIsLoading(false);
         if (obj) {
           dispatch({ type: "set_form", form: initForm });
+          Notification.Success({
+            msg: `${t(state.form.rounds_type)} log created successfully`,
+          });
+
           if (["NORMAL", "TELEMEDICINE"].includes(state.form.rounds_type)) {
-            Notification.Success({
-              msg: `${state.form.rounds_type === "NORMAL" ? "Normal" : "Tele-medicine"} log update created successfully`,
-            });
-            navigate(
-              `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
-            );
-          } else if (state.form.rounds_type === "DOCTORS_LOG") {
-            Notification.Success({
-              msg: "Doctors log update created successfully",
-            });
             navigate(
               `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`,
             );
           } else {
-            Notification.Success({
-              msg: "Critical Care log update created successfully",
-            });
             navigate(
               `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily_rounds/${obj.id}/update`,
             );
@@ -419,6 +415,24 @@ export const DailyRounds = (props: any) => {
     return <Loading />;
   }
 
+  const roundTypes = [];
+
+  if (
+    ["Doctor", "Staff", "DistrictAdmin", "StateAdmin"].includes(
+      authUser.user_type,
+    )
+  ) {
+    roundTypes.push({ id: "DOCTORS_LOG", text: t("DOCTORS_LOG") });
+  }
+
+  roundTypes.push(
+    { id: "NORMAL", text: t("NORMAL") },
+    { id: "VENTILATOR", text: t("VENTILATOR") },
+  );
+
+  if (consultationSuggestion === "DC") {
+    roundTypes.push({ id: "TELEMEDICINE", text: t("TELEMEDICINE") });
+  }
   const submitButtonDisabled = (() => {
     if (buttonText !== "Save") {
       return false;
@@ -500,16 +514,7 @@ export const DailyRounds = (props: any) => {
               required
               className="w-full"
               label="Round Type"
-              options={[
-                ...[
-                  { id: "NORMAL", text: "Normal" },
-                  { id: "DOCTORS_LOG", text: "Doctor's Log Update" },
-                  { id: "VENTILATOR", text: "Critical Care" },
-                ],
-                ...(consultationSuggestion == "DC"
-                  ? [{ id: "TELEMEDICINE", text: "Telemedicine" }]
-                  : []),
-              ]}
+              options={roundTypes}
               optionLabel={(option) => option.text}
               optionValue={(option) => option.id}
             />
@@ -732,16 +737,49 @@ export const DailyRounds = (props: any) => {
                   <FieldErrorText error={state.errors.investigation} />
                 </div>
                 <div>
-                  <h3 className="mb-4 mt-8 text-lg font-semibold">
-                    {t("prescription_medications")}
-                  </h3>
-                  <PrescriptionBuilder />
+                  <div className="mb-4 mt-8 flex items-center justify-between ">
+                    <h3 className="text-lg font-semibold">
+                      {t("prescription_medications")}
+                    </h3>
+                    <CheckBoxFormField
+                      label="Include discontinued prescriptions"
+                      name="toggle-discontinued-prescriptions-visibility"
+                      value={showDiscontinuedPrescriptions}
+                      onChange={({ value }) =>
+                        setShowDiscontinuedPrescriptions(value)
+                      }
+                      errorClassName="hidden"
+                    />
+                  </div>
+                  <PrescriptionBuilder
+                    discontinued={
+                      showDiscontinuedPrescriptions ? undefined : false
+                    }
+                    actions={["discontinue"]}
+                  />
                 </div>
                 <div>
-                  <h3 className="mb-4 mt-8 text-lg font-semibold">
-                    {t("prn_prescriptions")}
-                  </h3>
-                  <PrescriptionBuilder is_prn />
+                  <div className="mb-4 mt-8 flex items-center justify-between ">
+                    <h3 className="text-lg font-semibold">
+                      {t("prn_prescriptions")}
+                    </h3>
+                    <CheckBoxFormField
+                      label="Include discontinued prescriptions"
+                      name="toggle-discontinued-prescriptions-visibility"
+                      value={showDiscontinuedPrescriptions}
+                      onChange={({ value }) =>
+                        setShowDiscontinuedPrescriptions(value)
+                      }
+                      errorClassName="hidden"
+                    />
+                  </div>
+                  <PrescriptionBuilder
+                    is_prn
+                    discontinued={
+                      showDiscontinuedPrescriptions ? undefined : false
+                    }
+                    actions={["discontinue"]}
+                  />
                 </div>
               </div>
             </>

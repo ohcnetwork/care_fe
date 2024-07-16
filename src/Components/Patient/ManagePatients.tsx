@@ -519,11 +519,11 @@ export const PatientManager = () => {
             <div className="flex w-full flex-col gap-2 pl-2 md:block md:flex-row">
               <div className="flex w-full items-center justify-between gap-2">
                 <div
-                  className="flex flex-wrap gap-2 font-semibold"
+                  className="flex flex-wrap items-end gap-3 font-semibold"
                   id="patient-name-list"
                 >
                   <span className="text-xl capitalize">{patient.name}</span>
-                  <span className="text-gray-800">
+                  <span className="font-bold text-gray-700">
                     {formatPatientAge(patient, true)}
                   </span>
                 </div>
@@ -556,6 +556,35 @@ export const PatientManager = () => {
               )}
               <div className="flex w-full">
                 <div className="flex flex-row flex-wrap justify-start gap-2">
+                  {!patient.last_consultation ||
+                  patient.last_consultation?.facility !== patient.facility ||
+                  (patient.last_consultation?.discharge_date &&
+                    patient.is_active) ? (
+                    <span className="relative inline-flex">
+                      <Chip
+                        size="small"
+                        variant="danger"
+                        startIcon="l-notes"
+                        text="No Consultation Filed"
+                      />
+                      <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center">
+                        <span className="center absolute inline-flex h-4 w-4 animate-ping rounded-full bg-red-400"></span>
+                        <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
+                      </span>
+                    </span>
+                  ) : (
+                    <>
+                      {patient.last_consultation?.patient_no && (
+                        <Chip
+                          size="small"
+                          variant="primary"
+                          text={`${patient.last_consultation?.suggestion === "A" ? "IP No:" : "OP No:"} ${
+                            patient.last_consultation?.patient_no
+                          }`}
+                        />
+                      )}
+                    </>
+                  )}
                   {patient.review_time &&
                     !patient.last_consultation?.discharge_date &&
                     Number(patient.last_consultation?.review_interval) > 0 &&
@@ -583,7 +612,7 @@ export const PatientManager = () => {
                         size="small"
                         variant="primary"
                         startIcon="l-clock-three"
-                        text={`IP Days: ${dayjs().diff(patient.last_consultation.encounter_date, "day")}`}
+                        text={`IP Day No: ${dayjs().diff(patient.last_consultation.encounter_date, "day") + 1}`}
                       />
                     )}
                   {patient.gender === 2 &&
@@ -606,23 +635,6 @@ export const PatientManager = () => {
                       startIcon="l-user-md"
                       text="Medical Worker"
                     />
-                  )}
-                  {(!patient.last_consultation ||
-                    patient.last_consultation?.facility !== patient.facility ||
-                    (patient.last_consultation?.discharge_date &&
-                      patient.is_active)) && (
-                    <span className="relative inline-flex">
-                      <Chip
-                        size="small"
-                        variant="danger"
-                        startIcon="l-notes"
-                        text="No Consultation Filed"
-                      />
-                      <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center">
-                        <span className="center absolute inline-flex h-4 w-4 animate-ping rounded-full bg-red-400"></span>
-                        <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
-                      </span>
-                    </span>
                   )}
                   {!(
                     patient.last_consultation?.facility !== patient.facility

@@ -313,8 +313,12 @@ export const REVIEW_AT_CHOICES: Array<OptionsType> = [
   { id: 36 * 60, text: "36 hr" },
   { id: 2 * 24 * 60, text: "2 days" },
   { id: 3 * 24 * 60, text: "3 days" },
+  { id: 5 * 24 * 60, text: "5 days" },
   { id: 7 * 24 * 60, text: "7 days" },
+  { id: 10 * 24 * 60, text: "10 days" },
   { id: 14 * 24 * 60, text: "2 weeks" },
+  { id: 21 * 24 * 60, text: "3 weeks" },
+  { id: 25 * 24 * 60, text: "25 days" },
   { id: 30 * 24 * 60, text: "1 month" },
 ];
 

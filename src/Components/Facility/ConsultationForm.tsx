@@ -1214,16 +1214,9 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       required={["A", "DC", "OP"].includes(
                         state.form.suggestion,
                       )}
-                      label={
-                        {
-                          A: "Date & Time of Admission to the Facility",
-                          DC: "Date & Time of Domiciliary Care commencement",
-                          OP: "Date & Time of Out-patient visit",
-                          DD: "Date & Time of Consultation",
-                          HI: "Date & Time of Consultation",
-                          R: "Date & Time of Consultation",
-                        }[state.form.suggestion]
-                      }
+                      label={t(
+                        `encounter_date_field_label__${state.form.suggestion}`,
+                      )}
                       type="datetime-local"
                       value={dayjs(state.form.encounter_date).format(
                         "YYYY-MM-DDTHH:mm",
@@ -1235,6 +1228,21 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                           : undefined
                       }
                     />
+                    {dayjs().diff(state.form.encounter_date, "day") > 30 && (
+                      <div className="mb-6">
+                        <span className="font-medium text-warning-500">
+                          <CareIcon
+                            icon="l-exclamation-triangle"
+                            className="pr-2 text-lg"
+                          />
+                          {t("caution")}:{" "}
+                          {t("back_dated_encounter_date_caution")}{" "}
+                          <strong className="font-bold">
+                            {dayjs(state.form.encounter_date).fromNow()}.
+                          </strong>
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {state.form.route_to_facility === 30 && (
