@@ -394,7 +394,7 @@ const DischargeModal = ({
           {durationNeedsAttention && (
             <>
               <CareIcon icon="l-exclamation-triangle" className="text-lg" />
-              <strong> Caution: </strong>
+              <strong> {t("caution")}: </strong>
             </>
           )}
           {t("encounter_duration_confirmation")}{" "}
