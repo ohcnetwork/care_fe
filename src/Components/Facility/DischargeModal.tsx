@@ -224,7 +224,9 @@ const DischargeModal = ({
           <p>Discharge patient from CARE</p>
           <span className="mt-1 flex gap-1 text-sm font-medium text-warning-500">
             <CareIcon icon="l-exclamation-triangle" className="text-base" />
-            <p>Caution: this action is irreversible.</p>
+            <p>
+              {t("caution")}: {t("action_irreversible")}
+            </p>
           </span>
         </div>
       }
