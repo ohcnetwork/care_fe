@@ -204,18 +204,18 @@ const DischargeModal = ({
     }));
   };
 
-  const encounterDuration = dayjs
-    .duration(
-      dayjs(
-        preDischargeForm[
-          discharge_reason ===
-          DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
-            ? "death_datetime"
-            : "discharge_date"
-        ],
-      ).diff(consultationData.encounter_date),
-    )
-    .humanize();
+  const encounterDuration = dayjs.duration(
+    dayjs(
+      preDischargeForm[
+        discharge_reason ===
+        DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
+          ? "death_datetime"
+          : "discharge_date"
+      ],
+    ).diff(consultationData.encounter_date),
+  );
+
+  const durationNeedsAttention = encounterDuration.asDays() >= 30;
 
   return (
     <DialogModal
@@ -386,9 +386,19 @@ const DischargeModal = ({
       )}
 
       <div className="py-4">
-        <span className="text-gray-700">
+        <span
+          className={
+            durationNeedsAttention ? "text-warning-500" : "text-gray-700"
+          }
+        >
+          {durationNeedsAttention && (
+            <>
+              <CareIcon icon="l-exclamation-triangle" className="text-lg" />
+              <strong> Caution: </strong>
+            </>
+          )}
           {t("encounter_duration_confirmation")}{" "}
-          <strong>{encounterDuration}</strong>.
+          <strong>{encounterDuration.humanize()}</strong>.
         </span>
       </div>
       <div className="cui-form-button-group">
