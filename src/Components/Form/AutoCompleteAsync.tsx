@@ -8,6 +8,7 @@ import {
   dropdownOptionClassNames,
 } from "./MultiSelectMenuV2";
 import { useTranslation } from "react-i18next";
+import { classNames } from "../../Utils/utils";
 
 interface Props {
   id?: string;
@@ -17,7 +18,7 @@ interface Props {
   onChange: (selected: any) => void;
   optionLabel?: (option: any) => string;
   optionLabelChip?: (option: any) => string;
-  showNOptions?: number;
+  showNOptions?: number | undefined;
   multiple?: boolean;
   compareBy?: string;
   debounceTime?: number;
@@ -39,7 +40,7 @@ const AutoCompleteAsync = (props: Props) => {
     onChange,
     optionLabel = (option: any) => option.label,
     optionLabelChip = (option: any) => option.label,
-    showNOptions = 10,
+    showNOptions,
     multiple = false,
     compareBy,
     debounceTime = 300,
@@ -61,8 +62,13 @@ const AutoCompleteAsync = (props: Props) => {
     () =>
       debounce(async (query: string) => {
         setLoading(true);
-        const data = await fetchData(query);
-        setData(data?.slice(0, showNOptions) || []);
+        const data = (await fetchData(query)) || [];
+
+        if (showNOptions !== undefined) {
+          setData(data.slice(0, showNOptions));
+        } else {
+          setData(data);
+        }
         setLoading(false);
       }, debounceTime),
     [fetchData, showNOptions, debounceTime],
@@ -86,7 +92,10 @@ const AutoCompleteAsync = (props: Props) => {
             <Combobox.Input
               id={id}
               name={name}
-              className="cui-input-base truncate pr-16"
+              className={classNames(
+                "cui-input-base truncate pr-16",
+                error && "border-danger-500",
+              )}
               placeholder={
                 multiple && hasSelection
                   ? `${selected.length} selected`
@@ -98,7 +107,6 @@ const AutoCompleteAsync = (props: Props) => {
               onChange={({ target }) => setQuery(target.value)}
               onFocus={props.onFocus}
               onBlur={() => {
-                setQuery("");
                 props.onBlur?.();
               }}
               autoComplete="off"
@@ -183,7 +191,9 @@ const AutoCompleteAsync = (props: Props) => {
             </div>
           )}
           {error && (
-            <div className="mt-1 text-sm font-medium text-red-500">{error}</div>
+            <div className="mt-1 text-xs font-medium text-danger-500">
+              {error}
+            </div>
           )}
         </div>
       </Combobox>
