@@ -20,7 +20,7 @@ const VitalsMonitorAssetPopover = ({
       <Popover.Button>
         <CareIcon
           icon="l-info-circle"
-          className="cursor-pointer text-sm text-gray-500 hover:text-white md:text-base"
+          className="cursor-pointer text-sm text-secondary-500 hover:text-white md:text-base"
         />
       </Popover.Button>
       <Transition
@@ -49,13 +49,13 @@ const VitalsMonitorAssetPopover = ({
             </div>
             <div className="flex flex-col gap-1">
               <p className="text-sm md:text-base">Middleware Hostname:</p>
-              <p className="break-words text-gray-600">
+              <p className="break-words text-secondary-600">
                 {asset?.resolved_middleware?.hostname}
               </p>
             </div>
             <div className="flex flex-col gap-1">
               <p className="text-sm md:text-base">Local IP Address:</p>
-              <p className="break-words text-gray-600">
+              <p className="break-words text-secondary-600">
                 {asset?.meta?.local_ip_address}
               </p>
             </div>

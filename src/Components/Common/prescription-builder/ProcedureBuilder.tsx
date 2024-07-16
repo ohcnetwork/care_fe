@@ -41,18 +41,18 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
           <div
             key={i}
             className={`border-2 ${
-              activeIdx === i ? "border-primary-500" : "border-gray-500"
-            } mb-2 border-spacing-2 rounded-md border-dashed p-3 text-sm text-gray-600`}
+              activeIdx === i ? "border-primary-500" : "border-secondary-500"
+            } mb-2 border-spacing-2 rounded-md border-dashed p-3 text-sm text-secondary-600`}
           >
             <div className="flex flex-col gap-2 md:flex-row">
               <div className="flex w-full flex-1 flex-col gap-2">
                 <div className="flex flex-wrap items-center gap-2 md:flex-row md:gap-4">
-                  <h4 className="text-base font-medium text-gray-700">
+                  <h4 className="text-base font-medium text-secondary-700">
                     Procedure No. {i + 1}
                   </h4>
                   <button
                     type="button"
-                    className="flex h-full items-center justify-center gap-2 rounded-md bg-red-500 px-3 py-1 text-sm text-gray-100 transition hover:bg-red-600"
+                    className="flex h-full items-center justify-center gap-2 rounded-md bg-red-500 px-3 py-1 text-sm text-secondary-100 transition hover:bg-red-600"
                     onClick={() =>
                       setProcedures(
                         procedures.filter((procedure, index) => i != index),
@@ -69,7 +69,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                   <input
                     id="procedure-name"
                     type="text"
-                    className="mt-1 block w-full rounded border border-gray-400 bg-gray-100 px-4 py-2 text-sm hover:bg-gray-200 focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-primary-500"
+                    className="mt-1 block w-full rounded border border-secondary-400 bg-secondary-100 px-4 py-2 text-sm hover:bg-secondary-200 focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-primary-500"
                     placeholder="Procedure"
                     maxLength={100}
                     value={procedure.procedure || ""}
@@ -138,7 +138,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                       <input
                         id="procedure-time"
                         type="datetime-local"
-                        className="block w-[calc(100%-5px)] rounded border border-gray-400 bg-gray-100 px-4 py-2 text-sm hover:bg-gray-200 focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-primary-500"
+                        className="block w-[calc(100%-5px)] rounded border border-secondary-400 bg-secondary-100 px-4 py-2 text-sm hover:bg-secondary-200 focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-primary-500"
                         value={procedure.time || ""}
                         onFocus={() => setActiveIdx(i)}
                         onBlur={() => setActiveIdx(null)}
@@ -160,7 +160,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                   <div className="mb-1">Notes</div>
                   <input
                     type="text"
-                    className="block w-full rounded border border-gray-400 bg-gray-100 px-4 py-2 text-sm hover:bg-gray-200 focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-primary-500"
+                    className="block w-full rounded border border-secondary-400 bg-secondary-100 px-4 py-2 text-sm hover:bg-secondary-200 focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-primary-500"
                     placeholder="Notes"
                     value={procedure.notes || ""}
                     onFocus={() => setActiveIdx(i)}
@@ -186,7 +186,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
         onClick={() => {
           setProcedures([...procedures, { repetitive: false }]);
         }}
-        className="mt-4 block w-full bg-gray-200 px-4 py-2 text-left text-sm font-bold leading-5 text-gray-700 shadow-sm hover:bg-gray-300 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none"
+        className="mt-4 block w-full bg-secondary-200 px-4 py-2 text-left text-sm font-bold leading-5 text-secondary-700 shadow-sm hover:bg-secondary-300 hover:text-secondary-900 focus:bg-secondary-100 focus:text-secondary-900 focus:outline-none"
       >
         + Add Procedures
       </button>

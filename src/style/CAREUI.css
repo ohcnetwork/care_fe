@@ -18,11 +18,11 @@
 }
 
 .cui-input-base {
-    @apply text-sm block w-full py-3 px-4 text-black placeholder:text-gray-600 bg-white disabled:bg-gray-200 border border-gray-400 focus:border-primary-400 ring-0 focus:ring-1 ring-primary-400 outline-none focus:outline-none shadow-none rounded transition-colors duration-300 !important
+    @apply text-sm block w-full py-3 px-4 text-black placeholder:text-secondary-600 bg-white disabled:bg-secondary-200 border border-secondary-400 focus:border-primary-400 ring-0 focus:ring-1 ring-primary-400 outline-none focus:outline-none shadow-none rounded transition-colors duration-300 !important
 }
 
 .cui-dropdown-base {
-    @apply z-40 w-full rounded-b-md xl:rounded-b-lg shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none
+    @apply z-40 w-full rounded-b-md xl:rounded-b-lg shadow-lg overflow-auto max-h-96 bg-secondary-100 divide-y divide-secondary-300 ring-1 ring-secondary-400 focus:outline-none
 }
 
 .cui-card {

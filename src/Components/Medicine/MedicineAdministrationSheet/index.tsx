@@ -152,7 +152,7 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
           <ButtonV2
             id="discontinued-medicine"
             variant="secondary"
-            className="group sticky left-0 w-full rounded-b-lg rounded-t-none bg-gray-100"
+            className="group sticky left-0 w-full rounded-b-lg rounded-t-none bg-secondary-100"
             disabled={loading || discontinuedPrescriptions.loading}
             onClick={() => setShowDiscontinued(!showDiscontinued)}
           >
@@ -178,7 +178,7 @@ export default MedicineAdministrationSheet;
 
 const NoPrescriptions = ({ prn }: { prn: boolean }) => {
   return (
-    <div className="my-16 flex w-full flex-col items-center justify-center gap-4 text-gray-500">
+    <div className="my-16 flex w-full flex-col items-center justify-center gap-4 text-secondary-500">
       <CareIcon icon="l-tablets" className="text-5xl" />
       <h3 className="text-lg font-medium">
         {prn

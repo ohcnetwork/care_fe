@@ -11,7 +11,7 @@ let make = (~name, ~text, ~onChange, ~label=name) => {
     <label htmlFor={name} className="block mt-2"> {str(label)} </label>
     <textarea
       id={name}
-      className="block w-full border-gray-500 border-2 rounded px-2 py-1 mt-2"
+      className="block w-full border-secondary-500 border-2 rounded px-2 py-1 mt-2"
       rows=3
       value={text}
       onChange={handleOnChange(onChange)}

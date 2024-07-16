@@ -282,7 +282,7 @@ export default function PatientConsentRecords(props: {
             (r) =>
               files?.results.filter((f) => f.associating_id === r.id).length,
           ).length === 0 ? (
-            <div className="flex h-32 items-center justify-center text-gray-500">
+            <div className="flex h-32 items-center justify-center text-secondary-500">
               No consent records found
             </div>
           ) : (
