@@ -390,7 +390,7 @@ const DischargeModal = ({
       <div className="py-4">
         <span
           className={
-            durationNeedsAttention ? "text-warning-500" : "text-secondary-700"
+            durationNeedsAttention ? "text-danger-500" : "text-secondary-700"
           }
         >
           {durationNeedsAttention && (
