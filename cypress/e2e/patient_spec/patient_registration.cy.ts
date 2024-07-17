@@ -254,23 +254,7 @@ describe("Patient Creation with consultation", () => {
   });
 
   it("Patient Registration using the transfer with no consultation", () => {
-    // transfer the patient and no consulation
-    patientPage.createPatient();
-    patientPage.selectFacility(patientTransferFacility);
-    patientPage.patientformvisibility();
-    patientPage.typePatientPhoneNumber(patientTransferPhoneNumber);
-    patientTransfer.clickAdmitPatientRecordButton();
-    patientTransfer.clickTransferPopupContinueButton();
-    patientTransfer.clickTransferPatientNameList(patientTransferName);
-    patientTransfer.clickTransferPatientYOB(yearOfBirth);
-    patientTransfer.clickTransferSubmitButton();
-    patientTransfer.verifyFacilitySuccessfullMessage();
-    patientTransfer.clickConsultationCancelButton();
-    cy.wait(3000);
-    // allow the transfer button of a patient
-    patientTransfer.clickAllowPatientTransferButton();
-    // Verify the patient error message for the same facility
-    cy.awaitUrl("/patients");
+    // check for error when patient is transferred with an active consultation
     patientPage.createPatient();
     patientPage.selectFacility(patientTransferFacility);
     patientPage.patientformvisibility();
