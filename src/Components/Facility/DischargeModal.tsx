@@ -222,9 +222,13 @@ const DischargeModal = ({
       title={
         <div>
           <p>Discharge patient from CARE</p>
-          <span className="mt-1 flex gap-1 text-sm font-medium text-warning-500">
+          <span className="mt-1 flex gap-1 text-sm font-medium text-danger-500">
             <CareIcon icon="l-exclamation-triangle" className="text-base" />
-            <p>Caution: this action is irreversible.</p>
+            <p>
+              {new_discharge_reason === 3 // Expired
+                ? "Caution: Once a patient is marked as expired, the patient file cannot be transferred or edited. Please proceed with caution."
+                : "Caution: This action is irrevesible. Please proceed with caution."}
+            </p>
           </span>
         </div>
       }
