@@ -82,7 +82,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
             <Popover.Button>
               <ButtonV2
                 variant={
-                  qParams.ordering ||
+                  qParams.location ||
                   qParams.monitors_without_patient === "true"
                     ? "primary"
                     : "secondary"
