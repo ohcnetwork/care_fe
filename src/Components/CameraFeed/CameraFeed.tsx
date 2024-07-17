@@ -17,7 +17,6 @@ interface Props {
   children?: React.ReactNode;
   asset: AssetData;
   preset?: PTZPayload;
-  silent?: boolean;
   className?: string;
   // Callbacks
   onCameraPresetsObtained?: (presets: Record<string, number>) => void;
@@ -27,17 +26,16 @@ interface Props {
   constrolsDisabled?: boolean;
   shortcutsDisabled?: boolean;
   onMove?: () => void;
-  onReset?: () => void;
+  operate: ReturnType<typeof useOperateCamera>["operate"];
 }
 
 export default function CameraFeed(props: Props) {
   const playerRef = useRef<HTMLVideoElement | ReactPlayer | null>(null);
   const playerWrapperRef = useRef<HTMLDivElement>(null);
   const streamUrl = getStreamUrl(props.asset);
-  const inlineControls = useBreakpoints({ default: false, md: true });
+  const inlineControls = useBreakpoints({ default: false, sm: true });
 
   const player = usePlayer(streamUrl, playerRef);
-  const operate = useOperateCamera(props.asset.id, props.silent);
 
   const [isFullscreen, setFullscreen] = useFullscreen();
   const [state, setState] = useState<FeedAlertState>();
@@ -47,7 +45,10 @@ export default function CameraFeed(props: Props) {
   useEffect(() => {
     async function move(preset: PTZPayload) {
       setState("moving");
-      const { res } = await operate({ type: "absolute_move", data: preset });
+      const { res } = await props.operate({
+        type: "absolute_move",
+        data: preset,
+      });
       setTimeout(() => setState((s) => (s === "moving" ? undefined : s)), 4000);
       if (res?.status === 500) {
         setState("host_unreachable");
@@ -63,19 +64,19 @@ export default function CameraFeed(props: Props) {
   useEffect(() => {
     if (!props.onCameraPresetsObtained) return;
     async function getPresets(cb: (presets: Record<string, number>) => void) {
-      const { res, data } = await operate({ type: "get_presets" });
+      const { res, data } = await props.operate({ type: "get_presets" });
       if (res?.ok && data) {
         cb((data as { result: Record<string, number> }).result);
       }
     }
     getPresets(props.onCameraPresetsObtained);
-  }, [operate, props.onCameraPresetsObtained]);
+  }, [props.operate, props.onCameraPresetsObtained]);
 
   const initializeStream = useCallback(() => {
     player.initializeStream({
       onSuccess: async () => {
         props.onStreamSuccess?.();
-        const { res } = await operate({ type: "get_status" });
+        const { res } = await props.operate({ type: "get_status" });
         if (res?.status === 500) {
           setState("host_unreachable");
         }
@@ -89,12 +90,12 @@ export default function CameraFeed(props: Props) {
 
   const resetStream = () => {
     setState("loading");
-    props.onReset?.();
     initializeStream();
   };
 
   const controls = !props.constrolsDisabled && (
     <FeedControls
+      inlineView={inlineControls}
       shortcutsDisabled={props.shortcutsDisabled}
       isFullscreen={isFullscreen}
       setFullscreen={(value) => {
@@ -126,7 +127,7 @@ export default function CameraFeed(props: Props) {
       onMove={async (data) => {
         props.onMove?.();
         setState("moving");
-        const { res } = await operate({ type: "relative_move", data });
+        const { res } = await props.operate({ type: "relative_move", data });
         setTimeout(() => {
           setState((state) => (state === "moving" ? undefined : state));
         }, 4000);

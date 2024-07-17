@@ -4,7 +4,7 @@ import { classNames } from "../../Utils/utils";
 interface Props {
   className?: string;
   children?: React.ReactNode;
-  readonly shortcut?: string[];
+  shortcuts?: string[][];
   onTrigger: () => void;
   helpText?: string;
   shortcutsDisabled?: boolean;
@@ -26,21 +26,27 @@ export default function FeedButton(props: Props) {
     </button>
   );
 
-  if (props.shortcutsDisabled || !props.shortcut) {
+  if (props.shortcutsDisabled || !props.shortcuts) {
     return child;
   }
 
   return (
-    <KeyboardShortcut
-      shortcut={props.shortcut}
-      onTrigger={props.onTrigger}
-      helpText={props.helpText}
-      tooltipClassName={classNames(
-        props.tooltipClassName,
-        "hidden lg:inline-flex",
-      )}
-    >
-      {child}
-    </KeyboardShortcut>
+    <>
+      {props.shortcuts.map((shortcut, idx) => (
+        <KeyboardShortcut
+          key={idx}
+          shortcut={shortcut}
+          onTrigger={props.onTrigger}
+          helpText={props.helpText}
+          tooltipClassName={classNames(
+            props.tooltipClassName,
+            "hidden lg:inline-flex",
+          )}
+          altShortcuts={idx === 0 ? props.shortcuts : undefined}
+        >
+          {idx === 0 && child}
+        </KeyboardShortcut>
+      ))}
+    </>
   );
 }

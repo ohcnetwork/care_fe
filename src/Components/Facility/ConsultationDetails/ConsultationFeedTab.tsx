@@ -33,7 +33,6 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
     useState(false);
   const [isUpdatingPreset, setIsUpdatingPreset] = useState(false);
   const [hasMoved, setHasMoved] = useState(false);
-  const [key, setKey] = useState(0);
   const divRef = useRef<any>();
 
   const suggestOptimalExperience = useBreakpoints({ default: true, sm: false });
@@ -50,7 +49,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
     }
   }, []);
 
-  const operate = useOperateCamera(asset?.id ?? "", true);
+  const { key, operate } = useOperateCamera(asset?.id ?? "", true);
 
   const { data, loading, refetch } = useQuery(routes.listAssetBeds, {
     query: { limit: 100, facility, bed: bed?.id, asset: asset?.id },
@@ -131,11 +130,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
           asset={asset}
           preset={preset?.meta.position}
           onMove={() => setHasMoved(true)}
-          onReset={() => {
-            if (isIOS) {
-              setKey(key + 1);
-            }
-          }}
+          operate={operate}
           onStreamError={() => {
             triggerGoal("Camera Feed Viewed", {
               consultationId: props.consultationId,
