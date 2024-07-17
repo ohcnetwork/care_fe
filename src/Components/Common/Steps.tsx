@@ -13,7 +13,7 @@ export default function Steps(props: { steps: Step[] }) {
     <nav aria-label="Progress">
       <ol
         role="list"
-        className="divide-y divide-gray-300 rounded-md border border-gray-300 md:flex md:divide-y-0"
+        className="divide-y divide-secondary-300 rounded-md border border-secondary-300 md:flex md:divide-y-0"
       >
         {props.steps.map((step, stepIdx) => (
           <li key={step.name} className="relative md:flex md:flex-1">
@@ -34,7 +34,7 @@ export default function Steps(props: { steps: Step[] }) {
                       aria-hidden="true"
                     />
                   </span>
-                  <span className="ml-4 text-sm font-medium text-gray-900">
+                  <span className="ml-4 text-sm font-medium text-secondary-900">
                     {step.name}
                   </span>
                 </span>
@@ -66,12 +66,12 @@ export default function Steps(props: { steps: Step[] }) {
                 }`}
               >
                 <span className="flex items-center px-6 py-4 text-sm font-medium">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-gray-300 group-hover:border-gray-400">
-                    <span className="text-gray-500 group-hover:text-gray-900">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-secondary-300 group-hover:border-secondary-400">
+                    <span className="text-secondary-500 group-hover:text-secondary-900">
                       {step.id}
                     </span>
                   </span>
-                  <span className="ml-4 text-sm font-medium text-gray-500 group-hover:text-gray-900">
+                  <span className="ml-4 text-sm font-medium text-secondary-500 group-hover:text-secondary-900">
                     {step.name}
                   </span>
                 </span>
@@ -85,7 +85,7 @@ export default function Steps(props: { steps: Step[] }) {
                   aria-hidden="true"
                 >
                   <svg
-                    className="h-full w-full text-gray-300"
+                    className="h-full w-full text-secondary-300"
                     viewBox="0 0 22 80"
                     fill="none"
                     preserveAspectRatio="none"

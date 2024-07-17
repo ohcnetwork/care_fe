@@ -53,7 +53,7 @@ let reducer = (state, action) => {
   switch action {
   | SetPain(pain) => {
       ...state,
-      pain: pain,
+      pain,
       dirty: true,
     }
   | SetSystolic(systolic) => {
@@ -85,10 +85,10 @@ let reducer = (state, action) => {
       resp: Some(resp),
       dirty: true,
     }
-  | SetRhythm(rhythm) => {...state, rhythm: rhythm, dirty: true}
+  | SetRhythm(rhythm) => {...state, rhythm, dirty: true}
   | SetRhythmDetails(rhythmDetails) => {
       ...state,
-      rhythmDetails: rhythmDetails,
+      rhythmDetails,
       dirty: true,
     }
   | SetSaving => {...state, saving: true}
@@ -143,7 +143,11 @@ let makePayload = state => {
     Js.Dict.set(payload, "bp", Js.Json.object_(makeBpPayload(systolic, diastolic)))
   | (_, _) => ()
   }
-  Js.Dict.set(payload, "pain_scale_enhanced", Js.Json.objectArray(Js.Array.map(makePainField, state.pain)))
+  Js.Dict.set(
+    payload,
+    "pain_scale_enhanced",
+    Js.Json.objectArray(Js.Array.map(makePainField, state.pain)),
+  )
   DictUtils.setOptionalNumber("pulse", state.pulse, payload)
   DictUtils.setOptionalNumber("ventilator_spo2", state.spo2, payload)
   DictUtils.setOptionalFloat(
@@ -256,11 +260,11 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
           hasError={ValidationUtils.isInputInRangeInt(0, 100, state.spo2)}
         />
       </div>
-      <div className="border-b border-b-gray-500 w-full my-10" />
+      <div className="border-b border-b-secondary-500 w-full my-10" />
       <Slider
         title={"Temperature"}
         titleNeighbour={<div
-          className="flex items-center ml-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200"
+          className="flex items-center ml-1 border border-secondary-400 rounded px-4 h-10 cursor-pointer hover:bg-secondary-200"
           onClick={_ => ToggleTemperatureUnit->send}>
           <span className="text-blue-700"> {state.tempInCelcius ? "C"->str : "F"->str} </span>
         </div>}
@@ -291,19 +295,19 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
       <div className="w-full">
         <div className="mx-2">
           <h4> {str("Pain")} </h4>
-          <p>{str("Mark region and intensity of pain")}</p>
+          <p> {str("Mark region and intensity of pain")} </p>
         </div>
       </div>
       <CriticalCare__PainEditor
         previewMode={false}
         painParameter={state.pain}
         updateCB={data => {
-          send(SetPain(data));
+          send(SetPain(data))
         }}
         id={id}
         consultationId={consultationId}
       />
-      <div className="border-b border-b-gray-500 w-full mt-10" />
+      <div className="border-b border-b-secondary-500 w-full mt-10" />
       <Slider
         title={"Pulse (bpm)"}
         start={"0"}
@@ -337,7 +341,7 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
         </label>
         <textarea
           id="description"
-          className="block w-full border-gray-500 border-2 rounded px-2 py-1 focus:outline-green-500 focus:outline-offset-0 focus:outline-1 focus:border-green-500"
+          className="block w-full border-secondary-500 border-2 rounded px-2 py-1 focus:outline-green-500 focus:outline-offset-0 focus:outline-1 focus:border-green-500"
           rows=3
           value={state.rhythmDetails}
           onChange={e => send(SetRhythmDetails(ReactEvent.Form.target(e)["value"]))}

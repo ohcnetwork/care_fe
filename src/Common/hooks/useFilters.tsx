@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import GenericFilterBadge from "../../CAREUI/display/FilterBadge";
 import PaginationComponent from "../../Components/Common/Pagination";
 import useConfig from "./useConfig";
-import { classNames } from "../../Utils/utils";
+import { classNames, humanizeStrings } from "../../Utils/utils";
 import FiltersCache from "../../Utils/FiltersCache";
 
 export type FilterState = Record<string, unknown>;
@@ -87,10 +87,7 @@ export default function useFilters({
           name={name}
           value={
             value === undefined
-              ? paramKey
-                  .map((k) => qParams[k])
-                  .filter(Boolean)
-                  .join(", ")
+              ? humanizeStrings(paramKey.map((k) => qParams[k]).filter(Boolean))
               : value
           }
           onRemove={() => removeFilters(paramKey)}
@@ -200,7 +197,7 @@ export default function useFilters({
         {show && (
           <button
             id="clear-all-filters"
-            className="rounded-full border border-gray-300 bg-white px-2 py-1 text-xs text-gray-600 hover:text-gray-800"
+            className="rounded-full border border-secondary-300 bg-white px-2 py-1 text-xs text-secondary-600 hover:text-secondary-800"
             onClick={() => removeFilters()}
           >
             {t("clear_all_filters")}

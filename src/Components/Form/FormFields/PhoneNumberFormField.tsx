@@ -160,7 +160,7 @@ const PhoneNumberTypesHelp = (props: { types: PhoneNumberType[] }) => {
   const { t } = useTranslation();
 
   return (
-    <div className="tooltip mt-1 pr-1 text-gray-500">
+    <div className="tooltip mt-1 pr-1 text-secondary-500">
       <CareIcon icon="l-question-circle" className="text-lg" />
       <div className="tooltip-text tooltip-bottom w-64 -translate-x-full whitespace-pre-wrap text-sm">
         Supports only{" "}
@@ -204,7 +204,7 @@ const CountryCodesList = ({
   const [searchValue, setSearchValue] = useState<string>("");
 
   return (
-    <div className="absolute z-10 w-full rounded-md border border-gray-300 bg-white shadow-lg transition-all duration-300">
+    <div className="absolute z-10 w-full rounded-md border border-secondary-300 bg-white shadow-lg transition-all duration-300">
       <div className="relative m-2">
         <CareIcon
           icon="l-search"
@@ -213,7 +213,7 @@ const CountryCodesList = ({
         <input
           type="search"
           placeholder="Search"
-          className="w-full border-b border-gray-400 p-2 pl-10 focus:outline-none focus:ring-0"
+          className="w-full border-b border-secondary-400 p-2 pl-10 focus:outline-none focus:ring-0"
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
         />
@@ -243,7 +243,7 @@ const CountryCodesList = ({
             >
               <span>{flag}</span>
               <span>{name}</span>
-              <span className="text-gray-600">
+              <span className="text-secondary-600">
                 {" "}
                 ({conditionPhoneCode(code)})
               </span>
@@ -259,7 +259,7 @@ const CountryCodesList = ({
         >
           <span>📞</span>
           <span>Support</span>
-          <span className="text-gray-600"> (1800)</span>
+          <span className="text-secondary-600"> (1800)</span>
         </li>
         <li
           key={"other"}
@@ -271,7 +271,7 @@ const CountryCodesList = ({
         >
           <span>🌍</span>
           <span>Other</span>
-          <span className="text-gray-600"> (+)</span>
+          <span className="text-secondary-600"> (+)</span>
         </li>
       </ul>
     </div>

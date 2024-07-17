@@ -242,7 +242,7 @@ export default function PatientConsentRecords(props: {
                   f.associating_id === r.id && f.is_archived === showArchived,
               ).length,
           ).length === 0 ? (
-            <div className="flex h-32 items-center justify-center text-gray-500">
+            <div className="flex h-32 items-center justify-center text-secondary-500">
               No consent records found
             </div>
           ) : (

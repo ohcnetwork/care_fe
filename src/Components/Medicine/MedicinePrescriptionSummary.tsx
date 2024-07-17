@@ -6,6 +6,7 @@ import { lazy } from "react";
 import Timeline, { TimelineNode } from "../../CAREUI/display/Timeline";
 import { MedibaseMedicine, Prescription } from "../Medicine/models";
 import { useTranslation } from "react-i18next";
+import { humanizeStrings } from "../../Utils/utils";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -57,13 +58,13 @@ export const MedicinePrescriptionSummary = ({
 
   return (
     <div className="pt-6">
-      <p className="text-xl font-bold text-gray-700">{t("summary")}</p>
+      <p className="text-xl font-bold text-secondary-700">{t("summary")}</p>
       <div className="flex flex-col gap-2 pt-4">
         {medicinesList && medicinesList.length > 0 ? (
           medicinesList?.map((med: MedibaseMedicine) => (
             <div
               key={med.id}
-              className="flex cursor-pointer items-center justify-between rounded-lg border bg-white p-4 shadow hover:bg-gray-200"
+              className="flex cursor-pointer items-center justify-between rounded-lg border bg-white p-4 shadow hover:bg-secondary-200"
             >
               <div>{med.name}</div>
               <button
@@ -82,7 +83,7 @@ export const MedicinePrescriptionSummary = ({
           ))
         ) : (
           <div className="rounded-lg border shadow">
-            <div className="my-16 flex w-full flex-col items-center justify-center gap-4 text-gray-500">
+            <div className="my-16 flex w-full flex-col items-center justify-center gap-4 text-secondary-500">
               <h3 className="text-lg font-medium">{"No Medicine Summary"}</h3>
             </div>
           </div>
@@ -310,7 +311,7 @@ export default function ConsultationMedicineLogs({
 
       // If there are changes, add them to the changes array
       if (changesForPrescription.length > 0 && !prevPrescription.discontinued) {
-        const message = `Changes: ${changesForPrescription.join(", ")}`;
+        const message = `Changes: ${humanizeStrings(changesForPrescription)}`;
         changes.push({
           prescriptionId: currentPrescription.id,
           changeMessage: message,
