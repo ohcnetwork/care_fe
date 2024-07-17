@@ -106,7 +106,7 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
           ].map((item, index) =>
             item.value ? (
               <div key={index}>
-                <div className="text-xs text-gray-700">{item.label}</div>
+                <div className="text-xs text-secondary-700">{item.label}</div>
                 <div>{item.value}</div>
               </div>
             ) : null,
@@ -114,7 +114,7 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
         </div>
       </div>
 
-      <div className="mt-4 flex flex-col text-xs text-gray-700">
+      <div className="mt-4 flex flex-col text-xs text-secondary-700">
         {abha?.created_date && (
           <div className="flex items-center gap-1">
             <span className="">Created On: </span>

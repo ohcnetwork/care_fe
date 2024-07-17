@@ -79,8 +79,8 @@ export default function ConsultationDiagnosisEntry(props: Props) {
             object.is_principal
               ? "font-semibold text-primary-500"
               : "font-normal",
-            !isActive && "text-gray-500 line-through",
-            !object.diagnosis_object?.label && "italic text-gray-500",
+            !isActive && "text-secondary-500 line-through",
+            !object.diagnosis_object?.label && "italic text-secondary-500",
           )}
         >
           {object.diagnosis_object?.label ||

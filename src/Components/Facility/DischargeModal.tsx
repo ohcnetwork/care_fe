@@ -82,18 +82,15 @@ const DischargeModal = ({
   useEffect(() => {
     setPreDischargeForm((prev) => ({
       ...prev,
-      new_discharge_reason,
       discharge_notes: referred_to
         ? "Patient Shifted to another facility."
         : "",
-      discharge_date,
-      death_datetime,
       referred_to_external: !referred_to?.id ? referred_to?.name : null,
       referred_to: referred_to?.id ? referred_to.id : null,
     }));
 
     setFacility(referred_to);
-  }, [referred_to, new_discharge_reason, discharge_date, death_datetime]);
+  }, [referred_to]);
 
   const discharge_reason =
     new_discharge_reason ?? preDischargeForm.new_discharge_reason;
@@ -389,7 +386,7 @@ const DischargeModal = ({
       )}
 
       <div className="py-4">
-        <span className="text-gray-700">
+        <span className="text-secondary-700">
           {t("encounter_duration_confirmation")}{" "}
           <strong>{encounterDuration}</strong>.
         </span>

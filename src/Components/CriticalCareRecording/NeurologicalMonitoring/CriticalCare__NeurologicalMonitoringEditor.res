@@ -479,7 +479,7 @@ let make = (~updateCB, ~neurologicalMonitoring, ~id, ~consultationId) => {
         ~name="consciousness_level",
       )}
       {ReactUtils.nullIf(renderPupil(state, send), state.inPronePosition)}
-      <div className="my-15 w-full h-1 bg-gray-300" />
+      <div className="my-15 w-full h-1 bg-secondary-300" />
       <div className="my-10">
         <div className="text-3xl font-bold"> {str("Glasgow Coma Scale")} </div>
         <div className="mt-4">
@@ -541,7 +541,7 @@ let make = (~updateCB, ~neurologicalMonitoring, ~id, ~consultationId) => {
           </div>
         </div>
       </div>
-      <div className="my-15 w-full h-1 bg-gray-300" />
+      <div className="my-15 w-full h-1 bg-secondary-300" />
       <div className="my-10">
         <div className="text-3xl font-bold"> {str("Limb Response")} </div>
         <div>
@@ -568,7 +568,7 @@ let make = (~updateCB, ~neurologicalMonitoring, ~id, ~consultationId) => {
           )}
         </div>
       </div>
-      <div className="my-15 w-full h-1 bg-gray-300" />
+      <div className="my-15 w-full h-1 bg-secondary-300" />
       <button
         disabled={state.saving || !state.dirty}
         className="btn btn-primary btn-large w-full"

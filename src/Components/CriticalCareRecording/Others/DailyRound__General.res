@@ -41,7 +41,7 @@ let make = (~others, ~renderOptionalDescription, ~title) => {
     <div className="flex flex-wrap max-w-full">
       {switch additionalSymptoms {
       | Some(symptomsArray) => Js.Array.map(id => {
-          <div className="rounded-full px-4 py-2 bg-gray-400 m-1 text-sm">
+          <div className="rounded-full px-4 py-2 bg-secondary-400 m-1 text-sm">
             {str(symptoms[id - 1])}
           </div>
         }, symptomsArray)->React.array

@@ -173,12 +173,12 @@ export default function MedicineAdministrationTableRow({
       <tr
         className={classNames(
           "group transition-all duration-200 ease-in-out",
-          loading ? "bg-gray-300" : "bg-white hover:bg-primary-100",
+          loading ? "bg-secondary-300" : "bg-white hover:bg-primary-100",
         )}
         id={props.id}
       >
         <td
-          className="bg-gray-white sticky left-0 z-10 cursor-pointer bg-white py-3 pl-4 text-left transition-all duration-200 ease-in-out group-hover:bg-primary-100"
+          className="bg-secondary-white sticky left-0 z-10 cursor-pointer bg-white py-3 pl-4 text-left transition-all duration-200 ease-in-out group-hover:bg-primary-100"
           onClick={() => setShowDetails(true)}
         >
           <div className="flex flex-col gap-1 lg:flex-row lg:justify-between lg:gap-2">
@@ -186,7 +186,9 @@ export default function MedicineAdministrationTableRow({
               <span
                 className={classNames(
                   "text-sm font-semibold",
-                  prescription.discontinued ? "text-gray-700" : "text-gray-900",
+                  prescription.discontinued
+                    ? "text-secondary-700"
+                    : "text-secondary-900",
                 )}
               >
                 {prescription.medicine_object?.name ??
@@ -194,7 +196,7 @@ export default function MedicineAdministrationTableRow({
               </span>
 
               {prescription.discontinued && (
-                <span className="hidden rounded-full border border-gray-500 bg-gray-200 px-1.5 text-xs font-medium text-gray-700 lg:block">
+                <span className="hidden rounded-full border border-secondary-500 bg-secondary-200 px-1.5 text-xs font-medium text-secondary-700 lg:block">
                   {t("discontinued")}
                 </span>
               )}
@@ -206,7 +208,7 @@ export default function MedicineAdministrationTableRow({
               )}
             </div>
 
-            <div className="flex gap-1 text-xs font-semibold text-gray-900 lg:flex-col lg:px-2 lg:text-center">
+            <div className="flex gap-1 text-xs font-semibold text-secondary-900 lg:flex-col lg:px-2 lg:text-center">
               {prescription.dosage_type !== "TITRATED" ? (
                 <p>{prescription.base_dosage}</p>
               ) : (
@@ -237,7 +239,7 @@ export default function MedicineAdministrationTableRow({
               {!data?.results ? (
                 <CareIcon
                   icon="l-spinner"
-                  className="animate-spin text-lg text-gray-500"
+                  className="animate-spin text-lg text-secondary-500"
                 />
               ) : (
                 <AdministrationEventCell

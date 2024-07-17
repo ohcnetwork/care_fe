@@ -277,7 +277,7 @@ export default function useFileManager(
         className="md:w-[700px]"
         onClose={() => setArchiveDialogueOpen(null)}
       >
-        <div className="mb-8 text-xs text-gray-700">
+        <div className="mb-8 text-xs text-secondary-700">
           <CareIcon icon="l-archive" className="mr-2" />
           This file has been archived and cannot be unarchived.
         </div>
@@ -322,7 +322,7 @@ export default function useFileManager(
                 />
               </div>
               <div>
-                <div className="text-xs uppercase text-gray-700">
+                <div className="text-xs uppercase text-secondary-700">
                   {item.label}
                 </div>
                 <div className="break-words text-base">{item.content}</div>
