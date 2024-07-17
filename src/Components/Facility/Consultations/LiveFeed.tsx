@@ -547,7 +547,7 @@ const LiveFeed = (props: any) => {
                     {viewOptions(presetsPage)?.map((option: any, i) => (
                       <button
                         key={i}
-                        className="max- flex w-full flex-wrap gap-2 truncate rounded-md border border-white bg-green-100 p-3  text-black hover:bg-green-500 hover:text-white"
+                        className="flex w-full flex-wrap gap-2 truncate whitespace-pre-wrap rounded-md border border-white bg-green-100 p-3  text-black hover:bg-green-500 hover:text-white"
                         onClick={() => {
                           setLoading(`Moving to Preset ${option.label}`);
                           gotoPreset(
@@ -571,7 +571,7 @@ const LiveFeed = (props: any) => {
                       <div className="flex flex-col">
                         <button
                           key={preset.id}
-                          className="flex flex-col truncate rounded-t-md border border-white bg-green-100 p-2  text-black hover:bg-green-500 hover:text-white"
+                          className="flex h-full flex-col truncate whitespace-pre-wrap rounded-t-md border border-white  bg-green-100 p-2 text-black hover:bg-green-500 hover:text-white"
                           onClick={() => {
                             setLoading("Moving");
                             gotoBedPreset(preset);
