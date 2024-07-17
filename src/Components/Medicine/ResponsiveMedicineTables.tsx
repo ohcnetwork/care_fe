@@ -37,13 +37,13 @@ export default function ResponsiveMedicineTable(props: {
             <tr>
               {props.theads.map((item) => {
                 return (
-                  <th className="whitespace-nowrap border-b border-gray-200 bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-800">
+                  <th className="bg-secondary-50 whitespace-nowrap border-b border-secondary-200 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-secondary-800">
                     {item}
                   </th>
                 );
               })}
               {props.actions && (
-                <th className="border-b border-gray-200 bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-800">
+                <th className="bg-secondary-50 border-b border-secondary-200 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-secondary-800">
                   {props.actionLabel || ""}
                 </th>
               )}
@@ -54,7 +54,7 @@ export default function ResponsiveMedicineTable(props: {
               <tr
                 className={classNames(
                   "bg-white",
-                  props.onClick && "cursor-pointer hover:bg-gray-200",
+                  props.onClick && "cursor-pointer hover:bg-secondary-200",
                 )}
                 key={index}
                 onClick={() => props.onClick && props.onClick(med)}
@@ -65,14 +65,14 @@ export default function ResponsiveMedicineTable(props: {
                     idx === props.maxWidthColumn
                   ) {
                     return (
-                      <td className="w-full px-6 py-4 text-sm font-medium leading-5 text-gray-900">
+                      <td className="w-full px-6 py-4 text-sm font-medium leading-5 text-secondary-900">
                         {med[key]}
                       </td>
                     );
                   }
 
                   return (
-                    <td className="px-6 py-4 text-sm leading-5 text-gray-900">
+                    <td className="px-6 py-4 text-sm leading-5 text-secondary-900">
                       {med[key]}
                     </td>
                   );
@@ -110,11 +110,11 @@ export default function ResponsiveMedicineTable(props: {
               className={
                 props.list.length - 1 === index
                   ? "bg-white p-5 "
-                  : "border-b border-b-gray-400 bg-white p-5"
+                  : "border-b border-b-secondary-400 bg-white p-5"
               }
               key={index}
             >
-              <div className="mt-3 flex w-full flex-col border-t border-t-gray-400">
+              <div className="mt-3 flex w-full flex-col border-t border-t-secondary-400">
                 <div className="mt-3 grid w-full grid-cols-2 gap-3">
                   {props.objectKeys.map((key, i) => {
                     if (i !== 0 && i !== props.objectKeys.length - 1)

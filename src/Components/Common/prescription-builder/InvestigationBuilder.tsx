@@ -4,6 +4,7 @@ import { PrescriptionMultiDropdown } from "./PrescriptionMultiselect";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import request from "../../../Utils/request/request";
 import routes from "../../../Redux/api";
+import { humanizeStrings } from "../../../Utils/utils";
 
 export type InvestigationType = {
   type?: string[];
@@ -86,9 +87,9 @@ export default function InvestigationBuilder(
     return (
       data?.results.map(
         (investigation) =>
-          `${investigation.name} -- ${investigation.groups
-            .map((group) => ` ( ${group.name} ) `)
-            .join(", ")}`,
+          `${investigation.name} -- ${humanizeStrings(
+            investigation.groups.map((group) => ` ( ${group.name} ) `),
+          )}`,
       ) ?? []
     );
   };
@@ -125,16 +126,16 @@ export default function InvestigationBuilder(
           <div
             key={i}
             className={`border-2 ${
-              activeIdx === i ? "border-primary-500" : "border-gray-500"
-            } mb-2 border-spacing-2 rounded-md border-dashed p-3 text-sm text-gray-600`}
+              activeIdx === i ? "border-primary-500" : "border-secondary-500"
+            } mb-2 border-spacing-2 rounded-md border-dashed p-3 text-sm text-secondary-600`}
           >
             <div className="mb-2 flex flex-wrap items-center gap-2 md:flex-row md:gap-4">
-              <h4 className="text-base font-medium text-gray-700">
+              <h4 className="text-base font-medium text-secondary-700">
                 Investigation No. {i + 1}
               </h4>
               <button
                 type="button"
-                className="flex h-full items-center justify-center gap-1.5 rounded-md bg-red-500 px-3 py-1 text-sm text-gray-100 transition hover:bg-red-600"
+                className="flex h-full items-center justify-center gap-1.5 rounded-md bg-red-500 px-3 py-1 text-sm text-secondary-100 transition hover:bg-red-600"
                 onClick={() =>
                   setInvestigations(
                     investigations.filter((investigation, index) => i != index),
@@ -210,7 +211,7 @@ export default function InvestigationBuilder(
                       Time<span className="text-danger-500">{" *"}</span>
                       <input
                         type="datetime-local"
-                        className="block w-[calc(100%-5px)] rounded border border-gray-400 bg-gray-100 px-4 py-2 text-sm hover:bg-gray-200 focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-primary-500"
+                        className="block w-[calc(100%-5px)] rounded border border-secondary-400 bg-secondary-100 px-4 py-2 text-sm hover:bg-secondary-200 focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-primary-500"
                         value={investigation.time || ""}
                         onChange={(e) => {
                           setItem(
@@ -257,7 +258,7 @@ export default function InvestigationBuilder(
         onClick={() => {
           setInvestigations([...investigations, { repetitive: false }]);
         }}
-        className="mt-4 block w-full bg-gray-200 px-4 py-2 text-left text-sm font-bold leading-5 text-gray-700 shadow-sm hover:bg-gray-300 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none"
+        className="mt-4 block w-full bg-secondary-200 px-4 py-2 text-left text-sm font-bold leading-5 text-secondary-700 shadow-sm hover:bg-secondary-300 hover:text-secondary-900 focus:bg-secondary-100 focus:text-secondary-900 focus:outline-none"
       >
         + Add Investigation
       </button>

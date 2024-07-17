@@ -11,7 +11,11 @@ import { lazy, useCallback, useState } from "react";
 import DoctorVideoSlideover from "../DoctorVideoSlideover";
 import { make as Link } from "../../Common/components/Link.bs";
 import { PatientModel } from "../../Patient/models";
-import { formatDateTime, relativeTime } from "../../../Utils/utils";
+import {
+  formatDateTime,
+  humanizeStrings,
+  relativeTime,
+} from "../../../Utils/utils";
 
 import { navigate, useQueryParams } from "raviger";
 import { useDispatch } from "react-redux";
@@ -93,8 +97,9 @@ export const ConsultationDetails = (props: any) => {
 
   const getPatientComorbidities = (patientData: any) => {
     if (patientData?.medical_history?.length) {
-      const medHis = patientData.medical_history;
-      return medHis.map((item: any) => item.disease).join(", ");
+      return humanizeStrings(
+        patientData.medical_history.map((item: any) => item.disease),
+      );
     } else {
       return "None";
     }
@@ -113,15 +118,6 @@ export const ConsultationDetails = (props: any) => {
             ...res.data,
             symptoms_text: "",
           };
-          // if (res.data.symptoms?.length) {
-          //   const symptoms = res.data.symptoms
-          //     .filter((symptom: number) => symptom !== 9)
-          //     .map((symptom: number) => {
-          //       const option = symptomChoices.find((i) => i.id === symptom);
-          //       return option ? option.text.toLowerCase() : symptom;
-          //     });
-          //   data.symptoms_text = symptoms.join(", ");
-          // }
           if (facilityId != data.facility || patientId != data.patient) {
             navigate(
               `/facility/${data.facility}/patient/${data.patient}/consultation/${data?.id}`,
@@ -209,7 +205,7 @@ export const ConsultationDetails = (props: any) => {
   }
 
   const tabButtonClasses = (selected: boolean) =>
-    `capitalize min-w-max-content cursor-pointer border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300 font-bold whitespace-nowrap ${
+    `capitalize min-w-max-content cursor-pointer border-transparent text-secondary-700 hover:text-secondary-700 hover:border-secondary-300 font-bold whitespace-nowrap ${
       selected === true ? "border-primary-500 text-primary-600 border-b-2" : ""
     }`;
 
@@ -302,7 +298,7 @@ export const ConsultationDetails = (props: any) => {
 
             <div className="flex flex-col justify-between px-4 md:flex-row">
               {consultationData.admitted_to && (
-                <div className="mt-2 rounded-lg border bg-gray-100 p-2 md:mt-0">
+                <div className="mt-2 rounded-lg border bg-secondary-100 p-2 md:mt-0">
                   <div className="border-b-2 py-1">
                     Patient
                     {consultationData.discharge_date
@@ -332,9 +328,9 @@ export const ConsultationDetails = (props: any) => {
               )}
             </div>
             <div className="flex flex-col justify-between gap-2 px-4 py-1 md:flex-row">
-              <div className="font-base flex flex-col text-xs leading-relaxed text-gray-700">
+              <div className="font-base flex flex-col text-xs leading-relaxed text-secondary-700">
                 <div className="flex">
-                  <span className="text-gray-900">Created: </span>&nbsp;
+                  <span className="text-secondary-900">Created: </span>&nbsp;
                   <RelativeDateUserMention
                     actionDate={consultationData.created_date}
                     user={consultationData.created_by}
@@ -343,9 +339,10 @@ export const ConsultationDetails = (props: any) => {
                   />
                 </div>
               </div>
-              <div className="font-base flex flex-col text-xs leading-relaxed text-gray-700 md:text-right">
+              <div className="font-base flex flex-col text-xs leading-relaxed text-secondary-700 md:text-right">
                 <div className="flex">
-                  <span className="text-gray-900">Last Modified: </span>&nbsp;
+                  <span className="text-secondary-900">Last Modified: </span>
+                  &nbsp;
                   <RelativeDateUserMention
                     actionDate={consultationData.modified_date}
                     user={consultationData.last_edited_by}
@@ -366,7 +363,7 @@ export const ConsultationDetails = (props: any) => {
             </div>
           </div>
         )}
-        <div className="mt-4 w-full border-b-2 border-gray-200">
+        <div className="mt-4 w-full border-b-2 border-secondary-200">
           <div className="overflow-x-auto sm:flex sm:items-baseline">
             <div className="mt-4 sm:mt-0">
               <nav

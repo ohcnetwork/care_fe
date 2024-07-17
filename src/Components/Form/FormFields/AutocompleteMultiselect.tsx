@@ -135,7 +135,7 @@ export const AutocompleteMutliSelect = <T, V>(
                 ref={comboButtonRef}
                 className="absolute inset-y-0 right-0 flex items-center pr-2"
               >
-                <div className="absolute right-0 top-1 mr-2 flex items-center text-lg text-gray-900">
+                <div className="absolute right-0 top-1 mr-2 flex items-center text-lg text-secondary-900">
                   {props.isLoading ? (
                     <CareIcon icon="l-spinner" className="animate-spin" />
                   ) : (
@@ -205,10 +205,10 @@ export const AutocompleteMutliSelect = <T, V>(
                               className={classNames(
                                 "text-sm font-normal",
                                 option.disabled
-                                  ? "text-gray-700"
+                                  ? "text-secondary-700"
                                   : active
                                     ? "text-primary-200"
-                                    : "text-gray-700",
+                                    : "text-secondary-700",
                               )}
                             >
                               {option.description}

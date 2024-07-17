@@ -187,7 +187,9 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
                         icon="l-save"
                         className={classNames(
                           "text-lg",
-                          hasMoved ? "text-gray-200" : "text-gray-500",
+                          hasMoved
+                            ? "text-secondary-200"
+                            : "text-secondary-500",
                         )}
                       />
                     </ButtonV2>
