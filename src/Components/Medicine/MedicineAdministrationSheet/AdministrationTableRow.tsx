@@ -182,30 +182,35 @@ export default function MedicineAdministrationTableRow({
           onClick={() => setShowDetails(true)}
         >
           <div className="flex flex-col gap-1 lg:flex-row lg:justify-between lg:gap-2">
-            <div className="flex items-center gap-2">
-              <span
-                className={classNames(
-                  "text-sm font-semibold",
-                  prescription.discontinued
-                    ? "text-secondary-700"
-                    : "text-secondary-900",
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <span
+                  className={classNames(
+                    "text-sm font-semibold uppercase",
+                    prescription.discontinued
+                      ? "text-secondary-700"
+                      : "text-secondary-900",
+                  )}
+                >
+                  {prescription.medicine_object?.name ??
+                    prescription.medicine_old}
+                </span>
+
+                {prescription.discontinued && (
+                  <span className="hidden rounded-full border border-secondary-500 bg-secondary-200 px-1.5 text-xs font-medium text-secondary-700 lg:block">
+                    {t("discontinued")}
+                  </span>
                 )}
-              >
-                {prescription.medicine_object?.name ??
-                  prescription.medicine_old}
+
+                {prescription.route && (
+                  <span className="hidden rounded-full border border-blue-500 bg-blue-100 px-1.5 text-xs font-medium text-blue-700 lg:block">
+                    {t(prescription.route)}
+                  </span>
+                )}
+              </div>
+              <span className="text-xs font-medium capitalize text-secondary-700">
+                {prescription.medicine_object?.generic}
               </span>
-
-              {prescription.discontinued && (
-                <span className="hidden rounded-full border border-secondary-500 bg-secondary-200 px-1.5 text-xs font-medium text-secondary-700 lg:block">
-                  {t("discontinued")}
-                </span>
-              )}
-
-              {prescription.route && (
-                <span className="hidden rounded-full border border-blue-500 bg-blue-100 px-1.5 text-xs font-medium text-blue-700 lg:block">
-                  {t(prescription.route)}
-                </span>
-              )}
             </div>
 
             <div className="flex gap-1 text-xs font-semibold text-secondary-900 lg:flex-col lg:px-2 lg:text-center">
