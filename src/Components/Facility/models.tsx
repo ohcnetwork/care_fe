@@ -12,7 +12,11 @@ import { InvestigationType } from "../Common/prescription-builder/InvestigationB
 import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
-import { AssignedToObjectModel, DailyRoundsModel } from "../Patient/models";
+import {
+  AssignedToObjectModel,
+  DailyRoundsModel,
+  FileUploadModel,
+} from "../Patient/models";
 import { EncounterSymptom } from "../Symptoms/types";
 import { UserBareMinimum } from "../Users/models";
 
@@ -105,6 +109,7 @@ export interface PatientConsentModel {
   patient_code_status:
     | (typeof CONSENT_PATIENT_CODE_STATUS_CHOICES)[number]["id"]
     | null;
+  files: FileUploadModel[] | null;
   archived: boolean;
   archived_by?: UserBareMinimum;
   archived_date: string;
@@ -180,6 +185,7 @@ export interface ConsultationModel {
   is_readmission?: boolean;
   medico_legal_case?: boolean;
   investigation?: InvestigationType[];
+  has_consents?: (typeof CONSENT_TYPE_CHOICES)[number]["id"][];
 }
 
 export interface PatientStatsModel {

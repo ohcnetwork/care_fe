@@ -2,6 +2,7 @@ import * as Notification from "../../Utils/Notifications.js";
 
 import {
   ADMITTED_TO,
+  CONSENT_TYPE_CHOICES,
   DISCHARGE_REASONS,
   GENDER_TYPES,
   PATIENT_CATEGORIES,
@@ -195,6 +196,8 @@ export const PatientManager = () => {
       qParams.last_consultation_discharge_date_after || undefined,
     last_consultation_admitted_bed_type_list:
       qParams.last_consultation_admitted_bed_type_list || undefined,
+    last_consultation__consent_types:
+      qParams.last_consultation__consent_types || undefined,
     last_consultation__new_discharge_reason:
       qParams.last_consultation__new_discharge_reason || undefined,
     last_consultation_current_bed__location:
@@ -396,6 +399,17 @@ export const PatientManager = () => {
     },
   );
 
+  const { data: patientsWithNoConsentsData } = useQuery(routes.patientList, {
+    query: {
+      ...qParams,
+      limit: 1,
+      last_consultation__consent_types: "None",
+      is_active: "True",
+    },
+  });
+
+  const patientsWithNoConsents = patientsWithNoConsentsData?.count;
+
   const { data: permittedFacilities } = useQuery(
     routes.getPermittedFacilities,
     {
@@ -429,6 +443,39 @@ export const PatientManager = () => {
       .map((id: string) => {
         const text = ADMITTED_TO.find((obj) => obj.id == id)?.text;
         return badge("Bed Type", text, id);
+      });
+  };
+
+  const HasConsentTypesBadges = () => {
+    const badge = (key: string, value: any, id: string) => {
+      return (
+        value && (
+          <FilterBadge
+            name={key}
+            value={value}
+            onRemove={() => {
+              const lcat = qParams.last_consultation__consent_types
+                .split(",")
+                .filter((x: string) => x != id)
+                .join(",");
+              updateQuery({
+                ...qParams,
+                last_consultation__consent_types: lcat,
+              });
+            }}
+          />
+        )
+      );
+    };
+
+    return qParams.last_consultation__consent_types
+      .split(",")
+      .map((id: string) => {
+        const text = [
+          ...CONSENT_TYPE_CHOICES,
+          { id: "None", text: "No Consents" },
+        ].find((obj) => obj.id == id)?.text;
+        return badge("Has Consent", text, id);
       });
   };
 
@@ -660,6 +707,20 @@ export const PatientManager = () => {
                         </span>
                       </span>
                     )}
+                  {!!patient.last_consultation?.has_consents.length || (
+                    <span className="relative inline-flex">
+                      <Chip
+                        size="small"
+                        variant="danger"
+                        startIcon="l-file"
+                        text="No consents recorded"
+                      />
+                      <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center">
+                        <span className="center absolute inline-flex h-4 w-4 animate-ping rounded-full bg-red-400"></span>
+                        <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
+                      </span>
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -949,7 +1010,25 @@ export const PatientManager = () => {
           </div>
         </div>
       </div>
-      <div className="col-span-3 mt-6 flex flex-wrap">
+      {!qParams.last_consultation__consent_types &&
+        (patientsWithNoConsents || 0) > 0 && (
+          <div className="flex w-full items-center gap-4 rounded-lg bg-red-500/10 p-4 text-sm text-red-500">
+            <CareIcon icon="l-info-circle" className="text-xl" />
+            <p className="font-semibold">
+              {patientsWithNoConsents} patients admitted missing consent
+              records&nbsp;
+              <button
+                onClick={() =>
+                  updateQuery({ last_consultation__consent_types: "None" })
+                }
+                className="underline"
+              >
+                Click to view
+              </button>
+            </p>
+          </div>
+        )}
+      <div className="col-span-3 flex flex-wrap">
         <FilterBadges
           badges={({
             badge,
@@ -1056,8 +1135,15 @@ export const PatientManager = () => {
             ),
           ]}
           children={
-            qParams.last_consultation_admitted_bed_type_list &&
-            LastAdmittedToTypeBadges()
+            (qParams.last_consultation_admitted_bed_type_list ||
+              qParams.last_consultation__consent_types) && (
+              <>
+                {qParams.last_consultation_admitted_bed_type_list &&
+                  LastAdmittedToTypeBadges()}
+                {qParams.last_consultation__consent_types &&
+                  HasConsentTypesBadges()}
+              </>
+            )
           }
         />
       </div>
