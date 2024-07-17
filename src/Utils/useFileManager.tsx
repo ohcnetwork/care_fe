@@ -224,9 +224,9 @@ export default function useFileManager(
                 className="text-lg text-danger-500"
               />
             </div>
-            <div>
+            <div className="text-sm">
               <h1 className="text-xl text-black">Archive File</h1>
-              <span className="text-sm text-secondary-700">
+              <span className="text-sm text-secondary-600">
                 This action is irreversible. Once a file is archived it cannot
                 be unarchived.
               </span>
