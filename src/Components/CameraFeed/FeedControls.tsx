@@ -13,7 +13,7 @@ const Actions = {
   ZOOM_OUT: 1 << 5,
 } as const;
 
-const metaKey = isAppleDevice ? "Meta" : "Ctrl";
+const metaKey = isAppleDevice ? "Meta" : "Alt";
 
 export type PTZAction = keyof typeof Actions;
 
