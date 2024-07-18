@@ -15,7 +15,7 @@ import useOperateCamera, {
   PTZPayload,
 } from "../../CameraFeed/useOperateCamera";
 import request from "../../../Utils/request/request";
-import { classNames, isIOS } from "../../../Utils/utils";
+import { isIOS } from "../../../Utils/utils";
 import ConfirmDialog from "../../Common/ConfirmDialog";
 import useBreakpoints from "../../../Common/hooks/useBreakpoints";
 import { Warn } from "../../../Utils/Notifications";
@@ -172,10 +172,11 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
                 ) : (
                   <ButtonV2
                     size="small"
-                    variant="secondary"
+                    variant={hasMoved ? "secondary" : "secondary"}
                     disabled={!hasMoved}
-                    className="hover:bg-zinc-700 disabled:bg-transparent"
-                    ghost
+                    border
+                    ghost={!hasMoved}
+                    shadow={hasMoved}
                     tooltip={
                       hasMoved
                         ? "Save current position to selected preset"
@@ -184,13 +185,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
                     tooltipClassName="translate-x-3 translate-y-8 text-xs"
                     onClick={() => setShowPresetSaveConfirmation(true)}
                   >
-                    <CareIcon
-                      icon="l-save"
-                      className={classNames(
-                        "text-lg",
-                        !hasMoved && "text-zinc-300",
-                      )}
-                    />
+                    <CareIcon icon="l-save" className="text-lg" />
                   </ButtonV2>
                 )}
               </>

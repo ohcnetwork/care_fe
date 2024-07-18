@@ -4,6 +4,7 @@ import { Listbox, Transition } from "@headlessui/react";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import { dropdownOptionClassNames } from "../Form/MultiSelectMenuV2";
+import ButtonV2 from "../Common/components/ButtonV2";
 
 interface Props {
   disabled?: boolean;
@@ -25,12 +26,12 @@ export default function CameraPresetSelect(props: Props) {
             const selected = props.value?.id === option.id;
 
             return (
-              <button
-                className={classNames(
-                  "flex min-w-16 max-w-40 items-center justify-center gap-1 overflow-hidden text-ellipsis whitespace-nowrap rounded border px-1.5 py-0.5 text-sm font-medium transition-all duration-500 ease-in-out hover:bg-white hover:text-black",
-                  selected ? "border-current" : "border-zinc-500 text-zinc-500",
-                )}
+              <ButtonV2
+                variant={selected ? "primary" : "secondary"}
+                className="min-w-16 max-w-40 text-ellipsis text-sm"
                 onClick={() => props.onChange?.(option)}
+                border
+                size="small"
               >
                 {label(option)}
                 {selected && (
@@ -39,13 +40,13 @@ export default function CameraPresetSelect(props: Props) {
                     className="rounded-full bg-primary-500 text-base text-white"
                   />
                 )}
-              </button>
+              </ButtonV2>
             );
           })}
         {props.options.length > 5 && (
           <CameraPresetDropdown
             {...props}
-            placeholder="More preset"
+            placeholder="More presets"
             options={props.options.slice(4)}
             value={props.options.slice(4).find((o) => o.id === props.value?.id)}
           />
@@ -77,13 +78,12 @@ export const CameraPresetDropdown = (
     >
       <div className="relative flex-1">
         <Listbox.Button
-          className={({ open }) =>
-            classNames(
-              "relative flex min-w-40 max-w-56 items-center gap-1 overflow-hidden text-ellipsis whitespace-nowrap rounded border px-1.5 py-1 pr-8 text-left text-sm font-medium transition-all duration-500 ease-in-out",
-              selected ? "border-current" : "border-zinc-300 text-zinc-500",
-              open && "rounded-b-none ring-1 ring-gray-400",
-            )
-          }
+          className={classNames(
+            "button-size-small button-shape-square inline-flex h-min w-full min-w-40 cursor-pointer items-center gap-2 whitespace-pre text-left text-sm font-medium shadow outline-offset-1 transition-all duration-200 ease-in-out enabled:hover:shadow-md disabled:cursor-not-allowed disabled:bg-secondary-200 disabled:text-secondary-500",
+            selected
+              ? "button-primary-default button-primary-border"
+              : "button-secondary-default button-secondary-border",
+          )}
         >
           <span className="block truncate">
             {options.length === 0

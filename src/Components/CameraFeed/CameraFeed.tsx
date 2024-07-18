@@ -161,7 +161,7 @@ export default function CameraFeed(props: Props) {
                 return "bg-zinc-900 text-white";
               }
 
-              return "bg-zinc-100 to-zinc-800";
+              return "bg-zinc-500/20 text-zinc-800";
             })(),
           )}
         >
