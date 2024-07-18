@@ -183,6 +183,7 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
                         : "Change camera position to update preset"
                     }
                     tooltipClassName="translate-x-3 translate-y-8 text-xs"
+                    className="ml-1"
                     onClick={() => setShowPresetSaveConfirmation(true)}
                   >
                     <CareIcon icon="l-save" className="text-lg" />
