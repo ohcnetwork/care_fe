@@ -79,7 +79,7 @@ export const CameraPresetDropdown = (
       <div className="relative flex-1">
         <Listbox.Button
           className={classNames(
-            "button-size-small button-shape-square inline-flex h-min w-full min-w-40 cursor-pointer items-center gap-2 whitespace-pre text-left text-sm font-medium shadow outline-offset-1 transition-all duration-200 ease-in-out enabled:hover:shadow-md disabled:cursor-not-allowed disabled:bg-secondary-200 disabled:text-secondary-500",
+            "button-size-small button-shape-square relative inline-flex h-min min-w-40 cursor-pointer items-center gap-2 whitespace-pre text-left text-sm font-medium shadow outline-offset-1 transition-all duration-200 ease-in-out enabled:hover:shadow-md disabled:cursor-not-allowed disabled:bg-secondary-200 disabled:text-secondary-500",
             selected
               ? "button-primary-default button-primary-border"
               : "button-secondary-default button-secondary-border",
