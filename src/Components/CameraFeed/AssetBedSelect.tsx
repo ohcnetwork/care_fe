@@ -27,6 +27,7 @@ export default function CameraPresetSelect(props: Props) {
 
             return (
               <ButtonV2
+                key={option.id}
                 variant={selected ? "primary" : "secondary"}
                 className="min-w-16 max-w-40 text-ellipsis text-sm"
                 onClick={() => props.onChange?.(option)}

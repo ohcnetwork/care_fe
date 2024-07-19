@@ -15,7 +15,7 @@ import useOperateCamera, {
   PTZPayload,
 } from "../../CameraFeed/useOperateCamera";
 import request from "../../../Utils/request/request";
-import { isIOS } from "../../../Utils/utils";
+import { classNames, isIOS } from "../../../Utils/utils";
 import ConfirmDialog from "../../Common/ConfirmDialog";
 import useBreakpoints from "../../../Common/hooks/useBreakpoints";
 import { Warn } from "../../../Utils/Notifications";
@@ -124,7 +124,13 @@ export const ConsultationFeedTab = (props: ConsultationTabProps) => {
         onConfirm={handleUpdatePreset}
       />
 
-      <div ref={divRef} className="-mx-3 lg:-mb-2">
+      <div
+        ref={divRef}
+        className={classNames(
+          "-mx-3 lg:-mb-2",
+          isIOS && "mt-8", // For some reason iOS based browser alone seems to be needing this.
+        )}
+      >
         <CameraFeed
           key={key}
           asset={asset}
