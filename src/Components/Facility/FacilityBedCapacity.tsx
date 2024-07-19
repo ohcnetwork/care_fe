@@ -8,6 +8,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { BedCapacity } from "./BedCapacity";
 import BedTypeCard from "./BedTypeCard";
 import useConfig from "../../Common/hooks/useConfig";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 export const FacilityBedCapacity = (props: any) => {
   const [bedCapacityModalOpen, setBedCapacityModalOpen] = useState(false);
@@ -20,18 +21,18 @@ export const FacilityBedCapacity = (props: any) => {
   let capacityList: any = null;
   if (!capacityQuery.data || !capacityQuery.data.results.length) {
     capacityList = (
-      <h5 className="mt-4 flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-gray-500 shadow">
+      <h5 className="mt-4 flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-secondary-500 shadow">
         No Bed Types Found
       </h5>
     );
   } else {
     const totalBedCount = capacityQuery.data.results.reduce(
       (acc, x) => acc + (x.total_capacity ? x.total_capacity : 0),
-      0
+      0,
     );
     const totalOccupiedBedCount = capacityQuery.data.results.reduce(
       (acc, x) => acc + (x.current_capacity ? x.current_capacity : 0),
-      0
+      0,
     );
 
     capacityList = (
@@ -92,7 +93,7 @@ export const FacilityBedCapacity = (props: any) => {
             onClick={() => setBedCapacityModalOpen(true)}
             authorizeFor={NonReadOnlyUsers}
           >
-            <i className="fas fa-bed mr-2 text-white" />
+            <CareIcon icon="l-bed" className="mr-2 text-lg text-white" />
             Add More Bed Types
           </ButtonV2>
         </div>

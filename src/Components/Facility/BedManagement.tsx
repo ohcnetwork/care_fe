@@ -5,13 +5,14 @@ import { ReactElement } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
 import BedDeleteDialog from "./BedDeleteDialog";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import Page from "../Common/components/Page";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import useFilters from "../../Common/hooks/useFilters";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 const Loading = lazy(() => import("../Common/Loading"));
 
 interface BedManagementProps {
@@ -45,13 +46,17 @@ const BedRow = (props: BedRowProps) => {
     show: boolean;
     name: string;
   }>({ show: false, name: "" });
-
+  const authUser = useAuthUser();
   const handleDelete = (name: string, _id: string) => {
     setBedData({
       show: true,
       name,
     });
   };
+
+  const allowedUser = ["DistrictAdmin", "StateAdmin"].includes(
+    authUser.user_type,
+  );
 
   const handleDeleteConfirm = async () => {
     const { res } = await request(routes.deleteFacilityBed, {
@@ -93,7 +98,7 @@ const BedRow = (props: BedRowProps) => {
               {LOCATION_BED_TYPES.find((item) => item.id === bedType) && (
                 <p className="mb-1 inline-flex w-fit items-center rounded-md bg-blue-100 px-2.5 py-0.5 text-sm font-medium capitalize leading-5 text-blue-800">
                   {LOCATION_BED_TYPES.find(
-                    (item) => item.id === bedType
+                    (item) => item.id === bedType,
                   )?.name?.slice(0, 25) + (bedType.length > 25 ? "..." : "")}
                 </p>
               )}
@@ -120,22 +125,27 @@ const BedRow = (props: BedRowProps) => {
             border
             ghost
           >
-            <CareIcon className="care-l-pen text-lg" />
+            <CareIcon icon="l-pen" className="text-lg" />
             Edit
           </ButtonV2>
           <ButtonV2
             id="delete-bed-button"
             onClick={() => handleDelete(name, id)}
-            authorizeFor={NonReadOnlyUsers}
+            authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
             variant="danger"
             border
             ghost
             className="w-full lg:w-auto"
-            disabled={isOccupied}
-            tooltip={isOccupied ? "Bed is occupied" : undefined}
-            tooltipClassName="w-full lg:w-auto"
+            tooltip={
+              !allowedUser
+                ? "Contact your admin to delete the bed"
+                : isOccupied
+                  ? "Bed is occupied"
+                  : undefined
+            }
+            tooltipClassName=" text-xs w-full lg:w-auto"
           >
-            <CareIcon className="care-l-trash-alt text-lg" />
+            <CareIcon icon="l-trash-alt" className="text-lg" />
             Delete
           </ButtonV2>
         </div>
@@ -182,7 +192,7 @@ export const BedManagement = (props: BedManagementProps) => {
     ));
   } else if (data?.results.length === 0) {
     BedList = (
-      <p className="flex w-full justify-center bg-white p-5 text-center text-2xl font-bold text-gray-500">
+      <p className="flex w-full justify-center bg-white p-5 text-center text-2xl font-bold text-secondary-500">
         No beds available in this location
       </p>
     );
@@ -222,7 +232,7 @@ export const BedManagement = (props: BedManagementProps) => {
             href={`/facility/${facilityId}/location/${locationId}/beds/add`}
             authorizeFor={NonReadOnlyUsers}
           >
-            <CareIcon className="care-l-plus text-lg" />
+            <CareIcon icon="l-plus" className="text-lg" />
             Add New Bed(s)
           </ButtonV2>
         </div>

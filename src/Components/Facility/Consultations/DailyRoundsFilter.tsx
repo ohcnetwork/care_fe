@@ -34,7 +34,7 @@ export default function DailyRoundsFilter(props: Props) {
   });
 
   const isFilterApplied = Object.values(filter ?? {}).some(
-    (val) => val !== undefined
+    (val) => val !== undefined,
   );
 
   return (
@@ -45,7 +45,7 @@ export default function DailyRoundsFilter(props: Props) {
             variant={isFilterApplied ? "primary" : "secondary"}
             className="mr-5 border"
           >
-            <CareIcon className="care-l-filter" />
+            <CareIcon icon="l-filter" />
             {t("filter")}
           </ButtonV2>
         </Popover.Button>
@@ -59,10 +59,10 @@ export default function DailyRoundsFilter(props: Props) {
           leaveTo="opacity-0 translate-y-1"
         >
           <Popover.Panel className="absolute right-0 z-30 mt-1 w-80 px-4 sm:px-0 md:w-96 lg:max-w-3xl">
-            <div className="rounded-lg shadow-lg ring-1 ring-gray-400">
-              <div className="rounded-t-lg bg-gray-100 px-6 py-4">
+            <div className="rounded-lg shadow-lg ring-1 ring-secondary-400">
+              <div className="rounded-t-lg bg-secondary-100 px-6 py-4">
                 <div className="flow-root rounded-md">
-                  <span className="block text-sm text-gray-800">
+                  <span className="block text-sm text-secondary-800">
                     {t("filter_by")}
                   </span>
                 </div>

@@ -33,13 +33,12 @@ describe("Manage User", () => {
     cy.awaitUrl("/users");
   });
 
-  it("linking skills for a  users and verify its reflection in profile", () => {
+  it("linking skills for users and verify its reflection in profile", () => {
     // select the district user and select one skill link and verify its profile reflection
     userPage.typeInSearchInput(usernameforworkinghour);
     userPage.checkUsernameText(usernameforworkinghour);
     manageUserPage.clicklinkedskillbutton();
-    manageUserPage.typeSkill(linkedskill);
-    manageUserPage.selectFacilityFromDropdown(linkedskill);
+    manageUserPage.selectSkillFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
     manageUserPage.clickCloseSlideOver();
     cy.wait(5000);
@@ -50,7 +49,7 @@ describe("Manage User", () => {
     manageUserPage.navigateToProfile();
     userCreationPage.verifyElementContainsText(
       "username-profile-details",
-      usernameforworkinghour
+      usernameforworkinghour,
     );
     manageUserPage.assertSkillInAlreadyLinkedSkills(linkedskill);
   });
@@ -60,8 +59,7 @@ describe("Manage User", () => {
     userPage.typeInSearchInput(usernametolinkskill);
     userPage.checkUsernameText(usernametolinkskill);
     manageUserPage.clicklinkedskillbutton();
-    manageUserPage.typeSkill(linkedskill);
-    manageUserPage.selectFacilityFromDropdown(linkedskill);
+    manageUserPage.selectSkillFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
     manageUserPage.clickCloseSlideOver();
     cy.wait(5000); // temporary hack to fix the failure
@@ -69,8 +67,7 @@ describe("Manage User", () => {
     manageUserPage.assertSkillInAddedUserSkills(linkedskill);
     manageUserPage.clickUnlinkSkill();
     manageUserPage.clickSubmit();
-    manageUserPage.typeSkill(linkedskill);
-    manageUserPage.selectFacilityFromDropdown(linkedskill);
+    manageUserPage.selectSkillFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
     manageUserPage.clickCloseSlideOver();
     // verifying the doctor connect
@@ -105,7 +102,6 @@ describe("Manage User", () => {
     manageUserPage.assertHomeFacility("No Home Facility");
     //  Link a new facility and ensure it is under linked facility - doctor username (1)
     manageUserPage.clickFacilitiesTab();
-    manageUserPage.typeFacilityName(facilitytolinkusername);
     manageUserPage.selectFacilityFromDropdown(facilitytolinkusername);
     manageUserPage.clickLinkFacility();
     manageUserPage.assertLinkedFacility(facilitytolinkusername);
@@ -117,7 +113,6 @@ describe("Manage User", () => {
     userPage.typeInSearchInput(usernametolinkfacilitydoc2);
     userPage.checkUsernameText(usernametolinkfacilitydoc2);
     manageUserPage.clickFacilitiesTab();
-    manageUserPage.typeFacilityName(facilitytolinkusername);
     manageUserPage.selectFacilityFromDropdown(facilitytolinkusername);
     manageUserPage.clickLinkFacility();
     manageUserPage.clickHomeFacilityIcon();
@@ -134,7 +129,6 @@ describe("Manage User", () => {
     userPage.typeInSearchInput(usernametolinkfacilitydoc3);
     userPage.checkUsernameText(usernametolinkfacilitydoc3);
     manageUserPage.clickFacilitiesTab();
-    manageUserPage.typeFacilityName(facilitytolinkusername);
     manageUserPage.selectFacilityFromDropdown(facilitytolinkusername);
     manageUserPage.clickLinkFacility();
     manageUserPage.clickUnlinkFacilityButton();

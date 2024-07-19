@@ -25,7 +25,7 @@ export default function FeedNetworkSignal(props: Props) {
       if (-5 > delay || delay > 5) {
         props.onReset();
       }
-    }, 500);
+    }, 1000);
 
     return () => {
       clearInterval(interval);
@@ -34,7 +34,7 @@ export default function FeedNetworkSignal(props: Props) {
 
   return (
     <NetworkSignal strength={getStrength(props.status, videoDelay)}>
-      <span className="w-14 text-xs font-bold leading-none tracking-wide">
+      <span className="text-xs font-bold leading-none tracking-wide md:w-14">
         {videoDelay ? (
           `${(videoDelay * 1e3) | 1} ms`
         ) : (

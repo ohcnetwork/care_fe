@@ -4,6 +4,7 @@ import AutoCompleteAsync from "../Form/AutoCompleteAsync";
 import { useTranslation } from "react-i18next";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
+import { AssetClass } from "../Assets/AssetTypes";
 
 interface BedSelectProps {
   name: string;
@@ -17,6 +18,7 @@ interface BedSelectProps {
   showAll?: boolean;
   showNOptions?: number;
   selected: BedModel | BedModel[] | null;
+  not_occupied_by_asset_type?: AssetClass;
   setSelected: (selected: BedModel | BedModel[] | null) => void;
 }
 
@@ -33,6 +35,7 @@ export const BedSelect = (props: BedSelectProps) => {
     facility,
     location,
     showNOptions = 20,
+    not_occupied_by_asset_type,
   } = props;
   const { t } = useTranslation();
 
@@ -45,19 +48,19 @@ export const BedSelect = (props: BedSelectProps) => {
         all: searchAll,
         facility,
         location,
+        not_occupied_by_asset_type,
       };
-
       const { data } = await request(routes.listFacilityBeds, { query });
 
       if (unoccupiedOnly) {
         return data?.results?.filter(
-          (bed: BedModel) => bed?.is_occupied === false
+          (bed: BedModel) => bed?.is_occupied === false,
         );
       }
 
       return data?.results;
     },
-    [facility, location, searchAll, unoccupiedOnly]
+    [facility, location, searchAll, unoccupiedOnly],
   );
 
   return (

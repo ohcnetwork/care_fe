@@ -42,7 +42,7 @@ export default function CreateClaimCard({
   useEffect(() => {
     async function autoFill() {
       const latestApprovedPreAuthsRes = await dispatch(
-        HCXActions.preauths.list(consultationId)
+        HCXActions.preauths.list(consultationId),
       );
 
       if (latestApprovedPreAuthsRes.data?.results?.length) {
@@ -68,7 +68,7 @@ export default function CreateClaimCard({
               price: 0.0,
               category: "900000", // provider's packages
             };
-          })
+          }),
         );
       } else {
         setItems([]);
@@ -110,7 +110,7 @@ export default function CreateClaimCard({
         items,
         consultation: consultationId,
         use,
-      })
+      }),
     );
 
     if (res.data) {
@@ -153,7 +153,7 @@ export default function CreateClaimCard({
             Check Insurance Policy Eligibility
           </h1>
           <ButtonV2 onClick={() => setShowAddPolicy(true)} ghost border>
-            <CareIcon className="care-l-edit-alt text-lg" />
+            <CareIcon icon="l-edit-alt" className="text-lg" />
             Edit Patient Insurance Details
           </ButtonV2>
         </div>
@@ -177,14 +177,14 @@ export default function CreateClaimCard({
               setItems([...(items ?? []), { name: "", id: "", price: 0 }])
             }
           >
-            <CareIcon className="care-l-plus text-lg" />
+            <CareIcon icon="l-plus" className="text-lg" />
             <span>Add Item</span>
           </ButtonV2>
         </div>
         <span
           className={classNames(
             policy ? "opacity-0" : "opacity-100",
-            "text-gray-700 transition-opacity duration-300 ease-in-out"
+            "text-secondary-700 transition-opacity duration-300 ease-in-out",
           )}
         >
           Select a policy to add items
@@ -201,7 +201,7 @@ export default function CreateClaimCard({
           {items ? (
             <span className="font-bold tracking-wider">
               {formatCurrency(
-                items.map((p) => p.price).reduce((a, b) => a + b, 0.0)
+                items.map((p) => p.price).reduce((a, b) => a + b, 0.0),
               )}
             </span>
           ) : (
@@ -229,7 +229,7 @@ export default function CreateClaimCard({
           onClick={handleSubmit}
           className="min-w-[200px]"
         >
-          {isCreating && <CareIcon className="care-l-spinner animate-spin" />}
+          {isCreating && <CareIcon icon="l-spinner" className="animate-spin" />}
           {isCreating
             ? `Creating ${use === "claim" ? "Claim" : "Pre-Authorization"}...`
             : "Proceed"}

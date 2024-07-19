@@ -4,7 +4,7 @@ import { navigate } from "raviger";
 
 export default function handleResponse(
   { res, error }: RequestResult<unknown>,
-  silent?: boolean
+  silent?: boolean,
 ) {
   const notify = silent ? undefined : Notifications;
 
@@ -23,6 +23,12 @@ export default function handleResponse(
     // Invalid token
     if (!silent && error?.code === "token_not_valid") {
       navigate(`/session-expired?redirect=${window.location.href}`);
+    }
+
+    // Handle session expiry
+    if (error?.detail === "Authentication credentials were not provided.") {
+      notify?.Error({ msg: "Session expired. Please Login again." });
+      return;
     }
 
     notify?.Error({ msg: error?.detail || "Something went wrong...!" });

@@ -9,12 +9,15 @@ interface FacilitySelectProps {
   exclude_user?: string;
   errors?: string | undefined;
   className?: string;
+  required?: boolean;
   searchAll?: boolean;
+  disabled?: boolean;
   multiple?: boolean;
   facilityType?: number;
   district?: string;
+  state?: string;
   showAll?: boolean;
-  showNOptions?: number;
+  showNOptions?: number | undefined;
   freeText?: boolean;
   selected?: FacilityModel | FacilityModel[] | null;
   setSelected: (selected: FacilityModel | FacilityModel[] | null) => void;
@@ -24,15 +27,18 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
   const {
     name,
     exclude_user,
+    required,
     multiple,
     selected,
     setSelected,
     searchAll,
+    disabled = false,
     showAll = true,
-    showNOptions = 10,
+    showNOptions,
     className = "",
     facilityType,
     district,
+    state,
     freeText = false,
     errors = "",
   } = props;
@@ -47,28 +53,31 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
         facility_type: facilityType,
         exclude_user: exclude_user,
         district,
+        state,
       };
 
       const { data } = await request(
         showAll ? routes.getAllFacilities : routes.getPermittedFacilities,
-        { query }
+        { query },
       );
 
       if (freeText)
         data?.results?.push({
-          id: -1,
           name: text,
         });
+
       return data?.results;
     },
-    [searchAll, showAll, facilityType, district, exclude_user, freeText]
+    [searchAll, showAll, facilityType, district, exclude_user, freeText],
   );
 
   return (
     <AutoCompleteAsync
       name={name}
+      required={required}
       multiple={multiple}
       selected={selected}
+      disabled={disabled}
       onChange={setSelected}
       fetchData={facilitySearch}
       showNOptions={showNOptions}

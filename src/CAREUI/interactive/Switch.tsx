@@ -26,7 +26,7 @@ export default function Switch<T extends string>({
               size === "lg" && "px-4 py-3 text-base",
               props.selected === tab
                 ? "border-primary-500 bg-primary-500 font-semibold text-white hover:bg-primary-600 focus:border-primary-500 focus:ring-primary-500"
-                : "border-gray-400 bg-gray-50 hover:bg-gray-200 focus:border-primary-500 focus:ring-primary-500"
+                : "border-secondary-400 bg-secondary-50 hover:bg-secondary-200 focus:border-primary-500 focus:ring-primary-500",
             )}
             onClick={() => props.onChange(tab as T)}
           >

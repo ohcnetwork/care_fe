@@ -1,8 +1,7 @@
 import CareIcon from "../icons/CareIcon";
 import {
-  formatDate,
+  formatDateTime,
   formatName,
-  formatTime,
   isUserOnline,
   relativeTime,
 } from "../../Utils/utils";
@@ -39,12 +38,13 @@ const RecordMeta = ({
     <div className="tooltip">
       <span className="underline">{relativeTime(time)}</span>
       <span className="tooltip-text tooltip-bottom flex -translate-x-1/2 gap-1 text-xs font-medium tracking-wider">
-        {formatTime(time)} <br />
-        {formatDate(time)}
+        <span className="whitespace-break-spaces">
+          {formatDateTime(time).replace(";", "")}
+        </span>
         {user && !inlineUser && (
           <span className="flex items-center gap-1">
             by
-            <CareIcon className="care-l-user" />
+            <CareIcon icon="l-user" />
             {formatName(user)}
             {isOnline && (
               <div className="h-1.5 w-1.5 rounded-full bg-primary-400" />
@@ -61,7 +61,7 @@ const RecordMeta = ({
         {prefix}
         {child}
         {user && inlineUser && <span>by</span>}
-        {user && !inlineUser && <CareIcon className="care-l-user" />}
+        {user && !inlineUser && <CareIcon icon="l-user" />}
         {user && inlineUser && (
           <span className="font-medium">{formatName(user)}</span>
         )}

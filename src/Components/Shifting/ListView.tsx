@@ -8,7 +8,7 @@ import { ExportButton } from "../Common/Export";
 import ListFilter from "./ListFilter";
 import Page from "../Common/components/Page";
 import SearchInput from "../Form/SearchInput";
-import { formatAge, formatDateTime } from "../../Utils/utils";
+import { formatDateTime, formatPatientAge } from "../../Utils/utils";
 import { formatFilter } from "./Commons";
 import { navigate } from "raviger";
 
@@ -51,7 +51,7 @@ export default function ListView() {
       pathParams: { externalId: shift.external_id },
     });
     navigate(
-      `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`
+      `/facility/${shift.assigned_facility}/patient/${shift.patient}/consultation`,
     );
   };
 
@@ -69,7 +69,7 @@ export default function ListView() {
   const showShiftingCardList = (data: any) => {
     if (data && !data.length) {
       return (
-        <div className="mt-64 flex flex-1 justify-center text-gray-600">
+        <div className="mt-64 flex flex-1 justify-center text-secondary-600">
           {t("no_patients_to_show")}
         </div>
       );
@@ -78,23 +78,12 @@ export default function ListView() {
     return data.map((shift: any) => (
       <div key={`shift_${shift.id}`} className="mt-6 w-full">
         <div className="h-full overflow-hidden rounded-lg bg-white shadow">
-          <div
-            className={
-              "flex h-full flex-col justify-between p-4 " +
-              (shift.patient_object.disease_status == "POSITIVE"
-                ? "bg-red-50"
-                : "")
-            }
-          >
+          <div className="flex h-full flex-col justify-between p-4">
             <div>
               <div className="flex justify-between">
                 <div className="mb-2 text-xl font-bold capitalize">
                   {shift.patient_object.name} -{" "}
-                  {formatAge(
-                    shift.patient_object.age,
-                    shift.patient_object.date_of_birth,
-                    true
-                  )}
+                  {formatPatientAge(shift.patient_object, true)}
                 </div>
                 <div>
                   {shift.emergency && (
@@ -108,10 +97,10 @@ export default function ListView() {
                 <div className="sm:col-span-1">
                   <dt
                     title={t("shifting_status")}
-                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                   >
-                    <i className="fas fa-truck mr-2" />
-                    <dd className="text-sm font-bold leading-5 text-gray-900">
+                    <CareIcon icon="l-truck" className="mr-2" />
+                    <dd className="text-sm font-bold leading-5 text-secondary-900">
                       {shift.status}
                     </dd>
                   </dt>
@@ -119,10 +108,10 @@ export default function ListView() {
                 <div className="sm:col-span-1">
                   <dt
                     title={t("phone_number")}
-                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                   >
-                    <i className="fas fa-mobile mr-2" />
-                    <dd className="text-sm font-bold leading-5 text-gray-900">
+                    <CareIcon icon="l-mobile-android" className="mr-2" />
+                    <dd className="text-sm font-bold leading-5 text-secondary-900">
                       {shift.patient_object.phone_number || ""}
                     </dd>
                   </dt>
@@ -130,10 +119,10 @@ export default function ListView() {
                 <div className="sm:col-span-1">
                   <dt
                     title={t("origin_facility")}
-                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                   >
-                    <i className="fas fa-plane-departure mr-2"></i>
-                    <dd className="text-sm font-bold leading-5 text-gray-900">
+                    <CareIcon icon="l-plane-departure" className="mr-2" />
+                    <dd className="text-sm font-bold leading-5 text-secondary-900">
                       {(shift.origin_facility_object || {}).name}
                     </dd>
                   </dt>
@@ -142,10 +131,10 @@ export default function ListView() {
                   <div className="sm:col-span-1">
                     <dt
                       title={t("shifting_approving_facility")}
-                      className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                      className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                     >
-                      <i className="fas fa-user-check mr-2"></i>
-                      <dd className="text-sm font-bold leading-5 text-gray-900">
+                      <CareIcon icon="l-user-check" className="mr-2" />
+                      <dd className="text-sm font-bold leading-5 text-secondary-900">
                         {(shift.shifting_approving_facility_object || {}).name}
                       </dd>
                     </dt>
@@ -154,11 +143,11 @@ export default function ListView() {
                 <div className="sm:col-span-1">
                   <dt
                     title={t("assigned_facility")}
-                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                   >
-                    <i className="fas fa-plane-arrival mr-2"></i>
+                    <CareIcon icon="l-plane-arrival" className="m-2" />
 
-                    <dd className="text-sm font-bold leading-5 text-gray-900">
+                    <dd className="text-sm font-bold leading-5 text-secondary-900">
                       {shift.assigned_facility_external ||
                         shift.assigned_facility_object?.name ||
                         t("yet_to_be_decided")}
@@ -174,11 +163,11 @@ export default function ListView() {
                       (dayjs()
                         .subtract(2, "hours")
                         .isBefore(shift.modified_date)
-                        ? "text-gray-900"
+                        ? "text-secondary-900"
                         : "rounded bg-red-400 p-1 text-white")
                     }
                   >
-                    <i className="fas fa-stopwatch mr-2"></i>
+                    <CareIcon icon="l-stopwatch" className="mr-2" />
                     <dd className="text-sm font-bold leading-5">
                       {formatDateTime(shift.modified_date) || "--"}
                     </dd>
@@ -188,10 +177,10 @@ export default function ListView() {
                 <div className="sm:col-span-1">
                   <dt
                     title={t("patient_address")}
-                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                   >
-                    <i className="fas fa-home mr-2"></i>
-                    <dd className="text-sm font-bold leading-5 text-gray-900">
+                    <CareIcon icon="l-home" className="mr-2" />
+                    <dd className="text-sm font-bold leading-5 text-secondary-900">
                       {shift.patient_object.address || "--"}
                     </dd>
                   </dt>
@@ -206,7 +195,7 @@ export default function ListView() {
                 border
                 className="w-full"
               >
-                <i className="fas fa-eye mr-2" /> {t("all_details")}
+                <CareIcon icon="l-eye" className="mr-2" /> {t("all_details")}
               </ButtonV2>
             </div>
             {shift.status === "COMPLETED" && shift.assigned_facility && (
@@ -217,7 +206,7 @@ export default function ListView() {
                     !shift.patient_object.allow_transfer ||
                     !(
                       ["DistrictAdmin", "StateAdmin"].includes(
-                        authUser.user_type
+                        authUser.user_type,
                       ) ||
                       authUser.home_facility_object?.id ===
                         shift.assigned_facility
@@ -276,7 +265,7 @@ export default function ListView() {
               className="py-[11px]"
               onClick={() => navigate("/shifting/board", { query: qParams })}
             >
-              <CareIcon className="care-l-list-ul rotate-90" />
+              <CareIcon icon="l-list-ul" className="rotate-90" />
               {t("board_view")}
             </ButtonV2>
 
@@ -298,7 +287,11 @@ export default function ListView() {
                 className="text-xs hover:text-blue-800"
                 onClick={() => fetchData()}
               >
-                <i className="fa fa-refresh mr-1" aria-hidden="true"></i>
+                <CareIcon
+                  icon="l-refresh"
+                  className="mr-1"
+                  aria-hidden="true"
+                />
                 {t("refresh_list")}
               </button>
             </div>

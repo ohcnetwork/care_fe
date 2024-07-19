@@ -25,6 +25,7 @@ import { FieldLabel } from "../../Form/FormFields/FormField";
 import useFullscreen from "../../../Common/hooks/useFullscreen";
 import ReactPlayer from "react-player";
 import { isIOS } from "../../../Utils/utils";
+import TextFormField from "../../Form/FormFields/TextFormField";
 
 const LiveFeed = (props: any) => {
   const middlewareHostname = props.middlewareHostname;
@@ -35,11 +36,11 @@ const LiveFeed = (props: any) => {
   const [showDefaultPresets, setShowDefaultPresets] = useState<boolean>(false);
   const [precision, setPrecision] = useState(1);
   const [streamStatus, setStreamStatus] = useState<StreamStatus>(
-    StreamStatus.Offline
+    StreamStatus.Offline,
   );
   const [videoStartTime, setVideoStartTime] = useState<Date | null>(null);
   const [bed, setBed] = useState<BedModel>({});
-  const [preset, setNewPreset] = useState<string>("");
+  const [presetName, setPresetName] = useState("");
   const [loading, setLoading] = useState<string | undefined>();
   const dispatch: any = useDispatch();
   const [page, setPage] = useState({
@@ -120,7 +121,7 @@ const LiveFeed = (props: any) => {
         asset: id,
         limit: page.limit,
         offset: page.offset,
-      })
+      }),
     );
     setBedPresets(bedAssets?.data?.results);
     setPage({
@@ -145,7 +146,7 @@ const LiveFeed = (props: any) => {
   const updatePreset = async (currentPreset: any) => {
     const data = {
       bed_id: bed.id,
-      preset_name: preset,
+      preset_name: presetName,
     };
     const response = await dispatch(
       partialUpdateAssetBed(
@@ -157,8 +158,8 @@ const LiveFeed = (props: any) => {
             ...data,
           },
         },
-        currentPreset?.id
-      )
+        currentPreset?.id,
+      ),
     );
     if (response && response.status === 200) {
       Notification.Success({ msg: "Preset Updated" });
@@ -187,7 +188,7 @@ const LiveFeed = (props: any) => {
   }, []);
 
   useEffect(() => {
-    setNewPreset(toUpdate?.meta?.preset_name);
+    setPresetName(toUpdate?.meta?.preset_name);
     setBed(toUpdate?.bed_object);
   }, [toUpdate]);
 
@@ -239,7 +240,7 @@ const LiveFeed = (props: any) => {
   const cameraPTZActionCBs: { [key: string]: (option: any) => void } = {
     precision: () => {
       setPrecision((precision: number) =>
-        precision === 16 ? 1 : precision * 2
+        precision === 16 ? 1 : precision * 2,
       );
     },
     reset: () => {
@@ -271,8 +272,8 @@ const LiveFeed = (props: any) => {
                     position: data?.position,
                   },
                 },
-                currentPreset?.id
-              )
+                currentPreset?.id,
+              ),
             );
             if (response && response.status === 200) {
               Notification.Success({ msg: "Preset Updated" });
@@ -334,23 +335,30 @@ const LiveFeed = (props: any) => {
         <ConfirmDialog
           show
           title="Update Preset"
-          description={"Preset: " + toUpdate.meta.preset_name}
           action="Update"
           variant="primary"
           onClose={() => setToUpdate(null)}
           onConfirm={() => updatePreset(toUpdate)}
         >
-          <div className="mt-4 flex flex-col">
-            <FieldLabel required>Bed</FieldLabel>
-            <BedSelect
-              name="bed"
-              setSelected={(selected) => setBed(selected as BedModel)}
-              selected={bed}
-              error=""
-              multiple={false}
-              location={cameraAsset.location_id}
-              facility={cameraAsset.facility_id}
+          <div className="mt-4">
+            <TextFormField
+              name="preset_name"
+              label="Preset Name"
+              value={presetName}
+              onChange={({ value }) => setPresetName(value)}
             />
+            <div className="flex flex-col">
+              <FieldLabel required>Bed</FieldLabel>
+              <BedSelect
+                name="bed"
+                setSelected={(selected) => setBed(selected as BedModel)}
+                selected={bed}
+                error=""
+                multiple={false}
+                location={cameraAsset.location_id}
+                facility={cameraAsset.facility_id}
+              />
+            </div>
           </div>
         </ConfirmDialog>
       )}
@@ -410,8 +418,8 @@ const LiveFeed = (props: any) => {
 
               {streamStatus === StreamStatus.Playing &&
                 calculateVideoLiveDelay() > 3 && (
-                  <div className="absolute left-8 top-12 z-10 flex items-center gap-2 rounded-3xl bg-red-400 px-3 py-1.5 text-xs font-semibold text-gray-100">
-                    <CareIcon className="care-l-wifi-slash h-4 w-4" />
+                  <div className="absolute left-8 top-12 z-10 flex items-center gap-2 rounded-3xl bg-red-400 px-3 py-1.5 text-xs font-semibold text-secondary-100">
+                    <CareIcon icon="l-wifi-slash" className="h-4 w-4" />
                     <span>Slow Network Detected</span>
                   </div>
                 )}
@@ -485,7 +493,7 @@ const LiveFeed = (props: any) => {
                   >
                     <span className="sr-only">{option.label}</span>
                     {option.icon ? (
-                      <CareIcon className={`care-${option.icon}`} />
+                      <CareIcon icon={option.icon} />
                     ) : (
                       <span className="flex h-full w-8 items-center justify-center px-2 font-bold">
                         {option.value}x
@@ -504,7 +512,7 @@ const LiveFeed = (props: any) => {
           <div className="mx-4 flex max-w-sm flex-col">
             <nav className="flex flex-wrap">
               <button
-                className={`flex-1 p-4  text-center font-bold  text-gray-700 hover:text-gray-800  ${
+                className={`flex-1 p-4  text-center font-bold  text-secondary-700 hover:text-secondary-800  ${
                   showDefaultPresets
                     ? "border-b-2 border-primary-500 text-primary-600"
                     : ""
@@ -516,7 +524,7 @@ const LiveFeed = (props: any) => {
                 Default Presets
               </button>
               <button
-                className={`flex-1 p-4  text-center font-bold  text-gray-700 hover:text-gray-800  ${
+                className={`flex-1 p-4  text-center font-bold  text-secondary-700 hover:text-secondary-800  ${
                   !showDefaultPresets
                     ? "border-b-2 border-primary-500 text-primary-600"
                     : ""
@@ -539,7 +547,7 @@ const LiveFeed = (props: any) => {
                     {viewOptions(presetsPage)?.map((option: any, i) => (
                       <button
                         key={i}
-                        className="max- flex w-full flex-wrap gap-2 truncate rounded-md border border-white bg-green-100 p-3  text-black hover:bg-green-500 hover:text-white"
+                        className="flex w-full flex-wrap gap-2 truncate whitespace-pre-wrap rounded-md border border-white bg-green-100 p-3  text-black hover:bg-green-500 hover:text-white"
                         onClick={() => {
                           setLoading(`Moving to Preset ${option.label}`);
                           gotoPreset(
@@ -549,7 +557,7 @@ const LiveFeed = (props: any) => {
                                 setLoading(undefined);
                                 console.log("Preset Updated", option);
                               },
-                            }
+                            },
                           );
                         }}
                       >
@@ -563,7 +571,7 @@ const LiveFeed = (props: any) => {
                       <div className="flex flex-col">
                         <button
                           key={preset.id}
-                          className="flex flex-col truncate rounded-t-md border border-white bg-green-100 p-2  text-black hover:bg-green-500 hover:text-white"
+                          className="flex h-full flex-col truncate whitespace-pre-wrap rounded-t-md border border-white  bg-green-100 p-2 text-black hover:bg-green-500 hover:text-white"
                           onClick={() => {
                             setLoading("Moving");
                             gotoBedPreset(preset);
@@ -586,13 +594,13 @@ const LiveFeed = (props: any) => {
                             onClick={() => setToUpdate(preset)}
                             className="flex w-1/2 items-center justify-center gap-2 bg-green-200 py-1 text-sm text-green-800 hover:bg-green-800 hover:text-green-200 "
                           >
-                            <i className="fa-solid fa-pencil"></i>
+                            <CareIcon icon="l-pen" />
                           </button>
                           <button
                             onClick={() => setToDelete(preset)}
                             className="flex w-1/2 items-center justify-center gap-2 bg-red-200 py-1 text-sm text-red-800 hover:bg-red-800 hover:text-red-200 "
                           >
-                            <i className="fa-solid fa-trash-can"></i>
+                            <CareIcon icon="l-trash" />
                           </button>
                         </div>
                       </div>
@@ -604,43 +612,43 @@ const LiveFeed = (props: any) => {
               {showDefaultPresets ? (
                 <div className="flex flex-row gap-1">
                   <button
-                    className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
+                    className="flex-1 p-4  text-center font-bold  text-secondary-700 hover:bg-secondary-300 hover:text-secondary-800"
                     disabled={presetsPage < 10}
                     onClick={() => {
                       setPresetsPage(presetsPage - 10);
                     }}
                   >
-                    <i className="fas fa-arrow-left"></i>
+                    <CareIcon icon="l-arrow-left" className="text-2xl" />
                   </button>
                   <button
-                    className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
+                    className="flex-1 p-4  text-center font-bold  text-secondary-700 hover:bg-secondary-300 hover:text-secondary-800"
                     disabled={presetsPage >= presets?.length}
                     onClick={() => {
                       setPresetsPage(presetsPage + 10);
                     }}
                   >
-                    <i className="fas fa-arrow-right"></i>
+                    <CareIcon icon="l-arrow-right" className="text-2xl" />
                   </button>
                 </div>
               ) : (
                 <div className="flex flex-row gap-1">
                   <button
-                    className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
+                    className="flex-1 p-4  text-center font-bold  text-secondary-700 hover:bg-secondary-300 hover:text-secondary-800"
                     disabled={page.offset === 0}
                     onClick={() => {
                       handlePagination(page.offset - page.limit);
                     }}
                   >
-                    <i className="fas fa-arrow-left"></i>
+                    <CareIcon icon="l-arrow-left" className="text-2xl" />
                   </button>
                   <button
-                    className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
+                    className="flex-1 p-4  text-center font-bold  text-secondary-700 hover:bg-secondary-300 hover:text-secondary-800"
                     disabled={page.offset + page.limit >= page.count}
                     onClick={() => {
                       handlePagination(page.offset + page.limit);
                     }}
                   >
-                    <i className="fas fa-arrow-right"></i>
+                    <CareIcon icon="l-arrow-right" className="text-2xl" />
                   </button>
                 </div>
               )}
@@ -652,7 +660,7 @@ const LiveFeed = (props: any) => {
                     fetchCameraPresets();
                   }}
                 >
-                  <CareIcon className="care-l-redo h-4 text-lg" /> Refresh
+                  <CareIcon icon="l-redo" className="h-4 text-lg" /> Refresh
                 </button>
               )}
             </div>

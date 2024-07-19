@@ -20,7 +20,7 @@ describe("Shifting section filter", () => {
     shiftingPage.filterByFacility(
       "Dummy Shifting",
       "Dummy Shifting",
-      "District"
+      "District",
     );
 
     shiftingPage.facilityAssignedBadge().should("exist");
@@ -32,13 +32,10 @@ describe("Shifting section filter", () => {
       "ASC Created Date",
       "yes",
       "yes",
-      "POSITIVE",
       "no",
       "MODERATE",
-      "9999999999"
+      "9999999999",
     );
-
-    shiftingPage.diseaseStatusBadge().should("exist");
     shiftingPage.orderingBadge().should("exist");
     shiftingPage.breathlessnessLevelBadge().should("exist");
     shiftingPage.phoneNumberBadge().should("exist");

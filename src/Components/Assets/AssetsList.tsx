@@ -1,4 +1,4 @@
-import QrReader from "react-qr-reader";
+import { Scanner } from "@yudiel/react-qr-scanner";
 import * as Notification from "../../Utils/Notifications.js";
 import { listAssets } from "../../Redux/actions";
 import { assetClassProps, AssetData } from "./AssetTypes";
@@ -105,45 +105,68 @@ const AssetsList = () => {
     prefetch: !!(qParams.facility && qParams.location),
   });
 
-  const getAssetIdFromQR = async (assetUrl: string) => {
+  function isValidURL(url: string) {
+    try {
+      new URL(url);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  const accessAssetIdFromQR = async (assetURL: string) => {
     try {
       setIsLoading(true);
       setIsScannerActive(false);
-      const params = parseQueryParams(assetUrl);
-      // QR Maybe searchParams "asset" or "assetQR"
-      const assetId = params.asset || params.assetQR;
-      if (assetId) {
-        const { data } = await request(routes.listAssets, {
-          query: { qr_code_id: assetId },
+      if (!isValidURL(assetURL)) {
+        setIsLoading(false);
+        Notification.Error({
+          msg: "Invalid QR code scanned !!!",
         });
-        return data?.results[0].id;
+        return;
       }
-    } catch (err) {
-      console.log(err);
-    }
-  };
+      const params = parseQueryParams(assetURL);
+      // QR Maybe searchParams "asset" or "assetQR"
+      // If no params found, then use assetText
+      const assetId = params.asset || params.assetQR;
 
-  const checkValidAssetId = async (assetId: string) => {
-    const { data: assetData } = await request(routes.getAsset, {
-      pathParams: { id: assetId },
-    });
-    try {
-      if (assetData) {
-        navigate(
-          `/facility/${assetData.location_object.facility.id}/assets/${assetId}`
-        );
+      if (assetId) {
+        const { data } = await request(routes.listAssetQR, {
+          pathParams: { qr_code_id: assetId },
+        });
+        if (!data) {
+          setIsLoading(false);
+          Notification.Error({
+            msg: "Invalid QR code scanned !!!",
+          });
+          return;
+        }
+        const { data: assetData } = await request(routes.listAssets, {
+          query: { qr_code_id: assetId, limit: 1 },
+        });
+        if (assetData?.results.length === 1) {
+          navigate(
+            `/facility/${assetData.results[0].location_object.facility?.id}/assets/${assetData.results[0].id}`,
+          );
+        } else {
+          setIsLoading(false);
+          Notification.Error({
+            msg: "Asset not found !!!",
+          });
+        }
+      } else {
+        setIsLoading(false);
+        Notification.Error({
+          msg: "Invalid QR code scanned !!!",
+        });
       }
     } catch (err) {
       console.log(err);
-      setIsLoading(false);
-      Notification.Error({
-        msg: "Invalid QR code scanned !!!",
-      });
     }
   };
 
   const authorizedForImportExport = useIsAuthorized(
-    AuthorizeFor(["DistrictAdmin", "StateAdmin"])
+    AuthorizeFor(["DistrictAdmin", "StateAdmin"]),
   );
 
   if (isScannerActive)
@@ -153,22 +176,23 @@ const AssetsList = () => {
           onClick={() => setIsScannerActive(false)}
           className="btn btn-default mb-2"
         >
-          <i className="fas fa-times mr-2"></i> Close Scanner
+          <CareIcon icon="l-times" className="mr-1 text-lg" />
+          Close Scanner
         </button>
-        <QrReader
-          delay={300}
-          onScan={async (value: string | null) => {
-            if (value) {
-              const assetId = await getAssetIdFromQR(value);
-              checkValidAssetId(assetId ?? value);
+        <Scanner
+          onResult={async (text) => {
+            if (text) {
+              await accessAssetIdFromQR(text);
             }
           }}
-          onError={(e) =>
+          onError={(e) => {
             Notification.Error({
               msg: e.message,
-            })
-          }
-          style={{ width: "100%" }}
+            });
+          }}
+          options={{
+            delayBetweenScanAttempts: 300,
+          }}
         />
         <h2 className="self-center text-center text-lg">Scan Asset QR!</h2>
       </div>
@@ -187,7 +211,7 @@ const AssetsList = () => {
         {assets.map((asset: AssetData) => (
           <Link
             key={asset.id}
-            href={`/facility/${asset?.location_object.facility.id}/assets/${asset.id}`}
+            href={`/facility/${asset?.location_object.facility?.id}/assets/${asset.id}`}
             className="h-full text-inherit"
             data-testid="created-asset-list"
           >
@@ -199,13 +223,14 @@ const AssetsList = () => {
                 <p className="flex break-words text-xl font-medium capitalize">
                   <span className="mr-2 text-primary-500">
                     <CareIcon
-                      className={`care-l-${
+                      icon={
                         (
                           (asset.asset_class &&
                             assetClassProps[asset.asset_class]) ||
                           assetClassProps.NONE
                         ).icon
-                      } text-2xl`}
+                      }
+                      className="text-2xl"
                     />
                   </span>
                   <p
@@ -218,11 +243,17 @@ const AssetsList = () => {
               </div>
               <p className="text-sm font-normal">
                 <span className="text-sm font-medium">
-                  <CareIcon className="care-l-location-point mr-1 text-primary-500" />
+                  <CareIcon
+                    icon="l-location-point"
+                    className="mr-1 text-primary-500"
+                  />
                   {asset?.location_object?.name}
                 </span>
                 <span className="ml-2 text-sm font-medium">
-                  <CareIcon className="care-l-hospital mr-1 text-primary-500" />
+                  <CareIcon
+                    icon="l-hospital"
+                    className="mr-1 text-primary-500"
+                  />
                   {asset?.location_object?.facility?.name}
                 </span>
               </p>
@@ -250,7 +281,7 @@ const AssetsList = () => {
   } else {
     manageAssets = (
       <div className="col-span-3 w-full rounded-lg bg-white p-2 py-8 pt-4 text-center">
-        <p className="text-2xl font-bold text-gray-600">No Assets Found</p>
+        <p className="text-2xl font-bold text-secondary-600">No Assets Found</p>
       </div>
     );
   }
@@ -271,7 +302,10 @@ const AssetsList = () => {
                     label: "Import Assets",
                     options: {
                       icon: (
-                        <CareIcon className="care-l-import import-assets-button" />
+                        <CareIcon
+                          icon="l-import"
+                          className="import-assets-button"
+                        />
                       ),
                       onClick: () => setImportAssetModalOpen(true),
                     },
@@ -288,7 +322,7 @@ const AssetsList = () => {
                     type: "json",
                     filePrefix: `assets_${facility?.name ?? "all"}`,
                     options: {
-                      icon: <CareIcon className="care-l-export" />,
+                      icon: <CareIcon icon="l-export" />,
                       disabled: totalCount === 0 || !authorizedForImportExport,
                       id: "export-json-option",
                     },
@@ -305,7 +339,7 @@ const AssetsList = () => {
                     type: "csv",
                     filePrefix: `assets_${facility?.name ?? "all"}`,
                     options: {
-                      icon: <CareIcon className="care-l-export" />,
+                      icon: <CareIcon icon="l-export" />,
                       disabled: totalCount === 0 || !authorizedForImportExport,
                       id: "export-csv-option",
                     },
@@ -344,7 +378,8 @@ const AssetsList = () => {
               className="w-full py-[11px]"
               onClick={() => setIsScannerActive(true)}
             >
-              <i className="fas fa-search mr-1"></i> Scan Asset QR
+              <CareIcon icon="l-search" className="mr-1 text-base" /> Scan Asset
+              QR
             </ButtonV2>
           </div>
           <div
@@ -362,7 +397,7 @@ const AssetsList = () => {
                 }
               }}
             >
-              <CareIcon className="care-l-plus-circle text-lg" />
+              <CareIcon icon="l-plus-circle" className="text-lg" />
               <span>{t("create_asset")}</span>
             </ButtonV2>
           </div>
@@ -378,7 +413,7 @@ const AssetsList = () => {
               value(
                 "Facility",
                 "facility",
-                qParams.facility && facilityObject?.name
+                qParams.facility && facilityObject?.name,
               ),
               badge("Name/Serial No./QR ID", "search"),
               value("Asset Class", "asset_class", asset_class ?? ""),
@@ -386,17 +421,17 @@ const AssetsList = () => {
               value(
                 "Location",
                 "location",
-                qParams.location && locationObject?.name
+                qParams.location && locationObject?.name,
               ),
               value(
                 "Warranty AMC End Of Validity Before",
                 "warranty_amc_end_of_validity_before",
-                qParams.warranty_amc_end_of_validity_before ?? ""
+                qParams.warranty_amc_end_of_validity_before ?? "",
               ),
               value(
                 "Warranty AMC End Of Validity After",
                 "warranty_amc_end_of_validity_after",
-                qParams.warranty_amc_end_of_validity_after ?? ""
+                qParams.warranty_amc_end_of_validity_after ?? "",
               ),
             ]}
           />
@@ -456,7 +491,7 @@ const AssetsList = () => {
 };
 
 export const warrantyAmcValidityChip = (
-  warranty_amc_end_of_validity: string
+  warranty_amc_end_of_validity: string,
 ) => {
   if (warranty_amc_end_of_validity === "" || !warranty_amc_end_of_validity)
     return;
@@ -464,7 +499,8 @@ export const warrantyAmcValidityChip = (
   const warrantyAmcEndDate = new Date(warranty_amc_end_of_validity);
 
   const days = Math.ceil(
-    Math.abs(Number(warrantyAmcEndDate) - Number(today)) / (1000 * 60 * 60 * 24)
+    Math.abs(Number(warrantyAmcEndDate) - Number(today)) /
+      (1000 * 60 * 60 * 24),
   );
 
   if (warrantyAmcEndDate < today) {

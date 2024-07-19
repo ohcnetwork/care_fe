@@ -9,6 +9,7 @@ import ConfirmDialog from "../Common/ConfirmDialog";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ResourceDetails(props: { id: string }) {
@@ -76,7 +77,7 @@ export default function ResourceDetails(props: { id: string }) {
   const ApprovalLetter = (data: any) => {
     return (
       <div id="section-to-print" className="print bg-white">
-        <div className="mx-20 p-4">
+        <div className="mx-4 p-2 lg:mx-20 ">
           <div className="mt-6 text-center text-xl font-bold">
             APPROVAL LETTER
           </div>
@@ -217,10 +218,11 @@ export default function ResourceDetails(props: { id: string }) {
         <div className="my-4">
           <div className="my-4 flex justify-end gap-2">
             <ButtonV2 onClick={() => window.print()}>
-              <i className="fas fa-print mr-2"></i> Print Approval Letter
+              <CareIcon icon="l-print" className="mr-2 text-lg" /> Print
+              Approval Letter
             </ButtonV2>
             <ButtonV2 onClick={() => setIsPrintMode(false)} variant="secondary">
-              <i className="fas fa-times mr-2"></i> Close
+              <CareIcon icon="l-times" className="mr-2 text-lg" /> Close
             </ButtonV2>
           </div>
           {ApprovalLetter(data)}
@@ -229,7 +231,8 @@ export default function ResourceDetails(props: { id: string }) {
         <div className="mx-3 mb-10 md:mx-8">
           <div className="my-4 flex flex-col items-start md:flex-row md:items-center md:justify-between">
             <ButtonV2 onClick={(_) => setIsPrintMode(true)}>
-              <i className="fas fa-file-alt mr-2"></i> Approval Letter
+              <CareIcon icon="l-file-alt" className="mr-2 text-lg" /> Approval
+              Letter
             </ButtonV2>
           </div>
           {data.assigned_to_object && (
@@ -354,7 +357,7 @@ export default function ResourceDetails(props: { id: string }) {
               <div className="text-sm font-medium leading-5 text-black">
                 Created
               </div>
-              <div className="mt-1 text-sm leading-5 text-gray-900">
+              <div className="mt-1 text-sm leading-5 text-secondary-900">
                 <div className="text-sm">
                   {data?.created_by_object?.first_name}{" "}
                   {data?.created_by_object?.last_name}
@@ -368,7 +371,7 @@ export default function ResourceDetails(props: { id: string }) {
               <div className="text-sm font-medium leading-5 text-black">
                 Last Edited
               </div>
-              <div className="mt-1 text-sm leading-5 text-gray-900">
+              <div className="mt-1 text-sm leading-5 text-secondary-900">
                 <div className="text-sm">
                   {data?.last_edited_by_object?.first_name}{" "}
                   {data?.last_edited_by_object?.last_name}
@@ -384,7 +387,7 @@ export default function ResourceDetails(props: { id: string }) {
               "mt-8 grid grid-cols-1 gap-x-6 gap-y-12",
               data.assigned_facility_object
                 ? "lg:grid-cols-3"
-                : "lg:grid-cols-2"
+                : "lg:grid-cols-2",
             )}
           >
             <div>

@@ -9,13 +9,18 @@ import {
 } from "../../Common/constants.js";
 import { ConsultationModel, PatientCategory } from "../Facility/models.js";
 import { Switch, Menu } from "@headlessui/react";
-
 import { Link, navigate } from "raviger";
 import { useState } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon.js";
 import useConfig from "../../Common/hooks/useConfig.js";
 import dayjs from "../../Utils/dayjs.js";
-import { classNames, formatDate, formatDateTime } from "../../Utils/utils.js";
+import {
+  classNames,
+  formatDate,
+  formatDateTime,
+  formatPatientAge,
+  humanizeStrings,
+} from "../../Utils/utils.js";
 import ABHAProfileModal from "../ABDM/ABHAProfileModal.js";
 import LinkABHANumberModal from "../ABDM/LinkABHANumberModal.js";
 import LinkCareContextModal from "../ABDM/LinkCareContextModal.js";
@@ -33,6 +38,20 @@ import { Mews } from "../Facility/Consultations/Mews.js";
 import DischargeSummaryModal from "../Facility/DischargeSummaryModal.js";
 import DischargeModal from "../Facility/DischargeModal.js";
 import { useTranslation } from "react-i18next";
+import useQuery from "../../Utils/request/useQuery.js";
+import FetchRecordsModal from "../ABDM/FetchRecordsModal.js";
+import { SkillModel } from "../Users/models.js";
+import { AuthorizedForConsultationRelatedActions } from "../../CAREUI/misc/AuthorizedChild.js";
+
+const formatSkills = (arr: SkillModel[]) => {
+  const skills = arr.map((skill) => skill.skill_object.name);
+
+  if (skills.length <= 3) {
+    return humanizeStrings(skills);
+  }
+
+  return `${skills[0]}, ${skills[1]} and ${skills.length - 2} other skills...`;
+};
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
@@ -47,8 +66,9 @@ export default function PatientInfoCard(props: {
   const [open, setOpen] = useState(false);
   const [showLinkABHANumber, setShowLinkABHANumber] = useState(false);
   const [showABHAProfile, setShowABHAProfile] = useState(
-    !!props.showAbhaProfile
+    !!props.showAbhaProfile,
   );
+  const [showFetchABDMRecords, setShowFetchABDMRecords] = useState(false);
   const [openDischargeSummaryDialog, setOpenDischargeSummaryDialog] =
     useState(false);
   const [openDischargeDialog, setOpenDischargeDialog] = useState(false);
@@ -61,7 +81,7 @@ export default function PatientInfoCard(props: {
   const activeShiftingData = props.activeShiftingData;
 
   const [medicoLegalCase, setMedicoLegalCase] = useState(
-    consultation?.medico_legal_case ?? false
+    consultation?.medico_legal_case ?? false,
   );
 
   const category: PatientCategory | undefined =
@@ -73,8 +93,8 @@ export default function PatientInfoCard(props: {
   const bedDialogTitle = consultation?.discharge_date
     ? "Bed History"
     : !consultation?.current_bed
-    ? "Assign Bed"
-    : "Switch Bed";
+      ? "Assign Bed"
+      : "Switch Bed";
 
   const switchMedicoLegalCase = async (value: boolean) => {
     if (!consultation?.id || value === medicoLegalCase) return;
@@ -107,6 +127,12 @@ export default function PatientInfoCard(props: {
 
     return false;
   };
+  const skillsQuery = useQuery(routes.userListSkill, {
+    pathParams: {
+      username: consultation?.treating_physician_object?.username ?? "",
+    },
+    prefetch: !!consultation?.treating_physician_object?.username,
+  });
 
   return (
     <>
@@ -153,18 +179,21 @@ export default function PatientInfoCard(props: {
         </>
       )}
 
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        <div className="col-span-2 flex w-full flex-col bg-white px-4 pt-2 lg:flex-row xl:min-w-fit">
+      <section className="flex flex-col lg:flex-row">
+        <div
+          className="flex w-full flex-col bg-white px-4 pt-2 lg:flex-row"
+          id="patient-infobadges"
+        >
           {/* Can support for patient picture in the future */}
           <div className="flex justify-evenly lg:justify-normal">
             <div className="flex flex-col items-start lg:items-center">
               <div
-                className={`w-24 min-w-[5rem] bg-gray-200 ${categoryClass}-profile h-full`}
+                className={`w-24 min-w-20 bg-secondary-200 ${categoryClass}-profile h-24`}
               >
                 {consultation?.current_bed &&
                 consultation?.discharge_date === null ? (
                   <div className="tooltip flex h-full flex-col items-center justify-center">
-                    <p className="w-full truncate px-2 text-center text-sm text-gray-900">
+                    <p className="w-full truncate px-2 text-center text-sm text-secondary-900">
                       {
                         consultation?.current_bed?.bed_object?.location_object
                           ?.name
@@ -185,7 +214,10 @@ export default function PatientInfoCard(props: {
                   </div>
                 ) : (
                   <div className="flex h-full items-center justify-center">
-                    <i className="fas fa-user-injured text-3xl text-gray-500"></i>
+                    <CareIcon
+                      icon="l-user-injured"
+                      className="text-3xl text-secondary-500"
+                    />
                   </div>
                 )}
               </div>
@@ -196,69 +228,76 @@ export default function PatientInfoCard(props: {
                   {category.toUpperCase()}
                 </div>
               )}
-              <ButtonV2
-                ghost
-                onClick={() => setOpen(true)}
-                className="mt-1 px-[10px] py-1"
-              >
-                {bedDialogTitle}
-              </ButtonV2>
+              {consultation?.admitted && (
+                <ButtonV2
+                  ghost
+                  onClick={() => setOpen(true)}
+                  className="mt-1 px-[10px] py-1"
+                >
+                  {bedDialogTitle}
+                </ButtonV2>
+              )}
             </div>
             <div className="flex items-center justify-center">
               <div
-                className="mb-2 flex flex-col justify-center text-xl font-semibold lg:hidden"
+                className="mb-2 flex flex-col justify-center text-xl font-semibold capitalize lg:hidden"
                 id="patient-name-consultation"
               >
                 {patient.name}
-                <div className="ml-3 mr-2 mt-[6px] text-sm font-semibold text-gray-600">
-                  {patient.age} years • {patient.gender}
+                <div className="ml-3 mr-2 mt-[6px] text-sm font-semibold text-secondary-600">
+                  {formatPatientAge(patient, true)} • {patient.gender}
                 </div>
                 <div className="mr-3 flex flex-col items-center">
                   <Link
                     href={`/facility/${consultation?.facility}`}
                     className="mt-2 items-center justify-center text-sm font-semibold text-black hover:text-primary-600 lg:hidden"
                   >
-                    <i
-                      className="fas fa-hospital mr-1 text-primary-400"
+                    <CareIcon
+                      icon="l-hospital"
+                      className="mr-1 text-lg text-primary-400"
                       aria-hidden="true"
-                    ></i>
+                    />
                     {consultation?.facility_name}
                   </Link>
                 </div>
               </div>
             </div>
           </div>
-          <div className="flex w-full flex-col items-center gap-4 space-y-2 lg:items-start lg:gap-0 lg:pl-2 xl:w-full">
+          <div className="flex w-full flex-col items-center gap-4 space-y-2 lg:items-start lg:gap-0 lg:pl-2">
             <div className="flex flex-col items-center gap-2 sm:flex-row">
               <Link
                 href={`/facility/${consultation?.facility}`}
                 className="hidden font-semibold text-black hover:text-primary-600 lg:block"
               >
-                <i
-                  className="fas fa-hospital mr-1 text-primary-400"
+                <CareIcon
+                  icon="l-hospital"
+                  className="mr-1 text-xl text-primary-400"
                   aria-hidden="true"
-                ></i>
+                />
                 {consultation?.facility_name}
               </Link>
 
               {medicoLegalCase && (
-                <span className="flex pl-2 capitalize md:col-span-2">
+                <span className="flex pl-2 capitalize">
                   <span className="badge badge-pill badge-danger">MLC</span>
                 </span>
               )}
             </div>
             <div className="flex flex-col flex-wrap items-center justify-center lg:items-start lg:justify-normal">
               <div
-                className="mb-2 hidden flex-row text-xl font-semibold lg:flex"
+                className="mb-2 hidden flex-row text-xl font-semibold capitalize lg:flex"
                 id="patient-name-consultation"
               >
                 {patient.name}
-                <div className="ml-3 mr-2 mt-[6px] text-sm font-semibold text-gray-600">
-                  {patient.age} years • {patient.gender}
+                <div className="ml-3 mr-2 mt-[6px] text-sm font-semibold text-secondary-600">
+                  {formatPatientAge(patient, true)} • {patient.gender}
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2 text-sm sm:flex-row">
-                <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-gray-900 sm:flex-row sm:text-sm lg:justify-normal">
+                <div
+                  className="flex w-full flex-wrap items-center justify-center gap-2 text-sm text-secondary-900 sm:flex-row sm:text-sm md:pr-10 lg:justify-normal"
+                  id="patient-consultationbadges"
+                >
                   {consultation?.patient_no && (
                     <span className="flex capitalize">
                       <span className="items-stretch justify-center whitespace-nowrap rounded border border-green-400 bg-green-100 px-3 py-0.5 text-sm font-medium text-green-800">
@@ -270,12 +309,12 @@ export default function PatientInfoCard(props: {
                   )}
                   {patient.action && patient.action != 10 && (
                     <div>
-                      <div className="inline-flex w-full items-center justify-start rounded border border-gray-500 bg-blue-100 p-1 px-3 text-xs font-semibold leading-4">
+                      <div className="inline-flex w-full items-center justify-start rounded border border-secondary-500 bg-blue-100 p-1 px-3 text-xs font-semibold leading-4">
                         <span className="font-semibold text-indigo-800">
                           {" "}
                           {
                             TELEMEDICINE_ACTIONS.find(
-                              (i) => i.id === patient.action
+                              (i) => i.id === patient.action,
                             )?.desc
                           }
                         </span>
@@ -284,7 +323,7 @@ export default function PatientInfoCard(props: {
                   )}
                   <div>
                     {patient.blood_group && (
-                      <div className="inline-flex w-full items-center justify-start rounded border border-gray-500 bg-gray-100 p-1 px-2 text-xs font-semibold leading-4">
+                      <div className="inline-flex w-full items-center justify-start rounded border border-secondary-500 bg-secondary-100 p-1 px-2 text-xs font-semibold leading-4">
                         Blood Group: {patient.blood_group}
                       </div>
                     )}
@@ -295,13 +334,13 @@ export default function PatientInfoCard(props: {
                       <div>
                         <div
                           className={
-                            "inline-flex w-full items-center justify-center rounded border border-gray-500 p-1 text-xs font-semibold leading-4 " +
+                            "inline-flex w-full items-center justify-center rounded border border-secondary-500 p-1 text-xs font-semibold leading-4 " +
                             (dayjs().isBefore(patient.review_time)
-                              ? " bg-gray-100 "
+                              ? " bg-secondary-100 "
                               : " bg-red-400 text-white")
                           }
                         >
-                          <i className="text-md fas fa-clock mr-2"></i>
+                          <CareIcon icon="l-clock" className="text-md mr-2" />
                           {dayjs().isBefore(patient.review_time)
                             ? "Review before: "
                             : "Review Missed: "}
@@ -309,11 +348,23 @@ export default function PatientInfoCard(props: {
                         </div>
                       </div>
                     )}
+                  {!!consultation?.has_consents?.length || (
+                    <div>
+                      <div className="inline-flex w-full items-center justify-start rounded border border-red-600 bg-red-400 p-1 px-3 text-xs font-semibold leading-4">
+                        <span className="font-semibold text-white">
+                          Consent Records Missing
+                        </span>
+                      </div>
+                    </div>
+                  )}
                   {consultation?.suggestion === "DC" && (
                     <div>
                       <div>
-                        <div className="inline-flex w-full items-center justify-start rounded border border-gray-500 bg-gray-100 p-1 px-3 text-xs font-semibold leading-4">
-                          <CareIcon className="care-l-estate mr-1 text-base text-gray-700" />
+                        <div className="inline-flex w-full items-center justify-start rounded border border-secondary-500 bg-secondary-100 p-1 px-3 text-xs font-semibold leading-4">
+                          <CareIcon
+                            icon="l-estate"
+                            className="mr-1 text-base text-secondary-700"
+                          />
                           <span>Domiciliary Care</span>
                         </div>
                       </div>
@@ -330,7 +381,7 @@ export default function PatientInfoCard(props: {
                       RESPIRATORY_SUPPORT.find(
                         (resp) =>
                           resp.text ===
-                          consultation?.last_daily_round?.ventilator_interface
+                          consultation?.last_daily_round?.ventilator_interface,
                       )?.id ?? "UNKNOWN",
                       consultation?.last_daily_round?.ventilator_interface,
                     ],
@@ -339,7 +390,7 @@ export default function PatientInfoCard(props: {
                       <div className="flex flex-col items-center gap-2 text-sm">
                         <div
                           key={"patient_stat_" + i}
-                          className="flex items-center justify-center rounded border border-gray-500 bg-gray-100 p-1 px-3 text-xs font-semibold leading-4"
+                          className="flex items-center justify-center rounded border border-secondary-500 bg-secondary-100 p-1 px-3 text-xs font-semibold leading-4"
                         >
                           {stat[0]} : {stat[1]}
                         </div>
@@ -356,12 +407,12 @@ export default function PatientInfoCard(props: {
                             {
                               CONSULTATION_SUGGESTION.find(
                                 (suggestion) =>
-                                  suggestion.id === consultation?.suggestion
+                                  suggestion.id === consultation?.suggestion,
                               )?.text
                             }
                           </b>{" "}
                           on {formatDateTime(consultation.encounter_date)},
-                          {consultation?.new_discharge_reason === "EXP" ? (
+                          {consultation?.new_discharge_reason === 3 ? (
                             <span>
                               {" "}
                               <b>Expired on</b>{" "}
@@ -378,11 +429,13 @@ export default function PatientInfoCard(props: {
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-center rounded border border-gray-500 bg-gray-100 p-1 px-3 text-xs font-semibold leading-4">
+                    <div className="flex items-center justify-center rounded border border-secondary-500 bg-secondary-100 p-1 px-3 text-xs font-semibold leading-4">
                       <span className="flex">
                         {consultation?.encounter_date && (
                           <div>
-                            Admission on:{" "}
+                            {consultation.suggestion === "DC"
+                              ? "Commenced on: "
+                              : "Admitted on: "}
                             {formatDateTime(consultation?.encounter_date)}
                           </div>
                         )}
@@ -403,10 +456,13 @@ export default function PatientInfoCard(props: {
                 {consultation?.diagnoses?.length
                   ? (() => {
                       const principal_diagnosis = consultation.diagnoses.find(
-                        (diagnosis) => diagnosis.is_principal
+                        (diagnosis) => diagnosis.is_principal,
                       );
                       return principal_diagnosis ? (
-                        <div className="mt-1 flex flex-col sm:flex-row">
+                        <div
+                          className="mt-1 flex flex-col sm:flex-row"
+                          id="principal-diagnosis"
+                        >
                           <div className="mr-1 text-sm font-semibold">
                             Principal Diagnosis:
                           </div>
@@ -425,37 +481,73 @@ export default function PatientInfoCard(props: {
                   : null}
                 {(consultation?.treating_physician_object ||
                   consultation?.deprecated_verified_by) && (
-                  <div className="text-sm">
+                  <span className="space-x-1 text-sm" id="treating-physician">
                     <span className="font-semibold leading-relaxed">
-                      Treating Physician:{" "}
+                      {t("treating_doctor")}:{" "}
                     </span>
                     {consultation?.treating_physician_object
                       ? `${consultation?.treating_physician_object.first_name} ${consultation?.treating_physician_object.last_name}`
                       : consultation?.deprecated_verified_by}
-                    <i className="fas fa-check ml-2 fill-current text-sm text-green-500"></i>
-                  </div>
+                    <CareIcon
+                      icon="l-check"
+                      className="fill-current text-xl text-green-500"
+                    />
+                    <br className="md:hidden" />
+                    <span className="tooltip text-xs text-secondary-800">
+                      {!!skillsQuery.data?.results?.length &&
+                        formatSkills(skillsQuery.data?.results)}
+                      {(skillsQuery.data?.results?.length || 0) > 3 && (
+                        <ul className="tooltip-text tooltip-bottom flex flex-col text-xs font-medium">
+                          {skillsQuery.data?.results.map((skill) => (
+                            <li>{skill.skill_object.name}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </span>
+                  </span>
                 )}
               </div>
             </div>
           </div>
         </div>
         <div
-          className="col-span-2 flex w-full flex-col items-center justify-center gap-2 px-4 py-1 lg:col-span-1 2xl:flex-row"
+          className="flex flex-col items-center justify-end gap-4 px-4 py-1 2xl:flex-row"
           id="consultation-buttons"
         >
+          {consultation?.suggestion === "A" && (
+            <div className="flex flex-col items-center">
+              <div className="flex w-full justify-center bg-white px-4 lg:flex-row">
+                <div
+                  className={
+                    "flex h-7 w-7 items-center justify-center rounded-full border-2"
+                  }
+                >
+                  <span className="text-sm font-semibold">
+                    {dayjs(consultation.discharge_date || undefined).diff(
+                      consultation.encounter_date,
+                      "day",
+                    ) + 1}
+                  </span>
+                </div>
+              </div>
+              <span className="mt-1 text-xs font-medium text-secondary-700">
+                IP Day No
+              </span>
+            </div>
+          )}
           {consultation?.last_daily_round && (
-            <div className="col-span-1 flex w-full justify-center bg-white px-4 lg:flex-row">
+            <div className="flex w-full justify-center bg-white px-4 lg:flex-row">
               <Mews dailyRound={consultation?.last_daily_round} />
             </div>
           )}
           {!!consultation?.discharge_date && (
             <div className="flex min-w-max flex-col items-center justify-center">
-              <div className="text-sm font-normal leading-5 text-gray-500">
+              <div className="text-sm font-normal leading-5 text-secondary-500">
                 Discharge Reason
               </div>
-              <div className="mt-[6px] text-xl font-semibold leading-5 text-gray-900">
+              <div className="mt-[6px] text-xl font-semibold leading-5 text-secondary-900">
                 {!consultation?.new_discharge_reason ? (
-                  <span className="text-gray-800">
+                  <span className="text-secondary-800">
                     {consultation.suggestion === "OP"
                       ? "OP file closed"
                       : "UNKNOWN"}
@@ -465,94 +557,110 @@ export default function PatientInfoCard(props: {
                   <span className="text-red-600">EXPIRED</span>
                 ) : (
                   DISCHARGE_REASONS.find(
-                    (reason) => reason.id === consultation?.new_discharge_reason
+                    (reason) =>
+                      reason.id === consultation?.new_discharge_reason,
                   )?.text
                 )}
               </div>
             </div>
           )}
           <div className="flex w-full flex-col gap-3 lg:w-auto 2xl:flex-row">
-            {patient.is_active &&
-              consultation?.id &&
-              !consultation?.discharge_date && (
-                <div className="h-10 min-h-[40px] w-full min-w-[170px] lg:w-auto">
-                  <ButtonV2
-                    variant={
-                      !(consultation?.facility !== patient.facility) &&
+            <AuthorizedForConsultationRelatedActions>
+              {patient.is_active &&
+                consultation?.id &&
+                !consultation?.discharge_date && (
+                  <div
+                    className="h-10 min-h-[40px] w-full min-w-[170px] lg:w-auto"
+                    id="log-update"
+                  >
+                    <ButtonV2
+                      variant={
+                        !(consultation?.facility !== patient.facility) &&
+                        !(consultation?.discharge_date ?? !patient.is_active) &&
+                        dayjs(consultation?.modified_date).isBefore(
+                          dayjs().subtract(1, "day"),
+                        )
+                          ? "danger"
+                          : "primary"
+                      }
+                      href={
+                        consultation?.admitted && !consultation?.current_bed
+                          ? undefined
+                          : `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/daily-rounds`
+                      }
+                      onClick={() => {
+                        if (
+                          consultation?.admitted &&
+                          !consultation?.current_bed
+                        ) {
+                          Notification.Error({
+                            msg: "Please assign a bed to the patient",
+                          });
+                          setOpen(true);
+                        }
+                      }}
+                      className="w-full"
+                    >
+                      <span className="flex w-full items-center justify-center gap-2">
+                        <CareIcon icon="l-plus" className="text-xl" />
+                        <p className="font-semibold">
+                          {authUser.user_type === "Doctor"
+                            ? "File Note"
+                            : "Log Update"}
+                        </p>
+                      </span>
+                    </ButtonV2>
+                    {!(consultation?.facility !== patient.facility) &&
                       !(consultation?.discharge_date ?? !patient.is_active) &&
                       dayjs(consultation?.modified_date).isBefore(
-                        dayjs().subtract(1, "day")
-                      )
-                        ? "danger"
-                        : "primary"
-                    }
-                    href={
-                      consultation?.admitted && !consultation?.current_bed
-                        ? undefined
-                        : `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/daily-rounds`
-                    }
-                    onClick={() => {
-                      if (
-                        consultation?.admitted &&
-                        !consultation?.current_bed
-                      ) {
-                        Notification.Error({
-                          msg: "Please assign a bed to the patient",
-                        });
-                        setOpen(true);
-                      }
-                    }}
-                    className="w-full"
-                  >
-                    <span className="flex w-full items-center justify-center gap-2">
-                      <CareIcon className="care-l-plus text-xl" />
-                      <p className="font-semibold">Log Update</p>
-                    </span>
-                  </ButtonV2>
-                  {!(consultation?.facility !== patient.facility) &&
-                    !(consultation?.discharge_date ?? !patient.is_active) &&
-                    dayjs(consultation?.modified_date).isBefore(
-                      dayjs().subtract(1, "day")
-                    ) && (
-                      <>
-                        <p className="mt-0.5 text-xs text-red-500">
-                          <div className="text-center">
-                            <CareIcon className="care-l-exclamation-triangle" />{" "}
-                            No update filed in the last 24 hours
-                          </div>
-                        </p>
-                      </>
-                    )}
-                </div>
-              )}
+                        dayjs().subtract(1, "day"),
+                      ) && (
+                        <>
+                          <p className="mt-0.5 text-xs text-red-500">
+                            <div className="text-center">
+                              <CareIcon icon="l-exclamation-triangle" /> No
+                              update filed in the last 24 hours
+                            </div>
+                          </p>
+                        </>
+                      )}
+                  </div>
+                )}
+            </AuthorizedForConsultationRelatedActions>
             <DropdownMenu
               id="show-more"
               itemClassName="min-w-0 sm:min-w-[225px]"
-              title={"Manage Patient"}
+              title="Manage Patient"
               icon={<CareIcon icon="l-setting" className="text-xl" />}
               className="xl:justify-center"
-              containerClassName="w-full lg:w-auto mt-2 2xl:mt-0 flex justify-center"
+              containerClassName="w-full lg:w-auto mt-2 2xl:mt-0 flex justify-center z-20"
             >
               <div>
                 {[
                   [
                     `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/update`,
                     "Edit Consultation Details",
-                    "pen",
+                    "l-pen",
                     patient.is_active &&
                       consultation?.id &&
                       !consultation?.discharge_date,
                   ],
                   [
+                    `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/consent-records`,
+                    "Consent Records",
+                    "l-file-medical",
+                    patient.is_active,
+                  ],
+                  [
                     `/patient/${patient.id}/investigation_reports`,
                     "Investigation Summary",
-                    "align-alt",
+                    "l-align-alt",
                     true,
                   ],
                   [
                     `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/treatment-summary`,
                     "Treatment Summary",
-                    "file-medical",
+                    "l-file-medical",
                     consultation?.id,
                   ],
                 ]
@@ -562,11 +670,11 @@ export default function PatientInfoCard(props: {
                           [
                             `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/claims`,
                             "Claims",
-                            "copy-landscape",
+                            "l-copy-landscape",
                             consultation?.id,
                           ],
                         ]
-                      : []
+                      : [],
                   )
                   .map(
                     (action: any, i) =>
@@ -576,7 +684,10 @@ export default function PatientInfoCard(props: {
                             key={i}
                             className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
                             href={
-                              action[1] !== "Treatment Summary" &&
+                              ![
+                                "Treatment Summary",
+                                "Consent Records",
+                              ].includes(action[1]) &&
                               consultation?.admitted &&
                               !consultation?.current_bed &&
                               i === 1
@@ -585,7 +696,10 @@ export default function PatientInfoCard(props: {
                             }
                             onClick={() => {
                               if (
-                                action[1] !== "Treatment Summary" &&
+                                ![
+                                  "Treatment Summary",
+                                  "Consent Records",
+                                ].includes(action[1]) &&
                                 consultation?.admitted &&
                                 !consultation?.current_bed &&
                                 i === 1
@@ -603,7 +717,8 @@ export default function PatientInfoCard(props: {
                             }}
                           >
                             <CareIcon
-                              className={`care-l-${action[2]} text-lg text-primary-500`}
+                              icon={action[2]}
+                              className="text-lg text-primary-500"
                             />
                             <span>{action[1]}</span>
                           </Link>
@@ -615,7 +730,7 @@ export default function PatientInfoCard(props: {
                             </>
                           )}
                         </div>
-                      )
+                      ),
                   )}
               </div>
 
@@ -638,7 +753,10 @@ export default function PatientInfoCard(props: {
                                 });
                               }}
                             >
-                              <CareIcon className="care-l-user-square text-lg text-primary-500" />
+                              <CareIcon
+                                icon="l-user-square"
+                                className="text-lg text-primary-500"
+                              />
                               <span>Show ABHA Profile</span>
                             </div>
                             <div
@@ -653,8 +771,29 @@ export default function PatientInfoCard(props: {
                                 setShowLinkCareContext(true);
                               }}
                             >
-                              <CareIcon className="care-l-link text-lg text-primary-500" />
+                              <CareIcon
+                                icon="l-link"
+                                className="text-lg text-primary-500"
+                              />
                               <span>Link Care Context</span>
+                            </div>
+                            <div
+                              className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
+                              onClick={() => {
+                                close();
+                                setShowFetchABDMRecords(true);
+                                triggerGoal("Patient Card Button Clicked", {
+                                  buttonName: "Fetch Records over ABDM",
+                                  consultationId: consultation?.id,
+                                  userId: authUser?.id,
+                                });
+                              }}
+                            >
+                              <CareIcon
+                                icon="l-user-square"
+                                className="text-lg text-primary-500"
+                              />
+                              <span>Fetch Records over ABDM</span>
                             </div>
                           </>
                         )}
@@ -671,7 +810,10 @@ export default function PatientInfoCard(props: {
                           }}
                         >
                           <span className="flex w-full items-center justify-start gap-2">
-                            <CareIcon className="care-l-link text-lg text-primary-500" />
+                            <CareIcon
+                              icon="l-link"
+                              className="text-lg text-primary-500"
+                            />
                             <p>Link ABHA Number</p>
                           </span>
                         </div>
@@ -694,12 +836,15 @@ export default function PatientInfoCard(props: {
                                   activeShiftingData[
                                     activeShiftingData.length - 1
                                   ].id
-                                }`
+                                }`,
                               );
                             }}
                           >
                             <span className="flex w-full items-center justify-start gap-2">
-                              <CareIcon className="care-l-ambulance text-lg text-primary-500" />
+                              <CareIcon
+                                icon="l-ambulance"
+                                className="text-lg text-primary-500"
+                              />
                               <p>Track Shifting</p>
                             </span>
                           </div>
@@ -709,12 +854,15 @@ export default function PatientInfoCard(props: {
                             onClick={() => {
                               close();
                               navigate(
-                                `/facility/${patient.facility}/patient/${patient.id}/shift/new`
+                                `/facility/${patient.facility}/patient/${patient.id}/shift/new`,
                               );
                             }}
                           >
                             <span className="flex w-full items-center justify-start gap-2">
-                              <CareIcon className="care-l-ambulance text-lg text-primary-500" />
+                              <CareIcon
+                                icon="l-ambulance"
+                                className="text-lg text-primary-500"
+                              />
                               <p>Shift Patient</p>
                             </span>
                           </div>
@@ -733,7 +881,10 @@ export default function PatientInfoCard(props: {
                       }}
                     >
                       <span className="flex w-full items-center justify-start gap-2">
-                        <CareIcon className="care-l-clipboard-notes text-lg text-primary-500" />
+                        <CareIcon
+                          icon="l-clipboard-notes"
+                          className="text-lg text-primary-500"
+                        />
                         <p>{t("discharge_summary")}</p>
                       </span>
                     </div>
@@ -744,7 +895,7 @@ export default function PatientInfoCard(props: {
                     <div
                       className={`dropdown-item-primary pointer-events-auto ${
                         consultation?.discharge_date &&
-                        "text-gray-500 accent-gray-500 hover:bg-white"
+                        "text-secondary-500 accent-secondary-500 hover:bg-white"
                       } m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out`}
                       onClick={() => {
                         if (!consultation?.discharge_date) {
@@ -755,9 +906,10 @@ export default function PatientInfoCard(props: {
                     >
                       <span className="flex w-full items-center justify-start gap-2">
                         <CareIcon
-                          className={`care-l-hospital text-lg ${
+                          icon="l-hospital"
+                          className={`text-lg ${
                             consultation?.discharge_date
-                              ? "text-gray-500"
+                              ? "text-secondary-500"
                               : "text-primary-500"
                           }`}
                         />
@@ -781,20 +933,20 @@ export default function PatientInfoCard(props: {
                       switchMedicoLegalCase(checked);
                     }}
                     className={classNames(
-                      medicoLegalCase ? "bg-primary" : "bg-gray-200",
-                      "relative inline-flex h-4 w-8 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none "
+                      medicoLegalCase ? "bg-primary" : "bg-secondary-200",
+                      "relative inline-flex h-4 w-8 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ",
                     )}
                   >
                     <span
                       aria-hidden="true"
                       className={classNames(
                         medicoLegalCase ? "translate-x-4" : "translate-x-0",
-                        "pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                        "pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
                       )}
                     />
                   </Switch>
                   <Switch.Label as="span" className="ml-3 text-sm">
-                    <span className="font-medium text-gray-900">
+                    <span className="font-medium text-secondary-900">
                       Medico-Legal Case
                     </span>{" "}
                   </Switch.Label>
@@ -823,6 +975,11 @@ export default function PatientInfoCard(props: {
         patient={patient}
         show={showLinkCareContext}
         onClose={() => setShowLinkCareContext(false)}
+      />
+      <FetchRecordsModal
+        patient={patient}
+        show={showFetchABDMRecords}
+        onClose={() => setShowFetchABDMRecords(false)}
       />
     </>
   );

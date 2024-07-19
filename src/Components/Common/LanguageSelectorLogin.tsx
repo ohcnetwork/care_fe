@@ -4,8 +4,7 @@ import { LANGUAGE_NAMES } from "../../Locale/config";
 import { classNames } from "../../Utils/utils";
 
 export const LanguageSelectorLogin = () => {
-  const { i18n } = useTranslation();
-
+  const { i18n, t } = useTranslation();
   useEffect(() => {
     document.documentElement.setAttribute("lang", i18n.language);
   }, [i18n]);
@@ -19,8 +18,8 @@ export const LanguageSelectorLogin = () => {
   };
 
   return (
-    <div className="mt-8 flex flex-col items-center text-sm text-gray-800">
-      Available in:
+    <div className="mt-8 flex flex-col items-center text-sm text-secondary-800">
+      {t("available_in")}
       <br />
       <div className="inline-flex flex-wrap gap-3">
         {Object.keys(LANGUAGE_NAMES).map((e: string) => (
@@ -31,7 +30,7 @@ export const LanguageSelectorLogin = () => {
               "text-primary-400 hover:text-primary-600",
               (i18n.language === e ||
                 (i18n.language === "en-US" && e === "en")) &&
-                "text-primary-600 underline"
+                "text-primary-600 underline",
             )}
           >
             {LANGUAGE_NAMES[e]}

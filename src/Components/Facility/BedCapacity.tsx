@@ -77,7 +77,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
         // disable existing bed types
         const updatedBedTypes = getBedTypes(config).map((type: OptionsType) => {
           const isExisting = existingData.find(
-            (i: CapacityModal) => i.room_type === type.id
+            (i: CapacityModal) => i.room_type === type.id,
           );
           return {
             ...type,
@@ -173,7 +173,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
         {
           pathParams: { facilityId, ...(id ? { bed_id: id.toString() } : {}) },
           body: bodyData,
-        }
+        },
       );
       setIsLoading(false);
       if (data) {
@@ -209,7 +209,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
           <div role="status">
             <svg
               aria-hidden="true"
-              className="mr-2 h-8 w-8 animate-spin fill-primary text-gray-200 dark:text-gray-600"
+              className="mr-2 h-8 w-8 animate-spin fill-primary text-secondary-200 dark:text-secondary-600"
               viewBox="0 0 100 101"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"

@@ -52,7 +52,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
           <div className="h-full w-full grow">
             <Link
               href={`/facility/${facility.id}`}
-              className="group relative z-0 flex w-full min-w-[15%] items-center justify-center self-stretch bg-gray-300 min-[425px]:hidden"
+              className="group relative z-0 flex w-full min-w-[15%] items-center justify-center self-stretch bg-secondary-300 min-[425px]:hidden"
             >
               {(facility.read_cover_image_url && (
                 <img
@@ -61,7 +61,10 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                   className="h-full max-h-32 w-full object-cover"
                 />
               )) || (
-                <i className="fas fa-hospital block p-10 text-4xl text-gray-500" />
+                <CareIcon
+                  icon="l-hospital"
+                  className="block text-7xl text-secondary-500"
+                />
               )}
             </Link>
 
@@ -70,7 +73,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                 <div className="flex gap-5">
                   <Link
                     href={`/facility/${facility.id}`}
-                    className="group relative z-0 hidden h-[150px] min-h-[150px] w-[150px] min-w-[150px] items-center justify-center self-stretch rounded-md bg-gray-300 min-[425px]:flex"
+                    className="group relative z-0 hidden h-[150px] min-h-[150px] w-[150px] min-w-[150px] items-center justify-center self-stretch rounded-md bg-secondary-300 min-[425px]:flex"
                   >
                     {(facility.read_cover_image_url && (
                       <img
@@ -79,7 +82,10 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                         className="h-full w-full rounded-md object-cover"
                       />
                     )) || (
-                      <i className="fas fa-hospital block text-4xl text-gray-500" />
+                      <CareIcon
+                        icon="l-hospital"
+                        className="block text-5xl text-secondary-500"
+                      />
                     )}
                   </Link>
                   <div className="flow-root grow">
@@ -104,7 +110,10 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                         border
                         ghost
                       >
-                        <CareIcon className="care-l-monitor-heart-rate text-lg" />
+                        <CareIcon
+                          icon="l-monitor-heart-rate"
+                          className="text-lg"
+                        />
                         <span>View CNS</span>
                       </ButtonV2>
                     </div>
@@ -119,24 +128,24 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       {facility.features?.map(
                         (feature: number) =>
                           FACILITY_FEATURE_TYPES.some(
-                            (f) => f.id === feature
+                            (f) => f.id === feature,
                           ) && (
                             <Chip
                               hideBorder
                               key={feature}
                               text={
                                 FACILITY_FEATURE_TYPES.filter(
-                                  (f) => f.id === feature
+                                  (f) => f.id === feature,
                                 )[0]?.name
                               }
                               size="small"
                               startIcon={
                                 FACILITY_FEATURE_TYPES.filter(
-                                  (f) => f.id === feature
+                                  (f) => f.id === feature,
                                 )[0]?.icon
                               }
                             />
-                          )
+                          ),
                       )}
                     </div>
 
@@ -152,13 +161,14 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       className="text-sm font-semibold tracking-wider"
                     >
                       {formatPhoneNumber(
-                        parsePhoneNumber(facility.phone_number as string) ?? "-"
+                        parsePhoneNumber(facility.phone_number as string) ??
+                          "-",
                       )}
                     </a>
                   </div>
                 </div>
               </div>
-              <div className="flex flex-wrap border-t bg-gray-50 px-2 py-1 md:px-3">
+              <div className="flex flex-wrap border-t bg-secondary-50 px-2 py-1 md:px-3">
                 {/* <div className="flex justify-between py-2"> */}
                 <div className="flex w-full flex-wrap justify-between gap-2 py-2">
                   <div className="flex flex-wrap gap-2">
@@ -174,18 +184,19 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                         Live Patients / Total beds
                       </span>{" "}
                       <CareIcon
+                        icon="l-bed"
                         className={classNames(
-                          "care-l-bed mr-2",
+                          "mr-2",
                           facility.patient_count / facility.bed_count > 0.85
                             ? "text-white"
-                            : "text-primary-600"
+                            : "text-primary-600",
                         )}
                       />{" "}
                       <dt
                         className={`text-sm font-semibold ${
                           facility.patient_count / facility.bed_count > 0.85
                             ? "text-white"
-                            : "text-gray-700"
+                            : "text-secondary-700"
                         }`}
                       >
                         Occupancy: {facility.patient_count} /{" "}
@@ -235,7 +246,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                         className="h-[38px]"
                         onClick={(_) => setNotifyModalFor(facility.id)}
                       >
-                        <CareIcon className="care-l-megaphone text-lg" />
+                        <CareIcon icon="l-megaphone" className="text-lg" />
                         <span className="hidden md:block">Notify</span>
                       </ButtonV2>
                     )}
@@ -246,7 +257,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       ghost
                       className="h-[38px]"
                     >
-                      <CareIcon className="care-l-hospital text-lg" />
+                      <CareIcon icon="l-hospital" className="text-lg" />
                       <span className="hidden md:inline">
                         {t("view_faciliy")}
                       </span>
@@ -257,7 +268,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       border
                       ghost
                     >
-                      <CareIcon className="care-l-user-injured text-lg" />
+                      <CareIcon icon="l-user-injured" className="text-lg" />
                       {t("view_patients")}
                     </ButtonV2>
                     {/* </div> */}

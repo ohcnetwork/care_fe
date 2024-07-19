@@ -1,11 +1,24 @@
-import { AssignedToObjectModel, DailyRoundsModel } from "../Patient/models";
-import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
-import { NormalPrescription, PRNPrescription } from "../Medicine/models";
+import {
+  CONSENT_PATIENT_CODE_STATUS_CHOICES,
+  CONSENT_TYPE_CHOICES,
+  ConsultationSuggestionValue,
+  DISCHARGE_REASONS,
+  PATIENT_NOTES_THREADS,
+  UserRole,
+} from "../../Common/constants";
 import { AssetData, AssetLocationType } from "../Assets/AssetTypes";
-import { UserBareMinimum } from "../Users/models";
 import { RouteToFacility } from "../Common/RouteToFacilitySelect";
+import { InvestigationType } from "../Common/prescription-builder/InvestigationBuilder";
+import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
-import { ConsultationSuggestionValue, UserRole } from "../../Common/constants";
+import { NormalPrescription, PRNPrescription } from "../Medicine/models";
+import {
+  AssignedToObjectModel,
+  DailyRoundsModel,
+  FileUploadModel,
+} from "../Patient/models";
+import { EncounterSymptom } from "../Symptoms/types";
+import { UserBareMinimum } from "../Users/models";
 
 export interface LocalBodyModel {
   id: number;
@@ -88,11 +101,21 @@ export interface OptionsType {
   disabled?: boolean;
 }
 
-export type PatientCategory =
-  | "Comfort Care"
-  | "Stable"
-  | "Abnormal"
-  | "Critical";
+export type PatientCategory = "Comfort Care" | "Mild" | "Moderate" | "Critical";
+
+export interface PatientConsentModel {
+  id: string;
+  type: (typeof CONSENT_TYPE_CHOICES)[number]["id"];
+  patient_code_status:
+    | (typeof CONSENT_PATIENT_CODE_STATUS_CHOICES)[number]["id"]
+    | null;
+  files: FileUploadModel[] | null;
+  archived: boolean;
+  archived_by?: UserBareMinimum;
+  archived_date: string;
+  created_date: string;
+  created_by: UserBareMinimum;
+}
 
 export interface ConsultationModel {
   encounter_date: string;
@@ -103,7 +126,7 @@ export interface ConsultationModel {
   category?: PatientCategory;
   created_date?: string;
   discharge_date?: string;
-  new_discharge_reason?: number;
+  new_discharge_reason?: (typeof DISCHARGE_REASONS)[number]["id"];
   discharge_prescription?: NormalPrescription;
   discharge_prn_prescription?: PRNPrescription;
   discharge_notes?: string;
@@ -113,7 +136,6 @@ export interface ConsultationModel {
   facility_name?: string;
   id: string;
   modified_date?: string;
-  other_symptoms?: string;
   patient: string;
   treatment_plan?: string;
   referred_to?: FacilityModel["id"];
@@ -132,16 +154,16 @@ export interface ConsultationModel {
   kasp_enabled_date?: string;
   readonly diagnoses?: ConsultationDiagnosis[];
   create_diagnoses?: CreateDiagnosis[]; // Used for bulk creating diagnoses upon consultation creation
+  readonly symptoms?: EncounterSymptom[];
+  create_symptoms?: CreateDiagnosis[]; // Used for bulk creating symptoms upon consultation creation
   deprecated_verified_by?: string;
-  treating_physician?: UserBareMinimum["id"];
+  readonly treating_physician?: UserBareMinimum["id"];
   treating_physician_object?: UserBareMinimum;
   suggestion_text?: string;
-  symptoms?: Array<number>;
-  symptoms_text?: string;
-  symptoms_onset_date?: string;
   consultation_notes?: string;
   is_telemedicine?: boolean;
   procedure?: ProcedureType[];
+  assigned_to?: string;
   assigned_to_object?: AssignedToObjectModel;
   created_by?: any;
   last_edited_by?: any;
@@ -162,6 +184,8 @@ export interface ConsultationModel {
   death_confirmed_doctor?: string;
   is_readmission?: boolean;
   medico_legal_case?: boolean;
+  investigation?: InvestigationType[];
+  has_consents?: (typeof CONSENT_TYPE_CHOICES)[number]["id"][];
 }
 
 export interface PatientStatsModel {
@@ -184,6 +208,7 @@ export interface DupPatientModel {
   date_of_birth: string;
   year_of_birth: number;
   state_id: number;
+  is_expired: boolean;
 }
 
 export interface InventoryItemsModel {
@@ -198,7 +223,7 @@ export interface InventoryItemsModel {
     {
       id: number;
       name: string;
-    }
+    },
   ];
 }
 
@@ -223,7 +248,8 @@ export interface BedModel {
   facility?: string;
   location_object?: {
     name: string;
-    id?: string;
+    id: string;
+    facility?: { name: string; id: string };
   };
   location?: string;
   is_occupied?: boolean;
@@ -503,6 +529,7 @@ export interface PatientNotesModel {
   facility: BaseFacilityModel;
   created_by_object: BaseUserModel;
   user_type?: UserRole | "RemoteSpecialist";
+  thread: (typeof PATIENT_NOTES_THREADS)[keyof typeof PATIENT_NOTES_THREADS];
   created_date: string;
   last_edited_by?: BaseUserModel;
   last_edited_date?: string;
@@ -510,8 +537,8 @@ export interface PatientNotesModel {
 
 export interface PatientNoteStateType {
   notes: PatientNotesModel[];
-  patientId: string;
-  facilityId: string;
+  patientId?: string;
+  facilityId?: string;
   cPage: number;
   totalPages: number;
 }
@@ -583,6 +610,11 @@ export type InventoryLogResponse = InventorySummaryResponse & {
   probable_accident: boolean;
   unit: number;
   created_by: number;
+};
+
+export type PatientTransferRequest = {
+  facility: string;
+  year_of_birth: string;
 };
 
 export type PatientTransferResponse = {

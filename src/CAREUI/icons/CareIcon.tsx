@@ -5,27 +5,33 @@ import { useEffect } from "react";
 export type IconName = keyof typeof iconData;
 
 export interface CareIconProps {
-  icon?: IconName;
+  icon: IconName;
   className?: string | undefined;
   onClick?: React.MouseEventHandler<HTMLSpanElement> | undefined;
+  id?: string;
 }
 
 /**
  * ### CARE's Official Icon Library.
  * @param className icon class name
  * @returns icon component
- * @example ```<CareIcon className="care-l-hospital" /> ```
+ * @example ```<CareIcon icon="l-hospital"/> ```
  *
  * @see [icon library](https://iconscout.com/unicons/)
  */
-export default function CareIcon({ icon, className, onClick }: CareIconProps) {
+export default function CareIcon({
+  id,
+  icon,
+  className,
+  onClick,
+}: CareIconProps) {
   const effectiveClassName = icon
     ? `care-${icon} ${className ?? ""}`
     : className;
 
   useEffect(() => transformIcons(), [effectiveClassName]);
   return (
-    <span onClick={onClick} key={effectiveClassName}>
+    <span id={id} onClick={onClick} key={effectiveClassName}>
       <i className={`care ${effectiveClassName}`} />
     </span>
   );

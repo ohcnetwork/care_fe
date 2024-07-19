@@ -24,7 +24,7 @@ const initForm = {
 
 const initError = Object.assign(
   {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
 );
 
 const initialState = {
@@ -121,7 +121,7 @@ export default function UpdateResult(props: any) {
         setWard(initialLocalbodies);
       }
     },
-    [props.id]
+    [props.id],
   );
 
   const validateForm = () => {
@@ -216,14 +216,14 @@ export default function UpdateResult(props: any) {
         backUrl={`/external_results/${id}`}
       >
         <div className="md:p-4">
-          <div className="border-b border-gray-200 px-4 py-5 sm:px-6">
-            <h3 className="text-lg font-medium leading-6 text-gray-900">
+          <div className="border-b border-secondary-200 px-4 py-5 sm:px-6">
+            <h3 className="text-lg font-medium leading-6 text-secondary-900">
               {state.form.name} - {state.form.age} {state.form.age_in}
             </h3>
-            <p className="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
+            <p className="mt-1 max-w-2xl text-sm leading-5 text-secondary-500">
               SRF ID: {state.form.srf_id}
             </p>
-            <p className="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
+            <p className="mt-1 max-w-2xl text-sm leading-5 text-secondary-500">
               Care external results ID: {id}
             </p>
           </div>

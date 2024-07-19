@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { classNames } from "../../../Utils/utils";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 export function PrescriptionDropdown(props: {
   options: string[] | number[];
@@ -51,16 +52,17 @@ export function PrescriptionDropdown(props: {
         ref={dropRef}
         className={classNames(
           "absolute left-0 top-[calc(100%+10px)] z-40 max-h-[300px] w-full overflow-auto rounded-md bg-white shadow-lg",
-          !open && "hidden"
+          !open && "hidden",
         )}
       >
         {options.map((option, i) => {
           return (
             <div className="flex justify-between">
               <button
+                id="frequency-interval"
                 type="button"
                 key={i}
-                className="block w-full px-4 py-2 text-left text-sm leading-5 text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none"
+                className="block w-full px-4 py-2 text-left text-sm leading-5 text-secondary-700 hover:bg-secondary-100 hover:text-secondary-900 focus:bg-secondary-100 focus:text-secondary-900 focus:outline-none"
                 onClick={() => {
                   setValue(option);
                   setOpen(false);
@@ -77,7 +79,7 @@ export function PrescriptionDropdown(props: {
                   <span className="tooltip-text tooltip-right">
                     {tips[option]}
                   </span>
-                  <i className="fa-solid fa-circle-info"></i>
+                  <CareIcon icon="l-info-circle" className="text-lg" />
                 </button>
               )}
             </div>

@@ -12,6 +12,7 @@ interface Props {
   interval: { start: Date; end: Date };
   prescription: Prescription;
   refetch: () => void;
+  readonly?: boolean;
 }
 
 export default function AdministrationEventCell({
@@ -19,17 +20,18 @@ export default function AdministrationEventCell({
   interval: { start, end },
   prescription,
   refetch,
+  readonly,
 }: Props) {
   const [showTimeline, setShowTimeline] = useState(false);
   // Check if cell belongs to an administered prescription (including start and excluding end)
   const administered = administrations
     .filter((administration) =>
-      dayjs(administration.administered_date).isBetween(start, end, null, "[)")
+      dayjs(administration.administered_date).isBetween(start, end, null, "[)"),
     )
     .sort(
       (a, b) =>
         new Date(a.administered_date!).getTime() -
-        new Date(b.administered_date!).getTime()
+        new Date(b.administered_date!).getTime(),
     );
 
   const hasComment = administered.some((obj) => !!obj.notes);
@@ -45,7 +47,7 @@ export default function AdministrationEventCell({
           className="w-full md:max-w-4xl"
           show={showTimeline}
         >
-          <div className="mt-6 text-sm font-medium text-gray-700">
+          <div className="mt-6 text-sm font-medium text-secondary-700">
             Administrations on{" "}
             <span className="text-black">
               {formatDateTime(start, "DD/MM/YYYY")}
@@ -56,9 +58,11 @@ export default function AdministrationEventCell({
             prescription={prescription}
             showPrescriptionDetails
             onRefetch={refetch}
+            readonly={readonly}
           />
         </DialogModal>
         <button
+          id="administration-symbol"
           className="scale-100 transition-transform duration-200 ease-in-out hover:scale-110"
           onClick={() => setShowTimeline(true)}
         >
@@ -83,7 +87,9 @@ export default function AdministrationEventCell({
 
   // Check if cell belongs to after prescription.created_date
   if (dayjs(start).isAfter(prescription.created_date)) {
-    return <CareIcon icon="l-minus-circle" className="text-xl text-gray-400" />;
+    return (
+      <CareIcon icon="l-minus-circle" className="text-xl text-secondary-400" />
+    );
   }
 
   // Check if cell belongs to a discontinued prescription
@@ -101,7 +107,7 @@ export default function AdministrationEventCell({
             "text-xl",
             dayjs(prescription.discontinued_date).isBetween(start, end)
               ? "text-danger-700"
-              : "text-gray-400"
+              : "text-secondary-400",
           )}
         />
         <span className="tooltip-text tooltip-top -translate-x-1/2 text-xs">

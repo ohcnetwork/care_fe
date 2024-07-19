@@ -19,6 +19,7 @@ type SelectMenuProps<T, V = T> = {
   optionDescription?: OptionCallback<T, ReactNode>;
   optionIcon?: OptionCallback<T, ReactNode>;
   optionValue?: OptionCallback<T, V>;
+  optionDisabled?: OptionCallback<T, boolean>;
   showIconWhenSelected?: boolean;
   showChevronIcon?: boolean;
   className?: string;
@@ -51,21 +52,26 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
       selectedLabel: props.optionSelectedLabel
         ? props.optionSelectedLabel(option)
         : label,
-      description: props.optionDescription && props.optionDescription(option),
-      icon: props.optionIcon && props.optionIcon(option),
+      description: props.optionDescription?.(option),
+      icon: props.optionIcon?.(option),
       value: props.optionValue ? props.optionValue(option) : option,
+      disabled: props.optionDisabled?.(option),
     };
   });
 
   const showChevronIcon = props.showChevronIcon ?? true;
 
-  const placeholder = props.placeholder ?? "Select";
+  const placeholder =
+    valueOptions?.length > 0 ? props.placeholder ?? "Select" : "No options";
   const defaultOption = {
     label: placeholder,
-    selectedLabel: <p className="font-normal text-gray-600">{placeholder}</p>,
+    selectedLabel: (
+      <p className="font-normal text-secondary-600">{placeholder}</p>
+    ),
     description: undefined,
     icon: undefined,
     value: undefined,
+    disabled: undefined,
   };
 
   const options = props.required
@@ -77,7 +83,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
   return (
     <div className={props.className} id={props.id}>
       <Listbox
-        disabled={props.disabled}
+        disabled={props.disabled || valueOptions?.length === 0}
         value={value}
         onChange={(selection: any) => props.onChange(selection.value)}
       >
@@ -97,23 +103,26 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                 <div className="relative z-0 flex w-full items-center">
                   <div className="relative flex flex-1 items-center focus:z-10">
                     {props.showIconWhenSelected && value?.icon && (
-                      <div className="ml-2 text-sm text-gray-700">
+                      <div className="ml-2 text-sm text-secondary-700">
                         {value.icon}
                       </div>
                     )}
-                    <p className="ml-2.5 break-all text-sm font-medium">
+                    <p className="ml-2.5 whitespace-pre-wrap text-start text-sm font-medium">
                       {value.selectedLabel}
                     </p>
                   </div>
                   {showChevronIcon && (
-                    <CareIcon className="care-l-angle-down -mb-0.5 text-lg text-gray-900" />
+                    <CareIcon
+                      icon="l-angle-down"
+                      className="-mb-0.5 text-lg text-secondary-900"
+                    />
                   )}
                 </div>
               </Listbox.Button>
               <div
                 className={classNames(
                   "absolute z-10 w-full",
-                  props.position === "above" ? "bottom-0 mb-12" : "top-0 mt-12"
+                  props.position === "above" ? "bottom-0 mb-12" : "top-0 mt-12",
                 )}
               >
                 <DropdownTransition show={open}>
@@ -124,6 +133,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                         key={index}
                         className={dropdownOptionClassNames}
                         value={option}
+                        disabled={option.disabled}
                       >
                         {({ active, selected }) => (
                           <div className="flex flex-col gap-2">
@@ -132,14 +142,22 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                               {props.optionIcon
                                 ? option.icon
                                 : selected && (
-                                    <CareIcon className="care-l-check text-lg" />
+                                    <CareIcon
+                                      icon="l-check"
+                                      className="text-lg"
+                                    />
                                   )}
                             </div>
                             {option.description && (
                               <p
-                                className={`font-normal ${
-                                  active ? "text-primary-200" : "text-gray-700"
-                                }`}
+                                className={classNames(
+                                  "text-sm font-normal",
+                                  option.disabled
+                                    ? "text-secondary-700"
+                                    : active
+                                      ? "text-primary-200"
+                                      : "text-secondary-700",
+                                )}
                               >
                                 {option.description}
                               </p>

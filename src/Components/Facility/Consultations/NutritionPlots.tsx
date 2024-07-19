@@ -21,7 +21,7 @@ export const NutritionPlots = (props: any) => {
   useEffect(() => {
     const fetchDailyRounds = async (
       currentPage: number,
-      consultationId: string
+      consultationId: string,
     ) => {
       const { res, data } = await request(routes.dailyRoundsAnalyse, {
         body: {
@@ -65,7 +65,7 @@ export const NutritionPlots = (props: any) => {
   //IO Balance
   const IOvalues = Object.values(results)
     .map(
-      (p: any) => p["total_intake_calculated"] - p["total_output_calculated"]
+      (p: any) => p["total_intake_calculated"] - p["total_output_calculated"],
     )
     .reverse();
 
@@ -73,8 +73,8 @@ export const NutritionPlots = (props: any) => {
   const infusionList: any = [];
   Object.values(results).map((p: any) =>
     p.infusions.map((x: any) =>
-      infusionList.indexOf(x.name) === -1 ? infusionList.push(x.name) : null
-    )
+      infusionList.indexOf(x.name) === -1 ? infusionList.push(x.name) : null,
+    ),
   );
 
   const infusionsData: any = {};
@@ -83,7 +83,7 @@ export const NutritionPlots = (props: any) => {
       (infusionsData[x] = {
         name: x,
         data: [...Array(Object.keys(results).length).fill(undefined)],
-      })
+      }),
   );
 
   Object.values(results)
@@ -99,8 +99,8 @@ export const NutritionPlots = (props: any) => {
   const IVFluidsList: any = [];
   Object.values(results).map((p: any) =>
     p.iv_fluids.map((x: any) =>
-      IVFluidsList.indexOf(x.name) === -1 ? IVFluidsList.push(x.name) : null
-    )
+      IVFluidsList.indexOf(x.name) === -1 ? IVFluidsList.push(x.name) : null,
+    ),
   );
 
   const IVFluidsData: any = {};
@@ -109,7 +109,7 @@ export const NutritionPlots = (props: any) => {
       (IVFluidsData[x] = {
         name: x,
         data: [...Array(Object.keys(results).length).fill(undefined)],
-      })
+      }),
   );
 
   Object.values(results)
@@ -125,8 +125,8 @@ export const NutritionPlots = (props: any) => {
   const FeedsList: any = [];
   Object.values(results).map((p: any) =>
     p.feeds.map((x: any) =>
-      FeedsList.indexOf(x.name) === -1 ? FeedsList.push(x.name) : null
-    )
+      FeedsList.indexOf(x.name) === -1 ? FeedsList.push(x.name) : null,
+    ),
   );
 
   const FeedsData: any = {};
@@ -135,7 +135,7 @@ export const NutritionPlots = (props: any) => {
       (FeedsData[x] = {
         name: x,
         data: [...Array(Object.keys(results).length).fill(undefined)],
-      })
+      }),
   );
 
   Object.values(results)
@@ -151,8 +151,8 @@ export const NutritionPlots = (props: any) => {
   const OutputList: any = [];
   Object.values(results).map((p: any) =>
     p.output.map((x: any) =>
-      OutputList.indexOf(x.name) === -1 ? OutputList.push(x.name) : null
-    )
+      OutputList.indexOf(x.name) === -1 ? OutputList.push(x.name) : null,
+    ),
   );
 
   const OutputData: any = {};
@@ -161,7 +161,7 @@ export const NutritionPlots = (props: any) => {
       (OutputData[x] = {
         name: x,
         data: [...Array(Object.keys(results).length).fill(undefined)],
-      })
+      }),
   );
 
   Object.values(results)
@@ -175,16 +175,16 @@ export const NutritionPlots = (props: any) => {
 
   return (
     <div>
-      <section className="my-4 h-full space-y-2 rounded-lg bg-white p-4 text-gray-100 shadow">
+      <section className="my-4 h-full space-y-2 rounded-lg bg-white p-4 text-secondary-100 shadow">
         <div
-          className="flex justify-between border-b border-dashed pb-2 text-left text-lg font-semibold text-gray-900"
+          className="flex justify-between border-b border-dashed pb-2 text-left text-lg font-semibold text-secondary-900"
           onClick={() => setShowIO(!showIO)}
         >
           <div> IO Balance Plots</div>
           {showIO ? (
-            <CareIcon className="care-l-angle-up text-2xl font-bold" />
+            <CareIcon icon="l-angle-up" className="text-2xl font-bold" />
           ) : (
-            <CareIcon className="care-l-angle-down text-2xl font-bold" />
+            <CareIcon icon="l-angle-down" className="text-2xl font-bold" />
           )}
         </div>
 
@@ -217,16 +217,16 @@ export const NutritionPlots = (props: any) => {
           </div>
         </div>
       </section>
-      <section className="my-4 h-full space-y-2 rounded-lg bg-white p-4 text-gray-100 shadow">
+      <section className="my-4 h-full space-y-2 rounded-lg bg-white p-4 text-secondary-100 shadow">
         <div
-          className="flex justify-between border-b border-dashed pb-2 text-left text-lg font-semibold text-gray-900"
+          className="flex justify-between border-b border-dashed pb-2 text-left text-lg font-semibold text-secondary-900"
           onClick={() => setShowIntake(!showIntake)}
         >
           <div>Intake</div>
           {showIntake ? (
-            <CareIcon className="care-l-angle-up text-2xl font-bold" />
+            <CareIcon icon="l-angle-up" className="text-2xl font-bold" />
           ) : (
-            <CareIcon className="care-l-angle-down text-2xl font-bold" />
+            <CareIcon icon="l-angle-down" className="text-2xl font-bold" />
           )}
         </div>
         <div className={showIntake ? "grid gap-4 md:grid-cols-2" : "hidden"}>
@@ -245,7 +245,7 @@ export const NutritionPlots = (props: any) => {
               yData={Object.values(infusionsData)}
             />
           </div>
-          <div className="rounded-lg border bg-white px-4 pt-4 text-gray-900">
+          <div className="rounded-lg border bg-white px-4 pt-4 text-secondary-900">
             <h3 className="text-lg">Infusions:</h3>
             <div className="h-72 overflow-y-auto pb-2">
               {Object.entries(results).map((obj: any) => {
@@ -273,7 +273,7 @@ export const NutritionPlots = (props: any) => {
               yData={Object.values(IVFluidsData)}
             />
           </div>
-          <div className="rounded-lg border bg-white px-4 pt-4 text-gray-900">
+          <div className="rounded-lg border bg-white px-4 pt-4 text-secondary-900">
             <h3 className="text-lg">IV Fluids:</h3>
             <div className="h-72 overflow-y-auto pb-2">
               {Object.entries(results).map((obj: any) => {
@@ -301,7 +301,7 @@ export const NutritionPlots = (props: any) => {
               yData={Object.values(FeedsData)}
             />
           </div>
-          <div className="rounded-lg border bg-white px-4 pt-4 text-gray-900">
+          <div className="rounded-lg border bg-white px-4 pt-4 text-secondary-900">
             <h3 className="text-lg">Feeds:</h3>
             <div className="h-72 overflow-y-auto pb-2">
               {Object.entries(results).map((obj: any) => {
@@ -324,16 +324,16 @@ export const NutritionPlots = (props: any) => {
           </div>
         </div>
       </section>
-      <section className="my-4 h-full space-y-2 rounded-lg bg-white p-4 text-gray-100 shadow">
+      <section className="my-4 h-full space-y-2 rounded-lg bg-white p-4 text-secondary-100 shadow">
         <div
-          className="flex justify-between border-b border-dashed pb-2 text-left text-lg font-semibold text-gray-900"
+          className="flex justify-between border-b border-dashed pb-2 text-left text-lg font-semibold text-secondary-900"
           onClick={() => setShowOutput(!showOutput)}
         >
           <div> Output</div>
           {showOutput ? (
-            <CareIcon className="care-l-angle-up text-2xl font-bold" />
+            <CareIcon icon="l-angle-up" className="text-2xl font-bold" />
           ) : (
-            <CareIcon className="care-l-angle-down text-2xl font-bold" />
+            <CareIcon icon="l-angle-down" className="text-2xl font-bold" />
           )}
         </div>
         <div
@@ -356,7 +356,7 @@ export const NutritionPlots = (props: any) => {
               yData={Object.values(OutputData)}
             />
           </div>
-          <div className="rounded-lg border bg-white px-4 pt-4 text-gray-900">
+          <div className="rounded-lg border bg-white px-4 pt-4 text-secondary-900">
             <h3 className="text-lg">Output:</h3>
             <div className="h-72 overflow-y-auto pb-2">
               {Object.entries(results).map((obj: any) => {

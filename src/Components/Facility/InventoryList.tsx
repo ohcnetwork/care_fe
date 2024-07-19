@@ -45,18 +45,18 @@ export default function InventoryList(props: any) {
         id={`${inventoryItem.item_object?.name.replaceAll(" ", "-")}`}
         key={inventoryItem.id}
         className={classNames(
-          "cursor-pointer hover:bg-gray-200",
-          inventoryItem.is_low ? "bg-red-100" : "bg-white"
+          "cursor-pointer hover:bg-secondary-200",
+          inventoryItem.is_low ? "bg-red-100" : "bg-white",
         )}
         onClick={() =>
           navigate(
-            `/facility/${facilityId}/inventory/${inventoryItem.item_object?.id}`
+            `/facility/${facilityId}/inventory/${inventoryItem.item_object?.id}`,
           )
         }
       >
-        <td className="border-b border-gray-200 p-5 text-sm">
+        <td className="border-b border-secondary-200 p-5 text-sm">
           <div className="flex items-center">
-            <p className="whitespace-nowrap text-gray-900">
+            <p className="whitespace-nowrap text-secondary-900">
               {inventoryItem.item_object?.name}
               {inventoryItem.is_low && (
                 <span className="badge badge-danger ml-2">Low Stock</span>
@@ -64,8 +64,8 @@ export default function InventoryList(props: any) {
             </p>
           </div>
         </td>
-        <td className="border-b border-gray-200 p-5 text-sm">
-          <p className="whitespace-nowrap lowercase text-gray-900">
+        <td className="border-b border-secondary-200 p-5 text-sm">
+          <p className="whitespace-nowrap lowercase text-secondary-900">
             {inventoryItem.quantity}{" "}
             {inventoryItem.item_object?.default_unit?.name}
           </p>
@@ -75,8 +75,11 @@ export default function InventoryList(props: any) {
   } else if (inventoryData?.results && inventoryData.results.length === 0) {
     inventoryList = (
       <tr className="bg-white">
-        <td colSpan={3} className="border-b border-gray-200 p-5 text-center">
-          <p className="whitespace-nowrap text-gray-500">
+        <td
+          colSpan={3}
+          className="border-b border-secondary-200 p-5 text-center"
+        >
+          <p className="whitespace-nowrap text-secondary-500">
             No inventory available
           </p>
         </td>
@@ -94,10 +97,10 @@ export default function InventoryList(props: any) {
             <table className="min-w-full overflow-hidden rounded-lg leading-normal shadow">
               <thead>
                 <tr>
-                  <th className="border-b-2 border-gray-200 bg-primary-400 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
+                  <th className="border-b-2 border-secondary-200 bg-primary-400 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
                     Name
                   </th>
-                  <th className="border-b-2 border-gray-200 bg-primary-400 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
+                  <th className="border-b-2 border-secondary-200 bg-primary-400 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
                     Stock
                   </th>
                 </tr>

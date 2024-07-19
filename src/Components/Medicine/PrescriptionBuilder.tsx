@@ -11,17 +11,23 @@ import { useTranslation } from "react-i18next";
 import useQuery from "../../Utils/request/useQuery";
 import MedicineRoutes from "./routes";
 import useSlug from "../../Common/hooks/useSlug";
+import { AuthorizedForConsultationRelatedActions } from "../../CAREUI/misc/AuthorizedChild";
+import { compareBy } from "../../Utils/utils";
 
 interface Props {
   prescription_type?: Prescription["prescription_type"];
   is_prn?: boolean;
   disabled?: boolean;
+  discontinued?: boolean;
+  actions?: ("discontinue" | "administer")[];
 }
 
 export default function PrescriptionBuilder({
   prescription_type,
   is_prn = false,
   disabled,
+  discontinued,
+  actions = ["administer", "discontinue"],
 }: Props) {
   const { t } = useTranslation();
   const consultation = useSlug("consultation");
@@ -31,7 +37,12 @@ export default function PrescriptionBuilder({
 
   const { data, refetch } = useQuery(MedicineRoutes.listPrescriptions, {
     pathParams: { consultation },
-    query: { is_prn, prescription_type, limit: 100 },
+    query: {
+      dosage_type: is_prn ? "PRN" : "REGULAR,TITRATED",
+      prescription_type,
+      discontinued,
+      limit: 100,
+    },
   });
 
   return (
@@ -61,44 +72,62 @@ export default function PrescriptionBuilder({
         />
       )}
       <div className="flex flex-col gap-3">
-        {data?.results.map((obj, index) => (
-          <PrescriptionDetailCard
-            key={index}
-            prescription={obj}
-            onDiscontinueClick={() => setShowDiscontinueFor(obj)}
-            onAdministerClick={() => setShowAdministerFor(obj)}
-            readonly={disabled}
-          />
-        ))}
+        {data?.results
+          .sort(compareBy("discontinued"))
+          ?.map((obj) => (
+            <PrescriptionDetailCard
+              key={obj.id}
+              prescription={obj}
+              collapsible
+              onDiscontinueClick={
+                actions.includes("discontinue")
+                  ? () => setShowDiscontinueFor(obj)
+                  : undefined
+              }
+              onAdministerClick={
+                actions.includes("administer")
+                  ? () => setShowAdministerFor(obj)
+                  : undefined
+              }
+              readonly={disabled}
+            />
+          ))}
       </div>
-      <ButtonV2
-        type="button"
-        onClick={() => setShowCreate(true)}
-        variant="secondary"
-        className="mt-4 w-full bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900"
-        disabled={disabled}
-      >
-        <div className="flex w-full justify-start gap-2">
-          <CareIcon className="care-l-plus text-lg" />
-          <span className="font-bold">
-            {t(is_prn ? "add_prn_prescription" : "add_prescription_medication")}
-          </span>
-        </div>
-      </ButtonV2>
+      <AuthorizedForConsultationRelatedActions>
+        <ButtonV2
+          type="button"
+          onClick={() => setShowCreate(true)}
+          variant="secondary"
+          className="mt-4 w-full bg-secondary-200 text-secondary-700 hover:bg-secondary-300 hover:text-secondary-900 focus:bg-secondary-100 focus:text-secondary-900"
+          disabled={disabled}
+        >
+          <div
+            className="flex w-full justify-start gap-2"
+            id="add-prescription"
+          >
+            <CareIcon icon="l-plus" className="text-lg" />
+            <span className="font-bold">
+              {t(
+                is_prn ? "add_prn_prescription" : "add_prescription_medication",
+              )}
+            </span>
+          </div>
+        </ButtonV2>
+      </AuthorizedForConsultationRelatedActions>
       {showCreate && (
         <DialogModal
           onClose={() => setShowCreate(false)}
           show={showCreate}
           title={t(
-            is_prn ? "add_prn_prescription" : "add_prescription_medication"
+            is_prn ? "add_prn_prescription" : "add_prescription_medication",
           )}
           description={
             <div className="mt-2 flex w-full justify-start gap-2 text-warning-500">
-              <CareIcon className="care-l-exclamation-triangle text-base" />
+              <CareIcon icon="l-exclamation-triangle" className="text-base" />
               <span>{t("modification_caution_note")}</span>
             </div>
           }
-          className="w-full max-w-3xl lg:min-w-[600px]"
+          className="w-full max-w-4xl lg:min-w-[768px]"
         >
           <CreatePrescriptionForm
             prescription={
@@ -118,5 +147,7 @@ export default function PrescriptionBuilder({
   );
 }
 
-const DefaultPrescription: Partial<NormalPrescription> = { is_prn: false };
-const DefaultPRNPrescription: Partial<PRNPrescription> = { is_prn: true };
+const DefaultPrescription: Partial<NormalPrescription> = {
+  dosage_type: "REGULAR",
+};
+const DefaultPRNPrescription: Partial<PRNPrescription> = { dosage_type: "PRN" };

@@ -45,7 +45,7 @@ export default function ListView() {
   const showResourceCardList = (data: any) => {
     if (data && !data.length) {
       return (
-        <div className="mt-64 flex flex-1 justify-center text-gray-600">
+        <div className="mt-64 flex flex-1 justify-center text-secondary-600">
           No requests to show.
         </div>
       );
@@ -75,10 +75,10 @@ export default function ListView() {
                 <div className="sm:col-span-1">
                   <dt
                     title="Resource status"
-                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                   >
-                    <i className="fas fa-truck mr-2" />
-                    <dd className="text-sm font-bold leading-5 text-gray-900">
+                    <CareIcon icon="l-truck" className="mr-2" />
+                    <dd className="text-sm font-bold leading-5 text-secondary-900">
                       {resource.status}
                     </dd>
                   </dt>
@@ -86,10 +86,10 @@ export default function ListView() {
                 <div className="sm:col-span-1">
                   <dt
                     title=" Origin facility"
-                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                   >
-                    <i className="fas fa-plane-departure mr-2"></i>
-                    <dd className="text-sm font-bold leading-5 text-gray-900">
+                    <CareIcon icon="l-plane-departure" className="mr-2" />
+                    <dd className="text-sm font-bold leading-5 text-secondary-900">
                       {(resource.origin_facility_object || {}).name}
                     </dd>
                   </dt>
@@ -97,10 +97,10 @@ export default function ListView() {
                 <div className="sm:col-span-1">
                   <dt
                     title="Resource approving facility"
-                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                   >
-                    <i className="fas fa-user-check mr-2"></i>
-                    <dd className="text-sm font-bold leading-5 text-gray-900">
+                    <CareIcon icon="l-user-check" className="mr-2" />
+                    <dd className="text-sm font-bold leading-5 text-secondary-900">
                       {(resource.approving_facility_object || {}).name}
                     </dd>
                   </dt>
@@ -108,11 +108,11 @@ export default function ListView() {
                 <div className="sm:col-span-1">
                   <dt
                     title=" Assigned facility"
-                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                   >
-                    <i className="fas fa-plane-arrival mr-2"></i>
+                    <CareIcon icon="l-plane-arrival" className="m-2" />
 
-                    <dd className="text-sm font-bold leading-5 text-gray-900">
+                    <dd className="text-sm font-bold leading-5 text-secondary-900">
                       {(resource.assigned_facility_object || {}).name ||
                         "Yet to be decided"}
                     </dd>
@@ -127,11 +127,11 @@ export default function ListView() {
                       (dayjs()
                         .subtract(2, "hours")
                         .isBefore(resource.modified_date)
-                        ? "text-gray-900"
+                        ? "text-secondary-900"
                         : "rounded bg-red-400 p-1 text-white")
                     }
                   >
-                    <i className="fas fa-stopwatch mr-2"></i>
+                    <CareIcon icon="l-stopwatch" className="mr-2" />
                     <dd className="text-sm font-bold leading-5">
                       {formatDateTime(resource.modified_date) || "--"}
                     </dd>
@@ -146,7 +146,7 @@ export default function ListView() {
                 onClick={(_) => navigate(`/resource/${resource.id}`)}
                 className="btn btn-default mr-2 w-full bg-white"
               >
-                <i className="fas fa-eye mr-2" /> All Details
+                <CareIcon icon="l-eye" className="mr-2" /> All Details
               </button>
             </div>
           </div>
@@ -181,7 +181,7 @@ export default function ListView() {
           </div>
           <div className="flex w-full flex-col gap-2 lg:w-fit lg:flex-row lg:gap-4">
             <ButtonV2 className="py-[11px]" onClick={onBoardViewBtnClick}>
-              <CareIcon className="care-l-list-ul rotate-90" />
+              <CareIcon icon="l-list-ul" className="rotate-90" />
               {t("board_view")}
             </ButtonV2>
 
@@ -204,7 +204,11 @@ export default function ListView() {
                 className="text-xs hover:text-blue-800"
                 onClick={() => refetch()}
               >
-                <i className="fa fa-refresh mr-1" aria-hidden="true"></i>
+                <CareIcon
+                  icon="l-refresh"
+                  className="mr-1"
+                  aria-hidden="true"
+                />
                 {t("refresh_list")}
               </button>
             </div>

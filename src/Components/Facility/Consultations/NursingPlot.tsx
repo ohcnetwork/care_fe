@@ -18,7 +18,7 @@ export const NursingPlot = (props: any) => {
   useEffect(() => {
     const fetchDailyRounds = async (
       currentPage: number,
-      consultationId: string
+      consultationId: string,
     ) => {
       const { res, data } = await request(routes.dailyRoundsAnalyse, {
         body: {
@@ -54,13 +54,13 @@ export const NursingPlot = (props: any) => {
       x.nursing.map((f: any) => {
         f["date"] = x.date;
         return f;
-      })
+      }),
     )
     .reduce((accumulator, value) => accumulator.concat(value), []);
 
   const filterEmpty = (field: any) => {
     const filtered = dataToDisplay.filter(
-      (i: any) => i.procedure === field.text
+      (i: any) => i.procedure === field.text,
     );
     return filtered.length > 0;
   };
@@ -81,7 +81,7 @@ export const NursingPlot = (props: any) => {
           <div className="flex flex-row overflow-x-scroll">
             {areFieldsEmpty() && (
               <div className="mt-1 w-full rounded-lg border bg-white p-4 shadow">
-                <div className="flex items-center justify-center text-2xl font-bold text-gray-500">
+                <div className="flex items-center justify-center text-2xl font-bold text-secondary-500">
                   No data available
                 </div>
               </div>
@@ -91,7 +91,7 @@ export const NursingPlot = (props: any) => {
                 filterEmpty(f) && (
                   <div key={f.desc} className="m-2 w-3/4">
                     <div className="sticky top-0 z-10  rounded pt-2">
-                      <div className="mx-2 flex items-center justify-between rounded border bg-gray-200 p-4">
+                      <div className="mx-2 flex items-center justify-between rounded border bg-secondary-200 p-4">
                         <h3 className="flex h-8 items-center text-sm">
                           {f.desc}
                         </h3>
@@ -115,7 +115,7 @@ export const NursingPlot = (props: any) => {
                         ))}
                     </div>
                   </div>
-                )
+                ),
             )}
           </div>
         </div>

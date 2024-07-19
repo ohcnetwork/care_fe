@@ -11,7 +11,7 @@ export interface QueryOptions<TData> extends RequestOptions<TData> {
 
 export default function useQuery<TData>(
   route: QueryRoute<TData>,
-  options?: QueryOptions<TData>
+  options?: QueryOptions<TData>,
 ) {
   const [response, setResponse] = useState<RequestResult<TData>>();
   const [loading, setLoading] = useState(false);
@@ -31,12 +31,12 @@ export default function useQuery<TData>(
           : overrides ?? options;
 
       setLoading(true);
-      const response = await request(route, resolvedOptions);
+      const response = await request(route, { ...resolvedOptions, controller });
       setResponse(response);
       setLoading(false);
       return response;
     },
-    [route, JSON.stringify(options)]
+    [route, JSON.stringify(options)],
   );
 
   useEffect(() => {

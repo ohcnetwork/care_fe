@@ -34,7 +34,7 @@
 #### Install the required dependencies
 
 ```sh
-npm install --legacy-peer-deps
+npm install
 ```
 
 #### 🏃 Run the app in development mode
@@ -63,20 +63,50 @@ Authenticate to staging API with any of the following credentials
   role: Doctor
 ```
 
-#### 🏷️ Make use labels to update the PR/issue status
+#### Contributing to CARE
 
-- Mark your PRs as `work-in-progress` if it's still being worked on.
-- Once you have solved the related issue, mark your PR with `need testing` and `need review` labels.
-- When you’re making a PR with lots of code changes that affects multiple functionalities, or is likely to break, make sure you tag it with `Major Code Change` label.
+- Create a branch with branch name of the format `issues/{issue#}/{short-name}` (example `issues/7001/edit-prescriptions`) from the latest [`develop`](https://github.com/coronasafe/care_fe/tree/develop) branch when starting to work on an issue.
+- Once the changes are pushed to the branch, make a pull request with a meaningful title (example: "💊 Adds support for editing prescriptions" #6369)
+- Ensure the issue number is mentioned in the PR with a closing tag by following the PR body template. (Refer: [Linking a pull request to an issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword))
+- Once the code review is done, the PR will be marked with a "Needs Testing" label where it'll be queued for QA testing.
+- Once tested, the PR would be marked with a "Tested" label and would be queued for merge.
+
+### Testing
+
+To ensure the quality of our pull requests, we use a variety of tools:
+
+- **Automated E2E Testing:** We use Cypress for end-to-end testing to automatically verify the functionality and performance of our code.
+- **Manual Real Device Testing:** We use BrowserStack to manually test our code on real devices, ensuring compatibility and functionality across different platforms and browsers.
 
 #### 🧪 Run cypress tests
 
-Ensure that the development server is running and then run the cypress tests in either of the ways described below.
+To run cypress tests locally, you'll need to setup the backend to run locally and load dummy data required for cypress to the database. See [docs](https://github.com/coronasafe/care#self-hosting).
+
+Once backend is running locally, you'll have to ensure your local front-end is connected to local backend, by setting the `CARE_API` env.
+
+```env
+#.env
+CARE_API=http://127.0.0.1:9000
+```
+
+Once done, start the development server by running
 
 ```sh
-$ npm run cypress:run        # To run all tests in headless mode.
-$ npm run cypress:run:gui    # To run all tests in headed mode.
-$ npm run cypress:open       # To debug and run tests individually.
+npm run dev
+```
+
+Once development server is running, then run the cypress tests in either of the ways described below.
+
+```sh
+npm run cypress:run        # To run all tests in headless mode.
+```
+
+```sh
+npm run cypress:run:gui    # To run all tests in headed mode.
+```
+
+```sh
+npm run cypress:open       # To debug and run tests individually.
 ```
 
 - Failed test screenshots are saved in `cypress/screenshots`
@@ -87,6 +117,7 @@ $ npm run cypress:open       # To debug and run tests individually.
 - [CARE Documentation](https://docs.coronasafe.network/coronasafe-care-documentation/)
 - [Swagger API Documentation](https://careapi.ohc.network/swagger/)
 - [Storybook component library](https://careui.coronasafe.in/)
+- [Testing Documentation](https://docs.coronasafe.network/care-testing-documentation/)
 
 ## 🚀 Production
 

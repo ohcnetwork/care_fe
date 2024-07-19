@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -64,7 +65,7 @@ export const HospitalList = () => {
         facility_type: qParams.facility_type,
         kasp_empanelled: qParams.kasp_empanelled,
       },
-    }
+    },
   );
 
   const { data: stateData } = useQuery(routes.getState, {
@@ -129,17 +130,17 @@ export const HospitalList = () => {
   } else if (permittedData.results && permittedData.results.length === 0) {
     manageFacilities = hasFiltersApplied(qParams) ? (
       <div className="w-full rounded-lg bg-white p-3">
-        <div className="mt-4 flex w-full  justify-center text-2xl font-bold text-gray-600">
+        <div className="mt-4 flex w-full  justify-center text-2xl font-bold text-secondary-600">
           {t("no_facilities")}
         </div>
       </div>
     ) : (
       <div>
         <div
-          className="border-grey-500 mt-4 cursor-pointer whitespace-nowrap rounded-md border bg-white p-16 text-center text-sm font-semibold shadow hover:bg-gray-300"
+          className="mt-4 cursor-pointer whitespace-nowrap rounded-md border bg-white p-16 text-center text-sm font-semibold shadow hover:bg-secondary-300"
           onClick={() => navigate("/facility/create")}
         >
-          <i className="fas fa-plus text-3xl"></i>
+          <CareIcon icon="l-plus" className="text-3xl" />
           <div className="mt-2 text-xl">{t("create_facility")}</div>
           <div className="mt-1 text-xs text-red-700">
             {t("no_duplicate_facility")}
@@ -207,22 +208,22 @@ export const HospitalList = () => {
           value(
             "State",
             "state",
-            qParams.state && stateData ? stateData.name : ""
+            qParams.state && stateData ? stateData.name : "",
           ),
           value(
             "District",
             "district",
-            qParams.district && districtData ? districtData.name : ""
+            qParams.district && districtData ? districtData.name : "",
           ),
           value(
             "Local Body",
             "local_body",
-            qParams.local_body && localBodyData ? localBodyData.name : ""
+            qParams.local_body && localBodyData ? localBodyData.name : "",
           ),
           value(
             "Facility type",
             "facility_type",
-            findFacilityTypeById(qParams.facility_type) || ""
+            findFacilityTypeById(qParams.facility_type) || "",
           ),
           kasp("Empanelled", "kasp_empanelled"),
         ]}

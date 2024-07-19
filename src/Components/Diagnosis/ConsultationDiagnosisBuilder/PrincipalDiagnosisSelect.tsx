@@ -25,7 +25,7 @@ const PrincipalDiagnosisSelect = <T extends Option>(props: Props<T>) => {
 
   return (
     <div className={props.className}>
-      <div className="rounded-lg border border-gray-400 bg-gray-200 p-4">
+      <div className="rounded-lg border border-secondary-400 bg-secondary-200 p-4">
         <SelectFormField
           id="principal-diagnosis-select"
           name="principal_diagnosis"
@@ -48,12 +48,18 @@ const PrincipalDiagnosisSelect = <T extends Option>(props: Props<T>) => {
           }}
           errorClassName="hidden"
         />
-        {diagnosis && (
-          <span className="mt-3 flex w-full flex-wrap justify-center gap-x-1 px-2 text-center text-gray-900">
-            <p>This encounter will be categorised under:</p>
-            <p className="font-bold">{diagnosis.chapter}</p>
-          </span>
-        )}
+        {diagnosis &&
+          (diagnosis.chapter ? (
+            <span className="mt-3 flex w-full flex-wrap justify-center gap-x-1 px-2 text-center text-secondary-900">
+              <p>This encounter will be categorised under:</p>
+              <p className="font-bold">{diagnosis.chapter}</p>
+            </span>
+          ) : (
+            <span className="mt-3 flex w-full flex-wrap justify-center gap-x-1 px-2 text-center italic text-secondary-700">
+              This encounter will not be categorised under any chapter as the
+              diagnosis does not fall under a chapter.
+            </span>
+          ))}
       </div>
     </div>
   );

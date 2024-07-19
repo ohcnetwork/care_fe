@@ -2,7 +2,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { DropdownTransition } from "../Common/components/HelperComponents";
 import { Listbox } from "@headlessui/react";
 import { classNames } from "../../Utils/utils";
-import { ReactNode } from "react";
+import { ReactNode, useRef } from "react";
 
 type OptionCallback<T, R = void> = (option: T) => R;
 
@@ -16,6 +16,7 @@ type Props<T, V = T> = {
   optionDescription?: OptionCallback<T, ReactNode>;
   optionIcon?: OptionCallback<T, ReactNode>;
   optionValue?: OptionCallback<T, V>;
+  optionDisabled?: OptionCallback<T, boolean>;
   className?: string;
   disabled?: boolean;
   renderSelectedOptions?: OptionCallback<T[], ReactNode>;
@@ -42,12 +43,13 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
       option,
       label,
       selectedLabel,
-      description: props.optionDescription && props.optionDescription(option),
-      icon: props.optionIcon && props.optionIcon(option),
+      description: props.optionDescription?.(option),
+      icon: props.optionIcon?.(option),
       value,
+      disabled: props.optionDisabled?.(option),
       isSelected: props.value?.includes(value as any) ?? false,
       displayChip: (
-        <div className="rounded-full border border-secondary-400 bg-secondary-100 px-2 text-xs text-gray-900">
+        <div className="rounded-full border border-secondary-400 bg-secondary-100 px-2 text-xs text-secondary-900">
           {selectedLabel}
         </div>
       ),
@@ -61,9 +63,18 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
     if (selectedOptions.length === 0) return placeholder;
     if (props.renderSelectedOptions)
       return props.renderSelectedOptions(selectedOptions.map((o) => o.option));
-    return (
-      <span className="text-gray-800">{`${selectedOptions.length} item(s) selected`}</span>
-    );
+  };
+
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  const handleSingleSelect = (o: any) => {
+    if (
+      o.option?.isSingleSelect === true &&
+      !selectedOptions.includes(o) &&
+      buttonRef.current
+    ) {
+      buttonRef.current.click();
+    }
   };
 
   return (
@@ -83,32 +94,53 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
             </Listbox.Label>
             <div className="relative">
               <div>
-                <Listbox.Button className="cui-input-base flex w-full rounded">
+                <Listbox.Button
+                  className="cui-input-base flex w-full rounded"
+                  ref={buttonRef}
+                >
                   <div className="relative z-0 flex w-full items-center">
                     <div className="relative flex flex-1 items-center pr-4 focus:z-10">
-                      <p className="ml-2.5 text-sm font-normal text-gray-600">
+                      <p className="ml-2.5 text-sm font-normal text-secondary-600">
                         <Placeholder />
                       </p>
+
+                      {selectedOptions.length !== 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {selectedOptions.map((option, index) => (
+                            <MultiSelectOptionChip
+                              key={index}
+                              label={option.selectedLabel}
+                              onRemove={() => {
+                                const updatedOptions = selectedOptions.filter(
+                                  (selectedOption) =>
+                                    selectedOption.value !== option.value,
+                                );
+                                props.onChange(
+                                  updatedOptions.map((o) => o.value) as any,
+                                );
+                              }}
+                            />
+                          ))}
+                        </div>
+                      )}
                     </div>
-                    <CareIcon className="care-l-angle-down -mb-0.5 text-lg text-gray-900" />
+                    <CareIcon
+                      icon="l-angle-down"
+                      className="-mb-0.5 text-lg text-secondary-900"
+                    />
                   </div>
                 </Listbox.Button>
-                {selectedOptions.length !== 0 && (
-                  <div className="flex flex-wrap gap-2 p-2">
-                    {selectedOptions.map((option) => (
-                      <MultiSelectOptionChip label={option.selectedLabel} />
-                    ))}
-                  </div>
-                )}
               </div>
               <DropdownTransition show={open}>
-                <Listbox.Options className="cui-dropdown-base absolute top-12">
+                <Listbox.Options className="cui-dropdown-base absolute top-full">
                   {options.map((option, index) => (
                     <Listbox.Option
                       id={`${props.id}-option-${index}`}
                       key={index}
                       className={dropdownOptionClassNames}
                       value={option}
+                      onClick={() => handleSingleSelect(option)}
+                      disabled={option.disabled}
                     >
                       {({ active }) => (
                         <div className="flex flex-col gap-2">
@@ -116,16 +148,21 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
                             {option.label}
                             {(option.icon || option.isSelected) &&
                               (option.isSelected ? (
-                                <CareIcon className="care-l-check text-lg" />
+                                <CareIcon icon="l-check" className="text-lg" />
                               ) : (
                                 option.icon
                               ))}
                           </div>
                           {option.description && (
                             <p
-                              className={`font-normal ${
-                                active ? "text-primary-200" : "text-gray-700"
-                              }`}
+                              className={classNames(
+                                "text-sm font-normal",
+                                option.disabled
+                                  ? "text-secondary-500"
+                                  : active
+                                    ? "text-primary-200"
+                                    : "text-secondary-500",
+                              )}
                             >
                               {option.description}
                             </p>
@@ -151,16 +188,22 @@ interface MultiSelectOptionChipProps {
   onRemove?: () => void;
 }
 
-export const MultiSelectOptionChip = (props: MultiSelectOptionChipProps) => {
+export const MultiSelectOptionChip = ({
+  label,
+  onRemove,
+}: MultiSelectOptionChipProps) => {
   return (
-    <span className="flex items-center gap-2 rounded-full border-gray-300 bg-gray-200 px-3 text-xs text-gray-700">
-      <p className="py-1.5">{props.label}</p>
-      {props.onRemove && (
+    <span className="flex items-center gap-2 rounded-full border-secondary-300 bg-secondary-200 px-3 text-xs text-secondary-700">
+      <p className="py-1">{label}</p>
+      {onRemove && (
         <p
           className="cursor-pointer rounded-full hover:bg-white"
-          onClick={props.onRemove}
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove();
+          }}
         >
-          <CareIcon className="care-l-times text-base" />
+          <CareIcon icon="l-times" className="text-base" />
         </p>
       )}
     </span>
@@ -170,17 +213,20 @@ export const MultiSelectOptionChip = (props: MultiSelectOptionChipProps) => {
 interface OptionRenderPropArg {
   active: boolean;
   selected: boolean;
+  disabled: boolean;
 }
 
 export const dropdownOptionClassNames = ({
   active,
   selected,
+  disabled,
 }: OptionRenderPropArg) => {
   return classNames(
     "group/option relative w-full cursor-default select-none p-4 text-sm transition-colors duration-75 ease-in-out",
-    active && "bg-primary-500 text-white",
-    !active && selected && "text-primary-500",
-    !active && !selected && "text-gray-900",
-    selected ? "font-semibold" : "font-normal"
+    !disabled && active && "bg-primary-500 text-white",
+    !disabled && !active && selected && "text-primary-500",
+    !disabled && !active && !selected && "text-secondary-900",
+    disabled && "cursor-not-allowed text-secondary-600",
+    selected ? "font-semibold" : "font-normal",
   );
 };

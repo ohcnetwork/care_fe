@@ -1,20 +1,23 @@
 import { navigate } from "raviger";
 import ReportTable from "./Reports/ReportTable";
 
-import { formatDateTime } from "../../../Utils/utils";
-import { InvestigationSessionType } from "./investigationsTab";
 import { lazy } from "react";
+import { useTranslation } from "react-i18next";
+import { formatDateTime } from "../../../Utils/utils";
+import { InvestigationResponse } from "./Reports/types";
+import { InvestigationSessionType } from "./investigationsTab";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 
 export default function ViewInvestigations(props: {
   isLoading: boolean;
-  investigations: any;
+  investigations: InvestigationResponse;
   investigationSessions: InvestigationSessionType[];
   facilityId: string;
   patientId: string;
   consultationId: string;
 }) {
+  const { t } = useTranslation();
   const {
     isLoading,
     investigations,
@@ -34,7 +37,7 @@ export default function ViewInvestigations(props: {
         <div className="mt-4 space-y-2 ">
           {investigations.length > 0 && (
             <div>
-              <h4 className="-mb-14 text-gray-700">Summary</h4>
+              <h4 className="-mb-14 text-secondary-700">{t("summary")}</h4>
               <ReportTable
                 investigationData={investigations}
                 hidePrint={true}
@@ -42,15 +45,15 @@ export default function ViewInvestigations(props: {
             </div>
           )}
           {investigationSessions.length === 0 && (
-            <div className="text-semibold mt-5 h-full rounded-lg bg-white py-4 text-center text-lg text-gray-500 shadow">
-              No Investigation Reports Found
+            <div className="text-semibold mt-5 h-full rounded-lg bg-white py-4 text-center text-lg text-secondary-500 shadow">
+              {t("no_investigation")}
             </div>
           )}
           {investigationSessions.map((investigationSession) => {
             return (
               <div
                 key={investigationSession.session_external_id}
-                className="flex cursor-pointer items-center justify-between rounded-lg border bg-white p-4 shadow hover:bg-gray-200"
+                className="flex cursor-pointer items-center justify-between rounded-lg border bg-white p-4 shadow hover:bg-secondary-200"
               >
                 <div>
                   {formatDateTime(investigationSession.session_created_date)}
@@ -58,7 +61,7 @@ export default function ViewInvestigations(props: {
                 <button
                   onClick={() =>
                     navigate(
-                      `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigation/${investigationSession.session_external_id}`
+                      `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigation/${investigationSession.session_external_id}`,
                     )
                   }
                   className="btn btn-default"

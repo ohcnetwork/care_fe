@@ -8,6 +8,7 @@ import {
   dropdownOptionClassNames,
 } from "./MultiSelectMenuV2";
 import { useTranslation } from "react-i18next";
+import { classNames } from "../../Utils/utils";
 
 interface Props {
   id?: string;
@@ -17,7 +18,7 @@ interface Props {
   onChange: (selected: any) => void;
   optionLabel?: (option: any) => string;
   optionLabelChip?: (option: any) => string;
-  showNOptions?: number;
+  showNOptions?: number | undefined;
   multiple?: boolean;
   compareBy?: string;
   debounceTime?: number;
@@ -39,7 +40,7 @@ const AutoCompleteAsync = (props: Props) => {
     onChange,
     optionLabel = (option: any) => option.label,
     optionLabelChip = (option: any) => option.label,
-    showNOptions = 10,
+    showNOptions,
     multiple = false,
     compareBy,
     debounceTime = 300,
@@ -61,11 +62,16 @@ const AutoCompleteAsync = (props: Props) => {
     () =>
       debounce(async (query: string) => {
         setLoading(true);
-        const data = await fetchData(query);
-        setData(data?.slice(0, showNOptions) || []);
+        const data = (await fetchData(query)) || [];
+
+        if (showNOptions !== undefined) {
+          setData(data.slice(0, showNOptions));
+        } else {
+          setData(data);
+        }
         setLoading(false);
       }, debounceTime),
-    [fetchData, showNOptions, debounceTime]
+    [fetchData, showNOptions, debounceTime],
   );
 
   useEffect(() => {
@@ -86,7 +92,10 @@ const AutoCompleteAsync = (props: Props) => {
             <Combobox.Input
               id={id}
               name={name}
-              className="cui-input-base truncate pr-16"
+              className={classNames(
+                "cui-input-base truncate pr-16",
+                error && "border-danger-500",
+              )}
               placeholder={
                 multiple && hasSelection
                   ? `${selected.length} selected`
@@ -98,7 +107,6 @@ const AutoCompleteAsync = (props: Props) => {
               onChange={({ target }) => setQuery(target.value)}
               onFocus={props.onFocus}
               onBlur={() => {
-                setQuery("");
                 props.onBlur?.();
               }}
               autoComplete="off"
@@ -107,9 +115,10 @@ const AutoCompleteAsync = (props: Props) => {
               <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
                 <div className="absolute right-0 top-1 mr-2 flex items-center text-lg text-secondary-900">
                   {hasSelection && !loading && !required && (
-                    <div className="tooltip">
+                    <div className="tooltip" id="clear-button">
                       <CareIcon
-                        className="care-l-times-circle mb-[-5px] h-4 w-4 text-gray-800 transition-colors duration-200 ease-in-out hover:text-gray-500"
+                        icon="l-times-circle"
+                        className="mb-[-5px] h-4 w-4 text-secondary-800 transition-colors duration-200 ease-in-out hover:text-secondary-500"
                         onClick={(e) => {
                           e.preventDefault();
                           onChange(null);
@@ -121,9 +130,12 @@ const AutoCompleteAsync = (props: Props) => {
                     </div>
                   )}
                   {loading ? (
-                    <CareIcon className="care-l-spinner -mb-1.5 animate-spin" />
+                    <CareIcon
+                      icon="l-spinner"
+                      className="-mb-1.5 animate-spin"
+                    />
                   ) : (
-                    <CareIcon className="care-l-angle-down -mb-1.5" />
+                    <CareIcon icon="l-angle-down" className="-mb-1.5" />
                   )}
                 </div>
               </Combobox.Button>
@@ -132,7 +144,7 @@ const AutoCompleteAsync = (props: Props) => {
           <DropdownTransition>
             <Combobox.Options className="cui-dropdown-base absolute top-12 z-10 text-sm">
               {data?.length === 0 ? (
-                <div className="relative cursor-default select-none px-4 py-2 text-gray-700">
+                <div className="relative cursor-default select-none px-4 py-2 text-secondary-700">
                   {query !== ""
                     ? "Nothing found."
                     : "Start typing to search..."}
@@ -149,13 +161,13 @@ const AutoCompleteAsync = (props: Props) => {
                         <div className="flex items-center gap-2">
                           {optionLabel(item)}
                           {optionLabelChip(item) && (
-                            <div className="mt-1 h-fit max-w-fit rounded-full border border-secondary-400 bg-secondary-100 px-2 text-center text-xs text-gray-900 sm:mt-0">
+                            <div className="mt-1 h-fit max-w-fit rounded-full border border-secondary-400 bg-secondary-100 px-2 text-center text-xs text-secondary-900 sm:mt-0">
                               {optionLabelChip(item)}
                             </div>
                           )}
                         </div>
                         {selected && (
-                          <CareIcon className="care-l-check text-lg" />
+                          <CareIcon icon="l-check" className="text-lg" />
                         )}
                       </div>
                     )}
@@ -171,7 +183,7 @@ const AutoCompleteAsync = (props: Props) => {
                   label={optionLabel(option)}
                   onRemove={() =>
                     onChange(
-                      selected.filter((item: any) => item.id !== option.id)
+                      selected.filter((item: any) => item.id !== option.id),
                     )
                   }
                 />
@@ -179,7 +191,9 @@ const AutoCompleteAsync = (props: Props) => {
             </div>
           )}
           {error && (
-            <div className="mt-1 text-sm font-medium text-red-500">{error}</div>
+            <div className="mt-1 text-xs font-medium text-danger-500">
+              {error}
+            </div>
           )}
         </div>
       </Combobox>

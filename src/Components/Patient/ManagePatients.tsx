@@ -2,6 +2,7 @@ import * as Notification from "../../Utils/Notifications.js";
 
 import {
   ADMITTED_TO,
+  CONSENT_TYPE_CHOICES,
   DISCHARGE_REASONS,
   GENDER_TYPES,
   PATIENT_CATEGORIES,
@@ -31,7 +32,12 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import SearchInput from "../Form/SearchInput";
 import SortDropdownMenu from "../Common/SortDropdown";
 import SwitchTabs from "../Common/components/SwitchTabs";
-import { formatAge, parsePhoneNumber } from "../../Utils/utils.js";
+import {
+  formatPatientAge,
+  humanizeStrings,
+  isAntenatal,
+  parsePhoneNumber,
+} from "../../Utils/utils.js";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page.js";
@@ -73,13 +79,6 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-const PatientCategoryDisplayText: Record<PatientCategory, string> = {
-  "Comfort Care": "COMFORT CARE",
-  Stable: "STABLE",
-  Abnormal: "ABNORMAL",
-  Critical: "CRITICAL",
-};
-
 export const PatientManager = () => {
   const { t } = useTranslation();
   const {
@@ -103,9 +102,8 @@ export const PatientManager = () => {
   });
   const authUser = useAuthUser();
   const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
-  const [showDialog, setShowDialog] = useState(false);
+  const [showDialog, setShowDialog] = useState<"create" | "list-discharged">();
   const [showDoctors, setShowDoctors] = useState(false);
-  const [showDoctorConnect, setShowDoctorConnect] = useState(false);
   const [phone_number, setPhoneNumber] = useState("");
   const [phoneNumberError, setPhoneNumberError] = useState("");
   const [emergency_phone_number, setEmergencyPhoneNumber] = useState("");
@@ -161,7 +159,6 @@ export const PatientManager = () => {
     is_active:
       !qParams.last_consultation__new_discharge_reason &&
       (qParams.is_active || "True"),
-    disease_status: qParams.disease_status || undefined,
     phone_number: qParams.phone_number
       ? parsePhoneNumber(qParams.phone_number)
       : undefined,
@@ -177,7 +174,7 @@ export const PatientManager = () => {
     created_date_after: qParams.created_date_after || undefined,
     modified_date_before: qParams.modified_date_before || undefined,
     modified_date_after: qParams.modified_date_after || undefined,
-    ordering: qParams.ordering || "-modified_date",
+    ordering: qParams.ordering || undefined,
     category: qParams.category || undefined,
     gender: qParams.gender || undefined,
     age_min: qParams.age_min || undefined,
@@ -186,8 +183,7 @@ export const PatientManager = () => {
       qParams.date_declared_positive_before || undefined,
     date_declared_positive_after:
       qParams.date_declared_positive_after || undefined,
-    date_of_result_before: qParams.date_of_result_before || undefined,
-    date_of_result_after: qParams.date_of_result_after || undefined,
+    ration_card_category: qParams.ration_card_category || undefined,
     last_consultation_medico_legal_case:
       qParams.last_consultation_medico_legal_case || undefined,
     last_consultation_encounter_date_before:
@@ -200,11 +196,12 @@ export const PatientManager = () => {
       qParams.last_consultation_discharge_date_after || undefined,
     last_consultation_admitted_bed_type_list:
       qParams.last_consultation_admitted_bed_type_list || undefined,
+    last_consultation__consent_types:
+      qParams.last_consultation__consent_types || undefined,
     last_consultation__new_discharge_reason:
       qParams.last_consultation__new_discharge_reason || undefined,
     last_consultation_current_bed__location:
       qParams.last_consultation_current_bed__location || undefined,
-    srf_id: qParams.srf_id || undefined,
     number_of_doses: qParams.number_of_doses || undefined,
     covin_id: qParams.covin_id || undefined,
     is_kasp: qParams.is_kasp || undefined,
@@ -219,12 +216,17 @@ export const PatientManager = () => {
     last_consultation_is_telemedicine:
       qParams.last_consultation_is_telemedicine || undefined,
     is_antenatal: qParams.is_antenatal || undefined,
+    last_menstruation_start_date_after:
+      (qParams.is_antenatal === "true" &&
+        dayjs().subtract(9, "month").format("YYYY-MM-DD")) ||
+      undefined,
     ventilator_interface: qParams.ventilator_interface || undefined,
     diagnoses: qParams.diagnoses || undefined,
     diagnoses_confirmed: qParams.diagnoses_confirmed || undefined,
     diagnoses_provisional: qParams.diagnoses_provisional || undefined,
     diagnoses_unconfirmed: qParams.diagnoses_unconfirmed || undefined,
     diagnoses_differential: qParams.diagnoses_differential || undefined,
+    review_missed: qParams.review_missed || undefined,
   };
 
   useEffect(() => {
@@ -247,17 +249,10 @@ export const PatientManager = () => {
     qParams.diagnoses_differential,
   ]);
 
-  useEffect(() => {
-    if (params.facility) {
-      setShowDoctorConnect(true);
-    }
-  }, [qParams.facility]);
-
   const date_range_fields = [
     [params.created_date_before, params.created_date_after],
     [params.modified_date_before, params.modified_date_after],
     [params.date_declared_positive_before, params.date_declared_positive_after],
-    [params.date_of_result_before, params.date_of_result_after],
     [params.last_vaccinated_date_before, params.last_vaccinated_date_after],
     [
       params.last_consultation_encounter_date_before,
@@ -364,7 +359,7 @@ export const PatientManager = () => {
     let category_name;
     if (qParams.category) {
       category_name = PATIENT_CATEGORIES.find(
-        (item: any) => qParams.category === item.id
+        (item: any) => qParams.category === item.id,
       )?.text;
 
       return String(category_name);
@@ -401,12 +396,25 @@ export const PatientManager = () => {
         external_id: qParams.last_consultation_current_bed__location,
       },
       prefetch: !!qParams.last_consultation_current_bed__location,
-    }
+    },
   );
+
+  const { data: patientsWithNoConsentsData } = useQuery(routes.patientList, {
+    query: {
+      ...qParams,
+      limit: 1,
+      last_consultation__consent_types: "None",
+      is_active: "True",
+    },
+  });
+
+  const patientsWithNoConsents = patientsWithNoConsentsData?.count;
 
   const { data: permittedFacilities } = useQuery(
     routes.getPermittedFacilities,
-    {}
+    {
+      query: { limit: 1 },
+    },
   );
 
   const LastAdmittedToTypeBadges = () => {
@@ -435,6 +443,39 @@ export const PatientManager = () => {
       .map((id: string) => {
         const text = ADMITTED_TO.find((obj) => obj.id == id)?.text;
         return badge("Bed Type", text, id);
+      });
+  };
+
+  const HasConsentTypesBadges = () => {
+    const badge = (key: string, value: any, id: string) => {
+      return (
+        value && (
+          <FilterBadge
+            name={key}
+            value={value}
+            onRemove={() => {
+              const lcat = qParams.last_consultation__consent_types
+                .split(",")
+                .filter((x: string) => x != id)
+                .join(",");
+              updateQuery({
+                ...qParams,
+                last_consultation__consent_types: lcat,
+              });
+            }}
+          />
+        )
+      );
+    };
+
+    return qParams.last_consultation__consent_types
+      .split(",")
+      .map((id: string) => {
+        const text = [
+          ...CONSENT_TYPE_CHOICES,
+          { id: "None", text: "No Consents" },
+        ].find((obj) => obj.id == id)?.text;
+        return badge("Has Consent", text, id);
       });
   };
 
@@ -474,15 +515,15 @@ export const PatientManager = () => {
             className={`absolute inset-y-0 left-0 flex h-full w-1 items-center rounded-l-lg transition-all duration-200 ease-in-out group-hover:w-5 ${categoryClass}`}
           >
             <span className="absolute -inset-x-32 inset-y-0 flex -rotate-90 items-center justify-center text-center text-xs font-bold uppercase tracking-widest opacity-0 transition-all duration-200 ease-in-out group-hover:opacity-100">
-              {category ? PatientCategoryDisplayText[category] : "UNKNOWN"}
+              {category || "UNKNOWN"}
             </span>
           </div>
           <div className="flex flex-col items-start gap-4 md:flex-row">
-            <div className="h-20 w-full min-w-[5rem] rounded-lg border border-gray-300 bg-gray-50 md:w-20">
+            <div className="h-20 w-full min-w-20 rounded-lg border border-secondary-300 bg-secondary-50 md:w-20">
               {patient?.last_consultation?.current_bed &&
               patient?.last_consultation?.discharge_date === null ? (
                 <div className="tooltip flex h-full flex-col items-center justify-center">
-                  <span className="w-full truncate px-1 text-center text-sm text-gray-900">
+                  <span className="w-full truncate px-1 text-center text-sm text-secondary-900">
                     {
                       patient?.last_consultation?.current_bed?.bed_object
                         ?.location_object?.name
@@ -503,33 +544,39 @@ export const PatientManager = () => {
               ) : patient.last_consultation?.suggestion === "DC" ? (
                 <div className="flex h-full flex-col items-center justify-center">
                   <div className="tooltip">
-                    <CareIcon className="care-l-estate text-3xl text-gray-500" />
+                    <CareIcon
+                      icon="l-estate"
+                      className="text-3xl text-secondary-500"
+                    />
                     <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-sm font-medium">
                       Domiciliary Care
                     </span>
                   </div>
                 </div>
               ) : (
-                <div className="flex min-h-[5rem] items-center justify-center">
-                  <i className="fas fa-user-injured text-3xl text-gray-500"></i>
+                <div className="flex min-h-20 items-center justify-center">
+                  <CareIcon
+                    icon="l-user-injured"
+                    className="text-3xl text-secondary-500"
+                  />
                 </div>
               )}
             </div>
             <div className="flex w-full flex-col gap-2 pl-2 md:block md:flex-row">
               <div className="flex w-full items-center justify-between gap-2">
                 <div
-                  className="flex flex-wrap gap-2 font-semibold"
+                  className="flex flex-wrap items-end gap-3 font-semibold"
                   id="patient-name-list"
                 >
                   <span className="text-xl capitalize">{patient.name}</span>
-                  <span className="text-gray-800">
-                    {formatAge(patient.age, patient.date_of_birth, true)}
+                  <span className="font-bold text-secondary-700">
+                    {formatPatientAge(patient, true)}
                   </span>
                 </div>
               </div>
 
               {patient.action && patient.action != 10 && (
-                <span className="text-sm font-semibold text-gray-700">
+                <span className="text-sm font-semibold text-secondary-700">
                   {
                     TELEMEDICINE_ACTIONS.find((i) => i.id === patient.action)
                       ?.desc
@@ -540,13 +587,15 @@ export const PatientManager = () => {
               {patient.facility_object && (
                 <div className="mb-2">
                   <div className="flex flex-wrap items-center">
-                    <p className="mr-2 text-sm font-medium text-gray-700">
+                    <p className="mr-2 text-sm font-medium text-secondary-700">
                       {patient.facility_object.name}
                     </p>
                     <RecordMeta
-                      className="text-sm text-gray-900"
+                      className="text-sm text-secondary-900"
                       prefix={
-                        <span className="text-gray-600">{t("updated")}</span>
+                        <span className="text-secondary-600">
+                          {t("updated")}
+                        </span>
                       }
                       time={patient.modified_date}
                     />
@@ -555,6 +604,35 @@ export const PatientManager = () => {
               )}
               <div className="flex w-full">
                 <div className="flex flex-row flex-wrap justify-start gap-2">
+                  {!patient.last_consultation ||
+                  patient.last_consultation?.facility !== patient.facility ||
+                  (patient.last_consultation?.discharge_date &&
+                    patient.is_active) ? (
+                    <span className="relative inline-flex">
+                      <Chip
+                        size="small"
+                        variant="danger"
+                        startIcon="l-notes"
+                        text="No Consultation Filed"
+                      />
+                      <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center">
+                        <span className="center absolute inline-flex h-4 w-4 animate-ping rounded-full bg-red-400"></span>
+                        <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
+                      </span>
+                    </span>
+                  ) : (
+                    <>
+                      {patient.last_consultation?.patient_no && (
+                        <Chip
+                          size="small"
+                          variant="primary"
+                          text={`${patient.last_consultation?.suggestion === "A" ? "IP No:" : "OP No:"} ${
+                            patient.last_consultation?.patient_no
+                          }`}
+                        />
+                      )}
+                    </>
+                  )}
                   {patient.review_time &&
                     !patient.last_consultation?.discharge_date &&
                     Number(patient.last_consultation?.review_interval) > 0 &&
@@ -575,16 +653,19 @@ export const PatientManager = () => {
                       text="Readmission"
                     />
                   )}
-                  {patient.disease_status === "POSITIVE" && (
-                    <Chip
-                      size="small"
-                      variant="danger"
-                      startIcon="l-coronavirus"
-                      text="Positive"
-                    />
-                  )}
+                  {patient.last_consultation?.suggestion === "A" &&
+                    patient.last_consultation.facility === patient.facility &&
+                    !patient.last_consultation.discharge_date && (
+                      <Chip
+                        size="small"
+                        variant="primary"
+                        startIcon="l-clock-three"
+                        text={`IP Day No: ${dayjs().diff(patient.last_consultation.encounter_date, "day") + 1}`}
+                      />
+                    )}
                   {patient.gender === 2 &&
                     patient.is_antenatal &&
+                    isAntenatal(patient.last_menstruation_start_date) &&
                     patient.is_active && (
                       <Chip
                         size="small"
@@ -603,31 +684,6 @@ export const PatientManager = () => {
                       text="Medical Worker"
                     />
                   )}
-                  {patient.disease_status === "EXPIRED" && (
-                    <Chip
-                      size="small"
-                      variant="warning"
-                      startIcon="l-exclamation-triangle"
-                      text="Patient Expired"
-                    />
-                  )}
-                  {(!patient.last_consultation ||
-                    patient.last_consultation?.facility !== patient.facility ||
-                    (patient.last_consultation?.discharge_date &&
-                      patient.is_active)) && (
-                    <span className="relative inline-flex">
-                      <Chip
-                        size="small"
-                        variant="danger"
-                        startIcon="l-notes"
-                        text="No Consultation Filed"
-                      />
-                      <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center">
-                        <span className="center absolute inline-flex h-4 w-4 animate-ping rounded-full bg-red-400"></span>
-                        <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
-                      </span>
-                    </span>
-                  )}
                   {!(
                     patient.last_consultation?.facility !== patient.facility
                   ) &&
@@ -636,7 +692,7 @@ export const PatientManager = () => {
                       !patient.is_active
                     ) &&
                     dayjs(patient.last_consultation?.modified_date).isBefore(
-                      new Date().getTime() - 24 * 60 * 60 * 1000
+                      new Date().getTime() - 24 * 60 * 60 * 1000,
                     ) && (
                       <span className="relative inline-flex">
                         <Chip
@@ -651,6 +707,20 @@ export const PatientManager = () => {
                         </span>
                       </span>
                     )}
+                  {!!patient.last_consultation?.has_consents.length || (
+                    <span className="relative inline-flex">
+                      <Chip
+                        size="small"
+                        variant="danger"
+                        startIcon="l-file"
+                        text="No consents recorded"
+                      />
+                      <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center">
+                        <span className="center absolute inline-flex h-4 w-4 animate-ping rounded-full bg-red-400"></span>
+                        <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
+                      </span>
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -664,7 +734,7 @@ export const PatientManager = () => {
                       (resp) =>
                         resp.text ===
                         patient.last_consultation?.last_daily_round
-                          ?.ventilator_interface
+                          ?.ventilator_interface,
                     )?.id
                   }
                 </div>
@@ -706,7 +776,9 @@ export const PatientManager = () => {
   } else if (data && data.count === 0) {
     managePatients = (
       <div className="col-span-3 w-full rounded-lg bg-white p-2 py-8 pt-4 text-center">
-        <p className="text-2xl font-bold text-gray-600">No Patients Found</p>
+        <p className="text-2xl font-bold text-secondary-600">
+          No Patients Found
+        </p>
       </div>
     );
   }
@@ -720,6 +792,9 @@ export const PatientManager = () => {
     };
   };
 
+  const onlyAccessibleFacility =
+    permittedFacilities?.count === 1 ? permittedFacilities.results[0] : null;
+
   return (
     <Page
       title={t("Patients")}
@@ -731,17 +806,41 @@ export const PatientManager = () => {
             <ButtonV2
               id="add-patient-details"
               onClick={() => {
-                if (qParams.facility)
+                const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
+                if (
+                  qParams.facility &&
+                  showAllFacilityUsers.includes(authUser.user_type)
+                )
                   navigate(`/facility/${qParams.facility}/patient`);
-                else if (permittedFacilities?.results.length === 1)
+                else if (
+                  qParams.facility &&
+                  !showAllFacilityUsers.includes(authUser.user_type) &&
+                  authUser.home_facility_object?.id !== qParams.facility
+                )
+                  Notification.Error({
+                    msg: "Oops! Non-Home facility users don't have permission to perform this action.",
+                  });
+                else if (
+                  !showAllFacilityUsers.includes(authUser.user_type) &&
+                  authUser.home_facility_object?.id
+                ) {
                   navigate(
-                    `/facility/${permittedFacilities?.results[0].id}/patient`
+                    `/facility/${authUser.home_facility_object.id}/patient`,
                   );
-                else setShowDialog(true);
+                } else if (onlyAccessibleFacility)
+                  navigate(`/facility/${onlyAccessibleFacility.id}/patient`);
+                else if (
+                  !showAllFacilityUsers.includes(authUser.user_type) &&
+                  !authUser.home_facility_object?.id
+                )
+                  Notification.Error({
+                    msg: "Oops! No home facility found",
+                  });
+                else setShowDialog("create");
               }}
               className="w-full lg:w-fit"
             >
-              <CareIcon className="care-l-plus text-lg" />
+              <CareIcon icon="l-plus" className="text-lg" />
               <p id="add-patient-div" className="lg:my-[2px]">
                 Add Patient Details
               </p>
@@ -752,10 +851,30 @@ export const PatientManager = () => {
               tab1="Live"
               tab2="Discharged"
               onClickTab1={() => updateQuery({ is_active: "True" })}
-              onClickTab2={() => updateQuery({ is_active: "False" })}
-              isTab2Active={tabValue ? true : false}
+              onClickTab2={() => {
+                // Navigate to dedicated discharged list page if filtered by a facility or user has access only to one facility.
+                const id = qParams.facility || onlyAccessibleFacility?.id;
+                if (id) {
+                  navigate(`facility/${id}/discharged-patients`);
+                  return;
+                }
+
+                if (
+                  authUser.user_type === "StateAdmin" ||
+                  authUser.user_type === "StateReadOnlyAdmin"
+                ) {
+                  updateQuery({ is_active: "False" });
+                  return;
+                }
+
+                Notification.Warn({
+                  msg: "Facility needs to be selected to view discharged patients.",
+                });
+                setShowDialog("list-discharged");
+              }}
+              isTab2Active={!!tabValue}
             />
-            {showDoctorConnect && (
+            {!!params.facility && (
               <ButtonV2
                 id="doctor-connect-patient-button"
                 onClick={() => {
@@ -767,7 +886,7 @@ export const PatientManager = () => {
                   setShowDoctors(true);
                 }}
               >
-                <CareIcon className="care-l-phone text-lg" />
+                <CareIcon icon="l-phone" className="text-lg" />
                 <p className="lg:my-[2px]">Doctor Connect</p>
               </ButtonV2>
             )}
@@ -780,7 +899,7 @@ export const PatientManager = () => {
               selected={qParams.ordering}
               onSelect={updateQuery}
             />
-            <div className="tooltip">
+            <div className="tooltip w-full md:w-auto">
               {!isExportAllowed ? (
                 <ButtonV2
                   onClick={() => {
@@ -797,7 +916,7 @@ export const PatientManager = () => {
                   }}
                   className="mr-5 w-full lg:w-fit"
                 >
-                  <CareIcon className="care-l-export" />
+                  <CareIcon icon="l-export" />
                   <span className="lg:my-[3px]">Export</span>
                 </ButtonV2>
               ) : (
@@ -805,16 +924,8 @@ export const PatientManager = () => {
                   disabled={!isExportAllowed}
                   exportItems={[
                     {
-                      label:
-                        tabValue === 0
-                          ? "Live patients"
-                          : "Discharged patients",
+                      label: "Export Live patients",
                       action: exportPatients(true),
-                      parse: preventDuplicatePatientsDuetoPolicyId,
-                    },
-                    {
-                      label: "All patients",
-                      action: exportPatients(false),
                       parse: preventDuplicatePatientsDuetoPolicyId,
                     },
                   ]}
@@ -832,12 +943,21 @@ export const PatientManager = () => {
       }
     >
       <FacilitiesSelectDialogue
-        show={showDialog}
+        show={!!showDialog}
         setSelected={(e) => setSelectedFacility(e)}
         selectedFacility={selectedFacility}
-        handleOk={() => navigate(`facility/${selectedFacility.id}/patient`)}
+        handleOk={() => {
+          switch (showDialog) {
+            case "create":
+              navigate(`facility/${selectedFacility.id}/patient`);
+              break;
+            case "list-discharged":
+              navigate(`facility/${selectedFacility.id}/discharged-patients`);
+              break;
+          }
+        }}
         handleCancel={() => {
-          setShowDialog(false);
+          setShowDialog(undefined);
           setSelectedFacility({ name: "" });
         }}
       />
@@ -890,7 +1010,25 @@ export const PatientManager = () => {
           </div>
         </div>
       </div>
-      <div className="col-span-3 mt-6 flex flex-wrap">
+      {!qParams.last_consultation__consent_types &&
+        (patientsWithNoConsents || 0) > 0 && (
+          <div className="flex w-full items-center gap-4 rounded-lg bg-red-500/10 p-4 text-sm text-red-500">
+            <CareIcon icon="l-info-circle" className="text-xl" />
+            <p className="font-semibold">
+              {patientsWithNoConsents} patients admitted missing consent
+              records&nbsp;
+              <button
+                onClick={() =>
+                  updateQuery({ last_consultation__consent_types: "None" })
+                }
+                className="underline"
+              >
+                Click to view
+              </button>
+            </p>
+          </div>
+        )}
+      <div className="col-span-3 flex flex-wrap">
         <FilterBadges
           badges={({
             badge,
@@ -914,14 +1052,22 @@ export const PatientManager = () => {
             kasp(),
             badge("COWIN ID", "covin_id"),
             badge("Is Antenatal", "is_antenatal"),
+            badge("Review Missed", "review_missed"),
             badge(
               "Is Medico-Legal Case",
-              "last_consultation_medico_legal_case"
+              "last_consultation_medico_legal_case",
+            ),
+            value(
+              "Ration Card Category",
+              "ration_card_category",
+              qParams.ration_card_category
+                ? t(`ration_card__${qParams.ration_card_category}`)
+                : "",
             ),
             value(
               "Facility",
               "facility",
-              qParams.facility ? facilityData?.name || "" : ""
+              qParams.facility ? facilityData?.name || "" : "",
             ),
             value(
               "Location",
@@ -929,27 +1075,26 @@ export const PatientManager = () => {
               qParams.last_consultation_current_bed__location
                 ? facilityAssetLocationData?.name ||
                     qParams.last_consultation_current_bed__locations
-                : ""
+                : "",
             ),
             badge("Facility Type", "facility_type"),
             value(
               "District",
               "district",
-              qParams.district ? districtData?.name || "" : ""
+              qParams.district ? districtData?.name || "" : "",
             ),
             ordering(),
             value("Category", "category", getTheCategoryFromId()),
-            badge("Disease Status", "disease_status"),
             value(
               "Respiratory Support",
               "ventilator_interface",
               qParams.ventilator_interface &&
-                t(`RESPIRATORY_SUPPORT_${qParams.ventilator_interface}`)
+                t(`RESPIRATORY_SUPPORT_${qParams.ventilator_interface}`),
             ),
             value(
               "Gender",
               "gender",
-              parseOptionId(GENDER_TYPES, qParams.gender) || ""
+              parseOptionId(GENDER_TYPES, qParams.gender) || "",
             ),
             {
               name: "Admitted to",
@@ -957,7 +1102,6 @@ export const PatientManager = () => {
               paramKey: "last_consultation_admitted_to",
             },
             ...range("Age", "age"),
-            badge("SRF ID", "srf_id"),
             {
               name: "LSG Body",
               value: qParams.lsgBody ? LocalBodyData?.name || "" : "",
@@ -967,15 +1111,14 @@ export const PatientManager = () => {
               value(
                 DIAGNOSES_FILTER_LABELS[key],
                 key,
-                getDiagnosisFilterValue(key).join(", ")
-              )
+                humanizeStrings(getDiagnosisFilterValue(key)),
+              ),
             ),
             badge("Declared Status", "is_declared_positive"),
-            ...dateRange("Result", "date_of_result"),
             ...dateRange("Declared positive", "date_declared_positive"),
             ...dateRange(
               "Symptoms onset",
-              "last_consultation_symptoms_onset_date"
+              "last_consultation_symptoms_onset_date",
             ),
             ...dateRange("Last vaccinated", "last_vaccinated_date"),
             {
@@ -987,13 +1130,20 @@ export const PatientManager = () => {
               "last_consultation__new_discharge_reason",
               parseOptionId(
                 DISCHARGE_REASONS,
-                qParams.last_consultation__new_discharge_reason
-              ) || ""
+                qParams.last_consultation__new_discharge_reason,
+              ) || "",
             ),
           ]}
           children={
-            qParams.last_consultation_admitted_bed_type_list &&
-            LastAdmittedToTypeBadges()
+            (qParams.last_consultation_admitted_bed_type_list ||
+              qParams.last_consultation__consent_types) && (
+              <>
+                {qParams.last_consultation_admitted_bed_type_list &&
+                  LastAdmittedToTypeBadges()}
+                {qParams.last_consultation__consent_types &&
+                  HasConsentTypesBadges()}
+              </>
+            )
           }
         />
       </div>

@@ -36,7 +36,7 @@ export default function FiltersSlideover({
               onClick={onClear}
               id="clear-filter"
             >
-              <CareIcon className="care-l-filter-slash text-lg" />
+              <CareIcon icon="l-filter-slash" className="text-lg" />
               <span>{t("clear")}</span>
             </ButtonV2>
             <ButtonV2 ghost onClick={onApply} id="apply-filter">
@@ -58,11 +58,11 @@ export const AdvancedFilterButton = ({ onClick }: { onClick: () => void }) => {
     <ButtonV2
       ghost
       border
-      className="w-full bg-white sm:w-auto"
+      className="w-full bg-white md:w-auto"
       onClick={onClick}
       id="advanced-filter"
     >
-      <CareIcon className="care-l-filter" />
+      <CareIcon icon="l-filter" />
       <span className="py-0.5">{t("advanced_filters")}</span>
     </ButtonV2>
   );

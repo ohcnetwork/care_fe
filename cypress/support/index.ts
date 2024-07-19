@@ -1,3 +1,4 @@
+/// <reference types="cypress" />
 import "./commands";
 
 declare global {
@@ -10,10 +11,39 @@ declare global {
       verifyNotification(msg: string): Chainable<Subject>;
       awaitUrl(
         url: string,
-        disableLoginVerification?: boolean
+        disableLoginVerification?: boolean,
       ): Chainable<Subject>;
       getAttached(selector: string): Chainable<Subject>;
       clearAllFilters(): Chainable<Subject>;
+      submitButton(buttonText?: string): Chainable<Element>;
+      searchAndSelectOption(
+        element: string,
+        referance: string,
+      ): Chainable<Element>;
+      clickAndMultiSelectOption(
+        selector: string,
+        symptoms: string | string[],
+      ): Chainable<Element>;
+      typeAndMultiSelectOption(
+        selector: string,
+        input: string,
+        symptoms: string | string[],
+      ): Chainable<Element>;
+      clickAndTypeDate(date: string, selector: string): Chainable<Element>;
+      clickAndSelectOption(
+        element: string,
+        reference: string,
+      ): Chainable<Element>;
+      verifyAndClickElement(
+        element: string,
+        reference: string,
+      ): Chainable<Element>;
+      preventPrint(): Chainable<Window>;
+      closeNotification(): Chainable<Element>;
+      verifyContentPresence(
+        selector: string,
+        texts: string[],
+      ): Chainable<Element>;
     }
   }
 }

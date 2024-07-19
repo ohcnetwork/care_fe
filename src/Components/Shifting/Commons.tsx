@@ -19,7 +19,6 @@ export const initialFilterData = {
   ordering: null,
   is_kasp: "",
   assigned_to: "",
-  disease_status: "",
   is_antenatal: "",
   breathlessness_level: "",
 };
@@ -37,14 +36,14 @@ export const formatFilter = (params: any) => {
       (filter.emergency && filter.emergency) === ""
         ? ""
         : filter.emergency === "yes"
-        ? "true"
-        : "false",
+          ? "true"
+          : "false",
     is_up_shift:
       (filter.is_up_shift && filter.is_up_shift) === ""
         ? ""
         : filter.is_up_shift === "yes"
-        ? "true"
-        : "false",
+          ? "true"
+          : "false",
     limit: limit,
     offset: filter.offset,
     patient_name: filter.patient_name || undefined,
@@ -55,27 +54,26 @@ export const formatFilter = (params: any) => {
     patient_phone_number: filter.patient_phone_number || undefined,
     ordering: filter.ordering || undefined,
     assigned_to: filter.assigned_to || undefined,
-    disease_status: filter.disease_status || undefined,
     breathlessness_level: filter.breathlessness_level || undefined,
     is_kasp:
       (filter.is_kasp && filter.is_kasp) === ""
         ? ""
         : filter.is_kasp === "yes"
-        ? "true"
-        : "false",
+          ? "true"
+          : "false",
     is_antenatal:
       (filter.is_antenatal && filter.is_antenatal) === ""
         ? ""
         : filter.is_antenatal === "yes"
-        ? "true"
-        : "false",
+          ? "true"
+          : "false",
   };
 };
 
 export const badge = (key: string, value: any) => {
   return (
     value && (
-      <span className="inline-flex items-center rounded-full border bg-white px-3 py-1 text-xs font-medium leading-4 text-gray-600">
+      <span className="inline-flex items-center rounded-full border bg-white px-3 py-1 text-xs font-medium leading-4 text-secondary-600">
         {key}
         {": "}
         {value}

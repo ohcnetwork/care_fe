@@ -13,13 +13,13 @@ const OtpFormField = ({ length = 6, ...props }: TextAreaFormFieldProps) => {
   const inputs = useRef<Record<number, HTMLInputElement | null>>({});
 
   return (
-    <FormField props={props}>
+    <FormField field={props}>
       <div className="flex items-center justify-evenly">
         {new Array(length).fill(null).map((_, i) => (
           <input
             key={i}
             ref={(element) => (inputs.current[i] = element)}
-            className="form-control m-2 h-10 w-10 rounded border border-gray-600 text-center"
+            className="form-control m-2 h-10 w-10 rounded border border-secondary-600 text-center"
             maxLength={1}
             value={props.value[i]}
             onChange={(e) => {
@@ -28,7 +28,7 @@ const OtpFormField = ({ length = 6, ...props }: TextAreaFormFieldProps) => {
 
               let value = "";
               Object.values(inputs.current).forEach(
-                (el) => (value += el?.value)
+                (el) => (value += el?.value),
               );
               props.onChange(value);
             }}

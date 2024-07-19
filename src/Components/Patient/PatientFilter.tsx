@@ -3,11 +3,12 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import {
   ADMITTED_TO,
+  CONSENT_TYPE_CHOICES,
   DISCHARGE_REASONS,
-  DISEASE_STATUS,
   FACILITY_TYPES,
   GENDER_TYPES,
   PATIENT_FILTER_CATEGORIES,
+  RATION_CARD_CATEGORY,
 } from "../../Common/constants";
 import useConfig from "../../Common/hooks/useConfig";
 import useMergeState from "../../Common/hooks/useMergeState";
@@ -31,11 +32,16 @@ import DiagnosesFilter, { FILTER_BY_DIAGNOSES_KEYS } from "./DiagnosesFilter";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
+import useAuthUser from "../../Common/hooks/useAuthUser";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import { useTranslation } from "react-i18next";
 
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
 
 export default function PatientFilter(props: any) {
+  const { t } = useTranslation();
+  const authUser = useAuthUser();
   const { kasp_enabled, kasp_string } = useConfig();
   const { filter, onChange, closeFilter, removeFilters } = props;
 
@@ -49,19 +55,16 @@ export default function PatientFilter(props: any) {
     district_ref: null,
     date_declared_positive_before: filter.date_declared_positive_before || null,
     date_declared_positive_after: filter.date_declared_positive_after || null,
-    date_of_result_before: filter.date_of_result_before || null,
-    date_of_result_after: filter.date_of_result_after || null,
     created_date_before: filter.created_date_before || null,
     created_date_after: filter.created_date_after || null,
     modified_date_before: filter.modified_date_before || null,
     modified_date_after: filter.modified_date_after || null,
     category: filter.category || null,
     gender: filter.gender || null,
-    disease_status: filter.disease_status || null,
     age_min: filter.age_min || null,
     age_max: filter.age_max || null,
-    date_of_result: filter.date_of_result || null,
     date_declared_positive: filter.date_declared_positive || null,
+    ration_card_category: filter.ration_card_category || null,
     last_consultation_medico_legal_case:
       filter.last_consultation_medico_legal_case || null,
     last_consultation_encounter_date_before:
@@ -76,11 +79,11 @@ export default function PatientFilter(props: any) {
       filter.last_consultation_admitted_bed_type_list
         ? filter.last_consultation_admitted_bed_type_list.split(",")
         : [],
+    last_consultation__consent_types: filter.last_consultation__consent_types,
     last_consultation_current_bed__location:
       filter.last_consultation_current_bed__location || "",
     last_consultation__new_discharge_reason:
       filter.last_consultation__new_discharge_reason || null,
-    srf_id: filter.srf_id || null,
     number_of_doses: filter.number_of_doses || null,
     covin_id: filter.covin_id || null,
     is_kasp: filter.is_kasp || null,
@@ -100,6 +103,7 @@ export default function PatientFilter(props: any) {
     diagnoses_provisional: filter.diagnoses_provisional || null,
     diagnoses_unconfirmed: filter.diagnoses_unconfirmed || null,
     diagnoses_differential: filter.diagnoses_differential || null,
+    review_missed: filter.review_missed || null,
   });
 
   useQuery(routes.getAnyFacility, {
@@ -166,29 +170,26 @@ export default function PatientFilter(props: any) {
       lsgBody,
       date_declared_positive_before,
       date_declared_positive_after,
-      date_of_result_before,
-      date_of_result_after,
       created_date_before,
       created_date_after,
       modified_date_before,
       modified_date_after,
       category,
       gender,
-      disease_status,
       age_min,
       age_max,
-      date_of_result,
+      ration_card_category,
       last_consultation_medico_legal_case,
       last_consultation_encounter_date_before,
       last_consultation_encounter_date_after,
       last_consultation_discharge_date_before,
       last_consultation_discharge_date_after,
       last_consultation_admitted_bed_type_list,
+      last_consultation__consent_types,
       last_consultation__new_discharge_reason,
       last_consultation_current_bed__location,
       number_of_doses,
       covin_id,
-      srf_id,
       is_kasp,
       is_declared_positive,
       last_consultation_symptoms_onset_date_before,
@@ -203,6 +204,7 @@ export default function PatientFilter(props: any) {
       diagnoses_provisional,
       diagnoses_unconfirmed,
       diagnoses_differential,
+      review_missed,
     } = filterState;
     const data = {
       district: district || "",
@@ -212,52 +214,48 @@ export default function PatientFilter(props: any) {
         last_consultation_current_bed__location || "",
       facility_type: facility_type || "",
       date_declared_positive_before: dateQueryString(
-        date_declared_positive_before
+        date_declared_positive_before,
       ),
       date_declared_positive_after: dateQueryString(
-        date_declared_positive_after
+        date_declared_positive_after,
       ),
-      date_of_result_before: dateQueryString(date_of_result_before),
-      date_of_result_after: dateQueryString(date_of_result_after),
       created_date_before: dateQueryString(created_date_before),
       created_date_after: dateQueryString(created_date_after),
       modified_date_before: dateQueryString(modified_date_before),
       modified_date_after: dateQueryString(modified_date_after),
-      date_of_result: dateQueryString(date_of_result),
+      ration_card_category,
       last_consultation_medico_legal_case:
         last_consultation_medico_legal_case || "",
       last_consultation_encounter_date_before: dateQueryString(
-        last_consultation_encounter_date_before
+        last_consultation_encounter_date_before,
       ),
       last_consultation_encounter_date_after: dateQueryString(
-        last_consultation_encounter_date_after
+        last_consultation_encounter_date_after,
       ),
       last_consultation_discharge_date_before: dateQueryString(
-        last_consultation_discharge_date_before
+        last_consultation_discharge_date_before,
       ),
       last_consultation_discharge_date_after: dateQueryString(
-        last_consultation_discharge_date_after
+        last_consultation_discharge_date_after,
       ),
       category: category || "",
       gender: gender || "",
-      disease_status:
-        (disease_status == "Show All" ? "" : disease_status) || "",
       age_min: age_min || "",
       age_max: age_max || "",
       last_consultation_admitted_bed_type_list:
         last_consultation_admitted_bed_type_list || [],
+      last_consultation__consent_types: last_consultation__consent_types,
       last_consultation__new_discharge_reason:
         last_consultation__new_discharge_reason || "",
-      srf_id: srf_id || "",
       number_of_doses: number_of_doses || "",
       covin_id: covin_id || "",
       is_kasp: is_kasp || "",
       is_declared_positive: is_declared_positive || "",
       last_consultation_symptoms_onset_date_before: dateQueryString(
-        last_consultation_symptoms_onset_date_before
+        last_consultation_symptoms_onset_date_before,
       ),
       last_consultation_symptoms_onset_date_after: dateQueryString(
-        last_consultation_symptoms_onset_date_after
+        last_consultation_symptoms_onset_date_after,
       ),
       last_vaccinated_date_before: dateQueryString(last_vaccinated_date_before),
       last_vaccinated_date_after: dateQueryString(last_vaccinated_date_after),
@@ -270,6 +268,7 @@ export default function PatientFilter(props: any) {
       diagnoses_provisional: diagnoses_provisional || "",
       diagnoses_unconfirmed: diagnoses_unconfirmed || "",
       diagnoses_differential: diagnoses_differential || "",
+      review_missed: review_missed || "",
     };
     onChange(data);
   };
@@ -357,40 +356,69 @@ export default function PatientFilter(props: any) {
               />
             </div>
           </div>
-          <div className="w-full flex-none" id="bed-type-select">
-            <FieldLabel className="text-sm">Admitted to (Bed Types)</FieldLabel>
+          {props.dischargePage || (
+            <div className="w-full flex-none" id="bed-type-select">
+              <FieldLabel className="text-sm">
+                {props.dischargePage && "Last "}Admitted to (Bed Types)
+              </FieldLabel>
+              <MultiSelectMenuV2
+                id="last_consultation_admitted_bed_type_list"
+                placeholder="Select bed types"
+                options={ADMITTED_TO}
+                value={filterState.last_consultation_admitted_bed_type_list}
+                optionValue={(o) => o.id}
+                optionLabel={(o) => o.text}
+                onChange={(o) =>
+                  setFilterState({
+                    ...filterState,
+                    last_consultation_admitted_bed_type_list: o,
+                  })
+                }
+              />
+            </div>
+          )}
+          <div className="w-full flex-none" id="consent-type-select">
+            <FieldLabel className="text-sm">Has consent records for</FieldLabel>
             <MultiSelectMenuV2
-              id="last_consultation_admitted_bed_type_list"
-              placeholder="Select bed types"
-              options={ADMITTED_TO}
-              value={filterState.last_consultation_admitted_bed_type_list}
+              id="last_consultation__consent_types"
+              placeholder="Select consent types"
+              options={[
+                ...CONSENT_TYPE_CHOICES,
+                { id: "None", text: "No consents" },
+              ]}
+              value={filterState.last_consultation__consent_types}
               optionValue={(o) => o.id}
               optionLabel={(o) => o.text}
               onChange={(o) =>
                 setFilterState({
                   ...filterState,
-                  last_consultation_admitted_bed_type_list: o,
+                  last_consultation__consent_types: o,
                 })
               }
             />
           </div>
-          <div className="w-full flex-none" id="discharge-reason-select">
-            <FieldLabel className="text-sm">Discharge Reason</FieldLabel>
-            <SelectMenuV2
-              id="last_consultation__new_discharge_reason"
-              placeholder="Select discharge reason"
-              options={DISCHARGE_REASONS}
-              value={filterState.last_consultation__new_discharge_reason}
-              optionValue={(o) => o.id}
-              optionLabel={(o) => o.text}
-              onChange={(o) =>
-                setFilterState({
-                  ...filterState,
-                  last_consultation__new_discharge_reason: o,
-                })
-              }
-            />
-          </div>
+          {(props.dischargePage ||
+            ["StateAdmin", "StateReadOnlyAdmin"].includes(
+              authUser.user_type,
+            )) && (
+            <div className="w-full flex-none" id="discharge-reason-select">
+              <FieldLabel className="text-sm">Discharge Reason</FieldLabel>
+              <SelectMenuV2
+                id="last_consultation__new_discharge_reason"
+                placeholder="Select discharge reason"
+                options={DISCHARGE_REASONS}
+                value={filterState.last_consultation__new_discharge_reason}
+                optionValue={(o) => o.id}
+                optionLabel={(o) => o.text}
+                onChange={(o) =>
+                  setFilterState({
+                    ...filterState,
+                    last_consultation__new_discharge_reason: o,
+                  })
+                }
+              />
+            </div>
+          )}
           <div className="w-full flex-none">
             <FieldLabel className="text-sm">Telemedicine</FieldLabel>
             <SelectMenuV2
@@ -423,7 +451,7 @@ export default function PatientFilter(props: any) {
               }
             />
           </div>
-          <div className="w-full flex-none">
+          {/* <div className="w-full flex-none">
             <FieldLabel className="text-sm">Is Antenatal</FieldLabel>
             <SelectMenuV2
               placeholder="Show all"
@@ -436,6 +464,22 @@ export default function PatientFilter(props: any) {
                 setFilterState({ ...filterState, is_antenatal: v })
               }
             />
+          </div> */}
+          <div className="w-full flex-none">
+            {props.dischargePage || (
+              <>
+                <FieldLabel className="text-sm">Review Missed</FieldLabel>
+                <SelectMenuV2
+                  placeholder="Show all"
+                  options={["true", "false"]}
+                  optionLabel={(o) => (o === "true" ? "Yes" : "No")}
+                  value={filterState.review_missed}
+                  onChange={(v) =>
+                    setFilterState({ ...filterState, review_missed: v })
+                  }
+                />
+              </>
+            )}
           </div>
           <div className="w-full flex-none">
             <FieldLabel className="text-sm">Is Medico-Legal Case</FieldLabel>
@@ -454,6 +498,21 @@ export default function PatientFilter(props: any) {
               }
             />
           </div>
+          <SelectFormField
+            name="ration_card_category"
+            label="Ration Card Category"
+            placeholder="Select"
+            options={RATION_CARD_CATEGORY}
+            optionLabel={(o) => t(`ration_card__${o}`)}
+            optionValue={(o) => o}
+            value={filterState.ration_card_category}
+            onChange={(e) =>
+              setFilterState({
+                ...filterState,
+                [e.name]: e.value,
+              })
+            }
+          />
         </div>
       </AccordionV2>
       <AccordionV2
@@ -512,7 +571,7 @@ export default function PatientFilter(props: any) {
             label="Admit Date"
             value={{
               start: getDate(
-                filterState.last_consultation_encounter_date_after
+                filterState.last_consultation_encounter_date_after,
               ),
               end: getDate(filterState.last_consultation_encounter_date_before),
             }}
@@ -525,7 +584,7 @@ export default function PatientFilter(props: any) {
             label="Discharge Date"
             value={{
               start: getDate(
-                filterState.last_consultation_discharge_date_after
+                filterState.last_consultation_discharge_date_after,
               ),
               end: getDate(filterState.last_consultation_discharge_date_before),
             }}
@@ -538,10 +597,10 @@ export default function PatientFilter(props: any) {
             label="Onset of Symptoms Date"
             value={{
               start: getDate(
-                filterState.last_consultation_symptoms_onset_date_after
+                filterState.last_consultation_symptoms_onset_date_after,
               ),
               end: getDate(
-                filterState.last_consultation_symptoms_onset_date_before
+                filterState.last_consultation_symptoms_onset_date_before,
               ),
             }}
             onChange={handleDateRangeChange}
@@ -559,16 +618,18 @@ export default function PatientFilter(props: any) {
         className="rounded-md"
       >
         <div className="space-y-4">
-          <div>
-            <FieldLabel className="text-sm">Facility</FieldLabel>
-            <FacilitySelect
-              multiple={false}
-              name="facility"
-              showAll={false}
-              selected={filterState.facility_ref}
-              setSelected={(obj) => setFilterWithRef("facility", obj)}
-            />
-          </div>
+          {!props.dischargePage && (
+            <div>
+              <FieldLabel className="text-sm">Facility</FieldLabel>
+              <FacilitySelect
+                multiple={false}
+                name="facility"
+                showAll={false}
+                selected={filterState.facility_ref}
+                setSelected={(obj) => setFilterWithRef("facility", obj)}
+              />
+            </div>
+          )}
           {filterState.facility && (
             <div>
               <FieldLabel className="text-sm">Location</FieldLabel>
@@ -587,22 +648,24 @@ export default function PatientFilter(props: any) {
               />
             </div>
           )}
-          <div>
-            <FieldLabel className="text-sm">Facility type</FieldLabel>
-            <SelectMenuV2
-              placeholder="Show all"
-              options={FACILITY_TYPES}
-              optionLabel={(o) => o.text}
-              optionValue={(o) => o.text}
-              value={filterState.facility_type}
-              onChange={(v) =>
-                setFilterState({ ...filterState, facility_type: v })
-              }
-              optionIcon={() => (
-                <CareIcon className="care-l-hospital text-lg" />
-              )}
-            />
-          </div>
+          {!props.dischargePage && (
+            <div>
+              <FieldLabel className="text-sm">Facility type</FieldLabel>
+              <SelectMenuV2
+                placeholder="Show all"
+                options={FACILITY_TYPES}
+                optionLabel={(o) => o.text}
+                optionValue={(o) => o.text}
+                value={filterState.facility_type}
+                onChange={(v) =>
+                  setFilterState({ ...filterState, facility_type: v })
+                }
+                optionIcon={() => (
+                  <CareIcon icon="l-hospital" className="text-lg" />
+                )}
+              />
+            </div>
+          )}
           <div>
             <FieldLabel className="text-sm">LSG Body</FieldLabel>
             <div className="">
@@ -655,18 +718,6 @@ export default function PatientFilter(props: any) {
           )}
 
           <div className="w-full flex-none">
-            <FieldLabel className="text-sm">COVID Disease status</FieldLabel>
-            <SelectMenuV2
-              placeholder="Show all"
-              options={DISEASE_STATUS}
-              optionLabel={(o) => o}
-              value={filterState.disease_status}
-              onChange={(v) =>
-                setFilterState({ ...filterState, disease_status: v })
-              }
-            />
-          </div>
-          <div className="w-full flex-none">
             <FieldLabel className="text-sm">COVID Vaccinated</FieldLabel>
             <SelectMenuV2
               placeholder="Show all"
@@ -675,7 +726,7 @@ export default function PatientFilter(props: any) {
               optionValue={({ id }) => id}
               optionIcon={({ id }) => (
                 <>
-                  <CareIcon className="care-l-syringe mr-2 w-5" />
+                  <CareIcon icon="l-syringe" className="mr-2 w-5" />
                   <span className="font-bold">{id}</span>
                 </>
               )}
@@ -703,17 +754,6 @@ export default function PatientFilter(props: any) {
 
           <div className="w-full flex-none">
             <TextFormField
-              id="srf_id"
-              name="srf_id"
-              placeholder="Filter by SRF ID"
-              label={<span className="text-sm">SRF ID</span>}
-              value={filterState.srf_id}
-              onChange={handleFormFieldChange}
-              errorClassName="hidden"
-            />
-          </div>
-          <div className="w-full flex-none">
-            <TextFormField
               id="covin_id"
               name="covin_id"
               placeholder="Filter by COWIN ID"
@@ -724,17 +764,6 @@ export default function PatientFilter(props: any) {
             />
           </div>
 
-          <DateRangeFormField
-            labelClassName="text-sm"
-            name="date_of_result"
-            label="Date of result of COVID Test"
-            value={{
-              start: getDate(filterState.date_of_result_after),
-              end: getDate(filterState.date_of_result_before),
-            }}
-            onChange={handleDateRangeChange}
-            errorClassName="hidden"
-          />
           <DateRangeFormField
             labelClassName="text-sm"
             name="date_declared_positive"

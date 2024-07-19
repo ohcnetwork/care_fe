@@ -124,22 +124,22 @@ export const ResetPassword = (props: any) => {
                 onBlur={() => setPasswordInputInFocus(false)}
               />
               {passwordInputInFocus && (
-                <div className="text-small mb-2 pl-2 text-gray-500">
+                <div className="text-small mb-2 pl-2 text-secondary-500">
                   {validateRule(
                     form.password?.length >= 8,
-                    "Password should be atleast 8 characters long"
+                    "Password should be atleast 8 characters long",
                   )}
                   {validateRule(
                     form.password !== form.password.toUpperCase(),
-                    "Password should contain at least 1 lowercase letter"
+                    "Password should contain at least 1 lowercase letter",
                   )}
                   {validateRule(
                     form.password !== form.password.toLowerCase(),
-                    "Password should contain at least 1 uppercase letter"
+                    "Password should contain at least 1 uppercase letter",
                   )}
                   {validateRule(
                     /\d/.test(form.password),
-                    "Password should contain at least 1 number"
+                    "Password should contain at least 1 number",
                   )}
                 </div>
               )}
@@ -156,7 +156,7 @@ export const ResetPassword = (props: any) => {
                 form.confirm.length > 0 &&
                 validateRule(
                   form.confirm === form.password,
-                  "Confirm password should match the entered password"
+                  "Confirm password should match the entered password",
                 )}
             </div>
             <div className="grid p-4 sm:flex sm:justify-between">

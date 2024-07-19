@@ -11,8 +11,11 @@ export default function ManagePrescriptions() {
 
   return (
     <Page title={t("manage_prescriptions")}>
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-10 rounded bg-white p-6 transition-all sm:rounded-xl sm:p-12">
-        <div className="flex flex-col gap-10 divide-y-2 divide-dashed divide-gray-600">
+      <div
+        className="mx-auto flex w-full max-w-4xl flex-col gap-10 rounded bg-white p-6 transition-all sm:rounded-xl sm:p-12"
+        id="medicine-preview"
+      >
+        <div className="flex flex-col gap-10 divide-y-2 divide-dashed divide-secondary-600">
           <div>
             <h3 className="mb-4 text-lg font-semibold">
               {t("prescription_medications")}
@@ -33,11 +36,11 @@ export default function ManagePrescriptions() {
             onClick={() => goBack()}
             data-testid="return-to-patient-dashboard"
           >
-            <CareIcon className="care-l-angle-left-b text-lg" />
+            <CareIcon icon="l-angle-left-b" className="text-lg" />
             {t("return_to_patient_dashboard")}
           </ButtonV2>
           <span className="text-sm text-primary-500">
-            <CareIcon className="care-l-check text-base" />
+            <CareIcon icon="l-check" className="text-base" />
             <span className="pl-1">{t("all_changes_have_been_saved")}</span>
           </span>
         </div>

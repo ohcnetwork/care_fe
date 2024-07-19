@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import AutocompleteFormField from "../../Form/FormFields/Autocomplete";
 import {
@@ -6,10 +6,11 @@ import {
   CreateDiagnosis,
   ICD11DiagnosisModel,
 } from "../types";
-import { useAsyncOptions } from "../../../Common/hooks/useAsyncOptions";
-import { listICD11Diagnosis } from "../../../Redux/actions";
 import ConditionVerificationStatusMenu from "../ConditionVerificationStatusMenu";
-import { classNames } from "../../../Utils/utils";
+import { classNames, mergeQueryOptions } from "../../../Utils/utils";
+import useQuery from "../../../Utils/request/useQuery";
+import routes from "../../../Redux/api";
+import { Error } from "../../../Utils/Notifications";
 
 interface AddICD11DiagnosisProps {
   className?: string;
@@ -22,10 +23,17 @@ export default function AddICD11Diagnosis(props: AddICD11DiagnosisProps) {
   const { t } = useTranslation();
   const [selected, setSelected] = useState<ICD11DiagnosisModel>();
   const [adding, setAdding] = useState(false);
-  const hasError = !!props.disallowed.find((d) => d.id === selected?.id);
+  const hasError = !!props.disallowed.find((d) => d?.id === selected?.id);
 
-  const { fetchOptions, isLoading, options } =
-    useAsyncOptions<ICD11DiagnosisModel>("id");
+  const { res, data, loading, refetch } = useQuery(routes.listICD11Diagnosis, {
+    silent: true,
+  });
+
+  useEffect(() => {
+    if (res?.status === 500) {
+      Error({ msg: "ICD-11 Diagnosis functionality is facing issues." });
+    }
+  }, [res?.status]);
 
   const handleAdd = async (status: CreateDiagnosis["verification_status"]) => {
     if (!selected) return;
@@ -56,11 +64,15 @@ export default function AddICD11Diagnosis(props: AddICD11DiagnosisProps) {
         placeholder={t("search_icd11_placeholder")}
         value={selected}
         onChange={(e) => setSelected(e.value)}
-        options={options(selected ? [selected] : undefined)}
+        options={mergeQueryOptions(
+          selected ? [selected] : [],
+          data ?? [],
+          (obj) => obj.id,
+        )}
         optionLabel={(option) => option.label}
         optionValue={(option) => option}
-        onQuery={(query) => fetchOptions(listICD11Diagnosis({ query }))}
-        isLoading={isLoading}
+        onQuery={(query) => refetch({ query: { query } })}
+        isLoading={loading}
         error={hasError ? t("diagnosis_already_added") : undefined}
       />
       <ConditionVerificationStatusMenu

@@ -49,7 +49,6 @@ const Form = <T extends FormDetails>({
 
     if (validate) {
       const errors = omitBy(validate(state.form), isEmpty) as FormErrors<T>;
-
       if (Object.keys(errors).length) {
         dispatch({ type: "set_errors", errors });
 
@@ -78,7 +77,7 @@ const Form = <T extends FormDetails>({
       className={classNames(
         "mx-auto w-full rounded bg-white",
         !props.noPadding && "px-8 py-5 md:px-16 md:py-11",
-        props.className
+        props.className,
       )}
       noValidate
     >

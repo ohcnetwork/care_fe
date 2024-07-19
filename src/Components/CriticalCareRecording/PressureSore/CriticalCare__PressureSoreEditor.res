@@ -74,20 +74,20 @@ let reducer = (state, action) => {
   | AddSelectedPart(region) => {
       ...state,
       parts: Js.Array.concat(
-        Js.Array.filter(p => PressureSore.region(p) !== region, state.parts), 
+        Js.Array.filter(p => PressureSore.region(p) !== region, state.parts),
         [
           Belt.Option.getWithDefault(
-            Js.Array.find(p => PressureSore.region(p) === region, state.parts), 
-            PressureSore.makeDefault(region)
-          )
-        ]
+            Js.Array.find(p => PressureSore.region(p) === region, state.parts),
+            PressureSore.makeDefault(region),
+          ),
+        ],
       ),
       dirty: true,
     }
   | UpdateSelectedPart(part) => {
       ...state,
       parts: Js.Array.concat(
-        Js.Array.filter((item: PressureSore.part) => item.region != part.region, state.parts), 
+        Js.Array.filter((item: PressureSore.part) => item.region != part.region, state.parts),
         [part],
       ),
       dirty: true,
@@ -109,7 +109,7 @@ let reducer = (state, action) => {
   | ClearSaving => {...state, saving: false}
   | Update(parts) => {
       ...state,
-      parts: parts,
+      parts,
     }
   | SetPreviewMode => {...state, previewMode: true}
   | ClearPreviewMode => {...state, previewMode: false}
@@ -122,8 +122,16 @@ let makeField = p => {
   Js.Dict.set(payload, "scale", Js.Json.number(float_of_int(PressureSore.scale(p))))
   Js.Dict.set(payload, "width", Js.Json.number(p.width))
   Js.Dict.set(payload, "length", Js.Json.number(p.length))
-  Js.Dict.set(payload, "tissue_type", Js.Json.string(PressureSore.tissueTypeToString(p.tissue_type)))
-  Js.Dict.set(payload, "exudate_amount", Js.Json.string(PressureSore.extrudateAmountToString(p.exudate_amount)))
+  Js.Dict.set(
+    payload,
+    "tissue_type",
+    Js.Json.string(PressureSore.tissueTypeToString(p.tissue_type)),
+  )
+  Js.Dict.set(
+    payload,
+    "exudate_amount",
+    Js.Json.string(PressureSore.extrudateAmountToString(p.exudate_amount)),
+  )
   Js.Dict.set(payload, "description", Js.Json.string(p.description))
   payload
 }
@@ -159,35 +167,49 @@ let initialState = (psp, previewMode) => {
     selectedRegion: PressureSore.Other,
     saving: false,
     dirty: false,
-    previewMode: previewMode,
+    previewMode,
   }
 }
 
 let selectedClass = (part: option<PressureSore.part>) => {
   switch part {
   | Some(p) =>
-    let score =  PressureSore.calculatePushScore(p.length, p.width, p.exudate_amount, p.tissue_type) 
-    if score <= 0.0 { "text-gray-400 hover:bg-red-400 tooltip" } 
-    else if score <= 3.0 { "text-red-200 hover:bg-red-400 tooltip" }
-    else if score <= 6.0 { "text-red-400 hover:bg-red-500 tooltip" }
-    else if score <= 10.0 { "text-red-500 hover:bg-red-600 tooltip" }
-    else if score <= 15.0 { "text-red-600 hover:bg-red-700 tooltip" }
-    else { "text-red-700 hover:bg-red-800 tooltip" }
-  | None => "text-gray-400 hover:text-red-200 tooltip"
+    let score = PressureSore.calculatePushScore(p.length, p.width, p.exudate_amount, p.tissue_type)
+    if score <= 0.0 {
+      "text-secondary-400 hover:bg-red-400 tooltip"
+    } else if score <= 3.0 {
+      "text-red-200 hover:bg-red-400 tooltip"
+    } else if score <= 6.0 {
+      "text-red-400 hover:bg-red-500 tooltip"
+    } else if score <= 10.0 {
+      "text-red-500 hover:bg-red-600 tooltip"
+    } else if score <= 15.0 {
+      "text-red-600 hover:bg-red-700 tooltip"
+    } else {
+      "text-red-700 hover:bg-red-800 tooltip"
+    }
+  | None => "text-secondary-400 hover:text-red-200 tooltip"
   }
 }
 // UI for each Label
 let selectedLabelClass = (part: option<PressureSore.part>) => {
   switch part {
   | Some(p) =>
-    let score =  PressureSore.calculatePushScore(p.length, p.width, p.exudate_amount, p.tissue_type) 
-    if score <= 0.0 { "bg-gray-300 text-black hover:bg-gray-400" }
-    else if score <= 3.0 { "bg-red-200 text-red-700 hover:bg-red-400" }
-    else if score <= 6.0 { "bg-red-400 text-white hover:bg-red-500" }
-    else if score <= 10.0 { "bg-red-500 text-white hover:bg-red-600" }
-    else if score <= 15.0 { "bg-red-600 text-white hover:bg-red-700" }
-    else { "bg-red-700 text-white hover:bg-red-200" }
-  | None => "bg-gray-300 text-black hover:bg-red-200"
+    let score = PressureSore.calculatePushScore(p.length, p.width, p.exudate_amount, p.tissue_type)
+    if score <= 0.0 {
+      "bg-secondary-300 text-black hover:bg-secondary-400"
+    } else if score <= 3.0 {
+      "bg-red-200 text-red-700 hover:bg-red-400"
+    } else if score <= 6.0 {
+      "bg-red-400 text-white hover:bg-red-500"
+    } else if score <= 10.0 {
+      "bg-red-500 text-white hover:bg-red-600"
+    } else if score <= 15.0 {
+      "bg-red-600 text-white hover:bg-red-700"
+    } else {
+      "bg-red-700 text-white hover:bg-red-200"
+    }
+  | None => "bg-secondary-300 text-black hover:bg-red-200"
   }
 }
 
@@ -229,8 +251,9 @@ let getIntoView = (region: string, isPart: bool) => {
 }
 
 let renderBody = (state, send, title, partPaths, substr) => {
-  
-  let show = state.selectedRegion !== PressureSore.Other && partPaths->Belt.Array.some(p => PressureSore.regionForPath(p) === state.selectedRegion)
+  let show =
+    state.selectedRegion !== PressureSore.Other &&
+      partPaths->Belt.Array.some(p => PressureSore.regionForPath(p) === state.selectedRegion)
 
   let inputModal = React.useRef(Js.Nullable.null)
   let isMouseOverInputModal = %raw(`
@@ -260,29 +283,35 @@ let renderBody = (state, send, title, partPaths, substr) => {
             className={"p-1 col-auto text-sm rounded m-1 cursor-pointer " ++
             selectedLabelClass(selectedPart)}
             id={PressureSore.regionToString(regionType)}
-            onClick={_ => getIntoView(PressureSore.regionToString(regionType), false)}
-          >
+            onClick={_ => getIntoView(PressureSore.regionToString(regionType), false)}>
             <div className="flex justify-between">
               <div className="border-white px-1">
                 {str(
                   Js.String.sliceToEnd(
                     ~from=substr,
-                    PressureSore.regionToString(regionType) ++ (pushScoreValue(selectedPart) === "0" ? "" : " : " ++ pushScoreValue(selectedPart)),
+                    PressureSore.regionToString(regionType) ++ (
+                      pushScoreValue(selectedPart) === "0"
+                        ? ""
+                        : " : " ++ pushScoreValue(selectedPart)
+                    ),
                   ),
                 )}
               </div>
-              {state.previewMode ? React.null :  <div>
-              {switch selectedPart {
-              | Some(p) =>
-                <i
-                  className="border-l-2 fas fa-times p-1"
-                  onClick={state.previewMode
-                    ? _ => getIntoView(PressureSore.regionToString(regionType), false)
-                    : _ => send(RemoveFromSelectedParts(p))}
-                />
-              | None => React.null
-              }}
-              </div>}
+              {state.previewMode
+                ? React.null
+                : <div>
+                    {switch selectedPart {
+                    | Some(p) =>
+                      <CareIcon
+                        icon="l-times"
+                        className="border-l-2 p-1 text-lg"
+                        onClick={state.previewMode
+                          ? _ => getIntoView(PressureSore.regionToString(regionType), false)
+                          : _ => send(RemoveFromSelectedParts(p))}
+                      />
+                    | None => React.null
+                    }}
+                  </div>}
             </div>
           </div>
         }, partPaths)->React.array}
@@ -296,17 +325,18 @@ let renderBody = (state, send, title, partPaths, substr) => {
           modalRef={ReactDOM.Ref.domRef(inputModal)}
           hideModal={_ => send(SetSelectedRegion(PressureSore.Other))}
           position={state.modalPosition}
-          part={
-            Belt.Option.getWithDefault(
-              Js.Array.find(p => PressureSore.region(p) === state.selectedRegion, state.parts), 
-              PressureSore.makeDefault(state.selectedRegion)
-            )
-          }
+          part={Belt.Option.getWithDefault(
+            Js.Array.find(p => PressureSore.region(p) === state.selectedRegion, state.parts),
+            PressureSore.makeDefault(state.selectedRegion),
+          )}
           updatePart={part => send(UpdateSelectedPart(part))}
           previewMode={state.previewMode}
         />
       </div>
-      <svg className="h-screen py-4 cursor-pointer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 344.7 932.661">
+      <svg
+        className="h-screen py-4 cursor-pointer"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 344.7 932.661">
         {Js.Array.mapi((part, renderIndex) => {
           let regionType = PressureSore.regionForPath(part)
           let selectedPart = Js.Array.find(p => PressureSore.region(p) === regionType, state.parts)
@@ -318,9 +348,13 @@ let renderBody = (state, send, title, partPaths, substr) => {
             fill="currentColor"
             id={"part" ++ PressureSore.regionToString(regionType)}
             onClick={e => {
-              send(ShowInputModal(part.region, {"x": e->ReactEvent.Mouse.clientX, "y": e->ReactEvent.Mouse.clientY}))
-            }}
-          >
+              send(
+                ShowInputModal(
+                  part.region,
+                  {"x": e->ReactEvent.Mouse.clientX, "y": e->ReactEvent.Mouse.clientY},
+                ),
+              )
+            }}>
             <title className=""> {str(PressureSore.regionToString(regionType))} </title>
           </path>
         }, partPaths)->React.array}
@@ -347,7 +381,8 @@ let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId, ~previewMod
               // Toggle
 
               //Toggle Button
-              <div className="transition duration-150 ease-in-out mr-3 text-gray-700 font-medium">
+              <div
+                className="transition duration-150 ease-in-out mr-3 text-secondary-700 font-medium">
                 {str(state.previewMode ? "Preview Mode" : "Edit Mode")}
               </div>
               <div className="relative">
@@ -359,7 +394,7 @@ let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId, ~previewMod
                 />
                 <div
                   className={"block w-14 h-8 rounded-full " ++ (
-                    state.previewMode ? "bg-green-300" : "bg-gray-400"
+                    state.previewMode ? "bg-green-300" : "bg-secondary-400"
                   )}
                 />
                 <div

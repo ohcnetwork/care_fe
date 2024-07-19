@@ -1,11 +1,11 @@
-import { Context, createContext } from "react";
+import { createContext } from "react";
 import { FieldError, FieldValidator } from "./FieldValidators";
 import { FormDetails } from "./Utils";
 
 export type FormContextValue<T extends FormDetails> = (
   name: keyof T,
   validate?: FieldValidator<T[keyof T]>,
-  excludeFromDraft?: boolean
+  excludeFromDraft?: boolean,
 ) => {
   id: keyof T;
   name: keyof T;
@@ -13,8 +13,6 @@ export type FormContextValue<T extends FormDetails> = (
   value: any;
   error: FieldError | undefined;
 };
-
-export type FormContext<T extends FormDetails> = Context<FormContextValue<T>>;
 
 export const createFormContext = <T extends FormDetails>() =>
   createContext<FormContextValue<T>>(undefined as any);

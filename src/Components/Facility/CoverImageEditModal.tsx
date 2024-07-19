@@ -1,4 +1,3 @@
-import axios from "axios";
 import {
   ChangeEventHandler,
   useCallback,
@@ -20,6 +19,7 @@ import { LocalStorageKeys } from "../../Common/constants";
 import DialogModal from "../Common/Dialog";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
+import uploadFile from "../../Utils/request/uploadFile";
 interface Props {
   open: boolean;
   onClose: (() => void) | undefined;
@@ -59,7 +59,7 @@ const CoverImageEditModal = ({
     setFacingMode((prevState: any) =>
       prevState === FACING_MODE_USER
         ? FACING_MODE_ENVIRONMENT
-        : FACING_MODE_USER
+        : FACING_MODE_USER,
     );
   }, []);
 
@@ -105,34 +105,35 @@ const CoverImageEditModal = ({
 
     const formData = new FormData();
     formData.append("cover_image", selectedFile);
-
+    const url = `/api/v1/facility/${facility.id}/cover_image/`;
     setIsUploading(true);
-    try {
-      const response = await axios.post(
-        `/api/v1/facility/${facility.id}/cover_image/`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization:
-              "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken),
-          },
+
+    uploadFile(
+      url,
+      formData,
+      "POST",
+      {
+        Authorization:
+          "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken),
+      },
+      (xhr: XMLHttpRequest) => {
+        if (xhr.status === 200) {
+          Success({ msg: "Cover image updated." });
+        } else {
+          Notification.Error({
+            msg: "Something went wrong!",
+          });
+          setIsUploading(false);
         }
-      );
-      if (response.status === 200) {
-        Success({ msg: "Cover image updated." });
-      } else {
+      },
+      null,
+      () => {
         Notification.Error({
-          msg: "Something went wrong!",
+          msg: "Network Failure. Please check your internet connectivity.",
         });
         setIsUploading(false);
-      }
-    } catch (e) {
-      Notification.Error({
-        msg: "Network Failure. Please check your internet connectivity.",
-      });
-      setIsUploading(false);
-    }
+      },
+    );
 
     await sleep(1000);
     setIsUploading(false);
@@ -184,7 +185,7 @@ const CoverImageEditModal = ({
     >
       <div className="flex h-full w-full items-center justify-center overflow-y-auto">
         {!isCameraOpen ? (
-          <form className="flex max-h-screen min-h-[24rem] w-full flex-col overflow-auto">
+          <form className="flex max-h-screen min-h-96 w-full flex-col overflow-auto">
             {hasImage ? (
               <>
                 <div className="flex flex-1 items-center justify-center rounded-lg">
@@ -194,7 +195,7 @@ const CoverImageEditModal = ({
                     className="h-full w-full object-cover"
                   />
                 </div>
-                <p className="text-center font-medium text-gray-700">
+                <p className="text-center font-medium text-secondary-700">
                   {commonHint}
                 </p>
               </>
@@ -208,7 +209,7 @@ const CoverImageEditModal = ({
                 } ${
                   dragProps.fileDropError !== ""
                     ? "border-red-500"
-                    : "border-gray-500"
+                    : "border-secondary-500"
                 }`}
               >
                 <svg
@@ -221,7 +222,7 @@ const CoverImageEditModal = ({
                   } ${
                     dragProps.fileDropError !== ""
                       ? "text-red-500"
-                      : "text-gray-600"
+                      : "text-secondary-600"
                   }`}
                 >
                   <path d="M28 8H12a4 4 0 0 0-4 4v20m32-12v8m0 0v8a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4v-4m32-4-3.172-3.172a4 4 0 0 0-5.656 0L28 28M8 32l9.172-9.172a4 4 0 0 1 5.656 0L28 28m0 0 4 4m4-24h8m-4-4v8m-12 4h.02" />
@@ -232,14 +233,14 @@ const CoverImageEditModal = ({
                   } ${
                     dragProps.fileDropError !== ""
                       ? "text-red-500"
-                      : "text-gray-700"
+                      : "text-secondary-700"
                   } text-center`}
                 >
                   {dragProps.fileDropError !== ""
                     ? dragProps.fileDropError
                     : `${t("drag_drop_image_to_upload")}`}
                 </p>
-                <p className="mt-4 text-center font-medium text-gray-700">
+                <p className="mt-4 text-center font-medium text-secondary-700">
                   {t("no_cover_photo_uploaded_for_this_facility")}. {commonHint}
                 </p>
               </div>
@@ -251,7 +252,7 @@ const CoverImageEditModal = ({
                   id="upload-cover-image"
                   className="flex w-full cursor-pointer items-center justify-center gap-1 rounded-lg border border-primary-500 bg-white px-4 py-2 text-sm font-medium text-primary-500 transition-all hover:border-primary-400 hover:text-primary-400"
                 >
-                  <CareIcon className="care-l-cloud-upload text-lg" />
+                  <CareIcon icon="l-cloud-upload" className="text-lg" />
                   {t("upload_an_image")}
                   <input
                     title="changeFile"
@@ -293,9 +294,9 @@ const CoverImageEditModal = ({
                 disabled={isUploading}
               >
                 {isUploading ? (
-                  <CareIcon className="care-l-spinner animate-spin text-lg" />
+                  <CareIcon icon="l-spinner" className="animate-spin text-lg" />
                 ) : (
-                  <CareIcon className="care-l-save text-lg" />
+                  <CareIcon icon="l-save" className="text-lg" />
                 )}
                 <span>
                   {isUploading ? `${t("uploading")}...` : `${t("save")}`}
@@ -304,7 +305,7 @@ const CoverImageEditModal = ({
             </div>
           </form>
         ) : (
-          <div className="flex max-h-screen min-h-[24rem] flex-col overflow-auto">
+          <div className="flex max-h-screen min-h-96 flex-col overflow-auto">
             <div className="mb-1 mt-2 flex flex-col">
               <span className="text-xl font-medium">
                 {t("capture_cover_photo")}
@@ -370,7 +371,10 @@ const CoverImageEditModal = ({
                       </ButtonV2>
                       <ButtonV2 onClick={handleUpload} className="my-2 w-full">
                         {isCaptureImgBeingUploaded && (
-                          <CareIcon className="care-l-spinner animate-spin text-lg" />
+                          <CareIcon
+                            icon="l-spinner"
+                            className="animate-spin text-lg"
+                          />
                         )}
                         {t("submit")}
                       </ButtonV2>
@@ -386,7 +390,7 @@ const CoverImageEditModal = ({
                     setIsCameraOpen(false);
                     webRef.current.stopCamera();
                   }}
-                  className="border-grey-200 my-2 w-full border-2"
+                  className="my-2 w-full"
                 >
                   {t("close")}
                 </ButtonV2>
@@ -396,7 +400,7 @@ const CoverImageEditModal = ({
             <div className={`${isLaptopScreen ? " " : " hidden "}`}>
               <div className="m-4 flex lg:hidden">
                 <ButtonV2 onClick={handleSwitchCamera}>
-                  <CareIcon className="care-l-camera-change text-lg" />
+                  <CareIcon icon="l-camera-change" className="text-lg" />
                   {`${t("switch")} ${t("camera")}`}
                 </ButtonV2>
               </div>
@@ -411,7 +415,7 @@ const CoverImageEditModal = ({
                             captureImage();
                           }}
                         >
-                          <CareIcon className="care-l-capture text-lg" />
+                          <CareIcon icon="l-capture" className="text-lg" />
                           {t("capture")}
                         </ButtonV2>
                       </div>
@@ -429,7 +433,10 @@ const CoverImageEditModal = ({
                         <Submit disabled={isUploading} onClick={handleUpload}>
                           {isCaptureImgBeingUploaded ? (
                             <>
-                              <CareIcon className="care-l-spinner animate-spin text-lg" />
+                              <CareIcon
+                                icon="l-spinner"
+                                className="animate-spin text-lg"
+                              />
                               {`${t("submitting")}...`}
                             </>
                           ) : (

@@ -12,11 +12,11 @@
   "extends": [
     "eslint:recommended",
     "plugin:react-hooks/recommended",
-    "plugin:prettier/recommended",
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:i18next/recommended",
-    "plugin:tailwindcss/recommended"
+    "plugin:tailwindcss/recommended",
+    "plugin:storybook/recommended"
   ],
   "overrides": [
     {
@@ -31,7 +31,7 @@
         "react/jsx-no-target-blank": "off",
         "i18next/no-literal-string": "off"
       }
-    }    
+    }
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -42,11 +42,14 @@
     "sourceType": "module"
   },
   "plugins": [
-    "@typescript-eslint", 
+    "@typescript-eslint",
     "i18next"
   ],
   "rules": {
-    "quotes": ["error", "double"],
+    "quotes": [
+      "error",
+      "double"
+    ],
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": [
       "error",
@@ -62,21 +65,29 @@
       {
         "mode": "jsx-only",
         "jsx-attributes": {
-          "include": ["label", "placeholder", "error", "title"],
-          "exclude": [".*"]
+          "include": [
+            "label",
+            "placeholder",
+            "error",
+            "title"
+          ],
+          "exclude": [
+            ".*"
+          ]
         },
         "callees": {
-          "exclude": [".*"]
+          "exclude": [
+            ".*"
+          ]
         }
       }
     ],
     "tailwindcss/no-custom-classname": "off",
     "tailwindcss/migration-from-tailwind-2": "error",
-    "tailwindcss/classnames-order": "error",
-    "tailwindcss/enforces-shorthand": "error",
+    "tailwindcss/classnames-order": "off",
+    "tailwindcss/enforces-shorthand": "off",
     "tailwindcss/no-contradicting-classname": "error"
   },
-  
   "ignorePatterns": [
     "dist",
     "public",

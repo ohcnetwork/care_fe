@@ -1,12 +1,13 @@
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 import FormField from "./FormField";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   classNames,
   parsePhoneNumber,
   formatPhoneNumber as formatPhoneNumberUtil,
   getCountryCode,
   CountryData,
+  humanizeStrings,
 } from "../../../Utils/utils";
 import phoneCodesJson from "../../../Common/static/countryPhoneAndFlags.json";
 import {
@@ -15,6 +16,8 @@ import {
   PhoneNumberType,
 } from "../FieldValidators";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
+import { Popover } from "@headlessui/react";
+import { useTranslation } from "react-i18next";
 
 const phoneCodes: Record<string, CountryData> = phoneCodesJson;
 
@@ -26,12 +29,16 @@ interface Props extends FormFieldBaseProps<string> {
 }
 
 export default function PhoneNumberFormField(props: Props) {
-  const field = useFormFieldPropsResolver(props as any);
-  const [error, setError] = useState<FieldError>();
-
+  const field = useFormFieldPropsResolver(props);
+  const [error, setError] = useState<FieldError | undefined>();
+  const [country, setCountry] = useState<CountryData>({
+    flag: "🇮🇳",
+    name: "India",
+    code: "91",
+  });
   const validator = useMemo(
     () => PhoneNumberValidator(props.types),
-    [props.types]
+    [props.types],
   );
 
   const validate = useMemo(
@@ -48,22 +55,46 @@ export default function PhoneNumberFormField(props: Props) {
         return newError;
       }
     },
-    [props.disableValidation]
+    [props.disableValidation],
   );
 
-  const setValue = (value: string) => {
-    value = value.replaceAll(/[^0-9+]/g, "");
-    if (value.length > 12 && value.startsWith("+910")) {
-      value = "+91" + value.slice(4);
-    }
+  const setValue = useCallback(
+    (value: string) => {
+      value = value.replaceAll(/[^0-9+]/g, "");
+      if (value.length > 12 && value.startsWith("+910")) {
+        value = "+91" + value.slice(4);
+      }
 
-    const error = validate(value, "change");
-    field.handleChange(value);
+      const error = validate(value, "change");
+      field.handleChange(value);
 
-    setError(error);
+      setError(error);
+    },
+    [field, validate],
+  );
+
+  const handleCountryChange = (value: CountryData): void => {
+    setCountry(value);
+    setValue(conditionPhoneCode(value.code));
   };
 
-  useEffect(() => setValue(field.value || "+91"), []);
+  useEffect(() => {
+    if (field.value && field.value.length > 0) {
+      if (field.value.startsWith("1800")) {
+        setCountry({ flag: "📞", name: "Support", code: "1800" });
+        return;
+      }
+      if (field.value === "+") {
+        setCountry({ flag: "🌍", name: "Other", code: "+" });
+        return;
+      }
+      setCountry(phoneCodes[getCountryCode(field.value)!]);
+    }
+  }, [setValue]);
+
+  useEffect(() => {
+    setValue(field.value || "+91");
+  }, []);
 
   return (
     <FormField
@@ -76,90 +107,82 @@ export default function PhoneNumberFormField(props: Props) {
       }}
     >
       <div className="relative rounded-md shadow-sm">
-        <input
-          type="tel"
-          id={field.id}
-          name={field.name}
-          autoComplete={props.autoComplete ?? "tel"}
-          className={classNames(
-            "cui-input-base pr-24 tracking-widest sm:leading-6 md:pr-28",
-            field.error && "border-danger-500",
-            field.className
-          )}
-          maxLength={field.value?.startsWith("1800") ? 11 : 15}
-          placeholder={props.placeholder}
-          value={formatPhoneNumber(field.value, props.types)}
-          onChange={(e) => setValue(e.target.value)}
-          disabled={field.disabled}
-          onBlur={() => setError(validate(field.value, "blur"))}
-        />
-        <div className="absolute inset-y-0 right-0 flex items-center">
-          <label htmlFor={field.id + "__country"} className="sr-only">
-            Country
-          </label>
-          <select
-            disabled={field.disabled}
-            id={field.id + "__country"}
-            name="country"
-            autoComplete="country"
-            className="cui-input-base h-full border-0 bg-transparent pl-2 pr-8 text-end font-medium tracking-wider text-gray-700 focus:ring-2 focus:ring-inset"
-            value={
-              getCountryCode(field.value) ??
-              (field.value?.startsWith("1800") ? "1800" : "Other")
-            }
-            onChange={(e) => {
-              if (e.target.value === "1800") return setValue("1800");
-              if (e.target.value === "Other") return setValue("");
-              setValue(conditionPhoneCode(phoneCodes[e.target.value].code));
-            }}
-          >
-            {Object.entries(phoneCodes).map(([country, { flag }]) => (
-              <option key={country} value={country}>
-                {flag} {country}
-              </option>
-            ))}
-            <option value="Other">Other</option>
-            <option value="1800">Support</option>
-          </select>
-        </div>
+        <Popover>
+          {({ open }: { open: boolean }) => {
+            return (
+              <>
+                <Popover.Button className="absolute h-full">
+                  <div className="absolute inset-y-0 left-0 m-0.5 flex w-[4.5rem] cursor-pointer items-center justify-around bg-slate-100">
+                    <span className="rounded-md pl-4">
+                      {country?.flag ?? "🇮🇳"}
+                    </span>
+                    <CareIcon
+                      icon="l-angle-down"
+                      className={`text-2xl font-bold ${open && "rotate-180"}`}
+                    />
+                  </div>
+                </Popover.Button>
+                <input
+                  type="tel"
+                  id={field.id}
+                  name={field.name}
+                  autoComplete={props.autoComplete ?? "tel"}
+                  className={classNames(
+                    "cui-input-base h-full pl-20 tracking-widest sm:leading-6 ",
+                    field.error && "border-danger-500",
+                    field.className,
+                  )}
+                  maxLength={field.value?.startsWith("1800") ? 11 : 15}
+                  placeholder={props.placeholder}
+                  value={formatPhoneNumber(field.value, props.types)}
+                  onChange={(e) => setValue(e.target.value)}
+                  disabled={field.disabled}
+                  onBlur={() => setError(validate(field.value, "blur"))}
+                />
+                <Popover.Panel className="w-full">
+                  {({ close }) => (
+                    <CountryCodesList
+                      handleCountryChange={handleCountryChange}
+                      onClose={close}
+                    />
+                  )}
+                </Popover.Panel>
+              </>
+            );
+          }}
+        </Popover>
       </div>
     </FormField>
   );
 }
 
-const phoneNumberTypeIcons: Record<PhoneNumberType, string> = {
-  international_mobile: "globe",
-  indian_mobile: "mobile-android",
-  mobile: "mobile-android",
-  landline: "phone",
-  support: "headset",
-};
+const PhoneNumberTypesHelp = (props: { types: PhoneNumberType[] }) => {
+  const { t } = useTranslation();
 
-const PhoneNumberTypesHelp = ({ types }: { types: PhoneNumberType[] }) => (
-  <div className="flex gap-1">
-    {types.map((type) => (
-      <span key={type} className="tooltip mt-1">
-        <CareIcon
-          className={classNames(
-            `care-l-${phoneNumberTypeIcons[type]}`,
-            "text-lg text-gray-500"
-          )}
-        />
-        <span className="tooltip-text tooltip-bottom -translate-x-1/2 translate-y-1 text-xs capitalize">
-          {type.replace("_", " ")}
-        </span>
-      </span>
-    ))}
-  </div>
-);
+  return (
+    <div className="tooltip mt-1 pr-1 text-secondary-500">
+      <CareIcon icon="l-question-circle" className="text-lg" />
+      <div className="tooltip-text tooltip-bottom w-64 -translate-x-full whitespace-pre-wrap text-sm">
+        Supports only{" "}
+        <span className="font-bold lowercase">
+          {humanizeStrings(props.types.map((item) => t(item)))}
+        </span>{" "}
+        numbers.
+      </div>
+    </div>
+  );
+};
 
 const conditionPhoneCode = (code: string) => {
   code = code.split(" ")[0];
   return code.startsWith("+") ? code : "+" + code;
 };
 
-const formatPhoneNumber = (value: string, types: PhoneNumberType[]) => {
-  if (value === undefined || value === null) {
+const formatPhoneNumber = (
+  value: string | undefined,
+  types: PhoneNumberType[],
+) => {
+  if (value == null) {
     return "+91 ";
   }
 
@@ -169,4 +192,88 @@ const formatPhoneNumber = (value: string, types: PhoneNumberType[]) => {
 
   const phoneNumber = parsePhoneNumber(value);
   return phoneNumber ? formatPhoneNumberUtil(phoneNumber) : value;
+};
+
+const CountryCodesList = ({
+  handleCountryChange,
+  onClose,
+}: {
+  handleCountryChange: (value: CountryData) => void;
+  onClose: () => void;
+}) => {
+  const [searchValue, setSearchValue] = useState<string>("");
+
+  return (
+    <div className="absolute z-10 w-full rounded-md border border-secondary-300 bg-white shadow-lg transition-all duration-300">
+      <div className="relative m-2">
+        <CareIcon
+          icon="l-search"
+          className="absolute left-3 top-3 mr-1 text-base"
+        />
+        <input
+          type="search"
+          placeholder="Search"
+          className="w-full border-b border-secondary-400 p-2 pl-10 focus:outline-none focus:ring-0"
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+        />
+      </div>
+
+      <ul className="max-h-[200px] overflow-x-hidden overflow-y-scroll px-2">
+        {Object.entries(phoneCodes)
+          .filter(([country, { flag, name, code }]) => {
+            if (searchValue === "") {
+              return true;
+            }
+            return (
+              name.toLowerCase().includes(searchValue.toLowerCase()) ||
+              code.includes(searchValue) ||
+              country.toLowerCase().includes(searchValue.toLowerCase()) ||
+              flag.includes(searchValue)
+            );
+          })
+          .map(([country, { flag, name, code }]) => (
+            <li
+              key={country}
+              className="flex cursor-pointer items-center gap-2 rounded-md p-2 hover:bg-primary-100 hover:text-primary-600"
+              onClick={() => {
+                handleCountryChange({ flag, name, code });
+                onClose();
+              }}
+            >
+              <span>{flag}</span>
+              <span>{name}</span>
+              <span className="text-secondary-600">
+                {" "}
+                ({conditionPhoneCode(code)})
+              </span>
+            </li>
+          ))}
+        <li
+          key={"support"}
+          className="flex cursor-pointer items-center gap-2 rounded-md p-2 hover:bg-primary-100 hover:text-primary-600"
+          onClick={() => {
+            handleCountryChange({ flag: "📞", name: "Support", code: "1800" });
+            onClose();
+          }}
+        >
+          <span>📞</span>
+          <span>Support</span>
+          <span className="text-secondary-600"> (1800)</span>
+        </li>
+        <li
+          key={"other"}
+          className="flex cursor-pointer items-center gap-2 rounded-md p-2 hover:bg-primary-100 hover:text-primary-600"
+          onClick={() => {
+            handleCountryChange({ flag: "🌍", name: "Other", code: "+" });
+            onClose();
+          }}
+        >
+          <span>🌍</span>
+          <span>Other</span>
+          <span className="text-secondary-600"> (+)</span>
+        </li>
+      </ul>
+    </div>
+  );
 };

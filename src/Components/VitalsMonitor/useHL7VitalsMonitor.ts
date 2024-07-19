@@ -20,7 +20,7 @@ interface VitalsBPValue extends VitalsDataBase {
 }
 
 export default function useHL7VitalsMonitor(
-  config?: IVitalsComponentProps["config"]
+  config?: IVitalsComponentProps["config"],
 ) {
   const waveformForegroundCanvas = useCanvas();
   const waveformBackgroundCanvas = useCanvas();
@@ -92,26 +92,26 @@ export default function useHL7VitalsMonitor(
 
       device.current.once("ecg-waveform", (observation) => {
         ecgOptionsRef.current = getChannel(
-          observation as HL7VitalsWaveformData
+          observation as HL7VitalsWaveformData,
         );
         obtainRenderer();
       });
 
       device.current.once("pleth-waveform", (observation) => {
         plethOptionsRef.current = getChannel(
-          observation as HL7VitalsWaveformData
+          observation as HL7VitalsWaveformData,
         );
         obtainRenderer();
       });
 
       device.current.once("spo2-waveform", (observation) => {
         spo2OptionsRef.current = getChannel(
-          observation as HL7VitalsWaveformData
+          observation as HL7VitalsWaveformData,
         );
         obtainRenderer();
       });
     },
-    [waveformForegroundCanvas.contextRef, waveformBackgroundCanvas]
+    [waveformForegroundCanvas.contextRef, waveformBackgroundCanvas],
   );
 
   return {
@@ -137,14 +137,14 @@ export default function useHL7VitalsMonitor(
 
 const ingestTo = (
   vitalsRenderer: HL7VitalsRenderer,
-  channel: "ecg" | "pleth" | "spo2"
+  channel: "ecg" | "pleth" | "spo2",
 ) => {
   return (observation: HL7MonitorData) => {
     vitalsRenderer.append(
       channel,
       (observation as HL7VitalsWaveformData).data
         .split(" ")
-        .map((x) => parseInt(x)) || []
+        .map((x) => parseInt(x)) || [],
     );
   };
 };

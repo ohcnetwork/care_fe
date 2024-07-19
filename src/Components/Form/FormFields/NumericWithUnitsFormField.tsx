@@ -27,7 +27,7 @@ export default function NumericWithUnitsFormField(props: Props) {
           className={classNames(
             "cui-input-base pr-24 sm:leading-6 md:pr-28",
             field.error && "border-danger-500",
-            field.className
+            field.className,
           )}
           placeholder={props.placeholder}
           min={props.min}
@@ -35,6 +35,7 @@ export default function NumericWithUnitsFormField(props: Props) {
           autoComplete={props.autoComplete}
           required={field.required}
           value={numValue}
+          disabled={props.disabled}
           onChange={(e) =>
             field.handleChange(Number(e.target.value) + " " + unitValue)
           }
@@ -43,11 +44,12 @@ export default function NumericWithUnitsFormField(props: Props) {
           <select
             id={field.name + "_units"}
             name={field.name + "_units"}
-            className="cui-input-base h-full border-0 bg-transparent pl-2 pr-7 text-gray-700 focus:ring-2 focus:ring-inset"
+            className="cui-input-base h-full border-0 bg-transparent pl-2 pr-7 text-secondary-700 focus:ring-2 focus:ring-inset"
             value={unitValue}
             onChange={(e) =>
               field.handleChange(numValue + " " + e.target.value)
             }
+            disabled={props.disabled}
           >
             {props.units.map((unit) => (
               <option key={unit}>{unit}</option>

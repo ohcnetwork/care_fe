@@ -4,6 +4,11 @@ import { SortOption } from "../Components/Common/SortDropdown";
 import { dateQueryString } from "../Utils/utils";
 import { IconName } from "../CAREUI/icons/CareIcon";
 import { PhoneNumberValidator } from "../Components/Form/FieldValidators";
+import { SchemaType } from "./schemaParser";
+import {
+  ConsentHIType,
+  ConsentPurpose,
+} from "../Components/ABDM/types/consent";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 export const PAGINATION_LIMIT = 36;
@@ -23,33 +28,12 @@ export interface OptionsType {
   disabled?: boolean;
 }
 
-export type UserRole =
-  | "Pharmacist"
-  | "Volunteer"
-  | "StaffReadOnly"
-  | "Staff"
-  | "NurseReadOnly"
-  | "Nurse"
-  | "Doctor"
-  | "WardAdmin"
-  | "LocalBodyAdmin"
-  | "DistrictLabAdmin"
-  | "DistrictReadOnlyAdmin"
-  | "DistrictAdmin"
-  | "StateLabAdmin"
-  | "StateReadOnlyAdmin"
-  | "StateAdmin";
-
-export const USER_TYPE_OPTIONS: {
-  id: UserRole;
-  role: string;
-  readOnly?: boolean;
-}[] = [
+export const USER_TYPE_OPTIONS = [
   { id: "Pharmacist", role: "Pharmacist", readOnly: false },
   { id: "Volunteer", role: "Volunteer", readOnly: false },
   { id: "StaffReadOnly", role: "Staff", readOnly: true },
   { id: "Staff", role: "Staff", readOnly: false },
-  { id: "NurseReadOnly", role: "Nurse", readOnly: true },
+  // { id: "NurseReadOnly", role: "Nurse", readOnly: true },
   { id: "Nurse", role: "Nurse", readOnly: false },
   { id: "Doctor", role: "Doctor", readOnly: false },
   { id: "WardAdmin", role: "Ward Admin", readOnly: false },
@@ -60,7 +44,9 @@ export const USER_TYPE_OPTIONS: {
   { id: "StateLabAdmin", role: "State Lab Admin", readOnly: false },
   { id: "StateReadOnlyAdmin", role: "State Admin", readOnly: true },
   { id: "StateAdmin", role: "State Admin", readOnly: false },
-];
+] as const;
+
+export type UserRole = (typeof USER_TYPE_OPTIONS)[number]["id"];
 
 export const USER_TYPES = USER_TYPE_OPTIONS.map((o) => o.id);
 
@@ -106,38 +92,41 @@ export const VEHICLE_TYPES: Array<OptionsType> = [
 
 export const FACILITY_TYPES: Array<OptionsType> = [
   // { id: 1, text: "Educational Inst" },
-  { id: 2, text: "Private Hospital" },
-  { id: 3, text: "Other" },
   // { id: 4, text: "Hostel" },
   // { id: 5, text: "Hotel" },
   // { id: 6, text: "Lodge" },
-  { id: 7, text: "TeleMedicine" },
-  { id: 8, text: "Govt Hospital" },
-  { id: 9, text: "Labs" },
   { id: 800, text: "Primary Health Centres" },
-  { id: 801, text: "24x7 Public Health Centres" },
   { id: 802, text: "Family Health Centres" },
   { id: 803, text: "Community Health Centres" },
-  { id: 820, text: "Urban Primary Health Center" },
-  { id: 830, text: "Taluk Hospitals" },
-  { id: 831, text: "Taluk Headquarters Hospitals" },
   { id: 840, text: "Women and Child Health Centres" },
-  { id: 850, text: "General hospitals" },
+  { id: 830, text: "Taluk Hospitals" },
   { id: 860, text: "District Hospitals" },
   { id: 870, text: "Govt Medical College Hospitals" },
-
-  { id: 900, text: "Co-operative hospitals" },
+  { id: 9, text: "Govt Labs" },
+  { id: 10, text: "Private Labs" },
+  { id: 7, text: "TeleMedicine" },
+  { id: 2, text: "Private Hospital" },
   { id: 910, text: "Autonomous healthcare facility" },
+  { id: 1300, text: "Shifting Centre" },
+  { id: 1500, text: "Request Approving Center" },
+  { id: 1510, text: "Request Fulfilment Center" },
+  { id: 3, text: "Other" },
 
-  { id: 950, text: "Corona Testing Labs" },
-  { id: 1000, text: "Corona Care Centre" },
+  // { id: 8, text: "Govt Hospital" },
+  // { id: 801, text: "24x7 Public Health Centres" },
+  // { id: 820, text: "Urban Primary Health Center" },
+  // { id: 831, text: "Taluk Headquarters Hospitals" },
+  // { id: 850, text: "General hospitals" },
+
+  // { id: 900, text: "Co-operative hospitals" },
+
+  // { id: 950, text: "Corona Testing Labs" },
+  // { id: 1000, text: "Corona Care Centre" },
+
   // { id: 1010, text: "COVID-19 Domiciliary Care Center" },
   // { id: 1100, text: "First Line Treatment Centre" },
   // { id: 1200, text: "Second Line Treatment Center" },
-  { id: 1300, text: "Shifting Centre" },
   // { id: 1400, text: "Covid Management Center" },
-  { id: 1500, text: "Request Approving Center" },
-  { id: 1510, text: "Request Fulfilment Center" },
   // { id: 1600, text: "District War Room" },
 ];
 
@@ -203,6 +192,15 @@ export const PATIENT_SORT_OPTIONS: SortOption[] = [
   { isAscending: false, value: "-name" },
 ];
 
+export const DISCHARGED_PATIENT_SORT_OPTIONS: SortOption[] = [
+  { isAscending: false, value: "-created_date" },
+  { isAscending: true, value: "created_date" },
+  { isAscending: false, value: "-modified_date" },
+  { isAscending: true, value: "modified_date" },
+  { isAscending: true, value: "name" },
+  { isAscending: false, value: "-name" },
+];
+
 export const getBedTypes = ({
   kasp_enabled,
   kasp_string,
@@ -232,11 +230,60 @@ export const getBedTypes = ({
 };
 
 export const DOCTOR_SPECIALIZATION: Array<OptionsType> = [
-  { id: 1, text: "General Medicine", desc: "bg-doctors-general" },
-  { id: 2, text: "Pulmonology", desc: "bg-doctors-pulmonology" },
-  { id: 3, text: "Critical Care", desc: "bg-doctors-critical" },
-  { id: 4, text: "Paediatrics", desc: "bg-doctors-paediatrics" },
-  { id: 5, text: "Other Speciality", desc: "bg-doctors-other" },
+  { id: 1, text: "General Medicine" },
+  { id: 2, text: "Pulmonology" },
+  { id: 3, text: "Intensivist" },
+  { id: 4, text: "Pediatrician" },
+  { id: 6, text: "Anesthesiologist" },
+  { id: 7, text: "Cardiac Surgeon" },
+  { id: 8, text: "Cardiologist" },
+  { id: 9, text: "Dentist" },
+  { id: 10, text: "Dermatologist" },
+  { id: 11, text: "Diabetologist" },
+  { id: 12, text: "Emergency Medicine Physician" },
+  { id: 13, text: "Endocrinologist" },
+  { id: 14, text: "Family Physician" },
+  { id: 15, text: "Gastroenterologist" },
+  { id: 16, text: "General Surgeon" },
+  { id: 17, text: "Geriatrician" },
+  { id: 18, text: "Hematologist" },
+  { id: 29, text: "Immunologist" },
+  { id: 20, text: "Infectious Disease Specialist" },
+  { id: 21, text: "MBBS doctor" },
+  { id: 22, text: "Medical Officer" },
+  { id: 23, text: "Nephrologist" },
+  { id: 24, text: "Neuro Surgeon" },
+  { id: 25, text: "Neurologist" },
+  { id: 26, text: "Obstetrician and Gynecologist" },
+  { id: 27, text: "Oncologist" },
+  { id: 28, text: "Oncology Surgeon" },
+  { id: 29, text: "Ophthalmologist" },
+  {
+    id: 30,
+    text: "Oral and Maxillofacial Surgeon",
+  },
+  { id: 31, text: "Orthopedic" },
+  { id: 32, text: "Orthopedic Surgeon" },
+  { id: 33, text: "Otolaryngologist (ENT)" },
+  { id: 34, text: "Palliative care Physician" },
+  { id: 35, text: "Pathologist" },
+  { id: 36, text: "Pediatric Surgeon" },
+  { id: 37, text: "Physician" },
+  { id: 38, text: "Plastic Surgeon" },
+  { id: 39, text: "Psychiatrist" },
+  { id: 40, text: "Pulmonologist" },
+  { id: 41, text: "Radio technician" },
+  { id: 42, text: "Radiologist" },
+  { id: 43, text: "Rheumatologist" },
+  { id: 44, text: "Sports Medicine Specialist" },
+  { id: 45, text: "Thoraco-Vascular Surgeon" },
+  {
+    id: 46,
+    text: "Transfusion Medicine Specialist",
+  },
+  { id: 47, text: "Urologist" },
+  { id: 48, text: "Nurse" },
+  { id: 5, text: "Others" },
 ];
 
 export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
@@ -266,45 +313,13 @@ export const REVIEW_AT_CHOICES: Array<OptionsType> = [
   { id: 36 * 60, text: "36 hr" },
   { id: 2 * 24 * 60, text: "2 days" },
   { id: 3 * 24 * 60, text: "3 days" },
+  { id: 5 * 24 * 60, text: "5 days" },
   { id: 7 * 24 * 60, text: "7 days" },
+  { id: 10 * 24 * 60, text: "10 days" },
   { id: 14 * 24 * 60, text: "2 weeks" },
+  { id: 21 * 24 * 60, text: "3 weeks" },
+  { id: 25 * 24 * 60, text: "25 days" },
   { id: 30 * 24 * 60, text: "1 month" },
-];
-
-export const SYMPTOM_CHOICES = [
-  { id: 1, text: "ASYMPTOMATIC" },
-  { id: 2, text: "FEVER" },
-  { id: 3, text: "SORE THROAT" },
-  { id: 4, text: "COUGH" },
-  { id: 5, text: "BREATHLESSNESS" },
-  { id: 6, text: "MYALGIA" },
-  { id: 7, text: "ABDOMINAL DISCOMFORT" },
-  { id: 8, text: "VOMITING" },
-  { id: 11, text: "SPUTUM" },
-  { id: 12, text: "NAUSEA" },
-  { id: 13, text: "CHEST PAIN" },
-  { id: 14, text: "HEMOPTYSIS" },
-  { id: 15, text: "NASAL DISCHARGE" },
-  { id: 16, text: "BODY ACHE" },
-  { id: 17, text: "DIARRHOEA" },
-  { id: 18, text: "PAIN" },
-  { id: 19, text: "PEDAL EDEMA" },
-  { id: 20, text: "WOUND" },
-  { id: 21, text: "CONSTIPATION" },
-  { id: 22, text: "HEAD ACHE" },
-  { id: 23, text: "BLEEDING" },
-  { id: 24, text: "DIZZINESS" },
-  { id: 25, text: "CHILLS" },
-  { id: 26, text: "GENERAL WEAKNESS" },
-  { id: 27, text: "IRRITABILITY" },
-  { id: 28, text: "CONFUSION" },
-  { id: 29, text: "ABDOMINAL PAIN" },
-  { id: 30, text: "JOINT PAIN" },
-  { id: 31, text: "REDNESS OF EYES" },
-  { id: 32, text: "ANOREXIA" },
-  { id: 33, text: "NEW LOSS OF TASTE" },
-  { id: 34, text: "NEW LOSS OF SMELL" },
-  { id: 9, text: "OTHERS" },
 ];
 
 export const DISCHARGE_REASONS = [
@@ -312,7 +327,7 @@ export const DISCHARGE_REASONS = [
   { id: 2, text: "Referred" },
   { id: 3, text: "Expired" },
   { id: 4, text: "LAMA" },
-];
+] as const;
 
 export const CONSCIOUSNESS_LEVEL = [
   { id: "UNRESPONSIVE", text: "Unresponsive" },
@@ -324,8 +339,7 @@ export const CONSCIOUSNESS_LEVEL = [
     id: "ONSET_OF_AGITATION_AND_CONFUSION",
     text: "Onset of Agitation and Confusion",
   },
-  { id: "UNKNOWN", text: "Unknown" },
-];
+] as const;
 
 export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
   { id: 1, text: "CVP catheter " },
@@ -341,7 +355,7 @@ export const GENDER_TYPES = [
   { id: 1, text: "Male", icon: "M" },
   { id: 2, text: "Female", icon: "F" },
   { id: 3, text: "Transgender", icon: "TRANS" },
-];
+] as const;
 
 export const SAMPLE_TEST_RESULT = [
   { id: 1, text: "POSITIVE" },
@@ -353,10 +367,10 @@ export const SAMPLE_TEST_RESULT = [
 export const CONSULTATION_SUGGESTION = [
   { id: "HI", text: "Home Isolation", deprecated: true }, // # Deprecated. Preserving option for backward compatibility (use only for readonly operations)
   { id: "A", text: "Admission" },
-  { id: "R", text: "Refer to another Hospital" },
+  { id: "R", text: "Refer to another Hospital", editDisabled: true },
   { id: "OP", text: "OP Consultation" },
   { id: "DC", text: "Domiciliary Care" },
-  { id: "DD", text: "Declare Death" },
+  { id: "DD", text: "Declare Death", editDisabled: true },
 ] as const;
 
 export type ConsultationSuggestionValue =
@@ -385,20 +399,12 @@ export const PATIENT_CATEGORIES: {
   twClass: string;
 }[] = [
   { id: "Comfort", text: "Comfort Care", twClass: "patient-comfort" },
-  { id: "Stable", text: "Stable", twClass: "patient-stable" },
-  { id: "Moderate", text: "Abnormal", twClass: "patient-abnormal" },
+  { id: "Stable", text: "Mild", twClass: "patient-stable" },
+  { id: "Moderate", text: "Moderate", twClass: "patient-abnormal" },
   { id: "Critical", text: "Critical", twClass: "patient-critical" },
 ];
 
 export const PATIENT_FILTER_CATEGORIES = PATIENT_CATEGORIES;
-
-export const CURRENT_HEALTH_CHANGE = [
-  { id: 0, text: "NO DATA", desc: "" },
-  { id: 3, text: "STATUS QUO", desc: "No Change" },
-  { id: 4, text: "BETTER", desc: "Better" },
-  { id: 2, text: "WORSE", desc: "Worse" },
-  { id: 1, text: "REQUIRES VENTILATOR", desc: "Requires Ventilator" },
-];
 
 export const SAMPLE_TEST_STATUS = [
   { id: 1, text: "REQUEST_SUBMITTED", desc: "Request Submitted" },
@@ -431,13 +437,6 @@ export const SAMPLE_FLOW_RULES = {
   RECEIVED_AND_FORWARED: ["RECEIVED_AT_LAB", "COMPLETED"],
   RECEIVED_AT_LAB: ["COMPLETED"],
 };
-
-export const DISEASE_STATUS = [
-  "POSITIVE",
-  "SUSPECTED",
-  "NEGATIVE",
-  "RECOVERED",
-];
 
 export const TEST_TYPE = [
   "UNK",
@@ -547,77 +546,73 @@ export const DESIGNATION_HEALTH_CARE_WORKER = [
   "OTHERS",
 ];
 
-export const NOTIFICATION_EVENTS = [
-  { id: "MESSAGE", text: "Notice", icon: "fa-regular fa-message" },
+type NotificationEvent = {
+  id: string;
+  text: string;
+  icon: IconName;
+};
+
+export const NOTIFICATION_EVENTS: NotificationEvent[] = [
+  { id: "MESSAGE", text: "Notice", icon: "l-comment-alt-message" },
   {
     id: "PATIENT_CREATED",
     text: "Patient Created",
-    icon: "fa-solid fa-user-plus",
+    icon: "l-user-plus",
   },
   {
     id: "PATIENT_UPDATED",
     text: "Patient Updated",
-    icon: "fa-solid fa-user-pen",
-  },
-  {
-    id: "PATIENT_DELETED",
-    text: "Patient Deleted",
-    icon: "fa-solid fa-user-minus",
+    icon: "l-edit",
   },
   {
     id: "PATIENT_CONSULTATION_CREATED",
     text: "Patient Consultation Created",
-    icon: "fa-solid fa-heart-circle-check",
+    icon: "l-heart",
   },
   {
     id: "PATIENT_CONSULTATION_UPDATED",
     text: "Patient Consultation Updated",
-    icon: "fa-solid fa-heart-circle-plus",
-  },
-  {
-    id: "PATIENT_CONSULTATION_DELETED",
-    text: "Patient Consultation Deleted",
-    icon: "fa-solid fa-heart-circle-minus",
+    icon: "l-heart-medical",
   },
   {
     id: "INVESTIGATION_SESSION_CREATED",
     text: "Investigation Session Created",
-    icon: "fa-solid fa-magnifying-glass",
+    icon: "l-search",
   },
   {
     id: "INVESTIGATION_UPDATED",
     text: "Investigation Updated",
-    icon: "fa-solid fa-magnifying-glass-plus",
+    icon: "l-search-plus",
   },
   {
     id: "PATIENT_FILE_UPLOAD_CREATED",
     text: "Patient File Upload Created",
-    icon: "fa-solid fa-file-medical",
+    icon: "l-file-medical",
   },
   {
     id: "CONSULTATION_FILE_UPLOAD_CREATED",
     text: "Consultation File Upload Created",
-    icon: "fa-solid fa-file-waveform",
+    icon: "l-file-upload",
   },
   {
     id: "PATIENT_CONSULTATION_UPDATE_CREATED",
     text: "Patient Consultation Update Created",
-    icon: "fa-solid fa-file-circle-check",
+    icon: "l-heart",
   },
   {
     id: "PATIENT_CONSULTATION_UPDATE_UPDATED",
     text: "Patient Consultation Update Updated",
-    icon: "fa-solid fa-file-circle-plus",
+    icon: "l-heart-medical",
   },
   {
     id: "SHIFTING_UPDATED",
     text: "Shifting Updated",
-    icon: "fa-solid fa-truck-medical",
+    icon: "l-ambulance",
   },
   {
     id: "PATIENT_NOTE_ADDED",
     text: "Patient Note Added",
-    icon: "fa-solid fa-message",
+    icon: "l-notes",
   },
 ];
 
@@ -693,27 +688,27 @@ export const MOTOR_RESPONSE_SCALE = [
   { value: 2, text: "Abnormal Extension(decerebrate)" },
   { value: 1, text: "No Response" },
 ];
-export const CONSULTATION_TABS: Array<OptionsType> = [
-  { id: 1, text: "UPDATES", desc: "Updates" },
-  { id: 13, text: "FEED", desc: "Feed" },
-  { id: 2, text: "SUMMARY", desc: "Summary" },
-  { id: 3, text: "MEDICINES", desc: "Medicines" },
-  { id: 4, text: "FILES", desc: "Files" },
-  { id: 5, text: "INVESTIGATIONS", desc: "Investigations" },
-  { id: 6, text: "ABG", desc: "ABG" },
-  { id: 7, text: "NURSING", desc: "Nursing" },
-  { id: 8, text: "NEUROLOGICAL_MONITORING", desc: "Neurological Monitoring" },
-  { id: 9, text: "VENTILATOR", desc: "Respiratory Support" },
-  { id: 10, text: "NUTRITION", desc: "Nutrition" },
-  { id: 11, text: "PRESSURE_SORE", desc: "Pressure Sore" },
-  { id: 12, text: "DIALYSIS", desc: "Dialysis" },
+export const CONSULTATION_TABS = [
+  { text: "UPDATES", desc: "Overview" },
+  { text: "FEED", desc: "Feed" },
+  { text: "SUMMARY", desc: "Vitals" },
+  { text: "ABG", desc: "ABG" },
+  { text: "MEDICINES", desc: "Medicines" },
+  { text: "FILES", desc: "Files" },
+  { text: "INVESTIGATIONS", desc: "Investigations" },
+  { text: "NEUROLOGICAL_MONITORING", desc: "Neuro" },
+  { text: "VENTILATOR", desc: "Ventilation" },
+  { text: "NUTRITION", desc: "Nutrition" },
+  { text: "PRESSURE_SORE", desc: "Pressure Sore" },
+  { text: "NURSING", desc: "Nursing" },
+  { text: "DIALYSIS", desc: "Dialysis" },
+  { text: "ABDM", desc: "ABDM Records" },
 ];
 
-export const RHYTHM_CHOICES: Array<OptionsType> = [
-  { id: 0, text: "UNKNOWN", desc: "Unknown" },
+export const RHYTHM_CHOICES = [
   { id: 5, text: "REGULAR", desc: "Regular" },
   { id: 10, text: "IRREGULAR", desc: "Irregular" },
-];
+] as const;
 
 export const LOCATION_BED_TYPES: Array<any> = [
   { id: "ISOLATION", name: "Isolation" },
@@ -739,11 +734,11 @@ export const CAMERA_TYPE = [
 
 export const GENDER: { [key: number]: string } = GENDER_TYPES.reduce(
   (acc, curr) => ({ ...acc, [curr.id]: curr.text }),
-  {}
+  {},
 );
 
 export type CameraPTZ = {
-  icon?: string;
+  icon?: IconName;
   label: string;
   action: string;
   loadingLabel?: string;
@@ -895,23 +890,23 @@ export const BLACKLISTED_PATHS: RegExp[] = [
   /\/facility\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/patient\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/consultation\/([A-Za-z0-9]+(-[A-Za-z0-9]+)+)\/dialysis+/i,
 ];
 
-export const XLSXAssetImportSchema = {
-  Name: { prop: "name", type: String },
+export const AssetImportSchema: SchemaType = {
+  Name: { prop: "name", type: "string" },
   Type: {
     prop: "asset_type",
-    type: String,
+    type: "string",
     oneOf: ["INTERNAL", "EXTERNAL"],
     required: true,
   },
   Class: {
     prop: "asset_class",
-    type: String,
+    type: "string",
     oneOf: ["HL7MONITOR", "ONVIF", "VENTILATOR", ""],
   },
-  Description: { prop: "description", type: String },
+  Description: { prop: "description", type: "string" },
   "Working Status": {
     prop: "is_working",
-    type: Boolean,
+    type: "boolean",
     parse: (status: string) => {
       if (status === "WORKING") {
         return true;
@@ -923,18 +918,15 @@ export const XLSXAssetImportSchema = {
     },
     required: true,
   },
-  "Not Working Reason": {
-    prop: "not_working_reason",
-    type: String,
-  },
-  "Serial Number": { prop: "serial_number", type: String },
-  "QR Code ID": { prop: "qr_code_id", type: String },
-  Manufacturer: { prop: "manufacturer", type: String },
-  "Vendor Name": { prop: "vendor_name", type: String },
-  "Support Name": { prop: "support_name", type: String },
+  "Not Working Reason": { prop: "not_working_reason", type: "string" },
+  "Serial Number": { prop: "serial_number", type: "string" },
+  "QR Code ID": { prop: "qr_code_id", type: "string" },
+  Manufacturer: { prop: "manufacturer", type: "string" },
+  "Vendor Name": { prop: "vendor_name", type: "string" },
+  "Support Name": { prop: "support_name", type: "string" },
   "Support Email": {
     prop: "support_email",
-    type: String,
+    type: "string",
     parse: (email: string) => {
       if (!email) return null;
       const isValid = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
@@ -948,7 +940,7 @@ export const XLSXAssetImportSchema = {
   },
   "Support Phone Number": {
     prop: "support_phone",
-    type: String,
+    type: "string",
     parse: (phone: number | string) => {
       phone = String(phone);
       if (phone.length === 10 && !phone.startsWith("1800")) {
@@ -973,64 +965,162 @@ export const XLSXAssetImportSchema = {
   },
   "Warranty End Date": {
     prop: "warranty_amc_end_of_validity",
-    type: String,
+    type: "string",
     parse: (date: string) => {
       if (!date) return null;
-      const parts = date.split("-");
-      const reformattedDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
-      const parsed = new Date(reformattedDateStr);
-
-      if (String(parsed) === "Invalid Date") {
-        throw new Error("Invalid Warranty End Date:" + date);
+      //handles both "YYYY-MM-DD" and long date format eg : Wed Oct 14 2020 05:30:00 GMT+0530 (India Standard Time)
+      if (isNaN(Date.parse(date))) {
+        const parts = date.split("-");
+        if (parts.length !== 3) {
+          throw new Error("Invalid Date Format: " + date);
+        }
+        const reformattedDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+        const parsed = new Date(reformattedDateStr);
+        if (String(parsed) === "Invalid Date") {
+          throw new Error("Invalid Date: " + date);
+        }
+        return dateQueryString(parsed);
+      } else {
+        const parsed = new Date(date);
+        if (String(parsed) === "Invalid Date") {
+          throw new Error("Invalid Date: " + date);
+        }
+        return dateQueryString(parsed);
       }
-
-      return dateQueryString(parsed);
     },
   },
   "Last Service Date": {
     prop: "last_serviced_on",
-    type: String,
+    type: "string",
     parse: (date: string) => {
       if (!date) return null;
-      const parts = date.split("-");
-      const reformattedDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
-      const parsed = new Date(reformattedDateStr);
+      if (isNaN(Date.parse(date))) {
+        const parts = date.split("-");
+        if (parts.length !== 3) {
+          throw new Error("Invalid Date Format: " + date);
+        }
+        const reformattedDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+        const parsed = new Date(reformattedDateStr);
+        if (String(parsed) === "Invalid Date") {
+          throw new Error("Invalid Date: " + date);
+        }
+        return dateQueryString(parsed);
+      } else {
+        const parsed = new Date(date);
+        if (String(parsed) === "Invalid Date") {
+          throw new Error("Invalid Date: " + date);
+        }
+        return dateQueryString(parsed);
+      }
+    },
+  },
+  Notes: { prop: "note", type: "string" },
+  "Config - IP Address": {
+    parent: "meta",
+    prop: "local_ip_address",
+    type: "string",
+    parse: (ip: string) => {
+      if (!ip) return null;
+      const isValid =
+        /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
+          ip,
+        );
 
-      if (String(parsed) === "Invalid Date") {
-        throw new Error("Invalid Last Service Date:" + date);
+      if (!isValid) {
+        throw new Error("Invalid Config IP Address: " + ip);
       }
 
-      return dateQueryString(parsed);
+      return ip;
     },
   },
-  Notes: { prop: "notes", type: String },
-  META: {
-    prop: "meta",
-    type: {
-      "Config - IP Address": {
-        prop: "local_ip_address",
-        type: String,
-        parse: (ip: string) => {
-          if (!ip) return null;
-          const isValid =
-            /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
-              ip
-            );
-
-          if (!isValid) {
-            throw new Error("Invalid Config IP Address: " + ip);
-          }
-
-          return ip;
-        },
-      },
-      "Config - Camera Access Key": {
-        prop: "camera_access_key",
-        type: String,
-      },
-    },
+  "Config: Camera Access Key": {
+    parent: "meta",
+    prop: "camera_access_key",
+    type: "string",
   },
 };
+
+export const ExternalResultImportSchema: SchemaType = {
+  District: { prop: "district", type: "any" },
+  "SRF ID": { prop: "srf_id", type: "string" },
+  Name: { prop: "name", type: "string" },
+  Age: { prop: "age", type: "number" },
+  "Age in": { prop: "age_in", type: "string" },
+  Gender: { prop: "gender", type: "string" },
+  "Mobile Number": { prop: "mobile_number", type: "any" },
+  Address: { prop: "address", type: "string" },
+  Ward: { prop: "ward", type: "number" },
+  "Local Body": { prop: "local_body", type: "string" },
+  "Local Body Type": { prop: "local_body_type", type: "string" },
+  Source: { prop: "source", type: "string" },
+  "Sample Collection Date": {
+    prop: "sample_collection_date",
+    type: "string",
+    parse: (date: string) => {
+      if (!date) return null;
+      if (isNaN(Date.parse(date))) {
+        const parsed = new Date(date);
+        if (String(parsed) === "Invalid Date") {
+          throw new Error("Invalid Date: " + date);
+        }
+        return dateQueryString(parsed);
+      } else {
+        const parsed = new Date(date);
+        if (String(parsed) === "Invalid Date") {
+          throw new Error("Invalid Date: " + date);
+        }
+        return dateQueryString(parsed);
+      }
+    },
+  },
+  "Result Date": {
+    prop: "result_date",
+    type: "string",
+    parse: (date: string) => {
+      if (!date) return null;
+      if (isNaN(Date.parse(date))) {
+        const parsed = new Date(date);
+        if (String(parsed) === "Invalid Date") {
+          throw new Error("Invalid Date: " + date);
+        }
+        return dateQueryString(parsed);
+      } else {
+        const parsed = new Date(date);
+        if (String(parsed) === "Invalid Date") {
+          throw new Error("Invalid Date: " + date);
+        }
+        return dateQueryString(parsed);
+      }
+    },
+  },
+  "Test Type": { prop: "test_type", type: "string" },
+  "Lab Name": { prop: "lab_name", type: "string" },
+  "Sample Type": { prop: "sample_type", type: "string" },
+  "Patient Status": { prop: "patient_status", type: "string" },
+  "Is Repeat": { prop: "is_repeat", type: "string" },
+  "Patient Category": { prop: "patient_category", type: "string" },
+  Result: { prop: "result", type: "string" },
+};
+
+// ABDM
+export const ABDM_CONSENT_PURPOSE = [
+  { value: "CAREMGT", label: "Care Management" },
+  { value: "BTG", label: "Break The Glass" },
+  { value: "PUBHLTH", label: "Public Health" },
+  { value: "HPAYMT", label: "Healthcare Payment" },
+  { value: "DSRCH", label: "Disease Specific Healthcare Research" },
+  { value: "PATRQT", label: "Self Requested" },
+] as { value: ConsentPurpose; label: string }[];
+
+export const ABDM_HI_TYPE = [
+  { value: "Prescription", label: "Prescription" },
+  { value: "DiagnosticReport", label: "Diagnostic Report" },
+  { value: "OPConsultation", label: "Op Consultation" },
+  { value: "DischargeSummary", label: "Discharge Summary" },
+  { value: "ImmunizationRecord", label: "Immunization Record" },
+  { value: "HealthDocumentRecord", label: "Record Artifact" },
+  { value: "WellnessRecord", label: "Wellness Record" },
+] as { value: ConsentHIType; label: string }[];
 
 export const USER_TYPES_MAP = {
   Pharmacist: "Pharmacist",
@@ -1172,4 +1262,130 @@ export const IN_LANDLINE_AREA_CODES = [
   "870",
   "891",
   "4822",
+];
+
+export const CONSENT_TYPE_CHOICES = [
+  { id: 1, text: "Consent for admission" },
+  { id: 2, text: "Patient Code Status" },
+  { id: 3, text: "Consent for procedure" },
+  { id: 4, text: "High risk consent" },
+  { id: 5, text: "Others" },
+];
+
+export const CONSENT_PATIENT_CODE_STATUS_CHOICES = [
+  { id: 1, text: "Do Not Hospitalise (DNH)" },
+  { id: 2, text: "Do Not Resuscitate (DNR)" },
+  { id: 3, text: "Comfort Care Only" },
+  { id: 4, text: "Active treatment" },
+];
+export const OCCUPATION_TYPES = [
+  {
+    id: 27,
+    text: "Aircraft Pilot or Flight Engineer",
+    value: "PILOT_FLIGHT",
+  },
+  { id: 5, text: "Animal Handler", value: "ANIMAL_HANDLER" },
+  {
+    id: 9,
+    text: "Business or Finance related Occupations",
+    value: "BUSINESS_RELATED",
+  },
+  { id: 2, text: "Businessman", value: "BUSINESSMAN" },
+  { id: 14, text: "Chef or Head Cook", value: "CHEF" },
+  {
+    id: 24,
+    text: "Construction and Extraction Worker",
+    value: "CONSTRUCTION_EXTRACTION",
+  },
+  { id: 17, text: "Custodial Occupations", value: "CUSTODIAL" },
+  {
+    id: 18,
+    text: "Customer Service Occupations",
+    value: "CUSTOMER_SERVICE",
+  },
+  { id: 10, text: "Engineer", value: "ENGINEER" },
+  {
+    id: 25,
+    text: "Farming, Fishing and Forestry",
+    value: "AGRI_NATURAL",
+  },
+  {
+    id: 4,
+    text: "Healthcare Lab Worker",
+    value: "HEALTH_CARE_LAB_WORKER",
+  },
+  {
+    id: 7,
+    text: "Healthcare Practitioner",
+    value: "HEALTHCARE_PRACTITIONER",
+  },
+  { id: 3, text: "Healthcare Worker", value: "HEALTH_CARE_WORKER" },
+  { id: 30, text: "Homemaker", value: "HOMEMAKER" },
+  {
+    id: 16,
+    text: "Hospitality Service Occupations",
+    value: "HOSPITALITY",
+  },
+  {
+    id: 21,
+    text: "Insurance Sales Agent",
+    value: "INSURANCE_SALES_AGENT",
+  },
+  { id: 29, text: "Military", value: "MILITARY" },
+  {
+    id: 13,
+    text: "Office and Administrative Support Occupations",
+    value: "OFFICE_ADMINISTRATIVE",
+  },
+  {
+    id: 12,
+    text: "Other Professional Occupations",
+    value: "OTHER_PROFESSIONAL_OCCUPATIONS",
+  },
+  { id: 8, text: "Paramedics", value: "PARADEMICS" },
+  {
+    id: 26,
+    text: "Production Occupations",
+    value: "PRODUCTION_OCCUPATION",
+  },
+  {
+    id: 15,
+    text: "Protective Service Occupations",
+    value: "PROTECTIVE_SERVICE",
+  },
+  { id: 23, text: "Real Estate Sales Agent", value: "REAL_ESTATE" },
+  { id: 20, text: "Retail Sales Worker", value: "RETAIL_SALES_WORKER" },
+  {
+    id: 22,
+    text: "Sales Representative",
+    value: "SALES_REPRESENTATIVE",
+  },
+  { id: 19, text: "Sales Supervisor", value: "SALES_SUPERVISOR" },
+  { id: 1, text: "Student", value: "STUDENT" },
+  { id: 11, text: "Teacher", value: "TEACHER" },
+  { id: 28, text: "Vehicle Driver", value: "VEHICLE_DRIVER" },
+  { id: 6, text: "Others", value: "OTHERS" },
+  { id: 32, text: "Not Applicable", value: "NOT_APPLICABLE" },
+];
+
+export const PATIENT_NOTES_THREADS = {
+  Doctors: 10,
+  Nurses: 20,
+} as const;
+
+export const RATION_CARD_CATEGORY = ["BPL", "APL", "NO_CARD"] as const;
+
+export const DEFAULT_ALLOWED_EXTENSIONS = [
+  "image/*",
+  "video/*",
+  "audio/*",
+  "text/plain",
+  "text/csv",
+  "application/rtf",
+  "application/msword",
+  "application/vnd.oasis.opendocument.text",
+  "application/pdf",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.oasis.opendocument.spreadsheet,application/pdf",
 ];

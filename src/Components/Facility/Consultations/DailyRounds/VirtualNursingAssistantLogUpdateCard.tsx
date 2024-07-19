@@ -33,19 +33,10 @@ interface Props {
 
 const extractVirtualNursingAssistantFields = (round?: DailyRoundsModel) => {
   if (!round) return;
-  const {
-    temperature,
-    temperature_measured_at,
-    bp,
-    resp,
-    spo2,
-    ventilator_spo2,
-    pulse,
-  } = round;
+  const { temperature, bp, resp, spo2, ventilator_spo2, pulse } = round;
 
   return {
     temperature,
-    temperature_measured_at,
     bp,
     resp,
     spo2,
@@ -59,7 +50,7 @@ const VirtualNursingAssistantLogUpdateCard = (props: Props) => {
   const diff: Partial<ReturnType<typeof extractVirtualNursingAssistantFields>> =
     getDeepDiff(
       extractVirtualNursingAssistantFields(props.round),
-      extractVirtualNursingAssistantFields(props.previousRound)
+      extractVirtualNursingAssistantFields(props.previousRound),
     );
 
   const diffKeys = Object.keys(diff);
@@ -76,7 +67,7 @@ const VirtualNursingAssistantLogUpdateCard = (props: Props) => {
             />
           ))
         ) : (
-          <span className="text-sm italic text-gray-600">
+          <span className="text-sm italic text-secondary-600">
             {t("no_log_update_delta")}
           </span>
         )}

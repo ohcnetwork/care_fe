@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react";
-import axios from "axios";
 
 export interface IAsset {
   middlewareHostname: string;
@@ -45,9 +44,18 @@ const stopStream =
   (payload: { id: string }, options: IOptions) => {
     const { id } = payload;
     ws?.close();
-    axios
-      .post(`https://${middlewareHostname}/stop`, {
-        id,
+    fetch(`https://${middlewareHostname}/stop`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id }),
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("network response was not ok");
+        }
+        return res.json();
       })
       .then((res) => options?.onSuccess && options.onSuccess(res))
       .catch((err) => options.onError && options.onError(err));
@@ -76,7 +84,7 @@ const Utf8ArrayToStr = (array: string | any[] | Uint8Array) => {
         char2 = array[i++];
         char3 = array[i++];
         out += String.fromCharCode(
-          ((c & 0x0f) << 12) | ((char2 & 0x3f) << 6) | ((char3 & 0x3f) << 0)
+          ((c & 0x0f) << 12) | ((char2 & 0x3f) << 6) | ((char3 & 0x3f) << 0),
         );
         break;
     }
@@ -98,6 +106,11 @@ export const useMSEMediaPlayer = ({
     if (!mseSourceBuffer.updating) {
       if (mseQueue.length > 0) {
         const packet = mseQueue.shift();
+        // Check if SourceBuffer has been removed before appending buffer
+        if (mseSourceBuffer.removed) {
+          console.error("Attempted to append to a removed SourceBuffer.");
+          return;
+        }
         mseSourceBuffer.appendBuffer(packet);
       } else {
         mseStreamingStarted = false;
@@ -114,6 +127,11 @@ export const useMSEMediaPlayer = ({
 
   const readPacket = (packet: any) => {
     if (!mseStreamingStarted) {
+      // Check if SourceBuffer has been removed before appending buffer
+      if (mseSourceBuffer.removed) {
+        console.error("Attempted to append to a removed SourceBuffer.");
+        return;
+      }
       mseSourceBuffer.appendBuffer(packet);
       mseStreamingStarted = true;
       return;
@@ -141,7 +159,6 @@ export const useMSEMediaPlayer = ({
             const ws = wsRef.current;
             ws.binaryType = "arraybuffer";
             ws.onopen = function (_event) {
-              console.log("Connected to ws");
               onSuccess && onSuccess(undefined);
             };
             ws.onmessage = function (event) {
@@ -155,7 +172,7 @@ export const useMSEMediaPlayer = ({
                   mimeCodec = Utf8ArrayToStr(decoded_arr);
                 }
                 mseSourceBuffer = mse.addSourceBuffer(
-                  `video/mp4; codecs="${mimeCodec}"`
+                  `video/mp4; codecs="${mimeCodec}"`,
                 );
                 mseSourceBuffer.mode = "segments";
                 if (mseQueue.length > 0 && !mseSourceBuffer.updating) {
@@ -169,7 +186,7 @@ export const useMSEMediaPlayer = ({
               onError && onError(event);
             };
           },
-          false
+          false,
         );
       }
     } catch (e) {

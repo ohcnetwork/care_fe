@@ -75,7 +75,7 @@ const requiredFields: any = {
 
 const initError = Object.assign(
   {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+  ...Object.keys(initForm).map((k) => ({ [k]: "" })),
 );
 
 const initialState = {
@@ -147,7 +147,7 @@ export default function ResourceCreate(props: resourceProps) {
     return !isInvalidForm;
   };
 
-  const handleChange = (e: FieldChangeEvent<string>) => {
+  const handleChange = (e: FieldChangeEvent<string | null>) => {
     const form = { ...state.form };
     const { name, value } = e;
     form[name] = value;
@@ -186,7 +186,7 @@ export default function ResourceCreate(props: resourceProps) {
         refering_facility_contact_name:
           state.form.refering_facility_contact_name,
         refering_facility_contact_number: parsePhoneNumber(
-          state.form.refering_facility_contact_number
+          state.form.refering_facility_contact_number,
         ),
         requested_quantity: state.form.requested_quantity || 0,
       };

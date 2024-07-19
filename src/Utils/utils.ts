@@ -1,11 +1,7 @@
-import {
-  AREACODES,
-  IN_LANDLINE_AREA_CODES,
-  USER_TYPES,
-} from "../Common/constants";
+import { AREACODES, IN_LANDLINE_AREA_CODES } from "../Common/constants";
 import phoneCodesJson from "../Common/static/countryPhoneAndFlags.json";
 import dayjs from "./dayjs";
-import { UserModel } from "../Components/Users/models";
+import { PatientModel } from "../Components/Patient/models";
 
 interface ApacheParams {
   age: number;
@@ -164,59 +160,9 @@ export const classNames = (...classes: (string | boolean | undefined)[]) => {
   return classes.filter(Boolean).join(" ");
 };
 
-interface ISchema {
-  [key: string]: {
-    prop: string;
-    oneOf?: string[];
-    parse?: (value: any) => any;
-    type?: any;
-    required?: boolean;
-  };
-}
-
-export const parseCsvFile = async (
-  file: File,
-  schema: ISchema | undefined = undefined
-) => {
-  const parseWithSchema: any = (schema: any, data: any) =>
-    Object.keys(schema).reduce((acc, key) => {
-      if (schema[key]?.oneOf && !schema[key].oneOf.includes(data[key]))
-        throw new Error(`${key} should be one of the ${schema[key].oneOf}`);
-
-      const value =
-        typeof schema[key]?.type === "object"
-          ? parseWithSchema(schema[key]?.type, data)
-          : schema[key]?.parse?.(data[key]) ?? data[key];
-
-      if (schema[key]?.required && (value === undefined || value === null))
-        throw new Error(`${key} is required`);
-
-      return value === undefined || value === null
-        ? acc
-        : {
-            ...acc,
-            [schema[key]?.prop]: value,
-          };
-    }, {});
-
-  const csvData = (await file.text())
-    .trim()
-    .split("\n")
-    .map((row: string) => row.split(","));
-
-  const parsed = csvData
-    .map((row: string[]) =>
-      row.reduce((acc, val, i) => ({ ...acc, [csvData[0][i]]: val }), {})
-    )
-    .splice(1)
-    .map((csvMap: any) => (schema ? parseWithSchema(schema, csvMap) : csvMap));
-
-  return parsed;
-};
-
 export const getPincodeDetails = async (pincode: string, apiKey: string) => {
   const response = await fetch(
-    `https://api.data.gov.in/resource/6176ee09-3d56-4a3b-8115-21841576b2f6?api-key=${apiKey}&format=json&filters[pincode]=${pincode}&limit=1`
+    `https://api.data.gov.in/resource/6176ee09-3d56-4a3b-8115-21841576b2f6?api-key=${apiKey}&format=json&filters[pincode]=${pincode}&limit=1`,
   );
   const data = await response.json();
   return data.records[0];
@@ -288,7 +234,7 @@ export const formatPhoneNumber = (phoneNumber: string) => {
       ? phoneNumber.slice(4)
       : phoneNumber.slice(3);
     const landline_code = IN_LANDLINE_AREA_CODES.find((code) =>
-      phoneNumber.startsWith(code)
+      phoneNumber.startsWith(code),
     );
     if (landline_code === undefined)
       return "+91" + " " + phoneNumber.slice(0, 5) + " " + phoneNumber.slice(5);
@@ -300,7 +246,7 @@ export const formatPhoneNumber = (phoneNumber: string) => {
       " " +
       phoneNumber.slice(
         landline_code.length,
-        subscriber_no_length / 2 + landline_code.length
+        subscriber_no_length / 2 + landline_code.length,
       ) +
       " " +
       phoneNumber.slice(subscriber_no_length / 2 + landline_code.length)
@@ -330,7 +276,7 @@ export const getCountryCode = (phoneNumber: string) => {
     for (let i = 0; i < phoneCodesArr.length; i++) {
       if (
         phoneNumber.startsWith(
-          phoneCodes[phoneCodesArr[i]].code.replaceAll("-", "")
+          phoneCodes[phoneCodesArr[i]].code.replaceAll("-", ""),
         )
       ) {
         allMatchedCountries.push({
@@ -342,10 +288,10 @@ export const getCountryCode = (phoneNumber: string) => {
     // returns the country which is longest in case there are multiple matches
     if (allMatchedCountries.length === 0) return undefined;
     const matchedCountry = allMatchedCountries.reduce((max, country) =>
-      max.code > country.code ? max : country
+      max.code > country.code ? max : country,
     );
     const sameCodeCountries = allMatchedCountries.filter(
-      (country) => country.code === matchedCountry.code
+      (country) => country.code === matchedCountry.code,
     );
     if (matchedCountry === undefined) return undefined;
     // some countries share same country code but differ in area codes
@@ -354,40 +300,40 @@ export const getCountryCode = (phoneNumber: string) => {
       const areaCode = phoneNumber.substring(1, 4);
       return (
         sameCodeCountries.find((country) =>
-          AREACODES[country.name]?.includes(areaCode)
+          AREACODES[country.name]?.includes(areaCode),
         )?.name ?? "US"
       );
     } else if (matchedCountry.code === "262") {
       const areaCode = phoneNumber.substring(3, 6);
       return sameCodeCountries.find((country) =>
-        AREACODES[country.name]?.includes(areaCode)
+        AREACODES[country.name]?.includes(areaCode),
       )?.name;
     } else if (matchedCountry.code === "61") {
       const areaCode = phoneNumber.substring(2, 7);
       return (
         sameCodeCountries.find((country) =>
-          AREACODES[country.name]?.includes(areaCode)
+          AREACODES[country.name]?.includes(areaCode),
         )?.name ?? "AU"
       );
     } else if (matchedCountry.code === "599") {
       const areaCode = phoneNumber.substring(3, 4);
       return (
         sameCodeCountries.find((country) =>
-          AREACODES[country.name]?.includes(areaCode)
+          AREACODES[country.name]?.includes(areaCode),
         )?.name ?? "CW"
       );
     } else if (matchedCountry.code == "7") {
       const areaCode = phoneNumber.substring(1, 2);
       return (
         sameCodeCountries.find((country) =>
-          AREACODES[country.name]?.includes(areaCode)
+          AREACODES[country.name]?.includes(areaCode),
         )?.name ?? "RU"
       );
     } else if (matchedCountry.code == "47") {
       const areaCode = phoneNumber.substring(2, 4);
       return (
         sameCodeCountries.find((country) =>
-          AREACODES[country.name]?.includes(areaCode)
+          AREACODES[country.name]?.includes(areaCode),
         )?.name ?? "NO"
       );
     }
@@ -396,31 +342,60 @@ export const getCountryCode = (phoneNumber: string) => {
   return undefined;
 };
 
-export const formatAge = (
-  age?: number,
-  date_of_birth?: string,
-  abbreviated = false
-) => {
-  if (!age && !date_of_birth) return undefined;
-  if (!age) age = 0;
+const getRelativeDateSuffix = (abbreviated: boolean) => {
+  return {
+    day: abbreviated ? "d" : "days",
+    month: abbreviated ? "mo" : "months",
+    year: abbreviated ? "yr" : "years",
+  };
+};
 
-  const daySuffix = abbreviated ? "d" : "days";
-  const monthSuffix = abbreviated ? "mo" : "months";
-  const yearSuffix = abbreviated ? "yr" : "years";
+export const patientAgeInYears = (obj: PatientModel) => {
+  const start = dayjs(
+    obj.date_of_birth
+      ? new Date(obj.date_of_birth)
+      : new Date(obj.year_of_birth!, 0, 1),
+  );
 
-  if (age < 1 && date_of_birth) {
-    const dob = new Date(date_of_birth);
-    const today = new Date();
-    const diffTime = Math.abs(today.getTime() - dob.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    const months = Math.floor(diffDays / 30);
-    const days = diffDays % 30;
-    if (months === 0) {
-      return `${days} ${daySuffix}`;
-    }
-    return `${months} ${monthSuffix} ${days} ${daySuffix}`;
+  const end = dayjs(
+    obj.death_datetime ? new Date(obj.death_datetime) : new Date(),
+  );
+
+  return end.diff(start, "years");
+};
+
+export const formatPatientAge = (obj: PatientModel, abbreviated = false) => {
+  const suffixes = getRelativeDateSuffix(abbreviated);
+
+  const start = dayjs(
+    obj.date_of_birth
+      ? new Date(obj.date_of_birth)
+      : new Date(obj.year_of_birth!, 0, 1),
+  );
+
+  const end = dayjs(
+    obj.death_datetime ? new Date(obj.death_datetime) : new Date(),
+  );
+
+  const years = end.diff(start, "years");
+  if (years) {
+    return `${years}${suffixes.year}`;
   }
-  return `${age} ${yearSuffix}`;
+
+  // Skip representing as no. of months/days if we don't know the date of birth
+  // since it would anyways be inaccurate.
+  if (!obj.date_of_birth) {
+    return abbreviated
+      ? `Born ${obj.year_of_birth}`
+      : `Born on ${obj.year_of_birth}`;
+  }
+
+  const month = end.diff(start, "month");
+  const day = end.diff(start.add(month, "month"), "day");
+  if (month) {
+    return `${month}${suffixes.month} ${day}${suffixes.day}`;
+  }
+  return `${day}${suffixes.day}`;
 };
 
 export const scrollTo = (id: string | boolean) => {
@@ -428,32 +403,17 @@ export const scrollTo = (id: string | boolean) => {
   element?.scrollIntoView({ behavior: "smooth", block: "center" });
 };
 
-export const showUserDelete = (authUser: UserModel, targetUser: UserModel) => {
-  // Auth user should be higher in hierarchy than target user
-  if (
-    USER_TYPES.indexOf(authUser.user_type) <=
-    USER_TYPES.indexOf(targetUser.user_type)
-  )
-    return false;
-
-  if (
-    authUser.user_type === "StateAdmin" &&
-    targetUser.state_object?.id === authUser.state
-  )
-    return true;
-
-  if (
-    authUser.user_type === "DistrictAdmin" &&
-    targetUser.district_object?.id === authUser.district
-  )
-    return true;
-
-  return false;
-};
-
 export const compareBy = <T extends object>(key: keyof T) => {
   return (a: T, b: T) => {
     return a[key] < b[key] ? -1 : a[key] > b[key] ? 1 : 0;
+  };
+};
+
+export const compareByDateString = <T extends object>(key: keyof T) => {
+  return (a: T, b: T) => {
+    const aV = new Date(a[key] as string);
+    const bV = new Date(b[key] as string);
+    return aV < bV ? -1 : aV > bV ? 1 : 0;
   };
 };
 
@@ -469,13 +429,47 @@ export const isValidUrl = (url?: string) => {
 export const mergeQueryOptions = <T extends object>(
   selected: T[],
   queryOptions: T[],
-  compareBy: (obj: T) => T[keyof T]
+  compareBy: (obj: T) => T[keyof T],
 ) => {
   if (!selected.length) return queryOptions;
   return [
     ...selected,
     ...queryOptions.filter(
-      (option) => !selected.find((s) => compareBy(s) === compareBy(option))
+      (option) => !selected.find((s) => compareBy(s) === compareBy(option)),
     ),
   ];
+};
+
+export const properRoundOf = (value: number) => {
+  if (value % 1 === 0) {
+    return value.toFixed();
+  }
+  return value.toFixed(2);
+};
+
+export const isPostPartum = (data_of_delivery?: string) => {
+  return dayjs().diff(data_of_delivery, "week") <= 6;
+};
+
+export const isAntenatal = (menstruation_start_date?: string) => {
+  return dayjs().diff(menstruation_start_date, "month") <= 9;
+};
+
+/**
+ * A utility method to format an array of string to human readable format.
+ *
+ * @param values Array of strings to be made human readable.
+ * @returns Human readable version of the list of strings
+ */
+export const humanizeStrings = (strings: readonly string[], empty = "") => {
+  if (strings.length === 0) {
+    return empty;
+  }
+
+  if (strings.length === 1) {
+    return strings[0];
+  }
+
+  const [last, ...items] = [...strings].reverse();
+  return `${items.reverse().join(", ")} and ${last}`;
 };

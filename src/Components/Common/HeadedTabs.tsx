@@ -20,11 +20,11 @@ export default function HeadedTabs(props: headedTabsProps) {
         <select
           id="tabs"
           name="tabs"
-          className="block w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500"
+          className="block w-full rounded-md border-secondary-300 focus:border-primary-500 focus:ring-primary-500"
           defaultValue={tabs[0].value}
           onChange={(e) => {
             handleChange(
-              tabs.filter((tab) => tab.name === e.target.value)[0].value
+              tabs.filter((tab) => tab.name === e.target.value)[0].value,
             );
           }}
         >
@@ -34,7 +34,7 @@ export default function HeadedTabs(props: headedTabsProps) {
         </select>
       </div>
       <div className="hidden sm:block">
-        <div className="border-b border-gray-200">
+        <div className="border-b border-secondary-200">
           <nav
             className="-mb-px flex items-center justify-center"
             aria-label="Tabs"
@@ -42,10 +42,11 @@ export default function HeadedTabs(props: headedTabsProps) {
             {tabs.map((tab) => (
               <div
                 key={tab.name}
+                id={tab.name.split(" ").join("-").toLowerCase()}
                 className={`${
                   tab.value === currentTabState
                     ? "border-primary-500 text-primary-600"
-                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                    : "border-transparent text-secondary-500 hover:border-secondary-300 hover:text-secondary-700"
                 } w-1/4 cursor-pointer border-b-2 px-1 py-4 text-center text-sm font-medium`}
                 onClick={() => {
                   handleChange(tab.value);

@@ -105,7 +105,7 @@ let reducer = (state, action) => {
   | ClearSaving => {...state, saving: false}
   | Update(parts) => {
       ...state,
-      parts: parts,
+      parts,
     }
   | SetPreviewMode => {...state, previewMode: true}
   | ClearPreviewMode => {...state, previewMode: false}
@@ -151,7 +151,7 @@ let initialState = (psp, previewMode) => {
     selectedRegion: Pain.Other,
     saving: false,
     dirty: false,
-    previewMode: previewMode,
+    previewMode,
   }
 }
 
@@ -160,7 +160,7 @@ let selectedClass = (part: option<Pain.part>) => {
   | Some(p) =>
     let score = p.scale
     if score <= 0 {
-      "text-gray-400 hover:bg-red-400 tooltip"
+      "text-secondary-400 hover:bg-red-400 tooltip"
     } else if score <= 3 {
       "text-red-200 hover:bg-red-400 tooltip"
     } else if score <= 6 {
@@ -172,7 +172,7 @@ let selectedClass = (part: option<Pain.part>) => {
     } else {
       "text-red-700 hover:bg-red-800 tooltip"
     }
-  | None => "text-gray-400 hover:text-red-200 tooltip"
+  | None => "text-secondary-400 hover:text-red-200 tooltip"
   }
 }
 // UI for each Label
@@ -181,7 +181,7 @@ let selectedLabelClass = (part: option<Pain.part>) => {
   | Some(p) =>
     let score = p.scale
     if score <= 0 {
-      "bg-gray-300 text-black hover:bg-gray-400"
+      "bg-secondary-300 text-black hover:bg-secondary-400"
     } else if score <= 3 {
       "bg-red-200 text-red-700 hover:bg-red-400"
     } else if score <= 6 {
@@ -193,7 +193,7 @@ let selectedLabelClass = (part: option<Pain.part>) => {
     } else {
       "bg-red-700 text-white hover:bg-red-200"
     }
-  | None => "bg-gray-300 text-black hover:bg-red-200"
+  | None => "bg-secondary-300 text-black hover:bg-red-200"
   }
 }
 
@@ -280,8 +280,9 @@ let renderBody = (state, send, title, partPaths, substr) => {
               </div>
               {switch selectedPart {
               | Some(p) =>
-                <i
-                  className="border-l-2 fas fa-times p-1"
+                <CareIcon
+                  icon="l-times"
+                  className="border-l-2 text-xl"
                   onClick={state.previewMode
                     ? _ => getIntoView(Pain.regionToString(regionType), false)
                     : _ => send(RemoveFromSelectedParts(p))}
@@ -365,7 +366,8 @@ let make = (~painParameter, ~updateCB, ~id, ~consultationId, ~previewMode) => {
               // Toggle
 
               //Toggle Button
-              <div className="transition duration-150 ease-in-out mr-3 text-gray-700 font-medium">
+              <div
+                className="transition duration-150 ease-in-out mr-3 text-secondary-700 font-medium">
                 {str(state.previewMode ? "Preview Mode" : "Edit Mode")}
               </div>
               <div className="relative">
@@ -377,7 +379,7 @@ let make = (~painParameter, ~updateCB, ~id, ~consultationId, ~previewMode) => {
                 />
                 <div
                   className={"block w-14 h-8 rounded-full " ++ (
-                    state.previewMode ? "bg-green-300" : "bg-gray-400"
+                    state.previewMode ? "bg-green-300" : "bg-secondary-400"
                   )}
                 />
                 <div

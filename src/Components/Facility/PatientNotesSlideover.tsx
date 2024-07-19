@@ -12,6 +12,9 @@ import routes from "../../Redux/api";
 import { PatientNoteStateType } from "./models";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import AutoExpandingTextInputFormField from "../Form/FormFields/AutoExpandingTextInputFormField.js";
+import useAuthUser from "../../Common/hooks/useAuthUser";
+import { PATIENT_NOTES_THREADS } from "../../Common/constants.js";
+import useNotificationSubscriptionState from "../../Common/hooks/useNotificationSubscriptionState.js";
 
 interface PatientNotesProps {
   patientId: string;
@@ -21,10 +24,29 @@ interface PatientNotesProps {
 }
 
 export default function PatientNotesSlideover(props: PatientNotesProps) {
+  const authUser = useAuthUser();
+  const notificationSubscriptionState = useNotificationSubscriptionState();
+  const [thread, setThread] = useState(
+    authUser.user_type === "Nurse"
+      ? PATIENT_NOTES_THREADS.Nurses
+      : PATIENT_NOTES_THREADS.Doctors,
+  );
   const [show, setShow] = useState(true);
   const [patientActive, setPatientActive] = useState(true);
   const [reload, setReload] = useState(false);
   const [focused, setFocused] = useState(false);
+
+  useEffect(() => {
+    if (notificationSubscriptionState === "unsubscribed") {
+      Notification.Warn({
+        msg: "Please subscribe to notifications to get live updates on discussion notes.",
+      });
+    } else if (notificationSubscriptionState === "subscribed_on_other_device") {
+      Notification.Warn({
+        msg: "Please subscribe to notifications on this device to get live updates on discussion notes.",
+      });
+    }
+  }, [notificationSubscriptionState]);
 
   const initialData: PatientNoteStateType = {
     notes: [],
@@ -40,14 +62,10 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
 
   const localStorageKey = `patientNotesNoteField_${consultationId}`;
   const [noteField, setNoteField] = useState(
-    localStorage.getItem(localStorageKey) || ""
+    localStorage.getItem(localStorageKey) || "",
   );
 
   const onAddNote = async () => {
-    const payload = {
-      note: noteField,
-      consultation: consultationId,
-    };
     if (!/\S+/.test(noteField)) {
       Notification.Error({
         msg: "Note Should Contain At Least 1 Character",
@@ -56,7 +74,11 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
     }
     const { res } = await request(routes.addPatientNote, {
       pathParams: { patientId: patientId },
-      body: payload,
+      body: {
+        note: noteField,
+        consultation: consultationId,
+        thread,
+      },
     });
     if (res?.status === 201) {
       Notification.Success({ msg: "Note added successfully" });
@@ -101,34 +123,43 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
     },
     {
       ignoreInputFields: false,
-    }
+    },
   );
 
   const notesActionIcons = (
     <div className="flex gap-1">
       {show && (
         <Link
-          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
+          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-secondary-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
           href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/notes`}
         >
-          <CareIcon className="care-l-window-maximize text-lg transition-all delay-150 duration-300 ease-out" />
+          <CareIcon
+            icon="l-window-maximize"
+            className="text-lg transition-all delay-150 duration-300 ease-out"
+          />
         </Link>
       )}
       <div
         id="expand_doctor_notes"
         className={classNames(
-          "flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100",
-          show && "rotate-180"
+          "flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-secondary-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100",
+          show && "rotate-180",
         )}
         onClick={() => setShow(!show)}
       >
-        <CareIcon className="care-l-angle-up text-lg transition-all delay-150 duration-300 ease-out" />
+        <CareIcon
+          icon="l-angle-up"
+          className="text-lg transition-all delay-150 duration-300 ease-out"
+        />
       </div>
       <div
-        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
+        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-secondary-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
         onClick={() => setShowPatientNotesPopup(false)}
       >
-        <CareIcon className="care-l-times text-lg transition-all delay-150 duration-300 ease-out" />
+        <CareIcon
+          icon="l-times"
+          className="text-lg transition-all delay-150 duration-300 ease-out"
+        />
       </div>
     </div>
   );
@@ -143,7 +174,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
         "fixed bottom-0 z-20 sm:right-8",
         show
           ? "right-0 h-screen w-screen sm:h-fit sm:w-[400px]"
-          : "right-8 w-[250px]"
+          : "right-8 w-[250px]",
       )}
     >
       {!show ? (
@@ -151,23 +182,43 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
           className="flex w-full cursor-pointer items-center justify-around rounded-t-md bg-primary-800 p-2 text-white"
           onClick={() => setShow(!show)}
         >
-          <span className="font-semibold">{"Doctor's Notes"}</span>
+          <span className="font-semibold">Discussion Notes</span>
           {notesActionIcons}
         </div>
       ) : (
         <div className="flex h-screen w-full -translate-y-0 flex-col text-clip border-2 border-b-0 border-primary-800 bg-white pb-3 transition-all sm:h-[500px] sm:rounded-t-md ">
-          {/* Doctor Notes Header */}
           <div className="flex w-full items-center justify-between bg-primary-800 p-2 px-4 text-white">
-            <span className="font-semibold">{"Doctor's Notes"}</span>
+            <span className="font-semibold">Discussion Notes</span>
             {notesActionIcons}
           </div>
-          {/* Doctor Notes Body */}
+          <div className="flex bg-primary-800 text-sm">
+            {Object.values(PATIENT_NOTES_THREADS).map((current) => (
+              <button
+                key={current}
+                className={classNames(
+                  "flex flex-1 justify-center border-b-4 py-1",
+                  thread === current
+                    ? "border-primary-500 font-medium text-white"
+                    : "border-primary-800 text-white/70",
+                )}
+                onClick={() => setThread(current)}
+              >
+                {
+                  {
+                    10: "Doctor's Discussions",
+                    20: "Nurse's Discussions",
+                  }[current]
+                }
+              </button>
+            ))}
+          </div>
           <PatientConsultationNotesList
             state={state}
             setState={setState}
             reload={reload}
             setReload={setReload}
             disableEdit={!patientActive}
+            thread={thread}
           />
           <div className="relative mx-4 flex items-center">
             <AutoExpandingTextInputFormField
@@ -177,8 +228,9 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
               name="note"
               value={noteField}
               onChange={(e) => setNoteField(e.value)}
-              className="grow"
+              className="w-full grow"
               errorClassName="hidden"
+              innerClassName="pr-10"
               placeholder="Type your Note"
               disabled={!patientActive}
               onFocus={() => setFocused(true)}
@@ -194,7 +246,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
               disabled={!patientActive}
               authorizeFor={NonReadOnlyUsers}
             >
-              <CareIcon className="care-l-message text-lg" />
+              <CareIcon icon="l-message" className="text-lg" />
             </ButtonV2>
           </div>
         </div>

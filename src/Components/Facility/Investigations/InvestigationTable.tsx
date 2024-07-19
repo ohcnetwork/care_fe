@@ -9,15 +9,15 @@ const TestRow = ({ data, i, onChange, showForm, value, isChanged }: any) => {
   return (
     <tr
       className={classNames(
-        i % 2 == 0 ? "bg-gray-50" : "bg-white",
-        isChanged && "!bg-primary-300"
+        i % 2 == 0 ? "bg-secondary-50" : "bg-white",
+        isChanged && "!bg-primary-300",
       )}
       x-description="Even row"
     >
-      <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
+      <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-secondary-900">
         {data?.investigation_object?.name || "---"}
       </td>
-      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-secondary-700">
         {showForm ? (
           data?.investigation_object?.investigation_type === "Choice" ? (
             <SelectFormField
@@ -45,16 +45,16 @@ const TestRow = ({ data, i, onChange, showForm, value, isChanged }: any) => {
           value || "---"
         )}
       </td>
-      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-secondary-700">
         {data.investigation_object.unit || "---"}
       </td>
-      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-secondary-700">
         {data.investigation_object.min_value || "---"}
       </td>
-      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-secondary-700">
         {data.investigation_object.max_value || "---"}
       </td>
-      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-secondary-700">
         {data.investigation_object.ideal_value || "---"}
       </td>
     </tr>
@@ -64,6 +64,7 @@ const TestRow = ({ data, i, onChange, showForm, value, isChanged }: any) => {
 export const InvestigationTable = ({
   title,
   data,
+  isDischargedPatient,
   handleValueChange,
   changedFields,
   handleUpdateCancel,
@@ -94,6 +95,7 @@ export const InvestigationTable = ({
             Print Report
           </ButtonV2>
           <ButtonV2
+            disabled={isDischargedPatient}
             variant="primary"
             className="my-2 mr-2"
             onClick={() => {
@@ -101,7 +103,7 @@ export const InvestigationTable = ({
               setShowForm((prev) => !prev);
             }}
           >
-            {!showForm && <CareIcon className="care-l-edit mr-2" />}
+            {!showForm && <CareIcon icon="l-edit" className="mr-2" />}
             {showForm ? "Cancel" : "Update Details"}
           </ButtonV2>
           {showForm && (
@@ -125,19 +127,19 @@ export const InvestigationTable = ({
       />
       <br />
       <div id="section-to-print">
-        <div className="overflow-x-scroll border-b border-gray-200 shadow sm:rounded-lg">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="overflow-x-scroll border-b border-secondary-200 shadow sm:rounded-lg">
+          <table className="min-w-full divide-y divide-secondary-200">
+            <thead className="bg-secondary-50">
               <tr>
                 {["Name", "Value", "Unit", "Min", "Max", "Ideal"].map(
                   (heading) => (
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-800"
+                      className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-secondary-800"
                     >
                       {heading}
                     </th>
-                  )
+                  ),
                 )}
               </tr>
             </thead>
@@ -175,7 +177,9 @@ export const InvestigationTable = ({
                   );
                 })
               ) : (
-                <tr className="text-center text-gray-500">No tests taken</tr>
+                <tr className="text-center text-secondary-500">
+                  No tests taken
+                </tr>
               )}
             </tbody>
           </table>

@@ -19,10 +19,10 @@ type Props = FormFieldBaseProps<UserModel> & {
 };
 
 export default function UserAutocompleteFormField(props: Props) {
-  const field = useFormFieldPropsResolver(props as any);
+  const field = useFormFieldPropsResolver(props);
   const { fetchOptions, isLoading, options } = useAsyncOptions<UserModel>(
     "id",
-    { queryResponseExtractor: (data) => data.results }
+    { queryResponseExtractor: (data) => data.results },
   );
 
   let search_filter: {
@@ -31,7 +31,7 @@ export default function UserAutocompleteFormField(props: Props) {
     home_facility?: string;
     user_type?: string;
     search_text?: string;
-  } = { limit: 5, offset: 0 };
+  } = { limit: 50, offset: 0 };
 
   if (props.showActiveStatus && props.userType) {
     search_filter = { ...search_filter, user_type: props.userType };
@@ -48,7 +48,7 @@ export default function UserAutocompleteFormField(props: Props) {
       <div className="mr-6 mt-[2px]">
         <svg
           className={`h-3 w-3 ${
-            isUserOnline(option) ? "text-green-500" : "text-gray-400"
+            isUserOnline(option) ? "text-green-500" : "text-secondary-400"
           }`}
           fill="currentColor"
           viewBox="0 0 8 8"
@@ -65,6 +65,8 @@ export default function UserAutocompleteFormField(props: Props) {
         <Autocomplete
           id={field.id}
           disabled={field.disabled}
+          // Voluntarily casting type as true to ignore type errors.
+          required={field.required as true}
           placeholder={props.placeholder}
           value={field.value}
           onChange={field.handleChange}
@@ -80,7 +82,7 @@ export default function UserAutocompleteFormField(props: Props) {
                     ...search_filter,
                     search_text: query,
                   })
-                : getUserList({ ...search_filter, search_text: query })
+                : getUserList({ ...search_filter, search_text: query }),
             )
           }
           isLoading={isLoading}

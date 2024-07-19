@@ -11,17 +11,20 @@ let renderLine = (title, value) => {
 let renderIndicators = (title, value, isMin, isMax, minText, maxText) => {
   let indicator = if isMax {
     <span className="inline-block bg-red-200 rounded-full px-2 mx-3 my-1 text-xs py-1 text-red-800">
-      <i className="fas fa-exclamation-triangle mr-2" /> {str(maxText)}
+      <CareIcon icon="l-exclamation-triangle" className="mr-2" />
+      {str(maxText)}
     </span>
   } else if isMin {
     <span
       className="inline-block bg-yellow-200 rounded-full px-2 mx-3 my-1 text-xs py-1 text-yellow-800">
-      <i className="fas fa-exclamation-triangle mr-2" /> {str(minText)}
+      <CareIcon icon="l-exclamation-triangle" className="mr-2" />
+      {str(minText)}
     </span>
   } else {
     <span
       className="inline-block bg-green-200 rounded-full px-2 mx-3 my-1 text-xs py-1 text-green-800">
-      <i className="far fa-check-circle mr-2" /> {str("Normal")}
+      <CareIcon icon="l-check-circle" className="mr-2" />
+      {str("Normal")}
     </span>
   }
 
@@ -109,25 +112,25 @@ let make = (
     </div>
     <div>
       <div
-        className="bg-white px-2 md:px-6 py-5 border-b border-gray-200 sm:px-6 max-w-5xl mx-auto border mt-4 shadow rounded-lg">
+        className="bg-white px-2 md:px-6 py-5 border-b border-secondary-200 sm:px-6 max-w-5xl mx-auto border mt-4 shadow rounded-lg">
         <h1 className="text-4xl sm:text-5xl"> {str("Consultation Update")} </h1>
         <div>
           <CriticalCare__PageTitle title="General" />
           <DailyRound__General others title renderOptionalDescription />
         </div>
-        <div className="grow border-t border-gray-400 mt-4" />
+        <div className="grow border-t border-secondary-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Neurological Monitoring" />
           <DailyRound__NeurologicalMonitoring
             neurologicalMonitoring title renderLine renderOptionalDescription renderOptionalInt
           />
         </div>
-        <div className="grow border-t border-gray-400 mt-4" />
+        <div className="grow border-t border-secondary-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Medicines" />
           <DailyRound__Medicines prescriptions={medicine} />
         </div>
-        <div className="grow border-t border-gray-400 mt-4" />
+        <div className="grow border-t border-secondary-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Arterial Blood Gas Analysis" />
           <DailyRound__ABG
@@ -136,19 +139,19 @@ let make = (
             renderOptionalFloatWithIndicators
           />
         </div>
-        <div className="grow border-t border-gray-400 mt-4" />
+        <div className="grow border-t border-secondary-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Blood Sugar" />
           <DailyRound__BloodSugar
             bloodSugar renderOptionalIntWithIndicators renderOptionalFloat renderLine
           />
         </div>
-        <div className="grow border-t border-gray-400 mt-4" />
+        <div className="grow border-t border-secondary-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Dialysis" />
           <DailyRound__Dialysis dialysis renderOptionalInt />
         </div>
-        <div className="grow border-t border-gray-400 mt-4" />
+        <div className="grow border-t border-secondary-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Vitals" />
           <DailyRound__HemodynamicParameters
@@ -163,17 +166,17 @@ let make = (
             renderOptionalInt
           />
         </div>
-        <div className="grow border-t border-gray-400 mt-4" />
+        <div className="grow border-t border-secondary-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="I/O Balance" />
           <DailyRound__IOBalance ioBalance title renderOptionalDescription />
         </div>
-        <div className="grow border-t border-gray-400 mt-4" />
+        <div className="grow border-t border-secondary-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Nursing Care" />
           <DailyRound__NursingCare nursingCare renderLine />
         </div>
-        <div className="grow border-t border-gray-400 mt-4" />
+        <div className="grow border-t border-secondary-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Pressure Sore" />
           <CriticalCare__PressureSoreEditor
@@ -184,7 +187,7 @@ let make = (
             consultationId={consultationId}
           />
         </div>
-        <div className="grow border-t border-gray-400 mt-4" />
+        <div className="grow border-t border-secondary-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Respiratory Support" />
           <DailyRound__VentilatorParameters
@@ -195,12 +198,12 @@ let make = (
             renderLine
           />
         </div>
-        <div className="grow border-t border-gray-400 mt-4" />
+        <div className="grow border-t border-secondary-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Others" />
           <DailyRound__Others others renderOptionalIntWithIndicators renderOptionalBool />
         </div>
-        <div className="grow border-t border-gray-400 mt-4" />
+        <div className="grow border-t border-secondary-400 mt-4" />
       </div>
     </div>
   </div>

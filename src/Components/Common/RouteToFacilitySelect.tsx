@@ -13,13 +13,13 @@ export const ROUTE_TO_FACILITY_OPTIONS = {
 export type RouteToFacility = keyof typeof ROUTE_TO_FACILITY_OPTIONS;
 
 export const keys = Object.keys(ROUTE_TO_FACILITY_OPTIONS).map((key) =>
-  parseInt(key)
+  parseInt(key),
 ) as RouteToFacility[];
 
 type Props = FormFieldBaseProps<keyof typeof ROUTE_TO_FACILITY_OPTIONS>;
 
 export default function RouteToFacilitySelect(props: Props) {
-  const field = useFormFieldPropsResolver(props as any);
+  const field = useFormFieldPropsResolver(props);
 
   return (
     <SelectFormField

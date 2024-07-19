@@ -54,16 +54,16 @@ const DialogModal = (props: DialogProps) => {
                   className={classNames(
                     className,
                     fixedWidth && "w-full max-w-md",
-                    "transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+                    "transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all",
                   )}
                 >
                   <Dialog.Title
                     as="h4"
-                    className="flex w-full flex-col text-lg font-medium leading-6 text-gray-900"
+                    className="flex w-full flex-col text-lg font-medium leading-6 text-secondary-900"
                   >
                     <div className="w-full">
                       <h4>{title}</h4>
-                      <p className="mt-2 text-sm text-gray-600">
+                      <p className="mt-2 text-sm text-secondary-600">
                         {description}
                       </p>
                     </div>

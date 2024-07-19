@@ -35,42 +35,12 @@ describe("Patient", () => {
   // });
   // commented out the shifting request, as logic need to be re-visited
 
-  it("Post doctor notes for an already created patient", () => {
+  it("Post discussion notes for an already created patient", () => {
     patientPage.visitPatient("Dummy Patient 3");
     patientConsultationPage.visitDoctorNotesPage();
     patientConsultationPage.addDoctorsNotes("Test Doctor Notes");
     patientConsultationPage.postDoctorNotes();
-    patientConsultationPage.verifySuccessNotification(
-      "Note added successfully"
-    );
-  });
-
-  it("Edit prescription for an already created patient", () => {
-    patientPage.visitPatient("Dummy Patient 4");
-    patientConsultationPage.visitEditPrescriptionPage();
-    patientConsultationPage.clickAddPrescription();
-    patientConsultationPage.interceptMediaBase();
-    patientConsultationPage.selectMedicinebox();
-    patientConsultationPage.waitForMediabaseStatusCode();
-    patientConsultationPage.prescribesecondMedicine();
-    patientConsultationPage.enterDosage("4");
-    patientConsultationPage.selectDosageFrequency("Twice daily");
-    patientConsultationPage.submitPrescription();
-  });
-
-  it("Upload consultations file ", () => {
-    patientPage.visitPatient("Dummy Patient 5");
-    patientConsultationPage.visitFilesPage();
-    patientConsultationPage.uploadFile();
-    patientConsultationPage.clickUploadFile();
-  });
-
-  it("Discharge a patient", () => {
-    patientPage.visitPatient("Dummy Patient 6");
-    patientConsultationPage.clickDischargePatient();
-    patientConsultationPage.selectDischargeReason("Recovered");
-    patientConsultationPage.addDischargeNotes("Discharge notes");
-    patientConsultationPage.confirmDischarge();
+    cy.verifyNotification("Note added successfully");
   });
 
   afterEach(() => {

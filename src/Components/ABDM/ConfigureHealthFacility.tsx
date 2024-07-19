@@ -82,7 +82,7 @@ export const ConfigureHealthFacility = (props: any) => {
           pathParams: {
             facility_id: facilityId,
           },
-        }
+        },
       );
       response = res;
       responseData = data;
@@ -96,7 +96,7 @@ export const ConfigureHealthFacility = (props: any) => {
           body: {
             hf_id: state.form.hf_id,
           },
-        }
+        },
       );
       response = res;
       responseData = data;
@@ -156,13 +156,13 @@ export const ConfigureHealthFacility = (props: any) => {
                     "tooltip cursor-pointer text-sm",
                     state.form.health_facility?.registered
                       ? "text-primary-600 hover:text-primary-800"
-                      : "text-warning-600 hover:text-warning-800"
+                      : "text-warning-600 hover:text-warning-800",
                   )}
                 >
                   {state.form.health_facility?.registered ? (
                     <>
                       <div className="tooltip-text -ml-20 -mt-36 flex w-48 flex-col gap-4 whitespace-break-spaces">
-                        <span className="text-gray-100">
+                        <span className="text-secondary-100">
                           The ABDM health facility is successfully linked with
                           care{" "}
                           <strong>and registered as a service in bridge</strong>
@@ -176,7 +176,7 @@ export const ConfigureHealthFacility = (props: any) => {
                   ) : (
                     <>
                       <div className="tooltip-text -ml-20 -mt-44 flex w-48 flex-col gap-4 whitespace-break-spaces">
-                        <span className="text-gray-100">
+                        <span className="text-secondary-100">
                           The ABDM health facility is successfully linked with
                           care{" "}
                           <strong>

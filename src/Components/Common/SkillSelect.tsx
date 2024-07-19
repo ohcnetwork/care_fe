@@ -44,10 +44,13 @@ export const SkillSelect = (props: SkillSelectProps) => {
 
       const { data } = await request(routes.getAllSkills, { query });
       return data?.results.filter(
-        (skill) => !userSkills?.some((userSkill) => userSkill.id === skill.id)
+        (skill) =>
+          !userSkills?.some(
+            (userSkill) => userSkill.skill_object.id === skill.id,
+          ),
       );
     },
-    [searchAll, userSkills]
+    [searchAll, userSkills],
   );
 
   return (

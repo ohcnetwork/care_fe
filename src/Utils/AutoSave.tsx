@@ -12,7 +12,7 @@ type Draft = {
 
 export function useAutoSaveReducer<T>(
   reducer: any,
-  initialState: any
+  initialState: any,
 ): [FormState<T>, Dispatch<FormAction<T>>] {
   const saveInterval = 1000;
   const saveKey = useRef(`form_draft_${window.location.pathname}`);
@@ -42,7 +42,7 @@ export function useAutoSaveReducer<T>(
       const savedDrafts = localStorage.getItem(saveKey.current);
       const drafts = savedDrafts ? JSON.parse(savedDrafts) : [];
       const existingIndex = drafts.findIndex(
-        (draft: Draft) => draft.timestamp === sessionStartTime.current
+        (draft: Draft) => draft.timestamp === sessionStartTime.current,
       );
       const currentDraft = {
         timestamp: sessionStartTime.current,
@@ -113,7 +113,7 @@ export function DraftSection(props: {
         const savedDrafts = localStorage.getItem(key);
         const drafts = savedDrafts ? JSON.parse(savedDrafts) : [];
         const newDrafts = drafts.filter(
-          (draft: Draft) => now - draft.timestamp < 24 * 60 * 60 * 1000
+          (draft: Draft) => now - draft.timestamp < 24 * 60 * 60 * 1000,
         );
         localStorage.setItem(key, JSON.stringify(newDrafts));
         if (newDrafts.length === 0) localStorage.removeItem(key);
@@ -127,12 +127,12 @@ export function DraftSection(props: {
         <div className="my-2 flex flex-wrap justify-end">
           {drafts?.length > 0 && (
             <div className="mx-1 flex items-center">
-              <p className="text-gray-500">
+              <p className="text-secondary-500">
                 Last saved draft:{" "}
                 {relativeTime(
                   draftStarted
                     ? drafts[0].timestamp
-                    : drafts[drafts.length - 1].timestamp
+                    : drafts[drafts.length - 1].timestamp,
                 )}
               </p>
               <ButtonV2
@@ -140,7 +140,8 @@ export function DraftSection(props: {
                 variant="primary"
                 onClick={() =>
                   handleDraftSelect(
-                    (draftStarted ? drafts[0] : drafts[drafts.length - 1]).draft
+                    (draftStarted ? drafts[0] : drafts[drafts.length - 1])
+                      .draft,
                   )
                 }
                 className="ml-2"

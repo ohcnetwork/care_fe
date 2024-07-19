@@ -8,21 +8,21 @@ import { PaginatedResponse, QueryRoute } from "../../Utils/request/types";
 
 const STATUS_COLORS = {
   Operational: "bg-green-500",
-  "Not Monitored": "bg-gray-400",
+  "Not Monitored": "bg-secondary-400",
   Down: "bg-red-500",
   "Under Maintenance": "bg-blue-500",
 };
 
 const STATUS_COLORS_TEXT = {
   Operational: "text-green-500",
-  "Not Monitored": "text-gray-400",
+  "Not Monitored": "text-secondary-400",
   Down: "text-red-500",
   "Under Maintenance": "text-blue-500",
 };
 
 const now = dayjs();
 const formatDateBeforeDays = Array.from({ length: 100 }, (_, index) =>
-  now.subtract(index, "days").format("DD MMMM YYYY")
+  now.subtract(index, "days").format("DD MMMM YYYY"),
 );
 
 const uptimeScore: number[] = Array.from({ length: 100 }, () => 0);
@@ -47,12 +47,12 @@ function UptimeInfo({
   let totalMinutes = 0;
 
   return (
-    <div className="absolute z-50 w-full rounded-lg shadow-lg ring-1 ring-gray-400">
+    <div className="absolute z-50 w-full rounded-lg shadow-lg ring-1 ring-secondary-400">
       <div className="rounded-lg bg-white px-6 py-4">
         <div className="flow-root rounded-md">
-          <div className="block text-center text-sm text-gray-800">
+          <div className="block text-center text-sm text-secondary-800">
             <span className="font-bold ">{date}</span>
-            <div className="my-2 border-t border-gray-200"></div>
+            <div className="my-2 border-t border-secondary-200"></div>
             {incidents.length === 0 ? (
               <>
                 <span>No status for the day</span>
@@ -82,10 +82,10 @@ function UptimeInfo({
                           dayjs
                             .duration(
                               dayjs(endTimestamp).diff(
-                                dayjs(incident.timestamp)
-                              )
+                                dayjs(incident.timestamp),
+                              ),
                             )
-                            .asMinutes()
+                            .asMinutes(),
                         )
                       : "Ongoing";
                     if (
@@ -94,7 +94,7 @@ function UptimeInfo({
                     )
                       totalMinutes += dayjs(endTimestamp).diff(
                         dayjs(incident.timestamp),
-                        "minutes"
+                        "minutes",
                       );
 
                     return (
@@ -119,7 +119,7 @@ function UptimeInfo({
                     );
                   })}
                 </div>
-                <div className="my-2 border-t border-gray-200"></div>
+                <div className="my-2 border-t border-secondary-200"></div>
                 <div className="mt-1 flex justify-between">
                   <span className="font-bold">Total downtime</span>
                   <span>
@@ -154,8 +154,8 @@ function UptimeInfoPopover({
           day > numDays - 10
             ? "-translate-x-6"
             : day < 10
-            ? "-translate-x-full"
-            : "-translate-x-1/2"
+              ? "-translate-x-full"
+              : "-translate-x-1/2",
         )}
         static
       >
@@ -169,7 +169,10 @@ export default function Uptime(
   props: Readonly<{
     route: QueryRoute<PaginatedResponse<AvailabilityRecord>>;
     params?: Record<string, string | number>;
-  }>
+    header?: React.ReactNode;
+    parentClassNames?: string;
+    centerInfoPanel?: boolean;
+  }>,
 ) {
   const [summary, setSummary] = useState<{
     [key: number]: AvailabilityRecord[];
@@ -181,7 +184,7 @@ export default function Uptime(
   const availabilityData = data?.results ?? [];
   const graphElem = useRef<HTMLDivElement>(null);
   const [numDays, setNumDays] = useState(
-    Math.floor((window.innerWidth - 1024) / 20)
+    Math.floor((window.innerWidth - 1024) / 20),
   );
   const [hoveredDay, setHoveredDay] = useState(-1);
 
@@ -190,6 +193,8 @@ export default function Uptime(
     const newNumDays = Math.floor(containerWidth / 20);
     setNumDays(Math.min(newNumDays, 100));
   };
+
+  const centerInfoPanel = props.centerInfoPanel ?? false;
 
   const setUptimeRecord = (records: AvailabilityRecord[]): void => {
     const recordsByDayBefore: { [key: number]: AvailabilityRecord[] } = {};
@@ -224,7 +229,7 @@ export default function Uptime(
       } else {
         if (
           recordsByDayBefore[i].filter(
-            (r) => dayjs(r.timestamp).get("hour") < 8
+            (r) => dayjs(r.timestamp).get("hour") < 8,
           ).length === 0
         ) {
           recordsByDayBefore[i].unshift({
@@ -254,7 +259,7 @@ export default function Uptime(
         .set("hour", 0)
         .set("minute", 0)
         .set("second", 0),
-      "days"
+      "days",
     );
 
     const days = Math.max(1, Math.min(daysAvailable, displayDays));
@@ -292,7 +297,7 @@ export default function Uptime(
         const recordsInPeriod = dayRecords.filter(
           (record) =>
             dayjs(record.timestamp).hour() >= start &&
-            dayjs(record.timestamp).hour() < end
+            dayjs(record.timestamp).hour() < end,
         );
         recordsInPeriodCache[i] = recordsInPeriod;
         if (recordsInPeriod.length === 0) {
@@ -313,7 +318,7 @@ export default function Uptime(
             statusColors.push(
               STATUS_COLORS[
                 previousLatestRecord?.status as keyof typeof STATUS_COLORS
-              ] ?? STATUS_COLORS["Not Monitored"]
+              ] ?? STATUS_COLORS["Not Monitored"],
             );
             recordsInPeriodCache[i] = [previousLatestRecord];
           } else {
@@ -321,19 +326,19 @@ export default function Uptime(
           }
         } else if (
           recordsInPeriod.some(
-            (record) => record.status === AssetStatus["down"]
+            (record) => record.status === AssetStatus["down"],
           )
         ) {
           statusColors.push(STATUS_COLORS["Down"]);
         } else if (
           recordsInPeriod.some(
-            (record) => record.status === AssetStatus["maintenance"]
+            (record) => record.status === AssetStatus["maintenance"],
           )
         ) {
           statusColors.push(STATUS_COLORS["Under Maintenance"]);
         } else if (
           recordsInPeriod.some(
-            (record) => record.status === AssetStatus["operational"]
+            (record) => record.status === AssetStatus["operational"],
           )
         ) {
           statusColors.push(STATUS_COLORS["Operational"]);
@@ -361,13 +366,13 @@ export default function Uptime(
     );
   } else if (summary) {
     return (
-      <div className="mt-8 flex w-full flex-col bg-white p-4 shadow-sm sm:rounded-lg">
-        <div className="mx-2 w-full">
+      <div className={props.parentClassNames}>
+        <div className="w-full">
           <div className="grid grid-cols-1">
-            <div className="text-xl font-semibold">Availability History</div>
+            {props.header}
             <div>
               <div className="mt-2 overflow-x-clip px-5">
-                <div className="mb-1 mt-2 flex justify-center text-xs text-gray-700 opacity-70">
+                <div className="mb-1 mt-2 flex justify-center text-xs text-secondary-700 opacity-70">
                   {getUptimePercent(numDays)}% uptime
                 </div>
                 <div
@@ -388,41 +393,39 @@ export default function Uptime(
                           <div
                             className={`h-[11px] w-3 rounded-t-sm ${
                               hoveredDay === index
-                                ? "bg-gray-700"
+                                ? "bg-secondary-700"
                                 : dayStatus[0]
                             }`}
                           ></div>
                           <div
                             className={`h-[11px] w-3 ${
                               hoveredDay === index
-                                ? "bg-gray-700"
+                                ? "bg-secondary-700"
                                 : dayStatus[1]
                             }`}
                           ></div>
                           <div
                             className={`h-[11px] w-3 rounded-b-sm ${
                               hoveredDay === index
-                                ? "bg-gray-700"
+                                ? "bg-secondary-700"
                                 : dayStatus[2]
                             }`}
                           ></div>
                         </span>
-                        {hoveredDay === index && (
-                          <>
-                            <UptimeInfoPopover
-                              records={summary[index]}
-                              day={index}
-                              date={formatDateBeforeDays[index]}
-                              numDays={numDays}
-                            />
-                          </>
+                        {hoveredDay === index && !centerInfoPanel && (
+                          <UptimeInfoPopover
+                            records={summary[index]}
+                            day={index}
+                            date={formatDateBeforeDays[index]}
+                            numDays={numDays}
+                          />
                         )}
                       </>
                     );
                   })}
                 </div>
                 <div
-                  className={`flex text-xs text-gray-700 opacity-70 ${
+                  className={`flex text-xs text-secondary-700 opacity-70 ${
                     hoveredDay == -1 && "mt-2"
                   }`}
                 >
@@ -432,7 +435,7 @@ export default function Uptime(
               </div>
             </div>
             {hoveredDay !== -1 && (
-              <div className="relative sm:hidden">
+              <div className={`relative ${!centerInfoPanel && "sm:hidden"}`}>
                 <UptimeInfo
                   records={summary[hoveredDay]}
                   date={formatDateBeforeDays[hoveredDay]}

@@ -17,14 +17,14 @@ import { ABDMError, ABHAQRContent } from "./models";
 
 export const validateRule = (
   condition: boolean,
-  content: JSX.Element | string
+  content: JSX.Element | string,
 ) => {
   return (
     <div>
       {condition ? (
-        <i className="fas fa-circle-check text-green-500" />
+        <CareIcon icon="l-check-circle" className="text-base text-green-500" />
       ) : (
-        <i className="fas fa-circle-xmark text-red-500" />
+        <CareIcon icon="l-times-circle" className="text-base text-red-500" />
       )}{" "}
       <span
         className={classNames(condition ? "text-primary-500" : "text-red-500")}
@@ -59,7 +59,7 @@ export default function LinkABHANumberModal({
 
   const title = (
     <div className="flex items-center gap-3">
-      <CareIcon className="care-l-link text-xl" />
+      <CareIcon icon="l-link" className="text-xl" />
       <h2 className="text-xl font-bold text-black">
         {currentStep === "ScanExistingQR"
           ? "Link Existing ABHA Number"
@@ -113,7 +113,7 @@ export default function LinkABHANumberModal({
 
       <div>
         {["AadhaarVerification", "MobileVerification", "HealthIDCreation"].find(
-          (step) => step === currentStep
+          (step) => step === currentStep,
         ) ? (
           <p
             onClick={() => setCurrentStep("ScanExistingQR")}
@@ -158,7 +158,9 @@ const ScanABHAQRSection = ({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center gap-2">
-        <span className="text-3xl font-semibold text-gray-700">Loading</span>
+        <span className="text-3xl font-semibold text-secondary-700">
+          Loading
+        </span>
         <CircularProgress className="text-green-500" />
       </div>
     );
@@ -183,7 +185,7 @@ const ScanABHAQRSection = ({
           }
           setQrValue(value);
         }}
-        parse={async (value: string) => {
+        parse={async (value: string | null) => {
           if (!value) return;
           setIsLoading(true);
 
@@ -194,12 +196,12 @@ const ScanABHAQRSection = ({
               body: {
                 patientId,
                 hidn: abha?.hidn,
-                phr: abha?.hid,
+                phr: (abha?.phr ?? abha?.hid) as string,
                 name: abha?.name,
                 gender: abha?.gender,
                 dob: abha?.dob.replace(/\//g, "-"),
                 address: abha?.address,
-                "dist name": abha?.district_name,
+                "dist name": abha?.["dist name"] ?? abha?.district_name,
                 "state name": abha?.["state name"],
               },
             });
@@ -233,14 +235,14 @@ const ScanABHAQRSection = ({
       />
       {!txnId && (
         <div>
-          <span className="items-center text-xs text-gray-800">
+          <span className="items-center text-xs text-secondary-800">
             <input
               type="checkbox"
               checked={acceptedDisclaimer}
               onChange={(e) => {
                 setAcceptedDisclaimer(e.target.checked);
               }}
-              className="mr-2 rounded border-gray-700 shadow-sm ring-0 ring-offset-0"
+              className="mr-2 rounded border-secondary-700 shadow-sm ring-0 ring-offset-0"
             />
             I declare that the ABHA No. of the patient is voluntarily provided
             by the patient (or guardian or nominee of the patient).
@@ -278,7 +280,7 @@ const ScanABHAQRSection = ({
                             txnId: txnId,
                             patientId: patientId,
                           },
-                        }
+                        },
                       );
                       response = res;
                       Rdata = data;
@@ -296,7 +298,7 @@ const ScanABHAQRSection = ({
                             txnId: txnId,
                             patientId: patientId,
                           },
-                        }
+                        },
                       );
                       response = res;
                       Rdata = data;
@@ -331,7 +333,7 @@ const ScanABHAQRSection = ({
                   onClick={async () => {
                     const { res, data } = await request(
                       routes.abha.initiateAbdmAuthentication,
-                      { body: { authMethod: method, healthid: qrValue } }
+                      { body: { authMethod: method, healthid: qrValue } },
                     );
 
                     if (res?.status === 200 && data?.txnId) {
@@ -355,16 +357,16 @@ const ScanABHAQRSection = ({
                     body: {
                       healthId: qrValue,
                     },
-                  }
+                  },
                 );
 
                 if (res?.status === 200 && data?.authMethods) {
                   setAuthMethods(
                     data.authMethods?.filter?.((method: string) =>
                       supportedAuthMethods.find(
-                        (supported) => supported === method
-                      )
-                    )
+                        (supported) => supported === method,
+                      ),
+                    ),
                   );
                 }
               }}
@@ -407,7 +409,7 @@ const VerifyAadhaarSection = ({ onVerified }: VerifyAadhaarSectionProps) => {
   const validateAadhaar = () => {
     if (aadhaarNumber.length !== 12 && aadhaarNumber.length !== 16) {
       setAadhaarNumberError(
-        "Should be a 12-digit aadhaar number or 16-digit virtual ID"
+        "Should be a 12-digit aadhaar number or 16-digit virtual ID",
       );
       return false;
     }
@@ -524,8 +526,8 @@ const VerifyAadhaarSection = ({ onVerified }: VerifyAadhaarSectionProps) => {
         />
         <span
           className={classNames(
-            "ml-2 text-sm font-medium text-gray-600",
-            !aadhaarNumberError && "-mt-4"
+            "ml-2 text-sm font-medium text-secondary-600",
+            !aadhaarNumberError && "-mt-4",
           )}
         >
           Aadhaar number will not be stored by CARE
@@ -534,14 +536,14 @@ const VerifyAadhaarSection = ({ onVerified }: VerifyAadhaarSectionProps) => {
 
       {!otpSent && (
         <div className="flex flex-col gap-2">
-          <span className="items-center text-xs text-gray-800">
+          <span className="items-center text-xs text-secondary-800">
             <input
               type="checkbox"
               checked={acceptedDisclaimer1}
               onChange={(e) => {
                 setAcceptedDisclaimer1(e.target.checked);
               }}
-              className="mr-2 rounded border-gray-700 shadow-sm ring-0 ring-offset-0"
+              className="mr-2 rounded border-secondary-700 shadow-sm ring-0 ring-offset-0"
             />
             I declare that consent of the patient (or guardian or nominee of the
             patient) is obtained for generation of such ABHA Number as per the{" "}
@@ -551,14 +553,14 @@ const VerifyAadhaarSection = ({ onVerified }: VerifyAadhaarSectionProps) => {
             .
           </span>
 
-          <span className="items-center text-xs text-gray-800">
+          <span className="items-center text-xs text-secondary-800">
             <input
               type="checkbox"
               checked={acceptedDisclaimer2}
               onChange={(e) => {
                 setAcceptedDisclaimer2(e.target.checked);
               }}
-              className="mr-2 rounded border-gray-700 shadow-sm ring-0 ring-offset-0"
+              className="mr-2 rounded border-secondary-700 shadow-sm ring-0 ring-offset-0"
             />
             I declare that the Aadhaar Number and demographic details of the
             patient are shared voluntarily by the patient (or guardian or
@@ -752,7 +754,7 @@ const VerifyMobileSection = ({
         />
       ) : (
         <p className="-mt-4 text-sm text-warning-600">
-          <CareIcon className="care-l-exclamation-triangle h-4 w-4" /> OTP is
+          <CareIcon icon="l-exclamation-triangle" className="h-4 w-4" /> OTP is
           generated if the above phone number is not linked with given Aadhaar
           number.
         </p>
@@ -833,27 +835,27 @@ const CreateHealthIDSection = ({
       />
 
       <p className="-mt-4 text-sm text-warning-600">
-        <CareIcon className="care-l-exclamation-triangle h-4 w-4" /> Existing
+        <CareIcon icon="l-exclamation-triangle" className="h-4 w-4" /> Existing
         ABHA Address is used if ABHA Number already exists.
       </p>
 
       {isHealthIdInputInFocus && (
-        <div className="mb-2 pl-2 text-sm text-gray-500">
+        <div className="mb-2 pl-2 text-sm text-secondary-500">
           {validateRule(
             healthId.length >= 4,
-            "Should be atleast 4 character long"
+            "Should be atleast 4 character long",
           )}
           {validateRule(
             isNaN(Number(healthId[0])) && healthId[0] !== ".",
-            "Shouldn't start with a number or dot (.)"
+            "Shouldn't start with a number or dot (.)",
           )}
           {validateRule(
             healthId[healthId.length - 1] !== ".",
-            "Shouldn't end with a dot (.)"
+            "Shouldn't end with a dot (.)",
           )}
           {validateRule(
             /^[0-9a-zA-Z.]+$/.test(healthId),
-            "Should only contain letters, numbers and dot (.)"
+            "Should only contain letters, numbers and dot (.)",
           )}
         </div>
       )}

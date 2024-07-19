@@ -38,7 +38,7 @@ export const PrimaryParametersPlot = ({
   useEffect(() => {
     const fetchDailyRounds = async (
       currentPage: number,
-      consultationId: string
+      consultationId: string,
     ) => {
       const { res, data } = await request(routes.dailyRoundsAnalyse, {
         body: {
@@ -132,7 +132,7 @@ export const PrimaryParametersPlot = ({
       const key: string = dayjs(obj[0]).format("MMMM D, YYYY");
       const lst: Array<any> = Object.prototype.hasOwnProperty.call(
         rhythmValues,
-        key
+        key,
       )
         ? rhythmValues[key]
         : [];
@@ -147,7 +147,7 @@ export const PrimaryParametersPlot = ({
 
   return (
     <div>
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2" id="vital-section">
         <div className="m-2 overflow-x-auto rounded-lg border bg-white px-4 pt-4 shadow md:w-full">
           <StackedLinePlot title="BP" xData={dates} yData={BPData} />
         </div>
@@ -215,7 +215,7 @@ export const PrimaryParametersPlot = ({
                       <div className="relative pb-8">
                         {rhythmIdx !== obj[1].length ? (
                           <span
-                            className="absolute left-4 top-4 -ml-px h-full w-0.5 bg-gray-200"
+                            className="absolute left-4 top-4 -ml-px h-full w-0.5 bg-secondary-200"
                             aria-hidden="true"
                           />
                         ) : null}
@@ -229,9 +229,15 @@ export const PrimaryParametersPlot = ({
                               }`}
                             >
                               {rhythmDetails.rhythm === 5 ? (
-                                <CareIcon className="care-l-check-circle text-xl" />
+                                <CareIcon
+                                  icon="l-check-circle"
+                                  className="text-xl"
+                                />
                               ) : (
-                                <CareIcon className="care-l-times-circle text-xl" />
+                                <CareIcon
+                                  icon="l-times-circle"
+                                  className="text-xl"
+                                />
                               )}
                             </span>
                           </div>
@@ -252,7 +258,7 @@ export const PrimaryParametersPlot = ({
                                 <span>{rhythmDetails.rhythm_detail}</span>
                               </p>
                             </div>
-                            <div className="whitespace-nowrap text-right text-sm text-gray-500">
+                            <div className="whitespace-nowrap text-right text-sm text-secondary-500">
                               <p>
                                 {rhythmDetails.time}, {obj[0]}
                               </p>
@@ -261,7 +267,7 @@ export const PrimaryParametersPlot = ({
                         </div>
                       </div>
                     </li>
-                  ))
+                  )),
                 )}
               </ul>
             </div>

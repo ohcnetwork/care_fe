@@ -6,7 +6,6 @@ import Loading from "../Common/Loading";
 import Page from "../Common/components/Page";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { classNames } from "../../Utils/utils";
 import { LocationSelect } from "../Common/LocationSelect";
 import Pagination from "../Common/Pagination";
 import { Popover, Transition } from "@headlessui/react";
@@ -49,7 +48,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
       asset_class: "HL7MONITOR",
       ordering: qParams.ordering || "bed__name",
       bed_is_occupied:
-        (qParams.hide_monitors_without_patient ?? "true") === "true",
+        qParams.monitors_without_patient === "true" ? undefined : "true",
     },
   });
 
@@ -81,9 +80,17 @@ export default function CentralNursingStation({ facilityId }: Props) {
         <div className="flex flex-row-reverse items-center gap-4 md:flex-row">
           <Popover className="relative">
             <Popover.Button>
-              <ButtonV2 variant="secondary" border>
-                <CareIcon className="care-l-setting text-lg" />
-                Settings and Filters
+              <ButtonV2
+                variant={
+                  qParams.location ||
+                  qParams.monitors_without_patient === "true"
+                    ? "primary"
+                    : "secondary"
+                }
+                border
+              >
+                <CareIcon icon="l-setting" className="text-lg" />
+                {t("settings_and_filters")}
               </ButtonV2>
             </Popover.Button>
             <Transition
@@ -96,10 +103,10 @@ export default function CentralNursingStation({ facilityId }: Props) {
               leaveTo="opacity-0 translate-y-1"
             >
               <Popover.Panel className="absolute z-30 mt-1 w-80 -translate-x-1/3 px-4 sm:px-0 md:w-96 md:-translate-x-1/2 lg:max-w-3xl">
-                <div className="rounded-lg shadow-lg ring-1 ring-gray-400">
-                  <div className="rounded-t-lg bg-gray-100 px-6 py-4">
+                <div className="rounded-lg shadow-lg ring-1 ring-secondary-400">
+                  <div className="rounded-t-lg bg-secondary-100 px-6 py-4">
                     <div className="flow-root rounded-md">
-                      <span className="block text-sm text-gray-800">
+                      <span className="block text-sm text-secondary-800">
                         <span className="font-bold ">{totalCount}</span> Vitals
                         Monitor present
                       </span>
@@ -138,10 +145,10 @@ export default function CentralNursingStation({ facilityId }: Props) {
                       optionLabel={({ value }) => t("SortOptions." + value)}
                       optionIcon={({ isAscending }) => (
                         <CareIcon
-                          className={
+                          icon={
                             isAscending
-                              ? "care-l-sort-amount-up"
-                              : "care-l-sort-amount-down"
+                              ? "l-sort-amount-up"
+                              : "l-sort-amount-down"
                           }
                         />
                       )}
@@ -150,12 +157,12 @@ export default function CentralNursingStation({ facilityId }: Props) {
                       errorClassName="hidden"
                     />
                     <CheckBoxFormField
-                      name="hide_monitors_without_patient"
-                      label="Hide Monitors without Patient"
+                      name="monitors_without_patient"
+                      label="Include monitors without patient"
                       value={JSON.parse(
-                        qParams.hide_monitors_without_patient ?? true
+                        qParams.monitors_without_patient ?? "false",
                       )}
-                      onChange={(e) => updateQuery({ [e.name]: e.value })}
+                      onChange={(e) => updateQuery({ [e.name]: `${e.value}` })}
                       labelClassName="text-sm"
                       errorClassName="hidden"
                     />
@@ -166,12 +173,12 @@ export default function CentralNursingStation({ facilityId }: Props) {
                       className="tooltip !h-11"
                     >
                       <CareIcon
-                        className={classNames(
+                        icon={
                           isFullscreen
-                            ? "care-l-compress-arrows"
-                            : "care-l-expand-arrows-alt",
-                          "text-lg"
-                        )}
+                            ? "l-compress-arrows"
+                            : "l-expand-arrows-alt"
+                        }
+                        className="text-lg"
                       />
                       {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
                     </ButtonV2>
@@ -207,7 +214,8 @@ export default function CentralNursingStation({ facilityId }: Props) {
                     ?.start_date
                 }
                 key={`${props.patientAssetBed?.bed.id}-${hash}`}
-                {...props}
+                patientAssetBed={props.patientAssetBed}
+                socketUrl={props.socketUrl || ""}
                 config={config}
               />
             </div>

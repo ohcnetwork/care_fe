@@ -18,6 +18,7 @@ import useQuery from "../../Utils/request/useQuery";
 import { parsePhoneNumber } from "../../Utils/utils";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import ExternalResultImportModal from "./ExternalResultImportModal";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -34,6 +35,7 @@ export default function ResultList() {
     limit: 14,
     cacheBlacklist: ["mobile_number", "name"],
   });
+  const [importModalOpen, setImportModalOpen] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
@@ -90,7 +92,7 @@ export default function ResultList() {
     const updatedLsgList = dataList.lsgList.filter((x: any) => x.id !== id);
     const lsgParams = updatedLsgList.map((x: any) => x.id);
     const updatedWardList = dataList.wardList.filter(
-      (x: any) => x.local_body_id !== id
+      (x: any) => x.local_body_id !== id,
     );
     const wardParams = updatedWardList.map((x: any) => x.id);
     updateQuery({ [paramKey]: lsgParams, ["wards"]: wardParams });
@@ -112,19 +114,20 @@ export default function ResultList() {
       value && (
         <span
           key={`${key}-${value.id}`}
-          className="inline-flex h-full items-center rounded-full border bg-white px-3 py-1 text-xs font-medium leading-4 text-gray-600"
+          className="inline-flex h-full items-center rounded-full border bg-white px-3 py-1 text-xs font-medium leading-4 text-secondary-600"
         >
           {`${key}: ${value.name}`}
-          <i
-            className="fas fa-times ml-2 cursor-pointer rounded-full px-1 py-0.5 hover:bg-gray-500"
+          <CareIcon
+            icon="l-times"
+            className="ml-2 cursor-pointer rounded-full text-base hover:bg-secondary-500"
             onClick={() =>
               paramKey === "local_bodies"
                 ? removeLSGFilter(paramKey, value.id)
                 : paramKey === "wards"
-                ? removeWardFilter(paramKey, value.id)
-                : null
+                  ? removeWardFilter(paramKey, value.id)
+                  : null
             }
-          ></i>
+          />
         </span>
       )
     );
@@ -138,25 +141,25 @@ export default function ResultList() {
         <tr key={`usr_${result.id}`} className="bg-white">
           <td
             onClick={() => navigate(resultUrl)}
-            className="text-md whitespace-nowrap px-6 py-4 leading-5 text-gray-900"
+            className="text-md whitespace-nowrap px-6 py-4 leading-5 text-secondary-900"
           >
             <div className="flex">
               <a
                 href="#"
                 className="group inline-flex space-x-2 text-sm leading-5"
               >
-                <p className="text-gray-800 transition duration-150 ease-in-out group-hover:text-gray-900">
+                <p className="text-secondary-800 transition duration-150 ease-in-out group-hover:text-secondary-900">
                   {`${result.name}`} - {result.age} {result.age_in}
                 </p>
               </a>
             </div>
           </td>
-          <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
-            <span className="font-medium text-gray-900">
+          <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-secondary-500">
+            <span className="font-medium text-secondary-900">
               {result.test_type}
             </span>
           </td>
-          <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
+          <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-secondary-500">
             <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium capitalize leading-4 text-blue-800">
               {result.result}
             </span>
@@ -166,10 +169,10 @@ export default function ResultList() {
               </span>
             ) : null}
           </td>
-          <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-800">
+          <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-secondary-800">
             {result.result_date || "-"}
           </td>
-          <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
+          <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-secondary-500">
             <ButtonV2
               variant="primary"
               disabled={
@@ -191,7 +194,7 @@ export default function ResultList() {
     });
   }
 
-  if (loading) {
+  if (loading || !data) {
     manageResults = (
       <tr className="bg-white">
         <td colSpan={5}>
@@ -206,7 +209,7 @@ export default function ResultList() {
       <tr className="bg-white">
         <td colSpan={5}>
           <div className="w-full rounded-lg bg-white p-3">
-            <div className="mt-4 flex w-full  justify-center text-2xl font-bold text-gray-600">
+            <div className="mt-4 flex w-full  justify-center text-2xl font-bold text-secondary-600">
               No Results Found
             </div>
           </div>
@@ -242,9 +245,9 @@ export default function ResultList() {
                 ? [
                     {
                       label: "Import Results",
-                      action: () => navigate("/external_results/upload"),
                       options: {
-                        icon: <CareIcon className="care-l-import" />,
+                        icon: <CareIcon icon="l-import" />,
+                        onClick: () => setImportModalOpen(true),
                       },
                     },
                   ]
@@ -254,17 +257,23 @@ export default function ResultList() {
                 action: () =>
                   externalResultList(
                     { ...qParams, csv: true },
-                    "externalResultList"
+                    "externalResultList",
                   ),
                 filePrefix: "external_results",
                 options: {
-                  icon: <CareIcon className="care-l-export" />,
+                  icon: <CareIcon icon="l-export" />,
                 },
               },
             ]}
           />
         }
       >
+        {importModalOpen && (
+          <ExternalResultImportModal
+            open={importModalOpen}
+            onClose={() => setImportModalOpen(false)}
+          />
+        )}
         <div className="relative my-4 grid-cols-1 gap-5 px-2 sm:grid-cols-3 md:px-0 lg:grid">
           <CountBlock
             text="Total Results"
@@ -322,27 +331,27 @@ export default function ResultList() {
           className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-t-lg"
           id="external-result-table"
         >
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-secondary-200">
             <thead>
               <tr>
-                <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+                <th className="bg-secondary-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-secondary-500">
                   Name
                 </th>
-                <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+                <th className="bg-secondary-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-secondary-500">
                   Test Type
                 </th>
-                <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wide text-gray-500">
+                <th className="bg-secondary-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wide text-secondary-500">
                   Status
                 </th>
-                <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+                <th className="bg-secondary-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-secondary-500">
                   Result Date
                 </th>
-                <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+                <th className="bg-secondary-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-secondary-500">
                   Create Patient
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
+            <tbody className="divide-y divide-secondary-200 bg-white">
               {manageResults}
             </tbody>
           </table>

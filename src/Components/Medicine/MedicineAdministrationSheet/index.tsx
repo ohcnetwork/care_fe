@@ -13,6 +13,7 @@ import useRangePagination from "../../../Common/hooks/useRangePagination";
 import MedicineAdministrationTable from "./AdministrationTable";
 import Loading from "../../Common/Loading";
 import ScrollOverlay from "../../../CAREUI/interactive/ScrollOverlay";
+import { AuthorizedForConsultationRelatedActions } from "../../../CAREUI/misc/AuthorizedChild";
 
 interface Props {
   readonly?: boolean;
@@ -27,14 +28,18 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
 
   const [showDiscontinued, setShowDiscontinued] = useState(false);
 
-  const filters = { is_prn, prescription_type: "REGULAR", limit: 100 };
+  const filters = {
+    dosage_type: is_prn ? "PRN" : "REGULAR,TITRATED",
+    prescription_type: "REGULAR",
+    limit: 100,
+  };
 
   const { data, loading, refetch } = useQuery(
     MedicineRoutes.listPrescriptions,
     {
       pathParams: { consultation },
       query: { ...filters, discontinued: false },
-    }
+    },
   );
 
   const discontinuedPrescriptions = useQuery(MedicineRoutes.listPrescriptions, {
@@ -57,13 +62,13 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
   const { activityTimelineBounds, prescriptions } = useMemo(
     () => ({
       prescriptions: prescriptionList.sort(
-        (a, b) => +a.discontinued - +b.discontinued
+        (a, b) => +a.discontinued - +b.discontinued,
       ),
       activityTimelineBounds: prescriptionList
         ? computeActivityBounds(prescriptionList)
         : undefined,
     }),
-    [prescriptionList]
+    [prescriptionList],
   );
 
   const daysPerPage = useBreakpoints({ default: 1, "2xl": 2 });
@@ -79,14 +84,15 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
       <SubHeading
         title={is_prn ? "PRN Prescriptions" : "Prescriptions"}
         lastModified={
-          prescriptions?.[0]?.last_administered_on ??
+          prescriptions?.[0]?.last_administration?.created_date ??
           prescriptions?.[0]?.modified_date
         }
         options={
           !readonly &&
           !!data?.results && (
-            <>
+            <AuthorizedForConsultationRelatedActions>
               <ButtonV2
+                id="edit-prescription"
                 variant="secondary"
                 border
                 href="prescriptions"
@@ -102,7 +108,7 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
                 prescriptions={data.results}
                 onDone={() => refetch()}
               />
-            </>
+            </AuthorizedForConsultationRelatedActions>
           )
         }
       />
@@ -136,6 +142,7 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
                     refetch();
                     discontinuedPrescriptions.refetch();
                   }}
+                  readonly={readonly || false}
                 />
               )}
             </>
@@ -143,8 +150,9 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
         </ScrollOverlay>
         {!!discontinuedCount && (
           <ButtonV2
+            id="discontinued-medicine"
             variant="secondary"
-            className="group sticky left-0 w-full rounded-b-lg rounded-t-none bg-gray-100"
+            className="group sticky left-0 w-full rounded-b-lg rounded-t-none bg-secondary-100"
             disabled={loading || discontinuedPrescriptions.loading}
             onClick={() => setShowDiscontinued(!showDiscontinued)}
           >
@@ -170,7 +178,7 @@ export default MedicineAdministrationSheet;
 
 const NoPrescriptions = ({ prn }: { prn: boolean }) => {
   return (
-    <div className="my-16 flex w-full flex-col items-center justify-center gap-4 text-gray-500">
+    <div className="my-16 flex w-full flex-col items-center justify-center gap-4 text-secondary-500">
       <CareIcon icon="l-tablets" className="text-5xl" />
       <h3 className="text-lg font-medium">
         {prn

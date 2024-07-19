@@ -6,7 +6,11 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import DateFormField from "../Form/FormFields/DateFormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { formatDateTime } from "../../Utils/utils";
+import {
+  formatDateTime,
+  humanizeStrings,
+  patientAgeInYears,
+} from "../../Utils/utils";
 import Page from "../Common/components/Page";
 import Form from "../Form/Form";
 import { useTranslation } from "react-i18next";
@@ -14,6 +18,7 @@ import { navigate } from "raviger";
 import dayjs from "dayjs";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 type DeathReport = {
   name?: string;
@@ -88,8 +93,9 @@ export default function PrintDeathReport(props: { id: string }) {
       patientData.medical_history &&
       patientData.medical_history.length
     ) {
-      const medHis = patientData.medical_history;
-      return medHis.map((item: any) => item.disease).join(", ");
+      return humanizeStrings(
+        patientData.medical_history.map((item: any) => item.disease),
+      );
     } else {
       return "None";
     }
@@ -105,6 +111,7 @@ export default function PrintDeathReport(props: { id: string }) {
         const patientComorbidities = getPatientComorbidities(res.data);
         const data = {
           ...res.data,
+          age: patientAgeInYears(res.data!),
           gender: patientGender,
           address: patientAddress,
           comorbidities: patientComorbidities,
@@ -137,16 +144,18 @@ export default function PrintDeathReport(props: { id: string }) {
     <div className="my-4">
       <div className="my-4 flex justify-end ">
         <button
+          id="print-deathreport"
           onClick={(_) => window.print()}
           className="btn btn-primary mr-2"
         >
-          <i className="fas fa-print mr-2"></i> Print Death Report
+          <CareIcon icon="l-print" className="mr-2 text-lg" /> Print Death
+          Report
         </button>
         <button
           onClick={(_) => setIsPrintMode(false)}
           className="btn btn-default"
         >
-          <i className="fas fa-times mr-2"></i> Close
+          <CareIcon icon="l-times" className="mr-2 text-lg" /> Close
         </button>
       </div>
 

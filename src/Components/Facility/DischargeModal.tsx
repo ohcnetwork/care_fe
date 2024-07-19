@@ -4,26 +4,28 @@ import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { useCallback, useEffect, useState } from "react";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import CircularProgress from "../Common/components/CircularProgress";
 import ClaimCard from "../HCX/ClaimCard";
 import { ConsultationModel } from "./models";
 import CreateClaimCard from "../HCX/CreateClaimCard";
 import { DISCHARGE_REASONS } from "../../Common/constants";
 import DialogModal from "../Common/Dialog";
-import { FacilityModel } from "./models";
-import { FacilitySelect } from "../Common/FacilitySelect";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { HCXActions } from "../../Redux/actions";
 import { HCXClaimModel } from "../HCX/models";
-import PrescriptionBuilder from "../Medicine/PrescriptionBuilder";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-import dayjs from "../../Utils/dayjs";
 import { dischargePatient } from "../../Redux/actions";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
+import PrescriptionBuilder from "../Medicine/PrescriptionBuilder";
+import CircularProgress from "../Common/components/CircularProgress";
+import { FacilitySelect } from "../Common/FacilitySelect";
+import { FacilityModel } from "./models";
+import dayjs from "../../Utils/dayjs";
+import { FieldError } from "../Form/FieldValidators";
+import { useTranslation } from "react-i18next";
 
 interface PreDischargeFormInterface {
   new_discharge_reason: number | null;
@@ -31,7 +33,7 @@ interface PreDischargeFormInterface {
   discharge_date?: string;
   death_datetime?: string;
   death_confirmed_doctor?: string;
-  referred_to?: number | null | undefined;
+  referred_to?: string | null | undefined;
   referred_to_external?: string | null | undefined;
 }
 
@@ -39,9 +41,9 @@ interface IProps {
   show: boolean;
   onClose: () => void;
   consultationData: ConsultationModel;
+  referred_to?: FacilityModel | null;
   afterSubmit?: () => void;
   new_discharge_reason?: number | null;
-  discharge_notes?: string;
   discharge_date?: string;
   death_datetime?: string;
 }
@@ -52,26 +54,46 @@ const DischargeModal = ({
   consultationData,
   afterSubmit,
   new_discharge_reason = null,
-  discharge_notes = "",
+  referred_to = null,
   discharge_date = dayjs().format("YYYY-MM-DDTHH:mm"),
   death_datetime = dayjs().format("YYYY-MM-DDTHH:mm"),
 }: IProps) => {
+  const { t } = useTranslation();
   const { enable_hcx } = useConfig();
   const dispatch: any = useDispatch();
   const [preDischargeForm, setPreDischargeForm] =
     useState<PreDischargeFormInterface>({
       new_discharge_reason,
-      discharge_notes,
+      discharge_notes: referred_to
+        ? "Patient Shifted to another facility."
+        : "",
       discharge_date,
       death_datetime,
       death_confirmed_doctor: undefined,
-      referred_to_external: null,
+      referred_to_external: !referred_to?.id ? referred_to?.name : null,
+      referred_to: referred_to?.id ? referred_to.id : null,
     });
   const [latestClaim, setLatestClaim] = useState<HCXClaimModel>();
   const [isCreateClaimLoading, setIsCreateClaimLoading] = useState(false);
   const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
-  const [facility, setFacility] = useState<FacilityModel>();
+  const [facility, setFacility] = useState<FacilityModel | null>(referred_to);
   const [errors, setErrors] = useState<any>({});
+
+  useEffect(() => {
+    setPreDischargeForm((prev) => ({
+      ...prev,
+      discharge_notes: referred_to
+        ? "Patient Shifted to another facility."
+        : "",
+      referred_to_external: !referred_to?.id ? referred_to?.name : null,
+      referred_to: referred_to?.id ? referred_to.id : null,
+    }));
+
+    setFacility(referred_to);
+  }, [referred_to]);
+
+  const discharge_reason =
+    new_discharge_reason ?? preDischargeForm.new_discharge_reason;
 
   const fetchLatestClaim = useCallback(async () => {
     const res = await dispatch(
@@ -79,7 +101,7 @@ const DischargeModal = ({
         ordering: "-modified_date",
         use: "claim",
         consultation: consultationData.id,
-      })
+      }),
     );
 
     if (res?.data?.results?.length > 0) {
@@ -110,7 +132,7 @@ const DischargeModal = ({
 
   const handlePatientDischarge = async (value: boolean) => {
     setIsSendingDischargeApi(true);
-    if (!preDischargeForm.new_discharge_reason) {
+    if (!new_discharge_reason && !discharge_reason) {
       setErrors({
         ...errors,
         new_discharge_reason: "Please select a reason for discharge",
@@ -120,21 +142,28 @@ const DischargeModal = ({
     }
 
     if (
-      preDischargeForm.new_discharge_reason ==
-        DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id &&
-      !preDischargeForm.discharge_notes.trim()
+      discharge_reason == DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
     ) {
-      setErrors({
-        ...errors,
-        discharge_notes: "Please enter the cause of death",
-      });
-      setIsSendingDischargeApi(false);
-      return;
+      const newErrors: Record<string, FieldError> = {};
+
+      if (!preDischargeForm.discharge_notes.trim()) {
+        newErrors["discharge_notes"] = "Please enter the cause of death";
+      }
+      if (!preDischargeForm.death_confirmed_doctor?.trim()) {
+        newErrors["death_confirmed_doctor"] = "Field is required";
+      }
+
+      if (Object.entries(newErrors).length) {
+        setErrors({ ...errors, ...newErrors });
+        setIsSendingDischargeApi(false);
+        return;
+      }
     }
 
     const dischargeDetails = {
       ...preDischargeForm,
       discharge: value,
+      referred_to: referred_to?.id ?? preDischargeForm.referred_to,
       discharge_date: dayjs(preDischargeForm.discharge_date).toISOString(),
     };
 
@@ -149,10 +178,11 @@ const DischargeModal = ({
         {
           ...preDischargeForm,
           discharge: value,
+          new_discharge_reason: discharge_reason,
           discharge_date: dayjs(preDischargeForm.discharge_date).toISOString(),
         },
-        { id: consultationData.id }
-      )
+        { id: consultationData.id },
+      ),
     );
 
     setIsSendingDischargeApi(false);
@@ -165,28 +195,40 @@ const DischargeModal = ({
     }
   };
 
-  const handleFacilitySelect = (selected: FacilityModel) => {
-    setFacility(selected);
-    const { id, name } = selected || {};
-    const isExternal = Number(id) === -1;
-    setPreDischargeForm(
-      (prev) =>
-        ({
-          ...prev,
-          referred_to: isExternal ? null : id,
-          referred_to_external: isExternal ? name : null,
-        } as PreDischargeFormInterface)
-    );
+  const handleFacilitySelect = (selected?: FacilityModel) => {
+    setFacility(selected ?? null);
+    setPreDischargeForm((prev) => ({
+      ...prev,
+      referred_to: selected?.id ?? null,
+      referred_to_external: !selected?.id ? selected?.name : null,
+    }));
   };
+
+  const encounterDuration = dayjs
+    .duration(
+      dayjs(
+        preDischargeForm[
+          discharge_reason ===
+          DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
+            ? "death_datetime"
+            : "discharge_date"
+        ],
+      ).diff(consultationData.encounter_date),
+    )
+    .humanize();
 
   return (
     <DialogModal
       title={
         <div>
           <p>Discharge patient from CARE</p>
-          <span className="mt-1 flex gap-1 text-sm font-medium text-warning-500">
-            <CareIcon className="care-l-exclamation-triangle text-base" />
-            <p>Caution: this action is irreversible.</p>
+          <span className="mt-1 flex gap-1 text-sm font-medium text-danger-500">
+            <CareIcon icon="l-exclamation-triangle" className="text-base" />
+            <p>
+              {new_discharge_reason === 3 // Expired
+                ? "Caution: Once a patient is marked as expired, the patient file cannot be transferred or edited. Please proceed with caution."
+                : "Caution: This action is irrevesible. Please proceed with caution."}
+            </p>
           </span>
         </div>
       }
@@ -200,7 +242,7 @@ const DischargeModal = ({
           label="Reason"
           name="discharge_reason"
           id="discharge_reason"
-          value={preDischargeForm.new_discharge_reason}
+          value={discharge_reason}
           disabled={!!new_discharge_reason}
           options={DISCHARGE_REASONS}
           optionValue={({ id }) => id}
@@ -213,15 +255,16 @@ const DischargeModal = ({
           }
           error={errors?.new_discharge_reason}
         />
-        {preDischargeForm.new_discharge_reason ===
+        {discharge_reason ===
           DISCHARGE_REASONS.find((i) => i.text == "Referred")?.id && (
-          <>
+          <div id="facility-referredto">
             <FieldLabel>Referred to</FieldLabel>
             <FacilitySelect
               name="referred_to"
               setSelected={(selected) =>
-                handleFacilitySelect(selected as FacilityModel)
+                handleFacilitySelect(selected as FacilityModel | undefined)
               }
+              disabled={!!referred_to}
               selected={facility ?? null}
               showAll
               freeText
@@ -229,18 +272,18 @@ const DischargeModal = ({
               errors={errors?.referred_to}
               className="mb-4"
             />
-          </>
+          </div>
         )}
         <TextAreaFormField
           required={
-            preDischargeForm.new_discharge_reason ==
+            discharge_reason ==
             DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
           }
           label={
             {
               "3": "Cause of death",
               "1": "Discharged Advice",
-            }[preDischargeForm.new_discharge_reason ?? 0] ?? "Notes"
+            }[discharge_reason ?? 0] ?? "Notes"
           }
           name="discharge_notes"
           value={preDischargeForm.discharge_notes}
@@ -254,13 +297,13 @@ const DischargeModal = ({
         />
         <TextFormField
           name={
-            preDischargeForm.new_discharge_reason ===
+            discharge_reason ===
             DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
               ? "death_datetime"
               : "discharge_date"
           }
           label={
-            preDischargeForm.new_discharge_reason ===
+            discharge_reason ===
             DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
               ? "Date of Death"
               : "Date and Time of Discharge"
@@ -268,7 +311,7 @@ const DischargeModal = ({
           type="datetime-local"
           value={
             preDischargeForm[
-              preDischargeForm.new_discharge_reason ===
+              discharge_reason ===
               DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
                 ? "death_datetime"
                 : "discharge_date"
@@ -284,18 +327,17 @@ const DischargeModal = ({
           }}
           required
           min={dayjs(consultationData?.encounter_date).format(
-            "YYYY-MM-DDTHH:mm"
+            "YYYY-MM-DDTHH:mm",
           )}
           max={dayjs().format("YYYY-MM-DDTHH:mm")}
           error={
-            preDischargeForm.new_discharge_reason ===
+            discharge_reason ===
             DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id
               ? errors?.death_datetime
               : errors?.discharge_date
           }
         />
-
-        {preDischargeForm.new_discharge_reason ===
+        {discharge_reason ===
           DISCHARGE_REASONS.find((i) => i.text == "Recovered")?.id && (
           <>
             <div className="mb-4">
@@ -308,11 +350,12 @@ const DischargeModal = ({
             </div>
           </>
         )}
-        {preDischargeForm.new_discharge_reason ===
+        {discharge_reason ===
           DISCHARGE_REASONS.find((i) => i.text == "Expired")?.id && (
           <TextFormField
             name="death_confirmed_by"
             label="Confirmed By"
+            error={errors.death_confirmed_doctor}
             value={preDischargeForm.death_confirmed_doctor ?? ""}
             onChange={(e) => {
               setPreDischargeForm((form) => {
@@ -346,7 +389,13 @@ const DischargeModal = ({
         </div>
       )}
 
-      <div className="flex flex-col gap-2 pt-4 md:flex-row md:justify-end">
+      <div className="py-4">
+        <span className="text-secondary-700">
+          {t("encounter_duration_confirmation")}{" "}
+          <strong>{encounterDuration}</strong>.
+        </span>
+      </div>
+      <div className="cui-form-button-group">
         <Cancel onClick={onClose} />
         {isSendingDischargeApi ? (
           <CircularProgress />

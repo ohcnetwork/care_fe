@@ -46,8 +46,14 @@
   "apply": "Apply",
   "filter_by": "Filter By",
   "filter": "Filter",
+  "settings_and_filters": "Settings and Filters",
   "ordering": "Ordering",
   "phone_number": "Phone Number",
+  "international_mobile": "International Mobile",
+  "indian_mobile": "Indian Mobile",
+  "mobile": "Mobile",
+  "landline": "Indian landline",
+  "support": "Support",
   "emergency_contact_number": "Emergency Contact Number",
   "last_modified": "Last Modified",
   "patient_address": "Patient Address",
@@ -160,5 +166,12 @@
   "clear_selection": "Clear selection",
   "select_date": "Select date",
   "DD/MM/YYYY": "DD/MM/YYYY",
-  "clear_all_filters": "Clear All Filters"
+  "clear_all_filters": "Clear All Filters",
+  "summary": "Summary",
+  "report": "Report",
+  "treating_doctor": "Treating Doctor",
+  "ration_card__NO_CARD": "Non-card holder",
+  "ration_card__BPL": "BPL",
+  "ration_card__APL": "APL",
+  "caution": "Caution"
 }

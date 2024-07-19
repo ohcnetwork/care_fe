@@ -22,7 +22,7 @@ export const PressureSoreDiagrams = (props: any) => {
   useEffect(() => {
     const fetchDailyRounds = async (
       currentPage: number,
-      consultationId: string
+      consultationId: string,
     ) => {
       setIsLoading(true);
       const { res, data: dailyRounds } = await request(
@@ -35,13 +35,13 @@ export const PressureSoreDiagrams = (props: any) => {
           pathParams: {
             consultationId,
           },
-        }
+        },
       );
       if (res && res.ok && dailyRounds) {
         const keys = Object.keys(dailyRounds.results || {}).filter(
           (key) =>
             (dailyRounds.results[key] as PressureSoreDiagramsRes).pressure_sore
-              .length
+              .length,
         );
         const data: any = {};
         keys.forEach((key) => (data[key] = dailyRounds.results[key]));
@@ -89,7 +89,7 @@ export const PressureSoreDiagrams = (props: any) => {
         <div className="p-2">Choose Date and Time</div>
         <select
           title="date"
-          className="relative rounded border-gray-200 bg-white py-2 pl-3 pr-8 text-slate-600 shadow outline-none focus:border-gray-300  focus:outline-none focus:ring-1 focus:ring-gray-300"
+          className="relative rounded border-secondary-200 bg-white py-2 pl-3 pr-8 text-slate-600 shadow outline-none focus:border-secondary-300  focus:outline-none focus:ring-1 focus:ring-secondary-300"
           onChange={(e) => {
             setSelectedDateData(results, e.target.value);
           }}
@@ -107,7 +107,7 @@ export const PressureSoreDiagrams = (props: any) => {
       <div>
         <select
           title="date"
-          className="border-2 border-gray-400 py-2 pl-3 pr-8"
+          className="border-2 border-secondary-400 py-2 pl-3 pr-8"
           disabled={true}
         >
           <option>No Data Found</option>

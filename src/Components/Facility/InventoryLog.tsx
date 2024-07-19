@@ -9,6 +9,7 @@ import ButtonV2 from "../Common/components/ButtonV2.js";
 import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
+
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function InventoryLog(props: any) {
@@ -80,26 +81,29 @@ export default function InventoryLog(props: any) {
   if (data?.results.length) {
     inventoryList = data.results.map((inventoryItem: any, index) => (
       <tr id={`row-${index}`} key={inventoryItem.id} className="bg-white">
-        <td className="border-b border-gray-200 p-5 text-sm hover:bg-gray-100">
+        <td className="border-b border-secondary-200 p-5 text-sm hover:bg-secondary-100">
           <div className="flex items-center">
             <div className="ml-3">
-              <p className="whitespace-nowrap text-gray-900">
+              <p className="whitespace-nowrap text-secondary-900">
                 {formatDateTime(inventoryItem.created_date)}
               </p>
             </div>
           </div>
         </td>
-        <td className="border-b border-gray-200 p-5 text-sm hover:bg-gray-100">
-          <p className="whitespace-nowrap lowercase text-gray-900">
+        <td className="border-b border-secondary-200 p-5 text-sm hover:bg-secondary-100">
+          <p className="whitespace-nowrap lowercase text-secondary-900">
             {inventoryItem.quantity_in_default_unit}{" "}
             {inventoryItem.item_object?.default_unit?.name}
             {inventoryItem.probable_accident && (
-              <i className="fas fa-exclamation-triangle pl-2 text-orange-500"></i>
+              <CareIcon
+                icon="l-exclamation-triangle"
+                className="pl-2 text-lg text-orange-500"
+              />
             )}
           </p>
         </td>
-        <td className="border-b border-gray-200 p-5 text-sm hover:bg-gray-100">
-          <p className="whitespace-nowrap lowercase text-gray-900">
+        <td className="border-b border-secondary-200 p-5 text-sm hover:bg-secondary-100">
+          <p className="whitespace-nowrap lowercase text-secondary-900">
             {inventoryItem.is_incoming ? (
               <span className="ml-2 text-primary-600">Added Stock</span>
             ) : (
@@ -136,7 +140,10 @@ export default function InventoryLog(props: any) {
                 variant="primary"
               >
                 <span>
-                  <CareIcon className="care-l-exclamation-triangle pr-2 text-lg" />
+                  <CareIcon
+                    icon="l-exclamation-triangle"
+                    className="pr-2 text-lg"
+                  />
                   UnMark
                 </span>
               </ButtonV2>
@@ -145,9 +152,13 @@ export default function InventoryLog(props: any) {
                 onClick={(_) => flagFacility(inventoryItem.external_id)}
                 disabled={saving}
                 variant="danger"
+                className="mr-2"
               >
                 <span>
-                  <CareIcon className="care-l-exclamation-circle pr-2 text-lg" />
+                  <CareIcon
+                    icon="l-exclamation-circle"
+                    className="pr-2 text-lg"
+                  />
                   Mark as Accident
                 </span>
               </ButtonV2>
@@ -159,8 +170,11 @@ export default function InventoryLog(props: any) {
   } else if (data?.results && data.results.length === 0) {
     inventoryList = (
       <tr className="bg-white">
-        <td colSpan={3} className="border-b border-gray-200 p-5 text-center">
-          <p className="whitespace-nowrap text-gray-500">
+        <td
+          colSpan={3}
+          className="border-b border-secondary-200 p-5 text-center"
+        >
+          <p className="whitespace-nowrap text-secondary-500">
             No log for this inventory available
           </p>
         </td>
@@ -173,21 +187,21 @@ export default function InventoryLog(props: any) {
   } else if (data.results) {
     inventoryItem = (
       <>
-        <div className="-mx-4 overflow-x-auto p-4 sm:-mx-8 sm:px-8">
+        <div className="-mx-4 overflow-x-auto p-4 pb-9 sm:-mx-8 sm:px-8">
           <div className="inline-block min-w-full">
-            <table className="min-w-full overflow-hidden rounded-lg leading-normal shadow">
+            <table className="min-w-full overflow-x-clip rounded-lg leading-normal shadow">
               <thead>
                 <tr>
-                  <th className="border-b-2 border-gray-200 bg-primary-400 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
+                  <th className="border-b-2 border-secondary-200 bg-primary-400 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
                     Created On
                   </th>
-                  <th className="border-b-2 border-gray-200 bg-primary-400 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
+                  <th className="border-b-2 border-secondary-200 bg-primary-400 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
                     Quantity
                   </th>
-                  <th className="border-b-2 border-gray-200 bg-primary-400 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
+                  <th className="border-b-2 border-secondary-200 bg-primary-400 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
                     Status
                   </th>
-                  <th className="border-b-2 border-gray-200 bg-primary-400 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
+                  <th className="border-b-2 border-secondary-200 bg-primary-400 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
                     Actions
                   </th>
                 </tr>
@@ -227,10 +241,12 @@ export default function InventoryLog(props: any) {
               <h4>Item: {data?.results[0].item_object.name}</h4>
               {data?.results && data.results[0].current_stock > 0 && (
                 <div className="tooltip ">
-                  <div className="tooltip-text tooltip-left text-justify text-sm leading-snug">
-                    <b>Deletes the last transaction</b> by creating an
-                    equivalent undo transaction and marks both the transactions
-                    as accident.
+                  <div className="tooltip-text tooltip-left text-justify text-sm leading-snug ">
+                    <b>Deletes the last transaction</b>
+                    <br />
+                    It does by creating an equivalent undo transaction
+                    <br />
+                    and marks both the transactions as accident.
                   </div>
                   <ButtonV2
                     id="delete-last-entry"
@@ -241,7 +257,10 @@ export default function InventoryLog(props: any) {
                     disabled={saving}
                   >
                     <span>
-                      <CareIcon className="care-l-exclamation-circle pr-2 text-lg" />
+                      <CareIcon
+                        icon="l-exclamation-circle"
+                        className="pr-2 text-lg"
+                      />
                       Delete Last Entry
                     </span>
                   </ButtonV2>

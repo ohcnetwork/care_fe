@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import GenericFilterBadge from "../../CAREUI/display/FilterBadge";
 import PaginationComponent from "../../Components/Common/Pagination";
 import useConfig from "./useConfig";
-import { classNames } from "../../Utils/utils";
+import { classNames, humanizeStrings } from "../../Utils/utils";
 import FiltersCache from "../../Utils/FiltersCache";
 
 export type FilterState = Record<string, unknown>;
@@ -39,7 +39,7 @@ export default function useFilters({
 
   const setQueryParams = (
     query: QueryParam,
-    options?: setQueryParamsOptions
+    options?: setQueryParamsOptions,
   ) => {
     query = FiltersCache.utils.clean(query);
     _setQueryParams(query, options);
@@ -87,10 +87,7 @@ export default function useFilters({
           name={name}
           value={
             value === undefined
-              ? paramKey
-                  .map((k) => qParams[k])
-                  .filter(Boolean)
-                  .join(", ")
+              ? humanizeStrings(paramKey.map((k) => qParams[k]).filter(Boolean))
               : value
           }
           onRemove={() => removeFilters(paramKey)}
@@ -142,7 +139,7 @@ export default function useFilters({
         falseLabel?: string;
         trueValue?: string;
         falseValue?: string;
-      }
+      },
     ) {
       const {
         trueLabel = "Yes",
@@ -187,16 +184,20 @@ export default function useFilters({
       return acc;
     }, [] as string[]);
 
+    const show = activeFilters.length > 0 || children;
+
     return (
-      <div className="col-span-3 my-2 flex w-full flex-wrap items-center gap-2">
+      <div
+        className={`col-span-3 my-2 flex w-full flex-wrap items-center gap-2 ${show ? "" : "hidden"}`}
+      >
         {compiledBadges.map((props) => (
           <FilterBadge {...props} name={t(props.name)} key={props.name} />
         ))}
         {children}
-        {(activeFilters.length >= 1 || children) && (
+        {show && (
           <button
             id="clear-all-filters"
-            className="rounded-full border border-gray-300 bg-white px-2 py-1 text-xs text-gray-600 hover:text-gray-800"
+            className="rounded-full border border-secondary-300 bg-white px-2 py-1 text-xs text-secondary-600 hover:text-secondary-800"
             onClick={() => removeFilters()}
           >
             {t("clear_all_filters")}
@@ -222,7 +223,7 @@ export default function useFilters({
         className={classNames(
           "flex w-full justify-center",
           totalCount > limit ? "visible" : "invisible",
-          !noMargin && "mt-4"
+          !noMargin && "mt-4",
         )}
       >
         <PaginationComponent

@@ -5,7 +5,7 @@ import { ConsultationTabProps } from "./index";
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
 
 export const ConsultationNeurologicalMonitoringTab = (
-  props: ConsultationTabProps
+  props: ConsultationTabProps,
 ) => {
   return (
     <div>

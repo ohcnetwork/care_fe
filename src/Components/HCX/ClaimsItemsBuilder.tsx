@@ -15,7 +15,7 @@ import { HCXItemModel } from "./models";
 type Props = FormFieldBaseProps<HCXItemModel[]>;
 
 export default function ClaimsItemsBuilder(props: Props) {
-  const field = useFormFieldPropsResolver(props as any);
+  const field = useFormFieldPropsResolver(props);
 
   const handleUpdate = (index: number) => {
     return (event: FieldChangeEvent<any>) => {
@@ -29,14 +29,14 @@ export default function ClaimsItemsBuilder(props: Props) {
                   name: event.value.name,
                   price: event.value.price,
                 }
-              : obj
-          )
+              : obj,
+          ),
         );
       } else {
         field.handleChange(
           (props.value || [])?.map((obj, i) =>
-            i === index ? { ...obj, [event.name]: event.value } : obj
-          )
+            i === index ? { ...obj, [event.name]: event.value } : obj,
+          ),
         );
       }
     };
@@ -55,7 +55,7 @@ export default function ClaimsItemsBuilder(props: Props) {
           return (
             <div
               key={index}
-              className="rounded-lg border-2 border-dashed border-gray-200 p-4"
+              className="rounded-lg border-2 border-dashed border-secondary-200 p-4"
             >
               <div className="flex items-center justify-between">
                 <FieldLabel className="my-auto !font-bold">
@@ -70,7 +70,7 @@ export default function ClaimsItemsBuilder(props: Props) {
                     disabled={props.disabled}
                   >
                     Delete
-                    <CareIcon className="care-l-trash-alt text-lg" />
+                    <CareIcon icon="l-trash-alt" className="text-lg" />
                   </ButtonV2>
                 )}
               </div>
@@ -94,7 +94,7 @@ export default function ClaimsItemsBuilder(props: Props) {
                     <PMJAYProcedurePackageAutocomplete
                       required
                       className="flex-[7]"
-                      labelClassName="text-sm text-gray-700"
+                      labelClassName="text-sm text-secondary-700"
                       label="Procedure"
                       name="hbp"
                       value={obj}

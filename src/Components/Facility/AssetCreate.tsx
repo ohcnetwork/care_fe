@@ -4,6 +4,7 @@ import { AssetClass, AssetType } from "../Assets/AssetTypes";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import {
   LegacyRef,
+  MutableRefObject,
   RefObject,
   createRef,
   lazy,
@@ -12,12 +13,12 @@ import {
   useState,
 } from "react";
 
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import CareIcon, { IconName } from "../../CAREUI/icons/CareIcon";
 import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import { LocationSelect } from "../Common/LocationSelect";
 import Page from "../Common/components/Page";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import QrReader from "react-qr-reader";
+import { Scanner } from "@yudiel/react-qr-scanner";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import SwitchV2 from "../Common/components/Switch";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
@@ -60,7 +61,7 @@ const initError = formErrorKeys.reduce(
     acc[key] = "";
     return acc;
   },
-  {}
+  {},
 );
 
 const fieldRef = formErrorKeys.reduce(
@@ -68,7 +69,7 @@ const fieldRef = formErrorKeys.reduce(
     acc[key] = createRef();
     return acc;
   },
-  {}
+  {},
 );
 
 const initialState = {
@@ -132,19 +133,25 @@ const AssetCreate = (props: AssetProps) => {
   const [warrantyDetailsVisible, warrantyDetailsRef] = useVisibility(-300);
   const [serviceDetailsVisible, serviceDetailsRef] = useVisibility(-300);
 
-  const sections = {
+  const sections: {
+    [key in AssetFormSection]: {
+      icon: IconName;
+      isVisible: boolean;
+      ref: MutableRefObject<HTMLElement | undefined>;
+    };
+  } = {
     "General Details": {
-      iconClass: "fa-solid fa-circle-info",
+      icon: "l-info-circle",
       isVisible: generalDetailsVisible,
       ref: generalDetailsRef,
     },
     "Warranty Details": {
-      iconClass: "fa-solid fa-barcode",
+      icon: "l-qrcode-scan",
       isVisible: warrantyDetailsVisible,
       ref: warrantyDetailsRef,
     },
     "Service Details": {
-      iconClass: "fas fa-tools",
+      icon: "l-wrench",
       isVisible: serviceDetailsVisible,
       ref: serviceDetailsRef,
     },
@@ -375,25 +382,25 @@ const AssetCreate = (props: AssetProps) => {
       <Page
         title={assetId ? t("update_asset") : t("create_new_asset")}
         crumbsReplacements={{
-          assets: { style: "text-gray-200 pointer-events-none" },
+          assets: { style: "text-secondary-200 pointer-events-none" },
           [assetId || "????"]: { name },
         }}
         backUrl={`/facility/${facilityId}`}
       >
         <section className="text-center">
           <h1 className="flex flex-col items-center py-10 text-6xl">
-            <div className="flex h-40 w-40 items-center justify-center rounded-full bg-gray-200 p-5">
-              <CareIcon className="care-l-map-marker text-green-600" />
+            <div className="flex h-40 w-40 items-center justify-center rounded-full bg-secondary-200 p-5">
+              <CareIcon icon="l-map-marker" className="text-green-600" />
             </div>
           </h1>
-          <p className="text-gray-600">
+          <p className="text-secondary-600">
             {t("you_need_at_least_a_location_to_create_an_assest")}
           </p>
           <button
             className="btn-primary btn mt-5"
             onClick={() => navigate(`/facility/${facilityId}/location/add`)}
           >
-            <i className="fas fa-plus mr-2 text-white"></i>
+            <CareIcon icon="l-plus" className="mr-2 text-white" />
             {t("add_location")}
           </button>
         </section>
@@ -408,18 +415,19 @@ const AssetCreate = (props: AssetProps) => {
           onClick={() => setIsScannerActive(false)}
           className="btn btn-default mb-2"
         >
-          <i className="fas fa-times mr-2"></i>
+          <CareIcon icon="l-times" className="mr-2 text-lg" />
           {t("close_scanner")}
         </button>
-        <QrReader
-          delay={300}
-          onScan={(assetId: any) => (assetId ? parseAssetId(assetId) : null)}
-          onError={(e: any) =>
+        <Scanner
+          onResult={(assetId) => (assetId ? parseAssetId(assetId) : null)}
+          onError={(e) =>
             Notification.Error({
               msg: e.message,
             })
           }
-          style={{ width: "100%" }}
+          options={{
+            delayBetweenScanAttempts: 300,
+          }}
         />
         <h2 className="self-center text-center text-lg">
           {t("scan_asset_qr")}
@@ -438,11 +446,11 @@ const AssetCreate = (props: AssetProps) => {
         className="col-span-6 -ml-2 mb-6 flex flex-row items-center"
         ref={section.ref as LegacyRef<HTMLDivElement>}
       >
-        <i className={`${section.iconClass} mr-3 text-lg`} />
-        <label className="text-lg font-bold text-gray-900">
+        <CareIcon icon={section.icon} className="mr-3 text-lg" />
+        <label className="text-lg font-bold text-secondary-900">
           {sectionTitle}
         </label>
-        <hr className="ml-6 flex-1 border border-gray-400" />
+        <hr className="ml-6 flex-1 border border-secondary-400" />
       </div>
     );
   };
@@ -456,7 +464,7 @@ const AssetCreate = (props: AssetProps) => {
           [facilityId]: {
             name: locationsQuery.data?.results[0].facility?.name,
           },
-          assets: { style: "text-gray-200 pointer-events-none" },
+          assets: { style: "text-secondary-200 pointer-events-none" },
           [assetId || "????"]: { name },
         }}
         backUrl={
@@ -483,7 +491,7 @@ const AssetCreate = (props: AssetProps) => {
                     setCurrentSection(sectionTitle as AssetFormSection);
                   }}
                 >
-                  <i className={`${section.iconClass} text-sm`} />
+                  <CareIcon icon={section.icon} className="text-lg" />
                   <span>{sectionTitle}</span>
                 </button>
               );
@@ -663,10 +671,13 @@ const AssetCreate = (props: AssetProps) => {
                         />
                       </div>
                       <div
-                        className="ml-1 mt-1 flex h-10 cursor-pointer items-center justify-self-end rounded border border-gray-400 px-4 hover:bg-gray-200"
+                        className="ml-1 mt-1 flex h-10 cursor-pointer items-center justify-self-end rounded border border-secondary-400 px-4 hover:bg-secondary-200"
                         onClick={() => setIsScannerActive(true)}
                       >
-                        <CareIcon className="care-l-focus cursor-pointer text-lg" />
+                        <CareIcon
+                          icon="l-focus"
+                          className="cursor-pointer text-lg"
+                        />
                       </div>
                     </div>
                   </div>
@@ -830,7 +841,7 @@ const AssetCreate = (props: AssetProps) => {
                             });
                           } else {
                             setLastServicedOn(
-                              dayjs(date.value).format("YYYY-MM-DD")
+                              dayjs(date.value).format("YYYY-MM-DD"),
                             );
                           }
                         }}
@@ -850,7 +861,7 @@ const AssetCreate = (props: AssetProps) => {
                         name="notes"
                         label={t("notes")}
                         placeholder={t(
-                          "Eg. Details on functionality, service, etc."
+                          "Eg. Details on functionality, service, etc.",
                         )}
                         value={notes}
                         onChange={(e) => setNotes(e.value)}
@@ -865,7 +876,7 @@ const AssetCreate = (props: AssetProps) => {
                         navigate(
                           assetId
                             ? `/facility/${facilityId}/assets/${assetId}`
-                            : `/facility/${facilityId}`
+                            : `/facility/${facilityId}`,
                         )
                       }
                     />
