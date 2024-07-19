@@ -38,7 +38,7 @@ export default function ClaimCardCommunication({
       HCXActions.communications.list({
         claim: claim.id,
         ordering: "created_date",
-      })
+      }),
     );
 
     if (response.status === 200 && response.data) {
@@ -48,9 +48,9 @@ export default function ClaimCardCommunication({
             setMessages((prev) => [
               ...prev,
               { ...content, user: communication.created_by, index: i },
-            ])
+            ]),
           );
-        }
+        },
       );
     }
   }, [claim.id, dispatch]);
@@ -63,7 +63,7 @@ export default function ClaimCardCommunication({
           type: response.type as string,
           data: response.data as string,
         })),
-      })
+      }),
     );
 
     console.log(response, response.status);
@@ -81,7 +81,7 @@ export default function ClaimCardCommunication({
   }, [responses]);
 
   return (
-    <div className="flex flex-col justify-end h-full">
+    <div className="flex h-full flex-col justify-end">
       {createdCommunication && (
         <SendCommunicationModal
           communication={createdCommunication}
@@ -94,25 +94,26 @@ export default function ClaimCardCommunication({
       )}
       <div className="flex justify-end">
         <CareIcon
+          icon="l-info-circle"
+          className=" h-7 w-7 cursor-pointer text-gray-600 hover:text-gray-800"
           onClick={() => setShowMessages(false)}
-          className="care-l-info-circle w-7 h-7 text-gray-600 cursor-pointer hover:text-gray-800"
         />
       </div>
 
-      <div className="overflow-y-auto w-full h-full my-3">
+      <div className="my-3 h-full w-full overflow-y-auto">
         {messages.map((message) => (
           <div
             className={classNames(
-              "flex mb-4",
-              message.user ? "justify-end" : "justify-start"
+              "mb-4 flex",
+              message.user ? "justify-end" : "justify-start",
             )}
           >
             <p
               className={classNames(
-                "ml-2 py-3 px-4 text-white",
+                "ml-2 px-4 py-3 text-white",
                 message.user
-                  ? "bg-blue-400 rounded-bl-3xl rounded-tl-3xl rounded-tr-xl"
-                  : "bg-gray-500 rounded-br-3xl rounded-tr-3xl rounded-tl-xl"
+                  ? "rounded-bl-3xl rounded-tl-3xl rounded-tr-xl bg-blue-400"
+                  : "rounded-br-3xl rounded-tl-xl rounded-tr-3xl bg-gray-500",
               )}
             >
               {message.data}
@@ -121,31 +122,34 @@ export default function ClaimCardCommunication({
         ))}
 
         {responses.map((message, i) => (
-          <div className="flex mb-4 justify-end">
+          <div className="mb-4 flex justify-end">
             <p
               onClick={() =>
                 setResponses((prev) => prev.filter((_, j) => i !== j))
               }
-              className="group relative flex items-center justify-center gap-2 ml-2 py-3 px-4 text-white bg-blue-400 rounded-bl-3xl rounded-tl-3xl rounded-tr-xl hover:bg-red-400"
+              className="group relative ml-2 flex items-center justify-center gap-2 rounded-bl-3xl rounded-tl-3xl rounded-tr-xl bg-blue-400 px-4 py-3 text-white hover:bg-red-400"
             >
-              <span className="group-hover:opacity-40 group-hover:line-through">
+              <span className="group-hover:line-through group-hover:opacity-40">
                 {message.data}
               </span>
-              <CareIcon className="care-l-trash text-xl font-bold hidden group-hover:block group-hover:absolute top-1/3 left-1/2" />
+              <CareIcon
+                icon="l-trash"
+                className="left-1/2 top-1/3 hidden text-xl font-bold group-hover:absolute group-hover:block"
+              />
             </p>
           </div>
         ))}
 
         <div ref={bottomRef} />
       </div>
-      <div className="flex items-center gap-3 w-full m-auto">
+      <div className="m-auto flex w-full items-center gap-3">
         <TextAreaFormField
           name="message"
           value={inputText}
           onChange={(e) => setInputText(e.value)}
           placeholder="Enter a message"
           rows={1}
-          className="w-full -mb-3"
+          className="-mb-3 w-full"
         />
         {inputText.length || !responses.length ? (
           <ButtonV2

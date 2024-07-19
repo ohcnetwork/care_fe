@@ -42,7 +42,7 @@ export default function SendCommunicationModal({
       className="w-full max-w-screen-lg"
       titleAction={
         <Submit disabled={isLoading} onClick={handleSubmit}>
-          {isLoading && <CareIcon className="care-l-spinner animate-spin" />}
+          {isLoading && <CareIcon icon="l-spinner" className="animate-spin" />}
           {isLoading ? "Sending Message" : "Send Message"}
         </Submit>
       }

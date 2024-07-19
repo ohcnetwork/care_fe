@@ -34,8 +34,9 @@ export default function ClaimCardInfo({ claim, setShowMessages }: IProps) {
         </div>
         <div className="mt-4 flex flex-row-reverse items-center justify-center gap-3 sm:ml-16 sm:mt-0">
           <CareIcon
+            icon="l-comment-alt-message"
+            className="h-7 w-7 cursor-pointer text-gray-600 hover:text-gray-800"
             onClick={() => setShowMessages(true)}
-            className="care-l-comment-alt-message h-7 w-7 cursor-pointer text-gray-600 hover:text-gray-800"
           />
           {claim.use && (
             <span className="rounded bg-primary-100 p-1 px-2 text-sm font-bold text-primary-500 shadow">
