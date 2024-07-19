@@ -11,9 +11,7 @@ interface Props {
 }
 
 export default function KeyboardShortcut(props: Props) {
-  useKeyboardShortcut(props.shortcut, props.onTrigger, {
-    overrideSystem: true,
-  });
+  useKeyboardShortcut(props.shortcut, props.onTrigger);
 
   if (!props.children) {
     return null;

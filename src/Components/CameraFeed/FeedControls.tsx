@@ -13,7 +13,7 @@ const Actions = {
   ZOOM_OUT: 1 << 5,
 } as const;
 
-const metaKey = isAppleDevice ? "Meta" : "Alt";
+const metaKey = isAppleDevice ? "Meta" : "Control";
 
 export type PTZAction = keyof typeof Actions;
 
@@ -66,7 +66,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
     position: (
       <>
         <FeedButton
-          shortcuts={[[metaKey, "Shift", "7"]]}
+          shortcuts={[[metaKey, "7"]]}
           onTrigger={move(Actions.UP | Actions.LEFT)}
           shortcutsDisabled={shortcutsDisabled}
           helpText="Move Diagonally Up-Left"
@@ -77,7 +77,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
 
         <FeedButton
           shortcuts={[
-            [metaKey, "Shift", "8"],
+            [metaKey, "8"],
             [metaKey, "Shift", "ArrowUp"],
           ]}
           onTrigger={move(Actions.UP)}
@@ -89,7 +89,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
         </FeedButton>
 
         <FeedButton
-          shortcuts={[[metaKey, "Shift", "9"]]}
+          shortcuts={[[metaKey, "9"]]}
           onTrigger={move(Actions.UP | Actions.RIGHT)}
           shortcutsDisabled={shortcutsDisabled}
           helpText="Move Diagonally Up-Right"
@@ -100,7 +100,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
 
         <FeedButton
           shortcuts={[
-            [metaKey, "Shift", "4"],
+            [metaKey, "4"],
             [metaKey, "Shift", "ArrowLeft"],
           ]}
           onTrigger={move(Actions.LEFT)}
@@ -123,7 +123,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
         <FeedButton
           onTrigger={move(Actions.RIGHT)}
           shortcuts={[
-            [metaKey, "Shift", "6"],
+            [metaKey, "6"],
             [metaKey, "Shift", "ArrowRight"],
           ]}
           shortcutsDisabled={shortcutsDisabled}
@@ -134,7 +134,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
         </FeedButton>
 
         <FeedButton
-          shortcuts={[[metaKey, "Shift", "1"]]}
+          shortcuts={[[metaKey, "1"]]}
           onTrigger={move(Actions.DOWN | Actions.LEFT)}
           shortcutsDisabled={shortcutsDisabled}
           tooltipClassName="-translate-y-20"
@@ -146,7 +146,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
         <FeedButton
           onTrigger={move(Actions.DOWN)}
           shortcuts={[
-            [metaKey, "Shift", "2"],
+            [metaKey, "2"],
             [metaKey, "Shift", "ArrowDown"],
           ]}
           shortcutsDisabled={shortcutsDisabled}
@@ -157,7 +157,7 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
         </FeedButton>
 
         <FeedButton
-          shortcuts={[[metaKey, "Shift", "3"]]}
+          shortcuts={[[metaKey, "3"]]}
           onTrigger={move(Actions.DOWN | Actions.RIGHT)}
           shortcutsDisabled={shortcutsDisabled}
           tooltipClassName="-translate-y-9 translate-x-11"
