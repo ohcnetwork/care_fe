@@ -1,15 +1,14 @@
 import * as Notification from "../../Utils/Notifications";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 
 import ClaimCard from "../HCX/ClaimCard";
 import CreateClaimCard from "../HCX/CreateClaimCard";
-import { HCXActions } from "../../Redux/actions";
-import { HCXClaimModel } from "../HCX/models";
 import PageTitle from "../Common/PageTitle";
 import { navigate } from "raviger";
-import { useDispatch } from "react-redux";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 
 interface Props {
   facilityId: string;
@@ -22,32 +21,28 @@ export default function ConsultationClaims({
   consultationId,
   patientId,
 }: Props) {
-  const dispatch = useDispatch<any>();
-  const [claims, setClaims] = useState<HCXClaimModel[]>();
   const [isCreateLoading, setIsCreateLoading] = useState(false);
 
-  const fetchClaims = useCallback(async () => {
-    const res = await dispatch(
-      HCXActions.claims.list({
+  const { data: claimsResult, refetch: refetchClaims } = useQuery(
+    routes.listHCXClaims,
+    {
+      query: {
         ordering: "-modified_date",
         consultation: consultationId,
-      }),
-    );
-
-    if (res.data && res.data.results) {
-      setClaims(res.data.results);
-      if (isCreateLoading)
-        Notification.Success({ msg: "Fetched Claim Approval Results" });
-    } else {
-      if (isCreateLoading)
-        Notification.Success({ msg: "Error Fetched Claim Approval Results" });
-    }
-    setIsCreateLoading(false);
-  }, [dispatch, consultationId]);
-
-  useEffect(() => {
-    fetchClaims();
-  }, [fetchClaims]);
+      },
+      onResponse: (res) => {
+        if (res.data && res.data.results) {
+          if (isCreateLoading)
+            Notification.Success({ msg: "Fetched Claim Approval Results" });
+        } else {
+          if (isCreateLoading)
+            Notification.Error({
+              msg: "Error Fetching Claim Approval Results",
+            });
+        }
+      },
+    },
+  );
 
   useMessageListener((data) => {
     if (
@@ -55,7 +50,7 @@ export default function ConsultationClaims({
       (data.from === "claim/on_submit" || data.from === "preauth/on_submit") &&
       data.message === "success"
     ) {
-      fetchClaims();
+      refetchClaims();
     }
   });
 
@@ -83,7 +78,7 @@ export default function ConsultationClaims({
         </div>
 
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
-          {claims?.map((claim) => (
+          {claimsResult?.results.map((claim) => (
             <div className="rounded-lg bg-white p-8">
               <ClaimCard claim={claim} />
             </div>

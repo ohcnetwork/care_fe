@@ -25,10 +25,8 @@ export default function ClaimCard({ claim }: IProps) {
     }
   }, [cardContainerRef]);
 
-  console.log(containerDimensions);
-
   return showMessages ? (
-    <div style={{ ...containerDimensions }} className="px-6 lg:px-8 relative">
+    <div style={{ ...containerDimensions }} className="relative px-6 lg:px-8">
       <ClaimCardCommunication claim={claim} setShowMessages={setShowMessages} />
     </div>
   ) : (

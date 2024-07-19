@@ -1,13 +1,14 @@
 import { HCXClaimModel, HCXCommunicationModel } from "./models";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { HCXActions } from "../../Redux/actions";
 import SendCommunicationModal from "./SendCommunicationModal";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { classNames } from "../../Utils/utils";
-import { useDispatch } from "react-redux";
+import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
+import request from "../../Utils/request/request";
 
 interface IProps {
   claim: HCXClaimModel;
@@ -25,56 +26,55 @@ export default function ClaimCardCommunication({
   claim,
   setShowMessages,
 }: IProps) {
-  const dispatch = useDispatch<any>();
-  const [messages, setMessages] = useState<IMessage[]>([]);
   const [responses, setResponses] = useState<IMessage[]>([]);
   const [inputText, setInputText] = useState("");
   const [createdCommunication, setCreatedCommunication] =
     useState<HCXCommunicationModel>();
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const fetchCommunications = useCallback(async () => {
-    const response = await dispatch(
-      HCXActions.communications.list({
+  const { data: communicationsResult, refetch: refetchCommunications } =
+    useQuery(routes.listHCXCommunications, {
+      query: {
         claim: claim.id,
         ordering: "created_date",
-      }),
-    );
+      },
+    });
 
-    if (response.status === 200 && response.data) {
-      response.data.results?.forEach(
-        (communication: HCXCommunicationModel, i: number) => {
-          communication.content?.forEach((content) =>
-            setMessages((prev) => [
-              ...prev,
-              { ...content, user: communication.created_by, index: i },
-            ]),
-          );
-        },
-      );
-    }
-  }, [claim.id, dispatch]);
+  const messages = useMemo(() => {
+    return (
+      (communicationsResult?.results
+        ?.flatMap((communication, i) => {
+          return communication.content?.map((content) => ({
+            ...content,
+            user: communication.created_by,
+            index: i,
+          }));
+        })
+        .filter(Boolean) as IMessage[]) ?? []
+    );
+  }, [communicationsResult]);
 
   const handleSubmit = async () => {
-    const response = await dispatch(
-      HCXActions.communications.create({
+    if (!claim.id) return;
+
+    const { res, data } = await request(routes.createHCXCommunication, {
+      body: {
         claim: claim.id,
         content: responses.map((response) => ({
           type: response.type as string,
           data: response.data as string,
         })),
-      }),
-    );
+      },
+    });
 
-    console.log(response, response.status);
-    if (response.status === 201) {
-      setCreatedCommunication(response.data); //TODO: check if this is correct
+    if (res?.status === 201) {
+      setCreatedCommunication(data);
     }
   };
 
   useEffect(() => {
-    fetchCommunications();
-  }, [fetchCommunications, createdCommunication]);
+    refetchCommunications();
+  }, [refetchCommunications, createdCommunication]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -101,7 +101,7 @@ export default function ClaimCardCommunication({
       </div>
 
       <div className="my-3 h-full w-full overflow-y-auto">
-        {messages.map((message) => (
+        {messages?.map((message) => (
           <div
             className={classNames(
               "mb-4 flex",

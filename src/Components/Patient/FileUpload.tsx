@@ -101,9 +101,9 @@ export const LinearProgressWithLabel = (props: any) => {
 
 interface FileUploadProps {
   type: string;
-  patientId?: any;
-  facilityId?: any;
-  consultationId?: any;
+  patientId?: string;
+  facilityId?: string;
+  consultationId?: string;
   consentId?: string;
   hideBack: boolean;
   audio?: boolean;
@@ -257,12 +257,12 @@ export const FileUpload = (props: FileUploadProps) => {
   }, []);
 
   const { data: patient } = useQuery(routes.getPatient, {
-    pathParams: { id: patientId },
+    pathParams: { id: patientId! },
     prefetch: !!patientId,
   });
 
   const { data: consultation } = useQuery(routes.getConsultation, {
-    pathParams: { id: consultationId },
+    pathParams: { id: consultationId! },
     prefetch: !!consultationId,
   });
 
@@ -560,7 +560,7 @@ export const FileUpload = (props: FileUploadProps) => {
       pathParams: {
         id,
         fileType,
-        associatingId: getAssociatedId(),
+        associatingId: getAssociatedId()!,
       },
     });
 
@@ -583,7 +583,7 @@ export const FileUpload = (props: FileUploadProps) => {
       pathParams: {
         id,
         fileType: type,
-        associatingId: getAssociatedId(),
+        associatingId: getAssociatedId()!,
       },
     });
 
@@ -1046,7 +1046,7 @@ export const FileUpload = (props: FileUploadProps) => {
       pathParams: {
         id: data.id,
         fileType: type,
-        associatingId: getAssociatedId(),
+        associatingId: getAssociatedId()!,
       },
     });
   };
@@ -1065,7 +1065,7 @@ export const FileUpload = (props: FileUploadProps) => {
         original_name: name ?? "",
         file_type: type,
         name: filename,
-        associating_id: getAssociatedId(),
+        associating_id: getAssociatedId()!,
         file_category: category,
         mime_type: f?.type ?? "",
       },
@@ -1150,7 +1150,7 @@ export const FileUpload = (props: FileUploadProps) => {
         original_name: name,
         file_type: type,
         name: filename,
-        associating_id: getAssociatedId(),
+        associating_id: getAssociatedId()!,
         file_category: category,
         mime_type: audioBlob?.type ?? "",
       },
@@ -1495,8 +1495,8 @@ export const FileUpload = (props: FileUploadProps) => {
           hideBack={hideBack}
           breadcrumbs={false}
           crumbsReplacements={{
-            [facilityId]: { name: patient?.facility_object?.name },
-            [patientId]: { name: patient?.name },
+            [facilityId!]: { name: patient?.facility_object?.name },
+            [patientId!]: { name: patient?.name },
           }}
           backUrl={
             type === "CONSULTATION"

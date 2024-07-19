@@ -92,7 +92,11 @@ import {
   NotificationData,
   PNconfigData,
 } from "../Components/Notifications/models";
-import { HCXPolicyModel } from "../Components/HCX/models";
+import {
+  HCXClaimModel,
+  HCXCommunicationModel,
+  HCXPolicyModel,
+} from "../Components/HCX/models";
 import { ICD11DiagnosisModel } from "../Components/Diagnosis/types";
 import { IShift } from "../Components/Shifting/models";
 import { Investigation } from "../Components/Facility/Investigations/Reports/types";
@@ -1627,6 +1631,7 @@ const routes = {
   listHCXClaims: {
     path: "/api/v1/hcx/claim/",
     method: "GET",
+    TRes: Type<PaginatedResponse<HCXClaimModel>>(),
   },
 
   createHCXClaim: {
@@ -1662,26 +1667,38 @@ const routes = {
   listHCXCommunications: {
     path: "/api/v1/hcx/communication/",
     method: "GET",
+    TRes: Type<PaginatedResponse<HCXCommunicationModel>>(),
   },
 
   createHCXCommunication: {
     path: "/api/v1/hcx/communication/",
     method: "POST",
+    TRes: Type<HCXCommunicationModel>(),
+    TBody: Type<{
+      claim: string;
+      content: {
+        type: string;
+        data: string;
+      }[];
+    }>(),
   },
 
   getHCXCommunication: {
     path: "/api/v1/hcx/communication/{external_id}/",
     method: "GET",
+    TRes: Type<HCXCommunicationModel>(),
   },
 
   updateHCXCommunication: {
     path: "/api/v1/hcx/communication/{external_id}/",
     method: "PUT",
+    TRes: Type<HCXCommunicationModel>(),
   },
 
   partialUpdateHCXCommunication: {
     path: "/api/v1/hcx/communication/{external_id}/",
     method: "PATCH",
+    TRes: Type<HCXCommunicationModel>(),
   },
 
   deleteHCXCommunication: {
@@ -1692,6 +1709,10 @@ const routes = {
   hcxSendCommunication: {
     path: "/api/v1/hcx/send_communication/",
     method: "POST",
+    TRes: Type<void>(),
+    TBody: Type<{
+      communication: string;
+    }>(),
   },
 } as const;
 
