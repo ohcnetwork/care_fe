@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { isAppleDevice } from "../../Utils/utils";
 import FeedButton from "./FeedButton";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { PTZPayload } from "./useOperateCamera";
@@ -13,7 +12,7 @@ const Actions = {
   ZOOM_OUT: 1 << 5,
 } as const;
 
-const metaKey = isAppleDevice ? "Meta" : "Control";
+// const metaKey = isAppleDevice ? "Meta" : "Control";
 
 export type PTZAction = keyof typeof Actions;
 
@@ -54,7 +53,7 @@ interface Props {
   inlineView: boolean;
 }
 
-export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
+export default function FeedControls(props: Props) {
   const [precision, setPrecision] = useState(1);
   const togglePrecision = () => setPrecision((p) => (p === 16 ? 1 : p << 1));
 
@@ -66,9 +65,9 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
     position: (
       <>
         <FeedButton
-          shortcuts={[[metaKey, "7"]]}
+          // shortcuts={[["Shift", "7"]]}
           onTrigger={move(Actions.UP | Actions.LEFT)}
-          shortcutsDisabled={shortcutsDisabled}
+          // shortcutsDisabled={shortcutsDisabled}
           helpText="Move Diagonally Up-Left"
           tooltipClassName="-translate-y-20"
         >
@@ -76,12 +75,12 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
         </FeedButton>
 
         <FeedButton
-          shortcuts={[
-            [metaKey, "8"],
-            [metaKey, "Shift", "ArrowUp"],
-          ]}
+          // shortcuts={[
+          //   [metaKey, "Shift", "8"],
+          //   [metaKey, "Shift", "ArrowUp"],
+          // ]}
           onTrigger={move(Actions.UP)}
-          shortcutsDisabled={shortcutsDisabled}
+          // shortcutsDisabled={shortcutsDisabled}
           tooltipClassName="-translate-y-20 -translate-x-11"
           helpText="Move Up"
         >
@@ -89,9 +88,9 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
         </FeedButton>
 
         <FeedButton
-          shortcuts={[[metaKey, "9"]]}
+          // shortcuts={[[metaKey, "Shift", "9"]]}
           onTrigger={move(Actions.UP | Actions.RIGHT)}
-          shortcutsDisabled={shortcutsDisabled}
+          // shortcutsDisabled={shortcutsDisabled}
           helpText="Move Diagonally Up-Right"
           tooltipClassName="-translate-y-20 -translate-x-24"
         >
@@ -99,34 +98,34 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
         </FeedButton>
 
         <FeedButton
-          shortcuts={[
-            [metaKey, "4"],
-            [metaKey, "Shift", "ArrowLeft"],
-          ]}
+          // shortcuts={[
+          //   [metaKey, "Shift", "4"],
+          //   [metaKey, "Shift", "ArrowLeft"],
+          // ]}
           onTrigger={move(Actions.LEFT)}
-          shortcutsDisabled={shortcutsDisabled}
+          // shortcutsDisabled={shortcutsDisabled}
           helpText="Move Left"
         >
           <CareIcon icon="l-triangle" className="-rotate-90" />
         </FeedButton>
 
         <FeedButton
-          shortcuts={[["Shift", "P"]]}
+          // shortcuts={[["Shift", "P"]]}
           onTrigger={togglePrecision}
           helpText="Toggle Precision"
           className="font-bold"
-          shortcutsDisabled={shortcutsDisabled}
+          // shortcutsDisabled={shortcutsDisabled}
         >
           {precision}x
         </FeedButton>
 
         <FeedButton
           onTrigger={move(Actions.RIGHT)}
-          shortcuts={[
-            [metaKey, "6"],
-            [metaKey, "Shift", "ArrowRight"],
-          ]}
-          shortcutsDisabled={shortcutsDisabled}
+          // shortcuts={[
+          //   [metaKey, "Shift", "6"],
+          //   [metaKey, "Shift", "ArrowRight"],
+          // ]}
+          // shortcutsDisabled={shortcutsDisabled}
           helpText="Move Right"
           tooltipClassName="-translate-y-9 translate-x-11"
         >
@@ -134,9 +133,9 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
         </FeedButton>
 
         <FeedButton
-          shortcuts={[[metaKey, "1"]]}
+          // shortcuts={[[metaKey, "Shift", "1"]]}
           onTrigger={move(Actions.DOWN | Actions.LEFT)}
-          shortcutsDisabled={shortcutsDisabled}
+          // shortcutsDisabled={shortcutsDisabled}
           tooltipClassName="-translate-y-20"
           helpText="Move Diagonally Down-Left"
         >
@@ -145,11 +144,11 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
 
         <FeedButton
           onTrigger={move(Actions.DOWN)}
-          shortcuts={[
-            [metaKey, "2"],
-            [metaKey, "Shift", "ArrowDown"],
-          ]}
-          shortcutsDisabled={shortcutsDisabled}
+          // shortcuts={[
+          //   [metaKey, "Shift", "2"],
+          //   [metaKey, "Shift", "ArrowDown"],
+          // ]}
+          // shortcutsDisabled={shortcutsDisabled}
           tooltipClassName="-translate-y-20  -translate-x-14"
           helpText="Move Down"
         >
@@ -157,9 +156,9 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
         </FeedButton>
 
         <FeedButton
-          shortcuts={[[metaKey, "3"]]}
+          // shortcuts={[[metaKey, "Shift", "3"]]}
           onTrigger={move(Actions.DOWN | Actions.RIGHT)}
-          shortcutsDisabled={shortcutsDisabled}
+          // shortcutsDisabled={shortcutsDisabled}
           tooltipClassName="-translate-y-9 translate-x-11"
           helpText="Move Diagonally Down-Right"
         >
@@ -170,20 +169,20 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
     zoom: (
       <>
         <FeedButton
-          shortcuts={[[metaKey, "I"]]}
+          // shortcuts={[[metaKey, "I"]]}
           tooltipClassName="tooltip-left translate-y-2 translate-x-1"
           helpText="Zoom In"
           onTrigger={move(Actions.ZOOM_IN)}
-          shortcutsDisabled={shortcutsDisabled}
+          // shortcutsDisabled={shortcutsDisabled}
         >
           <CareIcon icon="l-search-plus" />
         </FeedButton>
         <FeedButton
-          shortcuts={[[metaKey, "O"]]}
+          // shortcuts={[[metaKey, "O"]]}
           tooltipClassName="tooltip-left translate-y-2 translate-x-1"
           helpText="Zoom Out"
           onTrigger={move(Actions.ZOOM_OUT)}
-          shortcutsDisabled={shortcutsDisabled}
+          // shortcutsDisabled={shortcutsDisabled}
         >
           <CareIcon icon="l-search-minus" />
         </FeedButton>
@@ -192,22 +191,22 @@ export default function FeedControls({ shortcutsDisabled, ...props }: Props) {
 
     reset: (
       <FeedButton
-        shortcuts={[["Shift", "R"]]}
+        // shortcuts={[["Shift", "R"]]}
         tooltipClassName="tooltip-left translate-y-2 translate-x-1"
         helpText="Reset"
         onTrigger={props.onReset}
-        shortcutsDisabled={shortcutsDisabled}
+        // shortcutsDisabled={shortcutsDisabled}
       >
         <CareIcon icon="l-redo" />
       </FeedButton>
     ),
     fullscreen: (
       <FeedButton
-        shortcuts={[["Shift", "F"]]}
+        // shortcuts={[["Shift", "F"]]}
         tooltipClassName="tooltip-left translate-y-2 translate-x-1"
         helpText={props.isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
         onTrigger={() => props.setFullscreen(!props.isFullscreen)}
-        shortcutsDisabled={shortcutsDisabled}
+        // shortcutsDisabled={shortcutsDisabled}
       >
         <CareIcon
           icon={
