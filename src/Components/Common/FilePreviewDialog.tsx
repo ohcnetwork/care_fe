@@ -106,7 +106,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
       {fileUrl ? (
         <>
           <div className="mb-2 flex flex-col items-center justify-between md:flex-row">
-            <p className="text-md font-semibold text-gray-700">
+            <p className="text-md font-semibold text-secondary-700">
               {file_state.name}.{file_state.extension}
             </p>
             <div className="flex gap-4">
@@ -126,7 +126,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
             </div>
           </div>
           <div className="flex flex-1 items-center justify-center">
-            <div className="flex h-[75vh] w-full items-center justify-center overflow-scroll rounded-lg border border-gray-200">
+            <div className="flex h-[75vh] w-full items-center justify-center overflow-scroll rounded-lg border border-secondary-200">
               {file_state.isImage ? (
                 <img
                   src={fileUrl}
@@ -155,7 +155,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 <div className="flex h-full w-full flex-col items-center justify-center">
                   <CareIcon
                     icon="l-file"
-                    className="mb-4 text-5xl text-gray-600"
+                    className="mb-4 text-5xl text-secondary-600"
                   />
                   Can't preview this file. Try downloading it.
                 </div>

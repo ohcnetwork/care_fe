@@ -152,8 +152,8 @@ const ConsultationDoctorNotes = (props: ConsultationDoctorNotesProps) => {
               className={classNames(
                 "flex flex-1 justify-center border-b-2 py-2",
                 thread === current
-                  ? "border-primary-500 font-bold text-gray-800"
-                  : "border-gray-300 text-gray-800",
+                  ? "border-primary-500 font-bold text-secondary-800"
+                  : "border-secondary-300 text-secondary-800",
               )}
               onClick={() => setThread(current)}
             >

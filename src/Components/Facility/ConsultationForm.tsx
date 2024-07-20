@@ -819,11 +819,11 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
         ref={section.ref as LegacyRef<HTMLDivElement>}
       >
         <CareIcon icon={section.iconClass} className="mr-3 text-xl" />
-        <label className="text-lg font-bold text-gray-900">
+        <label className="text-lg font-bold text-secondary-900">
           {sectionTitle}
           {required && <span className="text-danger-500">{" *"}</span>}
         </label>
-        <hr className="ml-6 flex-1 border border-gray-400" />
+        <hr className="ml-6 flex-1 border border-secondary-400" />
       </div>
     );
   };
@@ -1101,7 +1101,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         placeholder="Weight"
                         trailingPadding=" "
                         trailing={
-                          <p className="absolute right-10 whitespace-nowrap text-sm text-gray-700">
+                          <p className="absolute right-10 whitespace-nowrap text-sm text-secondary-700">
                             Weight (kg)
                           </p>
                         }
@@ -1114,7 +1114,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                         placeholder="Height"
                         trailingPadding=" "
                         trailing={
-                          <p className="absolute right-10 whitespace-nowrap text-sm text-gray-700">
+                          <p className="absolute right-10 whitespace-nowrap text-sm text-secondary-700">
                             Height (cm)
                           </p>
                         }
@@ -1230,16 +1230,9 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                       required={["A", "DC", "OP"].includes(
                         state.form.suggestion,
                       )}
-                      label={
-                        {
-                          A: "Date & Time of Admission to the Facility",
-                          DC: "Date & Time of Domiciliary Care commencement",
-                          OP: "Date & Time of Out-patient visit",
-                          DD: "Date & Time of Consultation",
-                          HI: "Date & Time of Consultation",
-                          R: "Date & Time of Consultation",
-                        }[state.form.suggestion]
-                      }
+                      label={t(
+                        `encounter_date_field_label__${state.form.suggestion}`,
+                      )}
                       type="datetime-local"
                       value={dayjs(state.form.encounter_date).format(
                         "YYYY-MM-DDTHH:mm",
@@ -1251,6 +1244,21 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                           : undefined
                       }
                     />
+                    {dayjs().diff(state.form.encounter_date, "day") > 30 && (
+                      <div className="mb-6">
+                        <span className="font-medium text-warning-500">
+                          <CareIcon
+                            icon="l-exclamation-triangle"
+                            className="pr-2 text-lg"
+                          />
+                          {t("caution")}:{" "}
+                          {t("back_dated_encounter_date_caution")}{" "}
+                          <strong className="font-bold">
+                            {dayjs(state.form.encounter_date).fromNow()}.
+                          </strong>
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {state.form.route_to_facility === 30 && (
@@ -1307,7 +1315,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                 <div className="flex flex-col gap-4 pb-4">
                   <div className="flex flex-col">
                     {sectionTitle("Diagnosis", true)}
-                    <p className="-mt-4 space-x-1 text-sm text-gray-700">
+                    <p className="-mt-4 space-x-1 text-sm text-secondary-700">
                       <span>Diagnoses as per ICD-11 recommended by WHO</span>
                     </p>
                   </div>

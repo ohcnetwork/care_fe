@@ -170,12 +170,12 @@ const PatientNoteCard = ({
           </div>
           <div>
             <div>
-              <span className="text-sm font-semibold text-gray-700">
+              <span className="text-sm font-semibold text-secondary-700">
                 {note.created_by_object?.first_name || "Unknown"}{" "}
                 {note.created_by_object?.last_name}
               </span>
               {note.user_type && (
-                <span className="pl-2 text-sm text-gray-700">
+                <span className="pl-2 text-sm text-secondary-700">
                   {`(${USER_TYPES_MAP[note.user_type]})`}
                 </span>
               )}
@@ -189,7 +189,7 @@ const PatientNoteCard = ({
               ) ? (
                 <div className="flex">
                   <div
-                    className="cursor-pointer text-xs text-gray-600"
+                    className="cursor-pointer text-xs text-secondary-600"
                     onClick={() => {
                       fetchEditHistory();
                       setShowEditHistory(true);
@@ -253,7 +253,7 @@ const PatientNoteCard = ({
               <div className="flex flex-col">
                 <textarea
                   rows={2}
-                  className="h-20 w-full resize-none rounded-lg border border-gray-300 p-2"
+                  className="h-20 w-full resize-none rounded-lg border border-secondary-300 p-2"
                   value={noteField}
                   onChange={(e) => setNoteField(e.target.value)}
                 ></textarea>
@@ -331,7 +331,7 @@ const PatientNoteCard = ({
         >
           <div>
             <div className="mb-4">
-              <p className="text-md mt-1 text-gray-500">
+              <p className="text-md mt-1 text-secondary-500">
                 Edit History for note
                 <strong> {note.id}</strong>
               </p>
@@ -347,21 +347,23 @@ const PatientNoteCard = ({
                 return (
                   <div
                     key={index}
-                    className="my-2 flex flex-col justify-between rounded-lg border border-gray-300 p-4 py-2 transition-colors duration-200 hover:bg-gray-100"
+                    className="my-2 flex flex-col justify-between rounded-lg border border-secondary-300 p-4 py-2 transition-colors duration-200 hover:bg-secondary-100"
                   >
                     <div className="flex">
                       <div className="grow">
-                        <p className="text-sm font-medium text-gray-500">
+                        <p className="text-sm font-medium text-secondary-500">
                           {isLast ? "Created" : "Edited"} On
                         </p>
-                        <p className="text-sm text-gray-900">
+                        <p className="text-sm text-secondary-900">
                           {formatDateTime(edit.edited_date)}
                         </p>
                       </div>
                     </div>
                     <div className="mt-2 grow">
-                      <p className="text-sm font-medium text-gray-500">Note</p>
-                      <p className="text-sm text-gray-900">{edit.note}</p>
+                      <p className="text-sm font-medium text-secondary-500">
+                        Note
+                      </p>
+                      <p className="text-sm text-secondary-900">{edit.note}</p>
                     </div>
                   </div>
                 );

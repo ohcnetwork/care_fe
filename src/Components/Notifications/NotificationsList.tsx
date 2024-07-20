@@ -95,8 +95,8 @@ const NotificationTile = ({
         setShowNotifications(false);
       }}
       className={classNames(
-        "relative cursor-pointer rounded px-4 py-5 transition duration-200 ease-in-out hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg lg:px-8",
-        result.read_at && "text-gray-500",
+        "relative cursor-pointer rounded px-4 py-5 transition duration-200 ease-in-out hover:bg-secondary-200 focus:bg-secondary-200 md:rounded-lg lg:px-8",
+        result.read_at && "text-secondary-500",
       )}
     >
       <div className="flex justify-between">
@@ -416,7 +416,7 @@ export default function NotificationsList({
   } else if (data && data.length === 0) {
     manageResults = (
       <div className="flex justify-center px-4 pt-3 lg:px-8">
-        <h5 className="text-xl font-bold text-gray-600">
+        <h5 className="text-xl font-bold text-secondary-600">
           {t("no_results_found")}
         </h5>
       </div>

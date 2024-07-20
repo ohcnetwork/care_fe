@@ -8,6 +8,8 @@ export const DOSAGE_UNITS = [
   "drop(s)",
   "ampule(s)",
   "tsp",
+  "mcg",
+  "unit(s)",
 ] as const;
 
 export type DosageValue = `${number} ${(typeof DOSAGE_UNITS)[number]}`;

@@ -109,6 +109,7 @@ export interface PatientConsentModel {
   patient_code_status:
     | (typeof CONSENT_PATIENT_CODE_STATUS_CHOICES)[number]["id"]
     | null;
+  files: FileUploadModel[] | null;
   archived: boolean;
   archived_by?: UserBareMinimum;
   archived_date: string;
@@ -184,6 +185,7 @@ export interface ConsultationModel {
   is_readmission?: boolean;
   medico_legal_case?: boolean;
   investigation?: InvestigationType[];
+  has_consents?: (typeof CONSENT_TYPE_CHOICES)[number]["id"][];
 }
 
 export interface PatientStatsModel {
@@ -206,6 +208,7 @@ export interface DupPatientModel {
   date_of_birth: string;
   year_of_birth: number;
   state_id: number;
+  is_expired: boolean;
 }
 
 export interface InventoryItemsModel {
@@ -245,7 +248,8 @@ export interface BedModel {
   facility?: string;
   location_object?: {
     name: string;
-    id?: string;
+    id: string;
+    facility?: { name: string; id: string };
   };
   location?: string;
   is_occupied?: boolean;

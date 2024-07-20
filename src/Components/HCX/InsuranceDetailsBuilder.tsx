@@ -57,7 +57,7 @@ export default function InsuranceDetailsBuilder(props: Props) {
     <FormField field={field}>
       <ul className="flex flex-col gap-3">
         {props.value?.length === 0 && (
-          <span className="py-16 text-center text-gray-500">
+          <span className="py-16 text-center text-secondary-500">
             No insurance details added
           </span>
         )}
@@ -100,7 +100,7 @@ const InsuranceDetailEditCard = ({
       : undefined;
 
   return (
-    <div className="rounded-lg border-2 border-dashed border-gray-200 p-4">
+    <div className="rounded-lg border-2 border-dashed border-secondary-200 p-4">
       <div className="flex items-center justify-between">
         <FieldLabel className="my-auto !font-bold">Policy</FieldLabel>
         <ButtonV2 variant="danger" type="button" ghost onClick={handleRemove}>

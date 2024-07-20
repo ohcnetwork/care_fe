@@ -146,7 +146,7 @@ export default function DischargeSummaryModal(props: Props) {
     >
       <div className="flex flex-col">
         <div className="mb-6 flex flex-col gap-1">
-          <span className="text-sm text-gray-800">
+          <span className="text-sm text-secondary-800">
             {t("email_discharge_summary_description")}
           </span>
           <span className="text-sm text-warning-600">
