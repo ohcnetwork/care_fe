@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useSlug from "../../../Common/hooks/useSlug";
 import {
   ConsultationDiagnosis,
@@ -83,6 +83,11 @@ interface EditDiagnosesProps {
 export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
   const consultation = useSlug("consultation");
   const [diagnoses, setDiagnoses] = useState(props.value);
+
+  useEffect(() => {
+    setDiagnoses(props.value);
+  }, [props.value]);
+
   return (
     <div className={props.className}>
       <div className="flex w-full flex-col items-start rounded-lg border border-secondary-400">

@@ -29,7 +29,7 @@ import RadioFormField from "../Form/FormFields/RadioFormField";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import { Scribe } from "../Scribe/Scribe";
-import { DAILY_ROUND_FORM_SCRIBE_DATA } from "../Scribe/formDetails";
+import { SCRIBE_FORMS } from "../Scribe/formDetails";
 import { DailyRoundsModel } from "./models";
 import InvestigationBuilder from "../Common/prescription-builder/InvestigationBuilder";
 import { FieldErrorText } from "../Form/FormFields/FormField";
@@ -45,6 +45,8 @@ import { EncounterSymptomsBuilder } from "../Symptoms/SymptomsBuilder";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+import SymptomsApi from "../Symptoms/api";
+import DiagnosesRoutes from "../Diagnosis/routes";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -53,6 +55,7 @@ export const DailyRounds = (props: any) => {
   const authUser = useAuthUser();
   const { goBack } = useAppHistory();
   const { facilityId, patientId, consultationId, id } = props;
+  const [symptomsSeed, setSymptomsSeed] = useState<number>(1);
 
   const initForm: any = {
     physical_examination_info: "",
@@ -475,8 +478,42 @@ export const DailyRounds = (props: any) => {
     >
       <div className="flex w-full justify-end md:m-4">
         <Scribe
-          fields={DAILY_ROUND_FORM_SCRIBE_DATA}
-          onFormUpdate={(fields) => {
+          form={SCRIBE_FORMS.daily_round}
+          onFormUpdate={async (fields) => {
+            // Symptoms
+            if (fields.additional_symptoms) {
+              for (const symptom of fields.additional_symptoms) {
+                const { res, error } = await request(SymptomsApi.add, {
+                  pathParams: { consultationId },
+                  body: {
+                    ...symptom,
+                  },
+                });
+                if (res?.ok) setSymptomsSeed((s) => s + 1);
+                if (error) Notification.Error({ msg: error });
+              }
+            }
+
+            // ICD11 Diagnosis
+            if (fields.icd11_diagnosis) {
+              for (const diagnosis of fields.icd11_diagnosis) {
+                const { res, error } = await request(
+                  DiagnosesRoutes.createConsultationDiagnosis,
+                  {
+                    pathParams: { consultation: consultationId },
+                    body: diagnosis,
+                  },
+                );
+
+                if (res?.ok)
+                  setDiagnoses((diagnoses) => [
+                    ...(diagnoses || []),
+                    fields.icd11_diagnosis,
+                  ]);
+                if (error) Notification.Error({ msg: error });
+              }
+            }
+
             dispatch({
               type: "set_form",
               form: { ...state.form, ...fields },
@@ -532,6 +569,7 @@ export const DailyRounds = (props: any) => {
           <div className="pb-6 md:col-span-2">
             <FieldLabel>Symptoms</FieldLabel>
             <EncounterSymptomsBuilder
+              key={symptomsSeed}
               onChange={() => {
                 handleFormFieldChange({
                   name: "symptoms_dirty",

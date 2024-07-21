@@ -25,6 +25,12 @@ export interface Field {
   options?: readonly FieldOption[];
 }
 
+export interface ScribeForm {
+  id: string;
+  name: string;
+  fields: () => Promise<Field[]> | Field[];
+}
+
 export type ScribeModel = {
   external_id: string;
   requested_by: UserModel;
@@ -45,7 +51,8 @@ export type ScribeModel = {
 };
 
 interface ScribeProps {
-  fields: Field[];
+  form: ScribeForm;
+  existingData?: { [key: string]: any };
   onFormUpdate: (fields: any) => void;
 }
 
@@ -54,7 +61,7 @@ const SCRIBE_FILE_TYPES = {
   SCRIBE: 1,
 };
 
-export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
+export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
   const { enable_scribe } = useConfig();
   const [open, setOpen] = useState(false);
   const [_progress, setProgress] = useState(0);
@@ -71,6 +78,15 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
   const [updatedTranscript, setUpdatedTranscript] = useState<string>("");
   const [scribeID, setScribeID] = useState<string>("");
   const stageRef = useRef(stage);
+  const [fields, setFields] = useState<Field[]>([]);
+
+  useEffect(() => {
+    const loadFields = async () => {
+      const fields = await form.fields();
+      setFields(fields);
+    };
+    loadFields();
+  }, [form]);
 
   useEffect(() => {
     if (stageRef.current === "cancelled") {
@@ -373,35 +389,66 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
     stageRef.current = "cancelled";
   };
 
-  const processFormField = (
+  function processFormField(
     fieldDetails: Field | undefined,
-    formFields: { [key: string]: string | string[] | number },
+    formFields: { [key: string]: any },
     field: string,
-  ) => {
-    if (fieldDetails?.options) {
-      // Check if the form field is an array (multiple selections allowed)
-      if (Array.isArray(formFields[field])) {
-        // Map each selected option ID to its corresponding text
-        return (formFields[field] as string[])
-          .map((option) => {
-            const optionDetails = fieldDetails.options?.find(
-              (o) => o.id === option,
-            );
-            return optionDetails?.text ?? option; // Use option text if found, otherwise fallback to option ID
-          })
-          .join(", ");
-      } else {
-        // Single selection scenario, find the option that matches the field value
-        return (
-          fieldDetails.options?.find((o) => o.id === formFields[field])?.text ??
-          JSON.stringify(formFields[field])
-        );
+  ): React.ReactNode {
+    const value = formFields[field];
+    if (!fieldDetails || !value) return value;
+
+    const { options } = fieldDetails;
+
+    const getHumanizedKey = (key: string): string => {
+      return key
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+    };
+
+    const getOptionText = (value: string | number): string => {
+      if (!options) return value.toString();
+      const option = options.find((opt) => opt.id === value);
+      return option ? option.text : value.toString();
+    };
+
+    const renderPrimitive = (value: any): any => {
+      return options ? getOptionText(value) : value;
+    };
+
+    const renderArray = (values: any[]): React.ReactNode => {
+      return values.map((value) => renderPrimitive(value)).join(", ");
+    };
+
+    const renderObjectArray = (objects: any[]): React.ReactNode => {
+      return (
+        <div className="flex flex-col gap-2 text-sm">
+          {objects.map((obj, objIndex) => (
+            <div key={objIndex}>
+              {Object.keys(obj).map((key, keyIndex) => (
+                <div key={keyIndex}>
+                  <b>{getHumanizedKey(key)}</b>: {renderPrimitive(obj[key])}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      );
+    };
+
+    if (Array.isArray(value)) {
+      if (
+        value.length > 0 &&
+        typeof value[0] === "object" &&
+        !Array.isArray(value[0])
+      ) {
+        return renderObjectArray(value);
       }
-    } else {
-      // If no options are available, return the field value in JSON string format
-      return JSON.stringify(formFields[field]);
+      return renderArray(value);
     }
-  };
+
+    return renderPrimitive(value);
+  }
 
   const renderContentBasedOnStage = () => {
     switch (stage) {

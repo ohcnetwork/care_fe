@@ -5,18 +5,22 @@ import {
   RHYTHM_CHOICES,
   TELEMEDICINE_ACTIONS,
 } from "../../Common/constants";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
+import { loadInvestigations } from "../Common/prescription-builder/InvestigationBuilder";
+import { ICD11DiagnosisModel } from "../Diagnosis/types";
 import { SYMPTOM_CHOICES } from "../Symptoms/types";
-import { Field } from "./Scribe";
+import { Field, ScribeForm } from "./Scribe";
 
-export const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
+const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
   {
     friendlyName: "Additional Symptoms",
     id: "additional_symptoms",
-    type: "number[]",
-    example: "[1,2,3]",
+    type: "{symptom: number, other_symptom?: string, onset_date: string, cure_date?: string}[]",
+    example:
+      "[{symptom: 1, onset_date: '2024-12-03'}, {symptom: 2, onset_date: '2024-12-03', cure_date: '2024-12-05'}, {symptom: 9, other_symptom: 'Other symptom', onset_date: '2024-12-03'}]",
     default: "[]",
-    description:
-      "A numeric array of option IDs to store symptoms of the patient.",
+    description: `An array of objects to store the patient's symptoms along with their date of onset and date of cure (if any). The symptom field should be an integer corresponding to the symptom's ID. The onset_date and cure_date fields should be date strings (e.g., '2022-01-01'). If no onset_date has been specified, use todays date which is '${new Date().toISOString().slice(0, 10)}'. If the symptom is ongoing, the cure_date field should not be included. If the user has 'Other Symptom', only then the other_symptom field should be included with a string value describing the symptom.`,
     options: SYMPTOM_CHOICES,
   },
   {
@@ -174,12 +178,70 @@ export const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
       "An option to store the level of consciousness of the patient.",
     options: CONSCIOUSNESS_LEVEL,
   },
-];
-
-export const SCRIBE_FORMS = [
   {
-    id: "daily_round",
-    name: "Daily Round",
-    fields: DAILY_ROUND_FORM_SCRIBE_DATA,
+    friendlyName: "Diagnosis",
+    id: "icd11_diagnosis",
+    type: "{diagnosis: number, verification_status: \"unconfirmed\" | \"provisional\" | \"differential\" | \"confirmed\", is_principal: boolean}[]",
+    default: "[]",
+    example:
+      "[{diagnosis: 12345678, verification_status: 'confirmed', is_principal: true}, {diagnosis: 2, verification_status: 'provisional', is_principal: false}]",
+    description:
+      "A list of objects to store the patient's diagnosis along with their verification status and whether it is the principal diagnosis. By default set is_principal to false. NOTE: only one principal diagnosis can exist. The diagnosis field should be an integer corresponding to the diagnosis's ID. The verification_status field should be a string with one of the following values: 'unconfirmed', 'provisional', 'differential', or 'confirmed'. The is_principal field should be a boolean value.",
+  },
+  {
+    friendlyName: "Investigations",
+    id: "investigations",
+    type: `{
+      type: string[], 
+      repetitive: boolean, 
+      time?: string, 
+      frequency?: '15 min' | '30 min' | '1 hr' | '6 hrs' | '12 hrs' | '24 hrs' | '48 hrs', 
+      notes?: string
+    }[]`,
+    default: "[]",
+    example: "",
+    description:
+      "A list of objects to store the patient's investigations. The type field should be an array of strings corresponding to the names of the investigations provided in the options. The repetitive field should be a boolean value. The time field should be a string and only be filled if repetitive field is false. The frequency field should be a string with one of the following values: '15 min', '30 min', '1 hr', '6 hrs', '12 hrs', '24 hrs', or '48 hrs' and should be only filled if this is a repititive investigation . The notes field should be a string. If the type is not available in options, DO NOT MAKE IT.",
   },
 ];
+
+export const SCRIBE_FORMS: { [key: string]: ScribeForm } = {
+  daily_round: {
+    id: "daily_round",
+    name: "Daily Round",
+    fields: async () => {
+      const { res, data } = await request(routes.listICD11Diagnosis, {
+        silent: true,
+      });
+      let icd11Diagnoses: ICD11DiagnosisModel[] = [];
+
+      if (res?.ok && data) icd11Diagnoses = data;
+
+      const icd11DiagnosisOptions = icd11Diagnoses?.map((diagnosis) => ({
+        id: diagnosis.id,
+        text: diagnosis.label,
+      }));
+
+      const investigations = await loadInvestigations();
+
+      return DAILY_ROUND_FORM_SCRIBE_DATA.map((field) => {
+        if (field.id === "icd11_diagnosis") {
+          return {
+            ...field,
+            options: icd11DiagnosisOptions,
+          };
+        }
+        if (field.id === "investigations") {
+          return {
+            ...field,
+            options: investigations.map((investigation, i) => ({
+              id: i,
+              text: investigation,
+            })),
+          };
+        }
+        return field;
+      });
+    },
+  },
+};
