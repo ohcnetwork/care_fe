@@ -203,6 +203,16 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     description:
       "A list of objects to store the patient's investigations. The type field should be an array of strings corresponding to the names of the investigations provided in the options. The repetitive field should be a boolean value. The time field should be a string and only be filled if repetitive field is false. The frequency field should be a string with one of the following values: '15 min', '30 min', '1 hr', '6 hrs', '12 hrs', '24 hrs', or '48 hrs' and should be only filled if this is a repititive investigation . The notes field should be a string. If the type is not available in options, DO NOT MAKE IT.",
   },
+  {
+    friendlyName: "Prescriptions",
+    id: "prescriptions",
+    type: `{
+    
+    }[]`,
+    default: "[]",
+    example: "",
+    description: "Leave blank.",
+  },
 ];
 
 export const SCRIBE_FORMS: { [key: string]: ScribeForm } = {

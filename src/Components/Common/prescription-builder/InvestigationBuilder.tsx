@@ -89,7 +89,7 @@ export default function InvestigationBuilder(
 
   const setItem = (object: InvestigationType, i: number) => {
     setInvestigations(
-      investigations.map((investigation, index) =>
+      investigations?.map((investigation, index) =>
         index === i ? object : investigation,
       ),
     );
@@ -102,7 +102,7 @@ export default function InvestigationBuilder(
 
   return (
     <div className="mt-2">
-      {investigations.map((investigation, i) => {
+      {investigations?.map((investigation, i) => {
         const setFrequency = (frequency: string) => {
           setItem(
             {

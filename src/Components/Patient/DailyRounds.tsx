@@ -481,6 +481,7 @@ export const DailyRounds = (props: any) => {
           form={SCRIBE_FORMS.daily_round}
           onFormUpdate={async (fields) => {
             // Symptoms
+            let rounds_type = state.form.rounds_type;
             if (fields.additional_symptoms) {
               for (const symptom of fields.additional_symptoms) {
                 const { res, error } = await request(SymptomsApi.add, {
@@ -492,6 +493,7 @@ export const DailyRounds = (props: any) => {
                 if (res?.ok) setSymptomsSeed((s) => s + 1);
                 if (error) Notification.Error({ msg: error });
               }
+              rounds_type = "NORMAL";
             }
 
             // ICD11 Diagnosis
@@ -512,11 +514,12 @@ export const DailyRounds = (props: any) => {
                   ]);
                 if (error) Notification.Error({ msg: error });
               }
+              rounds_type = "NORMAL";
             }
 
             dispatch({
               type: "set_form",
-              form: { ...state.form, ...fields },
+              form: { ...state.form, ...fields, rounds_type },
             });
             fields.action !== undefined && setPreviousAction(fields.action);
             fields.review_interval !== undefined &&
