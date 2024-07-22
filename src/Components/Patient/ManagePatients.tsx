@@ -105,26 +105,45 @@ export const PatientManager = () => {
   const [showDialog, setShowDialog] = useState<"create" | "list-discharged">();
   const [showDoctors, setShowDoctors] = useState(false);
   const [phone_number, setPhoneNumber] = useState("");
+  const [phoneNumberError, setPhoneNumberError] = useState("");
   const [emergency_phone_number, setEmergencyPhoneNumber] = useState("");
+  const [emergencyPhoneNumberError, setEmergencyPhoneNumberError] =
+    useState("");
 
-  useEffect(() => {
+  const setPhoneNum = (phone_number: string) => {
+    setPhoneNumber(phone_number);
     if (phone_number.length >= 13) {
+      setPhoneNumberError("");
       updateQuery({ phone_number });
+      return;
     }
-    if (phone_number === "+91" || phone_number === "") {
-      qParams.phone_number && updateQuery({ phone_number: null });
-    }
-  }, [phone_number]);
 
-  useEffect(() => {
-    if (emergency_phone_number.length >= 13) {
-      updateQuery({ emergency_phone_number });
+    if (phone_number === "+91" || phone_number === "") {
+      setPhoneNumberError("");
+      qParams.phone_number && updateQuery({ phone_number: null });
+      return;
     }
+
+    setPhoneNumberError("Enter a valid number");
+  };
+
+  const setEmergencyPhoneNum = (emergency_phone_number: string) => {
+    setEmergencyPhoneNumber(emergency_phone_number);
+    if (emergency_phone_number.length >= 13) {
+      setEmergencyPhoneNumberError("");
+      updateQuery({ emergency_phone_number });
+      return;
+    }
+
     if (emergency_phone_number === "+91" || emergency_phone_number === "") {
+      setEmergencyPhoneNumberError("");
       qParams.emergency_phone_number &&
         updateQuery({ emergency_phone_number: null });
+      return;
     }
-  }, [emergency_phone_number]);
+
+    setEmergencyPhoneNumberError("Enter a valid number");
+  };
 
   const tabValue =
     qParams.last_consultation__new_discharge_reason ||
@@ -976,7 +995,8 @@ export const PatientManager = () => {
                 label="Search by Primary Number"
                 {...queryField("phone_number", "+91")}
                 value={phone_number}
-                onChange={({ value }) => setPhoneNumber(value)}
+                onChange={(e) => setPhoneNum(e.value)}
+                error={phoneNumberError}
                 types={["mobile", "landline"]}
                 className="w-full grow"
               />
@@ -984,7 +1004,8 @@ export const PatientManager = () => {
                 label="Search by Emergency Number"
                 {...queryField("emergency_phone_number", "+91")}
                 value={emergency_phone_number}
-                onChange={({ value }) => setEmergencyPhoneNumber(value)}
+                onChange={(e) => setEmergencyPhoneNum(e.value)}
+                error={emergencyPhoneNumberError}
                 types={["mobile", "landline"]}
                 className="w-full"
               />
