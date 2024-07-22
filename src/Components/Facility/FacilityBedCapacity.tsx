@@ -21,7 +21,7 @@ export const FacilityBedCapacity = (props: any) => {
   let capacityList: any = null;
   if (!capacityQuery.data || !capacityQuery.data.results.length) {
     capacityList = (
-      <h5 className="mt-4 flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-gray-500 shadow">
+      <h5 className="mt-4 flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-secondary-500 shadow">
         No Bed Types Found
       </h5>
     );

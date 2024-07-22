@@ -143,7 +143,7 @@ export default function CameraFeed(props: Props) {
           {player.status === "offline" && (
             <NoFeedAvailable
               message="Offline"
-              className="text-gray-500"
+              className="text-secondary-500"
               icon="l-exclamation-triangle"
               streamUrl={streamUrl}
               asset={props.asset}

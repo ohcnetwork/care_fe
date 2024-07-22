@@ -144,7 +144,7 @@ export default function ExcelFileDragAndDrop({
         onDrop={onDrop}
         onClick={() => !selectedFile && fileInputRef.current?.click()}
         className={`mb-8 mt-5 flex flex-1 flex-col items-center justify-center rounded-lg border-[3px] border-dashed px-3 py-6 ${
-          dragProps.dragOver ? "border-primary-500" : "border-gray-500"
+          dragProps.dragOver ? "border-primary-500" : "border-secondary-500"
         } ${dragProps.fileDropError !== "" ? "border-red-500" : ""}`}
       >
         <svg
@@ -153,14 +153,18 @@ export default function ExcelFileDragAndDrop({
           viewBox="0 0 24 24"
           aria-hidden="true"
           className={`h-12 w-12 ${dragProps.dragOver && "text-primary-500"} ${
-            dragProps.fileDropError !== "" ? "text-red-500" : "text-gray-600"
+            dragProps.fileDropError !== ""
+              ? "text-red-500"
+              : "text-secondary-600"
           }`}
         >
           <path d="M12.71,11.29a1,1,0,0,0-.33-.21,1,1,0,0,0-.76,0,1,1,0,0,0-.33.21l-2,2a1,1,0,0,0,1.42,1.42l.29-.3V17a1,1,0,0,0,2,0V14.41l.29.3a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42ZM20,8.94a1.31,1.31,0,0,0-.06-.27l0-.09a1.07,1.07,0,0,0-.19-.28h0l-6-6h0a1.07,1.07,0,0,0-.28-.19l-.1,0A1.1,1.1,0,0,0,13.06,2H7A3,3,0,0,0,4,5V19a3,3,0,0,0,3,3H17a3,3,0,0,0,3-3V9S20,9,20,8.94ZM14,5.41,16.59,8H15a1,1,0,0,1-1-1ZM18,19a1,1,0,0,1-1,1H7a1,1,0,0,1-1-1V5A1,1,0,0,1,7,4h5V7a3,3,0,0,0,3,3h3Z" />
         </svg>
         <p
           className={`text-sm ${dragProps.dragOver && "text-primary-500"} ${
-            dragProps.fileDropError !== "" ? "text-red-500" : "text-gray-700"
+            dragProps.fileDropError !== ""
+              ? "text-red-500"
+              : "text-secondary-700"
           } text-center`}
         >
           {dragProps.fileDropError !== "" && dragProps.fileDropError}
@@ -181,7 +185,7 @@ export default function ExcelFileDragAndDrop({
         />
         {selectedFile && (
           <div className="flex pt-2">
-            <p className="text-sm text-gray-700">
+            <p className="text-sm text-secondary-700">
               {selectedFile.name} - {(selectedFile.size / 1024).toFixed(2)} KB
             </p>
             <span
@@ -203,7 +207,7 @@ export default function ExcelFileDragAndDrop({
         {selectedFile ? (
           <>
             <span
-              className="focus:ring-blue mx-auto mt-4 max-w-xs cursor-pointer items-center rounded-md border border-primary-500 bg-white px-3 py-2 text-sm font-medium leading-4 text-primary-700 transition duration-150 ease-in-out hover:text-primary-500 hover:shadow focus:border-primary-300 focus:outline-none active:bg-gray-50 active:text-primary-800"
+              className="focus:ring-blue active:bg-secondary-50 mx-auto mt-4 max-w-xs cursor-pointer items-center rounded-md border border-primary-500 bg-white px-3 py-2 text-sm font-medium leading-4 text-primary-700 transition duration-150 ease-in-out hover:text-primary-500 hover:shadow focus:border-primary-300 focus:outline-none active:text-primary-800"
               onClick={() => setPreview(true)}
             >
               <CareIcon
@@ -216,7 +220,7 @@ export default function ExcelFileDragAndDrop({
           </>
         ) : (
           <a
-            className="focus:ring-blue mx-auto mt-4 max-w-xs items-center rounded-md border border-primary-500 bg-white px-3 py-2 text-sm font-medium leading-4 text-primary-700 transition duration-150 ease-in-out hover:text-primary-500 hover:shadow focus:border-primary-300 focus:outline-none active:bg-gray-50 active:text-primary-800"
+            className="focus:ring-blue active:bg-secondary-50 mx-auto mt-4 max-w-xs items-center rounded-md border border-primary-500 bg-white px-3 py-2 text-sm font-medium leading-4 text-primary-700 transition duration-150 ease-in-out hover:text-primary-500 hover:shadow focus:border-primary-300 focus:outline-none active:text-primary-800"
             href={sampleLink}
             target="_blank"
             download

@@ -48,7 +48,7 @@ export default function UserAutocompleteFormField(props: Props) {
       <div className="mr-6 mt-[2px]">
         <svg
           className={`h-3 w-3 ${
-            isUserOnline(option) ? "text-green-500" : "text-gray-400"
+            isUserOnline(option) ? "text-green-500" : "text-secondary-400"
           }`}
           fill="currentColor"
           viewBox="0 0 8 8"
