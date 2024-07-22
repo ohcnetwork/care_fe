@@ -398,7 +398,7 @@ export const PatientManager = () => {
       prefetch: !!qParams.last_consultation_current_bed__location,
     },
   );
-
+  /*
   const { data: patientsWithNoConsentsData } = useQuery(routes.patientList, {
     query: {
       ...qParams,
@@ -409,7 +409,7 @@ export const PatientManager = () => {
   });
 
   const patientsWithNoConsents = patientsWithNoConsentsData?.count;
-
+  */
   const { data: permittedFacilities } = useQuery(
     routes.getPermittedFacilities,
     {
@@ -1013,7 +1013,7 @@ export const PatientManager = () => {
           </div>
         </div>
       </div>
-      {!qParams.last_consultation__consent_types &&
+      {/*!qParams.last_consultation__consent_types &&
         (patientsWithNoConsents || 0) > 0 && (
           <div className="flex w-full items-center gap-4 rounded-lg bg-red-500/10 p-4 text-sm text-red-500">
             <CareIcon icon="l-info-circle" className="text-xl" />
@@ -1030,7 +1030,7 @@ export const PatientManager = () => {
               </button>
             </p>
           </div>
-        )}
+        )*/}
       <div className="col-span-3 flex flex-wrap">
         <FilterBadges
           badges={({
