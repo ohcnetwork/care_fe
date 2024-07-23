@@ -176,7 +176,7 @@ export const useMSEMediaPlayer = ({
                     `video/mp4; codecs="${mimeCodec}"`,
                   );
                 } catch (error) {
-                  onError && onError(error);
+                  onError?.(error);
                   return;
                 }
                 mseSourceBuffer.mode = "segments";
