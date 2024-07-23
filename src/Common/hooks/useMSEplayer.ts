@@ -171,9 +171,14 @@ export const useMSEMediaPlayer = ({
                 } else {
                   mimeCodec = Utf8ArrayToStr(decoded_arr);
                 }
-                mseSourceBuffer = mse.addSourceBuffer(
-                  `video/mp4; codecs="${mimeCodec}"`,
-                );
+                try {
+                  mseSourceBuffer = mse.addSourceBuffer(
+                    `video/mp4; codecs="${mimeCodec}"`,
+                  );
+                } catch (error) {
+                  onError && onError(error);
+                  return;
+                }
                 mseSourceBuffer.mode = "segments";
                 if (mseQueue.length > 0 && !mseSourceBuffer.updating) {
                   mseSourceBuffer.addEventListener("updateend", pushPacket);
