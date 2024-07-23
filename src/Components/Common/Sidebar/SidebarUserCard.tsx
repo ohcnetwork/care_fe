@@ -21,7 +21,7 @@ const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
       <div className="flex cursor-pointer justify-center" onClick={signOut}>
         <CareIcon
           icon="l-sign-out-alt"
-          className={`text-2xl text-gray-400 ${
+          className={`text-2xl text-secondary-400 ${
             shrinked ? "visible" : "hidden"
           }`}
         />
@@ -46,9 +46,9 @@ const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
         >
           <CareIcon
             icon="l-sign-out-alt"
-            className={`${shrinked ? "text-xl" : "mr-1"} text-gray-400`}
+            className={`${shrinked ? "text-xl" : "mr-1"} text-secondary-400`}
           />
-          <p className="text-gray-400 text-opacity-80">{t("sign_out")}</p>
+          <p className="text-secondary-400 text-opacity-80">{t("sign_out")}</p>
         </div>
       </div>
     </div>

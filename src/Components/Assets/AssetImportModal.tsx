@@ -124,11 +124,11 @@ const AssetImportModal = ({ open, onClose, facility, onUpdate }: Props) => {
       className="w-[48rem]"
       fixedWidth={false}
     >
-      <span className="mt-1 text-gray-700">{facility.name}</span>
+      <span className="mt-1 text-secondary-700">{facility.name}</span>
       {!loading && locations.length === 0 ? (
         <>
           <div className="flex h-full flex-col items-center justify-center">
-            <h1 className="m-7 text-2xl font-medium text-gray-700">
+            <h1 className="m-7 text-2xl font-medium text-secondary-700">
               You need at least one location to import an assest.
             </h1>
             <Link href={`/facility/${facility.id}/location/add`}>

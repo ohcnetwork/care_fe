@@ -9,10 +9,9 @@ import FeedAlert, { FeedAlertState } from "./FeedAlert";
 import FeedNetworkSignal from "./FeedNetworkSignal";
 import NoFeedAvailable from "./NoFeedAvailable";
 import FeedControls from "./FeedControls";
-import Fullscreen from "../../CAREUI/misc/Fullscreen";
 import FeedWatermark from "./FeedWatermark";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { Error } from "../../Utils/Notifications";
+import useFullscreen from "../../Common/hooks/useFullscreen";
 
 interface Props {
   children?: React.ReactNode;
@@ -33,12 +32,13 @@ interface Props {
 
 export default function CameraFeed(props: Props) {
   const playerRef = useRef<HTMLVideoElement | ReactPlayer | null>(null);
+  const playerWrapperRef = useRef<HTMLDivElement>(null);
   const streamUrl = getStreamUrl(props.asset);
 
   const player = usePlayer(streamUrl, playerRef);
   const operate = useOperateCamera(props.asset.id, props.silent);
 
-  const [isFullscreen, setFullscreen] = useState(false);
+  const [isFullscreen, setFullscreen] = useFullscreen();
   const [state, setState] = useState<FeedAlertState>();
   useEffect(() => setState(player.status), [player.status, setState]);
 
@@ -91,32 +91,20 @@ export default function CameraFeed(props: Props) {
     props.onReset?.();
     initializeStream();
   };
-  return (
-    <Fullscreen
-      fullscreen={isFullscreen}
-      onExit={(reason) => {
-        setFullscreen(false);
 
-        if (reason === "DEVICE_UNSUPPORTED") {
-          // iOS webkit allows only video/iframe elements to call full-screen
-          // APIs. But we need to show controls too, not just the video element.
-          Error({
-            msg: "This device does not support viewing this content in full-screen.",
-          });
-        }
-      }}
-    >
+  return (
+    <div ref={playerWrapperRef} className="flex flex-col justify-center">
       <div
         className={classNames(
-          "flex flex-col overflow-clip rounded-xl bg-black md:max-h-screen",
+          "flex flex-col justify-center overflow-hidden rounded-xl bg-black md:max-h-screen",
           props.className,
           isAppleDevice && isFullscreen && "px-20",
         )}
       >
-        <div className="flex items-center justify-between bg-zinc-900 px-4 py-1.5 md:py-2">
+        <div className="flex items-center justify-between bg-zinc-900 px-4 pt-1 md:py-2">
           {props.children}
-          <div className="flex w-full items-center justify-end gap-1 md:gap-4">
-            <span className="text-base font-semibold text-white">
+          <div className="flex w-full flex-col items-end justify-end md:flex-row md:items-center md:gap-4">
+            <span className="text-xs font-semibold text-white md:text-base">
               <CareIcon
                 icon="l-video"
                 className="hidden pr-2 text-lg text-zinc-400 md:inline-block"
@@ -155,7 +143,7 @@ export default function CameraFeed(props: Props) {
           {player.status === "offline" && (
             <NoFeedAvailable
               message="Offline"
-              className="text-gray-500"
+              className="text-secondary-500"
               icon="l-exclamation-triangle"
               streamUrl={streamUrl}
               asset={props.asset}
@@ -206,7 +194,32 @@ export default function CameraFeed(props: Props) {
             <FeedControls
               shortcutsDisabled={props.shortcutsDisabled}
               isFullscreen={isFullscreen}
-              setFullscreen={setFullscreen}
+              setFullscreen={(value) => {
+                if (!value) {
+                  setFullscreen(false);
+                  return;
+                }
+
+                if (isIOS) {
+                  const element = document.querySelector("video");
+                  if (!element) {
+                    return;
+                  }
+                  setFullscreen(true, element, true);
+                  return;
+                }
+
+                if (!playerRef.current) {
+                  return;
+                }
+
+                setFullscreen(
+                  true,
+                  playerWrapperRef.current ||
+                    (playerRef.current as HTMLElement),
+                  true,
+                );
+              }}
               onReset={resetStream}
               onMove={async (data) => {
                 props.onMove?.();
@@ -223,6 +236,6 @@ export default function CameraFeed(props: Props) {
           )}
         </div>
       </div>
-    </Fullscreen>
+    </div>
   );
 }

@@ -192,7 +192,7 @@ export const BedManagement = (props: BedManagementProps) => {
     ));
   } else if (data?.results.length === 0) {
     BedList = (
-      <p className="flex w-full justify-center bg-white p-5 text-center text-2xl font-bold text-gray-500">
+      <p className="flex w-full justify-center bg-white p-5 text-center text-2xl font-bold text-secondary-500">
         No beds available in this location
       </p>
     );

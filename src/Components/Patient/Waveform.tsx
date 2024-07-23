@@ -105,7 +105,7 @@ export default function Waveform(props: {
 
   return (
     <div className="relative w-full">
-      <div className="absolute left-5 top-0 text-xs text-gray-400">
+      <div className="absolute left-5 top-0 text-xs text-secondary-400">
         {props.title}
       </div>
       <LinePlot
@@ -126,7 +126,7 @@ export default function Waveform(props: {
       />
       <div className="absolute bottom-0 right-5 w-full md:w-[70%]">
         {props.metrics && (
-          <div className="flex flex-row flex-wrap justify-end gap-2 text-xs text-gray-400">
+          <div className="flex flex-row flex-wrap justify-end gap-2 text-xs text-secondary-400">
             <div>Lowest: {Math.min(...queueData.slice(0, viewable))}</div>
             <div>Highest: {Math.max(...queueData.slice(0, viewable))}</div>
             <div>Stream Length: {data.length}</div>

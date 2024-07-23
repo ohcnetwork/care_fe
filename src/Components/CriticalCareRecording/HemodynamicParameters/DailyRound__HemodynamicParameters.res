@@ -17,7 +17,7 @@ let make = (
     <div>
       {switch HemodynamicParameters.bp(hemodynamicParameter) {
       | Some(data) =>
-        <div className="px-4 py-2 border bg-gray-100 m-1 rounded-lg shadow md:w-1/2 w-full">
+        <div className="px-4 py-2 border bg-secondary-100 m-1 rounded-lg shadow md:w-1/2 w-full">
           {title("Blood Pressure: ")}
           {renderIntWithIndicators("Systolic", data.systolic, 100, 140, "Low", "High")}
           {renderIntWithIndicators("Diastolic", data.diastolic, 50, 90, "Low", "High")}
@@ -53,12 +53,12 @@ let make = (
     )}
     <h3 className="mt-4"> {str("Pain Scale")} </h3>
     <CriticalCare__PainEditor
-        previewMode={true}
-        painParameter={HemodynamicParameters.pain(hemodynamicParameter)}
-        updateCB={_ => ()}
-        id={""}
-        consultationId={""}
-      />
+      previewMode={true}
+      painParameter={HemodynamicParameters.pain(hemodynamicParameter)}
+      updateCB={_ => ()}
+      id={""}
+      consultationId={""}
+    />
     {renderLine(
       "Rhythm",
       HemodynamicParameters.rhythmToString(HemodynamicParameters.rhythm(hemodynamicParameter)),

@@ -30,15 +30,17 @@ export default function PrescriptionDetailCard({
     collapsible && prescription.discontinued,
   );
 
+  const medicine = prescription.medicine_object;
+
   return (
     <div
       className={classNames(
         "flex flex-col rounded border-2 p-3 transition-all duration-200 ease-in-out md:flex-row",
         props.selected
           ? "border-primary-500"
-          : "border-spacing-2 border-dashed border-gray-500",
-        prescription.discontinued && "bg-gray-200 opacity-80",
-        collapsible && "cursor-pointer hover:border-gray-900",
+          : "border-spacing-2 border-dashed border-secondary-500",
+        prescription.discontinued && "bg-secondary-200 opacity-80",
+        collapsible && "cursor-pointer hover:border-secondary-900",
       )}
     >
       <div
@@ -55,12 +57,11 @@ export default function PrescriptionDetailCard({
               <h3
                 className={classNames(
                   "text-lg font-bold transition-all duration-200 ease-in-out",
-                  props.selected ? "text-black" : "text-gray-700",
+                  props.selected ? "text-black" : "text-secondary-700",
                 )}
               >
                 {isCollapsed ? (
-                  prescription.medicine_object?.name ??
-                  prescription.medicine_old
+                  medicine?.name ?? prescription.medicine_old
                 ) : (
                   <>
                     {prescription.prescription_type === "DISCHARGE" &&
@@ -75,7 +76,7 @@ export default function PrescriptionDetailCard({
                 )}
               </h3>
               {prescription.discontinued && (
-                <span className="rounded-full bg-gray-700 px-2 py-1 text-xs font-semibold uppercase text-white">
+                <span className="rounded-full bg-secondary-700 px-2 py-1 text-xs font-semibold uppercase text-white">
                   {t("discontinued")}
                 </span>
               )}
@@ -126,46 +127,53 @@ export default function PrescriptionDetailCard({
         </div>
         {!isCollapsed && (
           <div className="mt-4 grid grid-cols-10 items-center gap-2">
-            <Detail
-              className={
-                prescription.dosage_type === "TITRATED"
-                  ? "col-span-10"
-                  : "col-span-10 md:col-span-4"
-              }
-              label={t("medicine")}
-            >
-              {prescription.medicine_object?.name ?? prescription.medicine_old}
+            <Detail className="col-span-10">
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-3">
+                  <span className="font-semibold uppercase">
+                    {medicine?.name ?? prescription.medicine_old}
+                  </span>
+                </div>
+                {medicine?.type === "brand" && (
+                  <span className="text-xs text-secondary-600">
+                    Generic:{" "}
+                    <span className="capitalize text-secondary-800">
+                      {medicine.generic}
+                    </span>
+                    ; Brand:{" "}
+                    <span className="capitalize text-secondary-800">
+                      {medicine.company}
+                    </span>
+                  </span>
+                )}
+              </div>
             </Detail>
-            <Detail
-              className="col-span-10 break-all sm:col-span-4"
-              label={t("route")}
-            >
-              {prescription.route &&
-                t("PRESCRIPTION_ROUTE_" + prescription.route)}
-            </Detail>
+
             {prescription.dosage_type === "TITRATED" ? (
               <>
-                <Detail
-                  className="col-span-5 sm:col-span-3"
-                  label={t("start_dosage")}
-                >
+                <Detail className="col-span-5" label={t("start_dosage")}>
                   {prescription.base_dosage}
                 </Detail>
-                <Detail
-                  className="col-span-5 sm:col-span-3"
-                  label={t("target_dosage")}
-                >
+                <Detail className="col-span-5" label={t("target_dosage")}>
                   {prescription.target_dosage}
                 </Detail>
               </>
             ) : (
               <Detail
-                className="col-span-10 sm:col-span-6 md:col-span-2"
+                className="col-span-10 sm:col-span-6 md:col-span-4"
                 label={t("dosage")}
               >
                 {prescription.base_dosage}
               </Detail>
             )}
+
+            <Detail
+              className="col-span-10 break-all sm:col-span-6"
+              label={t("route")}
+            >
+              {prescription.route &&
+                t("PRESCRIPTION_ROUTE_" + prescription.route)}
+            </Detail>
 
             {prescription.dosage_type === "PRN" ? (
               <>
@@ -232,7 +240,7 @@ export default function PrescriptionDetailCard({
             )}
           </div>
         )}
-        <div className="flex flex-col gap-1 text-xs text-gray-600 md:mt-3 md:flex-row md:items-center">
+        <div className="flex flex-col gap-1 text-xs text-secondary-600 md:mt-3 md:flex-row md:items-center">
           <span className="flex gap-1 font-medium">
             Prescribed
             <RecordMeta
@@ -257,18 +265,22 @@ export default function PrescriptionDetailCard({
 
 const Detail = (props: {
   className?: string;
-  label: string;
+  label?: string;
   children?: React.ReactNode;
 }) => {
   const { t } = useTranslation();
   return (
     <div className={classNames("flex flex-col gap-1", props.className)}>
-      <label className="text-sm font-medium text-gray-600">{props.label}</label>
+      {props.label && (
+        <label className="text-sm font-medium text-secondary-600">
+          {props.label}
+        </label>
+      )}
       <div className="cui-input-base w-full">
         {props.children ? (
           <span className="font-medium">{props.children}</span>
         ) : (
-          <span className="whitespace-nowrap text-xs font-medium text-gray-500">
+          <span className="whitespace-nowrap text-xs font-medium text-secondary-500">
             {t("not_specified")}
           </span>
         )}
