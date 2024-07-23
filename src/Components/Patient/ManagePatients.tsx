@@ -707,7 +707,7 @@ export const PatientManager = () => {
                         </span>
                       </span>
                     )}
-                  {!!patient.last_consultation?.has_consents.length || (
+                  {/* {!!patient.last_consultation?.has_consents.length || (
                     <span className="relative inline-flex">
                       <Chip
                         size="small"
@@ -720,7 +720,7 @@ export const PatientManager = () => {
                         <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
                       </span>
                     </span>
-                  )}
+                  )} */}
                 </div>
               </div>
             </div>
