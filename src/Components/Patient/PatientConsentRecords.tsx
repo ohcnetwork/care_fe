@@ -235,7 +235,7 @@ export default function PatientConsentRecords(props: {
           <div className="mt-2 text-sm text-red-500">{fileUpload.error}</div>
         </div>
         <div className="flex-1">
-          {consentRecords?.filter(
+          {/* {consentRecords?.filter(
             (r) =>
               r.files?.filter(
                 (f) =>
@@ -249,7 +249,7 @@ export default function PatientConsentRecords(props: {
             !consentRecords && (
               <div className="skeleton-animate-alpha h-32 rounded-lg" />
             )
-          )}
+          )} */}
           <div className="flex flex-col gap-4">
             {consentRecords?.map((record, index) => (
               <PatientConsentRecordBlockGroup

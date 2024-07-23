@@ -519,7 +519,7 @@ export const PatientManager = () => {
             </span>
           </div>
           <div className="flex flex-col items-start gap-4 md:flex-row">
-            <div className="bg-secondary-50 h-20 w-full min-w-20 rounded-lg border border-secondary-300 md:w-20">
+            <div className="h-20 w-full min-w-20 rounded-lg border border-secondary-300 bg-secondary-50 md:w-20">
               {patient?.last_consultation?.current_bed &&
               patient?.last_consultation?.discharge_date === null ? (
                 <div className="tooltip flex h-full flex-col items-center justify-center">
@@ -707,7 +707,7 @@ export const PatientManager = () => {
                         </span>
                       </span>
                     )}
-                  {!!patient.last_consultation?.has_consents.length || (
+                  {/* {!!patient.last_consultation?.has_consents.length || (
                     <span className="relative inline-flex">
                       <Chip
                         size="small"
@@ -720,7 +720,7 @@ export const PatientManager = () => {
                         <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
                       </span>
                     </span>
-                  )}
+                  )} */}
                 </div>
               </div>
             </div>
