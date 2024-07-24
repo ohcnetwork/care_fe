@@ -173,5 +173,6 @@
   "ration_card__NO_CARD": "Non-card holder",
   "ration_card__BPL": "BPL",
   "ration_card__APL": "APL",
-  "caution": "Caution"
+  "caution": "Caution",
+  "action_irreversible": "This action is irreversible"
 }
