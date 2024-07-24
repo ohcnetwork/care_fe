@@ -46,6 +46,7 @@
   "apply": "Apply",
   "filter_by": "Filter By",
   "filter": "Filter",
+  "settings_and_filters": "Settings and Filters",
   "ordering": "Ordering",
   "phone_number": "Phone Number",
   "international_mobile": "International Mobile",
@@ -174,5 +175,6 @@
   "ration_card__APL": "APL",
   "caution": "Caution",
   "feed_optimal_experience_for_phones": "For optimal viewing experience, consider rotating your device.",
-  "feed_optimal_experience_for_apple_phones": "For optimal viewing experience, consider rotating your device. Ensure auto-rotate is enabled in your device settings."
+  "feed_optimal_experience_for_apple_phones": "For optimal viewing experience, consider rotating your device. Ensure auto-rotate is enabled in your device settings.",
+  "action_irreversible": "This action is irreversible"
 }

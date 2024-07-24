@@ -30,6 +30,8 @@ export default function PrescriptionDetailCard({
     collapsible && prescription.discontinued,
   );
 
+  const medicine = prescription.medicine_object;
+
   return (
     <div
       className={classNames(
@@ -59,8 +61,7 @@ export default function PrescriptionDetailCard({
                 )}
               >
                 {isCollapsed ? (
-                  prescription.medicine_object?.name ??
-                  prescription.medicine_old
+                  medicine?.name ?? prescription.medicine_old
                 ) : (
                   <>
                     {prescription.prescription_type === "DISCHARGE" &&
@@ -126,46 +127,53 @@ export default function PrescriptionDetailCard({
         </div>
         {!isCollapsed && (
           <div className="mt-4 grid grid-cols-10 items-center gap-2">
-            <Detail
-              className={
-                prescription.dosage_type === "TITRATED"
-                  ? "col-span-10"
-                  : "col-span-10 md:col-span-4"
-              }
-              label={t("medicine")}
-            >
-              {prescription.medicine_object?.name ?? prescription.medicine_old}
+            <Detail className="col-span-10">
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-3">
+                  <span className="font-semibold uppercase">
+                    {medicine?.name ?? prescription.medicine_old}
+                  </span>
+                </div>
+                {medicine?.type === "brand" && (
+                  <span className="text-xs text-secondary-600">
+                    Generic:{" "}
+                    <span className="capitalize text-secondary-800">
+                      {medicine.generic}
+                    </span>
+                    ; Brand:{" "}
+                    <span className="capitalize text-secondary-800">
+                      {medicine.company}
+                    </span>
+                  </span>
+                )}
+              </div>
             </Detail>
-            <Detail
-              className="col-span-10 break-all sm:col-span-4"
-              label={t("route")}
-            >
-              {prescription.route &&
-                t("PRESCRIPTION_ROUTE_" + prescription.route)}
-            </Detail>
+
             {prescription.dosage_type === "TITRATED" ? (
               <>
-                <Detail
-                  className="col-span-5 sm:col-span-3"
-                  label={t("start_dosage")}
-                >
+                <Detail className="col-span-5" label={t("start_dosage")}>
                   {prescription.base_dosage}
                 </Detail>
-                <Detail
-                  className="col-span-5 sm:col-span-3"
-                  label={t("target_dosage")}
-                >
+                <Detail className="col-span-5" label={t("target_dosage")}>
                   {prescription.target_dosage}
                 </Detail>
               </>
             ) : (
               <Detail
-                className="col-span-10 sm:col-span-6 md:col-span-2"
+                className="col-span-10 sm:col-span-6 md:col-span-4"
                 label={t("dosage")}
               >
                 {prescription.base_dosage}
               </Detail>
             )}
+
+            <Detail
+              className="col-span-10 break-all sm:col-span-6"
+              label={t("route")}
+            >
+              {prescription.route &&
+                t("PRESCRIPTION_ROUTE_" + prescription.route)}
+            </Detail>
 
             {prescription.dosage_type === "PRN" ? (
               <>
@@ -257,15 +265,17 @@ export default function PrescriptionDetailCard({
 
 const Detail = (props: {
   className?: string;
-  label: string;
+  label?: string;
   children?: React.ReactNode;
 }) => {
   const { t } = useTranslation();
   return (
     <div className={classNames("flex flex-col gap-1", props.className)}>
-      <label className="text-sm font-medium text-secondary-600">
-        {props.label}
-      </label>
+      {props.label && (
+        <label className="text-sm font-medium text-secondary-600">
+          {props.label}
+        </label>
+      )}
       <div className="cui-input-base w-full">
         {props.children ? (
           <span className="font-medium">{props.children}</span>

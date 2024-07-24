@@ -37,7 +37,7 @@ const VitalsMonitorHeader = ({ patientAssetBed }: VitalsMonitorHeaderProps) => {
         {bed && (
           <Link
             className="flex flex-col items-end gap-2 text-secondary-500 md:flex-row md:items-center"
-            href={`/facility/${patient?.facility_object?.id}/location/${bed?.location_object?.id}/beds`}
+            href={`/facility/${bed.location_object!.facility!.id}/location/${bed!.location_object!.id}/beds`}
           >
             <span className="flex items-center gap-1 hover:text-white">
               <CareIcon icon="l-bed" className="text-sm md:text-base" />

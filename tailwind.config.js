@@ -3,6 +3,7 @@ const colors = require("tailwindcss/colors");
 const defaultTheme = require("tailwindcss/defaultTheme");
 
 const gray = {
+  50: "#F9FAFB",
   100: "#FBFAFC",
   200: "#F7F5FA",
   300: "#F1EDF7",
