@@ -390,7 +390,7 @@ const CoverImageEditModal = ({
                     setIsCameraOpen(false);
                     webRef.current.stopCamera();
                   }}
-                  className="border-grey-200 my-2 w-full border-2"
+                  className="my-2 w-full"
                 >
                   {t("close")}
                 </ButtonV2>

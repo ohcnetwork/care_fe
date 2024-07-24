@@ -398,7 +398,7 @@ export const PatientManager = () => {
       prefetch: !!qParams.last_consultation_current_bed__location,
     },
   );
-
+  /*
   const { data: patientsWithNoConsentsData } = useQuery(routes.patientList, {
     query: {
       ...qParams,
@@ -409,7 +409,7 @@ export const PatientManager = () => {
   });
 
   const patientsWithNoConsents = patientsWithNoConsentsData?.count;
-
+  */
   const { data: permittedFacilities } = useQuery(
     routes.getPermittedFacilities,
     {
@@ -519,7 +519,7 @@ export const PatientManager = () => {
             </span>
           </div>
           <div className="flex flex-col items-start gap-4 md:flex-row">
-            <div className="bg-secondary-50 h-20 w-full min-w-20 rounded-lg border border-secondary-300 md:w-20">
+            <div className="h-20 w-full min-w-20 rounded-lg border border-secondary-300 bg-secondary-50 md:w-20">
               {patient?.last_consultation?.current_bed &&
               patient?.last_consultation?.discharge_date === null ? (
                 <div className="tooltip flex h-full flex-col items-center justify-center">
@@ -707,7 +707,7 @@ export const PatientManager = () => {
                         </span>
                       </span>
                     )}
-                  {!!patient.last_consultation?.has_consents.length || (
+                  {/* {!!patient.last_consultation?.has_consents.length || (
                     <span className="relative inline-flex">
                       <Chip
                         size="small"
@@ -720,7 +720,7 @@ export const PatientManager = () => {
                         <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
                       </span>
                     </span>
-                  )}
+                  )} */}
                 </div>
               </div>
             </div>
@@ -788,7 +788,6 @@ export const PatientManager = () => {
       name,
       value: qParams[name] || defaultValue,
       onChange: (e: FieldChangeEvent<T>) => updateQuery({ [e.name]: e.value }),
-      className: "grow w-full mb-2",
     };
   };
 
@@ -975,21 +974,23 @@ export const PatientManager = () => {
           </div>
         </div>
         <div className="col-span-3 w-full">
-          <div className="col-span-2 mt-2">
-            <div className="mt-1 md:flex md:gap-4">
+          <div className="mt-2">
+            <div className="mb-4 mt-1 md:flex md:gap-4">
               <SearchInput
                 label="Search by Patient"
                 placeholder="Enter patient name"
                 {...queryField("name")}
+                className="w-full grow"
               />
               <SearchInput
                 label="Search by IP/OP Number"
                 placeholder="Enter IP/OP Number"
                 secondary
                 {...queryField("patient_no")}
+                className="w-full grow"
               />
             </div>
-            <div className="md:flex md:gap-4">
+            <div className="mb-4 md:flex md:gap-4">
               <PhoneNumberFormField
                 label="Search by Primary Number"
                 {...queryField("phone_number", "+91")}
@@ -997,6 +998,7 @@ export const PatientManager = () => {
                 onChange={(e) => setPhoneNum(e.value)}
                 error={phoneNumberError}
                 types={["mobile", "landline"]}
+                className="w-full grow"
               />
               <PhoneNumberFormField
                 label="Search by Emergency Number"
@@ -1005,12 +1007,13 @@ export const PatientManager = () => {
                 onChange={(e) => setEmergencyPhoneNum(e.value)}
                 error={emergencyPhoneNumberError}
                 types={["mobile", "landline"]}
+                className="w-full"
               />
             </div>
           </div>
         </div>
       </div>
-      {!qParams.last_consultation__consent_types &&
+      {/*!qParams.last_consultation__consent_types &&
         (patientsWithNoConsents || 0) > 0 && (
           <div className="flex w-full items-center gap-4 rounded-lg bg-red-500/10 p-4 text-sm text-red-500">
             <CareIcon icon="l-info-circle" className="text-xl" />
@@ -1027,7 +1030,7 @@ export const PatientManager = () => {
               </button>
             </p>
           </div>
-        )}
+        )*/}
       <div className="col-span-3 flex flex-wrap">
         <FilterBadges
           badges={({

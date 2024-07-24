@@ -208,6 +208,7 @@ export interface DupPatientModel {
   date_of_birth: string;
   year_of_birth: number;
   state_id: number;
+  is_expired: boolean;
 }
 
 export interface InventoryItemsModel {

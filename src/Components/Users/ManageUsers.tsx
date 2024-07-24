@@ -569,7 +569,7 @@ export default function ManageUsers() {
         />
       </div>
 
-      <div>
+      <div className="pt-4">
         <div>{manageUsers}</div>
       </div>
       {userData.show && (
