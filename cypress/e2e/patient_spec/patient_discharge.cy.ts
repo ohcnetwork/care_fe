@@ -79,9 +79,6 @@ describe("Patient Discharge based on multiple reason", () => {
     patientDischarge.typeReferringFacility(referringFreetextFacility);
     cy.wait(2000);
     cy.submitButton("Confirm Discharge");
-    cy.wait(500);
-    cy.submitButton("Cancel");
-    cy.submitButton("Confirm Discharge");
     cy.submitButton("Acknowledge & Submit");
     cy.wait(2000);
     cy.verifyNotification("Patient Discharged Successfully");
