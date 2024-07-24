@@ -254,7 +254,7 @@ describe("Patient Creation with consultation", () => {
   });
 
   it("Patient Registration using the transfer with no consultation", () => {
-    // transfer the patient and no consulation
+    // transfer the patient with no consulation and verify the transfer to a new facility
     patientPage.createPatient();
     patientPage.selectFacility(patientTransferFacility);
     patientPage.patientformvisibility();
@@ -264,9 +264,10 @@ describe("Patient Creation with consultation", () => {
     patientTransfer.clickTransferPatientNameList(patientTransferName);
     patientTransfer.clickTransferPatientYOB(yearOfBirth);
     patientTransfer.clickTransferSubmitButton();
-    patientTransfer.verifyFacilitySuccessfullMessage();
+    cy.verifyNotification(
+      "Patient Dummy Patient 10 (Male) transferred successfully",
+    );
     patientTransfer.clickConsultationCancelButton();
-    cy.wait(3000);
     // allow the transfer button of a patient
     patientTransfer.clickAllowPatientTransferButton();
     // Verify the patient error message for the same facility
@@ -280,7 +281,9 @@ describe("Patient Creation with consultation", () => {
     patientTransfer.clickTransferPatientNameList(patientTransferName);
     patientTransfer.clickTransferPatientYOB(yearOfBirth);
     patientTransfer.clickTransferSubmitButton();
-    patientTransfer.verifyFacilityErrorMessage();
+    cy.verifyNotification(
+      "Patient - Patient transfer cannot be completed because the patient has an active consultation in the same facility",
+    );
   });
 
   it("Patient Registration using External Result Import", () => {

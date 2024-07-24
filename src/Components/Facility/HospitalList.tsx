@@ -137,7 +137,7 @@ export const HospitalList = () => {
     ) : (
       <div>
         <div
-          className="border-grey-500 mt-4 cursor-pointer whitespace-nowrap rounded-md border bg-white p-16 text-center text-sm font-semibold shadow hover:bg-secondary-300"
+          className="mt-4 cursor-pointer whitespace-nowrap rounded-md border bg-white p-16 text-center text-sm font-semibold shadow hover:bg-secondary-300"
           onClick={() => navigate("/facility/create")}
         >
           <CareIcon icon="l-plus" className="text-3xl" />

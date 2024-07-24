@@ -8,6 +8,7 @@ import useQuery from "../../Utils/request/useQuery";
 import SearchInput from "../Form/SearchInput";
 import {
   ADMITTED_TO,
+  CONSENT_TYPE_CHOICES,
   DISCHARGED_PATIENT_SORT_OPTIONS,
   DISCHARGE_REASONS,
   GENDER_TYPES,
@@ -157,6 +158,39 @@ const DischargedPatientsList = ({
       .map((id: string) => {
         const text = ADMITTED_TO.find((obj) => obj.id == id)?.text;
         return badge("Bed Type", text, id);
+      });
+  };
+
+  const HasConsentTypesBadges = () => {
+    const badge = (key: string, value: any, id: string) => {
+      return (
+        value && (
+          <FilterBadge
+            name={key}
+            value={value}
+            onRemove={() => {
+              const lcat = qParams.last_consultation__consent_types
+                .split(",")
+                .filter((x: string) => x != id)
+                .join(",");
+              updateQuery({
+                ...qParams,
+                last_consultation__consent_types: lcat,
+              });
+            }}
+          />
+        )
+      );
+    };
+
+    return qParams.last_consultation__consent_types
+      .split(",")
+      .map((id: string) => {
+        const text = [
+          ...CONSENT_TYPE_CHOICES,
+          { id: "None", text: "No Consents" },
+        ].find((obj) => obj.id == id)?.text;
+        return badge("Has Consent", text, id);
       });
   };
 
@@ -385,8 +419,12 @@ const DischargedPatientsList = ({
             ),
           ]}
           children={
-            qParams.last_consultation_admitted_bed_type_list &&
-            LastAdmittedToTypeBadges()
+            <>
+              {qParams.last_consultation_admitted_bed_type_list &&
+                LastAdmittedToTypeBadges()}
+              {qParams.last_consultation__consent_types &&
+                HasConsentTypesBadges()}
+            </>
           }
         />
       </div>
@@ -442,7 +480,7 @@ export default DischargedPatientsList;
 const PatientListItem = ({ patient }: { patient: PatientModel }) => {
   return (
     <div className="flex rounded-lg border bg-white p-5 shadow hover:ring-1 hover:ring-primary-400">
-      <div className="bg-secondary-50 flex rounded border border-secondary-300 p-6">
+      <div className="flex rounded border border-secondary-300 bg-secondary-50 p-6">
         <CareIcon
           icon="l-user-injured"
           className="text-3xl text-secondary-800"

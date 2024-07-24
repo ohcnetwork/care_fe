@@ -73,7 +73,7 @@ export const Mews = ({ dailyRound }: { dailyRound: DailyRoundsModel }) => {
       return (
         <>
           <div className="tooltip flex flex-col items-center">
-            <div className="border-grey-400 flex h-7 w-7 items-center justify-center rounded-full border-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full border-2">
               <span className="text-sm font-semibold">-</span>
             </div>
             <span className="mt-1 text-xs font-medium text-secondary-700">

@@ -133,29 +133,6 @@ export default function PatientInfoCard(props: {
     },
     prefetch: !!consultation?.treating_physician_object?.username,
   });
-  const { data: consentRecords, loading: consentRecordsLoading } = useQuery(
-    routes.listConsents,
-    {
-      pathParams: {
-        consultationId: consultation?.id ?? "",
-      },
-      prefetch: !!consultation?.id,
-    },
-  );
-
-  const { data: consentFiles, loading: consentFilesLoading } = useQuery(
-    routes.viewUpload,
-    {
-      query: {
-        file_type: "CONSENT_RECORD",
-        associating_id: consentRecords?.results.map((cr) => cr.id).join(","),
-        limit: 1,
-        offset: 0,
-        is_archived: false,
-      },
-      prefetch: (consentRecords?.results.length || 0) > 0,
-    },
-  );
 
   return (
     <>
@@ -371,18 +348,15 @@ export default function PatientInfoCard(props: {
                         </div>
                       </div>
                     )}
-                  {!consentFilesLoading &&
-                    !consentRecordsLoading &&
-                    !consentFiles?.results.filter((c) => !c.is_archived)
-                      .length && (
-                      <div>
-                        <div className="inline-flex w-full items-center justify-start rounded border border-red-600 bg-red-400 p-1 px-3 text-xs font-semibold leading-4">
-                          <span className="font-semibold text-white">
-                            Consent Records Missing
-                          </span>
-                        </div>
+                  {!!consultation?.has_consents?.length || (
+                    <div>
+                      <div className="inline-flex w-full items-center justify-start rounded border border-red-600 bg-red-400 p-1 px-3 text-xs font-semibold leading-4">
+                        <span className="font-semibold text-white">
+                          Consent Records Missing
+                        </span>
                       </div>
-                    )}
+                    </div>
+                  )}
                   {consultation?.suggestion === "DC" && (
                     <div>
                       <div>
