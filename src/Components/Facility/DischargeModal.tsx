@@ -212,7 +212,7 @@ const DischargeModal = ({
         title="Confirm Discharge"
         action="Acknowledge & Submit"
         variant="warning"
-        className="md:max-w-2xl"
+        className="md:max-w-xl"
       >
         <div className="flex flex-col gap-2 py-2 text-secondary-900">
           <p>
