@@ -356,27 +356,25 @@ export default function PatientFilter(props: any) {
               />
             </div>
           </div>
-          {props.dischargePage || (
-            <div className="w-full flex-none" id="bed-type-select">
-              <FieldLabel className="text-sm">
-                {props.dischargePage && "Last "}Admitted to (Bed Types)
-              </FieldLabel>
-              <MultiSelectMenuV2
-                id="last_consultation_admitted_bed_type_list"
-                placeholder="Select bed types"
-                options={ADMITTED_TO}
-                value={filterState.last_consultation_admitted_bed_type_list}
-                optionValue={(o) => o.id}
-                optionLabel={(o) => o.text}
-                onChange={(o) =>
-                  setFilterState({
-                    ...filterState,
-                    last_consultation_admitted_bed_type_list: o,
-                  })
-                }
-              />
-            </div>
-          )}
+          <div className="w-full flex-none" id="bed-type-select">
+            <FieldLabel className="text-sm">
+              {props.dischargePage && "Last "}Admitted to (Bed Types)
+            </FieldLabel>
+            <MultiSelectMenuV2
+              id="last_consultation_admitted_bed_type_list"
+              placeholder="Select bed types"
+              options={ADMITTED_TO}
+              value={filterState.last_consultation_admitted_bed_type_list}
+              optionValue={(o) => o.id}
+              optionLabel={(o) => o.text}
+              onChange={(o) =>
+                setFilterState({
+                  ...filterState,
+                  last_consultation_admitted_bed_type_list: o,
+                })
+              }
+            />
+          </div>
           <div className="w-full flex-none" id="consent-type-select">
             <FieldLabel className="text-sm">Has consent records for</FieldLabel>
             <MultiSelectMenuV2
