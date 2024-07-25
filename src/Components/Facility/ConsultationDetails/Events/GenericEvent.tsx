@@ -85,7 +85,9 @@ export default function GenericEvent(props: IProps) {
       {Object.entries(props.values).map(([key, value]) => (
         <div className="flex w-full flex-col items-start gap-2">
           <span className="text-xs uppercase text-secondary-700">
-            {key.replaceAll(/_/g, " ")}
+            {key === "consultation_notes"
+              ? "General Instructions (Advice)"
+              : key.replaceAll(/_/g, " ")}
           </span>
           <span className="break-all text-sm font-semibold text-secondary-700">
             {formatValue(value, key)}
