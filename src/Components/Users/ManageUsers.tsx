@@ -561,9 +561,11 @@ export default function ManageUsers() {
             value(
               "Last Active",
               "last_active_days",
-              qParams.last_active_days === "never"
-                ? "Never"
-                : `in the last ${qParams.last_active_days} day${qParams.last_active_days > 1 ? "s" : ""}`,
+              (() => {
+                if (!qParams.last_active_days) return "";
+                if (qParams.last_active_days === "never") return "Never";
+                return `in the last ${qParams.last_active_days} day${qParams.last_active_days > 1 ? "s" : ""}`;
+              })(),
             ),
           ]}
         />
