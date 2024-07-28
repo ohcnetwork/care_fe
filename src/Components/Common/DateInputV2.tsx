@@ -256,7 +256,7 @@ const DateInputV2: React.FC<Props> = ({
                   type="text"
                   readOnly
                   disabled={disabled}
-                  className={`cui-input-base cursor-pointer disabled:cursor-not-allowed ${className}`}
+                  className={`cui-input-base cursor-pointer disabled:cursor-not-allowed max-sm:!px-2 ${className}`}
                   placeholder={placeholder ?? t("select_date")}
                   value={value && dayjs(value).format("DD/MM/YYYY")}
                 />
