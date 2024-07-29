@@ -119,7 +119,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
     return new Promise((resolve, reject) => {
       if (stageRef.current === "cancelled") resolve({});
       const category = "AUDIO";
-      const name = "audio.mp3";
+      const name = "audio." + audioBlob.type.split(";")[0].split("/")[1];
       const filename = Date.now().toString();
 
       request(routes.createScribeFileUpload, {
