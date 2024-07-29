@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Combobox } from "@headlessui/react";
 import { DropdownTransition } from "../../Common/components/HelperComponents";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
@@ -7,7 +7,6 @@ import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 import FormField from "./FormField";
 import { classNames } from "../../../Utils/utils";
 import { useTranslation } from "react-i18next";
-import * as Notifications from "../../../Utils/Notifications.js";
 
 type OptionCallback<T, R> = (option: T) => R;
 
@@ -72,7 +71,6 @@ type AutocompleteProps<T, V = T> = {
   isLoading?: boolean;
   allowRawInput?: boolean;
   error?: string;
-  noResultsLabel?: string;
 } & (
   | {
       required?: false;
@@ -138,21 +136,6 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
       ? options.filter((o) => o.search.includes(query))
       : options;
 
-  const prevQuery = useRef("");
-  useEffect(() => {
-    if (
-      query &&
-      prevQuery.current !== query &&
-      filteredOptions.length === 0 &&
-      props.noResultsLabel
-    ) {
-      Notifications.Error({
-        msg: props.noResultsLabel,
-      });
-    }
-    prevQuery.current = query;
-  }, [query, filteredOptions, props.noResultsLabel]);
-
   return (
     <div
       className={
@@ -212,7 +195,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
             <Combobox.Options className="cui-dropdown-base absolute z-10 mt-0.5 origin-top-right">
               {filteredOptions.length === 0 && (
                 <div className="p-2 text-sm text-gray-500">
-                  {props.noResultsLabel ?? "No options found"}
+                  No options found
                 </div>
               )}
               {filteredOptions.map((option, index) => (

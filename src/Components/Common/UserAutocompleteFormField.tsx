@@ -9,6 +9,8 @@ import {
 import { UserModel } from "../Users/models";
 import { isUserOnline } from "../../Utils/utils";
 import { UserRole } from "../../Common/constants";
+import { useEffect } from "react";
+import { Error } from "../../Utils/Notifications";
 
 type Props = FormFieldBaseProps<UserModel> & {
   placeholder?: string;
@@ -60,16 +62,28 @@ export default function UserAutocompleteFormField(props: Props) {
     );
   };
 
+  const items = options(field.value && [field.value]);
+
+  useEffect(() => {
+    if (props.required && !isLoading && !items.length && props.noResultsLabel) {
+      Error({ msg: props.noResultsLabel });
+    }
+  }, [isLoading, items, props.required]);
+
   return (
     <FormField field={field}>
       <div className="relative">
         <Autocomplete
           id={field.id}
           disabled={field.disabled}
-          placeholder={props.placeholder}
+          placeholder={
+            items.length
+              ? props.placeholder
+              : props.noResultsLabel ?? props.placeholder
+          }
           value={field.value}
           onChange={field.handleChange}
-          options={options(field.value && [field.value])}
+          options={items}
           optionLabel={getUserFullName}
           optionIcon={getStatusIcon}
           optionDescription={(option) => `${option.user_type}`}
@@ -84,7 +98,6 @@ export default function UserAutocompleteFormField(props: Props) {
                 : getUserList({ ...search_filter, search_text: query }),
             )
           }
-          noResultsLabel={props.noResultsLabel ?? "No options found"}
           isLoading={isLoading}
         />
       </div>
