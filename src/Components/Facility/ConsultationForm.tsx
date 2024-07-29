@@ -1414,7 +1414,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                           userType={"Doctor"}
                           homeFacility={facilityId}
                           error={state.errors.treating_physician}
-                          noResultsLabel="No home facility doctors available"
+                          noResultsLabel={t("no_treating_physicians_available")}
                         />
                       </div>
 

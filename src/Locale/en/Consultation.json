@@ -34,5 +34,6 @@
   "generate_report": "Generate Report",
   "prev_sessions": "Prev Sessions",
   "next_sessions": "Next Sessions",
-  "no_changes": "No changes"
+  "no_changes": "No changes",
+  "no_treating_physicians_available": "This facility does not have any home facility doctors."
 }
