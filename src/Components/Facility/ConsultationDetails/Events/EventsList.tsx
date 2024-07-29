@@ -34,12 +34,6 @@ export default function EventsList() {
                         /_/g,
                         " ",
                       ) + " Event"
-                      // .split("_")
-                      // .map(
-                      //   (text) =>
-                      //     text[0].toUpperCase() + text.toLowerCase().slice(1),
-                      // )
-                      // .join(" ") + " Event"
                     }
                     event={{
                       type: item.change_type.replace(/_/g, " ").toLowerCase(),

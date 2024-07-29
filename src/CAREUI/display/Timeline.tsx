@@ -92,15 +92,10 @@ export const TimelineNode = (props: TimelineNodeProps) => {
                             }`}{" "}
                       </span>
                     )}
-                    {props.titleSuffix ? (
-                      props.titleSuffix
-                    ) : (
+                    {props.titleSuffix || (
                       <>
-                        {props.event.type} {t(" the")}
-                        <span className="capitalize">
-                          {" "}
-                          {props.name || name}
-                        </span>
+                        {`${props.event.type} the `}
+                        <span className="capitalize">{props.name || name}</span>
                       </>
                     )}
                   </p>
