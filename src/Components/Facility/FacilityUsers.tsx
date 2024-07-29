@@ -185,7 +185,7 @@ export default function FacilityUsers(props: any) {
                 </div>
                 <div className="flex justify-between">
                   {user.phone_number && (
-                    <div className="bg-secondary-50 mt-2 border-t px-6 py-2">
+                    <div className="mt-2 border-t bg-secondary-50 px-6 py-2">
                       <div className="flex justify-between py-4">
                         <div>
                           <div className="leading-relaxed text-secondary-500">
