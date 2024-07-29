@@ -7,7 +7,7 @@ import { FC } from "react";
 
 const ReportRow = ({ data, name, min, max }: any) => {
   return (
-    <tr className="even:bg-secondary-50 bg-white">
+    <tr className="bg-white even:bg-secondary-50">
       <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-secondary-900">
         {name}
       </td>

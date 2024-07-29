@@ -101,7 +101,11 @@
   "IL": { "flag": "🇮🇱", "name": "Israel", "code": "972" },
   "IM": { "flag": "🇮🇲", "name": "Isle of Man", "code": "44-1624" },
   "IN": { "flag": "🇮🇳", "name": "India", "code": "91" },
-  "IO": { "flag": "🇮🇴", "name": "British Indian Ocean Territory", "code": "246" },
+  "IO": {
+    "flag": "🇮🇴",
+    "name": "British Indian Ocean Territory",
+    "code": "246"
+  },
   "IQ": { "flag": "🇮🇶", "name": "Iraq", "code": "964" },
   "IR": { "flag": "🇮🇷", "name": "Iran", "code": "98" },
   "IS": { "flag": "🇮🇸", "name": "Iceland", "code": "354" },
