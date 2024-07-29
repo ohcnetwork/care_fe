@@ -205,13 +205,15 @@ export const ConsultationDetails = (props: any) => {
   }
 
   const tabButtonClasses = (selected: boolean) =>
-    `capitalize min-w-max-content cursor-pointer border-transparent text-secondary-700 hover:text-secondary-700 hover:border-secondary-300 font-bold whitespace-nowrap ${
-      selected === true ? "border-primary-500 text-primary-600 border-b-2" : ""
+    `capitalize min-w-max-content cursor-pointer font-bold whitespace-nowrap ${
+      selected === true
+        ? "border-primary-500 hover:border-secondary-300 text-primary-600 border-b-2"
+        : "text-secondary-700 hover:text-secondary-700"
     }`;
 
   return (
     <div>
-      <div className="px-2 pb-2">
+      <div>
         <nav className="relative flex flex-wrap items-start justify-between">
           <PageTitle
             title="Patient Dashboard"

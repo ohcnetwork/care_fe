@@ -45,7 +45,7 @@ export default function NetworkSignal({ strength, children }: Props) {
                 i === 2 && "h-[15px]",
 
                 // Whether to infill with strength color or not
-                strength > i ? "bg-current" : "bg-zinc-600",
+                strength > i ? "bg-current" : "bg-zinc-500/30",
               )}
             />
           ))
