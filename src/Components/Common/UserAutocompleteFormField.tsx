@@ -22,7 +22,7 @@ type Props = FormFieldBaseProps<UserModel> & {
 };
 
 export default function UserAutocompleteFormField(props: Props) {
-  const field = useFormFieldPropsResolver(props as any);
+  const field = useFormFieldPropsResolver(props);
   const { fetchOptions, isLoading, options } = useAsyncOptions<UserModel>(
     "id",
     { queryResponseExtractor: (data) => data.results },
@@ -51,7 +51,7 @@ export default function UserAutocompleteFormField(props: Props) {
       <div className="mr-6 mt-[2px]">
         <svg
           className={`h-3 w-3 ${
-            isUserOnline(option) ? "text-green-500" : "text-gray-400"
+            isUserOnline(option) ? "text-green-500" : "text-secondary-400"
           }`}
           fill="currentColor"
           viewBox="0 0 8 8"
@@ -76,6 +76,8 @@ export default function UserAutocompleteFormField(props: Props) {
         <Autocomplete
           id={field.id}
           disabled={field.disabled}
+          // Voluntarily casting type as true to ignore type errors.
+          required={field.required as true}
           placeholder={
             items.length
               ? props.placeholder

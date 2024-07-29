@@ -73,7 +73,7 @@ export default function DoctorVideoSlideover(props: {
       dialogClass="md:w-[450px]"
     >
       {/* Title and close button */}
-      <p className="-mt-3 pb-4 text-sm text-gray-600">
+      <p className="-mt-3 pb-4 text-sm text-secondary-600">
         Select a doctor to connect via video
       </p>
       <div className="flex justify-center" id="doctor-connect-filter-tabs">
@@ -130,12 +130,12 @@ const UserGroupList = (props: {
           <span className="whitespace-nowrap text-lg font-bold">
             {UserGroups[props.group]}
           </span>
-          <div className="mx-6 h-1 w-full bg-gray-300" />
+          <div className="mx-6 h-1 w-full bg-secondary-300" />
         </div>
       )}
 
       {!users.length && (
-        <span className="flex w-full justify-center py-2 font-bold text-gray-500">
+        <span className="flex w-full justify-center py-2 font-bold text-secondary-500">
           No users in this category
         </span>
       )}
@@ -172,11 +172,11 @@ function UserListItem({ user }: { user: UserAnnotatedWithGroup }) {
   function connectOnWhatsApp(e: React.MouseEvent<HTMLAnchorElement>) {
     e.stopPropagation();
     if (!user.alt_phone_number) return;
-    const phoneNumber = user.alt_phone_number;
+    const phoneNumber = user.alt_phone_number?.replace(/\D+/g, "");
     const message = `${courtesyTitle(user)} ${user.first_name} ${user.last_name}, I have a query regarding a patient.\n\nPatient Link: ${window.location.href}`;
     const encodedMessage = encodeURIComponent(message);
     const whatsappAppURL = `whatsapp://send?phone=${phoneNumber}&text=${encodedMessage}`;
-    const whatsappWebURL = `https://web.whatsapp.com/send?phone=${phoneNumber}&text=${encodedMessage}`;
+    const whatsappWebURL = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
 
     const userAgent = navigator.userAgent;
     const isEdge = /edge\/\d+/i.test(userAgent);
@@ -233,8 +233,8 @@ function UserListItem({ user }: { user: UserAnnotatedWithGroup }) {
       className={classNames(
         "group cursor-default select-none rounded-xl p-3",
         user.alt_phone_number
-          ? "cursor-pointer border border-gray-400 transition hover:border-green-500 hover:bg-green-50"
-          : "pointer-events-none cursor-not-allowed bg-gray-400",
+          ? "cursor-pointer border border-secondary-400 transition hover:border-green-500 hover:bg-green-50"
+          : "pointer-events-none cursor-not-allowed bg-secondary-400",
       )}
     >
       <a className="flex" onClick={connectOnWhatsApp}>
@@ -245,12 +245,12 @@ function UserListItem({ user }: { user: UserAnnotatedWithGroup }) {
             Number(new Date()) - Number(new Date(user.last_login)) < 60000 ? (
               <CareIcon icon={icon} className="text-xl text-green-600" />
             ) : (
-              <CareIcon icon={icon} className="text-2xl text-gray-600" />
+              <CareIcon icon={icon} className="text-2xl text-secondary-600" />
             )
           }
         </div>
         <div className="ml-4 flex flex-auto flex-col gap-1">
-          <div className="flex justify-between gap-2 text-sm text-gray-700">
+          <div className="flex justify-between gap-2 text-sm text-secondary-700">
             <span>
               <strong>
                 {user.first_name} {user.last_name}
@@ -262,12 +262,12 @@ function UserListItem({ user }: { user: UserAnnotatedWithGroup }) {
             />
           </div>
           {!!user.skills.length && (
-            <div className="mt-1 text-sm leading-5 text-gray-900">
+            <div className="mt-1 text-sm leading-5 text-secondary-900">
               <div className="flex flex-wrap gap-2">
                 {user.skills?.map((skill: SkillObjectModel) => (
                   <span
                     key={skill.id}
-                    className="flex items-center gap-2 rounded-full border-gray-300 bg-gray-200 px-3 text-xs text-gray-900"
+                    className="flex items-center gap-2 rounded-full border-secondary-300 bg-secondary-200 px-3 text-xs text-secondary-900"
                   >
                     <p className="py-1.5">{skill.name}</p>
                   </span>
@@ -275,7 +275,7 @@ function UserListItem({ user }: { user: UserAnnotatedWithGroup }) {
               </div>
             </div>
           )}
-          <div className="flex justify-between gap-2 text-sm text-gray-500">
+          <div className="flex justify-between gap-2 text-sm text-secondary-500">
             <div className="flex items-center gap-1">
               <a
                 role="button"
@@ -296,7 +296,7 @@ function UserListItem({ user }: { user: UserAnnotatedWithGroup }) {
               </a>
               <span>{user.alt_phone_number}</span>
             </div>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-secondary-500">
               {user.last_login && <span>{relativeTime(user.last_login)}</span>}
             </div>
           </div>

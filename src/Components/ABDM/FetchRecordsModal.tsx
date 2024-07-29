@@ -122,7 +122,7 @@ export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
           )}
         >
           {idVerificationStatus === "in-progress" && (
-            <CircularProgress className="!h-5 !w-5 !text-gray-500" />
+            <CircularProgress className="!h-5 !w-5 !text-secondary-500" />
           )}
           {idVerificationStatus === "verified" && <CareIcon icon="l-check" />}
           {

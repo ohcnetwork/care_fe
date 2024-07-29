@@ -2,6 +2,7 @@ import * as Notification from "../../Utils/Notifications.js";
 
 import {
   ADMITTED_TO,
+  CONSENT_TYPE_CHOICES,
   DISCHARGE_REASONS,
   GENDER_TYPES,
   PATIENT_CATEGORIES,
@@ -33,6 +34,7 @@ import SortDropdownMenu from "../Common/SortDropdown";
 import SwitchTabs from "../Common/components/SwitchTabs";
 import {
   formatPatientAge,
+  humanizeStrings,
   isAntenatal,
   parsePhoneNumber,
 } from "../../Utils/utils.js";
@@ -181,6 +183,7 @@ export const PatientManager = () => {
       qParams.date_declared_positive_before || undefined,
     date_declared_positive_after:
       qParams.date_declared_positive_after || undefined,
+    ration_card_category: qParams.ration_card_category || undefined,
     last_consultation_medico_legal_case:
       qParams.last_consultation_medico_legal_case || undefined,
     last_consultation_encounter_date_before:
@@ -193,6 +196,8 @@ export const PatientManager = () => {
       qParams.last_consultation_discharge_date_after || undefined,
     last_consultation_admitted_bed_type_list:
       qParams.last_consultation_admitted_bed_type_list || undefined,
+    last_consultation__consent_types:
+      qParams.last_consultation__consent_types || undefined,
     last_consultation__new_discharge_reason:
       qParams.last_consultation__new_discharge_reason || undefined,
     last_consultation_current_bed__location:
@@ -393,7 +398,18 @@ export const PatientManager = () => {
       prefetch: !!qParams.last_consultation_current_bed__location,
     },
   );
+  /*
+  const { data: patientsWithNoConsentsData } = useQuery(routes.patientList, {
+    query: {
+      ...qParams,
+      limit: 1,
+      last_consultation__consent_types: "None",
+      is_active: "True",
+    },
+  });
 
+  const patientsWithNoConsents = patientsWithNoConsentsData?.count;
+  */
   const { data: permittedFacilities } = useQuery(
     routes.getPermittedFacilities,
     {
@@ -427,6 +443,39 @@ export const PatientManager = () => {
       .map((id: string) => {
         const text = ADMITTED_TO.find((obj) => obj.id == id)?.text;
         return badge("Bed Type", text, id);
+      });
+  };
+
+  const HasConsentTypesBadges = () => {
+    const badge = (key: string, value: any, id: string) => {
+      return (
+        value && (
+          <FilterBadge
+            name={key}
+            value={value}
+            onRemove={() => {
+              const lcat = qParams.last_consultation__consent_types
+                .split(",")
+                .filter((x: string) => x != id)
+                .join(",");
+              updateQuery({
+                ...qParams,
+                last_consultation__consent_types: lcat,
+              });
+            }}
+          />
+        )
+      );
+    };
+
+    return qParams.last_consultation__consent_types
+      .split(",")
+      .map((id: string) => {
+        const text = [
+          ...CONSENT_TYPE_CHOICES,
+          { id: "None", text: "No Consents" },
+        ].find((obj) => obj.id == id)?.text;
+        return badge("Has Consent", text, id);
       });
   };
 
@@ -470,11 +519,11 @@ export const PatientManager = () => {
             </span>
           </div>
           <div className="flex flex-col items-start gap-4 md:flex-row">
-            <div className="h-20 w-full min-w-20 rounded-lg border border-gray-300 bg-gray-50 md:w-20">
+            <div className="h-20 w-full min-w-20 rounded-lg border border-secondary-300 bg-secondary-50 md:w-20">
               {patient?.last_consultation?.current_bed &&
               patient?.last_consultation?.discharge_date === null ? (
                 <div className="tooltip flex h-full flex-col items-center justify-center">
-                  <span className="w-full truncate px-1 text-center text-sm text-gray-900">
+                  <span className="w-full truncate px-1 text-center text-sm text-secondary-900">
                     {
                       patient?.last_consultation?.current_bed?.bed_object
                         ?.location_object?.name
@@ -497,7 +546,7 @@ export const PatientManager = () => {
                   <div className="tooltip">
                     <CareIcon
                       icon="l-estate"
-                      className="text-3xl text-gray-500"
+                      className="text-3xl text-secondary-500"
                     />
                     <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-sm font-medium">
                       Domiciliary Care
@@ -508,7 +557,7 @@ export const PatientManager = () => {
                 <div className="flex min-h-20 items-center justify-center">
                   <CareIcon
                     icon="l-user-injured"
-                    className="text-3xl text-gray-500"
+                    className="text-3xl text-secondary-500"
                   />
                 </div>
               )}
@@ -516,18 +565,18 @@ export const PatientManager = () => {
             <div className="flex w-full flex-col gap-2 pl-2 md:block md:flex-row">
               <div className="flex w-full items-center justify-between gap-2">
                 <div
-                  className="flex flex-wrap gap-2 font-semibold"
+                  className="flex flex-wrap items-end gap-3 font-semibold"
                   id="patient-name-list"
                 >
                   <span className="text-xl capitalize">{patient.name}</span>
-                  <span className="text-gray-800">
+                  <span className="font-bold text-secondary-700">
                     {formatPatientAge(patient, true)}
                   </span>
                 </div>
               </div>
 
               {patient.action && patient.action != 10 && (
-                <span className="text-sm font-semibold text-gray-700">
+                <span className="text-sm font-semibold text-secondary-700">
                   {
                     TELEMEDICINE_ACTIONS.find((i) => i.id === patient.action)
                       ?.desc
@@ -538,13 +587,15 @@ export const PatientManager = () => {
               {patient.facility_object && (
                 <div className="mb-2">
                   <div className="flex flex-wrap items-center">
-                    <p className="mr-2 text-sm font-medium text-gray-700">
+                    <p className="mr-2 text-sm font-medium text-secondary-700">
                       {patient.facility_object.name}
                     </p>
                     <RecordMeta
-                      className="text-sm text-gray-900"
+                      className="text-sm text-secondary-900"
                       prefix={
-                        <span className="text-gray-600">{t("updated")}</span>
+                        <span className="text-secondary-600">
+                          {t("updated")}
+                        </span>
                       }
                       time={patient.modified_date}
                     />
@@ -553,6 +604,35 @@ export const PatientManager = () => {
               )}
               <div className="flex w-full">
                 <div className="flex flex-row flex-wrap justify-start gap-2">
+                  {!patient.last_consultation ||
+                  patient.last_consultation?.facility !== patient.facility ||
+                  (patient.last_consultation?.discharge_date &&
+                    patient.is_active) ? (
+                    <span className="relative inline-flex">
+                      <Chip
+                        size="small"
+                        variant="danger"
+                        startIcon="l-notes"
+                        text="No Consultation Filed"
+                      />
+                      <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center">
+                        <span className="center absolute inline-flex h-4 w-4 animate-ping rounded-full bg-red-400"></span>
+                        <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
+                      </span>
+                    </span>
+                  ) : (
+                    <>
+                      {patient.last_consultation?.patient_no && (
+                        <Chip
+                          size="small"
+                          variant="primary"
+                          text={`${patient.last_consultation?.suggestion === "A" ? "IP No:" : "OP No:"} ${
+                            patient.last_consultation?.patient_no
+                          }`}
+                        />
+                      )}
+                    </>
+                  )}
                   {patient.review_time &&
                     !patient.last_consultation?.discharge_date &&
                     Number(patient.last_consultation?.review_interval) > 0 &&
@@ -580,7 +660,7 @@ export const PatientManager = () => {
                         size="small"
                         variant="primary"
                         startIcon="l-clock-three"
-                        text={`IP Days: ${dayjs().diff(patient.last_consultation.encounter_date, "day")}`}
+                        text={`IP Day No: ${dayjs().diff(patient.last_consultation.encounter_date, "day") + 1}`}
                       />
                     )}
                   {patient.gender === 2 &&
@@ -603,23 +683,6 @@ export const PatientManager = () => {
                       startIcon="l-user-md"
                       text="Medical Worker"
                     />
-                  )}
-                  {(!patient.last_consultation ||
-                    patient.last_consultation?.facility !== patient.facility ||
-                    (patient.last_consultation?.discharge_date &&
-                      patient.is_active)) && (
-                    <span className="relative inline-flex">
-                      <Chip
-                        size="small"
-                        variant="danger"
-                        startIcon="l-notes"
-                        text="No Consultation Filed"
-                      />
-                      <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center">
-                        <span className="center absolute inline-flex h-4 w-4 animate-ping rounded-full bg-red-400"></span>
-                        <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
-                      </span>
-                    </span>
                   )}
                   {!(
                     patient.last_consultation?.facility !== patient.facility
@@ -644,6 +707,20 @@ export const PatientManager = () => {
                         </span>
                       </span>
                     )}
+                  {/* {!!patient.last_consultation?.has_consents.length || (
+                    <span className="relative inline-flex">
+                      <Chip
+                        size="small"
+                        variant="danger"
+                        startIcon="l-file"
+                        text="No consents recorded"
+                      />
+                      <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center">
+                        <span className="center absolute inline-flex h-4 w-4 animate-ping rounded-full bg-red-400"></span>
+                        <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
+                      </span>
+                    </span>
+                  )} */}
                 </div>
               </div>
             </div>
@@ -699,7 +776,9 @@ export const PatientManager = () => {
   } else if (data && data.count === 0) {
     managePatients = (
       <div className="col-span-3 w-full rounded-lg bg-white p-2 py-8 pt-4 text-center">
-        <p className="text-2xl font-bold text-gray-600">No Patients Found</p>
+        <p className="text-2xl font-bold text-secondary-600">
+          No Patients Found
+        </p>
       </div>
     );
   }
@@ -709,7 +788,6 @@ export const PatientManager = () => {
       name,
       value: qParams[name] || defaultValue,
       onChange: (e: FieldChangeEvent<T>) => updateQuery({ [e.name]: e.value }),
-      className: "grow w-full mb-2",
     };
   };
 
@@ -820,7 +898,7 @@ export const PatientManager = () => {
               selected={qParams.ordering}
               onSelect={updateQuery}
             />
-            <div className="tooltip">
+            <div className="tooltip w-full md:w-auto">
               {!isExportAllowed ? (
                 <ButtonV2
                   onClick={() => {
@@ -896,21 +974,23 @@ export const PatientManager = () => {
           </div>
         </div>
         <div className="col-span-3 w-full">
-          <div className="col-span-2 mt-2">
-            <div className="mt-1 md:flex md:gap-4">
+          <div className="mt-2">
+            <div className="mb-4 mt-1 md:flex md:gap-4">
               <SearchInput
                 label="Search by Patient"
                 placeholder="Enter patient name"
                 {...queryField("name")}
+                className="w-full grow"
               />
               <SearchInput
                 label="Search by IP/OP Number"
                 placeholder="Enter IP/OP Number"
                 secondary
                 {...queryField("patient_no")}
+                className="w-full grow"
               />
             </div>
-            <div className="md:flex md:gap-4">
+            <div className="mb-4 md:flex md:gap-4">
               <PhoneNumberFormField
                 label="Search by Primary Number"
                 {...queryField("phone_number", "+91")}
@@ -918,6 +998,7 @@ export const PatientManager = () => {
                 onChange={(e) => setPhoneNum(e.value)}
                 error={phoneNumberError}
                 types={["mobile", "landline"]}
+                className="w-full grow"
               />
               <PhoneNumberFormField
                 label="Search by Emergency Number"
@@ -926,12 +1007,31 @@ export const PatientManager = () => {
                 onChange={(e) => setEmergencyPhoneNum(e.value)}
                 error={emergencyPhoneNumberError}
                 types={["mobile", "landline"]}
+                className="w-full"
               />
             </div>
           </div>
         </div>
       </div>
-      <div className="col-span-3 mt-6 flex flex-wrap">
+      {/*!qParams.last_consultation__consent_types &&
+        (patientsWithNoConsents || 0) > 0 && (
+          <div className="flex w-full items-center gap-4 rounded-lg bg-red-500/10 p-4 text-sm text-red-500">
+            <CareIcon icon="l-info-circle" className="text-xl" />
+            <p className="font-semibold">
+              {patientsWithNoConsents} patients admitted missing consent
+              records&nbsp;
+              <button
+                onClick={() =>
+                  updateQuery({ last_consultation__consent_types: "None" })
+                }
+                className="underline"
+              >
+                Click to view
+              </button>
+            </p>
+          </div>
+        )*/}
+      <div className="col-span-3 flex flex-wrap">
         <FilterBadges
           badges={({
             badge,
@@ -959,6 +1059,13 @@ export const PatientManager = () => {
             badge(
               "Is Medico-Legal Case",
               "last_consultation_medico_legal_case",
+            ),
+            value(
+              "Ration Card Category",
+              "ration_card_category",
+              qParams.ration_card_category
+                ? t(`ration_card__${qParams.ration_card_category}`)
+                : "",
             ),
             value(
               "Facility",
@@ -1007,7 +1114,7 @@ export const PatientManager = () => {
               value(
                 DIAGNOSES_FILTER_LABELS[key],
                 key,
-                getDiagnosisFilterValue(key).join(", "),
+                humanizeStrings(getDiagnosisFilterValue(key)),
               ),
             ),
             badge("Declared Status", "is_declared_positive"),
@@ -1031,8 +1138,15 @@ export const PatientManager = () => {
             ),
           ]}
           children={
-            qParams.last_consultation_admitted_bed_type_list &&
-            LastAdmittedToTypeBadges()
+            (qParams.last_consultation_admitted_bed_type_list ||
+              qParams.last_consultation__consent_types) && (
+              <>
+                {qParams.last_consultation_admitted_bed_type_list &&
+                  LastAdmittedToTypeBadges()}
+                {qParams.last_consultation__consent_types &&
+                  HasConsentTypesBadges()}
+              </>
+            )
           }
         />
       </div>

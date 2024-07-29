@@ -17,6 +17,7 @@ type AutocompleteMultiSelectFormFieldProps<T, V> = FormFieldBaseProps<V[]> & {
   options: T[];
   optionLabel: OptionCallback<T, string>;
   optionValue?: OptionCallback<T, V>;
+  optionDisabled?: OptionCallback<T, boolean>;
   onQuery?: (query: string) => void;
   dropdownIcon?: React.ReactNode | undefined;
   isLoading?: boolean;
@@ -50,6 +51,7 @@ type AutocompleteMutliSelectProps<T, V = T> = {
   optionDescription?: OptionCallback<T, ReactNode>;
   optionLabel: OptionCallback<T, string>;
   optionValue?: OptionCallback<T, V>;
+  optionDisabled?: OptionCallback<T, boolean>;
   className?: string;
   onChange: OptionCallback<V[], void>;
   onQuery?: (query: string) => void;
@@ -84,9 +86,10 @@ export const AutocompleteMutliSelect = <T, V>(
     return {
       option,
       label,
-      description: props.optionDescription && props.optionDescription(option),
+      description: props.optionDescription?.(option),
       search: label.toLowerCase(),
       value: (props.optionValue ? props.optionValue(option) : option) as V,
+      disabled: props.optionDisabled?.(option),
     };
   });
 
@@ -132,7 +135,7 @@ export const AutocompleteMutliSelect = <T, V>(
                 ref={comboButtonRef}
                 className="absolute inset-y-0 right-0 flex items-center pr-2"
               >
-                <div className="absolute right-0 top-1 mr-2 flex items-center text-lg text-gray-900">
+                <div className="absolute right-0 top-1 mr-2 flex items-center text-lg text-secondary-900">
                   {props.isLoading ? (
                     <CareIcon icon="l-spinner" className="animate-spin" />
                   ) : (
@@ -187,8 +190,9 @@ export const AutocompleteMutliSelect = <T, V>(
                       onClick={() => {
                         handleSingleSelect(option);
                       }}
+                      disabled={option.disabled}
                     >
-                      {({ selected }) => (
+                      {({ active, selected }) => (
                         <>
                           <div className="flex justify-between">
                             {option.label}
@@ -198,9 +202,14 @@ export const AutocompleteMutliSelect = <T, V>(
                           </div>
                           {option.description && (
                             <p
-                              className={`font-normal ${
-                                selected ? "text-primary-200" : "text-gray-700"
-                              }`}
+                              className={classNames(
+                                "text-sm font-normal",
+                                option.disabled
+                                  ? "text-secondary-700"
+                                  : active
+                                    ? "text-primary-200"
+                                    : "text-secondary-700",
+                              )}
                             >
                               {option.description}
                             </p>

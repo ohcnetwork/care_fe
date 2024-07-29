@@ -36,7 +36,7 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
         <div className="flex h-full w-full flex-col gap-4 md:border-r xl:w-auto  xl:border-r-0">
           {Object.keys(details).map((key) => (
             <div className="">
-              <div className="mb-1 text-xs uppercase italic tracking-widest text-gray-200">
+              <div className="mb-1 text-xs uppercase italic tracking-widest text-secondary-200">
                 {key}
               </div>
               <div className="flex items-center gap-2 font-semibold">
@@ -65,7 +65,7 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
         <div className="mb-2 hidden h-px w-full bg-white/40 xl:block" />
         <div className="shrink-0">
           <div>
-            <div className="mb-1 text-xs uppercase italic tracking-widest text-gray-200">
+            <div className="mb-1 text-xs uppercase italic tracking-widest text-secondary-200">
               Customer Support Details
             </div>
             <div className="font-semibold">{asset.support_name || "--"}</div>
@@ -78,7 +78,9 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
               <div className="flex items-center">
                 {item[1] && (
                   <>
-                    <div className="w-16 italic text-gray-200">{item[0]} :</div>
+                    <div className="w-16 italic text-secondary-200">
+                      {item[0]} :
+                    </div>
                     <a
                       href={
                         (item[0] === "Email" ? "mailto:" : "tel:") + item[1]

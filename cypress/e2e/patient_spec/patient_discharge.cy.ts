@@ -36,6 +36,7 @@ describe("Patient Discharge based on multiple reason", () => {
     patientDischarge.clickDischarge();
     patientDischarge.selectDischargeReason(patientDischargeReason4);
     cy.submitButton("Confirm Discharge");
+    cy.submitButton("Acknowledge & Submit");
     cy.verifyNotification("Patient Discharged Successfully");
     cy.closeNotification();
     // Verify the consultation dashboard reflection
@@ -53,6 +54,7 @@ describe("Patient Discharge based on multiple reason", () => {
     patientDischarge.typeDischargeNote(patientDeathCause);
     patientDischarge.typeDoctorName(doctorName);
     cy.submitButton("Confirm Discharge");
+    cy.submitButton("Acknowledge & Submit");
     cy.verifyNotification("Patient Discharged Successfully");
     cy.closeNotification();
     // Verify the consultation dashboard reflection
@@ -77,6 +79,7 @@ describe("Patient Discharge based on multiple reason", () => {
     patientDischarge.typeReferringFacility(referringFreetextFacility);
     cy.wait(2000);
     cy.submitButton("Confirm Discharge");
+    cy.submitButton("Acknowledge & Submit");
     cy.wait(2000);
     cy.verifyNotification("Patient Discharged Successfully");
     cy.closeNotification();
@@ -108,6 +111,7 @@ describe("Patient Discharge based on multiple reason", () => {
     cy.closeNotification();
     // submit the discharge pop-up
     cy.submitButton("Confirm Discharge");
+    cy.submitButton("Acknowledge & Submit");
     cy.wait(2000);
     cy.verifyNotification("Patient Discharged Successfully");
     cy.closeNotification();

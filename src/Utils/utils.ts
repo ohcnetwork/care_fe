@@ -409,6 +409,14 @@ export const compareBy = <T extends object>(key: keyof T) => {
   };
 };
 
+export const compareByDateString = <T extends object>(key: keyof T) => {
+  return (a: T, b: T) => {
+    const aV = new Date(a[key] as string);
+    const bV = new Date(b[key] as string);
+    return aV < bV ? -1 : aV > bV ? 1 : 0;
+  };
+};
+
 export const isValidUrl = (url?: string) => {
   try {
     new URL(url ?? "");
@@ -445,4 +453,23 @@ export const isPostPartum = (data_of_delivery?: string) => {
 
 export const isAntenatal = (menstruation_start_date?: string) => {
   return dayjs().diff(menstruation_start_date, "month") <= 9;
+};
+
+/**
+ * A utility method to format an array of string to human readable format.
+ *
+ * @param values Array of strings to be made human readable.
+ * @returns Human readable version of the list of strings
+ */
+export const humanizeStrings = (strings: readonly string[], empty = "") => {
+  if (strings.length === 0) {
+    return empty;
+  }
+
+  if (strings.length === 1) {
+    return strings[0];
+  }
+
+  const [last, ...items] = [...strings].reverse();
+  return `${items.reverse().join(", ")} and ${last}`;
 };

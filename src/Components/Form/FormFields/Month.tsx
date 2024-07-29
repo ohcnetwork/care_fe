@@ -24,7 +24,7 @@ const MonthLabels = [
 ];
 
 const MonthFormField = (props: Props) => {
-  const field = useFormFieldPropsResolver(props as any);
+  const field = useFormFieldPropsResolver(props);
 
   const [month, setMonth] = useState(field.value?.getMonth());
   const [year, setYear] = useState(field.value?.getFullYear());
@@ -60,7 +60,7 @@ const MonthFormField = (props: Props) => {
         onChange={(event) => setYear(parseInt(event.value))}
       />
       {props.suffix && (
-        <span className="text-gray-600">{props.suffix(field.value)}</span>
+        <span className="text-secondary-600">{props.suffix(field.value)}</span>
       )}
     </FormField>
   );

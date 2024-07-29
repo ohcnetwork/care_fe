@@ -234,7 +234,7 @@ const Beds = (props: BedsProps) => {
             <div>
               <ButtonV2 variant="primary" type="submit">
                 <CareIcon icon="l-bed" className="text-xl" />
-                Move to bed
+                Update
               </ButtonV2>
             </div>
           </div>
@@ -251,8 +251,8 @@ const Beds = (props: BedsProps) => {
             loading={loading}
           />
         ) : (
-          <div className="flex w-full justify-center border-2 border-gray-200 bg-white p-5 text-center text-2xl font-bold text-gray-500">
-            <span className="flex justify-center rounded-lg bg-white p-3 text-gray-700">
+          <div className="flex w-full justify-center border-2 border-secondary-200 bg-white p-5 text-center text-2xl font-bold text-secondary-500">
+            <span className="flex justify-center rounded-lg bg-white p-3 text-secondary-700">
               No beds allocated yet
             </span>
           </div>

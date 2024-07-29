@@ -68,7 +68,7 @@ const ExcelViewer = ({
     >
       <>
         <div className="mb-2 flex flex-col items-center justify-between md:flex-row">
-          <p className="text-md font-semibold text-gray-700">
+          <p className="text-md font-semibold text-secondary-700">
             {selectedFile.name}
           </p>
           <div className="flex gap-4">
@@ -87,11 +87,11 @@ const ExcelViewer = ({
           </div>
         </div>
         <div className="flex flex-1 flex-col justify-center">
-          <div className="flex w-full justify-center overflow-scroll rounded-lg border border-gray-200">
+          <div className="flex w-full justify-center overflow-scroll rounded-lg border border-secondary-200">
             {fileData && fileData[0] ? (
               <div className="overflow-x-auto">
-                <table className="w-full table-auto border-collapse rounded-lg border border-gray-300 bg-white shadow-md">
-                  <thead className="sticky top-0 bg-gray-100">
+                <table className="w-full table-auto border-collapse rounded-lg border border-secondary-300 bg-white shadow-md">
+                  <thead className="sticky top-0 bg-secondary-100">
                     <tr>
                       {showCheckbox && (
                         <th className="w-5 px-4 py-2">
@@ -133,7 +133,7 @@ const ExcelViewer = ({
                           <tr
                             key={currentRowIndex}
                             className={`
-                            ${rowIndex % 2 === 0 ? "bg-gray-50" : "bg-white"}
+                            ${rowIndex % 2 === 0 ? "bg-secondary-50" : "bg-white"}
                           `}
                           >
                             {showCheckbox && (
@@ -218,12 +218,12 @@ const ExcelViewer = ({
                 </table>
               </div>
             ) : (
-              <div className="text-gray-500">No data found</div>
+              <div className="text-secondary-500">No data found</div>
             )}
           </div>
           {fileData && fileData.length > 5 && (
             <div className="flex w-full flex-wrap items-center justify-between">
-              <p className="my-6 text-gray-600 md:w-auto">
+              <p className="my-6 text-secondary-600 md:w-auto">
                 Showing {currentPage * rowsPerPage - rowsPerPage + 1} to{" "}
                 {currentPage * rowsPerPage > fileData.length
                   ? fileData.length
@@ -242,7 +242,7 @@ const ExcelViewer = ({
                 />
               )}
               <select
-                className="my-4 ml-2 h-9 w-[4.5rem] rounded-md border border-primary-400 py-0 pl-2 pr-4 text-gray-600"
+                className="my-4 ml-2 h-9 w-[4.5rem] rounded-md border border-primary-400 py-0 pl-2 pr-4 text-secondary-600"
                 value={rowsPerPage}
                 onChange={(e) => {
                   setRowsPerPage(+e.target.value);

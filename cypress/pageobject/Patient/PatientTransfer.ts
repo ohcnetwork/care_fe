@@ -19,43 +19,17 @@ class PatientTransfer {
 
   clickTransferSubmitButton() {
     cy.get("#submit-transferpatient").click();
+    cy.wait(2000);
   }
 
   clickConsultationCancelButton() {
     cy.get("#cancel").scrollIntoView();
     cy.get("#cancel").click();
+    cy.wait(2000);
   }
 
   clickAllowPatientTransferButton() {
     cy.get("#patient-allow-transfer").click();
-  }
-
-  verifyFacilitySuccessfullMessage() {
-    cy.get(".pnotify")
-      .should("exist")
-      .within(() => {
-        cy.get(".pnotify-text")
-          .invoke("text")
-          .then((text) => {
-            expect(text.trim()).to.match(
-              /^Patient Dummy Patient 10 \(Male\) transferred successfully$/i,
-            );
-          });
-      });
-  }
-
-  verifyFacilityErrorMessage() {
-    cy.get(".pnotify")
-      .should("exist")
-      .within(() => {
-        cy.get(".pnotify-text")
-          .invoke("text")
-          .then((text) => {
-            expect(text).to.match(
-              /Patient - Patient transfer cannot be completed because the patient has an active consultation in the same facility/,
-            );
-          });
-      });
   }
 }
 

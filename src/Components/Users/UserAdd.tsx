@@ -605,10 +605,11 @@ export const UserAdd = (props: UserProps) => {
       options={
         <Link
           href="https://school.coronasafe.network/targets/12953"
-          className="inline-block rounded border border-gray-600 bg-gray-50 px-4 py-2 text-gray-600 transition hover:bg-gray-100"
+          className="inline-block rounded border border-secondary-600 bg-secondary-50 px-4 py-2 text-secondary-600 transition hover:bg-secondary-100"
           target="_blank"
         >
-          <CareIcon icon="l-info-circle" className="text-lg" /> &nbsp;Need Help?
+          <CareIcon icon="l-question-circle" className="text-lg" /> &nbsp;Need
+          Help?
         </Link>
       }
       backUrl="/users"
@@ -724,7 +725,7 @@ export const UserAdd = (props: UserProps) => {
                 }}
               />
               {usernameInputInFocus && (
-                <div className="text-small pl-2 text-gray-500">
+                <div className="text-small pl-2 text-secondary-500">
                   <div>
                     {usernameExists !== userExistsEnums.idle && (
                       <>
@@ -814,7 +815,7 @@ export const UserAdd = (props: UserProps) => {
                 onBlur={() => setPasswordInputInFocus(false)}
               />
               {passwordInputInFocus && (
-                <div className="text-small pl-2 text-gray-500">
+                <div className="text-small pl-2 text-secondary-500">
                   {validateRule(
                     state.form.password?.length >= 8,
                     "Password should be atleast 8 characters long",

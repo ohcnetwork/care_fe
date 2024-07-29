@@ -127,7 +127,7 @@ export function DraftSection(props: {
         <div className="my-2 flex flex-wrap justify-end">
           {drafts?.length > 0 && (
             <div className="mx-1 flex items-center">
-              <p className="text-gray-500">
+              <p className="text-secondary-500">
                 Last saved draft:{" "}
                 {relativeTime(
                   draftStarted
