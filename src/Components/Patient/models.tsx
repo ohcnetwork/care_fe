@@ -2,10 +2,13 @@ import { ConsultationModel, PatientCategory } from "../Facility/models";
 import { PerformedByModel } from "../HCX/misc";
 import {
   CONSCIOUSNESS_LEVEL,
+  NURSING_CARE_FIELDS,
   OCCUPATION_TYPES,
   RATION_CARD_CATEGORY,
   RHYTHM_CHOICES,
 } from "../../Common/constants";
+import { HumanBody } from "../../CAREUI/interactive/HumanChart";
+import { OXYGEN_MODALITY_OPTIONS } from "../LogUpdate/utils";
 
 export interface FlowModel {
   id?: number;
@@ -269,11 +272,6 @@ export interface SampleListModel {
   fast_track?: string;
 }
 
-export interface DailyRoundsOutput {
-  name: string;
-  quantity: number;
-}
-
 export const DailyRoundTypes = [
   "NORMAL",
   "DOCTORS_LOG",
@@ -288,6 +286,23 @@ export interface BloodPressure {
   systolic?: number;
 }
 
+export interface PainScaleLog {
+  description: string;
+  region: HumanBody;
+  scale: number;
+}
+
+export type NameQuantity = { name: string; quantity: number };
+
+export type PressureSore = {
+  description: string;
+  exudate_amount: string;
+  length: number;
+  region: HumanBody;
+  scale: number;
+  tissue_type: string;
+  width: number;
+};
 export interface DailyRoundsModel {
   ventilator_spo2?: number;
   ventilator_interface?:
@@ -301,7 +316,7 @@ export interface DailyRoundsModel {
   bp?: BloodPressure;
   pulse?: number;
   resp?: number;
-  temperature?: string;
+  temperature?: number | string;
   physical_examination_info?: string;
   other_details?: string;
   consultation?: number;
@@ -311,7 +326,6 @@ export interface DailyRoundsModel {
   id?: string;
   admitted_to?: string;
   patient_category?: PatientCategory;
-  output?: DailyRoundsOutput[];
   recommend_discharge?: boolean;
   created_date?: string;
   modified_date?: string;
@@ -323,6 +337,53 @@ export interface DailyRoundsModel {
   created_by?: PerformedByModel;
   last_edited_by?: PerformedByModel;
   bed?: string;
+  pain_scale_enhanced?: PainScaleLog[];
+  in_prone_position?: boolean;
+  left_pupil_size?: number;
+  left_pupil_size_detail?: string;
+  left_pupil_light_reaction?: string;
+  left_pupil_light_reaction_detail?: string;
+  right_pupil_size?: number;
+  right_pupil_size_detail?: string;
+  right_pupil_light_reaction?: string;
+  right_pupil_light_reaction_detail?: string;
+  glasgow_eye_open?: number;
+  glasgow_motor_response?: number;
+  glasgow_verbal_response?: number;
+  consciousness_level_detail?: string;
+  limb_response_upper_extremity_right?: number;
+  limb_response_upper_extremity_left?: number;
+  limb_response_lower_extremity_left?: number;
+  limb_response_lower_extremity_right?: number;
+  glasgow_total_calculated?: number;
+  bilateral_air_entry?: boolean;
+  etco2?: number;
+  po2?: number;
+  pco2?: number;
+  ph?: number;
+  hco3?: number;
+  base_excess?: number;
+  lactate?: number;
+  sodium?: number;
+  potassium?: number;
+  blood_sugar_level?: number;
+  insulin_intake_dose?: number;
+  insulin_intake_frequency?: string;
+  dialysis_fluid_balance?: number;
+  dialysis_net_balance?: number;
+  nursing?: {
+    description: string;
+    procedure: (typeof NURSING_CARE_FIELDS)[number]["text"];
+  }[];
+  feeds?: NameQuantity[];
+  infusions?: NameQuantity[];
+  iv_fluids?: NameQuantity[];
+  output?: NameQuantity[];
+  ventilator_oxygen_modality?: (typeof OXYGEN_MODALITY_OPTIONS)[number]["value"];
+  ventilator_oxygen_modality_flow_rate?: number;
+  ventilator_oxygen_modality_oxygen_rate?: number;
+  ventilator_fi02?: number;
+  pressure_sore?: PressureSore[];
 }
 
 export interface FacilityNameModel {

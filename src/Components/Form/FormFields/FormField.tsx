@@ -31,28 +31,32 @@ export const FieldLabel = (props: LabelProps) => {
 type ErrorProps = {
   error: FieldError;
   className?: string | undefined;
+  compact?: boolean;
 };
-export const FieldErrorText = ({ error, className }: ErrorProps) => {
-  return (
-    <span
-      className={classNames(
-        "error-text ml-1 mt-2 text-xs font-medium tracking-wide text-danger-500 transition-opacity duration-300",
-        error ? "opacity-100" : "opacity-0",
-        className,
-      )}
-    >
-      {error}
-    </span>
-  );
+
+export const FieldErrorText = (props: ErrorProps) => {
+  if (props.error && !props.compact) {
+    return (
+      <span
+        className={classNames(
+          "error-text ml-1 mt-2 text-xs font-medium tracking-wide text-danger-500 transition-opacity duration-300",
+          props.error ? "opacity-100" : "opacity-0",
+          props.className,
+        )}
+      >
+        {props.error}
+      </span>
+    );
+  }
 };
 
 const FormField = ({
   field,
-  children,
+  ...props
 }: {
   field?: FormFieldBaseProps<any>;
   children: React.ReactNode;
-  className?: string;
+  compact?: boolean;
 }) => {
   return (
     <div className={field?.className}>
@@ -70,8 +74,12 @@ const FormField = ({
           <span className="mb-2 text-xs">{field?.labelSuffix}</span>
         )}
       </div>
-      <div className={field?.className}>{children}</div>
-      <FieldErrorText error={field?.error} className={field?.errorClassName} />
+      <div className={field?.className}>{props.children}</div>
+      <FieldErrorText
+        error={field?.error}
+        className={field?.errorClassName}
+        compact={props.compact}
+      />
     </div>
   );
 };

@@ -2,7 +2,7 @@ import FormField from "./FormField";
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 
 type Props<T> = FormFieldBaseProps<string | null> & {
-  options: T[];
+  options: readonly T[];
   optionDisplay: (option: T) => React.ReactNode;
   optionValue: (option: T) => string;
   containerClassName?: string;

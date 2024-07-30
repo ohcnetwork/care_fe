@@ -4,7 +4,6 @@ import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames, isAppleDevice } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
-import { make as Link } from "../Common/components/Link.bs";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import PatientConsultationNotesList from "./PatientConsultationNotesList";
 import request from "../../Utils/request/request";
@@ -15,6 +14,7 @@ import AutoExpandingTextInputFormField from "../Form/FormFields/AutoExpandingTex
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import { PATIENT_NOTES_THREADS } from "../../Common/constants.js";
 import useNotificationSubscriptionState from "../../Common/hooks/useNotificationSubscriptionState.js";
+import { Link } from "raviger";
 
 interface PatientNotesProps {
   patientId: string;

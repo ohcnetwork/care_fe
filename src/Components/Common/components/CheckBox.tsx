@@ -6,23 +6,33 @@ interface Props {
   checked?: boolean;
   error?: string;
   required?: boolean;
-  label?: string;
+  label?: React.ReactNode;
 }
 
 export default function Checkbox(props: Props) {
+  const id = props.id || props.name;
   return (
-    <div className={props.className} id={props.id}>
-      <div className="flex gap-4 py-2">
-        <input
-          className="rounded-none focus:outline-none focus:ring-0 focus:ring-offset-0"
-          type="checkbox"
-          name={props.name}
-          checked={props.checked}
-          required={props.required}
-          onChange={(event) => props.onCheck(event.target.checked)}
-        />
-        <label htmlFor={props.name}>{props.label}</label>
-      </div>
+    <div className={props.className}>
+      <input
+        className="checkbox__input hidden"
+        type="checkbox"
+        name={props.name}
+        checked={props.checked}
+        required={props.required}
+        onChange={(event) => props.onCheck(event.target.checked)}
+        id={id}
+      />
+      <label className="checkbox__label flex items-center" htmlFor={id}>
+        <span>
+          <svg width="11px" height="11px" viewBox="0 0 13 13">
+            <polyline points="1.5 6 4.5 9 10.5 1" />
+          </svg>
+        </span>
+        <span className="flex-1 text-sm font-semibold leading-loose">
+          {" "}
+          {props.label}{" "}
+        </span>
+      </label>
     </div>
   );
 }
