@@ -484,22 +484,21 @@ export const DailyRounds = (props: any) => {
             let rounds_type = state.form.rounds_type;
             if (fields.additional_symptoms) {
               for (const symptom of fields.additional_symptoms) {
-                const { res, error } = await request(SymptomsApi.add, {
+                const { res } = await request(SymptomsApi.add, {
                   pathParams: { consultationId },
                   body: {
                     ...symptom,
                   },
                 });
                 if (res?.ok) setSymptomsSeed((s) => s + 1);
-                if (error) Notification.Error({ msg: error });
               }
-              rounds_type = "NORMAL";
+              rounds_type = "DOCTORS_LOG";
             }
 
             // ICD11 Diagnosis
             if (fields.icd11_diagnosis) {
               for (const diagnosis of fields.icd11_diagnosis) {
-                const { res, error } = await request(
+                const { res } = await request(
                   DiagnosesRoutes.createConsultationDiagnosis,
                   {
                     pathParams: { consultation: consultationId },
@@ -512,9 +511,8 @@ export const DailyRounds = (props: any) => {
                     ...(diagnoses || []),
                     fields.icd11_diagnosis,
                   ]);
-                if (error) Notification.Error({ msg: error });
               }
-              rounds_type = "NORMAL";
+              rounds_type = "DOCTORS_LOG";
             }
 
             dispatch({

@@ -21,8 +21,9 @@ export interface Field {
   description: string;
   type: string;
   example: string;
-  default: string;
+  default: any;
   options?: readonly FieldOption[];
+  validator: (value: any) => boolean;
 }
 
 export interface ScribeForm {
@@ -83,7 +84,13 @@ export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
   useEffect(() => {
     const loadFields = async () => {
       const fields = await form.fields();
-      setFields(fields);
+      setFields(
+        fields.map((f) => ({
+          ...f,
+          validate: undefined,
+          default: JSON.stringify(f.default),
+        })),
+      );
     };
     loadFields();
   }, [form]);
@@ -328,8 +335,20 @@ export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
       setProgress(100);
       const parsedFormData = JSON.parse(updatedFieldsResponse ?? "{}");
       if (stageRef.current === "cancelled") return;
-      setFormFields(parsedFormData);
-      onFormUpdate(parsedFormData);
+
+      // run type validations
+      const validated = Object.entries(parsedFormData)
+        .filter(([k, v]) => {
+          const f = fields.find((f) => f.id === k);
+          if (!f) return false;
+          if (v === f.default) return false;
+          //if (f.validator) return f.validator(f.type === "number" ? Number(v) : v);
+          return true;
+        })
+        .map(([k, v]) => ({ [k]: v }))
+        .reduce((acc, curr) => ({ ...acc, ...curr }), {});
+      setFormFields(validated as any);
+      onFormUpdate(validated);
       setStage("final-review");
     } catch (error) {
       setErrors(["Error retrieving form data"]);
@@ -420,17 +439,23 @@ export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
       return values.map((value) => renderPrimitive(value)).join(", ");
     };
 
+    const renderObject = (obj: { [key: string]: any }): React.ReactNode => {
+      return (
+        <div className="flex flex-col gap-2 text-sm">
+          {Object.keys(obj).map((key, keyIndex) => (
+            <div key={keyIndex}>
+              <b>{getHumanizedKey(key)}</b>: {renderPrimitive(obj[key])}
+            </div>
+          ))}
+        </div>
+      );
+    };
+
     const renderObjectArray = (objects: any[]): React.ReactNode => {
       return (
         <div className="flex flex-col gap-2 text-sm">
           {objects.map((obj, objIndex) => (
-            <div key={objIndex}>
-              {Object.keys(obj).map((key, keyIndex) => (
-                <div key={keyIndex}>
-                  <b>{getHumanizedKey(key)}</b>: {renderPrimitive(obj[key])}
-                </div>
-              ))}
-            </div>
+            <div key={objIndex}>{renderObject(obj)}</div>
           ))}
         </div>
       );
@@ -445,6 +470,10 @@ export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
         return renderObjectArray(value);
       }
       return renderArray(value);
+    }
+
+    if (typeof value === "object") {
+      return renderObject(value);
     }
 
     return renderPrimitive(value);
@@ -646,13 +675,13 @@ export const Scribe: React.FC<ScribeProps> = ({ form, onFormUpdate }) => {
                                   <p className="mb-1 font-bold text-secondary-600">
                                     {fieldDetails?.friendlyName}
                                   </p>
-                                  <p className="text-secondary-800">
+                                  <div className="text-secondary-800">
                                     {processFormField(
                                       fieldDetails,
                                       formFields,
                                       field,
                                     )}
-                                  </p>
+                                  </div>
                                 </div>
                               );
                             })}
