@@ -15,7 +15,7 @@
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:i18next/recommended",
-    "plugin:tailwindcss/recommended",
+    "plugin:prettier/recommended",
     "plugin:storybook/recommended"
   ],
   "overrides": [
@@ -82,12 +82,7 @@
           ]
         }
       }
-    ],
-    "tailwindcss/no-custom-classname": "off",
-    "tailwindcss/migration-from-tailwind-2": "error",
-    "tailwindcss/classnames-order": "off",
-    "tailwindcss/enforces-shorthand": "off",
-    "tailwindcss/no-contradicting-classname": "error"
+    ]
   },
   "ignorePatterns": [
     "dist",
