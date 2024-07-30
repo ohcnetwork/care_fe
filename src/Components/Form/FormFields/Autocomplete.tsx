@@ -18,6 +18,7 @@ type AutocompleteFormFieldProps<T, V> = FormFieldBaseProps<V> & {
   optionDescription?: OptionCallback<T, string>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
   optionDisabled?: OptionCallback<T, boolean>;
+  minQueryLength?: number;
   onQuery?: (query: string) => void;
   dropdownIcon?: React.ReactNode | undefined;
   isLoading?: boolean;
@@ -45,6 +46,7 @@ const AutocompleteFormField = <T, V>(
         optionValue={props.optionValue}
         optionDescription={props.optionDescription}
         optionDisabled={props.optionDisabled}
+        minQueryLength={props.minQueryLength}
         onQuery={props.onQuery}
         isLoading={props.isLoading}
         allowRawInput={props.allowRawInput}
@@ -69,6 +71,7 @@ type AutocompleteProps<T, V = T> = {
   optionDescription?: OptionCallback<T, React.ReactNode>;
   optionDisabled?: OptionCallback<T, boolean>;
   className?: string;
+  minQueryLength?: number;
   onQuery?: (query: string) => void;
   requiredError?: boolean;
   isLoading?: boolean;
@@ -200,9 +203,9 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
 
           <DropdownTransition>
             <Combobox.Options className="cui-dropdown-base absolute z-10 mt-0.5 origin-top-right">
-              {query.length < 2 ? (
+              {props.minQueryLength && query.length < props.minQueryLength ? (
                 <div className="p-2 text-sm text-secondary-500">
-                  Please enter at least two characters to search
+                  {`Please enter at least ${props.minQueryLength} characters to search`}
                 </div>
               ) : filteredOptions.length === 0 ? (
                 <div className="p-2 text-sm text-secondary-500">
