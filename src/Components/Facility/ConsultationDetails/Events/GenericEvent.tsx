@@ -66,10 +66,10 @@ const formatValue = (value: unknown, key?: string): ReactNode => {
 
     return entries.map(([key, value]) => (
       <div className="flex flex-col items-center gap-2 md:flex-row">
-        <span className="text-xs uppercase text-gray-700">
+        <span className="text-xs uppercase text-secondary-700">
           {key.replaceAll(/_/g, " ")}
         </span>
-        <span className="text-sm font-semibold capitalize text-gray-700">
+        <span className="text-sm font-semibold capitalize text-secondary-700">
           {formatValue(value, key)}
         </span>
       </div>
@@ -81,13 +81,13 @@ const formatValue = (value: unknown, key?: string): ReactNode => {
 
 export default function GenericEvent(props: IProps) {
   return (
-    <div className="flex w-full flex-col gap-4 rounded-lg border border-gray-400 p-4 @container">
+    <div className="flex w-full flex-col gap-4 rounded-lg border border-secondary-400 p-4 @container">
       {Object.entries(props.values).map(([key, value]) => (
         <div className="flex w-full flex-col items-start gap-2">
-          <span className="text-xs uppercase text-gray-700">
+          <span className="text-xs uppercase text-secondary-700">
             {key.replaceAll(/_/g, " ")}
           </span>
-          <span className="break-all text-sm font-semibold text-gray-700">
+          <span className="break-all text-sm font-semibold text-secondary-700">
             {formatValue(value, key)}
           </span>
         </div>

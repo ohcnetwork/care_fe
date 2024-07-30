@@ -17,6 +17,7 @@ type AutocompleteFormFieldProps<T, V> = FormFieldBaseProps<V> & {
   optionValue?: OptionCallback<T, V>;
   optionDescription?: OptionCallback<T, string>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
+  optionDisabled?: OptionCallback<T, boolean>;
   onQuery?: (query: string) => void;
   dropdownIcon?: React.ReactNode | undefined;
   isLoading?: boolean;
@@ -43,6 +44,7 @@ const AutocompleteFormField = <T, V>(
         optionIcon={props.optionIcon}
         optionValue={props.optionValue}
         optionDescription={props.optionDescription}
+        optionDisabled={props.optionDisabled}
         onQuery={props.onQuery}
         isLoading={props.isLoading}
         allowRawInput={props.allowRawInput}
@@ -65,6 +67,7 @@ type AutocompleteProps<T, V = T> = {
   optionIcon?: OptionCallback<T, React.ReactNode>;
   optionValue?: OptionCallback<T, V>;
   optionDescription?: OptionCallback<T, React.ReactNode>;
+  optionDisabled?: OptionCallback<T, boolean>;
   className?: string;
   onQuery?: (query: string) => void;
   requiredError?: boolean;
@@ -105,6 +108,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
       search: label.toLowerCase(),
       icon: props.optionIcon?.(option),
       value: props.optionValue ? props.optionValue(option) : option,
+      disabled: props.optionDisabled?.(option),
     };
   });
 
@@ -123,6 +127,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
         search: query.toLowerCase(),
         icon: <CareIcon icon="l-plus" />,
         value: query,
+        disabled: undefined,
       },
       ...mappedOptions,
     ];
@@ -162,14 +167,14 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
             />
             {!props.disabled && (
               <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-                <div className="absolute right-0 top-1 mr-2 flex h-full items-center gap-1 pb-2 text-lg text-gray-900">
+                <div className="absolute right-0 top-1 mr-2 flex h-full items-center gap-1 pb-2 text-lg text-secondary-900">
                   <span>{value?.icon}</span>
 
                   {value && !props.isLoading && !props.required && (
                     <div className="tooltip" id="clear-button">
                       <CareIcon
                         icon="l-times-circle"
-                        className="h-4 w-4 text-gray-800 transition-colors duration-200 ease-in-out hover:text-gray-500"
+                        className="h-4 w-4 text-secondary-800 transition-colors duration-200 ease-in-out hover:text-secondary-500"
                         onClick={(e) => {
                           e.preventDefault();
                           props.onChange(undefined);
@@ -194,7 +199,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
           <DropdownTransition>
             <Combobox.Options className="cui-dropdown-base absolute z-10 mt-0.5 origin-top-right">
               {filteredOptions.length === 0 && (
-                <div className="p-2 text-sm text-gray-500">
+                <div className="p-2 text-sm text-secondary-500">
                   No options found
                 </div>
               )}
@@ -204,6 +209,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                   key={`${props.id}-option-${option.label}-value-${index}`}
                   className={dropdownOptionClassNames}
                   value={option}
+                  disabled={option.disabled}
                 >
                   {({ active }) => (
                     <div className="flex flex-col">
@@ -214,8 +220,12 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                       {option.description && (
                         <div
                           className={classNames(
-                            "text-sm",
-                            active ? "text-primary-200" : "text-gray-700",
+                            "text-sm font-normal",
+                            option.disabled
+                              ? "text-secondary-700"
+                              : active
+                                ? "text-primary-200"
+                                : "text-secondary-700",
                           )}
                         >
                           {option.description}

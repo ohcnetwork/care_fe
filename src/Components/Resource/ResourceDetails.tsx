@@ -357,7 +357,7 @@ export default function ResourceDetails(props: { id: string }) {
               <div className="text-sm font-medium leading-5 text-black">
                 Created
               </div>
-              <div className="mt-1 text-sm leading-5 text-gray-900">
+              <div className="mt-1 text-sm leading-5 text-secondary-900">
                 <div className="text-sm">
                   {data?.created_by_object?.first_name}{" "}
                   {data?.created_by_object?.last_name}
@@ -371,7 +371,7 @@ export default function ResourceDetails(props: { id: string }) {
               <div className="text-sm font-medium leading-5 text-black">
                 Last Edited
               </div>
-              <div className="mt-1 text-sm leading-5 text-gray-900">
+              <div className="mt-1 text-sm leading-5 text-secondary-900">
                 <div className="text-sm">
                   {data?.last_edited_by_object?.first_name}{" "}
                   {data?.last_edited_by_object?.last_name}

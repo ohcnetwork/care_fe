@@ -23,30 +23,32 @@ function ConsentArtefactCard({ artefact }: IConsentArtefactCardProps) {
     >
       <div className="flex flex-col items-center justify-between gap-4 px-4 py-5 sm:flex-row sm:gap-0 sm:px-6">
         <div className="flex flex-col items-center">
-          <h5 className="font-semibold leading-6 text-gray-900">
+          <h5 className="font-semibold leading-6 text-secondary-900">
             {artefact.hip}
           </h5>
-          <p className="mt-1 max-w-2xl text-sm text-gray-500">
+          <p className="mt-1 max-w-2xl text-sm text-secondary-500">
             created {dayjs(artefact.created_date).fromNow()}
           </p>
         </div>
         <div className="flex flex-col items-center">
-          <h6 className="mt-1 leading-6 text-gray-700">{artefact.status}</h6>
-          <h6 className="mt-1 leading-6 text-gray-700">
+          <h6 className="mt-1 leading-6 text-secondary-700">
+            {artefact.status}
+          </h6>
+          <h6 className="mt-1 leading-6 text-secondary-700">
             {dayjs(artefact.from_time).format("MMM DD YYYY")} -{" "}
             {dayjs(artefact.to_time).format("MMM DD YYYY")}
           </h6>
-          <p className="mt-1 max-w-2xl text-sm text-gray-500">
+          <p className="mt-1 max-w-2xl text-sm text-secondary-500">
             expires in {dayjs(artefact.expiry).fromNow()}
           </p>
         </div>
       </div>
-      <div className="flex flex-wrap items-center justify-center border-t border-gray-200 px-4 py-5 sm:gap-4">
+      <div className="flex flex-wrap items-center justify-center border-t border-secondary-200 px-4 py-5 sm:gap-4">
         {artefact.hi_types.map((hiType) => {
           return (
             <div
               key={hiType}
-              className="flex items-center justify-center rounded-full bg-gray-600 px-4 py-1.5 text-xs font-medium text-white"
+              className="flex items-center justify-center rounded-full bg-secondary-600 px-4 py-1.5 text-xs font-medium text-white"
             >
               {hiType}
             </div>
@@ -66,22 +68,22 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
     <div className="overflow-hidden bg-white shadow sm:rounded-lg">
       <div className="flex flex-col items-center justify-between gap-4 px-4 py-5 sm:flex-row sm:gap-0 sm:px-6">
         <div className="flex flex-col items-center">
-          <h5 className="font-semibold leading-6 text-gray-900">
+          <h5 className="font-semibold leading-6 text-secondary-900">
             {
               ABDM_CONSENT_PURPOSE.find((p) => p.value === consent.purpose)
                 ?.label
             }
           </h5>
-          <h6 className="mt-1 leading-6 text-gray-700">
+          <h6 className="mt-1 leading-6 text-secondary-700">
             {consent.requester.first_name} {consent.requester.last_name}
           </h6>
         </div>
         <div className="flex flex-col items-center">
-          <h6 className="mt-1 leading-6 text-gray-700">
+          <h6 className="mt-1 leading-6 text-secondary-700">
             {dayjs(consent.from_time).format("MMM DD YYYY")} -{" "}
             {dayjs(consent.to_time).format("MMM DD YYYY")}
           </h6>
-          <p className="mt-1 max-w-2xl text-sm text-gray-500">
+          <p className="mt-1 max-w-2xl text-sm text-secondary-500">
             expires in {dayjs(consent.expiry).fromNow()}
           </p>
         </div>
@@ -106,34 +108,34 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
               }
             }}
             ghost
-            className="max-w-2xl text-sm text-gray-700 hover:text-gray-900"
+            className="max-w-2xl text-sm text-secondary-700 hover:text-secondary-900"
           >
             <CareIcon icon="l-refresh" /> check status
           </ButtonV2>
-          <p className="mt-1 max-w-2xl text-sm text-gray-500">
+          <p className="mt-1 max-w-2xl text-sm text-secondary-500">
             created {dayjs(consent.created_date).fromNow()}
           </p>
-          <p className="mt-1 max-w-2xl text-sm text-gray-500">
+          <p className="mt-1 max-w-2xl text-sm text-secondary-500">
             modified {dayjs(consent.modified_date).fromNow()}
           </p>
         </div>
       </div>
       {consent.consent_artefacts?.length ? (
-        <div className="flex flex-wrap items-center justify-center border-t border-gray-200 bg-gray-50 px-4 py-5 sm:gap-4">
+        <div className="flex flex-wrap items-center justify-center border-t border-secondary-200 bg-secondary-50 px-4 py-5 sm:gap-4">
           {consent.consent_artefacts?.map((artefact) => (
             <ConsentArtefactCard key={artefact.id} artefact={artefact} />
           ))}
         </div>
       ) : (
-        <div className="border-t border-gray-200 bg-gray-50 px-4 py-5 sm:gap-4">
-          <p className="text-center text-sm text-gray-800">
+        <div className="border-t border-secondary-200 bg-secondary-50 px-4 py-5 sm:gap-4">
+          <p className="text-center text-sm text-secondary-800">
             {consent.status === "REQUESTED"
               ? "Waiting for the Patient to approve the consent request"
               : "Patient has rejected the consent request"}
           </p>
         </div>
       )}
-      <div className="flex flex-wrap items-center justify-center border-t border-gray-200 px-4 py-5 sm:gap-4">
+      <div className="flex flex-wrap items-center justify-center border-t border-secondary-200 px-4 py-5 sm:gap-4">
         {consent.hi_types.map((hiType) => {
           return (
             <div
@@ -141,8 +143,8 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
               className={classNames(
                 "flex items-center justify-center rounded-full px-4 py-1.5 text-xs font-medium text-white",
                 consent.consent_artefacts?.length
-                  ? "bg-gray-400"
-                  : "bg-gray-600",
+                  ? "bg-secondary-400"
+                  : "bg-secondary-600",
               )}
             >
               {hiType}
@@ -173,8 +175,8 @@ export default function ABDMRecordsTab({ patientId }: IProps) {
   if (!data?.results.length) {
     return (
       <div className="mt-12 flex flex-col items-center justify-center gap-2.5">
-        <p className="font-semibold text-gray-600">No Records found</p>
-        <p className="text-sm text-gray-600">
+        <p className="font-semibold text-secondary-600">No Records found</p>
+        <p className="text-sm text-secondary-600">
           Raise a consent request to fetch patient records over ABDM
         </p>
       </div>

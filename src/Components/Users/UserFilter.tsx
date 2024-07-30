@@ -2,7 +2,10 @@ import { parsePhoneNumber } from "../../Utils/utils";
 import TextFormField from "../Form/FormFields/TextFormField";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import { FieldLabel } from "../Form/FormFields/FormField";
-import { USER_TYPE_OPTIONS } from "../../Common/constants";
+import {
+  USER_LAST_ACTIVE_OPTIONS,
+  USER_TYPE_OPTIONS,
+} from "../../Common/constants";
 import useMergeState from "../../Common/hooks/useMergeState";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
@@ -35,6 +38,7 @@ export default function UserFilter(props: any) {
     state: filter.state || "",
     home_facility: filter.home_facility || "",
     home_facility_ref: null,
+    last_active_days: filter.last_active_days || "",
   });
 
   useQuery(routes.getAnyFacility, {
@@ -53,6 +57,7 @@ export default function UserFilter(props: any) {
       district,
       state,
       home_facility,
+      last_active_days,
     } = filterState;
     const data = {
       first_name: first_name || "",
@@ -63,6 +68,7 @@ export default function UserFilter(props: any) {
       district: district || "",
       state: district ? state || "" : "",
       home_facility: home_facility || "",
+      last_active_days: last_active_days || "",
     };
     if (state && !district) {
       Notify.Warn({
@@ -139,6 +145,21 @@ export default function UserFilter(props: any) {
           selected={filterState.home_facility_ref}
           errors=""
           multiple={false}
+        />
+      </div>
+
+      <div className="w-full flex-none">
+        <FieldLabel>Active in last...</FieldLabel>
+        <SelectMenuV2
+          id="last_active_days"
+          placeholder="Anytime"
+          options={USER_LAST_ACTIVE_OPTIONS}
+          optionLabel={(o) => o.text}
+          optionValue={(o) => o.id}
+          value={filterState.last_active_days}
+          onChange={(v) =>
+            setFilterState({ ...filterState, last_active_days: v })
+          }
         />
       </div>
 

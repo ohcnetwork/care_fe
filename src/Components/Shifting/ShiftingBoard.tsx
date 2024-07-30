@@ -39,17 +39,6 @@ interface boardProps {
   containerHeight: number;
 }
 
-const reduceLoading = (action: string, current: any) => {
-  switch (action) {
-    case "MORE":
-      return { ...current, more: true };
-    case "BOARD":
-      return { ...current, board: true };
-    case "COMPLETE":
-      return { board: false, more: false };
-  }
-};
-
 const ShiftCard = ({ shift, filter }: any) => {
   const { wartime_shifting } = useConfig();
   const [modalFor, setModalFor] = useState({
@@ -101,10 +90,10 @@ const ShiftCard = ({ shift, filter }: any) => {
               <div className="sm:col-span-1">
                 <dt
                   title={t("phone_number")}
-                  className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                  className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                 >
                   <CareIcon icon="l-mobile-android" className="mr-2 text-xl" />
-                  <dd className="break-normal text-sm font-bold leading-5 text-gray-900">
+                  <dd className="break-normal text-sm font-bold leading-5 text-secondary-900">
                     {shift.patient_object.phone_number || ""}
                   </dd>
                 </dt>
@@ -112,10 +101,10 @@ const ShiftCard = ({ shift, filter }: any) => {
               <div className="sm:col-span-1">
                 <dt
                   title={t("origin_facility")}
-                  className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                  className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                 >
                   <CareIcon icon="l-plane-departure" className="mr-2 text-xl" />
-                  <dd className="break-normal text-sm font-bold leading-5 text-gray-900">
+                  <dd className="break-normal text-sm font-bold leading-5 text-secondary-900">
                     {(shift.origin_facility_object || {}).name}
                   </dd>
                 </dt>
@@ -124,10 +113,10 @@ const ShiftCard = ({ shift, filter }: any) => {
                 <div className="sm:col-span-1">
                   <dt
                     title={t("shifting_approving_facility")}
-                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                   >
                     <CareIcon icon="l-user-check" className="mr-2 text-xl" />
-                    <dd className="break-normal text-sm font-bold leading-5 text-gray-900">
+                    <dd className="break-normal text-sm font-bold leading-5 text-secondary-900">
                       {(shift.shifting_approving_facility_object || {}).name}
                     </dd>
                   </dt>
@@ -136,11 +125,11 @@ const ShiftCard = ({ shift, filter }: any) => {
               <div className="sm:col-span-1">
                 <dt
                   title={t("assigned_facility")}
-                  className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                  className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                 >
                   <CareIcon icon="l-plane-arrival" className="mr-2 text-xl" />
 
-                  <dd className="break-normal text-sm font-bold leading-5 text-gray-900">
+                  <dd className="break-normal text-sm font-bold leading-5 text-secondary-900">
                     {shift.assigned_facility_external ||
                       shift.assigned_facility_object?.name ||
                       t("yet_to_be_decided")}
@@ -154,7 +143,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                   className={
                     "flex items-center text-sm font-medium leading-5 " +
                     (dayjs().subtract(2, "hours").isBefore(shift.modified_date)
-                      ? "text-gray-900"
+                      ? "text-secondary-900"
                       : "rounded bg-red-400 p-1 text-white")
                   }
                 >
@@ -168,10 +157,10 @@ const ShiftCard = ({ shift, filter }: any) => {
               <div className="sm:col-span-1">
                 <dt
                   title={t("patient_address")}
-                  className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                  className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                 >
                   <CareIcon icon="l-home" className="mr-2 text-xl" />
-                  <dd className="break-normal text-sm font-bold leading-5 text-gray-900">
+                  <dd className="break-normal text-sm font-bold leading-5 text-secondary-900">
                     {shift.patient_object.address || "--"}
                   </dd>
                 </dt>
@@ -181,10 +170,10 @@ const ShiftCard = ({ shift, filter }: any) => {
                 <div className="sm:col-span-1">
                   <dt
                     title={t("assigned_to")}
-                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                    className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                   >
                     <CareIcon icon="l-user" className="mr-2 text-xl" />
-                    <dd className="break-normal text-sm font-bold leading-5 text-gray-900">
+                    <dd className="break-normal text-sm font-bold leading-5 text-secondary-900">
                       {shift.assigned_to_object.first_name}{" "}
                       {shift.assigned_to_object.last_name} -{" "}
                       {shift.assigned_to_object.user_type}
@@ -196,10 +185,10 @@ const ShiftCard = ({ shift, filter }: any) => {
               <div className="sm:col-span-1">
                 <dt
                   title={t("patient_state")}
-                  className="flex items-center text-sm font-medium leading-5 text-gray-500"
+                  className="flex items-center text-sm font-medium leading-5 text-secondary-500"
                 >
                   <CareIcon icon="l-map-marker" className="mr-2 text-xl" />
-                  <dd className="text-sm font-bold leading-5 text-gray-900">
+                  <dd className="text-sm font-bold leading-5 text-secondary-900">
                     {shift.patient_object.state_object.name || "--"}
                   </dd>
                 </dt>
@@ -268,7 +257,8 @@ export default function ShiftingBoard({
 }: boardProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [offset, setOffSet] = useState(0);
-  const [isLoading, setIsLoading] = useState({ board: "BOARD", more: false });
+  const [pages, setPages] = useState<PaginatedResponse<IShift>[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [{ isOver }, drop] = useDrop(() => ({
     accept: "shift-card",
     drop: (item: any) => {
@@ -278,23 +268,24 @@ export default function ShiftingBoard({
     },
     collect: (monitor) => ({ isOver: !!monitor.isOver() }),
   }));
-  const [data, setData] = useState<PaginatedResponse<IShift>>();
 
-  useQuery(routes.listShiftRequests, {
+  const query = useQuery(routes.listShiftRequests, {
     query: formatFilter({
       ...filterProp,
       status: board,
     }),
     onResponse: ({ res, data: listShiftData }) => {
+      setIsLoading(false);
       if (res?.ok && listShiftData) {
-        setData(listShiftData);
+        setPages((prev) => [...prev, listShiftData]);
       }
-      setIsLoading((loading) => reduceLoading("COMPLETE", loading));
     },
   });
 
   useEffect(() => {
-    setIsLoading((loading) => reduceLoading("BOARD", loading));
+    setPages([]);
+    setIsLoading(true);
+    query.refetch();
   }, [
     filterProp.facility,
     filterProp.origin_facility,
@@ -316,7 +307,7 @@ export default function ShiftingBoard({
   ]);
 
   const handlePagination = async () => {
-    setIsLoading((loading) => reduceLoading("MORE", loading));
+    setIsLoading(true);
     setOffSet(offset + 14);
     const { res, data: newPageData } = await request(routes.listShiftRequests, {
       query: formatFilter({
@@ -326,18 +317,15 @@ export default function ShiftingBoard({
       }),
     });
     if (res?.ok && newPageData) {
-      setData((prev) =>
-        prev
-          ? { ...prev, results: [...prev.results, ...newPageData.results] }
-          : newPageData,
-      );
+      setPages((prev) => [...prev, newPageData]);
     }
-    setIsLoading((loading) => reduceLoading("COMPLETE", loading));
+    setIsLoading(false);
   };
   const { t } = useTranslation();
 
   const patientFilter = (filter: string) => {
-    return data?.results
+    return pages
+      .flatMap((p) => p.results)
       .filter(({ status }) => status === filter)
       .map((shift: any) => (
         <ShiftCard key={`shift_${shift.id}`} shift={shift} filter={filter} />
@@ -350,18 +338,18 @@ export default function ShiftingBoard({
       const { height } = container.getBoundingClientRect();
       containerHeight < height && setContainerHeight(height);
     }
-  }, [containerRef.current, data?.results.length]);
+  }, [containerRef.current, pages.flatMap((p) => p.results).length]);
 
   return (
     <div
       ref={drop}
       className={classNames(
-        "mr-2 h-full w-full flex-shrink-0 rounded-md bg-gray-200 pb-4 md:w-1/2 lg:w-1/3 xl:w-1/4",
+        "mr-2 h-full w-full flex-shrink-0 rounded-md bg-secondary-200 pb-4 md:w-1/2 lg:w-1/3 xl:w-1/4",
         isOver && "cursor-move",
       )}
       style={{ minHeight: `${containerHeight + 100}px` }}
     >
-      <div className="sticky top-0 z-10 rounded bg-gray-200 pt-2">
+      <div className="sticky top-0 z-10 rounded bg-secondary-200 pt-2">
         <div className="mx-2 flex items-center justify-between rounded bg-white p-4 shadow">
           <h3 className="flex h-8 items-center text-xs">
             {title || board}{" "}
@@ -376,44 +364,37 @@ export default function ShiftingBoard({
             />
           </h3>
           <span className="ml-2 rounded-lg bg-primary-500 px-2 text-white">
-            {data?.count || "0"}
+            {pages[0] ? pages[0].count : "..."}
           </span>
         </div>
       </div>
       <div ref={containerRef} className="mt-2 flex flex-col pb-2 text-sm">
-        {isLoading.board ? (
+        {pages[0]?.count > 0
+          ? patientFilter(board)
+          : !isLoading && (
+              <p className="mx-auto p-4">{t("no_patients_to_show")}</p>
+            )}
+        {isLoading ? (
           <div className="m-1">
-            <div className="mx-auto w-full max-w-sm rounded-md border border-gray-300 bg-white p-4 shadow">
+            <div className="mx-auto w-full max-w-sm rounded-md border border-secondary-300 bg-white p-4 shadow">
               <div className="flex animate-pulse space-x-4 ">
                 <div className="flex-1 space-y-4 py-1">
-                  <div className="h-4 w-3/4 rounded bg-gray-400"></div>
+                  <div className="h-4 w-3/4 rounded bg-secondary-400"></div>
                   <div className="space-y-2">
-                    <div className="h-4 rounded bg-gray-400"></div>
-                    <div className="h-4 w-5/6 rounded bg-gray-400"></div>
+                    <div className="h-4 rounded bg-secondary-400"></div>
+                    <div className="h-4 w-5/6 rounded bg-secondary-400"></div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        ) : data?.count ?? 0 > 0 ? (
-          patientFilter(board)
         ) : (
-          <p className="mx-auto p-4">{t("no_patients_to_show")}</p>
+          pages.at(-1)?.next && (
+            <ButtonV2 onClick={(_) => handlePagination()} className="m-2 block">
+              Load More
+            </ButtonV2>
+          )
         )}
-        {!isLoading.board &&
-          (data?.count ?? 0) < (data?.results.length || 0) &&
-          (isLoading.more ? (
-            <div className="mx-auto my-4 rounded-md bg-gray-100 p-2 px-4 hover:bg-white">
-              {t("loading")}
-            </div>
-          ) : (
-            <button
-              onClick={(_) => handlePagination()}
-              className="mx-auto my-4 rounded-md bg-gray-100 p-2 px-4 hover:bg-white"
-            >
-              More...
-            </button>
-          ))}
       </div>
     </div>
   );

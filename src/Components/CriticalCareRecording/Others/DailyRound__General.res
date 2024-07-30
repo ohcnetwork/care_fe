@@ -30,19 +30,28 @@ let symptoms = [
   "CONSTIPATION",
   "HEAD ACHE",
   "BLEEDING",
-  "DIZZINESS"
-];
+  "DIZZINESS",
+]
 
 @react.component
 let make = (~others, ~renderOptionalDescription, ~title) => {
-  <div> {title("Symptoms")} <div className=" flex flex-wrap max-w-full"> {Js.Array.map(id => {
-        <div className="rounded-full px-4 py-2 bg-gray-400 m-1 text-sm">
-          {str(symptoms[id - 1])}
-        </div>
-      }, Others.additional_symptoms(
-        others,
-      ))->React.array} </div> {renderOptionalDescription(
+  let additionalSymptoms = Others.additional_symptoms(others)
+  <div>
+    {title("Symptoms")}
+    <div className="flex flex-wrap max-w-full">
+      {switch additionalSymptoms {
+      | Some(symptomsArray) => Js.Array.map(id => {
+          <div className="rounded-full px-4 py-2 bg-secondary-400 m-1 text-sm">
+            {str(symptoms[id - 1])}
+          </div>
+        }, symptomsArray)->React.array
+      | None => React.null
+      }}
+    </div>
+    {renderOptionalDescription(
       "Physical Examination Info",
       Others.physical_examination_info(others),
-    )} {renderOptionalDescription("Other Details", Others.other_details(others))} </div>
+    )}
+    {renderOptionalDescription("Other Details", Others.other_details(others))}
+  </div>
 }

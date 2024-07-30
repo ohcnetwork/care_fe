@@ -6,11 +6,11 @@ import { useState } from "react";
 
 const TestRow = ({ data, value, onChange, i }: any) => {
   return (
-    <tr className={i % 2 == 0 ? "bg-gray-50" : "bg-white"}>
-      <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
+    <tr className={i % 2 == 0 ? "bg-secondary-50" : "bg-white"}>
+      <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-secondary-900">
         {data.name}
       </td>
-      <td className="min-w-[200px] whitespace-nowrap px-6 py-4 text-right text-sm text-gray-700">
+      <td className="min-w-[200px] whitespace-nowrap px-6 py-4 text-right text-sm text-secondary-700">
         {data.investigation_type === "Choice" ? (
           <SelectFormField
             name={data.name}
@@ -31,16 +31,16 @@ const TestRow = ({ data, value, onChange, i }: any) => {
           />
         )}
       </td>
-      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-secondary-700">
         {data.unit || "---"}
       </td>
-      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-secondary-700">
         {data.min_value ?? "---"}
       </td>
-      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-secondary-700">
         {data.max_value ?? "---"}
       </td>
-      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-secondary-700">
         {data.ideal_value || "---"}
       </td>
     </tr>
@@ -76,15 +76,15 @@ export const TestTable = ({ title, data, state, dispatch }: any) => {
         onChange={(e) => setSearchFilter(e.value)}
       />
       <br />
-      <div className="overflow-x-scroll border-b border-gray-200 shadow sm:overflow-x-visible sm:rounded-lg">
-        <table className="block min-w-full divide-y divide-gray-200 overflow-scroll">
-          <thead className="bg-gray-50">
+      <div className="overflow-x-scroll border-b border-secondary-200 shadow sm:overflow-x-visible sm:rounded-lg">
+        <table className="block min-w-full divide-y divide-secondary-200 overflow-scroll">
+          <thead className="bg-secondary-50">
             <tr>
               {["Name", "Value", "Unit", "Min", "Max", "Ideal"].map(
                 (heading) => (
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-800"
+                    className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-secondary-800"
                   >
                     {heading}
                   </th>
@@ -118,7 +118,7 @@ export const TestTable = ({ title, data, state, dispatch }: any) => {
                 );
               })
             ) : (
-              <tr className="text-center text-gray-500">No tests taken</tr>
+              <tr className="text-center text-secondary-500">No tests taken</tr>
             )}
           </tbody>
         </table>

@@ -21,13 +21,13 @@ const VitalsMonitorHeader = ({ patientAssetBed }: VitalsMonitorHeaderProps) => {
             {patient?.name}
           </Link>
         ) : (
-          <span className="flex items-center gap-1 text-gray-500">
+          <span className="flex items-center gap-1 text-secondary-500">
             <CareIcon icon="l-ban" />
             No Patient
           </span>
         )}
         {patient && (
-          <span className="text-xs font-bold text-gray-400 md:text-sm">
+          <span className="text-xs font-bold text-secondary-400 md:text-sm">
             {`${formatPatientAge(patient)}; `}
             {GENDER_TYPES.find((g) => g.id === patient.gender)?.icon}
           </span>
@@ -36,8 +36,8 @@ const VitalsMonitorHeader = ({ patientAssetBed }: VitalsMonitorHeaderProps) => {
       <div className="flex flex-col items-end gap-2 text-xs md:flex-row md:items-center md:text-sm">
         {bed && (
           <Link
-            className="flex flex-col items-end gap-2 text-gray-500 md:flex-row md:items-center"
-            href={`/facility/${patient?.facility_object?.id}/location/${bed?.location_object?.id}/beds`}
+            className="flex flex-col items-end gap-2 text-secondary-500 md:flex-row md:items-center"
+            href={`/facility/${bed.location_object!.facility!.id}/location/${bed!.location_object!.id}/beds`}
           >
             <span className="flex items-center gap-1 hover:text-white">
               <CareIcon icon="l-bed" className="text-sm md:text-base" />

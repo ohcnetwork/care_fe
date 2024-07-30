@@ -5,6 +5,7 @@ import {
   GENDER_TYPES,
   MEDICAL_HISTORY_CHOICES,
   OCCUPATION_TYPES,
+  RATION_CARD_CATEGORY,
   VACCINES,
 } from "../../Common/constants";
 import {
@@ -65,6 +66,7 @@ import SelectMenuV2 from "../Form/SelectMenuV2.js";
 import Checkbox from "../Common/components/CheckBox.js";
 import _ from "lodash";
 import { ILocalBodies } from "../ExternalResult/models.js";
+import { useTranslation } from "react-i18next";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -130,6 +132,7 @@ const initForm: any = {
   last_vaccinated_date: null,
   abha_number: null,
   ...medicalHistoryChoices,
+  ration_card_category: null,
 };
 
 const initError = Object.assign(
@@ -169,6 +172,7 @@ export const parseOccupationFromExt = (occupation: Occupation) => {
 
 export const PatientRegister = (props: PatientRegisterProps) => {
   const authUser = useAuthUser();
+  const { t } = useTranslation();
   const { goBack } = useAppHistory();
   const { gov_data_api_key, enable_hcx, enable_abdm } = useConfig();
   const { facilityId, id } = props;
@@ -750,6 +754,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       blood_group: formData.blood_group ? formData.blood_group : undefined,
       medical_history,
       is_active: true,
+      ration_card_category: formData.ration_card_category,
     };
     const { res, data: requestData } = id
       ? await request(routes.updatePatient, {
@@ -1131,7 +1136,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   if (!formField) setFormField(field);
                   return (
                     <>
-                      <div className="mb-2 overflow-visible rounded border border-gray-200 p-4">
+                      <div className="mb-2 overflow-visible rounded border border-secondary-200 p-4">
                         <ButtonV2
                           id="import-externalresult-button"
                           className="flex items-center gap-2"
@@ -1152,7 +1157,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         </ButtonV2>
                       </div>
                       {enable_abdm && (
-                        <div className="mb-8 overflow-visible rounded border border-gray-200 p-4">
+                        <div className="mb-8 overflow-visible rounded border border-secondary-200 p-4">
                           <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
                             ABHA Details
                           </h1>
@@ -1209,7 +1214,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     error=""
                                   />
                                 ) : (
-                                  <div className="mt-4 text-sm text-gray-500">
+                                  <div className="mt-4 text-sm text-secondary-500">
                                     No Abha Address Associated with this ABHA
                                     Number
                                   </div>
@@ -1219,7 +1224,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           )}
                         </div>
                       )}
-                      <div className="mb-8 overflow-visible rounded border border-gray-200 p-4">
+                      <div className="mb-8 overflow-visible rounded border border-secondary-200 p-4">
                         <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
                           Personal Details
                         </h1>
@@ -1340,8 +1345,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     <TextFormField
                                       {...field("age")}
                                       errorClassName="hidden"
+                                      trailingPadding="pr-4"
                                       trailing={
-                                        <p className="relative right-4 space-x-1 text-xs text-gray-700 sm:right-14 sm:text-sm md:right-4 lg:right-14">
+                                        <p className="absolute right-10 space-x-1 whitespace-nowrap text-xs text-secondary-700 sm:text-sm">
                                           {field("age").value !== "" && (
                                             <>
                                               <span className="hidden sm:inline md:hidden lg:inline">
@@ -1359,7 +1365,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                         </p>
                                       }
                                       placeholder="Enter the age"
-                                      className="col-span-6 sm:col-span-3"
                                       type="number"
                                       min={0}
                                     />
@@ -1702,6 +1707,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 optionLabel={(o) => o.text}
                                 optionValue={(o) => o.id}
                               />
+                              <SelectFormField
+                                {...field("ration_card_category")}
+                                label="Ration Card Category"
+                                placeholder="Select"
+                                options={RATION_CARD_CATEGORY}
+                                optionLabel={(o) => t(`ration_card__${o}`)}
+                                optionValue={(o) => o}
+                              />
                             </>
                           ) : (
                             <div id="passport_no-div">
@@ -1714,7 +1727,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           )}
                         </div>
                       </div>
-                      <div className="mb-8 rounded border border-gray-200 p-4">
+                      <div className="mb-8 rounded border border-secondary-200 p-4">
                         <AccordionV2
                           className="mt-2 shadow-none md:mt-0 lg:mt-0"
                           expandIcon={
@@ -1905,7 +1918,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           </div>
                         </div>
                       </div>
-                      <div className="flex w-full flex-col gap-4 rounded border border-gray-200 bg-white p-4">
+                      <div className="flex w-full flex-col gap-4 rounded border border-secondary-200 bg-white p-4">
                         <div className="flex w-full flex-col items-center justify-between gap-4 sm:flex-row">
                           <h1 className="text-left text-xl font-bold text-purple-500">
                             Insurance Details
