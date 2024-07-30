@@ -95,6 +95,7 @@ type AutocompleteProps<T, V = T> = {
 export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
   const { t } = useTranslation();
   const [query, setQuery] = useState(""); // Ensure lower case
+
   useEffect(() => {
     props.onQuery?.(query);
   }, [query]);
@@ -136,6 +137,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
   const options = props.allowRawInput ? getOptions() : mappedOptions;
 
   const value = options.find((o) => props.value == o.value);
+
   const filteredOptions =
     props.onQuery === undefined
       ? options.filter((o) => o.search.includes(query))
@@ -198,43 +200,48 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
 
           <DropdownTransition>
             <Combobox.Options className="cui-dropdown-base absolute z-10 mt-0.5 origin-top-right">
-              {filteredOptions.length === 0 && (
+              {query.length < 2 ? (
+                <div className="p-2 text-sm text-secondary-500">
+                  Please enter at least two characters to search
+                </div>
+              ) : filteredOptions.length === 0 ? (
                 <div className="p-2 text-sm text-secondary-500">
                   No options found
                 </div>
-              )}
-              {filteredOptions.map((option, index) => (
-                <Combobox.Option
-                  id={`${props.id}-option-${option.label}-value-${index}`}
-                  key={`${props.id}-option-${option.label}-value-${index}`}
-                  className={dropdownOptionClassNames}
-                  value={option}
-                  disabled={option.disabled}
-                >
-                  {({ active }) => (
-                    <div className="flex flex-col">
-                      <div className="flex justify-between">
-                        <span>{option.label}</span>
-                        <span>{option.icon}</span>
-                      </div>
-                      {option.description && (
-                        <div
-                          className={classNames(
-                            "text-sm font-normal",
-                            option.disabled
-                              ? "text-secondary-700"
-                              : active
-                                ? "text-primary-200"
-                                : "text-secondary-700",
-                          )}
-                        >
-                          {option.description}
+              ) : (
+                filteredOptions.map((option, index) => (
+                  <Combobox.Option
+                    id={`${props.id}-option-${option.label}-value-${index}`}
+                    key={`${props.id}-option-${option.label}-value-${index}`}
+                    className={dropdownOptionClassNames}
+                    value={option}
+                    disabled={option.disabled}
+                  >
+                    {({ active }) => (
+                      <div className="flex flex-col">
+                        <div className="flex justify-between">
+                          <span>{option.label}</span>
+                          <span>{option.icon}</span>
                         </div>
-                      )}
-                    </div>
-                  )}
-                </Combobox.Option>
-              ))}
+                        {option.description && (
+                          <div
+                            className={classNames(
+                              "text-sm font-normal",
+                              option.disabled
+                                ? "text-secondary-700"
+                                : active
+                                  ? "text-primary-200"
+                                  : "text-secondary-700",
+                            )}
+                          >
+                            {option.description}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </Combobox.Option>
+                ))
+              )}
             </Combobox.Options>
           </DropdownTransition>
         </div>
