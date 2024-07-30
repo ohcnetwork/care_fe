@@ -75,6 +75,7 @@ export default function DiagnosesListAccordion(props: Props) {
           onClick={() => {
             setIsVisible(false);
           }}
+          shadow={false}
         >
           <CareIcon icon="l-angle-up" className="h-7" />
           Hide Diagnoses

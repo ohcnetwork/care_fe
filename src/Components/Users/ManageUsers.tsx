@@ -94,6 +94,7 @@ export default function ManageUsers() {
       user_type: qParams.user_type,
       district_id: qParams.district,
       home_facility: qParams.home_facility,
+      last_active_days: qParams.last_active_days,
     },
   });
 
@@ -556,6 +557,15 @@ export default function ManageUsers() {
               "Home Facility",
               "home_facility",
               qParams.home_facility ? homeFacilityData?.name || "" : "",
+            ),
+            value(
+              "Last Active",
+              "last_active_days",
+              (() => {
+                if (!qParams.last_active_days) return "";
+                if (qParams.last_active_days === "never") return "Never";
+                return `in the last ${qParams.last_active_days} day${qParams.last_active_days > 1 ? "s" : ""}`;
+              })(),
             ),
           ]}
         />
