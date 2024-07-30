@@ -43,7 +43,7 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
           <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
               {/* eslint-disable-next-line tailwindcss/migration-from-tailwind-2 */}
-              <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5  sm:rounded-lg">
+              <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
                 <table className="min-w-full table-fixed divide-y divide-secondary-300">
                   <thead className="bg-secondary-50">
                     <tr>
@@ -86,8 +86,8 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                               consent.expiry,
                           ) < new Date()
                             ? "EXPIRED"
-                            : consent.consent_artefacts?.[0]?.status ??
-                              consent.status}
+                            : (consent.consent_artefacts?.[0]?.status ??
+                              consent.status)}
                         </td>
 
                         <td className="px-3 py-4 text-center text-sm">
@@ -159,7 +159,7 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                                 View
                               </Link>
                             ) : (
-                              <p className="cursor-not-allowed text-secondary-600 opacity-70 ">
+                              <p className="cursor-not-allowed text-secondary-600 opacity-70">
                                 View
                               </p>
                             )}

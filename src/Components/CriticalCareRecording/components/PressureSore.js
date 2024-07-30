@@ -191,7 +191,7 @@ export default function PressureSore() {
   return (
     <div className="mx-auto flex max-w-2xl justify-center">
       <svg
-        className=" h-screen py-4"
+        className="h-screen py-4"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 327.931 881.194"
       >
@@ -203,7 +203,7 @@ export default function PressureSore() {
               className={
                 selected === renderIndex
                   ? "text-blue-500"
-                  : "text-secondary-300  hover:text-blue-400"
+                  : "text-secondary-300 hover:text-blue-400"
               }
               fill="currentColor"
               onClick={(_) => setSelected(renderIndex)}

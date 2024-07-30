@@ -56,7 +56,9 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
 
   const prescriptionList = [
     ...(data?.results ?? []),
-    ...(showDiscontinued ? discontinuedPrescriptions.data?.results ?? [] : []),
+    ...(showDiscontinued
+      ? (discontinuedPrescriptions.data?.results ?? [])
+      : []),
   ];
 
   const { activityTimelineBounds, prescriptions } = useMemo(

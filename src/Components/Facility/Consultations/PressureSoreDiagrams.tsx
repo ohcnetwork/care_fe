@@ -89,7 +89,7 @@ export const PressureSoreDiagrams = (props: any) => {
         <div className="p-2">Choose Date and Time</div>
         <select
           title="date"
-          className="relative rounded border-secondary-200 bg-white py-2 pl-3 pr-8 text-slate-600 shadow outline-none focus:border-secondary-300  focus:outline-none focus:ring-1 focus:ring-secondary-300"
+          className="relative rounded border-secondary-200 bg-white py-2 pl-3 pr-8 text-slate-600 shadow outline-none focus:border-secondary-300 focus:outline-none focus:ring-1 focus:ring-secondary-300"
           onChange={(e) => {
             setSelectedDateData(results, e.target.value);
           }}

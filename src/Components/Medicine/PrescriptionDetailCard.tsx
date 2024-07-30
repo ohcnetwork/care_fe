@@ -61,7 +61,7 @@ export default function PrescriptionDetailCard({
                 )}
               >
                 {isCollapsed ? (
-                  medicine?.name ?? prescription.medicine_old
+                  (medicine?.name ?? prescription.medicine_old)
                 ) : (
                   <>
                     {prescription.prescription_type === "DISCHARGE" &&

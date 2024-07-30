@@ -369,7 +369,7 @@ export const ConsultationDetails = (props: any) => {
           <div className="overflow-x-auto sm:flex sm:items-baseline">
             <div className="mt-4 sm:mt-0">
               <nav
-                className="flex space-x-6 overflow-x-auto pb-2 pl-2 "
+                className="flex space-x-6 overflow-x-auto pb-2 pl-2"
                 id="consultation_tab_nav"
               >
                 {CONSULTATION_TABS.map((p) => {

@@ -186,7 +186,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
           {notesActionIcons}
         </div>
       ) : (
-        <div className="flex h-screen w-full -translate-y-0 flex-col text-clip border-2 border-b-0 border-primary-800 bg-white pb-3 transition-all sm:h-[500px] sm:rounded-t-md ">
+        <div className="flex h-screen w-full -translate-y-0 flex-col text-clip border-2 border-b-0 border-primary-800 bg-white pb-3 transition-all sm:h-[500px] sm:rounded-t-md">
           <div className="flex w-full items-center justify-between bg-primary-800 p-2 px-4 text-white">
             <span className="font-semibold">Discussion Notes</span>
             {notesActionIcons}

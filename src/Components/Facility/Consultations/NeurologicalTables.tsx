@@ -294,7 +294,7 @@ export const NeurologicalTable = (props: any) => {
             {locData.map((x: any, i: any) => (
               <div
                 key={`loc_${i}`}
-                className="min-w-max-content flex  flex-col  divide-x divide-secondary-200"
+                className="min-w-max-content flex flex-col divide-x divide-secondary-200"
               >
                 <div className="border-r bg-secondary-50 px-2 py-3 text-center text-xs font-medium leading-4 text-secondary-700">
                   {x.date}
@@ -349,7 +349,7 @@ export const NeurologicalTable = (props: any) => {
         <div className="text-xl font-semibold">Glasgow Coma Scale</div>
         <div className="mb-6 mt-2">
           <div className="w-max-content mb-4 flex max-w-full flex-row divide-y divide-secondary-200 overflow-hidden shadow sm:rounded-lg">
-            <div className="flex flex-col ">
+            <div className="flex flex-col">
               <div className="bg-secondary-50 px-2 py-7 text-center text-sm font-medium uppercase leading-4 tracking-wider text-secondary-700">
                 Time
               </div>

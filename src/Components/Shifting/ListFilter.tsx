@@ -165,7 +165,7 @@ export default function ListFilter(props: any) {
       patient_phone_number:
         patient_phone_number === "+91"
           ? ""
-          : parsePhoneNumber(patient_phone_number) ?? "",
+          : (parsePhoneNumber(patient_phone_number) ?? ""),
       created_date_before: dateQueryString(created_date_before),
       created_date_after: dateQueryString(created_date_after),
       modified_date_before: dateQueryString(modified_date_before),

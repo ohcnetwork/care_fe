@@ -479,7 +479,7 @@ export default function UserProfile() {
           </div>
           <div className="mt-5 lg:col-span-2 lg:mt-0">
             {!showEdit && !isLoading && (
-              <div className="m-2 overflow-hidden rounded-lg bg-white px-4 py-5  shadow sm:rounded-lg sm:px-6">
+              <div className="m-2 overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6">
                 <dl className="col-gap-4 row-gap-8 grid grid-cols-1 sm:grid-cols-2">
                   <div
                     className="my-2 sm:col-span-1"
@@ -493,7 +493,7 @@ export default function UserProfile() {
                     </dd>
                   </div>
                   <div
-                    className="my-2  sm:col-span-1"
+                    className="my-2 sm:col-span-1"
                     id="contactno-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
@@ -505,7 +505,7 @@ export default function UserProfile() {
                   </div>
 
                   <div
-                    className="my-2  sm:col-span-1"
+                    className="my-2 sm:col-span-1"
                     id="whatsapp-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
@@ -516,7 +516,7 @@ export default function UserProfile() {
                     </dd>
                   </div>
                   <div
-                    className="my-2  sm:col-span-1"
+                    className="my-2 sm:col-span-1"
                     id="emailid-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
@@ -527,7 +527,7 @@ export default function UserProfile() {
                     </dd>
                   </div>
                   <div
-                    className="my-2  sm:col-span-1"
+                    className="my-2 sm:col-span-1"
                     id="firstname-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
@@ -538,7 +538,7 @@ export default function UserProfile() {
                     </dd>
                   </div>
                   <div
-                    className="my-2  sm:col-span-1"
+                    className="my-2 sm:col-span-1"
                     id="lastname-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
@@ -549,7 +549,7 @@ export default function UserProfile() {
                     </dd>
                   </div>
                   <div
-                    className="my-2  sm:col-span-1"
+                    className="my-2 sm:col-span-1"
                     id="date_of_birth-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
@@ -561,7 +561,7 @@ export default function UserProfile() {
                         : "-"}
                     </dd>
                   </div>
-                  <div className="my-2  sm:col-span-1">
+                  <div className="my-2 sm:col-span-1">
                     <dt className="text-sm font-medium leading-5 text-black">
                       Access Level
                     </dt>
@@ -571,7 +571,7 @@ export default function UserProfile() {
                     </dd>
                   </div>
                   <div
-                    className="my-2  sm:col-span-1"
+                    className="my-2 sm:col-span-1"
                     id="gender-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">
@@ -581,7 +581,7 @@ export default function UserProfile() {
                       {userData?.gender || "-"}
                     </dd>
                   </div>
-                  <div className="my-2  sm:col-span-1">
+                  <div className="my-2 sm:col-span-1">
                     <dt className="text-sm font-medium leading-5 text-black">
                       Local Body
                     </dt>
@@ -589,7 +589,7 @@ export default function UserProfile() {
                       {userData?.local_body_object?.name || "-"}
                     </dd>
                   </div>
-                  <div className="my-2  sm:col-span-1">
+                  <div className="my-2 sm:col-span-1">
                     <dt className="text-sm font-medium leading-5 text-black">
                       District
                     </dt>
@@ -597,7 +597,7 @@ export default function UserProfile() {
                       {userData?.district_object?.name || "-"}
                     </dd>
                   </div>
-                  <div className="my-2  sm:col-span-1">
+                  <div className="my-2 sm:col-span-1">
                     <dt className="text-sm font-medium leading-5 text-black">
                       State
                     </dt>
@@ -605,7 +605,7 @@ export default function UserProfile() {
                       {userData?.state_object?.name || "-"}
                     </dd>
                   </div>
-                  <div className="my-2  sm:col-span-1">
+                  <div className="my-2 sm:col-span-1">
                     <dt className="text-sm font-medium leading-5 text-black">
                       Skills
                     </dt>
@@ -629,7 +629,7 @@ export default function UserProfile() {
                     </dd>
                   </div>
                   <div
-                    className="my-2  sm:col-span-1"
+                    className="my-2 sm:col-span-1"
                     id="averageworkinghour-profile-details"
                   >
                     <dt className="text-sm font-medium leading-5 text-black">

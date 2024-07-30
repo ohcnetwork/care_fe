@@ -62,7 +62,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
   const showChevronIcon = props.showChevronIcon ?? true;
 
   const placeholder =
-    valueOptions?.length > 0 ? props.placeholder ?? "Select" : "No options";
+    valueOptions?.length > 0 ? (props.placeholder ?? "Select") : "No options";
   const defaultOption = {
     label: placeholder,
     selectedLabel: (

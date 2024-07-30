@@ -166,8 +166,8 @@ export const DailyRounds = (props: any) => {
           ...formData,
           ...data,
           patient_category: data.patient_category
-            ? PATIENT_CATEGORIES.find((i) => i.text === data.patient_category)
-                ?.id ?? ""
+            ? (PATIENT_CATEGORIES.find((i) => i.text === data.patient_category)
+                ?.id ?? "")
             : "",
           rhythm:
             (data.rhythm &&
@@ -737,7 +737,7 @@ export const DailyRounds = (props: any) => {
                   <FieldErrorText error={state.errors.investigation} />
                 </div>
                 <div>
-                  <div className="mb-4 mt-8 flex items-center justify-between ">
+                  <div className="mb-4 mt-8 flex items-center justify-between">
                     <h3 className="text-lg font-semibold">
                       {t("prescription_medications")}
                     </h3>
@@ -759,7 +759,7 @@ export const DailyRounds = (props: any) => {
                   />
                 </div>
                 <div>
-                  <div className="mb-4 mt-8 flex items-center justify-between ">
+                  <div className="mb-4 mt-8 flex items-center justify-between">
                     <h3 className="text-lg font-semibold">
                       {t("prn_prescriptions")}
                     </h3>

@@ -137,7 +137,7 @@ export default function FacilityUsers(props: any) {
       return (
         <div
           key={`usr_${user.id}`}
-          className=" mt-6 w-full md:px-4 lg:w-1/2 xl:w-1/3"
+          className="mt-6 w-full md:px-4 lg:w-1/2 xl:w-1/3"
         >
           <div className="block h-full cursor-pointer overflow-hidden rounded-lg bg-white shadow hover:border-primary-500">
             <div className="flex h-full flex-col justify-between">

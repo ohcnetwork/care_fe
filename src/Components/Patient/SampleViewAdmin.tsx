@@ -300,7 +300,7 @@ export default function SampleViewAdmin() {
   } else if (sampeleData?.count === 0) {
     manageSamples = (
       <div className="w-full rounded-lg bg-white p-3">
-        <div className="mt-4 flex w-full  justify-center text-2xl font-bold text-secondary-600">
+        <div className="mt-4 flex w-full justify-center text-2xl font-bold text-secondary-600">
           No Sample Tests Found
         </div>
       </div>

@@ -98,7 +98,7 @@ export const DailyRoundListDetails = (props: any) => {
             <span className="font-semibold leading-relaxed">Pulse(bpm): </span>
             {dailyRoundListDetailsData.pulse ?? "-"}
           </div>
-          <div className="md:col-span-2 ">
+          <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">BP</span>
             <div className="flex flex-row space-x-20">
               <div className="flex">

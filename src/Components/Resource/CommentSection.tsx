@@ -85,7 +85,7 @@ export const Comment = ({
   modified_date,
 }: IComment) => (
   <div className="mt-4 flex w-full flex-col rounded-lg border border-secondary-300 bg-white p-4 text-secondary-800">
-    <div className="flex  w-full ">
+    <div className="flex w-full">
       <p className="text-justify">{comment}</p>
     </div>
     <div className="mt-3">
@@ -93,7 +93,7 @@ export const Comment = ({
         {formatDateTime(modified_date) || "-"}
       </span>
     </div>
-    <div className=" mr-auto flex items-center rounded-md border bg-secondary-100 py-1 pl-2 pr-3">
+    <div className="mr-auto flex items-center rounded-md border bg-secondary-100 py-1 pl-2 pr-3">
       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-700 p-1 uppercase text-white">
         {created_by_object?.first_name?.charAt(0) || "U"}
       </div>

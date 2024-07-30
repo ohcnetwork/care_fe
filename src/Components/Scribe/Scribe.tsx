@@ -507,7 +507,7 @@ export const Scribe: React.FC<ScribeProps> = ({ fields, onFormUpdate }) => {
                 >
                   <CareIcon
                     icon="l-times-circle"
-                    className=" flex -scale-x-100 justify-center text-lg"
+                    className="flex -scale-x-100 justify-center text-lg"
                   />
                 </ButtonV2>
               </div>

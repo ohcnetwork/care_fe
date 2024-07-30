@@ -299,7 +299,7 @@ export default function ShiftDetails(props: { id: string }) {
     )?.text;
 
     return (
-      <div id="section-to-print" className="print bg-white ">
+      <div id="section-to-print" className="print bg-white">
         <div>{data.is_kasp && <img alt="logo" src={header_logo.dark} />}</div>
         <div className="mx-2">
           <div className="mt-6">

@@ -90,14 +90,14 @@ export const NursingPlot = (props: any) => {
               (f: any) =>
                 filterEmpty(f) && (
                   <div key={f.desc} className="m-2 w-3/4">
-                    <div className="sticky top-0 z-10  rounded pt-2">
+                    <div className="sticky top-0 z-10 rounded pt-2">
                       <div className="mx-2 flex items-center justify-between rounded border bg-secondary-200 p-4">
                         <h3 className="flex h-8 items-center text-sm">
                           {f.desc}
                         </h3>
                       </div>
                     </div>
-                    <div className=" m-2">
+                    <div className="m-2">
                       {dataToDisplay
                         .filter((i: any) => i.procedure === f.text)
                         .map((care: any, index: number) => (
