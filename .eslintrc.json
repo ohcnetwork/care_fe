@@ -59,6 +59,7 @@
         "caughtErrorsIgnorePattern": "^_"
       }
     ],
+    "@typescript-eslint/no-explicit-any": "warn",
     "react/react-in-jsx-scope": "off",
     "i18next/no-literal-string": [
       "warn",
