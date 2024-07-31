@@ -453,7 +453,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           return;
         case "route_to_facility":
           if (!state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           }
           return;
@@ -469,7 +469,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           return;
         case "encounter_date":
           if (!state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           }
           if (
@@ -540,7 +540,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
           return;
         case "consultation_notes":
           if (!state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           } else if (!state.form[field].replace(/\s/g, "").length) {
             errors[field] = "Consultation notes can not be empty";
@@ -608,7 +608,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
 
         case "treating_physician": {
           if (state.form.suggestion !== "DD" && !state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
             break;
           }
