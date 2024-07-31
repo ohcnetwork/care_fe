@@ -46,7 +46,7 @@ export class PatientPage {
   }
 
   checkPhoneNumberIsEmergencyNumber() {
-    cy.get("#emergency_contact_checkbox > div > input").click();
+    cy.get("#emergency_contact_checkbox").click();
   }
 
   typePatientDateOfBirth(dateOfBirth: string) {
