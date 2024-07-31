@@ -118,7 +118,7 @@ export default logUpdateSection(
               length: 0,
               exudate_amount: "None",
               tissue_type: "Closed",
-              scale: 0,
+              scale: 1,
               description: "",
               ...value,
             },
