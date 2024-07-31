@@ -11,7 +11,7 @@ import { BloodPressure } from "../Patient/models";
 type Props = FormFieldBaseProps<BloodPressure>;
 
 export default function BloodPressureFormField(props: Props) {
-  const field = useFormFieldPropsResolver(props as any);
+  const field = useFormFieldPropsResolver(props);
 
   const handleChange = (event: FieldChangeEvent<number>) => {
     const value: BloodPressure = {
@@ -65,7 +65,7 @@ export default function BloodPressureFormField(props: Props) {
             },
           ]}
         />
-        <span className="px-2 text-lg font-medium text-gray-400">/</span>
+        <span className="px-2 text-lg font-medium text-secondary-400">/</span>
         <RangeAutocompleteFormField
           name="diastolic"
           placeholder="Diastolic"

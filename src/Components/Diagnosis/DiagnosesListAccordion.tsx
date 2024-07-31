@@ -4,7 +4,7 @@ import {
   ConsultationDiagnosis,
 } from "./types";
 import { useTranslation } from "react-i18next";
-import { compareBy } from "../../Utils/utils";
+import { classNames, compareBy } from "../../Utils/utils";
 import { useState } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -39,7 +39,7 @@ export default function DiagnosesListAccordion(props: Props) {
       <div className="flex justify-between">
         {!isVisible && (
           <ButtonV2
-            className="text-md w-full p-0 font-semibold text-black hover:bg-gray-200"
+            className="text-md w-full p-0 font-semibold text-black hover:bg-secondary-200"
             ghost
             onClick={() => {
               setIsVisible((prev) => !prev);
@@ -55,7 +55,7 @@ export default function DiagnosesListAccordion(props: Props) {
           isVisible ? "overflow-visible" : "h-0 overflow-hidden"
         }`}
       >
-        <h3 className="my-2 text-lg font-semibold leading-relaxed text-gray-900">
+        <h3 className="my-2 text-lg font-semibold leading-relaxed text-secondary-900">
           Diagnoses
         </h3>
         <div
@@ -70,11 +70,12 @@ export default function DiagnosesListAccordion(props: Props) {
           )}
         </div>
         <ButtonV2
-          className="text-md w-full rounded-lg p-0 text-gray-600 hover:bg-gray-200"
+          className="text-md w-full rounded-lg p-0 text-secondary-600 hover:bg-secondary-200"
           ghost
           onClick={() => {
             setIsVisible(false);
           }}
+          shadow={false}
         >
           <CareIcon icon="l-angle-up" className="h-7" />
           Hide Diagnoses
@@ -96,7 +97,15 @@ const DiagnosesOfStatus = ({ diagnoses }: Props) => {
       <ul className="text-sm">
         {diagnoses.map((diagnosis) => (
           <li key={diagnosis.id} className="flex items-center gap-2">
-            <span>{diagnosis.diagnosis_object?.label}</span>
+            <span
+              className={classNames(
+                !diagnosis.diagnosis_object?.label &&
+                  "italic text-secondary-500",
+              )}
+            >
+              {diagnosis.diagnosis_object?.label ||
+                "Unable to resolve ICD-11 diagnosis at the moment"}
+            </span>
           </li>
         ))}
       </ul>

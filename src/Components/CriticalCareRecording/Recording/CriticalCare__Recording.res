@@ -36,10 +36,11 @@ let basicEditor = (~facilityId, ~patientId, ~consultationId, ~id) => {
     href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${id}/update`}>
     <div className="flex items-center">
       <CareIcon icon="l-user-nurse" className="text-xl mr-4 text-green-500" />
-      
       <div className={`font-semibold text-xl text-green-500`}> {str("Basic Editor")} </div>
     </div>
-    <div> <CareIcon icon="l-check-circle" className="text-3xl text-green-500" /> </div>
+    <div>
+      <CareIcon icon="l-check-circle" className="text-3xl text-green-500" />
+    </div>
   </Link>
 }
 let editorNameToString = editor => {
@@ -71,19 +72,19 @@ let editorToggle = (editorName, state, send) => {
       <CareIcon
         icon="l-user-nurse"
         className={`text-xl mr-4 ${Belt.Option.isNone(editorUpdated)
-            ? "text-gray-400"
+            ? "text-secondary-400"
             : "text-green-500"}`}
       />
       <div
         className={`font-semibold text-xl  ${Belt.Option.isNone(editorUpdated)
-            ? "text-gray-800"
+            ? "text-secondary-800"
             : "text-green-500"}`}>
         {str(editorNameToString(editorName))}
       </div>
     </div>
     <div>
       {Belt.Option.isNone(editorUpdated)
-        ? <CareIcon icon="l-check-circle" className="text-3xl text-gray-300" />
+        ? <CareIcon icon="l-check-circle" className="text-3xl text-secondary-300" />
         : <CareIcon icon="l-check-circle" className="text-3xl text-green-500" />}
     </div>
   </div>
@@ -94,7 +95,7 @@ let reducer = (state, action) => {
   | ShowEditor(editor) => {...state, visibleEditor: Some(editor)}
   | CloseEditor => {...state, visibleEditor: None}
   | UpdateDailyRound(dailyRound, editor) => {
-      dailyRound: dailyRound,
+      dailyRound,
       visibleEditor: None,
       updatedEditors: Js.Array.concat([editor], state.updatedEditors),
     }
@@ -103,7 +104,7 @@ let reducer = (state, action) => {
 
 let initialState = dailyRound => {
   visibleEditor: None,
-  dailyRound: dailyRound,
+  dailyRound,
   updatedEditors: [],
 }
 
@@ -114,6 +115,21 @@ let updateDailyRound = (send, editor, dailyRound) => {
 @genType @react.component
 let make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
   let (state, send) = React.useReducer(reducer, initialState(dailyRound))
+
+  let sections =
+    dailyRound.roundsType == VentilatorRound
+      ? [
+          HemodynamicParametersEditor,
+          NeurologicalMonitoringEditor,
+          VentilatorParametersEditor,
+          ArterialBloodGasAnalysisEditor,
+          BloodSugarEditor,
+          IOBalanceEditor,
+          DialysisEditor,
+          PressureSoreEditor,
+          NursingCareEditor,
+        ]
+      : [NeurologicalMonitoringEditor, VentilatorParametersEditor]
 
   <div className=" px-4 py-5 sm:px-6 max-w-5xl mx-auto mt-4">
     {ReactUtils.nullUnless(
@@ -135,7 +151,7 @@ let make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
             {str("Back")}
           </button>
           <div
-            className="bg-white px-2 md:px-6 py-5 border-b border-gray-200 sm:px-6 max-w-5xl mx-auto border mt-4 shadow rounded-lg">
+            className="bg-white px-2 md:px-6 py-5 border-b border-secondary-200 sm:px-6 max-w-5xl mx-auto border mt-4 shadow rounded-lg">
             {switch editor {
             | NeurologicalMonitoringEditor =>
               <CriticalCare__NeurologicalMonitoringEditor
@@ -164,6 +180,8 @@ let make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
                 updateCB={updateDailyRound(send, VentilatorParametersEditor)}
                 id
                 consultationId
+                patientId
+                facilityId
               />
             | ArterialBloodGasAnalysisEditor =>
               <CriticalCare__ABGAnalysisEditor
@@ -217,28 +235,18 @@ let make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
         </div>
       | None =>
         <div
-          className="bg-white px-2 md:px-6 py-5 border-b border-gray-200 sm:px-6 max-w-5xl mx-auto border mt-4 shadow rounded-lg">
+          className="bg-white px-2 md:px-6 py-5 border-b border-secondary-200 sm:px-6 max-w-5xl mx-auto border mt-4 shadow rounded-lg">
           <h2> {str("Record Updates")} </h2>
           <div>
-            {basicEditor(~facilityId, ~patientId, ~consultationId, ~id)} {Js.Array.map(editor => {
+            {basicEditor(~facilityId, ~patientId, ~consultationId, ~id)}
+            {Js.Array.map(editor => {
               editorToggle(editor, state, send)
-            }, [
-              HemodynamicParametersEditor,
-              NeurologicalMonitoringEditor,
-              VentilatorParametersEditor,
-              ArterialBloodGasAnalysisEditor,
-              BloodSugarEditor,
-              IOBalanceEditor,
-              DialysisEditor,
-              PressureSoreEditor,
-              NursingCareEditor,
-            ])->React.array}
+            }, sections)->React.array}
           </div>
           <Link
             href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`}>
             <button
-              onClick={_ =>
-                Notifications.success({msg: "Critical care log updates are filed successfully"})}
+              onClick={_ => Notifications.success({msg: "Detailed Update filed successfully"})}
               className="btn btn-primary w-full mt-6">
               {str("Complete")}
             </button>

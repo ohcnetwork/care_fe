@@ -76,18 +76,18 @@ export default function ResultItem(props: any) {
           </button>
         </div>
         <div className="mt-4 overflow-hidden bg-white shadow sm:rounded-lg">
-          <div className="border-b border-gray-200 px-4 py-5 sm:px-6">
-            <h3 className="text-lg font-medium leading-6 text-gray-900">
+          <div className="border-b border-secondary-200 px-4 py-5 sm:px-6">
+            <h3 className="text-lg font-medium leading-6 text-secondary-900">
               <span id="external-patient-name">{resultItemData.name}</span> -{" "}
               <span>{resultItemData.age}</span>{" "}
               <span>{resultItemData.age_in}</span> |{" "}
               <span>{resultItemData.result}</span>
             </h3>
-            <p className="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
+            <p className="mt-1 max-w-2xl text-sm leading-5 text-secondary-500">
               {t("srf_id")}: {resultItemData.srf_id}
             </p>
             <p
-              className="mt-1 max-w-2xl text-sm leading-5 text-gray-500"
+              className="mt-1 max-w-2xl text-sm leading-5 text-secondary-500"
               id="patient-external-id"
             >
               {t("care_external_results_id")}: {resultItemData.id}
@@ -101,18 +101,18 @@ export default function ResultItem(props: any) {
           <div className="px-4 py-5 sm:p-0">
             <dl>
               <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 sm:py-5">
-                <dt className="text-sm font-medium leading-5 text-gray-500">
+                <dt className="text-sm font-medium leading-5 text-secondary-500">
                   {t("gender")}
                 </dt>
-                <dd className="mt-1 text-sm leading-5 text-gray-900 sm:col-span-2 sm:mt-0">
+                <dd className="mt-1 text-sm leading-5 text-secondary-900 sm:col-span-2 sm:mt-0">
                   {resultItemData.gender}
                 </dd>
               </div>
-              <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
-                <dt className="text-sm font-medium leading-5 text-gray-500">
+              <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-secondary-200 sm:px-6 sm:py-5">
+                <dt className="text-sm font-medium leading-5 text-secondary-500">
                   {t("address")}
                 </dt>
-                <dd className="mt-1 text-sm leading-5 text-gray-900 sm:col-span-2 sm:mt-0">
+                <dd className="mt-1 text-sm leading-5 text-secondary-900 sm:col-span-2 sm:mt-0">
                   {resultItemData.address}
 
                   {resultItemData.ward_object && (
@@ -128,84 +128,84 @@ export default function ResultItem(props: any) {
                   )}
                 </dd>
               </div>
-              <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
-                <dt className="text-sm font-medium leading-5 text-gray-500">
+              <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-secondary-200 sm:px-6 sm:py-5">
+                <dt className="text-sm font-medium leading-5 text-secondary-500">
                   {t("mobile_number")}
                 </dt>
-                <dd className="mt-1 text-sm leading-5 text-gray-900 sm:col-span-2 sm:mt-0">
+                <dd className="mt-1 text-sm leading-5 text-secondary-900 sm:col-span-2 sm:mt-0">
                   {resultItemData.mobile_number}
                 </dd>
               </div>
-              <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
-                <dt className="text-sm font-medium leading-5 text-gray-500">
+              <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-secondary-200 sm:px-6 sm:py-5">
+                <dt className="text-sm font-medium leading-5 text-secondary-500">
                   Repeat?
                 </dt>
-                <dd className="mt-1 text-sm leading-5 text-gray-900 sm:col-span-2 sm:mt-0">
+                <dd className="mt-1 text-sm leading-5 text-secondary-900 sm:col-span-2 sm:mt-0">
                   {resultItemData.is_repeat ? t("yes") : t("no")}
                 </dd>
               </div>
-              <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
-                <dt className="text-sm font-medium leading-5 text-gray-500">
+              <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-secondary-200 sm:px-6 sm:py-5">
+                <dt className="text-sm font-medium leading-5 text-secondary-500">
                   {t("patient_status")}
                 </dt>
-                <dd className="mt-1 text-sm leading-5 text-gray-900 sm:col-span-2 sm:mt-0">
+                <dd className="mt-1 text-sm leading-5 text-secondary-900 sm:col-span-2 sm:mt-0">
                   {resultItemData.patient_status}
                 </dd>
               </div>
-              <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
-                <dt className="text-sm font-medium leading-5 text-gray-500">
+              <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-secondary-200 sm:px-6 sm:py-5">
+                <dt className="text-sm font-medium leading-5 text-secondary-500">
                   {t("sample_type")}
                 </dt>
-                <dd className="mt-1 text-sm leading-5 text-gray-900 sm:col-span-2 sm:mt-0">
+                <dd className="mt-1 text-sm leading-5 text-secondary-900 sm:col-span-2 sm:mt-0">
                   {resultItemData.sample_type}
                 </dd>
               </div>
-              <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
-                <dt className="text-sm font-medium leading-5 text-gray-500">
+              <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-secondary-200 sm:px-6 sm:py-5">
+                <dt className="text-sm font-medium leading-5 text-secondary-500">
                   {t("test_type")}
                 </dt>
-                <dd className="mt-1 text-sm leading-5 text-gray-900 sm:col-span-2 sm:mt-0">
+                <dd className="mt-1 text-sm leading-5 text-secondary-900 sm:col-span-2 sm:mt-0">
                   {resultItemData.test_type}
                 </dd>
               </div>
-              <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
-                <dt className="text-sm font-medium leading-5 text-gray-500">
+              <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-secondary-200 sm:px-6 sm:py-5">
+                <dt className="text-sm font-medium leading-5 text-secondary-500">
                   {t("sample_collection_date")}
                 </dt>
-                <dd className="mt-1 text-sm leading-5 text-gray-900 sm:col-span-2 sm:mt-0">
+                <dd className="mt-1 text-sm leading-5 text-secondary-900 sm:col-span-2 sm:mt-0">
                   {resultItemData.sample_collection_date || "-"}
                 </dd>
               </div>
-              <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
-                <dt className="text-sm font-medium leading-5 text-gray-500">
+              <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-secondary-200 sm:px-6 sm:py-5">
+                <dt className="text-sm font-medium leading-5 text-secondary-500">
                   {t("result_date")}
                 </dt>
-                <dd className="mt-1 text-sm leading-5 text-gray-900 sm:col-span-2 sm:mt-0">
+                <dd className="mt-1 text-sm leading-5 text-secondary-900 sm:col-span-2 sm:mt-0">
                   {resultItemData.result_date || "-"}
                 </dd>
               </div>
-              <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
-                <dt className="text-sm font-medium leading-5 text-gray-500">
+              <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-secondary-200 sm:px-6 sm:py-5">
+                <dt className="text-sm font-medium leading-5 text-secondary-500">
                   {t("result")}
                 </dt>
-                <dd className="mt-1 text-sm leading-5 text-gray-900 sm:col-span-2 sm:mt-0">
+                <dd className="mt-1 text-sm leading-5 text-secondary-900 sm:col-span-2 sm:mt-0">
                   {resultItemData.result}
                 </dd>
               </div>
-              <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
-                <dt className="text-sm font-medium leading-5 text-gray-500">
+              <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-secondary-200 sm:px-6 sm:py-5">
+                <dt className="text-sm font-medium leading-5 text-secondary-500">
                   {t("source")}
                 </dt>
-                <dd className="mt-1 text-sm leading-5 text-gray-900 sm:col-span-2 sm:mt-0">
+                <dd className="mt-1 text-sm leading-5 text-secondary-900 sm:col-span-2 sm:mt-0">
                   {resultItemData.source}
                 </dd>
               </div>
 
-              <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-gray-200 sm:px-6 sm:py-5">
-                <dt className="text-sm font-medium leading-5 text-gray-500">
+              <div className="mt-8 sm:mt-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:border-t sm:border-secondary-200 sm:px-6 sm:py-5">
+                <dt className="text-sm font-medium leading-5 text-secondary-500">
                   {t("patient_category")}
                 </dt>
-                <dd className="mt-1 text-sm leading-5 text-gray-900 sm:col-span-2 sm:mt-0">
+                <dd className="mt-1 text-sm leading-5 text-secondary-900 sm:col-span-2 sm:mt-0">
                   {resultItemData.patient_category}
                 </dd>
               </div>

@@ -17,7 +17,7 @@ let make = (
       ),
     )}
     <div className="flex md:flex-row flex-col mt-2">
-      <div className="px-4 py-2 border bg-gray-100 m-1 rounded-lg shadow md:w-1/2 w-full">
+      <div className="px-4 py-2 border bg-secondary-100 m-1 rounded-lg shadow md:w-1/2 w-full">
         {title("Left Pupil")}
         {renderOptionalInt("Size", NeurologicalMonitoring.leftPupilSize(neurologicalMonitoring))}
         {renderOptionalDescription(
@@ -35,7 +35,7 @@ let make = (
           NeurologicalMonitoring.leftPupilLightReactionDetails(neurologicalMonitoring),
         )}
       </div>
-      <div className="px-4 py-2 border bg-gray-100 m-1 rounded-lg shadow md:w-1/2 w-full">
+      <div className="px-4 py-2 border bg-secondary-100 m-1 rounded-lg shadow md:w-1/2 w-full">
         {title("Right Pupil")}
         {renderOptionalInt("Size", NeurologicalMonitoring.rightPupilSize(neurologicalMonitoring))}
         {renderOptionalDescription(
@@ -73,7 +73,8 @@ let make = (
     <div>
       {title("Limb Response")}
       <div className="flex md:flex-no-wrap flex-wrap">
-        <div className="border md:w-1/2 w-full p-6 text-center bg-gray-100 hover:bg-gray-300">
+        <div
+          className="border md:w-1/2 w-full p-6 text-center bg-secondary-100 hover:bg-secondary-300">
           {renderLine(
             "Upper Left",
             NeurologicalMonitoring.limpResponseToString(
@@ -81,7 +82,8 @@ let make = (
             ),
           )}
         </div>
-        <div className="border md:w-1/2 w-full p-6 text-center bg-gray-100 hover:bg-gray-300">
+        <div
+          className="border md:w-1/2 w-full p-6 text-center bg-secondary-100 hover:bg-secondary-300">
           {renderLine(
             "Upper Right",
             NeurologicalMonitoring.limpResponseToString(
@@ -91,7 +93,8 @@ let make = (
         </div>
       </div>
       <div className="flex md:flex-no-wrap flex-wrap">
-        <div className="border md:w-1/2 w-full p-6 text-center bg-gray-100 hover:bg-gray-300">
+        <div
+          className="border md:w-1/2 w-full p-6 text-center bg-secondary-100 hover:bg-secondary-300">
           {renderLine(
             "Lower Left",
             NeurologicalMonitoring.limpResponseToString(
@@ -99,7 +102,8 @@ let make = (
             ),
           )}
         </div>
-        <div className="border md:w-1/2 w-full p-6 text-center bg-gray-100 hover:bg-gray-300">
+        <div
+          className="border md:w-1/2 w-full p-6 text-center bg-secondary-100 hover:bg-secondary-300">
           {renderLine(
             "Lower Right",
             NeurologicalMonitoring.limpResponseToString(

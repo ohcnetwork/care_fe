@@ -33,7 +33,7 @@ const UnlinkFacilityDialog = (props: ConfirmDialogProps) => {
       disabled={disable}
       variant="danger"
     >
-      <div className="flex leading-relaxed text-gray-800">
+      <div className="flex leading-relaxed text-secondary-800">
         <div>
           Are you sure you want to{" "}
           {isHomeFacility ? "clear the home facility" : "unlink the facility"}{" "}

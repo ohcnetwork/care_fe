@@ -111,7 +111,7 @@ export default function MedicineAdministration(props: Props) {
           readonly
           selected={shouldAdminister[index]}
         >
-          <div className="mt-4 flex w-full max-w-sm flex-col gap-2 border-t-2 border-dashed border-gray-500 py-2 pt-4 md:ml-4 md:mt-0 md:border-l-2 md:border-t-0 md:pl-4 md:pt-0">
+          <div className="mt-4 flex w-full max-w-sm flex-col gap-2 border-t-2 border-dashed border-secondary-500 py-2 pt-4 md:ml-4 md:mt-0 md:border-l-2 md:border-t-0 md:pl-4 md:pt-0">
             <CheckBoxFormField
               name="should_administer"
               label={t("select_for_administration")}
@@ -125,7 +125,7 @@ export default function MedicineAdministration(props: Props) {
               }
               errorClassName="hidden"
             />
-            <div className="text-sm font-semibold leading-relaxed text-gray-600">
+            <div className="text-sm font-semibold leading-relaxed text-secondary-600">
               <CareIcon icon="l-history-alt" className="pr-1" />{" "}
               {t("last_administered")}
               <span className="pl-1">
@@ -223,7 +223,11 @@ export default function MedicineAdministration(props: Props) {
         </PrescriptionDetailCard>
       ))}
       <div className="flex justify-end">
-        <ButtonV2 onClick={handleSubmit} disabled={!selectedCount}>
+        <ButtonV2
+          id="administer-selected-medicine"
+          onClick={handleSubmit}
+          disabled={!selectedCount}
+        >
           <CareIcon icon="l-syringe" className="text-lg" />
           {t("administer_selected_medicines")}{" "}
           {selectedCount > 0 && `(${selectedCount})`}
