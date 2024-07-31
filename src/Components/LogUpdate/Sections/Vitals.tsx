@@ -85,7 +85,7 @@ export default logUpdateSection(
             { text: "Normal", className: "text-green-500" },
           ]}
         />
-        <hr className="my-8 border border-gray-400" />
+        <hr className="my-8 border border-secondary-400" />
         <RangeFormField
           label="Temperature"
           name="temperature"
@@ -137,7 +137,7 @@ export default logUpdateSection(
           }
           onChange={(pain_scale_enhanced) => onChange({ pain_scale_enhanced })}
         />
-        <hr className="my-8 border border-gray-400" />
+        <hr className="my-8 border border-secondary-400" />
         <RadioFormField
           label="Heartbeat Rhythm"
           name="heartbeat-rythm"

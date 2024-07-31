@@ -157,7 +157,7 @@ export default logUpdateSection(
             })
           }
         />
-        <div className="border-l-2 border-l-gray-400 pl-4">
+        <div className="border-l-2 border-l-secondary-400 pl-4">
           {
             RESPIRATORY_SUPPORT_OPTIONS.find(
               (o) => o.value === log.ventilator_interface,

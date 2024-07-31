@@ -33,7 +33,7 @@ export default logUpdateSection(
         till: 0,
         color: "#ECECEC",
         text: "",
-        className: "bg-gray-300 border border-gray-400",
+        className: "bg-secondary-300 border border-secondary-400",
       },
       {
         till: 3,

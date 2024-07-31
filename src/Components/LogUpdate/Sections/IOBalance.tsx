@@ -76,7 +76,9 @@ export default logUpdateSection(
                     <div key={j} className="flex items-end gap-4">
                       <div className="flex-1">
                         {j == 0 && (
-                          <div className="mb-2 text-sm text-gray-800">Type</div>
+                          <div className="mb-2 text-sm text-secondary-800">
+                            Type
+                          </div>
                         )}
                         <SelectMenuV2
                           options={field.options
@@ -119,7 +121,7 @@ export default logUpdateSection(
                         }
                         label={
                           j == 0 && (
-                            <div className="text-sm text-gray-800">
+                            <div className="text-sm text-secondary-800">
                               Quantity
                             </div>
                           )
@@ -143,7 +145,7 @@ export default logUpdateSection(
                 )}
                 <ButtonV2
                   variant="secondary"
-                  className="bg-gray-200"
+                  className="bg-secondary-200"
                   onClick={() =>
                     onChange({
                       [field.key]: [
@@ -163,7 +165,7 @@ export default logUpdateSection(
                 </ButtonV2>
               </div>
             ))}
-            <div className="flex items-center justify-between border-b-2 border-b-gray-400 pb-2">
+            <div className="flex items-center justify-between border-b-2 border-b-secondary-400 pb-2">
               <h4>Total</h4>
               <div>
                 {fields

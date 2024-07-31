@@ -30,7 +30,7 @@ export default logUpdateSection(
 
     return (
       <div>
-        <div className="mt-4 flex items-center justify-between rounded-lg bg-gray-200 p-4">
+        <div className="mt-4 flex items-center justify-between rounded-lg bg-secondary-200 p-4">
           <CheckBoxFormField
             name="in_prone_position"
             label="The patient is in prone position"
@@ -129,7 +129,7 @@ export default logUpdateSection(
         <div className="flex items-center justify-between">
           <h3>Glasgow Coma Scale</h3>
           <div>
-            <span className="text-xs text-gray-700">Total&nbsp;</span>
+            <span className="text-xs text-secondary-700">Total&nbsp;</span>
             <span className="text-5xl font-bold text-primary-400">
               {(log.glasgow_eye_open || 0) +
                 (log.glasgow_verbal_response || 0) +

@@ -15,7 +15,7 @@ export default logUpdateSection(
 
         return (
           <div key={i}>
-            <div className="overflow-hidden rounded-lg border border-gray-400 bg-gray-200 ring-0 ring-primary-400 transition-all focus-within:ring-2">
+            <div className="overflow-hidden rounded-lg border border-secondary-400 bg-secondary-200 ring-0 ring-primary-400 transition-all focus-within:ring-2">
               <div className="p-4">
                 <CheckBoxFormField
                   label={field.desc}

@@ -52,8 +52,8 @@ export default function PupilSizeSelect(props: {
             <button
               disabled={!onChange}
               key={size}
-              //className={`h-10 flex items-center justify-center aspect-square rounded-full border border-black/20 ${size === pupilSize ? "bg-gray-300" : "bg-white"}`}
-              className={`flex aspect-square h-20 flex-col items-center justify-between rounded-lg border py-2 transition-all ${size === pupilSize ? "border-primary-500 bg-gray-300 bg-primary-500/10" : "border-gray-300 bg-white hover:bg-gray-200"}`}
+              //className={`h-10 flex items-center justify-center aspect-square rounded-full border border-black/20 ${size === pupilSize ? "bg-secondary-300" : "bg-white"}`}
+              className={`flex aspect-square h-20 flex-col items-center justify-between rounded-lg border py-2 transition-all ${size === pupilSize ? "border-primary-500 bg-primary-500/10 bg-secondary-300" : "border-secondary-300 bg-white hover:bg-secondary-200"}`}
               onClick={() => onChange?.(size)}
             >
               <div
