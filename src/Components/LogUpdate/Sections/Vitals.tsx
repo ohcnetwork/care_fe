@@ -1,4 +1,5 @@
 import { HumanBodyPaths } from "../../../CAREUI/interactive/HumanChart";
+import { meanArterialPressure } from "../../Common/BloodPressureFormField";
 import RadioFormField from "../../Form/FormFields/RadioFormField";
 import RangeFormField from "../../Form/FormFields/RangeFormField";
 import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
@@ -28,7 +29,16 @@ export default logUpdateSection(
     ];
 
     return (
-      <div>
+      <div className="space-y-8">
+        <div className="flex items-end justify-between pb-4">
+          <h2 className="text-xl">BP (mm hg)</h2>
+          <span>
+            Mean Arterial Pressure:{" "}
+            {log.bp && log.bp.diastolic && log.bp.systolic
+              ? meanArterialPressure(log.bp)?.toFixed()
+              : "--"}
+          </span>
+        </div>
         <RangeFormField
           label="Systolic"
           name="systolic"
@@ -58,7 +68,12 @@ export default logUpdateSection(
           ]}
         />
         <RangeFormField
-          label="Spo2"
+          label={
+            <span>
+              SpO<sub>2</sub>
+              {" %"}
+            </span>
+          }
           name="ventilator_spo2"
           onChange={(c) => onChange({ ventilator_spo2: c.value })}
           value={log.ventilator_spo2}

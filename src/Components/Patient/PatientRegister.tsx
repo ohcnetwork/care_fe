@@ -63,7 +63,6 @@ import routes from "../../Redux/api.js";
 import request from "../../Utils/request/request.js";
 import Error404 from "../ErrorPages/404";
 import SelectMenuV2 from "../Form/SelectMenuV2.js";
-import Checkbox from "../Common/components/CheckBox.js";
 import _ from "lodash";
 import { ILocalBodies } from "../ExternalResult/models.js";
 import { useTranslation } from "react-i18next";
@@ -1246,14 +1245,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               }}
                               types={["mobile", "landline"]}
                             />
-                            <Checkbox
+                            <CheckBoxFormField
                               label="Is the phone number an emergency number?"
                               className="font-bold"
                               id="emergency_contact_checkbox"
-                              checked={isEmergencyNumberEnabled}
-                              onCheck={(checked) => {
-                                setIsEmergencyNumberEnabled(checked);
-                                checked
+                              name="emergency_contact_checkbox"
+                              value={isEmergencyNumberEnabled}
+                              onChange={({ value }) => {
+                                setIsEmergencyNumberEnabled(value);
+                                value
                                   ? field("emergency_phone_number").onChange({
                                       name: field("emergency_phone_number")
                                         .name,

@@ -4,7 +4,7 @@ import {
   MOTOR_RESPONSE_SCALE,
   VERBAL_RESPONSE_SCALE,
 } from "../../../Common/constants";
-import Checkbox from "../../Common/components/CheckBox";
+import CheckBoxFormField from "../../Form/FormFields/CheckBoxFormField";
 import RadioFormField from "../../Form/FormFields/RadioFormField";
 import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
 import { DailyRoundsModel } from "../../Patient/models";
@@ -31,11 +31,11 @@ export default logUpdateSection(
     return (
       <div>
         <div className="mt-4 flex items-center justify-between rounded-lg bg-gray-200 p-4">
-          <Checkbox
+          <CheckBoxFormField
+            name="in_prone_position"
             label="The patient is in prone position"
-            className=""
-            checked={log.in_prone_position}
-            onCheck={(val) => onChange({ in_prone_position: val })}
+            value={log.in_prone_position}
+            onChange={(e) => onChange({ in_prone_position: e.value })}
           />
         </div>
         <br />

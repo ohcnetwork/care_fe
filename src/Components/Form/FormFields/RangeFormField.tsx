@@ -1,7 +1,7 @@
 import { HTMLInputTypeAttribute, useState } from "react";
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 import FormField from "./FormField";
-import { classNames } from "../../../Utils/utils";
+import { classNames, properRoundOf } from "../../../Utils/utils";
 import Chip from "../../../CAREUI/display/Chip";
 import TextFormField from "./TextFormField";
 
@@ -154,8 +154,12 @@ export default function RangeFormField(props: RangeFormFieldProps) {
         </div>
       }
       <div className="flex justify-between">
-        <span className="text-xs text-black/30">{start}</span>
-        <span className="text-xs text-black/30">{end}</span>
+        <span className="text-xs text-black/30">
+          {start && properRoundOf(start)}
+        </span>
+        <span className="text-xs text-black/30">
+          {end && properRoundOf(end)}
+        </span>
       </div>
     </FormField>
   );

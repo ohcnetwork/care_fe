@@ -1,4 +1,4 @@
-import Checkbox from "../../Common/components/CheckBox";
+import CheckBoxFormField from "../../Form/FormFields/CheckBoxFormField";
 import { getValueDescription } from "../../Form/FormFields/RangeFormField";
 import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
 
@@ -93,11 +93,11 @@ export default function PupilSizeSelect(props: {
             </div>
             */}
       <div>
-        <Checkbox
+        <CheckBoxFormField
           label="Cannot be Assessed"
           name="pupil_reaction"
-          checked={pupilSize === "UNKNOWN"}
-          onCheck={(val) => onChange?.(val ? "UNKNOWN" : null)}
+          value={pupilSize === "UNKNOWN"}
+          onChange={({ value }) => onChange?.(value ? "UNKNOWN" : null)}
         />
       </div>
       {pupilSize === "UNKNOWN" && (

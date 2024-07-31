@@ -1,5 +1,5 @@
 import { NURSING_CARE_FIELDS } from "../../../Common/constants";
-import Checkbox from "../../Common/components/CheckBox";
+import CheckBoxFormField from "../../Form/FormFields/CheckBoxFormField";
 import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
 import { logUpdateSection } from "../utils";
 
@@ -12,22 +12,18 @@ export default logUpdateSection(
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 2xl:grid-cols-3 3xl:grid-cols-4">
       {NURSING_CARE_FIELDS.map((field, i) => (
         <div key={i}>
-          <div
-            className={
-              "overflow-hidden rounded-lg border border-gray-400 bg-gray-200 ring-0 ring-primary-400 transition-all focus-within:ring-2"
-            }
-          >
-            <Checkbox
+          <div className="overflow-hidden rounded-lg border border-gray-400 bg-gray-200 ring-0 ring-primary-400 transition-all focus-within:ring-2">
+            <CheckBoxFormField
               label={
                 <div>
                   <h4 className="text-black">{field.desc}</h4>
                 </div>
               }
-              className="bg-gray-300 p-4"
-              checked={!!log.nursing?.find((n) => n.procedure === field.text)}
-              onCheck={(val) =>
+              name=""
+              value={!!log.nursing?.find((n) => n.procedure === field.text)}
+              onChange={(e) =>
                 onChange({
-                  nursing: val
+                  nursing: e.value
                     ? [
                         ...(log.nursing || []),
                         { procedure: field.text, description: "" },
