@@ -515,6 +515,10 @@ export const DailyRounds = (props: any) => {
               rounds_type = "DOCTORS_LOG";
             }
 
+            if ("investigations" in fields) {
+              rounds_type = "DOCTORS_LOG";
+            }
+
             dispatch({
               type: "set_form",
               form: { ...state.form, ...fields, rounds_type },

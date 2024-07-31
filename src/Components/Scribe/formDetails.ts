@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import {
   CONSCIOUSNESS_LEVEL,
   PATIENT_CATEGORIES,
@@ -247,9 +248,22 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
       notes?: string
     }[]`,
     default: [],
-    example: "",
+    example: `[
+      {
+        type: ["Haemotology (GROUP)"],
+        repetitive: false,
+        time: "2024-07-31T18:10",
+        notes: "Patient is allergic to penicillin."      
+      },
+      {
+        type: ["ECG", "X-Ray"],
+        repetitive: true,
+        frequency: "24 hrs",
+        notes: "Patient is going nuts"
+      }
+    ]`,
     description:
-      "A list of objects to store the patient's investigations. The type field should be an array of strings corresponding to the names of the investigations provided in the options. The repetitive field should be a boolean value. The time field should be a string and only be filled if repetitive field is false. The frequency field should be a string with one of the following values: '15 min', '30 min', '1 hr', '6 hrs', '12 hrs', '24 hrs', or '48 hrs' and should be only filled if this is a repititive investigation . The notes field should be a string. If the type is not available in options, DO NOT MAKE IT.",
+      "A list of objects to store the patient's investigations. The type field should be an array of strings corresponding to the names of the investigations provided in the options. The repetitive field should be a boolean value. The time field should be a string and only be filled if repetitive field is false. The frequency field should be a string with one of the following values: '15 min', '30 min', '1 hr', '6 hrs', '12 hrs', '24 hrs', or '48 hrs' and should be only filled if this is a repititive investigation. The time field should be of the example format if present - (2024-07-31T18:10). The notes field should be a string. If the type is not available in options, DO NOT MAKE IT.",
     validator: (value) => {
       if (!Array.isArray(value)) return false;
       value.forEach((i) => {
@@ -271,6 +285,31 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     validator: () => {
       return true;
     },
+  },
+  {
+    friendlyName: "Round Type",
+    id: "rounds_type",
+    type: "string",
+    default: "DOCTORS_LOG",
+    example: "TELEMEDICINE",
+    description: "A string to store the type of round.",
+    options: [
+      { id: "NORMAL", text: t("NORMAL") },
+      { id: "VENTILATOR", text: t("VENTILATOR") },
+      { id: "DOCTORS_LOG", text: t("DOCTORS_LOG") },
+      { id: "TELEMEDICINE", text: t("TELEMEDICINE") },
+    ],
+    validator: (value) => typeof value === "string",
+  },
+  {
+    friendlyName: "Measured At",
+    id: "taken_at",
+    type: "string",
+    default: "",
+    example: "2024-07-31T18:10",
+    description:
+      "A string to store the date and time at which the round was taken.",
+    validator: (value) => typeof value === "string",
   },
 ];
 
