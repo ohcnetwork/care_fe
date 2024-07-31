@@ -11,6 +11,7 @@ import { navigate } from "raviger";
 import { classNames } from "../../Utils/utils";
 import request from "../../Utils/request/request";
 import { useSlugs } from "../../Common/hooks/useSlug";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   facilityId: string;
@@ -22,9 +23,12 @@ type Props = {
 type Section = (typeof LogUpdateSections)[keyof typeof LogUpdateSections];
 
 export default function CriticalCareEditor(props: Props) {
+  const { t } = useTranslation();
+
   const query = useQuery(routes.getDailyReport, {
     pathParams: { consultationId: props.consultationId, id: props.id },
   });
+
   const [completed, setCompleted] = useState<Section[]>([]);
   const [current, setCurrent] = useState<Section>();
 
@@ -37,8 +41,8 @@ export default function CriticalCareEditor(props: Props) {
   return (
     <div
       className={classNames(
-        "transition-all duration-200 ease-in-out md:mx-auto md:pt-8",
-        current ? "md:max-w-4xl" : "md:max-w-2xl",
+        "w-full transition-all duration-200 ease-in-out md:mx-auto md:pt-8",
+        current ? "md:max-w-5xl" : "md:max-w-2xl",
       )}
     >
       <div className="py-4">
@@ -52,16 +56,13 @@ export default function CriticalCareEditor(props: Props) {
             }
           }}
         >
-          {current ? "Back" : "Go back to Consultation"}
+          {t(current ? "back" : "back_to_consultation")}
         </ButtonV2>
       </div>
-      <Card className="shadow-lg lg:p-8">
-        <h2>
-          {current?.icon && (
-            <CareIcon icon={current.icon} className="text-2xl" />
-          )}
-          {current?.title ?? "Record Updates"}
-        </h2>
+      <Card className="shadow-lg md:rounded-xl lg:p-8">
+        <h3 className="mb-6 text-black">
+          {current?.title ?? t("record_updates")}
+        </h3>
         {current ? (
           <SectionEditor
             section={current}
@@ -75,7 +76,24 @@ export default function CriticalCareEditor(props: Props) {
             }}
           />
         ) : (
-          <ul className="space-y-4 bg-white py-4">
+          <ul className="space-y-4 bg-white">
+            <li>
+              <ButtonV2
+                ghost
+                className="w-full bg-primary-100/50 py-3"
+                border
+                href={`${consultationDashboardUrl}/daily-rounds/${props.id}/update`}
+              >
+                <CareIcon
+                  icon="l-info-circle"
+                  className="mr-2 text-2xl text-primary-500"
+                />
+                <span className="mr-auto text-lg font-semibold">
+                  Basic Editor
+                </span>
+                <CareIcon icon="l-check-circle" className="text-2xl" />
+              </ButtonV2>
+            </li>
             {Object.entries(LogUpdateSections).map(([key, section]) => {
               const isCompleted = completed.some((o) => o === section);
               return (
@@ -84,14 +102,22 @@ export default function CriticalCareEditor(props: Props) {
                     ghost
                     variant={isCompleted ? "primary" : "secondary"}
                     className={classNames(
-                      "w-full",
+                      "w-full py-3",
                       isCompleted && "bg-primary-100/50",
                     )}
                     border
                     onClick={() => setCurrent(section)}
                   >
                     {section.icon && (
-                      <CareIcon icon={section.icon} className="mr-2 text-2xl" />
+                      <CareIcon
+                        icon={section.icon}
+                        className={classNames(
+                          "mr-2 text-2xl",
+                          isCompleted
+                            ? "text-primary-500"
+                            : "text-secondary-500",
+                        )}
+                      />
                     )}
                     <span className="mr-auto text-lg font-semibold">
                       {section.title}
@@ -113,7 +139,7 @@ export default function CriticalCareEditor(props: Props) {
         {!current && (
           <Submit
             label="Complete"
-            className="mt-4 md:w-full"
+            className="mt-8 md:w-full"
             href={consultationDashboardUrl}
           />
         )}
