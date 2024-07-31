@@ -30,13 +30,10 @@ export default function EventsList() {
                 {(item, items) => (
                   <TimelineNode
                     name={
-                      item.event_type.name
-                        .split("_")
-                        .map(
-                          (text) =>
-                            text[0].toUpperCase() + text.toLowerCase().slice(1),
-                        )
-                        .join(" ") + " Event"
+                      t(item.event_type.name.toLowerCase()).replaceAll(
+                        /_/g,
+                        " ",
+                      ) + " Event"
                     }
                     event={{
                       type: item.change_type.replace(/_/g, " ").toLowerCase(),

@@ -176,9 +176,9 @@ const SymptomEntry = (props: {
   const disabled =
     props.disabled || symptom.clinical_impression_status === "entered-in-error";
   return (
-    <div className="grid grid-cols-6 items-center gap-2 md:grid-cols-5">
+    <div className="grid grid-cols-6 items-center gap-2 lg:grid-cols-8 xl:grid-cols-5">
       <DateFormField
-        className="col-span-3 w-full md:col-span-1"
+        className="col-span-3 w-full lg:col-span-2 xl:col-span-1"
         name="onset_date"
         value={new Date(symptom.onset_date)}
         disableFuture
@@ -187,7 +187,7 @@ const SymptomEntry = (props: {
         errorClassName="hidden"
       />
       <DateFormField
-        className="col-span-3 w-full md:col-span-1"
+        className="col-span-3 w-full lg:col-span-2 xl:col-span-1"
         name="cure_date"
         value={symptom.cure_date ? new Date(symptom.cure_date) : undefined}
         disableFuture
@@ -198,7 +198,7 @@ const SymptomEntry = (props: {
         onChange={props.onChange}
         errorClassName="hidden"
       />
-      <div className="col-span-6 flex items-center gap-2 md:col-span-3">
+      <div className="col-span-6 flex items-center gap-2 lg:col-span-4 xl:col-span-3">
         <div
           className={classNames(
             "cui-input-base w-full font-medium",

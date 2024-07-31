@@ -46,5 +46,6 @@
   "encounter_date_field_label__HI": "Date & Time of Consultation",
   "encounter_date_field_label__R": "Date & Time of Consultation",
   "back_dated_encounter_date_caution": "You are creating an encounter for",
-  "encounter_duration_confirmation": "The duration of this encounter would be"
+  "encounter_duration_confirmation": "The duration of this encounter would be",
+  "consultation_notes": "General Instructions (Advice)"
 }
