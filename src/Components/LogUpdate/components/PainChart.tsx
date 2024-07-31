@@ -7,6 +7,7 @@ import HumanBodyChart, {
   HumanBody,
 } from "../../../CAREUI/interactive/HumanChart";
 import PopupModal from "../../../CAREUI/display/PopupModal";
+import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
 
 export default function PainChart(props: {
   pain: PainScaleLog[];
@@ -98,14 +99,15 @@ export default function PainChart(props: {
               />
             </div>
             <div className="w-full px-4">
-              <textarea
+              <TextAreaFormField
+                name="description"
                 placeholder="Pain Description"
-                className="h-24 w-full rounded-md border border-black/10 bg-black/10 text-sm"
+                className="text-sm"
                 value={selectedPain?.description}
                 onChange={(e) => {
                   const newPain = pain.map((p) =>
                     p.region === selectedRegion
-                      ? { ...p, description: e.target.value }
+                      ? { ...p, description: e.value }
                       : p,
                   );
                   onChange?.(newPain);

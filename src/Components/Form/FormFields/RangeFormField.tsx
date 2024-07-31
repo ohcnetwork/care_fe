@@ -115,9 +115,10 @@ export default function RangeFormField(props: RangeFormFieldProps) {
               name="range"
               compact={!error}
               type="number"
-              inputClassName={"w-[100px] p-2"}
               value={roundedValue.toString()}
               onChange={(e) => onChange(parseInt(e.value))}
+              min={start}
+              max={end}
             />
           )}
         </div>
