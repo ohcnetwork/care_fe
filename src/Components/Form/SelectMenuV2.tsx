@@ -66,7 +66,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
   const defaultOption = {
     label: placeholder,
     selectedLabel: (
-      <p className="font-normal text-secondary-600">{placeholder}</p>
+      <span className="font-normal text-secondary-600">{placeholder}</span>
     ),
     description: undefined,
     icon: undefined,
@@ -149,7 +149,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                                   )}
                             </div>
                             {option.description && (
-                              <p
+                              <span
                                 className={classNames(
                                   "text-sm font-normal",
                                   option.disabled
@@ -160,7 +160,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                                 )}
                               >
                                 {option.description}
-                              </p>
+                              </span>
                             )}
                           </div>
                         )}
