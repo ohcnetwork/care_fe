@@ -1,4 +1,3 @@
-import { t } from "i18next";
 import {
   CONSCIOUSNESS_LEVEL,
   PATIENT_CATEGORIES,
@@ -294,10 +293,10 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     example: "TELEMEDICINE",
     description: "A string to store the type of round.",
     options: [
-      { id: "NORMAL", text: t("NORMAL") },
-      { id: "VENTILATOR", text: t("VENTILATOR") },
-      { id: "DOCTORS_LOG", text: t("DOCTORS_LOG") },
-      { id: "TELEMEDICINE", text: t("TELEMEDICINE") },
+      { id: "NORMAL", text: "Brief Update" },
+      { id: "VENTILATOR", text: "Detailed Update" },
+      { id: "DOCTORS_LOG", text: "Progress Note" },
+      { id: "TELEMEDICINE", text: "Telemedicine" },
     ],
     validator: (value) => typeof value === "string",
   },
