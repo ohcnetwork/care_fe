@@ -7,7 +7,7 @@ export default logUpdateSection({ title: "Dialysis" }, ({ log, onChange }) => {
       <RangeFormField
         label={<h4>Dialysis Fluid Balance (ml/h)</h4>}
         name="blood_sugar"
-        onChange={(c) => onChange({ ...log, dialysis_fluid_balance: c.value })}
+        onChange={(c) => onChange({ dialysis_fluid_balance: c.value })}
         value={log.dialysis_fluid_balance}
         start={0}
         end={5000}
@@ -17,7 +17,7 @@ export default logUpdateSection({ title: "Dialysis" }, ({ log, onChange }) => {
       <RangeFormField
         label={<h4>Dialysis Net Balance (ml/h)</h4>}
         name="blood_sugar"
-        onChange={(c) => onChange({ ...log, dialysis_net_balance: c.value })}
+        onChange={(c) => onChange({ dialysis_net_balance: c.value })}
         value={log.dialysis_net_balance}
         start={0}
         end={5000}

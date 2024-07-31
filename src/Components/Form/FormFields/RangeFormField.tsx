@@ -126,7 +126,7 @@ export default function RangeFormField(props: RangeFormFieldProps) {
         <input
           type="range"
           id={field.id}
-          className={`cui-range-slider ${field.className}`}
+          className={classNames("cui-range-slider", field.className)}
           style={
             allValueColors
               ? {

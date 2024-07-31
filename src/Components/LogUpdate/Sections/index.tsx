@@ -10,15 +10,15 @@ import RespiratorySupport from "./RespiratorySupport";
 import Vitals from "./Vitals";
 
 const LogUpdateSections = {
+  Vitals,
+  NeurologicalMonitoring,
+  RespiratorySupport,
   ABGAnalysis,
   BloodSugar,
-  Dialysis,
   IOBalance,
-  NeurologicalMonitoring,
-  NursingCare,
+  Dialysis,
   PressureSore,
-  RespiratorySupport,
-  Vitals,
+  NursingCare,
 } as const satisfies Record<string, ReturnType<typeof logUpdateSection>>;
 
 export default LogUpdateSections;

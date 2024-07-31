@@ -106,7 +106,6 @@ export default logUpdateSection(
       if (!selectedRegion) return;
       if (!pressureSore?.find((p) => p.region === selectedRegion)) {
         onChange({
-          ...log,
           pressure_sore: [
             ...(log.pressure_sore || []),
             {
@@ -125,7 +124,7 @@ export default logUpdateSection(
         const newPressureSore = pressureSore?.map((p) =>
           p.region === selectedRegion ? { ...p, ...value } : p,
         );
-        onChange({ ...log, pressure_sore: newPressureSore });
+        onChange({ pressure_sore: newPressureSore });
       }
     };
 

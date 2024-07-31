@@ -115,7 +115,7 @@ export default logUpdateSection(
             key={index}
             label={<b>{field.label}</b>}
             name={field.key}
-            onChange={(c) => onChange({ ...log, [field.key]: c.value })}
+            onChange={(c) => onChange({ [field.key]: c.value })}
             value={log[field.key] as number}
             start={field.min}
             end={field.max}

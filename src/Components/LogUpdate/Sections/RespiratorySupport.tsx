@@ -42,7 +42,6 @@ export default logUpdateSection(
               value={log.ventilator_oxygen_modality}
               onChange={(c) =>
                 onChange({
-                  ...log,
                   ventilator_oxygen_modality:
                     c.value as typeof log.ventilator_oxygen_modality,
                 })
@@ -55,7 +54,6 @@ export default logUpdateSection(
                   name="oxygen_flow_rate"
                   onChange={(c) =>
                     onChange({
-                      ...log,
                       ventilator_oxygen_modality_flow_rate: c.value,
                     })
                   }
@@ -72,9 +70,7 @@ export default logUpdateSection(
                 <RangeFormField
                   label={<b>FiO2 (%)</b>}
                   name="oxygen_flow_rate"
-                  onChange={(c) =>
-                    onChange({ ...log, ventilator_fi02: c.value })
-                  }
+                  onChange={(c) => onChange({ ventilator_fi02: c.value })}
                   value={log.ventilator_fi02}
                   start={21}
                   end={100}
@@ -90,7 +86,6 @@ export default logUpdateSection(
                 name="oxygen_flow_rate"
                 onChange={(c) =>
                   onChange({
-                    ...log,
                     ventilator_oxygen_modality_oxygen_rate: c.value,
                   })
                 }
@@ -123,7 +118,6 @@ export default logUpdateSection(
           }
           onChange={(c) =>
             onChange({
-              ...log,
               bilateral_air_entry: YES_NO_OPTIONS.find(
                 (o) => o.text === c.value,
               )?.value,
@@ -133,7 +127,7 @@ export default logUpdateSection(
         <RangeFormField
           label={<h4>EtCO2 (mm Hg)</h4>}
           name="etco2"
-          onChange={(c) => onChange({ ...log, etco2: c.value })}
+          onChange={(c) => onChange({ etco2: c.value })}
           value={log.etco2}
           start={0}
           end={200}
@@ -155,7 +149,6 @@ export default logUpdateSection(
           value={log.ventilator_interface}
           onChange={(c) =>
             onChange({
-              ...log,
               ventilator_interface: (c.value ||
                 "UNKNOWN") as typeof log.ventilator_interface,
             })
@@ -172,7 +165,7 @@ export default logUpdateSection(
         <RangeFormField
           label={<h4>SPO2 (%)</h4>}
           name="ventilator_spo2"
-          onChange={(c) => onChange({ ...log, ventilator_spo2: c.value })}
+          onChange={(c) => onChange({ ventilator_spo2: c.value })}
           value={log.ventilator_spo2}
           start={0}
           end={100}

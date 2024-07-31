@@ -45,32 +45,13 @@ export const INSULIN_INTAKE_FREQUENCY_OPTIONS = [
   { id: 3, text: "Thrice a day (TD)", value: "TD" },
 ] as const;
 
-export type LogUpdateSectionProps = {
-  log: DailyRoundsModel;
-  onChange: (log: DailyRoundsModel, sectionComplete?: boolean) => void;
-};
-
-export enum LogUpdateType {
-  Vitals = "vitals",
-  NeurologicalMonitoring = "neurological monitoring",
-  RespiratorySupport = "respiratory support",
-  ArterialBloodGasAnalysis = "arterial blood gas analysis",
-  BloodSugar = "blood sugar",
-  IOBalance = "i/o balance",
-  Dialysis = "dialysis",
-  PressureSore = "pressure sore",
-  NursingCare = "nursing care",
-}
-
-export type LogUpdateMapping = {
-  type: LogUpdateType;
-  component: React.FC<LogUpdateSectionProps>;
-};
-
 export const logUpdateSection = <
   TTitle extends string,
   TDescription extends string | undefined = undefined,
 >(
   meta: { title: TTitle; description?: TDescription },
-  component: React.FC<LogUpdateSectionProps>,
+  component: React.FC<{
+    log: DailyRoundsModel;
+    onChange: (log: DailyRoundsModel) => void;
+  }>,
 ) => ({ ...meta, component });

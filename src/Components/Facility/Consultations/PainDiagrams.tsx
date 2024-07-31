@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import routes from "../../../Redux/api";
 import request from "../../../Utils/request/request";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import { make as CriticalCare__PainViewer } from "../../CriticalCareRecording/Pain/CriticalCare__PainViewer.bs";
 import { formatDateTime } from "../../../Utils/utils";
 
 export const PainDiagrams = (props: any) => {
@@ -109,15 +106,8 @@ export const PainDiagrams = (props: any) => {
   return (
     <div>
       {dates && dropdown(dates)}
-      {!isLoading && selectedData.data ? (
-        <CriticalCare__PainViewer
-          painParameter={selectedData.data}
-          id={selectedData.id}
-          consultationId={consultationId}
-        />
-      ) : (
-        <div className="h-screen" />
-      )}
+      {/* TODO: replace with preview mode component */}
+      {!isLoading && selectedData.data ? <></> : <div className="h-screen" />}
     </div>
   );
 };

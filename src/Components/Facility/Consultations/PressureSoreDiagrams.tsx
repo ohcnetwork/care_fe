@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import routes from "../../../Redux/api";
 import request from "../../../Utils/request/request";
-import { make as CriticalCare__PressureScoreViewer } from "../../CriticalCareRecording/PressureSore/CriticalCare__PressureSoreViewer.bs";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 
@@ -119,15 +118,8 @@ export const PressureSoreDiagrams = (props: any) => {
   return (
     <div>
       {dates && dropdown(dates)}
-      {!isLoading && selectedData.data ? (
-        <CriticalCare__PressureScoreViewer
-          pressureSoreParameter={selectedData.data}
-          id={selectedData.id}
-          consultationId={consultationId}
-        />
-      ) : (
-        <div className="h-screen" />
-      )}
+      {/* TODO: replace with preview mode component */}
+      {!isLoading && selectedData.data ? <></> : <div className="h-screen" />}
       {totalCount > PAGINATION_LIMIT && (
         <div className="mt-4 flex w-full justify-center">
           <Pagination

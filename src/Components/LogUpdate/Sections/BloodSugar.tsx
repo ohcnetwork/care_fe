@@ -10,7 +10,7 @@ export default logUpdateSection(
         <RangeFormField
           label={<h4>Blood Sugar Level(mg/dL)</h4>}
           name="blood_sugar"
-          onChange={(c) => onChange({ ...log, blood_sugar_level: c.value })}
+          onChange={(c) => onChange({ blood_sugar_level: c.value })}
           value={log.blood_sugar_level}
           start={0}
           end={700}
@@ -26,7 +26,7 @@ export default logUpdateSection(
         <RangeFormField
           label={<b>Dosage(units)</b>}
           name="insulin_intake"
-          onChange={(c) => onChange({ ...log, insulin_intake_dose: c.value })}
+          onChange={(c) => onChange({ insulin_intake_dose: c.value })}
           value={log.insulin_intake_dose}
           start={0}
           end={100}
@@ -41,7 +41,7 @@ export default logUpdateSection(
           optionValue={(c) => c.value}
           value={log.insulin_intake_frequency}
           onChange={(c) =>
-            onChange({ ...log, insulin_intake_frequency: c.value || "" })
+            onChange({ insulin_intake_frequency: c.value || "" })
           }
         />
       </div>

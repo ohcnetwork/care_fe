@@ -27,9 +27,7 @@ export default logUpdateSection({ title: "Vitals" }, ({ log, onChange }) => {
       <RangeFormField
         label="Systolic"
         name="systolic"
-        onChange={(c) =>
-          onChange({ ...log, bp: { ...log.bp, systolic: c.value } })
-        }
+        onChange={(c) => onChange({ bp: { ...log.bp, systolic: c.value } })}
         value={log.bp?.systolic}
         start={0}
         end={11}
@@ -43,9 +41,7 @@ export default logUpdateSection({ title: "Vitals" }, ({ log, onChange }) => {
       <RangeFormField
         label="Diastolic"
         name="diastolic"
-        onChange={(c) =>
-          onChange({ ...log, bp: { ...log.bp, diastolic: c.value } })
-        }
+        onChange={(c) => onChange({ bp: { ...log.bp, diastolic: c.value } })}
         value={log.bp?.diastolic}
         start={30}
         end={180}
@@ -59,7 +55,7 @@ export default logUpdateSection({ title: "Vitals" }, ({ log, onChange }) => {
       <RangeFormField
         label="Spo2"
         name="spo2"
-        onChange={(c) => onChange({ ...log, ventilator_spo2: c.value })}
+        onChange={(c) => onChange({ ventilator_spo2: c.value })}
         value={log.ventilator_spo2}
         start={0}
         end={100}
@@ -73,7 +69,7 @@ export default logUpdateSection({ title: "Vitals" }, ({ log, onChange }) => {
       <RangeFormField
         label="Temperature"
         name="temperature"
-        onChange={(c) => onChange({ ...log, temperature: `${c.value}` })}
+        onChange={(c) => onChange({ temperature: `${c.value}` })}
         value={Number(log.temperature)}
         start={95}
         end={106}
@@ -95,7 +91,7 @@ export default logUpdateSection({ title: "Vitals" }, ({ log, onChange }) => {
       <RangeFormField
         label="Respiratory Rate (bpm)"
         name="resp"
-        onChange={(c) => onChange({ ...log, resp: c.value })}
+        onChange={(c) => onChange({ resp: c.value })}
         value={log.resp}
         start={0}
         end={150}
@@ -117,13 +113,13 @@ export default logUpdateSection({ title: "Vitals" }, ({ log, onChange }) => {
             })),
           )
         }
-        onChange={(pain) => onChange({ ...log, pain_scale_enhanced: pain })}
+        onChange={(pain) => onChange({ pain_scale_enhanced: pain })}
       />
       <hr className="my-8 border border-gray-400" />
       <RangeFormField
         label="Spo2"
         name="spo2"
-        onChange={(c) => onChange({ ...log, ventilator_spo2: c.value })}
+        onChange={(c) => onChange({ ventilator_spo2: c.value })}
         value={log.ventilator_spo2}
         start={0}
         end={100}
@@ -142,7 +138,7 @@ export default logUpdateSection({ title: "Vitals" }, ({ log, onChange }) => {
         optionValue={(c) => c.value || ""}
         value={log.rhythm}
         onChange={(c) =>
-          onChange({ ...log, rhythm: c.value as DailyRoundsModel["rhythm"] })
+          onChange({ rhythm: c.value as DailyRoundsModel["rhythm"] })
         }
       />
       <br />
@@ -150,7 +146,7 @@ export default logUpdateSection({ title: "Vitals" }, ({ log, onChange }) => {
         label="Heartbeat Description"
         name="heartbeat-description"
         value={log.rhythm_detail}
-        onChange={(c) => onChange({ ...log, rhythm_detail: c.value })}
+        onChange={(c) => onChange({ rhythm_detail: c.value })}
       />
     </div>
   );

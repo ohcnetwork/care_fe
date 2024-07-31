@@ -24,7 +24,6 @@ export default logUpdateSection(
               checked={!!log.nursing?.find((n) => n.procedure === field.text)}
               onCheck={(val) =>
                 onChange({
-                  ...log,
                   nursing: val
                     ? [
                         ...(log.nursing || []),
@@ -46,7 +45,6 @@ export default logUpdateSection(
                   }
                   onChange={(val) =>
                     onChange({
-                      ...log,
                       nursing: log.nursing?.map((n) =>
                         n.procedure === field.text
                           ? { ...n, description: val.value }

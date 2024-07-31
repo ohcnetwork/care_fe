@@ -32,7 +32,7 @@ export default logUpdateSection(
             label="The patient is in prone position"
             className=""
             checked={log.in_prone_position}
-            onCheck={(val) => onChange({ ...log, in_prone_position: val })}
+            onCheck={(val) => onChange({ in_prone_position: val })}
           />
         </div>
         <br />
@@ -45,7 +45,6 @@ export default logUpdateSection(
           value={log.consciousness_level}
           onChange={(c) =>
             onChange({
-              ...log,
               consciousness_level:
                 c.value as (typeof CONSCIOUSNESS_LEVEL)[number]["id"],
             })
@@ -69,14 +68,12 @@ export default logUpdateSection(
                 }
                 onChange={(val) =>
                   onChange({
-                    ...log,
                     [`${d}_pupil_size` as keyof typeof log.left_pupil_size]:
                       val,
                   })
                 }
                 onDetailChange={(val) =>
                   onChange({
-                    ...log,
                     [`${d}_pupil_size_detail` as keyof typeof log.left_pupil_size_detail]:
                       val,
                   })
@@ -97,7 +94,6 @@ export default logUpdateSection(
                 }
                 onChange={(c) =>
                   onChange({
-                    ...log,
                     [`${d}_pupil_light_reaction` as keyof typeof log.left_pupil_light_reaction]:
                       c.value,
                   })
@@ -117,7 +113,6 @@ export default logUpdateSection(
                   }
                   onChange={(c) =>
                     onChange({
-                      ...log,
                       [`${d}_pupil_light_reaction_detail` as keyof typeof log.left_pupil_light_reaction_detail]:
                         c.value,
                     })
@@ -149,7 +144,7 @@ export default logUpdateSection(
             name="eye_opening_response"
             value={`${log.glasgow_eye_open}`}
             onChange={(c) =>
-              onChange({ ...log, glasgow_eye_open: parseInt(`${c.value}`) })
+              onChange({ glasgow_eye_open: parseInt(`${c.value}`) })
             }
             containerClassName="flex flex-col"
           />
@@ -162,7 +157,6 @@ export default logUpdateSection(
             value={`${log.glasgow_verbal_response}`}
             onChange={(c) =>
               onChange({
-                ...log,
                 glasgow_verbal_response: parseInt(`${c.value}`),
               })
             }
@@ -177,7 +171,6 @@ export default logUpdateSection(
             value={`${log.glasgow_motor_response}`}
             onChange={(c) =>
               onChange({
-                ...log,
                 glasgow_motor_response: parseInt(`${c.value}`),
               })
             }
@@ -203,7 +196,7 @@ export default logUpdateSection(
               optionValue={(c) => c.value}
               name={"limb_response_" + d}
               value={`${log[d]}`}
-              onChange={(c) => onChange({ ...log, [d]: c.value })}
+              onChange={(c) => onChange({ [d]: c.value })}
               containerClassName="flex flex-wrap gap-x-8"
             />
           ))}

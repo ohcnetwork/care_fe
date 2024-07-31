@@ -88,7 +88,6 @@ export default logUpdateSection(
                           value={name}
                           onChange={(val) =>
                             onChange({
-                              ...log,
                               [field.key]: (
                                 log[field.key] as NameQuantity[] | undefined
                               )?.map((f, fi) =>
@@ -106,7 +105,6 @@ export default logUpdateSection(
                         value={quantity.toString()}
                         onChange={(val) =>
                           onChange({
-                            ...log,
                             [field.key]: (
                               log[field.key] as NameQuantity[] | undefined
                             )?.map((f, fi) =>
@@ -129,7 +127,6 @@ export default logUpdateSection(
                         className="text-lg text-red-500"
                         onClick={() =>
                           onChange({
-                            ...log,
                             [field.key]: (
                               log[field.key] as NameQuantity[] | undefined
                             )?.filter((f, fi) => j !== fi),
@@ -146,7 +143,6 @@ export default logUpdateSection(
                   className="bg-gray-200"
                   onClick={() =>
                     onChange({
-                      ...log,
                       [field.key]: [
                         ...((log[field.key] as NameQuantity[] | undefined) ||
                           []),

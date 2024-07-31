@@ -128,7 +128,7 @@ const ButtonV2 = ({
 
   if (href && !(disabled || loading)) {
     return (
-      <Link href={href} target={target}>
+      <Link href={href} target={target} className={props.className}>
         <button {...props} disabled={disabled || loading} className={className}>
           {children}
         </button>
