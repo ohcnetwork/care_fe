@@ -390,7 +390,7 @@ const DischargeModal = ({
           <div className="my-5 rounded p-5 shadow">
             <h2 className="mb-2">Claim Insurance</h2>
             {latestClaim ? (
-              <ClaimDetailCard claim={latestClaim} />
+              <ClaimCard claim={latestClaim} />
             ) : (
               <CreateClaimCard
                 consultationId={consultationData.id ?? ""}
