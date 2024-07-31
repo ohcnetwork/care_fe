@@ -386,8 +386,8 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
             admitted: data.admitted ? String(data.admitted) : "false",
             admitted_to: data.admitted_to ? data.admitted_to : "",
             category: data.category
-              ? PATIENT_CATEGORIES.find((i) => i.text === data.category)?.id ??
-                ""
+              ? (PATIENT_CATEGORIES.find((i) => i.text === data.category)?.id ??
+                "")
               : "",
             patient_no: data.patient_no ?? "",
             OPconsultation: data.consultation_notes,
@@ -1437,7 +1437,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
                           userType={"Doctor"}
                           homeFacility={facilityId}
                           error={state.errors.treating_physician}
-                          noResultsLabel={t("no_treating_physicians_available")}
+                          noResultsError={t("no_treating_physicians_available")}
                         />
                       </div>
 
