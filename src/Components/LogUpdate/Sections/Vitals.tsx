@@ -35,7 +35,7 @@ export default logUpdateSection(
           onChange={(c) => onChange({ bp: { ...log.bp, systolic: c.value } })}
           value={log.bp?.systolic}
           start={0}
-          end={11}
+          end={250}
           step={1}
           valueDescriptions={[
             { till: 99, text: "Low", className: "text-red-500" },
@@ -59,7 +59,7 @@ export default logUpdateSection(
         />
         <RangeFormField
           label="Spo2"
-          name="spo2"
+          name="ventilator_spo2"
           onChange={(c) => onChange({ ventilator_spo2: c.value })}
           value={log.ventilator_spo2}
           start={0}
@@ -109,32 +109,20 @@ export default logUpdateSection(
         />
         <PainChart
           pain={
-            log.pain_scale_enhanced ||
-            [HumanBodyPaths.anterior, HumanBodyPaths.posterior].flatMap((p) =>
-              p.map((r) => ({
-                region: r.region,
-                scale: 0,
-                description: "",
-              })),
-            )
+            log.pain_scale_enhanced?.length
+              ? log.pain_scale_enhanced
+              : [HumanBodyPaths.anterior, HumanBodyPaths.posterior].flatMap(
+                  (p) =>
+                    p.map((r) => ({
+                      region: r.region,
+                      scale: 0,
+                      description: "",
+                    })),
+                )
           }
-          onChange={(pain) => onChange({ pain_scale_enhanced: pain })}
+          onChange={(pain_scale_enhanced) => onChange({ pain_scale_enhanced })}
         />
         <hr className="my-8 border border-gray-400" />
-        <RangeFormField
-          label="Spo2"
-          name="spo2"
-          onChange={(c) => onChange({ ventilator_spo2: c.value })}
-          value={log.ventilator_spo2}
-          start={0}
-          end={100}
-          step={1}
-          valueDescriptions={[
-            { till: 39, text: "Bradycardia", className: "text-red-500" },
-            { till: 100, text: "Normal", className: "text-green-500" },
-            { text: "Tachycardia", className: "text-red-500" },
-          ]}
-        />
         <RadioFormField
           label="Heartbeat Rhythm"
           name="heartbeat-rythm"
