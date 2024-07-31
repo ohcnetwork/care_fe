@@ -445,19 +445,6 @@ export const FacilityHome = (props: any) => {
                 <CareIcon icon="l-user-injured" className="text-lg" />
                 <span>View Patients</span>
               </ButtonV2>
-              <ButtonV2
-                id="view-patient-facility-list"
-                variant="primary"
-                ghost
-                border
-                className="mt-2 flex w-full flex-row justify-center md:w-auto"
-                onClick={() =>
-                  navigate(`/facility/${facilityId}/discharged-patients`)
-                }
-              >
-                <CareIcon icon="l-user-injured" className="text-lg" />
-                <span>View Discharged Patients</span>
-              </ButtonV2>
             </div>
           </div>
         </div>

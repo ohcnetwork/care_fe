@@ -46,6 +46,15 @@ export const USER_TYPE_OPTIONS = [
   { id: "StateAdmin", role: "State Admin", readOnly: false },
 ] as const;
 
+export const USER_LAST_ACTIVE_OPTIONS = [
+  { id: 1, text: "24 hours" },
+  { id: 7, text: "7 days" },
+  { id: 30, text: "30 days" },
+  { id: 90, text: "90 days" },
+  { id: 365, text: "1 Year" },
+  { id: "never", text: "Never" },
+];
+
 export type UserRole = (typeof USER_TYPE_OPTIONS)[number]["id"];
 
 export const USER_TYPES = USER_TYPE_OPTIONS.map((o) => o.id);
