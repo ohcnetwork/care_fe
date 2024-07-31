@@ -21,10 +21,6 @@ type Props = {
 
 type Section = (typeof LogUpdateSections)[keyof typeof LogUpdateSections];
 
-/**
- * This component would be removed in favour of form templates.
- * Just a temporary placeholder for now until form templates are completed.
- */
 export default function CriticalCareEditor(props: Props) {
   const query = useQuery(routes.getDailyReport, {
     pathParams: { consultationId: props.consultationId, id: props.id },
@@ -48,7 +44,6 @@ export default function CriticalCareEditor(props: Props) {
       <div className="py-4">
         <ButtonV2
           variant="secondary"
-          shadow={false}
           onClick={() => {
             if (current) {
               setCurrent(undefined);
@@ -60,13 +55,17 @@ export default function CriticalCareEditor(props: Props) {
           {current ? "Back" : "Go back to Consultation"}
         </ButtonV2>
       </div>
-      <Card className="lg:p-8">
-        <h2>{current?.title ?? "Record Updates"}</h2>
+      <Card className="shadow-lg lg:p-8">
+        <h2>
+          {current?.icon && (
+            <CareIcon icon={current.icon} className="text-2xl" />
+          )}
+          {current?.title ?? "Record Updates"}
+        </h2>
         {current ? (
           <SectionEditor
             section={current}
             log={query.data}
-            onCancel={() => setCurrent(undefined)}
             onComplete={() => {
               if (!completed.find((o) => o === current)) {
                 setCompleted((c) => [...c, current]);
@@ -85,13 +84,16 @@ export default function CriticalCareEditor(props: Props) {
                     ghost
                     variant={isCompleted ? "primary" : "secondary"}
                     className={classNames(
-                      "w-full justify-between",
+                      "w-full",
                       isCompleted && "bg-primary-100/50",
                     )}
                     border
                     onClick={() => setCurrent(section)}
                   >
-                    <span className="text-lg font-semibold">
+                    {section.icon && (
+                      <CareIcon icon={section.icon} className="mr-2 text-2xl" />
+                    )}
+                    <span className="mr-auto text-lg font-semibold">
                       {section.title}
                     </span>
                     <CareIcon
@@ -123,13 +125,12 @@ export default function CriticalCareEditor(props: Props) {
 type SectionEditorProps = {
   log: DailyRoundsModel;
   onComplete: () => void;
-  onCancel: () => void;
   section: Section;
 };
 
-const SectionEditor = ({ section, ...props }: SectionEditorProps) => {
+const SectionEditor = ({ log, onComplete, section }: SectionEditorProps) => {
   const [consultationId, id] = useSlugs("consultation", "daily_rounds");
-  const [data, setData] = useState<Partial<DailyRoundsModel>>({});
+  const [diff, setDiff] = useState<Partial<DailyRoundsModel>>({});
   const [isProcessing, setIsProcessing] = useState(false);
 
   return (
@@ -137,8 +138,8 @@ const SectionEditor = ({ section, ...props }: SectionEditorProps) => {
       className={classNames(isProcessing && "pointer-events-none opacity-50")}
     >
       <section.component
-        log={{ ...props.log, ...data }}
-        onChange={(changes) => setData({ ...data, ...changes })}
+        log={{ ...log, ...diff }}
+        onChange={(changes) => setDiff((base) => ({ ...base, ...changes }))}
       />
       <Submit
         className="mt-8 md:w-full"
@@ -148,11 +149,11 @@ const SectionEditor = ({ section, ...props }: SectionEditorProps) => {
           setIsProcessing(true);
           const { res } = await request(routes.updateDailyRound, {
             pathParams: { consultationId, id },
-            body: data,
+            body: diff,
           });
           setIsProcessing(false);
           if (res?.ok) {
-            props.onComplete();
+            onComplete();
           }
         }}
       />

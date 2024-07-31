@@ -7,6 +7,7 @@ import { getValueDescription } from "../../Form/FormFields/RangeFormField";
 import { SelectFormField } from "../../Form/FormFields/SelectFormField";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import { logUpdateSection } from "../utils";
+import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
 
 type PressureSore = {
   description: string;
@@ -19,7 +20,10 @@ type PressureSore = {
 };
 
 export default logUpdateSection(
-  { title: "Pressure Sore" },
+  {
+    title: "Pressure Sore",
+    icon: "l-user-md",
+  },
   ({ log, onChange }) => {
     const getTitle = (text: string) => text.split(/(?=[A-Z])/).join(" ");
     const pressureSore = log.pressure_sore;
@@ -131,7 +135,7 @@ export default logUpdateSection(
     return (
       <>
         <PopupModal
-          show={selectedRegion !== null}
+          show={!!selectedRegion}
           onHide={() => setSelectedRegion(undefined)}
           className={"flex w-[275px] flex-col items-center gap-4"}
           onSubmit={() => setSelectedRegion(undefined)}
@@ -191,14 +195,13 @@ export default logUpdateSection(
                 name="tissue-type"
               />
             </div>
-            <div className="w-full">
-              <textarea
+            <div className="mt-2 w-full">
+              <TextAreaFormField
+                name="description"
                 placeholder="Description"
-                className="h-24 w-full resize-none rounded-md border border-black/10 bg-black/5 text-sm"
-                value={selectedPressureSore?.description}
-                onChange={(e) =>
-                  changePressureSore({ description: e.target.value })
-                }
+                className="text-sm"
+                value={selectedPressureSore?.description || ""}
+                onChange={(e) => changePressureSore({ description: e.value })}
               />
             </div>
             {selectedPressureSore && (

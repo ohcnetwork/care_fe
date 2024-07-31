@@ -16,7 +16,10 @@ import {
 } from "../utils";
 
 export default logUpdateSection(
-  { title: "Neurological Monitoring" },
+  {
+    title: "Neurological Monitoring",
+    icon: "l-brain",
+  },
   ({ log, onChange }) => {
     const limbResponses: (keyof DailyRoundsModel)[] = [
       "limb_response_upper_extremity_left",

@@ -1,5 +1,6 @@
 import React from "react";
 import { DailyRoundsModel } from "../Patient/models";
+import { IconName } from "../../CAREUI/icons/CareIcon";
 
 export const REACTION_OPTIONS = [
   { id: 0, value: "UNKNOWN", text: "Unknown" },
@@ -49,7 +50,7 @@ export const logUpdateSection = <
   TTitle extends string,
   TDescription extends string | undefined = undefined,
 >(
-  meta: { title: TTitle; description?: TDescription },
+  meta: { title: TTitle; description?: TDescription; icon?: IconName },
   component: React.FC<{
     log: DailyRoundsModel;
     onChange: (log: DailyRoundsModel) => void;

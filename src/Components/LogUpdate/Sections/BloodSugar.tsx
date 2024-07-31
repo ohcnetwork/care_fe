@@ -3,7 +3,10 @@ import RangeFormField from "../../Form/FormFields/RangeFormField";
 import { INSULIN_INTAKE_FREQUENCY_OPTIONS, logUpdateSection } from "../utils";
 
 export default logUpdateSection(
-  { title: "Blood Sugar" },
+  {
+    title: "Blood Sugar",
+    icon: "l-tear",
+  },
   ({ log, onChange }) => {
     return (
       <div>

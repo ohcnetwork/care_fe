@@ -4,7 +4,10 @@ import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
 import { logUpdateSection } from "../utils";
 
 export default logUpdateSection(
-  { title: "Nursing Care" },
+  {
+    title: "Nursing Care",
+    icon: "l-user-nurse",
+  },
   ({ log, onChange }) => (
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 2xl:grid-cols-3 3xl:grid-cols-4">
       {NURSING_CARE_FIELDS.map((field, i) => (

@@ -7,7 +7,10 @@ import {
 } from "../utils";
 
 export default logUpdateSection(
-  { title: "Respiratory Support" },
+  {
+    title: "Respiratory Support",
+    icon: "l-lungs",
+  },
   ({ log, onChange }) => {
     const RESPIRATORY_SUPPORT_OPTIONS = [
       {

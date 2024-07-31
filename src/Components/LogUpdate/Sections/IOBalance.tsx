@@ -7,7 +7,10 @@ import ButtonV2 from "../../Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 export default logUpdateSection(
-  { title: "I/O Balance" },
+  {
+    title: "I/O Balance",
+    icon: "l-balance-scale",
+  },
   ({ log, onChange }) => {
     const infusionCollection = [
       "Adrenalin",

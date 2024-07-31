@@ -4,7 +4,10 @@ import RangeFormField, {
 import { logUpdateSection } from "../utils";
 
 export default logUpdateSection(
-  { title: "ABG Analysis" },
+  {
+    title: "ABG Analysis",
+    icon: "l-tear",
+  },
   ({ log, onChange }) => {
     const fields = [
       {
