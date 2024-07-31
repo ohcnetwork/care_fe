@@ -28,13 +28,15 @@ export default function RangeFormField(props: RangeFormFieldProps) {
   const field = useFormFieldPropsResolver(props);
   const [currentUnit, setCurrentUnit] = useState(0);
 
+  const _value = field.value && parseFloat(`${field.value}`);
+
   const valueDescription = props.valueDescriptions?.find(
-    (vd) => (vd.till || props.end || 0) >= (field.value || 0),
+    (vd) => (vd.till || props.end || 0) >= (_value || 0),
   );
   const selectedUnit = props.units?.[currentUnit];
   const value = selectedUnit?.conversionFn
-    ? selectedUnit.conversionFn(field.value || 0)
-    : field.value;
+    ? selectedUnit.conversionFn(_value || 0)
+    : _value;
   const start = selectedUnit?.conversionFn
     ? selectedUnit.conversionFn(props.start || 0)
     : props.start;
