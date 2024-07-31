@@ -77,16 +77,16 @@ export default function PopupModal(props: Props) {
         left: position.x + "px",
       }}
       className={classNames(
-        "absolute z-30 overflow-hidden rounded-lg border border-black/10 bg-white text-black transition-all",
+        "absolute z-10 rounded-lg border border-secondary-400 bg-white text-black shadow-lg transition-all",
         props.show ? "visible opacity-100" : "invisible opacity-0",
         props.className,
       )}
     >
       {children}
       {props.onSubmit && (
-        <div className="flex w-full items-center justify-end gap-2 border-t border-t-black/10 bg-black/10 p-2">
-          <Cancel onClick={props.onHide} label={t("close")} />
-          <Submit onClick={props.onSubmit} label={t("save")} />
+        <div className="flex w-full items-center justify-end gap-2 rounded-b-lg border-t border-t-secondary-300 bg-secondary-100 p-2">
+          <Cancel onClick={props.onHide} label={t("close")} shadow={false} />
+          <Submit onClick={props.onSubmit} label={t("save")} shadow={false} />
         </div>
       )}
     </div>
