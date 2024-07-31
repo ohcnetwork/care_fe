@@ -289,7 +289,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     friendlyName: "Round Type",
     id: "rounds_type",
     type: "string",
-    default: "DOCTORS_LOG",
+    default: "NORMAL",
     example: "TELEMEDICINE",
     description: "A string to store the type of round.",
     options: [
@@ -307,7 +307,7 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     default: "",
     example: "2024-07-31T18:10",
     description:
-      "A string to store the date and time at which the round was taken.",
+      "A string to store the date and time at which the round was taken or measured. 'The round was taken yesterday/today' would amount to yesterday/today's date.",
     validator: (value) => typeof value === "string",
   },
 ];
