@@ -15,9 +15,9 @@ export const LIMB_RESPONSE_OPTIONS = [
   { id: 5, value: "STRONG", text: "Strong" },
   { id: 10, value: "MODERATE", text: "Moderate" },
   { id: 15, value: "WEAK", text: "Weak" },
-  { id: 20, value: "Flexion", text: "Flexion" },
-  { id: 25, value: "Extension", text: "Extension" },
-  { id: 30, value: "None", text: "None" },
+  { id: 20, value: "FLEXION", text: "Flexion" },
+  { id: 25, value: "EXTENSION", text: "Extension" },
+  { id: 30, value: "NONE", text: "None" },
 ] as const;
 
 export const YES_NO_OPTIONS = [
