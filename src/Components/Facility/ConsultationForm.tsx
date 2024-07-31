@@ -608,7 +608,7 @@ export const ConsultationForm = ({ facilityId, patientId, id }: Props) => {
 
         case "treating_physician": {
           if (state.form.suggestion !== "DD" && !state.form[field]) {
-            errors[field] = "Please fill treating physician";
+            errors[field] = "Field is required";
             invalidForm = true;
             break;
           }
