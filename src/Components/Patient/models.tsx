@@ -372,8 +372,8 @@ export interface DailyRoundsModel {
   dialysis_fluid_balance?: number;
   dialysis_net_balance?: number;
   nursing?: {
-    description: string;
     procedure: (typeof NURSING_CARE_FIELDS)[number]["text"];
+    description: string;
   }[];
   feeds?: NameQuantity[];
   infusions?: NameQuantity[];
