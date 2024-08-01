@@ -487,7 +487,7 @@ export const DailyRounds = (props: any) => {
           }}
         />
       </div>
-      <form className="w-full max-w-4xl rounded-lg bg-white px-8 py-5 shadow md:m-4 md:px-16 md:py-11">
+      <form className="w-full max-w-4xl rounded-lg bg-white px-3 py-5 shadow sm:px-6 md:py-11">
         <DraftSection
           handleDraftSelect={(newState) => {
             dispatch({ type: "set_state", state: newState });
