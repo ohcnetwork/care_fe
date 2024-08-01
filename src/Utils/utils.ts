@@ -473,3 +473,25 @@ export const humanizeStrings = (strings: readonly string[], empty = "") => {
   const [last, ...items] = [...strings].reverse();
   return `${items.reverse().join(", ")} and ${last}`;
 };
+
+export type ValueDescription = {
+  till?: number;
+  text: React.ReactNode;
+  className?: string;
+  color?: string;
+};
+
+export const getValueDescription = (
+  valueDescriptions: ValueDescription[],
+  value: number,
+) => {
+  return valueDescriptions?.find((vd) => (vd.till || 0) >= (value || 0));
+};
+
+export const celsiusToFahrenheit = (celsius: number) => {
+  return (celsius * 9) / 5 + 32;
+};
+
+export const fahrenheitToCelsius = (fahrenheit: number) => {
+  return ((fahrenheit - 32) * 5) / 9;
+};

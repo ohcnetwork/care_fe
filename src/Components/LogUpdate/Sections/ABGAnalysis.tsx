@@ -1,6 +1,5 @@
-import RangeFormField, {
-  ValueDescription,
-} from "../../Form/FormFields/RangeFormField";
+import { ValueDescription } from "../../../Utils/utils";
+import RangeFormField from "../../Form/FormFields/RangeFormField";
 import { LogUpdateSectionProps } from "../utils";
 
 const ABGAnalysis = ({ log, onChange }: LogUpdateSectionProps) => {
@@ -115,8 +114,8 @@ const ABGAnalysis = ({ log, onChange }: LogUpdateSectionProps) => {
           name={field.key}
           onChange={(c) => onChange({ [field.key]: c.value })}
           value={log[field.key] as number}
-          start={field.min}
-          end={field.max}
+          min={field.min}
+          max={field.max}
           step={field.step || 1}
           valueDescriptions={field.valueDescription}
         />

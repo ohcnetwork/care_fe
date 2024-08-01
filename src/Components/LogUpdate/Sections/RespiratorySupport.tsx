@@ -56,8 +56,8 @@ const RespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
                   })
                 }
                 value={log.ventilator_oxygen_modality_flow_rate}
-                start={0}
-                end={70}
+                min={0}
+                max={70}
                 valueDescriptions={[
                   { till: 34, text: "Low", className: "text-red-500" },
                   { till: 60, text: "Normal", className: "text-green-500" },
@@ -70,8 +70,8 @@ const RespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
                 name="oxygen_flow_rate"
                 onChange={(c) => onChange({ ventilator_fi02: c.value })}
                 value={log.ventilator_fi02}
-                start={21}
-                end={100}
+                min={21}
+                max={100}
                 valueDescriptions={[
                   { till: 60, text: "Normal", className: "text-green-500" },
                   { text: "High", className: "text-red-500" },
@@ -88,8 +88,8 @@ const RespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
                 })
               }
               value={log.ventilator_oxygen_modality_oxygen_rate}
-              start={0}
-              end={50}
+              min={0}
+              max={50}
               valueDescriptions={[
                 { till: 4, text: "Low", className: "text-red-500" },
                 { till: 10, text: "Normal", className: "text-green-500" },
@@ -125,8 +125,8 @@ const RespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
         name="etco2"
         onChange={(c) => onChange({ etco2: c.value })}
         value={log.etco2}
-        start={0}
-        end={200}
+        min={0}
+        max={200}
         step={1}
         valueDescriptions={[
           { till: 34, text: "Low", className: "text-red-500" },
@@ -163,8 +163,8 @@ const RespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
         name="ventilator_spo2"
         onChange={(c) => onChange({ ventilator_spo2: c.value })}
         value={log.ventilator_spo2}
-        start={0}
-        end={100}
+        min={0}
+        max={100}
         valueDescriptions={[
           { till: 89, text: "Low", className: "text-red-500" },
           { text: "Normal", className: "text-green-500" },

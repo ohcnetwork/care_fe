@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { PainScaleLog } from "../../Patient/models";
-import RangeFormField, {
-  getValueDescription,
-} from "../../Form/FormFields/RangeFormField";
+import RangeFormField from "../../Form/FormFields/RangeFormField";
 import HumanBodyChart, {
   HumanBody,
 } from "../../../CAREUI/interactive/HumanChart";
 import PopupModal from "../../../CAREUI/display/PopupModal";
 import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
+import { getValueDescription } from "../../../Utils/utils";
 
 export default function PainChart(props: {
   pain: PainScaleLog[];
@@ -78,10 +77,10 @@ export default function PainChart(props: {
           <>
             <div className="w-full p-4">
               <RangeFormField
-                showInput={false}
+                hideInput
                 name="pain-scale"
-                start={0}
-                end={10}
+                min={0}
+                max={10}
                 value={selectedPain?.scale || 0}
                 className="block w-full"
                 onChange={(value) => {

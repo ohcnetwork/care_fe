@@ -3,11 +3,11 @@ import PopupModal from "../../../CAREUI/display/PopupModal";
 import HumanBodyChart, {
   HumanBody,
 } from "../../../CAREUI/interactive/HumanChart";
-import { getValueDescription } from "../../Form/FormFields/RangeFormField";
 import { SelectFormField } from "../../Form/FormFields/SelectFormField";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
 import { LogUpdateSectionProps } from "../utils";
+import { getValueDescription } from "../../../Utils/utils";
 
 type PressureSore = {
   description: string;

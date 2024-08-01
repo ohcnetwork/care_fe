@@ -1,5 +1,7 @@
 import { HumanBodyPaths } from "../../../CAREUI/interactive/HumanChart";
+import { celsiusToFahrenheit, fahrenheitToCelsius } from "../../../Utils/utils";
 import { meanArterialPressure } from "../../Common/BloodPressureFormField";
+
 import RadioFormField from "../../Form/FormFields/RadioFormField";
 import RangeFormField from "../../Form/FormFields/RangeFormField";
 import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
@@ -8,27 +10,12 @@ import PainChart from "../components/PainChart";
 import { LogUpdateSectionProps } from "../utils";
 
 const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
-  const heartbeatRhythmChoices = [
-    {
-      label: "Regular",
-      value: "REGULAR",
-    },
-    {
-      label: "Irregular",
-      value: "IRREGULAR",
-    },
-    {
-      label: "Unknown",
-      value: null,
-    },
-  ];
-
   return (
     <div className="space-y-8">
-      <div className="flex items-end justify-between pb-4">
-        <h2 className="text-xl">BP (mm hg)</h2>
+      <div className="flex items-end justify-between">
+        <h2 className="text-lg">Blood Pressure</h2>
         <span>
-          Mean Arterial Pressure:{" "}
+          MAP:{" "}
           {log.bp && log.bp.diastolic && log.bp.systolic
             ? meanArterialPressure(log.bp)?.toFixed()
             : "--"}
@@ -39,9 +26,10 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
         name="systolic"
         onChange={(c) => onChange({ bp: { ...log.bp, systolic: c.value } })}
         value={log.bp?.systolic}
-        start={0}
-        end={250}
+        min={0}
+        max={250}
         step={1}
+        unit="mmHg"
         valueDescriptions={[
           { till: 99, text: "Low", className: "text-red-500" },
           { till: 139, text: "Normal", className: "text-green-500" },
@@ -53,41 +41,42 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
         name="diastolic"
         onChange={(c) => onChange({ bp: { ...log.bp, diastolic: c.value } })}
         value={log.bp?.diastolic}
-        start={30}
-        end={180}
+        min={30}
+        max={180}
         step={1}
+        unit="mmHg"
         valueDescriptions={[
           { till: 49, text: "Low", className: "text-red-500" },
           { till: 89, text: "Normal", className: "text-green-500" },
           { text: "High", className: "text-red-500" },
         ]}
       />
+      <hr />
       <RangeFormField
         label={
           <span>
             SpO<sub>2</sub>
-            {" %"}
           </span>
         }
         name="ventilator_spo2"
         onChange={(c) => onChange({ ventilator_spo2: c.value })}
         value={log.ventilator_spo2}
-        start={0}
-        end={100}
+        min={0}
+        max={100}
         step={1}
+        unit="%"
         valueDescriptions={[
           { till: 89, text: "Low", className: "text-red-500" },
           { text: "Normal", className: "text-green-500" },
         ]}
       />
-      <hr className="my-8 border border-secondary-400" />
       <RangeFormField
         label="Temperature"
         name="temperature"
-        onChange={(c) => onChange({ temperature: `${c.value}` })}
-        value={Number(log.temperature)}
-        start={95}
-        end={106}
+        onChange={(c) => onChange({ temperature: c.value })}
+        value={log.temperature}
+        min={95}
+        max={106}
         step={0.1}
         valueDescriptions={[
           { till: 97.4, text: "Low", className: "text-red-500" },
@@ -98,19 +87,20 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
           { label: "°F" },
           {
             label: "°C",
-            conversionFn: (val) => ((val - 32) * 5) / 9,
-            inversionFn: (val) => (val * 9) / 5 + 32,
+            conversionFn: fahrenheitToCelsius,
+            inversionFn: celsiusToFahrenheit,
           },
         ]}
       />
       <RangeFormField
-        label="Respiratory Rate (bpm)"
+        label="Respiratory Rate"
         name="resp"
         onChange={(c) => onChange({ resp: c.value })}
         value={log.resp}
-        start={0}
-        end={150}
+        min={0}
+        max={150}
         step={1}
+        unit="bpm"
         valueDescriptions={[
           { till: 11, text: "Low", className: "text-red-500" },
           { till: 16, text: "Normal", className: "text-green-500" },
@@ -131,11 +121,30 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
         }
         onChange={(pain_scale_enhanced) => onChange({ pain_scale_enhanced })}
       />
-      <hr className="my-8 border border-secondary-400" />
+      <hr />
+      <RangeFormField
+        label="Pulse"
+        name="pulse"
+        onChange={(c) => onChange({ pulse: c.value })}
+        value={log.pulse}
+        min={0}
+        max={200}
+        step={1}
+        unit="bpm"
+        valueDescriptions={[
+          { till: 39, text: "Bradycardia", className: "text-red-500" },
+          { till: 100, text: "Normal", className: "text-green-500" },
+          { text: "High", className: "text-red-500" },
+        ]}
+      />
       <RadioFormField
         label="Heartbeat Rhythm"
         name="heartbeat-rythm"
-        options={heartbeatRhythmChoices}
+        options={[
+          { label: "Regular", value: "REGULAR" },
+          { label: "Irregular", value: "IRREGULAR" },
+          { label: "Unknown", value: null },
+        ]}
         optionDisplay={(c) => c.label}
         optionValue={(c) => c.value || ""}
         value={log.rhythm}
@@ -143,10 +152,9 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
           onChange({ rhythm: c.value as DailyRoundsModel["rhythm"] })
         }
       />
-      <br />
       <TextAreaFormField
         label="Heartbeat Description"
-        name="heartbeat-description"
+        name="rhythm_detail"
         value={log.rhythm_detail}
         onChange={(c) => onChange({ rhythm_detail: c.value })}
       />

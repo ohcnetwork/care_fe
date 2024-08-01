@@ -1,130 +1,186 @@
-import { HTMLInputTypeAttribute, useState } from "react";
+import { useState } from "react";
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 import FormField from "./FormField";
-import { classNames, properRoundOf } from "../../../Utils/utils";
-import Chip from "../../../CAREUI/display/Chip";
+import {
+  classNames,
+  properRoundOf,
+  ValueDescription,
+} from "../../../Utils/utils";
 import TextFormField from "./TextFormField";
 
-export type RangeFormFieldProps = FormFieldBaseProps<number> & {
-  value?: number;
-  start?: number;
-  end?: number;
+type BaseProps = FormFieldBaseProps<number> & {
+  min: number;
+  max: number;
   step?: number;
-  type?: HTMLInputTypeAttribute;
-  className?: string | undefined;
-  inputClassName?: string | undefined;
-  removeDefaultClasses?: true | undefined;
   valueDescriptions?: ValueDescription[];
-  showInput?: boolean;
-  units?: {
+  hideInput?: boolean;
+};
+
+type PropsWithUnit = BaseProps & {
+  unit: string;
+  units?: undefined;
+};
+
+type PropsWithUnits = BaseProps & {
+  unit?: undefined;
+  units: {
     label: string;
-    className?: string;
+    // Fn. to convert field's `value` to the this unit.
     conversionFn?: (val: number) => number;
+    // Fn. to convert user input from this unit to field's `value`.
     inversionFn?: (val: number) => number;
   }[];
 };
 
-export default function RangeFormField(props: RangeFormFieldProps) {
+type Props = PropsWithUnit | PropsWithUnits;
+
+const unity = (v: number) => v;
+
+export default function RangeFormField(props: Props) {
   const field = useFormFieldPropsResolver(props);
-  const [currentUnit, setCurrentUnit] = useState(0);
 
-  const _value = field.value && parseFloat(`${field.value}`);
+  const [unit, setUnit] = useState(() => {
+    if (props.units?.length) {
+      return {
+        label: props.units[0].label,
+        conversionFn: props.units[0].conversionFn || unity,
+        inversionFn: props.units[0].inversionFn || unity,
+      };
+    }
 
-  const valueDescription = props.valueDescriptions?.find(
-    (vd) => (vd.till || props.end || 0) >= (_value || 0),
-  );
-  const selectedUnit = props.units?.[currentUnit];
-  const value = selectedUnit?.conversionFn
-    ? selectedUnit.conversionFn(_value || 0)
-    : _value;
-  const start = selectedUnit?.conversionFn
-    ? selectedUnit.conversionFn(props.start || 0)
-    : props.start;
-  const end = selectedUnit?.conversionFn
-    ? selectedUnit.conversionFn(props.end || 0)
-    : props.end;
-  const onChange = (value: number) => {
-    field.handleChange(
-      selectedUnit?.inversionFn ? selectedUnit.inversionFn(value) : value,
-    );
-  };
+    return {
+      label: props.unit || "",
+      conversionFn: unity,
+      inversionFn: unity,
+    };
+  });
+
+  // Value in current unit
+  const value = (() => {
+    if (props.value == null) {
+      return;
+    }
+    if (typeof props.value === "string") {
+      // Because serializes decimals as strings, although it accepts decimal as numbers.
+      return unit.conversionFn(parseFloat(props.value));
+    }
+    return unit.conversionFn(props.value);
+  })();
+
+  // Min and max in current unit
+  const [min, max] = [props.min, props.max].map(unit.conversionFn);
+
+  const error = (() => {
+    if (value == null) {
+      return;
+    }
+
+    if (value < min) {
+      return `Value must be greater than or equal to ${min}${unit?.label ?? ""}.`;
+    }
+
+    if (value > max) {
+      return `Value must be lesser than or equal to ${max}${unit?.label ?? ""}.`;
+    }
+  })();
+
+  const valueDescription =
+    value != null
+      ? props.valueDescriptions?.find((vd) => (vd.till || props.max) >= value)
+      : undefined;
+
   const roundedValue =
-    Math.round(((value || start || 0) + Number.EPSILON) * 100) / 100;
-
-  const { showInput = true } = props;
+    Math.round(((value || min) + Number.EPSILON) * 100) / 100;
 
   const allValueColors = props.valueDescriptions?.every((vd) => vd.color);
 
-  const trailPercent =
-    ((roundedValue - (start || 0)) / ((end || 0) - (start || 0))) * 100;
+  const trailPercent = ((roundedValue - min) / ((max || 0) - (min || 0))) * 100;
 
-  const higherThanAllowed = (roundedValue || 0) > (end || 0);
-  const lowerThanAllowed = (roundedValue || 0) < (start || 0);
-  const error = higherThanAllowed || lowerThanAllowed;
-
-  const snapStopRange = (end || 0) - (start || 0);
   const snapStopLength = Math.min(
-    snapStopRange / (props.step || 1),
-    snapStopRange,
+    (props.max - props.min) / (props.step || 1),
+    props.max - props.min,
     20,
   );
 
+  const handleChange = (v: number) => field.handleChange(unit.inversionFn(v));
+
+  const displayValue = value != null ? properRoundOf(value) : undefined;
+
   return (
-    <FormField field={{ ...field, label: undefined }} compact>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {props.label}
-          {props.units && (
-            <div className="flex items-center gap-2">
-              {props.units.map((unit, index) => (
-                <div
-                  key={index}
-                  className={`cursor-pointer ${currentUnit === index ? "font-semibold" : ""} ${unit.className}`}
-                  onClick={() => setCurrentUnit(index)}
-                >
-                  {unit.label}
-                </div>
-              ))}
+    <FormField
+      field={{
+        ...field,
+        label: (
+          <>
+            {field.label} <span>({unit.label})</span>
+          </>
+        ),
+        labelSuffix: (
+          <div className="flex flex-row items-center gap-2">
+            <div
+              className={classNames(
+                "text-sm font-bold",
+                valueDescription?.className,
+              )}
+              style={{ color: valueDescription?.color }}
+            >
+              {valueDescription?.text}
             </div>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          {lowerThanAllowed && (
-            <Chip
-              text="Value lower than allowed"
-              startIcon="l-exclamation-triangle"
-              variant="danger"
-            />
-          )}
-          {higherThanAllowed && (
-            <Chip
-              text="Value higher than allowed"
-              startIcon="l-exclamation-triangle"
-              variant="danger"
-            />
-          )}
-          <div
-            className={classNames(
-              "text-sm font-bold",
-              valueDescription?.className,
+            {!props.hideInput && (
+              <TextFormField
+                name="range"
+                type="number"
+                value={displayValue}
+                placeholder="--.--"
+                onChange={(e) => handleChange(parseFloat(e.value))}
+                min={min}
+                max={max}
+                errorClassName="hidden"
+                inputClassName={classNames(
+                  "py-1.5",
+                  unit.label ? "w-36" : "w-24",
+                )}
+                trailingPadding=" "
+                trailing={
+                  props.units?.length ? (
+                    <select
+                      id={field.name + "_units"}
+                      name={field.name + "_units"}
+                      className="cui-input-base mr-3 h-full border-0 bg-transparent py-0 pl-2 pr-8 text-xs font-bold text-secondary-700 focus:ring-2 focus:ring-inset"
+                      value={unit.label}
+                      onChange={(e) => {
+                        const resolved = props.units.find(
+                          (o) => o.label === e.target.value,
+                        );
+                        if (resolved) {
+                          setUnit({
+                            label: resolved.label,
+                            conversionFn: resolved.conversionFn ?? unity,
+                            inversionFn: resolved.inversionFn ?? unity,
+                          });
+                        }
+                      }}
+                      disabled={props.disabled}
+                    >
+                      {props.units.map(({ label }, i) => (
+                        <option key={i} value={label}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <p className="absolute right-10 pr-2 text-xs font-bold text-secondary-700">
+                      {unit.label}
+                    </p>
+                  )
+                }
+              />
             )}
-            style={{ color: valueDescription?.color }}
-          >
-            {valueDescription?.text}
           </div>
-          {showInput && (
-            <TextFormField
-              name="range"
-              compact={!error}
-              type="number"
-              value={roundedValue.toString()}
-              onChange={(e) => onChange(parseInt(e.value))}
-              min={start}
-              max={end}
-            />
-          )}
-        </div>
-      </div>
+        ),
+        error: error || field.error,
+      }}
+    >
       <div className="relative">
         <input
           type="range"
@@ -141,42 +197,24 @@ export default function RangeFormField(props: RangeFormFieldProps) {
           }
           disabled={field.disabled}
           name={field.name}
-          value={roundedValue}
-          min={start}
-          max={end}
+          value={displayValue}
+          min={min}
+          max={max}
           step={props.step}
-          onChange={(e) => onChange(e.target.valueAsNumber)}
+          onChange={(e) => handleChange(e.target.valueAsNumber)}
         />
       </div>
-      {
-        <div className="flex justify-between">
-          {Array.from({ length: snapStopLength + 1 }).map((_, index) => (
-            <div key={index} className="h-1 w-px bg-black/20" />
-          ))}
-        </div>
-      }
+
       <div className="flex justify-between">
-        <span className="text-xs text-black/30">
-          {start && properRoundOf(start)}
-        </span>
-        <span className="text-xs text-black/30">
-          {end && properRoundOf(end)}
-        </span>
+        {Array.from({ length: snapStopLength + 1 }).map((_, index) => (
+          <div key={index} className="h-1 w-px bg-black/20" />
+        ))}
+      </div>
+
+      <div className="flex justify-between text-xs text-black/30">
+        <span>{properRoundOf(min)}</span>
+        <span>{properRoundOf(max)}</span>
       </div>
     </FormField>
   );
 }
-
-export type ValueDescription = {
-  till?: number;
-  text: React.ReactNode;
-  className?: string;
-  color?: string;
-};
-
-export const getValueDescription = (
-  valueDescriptions: ValueDescription[],
-  value: number,
-) => {
-  return valueDescriptions?.find((vd) => (vd.till || 0) >= (value || 0));
-};

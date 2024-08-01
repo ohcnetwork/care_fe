@@ -176,5 +176,5 @@ button.button-alert-ghost { @apply enabled:hover:bg-alert-100 }
     @apply appearance-none w-5 aspect-square bg-black border border-black rounded-full cursor-pointer
 } 
 hr {
-    @apply !my-8 border border-secondary-300
+    @apply border border-secondary-300
 }

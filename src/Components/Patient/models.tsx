@@ -316,7 +316,7 @@ export interface DailyRoundsModel {
   bp?: BloodPressure;
   pulse?: number;
   resp?: number;
-  temperature?: number | string;
+  temperature?: number;
   physical_examination_info?: string;
   other_details?: string;
   consultation?: number;

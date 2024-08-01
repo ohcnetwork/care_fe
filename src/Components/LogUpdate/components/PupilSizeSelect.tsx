@@ -1,5 +1,5 @@
+import { getValueDescription } from "../../../Utils/utils";
 import CheckBoxFormField from "../../Form/FormFields/CheckBoxFormField";
-import { getValueDescription } from "../../Form/FormFields/RangeFormField";
 import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
 
 export default function PupilSizeSelect(props: {

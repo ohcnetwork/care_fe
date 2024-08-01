@@ -9,8 +9,8 @@ const Dialysis = ({ log, onChange }: LogUpdateSectionProps) => {
         name="blood_sugar"
         onChange={(c) => onChange({ dialysis_fluid_balance: c.value })}
         value={log.dialysis_fluid_balance}
-        start={0}
-        end={5000}
+        min={0}
+        max={5000}
       />
       <br />
       <br />
@@ -19,8 +19,8 @@ const Dialysis = ({ log, onChange }: LogUpdateSectionProps) => {
         name="blood_sugar"
         onChange={(c) => onChange({ dialysis_net_balance: c.value })}
         value={log.dialysis_net_balance}
-        start={0}
-        end={5000}
+        min={0}
+        max={5000}
       />
     </div>
   );

@@ -19,7 +19,6 @@ export const DailyRoundListDetails = (props: any) => {
       if (res && data) {
         const tdata: DailyRoundsModel = {
           ...data,
-          temperature: Number(data.temperature) ? data.temperature : "",
           medication_given: data.medication_given ?? [],
         };
         setDailyRoundListDetails(tdata);

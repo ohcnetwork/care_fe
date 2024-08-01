@@ -13,8 +13,8 @@ const BloodSugar = ({ log, onChange }: LogUpdateSectionProps) => {
         name="blood_sugar"
         onChange={(c) => onChange({ blood_sugar_level: c.value })}
         value={log.blood_sugar_level}
-        start={0}
-        end={700}
+        min={0}
+        max={700}
         valueDescriptions={[
           { till: 69, text: "Low", className: "text-red-500" },
           { till: 110, text: "Normal", className: "text-green-500" },
@@ -29,8 +29,8 @@ const BloodSugar = ({ log, onChange }: LogUpdateSectionProps) => {
         name="insulin_intake"
         onChange={(c) => onChange({ insulin_intake_dose: c.value })}
         value={log.insulin_intake_dose}
-        start={0}
-        end={100}
+        min={0}
+        max={100}
         step={0.1}
       />
       <br />
