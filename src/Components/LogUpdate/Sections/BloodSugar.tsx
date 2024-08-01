@@ -7,10 +7,11 @@ import {
 
 const BloodSugar = ({ log, onChange }: LogUpdateSectionProps) => {
   return (
-    <div>
+    <div className="flex flex-col gap-4">
       <RangeFormField
-        label={<h4>Blood Sugar Level(mg/dL)</h4>}
-        name="blood_sugar"
+        label="Blood Sugar Level"
+        unit="mg/dL"
+        name="blood_sugar_level"
         onChange={(c) => onChange({ blood_sugar_level: c.value })}
         value={log.blood_sugar_level}
         min={0}
@@ -22,26 +23,29 @@ const BloodSugar = ({ log, onChange }: LogUpdateSectionProps) => {
         ]}
       />
       <br />
-      <h4>Insulin Intake</h4>
+      <hr />
       <br />
+      <h5 className="pb-2">Insulin Intake</h5>
       <RangeFormField
-        label={<b>Dosage(units)</b>}
-        name="insulin_intake"
+        label="Dosage"
+        name="insulin_intake_dose"
+        unit="units"
         onChange={(c) => onChange({ insulin_intake_dose: c.value })}
         value={log.insulin_intake_dose}
         min={0}
         max={100}
-        step={0.1}
+        step={1}
       />
-      <br />
       <RadioFormField
-        label={<b>Frequency(units/day)</b>}
-        name="insulin_frequency"
+        label="Frequency"
+        name="insulin_intake_frequency"
         options={INSULIN_INTAKE_FREQUENCY_OPTIONS}
         optionDisplay={(c) => c.text}
         optionValue={(c) => c.value}
         value={log.insulin_intake_frequency}
-        onChange={(c) => onChange({ insulin_intake_frequency: c.value || "" })}
+        onChange={(c) =>
+          onChange({ insulin_intake_frequency: c.value || undefined })
+        }
       />
     </div>
   );
