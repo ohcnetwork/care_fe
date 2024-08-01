@@ -1,63 +1,58 @@
 import { Fragment } from "react/jsx-runtime";
-import { NameQuantity } from "../../Patient/models";
+import { DailyRoundsModel, NameQuantity } from "../../Patient/models";
 import SelectMenuV2 from "../../Form/SelectMenuV2";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { LogUpdateSectionProps } from "../utils";
 
-const IOBalance = ({ log, onChange }: LogUpdateSectionProps) => {
-  const infusionCollection = [
-    "Adrenalin",
-    "Nor-adrenalin",
-    "Vasopressin",
-    "Dopamine",
-    "Dobutamine",
-  ];
-  const ivfluidsCollection = ["RL", "NS", "DNS"];
-  const feedsCollection = ["Ryles Tube", "Normal Feed"];
-  const outputsCollection = ["Urine", "Rules Tube Aspiration", "ICD"];
-
-  const sections: {
+const sections = [
+  {
+    name: "Intake",
+    fields: [
+      {
+        name: "Infusions",
+        options: [
+          "Adrenalin",
+          "Nor-adrenalin",
+          "Vasopressin",
+          "Dopamine",
+          "Dobutamine",
+        ],
+        key: "infusions",
+      },
+      {
+        name: "IV Fluids",
+        options: ["RL", "NS", "DNS"],
+        key: "iv_fluids",
+      },
+      {
+        name: "Feed",
+        options: ["Ryles Tube", "Normal Feed"],
+        key: "feeds",
+      },
+    ],
+  },
+  {
+    name: "Outturn",
+    fields: [
+      {
+        name: "Output",
+        options: ["Urine", "Rules Tube Aspiration", "ICD"],
+        key: "output",
+      },
+    ],
+  },
+] satisfies {
+  name: string;
+  fields: {
     name: string;
-    fields: {
-      name: string;
-      options: string[];
-      key: keyof typeof log;
-    }[];
-  }[] = [
-    {
-      name: "Intake",
-      fields: [
-        {
-          name: "Infusions",
-          options: infusionCollection,
-          key: "infusions",
-        },
-        {
-          name: "IV Fluids",
-          options: ivfluidsCollection,
-          key: "iv_fluids",
-        },
-        {
-          name: "Feed",
-          options: feedsCollection,
-          key: "feeds",
-        },
-      ],
-    },
-    {
-      name: "Outturn",
-      fields: [
-        {
-          name: "Output",
-          options: outputsCollection,
-          key: "output",
-        },
-      ],
-    },
-  ];
+    options: string[];
+    key: keyof DailyRoundsModel;
+  }[];
+}[];
 
+const IOBalance = ({ log, onChange }: LogUpdateSectionProps) => {
   return (
     <div className="flex flex-col gap-8">
       {sections.map(({ name, fields }, k) => (
