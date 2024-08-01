@@ -3,26 +3,27 @@ import { LogUpdateSectionProps } from "../utils";
 
 const Dialysis = ({ log, onChange }: LogUpdateSectionProps) => {
   return (
-    <div>
+    <>
       <RangeFormField
-        label={<h4>Dialysis Fluid Balance (ml/h)</h4>}
-        name="blood_sugar"
+        label="Dialysis Fluid Balance"
+        unit="ml/h"
+        name="dialysis_fluid_balance"
         onChange={(c) => onChange({ dialysis_fluid_balance: c.value })}
         value={log.dialysis_fluid_balance}
         min={0}
         max={5000}
       />
       <br />
-      <br />
       <RangeFormField
-        label={<h4>Dialysis Net Balance (ml/h)</h4>}
-        name="blood_sugar"
+        label="Dialysis Net Balance"
+        unit="ml/h"
+        name="dialysis_net_balance"
         onChange={(c) => onChange({ dialysis_net_balance: c.value })}
         value={log.dialysis_net_balance}
         min={0}
         max={5000}
       />
-    </div>
+    </>
   );
 };
 
