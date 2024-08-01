@@ -38,6 +38,7 @@
   "next_sessions": "Next Sessions",
   "no_changes": "No changes",
   "back_to_consultation": "Go back to Consultation",
+  "no_treating_physicians_available": "This facility does not have any home facility doctors. Please contact your admin.",
   "encounter_suggestion_edit_disallowed": "Not allowed to switch to this option in edit consultation",
   "encounter_date_field_label__A": "Date & Time of Admission to the Facility",
   "encounter_date_field_label__DC": "Date & Time of Domiciliary Care commencement",

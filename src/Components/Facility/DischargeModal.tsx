@@ -151,7 +151,7 @@ const DischargeModal = ({
         newErrors["discharge_notes"] = "Please enter the cause of death";
       }
       if (!preDischargeForm.death_confirmed_doctor?.trim()) {
-        newErrors["death_confirmed_doctor"] = "Field is required";
+        newErrors["death_confirmed_doctor"] = t("field_required");
       }
 
       if (Object.entries(newErrors).length) {
