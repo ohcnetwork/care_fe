@@ -112,7 +112,7 @@ export default function RangeFormField(props: Props) {
         ...field,
         label: (
           <>
-            {field.label} <span>({unit.label})</span>
+            {field.label} {unit.label && <span>({unit.label})</span>}
           </>
         ),
         labelSuffix: (
@@ -169,7 +169,7 @@ export default function RangeFormField(props: Props) {
                       ))}
                     </select>
                   ) : (
-                    <p className="absolute right-10 pr-2 text-xs font-bold text-secondary-700">
+                    <p className="absolute right-10 text-xs font-bold text-secondary-700">
                       {unit.label}
                     </p>
                   )
