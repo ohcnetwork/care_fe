@@ -1,6 +1,4 @@
-import React from "react";
 import { DailyRoundsModel } from "../Patient/models";
-import { IconName } from "../../CAREUI/icons/CareIcon";
 
 export const REACTION_OPTIONS = [
   { id: 0, value: "UNKNOWN", text: "Unknown" },
@@ -46,13 +44,7 @@ export const INSULIN_INTAKE_FREQUENCY_OPTIONS = [
   { id: 3, text: "Thrice a day (TD)", value: "TD" },
 ] as const;
 
-export const logUpdateSection = <
-  TTitle extends string,
-  TDescription extends string | undefined = undefined,
->(
-  meta: { title: TTitle; description?: TDescription; icon?: IconName },
-  component: React.FC<{
-    log: DailyRoundsModel;
-    onChange: (log: DailyRoundsModel) => void;
-  }>,
-) => ({ ...meta, component });
+export type LogUpdateSectionProps = {
+  log: DailyRoundsModel;
+  onChange: (log: DailyRoundsModel) => void;
+};

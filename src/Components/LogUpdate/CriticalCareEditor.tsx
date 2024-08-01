@@ -1,7 +1,7 @@
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import LogUpdateSections from "./Sections";
-import { useState } from "react";
+import React, { useState } from "react";
 import Loading from "../Common/Loading";
 import { DailyRoundsModel } from "../Patient/models";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
@@ -20,7 +20,7 @@ type Props = {
   id: string;
 };
 
-type Section = (typeof LogUpdateSections)[keyof typeof LogUpdateSections];
+type SectionKey = keyof typeof LogUpdateSections;
 
 export default function CriticalCareEditor(props: Props) {
   const { t } = useTranslation();
@@ -29,8 +29,8 @@ export default function CriticalCareEditor(props: Props) {
     pathParams: { consultationId: props.consultationId, id: props.id },
   });
 
-  const [completed, setCompleted] = useState<Section[]>([]);
-  const [current, setCurrent] = useState<Section>();
+  const [completed, setCompleted] = useState<SectionKey[]>([]);
+  const [current, setCurrent] = useState<SectionKey>();
 
   if (query.loading || !query.data) {
     return <Loading />;
@@ -61,7 +61,9 @@ export default function CriticalCareEditor(props: Props) {
       </div>
       <Card className="shadow-lg md:rounded-xl lg:p-8">
         <h3 className="mb-6 text-black">
-          {current?.title ?? t("record_updates")}
+          {current
+            ? LogUpdateSections[current].meta.title
+            : t("record_updates")}
         </h3>
         {current ? (
           <SectionEditor
@@ -94,8 +96,10 @@ export default function CriticalCareEditor(props: Props) {
                 <CareIcon icon="l-check-circle" className="text-2xl" />
               </ButtonV2>
             </li>
-            {Object.entries(LogUpdateSections).map(([key, section]) => {
-              const isCompleted = completed.some((o) => o === section);
+            {Object.keys(LogUpdateSections).map((key) => {
+              const isCompleted = completed.includes(key as SectionKey);
+              const section = LogUpdateSections[key as SectionKey];
+
               return (
                 <li key={key}>
                   <ButtonV2
@@ -106,11 +110,11 @@ export default function CriticalCareEditor(props: Props) {
                       isCompleted && "bg-primary-100/50",
                     )}
                     border
-                    onClick={() => setCurrent(section)}
+                    onClick={() => setCurrent(key as SectionKey)}
                   >
-                    {section.icon && (
+                    {section.meta.icon && (
                       <CareIcon
-                        icon={section.icon}
+                        icon={section.meta.icon}
                         className={classNames(
                           "mr-2 text-2xl",
                           isCompleted
@@ -120,7 +124,7 @@ export default function CriticalCareEditor(props: Props) {
                       />
                     )}
                     <span className="mr-auto text-lg font-semibold">
-                      {section.title}
+                      {section.meta.title}
                     </span>
                     <CareIcon
                       icon="l-check-circle"
@@ -151,7 +155,7 @@ export default function CriticalCareEditor(props: Props) {
 type SectionEditorProps = {
   log: DailyRoundsModel;
   onComplete: () => void;
-  section: Section;
+  section: SectionKey;
 };
 
 const SectionEditor = ({ log, onComplete, section }: SectionEditorProps) => {
@@ -159,11 +163,13 @@ const SectionEditor = ({ log, onComplete, section }: SectionEditorProps) => {
   const [diff, setDiff] = useState<Partial<DailyRoundsModel>>({});
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const Section = LogUpdateSections[section];
+
   return (
     <div
       className={classNames(isProcessing && "pointer-events-none opacity-50")}
     >
-      <section.component
+      <Section
         log={{ ...log, ...diff }}
         onChange={(changes) => setDiff((base) => ({ ...base, ...changes }))}
       />
