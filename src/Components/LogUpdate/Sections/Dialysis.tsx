@@ -5,7 +5,7 @@ const Dialysis = ({ log, onChange }: LogUpdateSectionProps) => {
   return (
     <>
       <RangeFormField
-        label="Dialysis Fluid Balance"
+        label="Fluid Balance"
         unit="ml/h"
         name="dialysis_fluid_balance"
         onChange={(c) => onChange({ dialysis_fluid_balance: c.value })}
@@ -15,7 +15,7 @@ const Dialysis = ({ log, onChange }: LogUpdateSectionProps) => {
       />
       <br />
       <RangeFormField
-        label="Dialysis Net Balance"
+        label="Net Balance"
         unit="ml/h"
         name="dialysis_net_balance"
         onChange={(c) => onChange({ dialysis_net_balance: c.value })}
