@@ -481,7 +481,7 @@ export const DailyRounds = (props: any) => {
           form={SCRIBE_FORMS.daily_round}
           onFormUpdate={async (fields) => {
             // Symptoms
-            let rounds_type = state.form.rounds_type;
+            let rounds_type = fields.rounds_type || state.form.rounds_type;
             if (fields.additional_symptoms) {
               for (const symptom of fields.additional_symptoms) {
                 const { res } = await request(SymptomsApi.add, {
