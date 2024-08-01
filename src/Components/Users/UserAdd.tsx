@@ -41,6 +41,7 @@ import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
 import useQuery from "../../Utils/request/useQuery";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { useTranslation } from "react-i18next";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -163,6 +164,7 @@ export const validateRule = (
 };
 
 export const UserAdd = (props: UserProps) => {
+  const { t } = useTranslation();
   const { goBack } = useAppHistory();
   const { userId } = props;
 
@@ -355,7 +357,7 @@ export const UserAdd = (props: UserProps) => {
           return;
         case "doctor_experience_commenced_on":
           if (state.form.user_type === "Doctor" && !state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           } else if (
             state.form.user_type === "Doctor" &&
@@ -368,7 +370,7 @@ export const UserAdd = (props: UserProps) => {
         case "doctor_qualification":
         case "doctor_medical_council_registration":
           if (state.form.user_type === "Doctor" && !state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("field_required");
             invalidForm = true;
           }
           return;
