@@ -7,7 +7,7 @@ import RangeFormField from "../../Form/FormFields/RangeFormField";
 import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
 import { DailyRoundsModel } from "../../Patient/models";
 import PainChart from "../components/PainChart";
-import { LogUpdateSectionProps } from "../utils";
+import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
 
 const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
   return (
@@ -165,6 +165,6 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
 Vitals.meta = {
   title: "Vitals",
   icon: "l-heartbeat",
-} as const;
+} as const satisfies LogUpdateSectionMeta;
 
 export default Vitals;

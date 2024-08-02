@@ -1,3 +1,4 @@
+import { IconName } from "../../CAREUI/icons/CareIcon";
 import { DailyRoundsModel } from "../Patient/models";
 
 export const REACTION_OPTIONS = [
@@ -47,4 +48,10 @@ export const INSULIN_INTAKE_FREQUENCY_OPTIONS = [
 export type LogUpdateSectionProps = {
   log: DailyRoundsModel;
   onChange: (log: DailyRoundsModel) => void;
+};
+
+export type LogUpdateSectionMeta = {
+  title: string;
+  description?: string;
+  icon?: IconName;
 };

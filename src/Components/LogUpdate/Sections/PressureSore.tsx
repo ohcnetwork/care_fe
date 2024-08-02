@@ -6,7 +6,7 @@ import HumanBodyChart, {
 import { SelectFormField } from "../../Form/FormFields/SelectFormField";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
-import { LogUpdateSectionProps } from "../utils";
+import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
 import { getValueDescription } from "../../../Utils/utils";
 
 type PressureSore = {
@@ -242,6 +242,6 @@ const PressureSore = ({ log, onChange }: LogUpdateSectionProps) => {
 PressureSore.meta = {
   title: "Pressure Sore",
   icon: "l-user-md",
-} as const;
+} as const satisfies LogUpdateSectionMeta;
 
 export default PressureSore;

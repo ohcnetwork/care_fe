@@ -8,8 +8,7 @@ import NursingCare from "./NursingCare";
 import PressureSore from "./PressureSore";
 import RespiratorySupport from "./RespiratorySupport";
 import Vitals from "./Vitals";
-import { LogUpdateSectionProps } from "../utils";
-import { IconName } from "../../../CAREUI/icons/CareIcon";
+import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
 
 const LogUpdateSections = {
   Vitals,
@@ -23,13 +22,7 @@ const LogUpdateSections = {
   NursingCare,
 } as const satisfies Record<
   string,
-  React.FC<LogUpdateSectionProps> & {
-    meta: {
-      title: string;
-      description?: string;
-      icon?: IconName;
-    };
-  }
+  React.FC<LogUpdateSectionProps> & { meta: LogUpdateSectionMeta }
 >;
 
 export default LogUpdateSections;

@@ -1,6 +1,7 @@
 import RadioFormField from "../../Form/FormFields/RadioFormField";
 import RangeFormField from "../../Form/FormFields/RangeFormField";
 import {
+  LogUpdateSectionMeta,
   LogUpdateSectionProps,
   OXYGEN_MODALITY_OPTIONS,
   YES_NO_OPTIONS,
@@ -80,8 +81,9 @@ const RespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
             </>
           ) : (
             <RangeFormField
-              label={<b>Oxygen Flow Rate</b>}
+              label="Oxygen Flow Rate"
               name="oxygen_flow_rate"
+              unit=""
               onChange={(c) =>
                 onChange({
                   ventilator_oxygen_modality_oxygen_rate: c.value,
@@ -97,19 +99,37 @@ const RespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
               ]}
             />
           )}
+          <RangeFormField
+            label={
+              <span>
+                SpO<sub>2</sub>
+              </span>
+            }
+            unit="%"
+            name="ventilator_spo2"
+            onChange={(c) => onChange({ ventilator_spo2: c.value })}
+            value={log.ventilator_spo2}
+            min={0}
+            max={100}
+            valueDescriptions={[
+              { till: 89, text: "Low", className: "text-red-500" },
+              { text: "Normal", className: "text-green-500" },
+            ]}
+          />
         </>
       ),
     },
   ];
 
   return (
-    <div>
-      <h4>Bilateral Air Entry</h4>
+    <div className="flex flex-col gap-4">
       <RadioFormField
+        label="Bilateral Air Entry"
+        labelClassName="text-lg sm:font-bold"
         options={YES_NO_OPTIONS}
         optionDisplay={(c) => c.text}
         optionValue={(c) => c.text}
-        name="ventilator"
+        name="bilateral_air_entry"
         value={
           YES_NO_OPTIONS.find((o) => o.value === log.bilateral_air_entry)?.text
         }
@@ -121,7 +141,12 @@ const RespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
         }
       />
       <RangeFormField
-        label={<h4>EtCO2 (mm Hg)</h4>}
+        label={
+          <span>
+            EtCO<sub>2</sub>
+          </span>
+        }
+        unit="mmHg"
         name="etco2"
         onChange={(c) => onChange({ etco2: c.value })}
         value={log.etco2}
@@ -150,26 +175,13 @@ const RespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
           })
         }
       />
-      <div className="border-l-2 border-l-secondary-400 pl-4">
+      <div className="ml-5 space-y-4 border-l-4 border-l-secondary-300 pl-6">
         {
           RESPIRATORY_SUPPORT_OPTIONS.find(
             (o) => o.value === log.ventilator_interface,
           )?.content
         }
       </div>
-      <hr />
-      <RangeFormField
-        label={<h4>SPO2 (%)</h4>}
-        name="ventilator_spo2"
-        onChange={(c) => onChange({ ventilator_spo2: c.value })}
-        value={log.ventilator_spo2}
-        min={0}
-        max={100}
-        valueDescriptions={[
-          { till: 89, text: "Low", className: "text-red-500" },
-          { text: "Normal", className: "text-green-500" },
-        ]}
-      />
     </div>
   );
 };
@@ -177,6 +189,6 @@ const RespiratorySupport = ({ log, onChange }: LogUpdateSectionProps) => {
 RespiratorySupport.meta = {
   title: "Respiratory Support",
   icon: "l-lungs",
-} as const;
+} as const satisfies LogUpdateSectionMeta;
 
 export default RespiratorySupport;

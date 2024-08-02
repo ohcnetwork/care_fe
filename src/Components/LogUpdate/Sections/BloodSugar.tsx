@@ -2,6 +2,7 @@ import RadioFormField from "../../Form/FormFields/RadioFormField";
 import RangeFormField from "../../Form/FormFields/RangeFormField";
 import {
   INSULIN_INTAKE_FREQUENCY_OPTIONS,
+  LogUpdateSectionMeta,
   LogUpdateSectionProps,
 } from "../utils";
 
@@ -54,6 +55,6 @@ const BloodSugar = ({ log, onChange }: LogUpdateSectionProps) => {
 BloodSugar.meta = {
   title: "Blood Sugar",
   icon: "l-tear",
-} as const;
+} as const satisfies LogUpdateSectionMeta;
 
 export default BloodSugar;

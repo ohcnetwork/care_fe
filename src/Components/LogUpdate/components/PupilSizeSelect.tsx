@@ -1,48 +1,43 @@
-import { getValueDescription } from "../../../Utils/utils";
+import { classNames, getValueDescription } from "../../../Utils/utils";
 import CheckBoxFormField from "../../Form/FormFields/CheckBoxFormField";
 import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
 
-export default function PupilSizeSelect(props: {
-  pupilSize: number | null | "UNKNOWN";
-  detail: string | null;
-  onChange?: (val: number | "UNKNOWN" | null) => void;
+const PupilSizeValueDescriptions = [
+  { till: 2, text: "Constricted", color: "red" },
+  { till: 6, text: "Normal", color: "green" },
+  { till: 8, text: "Dilated", color: "red" },
+];
+
+type Props = {
+  pupilSize?: number | null;
+  detail?: string | null;
+  onChange?: (val: number | null) => void;
   onDetailChange?: (val: string) => void;
   className?: string;
-}) {
-  const { pupilSize, detail, onChange, onDetailChange, className } = props;
+};
 
-  const min = 1;
-  const max = 8;
+const min = 1;
+const max = 8;
 
-  const valDes =
+export default function PupilSizeSelect({
+  pupilSize,
+  detail,
+  onChange,
+  onDetailChange,
+  className,
+}: Props) {
+  const valueDescription =
     typeof pupilSize === "number"
-      ? getValueDescription(
-          [
-            {
-              till: 2,
-              text: "Constricted",
-              color: "red",
-            },
-            {
-              till: 6,
-              text: "Normal",
-              color: "green",
-            },
-            {
-              till: 8,
-              text: "Dilated",
-              color: "red",
-            },
-          ],
-          pupilSize,
-        )
+      ? getValueDescription(PupilSizeValueDescriptions, pupilSize)
       : null;
 
   return (
     <div className={`flex flex-col ${className} gap-4`}>
       <div className="flex items-center justify-between">
         <h5>Size</h5>
-        <span style={{ color: valDes?.color }}>{valDes?.text}</span>
+        <span style={{ color: valueDescription?.color }}>
+          {valueDescription?.text}
+        </span>
       </div>
       <div
         className={`flex flex-wrap items-center gap-2 ${"" /*invertImage ? "justify-end" : "justify-start"*/}`}
@@ -52,8 +47,12 @@ export default function PupilSizeSelect(props: {
             <button
               disabled={!onChange}
               key={size}
-              //className={`h-10 flex items-center justify-center aspect-square rounded-full border border-black/20 ${size === pupilSize ? "bg-secondary-300" : "bg-white"}`}
-              className={`flex aspect-square h-20 flex-col items-center justify-between rounded-lg border py-2 transition-all ${size === pupilSize ? "border-primary-500 bg-primary-500/10 bg-secondary-300" : "border-secondary-300 bg-white hover:bg-secondary-200"}`}
+              className={classNames(
+                "flex aspect-square h-20 flex-col items-center justify-between rounded-lg border py-2 transition-all duration-200 ease-in-out",
+                size === pupilSize
+                  ? "border-primary-500 bg-primary-100 shadow-md"
+                  : "border-secondary-300 bg-white hover:bg-secondary-200",
+              )}
               onClick={() => onChange?.(size)}
             >
               <div
@@ -92,25 +91,32 @@ export default function PupilSizeSelect(props: {
                 </div>
             </div>
             */}
-      <div>
+
+      <div
+        className={classNames(
+          "space-y-2 p-2",
+          pupilSize === 0 &&
+            "rounded-lg border border-secondary-400 bg-secondary-100",
+        )}
+      >
         <CheckBoxFormField
           label="Cannot be Assessed"
           name="pupil_reaction"
-          value={pupilSize === "UNKNOWN"}
-          onChange={({ value }) => onChange?.(value ? "UNKNOWN" : null)}
+          value={pupilSize === 0}
+          onChange={({ value }) => onChange?.(value ? 0 : null)}
+          errorClassName="hidden"
         />
-      </div>
-      {pupilSize === "UNKNOWN" && (
-        <div>
+        {pupilSize === 0 && (
           <TextAreaFormField
-            label="Pupil Size Description"
+            label="Describe size of the Pupil"
+            labelClassName="text-sm sm:font-medium"
             name="pupil_size_unknown_reason"
             value={detail || ""}
             onChange={(val) => onDetailChange?.(val.value)}
             disabled={!onDetailChange}
           />
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

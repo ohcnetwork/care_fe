@@ -146,7 +146,7 @@ export default function RangeFormField(props: Props) {
                     <select
                       id={field.name + "_units"}
                       name={field.name + "_units"}
-                      className="cui-input-base mr-3 h-full border-0 bg-transparent py-0 pl-2 pr-8 text-xs font-bold text-secondary-700 focus:ring-2 focus:ring-inset"
+                      className="cui-input-base mr-4 h-full border-0 bg-transparent py-0 pl-2 pr-8 text-xs font-bold text-secondary-700 focus:ring-2 focus:ring-inset"
                       value={unit.label}
                       onChange={(e) => {
                         const resolved = props.units.find(

@@ -7,25 +7,18 @@ import {
 import CheckBoxFormField from "../../Form/FormFields/CheckBoxFormField";
 import RadioFormField from "../../Form/FormFields/RadioFormField";
 import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
-import { DailyRoundsModel } from "../../Patient/models";
 import PupilSizeSelect from "../components/PupilSizeSelect";
 import {
   LIMB_RESPONSE_OPTIONS,
+  LogUpdateSectionMeta,
   LogUpdateSectionProps,
   REACTION_OPTIONS,
 } from "../utils";
 
 const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
-  const limbResponses: (keyof DailyRoundsModel)[] = [
-    "limb_response_upper_extremity_left",
-    "limb_response_upper_extremity_right",
-    "limb_response_lower_extremity_left",
-    "limb_response_lower_extremity_right",
-  ];
-
   return (
-    <div>
-      <div className="mt-4 flex items-center justify-between rounded-lg bg-secondary-200 p-4">
+    <div className="flex flex-col gap-2">
+      <div className="mt-4 rounded-lg bg-secondary-100 p-4">
         <CheckBoxFormField
           name="in_prone_position"
           label="The patient is in prone position"
@@ -34,12 +27,12 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
         />
       </div>
       <br />
-      <h4>Levels of Consciousness</h4>
+      <h4>Level of Consciousness</h4>
       <RadioFormField
-        name="consciousness"
+        name="consciousness_level"
         options={CONSCIOUSNESS_LEVEL}
         optionDisplay={(c) => c.text}
-        optionValue={(c) => c.id || ""}
+        optionValue={(c) => c.id}
         value={log.consciousness_level}
         onChange={(c) =>
           onChange({
@@ -47,79 +40,67 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
               c.value as (typeof CONSCIOUSNESS_LEVEL)[number]["id"],
           })
         }
-        containerClassName="grid grid-cols-2 mt-5"
+        containerClassName="grid grid-cols-2 gap-2"
       />
+      <br />
       <hr />
-      <div className="flex flex-wrap gap-8">
-        {["left", "right"].map((d, i) => (
-          <div key={i}>
-            <h4 className="capitalize">{d} Pupil</h4>
-            <PupilSizeSelect
-              pupilSize={
-                log[`${d}_pupil_size` as keyof typeof log.left_pupil_size] ||
-                null
-              }
-              detail={
-                log[
-                  `${d}_pupil_size_detail` as keyof typeof log.left_pupil_size_detail
-                ] || ""
-              }
-              onChange={(val) =>
-                onChange({
-                  [`${d}_pupil_size` as keyof typeof log.left_pupil_size]: val,
-                })
-              }
-              onDetailChange={(val) =>
-                onChange({
-                  [`${d}_pupil_size_detail` as keyof typeof log.left_pupil_size_detail]:
-                    val,
-                })
-              }
-              className="mt-4"
-            />
-            <br />
-            <h5 className="">Reaction</h5>
-            <RadioFormField
-              options={REACTION_OPTIONS.filter((o) => o.value !== "UNKNOWN")}
-              optionDisplay={(c) => c.text}
-              optionValue={(c) => c.value}
-              name={`${d}_pupil_light_reaction`}
-              value={
-                log[
-                  `${d}_pupil_light_reaction` as keyof typeof log.left_pupil_light_reaction
-                ]
-              }
-              onChange={(c) =>
-                onChange({
-                  [`${d}_pupil_light_reaction` as keyof typeof log.left_pupil_light_reaction]:
-                    c.value,
-                })
-              }
-              containerClassName=""
-            />
-            {log[
-              `${d}_pupil_light_reaction` as keyof typeof log.left_pupil_light_reaction
-            ] === "CANNOT_BE_ASSESSED" && (
-              <TextAreaFormField
-                label="Reaction Detail"
-                name={`${d}_pupil_light_reaction_detail`}
-                value={
-                  log[
-                    `${d}_pupil_light_reaction_detail` as keyof typeof log.left_pupil_light_reaction_detail
-                  ]
-                }
-                onChange={(c) =>
-                  onChange({
-                    [`${d}_pupil_light_reaction_detail` as keyof typeof log.left_pupil_light_reaction_detail]:
-                      c.value,
-                  })
-                }
-              />
-            )}
+      <br />
+      {!log.in_prone_position && (
+        <>
+          <h3>Pupil</h3>
+          <div className="flex flex-wrap gap-8">
+            {(["left", "right"] as const).map((d, i) => (
+              <div key={i}>
+                <h4 className="capitalize">{d} Pupil</h4>
+                <PupilSizeSelect
+                  pupilSize={log[`${d}_pupil_size`]}
+                  detail={log[`${d}_pupil_size_detail`]}
+                  onChange={(val) => onChange({ [`${d}_pupil_size`]: val })}
+                  onDetailChange={(val) =>
+                    onChange({ [`${d}_pupil_size_detail`]: val })
+                  }
+                  className="mt-4"
+                />
+                <br />
+                <h5 className="">Reaction</h5>
+                <RadioFormField
+                  options={REACTION_OPTIONS.filter(
+                    (o) => o.value !== "UNKNOWN",
+                  )}
+                  optionDisplay={(c) => c.text}
+                  optionValue={(c) => c.value}
+                  name={`${d}_pupil_light_reaction`}
+                  value={log[`${d}_pupil_light_reaction`]}
+                  onChange={(c) =>
+                    onChange({
+                      [`${d}_pupil_light_reaction`]: c.value,
+                    })
+                  }
+                  containerClassName=""
+                />
+                {log[`${d}_pupil_light_reaction`] === "CANNOT_BE_ASSESSED" && (
+                  <div className="ml-4">
+                    <TextAreaFormField
+                      label="Reaction Detail"
+                      labelClassName="text-sm sm:font-medium"
+                      name={`${d}_pupil_light_reaction_detail`}
+                      value={log[`${d}_pupil_light_reaction_detail`]}
+                      onChange={(c) =>
+                        onChange({
+                          [`${d}_pupil_light_reaction_detail`]: c.value,
+                        })
+                      }
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-      <hr />
+          <br />
+          <hr />
+          <br />
+        </>
+      )}
       <div className="flex items-center justify-between">
         <h3>Glasgow Coma Scale</h3>
         <div>
@@ -178,20 +159,27 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
       <h3>Limb Response</h3>
       <br />
       <div className="md:grid md:grid-cols-2 md:gap-x-4">
-        {limbResponses.map((d, i) => (
+        {(
+          [
+            "limb_response_upper_extremity_left",
+            "limb_response_upper_extremity_right",
+            "limb_response_lower_extremity_left",
+            "limb_response_lower_extremity_right",
+          ] as const
+        ).map((key, i) => (
           <RadioFormField
             key={i}
             label={
               <b className="capitalize">
-                {d.replaceAll("limb_response_", "").replaceAll("_", " ")}
+                {key.replaceAll("limb_response_", "").replaceAll("_", " ")}
               </b>
             }
             options={LIMB_RESPONSE_OPTIONS.filter((o) => o.value !== "UNKNOWN")}
             optionDisplay={(c) => c.text}
             optionValue={(c) => c.value}
-            name={"limb_response_" + d}
-            value={`${log[d]}`}
-            onChange={(c) => onChange({ [d]: c.value })}
+            name={key}
+            value={`${log[key]}`}
+            onChange={(c) => onChange({ [key]: c.value })}
             containerClassName="flex flex-wrap gap-x-8"
           />
         ))}
@@ -203,6 +191,6 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
 NeurologicalMonitoring.meta = {
   title: "Neurological Monitoring",
   icon: "l-brain",
-} as const;
+} as const satisfies LogUpdateSectionMeta;
 
 export default NeurologicalMonitoring;

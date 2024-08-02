@@ -1,5 +1,5 @@
 import RangeFormField from "../../Form/FormFields/RangeFormField";
-import { LogUpdateSectionProps } from "../utils";
+import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
 
 const Dialysis = ({ log, onChange }: LogUpdateSectionProps) => {
   return (
@@ -30,6 +30,6 @@ const Dialysis = ({ log, onChange }: LogUpdateSectionProps) => {
 Dialysis.meta = {
   title: "Dialysis",
   icon: "l-jackhammer",
-} as const;
+} as const satisfies LogUpdateSectionMeta;
 
 export default Dialysis;

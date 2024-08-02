@@ -4,7 +4,7 @@ import SelectMenuV2 from "../../Form/SelectMenuV2";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { LogUpdateSectionProps } from "../utils";
+import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
 
 const sections = [
   {
@@ -211,6 +211,6 @@ const IOBalance = ({ log, onChange }: LogUpdateSectionProps) => {
 IOBalance.meta = {
   title: "I/O Balance",
   icon: "l-balance-scale",
-} as const;
+} as const satisfies LogUpdateSectionMeta;
 
 export default IOBalance;

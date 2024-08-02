@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { ValueDescription } from "../../../Utils/utils";
 import RangeFormField from "../../Form/FormFields/RangeFormField";
-import { LogUpdateSectionProps } from "../utils";
+import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
 import { DailyRoundsModel } from "../../Patient/models";
 
 const fields = [
@@ -151,6 +151,6 @@ const ABGAnalysis = ({ log, onChange }: LogUpdateSectionProps) => {
 ABGAnalysis.meta = {
   title: "Arterial Blood Gas Analysis",
   icon: "l-tear",
-} as const;
+} as const satisfies LogUpdateSectionMeta;
 
 export default ABGAnalysis;

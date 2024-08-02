@@ -81,6 +81,7 @@ export default function PainChart(props: {
                 name="pain-scale"
                 min={0}
                 max={10}
+                unit=""
                 value={selectedPain?.scale || 0}
                 className="block w-full"
                 onChange={(value) => {

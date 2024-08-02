@@ -2,7 +2,7 @@ import { NURSING_CARE_FIELDS } from "../../../Common/constants";
 import { classNames } from "../../../Utils/utils";
 import CheckBoxFormField from "../../Form/FormFields/CheckBoxFormField";
 import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
-import { LogUpdateSectionProps } from "../utils";
+import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
 
 const NursingCare = ({ log, onChange }: LogUpdateSectionProps) => {
   const nursing = log.nursing || [];
@@ -72,6 +72,6 @@ const NursingCare = ({ log, onChange }: LogUpdateSectionProps) => {
 NursingCare.meta = {
   title: "Nursing Care",
   icon: "l-user-nurse",
-} as const;
+} as const satisfies LogUpdateSectionMeta;
 
 export default NursingCare;
