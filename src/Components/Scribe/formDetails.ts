@@ -217,16 +217,15 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
     options: CONSCIOUSNESS_LEVEL,
     validator: (value) => typeof value === "string",
   },
-  /* Will be added later
   {
     friendlyName: "Diagnosis",
     id: "icd11_diagnosis",
-    type: "{diagnosis: number, verification_status: \"unconfirmed\" | \"provisional\" | \"differential\" | \"confirmed\", is_principal: boolean}[]",
+    type: "{diagnosis: string, verification_status: \"unconfirmed\" | \"provisional\" | \"differential\" | \"confirmed\", is_principal: boolean}[]",
     default: [],
     example:
-      "[{diagnosis: 12345678, verification_status: 'confirmed', is_principal: true}, {diagnosis: 2, verification_status: 'provisional', is_principal: false}]",
+      "[{diagnosis: '4A42.0 Paediatric onset systemic sclerosis', verification_status: 'confirmed', is_principal: true}, {diagnosis: 2, verification_status: 'provisional', is_principal: false}]",
     description:
-      "A list of objects to store the patient's diagnosis along with their verification status and whether it is the principal diagnosis. By default set is_principal to false. NOTE: only one principal diagnosis can exist. The diagnosis field should be an integer corresponding to the diagnosis's ID. The verification_status field should be a string with one of the following values: 'unconfirmed', 'provisional', 'differential', or 'confirmed'. The is_principal field should be a boolean value.",
+      "A list of objects to store the patient's diagnosis along with their verification status and whether it is the principal diagnosis. By default set is_principal to false. NOTE: only one principal diagnosis can exist. The diagnosis field should be a string that may contain a corresponding diagnosis ID. The verification_status field should be a string with one of the following values: 'unconfirmed', 'provisional', 'differential', or 'confirmed'. The is_principal field should be a boolean value.",
     validator: (value) => {
       if (!Array.isArray(value)) return false;
       value.forEach(d => {
@@ -235,7 +234,6 @@ const DAILY_ROUND_FORM_SCRIBE_DATA: Field[] = [
       return true;
     }
   },
-  */
   {
     friendlyName: "Investigations",
     id: "investigations",
@@ -332,13 +330,6 @@ export const SCRIBE_FORMS: { [key: string]: ScribeForm } = {
       const investigations = await loadInvestigations();
 
       return DAILY_ROUND_FORM_SCRIBE_DATA.map((field) => {
-        if (field.id === "icd11_diagnosis") {
-          return {
-            ...field,
-            options: icd11DiagnosisOptions,
-            currentData: undefined,
-          };
-        }
         if (field.id === "investigations") {
           return {
             ...field,

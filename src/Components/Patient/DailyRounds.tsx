@@ -170,7 +170,7 @@ export const DailyRounds = (props: any) => {
           ...data,
           patient_category: data.patient_category
             ? PATIENT_CATEGORIES.find((i) => i.text === data.patient_category)
-                ?.id ?? ""
+              ?.id ?? ""
             : "",
           rhythm:
             (data.rhythm &&
@@ -498,6 +498,32 @@ export const DailyRounds = (props: any) => {
             // ICD11 Diagnosis
             if (fields.icd11_diagnosis) {
               for (const diagnosis of fields.icd11_diagnosis) {
+
+                // Fetch available diagnoses
+
+                const { res: icdRes, data: icdData } = await request(
+                  routes.listICD11Diagnosis,
+                  {
+                    query: { query: diagnosis.diagnosis },
+                  },
+                )
+
+                if (!icdRes?.ok) {
+                  error({
+                    text: "Failed to fetch ICD11 Diagnosis",
+                  });
+                  continue;
+                }
+
+                const awailableDiagnosis = icdData?.[0]?.id;
+
+                if (!awailableDiagnosis) {
+                  error({
+                    text: "Diagnosis not found",
+                  });
+                  continue;
+                }
+
                 const { res } = await request(
                   DiagnosesRoutes.createConsultationDiagnosis,
                   {
@@ -629,124 +655,124 @@ export const DailyRounds = (props: any) => {
           {["NORMAL", "TELEMEDICINE", "DOCTORS_LOG"].includes(
             state.form.rounds_type,
           ) && (
-            <>
-              <h3 className="mb-6 md:col-span-2">Vitals</h3>
+              <>
+                <h3 className="mb-6 md:col-span-2">Vitals</h3>
 
-              <BloodPressureFormField {...field("bp")} label="Blood Pressure" />
+                <BloodPressureFormField {...field("bp")} label="Blood Pressure" />
 
-              <RangeAutocompleteFormField
-                {...field("pulse")}
-                label="Pulse"
-                unit="bpm"
-                start={0}
-                end={200}
-                step={1}
-                thresholds={[
-                  {
-                    value: 0,
-                    className: "text-danger-500",
-                    label: "Bradycardia",
-                  },
-                  {
-                    value: 40,
-                    className: "text-primary-500",
-                    label: "Normal",
-                  },
-                  {
-                    value: 100,
-                    className: "text-danger-500",
-                    label: "Tachycardia",
-                  },
-                ]}
-              />
+                <RangeAutocompleteFormField
+                  {...field("pulse")}
+                  label="Pulse"
+                  unit="bpm"
+                  start={0}
+                  end={200}
+                  step={1}
+                  thresholds={[
+                    {
+                      value: 0,
+                      className: "text-danger-500",
+                      label: "Bradycardia",
+                    },
+                    {
+                      value: 40,
+                      className: "text-primary-500",
+                      label: "Normal",
+                    },
+                    {
+                      value: 100,
+                      className: "text-danger-500",
+                      label: "Tachycardia",
+                    },
+                  ]}
+                />
 
-              <TemperatureFormField
-                {...field("temperature")}
-                label="Temperature"
-              />
+                <TemperatureFormField
+                  {...field("temperature")}
+                  label="Temperature"
+                />
 
-              <RangeAutocompleteFormField
-                {...field("resp")}
-                label="Respiratory Rate"
-                unit="bpm"
-                start={0}
-                end={150}
-                step={1}
-                thresholds={[
-                  {
-                    value: 0,
-                    className: "text-danger-500",
-                    label: "Bradypnea",
-                  },
-                  {
-                    value: 12,
-                    className: "text-primary-500",
-                    label: "Normal",
-                  },
-                  {
-                    value: 16,
-                    className: "text-danger-500",
-                    label: "Tachypnea",
-                  },
-                ]}
-              />
+                <RangeAutocompleteFormField
+                  {...field("resp")}
+                  label="Respiratory Rate"
+                  unit="bpm"
+                  start={0}
+                  end={150}
+                  step={1}
+                  thresholds={[
+                    {
+                      value: 0,
+                      className: "text-danger-500",
+                      label: "Bradypnea",
+                    },
+                    {
+                      value: 12,
+                      className: "text-primary-500",
+                      label: "Normal",
+                    },
+                    {
+                      value: 16,
+                      className: "text-danger-500",
+                      label: "Tachypnea",
+                    },
+                  ]}
+                />
 
-              <RangeAutocompleteFormField
-                {...field("ventilator_spo2")}
-                label="SPO2"
-                unit="%"
-                start={0}
-                end={100}
-                step={1}
-                thresholds={[
-                  {
-                    value: 0,
-                    className: "text-danger-500",
-                    label: "Low",
-                  },
-                  {
-                    value: 90,
-                    className: "text-primary-500",
-                    label: "Normal",
-                  },
-                  {
-                    value: 100,
-                    className: "text-danger-500",
-                    label: "High",
-                  },
-                ]}
-              />
+                <RangeAutocompleteFormField
+                  {...field("ventilator_spo2")}
+                  label="SPO2"
+                  unit="%"
+                  start={0}
+                  end={100}
+                  step={1}
+                  thresholds={[
+                    {
+                      value: 0,
+                      className: "text-danger-500",
+                      label: "Low",
+                    },
+                    {
+                      value: 90,
+                      className: "text-primary-500",
+                      label: "Normal",
+                    },
+                    {
+                      value: 100,
+                      className: "text-danger-500",
+                      label: "High",
+                    },
+                  ]}
+                />
 
-              <SelectFormField
-                {...field("rhythm")}
-                label="Rhythm"
-                placeholder="Unknown"
-                options={RHYTHM_CHOICES}
-                optionLabel={(option) => option.desc}
-                optionValue={(option) => option.id}
-              />
+                <SelectFormField
+                  {...field("rhythm")}
+                  label="Rhythm"
+                  placeholder="Unknown"
+                  options={RHYTHM_CHOICES}
+                  optionLabel={(option) => option.desc}
+                  optionValue={(option) => option.id}
+                />
 
-              <TextAreaFormField
-                {...field("rhythm_detail")}
-                className="md:col-span-1"
-                label="Rhythm Description"
-                rows={7}
-              />
+                <TextAreaFormField
+                  {...field("rhythm_detail")}
+                  className="md:col-span-1"
+                  label="Rhythm Description"
+                  rows={7}
+                />
 
-              <RadioFormField
-                label="Level Of Consciousness"
-                {...field("consciousness_level")}
-                options={CONSCIOUSNESS_LEVEL.map((level) => ({
-                  label: level.text,
-                  value: level.id,
-                }))}
-                optionDisplay={(option) => option.label}
-                optionValue={(option) => option.value}
-                unselectLabel="Unknown"
-                containerClassName="grid gap-1 grid-cols-1"
-              />
-            </>
-          )}
+                <RadioFormField
+                  label="Level Of Consciousness"
+                  {...field("consciousness_level")}
+                  options={CONSCIOUSNESS_LEVEL.map((level) => ({
+                    label: level.text,
+                    value: level.id,
+                  }))}
+                  optionDisplay={(option) => option.label}
+                  optionValue={(option) => option.value}
+                  unselectLabel="Unknown"
+                  containerClassName="grid gap-1 grid-cols-1"
+                />
+              </>
+            )}
 
           {state.form.rounds_type === "DOCTORS_LOG" && (
             <>
