@@ -40,7 +40,7 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
               c.value as (typeof CONSCIOUSNESS_LEVEL)[number]["id"],
           })
         }
-        containerClassName="grid grid-cols-2 gap-2"
+        layout="vertical"
       />
       <br />
       <hr />
@@ -62,7 +62,7 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
                   className="mt-4"
                 />
                 <br />
-                <h5 className="">Reaction</h5>
+                <h5>Reaction</h5>
                 <RadioFormField
                   options={REACTION_OPTIONS.filter(
                     (o) => o.value !== "UNKNOWN",
@@ -72,14 +72,11 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
                   name={`${d}_pupil_light_reaction`}
                   value={log[`${d}_pupil_light_reaction`]}
                   onChange={(c) =>
-                    onChange({
-                      [`${d}_pupil_light_reaction`]: c.value,
-                    })
+                    onChange({ [`${d}_pupil_light_reaction`]: c.value })
                   }
-                  containerClassName=""
                 />
                 {log[`${d}_pupil_light_reaction`] === "CANNOT_BE_ASSESSED" && (
-                  <div className="ml-4">
+                  <div className="ml-2">
                     <TextAreaFormField
                       label="Reaction Detail"
                       labelClassName="text-sm sm:font-medium"
@@ -112,8 +109,7 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
           </span>
         </div>
       </div>
-      <br />
-      <div className="flex flex-wrap gap-x-16">
+      <div className="space-y-6 pl-2">
         <RadioFormField
           label={<b>Eye Opening Response</b>}
           options={EYE_OPEN_SCALE.toReversed()}
@@ -124,7 +120,7 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
           onChange={(c) =>
             onChange({ glasgow_eye_open: parseInt(`${c.value}`) })
           }
-          containerClassName="flex flex-col"
+          layout="vertical"
         />
         <RadioFormField
           label={<b>Verbal Response</b>}
@@ -138,7 +134,7 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
               glasgow_verbal_response: parseInt(`${c.value}`),
             })
           }
-          containerClassName="flex flex-col"
+          layout="vertical"
         />
         <RadioFormField
           label={<b>Motor Response</b>}
@@ -152,13 +148,12 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
               glasgow_motor_response: parseInt(`${c.value}`),
             })
           }
-          containerClassName="flex flex-col"
+          layout="vertical"
         />
       </div>
       <hr />
       <h3>Limb Response</h3>
-      <br />
-      <div className="md:grid md:grid-cols-2 md:gap-x-4">
+      <div className="space-y-4 pl-1">
         {(
           [
             "limb_response_upper_extremity_left",
@@ -166,21 +161,20 @@ const NeurologicalMonitoring = ({ log, onChange }: LogUpdateSectionProps) => {
             "limb_response_lower_extremity_left",
             "limb_response_lower_extremity_right",
           ] as const
-        ).map((key, i) => (
+        ).map((key) => (
           <RadioFormField
-            key={i}
+            key={key}
             label={
-              <b className="capitalize">
+              <span className="font-medium capitalize">
                 {key.replaceAll("limb_response_", "").replaceAll("_", " ")}
-              </b>
+              </span>
             }
             options={LIMB_RESPONSE_OPTIONS.filter((o) => o.value !== "UNKNOWN")}
             optionDisplay={(c) => c.text}
             optionValue={(c) => c.value}
             name={key}
-            value={`${log[key]}`}
+            value={log[key]}
             onChange={(c) => onChange({ [key]: c.value })}
-            containerClassName="flex flex-wrap gap-x-8"
           />
         ))}
       </div>

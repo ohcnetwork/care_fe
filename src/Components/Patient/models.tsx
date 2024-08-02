@@ -8,7 +8,10 @@ import {
   RHYTHM_CHOICES,
 } from "../../Common/constants";
 import { HumanBody } from "../../CAREUI/interactive/HumanChart";
-import { OXYGEN_MODALITY_OPTIONS } from "../LogUpdate/utils";
+import {
+  LIMB_RESPONSE_OPTIONS,
+  OXYGEN_MODALITY_OPTIONS,
+} from "../LogUpdate/utils";
 
 export interface FlowModel {
   id?: number;
@@ -351,10 +354,10 @@ export interface DailyRoundsModel {
   glasgow_motor_response?: number;
   glasgow_verbal_response?: number;
   consciousness_level_detail?: string;
-  limb_response_upper_extremity_right?: number;
-  limb_response_upper_extremity_left?: number;
-  limb_response_lower_extremity_left?: number;
-  limb_response_lower_extremity_right?: number;
+  limb_response_upper_extremity_right?: (typeof LIMB_RESPONSE_OPTIONS)[number]["value"];
+  limb_response_upper_extremity_left?: (typeof LIMB_RESPONSE_OPTIONS)[number]["value"];
+  limb_response_lower_extremity_left?: (typeof LIMB_RESPONSE_OPTIONS)[number]["value"];
+  limb_response_lower_extremity_right?: (typeof LIMB_RESPONSE_OPTIONS)[number]["value"];
   glasgow_total_calculated?: number;
   bilateral_air_entry?: boolean;
   etco2?: number;

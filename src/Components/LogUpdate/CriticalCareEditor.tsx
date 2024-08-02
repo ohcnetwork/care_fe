@@ -163,6 +163,9 @@ const SectionEditor = ({ log, onComplete, section }: SectionEditorProps) => {
   const [diff, setDiff] = useState<Partial<DailyRoundsModel>>({});
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // TODO: disable section submit button if diff empty
+  // TODO: show notifcation when section submitted
+
   const Section = LogUpdateSections[section];
 
   return (
@@ -171,7 +174,10 @@ const SectionEditor = ({ log, onComplete, section }: SectionEditorProps) => {
     >
       <Section
         log={{ ...log, ...diff }}
-        onChange={(changes) => setDiff((base) => ({ ...base, ...changes }))}
+        onChange={(changes) => {
+          console.log(changes);
+          return setDiff((base) => ({ ...base, ...changes }));
+        }}
       />
       <Submit
         className="mt-8 md:w-full"

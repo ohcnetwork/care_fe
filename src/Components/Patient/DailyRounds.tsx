@@ -700,7 +700,6 @@ export const DailyRounds = (props: any) => {
                 optionDisplay={(option) => option.label}
                 optionValue={(option) => option.value}
                 unselectLabel="Unknown"
-                containerClassName="grid gap-1 grid-cols-1"
               />
             </>
           )}
