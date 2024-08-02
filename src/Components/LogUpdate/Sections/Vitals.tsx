@@ -1,4 +1,4 @@
-import { HumanBodyPaths } from "../../../CAREUI/interactive/HumanChart";
+import { HumanBodyPaths } from "../../../Common/constants";
 import {
   celsiusToFahrenheit,
   fahrenheitToCelsius,
@@ -54,7 +54,7 @@ const Vitals = ({ log, onChange }: LogUpdateSectionProps) => {
             SpO<sub>2</sub>
           </span>
         }
-        name="ventilator_spo2"
+        name="ventilator_spo2" //TODO: ensure whether this should be ventilator_spo2 itself or spo2
         onChange={(c) => onChange({ ventilator_spo2: c.value })}
         value={log.ventilator_spo2}
         min={0}

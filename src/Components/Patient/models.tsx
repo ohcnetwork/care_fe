@@ -2,12 +2,14 @@ import { ConsultationModel, PatientCategory } from "../Facility/models";
 import { PerformedByModel } from "../HCX/misc";
 import {
   CONSCIOUSNESS_LEVEL,
+  HumanBodyRegion,
   NURSING_CARE_FIELDS,
   OCCUPATION_TYPES,
+  PressureSoreExudateAmountOptions,
+  PressureSoreTissueTypeOptions,
   RATION_CARD_CATEGORY,
   RHYTHM_CHOICES,
 } from "../../Common/constants";
-import { HumanBody } from "../../CAREUI/interactive/HumanChart";
 import {
   LIMB_RESPONSE_OPTIONS,
   OXYGEN_MODALITY_OPTIONS,
@@ -293,23 +295,23 @@ export interface BloodPressure {
 
 export interface PainScaleLog {
   description: string;
-  region: HumanBody;
+  region: HumanBodyRegion;
   scale: number;
 }
 
 export type NameQuantity = { name: string; quantity: number };
 
-export type PressureSore = {
-  description: string;
-  exudate_amount: string;
-  length: number;
-  region: HumanBody;
-  scale: number;
-  tissue_type: string;
+export type IPressureSore = {
+  region: HumanBodyRegion;
   width: number;
+  length: number;
+  description: string;
+  scale: number;
+  exudate_amount: (typeof PressureSoreExudateAmountOptions)[number];
+  tissue_type: (typeof PressureSoreTissueTypeOptions)[number];
 };
 export interface DailyRoundsModel {
-  spo2?: string;
+  spo2?: number;
   rhythm?: (typeof RHYTHM_CHOICES)[number]["text"];
   rhythm_detail?: string;
   bp?: BloodPressure;
@@ -392,7 +394,7 @@ export interface DailyRoundsModel {
   ventilator_pressure_support?: number;
 
   ventilator_tidal_volume?: number;
-  pressure_sore?: PressureSore[];
+  pressure_sore?: IPressureSore[];
 }
 
 export interface FacilityNameModel {

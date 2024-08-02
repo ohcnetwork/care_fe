@@ -154,7 +154,7 @@ export default function RangeFormField(props: Props) {
                       ))}
                     </select>
                   ) : (
-                    <p className="absolute right-10 text-xs font-bold text-secondary-700">
+                    <p className="absolute right-10 whitespace-nowrap text-xs font-bold text-secondary-700">
                       {unit.label}
                     </p>
                   )

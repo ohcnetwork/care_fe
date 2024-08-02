@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { PainScaleLog } from "../../Patient/models";
 import RangeFormField from "../../Form/FormFields/RangeFormField";
-import HumanBodyChart, {
-  HumanBody,
-} from "../../../CAREUI/interactive/HumanChart";
+import HumanBodyChart from "../../../CAREUI/interactive/HumanChart";
 import PopupModal from "../../../CAREUI/display/PopupModal";
 import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
 import { getValueDescription } from "../../../Utils/utils";
+import { HumanBodyRegion } from "../../../Common/constants";
 
 export default function PainChart(props: {
   pain: PainScaleLog[];
@@ -42,7 +41,7 @@ export default function PainChart(props: {
     },
   ];
 
-  const [selectedRegion, setSelectedRegion] = useState<HumanBody | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState<HumanBodyRegion>();
   const selectedPain = pain.find((p) => p.region === selectedRegion);
   const selectedValueDescription = getValueDescription(
     valueDescriptions,
@@ -51,10 +50,10 @@ export default function PainChart(props: {
   return (
     <>
       <PopupModal
-        show={selectedRegion !== null}
-        onHide={() => setSelectedRegion(null)}
+        show={selectedRegion != null}
+        onHide={() => setSelectedRegion(undefined)}
         className={`flex w-[275px] flex-col items-center gap-4 ${onChange ? "pt-4" : "py-4"}`}
-        onSubmit={onChange ? () => setSelectedRegion(null) : undefined}
+        onSubmit={onChange ? () => setSelectedRegion(undefined) : undefined}
       >
         <h1 className="text-center text-lg font-black">
           {getTitle(selectedRegion || "")}

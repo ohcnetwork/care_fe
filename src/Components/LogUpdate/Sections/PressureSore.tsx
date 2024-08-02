@@ -1,23 +1,13 @@
 import { useState } from "react";
 import PopupModal from "../../../CAREUI/display/PopupModal";
-import HumanBodyChart, {
-  HumanBody,
-} from "../../../CAREUI/interactive/HumanChart";
+import HumanBodyChart from "../../../CAREUI/interactive/HumanChart";
 import { SelectFormField } from "../../Form/FormFields/SelectFormField";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import TextAreaFormField from "../../Form/FormFields/TextAreaFormField";
 import { LogUpdateSectionMeta, LogUpdateSectionProps } from "../utils";
 import { getValueDescription } from "../../../Utils/utils";
-
-type PressureSore = {
-  description: string;
-  exudate_amount: string;
-  length: number;
-  region: HumanBody;
-  scale: number;
-  tissue_type: string;
-  width: number;
-};
+import { HumanBodyRegion } from "../../../Common/constants";
+import { IPressureSore } from "../../Patient/models";
 
 const PressureSore = ({ log, onChange }: LogUpdateSectionProps) => {
   const getTitle = (text: string) => text.split(/(?=[A-Z])/).join(" ");
@@ -50,7 +40,7 @@ const PressureSore = ({ log, onChange }: LogUpdateSectionProps) => {
     },
   ];
 
-  const [selectedRegion, setSelectedRegion] = useState<HumanBody>();
+  const [selectedRegion, setSelectedRegion] = useState<HumanBodyRegion>();
   const selectedPressureSore = pressureSore?.find(
     (p) => p.region === selectedRegion,
   );
@@ -67,7 +57,7 @@ const PressureSore = ({ log, onChange }: LogUpdateSectionProps) => {
     "Necrotic",
   ];
 
-  const calculatePushScore = (pressureSore: PressureSore): number => {
+  const calculatePushScore = (pressureSore: IPressureSore): number => {
     const areaIntervalPoints = [
       0.0, 0.3, 0.6, 1.0, 2.2, 3.0, 4.0, 8.0, 12.0, 24.0,
     ];
@@ -101,7 +91,7 @@ const PressureSore = ({ log, onChange }: LogUpdateSectionProps) => {
     return areaScore + exudateScore + tissueScore;
   };
 
-  const changePressureSore = (value: Partial<PressureSore>) => {
+  const changePressureSore = (value: Partial<IPressureSore>) => {
     if (!selectedRegion) return;
     if (!pressureSore?.find((p) => p.region === selectedRegion)) {
       onChange({
